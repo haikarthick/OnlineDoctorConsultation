@@ -1,5 +1,3 @@
-import logger from './logger';
-
 export class AppError extends Error {
   constructor(
     public statusCode: number,
@@ -61,7 +59,6 @@ export class ConflictError extends AppError {
 export class DatabaseError extends AppError {
   constructor(message: string, details?: Record<string, any>) {
     super(500, message, 'DATABASE_ERROR', details);
-    logger.error('Database Error', { originalError: details });
     Object.setPrototypeOf(this, DatabaseError.prototype);
   }
 }
@@ -69,7 +66,6 @@ export class DatabaseError extends AppError {
 export class ServiceError extends AppError {
   constructor(service: string, message: string, details?: Record<string, any>) {
     super(500, `${service} service error: ${message}`, 'SERVICE_ERROR', { service, ...details });
-    logger.error(`${service} Service Error`, { message, details });
     Object.setPrototypeOf(this, ServiceError.prototype);
   }
 }

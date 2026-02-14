@@ -49,3 +49,7 @@ temp/
 # Cache
 .eslintcache
 .parcel-cache
+
+# Temporary output files
+*.txt
+!README.txt

@@ -37,13 +37,21 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Logging
 app.use(requestLogger);
 
-// Routes
+// Root welcome route (so localhost:3000 doesn't show 404)
+app.get('/', (_req: Request, res: Response) => {
+  res.json({
+    name: 'VetCare API',
+    version: config.app.apiVersion,
+    status: 'running',
+    docs: `/api/${config.app.apiVersion}/health`,
+    features: `/api/${config.app.apiVersion}/features`,
+  });
+});
+
+// API Routes
 app.use(`/api/${config.app.apiVersion}`, routes);
 
-// Error handling
-app.use(errorHandler);
-
-// 404 Handler
+// 404 Handler - must come before error handler
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
@@ -55,5 +63,8 @@ app.use((req: Request, res: Response) => {
     }
   });
 });
+
+// Error handling - must be last middleware
+app.use(errorHandler);
 
 export default app;

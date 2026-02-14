@@ -2,7 +2,7 @@ import database from '../utils/database';
 import { v4 as uuidv4 } from 'uuid';
 import { User, UserCreateDTO } from '../models/types';
 import SecurityUtils from '../utils/security';
-import { DatabaseError, ConflictError } from '../utils/errors';
+import { DatabaseError, ConflictError, AppError } from '../utils/errors';
 import logger from '../utils/logger';
 
 export class UserService {

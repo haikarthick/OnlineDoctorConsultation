@@ -91,9 +91,12 @@ export class AuthController {
         throw new UnauthorizedError('User not found');
       }
 
+      // Never expose password hash
+      const { passwordHash, ...safeUser } = user;
+
       res.json({
         success: true,
-        data: user
+        data: safeUser
       });
     } catch (error) {
       throw error;

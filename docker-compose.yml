@@ -18,6 +18,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -31,6 +32,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   backend:
     build:
@@ -38,9 +40,31 @@ services:
       dockerfile: docker/Dockerfile.backend
     container_name: vet_consultation_api
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
+      PORT: 3000
+      MOCK_DB: "false"
+      MOCK_REDIS: "false"
       DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: veterinary_consultation
       REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
+      CORS_ORIGIN: http://localhost:5173
+      CORS_CREDENTIALS: "true"
+      # Feature flags – all OFF for initial go-live
+      FEATURE_REDIS_CACHE: "false"
+      FEATURE_PAYMENTS: "false"
+      FEATURE_EMAIL_NOTIFICATIONS: "false"
+      FEATURE_FILE_STORAGE: "false"
+      FEATURE_REALTIME_CHAT: "false"
+      FEATURE_OAUTH_SSO: "false"
+      FEATURE_TWO_FACTOR_AUTH: "false"
+      FEATURE_AUDIT_LOGGING: "false"
+      FEATURE_ADVANCED_RATE_LIMITING: "false"
+      FEATURE_ANALYTICS: "false"
     ports:
       - "3000:3000"
     depends_on:
@@ -48,10 +72,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    command: npm run dev
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
 
 volumes:
   postgres_data:

@@ -13,17 +13,19 @@ export class SecurityUtils {
   }
 
   static generateToken(payload: Record<string, any>, expiresIn?: string): string {
-    return jwt.sign(payload, config.jwt.secret, {
-      expiresIn: expiresIn || config.jwt.expiresIn
-    });
+    const options: any = {};
+    if (expiresIn || config.jwt.expiresIn) {
+      options.expiresIn = expiresIn || config.jwt.expiresIn;
+    }
+    return jwt.sign(payload, config.jwt.secret as string, options);
   }
 
   static verifyToken(token: string): Record<string, any> {
-    return jwt.verify(token, config.jwt.secret) as Record<string, any>;
+    return jwt.verify(token, config.jwt.secret as string) as Record<string, any>;
   }
 
   static generateRefreshToken(userId: string): string {
-    return jwt.sign({ userId }, config.jwt.secret, { expiresIn: '7d' });
+    return jwt.sign({ userId }, config.jwt.secret as string, { expiresIn: '7d' });
   }
 }
 

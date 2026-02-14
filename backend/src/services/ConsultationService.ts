@@ -49,6 +49,9 @@ export class ConsultationService {
       }
       return result.rows[0];
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       throw new DatabaseError('Error fetching consultation', { originalError: error });
     }
   }

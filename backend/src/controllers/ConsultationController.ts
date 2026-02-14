@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import ConsultationService from '../services/ConsultationService';
-import { ValidationError, NotFoundError } from '../utils/errors';
+import { ValidationError, NotFoundError, ForbiddenError } from '../utils/errors';
 
 export class ConsultationController {
   async createConsultation(req: AuthRequest, res: Response): Promise<void> {
@@ -33,7 +33,7 @@ export class ConsultationController {
       const consultation = await ConsultationService.getConsultation(id);
 
       if (consultation.userId !== req.userId && req.userRole !== 'admin') {
-        throw new Error('Access denied');
+        throw new ForbiddenError('You do not have permission to view this consultation');
       }
 
       res.json({
@@ -51,7 +51,7 @@ export class ConsultationController {
       const consultation = await ConsultationService.getConsultation(id);
 
       if (consultation.veterinarianId !== req.userId && req.userRole !== 'admin') {
-        throw new Error('Access denied');
+        throw new ForbiddenError('You do not have permission to update this consultation');
       }
 
       const updated = await ConsultationService.updateConsultation(id, req.body);

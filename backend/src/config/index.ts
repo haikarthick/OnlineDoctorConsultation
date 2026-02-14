@@ -3,6 +3,9 @@ import path from 'path';
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
+// Re-export feature flags so they're accessible from config
+export { featureFlags, isFeatureEnabled, getAllFeatureFlags } from './featureFlags';
+
 export const config = {
   app: {
     nodeEnv: process.env.NODE_ENV || 'development',
@@ -31,8 +34,8 @@ export const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || '24h'
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
-    credentials: process.env.CORS_CREDENTIALS === 'true'
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    credentials: process.env.CORS_CREDENTIALS !== 'false'
   },
   logging: {
     level: process.env.LOG_LEVEL || 'info'

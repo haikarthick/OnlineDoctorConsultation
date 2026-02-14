@@ -68,7 +68,7 @@ export const validateBody = (schema: any) => {
     try {
       const { error, value } = schema.validate(req.body, { abortEarly: false });
       if (error) {
-        const messages = error.details.map(d => d.message).join(', ');
+        const messages = error.details.map((d: any) => d.message).join(', ');
         return res.status(400).json({ error: messages });
       }
       req.body = value;
