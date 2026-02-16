@@ -10,6 +10,12 @@ import MedicalRecordController from '../controllers/MedicalRecordController';
 import NotificationController from '../controllers/NotificationController';
 import PaymentController from '../controllers/PaymentController';
 import ReviewController from '../controllers/ReviewController';
+import BookingController from '../controllers/BookingController';
+import VideoSessionController from '../controllers/VideoSessionController';
+import ScheduleController from '../controllers/ScheduleController';
+import PrescriptionController from '../controllers/PrescriptionController';
+import AdminController from '../controllers/AdminController';
+import AdminService from '../services/AdminService';
 import { asyncHandler } from '../utils/errorHandler';
 
 const router = Router();
@@ -24,6 +30,42 @@ router.post('/consultations', authMiddleware, validateBody(createConsultationSch
 router.get('/consultations', authMiddleware, asyncHandler((req: Request, res: Response) => ConsultationController.listConsultations(req, res)));
 router.get('/consultations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ConsultationController.getConsultation(req, res)));
 router.put('/consultations/:id', authMiddleware, validateBody(updateConsultationSchema), asyncHandler((req: Request, res: Response) => ConsultationController.updateConsultation(req, res)));
+
+// ─── Booking routes ──────────────────────────────────────────
+router.post('/bookings', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.createBooking(req, res)));
+router.get('/bookings', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.listBookings(req, res)));
+router.get('/bookings/:id', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getBooking(req, res)));
+router.put('/bookings/:id/confirm', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.confirmBooking(req, res)));
+router.put('/bookings/:id/cancel', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.cancelBooking(req, res)));
+router.put('/bookings/:id/reschedule', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.rescheduleBooking(req, res)));
+router.get('/bookings/:id/action-logs', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getBookingActionLogs(req, res)));
+router.get('/action-logs/my', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getMyActionLogs(req, res)));
+
+// ─── Video Session routes ────────────────────────────────────
+router.post('/video-sessions', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.createSession(req, res)));
+router.get('/video-sessions/active', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.listActiveSessions(req, res)));
+router.get('/video-sessions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getSession(req, res)));
+router.get('/video-sessions/consultation/:consultationId', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getSessionByConsultation(req, res)));
+router.put('/video-sessions/:id/start', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.startSession(req, res)));
+router.put('/video-sessions/:id/end', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.endSession(req, res)));
+router.post('/video-sessions/join/:roomId', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.joinSession(req, res)));
+router.post('/video-sessions/:id/messages', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.sendMessage(req, res)));
+router.get('/video-sessions/:id/messages', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getMessages(req, res)));
+
+// ─── Schedule & Availability routes ─────────────────────────
+router.post('/schedules', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.createSchedule(req, res)));
+router.get('/schedules/me', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getSchedules(req, res)));
+router.get('/schedules/vet/:vetId', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getSchedules(req, res)));
+router.put('/schedules/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.updateSchedule(req, res)));
+router.delete('/schedules/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.deleteSchedule(req, res)));
+router.get('/availability/:vetId/:date', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getAvailability(req, res)));
+
+// ─── Prescription routes ─────────────────────────────────────
+router.post('/prescriptions', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.createPrescription(req, res)));
+router.get('/prescriptions/me', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listMyPrescriptions(req, res)));
+router.get('/prescriptions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.getPrescription(req, res)));
+router.get('/prescriptions/consultation/:consultationId', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listByConsultation(req, res)));
+router.put('/prescriptions/:id/deactivate', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.deactivatePrescription(req, res)));
 
 // ─── Animal / Pet routes ─────────────────────────────────────
 router.post('/animals', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.createAnimal(req, res)));
@@ -46,19 +88,39 @@ router.get('/medical-records/:id', authMiddleware, asyncHandler((req: Request, r
 router.put('/medical-records/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.updateRecord(req, res)));
 router.delete('/medical-records/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.deleteRecord(req, res)));
 
-// ─── Notification routes (feature-gated) ─────────────────────
+// ─── Notification routes ─────────────────────────────────────
 router.get('/notifications', authMiddleware, asyncHandler((req: Request, res: Response) => NotificationController.listNotifications(req, res)));
 router.put('/notifications/:id/read', authMiddleware, asyncHandler((req: Request, res: Response) => NotificationController.markAsRead(req, res)));
 router.put('/notifications/read-all', authMiddleware, asyncHandler((req: Request, res: Response) => NotificationController.markAllAsRead(req, res)));
 
-// ─── Payment routes (feature-gated) ──────────────────────────
-router.post('/payments', authMiddleware, requireFeature('payments'), asyncHandler((req: Request, res: Response) => PaymentController.createPayment(req, res)));
-router.get('/payments', authMiddleware, requireFeature('payments'), asyncHandler((req: Request, res: Response) => PaymentController.listPayments(req, res)));
-router.get('/payments/:id', authMiddleware, requireFeature('payments'), asyncHandler((req: Request, res: Response) => PaymentController.getPayment(req, res)));
+// ─── Payment routes ──────────────────────────────────────────
+router.post('/payments', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.createPayment(req, res)));
+router.get('/payments', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.listPayments(req, res)));
+router.get('/payments/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.getPayment(req, res)));
 
 // ─── Review routes ───────────────────────────────────────────
 router.post('/reviews', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.createReview(req, res)));
 router.get('/reviews/vet/:vetId', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.listReviews(req, res)));
+
+// ─── Admin routes (admin role required) ──────────────────────
+router.get('/admin/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.getDashboardStats(req, res)));
+router.get('/admin/users', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.listUsers(req, res)));
+router.put('/admin/users/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.toggleUserStatus(req, res)));
+router.put('/admin/users/:id/role', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.changeUserRole(req, res)));
+router.get('/admin/consultations', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.listConsultations(req, res)));
+router.get('/admin/payments', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.listPayments(req, res)));
+router.post('/admin/payments/:id/refund', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.processRefund(req, res)));
+router.get('/admin/reviews', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.listReviews(req, res)));
+router.put('/admin/reviews/:id/moderate', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.moderateReview(req, res)));
+router.get('/admin/settings', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.getSystemSettings(req, res)));
+router.put('/admin/settings', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.updateSystemSetting(req, res)));
+router.get('/admin/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));
+
+// ─── Public settings (no auth) ───────────────────────────────
+router.get('/settings/public', asyncHandler(async (_req: Request, res: Response) => {
+  const settings = await AdminService.getPublicSettings();
+  res.json({ success: true, data: settings });
+}));
 
 // ─── Health check & feature flags ────────────────────────────
 router.get('/health', (_req, res) => {

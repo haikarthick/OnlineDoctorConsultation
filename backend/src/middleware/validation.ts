@@ -99,6 +99,9 @@ export const createConsultationSchema = Joi.object({
     .messages({
       'date.min': 'Scheduled date must be in the future',
     }),
+  animalId: Joi.string().uuid().optional().allow(null),
+  bookingId: Joi.string().uuid().optional().allow(null),
+  petOwnerId: Joi.string().uuid().optional().allow(null),
 });
 
 export const updateConsultationSchema = Joi.object({
@@ -107,9 +110,22 @@ export const updateConsultationSchema = Joi.object({
     .optional(),
   diagnosis: Joi.string()
     .max(5000)
+    .allow('', null)
     .optional(),
   prescription: Joi.string()
     .max(5000)
+    .optional(),
+  notes: Joi.string()
+    .max(10000)
+    .allow('', null)
+    .optional(),
+  duration: Joi.number()
+    .integer()
+    .min(0)
+    .optional(),
+  animalId: Joi.string()
+    .uuid()
+    .allow(null)
     .optional(),
   startedAt: Joi.date()
     .iso()

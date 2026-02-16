@@ -56,7 +56,7 @@ export class ReviewService {
         WHERE r.veterinarian_id = $1
         ORDER BY r.created_at DESC LIMIT $2 OFFSET $3
       `;
-      const countQuery = `SELECT COUNT(*) as count, COALESCE(AVG(rating), 0) as avg_rating FROM reviews WHERE veterinarian_id = $1`;
+      const countQuery = `SELECT COUNT(*) as count, COALESCE(AVG(rating), 0) as "avgRating" FROM reviews WHERE veterinarian_id = $1`;
       const [reviewsResult, countResult] = await Promise.all([
         database.query(query, [veterinarianId, limit, offset]),
         database.query(countQuery, [veterinarianId]),
@@ -64,7 +64,7 @@ export class ReviewService {
       return {
         reviews: reviewsResult.rows,
         total: parseInt(countResult.rows[0]?.count || '0', 10),
-        averageRating: parseFloat(countResult.rows[0]?.avg_rating || '0'),
+        averageRating: parseFloat(countResult.rows[0]?.avgRating || '0'),
       };
     } catch (error) {
       throw new DatabaseError('Error listing reviews', { originalError: error });

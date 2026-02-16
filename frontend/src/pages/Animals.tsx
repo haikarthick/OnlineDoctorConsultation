@@ -11,6 +11,7 @@ interface Animal {
   gender?: string
   weight?: number
   color?: string
+  microchipId?: string
   medicalNotes?: string
 }
 
@@ -146,6 +147,9 @@ const Animals: React.FC = () => {
                 </div>
                 <div className="appointment-info">
                   <h3>{animal.name}</h3>
+                  <p className="date" style={{ fontFamily: 'monospace', color: '#2563eb', fontWeight: 600 }}>
+                    🏷️ {animal.microchipId || `ID: ${animal.id.substring(0, 8).toUpperCase()}`}
+                  </p>
                   <p className="date">{animal.species}{animal.breed ? ` • ${animal.breed}` : ''}</p>
                   {animal.gender && <p className="time">Gender: {animal.gender}</p>}
                   {animal.weight && <p className="type">Weight: {animal.weight} kg</p>}

@@ -33,9 +33,24 @@ export interface AnimalCreateDTO {
 }
 
 export class AnimalService {
+  // Generate a unique tracking number like VET-00001
+  private async generateTrackingNumber(): Promise<string> {
+    try {
+      const result = await database.query(`SELECT COUNT(*) as count FROM animals`);
+      const count = parseInt(result.rows[0]?.count || '0', 10) + 1;
+      return `VET-${count.toString().padStart(5, '0')}`;
+    } catch {
+      // fallback to timestamp-based
+      return `VET-${Date.now().toString(36).toUpperCase()}`;
+    }
+  }
+
   async createAnimal(ownerId: string, data: AnimalCreateDTO): Promise<Animal> {
     try {
       const id = uuidv4();
+      const trackingNumber = await this.generateTrackingNumber();
+      // Use microchip_id field to store tracking number if not provided
+      const microchipId = data.microchipId || trackingNumber;
       const query = `
         INSERT INTO animals (id, owner_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id, medical_notes, is_active, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW(), NOW())
@@ -46,9 +61,9 @@ export class AnimalService {
       const result = await database.query(query, [
         id, ownerId, data.name, data.species, data.breed || null,
         data.dateOfBirth || null, data.gender || null, data.weight || null,
-        data.color || null, data.microchipId || null, data.medicalNotes || null
+        data.color || null, microchipId, data.medicalNotes || null
       ]);
-      logger.info('Animal created', { id, ownerId });
+      logger.info('Animal created', { id, ownerId, trackingNumber });
       return result.rows[0];
     } catch (error) {
       throw new DatabaseError('Error creating animal', { originalError: error });

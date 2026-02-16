@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config';
+import database from '../utils/database';
 import { UnauthorizedError } from '../utils/errors';
 import logger from '../utils/logger';
 
@@ -10,7 +11,7 @@ export interface AuthRequest extends Request {
   token?: string;
 }
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -19,6 +20,13 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
 
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, config.jwt.secret) as any;
+
+    // Verify the user actually exists in the database
+    const userCheck = await database.query('SELECT id, role FROM users WHERE id = $1', [decoded.userId]);
+    if (userCheck.rows.length === 0) {
+      logger.warn('Token references non-existent user', { userId: decoded.userId });
+      return res.status(401).json({ error: 'User no longer exists. Please register again.' });
+    }
 
     req.userId = decoded.userId;
     req.userRole = decoded.role;

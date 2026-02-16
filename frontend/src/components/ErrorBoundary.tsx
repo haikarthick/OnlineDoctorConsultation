@@ -79,22 +79,34 @@ export class ErrorBoundary extends Component<Props, State> {
               Reload Page
             </button>
           </div>
-          {import.meta.env.DEV && this.state.error && (
-            <details style={{ marginTop: '24px', textAlign: 'left', maxWidth: '600px' }}>
-              <summary style={{ cursor: 'pointer', color: '#999' }}>Error Details</summary>
-              <pre style={{
-                background: '#f5f5f5',
+          {this.state.error && (
+            <div style={{ marginTop: '24px', textAlign: 'left', maxWidth: '600px', margin: '24px auto' }}>
+              <div style={{
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
                 padding: '16px',
                 borderRadius: '8px',
                 overflow: 'auto',
-                fontSize: '12px',
-                color: '#d32f2f',
+                fontSize: '13px',
+                color: '#991b1b',
               }}>
-                {this.state.error.message}
-                {'\n'}
-                {this.state.error.stack}
-              </pre>
-            </details>
+                <strong>Error: </strong>{this.state.error.message}
+              </div>
+              {import.meta.env.DEV && (
+                <pre style={{
+                  background: '#f5f5f5',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  overflow: 'auto',
+                  fontSize: '11px',
+                  color: '#666',
+                  marginTop: '8px',
+                  maxHeight: '200px',
+                }}>
+                  {this.state.error.stack}
+                </pre>
+              )}
+            </div>
           )}
         </div>
       )

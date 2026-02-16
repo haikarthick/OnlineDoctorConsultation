@@ -9,24 +9,25 @@ export class ConsultationService {
     try {
       const consultationId = uuidv4();
       const query = `
-        INSERT INTO consultations (id, user_id, veterinarian_id, animal_type, symptom_description, status, scheduled_at, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-        RETURNING id, user_id as "userId", veterinarian_id as "veterinarianId", animal_type as "animalType",
-                  symptom_description as "symptomDescription", status, scheduled_at as "scheduledAt",
-                  created_at as "createdAt", updated_at as "updatedAt"
+        INSERT INTO consultations (id, user_id, veterinarian_id, animal_id, animal_type, symptom_description, status, scheduled_at, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+        RETURNING id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId",
+                  animal_type as "animalType", symptom_description as "symptomDescription", status,
+                  scheduled_at as "scheduledAt", created_at as "createdAt", updated_at as "updatedAt"
       `;
 
       const result = await database.query(query, [
         consultationId,
         userId,
         veterinarianId,
+        data.animalId || null,
         data.animalType,
         data.symptomDescription,
         'scheduled',
         data.scheduledAt || new Date()
       ]);
 
-      logger.info('Consultation created', { consultationId, userId, veterinarianId });
+      logger.info('Consultation created', { consultationId, userId, veterinarianId, animalId: data.animalId });
       return result.rows[0];
     } catch (error) {
       throw new DatabaseError('Error creating consultation', { originalError: error });
@@ -36,9 +37,9 @@ export class ConsultationService {
   async getConsultation(consultationId: string): Promise<Consultation> {
     try {
       const query = `
-        SELECT id, user_id as "userId", veterinarian_id as "veterinarianId", animal_type as "animalType",
+        SELECT id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId", animal_type as "animalType",
                symptom_description as "symptomDescription", status, scheduled_at as "scheduledAt",
-               started_at as "startedAt", completed_at as "completedAt", diagnosis, prescription,
+               started_at as "startedAt", completed_at as "completedAt", diagnosis, prescription, notes, duration,
                created_at as "createdAt", updated_at as "updatedAt"
         FROM consultations WHERE id = $1
       `;
@@ -58,12 +59,15 @@ export class ConsultationService {
 
   async updateConsultation(consultationId: string, updates: Partial<Consultation>): Promise<Consultation> {
     try {
-      const validUpdates = {
+      const validUpdates: Record<string, any> = {
         status: updates.status,
         started_at: updates.startedAt,
         completed_at: updates.completedAt,
         diagnosis: updates.diagnosis,
-        prescription: updates.prescription
+        prescription: updates.prescription,
+        notes: (updates as any).notes,
+        animal_id: (updates as any).animalId,
+        duration: updates.duration
       };
 
       const fields = Object.entries(validUpdates)
@@ -79,9 +83,10 @@ export class ConsultationService {
       const query = `
         UPDATE consultations SET ${fields.join(', ')}, updated_at = NOW()
         WHERE id = $1
-        RETURNING id, user_id as "userId", veterinarian_id as "veterinarianId", animal_type as "animalType",
-                  symptom_description as "symptomDescription", status, scheduled_at as "scheduledAt",
-                  started_at as "startedAt", completed_at as "completedAt", diagnosis, prescription,
+        RETURNING id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId",
+                  animal_type as "animalType", symptom_description as "symptomDescription", status,
+                  scheduled_at as "scheduledAt", started_at as "startedAt", completed_at as "completedAt",
+                  diagnosis, prescription, notes, duration,
                   created_at as "createdAt", updated_at as "updatedAt"
       `;
 
@@ -95,8 +100,9 @@ export class ConsultationService {
 
   async listConsultations(userId?: string, veterinarianId?: string, limit: number = 10, offset: number = 0) {
     try {
-      let query = `SELECT id, user_id as "userId", veterinarian_id as "veterinarianId", animal_type as "animalType",
+      let query = `SELECT id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId", animal_type as "animalType",
                    symptom_description as "symptomDescription", status, scheduled_at as "scheduledAt",
+                   diagnosis, notes, duration,
                    created_at as "createdAt", updated_at as "updatedAt"
                    FROM consultations WHERE 1=1`;
       const params: any[] = [];

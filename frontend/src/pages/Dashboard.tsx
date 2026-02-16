@@ -1,26 +1,78 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useSettings } from '../context/SettingsContext'
+import apiService from '../services/api'
 import './Dashboard.css'
+
+interface DashStats { bookings: number; consultations: number; animals: number; pending: number }
+interface ActivityItem { type: string; description: string; time: string; status: string }
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth()
-
-  const stats = [
-    { label: 'Consultations', value: '12', icon: '🏥', color: '#667eea' },
-    { label: 'Appointments', value: '5', icon: '📅', color: '#764ba2' },
-    { label: 'Medical Records', value: '8', icon: '📋', color: '#f093fb' },
-    { label: 'Messages', value: '3', icon: '💬', color: '#4facfe' }
-  ]
-
-  const recentActivity = [
-    { type: 'Consultation', description: 'With Dr. Smith for Buddy', time: '2 hours ago', status: 'completed' },
-    { type: 'Appointment', description: 'Scheduled for tomorrow at 2 PM', time: '1 day ago', status: 'scheduled' },
-    { type: 'Medical Record', description: 'Updated vaccination records', time: '3 days ago', status: 'updated' }
-  ]
+  const { formatDate } = useSettings()
+  const navigate = useNavigate()
+  const [stats, setStats] = useState<DashStats>({ bookings: 0, consultations: 0, animals: 0, pending: 0 })
+  const [activities, setActivities] = useState<ActivityItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   const isVeterinarian = user?.role === 'veterinarian'
   const isPetOwner = user?.role === 'pet_owner'
   const isFarmer = user?.role === 'farmer'
+
+  useEffect(() => { loadDashboardData() }, [])
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true)
+      const [bRes, cRes] = await Promise.all([
+        apiService.listBookings({ limit: 50 }),
+        apiService.listConsultations({ limit: 50 })
+      ])
+      let aRes: any = { data: [] }
+      try { aRes = await apiService.listAnimals({ limit: 50 }) } catch {}
+
+      const bookings = bRes.data?.items || (Array.isArray(bRes.data) ? bRes.data : [])
+      const consults = cRes.data?.items || (Array.isArray(cRes.data) ? cRes.data : [])
+      const animals = aRes.data?.animals || aRes.data?.items || (Array.isArray(aRes.data) ? aRes.data : [])
+      const pending = bookings.filter((b: any) => b.status === 'pending').length
+
+      setStats({ bookings: bookings.length, consultations: consults.length, animals: animals.length, pending })
+
+      // Build recent activity from real data
+      const acts: ActivityItem[] = []
+      bookings.slice(0, 3).forEach((b: any) => {
+        const who = isVeterinarian ? (b.petOwnerName || 'Patient') : (b.vetName || 'Doctor')
+        acts.push({
+          type: 'Booking',
+          description: `${b.bookingType === 'video_call' ? 'Video' : 'In-person'} with ${who} — ${b.reasonForVisit || 'Consultation'}`,
+          time: b.scheduledDate ? formatDate(b.scheduledDate, { month: 'short', day: 'numeric' }) : '',
+          status: b.status
+        })
+      })
+      consults.slice(0, 2).forEach((c: any) => {
+        acts.push({
+          type: 'Consultation',
+          description: `${c.animalType || 'Animal'} — ${c.symptomDescription || 'General consultation'}`,
+          time: c.scheduledAt ? formatDate(c.scheduledAt, { month: 'short', day: 'numeric' }) : '',
+          status: c.status
+        })
+      })
+      setActivities(acts.length > 0 ? acts : [])
+    } catch { /* silently fail, stats stay 0 */ }
+    finally { setLoading(false) }
+  }
+
+  const statCards = [
+    { label: 'Appointments', value: stats.bookings, icon: '📅', color: '#667eea',
+      path: isVeterinarian ? '/doctor/patient-queue' : '/consultations' },
+    { label: 'Consultations', value: stats.consultations, icon: '🏥', color: '#764ba2',
+      path: '/consultations' },
+    { label: isPetOwner || isFarmer ? 'My Animals' : 'Patients', value: stats.animals, icon: '🐾', color: '#f093fb',
+      path: isVeterinarian ? '/doctor/patient-queue' : '/animals' },
+    { label: 'Pending Actions', value: stats.pending, icon: '⏳', color: '#4facfe',
+      path: isVeterinarian ? '/doctor/patient-queue' : '/consultations' }
+  ]
 
   return (
     <div className="dashboard-container">
@@ -34,19 +86,20 @@ const Dashboard: React.FC = () => {
           </p>
         </div>
         <div className="dashboard-date">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          {formatDate(new Date(), { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="dashboard-stats-grid">
-        {stats.map((stat, index) => (
-          <div key={index} className="stat-card">
+        {statCards.map((stat, index) => (
+          <div key={index} className="stat-card" onClick={() => navigate(stat.path)}
+            style={{ cursor: 'pointer' }} title={`View ${stat.label}`}>
             <div className="stat-icon" style={{ background: `${stat.color}20` }}>
               <span>{stat.icon}</span>
             </div>
             <div className="stat-content">
-              <div className="stat-value">{stat.value}</div>
+              <div className="stat-value">{loading ? '…' : stat.value}</div>
               <div className="stat-label">{stat.label}</div>
             </div>
           </div>
@@ -62,31 +115,31 @@ const Dashboard: React.FC = () => {
           <div className="quick-actions-grid">
             {isVeterinarian && (
               <>
-                <button className="action-btn">
+                <button className="action-btn" onClick={() => navigate('/doctor/patient-queue')}>
                   <span className="action-icon">➕</span>
                   <span className="action-label">New Consultation</span>
                 </button>
-                <button className="action-btn">
+                <button className="action-btn" onClick={() => navigate('/doctor/patient-queue')}>
                   <span className="action-icon">👥</span>
                   <span className="action-label">View Patients</span>
                 </button>
-                <button className="action-btn">
+                <button className="action-btn" onClick={() => navigate('/doctor/manage-schedule')}>
                   <span className="action-icon">📊</span>
-                  <span className="action-label">Generate Report</span>
+                  <span className="action-label">Manage Schedule</span>
                 </button>
               </>
             )}
             {isPetOwner && (
               <>
-                <button className="action-btn">
+                <button className="action-btn" onClick={() => navigate('/book-consultation')}>
                   <span className="action-icon">📞</span>
                   <span className="action-label">Book Consultation</span>
                 </button>
-                <button className="action-btn">
+                <button className="action-btn" onClick={() => navigate('/medical-records')}>
                   <span className="action-icon">📋</span>
                   <span className="action-label">View Records</span>
                 </button>
-                <button className="action-btn">
+                <button className="action-btn" onClick={() => navigate('/animals')}>
                   <span className="action-icon">🐾</span>
                   <span className="action-label">Add Pet</span>
                 </button>
@@ -94,15 +147,15 @@ const Dashboard: React.FC = () => {
             )}
             {isFarmer && (
               <>
-                <button className="action-btn">
+                <button className="action-btn" onClick={() => navigate('/animals')}>
                   <span className="action-icon">🚜</span>
                   <span className="action-label">Herd Management</span>
                 </button>
-                <button className="action-btn">
+                <button className="action-btn" onClick={() => navigate('/medical-records')}>
                   <span className="action-icon">💉</span>
                   <span className="action-label">Vaccination Schedule</span>
                 </button>
-                <button className="action-btn">
+                <button className="action-btn" onClick={() => navigate('/book-consultation')}>
                   <span className="action-icon">📞</span>
                   <span className="action-label">Consult Vet</span>
                 </button>
@@ -115,15 +168,20 @@ const Dashboard: React.FC = () => {
         <section className="dashboard-section recent-activity">
           <div className="section-header">
             <h2 className="section-title">Recent Activity</h2>
-            <a href="#" className="view-all-link">View All</a>
+            <button className="view-all-link" onClick={() => navigate('/consultations')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#667eea' }}>View All</button>
           </div>
           <div className="activity-list">
-            {recentActivity.map((activity, index) => (
+            {activities.length === 0 && !loading && (
+              <div style={{ textAlign: 'center', padding: 24, color: '#9ca3af' }}>
+                <p>No recent activity yet</p>
+                {isPetOwner && <button className="action-btn" onClick={() => navigate('/book-consultation')}><span className="action-label">Book your first consultation</span></button>}
+              </div>
+            )}
+            {activities.map((activity, index) => (
               <div key={index} className="activity-item">
                 <div className="activity-icon">
                   {activity.type === 'Consultation' && '🏥'}
-                  {activity.type === 'Appointment' && '📅'}
-                  {activity.type === 'Medical Record' && '📋'}
+                  {activity.type === 'Booking' && '📅'}
                 </div>
                 <div className="activity-content">
                   <div className="activity-title">{activity.type}</div>

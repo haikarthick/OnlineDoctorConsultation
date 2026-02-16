@@ -13,6 +13,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const menuItems: MenuItem[] = [
+    // ── Common ──
     {
       id: 'dashboard',
       label: 'Dashboard',
@@ -27,26 +28,27 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       path: '/consultations',
       roles: ['veterinarian', 'pet_owner', 'farmer']
     },
+    // ── Pet Owner Module ──
     {
-      id: 'appointments',
-      label: 'Appointments',
-      icon: '📅',
-      path: '/appointments',
-      roles: ['veterinarian', 'pet_owner', 'farmer']
+      id: 'find-doctor',
+      label: 'Find Doctor',
+      icon: '🔍',
+      path: '/find-doctor',
+      roles: ['pet_owner', 'farmer']
     },
     {
-      id: 'medical',
-      label: 'Medical Records',
+      id: 'book-consultation',
+      label: 'Book Consultation',
+      icon: '📝',
+      path: '/book-consultation',
+      roles: ['pet_owner', 'farmer']
+    },
+    {
+      id: 'my-bookings',
+      label: 'My Bookings',
       icon: '📋',
-      path: '/medical-records',
-      roles: ['veterinarian', 'pet_owner']
-    },
-    {
-      id: 'patients',
-      label: 'Patients',
-      icon: '👥',
-      path: '/patients',
-      roles: ['veterinarian']
+      path: '/my-bookings',
+      roles: ['pet_owner', 'farmer']
     },
     {
       id: 'animals',
@@ -56,12 +58,102 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer']
     },
     {
-      id: 'reports',
-      label: 'Reports',
-      icon: '📈',
-      path: '/reports',
-      roles: ['veterinarian', 'farmer']
+      id: 'medical',
+      label: 'Medical Records',
+      icon: '📋',
+      path: '/medical-records',
+      roles: ['veterinarian', 'pet_owner']
     },
+
+    // ── Doctor/Vet Module ──
+    {
+      id: 'doctor-dashboard',
+      label: 'Doctor Hub',
+      icon: '👨‍⚕️',
+      path: '/doctor/dashboard',
+      roles: ['veterinarian']
+    },
+    {
+      id: 'manage-schedule',
+      label: 'My Schedule',
+      icon: '🗓️',
+      path: '/doctor/manage-schedule',
+      roles: ['veterinarian']
+    },
+    {
+      id: 'patient-queue',
+      label: 'Patient Queue',
+      icon: '👥',
+      path: '/doctor/patient-queue',
+      roles: ['veterinarian']
+    },
+    {
+      id: 'prescriptions',
+      label: 'Prescriptions',
+      icon: '💊',
+      path: '/doctor/prescriptions',
+      roles: ['veterinarian']
+    },
+    {
+      id: 'my-reviews',
+      label: 'My Reviews',
+      icon: '⭐',
+      path: '/doctor/reviews',
+      roles: ['veterinarian']
+    },
+
+    // ── Admin Module ──
+    {
+      id: 'admin-dashboard',
+      label: 'Admin Panel',
+      icon: '🛡️',
+      path: '/admin/dashboard',
+      roles: ['admin']
+    },
+    {
+      id: 'admin-users',
+      label: 'User Management',
+      icon: '👥',
+      path: '/admin/users',
+      roles: ['admin']
+    },
+    {
+      id: 'admin-consultations',
+      label: 'Consultations',
+      icon: '🩺',
+      path: '/admin/consultations',
+      roles: ['admin']
+    },
+    {
+      id: 'admin-payments',
+      label: 'Payments',
+      icon: '💳',
+      path: '/admin/payments',
+      roles: ['admin']
+    },
+    {
+      id: 'admin-reviews',
+      label: 'Review Moderation',
+      icon: '⚖️',
+      path: '/admin/reviews',
+      roles: ['admin']
+    },
+    {
+      id: 'admin-settings',
+      label: 'System Settings',
+      icon: '⚙️',
+      path: '/admin/settings',
+      roles: ['admin']
+    },
+    {
+      id: 'admin-audit',
+      label: 'Audit Logs',
+      icon: '📜',
+      path: '/admin/audit-logs',
+      roles: ['admin']
+    },
+
+    // ── Common Bottom ──
     {
       id: 'settings',
       label: 'Settings',
@@ -86,7 +178,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     setIsMobileMenuOpen(false)
   }
 
-  const isActive = (path: string) => currentPath === path
+  const isActive = (path: string) => currentPath === path || (path !== '/dashboard' && path !== '/settings' && currentPath.startsWith(path + '/'))
 
   return (
     <>
