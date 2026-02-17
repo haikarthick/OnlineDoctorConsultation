@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import apiService from '../services/api'
 import './ModulePage.css'
 
-type Tab = 'overview' | 'records' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline' | 'prescriptions'
+type Tab = 'overview' | 'records' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline'
 
 const RECORD_TYPES = [
   { value: 'diagnosis', label: 'Diagnosis', icon: '🩺', color: '#667eea' },
@@ -46,7 +46,9 @@ const MedicalRecords: React.FC = () => {
   const [weightHistory, setWeightHistory] = useState<any[]>([])
   const [timeline, setTimeline] = useState<any[]>([])
   const [prescriptions, setPrescriptions] = useState<any[]>([])
-
+  const [consultations, setConsultations] = useState<any[]>([])
+  const [consultationsTotal, setConsultationsTotal] = useState(0)
+  const [prescriptionsTotal, setPrescriptionsTotal] = useState(0)
   // Filters
   const [recordTypeFilter, setRecordTypeFilter] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -137,11 +139,29 @@ const MedicalRecords: React.FC = () => {
 
   const loadPrescriptions = useCallback(async () => {
     try {
-      const res = await apiService.getMyPrescriptions({ limit: 50 })
-      const data = res.data?.items || (Array.isArray(res.data) ? res.data : [])
-      setPrescriptions(data)
-    } catch { setPrescriptions([]) }
-  }, [])
+      if (selectedAnimal) {
+        const res = await apiService.getPrescriptionsByAnimal(selectedAnimal, { limit: 50 })
+        const data = res.data
+        setPrescriptions(data?.prescriptions || [])
+        setPrescriptionsTotal(data?.total || 0)
+      } else {
+        const res = await apiService.getMyPrescriptions({ limit: 50 })
+        const data = res.data?.items || (Array.isArray(res.data) ? res.data : [])
+        setPrescriptions(data)
+        setPrescriptionsTotal(data.length)
+      }
+    } catch { setPrescriptions([]); setPrescriptionsTotal(0) }
+  }, [selectedAnimal])
+
+  const loadConsultations = useCallback(async () => {
+    if (!selectedAnimal) { setConsultations([]); setConsultationsTotal(0); return }
+    try {
+      const res = await apiService.getConsultationsByAnimal(selectedAnimal, { limit: 50 })
+      const data = res.data
+      setConsultations(data?.consultations || [])
+      setConsultationsTotal(data?.total || 0)
+    } catch { setConsultations([]); setConsultationsTotal(0) }
+  }, [selectedAnimal])
 
   const loadAllData = useCallback(async () => {
     setLoading(true)
@@ -158,6 +178,8 @@ const MedicalRecords: React.FC = () => {
   useEffect(() => {
     if (selectedAnimal) {
       loadRecords()
+      loadPrescriptions()
+      if (activeTab === 'consultations') loadConsultations()
       if (activeTab === 'vaccinations') loadVaccinations()
       if (activeTab === 'lab_results') loadLabResults()
       if (activeTab === 'allergies') loadAllergies()
@@ -165,6 +187,7 @@ const MedicalRecords: React.FC = () => {
       if (activeTab === 'timeline') loadTimeline()
     } else {
       loadRecords()
+      loadPrescriptions()
     }
   }, [selectedAnimal, activeTab, recordTypeFilter, searchQuery])
 
@@ -296,6 +319,7 @@ const MedicalRecords: React.FC = () => {
         <div style={{ display: 'flex', gap: 16, padding: '12px 16px', background: '#f0f4ff', borderRadius: 8, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap', fontSize: 13 }}>
           <span style={{ fontWeight: 700, color: '#667eea' }}>🐾 {selectedAnimalData.uniqueId || selectedAnimalData.unique_id || 'N/A'}</span>
           <span><strong>{selectedAnimalData.name}</strong> ({selectedAnimalData.species}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''})</span>
+          {selectedAnimalData.ownerName && <span>Owner: {selectedAnimalData.ownerName}</span>}
           {selectedAnimalData.gender && <span>Gender: {selectedAnimalData.gender}</span>}
           {selectedAnimalData.weight && <span>Weight: {selectedAnimalData.weight} kg</span>}
           {selectedAnimalData.dateOfBirth && <span>DOB: {fmtDate(selectedAnimalData.dateOfBirth || selectedAnimalData.date_of_birth)}</span>}
@@ -306,8 +330,9 @@ const MedicalRecords: React.FC = () => {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderBottom: '2px solid #e5e7eb', overflowX: 'auto' }}>
         <button onClick={() => setActiveTab('overview')} style={tabStyle('overview')}>📊 Overview</button>
+        <button onClick={() => setActiveTab('consultations')} style={tabStyle('consultations')}>🩺 Consultations ({consultationsTotal})</button>
+        <button onClick={() => setActiveTab('prescriptions')} style={tabStyle('prescriptions')}>💊 Prescriptions ({prescriptionsTotal})</button>
         <button onClick={() => setActiveTab('records')} style={tabStyle('records')}>📄 Records ({recordsTotal})</button>
-        <button onClick={() => setActiveTab('prescriptions')} style={tabStyle('prescriptions')}>💊 Prescriptions ({prescriptions.length})</button>
         <button onClick={() => setActiveTab('vaccinations')} style={tabStyle('vaccinations')}>💉 Vaccinations ({vaccinations.length})</button>
         <button onClick={() => setActiveTab('lab_results')} style={tabStyle('lab_results')}>🔬 Lab Results ({labResults.length})</button>
         <button onClick={() => setActiveTab('allergies')} style={tabStyle('allergies')}>⚠️ Allergies ({allergies.length})</button>
@@ -323,12 +348,16 @@ const MedicalRecords: React.FC = () => {
             {/* Stats Cards */}
             {stats && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
-                <StatCard icon="📋" label="Total Records" value={stats.totalRecords || 0} color="#667eea" />
+                <StatCard icon="🩺" label="Consultations" value={stats.consultations?.total || 0}
+                  sub={stats.consultations?.completed ? `${stats.consultations.completed} completed` : ''} color="#667eea" />
+                <StatCard icon="💊" label="Prescriptions" value={stats.prescriptions?.total || 0}
+                  sub={stats.prescriptions?.active ? `${stats.prescriptions.active} active` : ''} color="#059669" />
                 <StatCard icon="💉" label="Vaccinations" value={stats.vaccinations?.total || 0}
                   sub={stats.vaccinations?.upcomingDue ? `${stats.vaccinations.upcomingDue} due soon` : ''} color="#7c3aed" />
                 <StatCard icon="🔬" label="Lab Results" value={stats.labResults?.total || 0}
                   sub={stats.labResults?.pending ? `${stats.labResults.pending} pending` : ''} color="#d97706" />
                 <StatCard icon="⚠️" label="Active Allergies" value={stats.allergies?.active || 0} color="#dc2626" />
+                <StatCard icon="📋" label="Medical Records" value={stats.totalRecords || 0} color="#6b7280" />
                 <StatCard icon="📅" label="Follow-ups (7d)" value={stats.upcomingFollowUps || 0} color="#ea580c" />
               </div>
             )}
@@ -370,6 +399,35 @@ const MedicalRecords: React.FC = () => {
             )}
 
             {/* Recent Activity preview */}
+            {prescriptions.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>Recent Prescriptions</h3>
+                <div className="records-list">
+                  {prescriptions.slice(0, 5).map((rx: any) => (
+                    <div key={rx.id} className="record-item" style={{ borderLeft: '4px solid #059669' }}>
+                      <div className="record-icon">💊</div>
+                      <div className="record-details">
+                        <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : 'Medication'}</h4>
+                        {rx.diagnosis && <p style={{ color: '#667eea', fontSize: 12 }}><strong>Diagnosis:</strong> {rx.diagnosis}</p>}
+                        <p className="text-muted" style={{ fontSize: 11 }}>
+                          {rx.veterinarianName && `👨‍⚕️ Dr. ${rx.veterinarianName} • `}
+                          {fmtDate(rx.createdAt || rx.created_at || '')}
+                        </p>
+                      </div>
+                      <div className="record-actions">
+                        <span className="badge badge-completed">{rx.isActive || rx.is_active ? 'active' : 'expired'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {prescriptions.length > 5 && (
+                  <button onClick={() => setActiveTab('prescriptions')} style={{ marginTop: 8, color: '#059669', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                    View all {prescriptionsTotal} prescriptions →
+                  </button>
+                )}
+              </div>
+            )}
+
             {records.length > 0 && (
               <div>
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>Recent Records</h3>
@@ -413,11 +471,49 @@ const MedicalRecords: React.FC = () => {
           </div>
         )}
 
+        {/* ═══ CONSULTATIONS TAB ════════════════════════════ */}
+        {activeTab === 'consultations' && (
+          <div>
+            {!selectedAnimal ? (
+              <EmptyState icon="🩺" title="Select a pet" subtitle="Choose a pet from the dropdown above to view consultation history" />
+            ) : consultations.length === 0 ? (
+              <EmptyState icon="🩺" title="No consultations found" subtitle="Consultation history for this pet will appear here" />
+            ) : (
+              <div className="records-list">
+                {consultations.map((c: any) => {
+                  const statusColors: Record<string, string> = { completed: '#059669', in_progress: '#667eea', scheduled: '#d97706', cancelled: '#dc2626', missed: '#9ca3af' }
+                  return (
+                    <div key={c.id} className="record-item" style={{ borderLeft: `4px solid ${statusColors[c.status] || '#6b7280'}` }}>
+                      <div className="record-icon">🩺</div>
+                      <div className="record-details">
+                        <h4>
+                          Consultation with Dr. {c.veterinarianName || 'Unknown'}
+                          {c.prescriptionCount > 0 && <span style={{ fontSize: 11, color: '#059669', marginLeft: 8 }}>💊 {c.prescriptionCount} prescription{c.prescriptionCount > 1 ? 's' : ''}</span>}
+                        </h4>
+                        {c.diagnosis && <p><strong>Diagnosis:</strong> {c.diagnosis}</p>}
+                        {c.notes && <p className="text-muted">📝 {(c.notes || '').substring(0, 150)}{(c.notes || '').length > 150 ? '...' : ''}</p>}
+                        <p className="text-muted">
+                          Date: {fmtDate(c.startTime || c.createdAt)}
+                          {c.ownerName && ` • Owner: ${c.ownerName}`}
+                          {c.followUpDate && ` • Follow-up: ${fmtDate(c.followUpDate)}`}
+                        </p>
+                      </div>
+                      <div className="record-actions">
+                        <span className={`badge badge-${c.status === 'completed' ? 'completed' : c.status === 'cancelled' ? 'cancelled' : 'pending'}`}>{c.status}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ═══ PRESCRIPTIONS TAB ═════════════════════════════ */}
         {activeTab === 'prescriptions' && (
           <div>
             {prescriptions.length === 0 ? (
-              <EmptyState icon="💊" title="No prescriptions yet" subtitle="Prescriptions from your consultations will appear here" />
+              <EmptyState icon="💊" title="No prescriptions yet" subtitle={selectedAnimal ? 'No prescriptions found for this pet' : 'Select a pet to view prescriptions or showing all your prescriptions'} />
             ) : (
               <div className="records-list">
                 {prescriptions.map((rx: any) => (
@@ -428,8 +524,10 @@ const MedicalRecords: React.FC = () => {
                       {Array.isArray(rx.medications) && rx.medications.map((med: any, mi: number) => (
                         <p key={mi}><strong>{med.name}</strong>{med.dosage ? ` — ${med.dosage}` : ''}{med.frequency ? `, ${med.frequency}` : ''}{med.duration ? ` for ${med.duration}` : ''}</p>
                       ))}
+                      {rx.diagnosis && <p style={{ color: '#667eea' }}><strong>Diagnosis:</strong> {rx.diagnosis}</p>}
                       {rx.instructions && <p className="text-muted">📝 {rx.instructions}</p>}
                       <p className="text-muted">
+                        {rx.veterinarianName && `👨‍⚕️ Dr. ${rx.veterinarianName} • `}
                         Prescribed: {fmtDate(rx.createdAt || rx.created_at || '')} • Valid until: {fmtDate(rx.validUntil || rx.valid_until || '')}
                       </p>
                     </div>

@@ -202,6 +202,17 @@ export class MedicalRecordController {
     res.json({ success: true, data: result });
   }
 
+  // ═══ CONSULTATIONS BY ANIMAL ══════════════════════════════
+
+  async getConsultationsByAnimal(req: AuthRequest, res: Response): Promise<void> {
+    const animalId = req.params.animalId;
+    if (!animalId) throw new ValidationError('animalId is required');
+    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+    const offset = parseInt(req.query.offset as string) || 0;
+    const result = await MedicalRecordService.getConsultationsByAnimal(animalId, limit, offset);
+    res.json({ success: true, data: result });
+  }
+
   // ═══ STATS ════════════════════════════════════════════════
 
   async getStats(req: AuthRequest, res: Response): Promise<void> {

@@ -146,6 +146,36 @@ class PrescriptionService {
     });
   }
 
+  async listByAnimal(animalId: string, params?: { limit?: number; offset?: number }): Promise<{ prescriptions: Prescription[]; total: number }> {
+    const limit = params?.limit || 50;
+    const offset = params?.offset || 0;
+
+    const result = await database.query(
+      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
+       p.valid_until as "validUntil", p.is_active as "isActive",
+       p.created_at as "createdAt", p.updated_at as "updatedAt",
+       COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "veterinarianName",
+       c.diagnosis
+       FROM prescriptions p
+       LEFT JOIN users u ON u.id = p.veterinarian_id
+       LEFT JOIN consultations c ON c.id = p.consultation_id
+       WHERE p.animal_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
+      [animalId, limit, offset]
+    );
+    const countResult = await database.query(
+      `SELECT COUNT(*) as count FROM prescriptions WHERE animal_id = $1`,
+      [animalId]
+    );
+    return {
+      prescriptions: result.rows.map((row: any) => {
+        if (typeof row.medications === 'string') row.medications = JSON.parse(row.medications);
+        return row;
+      }),
+      total: parseInt(countResult.rows[0]?.count || '0', 10),
+    };
+  }
+
   async deactivatePrescription(id: string): Promise<Prescription> {
     const result = await database.query(
       `UPDATE prescriptions SET is_active = $1, updated_at = $2 WHERE id = $3

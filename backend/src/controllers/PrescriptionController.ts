@@ -49,6 +49,16 @@ class PrescriptionController {
     res.json({ success: true, data: prescriptions });
   }
 
+  async listByAnimal(req: Request, res: Response) {
+    const { animalId } = req.params;
+    const params = {
+      limit: parseInt(req.query.limit as string) || 50,
+      offset: parseInt(req.query.offset as string) || 0
+    };
+    const result = await PrescriptionService.listByAnimal(animalId, params);
+    res.json({ success: true, data: result });
+  }
+
   async deactivatePrescription(req: Request, res: Response) {
     const authReq = req as AuthRequest;
     if (authReq.userRole !== 'veterinarian' && authReq.userRole !== 'admin') {

@@ -214,6 +214,16 @@ class ApiService {
     return response.data
   }
 
+  async getPrescriptionsByAnimal(animalId: string, params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get(`/prescriptions/animal/${animalId}`, { params })
+    return response.data
+  }
+
+  async getConsultationsByAnimal(animalId: string, params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get(`/consultations/animal/${animalId}`, { params })
+    return response.data
+  }
+
   async getPrescriptionsByConsultation(consultationId: string) {
     const response = await this.client.get(`/prescriptions/consultation/${consultationId}`)
     return response.data

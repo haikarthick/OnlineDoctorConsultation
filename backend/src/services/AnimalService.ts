@@ -51,19 +51,26 @@ export class AnimalService {
       const trackingNumber = await this.generateTrackingNumber();
       // Use microchip_id field to store tracking number if not provided
       const microchipId = data.microchipId || trackingNumber;
+      // Generate unique pet ID
+      let uniqueId: string;
+      try {
+        const cnt = await database.query('SELECT COUNT(*) as count FROM animals');
+        const num = parseInt(cnt.rows[0]?.count || '0', 10) + 1;
+        uniqueId = `PET-${num.toString().padStart(5, '0')}`;
+      } catch { uniqueId = `PET-${Date.now().toString(36).toUpperCase()}`; }
       const query = `
-        INSERT INTO animals (id, owner_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id, medical_notes, is_active, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, NOW(), NOW())
-        RETURNING id, owner_id as "ownerId", name, species, breed, date_of_birth as "dateOfBirth",
+        INSERT INTO animals (id, owner_id, unique_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id, medical_notes, is_active, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, true, NOW(), NOW())
+        RETURNING id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
                   gender, weight, color, microchip_id as "microchipId", medical_notes as "medicalNotes",
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [
-        id, ownerId, data.name, data.species, data.breed || null,
+        id, ownerId, uniqueId, data.name, data.species, data.breed || null,
         data.dateOfBirth || null, data.gender || null, data.weight || null,
         data.color || null, microchipId, data.medicalNotes || null
       ]);
-      logger.info('Animal created', { id, ownerId, trackingNumber });
+      logger.info('Animal created', { id, ownerId, uniqueId, trackingNumber });
       return result.rows[0];
     } catch (error) {
       throw new DatabaseError('Error creating animal', { originalError: error });
@@ -73,7 +80,7 @@ export class AnimalService {
   async getAnimal(animalId: string): Promise<Animal> {
     try {
       const query = `
-        SELECT id, owner_id as "ownerId", name, species, breed, date_of_birth as "dateOfBirth",
+        SELECT id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
                gender, weight, color, microchip_id as "microchipId", medical_notes as "medicalNotes",
                is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
         FROM animals WHERE id = $1
@@ -92,7 +99,7 @@ export class AnimalService {
   async listAnimalsByOwner(ownerId: string, limit: number = 20, offset: number = 0): Promise<{ animals: Animal[]; total: number }> {
     try {
       const query = `
-        SELECT id, owner_id as "ownerId", name, species, breed, date_of_birth as "dateOfBirth",
+        SELECT id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
                gender, weight, color, microchip_id as "microchipId", medical_notes as "medicalNotes",
                is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
         FROM animals WHERE owner_id = $1 AND is_active = true
@@ -112,6 +119,68 @@ export class AnimalService {
     }
   }
 
+  async listAnimalsByVeterinarian(vetId: string, limit: number = 100, offset: number = 0): Promise<{ animals: Animal[]; total: number }> {
+    try {
+      // Get distinct animals the vet has consulted with (via bookings or consultations)
+      const query = `
+        SELECT DISTINCT a.id, a.owner_id as "ownerId", a.unique_id as "uniqueId", a.name, a.species, a.breed,
+               a.date_of_birth as "dateOfBirth", a.gender, a.weight, a.color,
+               a.microchip_id as "microchipId", a.medical_notes as "medicalNotes",
+               a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
+               COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
+        FROM animals a
+        LEFT JOIN users u ON u.id = a.owner_id
+        WHERE a.is_active = true AND (
+          a.id IN (SELECT animal_id FROM bookings WHERE veterinarian_id = $1 AND animal_id IS NOT NULL)
+          OR a.id IN (SELECT animal_id FROM consultations WHERE veterinarian_id = $1 AND animal_id IS NOT NULL)
+        )
+        ORDER BY a.name ASC LIMIT $2 OFFSET $3
+      `;
+      const countQuery = `
+        SELECT COUNT(DISTINCT a.id) as count FROM animals a
+        WHERE a.is_active = true AND (
+          a.id IN (SELECT animal_id FROM bookings WHERE veterinarian_id = $1 AND animal_id IS NOT NULL)
+          OR a.id IN (SELECT animal_id FROM consultations WHERE veterinarian_id = $1 AND animal_id IS NOT NULL)
+        )
+      `;
+      const [animalsResult, countResult] = await Promise.all([
+        database.query(query, [vetId, limit, offset]),
+        database.query(countQuery, [vetId]),
+      ]);
+      return {
+        animals: animalsResult.rows,
+        total: parseInt(countResult.rows[0]?.count || '0', 10),
+      };
+    } catch (error) {
+      throw new DatabaseError('Error listing vet animals', { originalError: error });
+    }
+  }
+
+  async listAllAnimals(limit: number = 100, offset: number = 0): Promise<{ animals: Animal[]; total: number }> {
+    try {
+      const query = `
+        SELECT a.id, a.owner_id as "ownerId", a.unique_id as "uniqueId", a.name, a.species, a.breed,
+               a.date_of_birth as "dateOfBirth", a.gender, a.weight, a.color,
+               a.microchip_id as "microchipId", a.medical_notes as "medicalNotes",
+               a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
+               COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
+        FROM animals a LEFT JOIN users u ON u.id = a.owner_id
+        WHERE a.is_active = true ORDER BY a.name ASC LIMIT $1 OFFSET $2
+      `;
+      const countQuery = `SELECT COUNT(*) as count FROM animals WHERE is_active = true`;
+      const [animalsResult, countResult] = await Promise.all([
+        database.query(query, [limit, offset]),
+        database.query(countQuery),
+      ]);
+      return {
+        animals: animalsResult.rows,
+        total: parseInt(countResult.rows[0]?.count || '0', 10),
+      };
+    } catch (error) {
+      throw new DatabaseError('Error listing all animals', { originalError: error });
+    }
+  }
+
   async updateAnimal(animalId: string, updates: Partial<AnimalCreateDTO>): Promise<Animal> {
     try {
       const fieldMap: Record<string, string> = {
@@ -128,7 +197,7 @@ export class AnimalService {
       const query = `
         UPDATE animals SET ${sets.join(', ')}, updated_at = NOW()
         WHERE id = $1
-        RETURNING id, owner_id as "ownerId", name, species, breed, date_of_birth as "dateOfBirth",
+        RETURNING id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
                   gender, weight, color, microchip_id as "microchipId", medical_notes as "medicalNotes",
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;

@@ -796,13 +796,21 @@ export class MedicalRecordService {
     try {
       const userFilter = userId && !isAdmin ? `WHERE mr.user_id = '${userId}' OR mr.created_by = '${userId}' OR mr.veterinarian_id = '${userId}'` : '';
       const animalFilter = userId && !isAdmin ? `WHERE a.owner_id = '${userId}'` : '';
+      // Vets: include animals from their consultations
+      const vetAnimalFilter = userId && !isAdmin ?
+        `WHERE (a.owner_id = '${userId}' OR a.id IN (SELECT animal_id FROM consultations WHERE veterinarian_id = '${userId}' AND animal_id IS NOT NULL) OR a.id IN (SELECT animal_id FROM bookings WHERE veterinarian_id = '${userId}' AND animal_id IS NOT NULL))` :
+        '';
+      const prescriptionFilter = userId && !isAdmin ? `WHERE p.veterinarian_id = '${userId}' OR p.pet_owner_id = '${userId}'` : '';
+      const consultationFilter = userId && !isAdmin ? `WHERE c.veterinarian_id = '${userId}' OR c.user_id = '${userId}'` : '';
 
-      const [records, vaccinations, allergies, labs, upcoming] = await Promise.all([
+      const [records, vaccinations, allergies, labs, upcoming, prescriptions, consultations] = await Promise.all([
         database.query(`SELECT COUNT(*) as count, record_type as type FROM medical_records mr ${userFilter} GROUP BY record_type`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records vr LEFT JOIN animals a ON a.id = vr.animal_id ${animalFilter}`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN is_active THEN 1 END) as active FROM allergy_records ar LEFT JOIN animals a ON a.id = ar.animal_id ${animalFilter}`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${animalFilter}`),
-        database.query(`SELECT COUNT(*) as count FROM medical_records mr ${userFilter ? userFilter + ' AND' : 'WHERE'} follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`)
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records vr LEFT JOIN animals a ON a.id = vr.animal_id ${vetAnimalFilter}`),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active FROM allergy_records ar LEFT JOIN animals a ON a.id = ar.animal_id ${vetAnimalFilter}`),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${vetAnimalFilter}`),
+        database.query(`SELECT COUNT(*) as count FROM medical_records mr ${userFilter ? userFilter + ' AND' : 'WHERE'} follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN is_active THEN 1 END) as active FROM prescriptions p ${prescriptionFilter}`),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN c.status = 'completed' THEN 1 END) as completed FROM consultations c ${consultationFilter}`),
       ]);
 
       const recordsByType: Record<string, number> = {};
@@ -814,10 +822,47 @@ export class MedicalRecordService {
         vaccinations: { total: parseInt(vaccinations.rows[0]?.total || '0'), upcomingDue: parseInt(vaccinations.rows[0]?.upcoming || '0') },
         allergies: { total: parseInt(allergies.rows[0]?.total || '0'), active: parseInt(allergies.rows[0]?.active || '0') },
         labResults: { total: parseInt(labs.rows[0]?.total || '0'), pending: parseInt(labs.rows[0]?.pending || '0') },
+        prescriptions: { total: parseInt(prescriptions.rows[0]?.total || '0'), active: parseInt(prescriptions.rows[0]?.active || '0') },
+        consultations: { total: parseInt(consultations.rows[0]?.total || '0'), completed: parseInt(consultations.rows[0]?.completed || '0') },
         upcomingFollowUps: parseInt(upcoming.rows[0]?.count || '0'),
       };
     } catch (error) {
       throw new DatabaseError('Error fetching medical stats', { originalError: error });
+    }
+  }
+
+  // ═══ CONSULTATIONS BY ANIMAL ═══════════════════════════════
+
+  async getConsultationsByAnimal(animalId: string, limit: number = 50, offset: number = 0): Promise<{ consultations: any[]; total: number }> {
+    try {
+      const query = `
+        SELECT c.id, c.booking_id as "bookingId", c.status,
+               c.diagnosis, c.notes, c.follow_up_date as "followUpDate",
+               c.started_at as "startTime", c.completed_at as "endTime",
+               c.scheduled_at as "scheduledAt",
+               c.created_at as "createdAt",
+               COALESCE(vet.first_name || ' ' || vet.last_name, 'Unknown') as "veterinarianName",
+               COALESCE(own.first_name || ' ' || own.last_name, 'Unknown') as "ownerName",
+               a.name as "animalName", a.unique_id as "animalUniqueId",
+               (SELECT COUNT(*) FROM prescriptions p WHERE p.consultation_id = c.id) as "prescriptionCount"
+        FROM consultations c
+        LEFT JOIN users vet ON vet.id = c.veterinarian_id
+        LEFT JOIN users own ON own.id = c.user_id
+        LEFT JOIN animals a ON a.id = c.animal_id
+        WHERE c.animal_id = $1
+        ORDER BY c.created_at DESC LIMIT $2 OFFSET $3
+      `;
+      const countQuery = `SELECT COUNT(*) as count FROM consultations WHERE animal_id = $1`;
+      const [result, countResult] = await Promise.all([
+        database.query(query, [animalId, limit, offset]),
+        database.query(countQuery, [animalId]),
+      ]);
+      return {
+        consultations: result.rows,
+        total: parseInt(countResult.rows[0]?.count || '0', 10),
+      };
+    } catch (error) {
+      throw new DatabaseError('Error fetching consultations by animal', { originalError: error });
     }
   }
 
