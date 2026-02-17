@@ -81,13 +81,6 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['veterinarian']
     },
     {
-      id: 'patient-queue',
-      label: 'Patient Queue',
-      icon: '👥',
-      path: '/doctor/patient-queue',
-      roles: ['veterinarian']
-    },
-    {
       id: 'prescriptions',
       label: 'Prescriptions',
       icon: '💊',

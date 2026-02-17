@@ -157,8 +157,8 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ onNavigate }) => {
         <div className="card-header"><h2>⚡ Quick Actions</h2></div>
         <div className="card-body">
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button className="btn btn-primary" onClick={() => onNavigate('/doctor/patient-queue')}>
-              👥 Patient Queue
+            <button className="btn btn-primary" onClick={() => onNavigate('/consultations')}>
+              👥 Consultations
             </button>
             <button className="btn btn-outline" onClick={() => onNavigate('/doctor/manage-schedule')}>
               📅 Manage Schedule
@@ -178,7 +178,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ onNavigate }) => {
         <div className="card">
           <div className="card-header">
             <h2>📅 Upcoming Bookings</h2>
-            <button className="btn btn-sm btn-outline" onClick={() => onNavigate('/doctor/patient-queue')}>
+            <button className="btn btn-sm btn-outline" onClick={() => onNavigate('/consultations')}>
               View All
             </button>
           </div>

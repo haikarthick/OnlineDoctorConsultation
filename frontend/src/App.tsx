@@ -20,7 +20,6 @@ import WriteReview from './pages/petowner/WriteReview'
 // Doctor Module
 import DoctorDashboard from './pages/doctor/DoctorDashboard'
 import ManageSchedule from './pages/doctor/ManageSchedule'
-import PatientQueue from './pages/doctor/PatientQueue'
 import ConsultationRoom from './pages/doctor/ConsultationRoom'
 import PrescriptionWriter from './pages/doctor/PrescriptionWriter'
 import Prescriptions from './pages/doctor/Prescriptions'
@@ -118,7 +117,7 @@ function AppRoutes() {
       {/* ── Doctor/Vet Module ── */}
       <Route path="/doctor/dashboard" element={<ProtectedRoute><AppLayout><RoutedPage Component={DoctorDashboard} /></AppLayout></ProtectedRoute>} />
       <Route path="/doctor/manage-schedule" element={<ProtectedRoute><AppLayout><RoutedPage Component={ManageSchedule} /></AppLayout></ProtectedRoute>} />
-      <Route path="/doctor/patient-queue" element={<ProtectedRoute><AppLayout><RoutedPage Component={PatientQueue} /></AppLayout></ProtectedRoute>} />
+      <Route path="/doctor/patient-queue" element={<Navigate to="/consultations" replace />} />
       <Route path="/doctor/consultation-room/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={ConsultationRoom} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />
       <Route path="/doctor/prescriptions/new" element={<ProtectedRoute><AppLayout><RoutedPage Component={PrescriptionWriter} /></AppLayout></ProtectedRoute>} />
       <Route path="/doctor/prescriptions" element={<ProtectedRoute><AppLayout><RoutedPage Component={Prescriptions} /></AppLayout></ProtectedRoute>} />

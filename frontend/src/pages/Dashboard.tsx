@@ -65,13 +65,13 @@ const Dashboard: React.FC = () => {
 
   const statCards = [
     { label: 'Appointments', value: stats.bookings, icon: '📅', color: '#667eea',
-      path: isVeterinarian ? '/doctor/patient-queue' : '/consultations' },
+      path: '/consultations' },
     { label: 'Consultations', value: stats.consultations, icon: '🏥', color: '#764ba2',
       path: '/consultations' },
     { label: isPetOwner || isFarmer ? 'My Animals' : 'Patients', value: stats.animals, icon: '🐾', color: '#f093fb',
-      path: isVeterinarian ? '/doctor/patient-queue' : '/animals' },
+      path: isVeterinarian ? '/consultations' : '/animals' },
     { label: 'Pending Actions', value: stats.pending, icon: '⏳', color: '#4facfe',
-      path: isVeterinarian ? '/doctor/patient-queue' : '/consultations' }
+      path: '/consultations' }
   ]
 
   return (
@@ -115,11 +115,11 @@ const Dashboard: React.FC = () => {
           <div className="quick-actions-grid">
             {isVeterinarian && (
               <>
-                <button className="action-btn" onClick={() => navigate('/doctor/patient-queue')}>
+                <button className="action-btn" onClick={() => navigate('/consultations')}>
                   <span className="action-icon">➕</span>
                   <span className="action-label">New Consultation</span>
                 </button>
-                <button className="action-btn" onClick={() => navigate('/doctor/patient-queue')}>
+                <button className="action-btn" onClick={() => navigate('/consultations')}>
                   <span className="action-icon">👥</span>
                   <span className="action-label">View Patients</span>
                 </button>
