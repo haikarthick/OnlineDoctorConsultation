@@ -48,7 +48,9 @@ const Dashboard: React.FC = () => {
       const animals = aRes.data?.animals || aRes.data?.items || (Array.isArray(aRes.data) ? aRes.data : [])
       const pending = bookings.filter((b: any) => b.status === 'pending').length
 
-      setStats({ bookings: bookings.length, consultations: consults.length, animals: animals.length, pending })
+      // Consultation count = bookings that actually had a consultation session (have consultationId)
+      const consultationsDone = bookings.filter((b: any) => b.consultationId).length
+      setStats({ bookings: bookings.length, consultations: consultationsDone, animals: animals.length, pending })
 
       // Vet-specific: pending approvals, upcoming confirmed, recent consultations
       if (hasPermission('dashboard_pending_approvals')) {

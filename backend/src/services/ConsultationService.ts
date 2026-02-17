@@ -9,11 +9,12 @@ export class ConsultationService {
     try {
       const consultationId = uuidv4();
       const query = `
-        INSERT INTO consultations (id, user_id, veterinarian_id, animal_id, animal_type, symptom_description, status, scheduled_at, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+        INSERT INTO consultations (id, user_id, veterinarian_id, animal_id, animal_type, symptom_description, status, scheduled_at, booking_id, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
         RETURNING id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId",
                   animal_type as "animalType", symptom_description as "symptomDescription", status,
-                  scheduled_at as "scheduledAt", created_at as "createdAt", updated_at as "updatedAt"
+                  scheduled_at as "scheduledAt", booking_id as "bookingId",
+                  created_at as "createdAt", updated_at as "updatedAt"
       `;
 
       const result = await database.query(query, [
@@ -24,7 +25,8 @@ export class ConsultationService {
         data.animalType,
         data.symptomDescription,
         'scheduled',
-        data.scheduledAt || new Date()
+        data.scheduledAt || new Date(),
+        data.bookingId || null
       ]);
 
       logger.info('Consultation created', { consultationId, userId, veterinarianId, animalId: data.animalId });

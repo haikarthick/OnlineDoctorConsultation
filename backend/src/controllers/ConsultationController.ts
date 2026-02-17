@@ -21,30 +21,56 @@ export class ConsultationController {
         patientId = petOwnerId;
       }
 
-      // === DEDUP LAYER 1: Booking-level dedup ===
-      // If creating from a booking, check if a consultation already exists for that booking
+      // === DEDUP LAYER 1: Booking-level dedup (check both booking link and consultations.booking_id) ===
       if (bookingId) {
+        // Check 1a: booking.consultation_id
         try {
           const BookingService = (await import('../services/BookingService')).default;
           const booking = await BookingService.getBooking(bookingId);
           if (booking && booking.consultationId) {
-            // Booking already linked to a consultation — return the existing one
             const existing = await ConsultationService.getConsultation(booking.consultationId);
-            logger.info('Returning existing consultation from booking', { bookingId, consultationId: existing.id });
+            logger.info('Returning existing consultation from booking link', { bookingId, consultationId: existing.id });
             return res.status(200).json({ success: true, data: existing }) as any;
           }
         } catch (err) {
           logger.warn('Booking lookup failed during dedup', { bookingId, error: (err as Error).message });
         }
+
+        // Check 1b: consultations.booking_id (catches cases where booking link failed but consultation exists)
+        try {
+          const dupByBooking = await database.query(
+            `SELECT id, user_id as "userId", veterinarian_id as "veterinarianId", animal_type as "animalType",
+                    symptom_description as "symptomDescription", status, scheduled_at as "scheduledAt",
+                    started_at as "startedAt", completed_at as "completedAt", diagnosis, prescription,
+                    booking_id as "bookingId",
+                    created_at as "createdAt", updated_at as "updatedAt"
+             FROM consultations WHERE booking_id = $1 LIMIT 1`,
+            [bookingId]
+          );
+          if (dupByBooking.rows.length > 0) {
+            const existing = dupByBooking.rows[0];
+            // Also ensure booking is linked
+            try {
+              await database.query(
+                'UPDATE bookings SET consultation_id = $1, updated_at = NOW() WHERE id = $2 AND consultation_id IS NULL',
+                [existing.id, bookingId]
+              );
+            } catch { /* safe to ignore */ }
+            logger.info('Returning existing consultation from booking_id column', { bookingId, consultationId: existing.id });
+            return res.status(200).json({ success: true, data: existing }) as any;
+          }
+        } catch (err) {
+          logger.warn('Consultation booking_id dedup check failed', { error: (err as Error).message });
+        }
       }
 
-      // === DEDUP LAYER 2: Consultation-level dedup ===
-      // Prevent duplicate consultations for the same vet + patient with active status
+      // === DEDUP LAYER 2: Vet+patient active consultation dedup ===
       try {
         const dupCheck = await database.query(
           `SELECT id, user_id as "userId", veterinarian_id as "veterinarianId", animal_type as "animalType",
                   symptom_description as "symptomDescription", status, scheduled_at as "scheduledAt",
                   started_at as "startedAt", completed_at as "completedAt", diagnosis, prescription,
+                  booking_id as "bookingId",
                   created_at as "createdAt", updated_at as "updatedAt"
            FROM consultations 
            WHERE veterinarian_id = $1 AND user_id = $2 AND status IN ('scheduled', 'in_progress')
@@ -56,14 +82,17 @@ export class ConsultationController {
           logger.info('Returning existing active consultation (vet+patient dedup)', { 
             consultationId: existing.id, veterinarianId, patientId 
           });
-          // Also link the booking if provided and not yet linked
           if (bookingId) {
             try {
               await database.query(
                 'UPDATE bookings SET consultation_id = $1, updated_at = NOW() WHERE id = $2 AND consultation_id IS NULL',
                 [existing.id, bookingId]
               );
-            } catch { /* linking failed, not critical */ }
+              // Also update consultation's booking_id if not set
+              if (!existing.bookingId) {
+                await database.query('UPDATE consultations SET booking_id = $1 WHERE id = $2', [bookingId, existing.id]);
+              }
+            } catch { /* safe to ignore */ }
           }
           return res.status(200).json({ success: true, data: existing }) as any;
         }
@@ -75,10 +104,10 @@ export class ConsultationController {
       const consultation = await ConsultationService.createConsultation(
         patientId,
         veterinarianId,
-        { animalType, symptomDescription, scheduledAt, animalId }
+        { animalType, symptomDescription, scheduledAt, animalId, bookingId }
       );
 
-      // If created from a booking, link the booking to this consultation
+      // Link the booking to this consultation
       if (bookingId) {
         try {
           await database.query(
