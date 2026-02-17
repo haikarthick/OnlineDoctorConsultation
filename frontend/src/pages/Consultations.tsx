@@ -38,6 +38,11 @@ const Consultations: React.FC = () => {
   const [rescheduleSlotsLoading, setRescheduleSlotsLoading] = useState(false)
   const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false)
 
+  // Cancel modal state
+  const [cancelModal, setCancelModal] = useState<{ show: boolean; bookingId: string; reason: string }>({
+    show: false, bookingId: '', reason: ''
+  })
+
   // Action Log modal state
   const [actionLogBookingId, setActionLogBookingId] = useState<string | null>(null)
   const [actionLogs, setActionLogs] = useState<any[]>([])
@@ -90,10 +95,21 @@ const Consultations: React.FC = () => {
     catch (err: any) { setError(err?.response?.data?.error?.message || 'Failed to confirm booking') }
   }
 
-  const handleCancelBooking = async (id: string) => {
-    if (!window.confirm('Cancel this booking?')) return
-    try { await apiService.cancelBooking(id, 'Cancelled by user'); loadData() }
-    catch (err: any) { setError(err?.response?.data?.error?.message || 'Failed to cancel booking') }
+  const handleCancelBooking = async (id?: string) => {
+    const bookingId = id || cancelModal.bookingId
+    if (!bookingId) return
+    // If called directly (not from modal), show the modal
+    if (!cancelModal.show) {
+      setCancelModal({ show: true, bookingId, reason: '' })
+      return
+    }
+    try {
+      await apiService.cancelBooking(bookingId, cancelModal.reason || 'Cancelled by user')
+      setCancelModal({ show: false, bookingId: '', reason: '' })
+      loadData()
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message || 'Failed to cancel booking')
+    }
   }
 
   // ─── Reschedule helpers ─────────────────────────────────
@@ -557,6 +573,47 @@ const Consultations: React.FC = () => {
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
               <button className="btn-small" style={{ padding: '8px 20px' }} onClick={() => setActionLogBookingId(null)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Cancel Booking Modal ──────────────────────────── */}
+      {cancelModal.show && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999
+        }} onClick={() => setCancelModal({ show: false, bookingId: '', reason: '' })}>
+          <div style={{
+            background: 'white', borderRadius: 12, padding: 24, width: '90%', maxWidth: 440,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2 style={{ margin: 0, fontSize: 18 }}>❌ Cancel Booking</h2>
+              <button onClick={() => setCancelModal({ show: false, bookingId: '', reason: '' })}
+                style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
+            </div>
+            <div style={{ background: '#fef2f2', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13, color: '#991b1b' }}>
+              ⚠️ This action cannot be undone. The appointment will be cancelled.
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Reason for cancellation</label>
+              <textarea
+                placeholder="Please provide a reason for cancellation..."
+                value={cancelModal.reason}
+                onChange={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
+                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, minHeight: 80, resize: 'vertical', boxSizing: 'border-box' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setCancelModal({ show: false, bookingId: '', reason: '' })}
+                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontWeight: 500 }}
+              >Keep Booking</button>
+              <button
+                onClick={() => handleCancelBooking()}
+                style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: '#dc2626', color: 'white', cursor: 'pointer', fontWeight: 600 }}
+              >Confirm Cancellation</button>
             </div>
           </div>
         </div>

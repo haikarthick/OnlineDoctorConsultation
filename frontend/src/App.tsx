@@ -15,7 +15,6 @@ import Settings from './pages/Settings'
 // Pet Owner Module
 import FindDoctor from './pages/petowner/FindDoctor'
 import BookConsultation from './pages/petowner/BookConsultation'
-import MyBookings from './pages/petowner/MyBookings'
 import VideoConsultation from './pages/petowner/VideoConsultation'
 import WriteReview from './pages/petowner/WriteReview'
 // Doctor Module
@@ -125,7 +124,7 @@ function AppRoutes() {
       {/* ── Pet Owner Module ── */}
       <Route path="/find-doctor" element={<RoleRoute path="/find-doctor"><AppLayout><RoutedPage Component={FindDoctor} /></AppLayout></RoleRoute>} />
       <Route path="/book-consultation" element={<RoleRoute path="/book-consultation"><AppLayout><RoutedPage Component={BookConsultation} /></AppLayout></RoleRoute>} />
-      <Route path="/my-bookings" element={<RoleRoute path="/my-bookings"><AppLayout><RoutedPage Component={MyBookings} /></AppLayout></RoleRoute>} />
+      <Route path="/my-bookings" element={<Navigate to="/consultations" replace />} />
       <Route path="/video-consultation/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VideoConsultation} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />
       <Route path="/write-review" element={<RoleRoute path="/write-review"><AppLayout><RoutedPage Component={WriteReview} /></AppLayout></RoleRoute>} />
 

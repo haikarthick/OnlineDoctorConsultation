@@ -46,13 +46,6 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer']
     },
     {
-      id: 'my-bookings',
-      label: 'My Bookings',
-      icon: '📋',
-      path: '/my-bookings',
-      roles: ['pet_owner', 'farmer']
-    },
-    {
       id: 'animals',
       label: 'My Animals',
       icon: '🐾',

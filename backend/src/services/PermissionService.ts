@@ -11,7 +11,6 @@ export const PERMISSION_CATEGORIES = {
       'consultations',
       'find_doctor',
       'book_consultation',
-      'my_bookings',
       'animals',
       'medical_records',
       'schedule',
@@ -89,7 +88,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   pet_owner: [
     // Pages
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
-    'my_bookings', 'animals', 'medical_records', 'video_consultation',
+    'animals', 'medical_records', 'video_consultation',
     'settings', 'write_review',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
@@ -101,7 +100,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   farmer: [
     // Pages
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
-    'my_bookings', 'animals', 'video_consultation', 'settings',
+    'animals', 'video_consultation', 'settings',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'animal_manage',
@@ -129,7 +128,6 @@ export const PERMISSION_LABELS: Record<string, string> = {
   consultations: 'Consultations Page',
   find_doctor: 'Find Doctor',
   book_consultation: 'Book Consultation',
-  my_bookings: 'My Bookings',
   animals: 'My Animals / Pets',
   medical_records: 'Medical Records',
   schedule: 'My Schedule',
