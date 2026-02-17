@@ -3,6 +3,7 @@ import config from '../config';
 import logger from './logger';
 import * as fs from 'fs';
 import * as path from 'path';
+import PermissionService from '../services/PermissionService';
 
 class PostgresDatabase {
   private pool: Pool;
@@ -43,6 +44,10 @@ class PostgresDatabase {
 
       // Sync stale booking statuses with completed consultations
       await this.syncBookingStatuses();
+
+      // Ensure RBAC permission table and seed defaults
+      await PermissionService.ensureTable();
+      await PermissionService.seedDefaults();
     } catch (error: any) {
       logger.error('Failed to connect to PostgreSQL', { error: error.message });
       throw error;

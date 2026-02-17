@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
+import { PermissionProvider, usePermission, ROUTE_PERMISSION_MAP } from './context/PermissionContext'
 import { Layout } from './components/Layout'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -18,7 +19,6 @@ import MyBookings from './pages/petowner/MyBookings'
 import VideoConsultation from './pages/petowner/VideoConsultation'
 import WriteReview from './pages/petowner/WriteReview'
 // Doctor Module
-import DoctorDashboard from './pages/doctor/DoctorDashboard'
 import ManageSchedule from './pages/doctor/ManageSchedule'
 import ConsultationRoom from './pages/doctor/ConsultationRoom'
 import PrescriptionWriter from './pages/doctor/PrescriptionWriter'
@@ -32,6 +32,7 @@ import PaymentManagement from './pages/admin/PaymentManagement'
 import ReviewModeration from './pages/admin/ReviewModeration'
 import SystemSettings from './pages/admin/SystemSettings'
 import AuditLogs from './pages/admin/AuditLogs'
+import PermissionManagement from './pages/admin/PermissionManagement'
 import './App.css'
 import './styles/modules.css'
 
@@ -39,6 +40,19 @@ import './styles/modules.css'
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
   if (!isAuthenticated) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
+/** Wrapper: enforces RBAC permission on a route. Redirects to /dashboard if no access */
+function RoleRoute({ children, path }: { children: React.ReactNode; path: string }) {
+  const { isAuthenticated } = useAuth()
+  const { hasPermission, loading } = usePermission()
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><p>Loading...</p></div>
+  const requiredPermission = ROUTE_PERMISSION_MAP[path]
+  if (requiredPermission && !hasPermission(requiredPermission)) {
+    return <Navigate to="/dashboard" replace />
+  }
   return <>{children}</>
 }
 
@@ -102,35 +116,36 @@ function AppRoutes() {
 
       {/* Protected pages (inside AppLayout) */}
       <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
-      <Route path="/consultations" element={<ProtectedRoute><AppLayout><Consultations /></AppLayout></ProtectedRoute>} />
-      <Route path="/medical-records" element={<ProtectedRoute><AppLayout><MedicalRecords /></AppLayout></ProtectedRoute>} />
-      <Route path="/animals" element={<ProtectedRoute><AppLayout><Animals /></AppLayout></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
+      <Route path="/consultations" element={<RoleRoute path="/consultations"><AppLayout><Consultations /></AppLayout></RoleRoute>} />
+      <Route path="/medical-records" element={<RoleRoute path="/medical-records"><AppLayout><MedicalRecords /></AppLayout></RoleRoute>} />
+      <Route path="/animals" element={<RoleRoute path="/animals"><AppLayout><Animals /></AppLayout></RoleRoute>} />
+      <Route path="/settings" element={<RoleRoute path="/settings"><AppLayout><Settings /></AppLayout></RoleRoute>} />
 
       {/* ── Pet Owner Module ── */}
-      <Route path="/find-doctor" element={<ProtectedRoute><AppLayout><RoutedPage Component={FindDoctor} /></AppLayout></ProtectedRoute>} />
-      <Route path="/book-consultation" element={<ProtectedRoute><AppLayout><RoutedPage Component={BookConsultation} /></AppLayout></ProtectedRoute>} />
-      <Route path="/my-bookings" element={<ProtectedRoute><AppLayout><RoutedPage Component={MyBookings} /></AppLayout></ProtectedRoute>} />
+      <Route path="/find-doctor" element={<RoleRoute path="/find-doctor"><AppLayout><RoutedPage Component={FindDoctor} /></AppLayout></RoleRoute>} />
+      <Route path="/book-consultation" element={<RoleRoute path="/book-consultation"><AppLayout><RoutedPage Component={BookConsultation} /></AppLayout></RoleRoute>} />
+      <Route path="/my-bookings" element={<RoleRoute path="/my-bookings"><AppLayout><RoutedPage Component={MyBookings} /></AppLayout></RoleRoute>} />
       <Route path="/video-consultation/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VideoConsultation} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />
-      <Route path="/write-review" element={<ProtectedRoute><AppLayout><RoutedPage Component={WriteReview} /></AppLayout></ProtectedRoute>} />
+      <Route path="/write-review" element={<RoleRoute path="/write-review"><AppLayout><RoutedPage Component={WriteReview} /></AppLayout></RoleRoute>} />
 
       {/* ── Doctor/Vet Module ── */}
-      <Route path="/doctor/dashboard" element={<ProtectedRoute><AppLayout><RoutedPage Component={DoctorDashboard} /></AppLayout></ProtectedRoute>} />
-      <Route path="/doctor/manage-schedule" element={<ProtectedRoute><AppLayout><RoutedPage Component={ManageSchedule} /></AppLayout></ProtectedRoute>} />
+      <Route path="/doctor/dashboard" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/doctor/manage-schedule" element={<RoleRoute path="/doctor/manage-schedule"><AppLayout><RoutedPage Component={ManageSchedule} /></AppLayout></RoleRoute>} />
       <Route path="/doctor/patient-queue" element={<Navigate to="/consultations" replace />} />
       <Route path="/doctor/consultation-room/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={ConsultationRoom} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />
-      <Route path="/doctor/prescriptions/new" element={<ProtectedRoute><AppLayout><RoutedPage Component={PrescriptionWriter} /></AppLayout></ProtectedRoute>} />
-      <Route path="/doctor/prescriptions" element={<ProtectedRoute><AppLayout><RoutedPage Component={Prescriptions} /></AppLayout></ProtectedRoute>} />
-      <Route path="/doctor/reviews" element={<ProtectedRoute><AppLayout><RoutedPage Component={MyReviews} /></AppLayout></ProtectedRoute>} />
+      <Route path="/doctor/prescriptions/new" element={<RoleRoute path="/doctor/prescriptions/new"><AppLayout><RoutedPage Component={PrescriptionWriter} /></AppLayout></RoleRoute>} />
+      <Route path="/doctor/prescriptions" element={<RoleRoute path="/doctor/prescriptions"><AppLayout><RoutedPage Component={Prescriptions} /></AppLayout></RoleRoute>} />
+      <Route path="/doctor/reviews" element={<RoleRoute path="/doctor/reviews"><AppLayout><RoutedPage Component={MyReviews} /></AppLayout></RoleRoute>} />
 
       {/* ── Admin Module ── */}
-      <Route path="/admin/dashboard" element={<ProtectedRoute><AppLayout><RoutedPage Component={AdminDashboard} /></AppLayout></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute><AppLayout><RoutedPage Component={UserManagement} /></AppLayout></ProtectedRoute>} />
-      <Route path="/admin/consultations" element={<ProtectedRoute><AppLayout><RoutedPage Component={ConsultationManagement} /></AppLayout></ProtectedRoute>} />
-      <Route path="/admin/payments" element={<ProtectedRoute><AppLayout><RoutedPage Component={PaymentManagement} /></AppLayout></ProtectedRoute>} />
-      <Route path="/admin/reviews" element={<ProtectedRoute><AppLayout><RoutedPage Component={ReviewModeration} /></AppLayout></ProtectedRoute>} />
-      <Route path="/admin/settings" element={<ProtectedRoute><AppLayout><RoutedPage Component={SystemSettings} /></AppLayout></ProtectedRoute>} />
-      <Route path="/admin/audit-logs" element={<ProtectedRoute><AppLayout><RoutedPage Component={AuditLogs} /></AppLayout></ProtectedRoute>} />
+      <Route path="/admin/dashboard" element={<RoleRoute path="/admin/dashboard"><AppLayout><RoutedPage Component={AdminDashboard} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/users" element={<RoleRoute path="/admin/users"><AppLayout><RoutedPage Component={UserManagement} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/consultations" element={<RoleRoute path="/admin/consultations"><AppLayout><RoutedPage Component={ConsultationManagement} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/payments" element={<RoleRoute path="/admin/payments"><AppLayout><RoutedPage Component={PaymentManagement} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/reviews" element={<RoleRoute path="/admin/reviews"><AppLayout><RoutedPage Component={ReviewModeration} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/settings" element={<RoleRoute path="/admin/settings"><AppLayout><RoutedPage Component={SystemSettings} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/audit-logs" element={<RoleRoute path="/admin/audit-logs"><AppLayout><RoutedPage Component={AuditLogs} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/permissions" element={<RoleRoute path="/admin/permissions"><AppLayout><RoutedPage Component={PermissionManagement} /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -143,7 +158,9 @@ function App() {
     <BrowserRouter>
       <SettingsProvider>
         <AuthProvider>
-          <AppRoutes />
+          <PermissionProvider>
+            <AppRoutes />
+          </PermissionProvider>
         </AuthProvider>
       </SettingsProvider>
     </BrowserRouter>

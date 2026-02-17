@@ -16,7 +16,9 @@ import ScheduleController from '../controllers/ScheduleController';
 import PrescriptionController from '../controllers/PrescriptionController';
 import AdminController from '../controllers/AdminController';
 import AdminService from '../services/AdminService';
+import PermissionService from '../services/PermissionService';
 import { asyncHandler } from '../utils/errorHandler';
+import { AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -103,18 +105,68 @@ router.post('/reviews', authMiddleware, asyncHandler((req: Request, res: Respons
 router.get('/reviews/vet/:vetId', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.listReviews(req, res)));
 
 // ─── Admin routes (admin role required) ──────────────────────
-router.get('/admin/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.getDashboardStats(req, res)));
-router.get('/admin/users', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.listUsers(req, res)));
-router.put('/admin/users/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.toggleUserStatus(req, res)));
-router.put('/admin/users/:id/role', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.changeUserRole(req, res)));
-router.get('/admin/consultations', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.listConsultations(req, res)));
-router.get('/admin/payments', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.listPayments(req, res)));
-router.post('/admin/payments/:id/refund', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.processRefund(req, res)));
-router.get('/admin/reviews', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.listReviews(req, res)));
-router.put('/admin/reviews/:id/moderate', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.moderateReview(req, res)));
-router.get('/admin/settings', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.getSystemSettings(req, res)));
-router.put('/admin/settings', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.updateSystemSetting(req, res)));
-router.get('/admin/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));
+router.get('/admin/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getDashboardStats(req, res)));
+router.get('/admin/users', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listUsers(req, res)));
+router.put('/admin/users/:id/status', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.toggleUserStatus(req, res)));
+router.put('/admin/users/:id/role', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.changeUserRole(req, res)));
+router.get('/admin/consultations', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listConsultations(req, res)));
+router.get('/admin/payments', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listPayments(req, res)));
+router.post('/admin/payments/:id/refund', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.processRefund(req, res)));
+router.get('/admin/reviews', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listReviews(req, res)));
+router.put('/admin/reviews/:id/moderate', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.moderateReview(req, res)));
+router.get('/admin/settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getSystemSettings(req, res)));
+router.put('/admin/settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.updateSystemSetting(req, res)));
+router.get('/admin/audit-logs', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));
+
+// ─── Permission routes ───────────────────────────────────────
+// Get my permissions (authenticated user)
+router.get('/permissions/my', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const permissions = await PermissionService.getPermissionsForRole(authReq.userRole || '');
+  const metadata = PermissionService.getPermissionMetadata();
+  res.json({ success: true, data: { permissions, metadata } });
+}));
+
+// Admin: get full permission matrix
+router.get('/admin/permissions', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  const matrix = await PermissionService.getFullPermissionMatrix();
+  const metadata = PermissionService.getPermissionMetadata();
+  res.json({ success: true, data: { matrix, metadata } });
+}));
+
+// Admin: update permission for a role
+router.put('/admin/permissions', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { role, permission, isEnabled } = req.body;
+  if (!role || !permission || typeof isEnabled !== 'boolean') {
+    return res.status(400).json({ error: 'role, permission, and isEnabled (boolean) are required' });
+  }
+  await PermissionService.updatePermission(role, permission, isEnabled, authReq.userId);
+  res.json({ success: true, message: `Permission ${permission} for ${role} set to ${isEnabled}` });
+}));
+
+// Admin: bulk update permissions for a role
+router.put('/admin/permissions/bulk', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { role, permissions } = req.body;
+  if (!role || !permissions || typeof permissions !== 'object') {
+    return res.status(400).json({ error: 'role and permissions object are required' });
+  }
+  await PermissionService.bulkUpdatePermissions(role, permissions, authReq.userId);
+  const updated = await PermissionService.getFullPermissionMatrix();
+  res.json({ success: true, data: { matrix: updated }, message: `Permissions updated for ${role}` });
+}));
+
+// Admin: reset role permissions to defaults
+router.post('/admin/permissions/reset', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const { role } = req.body;
+  if (!role) {
+    return res.status(400).json({ error: 'role is required' });
+  }
+  await PermissionService.resetToDefaults(role);
+  const updated = await PermissionService.getFullPermissionMatrix();
+  res.json({ success: true, data: { matrix: updated }, message: `Permissions reset to defaults for ${role}` });
+}));
 
 // ─── Public settings (no auth) ───────────────────────────────
 router.get('/settings/public', asyncHandler(async (_req: Request, res: Response) => {

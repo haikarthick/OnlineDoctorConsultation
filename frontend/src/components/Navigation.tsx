@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { usePermission, NAV_PERMISSION_MAP } from '../context/PermissionContext'
 import { MenuItem, UserRole } from '../types'
 import './Navigation.css'
 
@@ -10,6 +11,7 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath }) => {
   const { user, logout } = useAuth()
+  const { hasPermission } = usePermission()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const menuItems: MenuItem[] = [
@@ -19,7 +21,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       label: 'Dashboard',
       icon: '📊',
       path: '/dashboard',
-      roles: ['veterinarian', 'pet_owner', 'farmer']
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin']
     },
     {
       id: 'consultations',
@@ -66,13 +68,6 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     },
 
     // ── Doctor/Vet Module ──
-    {
-      id: 'doctor-dashboard',
-      label: 'Doctor Hub',
-      icon: '👨‍⚕️',
-      path: '/doctor/dashboard',
-      roles: ['veterinarian']
-    },
     {
       id: 'manage-schedule',
       label: 'My Schedule',
@@ -139,6 +134,13 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin']
     },
     {
+      id: 'admin-permissions',
+      label: 'Permissions',
+      icon: '🔐',
+      path: '/admin/permissions',
+      roles: ['admin']
+    },
+    {
       id: 'admin-audit',
       label: 'Audit Logs',
       icon: '📜',
@@ -156,9 +158,15 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     }
   ]
 
-  const filteredMenuItems = menuItems.filter(item => 
-    item.roles.includes(user?.role as UserRole)
-  )
+  // Filter by role AND permission
+  const filteredMenuItems = menuItems.filter(item => {
+    // Must have the role
+    if (!item.roles.includes(user?.role as UserRole)) return false
+    // Must have the permission (if mapping exists)
+    const permKey = NAV_PERMISSION_MAP[item.id]
+    if (permKey && !hasPermission(permKey)) return false
+    return true
+  })
 
   const handleLogout = () => {
     logout()

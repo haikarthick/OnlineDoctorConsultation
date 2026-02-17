@@ -397,6 +397,32 @@ class ApiService {
     return response.data
   }
 
+  // ─── Permissions (RBAC) ────────────────────────────────────
+  async getMyPermissions() {
+    const response = await this.client.get('/permissions/my')
+    return response.data
+  }
+
+  async adminGetPermissions() {
+    const response = await this.client.get('/admin/permissions')
+    return response.data
+  }
+
+  async adminUpdatePermission(role: string, permission: string, isEnabled: boolean) {
+    const response = await this.client.put('/admin/permissions', { role, permission, isEnabled })
+    return response.data
+  }
+
+  async adminBulkUpdatePermissions(role: string, permissions: Record<string, boolean>) {
+    const response = await this.client.put('/admin/permissions/bulk', { role, permissions })
+    return response.data
+  }
+
+  async adminResetPermissions(role: string) {
+    const response = await this.client.post('/admin/permissions/reset', { role })
+    return response.data
+  }
+
   // ─── Health check ──────────────────────────────────────────
   async healthCheck() {
     const response = await this.client.get('/health')

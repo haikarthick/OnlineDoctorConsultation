@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import apiService from '../../services/api'
 import { Medication } from '../../types'
@@ -78,7 +78,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
     return (
       <div className="module-page">
         <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>💊</div>
+          <div style={{ fontSize: 64, marginBottom: 20 }}>ðŸ’Š</div>
           <h1 style={{ marginBottom: 8 }}>Prescription Created</h1>
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 24 }}>
             {medications.length} medication{medications.length > 1 ? 's' : ''} prescribed
@@ -86,10 +86,10 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             {conId && (
               <button className="btn btn-primary" onClick={() => onNavigate(`/doctor/consultation-room/${conId}`)}>
-                ← Back to Consultation
+                â† Back to Consultation
               </button>
             )}
-            <button className="btn btn-outline" onClick={() => onNavigate('/doctor/dashboard')}>
+            <button className="btn btn-outline" onClick={() => onNavigate('/dashboard')}>
               Dashboard
             </button>
             <button className="btn btn-outline" onClick={() => { setSubmitted(false); setMedications([]); setDiagnosis(''); }}>
@@ -109,8 +109,8 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
           <p className="page-subtitle">Create a new prescription for your patient</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-outline" onClick={() => onNavigate(conId ? `/doctor/consultation-room/${conId}` : '/doctor/dashboard')}>
-            ← Back
+          <button className="btn btn-outline" onClick={() => onNavigate(conId ? `/doctor/consultation-room/${conId}` : '/dashboard')}>
+            â† Back
           </button>
         </div>
       </div>
@@ -126,7 +126,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
           {/* Left: Diagnosis & Instructions */}
           <div>
             <div className="card">
-              <div className="card-header"><h2>🩺 Diagnosis & Notes</h2></div>
+              <div className="card-header"><h2>ðŸ©º Diagnosis & Notes</h2></div>
               <div className="card-body">
                 <div className="form-group">
                   <label className="form-label">Diagnosis *</label>
@@ -167,7 +167,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
           <div>
             <div className="card">
               <div className="card-header">
-                <h2>💊 Medications ({medications.length})</h2>
+                <h2>ðŸ’Š Medications ({medications.length})</h2>
               </div>
               <div className="card-body">
                 {/* Current Medications */}
@@ -183,14 +183,14 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                         border: 'none', cursor: 'pointer', fontSize: 16, color: '#dc2626'
                       }}
                       onClick={() => removeMedication(i)}
-                    >✕</button>
+                    >âœ•</button>
                     <strong>{med.name}</strong>
                     <p style={{ margin: '4px 0 0', fontSize: 13, color: '#4b5563' }}>
-                      {med.dosage} • {med.frequency} • {med.duration || 'As needed'}
+                      {med.dosage} â€¢ {med.frequency} â€¢ {med.duration || 'As needed'}
                     </p>
                     {med.instructions && (
                       <p style={{ margin: '2px 0 0', fontSize: 12, color: '#6b7280' }}>
-                        📝 {med.instructions}
+                        ðŸ“ {med.instructions}
                       </p>
                     )}
                   </div>
@@ -248,9 +248,9 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
 
         {/* Submit */}
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
-          <button type="button" className="btn btn-outline" onClick={() => onNavigate(conId ? `/doctor/consultation-room/${conId}` : '/doctor/dashboard')}>Cancel</button>
+          <button type="button" className="btn btn-outline" onClick={() => onNavigate(conId ? `/doctor/consultation-room/${conId}` : '/dashboard')}>Cancel</button>
           <button type="submit" className="btn btn-primary btn-lg" disabled={submitting}>
-            {submitting ? 'Creating...' : '💊 Create Prescription'}
+            {submitting ? 'Creating...' : 'ðŸ’Š Create Prescription'}
           </button>
         </div>
       </form>
