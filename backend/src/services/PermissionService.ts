@@ -33,6 +33,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_settings',
       'admin_audit',
       'admin_permissions',
+      'admin_medical_records',
     ]
   },
   actions: {
@@ -113,7 +114,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard', 'consultations', 'settings',
     // Admin pages
     'admin_dashboard', 'admin_users', 'admin_consultations', 'admin_payments',
-    'admin_reviews', 'admin_settings', 'admin_audit', 'admin_permissions',
+    'admin_reviews', 'admin_settings', 'admin_audit', 'admin_permissions', 'admin_medical_records',
     // Actions
     'booking_confirm', 'booking_cancel', 'review_moderate',
     // Dashboard widgets
@@ -146,6 +147,7 @@ export const PERMISSION_LABELS: Record<string, string> = {
   admin_settings: 'System Settings',
   admin_audit: 'Audit Logs',
   admin_permissions: 'Permission Management',
+  admin_medical_records: 'Medical Record Management',
   // Actions
   booking_create: 'Create Bookings',
   booking_confirm: 'Confirm Bookings',

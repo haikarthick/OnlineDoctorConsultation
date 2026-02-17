@@ -84,11 +84,36 @@ router.get('/vet-profiles/:userId', authMiddleware, asyncHandler((req: Request, 
 router.put('/vet-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.updateProfile(req, res)));
 
 // ─── Medical Record routes ───────────────────────────────────
+router.get('/medical-records/stats', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getStats(req, res)));
+router.get('/medical-records/audit', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getAuditLog(req, res)));
 router.post('/medical-records', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.createRecord(req, res)));
 router.get('/medical-records', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listRecords(req, res)));
 router.get('/medical-records/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getRecord(req, res)));
 router.put('/medical-records/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.updateRecord(req, res)));
 router.delete('/medical-records/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.deleteRecord(req, res)));
+
+// ─── Vaccination routes ──────────────────────────────────────
+router.post('/vaccinations', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.createVaccination(req, res)));
+router.get('/vaccinations/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listVaccinations(req, res)));
+router.put('/vaccinations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.updateVaccination(req, res)));
+router.delete('/vaccinations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.deleteVaccination(req, res)));
+
+// ─── Weight History routes ───────────────────────────────────
+router.post('/weight-history', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.addWeight(req, res)));
+router.get('/weight-history/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listWeightHistory(req, res)));
+
+// ─── Allergy routes ─────────────────────────────────────────
+router.post('/allergies', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.createAllergy(req, res)));
+router.get('/allergies/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listAllergies(req, res)));
+router.put('/allergies/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.updateAllergy(req, res)));
+
+// ─── Lab Result routes ──────────────────────────────────────
+router.post('/lab-results', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.createLabResult(req, res)));
+router.get('/lab-results/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listLabResults(req, res)));
+router.put('/lab-results/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.updateLabResult(req, res)));
+
+// ─── Medical Timeline route ─────────────────────────────────
+router.get('/timeline/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getTimeline(req, res)));
 
 // ─── Notification routes ─────────────────────────────────────
 router.get('/notifications', authMiddleware, asyncHandler((req: Request, res: Response) => NotificationController.listNotifications(req, res)));

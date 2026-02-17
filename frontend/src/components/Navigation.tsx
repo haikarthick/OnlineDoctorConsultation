@@ -141,6 +141,13 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin']
     },
     {
+      id: 'admin-medical-records',
+      label: 'Medical Records',
+      icon: '📋',
+      path: '/admin/medical-records',
+      roles: ['admin']
+    },
+    {
       id: 'admin-audit',
       label: 'Audit Logs',
       icon: '📜',

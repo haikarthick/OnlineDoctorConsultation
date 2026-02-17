@@ -1,7 +1,7 @@
 -- ============================================================
 -- VetCare - Complete Database Schema (PostgreSQL 18)
 -- ============================================================
--- Covers ALL 16 tables used by the application services.
+-- Covers ALL 22 tables used by the application services.
 -- ============================================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT true,
   avatar_url VARCHAR(500),
+  unique_id VARCHAR(20) UNIQUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -78,6 +79,7 @@ CREATE TABLE IF NOT EXISTS animals (
   microchip_id VARCHAR(100),
   medical_notes TEXT,
   is_active BOOLEAN DEFAULT true,
+  unique_id VARCHAR(20) UNIQUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -216,12 +218,112 @@ CREATE TABLE IF NOT EXISTS medical_records (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+  veterinarian_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  record_number VARCHAR(20) UNIQUE,
   record_type VARCHAR(50) NOT NULL
     CHECK (record_type IN ('diagnosis', 'prescription', 'lab_report', 'vaccination', 'surgery', 'imaging', 'follow_up', 'other')),
   title VARCHAR(255) NOT NULL DEFAULT 'Untitled Record',
   content TEXT NOT NULL,
+  severity VARCHAR(20) DEFAULT 'normal'
+    CHECK (severity IN ('low', 'normal', 'high', 'critical')),
+  status VARCHAR(20) DEFAULT 'active'
+    CHECK (status IN ('active', 'archived', 'draft')),
+  medications JSONB DEFAULT '[]',
+  attachments JSONB DEFAULT '[]',
+  is_confidential BOOLEAN DEFAULT false,
+  follow_up_date DATE,
+  tags TEXT[] DEFAULT '{}',
   file_url VARCHAR(500),
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 10b. VACCINATION RECORDS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS vaccination_records (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  vaccine_name VARCHAR(255) NOT NULL,
+  vaccine_type VARCHAR(100),
+  date_administered DATE NOT NULL,
+  next_due_date DATE,
+  dosage VARCHAR(100),
+  batch_number VARCHAR(100),
+  manufacturer VARCHAR(255),
+  administered_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  certificate_number VARCHAR(100),
+  reaction_notes TEXT,
+  is_valid BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 10c. WEIGHT HISTORY
+-- ============================================================
+CREATE TABLE IF NOT EXISTS weight_history (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  weight DECIMAL(8,2) NOT NULL,
+  unit VARCHAR(10) DEFAULT 'kg',
+  notes TEXT,
+  recorded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 10d. ALLERGY RECORDS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS allergy_records (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  allergen VARCHAR(255) NOT NULL,
+  reaction TEXT,
+  severity VARCHAR(20) DEFAULT 'mild'
+    CHECK (severity IN ('mild', 'moderate', 'severe')),
+  identified_date DATE,
+  is_active BOOLEAN DEFAULT true,
+  notes TEXT,
+  reported_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 10e. MEDICAL RECORD AUDIT LOG
+-- ============================================================
+CREATE TABLE IF NOT EXISTS medical_record_audit_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  record_id UUID,
+  record_type VARCHAR(50),
+  action VARCHAR(50) NOT NULL,
+  performed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  details JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 10f. LAB RESULTS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS lab_results (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  medical_record_id UUID REFERENCES medical_records(id) ON DELETE SET NULL,
+  test_name VARCHAR(255) NOT NULL,
+  test_category VARCHAR(100),
+  test_date DATE NOT NULL,
+  result_value TEXT,
+  normal_range VARCHAR(100),
+  unit VARCHAR(50),
+  is_abnormal BOOLEAN DEFAULT false,
+  interpretation TEXT,
+  status VARCHAR(20) DEFAULT 'pending'
+    CHECK (status IN ('pending', 'in_progress', 'completed')),
+  lab_name VARCHAR(255),
+  ordered_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -364,6 +466,15 @@ CREATE TRIGGER update_prescriptions_updated_at BEFORE UPDATE ON prescriptions
 CREATE TRIGGER update_medical_records_updated_at BEFORE UPDATE ON medical_records
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_vaccination_records_updated_at BEFORE UPDATE ON vaccination_records
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_allergy_records_updated_at BEFORE UPDATE ON allergy_records
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_lab_results_updated_at BEFORE UPDATE ON lab_results
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -407,6 +518,20 @@ CREATE INDEX IF NOT EXISTS idx_prescriptions_owner ON prescriptions(pet_owner_id
 
 CREATE INDEX IF NOT EXISTS idx_medical_records_user_id ON medical_records(user_id);
 CREATE INDEX IF NOT EXISTS idx_medical_records_animal_id ON medical_records(animal_id);
+CREATE INDEX IF NOT EXISTS idx_medical_records_record_type ON medical_records(record_type);
+CREATE INDEX IF NOT EXISTS idx_medical_records_record_number ON medical_records(record_number);
+CREATE INDEX IF NOT EXISTS idx_medical_records_status ON medical_records(status);
+CREATE INDEX IF NOT EXISTS idx_medical_records_veterinarian_id ON medical_records(veterinarian_id);
+CREATE INDEX IF NOT EXISTS idx_vaccination_records_animal_id ON vaccination_records(animal_id);
+CREATE INDEX IF NOT EXISTS idx_vaccination_records_next_due ON vaccination_records(next_due_date);
+CREATE INDEX IF NOT EXISTS idx_weight_history_animal_id ON weight_history(animal_id);
+CREATE INDEX IF NOT EXISTS idx_allergy_records_animal_id ON allergy_records(animal_id);
+CREATE INDEX IF NOT EXISTS idx_lab_results_animal_id ON lab_results(animal_id);
+CREATE INDEX IF NOT EXISTS idx_lab_results_status ON lab_results(status);
+CREATE INDEX IF NOT EXISTS idx_medical_audit_log_record ON medical_record_audit_log(record_id);
+CREATE INDEX IF NOT EXISTS idx_medical_audit_log_action ON medical_record_audit_log(action);
+CREATE INDEX IF NOT EXISTS idx_users_unique_id ON users(unique_id);
+CREATE INDEX IF NOT EXISTS idx_animals_unique_id ON animals(unique_id);
 
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
 

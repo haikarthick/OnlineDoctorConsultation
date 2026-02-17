@@ -33,6 +33,7 @@ import ReviewModeration from './pages/admin/ReviewModeration'
 import SystemSettings from './pages/admin/SystemSettings'
 import AuditLogs from './pages/admin/AuditLogs'
 import PermissionManagement from './pages/admin/PermissionManagement'
+import MedicalRecordManagement from './pages/admin/MedicalRecordManagement'
 import './App.css'
 import './styles/modules.css'
 
@@ -146,6 +147,7 @@ function AppRoutes() {
       <Route path="/admin/settings" element={<RoleRoute path="/admin/settings"><AppLayout><RoutedPage Component={SystemSettings} /></AppLayout></RoleRoute>} />
       <Route path="/admin/audit-logs" element={<RoleRoute path="/admin/audit-logs"><AppLayout><RoutedPage Component={AuditLogs} /></AppLayout></RoleRoute>} />
       <Route path="/admin/permissions" element={<RoleRoute path="/admin/permissions"><AppLayout><RoutedPage Component={PermissionManagement} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/medical-records" element={<RoleRoute path="/admin/medical-records"><AppLayout><RoutedPage Component={MedicalRecordManagement} /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />

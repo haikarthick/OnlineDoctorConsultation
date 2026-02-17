@@ -67,6 +67,7 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'admin-settings': 'admin_settings',
   'admin-audit': 'admin_audit',
   'admin-permissions': 'admin_permissions',
+  'admin-medical-records': 'admin_medical_records',
 }
 
 // ─── Context ────────────────────────────────────────────────
