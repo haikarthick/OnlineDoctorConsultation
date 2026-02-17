@@ -104,7 +104,7 @@ const Consultations: React.FC = () => {
       return
     }
     try {
-      await apiService.cancelBooking(bookingId, cancelModal.reason || 'Cancelled by user')
+      await apiService.cancelBooking(bookingId, cancelModal.reason.trim())
       setCancelModal({ show: false, bookingId: '', reason: '' })
       loadData()
     } catch (err: any) {
@@ -560,9 +560,10 @@ const Consultations: React.FC = () => {
                           {log.details.newStatus === 'confirmed' && <span style={{ color: '#059669' }}> (auto-confirmed)</span>}
                         </div>
                       )}
-                      {log.action === 'BOOKING_CANCELLED' && log.details?.reason && (
+                      {log.action === 'BOOKING_CANCELLED' && (
                         <div style={{ fontSize: 12, color: '#dc2626', marginTop: 4 }}>
-                          Reason: {log.details.reason}
+                          {log.details?.cancelledByRole && <span>Cancelled by {log.details.cancelledByRole}. </span>}
+                          {log.details?.reason && <span>Reason: {log.details.reason}</span>}
                         </div>
                       )}
                     </div>
@@ -612,7 +613,8 @@ const Consultations: React.FC = () => {
               >Keep Booking</button>
               <button
                 onClick={() => handleCancelBooking()}
-                style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: '#dc2626', color: 'white', cursor: 'pointer', fontWeight: 600 }}
+                disabled={!cancelModal.reason.trim()}
+                style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: cancelModal.reason.trim() ? '#dc2626' : '#e5e7eb', color: cancelModal.reason.trim() ? 'white' : '#9ca3af', cursor: cancelModal.reason.trim() ? 'pointer' : 'not-allowed', fontWeight: 600 }}
               >Confirm Cancellation</button>
             </div>
           </div>
