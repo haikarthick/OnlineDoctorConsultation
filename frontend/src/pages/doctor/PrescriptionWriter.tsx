@@ -74,6 +74,18 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
     }
   }
 
+  // Auto-redirect back to consultation after prescription is created
+  const [redirectCountdown, setRedirectCountdown] = useState(3)
+  React.useEffect(() => {
+    if (!submitted || !conId) return
+    if (redirectCountdown <= 0) {
+      onNavigate(`/doctor/consultation-room/${conId}`)
+      return
+    }
+    const timer = setTimeout(() => setRedirectCountdown(prev => prev - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [submitted, conId, redirectCountdown])
+
   if (submitted) {
     return (
       <div className="module-page">
@@ -83,19 +95,33 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 24 }}>
             {medications.length} medication{medications.length > 1 ? 's' : ''} prescribed
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            {conId && (
-              <button className="btn btn-primary" onClick={() => onNavigate(`/doctor/consultation-room/${conId}`)}>
-                ← Back to Consultation
+          {conId ? (
+            <>
+              <p style={{ color: '#667eea', fontSize: 14, marginBottom: 20 }}>
+                Returning to consultation in {redirectCountdown}s...
+              </p>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <button className="btn btn-primary" onClick={() => onNavigate(`/doctor/consultation-room/${conId}`)}>
+                  ← Back to Consultation Now
+                </button>
+                <button className="btn btn-outline" onClick={() => {
+                  setRedirectCountdown(999)
+                  setSubmitted(false); setMedications([]); setDiagnosis('')
+                }}>
+                  Write Another Prescription
+                </button>
+              </div>
+            </>
+          ) : (
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button className="btn btn-primary" onClick={() => onNavigate('/dashboard')}>
+                Dashboard
               </button>
-            )}
-            <button className="btn btn-outline" onClick={() => onNavigate('/dashboard')}>
-              Dashboard
-            </button>
-            <button className="btn btn-outline" onClick={() => { setSubmitted(false); setMedications([]); setDiagnosis(''); }}>
-              Write Another
-            </button>
-          </div>
+              <button className="btn btn-outline" onClick={() => { setSubmitted(false); setMedications([]); setDiagnosis(''); }}>
+                Write Another
+              </button>
+            </div>
+          )}
         </div>
       </div>
     )
