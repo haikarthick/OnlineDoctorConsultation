@@ -44,6 +44,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const mountedRef = useRef(true)
   const localVideoRef = useRef<HTMLVideoElement>(null)
   const remoteVideoRef = useRef<HTMLVideoElement>(null)
   const localStreamRef = useRef<MediaStream | null>(null)
@@ -52,6 +53,18 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const recordedChunksRef = useRef<Blob[]>([])
 
   const conId = consultationId || window.location.pathname.split('/').pop() || ''
+
+  // ─── Message cache helpers (sessionStorage) ────────────────
+  const cacheKey = `chat_messages_${conId}`
+  const getCachedMessages = (): ChatMessage[] => {
+    try {
+      const cached = sessionStorage.getItem(cacheKey)
+      return cached ? JSON.parse(cached) : []
+    } catch { return [] }
+  }
+  const setCachedMessages = (msgs: ChatMessage[]) => {
+    try { sessionStorage.setItem(cacheKey, JSON.stringify(msgs)) } catch { /* quota */ }
+  }
 
   // â”€â”€â”€ Camera / Microphone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const startLocalStream = useCallback(async () => {
@@ -105,9 +118,17 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   }, [])
 
   // â”€â”€â”€ Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Restore cached messages immediately on mount
   useEffect(() => {
+    const cached = getCachedMessages()
+    if (cached.length > 0) setMessages(cached)
+  }, [conId])
+
+  useEffect(() => {
+    mountedRef.current = true
     initRoom()
     return () => {
+      mountedRef.current = false
       if (timerRef.current) clearInterval(timerRef.current)
       if (pollRef.current) clearInterval(pollRef.current)
       if (sessionPollRef.current) clearInterval(sessionPollRef.current)
@@ -117,6 +138,13 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       stopLocalStream()
     }
   }, [conId])
+
+  // Safety-net: if session is active/waiting but no polling is running, restart it
+  useEffect(() => {
+    if (session && (session.status === 'active' || session.status === 'waiting') && !pollRef.current) {
+      startMessagePolling(session.id)
+    }
+  }, [session?.id, session?.status])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -417,11 +445,19 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     pollRef.current = setInterval(() => loadMessages(sessionId), 3000)
   }
 
-  const loadMessages = async (sessionId: string) => {
+  const loadMessages = async (sessionId: string, retryCount = 0) => {
     try {
       const result = await apiService.getVideoMessages(sessionId)
-      if (result.data) setMessages(result.data)
-    } catch { /* ignore */ }
+      if (!mountedRef.current) return
+      const msgs = result.data || []
+      setMessages(msgs)
+      if (msgs.length > 0) setCachedMessages(msgs)
+    } catch (err) {
+      console.warn('[ConsultationRoom] loadMessages failed:', err)
+      if (retryCount < 2 && mountedRef.current) {
+        setTimeout(() => loadMessages(sessionId, retryCount + 1), 1000)
+      }
+    }
   }
 
   const handleSendMessage = async () => {
@@ -433,7 +469,9 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       if (result.data) {
         setMessages(prev => {
           if (prev.some(m => m.id === result.data.id)) return prev
-          return [...prev, result.data]
+          const updated = [...prev, result.data]
+          setCachedMessages(updated)
+          return updated
         })
       }
     } catch (err) {

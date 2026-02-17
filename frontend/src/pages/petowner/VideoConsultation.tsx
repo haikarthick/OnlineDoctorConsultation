@@ -30,6 +30,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionPollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const mountedRef = useRef(true)
 
   // Media stream refs
   const localVideoRef = useRef<HTMLVideoElement>(null)
@@ -42,6 +43,18 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
   const [prescriptions, setPrescriptions] = useState<any[]>([])
 
   const conId = consultationId || window.location.pathname.split('/').pop() || ''
+
+  // ─── Message cache helpers (sessionStorage) ────────────────
+  const cacheKey = `chat_messages_${conId}`
+  const getCachedMessages = (): ChatMessage[] => {
+    try {
+      const cached = sessionStorage.getItem(cacheKey)
+      return cached ? JSON.parse(cached) : []
+    } catch { return [] }
+  }
+  const setCachedMessages = (msgs: ChatMessage[]) => {
+    try { sessionStorage.setItem(cacheKey, JSON.stringify(msgs)) } catch { /* quota */ }
+  }
 
   // Start the camera & microphone — with graceful fallback
   const startLocalStream = useCallback(async () => {
@@ -104,9 +117,17 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
     }
   }, [])
 
+  // Restore cached messages immediately on mount (before any API call)
   useEffect(() => {
+    const cached = getCachedMessages()
+    if (cached.length > 0) setMessages(cached)
+  }, [conId])
+
+  useEffect(() => {
+    mountedRef.current = true
     initializeSession()
     return () => {
+      mountedRef.current = false
       if (timerRef.current) clearInterval(timerRef.current)
       if (pollRef.current) clearInterval(pollRef.current)
       if (sessionPollRef.current) clearInterval(sessionPollRef.current)
@@ -116,6 +137,13 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       stopLocalStream()
     }
   }, [conId])
+
+  // Safety-net: if session is active but no polling is running, restart it
+  useEffect(() => {
+    if (session && (session.status === 'active' || session.status === 'waiting') && !pollRef.current) {
+      startMessagePolling(session.id)
+    }
+  }, [session?.id, session?.status])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -312,11 +340,20 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
     pollRef.current = setInterval(() => loadMessages(sessionId), 3000)
   }
 
-  const loadMessages = async (sessionId: string) => {
+  const loadMessages = async (sessionId: string, retryCount = 0) => {
     try {
       const result = await apiService.getVideoMessages(sessionId)
-      if (result.data) setMessages(result.data)
-    } catch { /* ignore polling errors */ }
+      if (!mountedRef.current) return
+      const msgs = result.data || []
+      setMessages(msgs)
+      if (msgs.length > 0) setCachedMessages(msgs)
+    } catch (err) {
+      console.warn('[VideoConsultation] loadMessages failed:', err)
+      // On first failure, retry once after a short delay
+      if (retryCount < 2 && mountedRef.current) {
+        setTimeout(() => loadMessages(sessionId, retryCount + 1), 1000)
+      }
+    }
   }
 
   const loadPrescriptions = async () => {
@@ -336,7 +373,9 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
         setMessages(prev => {
           // Avoid duplicate if polling already picked it up
           const exists = prev.some(m => m.id === result.data.id)
-          return exists ? prev : [...prev, result.data]
+          const updated = exists ? prev : [...prev, result.data]
+          setCachedMessages(updated)
+          return updated
         })
       }
     } catch (err: any) {
@@ -615,7 +654,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
                 🔴 Live — {formatDuration(callDuration)}
               </span>
             ) : session?.status === 'waiting' ? (
-              'Waiting for participants...'
+              'Waiting for Doctor...'
             ) : (
               'Ready to start'
             )}
@@ -682,7 +721,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
             ) : (
               <div className="video-placeholder">
                 <div className="video-avatar">👨‍⚕️</div>
-                <p>Waiting for participants...</p>
+                <p>Waiting for Doctor...</p>
               </div>
             )}
 
