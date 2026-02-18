@@ -792,10 +792,37 @@ export class MedicalRecordService {
 
   // ═══ STATS ════════════════════════════════════════════════
 
-  async getMedicalStats(userId?: string, isAdmin?: boolean): Promise<any> {
+  async getMedicalStats(userId?: string, isAdmin?: boolean, animalId?: string): Promise<any> {
     try {
+      // When animalId is provided, filter everything by that animal
+      if (animalId) {
+        const [records, vaccinations, allergies, labs, upcoming, prescriptions, consultations] = await Promise.all([
+          database.query(`SELECT COUNT(*) as count, record_type as type FROM medical_records mr WHERE mr.animal_id = $1 GROUP BY record_type`, [animalId]),
+          database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records WHERE animal_id = $1`, [animalId]),
+          database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN is_active THEN 1 END) as active FROM allergy_records WHERE animal_id = $1`, [animalId]),
+          database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending FROM lab_results WHERE animal_id = $1`, [animalId]),
+          database.query(`SELECT COUNT(*) as count FROM medical_records WHERE animal_id = $1 AND follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`, [animalId]),
+          database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN is_active THEN 1 END) as active FROM prescriptions WHERE animal_id = $1`, [animalId]),
+          database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed FROM consultations WHERE animal_id = $1`, [animalId]),
+        ]);
+
+        const recordsByType: Record<string, number> = {};
+        records.rows.forEach((r: any) => { recordsByType[r.type] = parseInt(r.count); });
+
+        return {
+          totalRecords: Object.values(recordsByType).reduce((a: number, b: number) => a + b, 0),
+          recordsByType,
+          vaccinations: { total: parseInt(vaccinations.rows[0]?.total || '0'), upcomingDue: parseInt(vaccinations.rows[0]?.upcoming || '0') },
+          allergies: { total: parseInt(allergies.rows[0]?.total || '0'), active: parseInt(allergies.rows[0]?.active || '0') },
+          labResults: { total: parseInt(labs.rows[0]?.total || '0'), pending: parseInt(labs.rows[0]?.pending || '0') },
+          prescriptions: { total: parseInt(prescriptions.rows[0]?.total || '0'), active: parseInt(prescriptions.rows[0]?.active || '0') },
+          consultations: { total: parseInt(consultations.rows[0]?.total || '0'), completed: parseInt(consultations.rows[0]?.completed || '0') },
+          upcomingFollowUps: parseInt(upcoming.rows[0]?.count || '0'),
+        };
+      }
+
+      // Global stats (no animal filter)
       const userFilter = userId && !isAdmin ? `WHERE mr.user_id = '${userId}' OR mr.created_by = '${userId}' OR mr.veterinarian_id = '${userId}'` : '';
-      const animalFilter = userId && !isAdmin ? `WHERE a.owner_id = '${userId}'` : '';
       // Vets: include animals from their consultations
       const vetAnimalFilter = userId && !isAdmin ?
         `WHERE (a.owner_id = '${userId}' OR a.id IN (SELECT animal_id FROM consultations WHERE veterinarian_id = '${userId}' AND animal_id IS NOT NULL) OR a.id IN (SELECT animal_id FROM bookings WHERE veterinarian_id = '${userId}' AND animal_id IS NOT NULL))` :

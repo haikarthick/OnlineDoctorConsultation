@@ -307,8 +307,8 @@ class ApiService {
     return response.data
   }
 
-  async getMedicalStats() {
-    const response = await this.client.get('/medical-records/stats')
+  async getMedicalStats(params?: { animalId?: string }) {
+    const response = await this.client.get('/medical-records/stats', { params })
     return response.data
   }
 

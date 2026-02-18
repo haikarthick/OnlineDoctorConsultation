@@ -217,7 +217,8 @@ export class MedicalRecordController {
 
   async getStats(req: AuthRequest, res: Response): Promise<void> {
     const isAdmin = req.userRole === 'admin';
-    const stats = await MedicalRecordService.getMedicalStats(req.userId!, isAdmin);
+    const animalId = req.query.animalId as string | undefined;
+    const stats = await MedicalRecordService.getMedicalStats(req.userId!, isAdmin, animalId);
     res.json({ success: true, data: stats });
   }
 }

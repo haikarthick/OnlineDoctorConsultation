@@ -79,10 +79,12 @@ const MedicalRecords: React.FC = () => {
 
   const loadStats = useCallback(async () => {
     try {
-      const res = await apiService.getMedicalStats()
+      const params: any = {};
+      if (selectedAnimal) params.animalId = selectedAnimal;
+      const res = await apiService.getMedicalStats(params)
       setStats(res.data)
     } catch { /* ignore */ }
-  }, [])
+  }, [selectedAnimal])
 
   const loadRecords = useCallback(async () => {
     try {
@@ -179,6 +181,7 @@ const MedicalRecords: React.FC = () => {
     if (selectedAnimal) {
       loadRecords()
       loadPrescriptions()
+      loadStats()
       if (activeTab === 'consultations') loadConsultations()
       if (activeTab === 'vaccinations') loadVaccinations()
       if (activeTab === 'lab_results') loadLabResults()
@@ -188,6 +191,7 @@ const MedicalRecords: React.FC = () => {
     } else {
       loadRecords()
       loadPrescriptions()
+      loadStats()
     }
   }, [selectedAnimal, activeTab, recordTypeFilter, searchQuery])
 
@@ -330,12 +334,12 @@ const MedicalRecords: React.FC = () => {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderBottom: '2px solid #e5e7eb', overflowX: 'auto' }}>
         <button onClick={() => setActiveTab('overview')} style={tabStyle('overview')}>📊 Overview</button>
-        <button onClick={() => setActiveTab('consultations')} style={tabStyle('consultations')}>🩺 Consultations ({consultationsTotal})</button>
-        <button onClick={() => setActiveTab('prescriptions')} style={tabStyle('prescriptions')}>💊 Prescriptions ({prescriptionsTotal})</button>
+        <button onClick={() => setActiveTab('consultations')} style={tabStyle('consultations')}>🩺 Consultations ({stats?.consultations?.total ?? consultationsTotal})</button>
+        <button onClick={() => setActiveTab('prescriptions')} style={tabStyle('prescriptions')}>💊 Prescriptions ({stats?.prescriptions?.total ?? prescriptionsTotal})</button>
         <button onClick={() => setActiveTab('records')} style={tabStyle('records')}>📄 Records ({recordsTotal})</button>
-        <button onClick={() => setActiveTab('vaccinations')} style={tabStyle('vaccinations')}>💉 Vaccinations ({vaccinations.length})</button>
-        <button onClick={() => setActiveTab('lab_results')} style={tabStyle('lab_results')}>🔬 Lab Results ({labResults.length})</button>
-        <button onClick={() => setActiveTab('allergies')} style={tabStyle('allergies')}>⚠️ Allergies ({allergies.length})</button>
+        <button onClick={() => setActiveTab('vaccinations')} style={tabStyle('vaccinations')}>💉 Vaccinations ({stats?.vaccinations?.total ?? vaccinations.length})</button>
+        <button onClick={() => setActiveTab('lab_results')} style={tabStyle('lab_results')}>🔬 Lab Results ({stats?.labResults?.total ?? labResults.length})</button>
+        <button onClick={() => setActiveTab('allergies')} style={tabStyle('allergies')}>⚠️ Allergies ({stats?.allergies?.total ?? allergies.length})</button>
         <button onClick={() => setActiveTab('weight')} style={tabStyle('weight')}>⚖️ Weight ({weightHistory.length})</button>
         <button onClick={() => setActiveTab('timeline')} style={tabStyle('timeline')}>📅 Timeline</button>
       </div>
