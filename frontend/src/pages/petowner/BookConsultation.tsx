@@ -361,7 +361,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                 >
                   <option value="">-- Select a pet (optional) --</option>
                   {animals.map(a => (
-                    <option key={a.id} value={a.id}>{a.name} ({a.species})</option>
+                    <option key={a.id} value={a.id}>{a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
                   ))}
                 </select>
               </div>

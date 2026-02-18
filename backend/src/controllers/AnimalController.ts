@@ -5,11 +5,15 @@ import { ValidationError, ForbiddenError } from '../utils/errors';
 
 export class AnimalController {
   async createAnimal(req: AuthRequest, res: Response): Promise<void> {
-    const { name, species, breed, dateOfBirth, gender, weight, color, microchipId, medicalNotes } = req.body;
+    const { name, species, breed, dateOfBirth, gender, weight, color, microchipId,
+            earTagId, registrationNumber, isNeutered, insuranceProvider, insurancePolicyNumber,
+            insuranceExpiry, medicalNotes } = req.body;
     if (!name || !species) throw new ValidationError('Name and species are required');
 
     const animal = await AnimalService.createAnimal(req.userId!, {
-      name, species, breed, dateOfBirth, gender, weight, color, microchipId, medicalNotes,
+      name, species, breed, dateOfBirth, gender, weight, color, microchipId,
+      earTagId, registrationNumber, isNeutered, insuranceProvider, insurancePolicyNumber,
+      insuranceExpiry, medicalNotes,
     });
 
     res.status(201).json({ success: true, data: animal });

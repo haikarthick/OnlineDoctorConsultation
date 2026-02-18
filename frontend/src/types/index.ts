@@ -375,6 +375,7 @@ export interface Payment {
 export interface Animal {
   id: string
   ownerId: string
+  uniqueId?: string
   name: string
   species: string
   breed?: string
@@ -383,10 +384,17 @@ export interface Animal {
   weight?: number
   color?: string
   microchipId?: string
+  earTagId?: string
+  registrationNumber?: string
+  isNeutered?: boolean
+  insuranceProvider?: string
+  insurancePolicyNumber?: string
+  insuranceExpiry?: string
   allergies?: string[]
   medicalNotes?: string
   profileImage?: string
   isActive?: boolean
+  ownerName?: string
   createdAt: string
   updatedAt: string
 }

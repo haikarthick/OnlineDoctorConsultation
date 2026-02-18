@@ -298,7 +298,7 @@ const MedicalRecords: React.FC = () => {
             <option value="">All Animals</option>
             {animals.map((a: any) => (
               <option key={a.id} value={a.id}>
-                {a.uniqueId || a.unique_id || ''} {a.name} ({a.species})
+                {a.uniqueId || a.unique_id || ''} {a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}
               </option>
             ))}
           </select>
@@ -320,14 +320,22 @@ const MedicalRecords: React.FC = () => {
 
       {/* Selected Animal Info Bar */}
       {selectedAnimalData && (
-        <div style={{ display: 'flex', gap: 16, padding: '12px 16px', background: '#f0f4ff', borderRadius: 8, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap', fontSize: 13 }}>
-          <span style={{ fontWeight: 700, color: '#667eea' }}>🐾 {selectedAnimalData.uniqueId || selectedAnimalData.unique_id || 'N/A'}</span>
-          <span><strong>{selectedAnimalData.name}</strong> ({selectedAnimalData.species}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''})</span>
-          {selectedAnimalData.ownerName && <span>Owner: {selectedAnimalData.ownerName}</span>}
-          {selectedAnimalData.gender && <span>Gender: {selectedAnimalData.gender}</span>}
-          {selectedAnimalData.weight && <span>Weight: {selectedAnimalData.weight} kg</span>}
-          {selectedAnimalData.dateOfBirth && <span>DOB: {fmtDate(selectedAnimalData.dateOfBirth || selectedAnimalData.date_of_birth)}</span>}
-          {selectedAnimalData.microchipId && <span>Microchip: {selectedAnimalData.microchipId}</span>}
+        <div style={{ padding: '12px 16px', background: '#f0f4ff', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 700, color: '#667eea' }}>🐾 {selectedAnimalData.uniqueId || selectedAnimalData.unique_id || 'N/A'}</span>
+            <span><strong>{selectedAnimalData.name}</strong> ({selectedAnimalData.species}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''})</span>
+            {selectedAnimalData.ownerName && <span>Owner: {selectedAnimalData.ownerName}</span>}
+            {selectedAnimalData.gender && <span>Gender: {selectedAnimalData.gender === 'male' ? '♂ Male' : '♀ Female'}</span>}
+            {selectedAnimalData.weight && <span>Weight: {selectedAnimalData.weight} kg</span>}
+            {selectedAnimalData.dateOfBirth && <span>DOB: {fmtDate(selectedAnimalData.dateOfBirth || selectedAnimalData.date_of_birth)}</span>}
+            {selectedAnimalData.isNeutered && <span style={{ color: '#059669' }}>Neutered ✓</span>}
+          </div>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 6 }}>
+            {selectedAnimalData.microchipId && <span>🏷️ Microchip: <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.microchipId}</strong></span>}
+            {selectedAnimalData.earTagId && <span>🏷️ Ear Tag: <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.earTagId}</strong></span>}
+            {selectedAnimalData.registrationNumber && <span>📋 Reg#: <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.registrationNumber}</strong></span>}
+            {selectedAnimalData.insuranceProvider && <span>🛡️ Insurance: <strong>{selectedAnimalData.insuranceProvider}</strong>{selectedAnimalData.insurancePolicyNumber ? ` (${selectedAnimalData.insurancePolicyNumber})` : ''}</span>}
+          </div>
         </div>
       )}
 

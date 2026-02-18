@@ -235,7 +235,7 @@ class ApiService {
   }
 
   // ─── Animals ──────────────────────────────────────────────
-  async createAnimal(data: { name: string; species: string; breed?: string; gender?: string; weight?: number; color?: string; medicalNotes?: string }) {
+  async createAnimal(data: { name: string; species: string; breed?: string; gender?: string; weight?: number; color?: string; medicalNotes?: string; dateOfBirth?: string; microchipId?: string; earTagId?: string; registrationNumber?: string; isNeutered?: boolean; insuranceProvider?: string; insurancePolicyNumber?: string; insuranceExpiry?: string }) {
     const response = await this.client.post('/animals', data)
     return response.data
   }

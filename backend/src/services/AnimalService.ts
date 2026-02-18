@@ -6,6 +6,7 @@ import logger from '../utils/logger';
 export interface Animal {
   id: string;
   ownerId: string;
+  uniqueId?: string;
   name: string;
   species: string;
   breed?: string;
@@ -14,6 +15,12 @@ export interface Animal {
   weight?: number;
   color?: string;
   microchipId?: string;
+  earTagId?: string;
+  registrationNumber?: string;
+  isNeutered?: boolean;
+  insuranceProvider?: string;
+  insurancePolicyNumber?: string;
+  insuranceExpiry?: string;
   medicalNotes?: string;
   isActive: boolean;
   createdAt: Date;
@@ -29,6 +36,12 @@ export interface AnimalCreateDTO {
   weight?: number;
   color?: string;
   microchipId?: string;
+  earTagId?: string;
+  registrationNumber?: string;
+  isNeutered?: boolean;
+  insuranceProvider?: string;
+  insurancePolicyNumber?: string;
+  insuranceExpiry?: string;
   medicalNotes?: string;
 }
 
@@ -59,16 +72,23 @@ export class AnimalService {
         uniqueId = `PET-${num.toString().padStart(5, '0')}`;
       } catch { uniqueId = `PET-${Date.now().toString(36).toUpperCase()}`; }
       const query = `
-        INSERT INTO animals (id, owner_id, unique_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id, medical_notes, is_active, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, true, NOW(), NOW())
+        INSERT INTO animals (id, owner_id, unique_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id,
+                             ear_tag_id, registration_number, is_neutered, insurance_provider, insurance_policy_number, insurance_expiry,
+                             medical_notes, is_active, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, true, NOW(), NOW())
         RETURNING id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
-                  gender, weight, color, microchip_id as "microchipId", medical_notes as "medicalNotes",
+                  gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
+                  registration_number as "registrationNumber", is_neutered as "isNeutered",
+                  insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
+                  insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [
         id, ownerId, uniqueId, data.name, data.species, data.breed || null,
         data.dateOfBirth || null, data.gender || null, data.weight || null,
-        data.color || null, microchipId, data.medicalNotes || null
+        data.color || null, microchipId, data.earTagId || null, data.registrationNumber || null,
+        data.isNeutered || false, data.insuranceProvider || null, data.insurancePolicyNumber || null,
+        data.insuranceExpiry || null, data.medicalNotes || null
       ]);
       logger.info('Animal created', { id, ownerId, uniqueId, trackingNumber });
       return result.rows[0];
@@ -81,7 +101,10 @@ export class AnimalService {
     try {
       const query = `
         SELECT id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
-               gender, weight, color, microchip_id as "microchipId", medical_notes as "medicalNotes",
+               gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
+               registration_number as "registrationNumber", is_neutered as "isNeutered",
+               insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
+               insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
                is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
         FROM animals WHERE id = $1
       `;
@@ -100,7 +123,10 @@ export class AnimalService {
     try {
       const query = `
         SELECT id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
-               gender, weight, color, microchip_id as "microchipId", medical_notes as "medicalNotes",
+               gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
+               registration_number as "registrationNumber", is_neutered as "isNeutered",
+               insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
+               insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
                is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
         FROM animals WHERE owner_id = $1 AND is_active = true
         ORDER BY name ASC LIMIT $2 OFFSET $3
@@ -125,7 +151,10 @@ export class AnimalService {
       const query = `
         SELECT DISTINCT a.id, a.owner_id as "ownerId", a.unique_id as "uniqueId", a.name, a.species, a.breed,
                a.date_of_birth as "dateOfBirth", a.gender, a.weight, a.color,
-               a.microchip_id as "microchipId", a.medical_notes as "medicalNotes",
+               a.microchip_id as "microchipId", a.ear_tag_id as "earTagId",
+               a.registration_number as "registrationNumber", a.is_neutered as "isNeutered",
+               a.insurance_provider as "insuranceProvider", a.insurance_policy_number as "insurancePolicyNumber",
+               a.insurance_expiry as "insuranceExpiry", a.medical_notes as "medicalNotes",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
         FROM animals a
@@ -161,7 +190,10 @@ export class AnimalService {
       const query = `
         SELECT a.id, a.owner_id as "ownerId", a.unique_id as "uniqueId", a.name, a.species, a.breed,
                a.date_of_birth as "dateOfBirth", a.gender, a.weight, a.color,
-               a.microchip_id as "microchipId", a.medical_notes as "medicalNotes",
+               a.microchip_id as "microchipId", a.ear_tag_id as "earTagId",
+               a.registration_number as "registrationNumber", a.is_neutered as "isNeutered",
+               a.insurance_provider as "insuranceProvider", a.insurance_policy_number as "insurancePolicyNumber",
+               a.insurance_expiry as "insuranceExpiry", a.medical_notes as "medicalNotes",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
         FROM animals a LEFT JOIN users u ON u.id = a.owner_id
@@ -186,7 +218,9 @@ export class AnimalService {
       const fieldMap: Record<string, string> = {
         name: 'name', species: 'species', breed: 'breed', dateOfBirth: 'date_of_birth',
         gender: 'gender', weight: 'weight', color: 'color', microchipId: 'microchip_id',
-        medicalNotes: 'medical_notes',
+        earTagId: 'ear_tag_id', registrationNumber: 'registration_number', isNeutered: 'is_neutered',
+        insuranceProvider: 'insurance_provider', insurancePolicyNumber: 'insurance_policy_number',
+        insuranceExpiry: 'insurance_expiry', medicalNotes: 'medical_notes',
       };
       const entries = Object.entries(updates).filter(([_, v]) => v !== undefined);
       if (entries.length === 0) return this.getAnimal(animalId);
@@ -198,7 +232,10 @@ export class AnimalService {
         UPDATE animals SET ${sets.join(', ')}, updated_at = NOW()
         WHERE id = $1
         RETURNING id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
-                  gender, weight, color, microchip_id as "microchipId", medical_notes as "medicalNotes",
+                  gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
+                  registration_number as "registrationNumber", is_neutered as "isNeutered",
+                  insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
+                  insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [animalId, ...values]);
