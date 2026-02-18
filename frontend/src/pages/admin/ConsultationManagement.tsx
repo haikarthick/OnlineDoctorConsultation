@@ -75,10 +75,10 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavig
         />
         <select className="form-input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: 170 }}>
           <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
           <option value="scheduled">Scheduled</option>
           <option value="in_progress">In Progress</option>
           <option value="completed">Completed</option>
+          <option value="ended">Ended</option>
           <option value="cancelled">Cancelled</option>
         </select>
         <button className="btn btn-outline" onClick={loadConsultations}>🔄</button>

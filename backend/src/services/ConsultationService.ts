@@ -100,7 +100,7 @@ export class ConsultationService {
     }
   }
 
-  async listConsultations(userId?: string, veterinarianId?: string, limit: number = 10, offset: number = 0) {
+  async listConsultations(userId?: string, veterinarianId?: string, limit: number = 10, offset: number = 0, status?: string) {
     try {
       let query = `SELECT id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId", animal_type as "animalType",
                    symptom_description as "symptomDescription", status, scheduled_at as "scheduledAt",
@@ -120,6 +120,12 @@ export class ConsultationService {
         paramCount++;
         query += ` AND veterinarian_id = $${paramCount}`;
         params.push(veterinarianId);
+      }
+
+      if (status) {
+        paramCount++;
+        query += ` AND status = $${paramCount}`;
+        params.push(status);
       }
 
       query += ` ORDER BY scheduled_at DESC LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`;

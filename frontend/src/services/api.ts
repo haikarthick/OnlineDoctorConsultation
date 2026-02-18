@@ -72,7 +72,7 @@ class ApiService {
     return response.data
   }
 
-  async listConsultations(params?: { limit?: number; offset?: number }) {
+  async listConsultations(params?: { limit?: number; offset?: number; status?: string }) {
     const response = await this.client.get('/consultations', { params })
     return response.data
   }

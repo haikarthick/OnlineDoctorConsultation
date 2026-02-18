@@ -30,6 +30,16 @@ const Consultations: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'bookings' | 'consultations'>('bookings')
   const [statusFilter, setStatusFilter] = useState('')
 
+  // Tab-specific status filter options
+  const bookingStatuses = ['pending', 'confirmed', 'rescheduled', 'missed', 'completed', 'cancelled']
+  const consultationStatuses = ['scheduled', 'in_progress', 'completed', 'ended']
+  const currentStatuses = activeTab === 'bookings' ? bookingStatuses : consultationStatuses
+
+  const handleTabSwitch = (tab: 'bookings' | 'consultations') => {
+    setStatusFilter('')
+    setActiveTab(tab)
+  }
+
   // Reschedule modal state
   const [rescheduleBooking, setRescheduleBooking] = useState<BookingRow | null>(null)
   const [rescheduleDate, setRescheduleDate] = useState('')
@@ -72,16 +82,18 @@ const Consultations: React.FC = () => {
     finally { setActionLogsLoading(false) }
   }
 
-  useEffect(() => { loadData() }, [statusFilter])
+  useEffect(() => { loadData() }, [statusFilter, activeTab])
 
   const loadData = async () => {
     try {
       setLoading(true); setError('')
       const params: any = { limit: 50 }
       if (statusFilter) params.status = statusFilter
+      const consultParams: any = { limit: 50 }
+      if (statusFilter && activeTab === 'consultations') consultParams.status = statusFilter
       const [bRes, cRes] = await Promise.all([
         apiService.listBookings(params),
-        apiService.listConsultations({ limit: 50 })
+        apiService.listConsultations(consultParams)
       ])
       setBookings(bRes.data?.items || (Array.isArray(bRes.data) ? bRes.data : []))
       setConsultations(cRes.data?.items || (Array.isArray(cRes.data) ? cRes.data : []))
@@ -246,7 +258,7 @@ const Consultations: React.FC = () => {
         {[{ key: 'bookings' as const, label: '📅 Appointments', count: bookings.length },
           { key: 'consultations' as const, label: '🩺 Consultation History', count: consultations.length }
         ].map(t => (
-          <button key={t.key} onClick={() => setActiveTab(t.key)}
+          <button key={t.key} onClick={() => handleTabSwitch(t.key)}
             style={{ padding: '12px 24px', fontWeight: 600, fontSize: 14, cursor: 'pointer', border: 'none', background: 'none',
               borderBottom: activeTab === t.key ? '3px solid #667eea' : '3px solid transparent',
               color: activeTab === t.key ? '#667eea' : '#6b7280'
@@ -259,16 +271,16 @@ const Consultations: React.FC = () => {
       {/* Filters */}
       <div style={{ marginBottom: 16, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <span style={{ fontSize: 13, color: '#6b7280' }}>Filter:</span>
-        {['', 'pending', 'confirmed', 'missed', 'rescheduled', 'completed', 'cancelled'].map(s => (
+        {['', ...currentStatuses].map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
             style={{ padding: '5px 14px', borderRadius: 16, fontSize: 12, fontWeight: 500, cursor: 'pointer',
               border: statusFilter === s ? '2px solid #667eea' : '1px solid #d1d5db',
               background: statusFilter === s ? '#eef2ff' : 'white', color: statusFilter === s ? '#667eea' : '#6b7280'
             }}>
-            {s || 'All'}
+            {s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'All'}
           </button>
         ))}
-        <button onClick={loadData} style={{ marginLeft: 'auto', padding: '5px 14px', borderRadius: 6, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontSize: 12 }}>↻ Refresh</button>
+        <button onClick={loadData} style={{ marginLeft: 'auto', padding: '5px 14px', borderRadius: 6, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#374151' }}>&#x21bb; Refresh</button>
       </div>
 
       {/* Bookings Tab */}
