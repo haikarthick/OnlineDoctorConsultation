@@ -30,10 +30,22 @@ const Consultations: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'bookings' | 'consultations'>('bookings')
   const [statusFilter, setStatusFilter] = useState('')
 
-  // Tab-specific status filter options
-  const bookingStatuses = ['pending', 'confirmed', 'rescheduled', 'missed', 'completed', 'cancelled']
-  const consultationStatuses = ['scheduled', 'in_progress', 'completed', 'ended']
-  const currentStatuses = activeTab === 'bookings' ? bookingStatuses : consultationStatuses
+  // Split bookings into active (needs attention) vs history (reference only)
+  const activeStatuses = ['pending', 'confirmed', 'rescheduled', 'missed']
+  const historyStatuses = ['completed', 'cancelled']
+
+  const activeBookings = bookings.filter(b => activeStatuses.includes(b.status))
+  const historyBookings = bookings.filter(b => historyStatuses.includes(b.status))
+
+  // Build diagnosis lookup from consultations
+  const diagnosisMap = new Map(consultations.map(c => [c.id, c.diagnosis || '']))
+
+  // Apply client-side status filter
+  const filteredActive = statusFilter ? activeBookings.filter(b => b.status === statusFilter) : activeBookings
+  const filteredHistory = statusFilter ? historyBookings.filter(b => b.status === statusFilter) : historyBookings
+
+  // Tab-specific filter options
+  const currentFilterStatuses = activeTab === 'bookings' ? activeStatuses : historyStatuses
 
   const handleTabSwitch = (tab: 'bookings' | 'consultations') => {
     setStatusFilter('')
@@ -82,18 +94,14 @@ const Consultations: React.FC = () => {
     finally { setActionLogsLoading(false) }
   }
 
-  useEffect(() => { loadData() }, [statusFilter, activeTab])
+  useEffect(() => { loadData() }, [])
 
   const loadData = async () => {
     try {
       setLoading(true); setError('')
-      const params: any = { limit: 50 }
-      if (statusFilter) params.status = statusFilter
-      const consultParams: any = { limit: 50 }
-      if (statusFilter && activeTab === 'consultations') consultParams.status = statusFilter
       const [bRes, cRes] = await Promise.all([
-        apiService.listBookings(params),
-        apiService.listConsultations(consultParams)
+        apiService.listBookings({ limit: 100 }),
+        apiService.listConsultations({ limit: 100 })
       ])
       setBookings(bRes.data?.items || (Array.isArray(bRes.data) ? bRes.data : []))
       setConsultations(cRes.data?.items || (Array.isArray(cRes.data) ? cRes.data : []))
@@ -255,8 +263,8 @@ const Consultations: React.FC = () => {
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: 20 }}>
-        {[{ key: 'bookings' as const, label: '📅 Appointments', count: bookings.length },
-          { key: 'consultations' as const, label: '🩺 Consultation History', count: consultations.length }
+        {[{ key: 'bookings' as const, label: '📅 Appointments', count: activeBookings.length },
+          { key: 'consultations' as const, label: '🩺 Consultation History', count: historyBookings.length }
         ].map(t => (
           <button key={t.key} onClick={() => handleTabSwitch(t.key)}
             style={{ padding: '12px 24px', fontWeight: 600, fontSize: 14, cursor: 'pointer', border: 'none', background: 'none',
@@ -271,7 +279,7 @@ const Consultations: React.FC = () => {
       {/* Filters */}
       <div style={{ marginBottom: 16, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <span style={{ fontSize: 13, color: '#6b7280' }}>Filter:</span>
-        {['', ...currentStatuses].map(s => (
+        {['', ...currentFilterStatuses].map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
             style={{ padding: '5px 14px', borderRadius: 16, fontSize: 12, fontWeight: 500, cursor: 'pointer',
               border: statusFilter === s ? '2px solid #667eea' : '1px solid #d1d5db',
@@ -283,14 +291,15 @@ const Consultations: React.FC = () => {
         <button onClick={loadData} style={{ marginLeft: 'auto', padding: '5px 14px', borderRadius: 6, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#374151' }}>&#x21bb; Refresh</button>
       </div>
 
-      {/* Bookings Tab */}
+      {/* Appointments Tab — items needing attention or upcoming */}
       {activeTab === 'bookings' && (
         <div className="module-content">
-          {bookings.length === 0 ? (
+          {filteredActive.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>📅</div>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>No appointments found</p>
-              {isPetOwner && <button className="btn-primary" style={{ marginTop: 12 }} onClick={() => navigate('/book-consultation')}>Book Your First Consultation</button>}
+              <p style={{ fontSize: 16, fontWeight: 500 }}>{statusFilter ? 'No appointments match this filter' : 'No upcoming appointments'}</p>
+              <p style={{ fontSize: 13, margin: '4px 0 12px' }}>Appointments requiring your attention will appear here</p>
+              {isPetOwner && !statusFilter && <button className="btn-primary" style={{ marginTop: 4 }} onClick={() => navigate('/book-consultation')}>Book a Consultation</button>}
             </div>
           ) : (
             <div className="table-wrapper">
@@ -303,7 +312,7 @@ const Consultations: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.map(b => (
+                  {filteredActive.map(b => (
                     <tr key={b.id}>
                       {isVet && <td><strong>{b.petOwnerName || 'Patient'}</strong></td>}
                       {isPetOwner && <td><strong>{b.vetName || 'Doctor'}</strong></td>}
@@ -337,23 +346,13 @@ const Consultations: React.FC = () => {
                           {b.status === 'missed' && (
                             <button className="btn-small" style={{ background: '#f59e0b', color: 'white', border: 'none' }} onClick={() => openRescheduleModal(b)}>🔄 Reschedule</button>
                           )}
-                          {b.status === 'completed' && b.consultationId && (
-                            <button className="btn-small" style={{ background: '#f0fdf4', color: '#059669', border: '1px solid #059669' }}
-                              onClick={() => {
-                                if (isVet) navigate(`/doctor/consultation-room/${b.consultationId}`)
-                                else navigate(`/video-consultation/${b.consultationId}`)
-                              }}>📋 View</button>
-                          )}
-                          {b.status === 'completed' && isPetOwner && b.consultationId && (
-                            <button className="btn-small" onClick={() => navigate(`/write-review?consultationId=${b.consultationId}&veterinarianId=${b.veterinarianId}`)}>⭐ Review</button>
-                          )}
                           {(b.status === 'pending' || b.status === 'confirmed') && (
                             <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #dc2626', background: 'white' }} onClick={() => handleCancelBooking(b.id)}>✕ Cancel</button>
                           )}
                           {isAdmin && b.status === 'pending' && (
                             <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>✓ Confirm</button>
                           )}
-                          <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View Action History">📋 History</button>
+                          <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View Action History">📋 Log</button>
                         </div>
                       </td>
                     </tr>
@@ -365,50 +364,58 @@ const Consultations: React.FC = () => {
         </div>
       )}
 
-      {/* Consultations History Tab */}
+      {/* Consultation History Tab — completed/cancelled, reference only */}
       {activeTab === 'consultations' && (
         <div className="module-content">
-          {consultations.length === 0 ? (
+          {filteredHistory.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🩺</div>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>No consultation history yet</p>
-              <p style={{ fontSize: 13 }}>Consultations appear here after appointments are completed</p>
+              <p style={{ fontSize: 16, fontWeight: 500 }}>{statusFilter ? 'No consultations match this filter' : 'No consultation history yet'}</p>
+              <p style={{ fontSize: 13 }}>Completed and cancelled consultations will appear here for reference</p>
             </div>
           ) : (
             <div className="table-wrapper">
               <table className="data-table">
                 <thead>
-                  <tr><th>Date</th><th>Description</th><th>Status</th><th>Diagnosis</th><th>Actions</th></tr>
+                  <tr>
+                    {isVet ? <th>Patient</th> : <th>Doctor</th>}
+                    {isAdmin && <><th>Patient</th><th>Doctor</th></>}
+                    <th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Diagnosis</th><th>Actions</th>
+                  </tr>
                 </thead>
                 <tbody>
-                  {consultations.map(c => (
-                    <tr key={c.id}>
-                      <td>{fmt(c.scheduledAt || c.createdAt || '')}</td>
-                      <td>
-                        <strong>{c.animalType}</strong><br />
-                        <span style={{ fontSize: 12, color: '#6b7280' }}>{c.symptomDescription}</span>
-                      </td>
-                      <td>{badge(c.status)}</td>
-                      <td style={{ maxWidth: 200 }}>{c.diagnosis || '—'}</td>
-                      <td>
-                        {(c.status === 'scheduled' || c.status === 'in_progress') && isVet && (
-                          <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }}
-                            onClick={() => navigate(`/doctor/consultation-room/${c.id}`)}>🩺 Open</button>
-                        )}
-                        {(c.status === 'scheduled' || c.status === 'in_progress') && isPetOwner && (
-                          <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }}
-                            onClick={() => navigate(`/video-consultation/${c.id}`)}>📹 Join</button>
-                        )}
-                        {c.status === 'completed' && isPetOwner && (
-                          <button className="btn-small" onClick={() => navigate(`/write-review?consultationId=${c.id}&veterinarianId=${c.veterinarianId}`)}>⭐ Review</button>
-                        )}
-                        {c.status === 'completed' && isVet && (
-                          <button className="btn-small" style={{ background: '#f0fdf4', color: '#059669', border: '1px solid #059669' }}
-                            onClick={() => navigate(`/doctor/consultation-room/${c.id}`)}>📋 View</button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredHistory.map(b => {
+                    const diagnosis = b.consultationId ? diagnosisMap.get(b.consultationId) : ''
+                    return (
+                      <tr key={b.id}>
+                        {isVet && <td><strong>{b.petOwnerName || 'Patient'}</strong></td>}
+                        {isPetOwner && <td><strong>{b.vetName || 'Doctor'}</strong></td>}
+                        {isAdmin && <><td>{b.petOwnerName || '—'}</td><td>{b.vetName || '—'}</td></>}
+                        <td>{fmt(b.scheduledDate)}</td>
+                        <td>{b.timeSlotStart} - {b.timeSlotEnd}</td>
+                        <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.reasonForVisit || b.reason || '—'}</td>
+                        <td>{badge(b.status)}</td>
+                        <td style={{ maxWidth: 200, fontSize: 13 }}>{diagnosis || '—'}</td>
+                        <td>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {b.status === 'completed' && b.consultationId && (
+                              <button className="btn-small" style={{ background: '#f0fdf4', color: '#059669', border: '1px solid #059669' }}
+                                onClick={() => {
+                                  if (isVet) navigate(`/doctor/consultation-room/${b.consultationId}`)
+                                  else navigate(`/video-consultation/${b.consultationId}`)
+                                }}>📋 View</button>
+                            )}
+                            {b.status === 'completed' && isPetOwner && b.consultationId && (
+                              <button className="btn-small" onClick={() => navigate(`/write-review?consultationId=${b.consultationId}&veterinarianId=${b.veterinarianId}`)}>⭐ Review</button>
+                            )}
+                            {b.status === 'cancelled' && (
+                              <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View cancellation details">📋 Details</button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
