@@ -1165,3 +1165,265 @@ export interface GeneratedReport {
   expiresAt?: string
   generatedByName?: string
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Tier-4: Next-Generation Innovative Features
+// ═══════════════════════════════════════════════════════════════
+
+// ─── AI Veterinary Copilot ───────────────────────────────────
+export interface AIChatSession {
+  id: string
+  enterpriseId?: string
+  userId: string
+  animalId?: string
+  title: string
+  contextType: 'general' | 'animal' | 'enterprise' | 'emergency'
+  status: 'active' | 'archived'
+  messageCount: number
+  lastMessageAt?: string
+  animalName?: string
+  species?: string
+  breed?: string
+  enterpriseName?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AIChatMessage {
+  id: string
+  sessionId: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  confidence?: number
+  sources?: string[]
+  tokensUsed?: number
+  createdAt: string
+}
+
+export interface DrugInteractionResult {
+  drugs: string[]
+  interactions: { drug1: string; drug2: string; severity: string; note: string }[]
+  hasInteractions: boolean
+}
+
+export interface SymptomAnalysisResult {
+  symptoms: string[]
+  species: string
+  findings: { symptom: string; response: string; confidence: number; sources: string[] }[]
+  overallUrgency: string
+  disclaimer: string
+}
+
+// ─── Digital Twin & Simulator ────────────────────────────────
+export interface DigitalTwin {
+  id: string
+  enterpriseId: string
+  name: string
+  twinType: 'farm' | 'herd' | 'facility' | 'supply_chain'
+  description?: string
+  modelData: Record<string, any>
+  currentState: Record<string, any>
+  creatorName?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SimulationRun {
+  id: string
+  twinId: string
+  enterpriseId: string
+  name: string
+  scenarioType: 'disease_spread' | 'resource_optimization' | 'financial_forecast' | 'capacity_planning'
+  parameters: Record<string, any>
+  inputState: Record<string, any>
+  resultData: { rows: any[]; summary: Record<string, any>; totalRows: number }
+  outcomeSummary: Record<string, any>
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  durationMs?: number
+  twinName?: string
+  createdAt: string
+}
+
+// ─── Marketplace & Auctions ─────────────────────────────────
+export interface MarketplaceListing {
+  id: string
+  enterpriseId?: string
+  sellerId: string
+  title: string
+  description?: string
+  category: 'animal' | 'feed' | 'equipment' | 'medicine' | 'semen_embryo' | 'service' | 'other'
+  listingType: 'fixed_price' | 'auction'
+  price?: number
+  currency: string
+  quantity: number
+  unit?: string
+  condition: 'new' | 'used' | 'refurbished'
+  images: string[]
+  location?: string
+  shippingOptions: any[]
+  tags: string[]
+  status: 'draft' | 'active' | 'sold' | 'expired' | 'deleted'
+  featured: boolean
+  viewsCount: number
+  sellerName?: string
+  enterpriseName?: string
+  bidCount?: number
+  highestBid?: number
+  expiresAt?: string
+  createdAt: string
+}
+
+export interface MarketplaceBid {
+  id: string
+  listingId: string
+  bidderId: string
+  amount: number
+  message?: string
+  isWinning: boolean
+  status: 'active' | 'outbid' | 'won' | 'cancelled'
+  bidderName?: string
+  createdAt: string
+}
+
+export interface MarketplaceOrder {
+  id: string
+  listingId: string
+  buyerId: string
+  sellerId: string
+  quantity: number
+  unitPrice: number
+  totalPrice: number
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled' | 'disputed'
+  shippingAddress: Record<string, any>
+  trackingNumber?: string
+  notes?: string
+  listingTitle?: string
+  category?: string
+  buyerName?: string
+  sellerName?: string
+  completedAt?: string
+  createdAt: string
+}
+
+// ─── Sustainability & Carbon ─────────────────────────────────
+export interface SustainabilityMetric {
+  id: string
+  enterpriseId: string
+  metricType: string
+  metricName: string
+  value: number
+  unit?: string
+  periodStart: string
+  periodEnd: string
+  category: string
+  scope: 'scope_1' | 'scope_2' | 'scope_3'
+  dataSource?: string
+  notes?: string
+  recordedByName?: string
+  createdAt: string
+}
+
+export interface SustainabilityGoal {
+  id: string
+  enterpriseId: string
+  goalName: string
+  description?: string
+  metricType: string
+  targetValue: number
+  currentValue: number
+  unit?: string
+  baselineValue?: number
+  baselineDate?: string
+  targetDate: string
+  progressPct: number
+  status: 'active' | 'achieved' | 'missed' | 'cancelled'
+  creatorName?: string
+  createdAt: string
+}
+
+export interface CarbonFootprintEstimate {
+  estimates: { species: string; count: number; emissionFactor: number; annualCO2kg: number }[]
+  totalEstimatedCO2kg: number
+  totalEstimatedCO2tons: string
+  trackedEmissions: any[]
+  methodology: string
+}
+
+// ─── Client Portal & Wellness ────────────────────────────────
+export interface WellnessScorecard {
+  id: string
+  animalId: string
+  enterpriseId?: string
+  ownerId: string
+  overallScore: number
+  nutritionScore: number
+  activityScore: number
+  vaccinationScore: number
+  dentalScore: number
+  weightStatus: 'underweight' | 'normal' | 'overweight' | 'obese'
+  nextCheckup?: string
+  recommendations: string[]
+  riskFlags: string[]
+  animalName?: string
+  species?: string
+  breed?: string
+  assessedByName?: string
+  assessedAt: string
+}
+
+export interface WellnessReminder {
+  id: string
+  animalId: string
+  ownerId: string
+  reminderType: string
+  title: string
+  description?: string
+  dueDate: string
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  status: 'pending' | 'snoozed' | 'completed' | 'dismissed'
+  recurrence?: 'daily' | 'weekly' | 'monthly' | 'yearly'
+  recurrenceInterval?: number
+  snoozedUntil?: string
+  completedAt?: string
+  animalName?: string
+  createdAt: string
+}
+
+// ─── Geospatial Analytics ────────────────────────────────────
+export interface GeofenceZone {
+  id: string
+  enterpriseId: string
+  name: string
+  zoneType: 'boundary' | 'pasture' | 'barn' | 'quarantine' | 'water' | 'feeding' | 'restricted'
+  centerLat?: number
+  centerLng?: number
+  radiusMeters?: number
+  polygonCoords: { lat: number; lng: number }[]
+  color: string
+  alertOnEntry: boolean
+  alertOnExit: boolean
+  isRestricted: boolean
+  status: 'active' | 'inactive'
+  eventCount?: number
+  creatorName?: string
+  createdAt: string
+}
+
+export interface GeospatialEvent {
+  id: string
+  enterpriseId: string
+  zoneId?: string
+  animalId?: string
+  sensorId?: string
+  eventType: 'zone_entry' | 'zone_exit' | 'proximity_alert' | 'location_update' | 'speed_alert' | 'boundary_breach'
+  latitude: number
+  longitude: number
+  altitude?: number
+  accuracyMeters?: number
+  speedKmh?: number
+  heading?: number
+  metadata: Record<string, any>
+  zoneName?: string
+  animalName?: string
+  createdAt: string
+}

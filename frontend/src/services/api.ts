@@ -1153,6 +1153,301 @@ class ApiService {
     const response = await this.client.delete(`/reports/${id}`)
     return response.data
   }
+
+  // ═══════════════════════════════════════════════════════════════
+  // Tier-4: Next-Generation Innovative Features
+  // ═══════════════════════════════════════════════════════════════
+
+  // ─── AI Veterinary Copilot ──────────────────────────────────
+  async listChatSessions(filters: any = {}) {
+    const response = await this.client.get('/ai-copilot/sessions', { params: filters })
+    return response.data
+  }
+
+  async createChatSession(data: any) {
+    const response = await this.client.post('/ai-copilot/sessions', data)
+    return response.data
+  }
+
+  async getChatSession(id: string) {
+    const response = await this.client.get(`/ai-copilot/sessions/${id}`)
+    return response.data
+  }
+
+  async deleteChatSession(id: string) {
+    const response = await this.client.delete(`/ai-copilot/sessions/${id}`)
+    return response.data
+  }
+
+  async listChatMessages(sessionId: string) {
+    const response = await this.client.get(`/ai-copilot/sessions/${sessionId}/messages`)
+    return response.data
+  }
+
+  async sendChatMessage(sessionId: string, content: string) {
+    const response = await this.client.post(`/ai-copilot/sessions/${sessionId}/messages`, { content })
+    return response.data
+  }
+
+  async checkDrugInteractions(drugs: string[]) {
+    const response = await this.client.post('/ai-copilot/drug-interactions', { drugs })
+    return response.data
+  }
+
+  async analyzeSymptoms(symptoms: string[], species?: string) {
+    const response = await this.client.post('/ai-copilot/symptom-analysis', { symptoms, species })
+    return response.data
+  }
+
+  // ─── Digital Twin & Simulator ───────────────────────────────
+  async getDigitalTwinDashboard(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/digital-twins/dashboard`)
+    return response.data
+  }
+
+  async listDigitalTwins(enterpriseId: string, filters: any = {}) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/digital-twins`, { params: filters })
+    return response.data
+  }
+
+  async createDigitalTwin(enterpriseId: string, data: any) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/digital-twins`, data)
+    return response.data
+  }
+
+  async updateDigitalTwin(id: string, data: any) {
+    const response = await this.client.put(`/digital-twins/${id}`, data)
+    return response.data
+  }
+
+  async deleteDigitalTwin(id: string) {
+    const response = await this.client.delete(`/digital-twins/${id}`)
+    return response.data
+  }
+
+  async listSimulations(enterpriseId: string, filters: any = {}) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/simulations`, { params: filters })
+    return response.data
+  }
+
+  async runSimulation(enterpriseId: string, data: any) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/simulations`, data)
+    return response.data
+  }
+
+  async getSimulation(id: string) {
+    const response = await this.client.get(`/simulations/${id}`)
+    return response.data
+  }
+
+  async deleteSimulation(id: string) {
+    const response = await this.client.delete(`/simulations/${id}`)
+    return response.data
+  }
+
+  // ─── Marketplace & Auctions ─────────────────────────────────
+  async getMarketplaceDashboard(filters: any = {}) {
+    const response = await this.client.get('/marketplace/dashboard', { params: filters })
+    return response.data
+  }
+
+  async listMarketplaceListings(filters: any = {}) {
+    const response = await this.client.get('/marketplace/listings', { params: filters })
+    return response.data
+  }
+
+  async getMarketplaceListing(id: string) {
+    const response = await this.client.get(`/marketplace/listings/${id}`)
+    return response.data
+  }
+
+  async createMarketplaceListing(data: any) {
+    const response = await this.client.post('/marketplace/listings', data)
+    return response.data
+  }
+
+  async updateMarketplaceListing(id: string, data: any) {
+    const response = await this.client.put(`/marketplace/listings/${id}`, data)
+    return response.data
+  }
+
+  async deleteMarketplaceListing(id: string) {
+    const response = await this.client.delete(`/marketplace/listings/${id}`)
+    return response.data
+  }
+
+  async listMarketplaceBids(listingId: string) {
+    const response = await this.client.get(`/marketplace/listings/${listingId}/bids`)
+    return response.data
+  }
+
+  async placeMarketplaceBid(listingId: string, data: any) {
+    const response = await this.client.post(`/marketplace/listings/${listingId}/bids`, data)
+    return response.data
+  }
+
+  async listMarketplaceOrders(role: 'buyer' | 'seller' = 'buyer') {
+    const response = await this.client.get('/marketplace/orders', { params: { role } })
+    return response.data
+  }
+
+  async createMarketplaceOrder(data: any) {
+    const response = await this.client.post('/marketplace/orders', data)
+    return response.data
+  }
+
+  async updateOrderStatus(id: string, status: string) {
+    const response = await this.client.patch(`/marketplace/orders/${id}/status`, { status })
+    return response.data
+  }
+
+  // ─── Sustainability & Carbon ────────────────────────────────
+  async getSustainabilityDashboard(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/sustainability/dashboard`)
+    return response.data
+  }
+
+  async listSustainabilityMetrics(enterpriseId: string, filters: any = {}) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/sustainability/metrics`, { params: filters })
+    return response.data
+  }
+
+  async createSustainabilityMetric(enterpriseId: string, data: any) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/sustainability/metrics`, data)
+    return response.data
+  }
+
+  async updateSustainabilityMetric(id: string, data: any) {
+    const response = await this.client.put(`/sustainability/metrics/${id}`, data)
+    return response.data
+  }
+
+  async deleteSustainabilityMetric(id: string) {
+    const response = await this.client.delete(`/sustainability/metrics/${id}`)
+    return response.data
+  }
+
+  async listSustainabilityGoals(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/sustainability/goals`)
+    return response.data
+  }
+
+  async createSustainabilityGoal(enterpriseId: string, data: any) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/sustainability/goals`, data)
+    return response.data
+  }
+
+  async updateSustainabilityGoal(id: string, data: any) {
+    const response = await this.client.put(`/sustainability/goals/${id}`, data)
+    return response.data
+  }
+
+  async deleteSustainabilityGoal(id: string) {
+    const response = await this.client.delete(`/sustainability/goals/${id}`)
+    return response.data
+  }
+
+  async getCarbonFootprint(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/sustainability/carbon-footprint`)
+    return response.data
+  }
+
+  // ─── Client Portal & Wellness ───────────────────────────────
+  async getWellnessDashboard() {
+    const response = await this.client.get('/wellness/dashboard')
+    return response.data
+  }
+
+  async listWellnessScorecards(filters: any = {}) {
+    const response = await this.client.get('/wellness/scorecards', { params: filters })
+    return response.data
+  }
+
+  async createWellnessScorecard(data: any) {
+    const response = await this.client.post('/wellness/scorecards', data)
+    return response.data
+  }
+
+  async updateWellnessScorecard(id: string, data: any) {
+    const response = await this.client.put(`/wellness/scorecards/${id}`, data)
+    return response.data
+  }
+
+  async deleteWellnessScorecard(id: string) {
+    const response = await this.client.delete(`/wellness/scorecards/${id}`)
+    return response.data
+  }
+
+  async listWellnessReminders(filters: any = {}) {
+    const response = await this.client.get('/wellness/reminders', { params: filters })
+    return response.data
+  }
+
+  async createWellnessReminder(data: any) {
+    const response = await this.client.post('/wellness/reminders', data)
+    return response.data
+  }
+
+  async completeReminder(id: string) {
+    const response = await this.client.patch(`/wellness/reminders/${id}/complete`)
+    return response.data
+  }
+
+  async snoozeReminder(id: string, until: string) {
+    const response = await this.client.patch(`/wellness/reminders/${id}/snooze`, { until })
+    return response.data
+  }
+
+  async deleteReminder(id: string) {
+    const response = await this.client.delete(`/wellness/reminders/${id}`)
+    return response.data
+  }
+
+  // ─── Geospatial Analytics ───────────────────────────────────
+  async getGeospatialDashboard(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/geospatial/dashboard`)
+    return response.data
+  }
+
+  async listGeofenceZones(enterpriseId: string, filters: any = {}) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/geospatial/zones`, { params: filters })
+    return response.data
+  }
+
+  async createGeofenceZone(enterpriseId: string, data: any) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/geospatial/zones`, data)
+    return response.data
+  }
+
+  async updateGeofenceZone(id: string, data: any) {
+    const response = await this.client.put(`/geospatial/zones/${id}`, data)
+    return response.data
+  }
+
+  async deleteGeofenceZone(id: string) {
+    const response = await this.client.delete(`/geospatial/zones/${id}`)
+    return response.data
+  }
+
+  async listGeospatialEvents(enterpriseId: string, filters: any = {}) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/geospatial/events`, { params: filters })
+    return response.data
+  }
+
+  async createGeospatialEvent(enterpriseId: string, data: any) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/geospatial/events`, data)
+    return response.data
+  }
+
+  async getHeatmapData(enterpriseId: string, filters: any = {}) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/geospatial/heatmap`, { params: filters })
+    return response.data
+  }
+
+  async getMovementTrail(animalId: string, filters: any = {}) {
+    const response = await this.client.get(`/geospatial/animals/${animalId}/trail`, { params: filters })
+    return response.data
+  }
 }
 
 export const apiService = new ApiService()

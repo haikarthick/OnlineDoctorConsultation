@@ -53,6 +53,13 @@ import IoTSensors from './pages/IoTSensors'
 import SupplyChain from './pages/SupplyChain'
 import Workforce from './pages/Workforce'
 import ReportBuilder from './pages/ReportBuilder'
+// Tier-4 Futuristic Modules
+import AICopilot from './pages/AICopilot'
+import DigitalTwin from './pages/DigitalTwin'
+import Marketplace from './pages/Marketplace'
+import Sustainability from './pages/Sustainability'
+import WellnessPortal from './pages/WellnessPortal'
+import GeospatialAnalytics from './pages/GeospatialAnalytics'
 import './App.css'
 import './styles/modules.css'
 
@@ -170,6 +177,14 @@ function AppRoutes() {
       <Route path="/supply-chain" element={<RoleRoute path="/supply-chain"><AppLayout><SupplyChain /></AppLayout></RoleRoute>} />
       <Route path="/workforce" element={<RoleRoute path="/workforce"><AppLayout><Workforce /></AppLayout></RoleRoute>} />
       <Route path="/report-builder" element={<RoleRoute path="/report-builder"><AppLayout><ReportBuilder /></AppLayout></RoleRoute>} />
+
+      {/* ── Tier-4 Futuristic Modules ── */}
+      <Route path="/ai-copilot" element={<RoleRoute path="/ai-copilot"><AppLayout><AICopilot /></AppLayout></RoleRoute>} />
+      <Route path="/digital-twin" element={<RoleRoute path="/digital-twin"><AppLayout><DigitalTwin /></AppLayout></RoleRoute>} />
+      <Route path="/marketplace" element={<RoleRoute path="/marketplace"><AppLayout><Marketplace /></AppLayout></RoleRoute>} />
+      <Route path="/sustainability" element={<RoleRoute path="/sustainability"><AppLayout><Sustainability /></AppLayout></RoleRoute>} />
+      <Route path="/wellness" element={<RoleRoute path="/wellness"><AppLayout><WellnessPortal /></AppLayout></RoleRoute>} />
+      <Route path="/geospatial" element={<RoleRoute path="/geospatial"><AppLayout><GeospatialAnalytics /></AppLayout></RoleRoute>} />
 
       {/* ── Doctor/Vet Module ── */}
       <Route path="/doctor/dashboard" element={<Navigate to="/dashboard" replace />} />

@@ -55,6 +55,13 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   supply_chain: ['/supply-chain'],
   workforce_manage: ['/workforce'],
   report_builder: ['/report-builder'],
+  // Tier-4 Futuristic Modules
+  ai_copilot: ['/ai-copilot'],
+  digital_twin: ['/digital-twin'],
+  marketplace_access: ['/marketplace'],
+  sustainability_manage: ['/sustainability'],
+  wellness_portal: ['/wellness'],
+  geospatial_analytics: ['/geospatial'],
 }
 
 // Reverse map: route path → required permission
@@ -106,6 +113,13 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'supply-chain': 'supply_chain',
   'workforce': 'workforce_manage',
   'report-builder': 'report_builder',
+  // Tier-4 Futuristic Modules
+  'ai-copilot': 'ai_copilot',
+  'digital-twin': 'digital_twin',
+  'marketplace': 'marketplace_access',
+  'sustainability': 'sustainability_manage',
+  'wellness': 'wellness_portal',
+  'geospatial': 'geospatial_analytics',
 }
 
 // ─── Context ────────────────────────────────────────────────

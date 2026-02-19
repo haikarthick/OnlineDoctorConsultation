@@ -185,6 +185,50 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['farmer', 'admin', 'veterinarian']
     },
 
+    // ── Tier-4 Futuristic Modules ──
+    {
+      id: 'ai-copilot',
+      label: 'AI Copilot',
+      icon: '🤖',
+      path: '/ai-copilot',
+      roles: ['veterinarian', 'farmer', 'admin', 'pet_owner']
+    },
+    {
+      id: 'digital-twin',
+      label: 'Digital Twin',
+      icon: '🔮',
+      path: '/digital-twin',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'marketplace',
+      label: 'Marketplace',
+      icon: '🏪',
+      path: '/marketplace',
+      roles: ['farmer', 'admin', 'pet_owner', 'veterinarian']
+    },
+    {
+      id: 'sustainability',
+      label: 'Sustainability',
+      icon: '🌱',
+      path: '/sustainability',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'wellness',
+      label: 'Wellness Portal',
+      icon: '💚',
+      path: '/wellness',
+      roles: ['pet_owner', 'farmer', 'admin', 'veterinarian']
+    },
+    {
+      id: 'geospatial',
+      label: 'Geospatial',
+      icon: '🗺️',
+      path: '/geospatial',
+      roles: ['farmer', 'admin']
+    },
+
     // ── Doctor/Vet Module ──
     {
       id: 'manage-schedule',

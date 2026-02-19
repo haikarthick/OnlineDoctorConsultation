@@ -110,6 +110,15 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
     { icon: '📊', title: 'Report Builder', description: 'Generate 7 types of cross-module reports on demand — from animal census to sensor analytics — with export capabilities' }
   ]
 
+  const tier4Features = [
+    { icon: '🤖', title: 'AI Vet Copilot', description: 'Intelligent veterinary AI assistant with drug interaction checking, symptom analysis, and chat-based clinical decision support' },
+    { icon: '🔮', title: 'Digital Twin & Simulator', description: 'Create digital replicas of your operations and run simulations for disease spread, resource optimization, and financial forecasting' },
+    { icon: '🏪', title: 'Marketplace & Auctions', description: 'Buy, sell, and auction livestock, equipment, and supplies with real-time bidding, order management, and seller dashboards' },
+    { icon: '🌱', title: 'Sustainability & Carbon', description: 'Track ESG metrics, set sustainability goals, and estimate carbon footprints using IPCC emission factors per species' },
+    { icon: '💚', title: 'Wellness Portal', description: 'Comprehensive pet health scorecards with nutrition, activity, vaccination & dental tracking plus smart recurring reminders' },
+    { icon: '🗺️', title: 'Geospatial Analytics', description: 'Geofencing zones, real-time location tracking, heatmap clustering, movement trails, and automatic zone breach detection' }
+  ]
+
   return (
     <div className="home-page">
       {/* Top Navigation Bar */}
@@ -274,6 +283,21 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
               <div className="advanced-icon">{feat.icon}</div>
               <h3 style={{ color: '#f8fafc' }}>{feat.title}</h3>
               <p style={{ color: '#94a3b8' }}>{feat.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Tier-4 Futuristic Features Showcase */}
+      <section className="advanced-features-section" style={{ background: 'linear-gradient(135deg, #4a1d96 0%, #7c3aed 50%, #2563eb 100%)' }}>
+        <h2 className="section-title" style={{ color: '#f8fafc' }}>🔮 Tier-4 — Futuristic Intelligence</h2>
+        <p className="section-subtitle" style={{ color: '#c4b5fd' }}>AI copilots, digital twins, marketplace ecosystems, and geospatial intelligence</p>
+        <div className="advanced-grid">
+          {tier4Features.map((feat, idx) => (
+            <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#e2e8f0' }}>
+              <div className="advanced-icon">{feat.icon}</div>
+              <h3 style={{ color: '#f8fafc' }}>{feat.title}</h3>
+              <p style={{ color: '#c4b5fd' }}>{feat.description}</p>
             </div>
           ))}
         </div>

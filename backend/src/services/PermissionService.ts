@@ -95,6 +95,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
     'dashboard_pending_approvals', 'dashboard_upcoming_bookings',
     'dashboard_recent_consultations',
+    // Tier-4 (vet access)
+    'ai_copilot', 'marketplace_access', 'wellness_portal',
   ],
   pet_owner: [
     // Pages
@@ -103,6 +105,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'settings', 'write_review',
     // Enterprise (basic access)
     'enterprise_manage',
+    // Tier-4 (user-scoped)
+    'ai_copilot', 'marketplace_access', 'wellness_portal',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'review_create', 'animal_manage',
@@ -123,6 +127,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Tier-3 Innovative Modules
     'disease_prediction', 'genomic_lineage', 'iot_sensors',
     'supply_chain', 'workforce_manage', 'report_builder',
+    // Tier-4 Futuristic Modules
+    'ai_copilot', 'digital_twin', 'marketplace_access',
+    'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'animal_manage',
@@ -145,6 +152,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Tier-3 Innovative Modules (full access)
     'disease_prediction', 'genomic_lineage', 'iot_sensors',
     'supply_chain', 'workforce_manage', 'report_builder',
+    // Tier-4 Futuristic Modules
+    'ai_copilot', 'digital_twin', 'marketplace_access',
+    'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
     // Actions
     'booking_confirm', 'booking_cancel', 'review_moderate',
     // Dashboard widgets
@@ -211,6 +221,13 @@ export const PERMISSION_LABELS: Record<string, string> = {
   supply_chain: 'Supply Chain & Traceability',
   workforce_manage: 'Workforce & Task Management',
   report_builder: 'Report Builder & Exports',
+  // Tier-4 Futuristic Modules
+  ai_copilot: 'AI Vet Copilot',
+  digital_twin: 'Digital Twin & Simulator',
+  marketplace_access: 'Marketplace & Auctions',
+  sustainability_manage: 'Sustainability & ESG',
+  wellness_portal: 'Wellness Portal',
+  geospatial_analytics: 'Geospatial Analytics',
   // Dashboard widgets
   dashboard_stats: 'Dashboard Stats Cards',
   dashboard_quick_actions: 'Dashboard Quick Actions',
