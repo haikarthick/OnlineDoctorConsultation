@@ -46,6 +46,13 @@ import FeedInventory from './pages/FeedInventory'
 import ComplianceDocs from './pages/ComplianceDocs'
 import FinancialAnalytics from './pages/FinancialAnalytics'
 import AlertCenter from './pages/AlertCenter'
+// Tier-3 Innovative Modules
+import DiseasePrediction from './pages/DiseasePrediction'
+import GenomicLineage from './pages/GenomicLineage'
+import IoTSensors from './pages/IoTSensors'
+import SupplyChain from './pages/SupplyChain'
+import Workforce from './pages/Workforce'
+import ReportBuilder from './pages/ReportBuilder'
 import './App.css'
 import './styles/modules.css'
 
@@ -155,6 +162,14 @@ function AppRoutes() {
       <Route path="/compliance" element={<RoleRoute path="/compliance"><AppLayout><ComplianceDocs /></AppLayout></RoleRoute>} />
       <Route path="/financial" element={<RoleRoute path="/financial"><AppLayout><FinancialAnalytics /></AppLayout></RoleRoute>} />
       <Route path="/alerts" element={<RoleRoute path="/alerts"><AppLayout><AlertCenter /></AppLayout></RoleRoute>} />
+
+      {/* ── Tier-3 Innovative Modules ── */}
+      <Route path="/disease-prediction" element={<RoleRoute path="/disease-prediction"><AppLayout><DiseasePrediction /></AppLayout></RoleRoute>} />
+      <Route path="/genomic-lineage" element={<RoleRoute path="/genomic-lineage"><AppLayout><GenomicLineage /></AppLayout></RoleRoute>} />
+      <Route path="/iot-sensors" element={<RoleRoute path="/iot-sensors"><AppLayout><IoTSensors /></AppLayout></RoleRoute>} />
+      <Route path="/supply-chain" element={<RoleRoute path="/supply-chain"><AppLayout><SupplyChain /></AppLayout></RoleRoute>} />
+      <Route path="/workforce" element={<RoleRoute path="/workforce"><AppLayout><Workforce /></AppLayout></RoleRoute>} />
+      <Route path="/report-builder" element={<RoleRoute path="/report-builder"><AppLayout><ReportBuilder /></AppLayout></RoleRoute>} />
 
       {/* ── Doctor/Vet Module ── */}
       <Route path="/doctor/dashboard" element={<Navigate to="/dashboard" replace />} />

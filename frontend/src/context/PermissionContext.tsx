@@ -48,6 +48,13 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   compliance_manage: ['/compliance'],
   financial_analytics: ['/financial'],
   alert_manage: ['/alerts'],
+  // Tier-3 Innovative Modules
+  disease_prediction: ['/disease-prediction'],
+  genomic_lineage: ['/genomic-lineage'],
+  iot_sensors: ['/iot-sensors'],
+  supply_chain: ['/supply-chain'],
+  workforce_manage: ['/workforce'],
+  report_builder: ['/report-builder'],
 }
 
 // Reverse map: route path → required permission
@@ -92,6 +99,13 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'compliance': 'compliance_manage',
   'financial': 'financial_analytics',
   'alerts': 'alert_manage',
+  // Tier-3 Innovative Modules
+  'disease-prediction': 'disease_prediction',
+  'genomic-lineage': 'genomic_lineage',
+  'iot-sensors': 'iot_sensors',
+  'supply-chain': 'supply_chain',
+  'workforce': 'workforce_manage',
+  'report-builder': 'report_builder',
 }
 
 // ─── Context ────────────────────────────────────────────────

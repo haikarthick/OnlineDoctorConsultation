@@ -120,6 +120,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Tier-2 Advanced
     'health_analytics', 'breeding_manage', 'feed_manage',
     'compliance_manage', 'financial_analytics', 'alert_manage',
+    // Tier-3 Innovative Modules
+    'disease_prediction', 'genomic_lineage', 'iot_sensors',
+    'supply_chain', 'workforce_manage', 'report_builder',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'animal_manage',
@@ -139,6 +142,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Tier-2 Advanced (full access)
     'health_analytics', 'breeding_manage', 'feed_manage',
     'compliance_manage', 'financial_analytics', 'alert_manage',
+    // Tier-3 Innovative Modules (full access)
+    'disease_prediction', 'genomic_lineage', 'iot_sensors',
+    'supply_chain', 'workforce_manage', 'report_builder',
     // Actions
     'booking_confirm', 'booking_cancel', 'review_moderate',
     // Dashboard widgets
@@ -198,6 +204,13 @@ export const PERMISSION_LABELS: Record<string, string> = {
   compliance_manage: 'Compliance & Regulatory',
   financial_analytics: 'Financial Analytics',
   alert_manage: 'Smart Alerts',
+  // Tier-3 Innovative Modules
+  disease_prediction: 'AI Disease Prediction',
+  genomic_lineage: 'Genomic Lineage & Diversity',
+  iot_sensors: 'IoT Sensor Integration',
+  supply_chain: 'Supply Chain & Traceability',
+  workforce_manage: 'Workforce & Task Management',
+  report_builder: 'Report Builder & Exports',
   // Dashboard widgets
   dashboard_stats: 'Dashboard Stats Cards',
   dashboard_quick_actions: 'Dashboard Quick Actions',

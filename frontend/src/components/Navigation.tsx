@@ -141,6 +141,50 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['farmer', 'admin', 'veterinarian']
     },
 
+    // ── Tier-3 Innovative Modules ──
+    {
+      id: 'disease-prediction',
+      label: 'Disease AI',
+      icon: '🧠',
+      path: '/disease-prediction',
+      roles: ['farmer', 'admin', 'veterinarian']
+    },
+    {
+      id: 'genomic-lineage',
+      label: 'Genomic Lineage',
+      icon: '🧬',
+      path: '/genomic-lineage',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'iot-sensors',
+      label: 'IoT Sensors',
+      icon: '📡',
+      path: '/iot-sensors',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'supply-chain',
+      label: 'Supply Chain',
+      icon: '🔗',
+      path: '/supply-chain',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'workforce',
+      label: 'Workforce',
+      icon: '👷',
+      path: '/workforce',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'report-builder',
+      label: 'Report Builder',
+      icon: '📊',
+      path: '/report-builder',
+      roles: ['farmer', 'admin', 'veterinarian']
+    },
+
     // ── Doctor/Vet Module ──
     {
       id: 'manage-schedule',

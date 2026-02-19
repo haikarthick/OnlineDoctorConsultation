@@ -101,6 +101,15 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
     { icon: '💹', title: 'Financial Management', description: 'Revenue per animal, treatment cost analytics, insurance claims tracking, and enterprise billing' }
   ]
 
+  const tier3Features = [
+    { icon: '🧠', title: 'AI Disease Prediction', description: 'Predict disease outbreaks before they happen using risk scoring, geographic outbreak mapping, and automated preventive action plans' },
+    { icon: '🧬', title: 'Genomic Lineage Tracker', description: 'Deep ancestry trees with recursive lineage tracing, inbreeding coefficient analysis, and AI-powered breeding pair recommendations' },
+    { icon: '📡', title: 'IoT Sensor Dashboard', description: 'Real-time environmental monitoring with automated anomaly detection, low-battery alerts, and telemetry analytics across all facilities' },
+    { icon: '🔗', title: 'Farm-to-Fork Traceability', description: 'Blockchain-style supply chain audit trail with SHA-256 verification, QR code generation, and complete batch traceability' },
+    { icon: '👷', title: 'Workforce Ops Center', description: 'Task boards with priority scheduling, shift management with check-in/out, and worker performance analytics' },
+    { icon: '📊', title: 'Report Builder', description: 'Generate 7 types of cross-module reports on demand — from animal census to sensor analytics — with export capabilities' }
+  ]
+
   return (
     <div className="home-page">
       {/* Top Navigation Bar */}
@@ -250,6 +259,21 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
               <div className="advanced-icon">{feat.icon}</div>
               <h3>{feat.title}</h3>
               <p>{feat.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Tier-3 Innovative Features Showcase */}
+      <section className="advanced-features-section" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
+        <h2 className="section-title" style={{ color: '#f8fafc' }}>🚀 Next-Generation Innovation</h2>
+        <p className="section-subtitle" style={{ color: '#94a3b8' }}>Cutting-edge AI, IoT, and blockchain-style features that redefine animal management</p>
+        <div className="advanced-grid">
+          {tier3Features.map((feat, idx) => (
+            <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0' }}>
+              <div className="advanced-icon">{feat.icon}</div>
+              <h3 style={{ color: '#f8fafc' }}>{feat.title}</h3>
+              <p style={{ color: '#94a3b8' }}>{feat.description}</p>
             </div>
           ))}
         </div>
