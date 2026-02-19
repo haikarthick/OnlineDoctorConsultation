@@ -693,3 +693,209 @@ export interface MenuItem {
   subItems?: MenuItem[]
   badge?: string
 }
+
+// ═══════════════════════════════════════════════════════════════
+// ─── Tier-2: Health Analytics ────────────────────────────────
+export interface HealthObservation {
+  id: string
+  enterpriseId: string
+  animalId?: string
+  observerId?: string
+  observationType: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  title: string
+  description?: string
+  symptoms?: string[]
+  bodyTemperature?: number
+  heartRate?: number
+  respiratoryRate?: number
+  weightAtObservation?: number
+  isResolved: boolean
+  resolvedAt?: string
+  createdAt: string
+  updatedAt: string
+  animalName?: string
+  observerName?: string
+}
+
+export interface HealthDashboard {
+  severityDistribution: { severity: string; count: number }[]
+  observationTimeline: { week: string; count: number }[]
+  unresolvedByType: { observation_type: string; count: number }[]
+  healthScoreDistribution: { range: string; count: number }[]
+  criticalObservations: HealthObservation[]
+  mortalityTrend: { month: string; deaths: number }[]
+}
+
+// ─── Tier-2: Breeding & Genetics ────────────────────────────
+export interface BreedingRecord {
+  id: string
+  enterpriseId: string
+  damId: string
+  sireId?: string
+  breedingDate: string
+  breedingMethod?: string
+  technicianId?: string
+  expectedDueDate?: string
+  actualDeliveryDate?: string
+  status: 'bred' | 'confirmed_pregnant' | 'not_pregnant' | 'delivered' | 'aborted' | 'reabsorbed'
+  offspringCount?: number
+  liveOffspring?: number
+  stillborn?: number
+  notes?: string
+  createdAt: string
+  updatedAt: string
+  damName?: string
+  sireName?: string
+  technicianName?: string
+}
+
+export interface BreedingStats {
+  total: number
+  bred: number
+  confirmed: number
+  delivered: number
+  live_births: number
+  stillbirths: number
+  avgGestation: number
+}
+
+// ─── Tier-2: Feed & Inventory ───────────────────────────────
+export interface FeedItem {
+  id: string
+  enterpriseId: string
+  feedType: string
+  name: string
+  brand?: string
+  batchNumber?: string
+  quantityInStock: number
+  unit: string
+  minimumStockLevel: number
+  costPerUnit: number
+  currency: string
+  expiryDate?: string
+  storageLocation?: string
+  supplier?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface FeedConsumptionLog {
+  id: string
+  feedId: string
+  enterpriseId: string
+  animalId?: string
+  groupId?: string
+  quantityUsed: number
+  unit: string
+  costAtTime: number
+  recordedBy: string
+  notes?: string
+  consumptionDate: string
+  createdAt: string
+  feedName?: string
+  animalName?: string
+  groupName?: string
+  recordedByName?: string
+}
+
+export interface FeedAnalytics {
+  lowStockAlerts: FeedItem[]
+  consumptionByType: { feed_type: string; total_used: number; total_cost: number }[]
+  dailyConsumptionTrend: { day: string; total_used: number; total_cost: number }[]
+  totalInventoryValue: number
+}
+
+// ─── Tier-2: Compliance & Regulatory ────────────────────────
+export interface ComplianceDocument {
+  id: string
+  enterpriseId: string
+  documentType: string
+  documentNumber?: string
+  title: string
+  issuingAuthority?: string
+  issueDate?: string
+  expiryDate?: string
+  status: 'draft' | 'active' | 'expired' | 'revoked' | 'pending_renewal'
+  fileUrl?: string
+  notes?: string
+  verifiedBy?: string
+  verifiedAt?: string
+  createdAt: string
+  updatedAt: string
+  verifiedByName?: string
+}
+
+export interface ComplianceSummary {
+  expiringSoon: ComplianceDocument[]
+  expired: ComplianceDocument[]
+  byType: { document_type: string; count: number }[]
+  byStatus: { status: string; count: number }[]
+}
+
+// ─── Tier-2: Financial Analytics ────────────────────────────
+export interface FinancialRecord {
+  id: string
+  enterpriseId: string
+  recordType: 'income' | 'expense'
+  category: string
+  amount: number
+  currency: string
+  description?: string
+  referenceNumber?: string
+  transactionDate: string
+  recordedBy: string
+  animalId?: string
+  groupId?: string
+  notes?: string
+  createdAt: string
+  updatedAt: string
+  recordedByName?: string
+  animalName?: string
+  groupName?: string
+}
+
+export interface FinancialDashboard {
+  totalIncome: number
+  totalExpenses: number
+  netProfit: number
+  monthlyBreakdown: { month: string; income: number; expenses: number; profit: number }[]
+  topExpenseCategories: { category: string; total: number }[]
+  revenueByCategory: { category: string; total: number }[]
+  recentTransactions: FinancialRecord[]
+}
+
+// ─── Tier-2: Smart Alerts ───────────────────────────────────
+export interface AlertRule {
+  id: string
+  enterpriseId: string
+  name: string
+  ruleType: 'vaccination_due' | 'breeding_due' | 'low_feed_stock' | 'document_expiry' | 'health_threshold' | 'custom'
+  conditions: any
+  severity: 'info' | 'warning' | 'critical'
+  isEnabled: boolean
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AlertEvent {
+  id: string
+  ruleId?: string
+  enterpriseId: string
+  eventType: string
+  severity: 'info' | 'warning' | 'critical'
+  title: string
+  message: string
+  animalId?: string
+  metadata?: any
+  isRead: boolean
+  readAt?: string
+  acknowledgedBy?: string
+  acknowledgedAt?: string
+  createdAt: string
+  ruleName?: string
+  animalName?: string
+  acknowledgedByName?: string
+}

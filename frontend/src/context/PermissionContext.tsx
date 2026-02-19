@@ -41,6 +41,13 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   enterprise_locations: ['/locations'],
   enterprise_movements: ['/movement-log'],
   enterprise_campaigns: ['/campaigns'],
+  // Tier-2 Advanced
+  health_analytics: ['/health-analytics'],
+  breeding_manage: ['/breeding'],
+  feed_manage: ['/feed-inventory'],
+  compliance_manage: ['/compliance'],
+  financial_analytics: ['/financial'],
+  alert_manage: ['/alerts'],
 }
 
 // Reverse map: route path → required permission
@@ -78,6 +85,13 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'locations': 'enterprise_locations',
   'movement-log': 'enterprise_movements',
   'campaigns': 'enterprise_campaigns',
+  // Tier-2 Advanced
+  'health-analytics': 'health_analytics',
+  'breeding': 'breeding_manage',
+  'feed-inventory': 'feed_manage',
+  'compliance': 'compliance_manage',
+  'financial': 'financial_analytics',
+  'alerts': 'alert_manage',
 }
 
 // ─── Context ────────────────────────────────────────────────

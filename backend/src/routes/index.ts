@@ -16,6 +16,7 @@ import ScheduleController from '../controllers/ScheduleController';
 import PrescriptionController from '../controllers/PrescriptionController';
 import AdminController from '../controllers/AdminController';
 import EnterpriseController from '../controllers/EnterpriseController';
+import Tier2Controller from '../controllers/Tier2Controller';
 import AdminService from '../services/AdminService';
 import PermissionService from '../services/PermissionService';
 import { asyncHandler } from '../utils/errorHandler';
@@ -238,6 +239,59 @@ router.post('/admin/permissions/reset', authMiddleware, roleMiddleware(['admin']
   const updated = await PermissionService.getFullPermissionMatrix();
   res.json({ success: true, data: { matrix: updated }, message: `Permissions reset to defaults for ${role}` });
 }));
+
+// ═══════════════════════════════════════════════════════════════
+// ─── Tier-2: Health Analytics ────────────────────────────────
+router.get('/enterprises/:enterpriseId/health/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getHealthDashboard(req, res)));
+router.get('/enterprises/:enterpriseId/health/observations', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listObservations(req, res)));
+router.post('/enterprises/:enterpriseId/health/observations', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createObservation(req, res)));
+router.patch('/health/observations/:id/resolve', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.resolveObservation(req, res)));
+
+// ─── Tier-2: Breeding & Genetics ────────────────────────────
+router.get('/enterprises/:enterpriseId/breeding', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listBreedingRecords(req, res)));
+router.post('/enterprises/:enterpriseId/breeding', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createBreedingRecord(req, res)));
+router.put('/breeding/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateBreedingRecord(req, res)));
+router.get('/enterprises/:enterpriseId/breeding/upcoming-due', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getUpcomingDueDates(req, res)));
+router.get('/enterprises/:enterpriseId/breeding/stats', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getBreedingStats(req, res)));
+
+// ─── Tier-2: Feed & Inventory ───────────────────────────────
+router.get('/enterprises/:enterpriseId/feed', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listFeeds(req, res)));
+router.post('/enterprises/:enterpriseId/feed', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createFeed(req, res)));
+router.put('/feed/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateFeed(req, res)));
+router.post('/feed/:id/restock', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.restockFeed(req, res)));
+router.delete('/feed/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.deleteFeed(req, res)));
+router.post('/enterprises/:enterpriseId/feed/consumption', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.logFeedConsumption(req, res)));
+router.get('/enterprises/:enterpriseId/feed/consumption', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listConsumptionLogs(req, res)));
+router.get('/enterprises/:enterpriseId/feed/analytics', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getFeedAnalytics(req, res)));
+
+// ─── Tier-2: Compliance & Regulatory ────────────────────────
+router.get('/enterprises/:enterpriseId/compliance', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listComplianceDocs(req, res)));
+router.post('/enterprises/:enterpriseId/compliance', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createComplianceDoc(req, res)));
+router.put('/compliance/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateComplianceDoc(req, res)));
+router.patch('/compliance/:id/verify', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.verifyComplianceDoc(req, res)));
+router.delete('/compliance/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.deleteComplianceDoc(req, res)));
+router.get('/enterprises/:enterpriseId/compliance/summary', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getComplianceSummary(req, res)));
+
+// ─── Tier-2: Financial Analytics ────────────────────────────
+router.get('/enterprises/:enterpriseId/financial', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listFinancialRecords(req, res)));
+router.post('/enterprises/:enterpriseId/financial', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createFinancialRecord(req, res)));
+router.put('/financial/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateFinancialRecord(req, res)));
+router.delete('/financial/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.deleteFinancialRecord(req, res)));
+router.get('/enterprises/:enterpriseId/financial/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getFinancialDashboard(req, res)));
+
+// ─── Tier-2: Smart Alerts ───────────────────────────────────
+router.get('/enterprises/:enterpriseId/alerts/rules', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listAlertRules(req, res)));
+router.post('/enterprises/:enterpriseId/alerts/rules', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createAlertRule(req, res)));
+router.put('/alerts/rules/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateAlertRule(req, res)));
+router.delete('/alerts/rules/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.deleteAlertRule(req, res)));
+router.patch('/alerts/rules/:id/toggle', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.toggleAlertRule(req, res)));
+router.get('/enterprises/:enterpriseId/alerts/events', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listAlertEvents(req, res)));
+router.patch('/alerts/events/:id/read', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.markAlertRead(req, res)));
+router.patch('/enterprises/:enterpriseId/alerts/events/read-all', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.markAllAlertsRead(req, res)));
+router.patch('/alerts/events/:id/acknowledge', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.acknowledgeAlert(req, res)));
+router.post('/enterprises/:enterpriseId/alerts/run-checks', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.runAlertChecks(req, res)));
+
+// ═══════════════════════════════════════════════════════════════
 
 // ─── Public settings (no auth) ───────────────────────────────
 router.get('/settings/public', asyncHandler(async (_req: Request, res: Response) => {

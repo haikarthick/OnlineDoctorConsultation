@@ -117,6 +117,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Enterprise
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
     'enterprise_movements', 'enterprise_campaigns', 'enterprise_members',
+    // Tier-2 Advanced
+    'health_analytics', 'breeding_manage', 'feed_manage',
+    'compliance_manage', 'financial_analytics', 'alert_manage',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'animal_manage',
@@ -133,6 +136,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Enterprise (full access)
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
     'enterprise_movements', 'enterprise_campaigns', 'enterprise_members',
+    // Tier-2 Advanced (full access)
+    'health_analytics', 'breeding_manage', 'feed_manage',
+    'compliance_manage', 'financial_analytics', 'alert_manage',
     // Actions
     'booking_confirm', 'booking_cancel', 'review_moderate',
     // Dashboard widgets
@@ -185,6 +191,13 @@ export const PERMISSION_LABELS: Record<string, string> = {
   enterprise_movements: 'Movement Log',
   enterprise_campaigns: 'Treatment Campaigns',
   enterprise_members: 'Enterprise Members',
+  // Tier-2 Advanced Modules
+  health_analytics: 'Health Analytics',
+  breeding_manage: 'Breeding & Genetics',
+  feed_manage: 'Feed & Inventory',
+  compliance_manage: 'Compliance & Regulatory',
+  financial_analytics: 'Financial Analytics',
+  alert_manage: 'Smart Alerts',
   // Dashboard widgets
   dashboard_stats: 'Dashboard Stats Cards',
   dashboard_quick_actions: 'Dashboard Quick Actions',

@@ -97,6 +97,50 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['farmer', 'admin', 'veterinarian']
     },
 
+    // ── Tier-2 Advanced Modules ──
+    {
+      id: 'health-analytics',
+      label: 'Health Analytics',
+      icon: '🏥',
+      path: '/health-analytics',
+      roles: ['farmer', 'admin', 'veterinarian']
+    },
+    {
+      id: 'breeding',
+      label: 'Breeding & Genetics',
+      icon: '🧬',
+      path: '/breeding',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'feed-inventory',
+      label: 'Feed & Inventory',
+      icon: '🌾',
+      path: '/feed-inventory',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'compliance',
+      label: 'Compliance Docs',
+      icon: '📜',
+      path: '/compliance',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'financial',
+      label: 'Financial Analytics',
+      icon: '💰',
+      path: '/financial',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'alerts',
+      label: 'Smart Alerts',
+      icon: '🔔',
+      path: '/alerts',
+      roles: ['farmer', 'admin', 'veterinarian']
+    },
+
     // ── Doctor/Vet Module ──
     {
       id: 'manage-schedule',

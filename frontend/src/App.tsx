@@ -39,6 +39,13 @@ import AnimalGroups from './pages/AnimalGroups'
 import LocationManagement from './pages/LocationManagement'
 import MovementLog from './pages/MovementLog'
 import TreatmentCampaigns from './pages/TreatmentCampaigns'
+// Tier-2 Advanced Modules
+import HealthAnalytics from './pages/HealthAnalytics'
+import BreedingManager from './pages/BreedingManager'
+import FeedInventory from './pages/FeedInventory'
+import ComplianceDocs from './pages/ComplianceDocs'
+import FinancialAnalytics from './pages/FinancialAnalytics'
+import AlertCenter from './pages/AlertCenter'
 import './App.css'
 import './styles/modules.css'
 
@@ -106,7 +113,7 @@ function AppRoutes() {
       {/* Public pages */}
       <Route path="/" element={
         <PublicOnlyRoute>
-          <Home onGetStarted={() => navigate('/register')} onViewForDoctors={() => navigate('/register')} />
+          <Home onGetStarted={() => navigate('/register')} onViewForDoctors={() => navigate('/register')} onLogin={() => navigate('/login')} />
         </PublicOnlyRoute>
       } />
       <Route path="/login" element={
@@ -140,6 +147,14 @@ function AppRoutes() {
       <Route path="/locations" element={<RoleRoute path="/locations"><AppLayout><LocationManagement /></AppLayout></RoleRoute>} />
       <Route path="/movement-log" element={<RoleRoute path="/movement-log"><AppLayout><MovementLog /></AppLayout></RoleRoute>} />
       <Route path="/campaigns" element={<RoleRoute path="/campaigns"><AppLayout><TreatmentCampaigns /></AppLayout></RoleRoute>} />
+
+      {/* ── Tier-2 Advanced Modules ── */}
+      <Route path="/health-analytics" element={<RoleRoute path="/health-analytics"><AppLayout><HealthAnalytics /></AppLayout></RoleRoute>} />
+      <Route path="/breeding" element={<RoleRoute path="/breeding"><AppLayout><BreedingManager /></AppLayout></RoleRoute>} />
+      <Route path="/feed-inventory" element={<RoleRoute path="/feed-inventory"><AppLayout><FeedInventory /></AppLayout></RoleRoute>} />
+      <Route path="/compliance" element={<RoleRoute path="/compliance"><AppLayout><ComplianceDocs /></AppLayout></RoleRoute>} />
+      <Route path="/financial" element={<RoleRoute path="/financial"><AppLayout><FinancialAnalytics /></AppLayout></RoleRoute>} />
+      <Route path="/alerts" element={<RoleRoute path="/alerts"><AppLayout><AlertCenter /></AppLayout></RoleRoute>} />
 
       {/* ── Doctor/Vet Module ── */}
       <Route path="/doctor/dashboard" element={<Navigate to="/dashboard" replace />} />

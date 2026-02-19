@@ -684,6 +684,209 @@ class ApiService {
     const response = await this.client.delete(`/campaigns/${id}`)
     return response.data
   }
+
+  // ═══════════════════════════════════════════════════════════════
+  // ─── Tier-2: Health Analytics ─────────────────────────────────
+
+  async getHealthDashboard(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/health/dashboard`)
+    return response.data
+  }
+
+  async listHealthObservations(enterpriseId: string, params?: Record<string, unknown>) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/health/observations`, { params })
+    return response.data
+  }
+
+  async createHealthObservation(enterpriseId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/health/observations`, data)
+    return response.data
+  }
+
+  async resolveHealthObservation(id: string) {
+    const response = await this.client.patch(`/health/observations/${id}/resolve`)
+    return response.data
+  }
+
+  // ─── Tier-2: Breeding & Genetics ─────────────────────────────
+
+  async listBreedingRecords(enterpriseId: string, params?: Record<string, unknown>) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/breeding`, { params })
+    return response.data
+  }
+
+  async createBreedingRecord(enterpriseId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/breeding`, data)
+    return response.data
+  }
+
+  async updateBreedingRecord(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/breeding/${id}`, data)
+    return response.data
+  }
+
+  async getUpcomingDueDates(enterpriseId: string, days?: number) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/breeding/upcoming-due`, { params: { days } })
+    return response.data
+  }
+
+  async getBreedingStats(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/breeding/stats`)
+    return response.data
+  }
+
+  // ─── Tier-2: Feed & Inventory ─────────────────────────────────
+
+  async listFeeds(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/feed`)
+    return response.data
+  }
+
+  async createFeed(enterpriseId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/feed`, data)
+    return response.data
+  }
+
+  async updateFeed(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/feed/${id}`, data)
+    return response.data
+  }
+
+  async restockFeed(id: string, quantity: number) {
+    const response = await this.client.post(`/feed/${id}/restock`, { quantity })
+    return response.data
+  }
+
+  async deleteFeed(id: string) {
+    const response = await this.client.delete(`/feed/${id}`)
+    return response.data
+  }
+
+  async logFeedConsumption(enterpriseId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/feed/consumption`, data)
+    return response.data
+  }
+
+  async listFeedConsumption(enterpriseId: string, params?: Record<string, unknown>) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/feed/consumption`, { params })
+    return response.data
+  }
+
+  async getFeedAnalytics(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/feed/analytics`)
+    return response.data
+  }
+
+  // ─── Tier-2: Compliance & Regulatory ──────────────────────────
+
+  async listComplianceDocs(enterpriseId: string, params?: Record<string, unknown>) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/compliance`, { params })
+    return response.data
+  }
+
+  async createComplianceDoc(enterpriseId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/compliance`, data)
+    return response.data
+  }
+
+  async updateComplianceDoc(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/compliance/${id}`, data)
+    return response.data
+  }
+
+  async verifyComplianceDoc(id: string) {
+    const response = await this.client.patch(`/compliance/${id}/verify`)
+    return response.data
+  }
+
+  async deleteComplianceDoc(id: string) {
+    const response = await this.client.delete(`/compliance/${id}`)
+    return response.data
+  }
+
+  async getComplianceSummary(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/compliance/summary`)
+    return response.data
+  }
+
+  // ─── Tier-2: Financial Analytics ──────────────────────────────
+
+  async listFinancialRecords(enterpriseId: string, params?: Record<string, unknown>) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/financial`, { params })
+    return response.data
+  }
+
+  async createFinancialRecord(enterpriseId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/financial`, data)
+    return response.data
+  }
+
+  async updateFinancialRecord(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/financial/${id}`, data)
+    return response.data
+  }
+
+  async deleteFinancialRecord(id: string) {
+    const response = await this.client.delete(`/financial/${id}`)
+    return response.data
+  }
+
+  async getFinancialDashboard(enterpriseId: string, months?: number) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/financial/dashboard`, { params: { months } })
+    return response.data
+  }
+
+  // ─── Tier-2: Smart Alerts ─────────────────────────────────────
+
+  async listAlertRules(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/alerts/rules`)
+    return response.data
+  }
+
+  async createAlertRule(enterpriseId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/alerts/rules`, data)
+    return response.data
+  }
+
+  async updateAlertRule(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/alerts/rules/${id}`, data)
+    return response.data
+  }
+
+  async deleteAlertRule(id: string) {
+    const response = await this.client.delete(`/alerts/rules/${id}`)
+    return response.data
+  }
+
+  async toggleAlertRule(id: string, isEnabled: boolean) {
+    const response = await this.client.patch(`/alerts/rules/${id}/toggle`, { isEnabled })
+    return response.data
+  }
+
+  async listAlertEvents(enterpriseId: string, params?: Record<string, unknown>) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/alerts/events`, { params })
+    return response.data
+  }
+
+  async markAlertRead(id: string) {
+    const response = await this.client.patch(`/alerts/events/${id}/read`)
+    return response.data
+  }
+
+  async markAllAlertsRead(enterpriseId: string) {
+    const response = await this.client.patch(`/enterprises/${enterpriseId}/alerts/events/read-all`)
+    return response.data
+  }
+
+  async acknowledgeAlert(id: string) {
+    const response = await this.client.patch(`/alerts/events/${id}/acknowledge`)
+    return response.data
+  }
+
+  async runAlertChecks(enterpriseId: string) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/alerts/run-checks`)
+    return response.data
+  }
 }
 
 export const apiService = new ApiService()
