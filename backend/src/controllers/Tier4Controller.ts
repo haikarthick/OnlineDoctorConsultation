@@ -1,5 +1,5 @@
 /**
- * Tier-4 Controller: Next-Generation Innovative Modules
+ * Controller: Next-Generation Innovative Modules
  * AI Vet Copilot, Digital Twin, Marketplace, Sustainability, Wellness, Geospatial
  */
 import { Request, Response } from 'express';

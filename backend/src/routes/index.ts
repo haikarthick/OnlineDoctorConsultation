@@ -243,20 +243,20 @@ router.post('/admin/permissions/reset', authMiddleware, roleMiddleware(['admin']
 }));
 
 // ═══════════════════════════════════════════════════════════════
-// ─── Tier-2: Health Analytics ────────────────────────────────
+// ─── Health Analytics ────────────────────────────────
 router.get('/enterprises/:enterpriseId/health/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getHealthDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/health/observations', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listObservations(req, res)));
 router.post('/enterprises/:enterpriseId/health/observations', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createObservation(req, res)));
 router.patch('/health/observations/:id/resolve', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.resolveObservation(req, res)));
 
-// ─── Tier-2: Breeding & Genetics ────────────────────────────
+// ─── Breeding & Genetics ────────────────────────────
 router.get('/enterprises/:enterpriseId/breeding', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listBreedingRecords(req, res)));
 router.post('/enterprises/:enterpriseId/breeding', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createBreedingRecord(req, res)));
 router.put('/breeding/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateBreedingRecord(req, res)));
 router.get('/enterprises/:enterpriseId/breeding/upcoming-due', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getUpcomingDueDates(req, res)));
 router.get('/enterprises/:enterpriseId/breeding/stats', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getBreedingStats(req, res)));
 
-// ─── Tier-2: Feed & Inventory ───────────────────────────────
+// ─── Feed & Inventory ───────────────────────────────
 router.get('/enterprises/:enterpriseId/feed', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listFeeds(req, res)));
 router.post('/enterprises/:enterpriseId/feed', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createFeed(req, res)));
 router.put('/feed/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateFeed(req, res)));
@@ -266,7 +266,7 @@ router.post('/enterprises/:enterpriseId/feed/consumption', authMiddleware, async
 router.get('/enterprises/:enterpriseId/feed/consumption', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listConsumptionLogs(req, res)));
 router.get('/enterprises/:enterpriseId/feed/analytics', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getFeedAnalytics(req, res)));
 
-// ─── Tier-2: Compliance & Regulatory ────────────────────────
+// ─── Compliance & Regulatory ────────────────────────
 router.get('/enterprises/:enterpriseId/compliance', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listComplianceDocs(req, res)));
 router.post('/enterprises/:enterpriseId/compliance', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createComplianceDoc(req, res)));
 router.put('/compliance/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateComplianceDoc(req, res)));
@@ -274,14 +274,14 @@ router.patch('/compliance/:id/verify', authMiddleware, asyncHandler((req: Reques
 router.delete('/compliance/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.deleteComplianceDoc(req, res)));
 router.get('/enterprises/:enterpriseId/compliance/summary', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getComplianceSummary(req, res)));
 
-// ─── Tier-2: Financial Analytics ────────────────────────────
+// ─── Financial Analytics ────────────────────────────
 router.get('/enterprises/:enterpriseId/financial', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listFinancialRecords(req, res)));
 router.post('/enterprises/:enterpriseId/financial', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createFinancialRecord(req, res)));
 router.put('/financial/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateFinancialRecord(req, res)));
 router.delete('/financial/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.deleteFinancialRecord(req, res)));
 router.get('/enterprises/:enterpriseId/financial/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getFinancialDashboard(req, res)));
 
-// ─── Tier-2: Smart Alerts ───────────────────────────────────
+// ─── Smart Alerts ───────────────────────────────────
 router.get('/enterprises/:enterpriseId/alerts/rules', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listAlertRules(req, res)));
 router.post('/enterprises/:enterpriseId/alerts/rules', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.createAlertRule(req, res)));
 router.put('/alerts/rules/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.updateAlertRule(req, res)));
@@ -295,7 +295,7 @@ router.post('/enterprises/:enterpriseId/alerts/run-checks', authMiddleware, asyn
 
 // ═══════════════════════════════════════════════════════════════
 
-// ─── Tier-3: AI Disease Prediction & Outbreak Mapping ────────
+// ─── AI Disease Prediction & Outbreak Mapping ────────
 router.get('/enterprises/:enterpriseId/disease-predictions/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getRiskDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/disease-predictions', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listPredictions(req, res)));
 router.post('/enterprises/:enterpriseId/disease-predictions', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.createPrediction(req, res)));
@@ -304,7 +304,7 @@ router.get('/enterprises/:enterpriseId/outbreak-zones', authMiddleware, asyncHan
 router.post('/enterprises/:enterpriseId/outbreak-zones', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.createOutbreakZone(req, res)));
 router.patch('/outbreak-zones/:id/resolve', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.resolveOutbreakZone(req, res)));
 
-// ─── Tier-3: Genomic Lineage & Genetic Diversity ────────────
+// ─── Genomic Lineage & Genetic Diversity ────────────
 router.get('/enterprises/:enterpriseId/genetic-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listGeneticProfiles(req, res)));
 router.post('/enterprises/:enterpriseId/genetic-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.createGeneticProfile(req, res)));
 router.put('/genetic-profiles/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.updateGeneticProfile(req, res)));
@@ -313,7 +313,7 @@ router.get('/enterprises/:enterpriseId/lineage-pairs', authMiddleware, asyncHand
 router.post('/enterprises/:enterpriseId/lineage-pairs', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.createPairRecommendation(req, res)));
 router.get('/enterprises/:enterpriseId/genetic-dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getGeneticDashboard(req, res)));
 
-// ─── Tier-3: IoT Sensor Integration ─────────────────────────
+// ─── IoT Sensor Integration ─────────────────────────
 router.get('/enterprises/:enterpriseId/iot/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getSensorDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/iot/sensors', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listSensors(req, res)));
 router.post('/enterprises/:enterpriseId/iot/sensors', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.createSensor(req, res)));
@@ -322,7 +322,7 @@ router.delete('/iot/sensors/:id', authMiddleware, asyncHandler((req: Request, re
 router.post('/enterprises/:enterpriseId/iot/readings', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.recordSensorReading(req, res)));
 router.get('/iot/sensors/:sensorId/readings', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listSensorReadings(req, res)));
 
-// ─── Tier-3: Supply Chain & Traceability ─────────────────────
+// ─── Supply Chain & Traceability ─────────────────────
 router.get('/enterprises/:enterpriseId/supply-chain/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getSupplyChainDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/supply-chain/batches', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listBatches(req, res)));
 router.post('/enterprises/:enterpriseId/supply-chain/batches', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.createBatch(req, res)));
@@ -334,7 +334,7 @@ router.get('/supply-chain/batches/:batchId/traceability', authMiddleware, asyncH
 router.post('/enterprises/:enterpriseId/supply-chain/qr-codes', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.generateQRCode(req, res)));
 router.get('/enterprises/:enterpriseId/supply-chain/qr-codes', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listQRCodes(req, res)));
 
-// ─── Tier-3: Workforce & Task Management ─────────────────────
+// ─── Workforce & Task Management ─────────────────────
 router.get('/enterprises/:enterpriseId/workforce/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.getWorkforceDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/workforce/tasks', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listTasks(req, res)));
 router.post('/enterprises/:enterpriseId/workforce/tasks', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.createTask(req, res)));
@@ -347,7 +347,7 @@ router.patch('/workforce/shifts/:id/check-in', authMiddleware, asyncHandler((req
 router.patch('/workforce/shifts/:id/check-out', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.checkOutShift(req, res)));
 router.delete('/workforce/shifts/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.deleteShift(req, res)));
 
-// ─── Tier-3: Report Builder & Export Center ──────────────────
+// ─── Report Builder & Export Center ──────────────────
 router.get('/enterprises/:enterpriseId/reports/templates', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listReportTemplates(req, res)));
 router.post('/enterprises/:enterpriseId/reports/templates', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.createReportTemplate(req, res)));
 router.put('/reports/templates/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.updateReportTemplate(req, res)));
@@ -359,7 +359,7 @@ router.delete('/reports/:id', authMiddleware, asyncHandler((req: Request, res: R
 
 // ═══════════════════════════════════════════════════════════════
 
-// ─── Tier-4: AI Veterinary Copilot ──────────────────────────
+// ─── AI Veterinary Copilot ──────────────────────────
 router.get('/ai-copilot/sessions', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listChatSessions(req, res)));
 router.post('/ai-copilot/sessions', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.createChatSession(req, res)));
 router.get('/ai-copilot/sessions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getChatSession(req, res)));
@@ -369,7 +369,7 @@ router.post('/ai-copilot/sessions/:sessionId/messages', authMiddleware, asyncHan
 router.post('/ai-copilot/drug-interactions', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.checkDrugInteractions(req, res)));
 router.post('/ai-copilot/symptom-analysis', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.analyzeSymptoms(req, res)));
 
-// ─── Tier-4: Digital Twin & Scenario Simulator ──────────────
+// ─── Digital Twin & Scenario Simulator ──────────────
 router.get('/enterprises/:enterpriseId/digital-twins/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getDigitalTwinDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/digital-twins', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listDigitalTwins(req, res)));
 router.post('/enterprises/:enterpriseId/digital-twins', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.createDigitalTwin(req, res)));
@@ -380,7 +380,7 @@ router.post('/enterprises/:enterpriseId/simulations', authMiddleware, asyncHandl
 router.get('/simulations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getSimulation(req, res)));
 router.delete('/simulations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteSimulation(req, res)));
 
-// ─── Tier-4: Marketplace & Auctions ─────────────────────────
+// ─── Marketplace & Auctions ─────────────────────────
 router.get('/marketplace/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceDashboard(req, res)));
 router.get('/marketplace/listings', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceListings(req, res)));
 router.get('/marketplace/listings/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceListing(req, res)));
@@ -393,7 +393,7 @@ router.get('/marketplace/orders', authMiddleware, asyncHandler((req: Request, re
 router.post('/marketplace/orders', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.createMarketplaceOrder(req, res)));
 router.patch('/marketplace/orders/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.updateOrderStatus(req, res)));
 
-// ─── Tier-4: Sustainability & Carbon Tracking ───────────────
+// ─── Sustainability & Carbon Tracking ───────────────
 router.get('/enterprises/:enterpriseId/sustainability/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getSustainabilityDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/sustainability/metrics', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listSustainabilityMetrics(req, res)));
 router.post('/enterprises/:enterpriseId/sustainability/metrics', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.createSustainabilityMetric(req, res)));
@@ -405,7 +405,7 @@ router.put('/sustainability/goals/:id', authMiddleware, asyncHandler((req: Reque
 router.delete('/sustainability/goals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteSustainabilityGoal(req, res)));
 router.get('/enterprises/:enterpriseId/sustainability/carbon-footprint', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getCarbonFootprint(req, res)));
 
-// ─── Tier-4: Client Portal & Wellness ───────────────────────
+// ─── Client Portal & Wellness ───────────────────────
 router.get('/wellness/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getWellnessDashboard(req, res)));
 router.get('/wellness/scorecards', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listWellnessScorecards(req, res)));
 router.post('/wellness/scorecards', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.createWellnessScorecard(req, res)));
@@ -417,7 +417,7 @@ router.patch('/wellness/reminders/:id/complete', authMiddleware, asyncHandler((r
 router.patch('/wellness/reminders/:id/snooze', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.snoozeReminder(req, res)));
 router.delete('/wellness/reminders/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteWellnessReminder(req, res)));
 
-// ─── Tier-4: Geospatial Analytics & Geofencing ──────────────
+// ─── Geospatial Analytics & Geofencing ──────────────
 router.get('/enterprises/:enterpriseId/geospatial/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getGeospatialDashboard(req, res)));
 router.get('/enterprises/:enterpriseId/geospatial/zones', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listGeofenceZones(req, res)));
 router.post('/enterprises/:enterpriseId/geospatial/zones', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.createGeofenceZone(req, res)));

@@ -95,7 +95,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
     'dashboard_pending_approvals', 'dashboard_upcoming_bookings',
     'dashboard_recent_consultations',
-    // Tier-4 (vet access)
+    // (vet access)
     'ai_copilot', 'marketplace_access', 'wellness_portal',
   ],
   pet_owner: [
@@ -105,7 +105,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'settings', 'write_review',
     // Enterprise (basic access)
     'enterprise_manage',
-    // Tier-4 (user-scoped)
+    // (user-scoped)
     'ai_copilot', 'marketplace_access', 'wellness_portal',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
@@ -121,13 +121,13 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Enterprise
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
     'enterprise_movements', 'enterprise_campaigns', 'enterprise_members',
-    // Tier-2 Advanced
+    // Advanced
     'health_analytics', 'breeding_manage', 'feed_manage',
     'compliance_manage', 'financial_analytics', 'alert_manage',
-    // Tier-3 Innovative Modules
+    // Innovative Modules
     'disease_prediction', 'genomic_lineage', 'iot_sensors',
     'supply_chain', 'workforce_manage', 'report_builder',
-    // Tier-4 Futuristic Modules
+    // Futuristic Modules
     'ai_copilot', 'digital_twin', 'marketplace_access',
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
     // Actions
@@ -146,13 +146,13 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Enterprise (full access)
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
     'enterprise_movements', 'enterprise_campaigns', 'enterprise_members',
-    // Tier-2 Advanced (full access)
+    // Advanced (full access)
     'health_analytics', 'breeding_manage', 'feed_manage',
     'compliance_manage', 'financial_analytics', 'alert_manage',
-    // Tier-3 Innovative Modules (full access)
+    // Innovative Modules (full access)
     'disease_prediction', 'genomic_lineage', 'iot_sensors',
     'supply_chain', 'workforce_manage', 'report_builder',
-    // Tier-4 Futuristic Modules
+    // Futuristic Modules
     'ai_copilot', 'digital_twin', 'marketplace_access',
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
     // Actions
@@ -207,21 +207,21 @@ export const PERMISSION_LABELS: Record<string, string> = {
   enterprise_movements: 'Movement Log',
   enterprise_campaigns: 'Treatment Campaigns',
   enterprise_members: 'Enterprise Members',
-  // Tier-2 Advanced Modules
+  // Advanced Modules
   health_analytics: 'Health Analytics',
   breeding_manage: 'Breeding & Genetics',
   feed_manage: 'Feed & Inventory',
   compliance_manage: 'Compliance & Regulatory',
   financial_analytics: 'Financial Analytics',
   alert_manage: 'Smart Alerts',
-  // Tier-3 Innovative Modules
+  // Innovative Modules
   disease_prediction: 'AI Disease Prediction',
   genomic_lineage: 'Genomic Lineage & Diversity',
   iot_sensors: 'IoT Sensor Integration',
   supply_chain: 'Supply Chain & Traceability',
   workforce_manage: 'Workforce & Task Management',
   report_builder: 'Report Builder & Exports',
-  // Tier-4 Futuristic Modules
+  // Futuristic Modules
   ai_copilot: 'AI Vet Copilot',
   digital_twin: 'Digital Twin & Simulator',
   marketplace_access: 'Marketplace & Auctions',

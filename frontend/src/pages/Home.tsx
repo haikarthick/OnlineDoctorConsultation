@@ -152,7 +152,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
     { number: '4.9★', label: 'Average Rating' }
   ]
 
-  const tier2Features = [
+  const advancedFeatures = [
     { icon: '📊', title: 'Health Analytics', description: 'AI-powered dashboards with mortality trends, growth curves, and predictive health scoring across your entire operation' },
     { icon: '🧬', title: 'Breeding & Genetics', description: 'Lineage trees, inbreeding coefficients, breeding cycle tracking, and genetic trait analysis for optimal pairing' },
     { icon: '⚖️', title: 'Feed & Inventory', description: 'Feed consumption tracking, cost-per-animal analytics, automated reorder alerts and supplier management' },
@@ -161,7 +161,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
     { icon: '💹', title: 'Financial Management', description: 'Revenue per animal, treatment cost analytics, insurance claims tracking, and enterprise billing' }
   ]
 
-  const tier3Features = [
+  const innovationFeatures = [
     { icon: '🧠', title: 'AI Disease Prediction', description: 'Predict disease outbreaks before they happen using risk scoring, geographic outbreak mapping, and automated preventive action plans' },
     { icon: '🧬', title: 'Genomic Lineage Tracker', description: 'Deep ancestry trees with recursive lineage tracing, inbreeding coefficient analysis, and AI-powered breeding pair recommendations' },
     { icon: '📡', title: 'IoT Sensor Dashboard', description: 'Real-time environmental monitoring with automated anomaly detection, low-battery alerts, and telemetry analytics across all facilities' },
@@ -170,7 +170,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
     { icon: '📊', title: 'Report Builder', description: 'Generate 7 types of cross-module reports on demand — from animal census to sensor analytics — with export capabilities' }
   ]
 
-  const tier4Features = [
+  const intelligenceFeatures = [
     { icon: '🤖', title: 'AI Vet Copilot', description: 'Intelligent veterinary AI assistant with drug interaction checking, symptom analysis, and chat-based clinical decision support' },
     { icon: '🔮', title: 'Digital Twin & Simulator', description: 'Create digital replicas of your operations and run simulations for disease spread, resource optimization, and financial forecasting' },
     { icon: '🏪', title: 'Marketplace & Auctions', description: 'Buy, sell, and auction livestock, equipment, and supplies with real-time bidding, order management, and seller dashboards' },
@@ -354,12 +354,12 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
         </div>
       </section>
 
-      {/* Advanced Features / Tier-2 Showcase */}
+      {/* Advanced Enterprise Capabilities */}
       <section className="advanced-features-section">
         <h2 className="section-title">Advanced Enterprise Capabilities</h2>
         <p className="section-subtitle">Built for operations that demand more</p>
         <div className="advanced-grid">
-          {tier2Features.map((feat, idx) => (
+          {advancedFeatures.map((feat, idx) => (
             <div key={idx} className="advanced-card">
               <div className="advanced-icon">{feat.icon}</div>
               <h3>{feat.title}</h3>
@@ -369,12 +369,12 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
         </div>
       </section>
 
-      {/* Tier-3 Innovative Features Showcase */}
+      {/* Next-Generation Innovation */}
       <section className="advanced-features-section" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
         <h2 className="section-title" style={{ color: '#f8fafc' }}>🚀 Next-Generation Innovation</h2>
         <p className="section-subtitle" style={{ color: '#94a3b8' }}>Cutting-edge AI, IoT, and blockchain-style features that redefine animal management</p>
         <div className="advanced-grid">
-          {tier3Features.map((feat, idx) => (
+          {innovationFeatures.map((feat, idx) => (
             <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0' }}>
               <div className="advanced-icon">{feat.icon}</div>
               <h3 style={{ color: '#f8fafc' }}>{feat.title}</h3>
@@ -384,12 +384,12 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
         </div>
       </section>
 
-      {/* Tier-4 Futuristic Features Showcase */}
+      {/* Futuristic Intelligence */}
       <section className="advanced-features-section" style={{ background: 'linear-gradient(135deg, #4a1d96 0%, #7c3aed 50%, #2563eb 100%)' }}>
-        <h2 className="section-title" style={{ color: '#f8fafc' }}>🔮 Tier-4 — Futuristic Intelligence</h2>
+        <h2 className="section-title" style={{ color: '#f8fafc' }}>🔮 Futuristic Intelligence</h2>
         <p className="section-subtitle" style={{ color: '#c4b5fd' }}>AI copilots, digital twins, marketplace ecosystems, and geospatial intelligence</p>
         <div className="advanced-grid">
-          {tier4Features.map((feat, idx) => (
+          {intelligenceFeatures.map((feat, idx) => (
             <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#e2e8f0' }}>
               <div className="advanced-icon">{feat.icon}</div>
               <h3 style={{ color: '#f8fafc' }}>{feat.title}</h3>

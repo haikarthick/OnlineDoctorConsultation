@@ -1,5 +1,5 @@
 /**
- * Tier-2 Enterprise Migration — Advanced Features
+ * Enterprise Migration — Advanced Features
  * 
  * Tables: breeding_records, feed_inventory, feed_consumption_logs,
  *         compliance_documents, financial_records, alert_rules, alert_events,
@@ -265,7 +265,7 @@ async function runTier2Migration() {
     console.log('✅ Animals table extended with health/breeding fields');
 
     await client.query('COMMIT');
-    console.log('\n🎉 Tier-2 migration completed successfully!');
+    console.log('\n🎉 migration completed successfully!');
     console.log('   New tables: health_observations, breeding_records, feed_inventory,');
     console.log('   feed_consumption_logs, compliance_documents, financial_records,');
     console.log('   alert_rules, alert_events');

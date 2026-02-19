@@ -39,21 +39,21 @@ import AnimalGroups from './pages/AnimalGroups'
 import LocationManagement from './pages/LocationManagement'
 import MovementLog from './pages/MovementLog'
 import TreatmentCampaigns from './pages/TreatmentCampaigns'
-// Tier-2 Advanced Modules
+// Advanced Modules
 import HealthAnalytics from './pages/HealthAnalytics'
 import BreedingManager from './pages/BreedingManager'
 import FeedInventory from './pages/FeedInventory'
 import ComplianceDocs from './pages/ComplianceDocs'
 import FinancialAnalytics from './pages/FinancialAnalytics'
 import AlertCenter from './pages/AlertCenter'
-// Tier-3 Innovative Modules
+// Innovation Modules
 import DiseasePrediction from './pages/DiseasePrediction'
 import GenomicLineage from './pages/GenomicLineage'
 import IoTSensors from './pages/IoTSensors'
 import SupplyChain from './pages/SupplyChain'
 import Workforce from './pages/Workforce'
 import ReportBuilder from './pages/ReportBuilder'
-// Tier-4 Futuristic Modules
+// Intelligence Modules
 import AICopilot from './pages/AICopilot'
 import DigitalTwin from './pages/DigitalTwin'
 import Marketplace from './pages/Marketplace'
@@ -162,7 +162,7 @@ function AppRoutes() {
       <Route path="/movement-log" element={<RoleRoute path="/movement-log"><AppLayout><MovementLog /></AppLayout></RoleRoute>} />
       <Route path="/campaigns" element={<RoleRoute path="/campaigns"><AppLayout><TreatmentCampaigns /></AppLayout></RoleRoute>} />
 
-      {/* ── Tier-2 Advanced Modules ── */}
+      {/* ── Advanced Modules ── */}
       <Route path="/health-analytics" element={<RoleRoute path="/health-analytics"><AppLayout><HealthAnalytics /></AppLayout></RoleRoute>} />
       <Route path="/breeding" element={<RoleRoute path="/breeding"><AppLayout><BreedingManager /></AppLayout></RoleRoute>} />
       <Route path="/feed-inventory" element={<RoleRoute path="/feed-inventory"><AppLayout><FeedInventory /></AppLayout></RoleRoute>} />
@@ -170,7 +170,7 @@ function AppRoutes() {
       <Route path="/financial" element={<RoleRoute path="/financial"><AppLayout><FinancialAnalytics /></AppLayout></RoleRoute>} />
       <Route path="/alerts" element={<RoleRoute path="/alerts"><AppLayout><AlertCenter /></AppLayout></RoleRoute>} />
 
-      {/* ── Tier-3 Innovative Modules ── */}
+      {/* ── Innovation Modules ── */}
       <Route path="/disease-prediction" element={<RoleRoute path="/disease-prediction"><AppLayout><DiseasePrediction /></AppLayout></RoleRoute>} />
       <Route path="/genomic-lineage" element={<RoleRoute path="/genomic-lineage"><AppLayout><GenomicLineage /></AppLayout></RoleRoute>} />
       <Route path="/iot-sensors" element={<RoleRoute path="/iot-sensors"><AppLayout><IoTSensors /></AppLayout></RoleRoute>} />
@@ -178,7 +178,7 @@ function AppRoutes() {
       <Route path="/workforce" element={<RoleRoute path="/workforce"><AppLayout><Workforce /></AppLayout></RoleRoute>} />
       <Route path="/report-builder" element={<RoleRoute path="/report-builder"><AppLayout><ReportBuilder /></AppLayout></RoleRoute>} />
 
-      {/* ── Tier-4 Futuristic Modules ── */}
+      {/* ── Intelligence Modules ── */}
       <Route path="/ai-copilot" element={<RoleRoute path="/ai-copilot"><AppLayout><AICopilot /></AppLayout></RoleRoute>} />
       <Route path="/digital-twin" element={<RoleRoute path="/digital-twin"><AppLayout><DigitalTwin /></AppLayout></RoleRoute>} />
       <Route path="/marketplace" element={<RoleRoute path="/marketplace"><AppLayout><Marketplace /></AppLayout></RoleRoute>} />

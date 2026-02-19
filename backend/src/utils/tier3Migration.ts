@@ -1,5 +1,5 @@
 /**
- * Tier-3 Enterprise Migration — Innovative Advanced Features
+ * Enterprise Migration — Innovative Advanced Features
  *
  * Tables:
  *   disease_predictions, outbreak_zones,
@@ -342,10 +342,10 @@ async function runTier3Migration() {
     console.log(`  ✓ ${indexes.length} indexes created`);
 
     await client.query('COMMIT');
-    console.log('\n✅ Tier-3 migration completed successfully!');
+    console.log('\n✅ migration completed successfully!');
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('❌ Tier-3 migration failed:', err);
+    console.error('❌ migration failed:', err);
     throw err;
   } finally {
     client.release();

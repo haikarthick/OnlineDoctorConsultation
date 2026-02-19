@@ -695,7 +695,7 @@ export interface MenuItem {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ─── Tier-2: Health Analytics ────────────────────────────────
+// ─── Health Analytics ────────────────────────────────
 export interface HealthObservation {
   id: string
   enterpriseId: string
@@ -727,7 +727,7 @@ export interface HealthDashboard {
   mortalityTrend: { month: string; deaths: number }[]
 }
 
-// ─── Tier-2: Breeding & Genetics ────────────────────────────
+// ─── Breeding & Genetics ────────────────────────────
 export interface BreedingRecord {
   id: string
   enterpriseId: string
@@ -760,7 +760,7 @@ export interface BreedingStats {
   avgGestation: number
 }
 
-// ─── Tier-2: Feed & Inventory ───────────────────────────────
+// ─── Feed & Inventory ───────────────────────────────
 export interface FeedItem {
   id: string
   enterpriseId: string
@@ -807,7 +807,7 @@ export interface FeedAnalytics {
   totalInventoryValue: number
 }
 
-// ─── Tier-2: Compliance & Regulatory ────────────────────────
+// ─── Compliance & Regulatory ────────────────────────
 export interface ComplianceDocument {
   id: string
   enterpriseId: string
@@ -834,7 +834,7 @@ export interface ComplianceSummary {
   byStatus: { status: string; count: number }[]
 }
 
-// ─── Tier-2: Financial Analytics ────────────────────────────
+// ─── Financial Analytics ────────────────────────────
 export interface FinancialRecord {
   id: string
   enterpriseId: string
@@ -866,7 +866,7 @@ export interface FinancialDashboard {
   recentTransactions: FinancialRecord[]
 }
 
-// ─── Tier-2: Smart Alerts ───────────────────────────────────
+// ─── Smart Alerts ───────────────────────────────────
 export interface AlertRule {
   id: string
   enterpriseId: string
@@ -901,7 +901,7 @@ export interface AlertEvent {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Tier-3: Advanced Innovative Features
+// Advanced Innovative Features
 // ═══════════════════════════════════════════════════════════════
 
 // ─── AI Disease Prediction ──────────────────────────────────
@@ -1167,7 +1167,7 @@ export interface GeneratedReport {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Tier-4: Next-Generation Innovative Features
+// Next-Generation Innovative Features
 // ═══════════════════════════════════════════════════════════════
 
 // ─── AI Veterinary Copilot ───────────────────────────────────

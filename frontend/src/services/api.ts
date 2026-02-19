@@ -686,7 +686,7 @@ class ApiService {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // ─── Tier-2: Health Analytics ─────────────────────────────────
+  // ─── Health Analytics ─────────────────────────────────
 
   async getHealthDashboard(enterpriseId: string) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/health/dashboard`)
@@ -708,7 +708,7 @@ class ApiService {
     return response.data
   }
 
-  // ─── Tier-2: Breeding & Genetics ─────────────────────────────
+  // ─── Breeding & Genetics ─────────────────────────────
 
   async listBreedingRecords(enterpriseId: string, params?: Record<string, unknown>) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/breeding`, { params })
@@ -735,7 +735,7 @@ class ApiService {
     return response.data
   }
 
-  // ─── Tier-2: Feed & Inventory ─────────────────────────────────
+  // ─── Feed & Inventory ─────────────────────────────────
 
   async listFeeds(enterpriseId: string) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/feed`)
@@ -777,7 +777,7 @@ class ApiService {
     return response.data
   }
 
-  // ─── Tier-2: Compliance & Regulatory ──────────────────────────
+  // ─── Compliance & Regulatory ──────────────────────────
 
   async listComplianceDocs(enterpriseId: string, params?: Record<string, unknown>) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/compliance`, { params })
@@ -809,7 +809,7 @@ class ApiService {
     return response.data
   }
 
-  // ─── Tier-2: Financial Analytics ──────────────────────────────
+  // ─── Financial Analytics ──────────────────────────────
 
   async listFinancialRecords(enterpriseId: string, params?: Record<string, unknown>) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/financial`, { params })
@@ -836,7 +836,7 @@ class ApiService {
     return response.data
   }
 
-  // ─── Tier-2: Smart Alerts ─────────────────────────────────────
+  // ─── Smart Alerts ─────────────────────────────────────
 
   async listAlertRules(enterpriseId: string) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/alerts/rules`)
@@ -889,7 +889,7 @@ class ApiService {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // Tier-3: Advanced Innovative Features
+  // Advanced Innovative Features
   // ═══════════════════════════════════════════════════════════════
 
   // ─── AI Disease Prediction ───────────────────────────────────
@@ -1155,7 +1155,7 @@ class ApiService {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // Tier-4: Next-Generation Innovative Features
+  // Next-Generation Innovative Features
   // ═══════════════════════════════════════════════════════════════
 
   // ─── AI Veterinary Copilot ──────────────────────────────────

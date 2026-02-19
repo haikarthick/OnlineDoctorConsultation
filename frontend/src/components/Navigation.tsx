@@ -97,7 +97,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['farmer', 'admin', 'veterinarian']
     },
 
-    // ── Tier-2 Advanced Modules ──
+    // ── Advanced Modules ──
     {
       id: 'health-analytics',
       label: 'Health Analytics',
@@ -141,7 +141,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['farmer', 'admin', 'veterinarian']
     },
 
-    // ── Tier-3 Innovative Modules ──
+    // ── Innovation Modules ──
     {
       id: 'disease-prediction',
       label: 'Disease AI',
@@ -185,7 +185,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['farmer', 'admin', 'veterinarian']
     },
 
-    // ── Tier-4 Futuristic Modules ──
+    // ── Intelligence Modules ──
     {
       id: 'ai-copilot',
       label: 'AI Copilot',

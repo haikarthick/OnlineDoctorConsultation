@@ -1,5 +1,5 @@
 /**
- * Tier-4 Enterprise Migration — Next-Generation Innovative Features
+ * Enterprise Migration — Next-Generation Innovative Features
  *
  * Tables:
  *   ai_chat_sessions, ai_chat_messages,
@@ -342,10 +342,10 @@ async function runTier4Migration() {
     console.log(`  ✓ ${indexes.length} indexes created`);
 
     await client.query('COMMIT');
-    console.log('\n✅ Tier-4 migration completed successfully!');
+    console.log('\n✅ migration completed successfully!');
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('❌ Tier-4 migration failed:', err);
+    console.error('❌ migration failed:', err);
     throw err;
   } finally {
     client.release();

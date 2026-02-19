@@ -41,21 +41,21 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   enterprise_locations: ['/locations'],
   enterprise_movements: ['/movement-log'],
   enterprise_campaigns: ['/campaigns'],
-  // Tier-2 Advanced
+  // Advanced
   health_analytics: ['/health-analytics'],
   breeding_manage: ['/breeding'],
   feed_manage: ['/feed-inventory'],
   compliance_manage: ['/compliance'],
   financial_analytics: ['/financial'],
   alert_manage: ['/alerts'],
-  // Tier-3 Innovative Modules
+  // Innovation Modules
   disease_prediction: ['/disease-prediction'],
   genomic_lineage: ['/genomic-lineage'],
   iot_sensors: ['/iot-sensors'],
   supply_chain: ['/supply-chain'],
   workforce_manage: ['/workforce'],
   report_builder: ['/report-builder'],
-  // Tier-4 Futuristic Modules
+  // Intelligence Modules
   ai_copilot: ['/ai-copilot'],
   digital_twin: ['/digital-twin'],
   marketplace_access: ['/marketplace'],
@@ -99,21 +99,21 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'locations': 'enterprise_locations',
   'movement-log': 'enterprise_movements',
   'campaigns': 'enterprise_campaigns',
-  // Tier-2 Advanced
+  // Advanced
   'health-analytics': 'health_analytics',
   'breeding': 'breeding_manage',
   'feed-inventory': 'feed_manage',
   'compliance': 'compliance_manage',
   'financial': 'financial_analytics',
   'alerts': 'alert_manage',
-  // Tier-3 Innovative Modules
+  // Innovation Modules
   'disease-prediction': 'disease_prediction',
   'genomic-lineage': 'genomic_lineage',
   'iot-sensors': 'iot_sensors',
   'supply-chain': 'supply_chain',
   'workforce': 'workforce_manage',
   'report-builder': 'report_builder',
-  // Tier-4 Futuristic Modules
+  // Intelligence Modules
   'ai-copilot': 'ai_copilot',
   'digital-twin': 'digital_twin',
   'marketplace': 'marketplace_access',
