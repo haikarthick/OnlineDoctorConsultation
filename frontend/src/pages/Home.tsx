@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import './Home.css'
 
 interface HomeProps {
@@ -7,8 +7,68 @@ interface HomeProps {
   onLogin?: () => void
 }
 
+const SECTIONS = [
+  { id: 'hero', label: 'Home' },
+  { id: 'enterprises', label: 'Enterprises' },
+  { id: 'features', label: 'Features' },
+  { id: 'how-it-works', label: 'How It Works' },
+  { id: 'testimonials', label: 'Testimonials' },
+] as const
+
 export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomeProps) {
   const [activeTab, setActiveTab] = useState<'owner' | 'enterprise' | 'vet'>('owner')
+  const [activeSection, setActiveSection] = useState('hero')
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const [showBackToTop, setShowBackToTop] = useState(false)
+  const [navScrolled, setNavScrolled] = useState(false)
+  const observerRef = useRef<IntersectionObserver | null>(null)
+
+  // Scroll progress + back-to-top + nav shadow
+  const handleScroll = useCallback(() => {
+    const scrollTop = window.scrollY
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight
+    setScrollProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0)
+    setShowBackToTop(scrollTop > 500)
+    setNavScrolled(scrollTop > 20)
+  }, [])
+
+  // IntersectionObserver for active section
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter(e => e.isIntersecting)
+        if (visible.length > 0) {
+          // Pick the one with the highest intersection ratio
+          const best = visible.reduce((a, b) => a.intersectionRatio > b.intersectionRatio ? a : b)
+          setActiveSection(best.target.id)
+        }
+      },
+      { rootMargin: '-20% 0px -60% 0px', threshold: [0, 0.25, 0.5] }
+    )
+
+    // Observe all sections with IDs
+    setTimeout(() => {
+      SECTIONS.forEach(({ id }) => {
+        const el = document.getElementById(id)
+        if (el) observerRef.current?.observe(el)
+      })
+    }, 100)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      observerRef.current?.disconnect()
+    }
+  }, [handleScroll])
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
   const ownerBenefits = [
     { icon: '⏰', title: 'Available 24/7', description: 'Get expert advice for your pets anytime, day or night' },
@@ -121,19 +181,27 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
 
   return (
     <div className="home-page">
+      {/* Scroll Progress Bar */}
+      <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
+
       {/* Top Navigation Bar */}
-      <nav className="home-nav">
+      <nav className={`home-nav${navScrolled ? ' home-nav--scrolled' : ''}`}>
         <div className="home-nav-inner">
-          <div className="home-nav-brand">
+          <div className="home-nav-brand" onClick={scrollToTop} style={{ cursor: 'pointer' }}>
             <span className="home-nav-logo">🏥</span>
             <span className="home-nav-title">VetCare</span>
             <span className="home-nav-badge">ENTERPRISE</span>
           </div>
           <div className="home-nav-center">
-            <a href="#features" className="home-nav-link">Features</a>
-            <a href="#enterprises" className="home-nav-link">For Enterprises</a>
-            <a href="#how-it-works" className="home-nav-link">How It Works</a>
-            <a href="#testimonials" className="home-nav-link">Testimonials</a>
+            {SECTIONS.filter(s => s.id !== 'hero').map(s => (
+              <button
+                key={s.id}
+                className={`home-nav-link${activeSection === s.id ? ' home-nav-link--active' : ''}`}
+                onClick={() => scrollToSection(s.id)}
+              >
+                {s.label}
+              </button>
+            ))}
           </div>
           <div className="home-nav-actions">
             <button className="home-nav-signin" onClick={onLogin || (() => {})}>
@@ -149,8 +217,32 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
         </div>
       </nav>
 
+      {/* Section Quick-Nav Dots */}
+      <div className={`section-dots${showBackToTop ? ' section-dots--visible' : ''}`}>
+        {SECTIONS.map(s => (
+          <button
+            key={s.id}
+            className={`section-dot${activeSection === s.id ? ' section-dot--active' : ''}`}
+            onClick={() => scrollToSection(s.id)}
+            title={s.label}
+          >
+            <span className="section-dot-tooltip">{s.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Back to Top */}
+      <button
+        className={`back-to-top${showBackToTop ? ' back-to-top--visible' : ''}`}
+        onClick={scrollToTop}
+        aria-label="Back to top"
+        title="Back to top"
+      >
+        ↑
+      </button>
+
       {/* Hero Section */}
-      <section className="hero-section">
+      <section className="hero-section" id="hero">
         <div className="hero-content">
           <div className="hero-text">
             <div className="hero-tag">Trusted by 3,000+ animal enterprises worldwide</div>
@@ -399,7 +491,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       </section>
 
       {/* Footer Section */}
-      <footer className="home-footer">
+      <footer className="home-footer" id="footer">
         <div className="footer-content">
           <div className="footer-brand">
             <span>🏥</span> <strong>VetCare Enterprise</strong>
