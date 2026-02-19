@@ -127,21 +127,25 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
           <div className="home-nav-brand">
             <span className="home-nav-logo">🏥</span>
             <span className="home-nav-title">VetCare</span>
-            <span className="home-nav-badge">Enterprise</span>
+            <span className="home-nav-badge">ENTERPRISE</span>
           </div>
-          <div className="home-nav-links">
+          <div className="home-nav-center">
             <a href="#features" className="home-nav-link">Features</a>
             <a href="#enterprises" className="home-nav-link">For Enterprises</a>
             <a href="#how-it-works" className="home-nav-link">How It Works</a>
             <a href="#testimonials" className="home-nav-link">Testimonials</a>
-            <button className="btn btn-secondary-outline btn-nav" onClick={onLogin || (() => {})}>
+          </div>
+          <div className="home-nav-actions">
+            <button className="home-nav-signin" onClick={onLogin || (() => {})}>
               Sign In
             </button>
-            <button className="btn btn-primary btn-nav" onClick={onGetStarted}>
+            <button className="home-nav-cta" onClick={onGetStarted}>
               Get Started Free
             </button>
           </div>
-          <button className="home-nav-mobile-signin" onClick={onLogin || (() => {})}>Sign In</button>
+          <button className="home-nav-mobile-toggle" onClick={onLogin || (() => {})}>
+            <span className="nav-hamburger" />
+          </button>
         </div>
       </nav>
 
