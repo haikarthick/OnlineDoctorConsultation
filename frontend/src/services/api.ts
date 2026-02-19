@@ -523,6 +523,167 @@ class ApiService {
     const response = await this.client.get('/health')
     return response.data
   }
+
+  // ─── Enterprise / Farm Management ─────────────────────────
+  async createEnterprise(data: { name: string; enterpriseType: string; description?: string; address?: string; city?: string; state?: string; country?: string; postalCode?: string; totalArea?: number; areaUnit?: string; licenseNumber?: string; regulatoryId?: string; taxId?: string; phone?: string; email?: string; website?: string }) {
+    const response = await this.client.post('/enterprises', data)
+    return response.data
+  }
+
+  async listEnterprises(params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get('/enterprises', { params })
+    return response.data
+  }
+
+  async getEnterprise(id: string) {
+    const response = await this.client.get(`/enterprises/${id}`)
+    return response.data
+  }
+
+  async updateEnterprise(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/enterprises/${id}`, data)
+    return response.data
+  }
+
+  async deleteEnterprise(id: string) {
+    const response = await this.client.delete(`/enterprises/${id}`)
+    return response.data
+  }
+
+  async getEnterpriseStats(id: string) {
+    const response = await this.client.get(`/enterprises/${id}/stats`)
+    return response.data
+  }
+
+  // Enterprise Members
+  async listEnterpriseMembers(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/members`)
+    return response.data
+  }
+
+  async addEnterpriseMember(enterpriseId: string, data: { userId: string; role: string; title?: string }) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/members`, data)
+    return response.data
+  }
+
+  async updateEnterpriseMember(enterpriseId: string, userId: string, data: { role: string; title?: string }) {
+    const response = await this.client.put(`/enterprises/${enterpriseId}/members/${userId}`, data)
+    return response.data
+  }
+
+  async removeEnterpriseMember(enterpriseId: string, userId: string) {
+    const response = await this.client.delete(`/enterprises/${enterpriseId}/members/${userId}`)
+    return response.data
+  }
+
+  // Animal Groups
+  async createAnimalGroup(data: { enterpriseId: string; name: string; groupType: string; species?: string; breed?: string; purpose?: string; targetCount?: number; description?: string; colorCode?: string }) {
+    const response = await this.client.post('/animal-groups', data)
+    return response.data
+  }
+
+  async getAnimalGroup(id: string) {
+    const response = await this.client.get(`/animal-groups/${id}`)
+    return response.data
+  }
+
+  async listAnimalGroups(enterpriseId: string, params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/groups`, { params })
+    return response.data
+  }
+
+  async updateAnimalGroup(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/animal-groups/${id}`, data)
+    return response.data
+  }
+
+  async deleteAnimalGroup(id: string) {
+    const response = await this.client.delete(`/animal-groups/${id}`)
+    return response.data
+  }
+
+  async assignAnimalToGroup(groupId: string, animalId: string) {
+    const response = await this.client.post(`/animal-groups/${groupId}/assign`, { animalId })
+    return response.data
+  }
+
+  async removeAnimalFromGroup(groupId: string, animalId: string) {
+    const response = await this.client.delete(`/animal-groups/${groupId}/animals/${animalId}`)
+    return response.data
+  }
+
+  // Locations
+  async createLocation(data: { enterpriseId: string; name: string; locationType: string; parentLocationId?: string; capacity?: number; area?: number; areaUnit?: string; description?: string }) {
+    const response = await this.client.post('/locations', data)
+    return response.data
+  }
+
+  async getLocation(id: string) {
+    const response = await this.client.get(`/locations/${id}`)
+    return response.data
+  }
+
+  async listLocations(enterpriseId: string, params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/locations`, { params })
+    return response.data
+  }
+
+  async getLocationTree(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/location-tree`)
+    return response.data
+  }
+
+  async updateLocation(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/locations/${id}`, data)
+    return response.data
+  }
+
+  async deleteLocation(id: string) {
+    const response = await this.client.delete(`/locations/${id}`)
+    return response.data
+  }
+
+  // Movement Records
+  async createMovement(data: { enterpriseId: string; animalId?: string; groupId?: string; fromLocationId?: string; toLocationId?: string; movementType: string; reason?: string; animalCount?: number; transportDate?: string; notes?: string }) {
+    const response = await this.client.post('/movements', data)
+    return response.data
+  }
+
+  async listMovements(enterpriseId: string, params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/movements`, { params })
+    return response.data
+  }
+
+  async getMovement(id: string) {
+    const response = await this.client.get(`/movements/${id}`)
+    return response.data
+  }
+
+  // Treatment Campaigns
+  async createCampaign(data: { enterpriseId: string; groupId?: string; campaignType: string; name: string; description?: string; productUsed?: string; dosage?: string; targetCount?: number; scheduledDate?: string; cost?: number; notes?: string }) {
+    const response = await this.client.post('/campaigns', data)
+    return response.data
+  }
+
+  async getCampaign(id: string) {
+    const response = await this.client.get(`/campaigns/${id}`)
+    return response.data
+  }
+
+  async listCampaigns(enterpriseId: string, params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/campaigns`, { params })
+    return response.data
+  }
+
+  async updateCampaign(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/campaigns/${id}`, data)
+    return response.data
+  }
+
+  async deleteCampaign(id: string) {
+    const response = await this.client.delete(`/campaigns/${id}`)
+    return response.data
+  }
 }
 
 export const apiService = new ApiService()

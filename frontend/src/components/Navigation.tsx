@@ -60,6 +60,43 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['veterinarian', 'pet_owner']
     },
 
+    // ── Enterprise Module ──
+    {
+      id: 'enterprises',
+      label: 'Enterprises',
+      icon: '🏢',
+      path: '/enterprises',
+      roles: ['farmer', 'admin', 'pet_owner']
+    },
+    {
+      id: 'animal-groups',
+      label: 'Animal Groups',
+      icon: '🐄',
+      path: '/animal-groups',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'locations',
+      label: 'Locations',
+      icon: '📍',
+      path: '/locations',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'movement-log',
+      label: 'Movement Log',
+      icon: '🔄',
+      path: '/movement-log',
+      roles: ['farmer', 'admin']
+    },
+    {
+      id: 'campaigns',
+      label: 'Campaigns',
+      icon: '💉',
+      path: '/campaigns',
+      roles: ['farmer', 'admin', 'veterinarian']
+    },
+
     // ── Doctor/Vet Module ──
     {
       id: 'manage-schedule',

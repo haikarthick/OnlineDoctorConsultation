@@ -33,6 +33,12 @@ import SystemSettings from './pages/admin/SystemSettings'
 import AuditLogs from './pages/admin/AuditLogs'
 import PermissionManagement from './pages/admin/PermissionManagement'
 import MedicalRecordManagement from './pages/admin/MedicalRecordManagement'
+// Enterprise Module
+import EnterpriseManagement from './pages/EnterpriseManagement'
+import AnimalGroups from './pages/AnimalGroups'
+import LocationManagement from './pages/LocationManagement'
+import MovementLog from './pages/MovementLog'
+import TreatmentCampaigns from './pages/TreatmentCampaigns'
 import './App.css'
 import './styles/modules.css'
 
@@ -127,6 +133,13 @@ function AppRoutes() {
       <Route path="/my-bookings" element={<Navigate to="/consultations" replace />} />
       <Route path="/video-consultation/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VideoConsultation} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />
       <Route path="/write-review" element={<RoleRoute path="/write-review"><AppLayout><RoutedPage Component={WriteReview} /></AppLayout></RoleRoute>} />
+
+      {/* ── Enterprise Module ── */}
+      <Route path="/enterprises" element={<RoleRoute path="/enterprises"><AppLayout><EnterpriseManagement /></AppLayout></RoleRoute>} />
+      <Route path="/animal-groups" element={<RoleRoute path="/animal-groups"><AppLayout><AnimalGroups /></AppLayout></RoleRoute>} />
+      <Route path="/locations" element={<RoleRoute path="/locations"><AppLayout><LocationManagement /></AppLayout></RoleRoute>} />
+      <Route path="/movement-log" element={<RoleRoute path="/movement-log"><AppLayout><MovementLog /></AppLayout></RoleRoute>} />
+      <Route path="/campaigns" element={<RoleRoute path="/campaigns"><AppLayout><TreatmentCampaigns /></AppLayout></RoleRoute>} />
 
       {/* ── Doctor/Vet Module ── */}
       <Route path="/doctor/dashboard" element={<Navigate to="/dashboard" replace />} />

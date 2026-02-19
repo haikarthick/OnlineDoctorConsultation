@@ -35,6 +35,12 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   admin_settings: ['/admin/settings'],
   admin_audit: ['/admin/audit-logs'],
   admin_permissions: ['/admin/permissions'],
+  // Enterprise
+  enterprise_manage: ['/enterprises'],
+  enterprise_groups: ['/animal-groups'],
+  enterprise_locations: ['/locations'],
+  enterprise_movements: ['/movement-log'],
+  enterprise_campaigns: ['/campaigns'],
 }
 
 // Reverse map: route path → required permission
@@ -66,6 +72,12 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'admin-audit': 'admin_audit',
   'admin-permissions': 'admin_permissions',
   'admin-medical-records': 'admin_medical_records',
+  // Enterprise
+  'enterprises': 'enterprise_manage',
+  'animal-groups': 'enterprise_groups',
+  'locations': 'enterprise_locations',
+  'movement-log': 'enterprise_movements',
+  'campaigns': 'enterprise_campaigns',
 }
 
 // ─── Context ────────────────────────────────────────────────

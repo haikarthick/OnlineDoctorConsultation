@@ -15,6 +15,7 @@ import VideoSessionController from '../controllers/VideoSessionController';
 import ScheduleController from '../controllers/ScheduleController';
 import PrescriptionController from '../controllers/PrescriptionController';
 import AdminController from '../controllers/AdminController';
+import EnterpriseController from '../controllers/EnterpriseController';
 import AdminService from '../services/AdminService';
 import PermissionService from '../services/PermissionService';
 import { asyncHandler } from '../utils/errorHandler';
@@ -84,6 +85,49 @@ router.get('/vet-profiles/me', authMiddleware, asyncHandler((req: Request, res: 
 router.get('/vet-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.listVets(req, res)));
 router.get('/vet-profiles/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.getProfile(req, res)));
 router.put('/vet-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.updateProfile(req, res)));
+
+// ─── Enterprise / Farm routes ────────────────────────────────
+router.post('/enterprises', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.createEnterprise(req, res)));
+router.get('/enterprises', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listEnterprises(req, res)));
+router.get('/enterprises/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getEnterprise(req, res)));
+router.put('/enterprises/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.updateEnterprise(req, res)));
+router.delete('/enterprises/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteEnterprise(req, res)));
+router.get('/enterprises/:id/stats', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getEnterpriseStats(req, res)));
+
+// Enterprise Members
+router.get('/enterprises/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listMembers(req, res)));
+router.post('/enterprises/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.addMember(req, res)));
+router.put('/enterprises/:enterpriseId/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.updateMember(req, res)));
+router.delete('/enterprises/:enterpriseId/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.removeMember(req, res)));
+
+// Animal Groups
+router.post('/animal-groups', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.createGroup(req, res)));
+router.get('/animal-groups/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getGroup(req, res)));
+router.put('/animal-groups/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.updateGroup(req, res)));
+router.delete('/animal-groups/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteGroup(req, res)));
+router.get('/enterprises/:enterpriseId/groups', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listGroups(req, res)));
+router.post('/animal-groups/:id/assign', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.assignAnimalToGroup(req, res)));
+router.delete('/animal-groups/:id/animals/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.removeAnimalFromGroup(req, res)));
+
+// Locations
+router.post('/locations', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.createLocation(req, res)));
+router.get('/locations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getLocation(req, res)));
+router.put('/locations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.updateLocation(req, res)));
+router.delete('/locations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteLocation(req, res)));
+router.get('/enterprises/:enterpriseId/locations', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listLocations(req, res)));
+router.get('/enterprises/:enterpriseId/location-tree', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getLocationTree(req, res)));
+
+// Movement Records
+router.post('/movements', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.createMovement(req, res)));
+router.get('/movements/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getMovement(req, res)));
+router.get('/enterprises/:enterpriseId/movements', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listMovements(req, res)));
+
+// Treatment Campaigns
+router.post('/campaigns', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.createCampaign(req, res)));
+router.get('/campaigns/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getCampaign(req, res)));
+router.put('/campaigns/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.updateCampaign(req, res)));
+router.delete('/campaigns/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteCampaign(req, res)));
+router.get('/enterprises/:enterpriseId/campaigns', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listCampaigns(req, res)));
 
 // ─── Medical Record routes ───────────────────────────────────
 router.get('/medical-records/stats', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getStats(req, res)));

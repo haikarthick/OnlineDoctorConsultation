@@ -7,7 +7,6 @@
  * Enable features as you scale by setting the corresponding environment variable to 'true'.
  * 
  * Environment Variables:
- *   FEATURE_REDIS_CACHE=true        → Use real Redis instead of in-memory mock
  *   FEATURE_PAYMENTS=true           → Enable Stripe payment processing
  *   FEATURE_EMAIL_NOTIFICATIONS=true → Enable email sending (SendGrid/SES)
  *   FEATURE_FILE_STORAGE=true       → Enable S3/cloud file uploads
@@ -24,7 +23,6 @@ export interface FeatureFlags {
   // auth, consultations, users, medical records → always enabled
 
   // --- Optional features (OFF by default for zero-cost go-live) ---
-  redisCache: boolean;
   payments: boolean;
   emailNotifications: boolean;
   fileStorage: boolean;
@@ -43,7 +41,6 @@ function envBool(key: string, defaultValue: boolean = false): boolean {
 }
 
 export const featureFlags: FeatureFlags = {
-  redisCache: envBool('FEATURE_REDIS_CACHE'),
   payments: envBool('FEATURE_PAYMENTS'),
   emailNotifications: envBool('FEATURE_EMAIL_NOTIFICATIONS'),
   fileStorage: envBool('FEATURE_FILE_STORAGE'),

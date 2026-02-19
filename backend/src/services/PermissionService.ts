@@ -52,6 +52,17 @@ export const PERMISSION_CATEGORIES = {
       'medical_record_create',
     ]
   },
+  enterprise: {
+    label: 'Enterprise Management',
+    permissions: [
+      'enterprise_manage',
+      'enterprise_groups',
+      'enterprise_locations',
+      'enterprise_movements',
+      'enterprise_campaigns',
+      'enterprise_members',
+    ]
+  },
   dashboard_widgets: {
     label: 'Dashboard Widgets',
     permissions: [
@@ -90,6 +101,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
     'animals', 'medical_records', 'video_consultation',
     'settings', 'write_review',
+    // Enterprise (basic access)
+    'enterprise_manage',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'review_create', 'animal_manage',
@@ -101,6 +114,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
     'animals', 'video_consultation', 'settings',
+    // Enterprise
+    'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
+    'enterprise_movements', 'enterprise_campaigns', 'enterprise_members',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'animal_manage',
@@ -114,6 +130,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Admin pages
     'admin_dashboard', 'admin_users', 'admin_consultations', 'admin_payments',
     'admin_reviews', 'admin_settings', 'admin_audit', 'admin_permissions', 'admin_medical_records',
+    // Enterprise (full access)
+    'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
+    'enterprise_movements', 'enterprise_campaigns', 'enterprise_members',
     // Actions
     'booking_confirm', 'booking_cancel', 'review_moderate',
     // Dashboard widgets
@@ -159,6 +178,13 @@ export const PERMISSION_LABELS: Record<string, string> = {
   animal_manage: 'Manage Animals',
   schedule_manage: 'Manage Schedule',
   medical_record_create: 'Create Medical Records',
+  // Enterprise Management
+  enterprise_manage: 'Enterprise Management',
+  enterprise_groups: 'Animal Groups',
+  enterprise_locations: 'Location Management',
+  enterprise_movements: 'Movement Log',
+  enterprise_campaigns: 'Treatment Campaigns',
+  enterprise_members: 'Enterprise Members',
   // Dashboard widgets
   dashboard_stats: 'Dashboard Stats Cards',
   dashboard_quick_actions: 'Dashboard Quick Actions',
