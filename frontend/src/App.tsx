@@ -132,12 +132,12 @@ function AppRoutes() {
       } />
       <Route path="/login" element={
         <PublicOnlyRoute>
-          <Login onSwitchToRegister={() => navigate('/register')} />
+          <Login onSwitchToRegister={() => navigate('/register')} onGoHome={() => navigate('/')} />
         </PublicOnlyRoute>
       } />
       <Route path="/register" element={
         <PublicOnlyRoute>
-          <Register onSwitchToLogin={() => navigate('/login')} />
+          <Register onSwitchToLogin={() => navigate('/login')} onGoHome={() => navigate('/')} />
         </PublicOnlyRoute>
       } />
 

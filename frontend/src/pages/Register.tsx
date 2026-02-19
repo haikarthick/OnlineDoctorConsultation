@@ -4,9 +4,10 @@ import './Auth.css'
 
 interface RegisterProps {
   onSwitchToLogin: () => void
+  onGoHome?: () => void
 }
 
-export default function Register({ onSwitchToLogin }: RegisterProps) {
+export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const { register } = useAuth()
   const [formData, setFormData] = useState({
     firstName: '',
@@ -99,6 +100,10 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
 
         {/* Right: Registration form */}
         <div className="register-form-panel">
+          <div className="register-form-topbar">
+            {onGoHome && <button className="back-home-btn" onClick={onGoHome} title="Back to Home">← Home</button>}
+            <span className="register-topbar-login">Already a member? <button className="link-btn" onClick={onSwitchToLogin}>Sign in</button></span>
+          </div>
           <div className="register-form-header">
             <h1>Create your account</h1>
             <p>Get started in under 2 minutes</p>
@@ -172,8 +177,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
           </form>
 
           <div className="register-footer">
-            <span>Already have an account?</span>
-            <button className="link-btn" onClick={onSwitchToLogin}>Sign in</button>
+            <span>By creating an account you agree to our Terms of Service</span>
           </div>
         </div>
       </div>

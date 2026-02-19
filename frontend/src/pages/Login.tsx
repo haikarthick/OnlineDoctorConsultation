@@ -4,9 +4,10 @@ import './Auth.css'
 
 interface LoginProps {
   onSwitchToRegister: () => void
+  onGoHome?: () => void
 }
 
-export default function Login({ onSwitchToRegister }: LoginProps) {
+export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
   const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,72 +30,81 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <div className="auth-card">
-          <h1>🔐 Login</h1>
-          <p className="subtitle">Welcome back to Veterinary Consultation</p>
-
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-group">
-              <label>Email Address</label>
-              <input
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+    <div className="auth-page login-page">
+      <div className="login-wrapper">
+        {/* Left brand panel */}
+        <div className="login-brand">
+          <div className="login-brand-inner">
+            <div className="login-logo">🏥</div>
+            <h2>VetCare</h2>
+            <p className="login-tagline">Welcome back</p>
+            <div className="login-features">
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>24/7 Online Consultations</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>Licensed Veterinarians</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>Quick Response Time</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>Enterprise-Grade Security</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>Complete Health Records</span></div>
             </div>
-
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            <div className="login-trust">
+              <span>Trusted by <strong>3,000+</strong> enterprises worldwide</span>
             </div>
-
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-
-          {message && (
-            <div className={`message ${message.includes('✓') ? 'success' : 'error'}`}>
-              {message}
-            </div>
-          )}
-
-          <div className="auth-divider">Don't have an account?</div>
-
-          <button className="btn btn-secondary" onClick={onSwitchToRegister}>
-            Create Account
-          </button>
+          </div>
         </div>
 
-        <div className="auth-info">
-          <h2>Welcome to VetCare</h2>
-          <p>Connect with experienced veterinary doctors for professional consultations</p>
-          <div className="features-list">
-            <div className="feature">
-              <span className="icon">✓</span>
-              <span>24/7 Online Consultations</span>
+        {/* Right form panel */}
+        <div className="login-form-panel">
+          <div className="login-topbar">
+            {onGoHome && <button className="back-home-btn" onClick={onGoHome} title="Back to Home">← Home</button>}
+            <span className="login-topbar-register">New here? <button className="link-btn" onClick={onSwitchToRegister}>Create account</button></span>
+          </div>
+
+          <div className="login-form-center">
+            <div className="login-form-header">
+              <h1>Sign in to your account</h1>
+              <p>Enter your credentials to continue</p>
             </div>
-            <div className="feature">
-              <span className="icon">✓</span>
-              <span>Licensed Veterinarians</span>
-            </div>
-            <div className="feature">
-              <span className="icon">✓</span>
-              <span>Quick Response Time</span>
-            </div>
-            <div className="feature">
-              <span className="icon">✓</span>
-              <span>Affordable Services</span>
+
+            {message && (
+              <div className={`message ${message.includes('✓') ? 'success' : 'error'}`}>
+                {message}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="login-form">
+              <div className="form-group">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  placeholder="you@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary login-submit" disabled={loading}>
+                {loading ? (
+                  <span className="btn-loading"><span className="spinner" /> Signing in...</span>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
+            </form>
+
+            <div className="login-footer">
+              <span>Don't have an account?</span>
+              <button className="link-btn" onClick={onSwitchToRegister}>Create one free</button>
             </div>
           </div>
         </div>
