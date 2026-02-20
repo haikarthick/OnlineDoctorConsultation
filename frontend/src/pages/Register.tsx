@@ -110,66 +110,71 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
           </div>
 
           {message && (
-            <div className={`message ${message.includes('✓') ? 'success' : 'error'}`}>
+            <div
+              className={`message ${message.includes('✓') ? 'success' : 'error'}`}
+              role="status"
+              aria-live="polite"
+            >
               {message}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="register-form">
+          <form onSubmit={handleSubmit} className="register-form" aria-label="Create account form">
             {/* Name row */}
             <div className="form-row">
               <div className="form-group">
-                <label>First Name</label>
-                <input type="text" name="firstName" placeholder="John" value={formData.firstName} onChange={handleChange} required />
+                <label htmlFor="reg-firstName">First Name</label>
+                <input id="reg-firstName" type="text" name="firstName" placeholder="John" value={formData.firstName} onChange={handleChange} required autoComplete="given-name" aria-required="true" />
               </div>
               <div className="form-group">
-                <label>Last Name</label>
-                <input type="text" name="lastName" placeholder="Doe" value={formData.lastName} onChange={handleChange} required />
+                <label htmlFor="reg-lastName">Last Name</label>
+                <input id="reg-lastName" type="text" name="lastName" placeholder="Doe" value={formData.lastName} onChange={handleChange} required autoComplete="family-name" aria-required="true" />
               </div>
             </div>
 
             {/* Email + Phone row */}
             <div className="form-row">
               <div className="form-group">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="you@email.com" value={formData.email} onChange={handleChange} required />
+                <label htmlFor="reg-email">Email</label>
+                <input id="reg-email" type="email" name="email" placeholder="you@email.com" value={formData.email} onChange={handleChange} required autoComplete="email" aria-required="true" />
               </div>
               <div className="form-group">
-                <label>Phone</label>
-                <input type="tel" name="phone" placeholder="+1 (555) 000-0000" value={formData.phone} onChange={handleChange} required />
+                <label htmlFor="reg-phone">Phone</label>
+                <input id="reg-phone" type="tel" name="phone" placeholder="+1 (555) 000-0000" value={formData.phone} onChange={handleChange} required autoComplete="tel" aria-required="true" />
               </div>
             </div>
 
             {/* Role selector cards */}
-            <div className="form-group">
-              <label>I am a...</label>
-              <div className="role-selector">
+            <fieldset className="form-group" style={{ border: 'none', margin: 0, padding: 0 }}>
+              <legend style={{ fontWeight: 600, marginBottom: '8px' }}>I am a...</legend>
+              <div className="role-selector" role="radiogroup" aria-label="Select your role">
                 {roleOptions.map(opt => (
                   <label key={opt.value} className={`role-option ${formData.role === opt.value ? 'selected' : ''}`}>
-                    <input type="radio" name="role" value={opt.value} checked={formData.role === opt.value} onChange={handleChange} />
-                    <span className="role-icon">{opt.icon}</span>
+                    <input type="radio" name="role" value={opt.value} checked={formData.role === opt.value} onChange={handleChange} aria-describedby={`role-desc-${opt.value}`} />
+                    <span className="role-icon" aria-hidden="true">{opt.icon}</span>
                     <span className="role-label">{opt.label}</span>
-                    <span className="role-desc">{opt.desc}</span>
+                    <span className="role-desc" id={`role-desc-${opt.value}`}>{opt.desc}</span>
                   </label>
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {/* Password row */}
             <div className="form-row">
               <div className="form-group">
-                <label>Password</label>
-                <input type="password" name="password" placeholder="Min 6 characters" value={formData.password} onChange={handleChange} required />
+                <label htmlFor="reg-password">Password</label>
+                <input id="reg-password" type="password" name="password" placeholder="Min 6 characters" value={formData.password} onChange={handleChange} required autoComplete="new-password" aria-required="true" aria-describedby="password-hint" />
+                <span id="password-hint" className="sr-only">Must be at least 6 characters</span>
               </div>
               <div className="form-group">
-                <label>Confirm Password</label>
-                <input type="password" name="confirmPassword" placeholder="Re-enter password" value={formData.confirmPassword} onChange={handleChange} required />
+                <label htmlFor="reg-confirmPassword">Confirm Password</label>
+                <input id="reg-confirmPassword" type="password" name="confirmPassword" placeholder="Re-enter password" value={formData.confirmPassword} onChange={handleChange} required autoComplete="new-password" aria-required="true" />
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary register-submit" disabled={loading}>
+            <button type="submit" className="btn btn-primary register-submit" disabled={loading} aria-busy={loading}>
               {loading ? (
-                <span className="btn-loading"><span className="spinner" /> Creating Account...</span>
+                <span className="btn-loading"><span className="spinner" aria-hidden="true" /> Creating Account...</span>
               ) : (
                 'Create Account'
               )}

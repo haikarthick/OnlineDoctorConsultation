@@ -1,4 +1,33 @@
 /* Layout Styles */
+
+/* Skip navigation link – visible only on :focus for keyboard users */
+.skip-to-main {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 10000;
+  background: #667eea;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 0 0 8px 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: top 0.2s ease;
+}
+.skip-to-main:focus {
+  top: 0;
+  outline: 3px solid #764ba2;
+  outline-offset: 2px;
+}
+
+/* Global focus-visible outline for keyboard navigation */
+*:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+}
+
 .layout-container {
   display: flex;
   width: 100%;

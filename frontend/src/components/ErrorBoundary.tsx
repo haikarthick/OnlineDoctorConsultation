@@ -34,16 +34,20 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '400px',
-          padding: '40px',
-          textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '64px', marginBottom: '20px' }}>⚠️</div>
+        <div
+          role="alert"
+          aria-live="assertive"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '400px',
+            padding: '40px',
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ fontSize: '64px', marginBottom: '20px' }} aria-hidden="true">⚠️</div>
           <h2 style={{ color: '#1a1a1a', marginBottom: '12px' }}>Something went wrong</h2>
           <p style={{ color: '#666', marginBottom: '24px', maxWidth: '500px' }}>
             An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.

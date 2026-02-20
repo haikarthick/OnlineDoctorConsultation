@@ -350,34 +350,46 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
   const isActive = (path: string) => currentPath === path || (path !== '/dashboard' && path !== '/settings' && currentPath.startsWith(path + '/'))
 
+  /** Close mobile menu on Escape key */
+  const handleOverlayKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') setIsMobileMenuOpen(false)
+  }
+
   return (
     <>
       {/* Mobile Header */}
-      <div className="nav-mobile-header">
+      <div className="nav-mobile-header" role="banner">
         <div className="nav-brand">
-          <span className="nav-logo">🏥</span>
+          <span className="nav-logo" aria-hidden="true">🏥</span>
           <span className="nav-title">VetCare</span>
         </div>
         <button 
           className="nav-mobile-toggle"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="nav-sidebar"
+          aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
         >
           {isMobileMenuOpen ? '✕' : '☰'}
         </button>
       </div>
 
       {/* Sidebar Navigation */}
-      <nav className={`nav-sidebar ${isMobileMenuOpen ? 'nav-sidebar-open' : ''}`}>
+      <nav
+        id="nav-sidebar"
+        className={`nav-sidebar ${isMobileMenuOpen ? 'nav-sidebar-open' : ''}`}
+        aria-label="Main navigation"
+      >
         <div className="nav-header">
           <div className="nav-brand-desktop">
-            <span className="nav-logo">🏥</span>
+            <span className="nav-logo" aria-hidden="true">🏥</span>
             <span className="nav-title">VetCare</span>
           </div>
         </div>
 
         {/* User Info */}
-        <div className="nav-user-section">
-          <div className="nav-user-avatar">
+        <div className="nav-user-section" aria-label="User profile" role="region">
+          <div className="nav-user-avatar" aria-hidden="true">
             {user?.firstName?.charAt(0).toUpperCase() || 'U'}
           </div>
           <div className="nav-user-info">
@@ -387,16 +399,18 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
         </div>
 
         {/* Menu Items */}
-        <ul className="nav-menu">
+        <ul className="nav-menu" role="menubar" aria-label="Navigation menu">
           {filteredMenuItems.map((item) => (
-            <li key={item.id} className="nav-menu-item">
+            <li key={item.id} className="nav-menu-item" role="none">
               <button
+                role="menuitem"
                 className={`nav-menu-link ${isActive(item.path) ? 'nav-menu-active' : ''}`}
                 onClick={() => handleMenuClick(item.path)}
+                aria-current={isActive(item.path) ? 'page' : undefined}
               >
-                <span className="nav-menu-icon">{item.icon}</span>
+                <span className="nav-menu-icon" aria-hidden="true">{item.icon}</span>
                 <span className="nav-menu-label">{item.label}</span>
-                {item.badge && <span className="nav-menu-badge">{item.badge}</span>}
+                {item.badge && <span className="nav-menu-badge" aria-label={`${item.badge} notifications`}>{item.badge}</span>}
               </button>
             </li>
           ))}
@@ -407,8 +421,9 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
           <button 
             className="nav-logout-btn"
             onClick={handleLogout}
+            aria-label="Log out of your account"
           >
-            <span className="nav-menu-icon">🚪</span>
+            <span className="nav-menu-icon" aria-hidden="true">🚪</span>
             <span className="nav-menu-label">Logout</span>
           </button>
         </div>
@@ -419,6 +434,9 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
         <div 
           className="nav-overlay"
           onClick={() => setIsMobileMenuOpen(false)}
+          onKeyDown={handleOverlayKeyDown}
+          role="presentation"
+          aria-hidden="true"
         />
       )}
     </>

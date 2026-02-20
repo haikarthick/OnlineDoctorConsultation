@@ -70,12 +70,13 @@ const GeospatialAnalytics = lazy(() => import('./pages/GeospatialAnalytics'))
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-      <div className="spinner" style={{
+    <div role="status" aria-label="Loading page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+      <div className="spinner" aria-hidden="true" style={{
         width: 40, height: 40, border: '4px solid #e0e0e0',
         borderTop: '4px solid #2e7d32', borderRadius: '50%',
         animation: 'spin 0.8s linear infinite'
       }} />
+      <span className="sr-only">Loading…</span>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )

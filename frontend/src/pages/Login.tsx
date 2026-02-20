@@ -65,37 +65,47 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
             </div>
 
             {message && (
-              <div className={`message ${message.includes('✓') ? 'success' : 'error'}`}>
+              <div
+                className={`message ${message.includes('✓') ? 'success' : 'error'}`}
+                role="status"
+                aria-live="polite"
+              >
                 {message}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="login-form">
+            <form onSubmit={handleSubmit} className="login-form" aria-label="Sign in form">
               <div className="form-group">
-                <label>Email Address</label>
+                <label htmlFor="login-email">Email Address</label>
                 <input
+                  id="login-email"
                   type="email"
                   placeholder="you@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
+                  aria-required="true"
                 />
               </div>
 
               <div className="form-group">
-                <label>Password</label>
+                <label htmlFor="login-password">Password</label>
                 <input
+                  id="login-password"
                   type="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
+                  aria-required="true"
                 />
               </div>
 
-              <button type="submit" className="btn btn-primary login-submit" disabled={loading}>
+              <button type="submit" className="btn btn-primary login-submit" disabled={loading} aria-busy={loading}>
                 {loading ? (
-                  <span className="btn-loading"><span className="spinner" /> Signing in...</span>
+                  <span className="btn-loading"><span className="spinner" aria-hidden="true" /> Signing in...</span>
                 ) : (
                   'Sign In'
                 )}
