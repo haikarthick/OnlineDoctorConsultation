@@ -25,8 +25,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
       const result = await apiService.getAdminDashboard()
       setStats(result.data)
     } catch (err: any) {
-      console.error('Admin dashboard error:', err)
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load dashboard data')
+setError(err?.response?.data?.error?.message || err?.message || 'Failed to load dashboard data')
     } finally {
       setLoading(false)
     }

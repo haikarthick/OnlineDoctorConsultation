@@ -37,8 +37,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       const result = await apiService.adminListUsers({ search, role: roleFilter || undefined })
       setUsers(result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err) {
-      console.error('Failed to load users:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }
@@ -49,8 +48,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       await apiService.adminToggleUserStatus(userId, !users.find(u => u.id === userId)?.isActive)
       setUsers(users.map(u => u.id === userId ? { ...u, isActive: !u.isActive } : u))
     } catch (err) {
-      console.error('Toggle error:', err)
-    } finally {
+} finally {
       setProcessing(null)
     }
   }
@@ -63,8 +61,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setUsers(users.map(u => u.id === showRoleModal.id ? { ...u, role: newRole } : u))
       setShowRoleModal(null)
     } catch (err) {
-      console.error('Role change error:', err)
-    } finally {
+} finally {
       setProcessing(null)
     }
   }

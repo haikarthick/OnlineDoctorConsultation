@@ -79,8 +79,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       setIsMuted(false)
       return // success
     } catch (err: any) {
-      console.warn('Video+Audio failed, trying audio-only:', err.message)
-    }
+}
 
     // Attempt 2: Audio only (camera might be in use by another tab)
     try {
@@ -92,8 +91,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       setCameraError('Camera is unavailable (may be in use by another tab). Audio-only mode enabled.')
       return
     } catch (err: any) {
-      console.warn('Audio-only also failed:', err.message)
-    }
+}
 
     // Attempt 3: No media at all — still allow chat
     setMediaMode('none')
@@ -318,8 +316,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       if (result.data) setSession(result.data)
       stopLocalStream()
     } catch (err: any) {
-      console.error('End session error:', err)
-      const msg = err?.response?.data?.error?.message
+const msg = err?.response?.data?.error?.message
         || err?.response?.data?.message
         || err?.message
         || 'Failed to end session'
@@ -348,8 +345,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       setMessages(msgs)
       if (msgs.length > 0) setCachedMessages(msgs)
     } catch (err) {
-      console.warn('[VideoConsultation] loadMessages failed:', err)
-      // On first failure, retry once after a short delay
+// On first failure, retry once after a short delay
       if (retryCount < 2 && mountedRef.current) {
         setTimeout(() => loadMessages(sessionId, retryCount + 1), 1000)
       }
@@ -379,8 +375,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
         })
       }
     } catch (err: any) {
-      console.error('Send message error:', err)
-      setNewMessage(messageText) // restore message on failure
+setNewMessage(messageText) // restore message on failure
       const msg = err?.response?.data?.error?.message
         || err?.response?.data?.message
         || err?.message
@@ -425,8 +420,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
           apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => {})
         }
       } catch (err) {
-        console.error('Failed to start recording:', err)
-        setError('Failed to start recording — your browser may not support MediaRecorder')
+setError('Failed to start recording — your browser may not support MediaRecorder')
       }
     } else {
       // Stop recording
@@ -531,8 +525,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
         }
         setIsScreenSharing(true)
       } catch (err) {
-        console.error('Screen share error:', err)
-      }
+}
     }
   }
 

@@ -25,8 +25,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
       const result = await apiService.listVets({ limit: 50 })
       setVets(result.data?.vets || result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err: any) {
-      console.error('Failed to load vets:', err)
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load veterinarians')
+setError(err?.response?.data?.error?.message || err?.message || 'Failed to load veterinarians')
     } finally {
       setLoading(false)
     }

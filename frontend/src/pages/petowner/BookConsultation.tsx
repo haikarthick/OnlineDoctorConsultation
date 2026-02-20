@@ -55,8 +55,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         }
       }
     } catch (err) {
-      console.error('Failed to load data:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }
@@ -68,8 +67,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       const result = await apiService.getVetAvailability(selectedVet.userId, date)
       setAvailableSlots(result.data?.slots || [])
     } catch (err) {
-      console.error('Failed to load availability:', err)
-      // Generate sample slots for demo
+// Generate sample slots for demo
       const demoSlots: TimeSlot[] = []
       const now = new Date()
       const isToday = date === now.toISOString().split('T')[0]

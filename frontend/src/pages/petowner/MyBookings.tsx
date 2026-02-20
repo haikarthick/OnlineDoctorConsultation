@@ -65,8 +65,7 @@ const MyBookings: React.FC<MyBookingsProps> = ({ onNavigate }) => {
       const result = await apiService.listBookings(params)
       setBookings(result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err) {
-      console.error('Failed to load bookings:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }
@@ -78,8 +77,7 @@ const MyBookings: React.FC<MyBookingsProps> = ({ onNavigate }) => {
       setCancelModal({ show: false, bookingId: '', reason: '' })
       loadBookings()
     } catch (err: any) {
-      console.error('Failed to cancel booking:', err)
-      setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to cancel booking')
+setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to cancel booking')
     }
   }
 
@@ -235,8 +233,7 @@ const MyBookings: React.FC<MyBookingsProps> = ({ onNavigate }) => {
                           onNavigate(`/video-consultation/${res.data.id}`)
                         }
                       } catch (err: any) {
-                        console.error('Failed to start consultation:', err)
-                      }
+}
                     }}
                   >
                     📹 Join Video Call

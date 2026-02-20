@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
@@ -54,7 +54,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
 
   const conId = consultationId || window.location.pathname.split('/').pop() || ''
 
-  // ─── Message cache helpers (sessionStorage) ────────────────
+  // --- Message cache helpers (sessionStorage) ----------------
   const cacheKey = `chat_messages_${conId}`
   const getCachedMessages = (): ChatMessage[] => {
     try {
@@ -66,7 +66,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     try { sessionStorage.setItem(cacheKey, JSON.stringify(msgs)) } catch { /* quota */ }
   }
 
-  // ─── Camera / Microphone ──────────────────────────────────
+  // --- Camera / Microphone ----------------------------------
   const startLocalStream = useCallback(async () => {
     setCameraError('')
     // Attempt 1: Video + Audio
@@ -83,8 +83,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       setIsMuted(false)
       return
     } catch (err: any) {
-      console.warn('Video+Audio failed:', err.message)
-    }
+}
     // Attempt 2: Audio only
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -92,11 +91,10 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       setMediaMode('audio-only')
       setIsCameraOff(true)
       setIsMuted(false)
-      setCameraError('Camera unavailable — audio-only mode.')
+      setCameraError('Camera unavailable � audio-only mode.')
       return
     } catch (err: any) {
-      console.warn('Audio also failed:', err.message)
-    }
+}
     // Attempt 3: No media
     setMediaMode('none')
     setIsCameraOff(true)
@@ -117,7 +115,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
   }, [])
 
-  // ─── Lifecycle ────────────────────────────────────────────
+  // --- Lifecycle --------------------------------------------
   // Restore cached messages immediately on mount
   useEffect(() => {
     const cached = getCachedMessages()
@@ -161,7 +159,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     }
   }, [isCameraOff, mediaMode])
 
-  // ─── Room Initialization ─────────────────────────────────
+  // --- Room Initialization ---------------------------------
   const initRoom = async () => {
     try {
       setLoading(true)
@@ -175,7 +173,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       } catch { /* no existing session */ }
 
       if (existingSession) {
-        // Skip ended sessions — allow creating a new one
+        // Skip ended sessions � allow creating a new one
         if (existingSession.status === 'ended') {
           setSession(existingSession)
           loadMessages(existingSession.id)
@@ -191,11 +189,11 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         } else if (existingSession.status === 'waiting') {
           // Start polling to detect when patient starts/joins
           startSessionPolling(existingSession.id)
-          // Also start message polling — patient might chat while waiting
+          // Also start message polling � patient might chat while waiting
           startMessagePolling(existingSession.id)
         }
       } else {
-        // No session exists — check consultation status before creating one
+        // No session exists � check consultation status before creating one
         try {
           const consultRes = await apiService.getConsultation(conId)
           const consult = consultRes.data
@@ -247,7 +245,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     } catch { /* ignore */ }
   }
 
-  // ─── Session Polling ──────────────────────────────────────
+  // --- Session Polling --------------------------------------
   const startSessionPolling = (sessionId: string) => {
     if (sessionPollRef.current) clearInterval(sessionPollRef.current)
     sessionPollRef.current = setInterval(async () => {
@@ -272,7 +270,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         try {
           const res2 = await apiService.getVideoSessionByConsultation(conId)
           if (res2.data && res2.data.id !== sessionId) {
-            // A different session was created — switch to that one
+            // A different session was created � switch to that one
             if (sessionPollRef.current) { clearInterval(sessionPollRef.current); sessionPollRef.current = null }
             setSession(res2.data)
             if (res2.data.status === 'active') {
@@ -289,7 +287,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     }, 3000) // Poll every 3 seconds for faster detection
   }
 
-  // ─── Call Controls ────────────────────────────────────────
+  // --- Call Controls ----------------------------------------
   const handleStartCall = async () => {
     if (!session) return
     try {
@@ -331,7 +329,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     }
   }
 
-  // ─── Media Controls ───────────────────────────────────────
+  // --- Media Controls ---------------------------------------
   const toggleMute = () => {
     if (localStreamRef.current) {
       localStreamRef.current.getAudioTracks().forEach(t => { t.enabled = isMuted })
@@ -394,8 +392,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         }
         setIsScreenSharing(true)
       } catch (err) {
-        console.error('Screen share error:', err)
-      }
+}
     }
   }
 
@@ -419,7 +416,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         recorder.start(1000)
         mediaRecorderRef.current = recorder
         setIsRecording(true)
-        if (session) apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => {})
+        if (session) apiService.sendVideoMessage(session.id, '?? Recording started').catch(() => {})
       } catch {
         setError('Failed to start recording')
       }
@@ -429,11 +426,11 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         mediaRecorderRef.current = null
       }
       setIsRecording(false)
-      if (session) apiService.sendVideoMessage(session.id, '⏹️ Recording stopped').catch(() => {})
+      if (session) apiService.sendVideoMessage(session.id, '?? Recording stopped').catch(() => {})
     }
   }
 
-  // ─── Chat / Notes / Timer ─────────────────────────────────
+  // --- Chat / Notes / Timer ---------------------------------
   const startTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(() => setCallDuration(p => p + 1), 1000)
@@ -453,8 +450,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       setMessages(msgs)
       if (msgs.length > 0) setCachedMessages(msgs)
     } catch (err) {
-      console.warn('[ConsultationRoom] loadMessages failed:', err)
-      if (retryCount < 2 && mountedRef.current) {
+if (retryCount < 2 && mountedRef.current) {
         setTimeout(() => loadMessages(sessionId, retryCount + 1), 1000)
       }
     }
@@ -475,8 +471,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         })
       }
     } catch (err) {
-      console.error('Send error:', err)
-      setNewMessage(text)
+setNewMessage(text)
     }
   }
 
@@ -491,8 +486,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       setNotesSaved(true)
       setTimeout(() => setNotesSaved(false), 3000)
     } catch (err: any) {
-      console.error('Save notes error:', err)
-      setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?.message || 'Unknown error'))
+setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?.message || 'Unknown error'))
     } finally {
       setSavingNotes(false)
     }
@@ -532,7 +526,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       : `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
   }
 
-  // ─── Loading State ────────────────────────────────────────
+  // --- Loading State ----------------------------------------
   if (loading) {
     return (
       <div className="module-page">
@@ -541,39 +535,39 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     )
   }
 
-  // ─── Session Ended View ───────────────────────────────────
+  // --- Session Ended View -----------------------------------
   if (session?.status === 'ended') {
     const isCompleted = consultationStatus === 'completed'
     return (
       <div className="module-page">
         <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>{isCompleted ? '✅' : '📋'}</div>
+          <div style={{ fontSize: 64, marginBottom: 20 }}>{isCompleted ? '?' : '??'}</div>
           <h1 style={{ marginBottom: 8 }}>{isCompleted ? 'Consultation Completed' : 'Consultation Session Ended'}</h1>
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 8 }}>
             Duration: {formatDuration(session.duration || callDuration)}
           </p>
           {isCompleted && (
             <p style={{ color: '#059669', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-              ✅ This consultation has been marked as completed
+              ? This consultation has been marked as completed
             </p>
           )}
 
           {/* Recording playback */}
           {recordingUrl && (
             <div style={{ marginTop: 20, marginBottom: 16 }}>
-              <p style={{ color: '#059669', fontSize: 14, marginBottom: 12 }}>🎬 Recording available</p>
+              <p style={{ color: '#059669', fontSize: 14, marginBottom: 12 }}>?? Recording available</p>
               <video src={recordingUrl} controls style={{ maxWidth: 500, width: '100%', borderRadius: 8, marginBottom: 12 }} />
               <br />
               <a href={recordingUrl} download={`consultation-${conId}-${new Date().toISOString().slice(0,10)}.webm`}
                 className="btn btn-outline" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                ⬇️ Download Recording
+                ?? Download Recording
               </a>
             </div>
           )}
 
           {/* Notes section */}
           <div style={{ maxWidth: 600, margin: '24px auto', textAlign: 'left' }}>
-            <h3>📝 Consultation Notes</h3>
+            <h3>?? Consultation Notes</h3>
             <div style={{ marginBottom: 12 }}>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>Diagnosis</label>
               <textarea className="form-input" rows={2} placeholder="Enter diagnosis..."
@@ -590,19 +584,19 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
               {!isCompleted && (
                 <>
                   <button className="btn btn-outline" onClick={handleSaveNotes} disabled={savingNotes}>
-                    {savingNotes ? '💾 Saving...' : notesSaved ? '✅ Saved!' : '💾 Save Notes'}
+                    {savingNotes ? '?? Saving...' : notesSaved ? '? Saved!' : '?? Save Notes'}
                   </button>
                   <button className="btn btn-primary" onClick={handleCompleteConsultation}>
-                    ✅ Complete Consultation
+                    ? Complete Consultation
                   </button>
                   <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                    💊 Write Prescription
+                    ?? Write Prescription
                   </button>
                 </>
               )}
               {isCompleted && (
                 <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                  💊 Write Prescription
+                  ?? Write Prescription
                 </button>
               )}
             </div>
@@ -611,7 +605,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
           {/* Chat transcript */}
           {messages.length > 0 && (
             <div style={{ maxWidth: 600, margin: '24px auto', textAlign: 'left' }}>
-              <h3>💬 Chat Transcript ({messages.length} messages)</h3>
+              <h3>?? Chat Transcript ({messages.length} messages)</h3>
               <div style={{ background: '#f9fafb', borderRadius: 8, padding: 16, maxHeight: 300, overflow: 'auto' }}>
                 {messages.map(msg => (
                   <div key={msg.id} style={{ marginBottom: 8, fontSize: 13 }}>
@@ -635,7 +629,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     )
   }
 
-  // ─── Main Consultation Room ───────────────────────────────
+  // --- Main Consultation Room -------------------------------
   return (
     <div className="module-page">
       <div className="page-header">
@@ -643,17 +637,17 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
           <h1>Consultation Room</h1>
           <p className="page-subtitle">
             {session?.status === 'active' ? (
-              <span style={{ color: '#dc2626', fontWeight: 600 }}>🔴 Live — {formatDuration(callDuration)}</span>
+              <span style={{ color: '#dc2626', fontWeight: 600 }}>?? Live � {formatDuration(callDuration)}</span>
             ) : 'Waiting for session to start...'}
           </p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-            💊 Prescription
+            ?? Prescription
           </button>
           {session?.status === 'active' && (
             <button className="btn btn-danger" onClick={handleEndCall} style={{ background: '#dc2626', color: 'white', border: 'none' }}>
-              📞 End Call
+              ?? End Call
             </button>
           )}
         </div>
@@ -661,7 +655,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
 
       {error && (
         <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
-          ⚠️ {error}
+          ?? {error}
           <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }}
             onClick={() => setError('')}>Dismiss</button>
         </div>
@@ -676,19 +670,19 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
               style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : session?.status === 'active' && isScreenSharing ? (
             <div className="video-placeholder">
-              <div className="video-avatar">🖥️</div>
+              <div className="video-avatar">???</div>
               <p>Screen Sharing Active</p>
             </div>
           ) : session?.status === 'active' ? (
             <div className="video-placeholder">
-              <div className="video-avatar">🐾</div>
+              <div className="video-avatar">??</div>
               <p>Patient Connected</p>
-              {mediaMode === 'audio-only' && <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 Audio-only mode</p>}
-              {mediaMode === 'none' && <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 Chat-only mode</p>}
+              {mediaMode === 'audio-only' && <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>?? Audio-only mode</p>}
+              {mediaMode === 'none' && <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>?? Chat-only mode</p>}
             </div>
           ) : (
             <div className="video-placeholder">
-              <div className="video-avatar">🐾</div>
+              <div className="video-avatar">??</div>
               <p>Waiting for patient to join...</p>
               <p style={{ fontSize: 13, color: '#9ca3af', marginTop: 4 }}>
                 {session ? `Room: ${session.roomId}` : 'Creating room...'}
@@ -704,7 +698,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
               color: 'white', padding: '8px 16px', borderRadius: 8, fontSize: 13,
               maxWidth: '80%', textAlign: 'center', zIndex: 10
             }}>
-              {mediaMode === 'audio-only' ? '🎤' : '⚠️'} {cameraError}
+              {mediaMode === 'audio-only' ? '??' : '??'} {cameraError}
             </div>
           )}
 
@@ -713,7 +707,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
             {isCameraOff || mediaMode !== 'video' ? (
               <span style={{ textAlign: 'center', fontSize: 13 }}>
                 {session?.status !== 'active' ? `Dr. ${user?.lastName?.charAt(0) || ''}` :
-                  mediaMode === 'audio-only' ? '🎤 Audio' : mediaMode === 'none' ? '💬 Chat' : '📷 Off'}
+                  mediaMode === 'audio-only' ? '?? Audio' : mediaMode === 'none' ? '?? Chat' : '?? Off'}
               </span>
             ) : (
               <video ref={localVideoRef} autoPlay playsInline muted
@@ -724,29 +718,29 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
           {/* Controls */}
           <div className="video-controls">
             {session?.status === 'waiting' && (
-              <button className="btn btn-success btn-lg" onClick={handleStartCall}>â–¶ Start Call</button>
+              <button className="btn btn-success btn-lg" onClick={handleStartCall}>▶ Start Call</button>
             )}
             {session?.status === 'active' && (
               <>
                 <button className={`video-control-btn ${!isMuted ? 'active' : ''}`}
                   onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}>
-                  {isMuted ? '🔇' : '🎤'}
+                  {isMuted ? '??' : '??'}
                 </button>
                 <button className={`video-control-btn ${!isCameraOff ? 'active' : ''}`}
                   onClick={toggleCamera} title={isCameraOff ? 'Turn on camera' : 'Turn off camera'}>
-                  {isCameraOff ? '📷' : '📹'}
+                  {isCameraOff ? '??' : '??'}
                 </button>
                 <button className={`video-control-btn ${isScreenSharing ? 'active' : ''}`}
                   onClick={toggleScreenShare} title="Share screen">
-                  🖥️
+                  ???
                 </button>
                 <button className={`video-control-btn ${isRecording ? 'recording' : ''}`}
                   onClick={toggleRecording} title={isRecording ? 'Stop Recording' : 'Start Recording'}
                   style={isRecording ? { background: '#dc2626', color: 'white', animation: 'pulse 1.5s infinite' } : {}}>
-                  {isRecording ? '⏹️' : '⏺️'}
+                  {isRecording ? '??' : '??'}
                 </button>
                 <button className="video-control-btn end-call" onClick={handleEndCall} title="End call">
-                  📞
+                  ??
                 </button>
               </>
             )}
@@ -771,7 +765,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
                 className={`tab ${activePanel === tab ? 'active' : ''}`}
                 style={{ flex: 1, border: 'none', padding: '10px', fontSize: 13 }}
                 onClick={() => setActivePanel(tab)}>
-                {tab === 'chat' ? `💬 Chat${messages.length > 0 ? ` (${messages.length})` : ''}` : tab === 'notes' ? '📝 Notes' : '💊 Rx'}
+                {tab === 'chat' ? `?? Chat${messages.length > 0 ? ` (${messages.length})` : ''}` : tab === 'notes' ? '?? Notes' : '?? Rx'}
               </button>
             ))}
           </div>
@@ -800,7 +794,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
                   value={newMessage}
                   onChange={e => setNewMessage(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSendMessage()} />
-                <button className="chat-send-btn" onClick={handleSendMessage}>➤</button>
+                <button className="chat-send-btn" onClick={handleSendMessage}>?</button>
               </div>
             </>
           )}
@@ -820,7 +814,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
                   value={notes} onChange={e => setNotes(e.target.value)} style={{ resize: 'vertical' }} />
               </div>
               <button className="btn btn-primary" onClick={handleSaveNotes} disabled={savingNotes}>
-                {savingNotes ? '💾 Saving...' : notesSaved ? '✅ Saved!' : '💾 Save Notes'}
+                {savingNotes ? '?? Saving...' : notesSaved ? '? Saved!' : '?? Save Notes'}
               </button>
             </div>
           )}
@@ -833,7 +827,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
               </p>
               <button className="btn btn-primary"
                 onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                💊 Open Prescription Writer
+                ?? Open Prescription Writer
               </button>
               <div style={{ marginTop: 12 }}>
                 <h4>Common Prescriptions</h4>

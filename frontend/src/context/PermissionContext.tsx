@@ -143,8 +143,7 @@ export const PermissionProvider: React.FC<{ children: ReactNode }> = ({ children
       const perms = result.data?.permissions || []
       setPermissions(perms)
     } catch (err) {
-      console.error('[RBAC] Failed to load permissions, using empty set:', err)
-      setPermissions([])
+setPermissions([])
     } finally {
       setLoading(false)
     }

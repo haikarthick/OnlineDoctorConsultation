@@ -67,8 +67,7 @@ const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
       const result = await apiService.listBookings()
       setBookings(result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err) {
-      console.error('Failed to load bookings:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }
@@ -79,8 +78,7 @@ const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
       await apiService.confirmBooking(bookingId)
       loadBookings()
     } catch (err) {
-      console.error('Confirm error:', err)
-    } finally {
+} finally {
       setProcessing(null)
     }
   }
@@ -92,8 +90,7 @@ const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
       await apiService.cancelBooking(bookingId, 'Cancelled by doctor')
       loadBookings()
     } catch (err) {
-      console.error('Cancel error:', err)
-    } finally {
+} finally {
       setProcessing(null)
     }
   }
@@ -148,8 +145,7 @@ const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
       const slots = res.data?.slots || res.data?.timeSlots || res.data || []
       setRescheduleSlots(Array.isArray(slots) ? slots : [])
     } catch (err) {
-      console.error('Failed to load slots:', err)
-      setRescheduleSlots([])
+setRescheduleSlots([])
     } finally {
       setRescheduleSlotsLoading(false)
     }

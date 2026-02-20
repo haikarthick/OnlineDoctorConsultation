@@ -28,8 +28,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       const result = await apiService.adminListPayments({ status: statusFilter || undefined })
       setPayments(result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err) {
-      console.error('Failed to load payments:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }
@@ -44,8 +43,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       setRefundReason('')
       loadPayments()
     } catch (err) {
-      console.error('Refund error:', err)
-    } finally {
+} finally {
       setProcessing(false)
     }
   }

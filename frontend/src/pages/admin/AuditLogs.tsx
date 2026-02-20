@@ -25,8 +25,7 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
       const result = await apiService.adminGetAuditLogs({ action: actionFilter || undefined })
       setLogs(result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err) {
-      console.error('Failed to load audit logs:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }

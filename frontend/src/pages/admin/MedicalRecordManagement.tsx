@@ -54,8 +54,7 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
       setRecords(res.data?.records || [])
       setRecordsTotal(res.data?.total || 0)
     } catch (err) {
-      console.error('Failed to load records:', err)
-    } finally { setLoading(false) }
+} finally { setLoading(false) }
   }, [typeFilter, searchQuery])
 
   const loadAuditLogs = useCallback(async () => {
@@ -64,8 +63,7 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
       const res = await apiService.getMedicalAuditLog({ limit: 100 })
       setAuditLogs(res.data?.logs || res.data || [])
     } catch (err) {
-      console.error('Failed to load audit logs:', err)
-    } finally { setLoading(false) }
+} finally { setLoading(false) }
   }, [])
 
   const loadStats = useCallback(async () => {
@@ -74,8 +72,7 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
       const res = await apiService.getMedicalStats()
       setStats(res.data)
     } catch (err) {
-      console.error('Failed to load stats:', err)
-    } finally { setLoading(false) }
+} finally { setLoading(false) }
   }, [])
 
   useEffect(() => {

@@ -27,8 +27,7 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
       const result = await apiService.listVetReviews(user?.id || '')
       setReviews(result.data?.reviews || result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err) {
-      console.error('Failed to load reviews:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }

@@ -34,8 +34,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       const result = await apiService.adminGetSettings()
       setSettings(result.data || [])
     } catch (err) {
-      console.error('Failed to load settings:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }
@@ -47,8 +46,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       setSettings(settings.map(s => s.key === key ? { ...s, value: editValue } : s))
       setEditingKey(null)
     } catch (err) {
-      console.error('Save error:', err)
-    } finally {
+} finally {
       setSaving(false)
     }
   }
@@ -62,8 +60,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       setNewSetting({ key: '', value: '', description: '' })
       setShowAdd(false)
     } catch (err) {
-      console.error('Add error:', err)
-    } finally {
+} finally {
       setSaving(false)
     }
   }
@@ -81,8 +78,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       setTimeFormatSaved(true)
       setTimeout(() => setTimeFormatSaved(false), 3000)
     } catch (err) {
-      console.error('Failed to update time format:', err)
-    } finally {
+} finally {
       setSavingTimeFormat(false)
     }
   }
@@ -98,8 +94,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       setJoinWindowSaved(true)
       setTimeout(() => setJoinWindowSaved(false), 3000)
     } catch (err) {
-      console.error('Failed to update join window:', err)
-    } finally {
+} finally {
       setSavingJoinWindow(false)
     }
   }

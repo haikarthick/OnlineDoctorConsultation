@@ -37,8 +37,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       const result = await apiService.getMySchedules()
       setSchedules(result.data || [])
     } catch (err) {
-      console.error('Failed to load schedules:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }
@@ -57,8 +56,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       resetForm()
       loadSchedules()
     } catch (err) {
-      console.error('Failed to save schedule:', err)
-    } finally {
+} finally {
       setSubmitting(false)
     }
   }
@@ -81,8 +79,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       await apiService.deleteSchedule(id)
       loadSchedules()
     } catch (err) {
-      console.error('Failed to delete:', err)
-    }
+}
   }
 
   const resetForm = () => {

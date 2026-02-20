@@ -25,8 +25,7 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
       const result = await apiService.adminListReviews({ status: statusFilter || undefined })
       setReviews(result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err) {
-      console.error('Failed to load reviews:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }
@@ -39,8 +38,7 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
         r.id === reviewId ? { ...r, status: action === 'approve' ? 'approved' : action === 'hide' ? 'hidden' : 'removed' } : r
       ))
     } catch (err) {
-      console.error('Moderation error:', err)
-    } finally {
+} finally {
       setProcessing(null)
     }
   }

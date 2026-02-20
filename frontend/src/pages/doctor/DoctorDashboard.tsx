@@ -52,8 +52,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ onNavigate }) => {
         pendingCount: pending.length
       })
     } catch (err: any) {
-      console.error('Dashboard load error:', err)
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load dashboard')
+setError(err?.response?.data?.error?.message || err?.message || 'Failed to load dashboard')
     } finally {
       setLoading(false)
     }

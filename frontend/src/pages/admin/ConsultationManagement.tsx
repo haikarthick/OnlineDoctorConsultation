@@ -25,8 +25,7 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavig
       const result = await apiService.adminListConsultations({ status: statusFilter || undefined })
       setConsultations(result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err) {
-      console.error('Failed to load consultations:', err)
-    } finally {
+} finally {
       setLoading(false)
     }
   }
