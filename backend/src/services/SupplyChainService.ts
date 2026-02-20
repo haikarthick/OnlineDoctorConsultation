@@ -15,13 +15,15 @@ class SupplyChainService {
     if (filters.productType) { conds.push(`pb.product_type = $${idx++}`); params.push(filters.productType); }
     if (filters.search) { conds.push(`(pb.batch_number ILIKE $${idx} OR pb.description ILIKE $${idx})`); params.push(`%${filters.search}%`); idx++; }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
+    params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
       `SELECT pb.*, ag.name as group_name
        FROM product_batches pb
        LEFT JOIN animal_groups ag ON ag.id = pb.source_group_id
        WHERE ${conds.join(' AND ')}
        ORDER BY pb.created_at DESC
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`,
+       LIMIT $${idx++} OFFSET $${idx++}`,
       params
     );
     return { items: result.rows, total: result.rowCount };
@@ -75,6 +77,7 @@ class SupplyChainService {
     if (filters.batchId) { conds.push(`te.batch_id = $${idx++}`); params.push(filters.batchId); }
     if (filters.eventType) { conds.push(`te.event_type = $${idx++}`); params.push(filters.eventType); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
     const result = await database.query(
       `SELECT te.*, u.first_name || ' ' || u.last_name as recorded_by_name,
         pb.batch_number, a.name as animal_name
@@ -84,7 +87,7 @@ class SupplyChainService {
        LEFT JOIN animals a ON a.id = te.animal_id
        WHERE ${conds.join(' AND ')}
        ORDER BY te.event_date DESC
-       LIMIT ${filters.limit || 50}`,
+       LIMIT $${idx++}`,
       params
     );
     return { items: result.rows, total: result.rowCount };

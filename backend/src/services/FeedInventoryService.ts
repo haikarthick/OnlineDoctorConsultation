@@ -89,6 +89,8 @@ class FeedInventoryService {
     if (filters.fromDate) { conditions.push(`cl.consumption_date >= $${idx++}`); params.push(filters.fromDate); }
     if (filters.toDate) { conditions.push(`cl.consumption_date <= $${idx++}`); params.push(filters.toDate); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
+    params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
       `SELECT cl.*, fi.feed_name, fi.feed_type, ag.name as group_name,
         u.first_name || ' ' || u.last_name as recorded_by_name
@@ -98,7 +100,7 @@ class FeedInventoryService {
        LEFT JOIN users u ON u.id = cl.recorded_by
        WHERE ${conditions.join(' AND ')}
        ORDER BY cl.consumption_date DESC
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`,
+       LIMIT $${idx++} OFFSET $${idx++}`,
       params
     );
     return { items: result.rows.map((r: any) => this.mapLog(r)) };

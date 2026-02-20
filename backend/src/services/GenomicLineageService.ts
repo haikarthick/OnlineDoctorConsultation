@@ -13,6 +13,8 @@ class GenomicLineageService {
     if (filters.animalId) { conds.push(`gp.animal_id = $${idx++}`); params.push(filters.animalId); }
     if (filters.minInbreeding !== undefined) { conds.push(`gp.inbreeding_coefficient >= $${idx++}`); params.push(+filters.minInbreeding); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
+    params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
       `SELECT gp.*, a.name as animal_name, a.species, a.breed,
         sire.name as sire_name, dam.name as dam_name
@@ -22,7 +24,7 @@ class GenomicLineageService {
        LEFT JOIN animals dam ON dam.id = gp.dam_id
        WHERE ${conds.join(' AND ')}
        ORDER BY gp.created_at DESC
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`,
+       LIMIT $${idx++} OFFSET $${idx++}`,
       params
     );
     return { items: result.rows, total: result.rowCount };

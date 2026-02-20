@@ -43,11 +43,13 @@ class FinancialService {
     if (filters.fromDate) { conditions.push(`fr.transaction_date >= $${idx++}`); params.push(filters.fromDate); }
     if (filters.toDate) { conditions.push(`fr.transaction_date <= $${idx++}`); params.push(filters.toDate); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
+    params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
       `SELECT fr.*, u.first_name || ' ' || u.last_name as recorded_by_name
        FROM financial_records fr LEFT JOIN users u ON u.id = fr.recorded_by
        WHERE ${conditions.join(' AND ')} ORDER BY fr.transaction_date DESC
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`, params
+       LIMIT $${idx++} OFFSET $${idx++}`, params
     );
     return { items: result.rows.map((r: any) => this.mapRow(r)) };
   }

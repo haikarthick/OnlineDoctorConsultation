@@ -15,6 +15,8 @@ class WorkforceService {
     if (filters.priority) { conds.push(`wt.priority = $${idx++}`); params.push(filters.priority); }
     if (filters.taskType) { conds.push(`wt.task_type = $${idx++}`); params.push(filters.taskType); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
+    params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
       `SELECT wt.*, 
         u_assign.first_name || ' ' || u_assign.last_name as assigned_to_name,
@@ -28,7 +30,7 @@ class WorkforceService {
        LEFT JOIN locations l ON l.id = wt.location_id
        WHERE ${conds.join(' AND ')}
        ORDER BY CASE wt.priority WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END, wt.due_date ASC NULLS LAST
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`,
+       LIMIT $${idx++} OFFSET $${idx++}`,
       params
     );
     return { items: result.rows, total: result.rowCount };
@@ -90,6 +92,7 @@ class WorkforceService {
     if (filters.to) { conds.push(`ss.shift_date <= $${idx++}`); params.push(filters.to); }
     if (filters.status) { conds.push(`ss.status = $${idx++}`); params.push(filters.status); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 100, 1), 200));
     const result = await database.query(
       `SELECT ss.*, u.first_name || ' ' || u.last_name as user_name, l.name as location_name
        FROM shift_schedules ss
@@ -97,7 +100,7 @@ class WorkforceService {
        LEFT JOIN locations l ON l.id = ss.location_id
        WHERE ${conds.join(' AND ')}
        ORDER BY ss.shift_date ASC, ss.start_time ASC
-       LIMIT ${filters.limit || 100}`, params
+       LIMIT $${idx++}`, params
     );
     return { items: result.rows, total: result.rowCount };
   }

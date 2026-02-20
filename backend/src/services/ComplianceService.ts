@@ -48,11 +48,13 @@ class ComplianceService {
     if (filters.documentType) { conditions.push(`cd.document_type = $${idx++}`); params.push(filters.documentType); }
     if (filters.status) { conditions.push(`cd.status = $${idx++}`); params.push(filters.status); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
+    params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
       `SELECT cd.*, v.first_name || ' ' || v.last_name as verified_by_name
        FROM compliance_documents cd LEFT JOIN users v ON v.id = cd.verified_by
        WHERE ${conditions.join(' AND ')} ORDER BY cd.created_at DESC
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`, params
+       LIMIT $${idx++} OFFSET $${idx++}`, params
     );
     return { items: result.rows.map((r: any) => this.mapRow(r)) };
   }

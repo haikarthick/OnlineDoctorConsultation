@@ -110,13 +110,14 @@ class ReportBuilderService {
 
     if (filters.reportType) { conds.push(`gr.report_type = $${idx++}`); params.push(filters.reportType); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 30, 1), 200));
     const result = await database.query(
       `SELECT gr.*, u.first_name || ' ' || u.last_name as generated_by_name
        FROM generated_reports gr
        LEFT JOIN users u ON u.id = gr.generated_by
        WHERE ${conds.join(' AND ')}
        ORDER BY gr.generated_at DESC
-       LIMIT ${filters.limit || 30}`, params
+       LIMIT $${idx++}`, params
     );
     return { items: result.rows };
   }

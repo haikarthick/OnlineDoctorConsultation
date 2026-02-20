@@ -14,6 +14,7 @@ class IoTSensorService {
     if (filters.status) { conds.push(`s.status = $${idx++}`); params.push(filters.status); }
     if (filters.locationId) { conds.push(`s.location_id = $${idx++}`); params.push(filters.locationId); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 100, 1), 200));
     const result = await database.query(
       `SELECT s.*, l.name as location_name, a.name as animal_name
        FROM iot_sensors s
@@ -21,7 +22,7 @@ class IoTSensorService {
        LEFT JOIN animals a ON a.id = s.animal_id
        WHERE ${conds.join(' AND ')}
        ORDER BY s.created_at DESC
-       LIMIT ${filters.limit || 100}`,
+       LIMIT $${idx++}`,
       params
     );
     return { items: result.rows, total: result.rowCount };
@@ -110,9 +111,10 @@ class IoTSensorService {
     if (filters.to) { conds.push(`sr.recorded_at <= $${idx++}`); params.push(filters.to); }
     if (filters.anomalyOnly) { conds.push(`sr.is_anomaly = true`); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 200, 1), 500));
     const result = await database.query(
       `SELECT sr.* FROM sensor_readings sr WHERE ${conds.join(' AND ')}
-       ORDER BY sr.recorded_at DESC LIMIT ${filters.limit || 200}`, params
+       ORDER BY sr.recorded_at DESC LIMIT $${idx++}`, params
     );
     return { items: result.rows, total: result.rowCount };
   }

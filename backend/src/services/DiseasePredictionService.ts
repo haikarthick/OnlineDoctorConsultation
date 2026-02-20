@@ -14,6 +14,8 @@ class DiseasePredictionService {
     if (filters.diseaseName) { conds.push(`dp.disease_name ILIKE $${idx++}`); params.push(`%${filters.diseaseName}%`); }
     if (filters.minRisk) { conds.push(`dp.risk_score >= $${idx++}`); params.push(+filters.minRisk); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
+    params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
       `SELECT dp.*, a.name as animal_name, a.species, u.first_name || ' ' || u.last_name as created_by_name
        FROM disease_predictions dp
@@ -21,7 +23,7 @@ class DiseasePredictionService {
        LEFT JOIN users u ON u.id = dp.created_by
        WHERE ${conds.join(' AND ')}
        ORDER BY dp.risk_score DESC, dp.created_at DESC
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`,
+       LIMIT $${idx++} OFFSET $${idx++}`,
       params
     );
     return { items: result.rows, total: result.rowCount };

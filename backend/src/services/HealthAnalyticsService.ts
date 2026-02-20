@@ -14,6 +14,8 @@ class HealthAnalyticsService {
     if (filters.observationType) { conditions.push(`ho.observation_type = $${idx++}`); params.push(filters.observationType); }
     if (filters.isResolved !== undefined) { conditions.push(`ho.is_resolved = $${idx++}`); params.push(filters.isResolved); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
+    params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
       `SELECT ho.*, a.name as animal_name, u.first_name || ' ' || u.last_name as observer_name
        FROM health_observations ho
@@ -21,7 +23,7 @@ class HealthAnalyticsService {
        LEFT JOIN users u ON u.id = ho.observer_id
        WHERE ${conditions.join(' AND ')}
        ORDER BY ho.created_at DESC
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`,
+       LIMIT $${idx++} OFFSET $${idx++}`,
       params
     );
     return { items: result.rows.map((r: any) => this.mapObservation(r)), total: result.rowCount };

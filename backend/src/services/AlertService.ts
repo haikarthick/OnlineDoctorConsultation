@@ -80,11 +80,13 @@ class AlertService {
     if (filters.severity) { conditions.push(`ae.severity = $${idx++}`); params.push(filters.severity); }
     if (filters.alertType) { conditions.push(`ae.alert_type = $${idx++}`); params.push(filters.alertType); }
 
+    params.push(Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200));
+    params.push(Math.max(parseInt(filters.offset) || 0, 0));
     const result = await database.query(
       `SELECT ae.*, ar.name as rule_name FROM alert_events ae
        LEFT JOIN alert_rules ar ON ar.id = ae.rule_id
        WHERE ${conditions.join(' AND ')} ORDER BY ae.created_at DESC
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`, params
+       LIMIT $${idx++} OFFSET $${idx++}`, params
     );
 
     const unreadCount = await database.query(

@@ -83,8 +83,8 @@ class BreedingService {
        LEFT JOIN users t ON t.id = br.technician_id
        WHERE ${conditions.join(' AND ')}
        ORDER BY br.breeding_date DESC
-       LIMIT ${filters.limit || 50} OFFSET ${filters.offset || 0}`,
-      params
+       LIMIT $${idx++} OFFSET $${idx++}`,
+      [...params, Math.min(Math.max(parseInt(filters.limit) || 50, 1), 200), Math.max(parseInt(filters.offset) || 0, 0)]
     );
     return { items: result.rows.map((r: any) => this.mapRow(r)), total: result.rowCount };
   }
