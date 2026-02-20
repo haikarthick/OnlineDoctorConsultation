@@ -22,16 +22,58 @@ app.use(helmet());
 app.use(cors(config.cors));
 app.use(cookieParser());
 
-// Rate limiting — generous limit for real-time polling (chat, session status)
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // limit each IP to 1000 requests per windowMs
+// ─── Rate Limiting (tiered) ──────────────────────────────────
+
+/** Extract user identifier for per-user limiting (falls back to IP) */
+function keyGenerator(req: express.Request): string {
+  const authHeader = req.headers.authorization || ''
+  if (authHeader.startsWith('Bearer ')) {
+    try {
+      // Decode JWT payload without verifying (rate limiter runs before auth)
+      const payload = JSON.parse(Buffer.from(authHeader.split('.')[1], 'base64').toString())
+      if (payload.userId) return `user:${payload.userId}`
+    } catch { /* fall through to IP */ }
+  }
+  return req.ip || req.socket.remoteAddress || 'unknown'
+}
+
+// Strict: auth endpoints (login / register / refresh)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  message: 'Too many authentication attempts. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip || req.socket.remoteAddress || 'unknown',
+})
+
+// Moderate: general API (per-user when authenticated)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
-  legacyHeaders: false
-});
+  legacyHeaders: false,
+  keyGenerator,
+})
 
-app.use('/api/', limiter);
+// Sensitive: admin & payment operations
+const sensitiveLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  message: 'Rate limit reached for sensitive operations. Try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator,
+})
+
+// Apply limiters in order (most specific first)
+app.use(`/api/${config.app.apiVersion}/auth/login`, authLimiter)
+app.use(`/api/${config.app.apiVersion}/auth/register`, authLimiter)
+app.use(`/api/${config.app.apiVersion}/auth/refresh`, authLimiter)
+app.use(`/api/${config.app.apiVersion}/admin`, sensitiveLimiter)
+app.use(`/api/${config.app.apiVersion}/payments`, sensitiveLimiter)
+app.use('/api/', apiLimiter)
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));
