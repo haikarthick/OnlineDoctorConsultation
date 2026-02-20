@@ -1,67 +1,84 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
 import { PermissionProvider, usePermission, ROUTE_PERMISSION_MAP } from './context/PermissionContext'
 import { Layout } from './components/Layout'
+// Eagerly loaded public pages (needed at first paint)
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
-import Consultations from './pages/Consultations'
-import MedicalRecords from './pages/MedicalRecords'
-import Animals from './pages/Animals'
-import Settings from './pages/Settings'
-// Pet Owner Module
-import FindDoctor from './pages/petowner/FindDoctor'
-import BookConsultation from './pages/petowner/BookConsultation'
-import VideoConsultation from './pages/petowner/VideoConsultation'
-import WriteReview from './pages/petowner/WriteReview'
-// Doctor Module
-import ManageSchedule from './pages/doctor/ManageSchedule'
-import ConsultationRoom from './pages/doctor/ConsultationRoom'
-import PrescriptionWriter from './pages/doctor/PrescriptionWriter'
-import Prescriptions from './pages/doctor/Prescriptions'
-import MyReviews from './pages/doctor/MyReviews'
-// Admin Module
-import AdminDashboard from './pages/admin/AdminDashboard'
-import UserManagement from './pages/admin/UserManagement'
-import ConsultationManagement from './pages/admin/ConsultationManagement'
-import PaymentManagement from './pages/admin/PaymentManagement'
-import ReviewModeration from './pages/admin/ReviewModeration'
-import SystemSettings from './pages/admin/SystemSettings'
-import AuditLogs from './pages/admin/AuditLogs'
-import PermissionManagement from './pages/admin/PermissionManagement'
-import MedicalRecordManagement from './pages/admin/MedicalRecordManagement'
-// Enterprise Module
-import EnterpriseManagement from './pages/EnterpriseManagement'
-import AnimalGroups from './pages/AnimalGroups'
-import LocationManagement from './pages/LocationManagement'
-import MovementLog from './pages/MovementLog'
-import TreatmentCampaigns from './pages/TreatmentCampaigns'
-// Advanced Modules
-import HealthAnalytics from './pages/HealthAnalytics'
-import BreedingManager from './pages/BreedingManager'
-import FeedInventory from './pages/FeedInventory'
-import ComplianceDocs from './pages/ComplianceDocs'
-import FinancialAnalytics from './pages/FinancialAnalytics'
-import AlertCenter from './pages/AlertCenter'
-// Innovation Modules
-import DiseasePrediction from './pages/DiseasePrediction'
-import GenomicLineage from './pages/GenomicLineage'
-import IoTSensors from './pages/IoTSensors'
-import SupplyChain from './pages/SupplyChain'
-import Workforce from './pages/Workforce'
-import ReportBuilder from './pages/ReportBuilder'
-// Intelligence Modules
-import AICopilot from './pages/AICopilot'
-import DigitalTwin from './pages/DigitalTwin'
-import Marketplace from './pages/Marketplace'
-import Sustainability from './pages/Sustainability'
-import WellnessPortal from './pages/WellnessPortal'
-import GeospatialAnalytics from './pages/GeospatialAnalytics'
 import './App.css'
 import './styles/modules.css'
+
+// ── Lazy-loaded protected pages ─────────────────────────────
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Consultations = lazy(() => import('./pages/Consultations'))
+const MedicalRecords = lazy(() => import('./pages/MedicalRecords'))
+const Animals = lazy(() => import('./pages/Animals'))
+const Settings = lazy(() => import('./pages/Settings'))
+// Pet Owner Module
+const FindDoctor = lazy(() => import('./pages/petowner/FindDoctor'))
+const BookConsultation = lazy(() => import('./pages/petowner/BookConsultation'))
+const VideoConsultation = lazy(() => import('./pages/petowner/VideoConsultation'))
+const WriteReview = lazy(() => import('./pages/petowner/WriteReview'))
+// Doctor Module
+const ManageSchedule = lazy(() => import('./pages/doctor/ManageSchedule'))
+const ConsultationRoom = lazy(() => import('./pages/doctor/ConsultationRoom'))
+const PrescriptionWriter = lazy(() => import('./pages/doctor/PrescriptionWriter'))
+const Prescriptions = lazy(() => import('./pages/doctor/Prescriptions'))
+const MyReviews = lazy(() => import('./pages/doctor/MyReviews'))
+// Admin Module
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const UserManagement = lazy(() => import('./pages/admin/UserManagement'))
+const ConsultationManagement = lazy(() => import('./pages/admin/ConsultationManagement'))
+const PaymentManagement = lazy(() => import('./pages/admin/PaymentManagement'))
+const ReviewModeration = lazy(() => import('./pages/admin/ReviewModeration'))
+const SystemSettings = lazy(() => import('./pages/admin/SystemSettings'))
+const AuditLogs = lazy(() => import('./pages/admin/AuditLogs'))
+const PermissionManagement = lazy(() => import('./pages/admin/PermissionManagement'))
+const MedicalRecordManagement = lazy(() => import('./pages/admin/MedicalRecordManagement'))
+// Enterprise Module
+const EnterpriseManagement = lazy(() => import('./pages/EnterpriseManagement'))
+const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
+const LocationManagement = lazy(() => import('./pages/LocationManagement'))
+const MovementLog = lazy(() => import('./pages/MovementLog'))
+const TreatmentCampaigns = lazy(() => import('./pages/TreatmentCampaigns'))
+// Advanced Modules
+const HealthAnalytics = lazy(() => import('./pages/HealthAnalytics'))
+const BreedingManager = lazy(() => import('./pages/BreedingManager'))
+const FeedInventory = lazy(() => import('./pages/FeedInventory'))
+const ComplianceDocs = lazy(() => import('./pages/ComplianceDocs'))
+const FinancialAnalytics = lazy(() => import('./pages/FinancialAnalytics'))
+const AlertCenter = lazy(() => import('./pages/AlertCenter'))
+// Innovation Modules
+const DiseasePrediction = lazy(() => import('./pages/DiseasePrediction'))
+const GenomicLineage = lazy(() => import('./pages/GenomicLineage'))
+const IoTSensors = lazy(() => import('./pages/IoTSensors'))
+const SupplyChain = lazy(() => import('./pages/SupplyChain'))
+const Workforce = lazy(() => import('./pages/Workforce'))
+const ReportBuilder = lazy(() => import('./pages/ReportBuilder'))
+// Intelligence Modules
+const AICopilot = lazy(() => import('./pages/AICopilot'))
+const DigitalTwin = lazy(() => import('./pages/DigitalTwin'))
+const Marketplace = lazy(() => import('./pages/Marketplace'))
+const Sustainability = lazy(() => import('./pages/Sustainability'))
+const WellnessPortal = lazy(() => import('./pages/WellnessPortal'))
+const GeospatialAnalytics = lazy(() => import('./pages/GeospatialAnalytics'))
+
+/** Suspense fallback spinner shown while lazy chunks load */
+function PageLoader() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+      <div className="spinner" style={{
+        width: 40, height: 40, border: '4px solid #e0e0e0',
+        borderTop: '4px solid #2e7d32', borderRadius: '50%',
+        animation: 'spin 0.8s linear infinite'
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
+}
 
 /** Wrapper: redirects unauthenticated users to /login */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -123,6 +140,7 @@ function AppRoutes() {
   const navigate = useNavigate()
 
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* Public pages */}
       <Route path="/" element={
@@ -209,6 +227,7 @@ function AppRoutes() {
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   )
 }
 
