@@ -13,7 +13,9 @@
     "test:integration": "jest --testPathPattern=integration",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "migrate": "ts-node --project tsconfig.json src/utils/migrationRunner.ts",
+    "migrate": "ts-node --project tsconfig.json src/utils/migrate.ts",
+    "migrate:status": "ts-node --project tsconfig.json src/utils/migrate.ts --status",
+    "migrate:create": "ts-node --project tsconfig.json src/utils/migrate.ts --create",
     "seed": "ts-node --project tsconfig.json src/utils/seedDatabase.ts"
   },
   "keywords": [
