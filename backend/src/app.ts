@@ -3,12 +3,14 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 import 'express-async-errors';
 
 import config from './config';
 import logger from './utils/logger';
 import { errorHandler, asyncHandler } from './utils/errorHandler';
 import { requestLogger, authMiddleware } from './middleware/auth';
+import { csrfProtection, csrfTokenRoute } from './middleware/csrf';
 import routes from './routes';
 import database from './utils/database';
 import cacheManager from './utils/cacheManager';
@@ -18,6 +20,7 @@ const app: Express = express();
 // Security Middleware
 app.use(helmet());
 app.use(cors(config.cors));
+app.use(cookieParser());
 
 // Rate limiting — generous limit for real-time polling (chat, session status)
 const limiter = rateLimit({
@@ -36,6 +39,12 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Logging
 app.use(requestLogger);
+
+// CSRF token endpoint (must be before csrfProtection middleware)
+app.get(`/api/${config.app.apiVersion}/csrf-token`, csrfTokenRoute);
+
+// CSRF protection for state-changing requests
+app.use(`/api/${config.app.apiVersion}`, csrfProtection);
 
 // Root welcome route (so localhost:3000 doesn't show 404)
 app.get('/', (_req: Request, res: Response) => {
