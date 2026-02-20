@@ -1,8 +1,10 @@
+import http from 'http';
 import app from './app';
 import config from './config';
 import logger from './utils/logger';
 import database from './utils/database';
 import cacheManager from './utils/cacheManager';
+import { initSocketIO } from './utils/socketIO';
 
 const startServer = async () => {
   try {
@@ -17,7 +19,10 @@ const startServer = async () => {
     logger.info('Cache initialized');
 
     // Start server
-    const server = app.listen(config.app.port, () => {
+    const httpServer = http.createServer(app);
+    initSocketIO(httpServer);
+
+    const server = httpServer.listen(config.app.port, () => {
       logger.info(`Server running on port ${config.app.port} in ${config.app.nodeEnv} mode`);
     });
 

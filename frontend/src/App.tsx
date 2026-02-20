@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, usePa
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
 import { PermissionProvider, usePermission, ROUTE_PERMISSION_MAP } from './context/PermissionContext'
+import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
 // Eagerly loaded public pages (needed at first paint)
 import Home from './pages/Home'
@@ -237,7 +238,9 @@ function App() {
       <SettingsProvider>
         <AuthProvider>
           <PermissionProvider>
-            <AppRoutes />
+            <SocketProvider>
+              <AppRoutes />
+            </SocketProvider>
           </PermissionProvider>
         </AuthProvider>
       </SettingsProvider>
