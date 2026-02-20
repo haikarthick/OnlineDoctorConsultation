@@ -1,10 +1,19 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import crypto from 'crypto';
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 // Re-export feature flags so they're accessible from config
 export { featureFlags, isFeatureEnabled, getAllFeatureFlags } from './featureFlags';
+
+// Generate a cryptographically strong fallback JWT secret for development.
+// In production, JWT_SECRET MUST be set via environment variable.
+const jwtFallback = crypto.randomBytes(64).toString('hex');
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  console.error('[FATAL] JWT_SECRET environment variable is required in production.');
+  process.exit(1);
+}
 
 export const config = {
   app: {
@@ -25,8 +34,9 @@ export const config = {
   },
 
   jwt: {
-    secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
-    expiresIn: process.env.JWT_EXPIRES_IN || '24h'
+    secret: process.env.JWT_SECRET || jwtFallback,
+    expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
   },
   cors: {
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
