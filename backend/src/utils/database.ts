@@ -4,6 +4,7 @@ import logger from './logger';
 import * as fs from 'fs';
 import * as path from 'path';
 import PermissionService from '../services/PermissionService';
+import RefreshTokenService from '../services/RefreshTokenService';
 
 class PostgresDatabase {
   private pool: Pool;
@@ -48,6 +49,9 @@ class PostgresDatabase {
       // Ensure RBAC permission table and seed defaults
       await PermissionService.ensureTable();
       await PermissionService.seedDefaults();
+
+      // Ensure refresh tokens table
+      await RefreshTokenService.ensureTable();
     } catch (error: any) {
       logger.error('Failed to connect to PostgreSQL', { error: error.message });
       throw error;

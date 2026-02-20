@@ -29,6 +29,9 @@ const router = Router();
 // ─── Auth routes ─────────────────────────────────────────────
 router.post('/auth/register', validateBody(registerSchema), asyncHandler((req: Request, res: Response) => AuthController.register(req, res)));
 router.post('/auth/login', validateBody(loginSchema), asyncHandler((req: Request, res: Response) => AuthController.login(req, res)));
+router.post('/auth/refresh', asyncHandler((req: Request, res: Response) => AuthController.refreshToken(req, res)));
+router.post('/auth/logout', asyncHandler((req: Request, res: Response) => AuthController.logout(req, res)));
+router.post('/auth/logout-all', authMiddleware, asyncHandler((req: Request, res: Response) => AuthController.logoutAll(req, res)));
 router.get('/auth/profile', authMiddleware, asyncHandler((req: Request, res: Response) => AuthController.getProfile(req, res)));
 
 // ─── Consultation routes ─────────────────────────────────────

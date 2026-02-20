@@ -46,14 +46,34 @@ class ApiService {
     this.client.interceptors.response.use(
       (response: AxiosResponse) => response,
       async (error: AxiosError) => {
-        if (error.response?.status === 401) {
+        const originalConfig = error.config as InternalAxiosRequestConfig & { _authRetry?: boolean; _csrfRetry?: boolean }
+
+        // On 401, try to refresh the token before logging out
+        if (error.response?.status === 401 && originalConfig && !originalConfig._authRetry) {
+          originalConfig._authRetry = true
+          const refreshTk = localStorage.getItem('refreshToken')
+          if (refreshTk) {
+            try {
+              const res = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken: refreshTk }, { withCredentials: true })
+              const { token: newToken, refreshToken: newRefreshToken } = res.data.data
+              localStorage.setItem('authToken', newToken)
+              if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken)
+              if (originalConfig.headers) {
+                originalConfig.headers.Authorization = `Bearer ${newToken}`
+              }
+              return this.client.request(originalConfig)
+            } catch {
+              // Refresh failed — logout
+            }
+          }
           localStorage.removeItem('authToken')
           localStorage.removeItem('authUser')
+          localStorage.removeItem('refreshToken')
           window.location.href = '/'
         }
+
         // If CSRF token expired/missing, fetch a new one and retry once
-        if (error.response?.status === 403 && error.config && !('_csrfRetry' in error.config)) {
-          const originalConfig = error.config as InternalAxiosRequestConfig & { _csrfRetry?: boolean }
+        if (error.response?.status === 403 && originalConfig && !originalConfig._csrfRetry) {
           const data = error.response?.data as any
           if (data?.error?.includes?.('CSRF')) {
             await this.fetchCsrfToken()

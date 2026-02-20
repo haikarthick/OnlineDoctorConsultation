@@ -28,6 +28,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       })
 
@@ -35,6 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (response.ok) {
         const authToken = data.data?.token || data.token
+        const refreshTk = data.data?.refreshToken
         const userData = data.data?.user || {
           email,
           firstName: data.data?.firstName || email.split('@')[0],
@@ -48,12 +50,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsAuthenticated(true)
         localStorage.setItem('authToken', authToken)
         localStorage.setItem('authUser', JSON.stringify(userData))
+        if (refreshTk) localStorage.setItem('refreshToken', refreshTk)
         navigate('/dashboard')
       } else {
         throw new Error(data.error?.message || data.error || 'Login failed')
       }
     } catch (error) {
-      console.error('[AUTH] Login error:', error)
       throw error
     }
   }
@@ -85,22 +87,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsAuthenticated(true)
         localStorage.setItem('authToken', authToken)
         localStorage.setItem('authUser', JSON.stringify(userData))
+        if (result.data?.refreshToken) localStorage.setItem('refreshToken', result.data.refreshToken)
         navigate('/dashboard')
       } else {
         throw new Error(result.error?.message || result.error || 'Registration failed')
       }
     } catch (error) {
-      console.error('[AUTH] Registration error:', error)
       throw error
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    // Revoke refresh token on server
+    const refreshTk = localStorage.getItem('refreshToken')
+    if (refreshTk) {
+      try {
+        await fetch(`${API_BASE}/auth/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ refreshToken: refreshTk }),
+        })
+      } catch { /* silent */ }
+    }
     setUser(null)
     setToken(null)
     setIsAuthenticated(false)
     localStorage.removeItem('authToken')
     localStorage.removeItem('authUser')
+    localStorage.removeItem('refreshToken')
     navigate('/')
   }
 
