@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 import 'express-async-errors';
 
 import config from './config';
@@ -81,6 +82,9 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Logging
 app.use(requestLogger);
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '..', 'uploads'))));
 
 // CSRF token endpoint (must be before csrfProtection middleware)
 app.get(`/api/${config.app.apiVersion}/csrf-token`, csrfTokenRoute);

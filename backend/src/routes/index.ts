@@ -73,6 +73,8 @@ import EnterpriseController from '../controllers/EnterpriseController';
 import Tier2Controller from '../controllers/Tier2Controller';
 import Tier3Controller from '../controllers/Tier3Controller';
 import Tier4Controller from '../controllers/Tier4Controller';
+import { FileController } from '../controllers/FileController';
+import { uploadAny } from '../middleware/upload';
 import AdminService from '../services/AdminService';
 import PermissionService from '../services/PermissionService';
 import { asyncHandler } from '../utils/errorHandler';
@@ -487,5 +489,11 @@ router.get('/health', (_req, res) => {
 router.get('/features', (_req, res) => {
   res.json({ success: true, data: getAllFeatureFlags() });
 });
+
+// ─── File Uploads ────────────────────────────────────────────
+router.post('/files/upload', authMiddleware, uploadAny.single('file'), asyncHandler((req: Request, res: Response) => FileController.upload(req, res)));
+router.post('/files/upload-multiple', authMiddleware, uploadAny.array('files', 10), asyncHandler((req: Request, res: Response) => FileController.uploadMultiple(req, res)));
+router.get('/files', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.list(req, res)));
+router.delete('/files/*', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.remove(req, res)));
 
 export default router;
