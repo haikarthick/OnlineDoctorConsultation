@@ -192,7 +192,7 @@ const HealthAnalytics: React.FC = () => {
                 <div className="mini-chart">
                   {(dashboard.observationTimeline || []).map((w, i) => (
                     <div key={i} className="chart-bar-wrapper">
-                      <div className="chart-bar" style={{ height: `${Math.min(100, (Number(w.count) / Math.max(1, ...dashboard.observationTimeline.map(x => Number(x.count)))) * 100)}%` }}></div>
+                      <div className="chart-bar" style={{ height: `${Math.min(100, (Number(w.count) / Math.max(1, ...(dashboard.observationTimeline || []).map(x => Number(x.count)))) * 100)}%` }}></div>
                       <span className="chart-label">{w.count}</span>
                     </div>
                   ))}
@@ -212,7 +212,7 @@ const HealthAnalytics: React.FC = () => {
                           <td>{o.observationType}</td>
                           <td><span className="badge" style={{ background: SEVERITY_COLORS[o.severity] }}>{o.severity}</span></td>
                           <td>{o.animalName || '–'}</td>
-                          <td>{new Date(o.createdAt).toLocaleDateString()}</td>
+                          <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '–'}</td>
                           <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>Resolve</button>}</td>
                         </tr>
                       ))}
@@ -227,7 +227,7 @@ const HealthAnalytics: React.FC = () => {
                 <div className="mini-chart">
                   {(dashboard.mortalityTrend || []).map((m, i) => (
                     <div key={i} className="chart-bar-wrapper">
-                      <div className="chart-bar danger" style={{ height: `${Math.min(100, (Number(m.deaths) / Math.max(1, ...dashboard.mortalityTrend.map(x => Number(x.deaths)))) * 100)}%` }}></div>
+                      <div className="chart-bar danger" style={{ height: `${Math.min(100, (Number(m.deaths) / Math.max(1, ...(dashboard.mortalityTrend || []).map(x => Number(x.deaths)))) * 100)}%` }}></div>
                       <span className="chart-label">{m.deaths}</span>
                     </div>
                   ))}
@@ -261,7 +261,7 @@ const HealthAnalytics: React.FC = () => {
                         <td><span className="badge" style={{ background: SEVERITY_COLORS[o.severity] }}>{o.severity}</span></td>
                         <td>{o.animalName || '–'}</td>
                         <td>{o.isResolved ? '✅ Resolved' : '⏳ Open'}</td>
-                        <td>{new Date(o.createdAt).toLocaleDateString()}</td>
+                        <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '–'}</td>
                         <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>Resolve</button>}</td>
                       </tr>
                     ))}

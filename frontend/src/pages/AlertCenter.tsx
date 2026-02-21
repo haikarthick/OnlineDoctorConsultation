@@ -211,7 +211,7 @@ const AlertCenter: React.FC = () => {
                       <div className="alert-event-header">
                         <span className="badge" style={{ background: SEVERITY_COLORS[ev.severity] }}>{ev.severity}</span>
                         <strong>{ev.title}</strong>
-                        <span className="alert-event-time">{new Date(ev.createdAt).toLocaleString()}</span>
+                        <span className="alert-event-time">{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : '–'}</span>
                       </div>
                       <p className="alert-event-message">{ev.message}</p>
                       <div className="alert-event-meta">

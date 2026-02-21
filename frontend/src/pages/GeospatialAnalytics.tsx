@@ -159,7 +159,7 @@ const GeospatialAnalytics: React.FC = () => {
               <h3>Recent Events</h3>
               <table className="module-table"><thead><tr><th>Time</th><th>Animal</th><th>Type</th><th>Zone</th><th>Location</th></tr></thead>
                 <tbody>{dashboard.recentEvents.map((ev: any) => (
-                  <tr key={ev.id}><td>{new Date(ev.recorded_at).toLocaleString()}</td><td>{ev.animal_name}</td>
+                  <tr key={ev.id}><td>{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString() : '–'}</td><td>{ev.animal_name}</td>
                     <td><span className={`module-badge ${ev.event_type === 'zone_breach' ? 'error' : ''}`}>{ev.event_type}</span></td>
                     <td>{ev.zone_name || '—'}</td><td>{(+ev.latitude).toFixed(4)}, {(+ev.longitude).toFixed(4)}</td></tr>
                 ))}</tbody></table>
@@ -216,7 +216,7 @@ const GeospatialAnalytics: React.FC = () => {
                   {z.zoneType} · {z.radiusMeters}m radius
                 </div>
                 <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>
-                  📍 {z.centerLat?.toFixed(4)}, {z.centerLng?.toFixed(4)}
+                  📍 {(+(z.centerLat ?? 0)).toFixed(4)}, {(+(z.centerLng ?? 0)).toFixed(4)}
                 </div>
                 <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 12 }}>
                   {z.alertOnEntry && <span>🔔 Entry Alerts</span>}
@@ -267,7 +267,7 @@ const GeospatialAnalytics: React.FC = () => {
                     <td>{ev.animalName || ev.animalId}</td>
                     <td><span className={`module-badge ${ev.eventType === 'boundary_breach' ? 'error' : ev.eventType === 'speed_alert' ? 'error' : ''}`}>{ev.eventType?.replace(/_/g, ' ')}</span></td>
                     <td>{ev.zoneName || '—'}</td>
-                    <td style={{ fontSize: 12 }}>{ev.latitude?.toFixed(4)}, {ev.longitude?.toFixed(4)}</td>
+                    <td style={{ fontSize: 12 }}>{(+(ev.latitude ?? 0)).toFixed(4)}, {(+(ev.longitude ?? 0)).toFixed(4)}</td>
                     <td style={{ fontSize: 12 }}>{ev.metadata ? JSON.stringify(ev.metadata).slice(0, 60) : '—'}</td>
                   </tr>
                 ))}
@@ -314,7 +314,7 @@ const GeospatialAnalytics: React.FC = () => {
               <div style={{ marginTop: 16 }}>
                 <div className="module-stats">
                   <div className="stat-card"><div className="stat-value">{trailData.pointCount || 0}</div><div className="stat-label">Points</div></div>
-                  <div className="stat-card"><div className="stat-value">{trailData.totalDistanceKm?.toFixed(2) || 0}</div><div className="stat-label">Distance (km)</div></div>
+                  <div className="stat-card"><div className="stat-value">{(+(trailData.totalDistanceKm ?? 0)).toFixed(2)}</div><div className="stat-label">Distance (km)</div></div>
                 </div>
                 {trailData.trail?.length > 0 && (
                   <div style={{ marginTop: 12 }}>
@@ -323,7 +323,7 @@ const GeospatialAnalytics: React.FC = () => {
                       <thead><tr><th>#</th><th>Time</th><th>Lat</th><th>Lng</th><th>Type</th></tr></thead>
                       <tbody>
                         {trailData.trail.slice(0, 50).map((p: any, i: number) => (
-                          <tr key={i}><td>{i + 1}</td><td>{new Date(p.recorded_at).toLocaleString()}</td>
+                          <tr key={i}><td>{i + 1}</td><td>{p.recorded_at ? new Date(p.recorded_at).toLocaleString() : '–'}</td>
                             <td>{(+p.latitude).toFixed(5)}</td><td>{(+p.longitude).toFixed(5)}</td><td>{p.event_type}</td></tr>
                         ))}
                       </tbody>

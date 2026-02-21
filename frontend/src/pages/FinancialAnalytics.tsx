@@ -197,7 +197,7 @@ const FinancialAnalytics: React.FC = () => {
                   <table className="data-table compact">
                     <thead><tr><th>Month</th><th>Income</th><th>Expenses</th><th>Profit</th></tr></thead>
                     <tbody>
-                      {dashboard.monthlyBreakdown.map(m => (
+                      {(dashboard.monthlyBreakdown || []).map(m => (
                         <tr key={m.month}>
                           <td>{m.month}</td>
                           <td className="text-success">${Number(m.income).toLocaleString('en', { minimumFractionDigits: 2 })}</td>

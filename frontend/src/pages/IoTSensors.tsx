@@ -155,7 +155,7 @@ const IoTSensorPage: React.FC = () => {
                     {dashboard.byType.map((t: any, i: number) => (
                       <div key={i} className="bar-row">
                         <span className="bar-label">{SENSOR_ICONS[t.sensor_type] || '📟'} {t.sensor_type}</span>
-                        <div className="bar-track"><div className="bar-fill" style={{ width: `${(+t.count / Math.max(...dashboard.byType.map((x: any) => +x.count))) * 100}%` }} /></div>
+                        <div className="bar-track"><div className="bar-fill" style={{ width: `${(+t.count / Math.max(1, ...(dashboard.byType || []).map((x: any) => +x.count))) * 100}%` }} /></div>
                         <span className="bar-value">{t.count}</span>
                       </div>
                     ))}
@@ -189,7 +189,7 @@ const IoTSensorPage: React.FC = () => {
                         <td>{a.sensor_name}</td><td>{a.sensor_type}</td>
                         <td><strong>{(+a.value).toFixed(2)}</strong> {a.sensor_unit || a.unit}</td>
                         <td><span className="badge badge-critical">{a.anomaly_type}</span></td>
-                        <td>{new Date(a.recorded_at).toLocaleString()}</td>
+                        <td>{a.recorded_at ? new Date(a.recorded_at).toLocaleString() : '–'}</td>
                       </tr>
                     ))}</tbody>
                   </table>
@@ -308,7 +308,7 @@ const IoTSensorPage: React.FC = () => {
                       <td>{r.unit}</td>
                       <td>{(r.isAnomaly || (r as any).is_anomaly) ? <span className="badge badge-critical">Yes</span> : '—'}</td>
                       <td>{(r.anomalyType || (r as any).anomaly_type) || '—'}</td>
-                      <td>{new Date(r.recordedAt || (r as any).recorded_at).toLocaleString()}</td>
+                      <td>{(r.recordedAt || (r as any).recorded_at) ? new Date(r.recordedAt || (r as any).recorded_at).toLocaleString() : '–'}</td>
                     </tr>
                   ))}
                   {!readings.length && <tr><td colSpan={5} className="empty-cell">No readings — select a sensor above</td></tr>}

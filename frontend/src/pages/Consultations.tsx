@@ -565,7 +565,7 @@ const Consultations: React.FC = () => {
                         by <strong>{log.userName || 'System'}</strong>
                         {log.details?.role && <span> ({log.details.role})</span>}
                         {' · '}
-                        {new Date(log.createdAt).toLocaleString()}
+                        {log.createdAt ? new Date(log.createdAt).toLocaleString() : '–'}
                       </div>
                       {log.action === 'BOOKING_RESCHEDULED' && log.details && (
                         <div style={{ fontSize: 12, color: '#4b5563', marginTop: 4, padding: '4px 8px', background: '#fef3c7', borderRadius: 4 }}>

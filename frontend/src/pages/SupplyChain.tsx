@@ -197,7 +197,7 @@ const SupplyChainPage: React.FC = () => {
                     <thead><tr><th>Batch #</th><th>Product</th><th>Expiry</th><th>Qty</th></tr></thead>
                     <tbody>{dashboard.expiringBatches.map((b: any, i: number) => (
                       <tr key={i}><td>{b.batch_number}</td><td>{b.product_type}</td>
-                        <td style={{ color: '#f97316' }}>{new Date(b.expiry_date).toLocaleDateString()}</td><td>{b.quantity} {b.unit}</td></tr>
+                        <td style={{ color: '#f97316' }}>{b.expiry_date ? new Date(b.expiry_date).toLocaleDateString() : '–'}</td><td>{b.quantity} {b.unit}</td></tr>
                     ))}</tbody>
                   </table>
                 </div>
@@ -295,7 +295,7 @@ const SupplyChainPage: React.FC = () => {
                       <td>{ev.batchNumber || (ev as any).batch_number || '—'}</td>
                       <td>{ev.location || '—'}</td>
                       <td>{(ev.verifiedBy || (ev as any).verified_by) ? <span className="badge badge-verified">✓ Verified</span> : <span className="badge badge-pending">Unverified</span>}</td>
-                      <td>{new Date(ev.eventDate || (ev as any).event_date).toLocaleDateString()}</td>
+                      <td>{(ev.eventDate || (ev as any).event_date) ? new Date(ev.eventDate || (ev as any).event_date).toLocaleDateString() : '–'}</td>
                       <td>{!(ev.verifiedBy || (ev as any).verified_by) && <button className="btn-sm" onClick={() => handleVerifyEvent(ev.id)}>Verify</button>}</td>
                     </tr>
                   ))}
@@ -316,7 +316,7 @@ const SupplyChainPage: React.FC = () => {
                       <div>Scans: <strong>{qr.scanCount || (qr as any).scan_count || 0}</strong></div>
                     </div>
                     <div className="card-footer">
-                      <small>Created {new Date(qr.createdAt || (qr as any).created_at).toLocaleDateString()}</small>
+                      <small>Created {(qr.createdAt || (qr as any).created_at) ? new Date(qr.createdAt || (qr as any).created_at).toLocaleDateString() : '–'}</small>
                       <span className={`badge badge-${(qr.isActive || (qr as any).is_active) ? 'active' : 'inactive'}`}>
                         {(qr.isActive || (qr as any).is_active) ? 'Active' : 'Inactive'}
                       </span>

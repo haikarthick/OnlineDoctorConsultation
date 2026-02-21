@@ -145,15 +145,15 @@ const DiseasePredictionPage: React.FC = () => {
           {tab === 'dashboard' && dashboard && (
             <div className="dashboard-grid">
               <div className="stat-card accent-purple">
-                <div className="stat-value">{dashboard.summary.totalActive}</div>
+                <div className="stat-value">{dashboard.summary?.totalActive ?? 0}</div>
                 <div className="stat-label">Active Predictions</div>
               </div>
               <div className="stat-card accent-orange">
-                <div className="stat-value">{dashboard.summary.avgRisk}%</div>
+                <div className="stat-value">{dashboard.summary?.avgRisk ?? 0}%</div>
                 <div className="stat-label">Avg Risk Score</div>
               </div>
               <div className="stat-card accent-red">
-                <div className="stat-value">{dashboard.summary.diseases}</div>
+                <div className="stat-value">{dashboard.summary?.diseases ?? 0}</div>
                 <div className="stat-label">Diseases Tracked</div>
               </div>
               <div className="stat-card accent-blue">
@@ -161,11 +161,11 @@ const DiseasePredictionPage: React.FC = () => {
                 <div className="stat-label">Active Outbreaks</div>
               </div>
 
-              {dashboard.activePredictions.length > 0 && (
+              {(dashboard.activePredictions || []).length > 0 && (
                 <div className="card full-width">
                   <h3>🔬 Disease Risk Distribution</h3>
                   <div className="mini-chart-bar">
-                    {dashboard.activePredictions.map((d, i) => (
+                    {(dashboard.activePredictions || []).map((d, i) => (
                       <div key={i} className="bar-row">
                         <span className="bar-label">{d.disease_name}</span>
                         <div className="bar-track">
@@ -178,13 +178,13 @@ const DiseasePredictionPage: React.FC = () => {
                 </div>
               )}
 
-              {dashboard.topRiskAnimals.length > 0 && (
+              {(dashboard.topRiskAnimals || []).length > 0 && (
                 <div className="card full-width">
                   <h3>⚠️ Highest Risk Animals</h3>
                   <table className="data-table">
                     <thead><tr><th>Animal</th><th>Species</th><th>Breed</th><th>Risk Score</th><th>Predictions</th></tr></thead>
                     <tbody>
-                      {dashboard.topRiskAnimals.map((a, i) => (
+                      {(dashboard.topRiskAnimals || []).map((a, i) => (
                         <tr key={i}>
                           <td>{a.name}</td><td>{a.species}</td><td>{a.breed}</td>
                           <td><span className="badge" style={{ backgroundColor: +a.highest_risk > 70 ? '#ef4444' : +a.highest_risk > 40 ? '#f97316' : '#22c55e' }}>{(+a.highest_risk).toFixed(1)}%</span></td>
@@ -281,7 +281,7 @@ const DiseasePredictionPage: React.FC = () => {
                       {(z.radiusKm || (z as any).radius_km) && <div><strong>{z.radiusKm || (z as any).radius_km} km</strong> radius</div>}
                     </div>
                     <div className="card-footer">
-                      <small>Started {new Date(z.startedAt || (z as any).started_at).toLocaleDateString()}</small>
+                      <small>Started {(z.startedAt || (z as any).started_at) ? new Date(z.startedAt || (z as any).started_at).toLocaleDateString() : '–'}</small>
                       {(z.containmentStatus || (z as any).containment_status) !== 'resolved' && (
                         <button className="btn-sm" onClick={() => handleResolveOutbreak(z.id)}>Resolve</button>
                       )}

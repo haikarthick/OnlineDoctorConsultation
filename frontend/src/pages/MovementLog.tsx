@@ -80,7 +80,7 @@ const MovementLog: React.FC = () => {
     } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
   }
 
-  const formatDate = (d: string) => new Date(d).toLocaleString()
+  const formatDate = (d: string) => d ? new Date(d).toLocaleString() : '–'
 
   return (
     <div className="module-page">

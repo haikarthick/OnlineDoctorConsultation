@@ -289,7 +289,7 @@ const Sustainability: React.FC = () => {
                   <thead><tr><th>Species</th><th>Head Count</th><th>Emission Factor</th><th>Annual CO₂ (kg)</th><th>Annual CO₂ (tons)</th></tr></thead>
                   <tbody>{carbonEst.estimates?.map((e: any) => (
                     <tr key={e.species}><td style={{ fontWeight: 600 }}>{e.species}</td><td>{e.count}</td><td>{e.emissionFactor} kg CO₂e/head/yr</td>
-                    <td>{e.annualCO2kg.toLocaleString()}</td><td>{(e.annualCO2kg / 1000).toFixed(2)}</td></tr>
+                    <td>{Number(e.annualCO2kg ?? 0).toLocaleString()}</td><td>{(Number(e.annualCO2kg ?? 0) / 1000).toFixed(2)}</td></tr>
                   ))}</tbody>
                 </table>
               </div>

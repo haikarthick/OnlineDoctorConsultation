@@ -103,7 +103,7 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
         </div>
         <div className="stat-card" onClick={() => onNavigate('/admin/reviews')} style={{ cursor: 'pointer' }} title="View Reviews">
           <div className="stat-icon">⭐</div>
-          <div className="stat-value">{(stats.averageRating ?? 0).toFixed(1)}</div>
+          <div className="stat-value">{(+(stats.averageRating ?? 0)).toFixed(1)}</div>
           <div className="stat-label">Avg Rating</div>
         </div>
         <div className="stat-card" onClick={() => onNavigate('/admin/reviews')} style={{ cursor: 'pointer' }} title="View Reviews">

@@ -331,7 +331,7 @@ const FeedInventory: React.FC = () => {
                 <div className="mini-chart">
                   {(analytics.dailyConsumptionTrend || []).slice(-14).map((d, i) => (
                     <div key={i} className="chart-bar-wrapper">
-                      <div className="chart-bar" style={{ height: `${Math.min(100, (Number(d.total_used) / Math.max(1, ...analytics.dailyConsumptionTrend.map(x => Number(x.total_used)))) * 100)}%` }}></div>
+                      <div className="chart-bar" style={{ height: `${Math.min(100, (Number(d.total_used) / Math.max(1, ...(analytics.dailyConsumptionTrend || []).map(x => Number(x.total_used)))) * 100)}%` }}></div>
                       <span className="chart-label">{Number(d.total_used).toFixed(0)}</span>
                     </div>
                   ))}

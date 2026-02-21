@@ -213,7 +213,7 @@ const ReportBuilderPage: React.FC = () => {
                       <td><span className="badge">{typeInfo(r.reportType || (r as any).report_type)?.label || r.reportType || (r as any).report_type}</span></td>
                       <td>{r.format}</td>
                       <td>{r.rowCount || (r as any).row_count || 0}</td>
-                      <td>{new Date(r.generatedAt || (r as any).generated_at).toLocaleString()}</td>
+                      <td>{(r.generatedAt || (r as any).generated_at) ? new Date(r.generatedAt || (r as any).generated_at).toLocaleString() : '–'}</td>
                       <td>
                         <button className="btn-sm" onClick={() => handleViewReport(r.id)}>View</button>
                         <button className="btn-sm btn-danger" onClick={() => handleDeleteReport(r.id)} style={{ marginLeft: '4px' }}>Delete</button>
@@ -235,7 +235,7 @@ const ReportBuilderPage: React.FC = () => {
                     <div className="card-meta">
                       <span className="badge">{typeInfo(selectedReport.reportType || (selectedReport as any).report_type)?.label || selectedReport.reportType}</span>
                       <span className="badge">{selectedReport.format?.toUpperCase()}</span>
-                      <span>Generated: {new Date(selectedReport.generatedAt || (selectedReport as any).generated_at).toLocaleString()}</span>
+                      <span>Generated: {(selectedReport.generatedAt || (selectedReport as any).generated_at) ? new Date(selectedReport.generatedAt || (selectedReport as any).generated_at).toLocaleString() : '–'}</span>
                     </div>
                   </div>
                   {renderReportData(selectedReport)}

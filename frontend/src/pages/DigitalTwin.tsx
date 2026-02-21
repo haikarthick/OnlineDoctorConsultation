@@ -204,7 +204,7 @@ const DigitalTwinPage: React.FC = () => {
                   <span className="module-badge">{t.twinType}</span>
                 </div>
                 {t.description && <p style={{ color: '#666', fontSize: 14, margin: '8px 0' }}>{t.description}</p>}
-                <div style={{ fontSize: 12, color: '#888' }}>Created: {new Date(t.createdAt).toLocaleDateString()}</div>
+                <div style={{ fontSize: 12, color: '#888' }}>Created: {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '–'}</div>
               </div>
             ))}
             {twins.length === 0 && <p style={{ color: '#888' }}>No digital twins yet</p>}
@@ -277,7 +277,7 @@ const DigitalTwinPage: React.FC = () => {
               {simulations.map(s => (
                 <tr key={s.id}><td>{s.name}</td><td>{s.twinName}</td><td><span className="module-badge">{s.scenarioType}</span></td>
                 <td><span className="module-badge success">{s.status}</span></td><td>{s.durationMs}ms</td>
-                <td>{new Date(s.createdAt).toLocaleDateString()}</td>
+                <td>{s.createdAt ? new Date(s.createdAt).toLocaleDateString() : '–'}</td>
                 <td><button className="module-btn small" onClick={() => viewSimResult(s)}>View</button></td></tr>
               ))}
             </tbody>

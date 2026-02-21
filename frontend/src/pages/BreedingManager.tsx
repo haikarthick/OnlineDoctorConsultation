@@ -189,7 +189,7 @@ const BreedingManager: React.FC = () => {
                         <td>{r.sireName || r.sireId?.slice(0, 8) || '–'}</td>
                         <td>{r.breedingDate ? new Date(r.breedingDate).toLocaleDateString() : '–'}</td>
                         <td>{r.breedingMethod?.replace(/_/g, ' ')}</td>
-                        <td><span className="badge" style={{ background: STATUS_COLORS[r.status] || '#888' }}>{r.status.replace(/_/g, ' ')}</span></td>
+                        <td><span className="badge" style={{ background: STATUS_COLORS[r.status] || '#888' }}>{r.status?.replace(/_/g, ' ')}</span></td>
                         <td>{r.expectedDueDate ? new Date(r.expectedDueDate).toLocaleDateString() : '–'}</td>
                         <td>{r.liveOffspring ?? '–'} / {r.offspringCount ?? '–'}</td>
                         <td><button className="btn btn-sm" onClick={() => startEdit(r)}>Edit</button></td>
@@ -213,7 +213,7 @@ const BreedingManager: React.FC = () => {
                           <td>{r.damName || r.damId?.slice(0, 8)}</td>
                           <td>{r.expectedDueDate ? new Date(r.expectedDueDate).toLocaleDateString() : '–'}</td>
                           <td><span className={`badge ${daysLeft && daysLeft <= 7 ? 'badge-danger' : daysLeft && daysLeft <= 14 ? 'badge-warning' : ''}`}>{daysLeft ?? '?'} days</span></td>
-                          <td>{r.status.replace(/_/g, ' ')}</td>
+                          <td>{r.status?.replace(/_/g, ' ')}</td>
                           <td>{r.breedingMethod?.replace(/_/g, ' ')}</td>
                         </tr>
                       )

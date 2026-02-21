@@ -299,7 +299,7 @@ const WorkforcePage: React.FC = () => {
                   {shifts.map(s => (
                     <tr key={s.id}>
                       <td>{s.userName || (s as any).user_name || s.userId}</td>
-                      <td>{new Date(s.shiftDate || (s as any).shift_date).toLocaleDateString()}</td>
+                      <td>{(s.shiftDate || (s as any).shift_date) ? new Date(s.shiftDate || (s as any).shift_date).toLocaleDateString() : '–'}</td>
                       <td>{s.startTime || (s as any).start_time}</td>
                       <td>{s.endTime || (s as any).end_time}</td>
                       <td>{s.roleOnShift || (s as any).role_on_shift || '—'}</td>

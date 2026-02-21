@@ -288,7 +288,7 @@ const Marketplace: React.FC = () => {
                 <tr key={o.id}><td>{o.listingTitle}</td><td>{o.sellerName}</td><td>{o.quantity}</td>
                 <td style={{ fontWeight: 700, color: '#667eea' }}>${o.totalPrice}</td>
                 <td><span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{o.status}</span></td>
-                <td>{new Date(o.createdAt).toLocaleDateString()}</td></tr>
+                <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '–'}</td></tr>
               ))}
             </tbody>
           </table>
