@@ -1,18 +1,17 @@
 # ============================================================
-# VetCare - Auto Git Commit Script
+# VetCare - Auto Git Commit & Push Script
 # ============================================================
 # Usage:
-#   .\git-commit.ps1                     → Auto-commit with timestamp message
-#   .\git-commit.ps1 "your message"      → Commit with custom message
-#   .\git-commit.ps1 -Push               → Commit and push to remote
-#   .\git-commit.ps1 "message" -Push     → Custom message + push
+#   .\git-commit.ps1                     → Commit + push with timestamp message
+#   .\git-commit.ps1 "your message"      → Commit + push with custom message
+#   .\git-commit.ps1 -NoPush             → Commit only (skip push)
 # ============================================================
 
 param(
     [Parameter(Position = 0)]
     [string]$Message = "",
 
-    [switch]$Push
+    [switch]$NoPush
 )
 
 $ErrorActionPreference = "Stop"
@@ -107,18 +106,29 @@ Write-Host "  Commit: $commitHash" -ForegroundColor Gray
 Write-Host "  Branch: $branch" -ForegroundColor Gray
 Write-Host "  Files:  $total changed" -ForegroundColor Gray
 
-# Push if requested
-if ($Push) {
+# Push (default behavior — use -NoPush to skip)
+if (-not $NoPush) {
     Write-Host ""
     Write-Host "Pushing to origin/$branch..." -ForegroundColor Cyan
-    $pushResult = git push origin $branch 2>&1
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Push failed: $pushResult" -ForegroundColor Red
-        Write-Host "You can push manually: git push origin $branch" -ForegroundColor Yellow
+    # git writes progress to stderr, so capture both streams
+    $pushOutput = git push origin $branch 2>&1 | Out-String
+
+    # Check if push actually succeeded by verifying local matches remote
+    $localHash  = git rev-parse HEAD 2>&1
+    $remoteHash = git ls-remote origin $branch 2>&1 | ForEach-Object { ($_ -split '\t')[0] }
+
+    if ($localHash -eq $remoteHash) {
+        Write-Host "Pushed successfully to origin/$branch!" -ForegroundColor Green
     } else {
-        Write-Host "Pushed successfully!" -ForegroundColor Green
+        Write-Host "Push may have failed:" -ForegroundColor Red
+        Write-Host $pushOutput -ForegroundColor Yellow
+        Write-Host "You can push manually: git push origin $branch" -ForegroundColor Yellow
     }
+} else {
+    Write-Host ""
+    Write-Host "Skipping push (-NoPush flag set)." -ForegroundColor Yellow
+    Write-Host "Push manually: git push origin $branch" -ForegroundColor Gray
 }
 
 Write-Host ""
