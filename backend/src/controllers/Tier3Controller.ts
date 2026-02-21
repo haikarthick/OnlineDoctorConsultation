@@ -9,8 +9,8 @@ import enterpriseService from '../services/EnterpriseService';
 import logger from '../utils/logger';
 
 async function ensureAccess(req: Request, res: Response, enterpriseId: string): Promise<boolean> {
-  const userId = (req as any).user?.id;
-  const role = (req as any).user?.role;
+  const userId = (req as any).userId;
+  const role = (req as any).userRole;
   if (role === 'admin') return true;
   const hasAccess = await enterpriseService.hasAccess(enterpriseId, userId);
   if (!hasAccess) {
@@ -44,7 +44,7 @@ class Tier3Controller {
 
   async createPrediction(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await diseasePredictionService.createPrediction({ ...req.body, createdBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -124,7 +124,7 @@ class Tier3Controller {
 
   async createPairRecommendation(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await genomicLineageService.createPairRecommendation({ ...req.body, createdBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -239,7 +239,7 @@ class Tier3Controller {
 
   async createTraceabilityEvent(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await supplyChainService.createEvent({ ...req.body, recordedBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -247,7 +247,7 @@ class Tier3Controller {
 
   async verifyTraceabilityEvent(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await supplyChainService.verifyEvent(req.params.id, userId);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -298,7 +298,7 @@ class Tier3Controller {
 
   async createTask(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await workforceService.createTask({ ...req.body, createdBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -375,7 +375,7 @@ class Tier3Controller {
 
   async createReportTemplate(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await reportBuilderService.createTemplate({ ...req.body, createdBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -397,7 +397,7 @@ class Tier3Controller {
 
   async generateReport(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await reportBuilderService.generateReport({ ...req.body, generatedBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }

@@ -90,7 +90,16 @@ app.use('/uploads', express.static(path.resolve(process.env.UPLOAD_DIR || path.j
 app.get(`/api/${config.app.apiVersion}/csrf-token`, csrfTokenRoute);
 
 // CSRF protection for state-changing requests
-app.use(`/api/${config.app.apiVersion}`, csrfProtection);
+// Auth endpoints (login/register/refresh/logout) are exempt because
+// there is no authenticated session to hijack before login, and
+// they already use rate-limiting + password validation for protection.
+app.use(`/api/${config.app.apiVersion}`, (req, res, next) => {
+  const authExemptPaths = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'];
+  if (authExemptPaths.some(p => req.path === p || req.path.endsWith(p))) {
+    return next();
+  }
+  return csrfProtection(req, res, next);
+});
 
 // Root welcome route (so localhost:3000 doesn't show 404)
 app.get('/', (_req: Request, res: Response) => {

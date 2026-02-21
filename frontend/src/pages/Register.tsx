@@ -60,7 +60,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        confirmPassword: formData.password,
+        confirmPassword: formData.confirmPassword,
         role: formData.role as 'pet_owner' | 'farmer' | 'veterinarian'
       })
       setMessage('✓ Registration successful! Logging you in...')

@@ -29,7 +29,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     }
 
     req.userId = decoded.userId;
-    req.userRole = decoded.role;
+    req.userRole = userCheck.rows[0].role; // Use DB role (source of truth) instead of JWT claim
     req.token = token;
 
     next();

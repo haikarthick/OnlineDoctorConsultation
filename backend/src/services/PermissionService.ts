@@ -74,6 +74,39 @@ export const PERMISSION_CATEGORIES = {
       'dashboard_recent_consultations',
       'dashboard_tips',
     ]
+  },
+  advanced: {
+    label: 'Advanced Modules',
+    permissions: [
+      'health_analytics',
+      'breeding_manage',
+      'feed_manage',
+      'compliance_manage',
+      'financial_analytics',
+      'alert_manage',
+    ]
+  },
+  innovation: {
+    label: 'Innovation Modules',
+    permissions: [
+      'disease_prediction',
+      'genomic_lineage',
+      'iot_sensors',
+      'supply_chain',
+      'workforce_manage',
+      'report_builder',
+    ]
+  },
+  intelligence: {
+    label: 'Intelligence Modules',
+    permissions: [
+      'ai_copilot',
+      'digital_twin',
+      'marketplace_access',
+      'sustainability_manage',
+      'wellness_portal',
+      'geospatial_analytics',
+    ]
   }
 };
 
@@ -87,6 +120,14 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'medical_records', 'schedule',
     'prescriptions', 'reviews', 'video_consultation', 'settings',
+    // Enterprise (vet serves enterprise clients per Home page)
+    'enterprise_campaigns',
+    // Advanced (vet needs analytics for clinical oversight)
+    'health_analytics', 'alert_manage',
+    // Innovation (vet-relevant modules)
+    'disease_prediction', 'report_builder',
+    // Intelligence
+    'ai_copilot', 'marketplace_access', 'wellness_portal',
     // Actions
     'booking_confirm', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'consultation_start', 'prescription_create',
@@ -95,8 +136,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
     'dashboard_pending_approvals', 'dashboard_upcoming_bookings',
     'dashboard_recent_consultations',
-    // (vet access)
-    'ai_copilot', 'marketplace_access', 'wellness_portal',
   ],
   pet_owner: [
     // Pages
@@ -117,7 +156,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   farmer: [
     // Pages
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
-    'animals', 'video_consultation', 'settings',
+    'animals', 'medical_records', 'video_consultation', 'settings', 'write_review',
     // Enterprise
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
     'enterprise_movements', 'enterprise_campaigns', 'enterprise_members',
@@ -132,7 +171,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
-    'consultation_create', 'animal_manage',
+    'consultation_create', 'review_create', 'animal_manage',
+    'medical_record_create',
     // Dashboard widgets
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
     'dashboard_tips',
@@ -256,23 +296,27 @@ class PermissionService {
     logger.info('role_permissions table ensured');
   }
 
-  /** Seed default permissions if table is empty */
+  /** Seed default permissions — inserts any missing permissions (safe to re-run) */
   async seedDefaults(): Promise<void> {
-    const check = await database.query('SELECT COUNT(*) as cnt FROM role_permissions');
-    if (parseInt(check.rows[0].cnt) > 0) return;
-
-    logger.info('Seeding default role permissions...');
+    logger.info('Syncing default role permissions...');
+    let changed = 0;
     for (const [role, permissions] of Object.entries(DEFAULT_ROLE_PERMISSIONS)) {
       for (const permission of ALL_PERMISSIONS) {
         const isEnabled = permissions.includes(permission);
-        await database.query(
+        const res = await database.query(
           `INSERT INTO role_permissions (role, permission, is_enabled) VALUES ($1, $2, $3)
-           ON CONFLICT (role, permission) DO NOTHING`,
+           ON CONFLICT (role, permission) DO UPDATE SET is_enabled = EXCLUDED.is_enabled
+           WHERE role_permissions.is_enabled <> EXCLUDED.is_enabled AND role_permissions.updated_by IS NULL`,
           [role, permission, isEnabled]
         );
+        if (res.rowCount && res.rowCount > 0) changed++;
       }
     }
-    logger.info('Default permissions seeded for all roles');
+    if (changed > 0) {
+      logger.info(`Synced ${changed} permission entries (new or updated defaults)`);
+    } else {
+      logger.info('All permissions already up to date');
+    }
   }
 
   /** Get all permissions for a specific role (returns only enabled permission keys) */

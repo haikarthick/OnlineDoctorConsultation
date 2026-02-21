@@ -84,15 +84,17 @@ function PageLoader() {
 
 /** Wrapper: redirects unauthenticated users to /login */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, loading } = useAuth()
+  if (loading) return <PageLoader />
   if (!isAuthenticated) return <Navigate to="/login" replace />
   return <>{children}</>
 }
 
 /** Wrapper: enforces RBAC permission on a route. Redirects to /dashboard if no access */
 function RoleRoute({ children, path }: { children: React.ReactNode; path: string }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const { hasPermission, loading } = usePermission()
+  if (authLoading) return <PageLoader />
   if (!isAuthenticated) return <Navigate to="/login" replace />
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}><p>Loading...</p></div>
   const requiredPermission = ROUTE_PERMISSION_MAP[path]
@@ -104,7 +106,8 @@ function RoleRoute({ children, path }: { children: React.ReactNode; path: string
 
 /** Wrapper: redirects authenticated users to /dashboard */
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, loading } = useAuth()
+  if (loading) return <PageLoader />
   if (isAuthenticated) return <Navigate to="/dashboard" replace />
   return <>{children}</>
 }

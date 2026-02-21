@@ -1,0 +1,1668 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "refresh": "↻ Refresh",
+    "yes": "Yes",
+    "no": "No",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "type": "Type",
+    "name": "Name",
+    "description": "Description",
+    "notes": "Notes",
+    "submit": "Submit",
+    "retry": "Retry",
+    "selectEnterprise": "Select Enterprise",
+    "noData": "No data",
+    "required": "Required",
+    "optional": "Optional",
+    "enabled": "✅ Enabled",
+    "disabled": "⏸ Disabled",
+    "active": "Active",
+    "inactive": "Inactive",
+    "verified": "✓ Verified",
+    "unverified": "Unverified",
+    "resolved": "Resolved",
+    "pending": "Pending",
+    "completed": "Completed",
+    "newborn": "Newborn",
+    "male": "Male",
+    "female": "Female",
+    "loadingPage": "Loading…",
+    "brand": "VetCare",
+    "enterprise": "ENTERPRISE",
+    "trustBadge": "Trusted by 3,000+ enterprises worldwide"
+  },
+
+  "nav": {
+    "brand": "VetCare",
+    "dashboard": "Dashboard",
+    "consultations": "Consultations",
+    "findDoctor": "Find Doctor",
+    "bookConsultation": "Book Consultation",
+    "myAnimals": "My Animals",
+    "medicalRecords": "Medical Records",
+    "enterprises": "Enterprises",
+    "animalGroups": "Animal Groups",
+    "locations": "Locations",
+    "movementLog": "Movement Log",
+    "campaigns": "Campaigns",
+    "healthAnalytics": "Health Analytics",
+    "breedingGenetics": "Breeding & Genetics",
+    "feedInventory": "Feed & Inventory",
+    "complianceDocs": "Compliance Docs",
+    "financialAnalytics": "Financial Analytics",
+    "smartAlerts": "Smart Alerts",
+    "diseaseAI": "Disease AI",
+    "genomicLineage": "Genomic Lineage",
+    "iotSensors": "IoT Sensors",
+    "supplyChain": "Supply Chain",
+    "workforce": "Workforce",
+    "reportBuilder": "Report Builder",
+    "aiCopilot": "AI Copilot",
+    "digitalTwin": "Digital Twin",
+    "marketplace": "Marketplace",
+    "sustainability": "Sustainability",
+    "wellnessPortal": "Wellness Portal",
+    "geospatial": "Geospatial",
+    "mySchedule": "My Schedule",
+    "prescriptions": "Prescriptions",
+    "myReviews": "My Reviews",
+    "adminPanel": "Admin Panel",
+    "userManagement": "User Management",
+    "payments": "Payments",
+    "reviewModeration": "Review Moderation",
+    "systemSettings": "System Settings",
+    "permissions": "Permissions",
+    "auditLogs": "Audit Logs",
+    "settings": "Settings",
+    "logout": "Logout",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu"
+  },
+
+  "login": {
+    "welcome": "Welcome back",
+    "title": "Sign in to your account",
+    "subtitle": "Enter your credentials to continue",
+    "email": "Email Address",
+    "emailPlaceholder": "you@email.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "createFree": "Create one free",
+    "newHere": "New here?",
+    "createAccount": "Create account",
+    "backHome": "← Home",
+    "features": {
+      "consultations": "24/7 Online Consultations",
+      "vets": "Licensed Veterinarians",
+      "response": "Quick Response Time",
+      "security": "Enterprise-Grade Security",
+      "records": "Complete Health Records"
+    },
+    "success": "✓ Login successful! Redirecting...",
+    "error": "Login failed"
+  },
+
+  "register": {
+    "title": "Create your account",
+    "subtitle": "Get started in under 2 minutes",
+    "tagline": "The Complete Animal Health Platform",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstNamePlaceholder": "John",
+    "lastNamePlaceholder": "Doe",
+    "emailPlaceholder": "you@email.com",
+    "phonePlaceholder": "+1 (555) 000-0000",
+    "passwordPlaceholder": "Min 6 characters",
+    "confirmPasswordPlaceholder": "Re-enter password",
+    "passwordHint": "Must be at least 6 characters",
+    "roleTitle": "I am a...",
+    "rolePetOwner": "Pet Owner",
+    "rolePetOwnerDesc": "Manage pets & book consultations",
+    "roleFarmer": "Farmer",
+    "roleFarmerDesc": "Enterprise livestock management",
+    "roleVet": "Veterinarian",
+    "roleVetDesc": "Provide consultations & care",
+    "createAccountBtn": "Create Account",
+    "creatingAccount": "Creating Account...",
+    "alreadyMember": "Already a member?",
+    "signIn": "Sign in",
+    "termsNote": "By creating an account you agree to our Terms of Service",
+    "features": {
+      "expertCare": "Expert Care",
+      "expertCareDesc": "Licensed veterinarians",
+      "instantAccess": "Instant Access",
+      "instantAccessDesc": "24/7 availability",
+      "secure": "Secure",
+      "secureDesc": "HIPAA-grade privacy",
+      "enterpriseReady": "Enterprise Ready",
+      "enterpriseReadyDesc": "Scale from 1 to 10,000+"
+    },
+    "success": "✓ Registration successful! Logging you in...",
+    "error": "Registration failed",
+    "validation": {
+      "allRequired": "All fields are required",
+      "passwordMismatch": "Passwords do not match",
+      "passwordLength": "Password must be at least 6 characters"
+    }
+  },
+
+  "home": {
+    "signIn": "Sign In",
+    "getStarted": "Get Started Free",
+    "heroTitle": "The Complete Platform for Animal Health & Enterprise Management",
+    "heroSubtitle": "From a single pet to 10,000-head livestock operations — VetCare delivers 24/7 veterinary consultations, AI-powered disease prediction, IoT monitoring, and full enterprise management in one unified platform.",
+    "ctaPrimary": "Start Free — Pet Owner",
+    "ctaEnterprise": "🏢 Enterprise Sign Up",
+    "ctaVet": "Join as Veterinarian",
+    "guarantees": "✓ Free for pet owners • ✓ 30-day enterprise trial • ✓ No credit card required",
+    "signinLink": "Already have an account? Sign in here →",
+    "benefitOwner": {
+      "access": "24/7 Expert Access",
+      "records": "Complete Health Records",
+      "reminders": "Smart Reminders",
+      "dashboard": "Multi-Pet Dashboard",
+      "chat": "Instant Chat",
+      "savings": "Cost Savings"
+    },
+    "benefitEnterprise": {
+      "herdAI": "Herd Health AI",
+      "iot": "IoT Integration",
+      "supplyChain": "Supply Chain Tracking",
+      "financial": "Financial Analytics",
+      "workforce": "Workforce Management",
+      "compliance": "Compliance Automation"
+    },
+    "benefitVet": {
+      "schedule": "Flexible Schedule",
+      "prescriptions": "Digital Prescriptions",
+      "history": "Patient History",
+      "revenue": "Revenue Growth",
+      "copilot": "AI Copilot",
+      "network": "Professional Network"
+    },
+    "enterpriseTypes": {
+      "dairy": "🐄 Dairy Farms",
+      "poultry": "🐓 Poultry Operations",
+      "swine": "🐖 Swine Production",
+      "sheep": "🐑 Sheep & Goat",
+      "aqua": "🐟 Aquaculture",
+      "equine": "🏇 Equine Centers",
+      "petClinics": "🐕 Pet Clinics",
+      "apiaries": "🐝 Apiaries",
+      "multiSpecies": "🏢 Multi-Species",
+      "research": "🔬 Research Labs",
+      "wildlife": "🌿 Wildlife",
+      "government": "📋 Government"
+    },
+    "ctaTitle": "Ready to Transform Your Animal Care?",
+    "ctaSubtitle": "Join thousands of pet owners, enterprises, and veterinarians on VetCare",
+    "footer": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact Us",
+      "signIn": "Sign In"
+    },
+    "howItWorks": {
+      "petOwners": "For Pet Owners",
+      "enterprises": "For Enterprises",
+      "veterinarians": "For Veterinarians"
+    }
+  },
+
+  "dashboard": {
+    "greeting": "Welcome, {{name}}!",
+    "subtitles": {
+      "petOwner": "Here's your pet care overview",
+      "vet": "Here's your practice overview",
+      "admin": "System administration overview",
+      "farmer": "Here's your farm management overview"
+    },
+    "stats": {
+      "appointments": "Appointments",
+      "consultations": "Consultations",
+      "myAnimals": "My Animals",
+      "patients": "Patients",
+      "pending": "Pending Actions"
+    },
+    "pendingBookings": "🔔 Pending Booking Confirmations",
+    "quickActions": {
+      "viewConsultations": "View Consultations",
+      "bookConsultation": "Book Consultation",
+      "myAnimals": "My Animals",
+      "myReviews": "My Reviews",
+      "newConsultation": "New Consultation",
+      "manageSchedule": "Manage Schedule",
+      "prescriptions": "Prescriptions",
+      "medicalRecords": "Medical Records",
+      "herdManagement": "Herd Management"
+    },
+    "recentActivity": "Recent Activity",
+    "viewAll": "View All",
+    "noActivity": "No recent activity yet",
+    "bookFirst": "Book your first consultation",
+    "upcomingBookings": "📅 Upcoming Bookings",
+    "noUpcoming": "No upcoming bookings",
+    "recentConsultations": "🩺 Recent Consultations",
+    "noRecent": "No recent consultations",
+    "proTips": "Pro Tips & Resources",
+    "tips": {
+      "appointmentTitle": "Appointment Best Practices",
+      "appointmentDesc": "Schedule consultations in advance for better availability",
+      "healthTitle": "Health Resources",
+      "healthDesc": "Access our comprehensive health articles and guides",
+      "communityTitle": "Community Forum",
+      "communityDesc": "Connect with other users and share experiences"
+    },
+    "learnMore": "Learn More →",
+    "explore": "Explore →",
+    "join": "Join →",
+    "cancelBooking": "Cancel this booking?",
+    "declinedByDoctor": "Declined by doctor"
+  },
+
+  "consultations": {
+    "pageTitle": "🏥 Consultations & Appointments",
+    "subtitles": {
+      "petOwner": "Schedule consultations, manage appointments, and review your visit history",
+      "vet": "Manage your appointments, conduct consultations, and track patient interactions",
+      "admin": "Monitor and manage all consultations and appointments across the platform"
+    },
+    "bookConsultation": "+ Book Consultation",
+    "dismiss": "Dismiss",
+    "tabs": {
+      "appointments": "📅 Appointments",
+      "history": "🩺 Consultation History"
+    },
+    "filterAll": "All",
+    "headers": {
+      "patient": "Patient",
+      "doctor": "Doctor",
+      "date": "Date",
+      "time": "Time",
+      "type": "Type",
+      "reason": "Reason",
+      "priority": "Priority",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "types": {
+      "video": "📹 Video",
+      "phone": "📞 Phone",
+      "inPerson": "🏥 In-person",
+      "chat": "💬 Chat"
+    },
+    "actions": {
+      "confirm": "✓ Confirm",
+      "start": "▶ Start",
+      "notYet": "🔒 Not Yet",
+      "join": "📹 Join",
+      "reschedule": "🔄 Reschedule",
+      "cancelBooking": "✕ Cancel",
+      "log": "📋 Log",
+      "view": "📋 View",
+      "review": "⭐ Review",
+      "details": "📋 Details"
+    },
+    "emptyAppointments": "No upcoming appointments",
+    "appointmentHint": "Appointments requiring your attention will appear here",
+    "bookButton": "Book a Consultation",
+    "noMatchFilter": "No consultations match this filter",
+    "noHistory": "No consultation history yet",
+    "historyHint": "Completed and cancelled consultations will appear here for reference",
+    "reschedule": {
+      "title": "🔄 Reschedule Appointment",
+      "originalLabel": "⚠️ Original Appointment",
+      "dateLabel": "Select New Date *",
+      "slotsTitle": "Available Time Slots",
+      "noSlots": "No available slots for this date. Please select another date.",
+      "confirming": "Rescheduling...",
+      "confirmBtn": "✓ Confirm Reschedule"
+    },
+    "actionLog": {
+      "title": "📋 Action Log",
+      "loading": "Loading action history...",
+      "empty": "No action history found for this booking.",
+      "by": "by",
+      "system": "System",
+      "newSlot": "New slot:",
+      "approved": "(approved ✓)",
+      "awaitingApproval": "(awaiting doctor approval)",
+      "autoConfirmed": "(auto-confirmed)",
+      "cancelledBy": "Cancelled by",
+      "reason": "Reason:"
+    },
+    "cancelModal": {
+      "title": "❌ Cancel Booking",
+      "warning": "⚠️ This action cannot be undone. The appointment will be cancelled.",
+      "reasonLabel": "Reason for cancellation",
+      "reasonPlaceholder": "Please provide a reason for cancellation...",
+      "keepBooking": "Keep Booking",
+      "confirmCancel": "Confirm Cancellation"
+    }
+  },
+
+  "animals": {
+    "pageTitles": {
+      "petOwner": "🐾 My Animals",
+      "vet": "🐾 Patient Animals",
+      "admin": "🐾 Animal Registry"
+    },
+    "subtitles": {
+      "petOwner": "Manage your pets and farm animals",
+      "vet": "Animals from your consultations",
+      "admin": "All registered animals in the system"
+    },
+    "registerAnimal": "+ Register Animal",
+    "searchPlaceholder": "Search by name, ID, ear tag, microchip...",
+    "allSpecies": "All Species",
+    "animalCount": "animal",
+    "animalsCount": "animals",
+    "registerModal": {
+      "titleNew": "📋 Register New Animal",
+      "titleEdit": "Edit {{name}}",
+      "requiredNote": "Fields marked with * are required",
+      "sections": {
+        "basic": "📝 Basic Information",
+        "identification": "🏷️ Identification & Tracking",
+        "insurance": "🛡️ Insurance Details",
+        "medical": "📋 Medical Notes"
+      },
+      "name": "Name *",
+      "species": "Species *",
+      "breed": "Breed",
+      "selectBreed": "Select breed",
+      "otherBreed": "Other (specify)",
+      "customBreed": "Custom Breed *",
+      "gender": "Gender",
+      "dob": "Date of Birth",
+      "color": "Color / Markings",
+      "weight": "Weight (kg)",
+      "neutered": "Spayed / Neutered",
+      "microchip": "Microchip ID",
+      "earTag": "Ear Tag ID",
+      "regNumber": "Registration / Pedigree Number",
+      "insuranceProvider": "Insurance Provider",
+      "policyNumber": "Policy Number",
+      "policyExpiry": "Policy Expiry Date",
+      "policyExpired": "⚠️ Policy expired",
+      "updateBtn": "💾 Update Animal",
+      "registerBtn": "✅ Register Animal"
+    },
+    "emptySearch": "No animals match your search",
+    "emptyAnimals": "No animals registered yet",
+    "petOwnerCTA": "Register your first pet or farm animal to get started.",
+    "adminCTA": "No animals found in the system.",
+    "cardLabels": {
+      "gender": "Gender:",
+      "weight": "Weight:",
+      "color": "Color:",
+      "neutered": "Neutered:",
+      "dob": "DOB:",
+      "owner": "Owner:",
+      "identification": "🏷️ Identification",
+      "microchip": "Microchip:",
+      "earTag": "Ear Tag:",
+      "regNumber": "Reg #:",
+      "insuranceExpired": "🛡️ Insurance Expired",
+      "insured": "Insured",
+      "expires": "Expires:",
+      "details": "📋 Details"
+    },
+    "cardActions": {
+      "records": "📁 Records",
+      "edit": "✏️ Edit",
+      "book": "📅 Book"
+    },
+    "detailModal": {
+      "species": "Species:",
+      "breed": "Breed:",
+      "gender": "Gender:",
+      "age": "Age:",
+      "weight": "Weight:",
+      "dob": "Date of Birth:",
+      "color": "Color:",
+      "neutered": "Spayed/Neutered:",
+      "uniqueId": "Unique ID:",
+      "owner": "Owner:",
+      "medicalRecords": "📁 Medical Records",
+      "editBtn": "✏️ Edit",
+      "closeBtn": "Close"
+    },
+    "toasts": {
+      "updated": "Animal updated successfully!",
+      "registered": "Animal registered successfully!",
+      "confirmRemove": "Are you sure you want to remove this animal?",
+      "removed": "Animal removed successfully"
+    }
+  },
+
+  "appointments": {
+    "pageTitle": "📅 Appointments",
+    "scheduleNew": "Schedule New",
+    "confirmed": "✓ Confirmed",
+    "pending": "⏳ Pending",
+    "reschedule": "Reschedule",
+    "types": {
+      "regular": "Regular Checkup",
+      "vaccination": "Vaccination",
+      "followUp": "Follow-up"
+    }
+  },
+
+  "medicalRecords": {
+    "pageTitle": "📋 Medical Records",
+    "allAnimals": "All Animals",
+    "newRecord": "+ New Record",
+    "tabs": {
+      "overview": "📊 Overview",
+      "consultations": "🩺 Consultations",
+      "prescriptions": "💊 Prescriptions",
+      "records": "📄 Records",
+      "vaccinations": "💉 Vaccinations",
+      "labResults": "🔬 Lab Results",
+      "allergies": "⚠️ Allergies",
+      "weight": "⚖️ Weight",
+      "timeline": "📅 Timeline"
+    },
+    "animalInfo": {
+      "owner": "Owner:",
+      "gender": "Gender:",
+      "weight": "Weight:",
+      "dob": "DOB:",
+      "neutered": "Neutered ✓",
+      "microchip": "Microchip:",
+      "earTag": "Ear Tag:",
+      "regNumber": "Reg#:",
+      "insurance": "Insurance:",
+      "maleSymbol": "♂ Male",
+      "femaleSymbol": "♀ Female"
+    },
+    "overview": {
+      "stats": {
+        "consultations": "Consultations",
+        "prescriptions": "Prescriptions",
+        "vaccinations": "Vaccinations",
+        "labResults": "Lab Results",
+        "activeAllergies": "Active Allergies",
+        "medicalRecords": "Medical Records",
+        "followUps": "Follow-ups (7d)"
+      },
+      "completed": "completed",
+      "active": "active",
+      "dueSoon": "due soon",
+      "pending": "pending",
+      "recordsByType": "Records by Type",
+      "quickActions": "Quick Actions",
+      "addRecord": "+ Record",
+      "addVaccination": "+ Vaccination",
+      "addWeight": "+ Weight",
+      "addAllergy": "+ Allergy",
+      "addLabResult": "+ Lab Result",
+      "recentPrescriptions": "Recent Prescriptions",
+      "diagnosis": "Diagnosis:",
+      "viewAllPrescriptions": "View all {{count}} prescriptions →",
+      "recentRecords": "Recent Records",
+      "viewAllRecords": "View all {{count}} records →",
+      "medication": "Medication"
+    },
+    "records": {
+      "searchPlaceholder": "Search records...",
+      "allTypes": "All Types",
+      "emptyTitle": "No medical records found",
+      "emptySubtitle": "Records created by veterinarians during consultations will appear here"
+    },
+    "consultationsTab": {
+      "selectPet": "Select a pet",
+      "selectPetSubtitle": "Choose a pet from the dropdown above to view consultation history",
+      "emptyTitle": "No consultations found",
+      "emptySubtitle": "Consultation history for this pet will appear here",
+      "consultWith": "Consultation with Dr. {{name}}",
+      "unknown": "Unknown",
+      "prescriptionCount": "{{count}} prescription(s)",
+      "diagnosis": "Diagnosis:",
+      "date": "Date:",
+      "owner": "Owner:",
+      "followUp": "Follow-up:"
+    },
+    "prescriptionsTab": {
+      "emptyTitle": "No prescriptions yet",
+      "emptySubtitle": "No prescriptions found for this pet",
+      "medication": "Medication",
+      "diagnosis": "Diagnosis:",
+      "prescribed": "Prescribed:",
+      "validUntil": "Valid until:",
+      "active": "active",
+      "expired": "expired"
+    },
+    "vaccinationsTab": {
+      "addButton": "+ Add Vaccination",
+      "selectPet": "Select a pet",
+      "emptyTitle": "No vaccination records",
+      "emptySubtitle": "Vaccination records will appear here once added",
+      "administered": "Administered:",
+      "dosage": "Dosage:",
+      "batch": "Batch:",
+      "nextDue": "Next due:",
+      "overdue": "(OVERDUE)",
+      "certificate": "Certificate:",
+      "reaction": "⚠️ Reaction:",
+      "valid": "Valid",
+      "invalid": "Invalid"
+    },
+    "labResultsTab": {
+      "addButton": "+ Add Lab Result",
+      "selectPet": "Select a pet",
+      "emptyTitle": "No lab results",
+      "emptySubtitle": "Lab test results will appear here once added",
+      "testDate": "Test Date:",
+      "orderedBy": "Ordered by:",
+      "result": "Result:",
+      "normal": "Normal:",
+      "lab": "Lab:",
+      "abnormal": "⚠️ Abnormal"
+    },
+    "allergiesTab": {
+      "addButton": "+ Report Allergy",
+      "selectPet": "Select a pet",
+      "emptyTitle": "No known allergies",
+      "emptySubtitle": "No allergies have been recorded for this pet",
+      "reaction": "Reaction:",
+      "severity": "Severity:",
+      "identified": "Identified:",
+      "reportedBy": "Reported by:",
+      "active": "⚠️ Active",
+      "resolved": "Resolved"
+    },
+    "weightTab": {
+      "addButton": "+ Record Weight",
+      "selectPet": "Select a pet",
+      "emptyTitle": "No weight records",
+      "emptySubtitle": "Weight measurements will appear here once added",
+      "weightTrend": "Weight Trend",
+      "latest": "Latest:",
+      "fromLast": "from last",
+      "recorded": "Recorded:"
+    },
+    "timelineTab": {
+      "selectPet": "Select a pet",
+      "selectSubtitle": "Choose a pet from the dropdown above to view its complete medical timeline",
+      "emptyTitle": "No medical history",
+      "emptySubtitle": "Medical events will appear here as records are created",
+      "by": "By:"
+    },
+    "modals": {
+      "newRecord": "📄 New Medical Record",
+      "recordType": "Record Type",
+      "title": "Title",
+      "content": "Content",
+      "severity": "Severity",
+      "followUpDate": "Follow-up Date (optional)",
+      "addVaccination": "💉 Add Vaccination",
+      "vaccineName": "Vaccine Name *",
+      "vaccineType": "Vaccine Type",
+      "dateAdministered": "Date Administered *",
+      "nextDueDate": "Next Due Date",
+      "dosage": "Dosage",
+      "batchNumber": "Batch Number",
+      "manufacturer": "Manufacturer",
+      "certificateNumber": "Certificate Number",
+      "reactionNotes": "Reaction Notes",
+      "recordWeight": "⚖️ Record Weight",
+      "weightValue": "Weight *",
+      "unit": "Unit",
+      "reportAllergy": "⚠️ Report Allergy",
+      "allergen": "Allergen *",
+      "reaction": "Reaction",
+      "dateIdentified": "Date Identified",
+      "addLabResult": "🔬 Add Lab Result",
+      "testName": "Test Name *",
+      "testCategory": "Test Category",
+      "testDate": "Test Date *",
+      "resultValue": "Result Value",
+      "normalRange": "Normal Range",
+      "labName": "Lab Name",
+      "abnormalLabel": "Result is abnormal",
+      "interpretation": "Interpretation"
+    },
+    "recordTypes": {
+      "diagnosis": "Diagnosis",
+      "prescription": "Prescription",
+      "labReport": "Lab Report",
+      "vaccination": "Vaccination",
+      "surgery": "Surgery",
+      "imaging": "Imaging",
+      "followUp": "Follow-up",
+      "other": "Other"
+    },
+    "severityLevels": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "critical": "Critical"
+    }
+  },
+
+  "settings": {
+    "pageTitle": "⚙️ Settings",
+    "profile": {
+      "title": "Profile Information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "saveChanges": "Save Changes",
+      "saved": "Settings saved! (This is a demo)"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "emailNotifications": "Email notifications for appointments",
+      "smsReminders": "SMS reminders for consultations",
+      "marketingEmails": "Marketing emails and offers",
+      "shareHealth": "Share health data with doctors"
+    },
+    "security": {
+      "title": "Security",
+      "changePassword": "Change Password",
+      "changePasswordDesc": "Update your password regularly for better security",
+      "twoFactor": "Two-Factor Authentication",
+      "twoFactorDesc": "Add an extra layer of security to your account",
+      "enable2FA": "Enable 2FA",
+      "activeSessions": "Active Sessions",
+      "activeSessionsDesc": "Manage your active login sessions",
+      "viewSessions": "View Sessions"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "deleteAccount": "Delete Account",
+      "deleteAccountDesc": "Permanently delete your account and all associated data"
+    }
+  },
+
+  "enterpriseManagement": {
+    "pageTitle": "🏢 Enterprise Management",
+    "subtitle": "Manage your farms, clinics, and animal enterprises",
+    "newEnterprise": "+ New Enterprise",
+    "searchPlaceholder": "Search enterprises...",
+    "loading": "Loading enterprises...",
+    "emptyTitle": "No Enterprises Yet",
+    "emptySubtitle": "Create your first enterprise to start managing animals at scale.",
+    "createBtn": "+ Create Enterprise",
+    "members": "members",
+    "animals": "animals",
+    "tabs": {
+      "overview": "Overview",
+      "animals": "Animals",
+      "groups": "Groups",
+      "locations": "Locations",
+      "members": "Members"
+    },
+    "license": "License:",
+    "regulatoryId": "Regulatory ID:",
+    "modal": {
+      "editTitle": "Edit Enterprise",
+      "createTitle": "Create New Enterprise",
+      "name": "Name *",
+      "license": "License #",
+      "regulatoryId": "Regulatory ID",
+      "address": "Address",
+      "description": "Description",
+      "timezone": "Timezone",
+      "type": "Enterprise Type"
+    },
+    "deactivateConfirm": "Are you sure you want to deactivate this enterprise?",
+    "deactivated": "Enterprise deactivated"
+  },
+
+  "animalGroups": {
+    "pageTitle": "🐾 Animal Groups",
+    "subtitle": "Manage herds, flocks, pens, and animal groups",
+    "newGroup": "+ New Group",
+    "selectEnterprise": "Select Enterprise...",
+    "emptyEnterprise": "Select an Enterprise",
+    "emptyEnterpriseSubtitle": "Choose an enterprise above to manage its animal groups.",
+    "loading": "Loading groups...",
+    "emptyTitle": "No Groups Yet",
+    "emptySubtitle": "Create your first animal group for this enterprise.",
+    "createBtn": "+ Create Group",
+    "species": "Species:",
+    "purpose": "Purpose:",
+    "animals": "animals",
+    "target": "target",
+    "modal": {
+      "editTitle": "Edit Group",
+      "createTitle": "Create Animal Group",
+      "name": "Group Name *",
+      "type": "Group Type *",
+      "purpose": "Purpose",
+      "species": "Species",
+      "breed": "Breed",
+      "targetCount": "Target Count",
+      "colorCode": "Color Code",
+      "description": "Description",
+      "updateBtn": "Update Group",
+      "createBtn": "Create Group"
+    },
+    "purposeOptions": {
+      "dairy": "Dairy",
+      "meat": "Meat",
+      "breeding": "Breeding",
+      "wool": "Wool",
+      "eggProduction": "Egg Production",
+      "draftWork": "Draft/Work",
+      "companion": "Companion",
+      "research": "Research",
+      "showExhibition": "Show/Exhibition",
+      "conservation": "Conservation",
+      "mixed": "Mixed",
+      "other": "Other"
+    },
+    "toasts": {
+      "nameRequired": "Name and group type are required",
+      "updated": "Group updated",
+      "created": "Group created",
+      "deleted": "Group deleted",
+      "deleteConfirm": "Delete this group? Animals will be unlinked."
+    }
+  },
+
+  "locationManagement": {
+    "pageTitle": "📍 Location Management",
+    "subtitle": "Manage barns, pens, paddocks, and facility locations",
+    "viewGrid": "Grid",
+    "viewTree": "Tree",
+    "newLocation": "+ New Location",
+    "selectEnterprise": "Select Enterprise...",
+    "emptyEnterprise": "Select an Enterprise",
+    "emptyEnterpriseSubtitle": "Choose an enterprise to manage locations.",
+    "loading": "Loading locations...",
+    "emptyTitle": "No Locations Yet",
+    "emptySubtitle": "Add your first location to track where animals are housed.",
+    "createBtn": "+ Create Location",
+    "occupancy": "Occupancy",
+    "inside": "Inside:",
+    "area": "Area:",
+    "modal": {
+      "editTitle": "Edit Location",
+      "createTitle": "Create Location",
+      "parentDefault": "None (Top Level)",
+      "validation": "Name and type are required"
+    }
+  },
+
+  "movementLog": {
+    "pageTitle": "🔄 Movement Log",
+    "subtitle": "Track animal transfers, births, sales, and more",
+    "recordMovement": "+ Record Movement",
+    "selectEnterprise": "Select Enterprise...",
+    "emptyEnterprise": "Select an Enterprise",
+    "emptyEnterpriseSubtitle": "Choose an enterprise to view movement history.",
+    "emptyTitle": "No Movements Recorded",
+    "emptySubtitle": "Movement records track animal transfers, births, sales, and other events.",
+    "headers": {
+      "type": "Type",
+      "animalGroup": "Animal/Group",
+      "from": "From",
+      "to": "To",
+      "reason": "Reason",
+      "date": "Date"
+    },
+    "types": {
+      "transfer": "Transfer",
+      "intake": "Intake",
+      "discharge": "Discharge",
+      "quarantine": "Quarantine",
+      "sale": "Sale",
+      "death": "Death",
+      "birth": "Birth",
+      "import": "Import",
+      "export": "Export"
+    },
+    "form": {
+      "title": "Record Movement",
+      "type": "Movement Type *",
+      "animalId": "Animal ID",
+      "group": "Or Group",
+      "fromLocation": "From Location",
+      "toLocation": "To Location",
+      "reason": "Reason",
+      "notes": "Notes",
+      "groupDefault": "None",
+      "locationDefault": "—",
+      "recordBtn": "Record Movement"
+    },
+    "validation": {
+      "typeRequired": "Movement type required",
+      "selectAnimal": "Select animal or group"
+    },
+    "toasts": {
+      "recorded": "Movement recorded",
+      "failed": "Failed"
+    }
+  },
+
+  "treatmentCampaigns": {
+    "pageTitle": "💉 Treatment Campaigns",
+    "subtitle": "Manage vaccination, deworming, testing, and other campaigns",
+    "newCampaign": "+ New Campaign",
+    "selectEnterprise": "Select Enterprise...",
+    "emptyEnterprise": "Select an Enterprise",
+    "emptyEnterpriseSubtitle": "Choose an enterprise to manage treatment campaigns.",
+    "emptyTitle": "No Campaigns Yet",
+    "emptySubtitle": "Create campaigns for vaccinations, deworming, testing, and more.",
+    "createBtn": "+ Create Campaign",
+    "types": {
+      "vaccination": "Vaccination",
+      "deworming": "Deworming",
+      "testing": "Testing",
+      "treatment": "Treatment",
+      "supplement": "Supplement",
+      "other": "Other"
+    },
+    "cardLabels": {
+      "species": "Species:",
+      "medication": "Medication:",
+      "dosage": "Dosage:",
+      "scheduled": "Scheduled:",
+      "started": "Started:",
+      "completed": "Completed:",
+      "treated": "Treated:"
+    },
+    "modal": {
+      "editTitle": "Edit Campaign",
+      "createTitle": "Create Campaign",
+      "name": "Campaign Name *",
+      "type": "Campaign Type *",
+      "status": "Status",
+      "targetSpecies": "Target Species",
+      "scheduledDate": "Scheduled Date",
+      "medication": "Medication",
+      "dosage": "Dosage",
+      "description": "Description",
+      "notes": "Notes",
+      "statusOptions": {
+        "planned": "Planned",
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "updateBtn": "Update Campaign",
+      "createBtn": "Create Campaign"
+    },
+    "toasts": {
+      "updated": "Campaign updated",
+      "created": "Campaign created",
+      "deleted": "Campaign deleted",
+      "nameRequired": "Name and type required",
+      "deleteConfirm": "Delete this campaign?",
+      "failed": "Failed"
+    }
+  },
+
+  "healthAnalytics": {
+    "pageTitle": "🏥 Health Analytics",
+    "subtitle": "Monitor herd health, track observations, and analyze health trends",
+    "tabs": {
+      "dashboard": "📊 Dashboard",
+      "observations": "📋 Observations"
+    },
+    "newObservation": "+ New Observation",
+    "form": {
+      "title": "Record Health Observation",
+      "observationTitle": "Title *",
+      "type": "Observation Type",
+      "severity": "Severity",
+      "animalId": "Animal ID (optional)",
+      "bodyTemp": "Body Temperature",
+      "heartRate": "Heart Rate (bpm)",
+      "respiratoryRate": "Respiratory Rate",
+      "weight": "Weight (kg)",
+      "description": "Description",
+      "saveBtn": "Save Observation"
+    },
+    "charts": {
+      "severityDistribution": "Severity Distribution (90 days)",
+      "healthScore": "Health Score Distribution",
+      "observationTimeline": "Observation Timeline (12 weeks)",
+      "mortalityTrend": "Mortality Trend (12 months)",
+      "unresolvedByType": "Unresolved by Type"
+    },
+    "critical": "🚨 Critical / Unresolved Observations",
+    "noCritical": "No critical observations!",
+    "headers": {
+      "resolved": "✅ Resolved",
+      "open": "⏳ Open"
+    },
+    "resolve": "Resolve",
+    "emptyObservations": "No observations recorded yet."
+  },
+
+  "breedingManager": {
+    "pageTitle": "🧬 Breeding & Genetics Manager",
+    "subtitle": "Track breeding records, monitor pregnancies, and analyze reproductive performance",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "tabs": {
+      "records": "📋 Records",
+      "upcomingDue": "🍼 Upcoming Due",
+      "statistics": "📊 Statistics"
+    },
+    "newRecord": "+ New Record",
+    "modal": {
+      "editTitle": "Edit Breeding Record",
+      "createTitle": "New Breeding Record",
+      "dam": "Dam (Mother) ID *",
+      "sire": "Sire (Father) ID",
+      "breedingDate": "Breeding Date *",
+      "method": "Method",
+      "status": "Status",
+      "offspringCount": "Offspring Count",
+      "liveOffspring": "Live Offspring",
+      "stillborn": "Stillborn",
+      "notes": "Notes",
+      "updateBtn": "Update",
+      "createBtn": "Create"
+    },
+    "recordsTable": {
+      "title": "Breeding Records",
+      "empty": "No breeding records yet.",
+      "headers": {
+        "dam": "Dam",
+        "sire": "Sire",
+        "date": "Date",
+        "method": "Method",
+        "status": "Status",
+        "dueDate": "Due Date",
+        "offspring": "Offspring",
+        "actions": "Actions"
+      }
+    },
+    "upcomingDue": {
+      "title": "🍼 Upcoming Due Dates (next 60 days)",
+      "empty": "No upcoming births expected.",
+      "daysLeft": "Days Left",
+      "dayUnit": "days"
+    },
+    "statistics": {
+      "totalRecords": "Total Records",
+      "currentlyBred": "Currently Bred",
+      "confirmedPregnant": "Confirmed Pregnant",
+      "delivered": "Delivered",
+      "liveBirths": "Live Births",
+      "stillbirths": "Stillbirths",
+      "avgGestation": "Avg Gestation (days)"
+    },
+    "toasts": {
+      "updated": "Breeding record updated!",
+      "created": "Breeding record created!",
+      "failed": "Failed to save breeding record"
+    }
+  },
+
+  "feedInventory": {
+    "pageTitle": "🌾 Feed & Inventory Management",
+    "subtitle": "Track feed stock levels, log consumption, and get low-stock alerts",
+    "tabs": {
+      "inventory": "📦 Inventory",
+      "analytics": "📊 Analytics"
+    },
+    "addFeed": "+ Add Feed",
+    "logConsumption": "📝 Log Consumption",
+    "inventoryTitle": "Feed Inventory",
+    "emptyInventory": "No feed items in inventory.",
+    "lowStock": "Low Stock",
+    "ok": "OK",
+    "restock": "Restock",
+    "totalValue": "Total Inventory Value",
+    "lowStockAlerts": "⚠️ Low Stock Alerts",
+    "allOk": "All stock levels OK!",
+    "consumptionByType": "Consumption by Type (30 days)",
+    "dailyTrend": "Daily Consumption Trend"
+  },
+
+  "complianceDocs": {
+    "pageTitle": "📜 Compliance & Regulatory Documents",
+    "subtitle": "Manage licenses, permits, certifications and track expiry dates",
+    "tabs": {
+      "documents": "📄 Documents",
+      "summary": "📊 Summary"
+    },
+    "addDocument": "+ Add Document",
+    "modal": {
+      "editTitle": "Edit Document",
+      "createTitle": "Add Compliance Document",
+      "title": "Title *",
+      "type": "Document Type",
+      "number": "Document Number",
+      "authority": "Issuing Authority",
+      "issueDate": "Issue Date",
+      "expiryDate": "Expiry Date",
+      "status": "Status",
+      "fileUrl": "File URL",
+      "notes": "Notes",
+      "updateBtn": "Update",
+      "addBtn": "Add Document"
+    },
+    "table": {
+      "title": "All Compliance Documents",
+      "empty": "No documents yet.",
+      "headers": {
+        "title": "Title",
+        "type": "Type",
+        "number": "Number",
+        "authority": "Authority",
+        "expiry": "Expiry",
+        "status": "Status",
+        "verified": "Verified",
+        "actions": "Actions"
+      },
+      "verify": "Verify",
+      "del": "Del"
+    },
+    "summary": {
+      "expiringSoon": "⚠️ Expiring Soon (30 days)",
+      "noExpiring": "No documents expiring soon!",
+      "expired": "🚨 Expired",
+      "noExpired": "No expired documents!",
+      "byType": "By Document Type",
+      "byStatus": "By Status"
+    },
+    "toasts": {
+      "updated": "Document updated!",
+      "created": "Document created!",
+      "deleted": "Document deleted!",
+      "verified": "Document verified!",
+      "deleteConfirm": "Delete this document?"
+    }
+  },
+
+  "financialAnalytics": {
+    "pageTitle": "💰 Financial Analytics",
+    "subtitle": "Track income, expenses, and analyze financial performance",
+    "tabs": {
+      "dashboard": "📊 Dashboard",
+      "records": "📋 Records"
+    },
+    "addRecord": "+ Add Record",
+    "form": {
+      "type": "Type *",
+      "income": "💚 Income",
+      "expense": "🔴 Expense",
+      "category": "Category *",
+      "amount": "Amount *",
+      "date": "Transaction Date *",
+      "description": "Description",
+      "reference": "Reference #",
+      "notes": "Notes"
+    },
+    "dashboard": {
+      "totalIncome": "Total Income",
+      "totalExpenses": "Total Expenses",
+      "netProfit": "Net Profit",
+      "monthlyBreakdown": "Monthly Breakdown",
+      "topExpenses": "Top Expense Categories",
+      "revenueByCategory": "Revenue by Category"
+    },
+    "emptyRecords": "No records yet.",
+    "deleteConfirm": "Delete this financial record?"
+  },
+
+  "alertCenter": {
+    "pageTitle": "🔔 Smart Alert Center",
+    "subtitle": "Configure alert rules, monitor events, and stay on top of critical issues",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "tabs": {
+      "events": "🔔 Events",
+      "rules": "⚙️ Rules"
+    },
+    "runChecks": "🔍 Run Alert Checks",
+    "markAllRead": "✓ Mark All Read",
+    "newRule": "+ New Rule",
+    "ruleModal": {
+      "editTitle": "Edit Alert Rule",
+      "createTitle": "Create Alert Rule",
+      "name": "Rule Name *",
+      "type": "Rule Type",
+      "severity": "Severity",
+      "conditions": "Conditions (JSON)",
+      "examples": "Examples:",
+      "updateBtn": "Update Rule",
+      "createBtn": "Create Rule"
+    },
+    "events": {
+      "title": "Alert Events",
+      "empty": "No alert events. Run alert checks to scan for issues.",
+      "rule": "Rule:",
+      "animal": "Animal:",
+      "acknowledgedBy": "Acknowledged by:",
+      "markRead": "Mark Read",
+      "acknowledge": "Acknowledge"
+    },
+    "rules": {
+      "title": "Alert Rules",
+      "empty": "No alert rules configured. Create one to start monitoring.",
+      "headers": {
+        "name": "Name",
+        "type": "Type",
+        "severity": "Severity",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "del": "Del"
+    },
+    "toasts": {
+      "ruleUpdated": "Rule updated!",
+      "ruleCreated": "Rule created!",
+      "ruleDeleted": "Rule deleted!",
+      "saveFailed": "Failed to save rule",
+      "toggleFailed": "Failed to toggle rule",
+      "deleteFailed": "Failed to delete",
+      "allRead": "All alerts marked as read",
+      "acknowledged": "Alert acknowledged",
+      "checksComplete": "Alert checks complete: {{count}} alert(s) triggered",
+      "deleteConfirm": "Delete this alert rule?",
+      "invalidJson": "Invalid JSON in conditions"
+    }
+  },
+
+  "diseasePrediction": {
+    "pageTitle": "🧠 AI Disease Prediction & Outbreak Mapping",
+    "subtitle": "Predictive risk scoring, geographic outbreak heatmaps, and recommended preventive actions",
+    "tabs": {
+      "dashboard": "Risk Dashboard",
+      "predictions": "Predictions",
+      "outbreaks": "Outbreak Zones"
+    },
+    "emptyEnterprise": "Select an enterprise to view AI disease predictions",
+    "loading": "Analyzing risk data…",
+    "stats": {
+      "activePredictions": "Active Predictions",
+      "avgRiskScore": "Avg Risk Score",
+      "diseasesTracked": "Diseases Tracked",
+      "activeOutbreaks": "Active Outbreaks"
+    },
+    "riskDistribution": "🔬 Disease Risk Distribution",
+    "highestRisk": "⚠️ Highest Risk Animals",
+    "newPrediction": "+ New Prediction",
+    "submitPrediction": "Submit Prediction",
+    "emptyPredictions": "No predictions yet",
+    "newOutbreak": "+ Report Outbreak Zone",
+    "createOutbreak": "Create Outbreak Zone",
+    "emptyOutbreaks": "No outbreak zones reported",
+    "resolvedBtn": "Resolved!",
+    "enterpriseWide": "Enterprise-wide",
+    "affected": "affected",
+    "atRisk": "at risk",
+    "radius": "radius",
+    "outbreakResolved": "Outbreak resolved!"
+  },
+
+  "genomicLineage": {
+    "pageTitle": "🧬 Genomic Lineage & Genetic Diversity",
+    "subtitle": "Track ancestry trees, inbreeding coefficients, and find optimal breeding pairs",
+    "tabs": {
+      "dashboard": "Diversity Dashboard",
+      "profiles": "Genetic Profiles",
+      "pairs": "Pair Recommendations"
+    },
+    "stats": {
+      "totalProfiles": "Total Profiles",
+      "avgInbreeding": "Avg Inbreeding Coeff.",
+      "highRisk": "High-Risk (>0.0625)",
+      "speciesTracked": "Species Tracked"
+    },
+    "diversityChart": "📊 Genetic Diversity by Species",
+    "highRiskAnimals": "⚠️ High Inbreeding Risk Animals",
+    "addProfile": "+ Add Genetic Profile",
+    "createProfile": "Create Profile",
+    "emptyProfiles": "No genetic profiles",
+    "addPair": "+ Add Pair Recommendation",
+    "createPair": "Create Pair Recommendation",
+    "emptyPairs": "No pair recommendations yet",
+    "emptyEnterprise": "Select an enterprise to view genetic data",
+    "loading": "Loading genetic data…"
+  },
+
+  "iotSensors": {
+    "pageTitle": "📡 IoT Sensor Integration Dashboard",
+    "subtitle": "Real-time environmental monitoring, automated telemetry, and anomaly detection",
+    "tabs": {
+      "dashboard": "Telemetry Dashboard",
+      "sensors": "Sensors",
+      "readings": "Readings"
+    },
+    "registerSensor": "Register Sensor",
+    "recordReading": "📊 Record Reading",
+    "loading": "Connecting to sensor network…"
+  },
+
+  "supplyChain": {
+    "pageTitle": "🔗 Supply Chain & Traceability (Farm-to-Fork)",
+    "subtitle": "Full birth-to-sale traceability, QR code generation, and blockchain-style audit trail",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "emptyEnterprise": "Select an enterprise to view supply chain data",
+    "loading": "Loading traceability data…",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "batches": "Product Batches",
+      "events": "Traceability Events",
+      "qrCodes": "QR Codes"
+    },
+    "stats": {
+      "totalBatches": "Total Batches",
+      "inProduction": "In Production",
+      "expiring": "Expiring (30d)",
+      "qrCodes": "QR Codes"
+    },
+    "batchStatus": "📦 Batch Status Distribution",
+    "eventTypes": "📋 Event Types (90d)",
+    "expiringSoon": "⏰ Expiring Soon",
+    "createBatch": "+ Create Batch",
+    "batchCreated": "Batch created!",
+    "eventLogged": "Traceability event logged!",
+    "eventVerified": "Event verified!",
+    "qrGenerated": "QR code generated!",
+    "logEvent": "+ Log Event",
+    "emptyBatches": "No batches",
+    "emptyEvents": "No traceability events",
+    "emptyQR": "No QR codes generated yet — create one from a batch"
+  },
+
+  "workforce": {
+    "pageTitle": "👷 Workforce & Task Management",
+    "subtitle": "Shift scheduling, task boards with checklists, and performance analytics",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "emptyEnterprise": "Select an enterprise to manage workforce",
+    "loading": "Loading workforce data…",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "taskBoard": "Task Board",
+      "shiftSchedule": "Shift Schedule"
+    },
+    "stats": {
+      "totalTasks": "Total Tasks",
+      "pending": "Pending",
+      "overdue": "Overdue",
+      "todayShifts": "Today's Shifts"
+    },
+    "priorityChart": "🏷️ Open Tasks by Priority",
+    "topWorkers": "🏆 Top Workers",
+    "overdueTasks": "🚨 Overdue Tasks",
+    "todayShifts": "📅 Today's Shifts",
+    "createTask": "+ Create Task",
+    "createShift": "+ Schedule Shift",
+    "taskCreated": "Task created!",
+    "shiftScheduled": "Shift scheduled!",
+    "startTask": "▶ Start",
+    "completeTask": "✓ Complete",
+    "unassigned": "Unassigned",
+    "emptyTasks": "No tasks yet",
+    "emptyShifts": "No shifts scheduled",
+    "checkIn": "Check In",
+    "checkOut": "Check Out"
+  },
+
+  "reportBuilder": {
+    "pageTitle": "📊 Report Builder & Export Center",
+    "subtitle": "Custom reports, scheduled exports, and cross-module analytical dashboards",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "emptyEnterprise": "Select an enterprise to generate reports",
+    "loading": "Loading report center…",
+    "tabs": {
+      "generate": "Generate Report",
+      "history": "Report History",
+      "view": "View Report",
+      "templates": "Templates"
+    },
+    "reportTypes": {
+      "animalCensus": "🐄 Animal Census",
+      "animalCensusDesc": "Comprehensive animal inventory by species, breed, gender",
+      "healthSummary": "🏥 Health Summary",
+      "healthSummaryDesc": "Health observations, resolution rates, severity analysis",
+      "financialSummary": "💰 Financial Summary",
+      "financialSummaryDesc": "Income vs expenses by category over time",
+      "breedingReport": "🧬 Breeding Report",
+      "breedingReportDesc": "Breeding outcomes, pregnancy rates, offspring stats",
+      "complianceAudit": "📋 Compliance Audit",
+      "complianceAuditDesc": "Document verification status, expiring certifications",
+      "taskPerformance": "👷 Task Performance",
+      "taskPerformanceDesc": "Worker productivity, completion rates, overdue analysis",
+      "sensorAnalytics": "📡 Sensor Analytics",
+      "sensorAnalyticsDesc": "IoT sensor readings, anomalies, averages across devices"
+    },
+    "selectType": "Select Report Type",
+    "reportName": "Report Name",
+    "format": "Format",
+    "generateBtn": "🚀 Generate Report",
+    "generating": "⏳ Generating Report…",
+    "generated": "Report generated!",
+    "deleted": "Report deleted!",
+    "templateCreated": "Template created!",
+    "emptyHistory": "No reports generated yet",
+    "emptyView": "Select a report from History or Generate a new one",
+    "createTemplate": "+ Create Template"
+  },
+
+  "aiCopilot": {
+    "pageTitle": "🤖 AI Veterinary Copilot",
+    "subtitle": "Intelligent assistant for symptom analysis, drug checks & treatment guidance",
+    "tabs": {
+      "chat": "💬 Chat Assistant",
+      "drugInteractions": "💊 Drug Interactions",
+      "symptomAnalysis": "🔬 Symptom Analysis"
+    },
+    "chat": {
+      "newChat": "+ New Chat",
+      "emptySessions": "No sessions yet. Start a new chat!",
+      "greeting": "How can I help today?",
+      "placeholder": "Ask about symptoms, treatments, nutrition, or any veterinary topic",
+      "send": "▹ Send",
+      "inputPlaceholder": "Type your question...",
+      "emptyTitle": "AI Veterinary Copilot",
+      "emptySubtitle": "Select a session or start a new chat",
+      "startNew": "Start New Chat"
+    },
+    "suggestedPrompts": {
+      "respiratory": "What are common signs of respiratory infection in cattle?",
+      "drugCheck": "Drug interaction check: NSAIDs + Corticosteroids",
+      "vaccination": "Recommended vaccination schedule for puppies",
+      "mastitis": "How to manage mastitis in dairy cows?",
+      "nutrition": "Nutritional requirements for pregnant ewes",
+      "emergency": "Emergency first aid for colic in horses"
+    },
+    "drug": {
+      "title": "💊 Drug Interaction Checker",
+      "description": "Enter medication names separated by commas to check for interactions",
+      "placeholder": "e.g. nsaids, corticosteroids, metronidazole",
+      "checkBtn": "Check Interactions",
+      "found": "⚠️ Interactions Found",
+      "none": "✅ No Interactions Detected"
+    },
+    "symptom": {
+      "title": "🔬 Symptom Analysis",
+      "description": "Describe symptoms to receive AI-assisted preliminary analysis",
+      "placeholder": "e.g. fever, vomiting, lameness",
+      "speciesPlaceholder": "Species (optional)",
+      "analyzeBtn": "Analyze",
+      "confidence": "Confidence:",
+      "sources": "Sources:",
+      "urgency": "Urgency:",
+      "species": "Species:"
+    },
+    "errors": {
+      "sendFailed": "Failed to send message",
+      "deleted": "Session deleted",
+      "deleteFailed": "Failed to delete"
+    }
+  },
+
+  "digitalTwin": {
+    "pageTitle": "🔮 Digital Twin & Simulator",
+    "subtitle": "Virtual farm models with scenario simulation and predictive analysis",
+    "selectEnterprise": "Select Enterprise",
+    "tabs": {
+      "dashboard": "📊 Dashboard",
+      "twins": "🏗️ Digital Twins",
+      "simulate": "🧪 Simulate"
+    },
+    "stats": {
+      "digitalTwins": "Digital Twins",
+      "simulationsRun": "Simulations Run",
+      "scenarioTypes": "Scenario Types Used",
+      "recentSimulations": "Recent Simulations"
+    },
+    "emptyDashboard": "Select an enterprise to view dashboard",
+    "createTwin": "+ Create Twin",
+    "createTwinModal": "Create Digital Twin",
+    "twinName": "Name",
+    "twinType": "Type",
+    "twinDescription": "Description",
+    "emptyTwins": "No digital twins yet",
+    "newSimulation": "+ New Simulation",
+    "runSimulation": "Run Simulation",
+    "simName": "Simulation name",
+    "selectTwin": "Select twin...",
+    "scenarioType": "Scenario Type",
+    "runBtn": "▸ Run Simulation",
+    "results": "Results:",
+    "emptySimulations": "No simulations yet. Create a digital twin first, then run simulations.",
+    "twinCreated": "Digital twin created!",
+    "simulationCompleted": "Simulation completed!"
+  },
+
+  "marketplace": {
+    "pageTitle": "🏪 Marketplace & Auctions",
+    "subtitle": "Buy, sell, and auction animals, equipment, and veterinary supplies",
+    "tabs": {
+      "dashboard": "📊 Dashboard",
+      "browse": "🛒 Browse",
+      "create": "➕ Create Listing",
+      "orders": "📦 My Orders"
+    },
+    "categories": {
+      "all": "All Categories",
+      "animals": "🐄 Animals",
+      "feed": "🌾 Feed & Nutrition",
+      "equipment": "🔧 Equipment",
+      "medicine": "💊 Medicine",
+      "semenEmbryo": "🧬 Semen/Embryo",
+      "services": "🩺 Services",
+      "other": "📦 Other"
+    },
+    "stats": {
+      "activeListings": "Active Listings",
+      "itemsSold": "Items Sold",
+      "categories": "Categories",
+      "activeSellers": "Active Sellers"
+    },
+    "latestListings": "Latest Listings",
+    "backToListings": "← Back to listings",
+    "contactForPrice": "Contact for price",
+    "searchPlaceholder": "Search listings...",
+    "allTypes": "All Types",
+    "fixedPrice": "Fixed Price",
+    "auction": "Auction",
+    "searchBtn": "Search",
+    "emptyListings": "No listings found",
+    "auctionBadge": "🔨 Auction",
+    "fixedBadge": "💵 Fixed",
+    "featuredBadge": "⭐ Featured",
+    "bids": "bids",
+    "buyNow": "Buy Now",
+    "placeBid": "Place Bid",
+    "currentHighest": "Current highest: ${{amount}}",
+    "bidHistory": "Bid History ({{count}})",
+    "winningBadge": "★ Winning",
+    "createListing": "Create New Listing",
+    "publishBtn": "Publish Listing",
+    "emptyOrders": "No orders yet",
+    "listingCreated": "Listing created!",
+    "bidPlaced": "Bid placed!",
+    "orderPlaced": "Order placed!"
+  },
+
+  "sustainability": {
+    "pageTitle": "🌱 Sustainability & Carbon",
+    "subtitle": "ESG scoring, carbon footprint tracking, and sustainability goal management",
+    "selectEnterprise": "Select Enterprise",
+    "tabs": {
+      "dashboard": "📊 Dashboard",
+      "metrics": "📈 Metrics",
+      "goals": "🎯 Goals",
+      "carbon": "🌍 Carbon Footprint"
+    },
+    "stats": {
+      "metricEntries": "Metric Entries",
+      "metricTypes": "Metric Types",
+      "activeGoals": "Active Goals",
+      "avgProgress": "Avg Goal Progress",
+      "co2Estimate": "Est. CO₂ (tons/yr)"
+    },
+    "goalProgress": "🎯 Goal Progress",
+    "target": "Target:",
+    "metricsSummary": "📊 Metrics Summary",
+    "summaryHeaders": {
+      "type": "Metric Type",
+      "entries": "Entries",
+      "total": "Total",
+      "average": "Average",
+      "unit": "Unit"
+    },
+    "recordMetric": "+ Record Metric",
+    "formTitle": "Record Sustainability Metric",
+    "saveMetric": "Save Metric",
+    "emptyMetrics": "No metrics recorded yet",
+    "metricTypes": {
+      "carbon": "🏭 Carbon Emissions",
+      "water": "💧 Water Usage",
+      "energy": "⚡ Energy Consumption",
+      "waste": "🗑️ Waste Generated",
+      "feedWaste": "🌾 Feed Waste",
+      "methane": "💨 Methane Output",
+      "renewable": "☀️ Renewable Energy %",
+      "recycling": "♻️ Recycling Rate"
+    },
+    "scopes": {
+      "scope1": "Direct Emissions",
+      "scope2": "Energy Indirect",
+      "scope3": "Value Chain"
+    },
+    "addGoal": "+ Add Goal",
+    "createGoal": "Create Sustainability Goal",
+    "emptyGoals": "No goals set yet",
+    "carbonFootprint": {
+      "totalCO2": "Total CO₂ (tons/yr)",
+      "speciesGroups": "Species Groups",
+      "tableTitle": "Carbon Emissions by Species",
+      "species": "Species",
+      "headCount": "Head Count",
+      "emissionFactor": "Emission Factor",
+      "annualKg": "Annual CO₂ (kg)",
+      "annualTons": "Annual CO₂ (tons)",
+      "calculating": "Calculating carbon footprint...",
+      "selectEnterprise": "Select an enterprise to view carbon footprint"
+    },
+    "toasts": {
+      "metricRecorded": "Metric recorded!",
+      "goalCreated": "Goal created!"
+    }
+  },
+
+  "wellnessPortal": {
+    "pageTitle": "💚 Wellness Portal",
+    "subtitle": "Pet health scorecards, vaccination reminders, and wellness tracking",
+    "tabs": {
+      "dashboard": "📊 Dashboard",
+      "scorecards": "📋 Scorecards",
+      "reminders": "⏰ Reminders"
+    },
+    "stats": {
+      "animals": "Animals",
+      "avgScore": "Avg Wellness Score",
+      "overdueReminders": "Overdue Reminders",
+      "upcoming": "Upcoming (14d)"
+    },
+    "latestScorecards": "Latest Wellness Scorecards",
+    "scoreLabels": {
+      "nutrition": "Nutrition",
+      "activity": "Activity",
+      "vaccines": "Vaccines",
+      "dental": "Dental"
+    },
+    "weight": "Weight:",
+    "upcomingReminders": "⏰ Upcoming Reminders",
+    "due": "Due:",
+    "completeBtn": "✓",
+    "snoozeBtn": "💤",
+    "newScorecard": "+ New Scorecard",
+    "createScorecard": "Create Wellness Scorecard",
+    "selectAnimal": "Select animal...",
+    "nextCheckup": "Next checkup:",
+    "emptyScorecards": "No scorecards yet. Create one for your pet!",
+    "createScorecardBtn": "Create Scorecard",
+    "newReminder": "+ New Reminder",
+    "createReminder": "Create Reminder",
+    "createReminderBtn": "Create Reminder",
+    "doneBtn": "✓ Done",
+    "snooze3d": "💤 Snooze",
+    "emptyReminders": "No reminders yet",
+    "toasts": {
+      "scorecardCreated": "Scorecard created!",
+      "reminderCreated": "Reminder created!",
+      "completed": "Completed!",
+      "snoozed": "Snoozed 3 days"
+    }
+  },
+
+  "geospatialAnalytics": {
+    "pageTitle": "🗺️ Geospatial Analytics",
+    "subtitle": "Geofencing, location tracking, heatmaps, and movement trails",
+    "tabs": {
+      "dashboard": "📊 Dashboard",
+      "zones": "📍 Zones",
+      "events": "📡 Events",
+      "heatmap": "🔥 Heatmap & Trails"
+    },
+    "stats": {
+      "totalZones": "Total Zones",
+      "activeZones": "Active Zones",
+      "restricted": "Restricted",
+      "events24h": "Events (24h)",
+      "trackedAnimals": "Tracked Animals"
+    },
+    "zoneOverview": "Zone Overview",
+    "recentEvents": "Recent Events",
+    "createZone": "Create Geofence Zone",
+    "recordEvent": "Record Geospatial Event",
+    "heatmapTitle": "🔥 Location Heatmap Data",
+    "heatmapSubtitle": "Clustered location density data",
+    "trailTitle": "🐾 Movement Trail",
+    "trailSubtitle": "Track an animal's movement path over time",
+    "animalIdPlaceholder": "Enter Animal ID",
+    "loadTrail": "Load Trail"
+  },
+
+  "errorBoundary": {
+    "heading": "Something went wrong",
+    "description": "An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.",
+    "tryAgain": "Try Again",
+    "reloadPage": "Reload Page",
+    "errorLabel": "Error: "
+  },
+
+  "layout": {
+    "skipToContent": "Skip to main content"
+  },
+
+  "languageSwitcher": {
+    "label": "Language",
+    "ariaLabel": "Select language"
+  }
+}

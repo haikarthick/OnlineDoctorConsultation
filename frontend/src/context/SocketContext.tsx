@@ -7,7 +7,7 @@
  *   socket?.on('chat:message', handler)
  */
 
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 
 interface SocketContextValue {
@@ -18,7 +18,7 @@ interface SocketContextValue {
 const SocketContext = createContext<SocketContextValue>({ socket: null, connected: false })
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const socketRef = useRef<Socket | null>(null)
+  const [socket, setSocket] = useState<Socket | null>(null)
   const [connected, setConnected] = useState(false)
 
   useEffect(() => {
@@ -40,6 +40,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     s.on('disconnect', () => setConnected(false))
 
+    s.on('connect_error', (err) => {
+      console.warn('[Socket] Connection error:', err.message)
+      setConnected(false)
+    })
+
     s.on('auth_error', () => {
       // Token may have been refreshed; re-try with current token
       const freshToken = localStorage.getItem('authToken')
@@ -48,17 +53,17 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       }
     })
 
-    socketRef.current = s
+    setSocket(s)
 
     return () => {
       s.disconnect()
-      socketRef.current = null
+      setSocket(null)
       setConnected(false)
     }
   }, [])
 
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current, connected }}>
+    <SocketContext.Provider value={{ socket, connected }}>
       {children}
     </SocketContext.Provider>
   )

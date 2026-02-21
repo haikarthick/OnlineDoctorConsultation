@@ -10,6 +10,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
   // Initialize from localStorage on mount
@@ -21,13 +22,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(JSON.parse(storedUser))
       setIsAuthenticated(true)
     }
+    setLoading(false)
   }, [])
+
+  /** Read a cookie by name (for CSRF) */
+  const getCookie = (name: string): string | null => {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
+    return match ? decodeURIComponent(match[2]) : null
+  }
+
+  /** Build headers with optional CSRF token */
+  const headersWithCsrf = (extra: Record<string, string> = {}): Record<string, string> => {
+    const h: Record<string, string> = { 'Content-Type': 'application/json', ...extra }
+    const csrf = getCookie('__csrf')
+    if (csrf) h['X-CSRF-Token'] = csrf
+    return h
+  }
 
   const login = async (email: string, password: string) => {
     try {
       const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headersWithCsrf(),
         credentials: 'include',
         body: JSON.stringify({ email, password })
       })
@@ -64,7 +80,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headersWithCsrf(),
+        credentials: 'include',
         body: JSON.stringify(data)
       })
 
@@ -119,7 +136,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )

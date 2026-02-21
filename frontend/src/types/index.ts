@@ -23,6 +23,7 @@ export interface AuthContextType {
   user: User | null
   token: string | null
   isAuthenticated: boolean
+  loading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (data: RegisterData) => Promise<void>
   logout: () => void
@@ -692,6 +693,7 @@ export interface MenuItem {
   roles: UserRole[]
   subItems?: MenuItem[]
   badge?: string
+  section?: string
 }
 
 // ═══════════════════════════════════════════════════════════════

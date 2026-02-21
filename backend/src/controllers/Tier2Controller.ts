@@ -10,8 +10,8 @@ import logger from '../utils/logger';
 
 // Helper to check enterprise access
 async function ensureAccess(req: Request, res: Response, enterpriseId: string): Promise<boolean> {
-  const userId = (req as any).user?.id;
-  const role = (req as any).user?.role;
+  const userId = (req as any).userId;
+  const role = (req as any).userRole;
   if (role === 'admin') return true;
   const hasAccess = await enterpriseService.hasAccess(enterpriseId, userId);
   if (!hasAccess) {
@@ -45,7 +45,7 @@ class Tier2Controller {
 
   async createObservation(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await healthAnalyticsService.createObservation({ ...req.body, observerId: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -143,7 +143,7 @@ class Tier2Controller {
 
   async logFeedConsumption(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await feedInventoryService.logConsumption({ ...req.body, recordedBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -194,7 +194,7 @@ class Tier2Controller {
 
   async verifyComplianceDoc(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await complianceService.verify(req.params.id, userId);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -229,7 +229,7 @@ class Tier2Controller {
 
   async createFinancialRecord(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await financialService.create({ ...req.body, recordedBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -272,7 +272,7 @@ class Tier2Controller {
 
   async createAlertRule(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await alertService.createRule({ ...req.body, createdBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -324,7 +324,7 @@ class Tier2Controller {
 
   async acknowledgeAlert(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       await alertService.acknowledge(req.params.id, userId);
       res.json({ data: { success: true } });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }

@@ -834,7 +834,7 @@ export class MedicalRecordService {
         database.query(`SELECT COUNT(*) as count, record_type as type FROM medical_records mr ${userFilter} GROUP BY record_type`),
         database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records vr LEFT JOIN animals a ON a.id = vr.animal_id ${vetAnimalFilter}`),
         database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active FROM allergy_records ar LEFT JOIN animals a ON a.id = ar.animal_id ${vetAnimalFilter}`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${vetAnimalFilter}`),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN lr.status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${vetAnimalFilter}`),
         database.query(`SELECT COUNT(*) as count FROM medical_records mr ${userFilter ? userFilter + ' AND' : 'WHERE'} follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`),
         database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN is_active THEN 1 END) as active FROM prescriptions p ${prescriptionFilter}`),
         database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN c.status = 'completed' THEN 1 END) as completed FROM consultations c ${consultationFilter}`),

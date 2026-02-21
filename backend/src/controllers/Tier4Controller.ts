@@ -13,8 +13,8 @@ import enterpriseService from '../services/EnterpriseService';
 import logger from '../utils/logger';
 
 async function ensureAccess(req: Request, res: Response, enterpriseId: string): Promise<boolean> {
-  const userId = (req as any).user?.id;
-  const role = (req as any).user?.role;
+  const userId = (req as any).userId;
+  const role = (req as any).userRole;
   if (role === 'admin') return true;
   const hasAccess = await enterpriseService.hasAccess(enterpriseId, userId);
   if (!hasAccess) {
@@ -30,7 +30,7 @@ class Tier4Controller {
 
   async listChatSessions(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await aiCopilotService.listSessions(userId, req.query);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -38,7 +38,7 @@ class Tier4Controller {
 
   async createChatSession(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await aiCopilotService.createSession({ ...req.body, userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -68,7 +68,7 @@ class Tier4Controller {
 
   async sendChatMessage(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await aiCopilotService.sendMessage(req.params.sessionId, userId, req.body.content);
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -101,7 +101,7 @@ class Tier4Controller {
 
   async createDigitalTwin(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await digitalTwinService.createTwin({ ...req.body, enterpriseId: req.params.enterpriseId, createdBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -132,7 +132,7 @@ class Tier4Controller {
 
   async runSimulation(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await digitalTwinService.runSimulation({ ...req.body, enterpriseId: req.params.enterpriseId, createdBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -181,7 +181,7 @@ class Tier4Controller {
 
   async createMarketplaceListing(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await marketplaceService.createListing({ ...req.body, sellerId: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -210,7 +210,7 @@ class Tier4Controller {
 
   async placeMarketplaceBid(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await marketplaceService.placeBid({ ...req.body, listingId: req.params.listingId, bidderId: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -218,7 +218,7 @@ class Tier4Controller {
 
   async listMarketplaceOrders(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const role = (req.query.role as string) || 'buyer';
       const data = await marketplaceService.listOrders(userId, role as any);
       res.json({ data });
@@ -227,7 +227,7 @@ class Tier4Controller {
 
   async createMarketplaceOrder(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await marketplaceService.createOrder({ ...req.body, buyerId: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -260,7 +260,7 @@ class Tier4Controller {
 
   async createSustainabilityMetric(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await sustainabilityService.createMetric({ ...req.body, enterpriseId: req.params.enterpriseId, recordedBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -291,7 +291,7 @@ class Tier4Controller {
 
   async createSustainabilityGoal(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await sustainabilityService.createGoal({ ...req.body, enterpriseId: req.params.enterpriseId, createdBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -333,7 +333,7 @@ class Tier4Controller {
 
   async listWellnessScorecards(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await wellnessService.listScorecards(userId, req.query);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -341,7 +341,7 @@ class Tier4Controller {
 
   async createWellnessScorecard(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await wellnessService.createScorecard({ ...req.body, ownerId: userId, assessedBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -363,7 +363,7 @@ class Tier4Controller {
 
   async listWellnessReminders(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await wellnessService.listReminders(userId, req.query);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -371,7 +371,7 @@ class Tier4Controller {
 
   async createWellnessReminder(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await wellnessService.createReminder({ ...req.body, ownerId: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -400,7 +400,7 @@ class Tier4Controller {
 
   async getWellnessDashboard(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await wellnessService.getDashboard(userId);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -419,7 +419,7 @@ class Tier4Controller {
 
   async createGeofenceZone(req: Request, res: Response) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).userId;
       const data = await geospatialService.createZone({ ...req.body, enterpriseId: req.params.enterpriseId, createdBy: userId });
       res.status(201).json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }

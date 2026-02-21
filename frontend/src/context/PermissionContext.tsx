@@ -83,6 +83,7 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'manage-schedule': 'schedule',
   'prescriptions': 'prescriptions',
   'my-reviews': 'reviews',
+  'write-review': 'write_review',
   'settings': 'settings',
   'admin-dashboard': 'admin_dashboard',
   'admin-users': 'admin_users',
