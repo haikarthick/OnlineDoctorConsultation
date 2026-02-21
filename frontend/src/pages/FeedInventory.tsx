@@ -46,7 +46,7 @@ const FeedInventory: React.FC = () => {
         apiService.listFeeds(selectedEnterpriseId),
         apiService.getFeedAnalytics(selectedEnterpriseId)
       ])
-      setFeeds(feedRes.data || [])
+      setFeeds(feedRes.data?.items || [])
       setAnalytics(analyticsRes.data || null)
     } catch { /* silently fail */ }
     finally { setLoading(false) }

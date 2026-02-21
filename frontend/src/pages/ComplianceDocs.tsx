@@ -50,7 +50,7 @@ const ComplianceDocs: React.FC = () => {
         apiService.listComplianceDocs(selectedEnterpriseId),
         apiService.getComplianceSummary(selectedEnterpriseId)
       ])
-      setDocuments(docsRes.data || [])
+      setDocuments(docsRes.data?.items || [])
       setSummary(summRes.data || null)
     } catch { /* silently fail */ }
     finally { setLoading(false) }

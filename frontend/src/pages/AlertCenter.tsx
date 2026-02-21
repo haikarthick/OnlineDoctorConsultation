@@ -42,8 +42,8 @@ const AlertCenter: React.FC = () => {
         apiService.listAlertRules(selectedEnterpriseId),
         apiService.listAlertEvents(selectedEnterpriseId)
       ])
-      setRules(rulesRes.data || [])
-      setEvents(eventsRes.data || [])
+      setRules(rulesRes.data?.items || [])
+      setEvents(eventsRes.data?.items || [])
     } catch { /* silently fail */ }
     finally { setLoading(false) }
   }

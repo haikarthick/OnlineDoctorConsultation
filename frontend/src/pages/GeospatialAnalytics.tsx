@@ -47,7 +47,7 @@ const GeospatialAnalytics: React.FC = () => {
       setDashboard(dRes.data)
       setZones(zRes.data?.items || [])
       setEvents(eRes.data?.items || [])
-      setHeatmapData(hRes.data?.clusters || hRes.data || [])
+      setHeatmapData(hRes.data?.points || hRes.data?.clusters || [])
     } catch (e: any) { setError(e.message) }
     setLoading(false)
   }

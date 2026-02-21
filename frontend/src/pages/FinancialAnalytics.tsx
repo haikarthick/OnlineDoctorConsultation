@@ -47,7 +47,7 @@ const FinancialAnalytics: React.FC = () => {
         apiService.listFinancialRecords(selectedEnterpriseId),
         apiService.getFinancialDashboard(selectedEnterpriseId)
       ])
-      setRecords(recRes.data || [])
+      setRecords(recRes.data?.items || [])
       setDashboard(dashRes.data || null)
     } catch { /* silently fail */ }
     finally { setLoading(false) }

@@ -61,7 +61,7 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
     try {
       setLoading(true)
       const res = await apiService.getMedicalAuditLog({ limit: 100 })
-      setAuditLogs(res.data?.logs || res.data || [])
+      setAuditLogs(res.data?.entries || res.data?.logs || [])
     } catch (err) {
 } finally { setLoading(false) }
   }, [])

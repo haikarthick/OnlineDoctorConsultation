@@ -44,7 +44,7 @@ const HealthAnalytics: React.FC = () => {
         apiService.listHealthObservations(selectedEnterpriseId)
       ])
       setDashboard(dashRes.data || null)
-      setObservations(obsRes.data || [])
+      setObservations(obsRes.data?.items || [])
     } catch { /* silently fail */ }
     finally { setLoading(false) }
   }

@@ -210,7 +210,11 @@ const AnimalGroups: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>Color Code</label>
-                  <input type="color" value={formData.colorCode} onChange={e => setFormData(f => ({ ...f, colorCode: e.target.value }))} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 6, border: '2px solid #d1d5db', background: formData.colorCode, flexShrink: 0 }} />
+                    <input type="color" value={formData.colorCode} onChange={e => setFormData(f => ({ ...f, colorCode: e.target.value }))} style={{ width: 40, height: 36, padding: 0, border: 'none', cursor: 'pointer' }} title="Pick a color" />
+                    <input type="text" value={formData.colorCode} onChange={e => { const v = e.target.value; if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setFormData(f => ({ ...f, colorCode: v })) }} style={{ width: 90, fontFamily: 'monospace', fontSize: '0.85rem' }} placeholder="#4F46E5" />
+                  </div>
                 </div>
               </div>
               <div className="form-group">

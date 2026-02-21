@@ -494,7 +494,7 @@ export type AnimalGroupType =
 export const GROUP_TYPE_LABELS: Record<AnimalGroupType, string> = {
   herd: 'Herd',
   flock: 'Flock',
-  pen: 'Pen',
+  pen: 'Pen / Corral',
   paddock: 'Paddock',
   enclosure: 'Enclosure',
   tank: 'Tank',

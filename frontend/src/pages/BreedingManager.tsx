@@ -46,7 +46,7 @@ const BreedingManager: React.FC = () => {
         apiService.getBreedingStats(selectedEnterpriseId),
         apiService.getUpcomingDueDates(selectedEnterpriseId, 60)
       ])
-      setRecords(recRes.data || [])
+      setRecords(recRes.data?.items || [])
       setStats(statsRes.data || null)
       setUpcomingDue(dueRes.data || [])
     } catch { /* silently fail */ }
