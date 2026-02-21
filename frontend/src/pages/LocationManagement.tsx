@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, FarmLocation, LocationType } from '../types'
+import MapView from '../components/MapView'
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
   barn: 'Barn', stable: 'Stable', pen: 'Pen', paddock: 'Paddock',
@@ -25,12 +26,13 @@ const LocationManagement: React.FC = () => {
   const [locations, setLocations] = useState<FarmLocation[]>([])
   const [locationTree, setLocationTree] = useState<FarmLocation[]>([])
   const [loading, setLoading] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'tree'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'tree' | 'map'>('grid')
   const [showForm, setShowForm] = useState(false)
   const [editingLocation, setEditingLocation] = useState<FarmLocation | null>(null)
   const [formData, setFormData] = useState({
     name: '', locationType: '' as LocationType, parentLocationId: '',
-    capacity: '', area: '', areaUnit: 'sqft', description: ''
+    capacity: '', area: '', areaUnit: 'sqft', description: '',
+    gpsLatitude: '', gpsLongitude: ''
   })
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -64,7 +66,7 @@ const LocationManagement: React.FC = () => {
   useEffect(() => { fetchLocations() }, [selectedEnterpriseId])
 
   const resetForm = () => {
-    setFormData({ name: '', locationType: '' as LocationType, parentLocationId: '', capacity: '', area: '', areaUnit: 'sqft', description: '' })
+    setFormData({ name: '', locationType: '' as LocationType, parentLocationId: '', capacity: '', area: '', areaUnit: 'sqft', description: '', gpsLatitude: '', gpsLongitude: '' })
     setEditingLocation(null); setError('')
   }
 
@@ -74,7 +76,8 @@ const LocationManagement: React.FC = () => {
       name: loc.name, locationType: loc.locationType as LocationType,
       parentLocationId: loc.parentLocationId || '', capacity: loc.capacity?.toString() || '',
       area: loc.area?.toString() || '', areaUnit: loc.areaUnit || 'sqft',
-      description: loc.description || ''
+      description: loc.description || '',
+      gpsLatitude: loc.gpsLatitude?.toString() || '', gpsLongitude: loc.gpsLongitude?.toString() || ''
     })
     setShowForm(true)
   }
@@ -89,6 +92,8 @@ const LocationManagement: React.FC = () => {
         capacity: formData.capacity ? parseInt(formData.capacity) : 0,
         area: formData.area ? parseFloat(formData.area) : undefined,
         parentLocationId: formData.parentLocationId || undefined,
+        gpsLatitude: formData.gpsLatitude ? parseFloat(formData.gpsLatitude) : undefined,
+        gpsLongitude: formData.gpsLongitude ? parseFloat(formData.gpsLongitude) : undefined,
       }
       if (editingLocation) {
         await apiService.updateLocation(editingLocation.id, payload)
@@ -140,6 +145,7 @@ const LocationManagement: React.FC = () => {
             <>
               <button className={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('grid')}>Grid</button>
               <button className={`btn btn-sm ${viewMode === 'tree' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('tree')}>Tree</button>
+              <button className={`btn btn-sm ${viewMode === 'map' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('map')}>🗺️ Map</button>
               <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>+ New Location</button>
             </>
           )}
@@ -174,6 +180,50 @@ const LocationManagement: React.FC = () => {
       ) : viewMode === 'tree' ? (
         <div style={{ background: 'var(--surface)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
           {locationTree.map(loc => renderTreeNode(loc))}
+        </div>
+      ) : viewMode === 'map' ? (
+        <div>
+          {/* Interactive Location Map */}
+          <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 20 }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+              <h3 style={{ margin: 0 }}>🗺️ Farm Locations Map</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+                {locations.filter(l => l.gpsLatitude && l.gpsLongitude).length} of {locations.length} locations have GPS coordinates
+              </p>
+            </div>
+            <MapView
+              height={500}
+              markers={locations.filter(l => l.gpsLatitude && l.gpsLongitude).map(loc => ({
+                id: loc.id,
+                lat: +(loc.gpsLatitude || 0),
+                lng: +(loc.gpsLongitude || 0),
+                color: loc.locationType === 'quarantine' || loc.locationType === 'isolation' ? '#ef4444'
+                  : loc.locationType === 'treatment_area' ? '#f97316'
+                  : loc.locationType === 'barn' || loc.locationType === 'stable' ? '#8b5cf6'
+                  : '#22c55e',
+                popup: (
+                  <div>
+                    <strong>{LOCATION_TYPE_ICONS[loc.locationType] || '📍'} {loc.name}</strong><br />
+                    <span style={{ fontSize: 12 }}>{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span><br />
+                    <span style={{ fontSize: 12 }}>Occupancy: {loc.currentOccupancy} / {loc.capacity}</span>
+                    {loc.area && <><br /><span style={{ fontSize: 12 }}>Area: {loc.area} {loc.areaUnit}</span></>}
+                    {loc.description && <><br /><span style={{ fontSize: 11, color: '#888' }}>{loc.description}</span></>}
+                  </div>
+                ),
+              }))}
+              onClick={(lat, lng) => {
+                if (showForm) {
+                  setFormData(f => ({ ...f, gpsLatitude: lat.toFixed(6), gpsLongitude: lng.toFixed(6) }))
+                }
+              }}
+              fitToData={locations.filter(l => l.gpsLatitude && l.gpsLongitude).length > 0}
+            />
+          </div>
+          {locations.filter(l => !l.gpsLatitude || !l.gpsLongitude).length > 0 && (
+            <div style={{ padding: '12px 16px', background: '#fef3c7', borderRadius: 8, fontSize: 13, color: '#92400e', marginBottom: 16 }}>
+              ⚠️ {locations.filter(l => !l.gpsLatitude || !l.gpsLongitude).length} location(s) don't have GPS coordinates: {locations.filter(l => !l.gpsLatitude || !l.gpsLongitude).map(l => l.name).join(', ')}. Edit them to add coordinates.
+            </div>
+          )}
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
@@ -254,6 +304,37 @@ const LocationManagement: React.FC = () => {
                 <label>Description</label>
                 <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
               </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label>GPS Latitude</label>
+                  <input type="number" step="0.000001" placeholder="Click map or type" value={formData.gpsLatitude} onChange={e => setFormData(f => ({ ...f, gpsLatitude: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label>GPS Longitude</label>
+                  <input type="number" step="0.000001" placeholder="Click map or type" value={formData.gpsLongitude} onChange={e => setFormData(f => ({ ...f, gpsLongitude: e.target.value }))} />
+                </div>
+              </div>
+              {showForm && (
+                <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: '0.5rem' }}>
+                  <div style={{ padding: '8px 12px', fontSize: 12, color: '#888', background: '#f9fafb', borderBottom: '1px solid var(--border)' }}>
+                    💡 Click the map to set GPS coordinates
+                  </div>
+                  <MapView
+                    height={220}
+                    markers={formData.gpsLatitude && formData.gpsLongitude ? [{
+                      id: 'form-location',
+                      lat: +formData.gpsLatitude,
+                      lng: +formData.gpsLongitude,
+                      color: '#3b82f6',
+                      pulse: true,
+                      popup: <div><strong>{formData.name || 'New Location'}</strong></div>,
+                    }] : []}
+                    onClick={(lat, lng) => setFormData(f => ({ ...f, gpsLatitude: lat.toFixed(6), gpsLongitude: lng.toFixed(6) }))}
+                    center={formData.gpsLatitude && formData.gpsLongitude ? [+formData.gpsLatitude, +formData.gpsLongitude] : undefined}
+                    zoom={formData.gpsLatitude ? 14 : undefined}
+                  />
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>Cancel</button>
                 <button type="submit" className="btn btn-primary">{editingLocation ? 'Update' : 'Create'} Location</button>

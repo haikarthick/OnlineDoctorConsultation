@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, DiseasePrediction, OutbreakZone, RiskDashboard } from '../types'
+import MapView from '../components/MapView'
 
 const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
@@ -249,6 +250,7 @@ const DiseasePredictionPage: React.FC = () => {
 
               {showOutbreakForm && (
                 <form className="module-form" onSubmit={handleCreateOutbreak}>
+                  <p style={{ fontSize: 13, color: '#888', margin: '0 0 12px' }}>💡 Click on the map below to set the outbreak center location</p>
                   <div className="form-grid">
                     <div className="form-group"><label>Disease *</label><input required value={outbreakForm.diseaseName} onChange={e => setOutbreakForm({ ...outbreakForm, diseaseName: e.target.value })} /></div>
                     <div className="form-group"><label>Severity</label>
@@ -260,12 +262,74 @@ const DiseasePredictionPage: React.FC = () => {
                     <div className="form-group"><label>Affected Count</label><input type="number" value={outbreakForm.affectedCount} onChange={e => setOutbreakForm({ ...outbreakForm, affectedCount: e.target.value })} /></div>
                     <div className="form-group"><label>Total at Risk</label><input type="number" value={outbreakForm.totalAtRisk} onChange={e => setOutbreakForm({ ...outbreakForm, totalAtRisk: e.target.value })} /></div>
                     <div className="form-group"><label>Radius (km)</label><input type="number" step="0.1" value={outbreakForm.radiusKm} onChange={e => setOutbreakForm({ ...outbreakForm, radiusKm: e.target.value })} /></div>
-                    <div className="form-group"><label>Center Lat</label><input type="number" step="0.0001" value={outbreakForm.centerLat} onChange={e => setOutbreakForm({ ...outbreakForm, centerLat: e.target.value })} /></div>
-                    <div className="form-group"><label>Center Lng</label><input type="number" step="0.0001" value={outbreakForm.centerLng} onChange={e => setOutbreakForm({ ...outbreakForm, centerLng: e.target.value })} /></div>
+                    <div className="form-group"><label>Center Lat</label><input type="number" step="0.0001" value={outbreakForm.centerLat} onChange={e => setOutbreakForm({ ...outbreakForm, centerLat: e.target.value })} placeholder="Click map or type" /></div>
+                    <div className="form-group"><label>Center Lng</label><input type="number" step="0.0001" value={outbreakForm.centerLng} onChange={e => setOutbreakForm({ ...outbreakForm, centerLng: e.target.value })} placeholder="Click map or type" /></div>
                   </div>
                   <button type="submit" className="btn-primary">Create Outbreak Zone</button>
                 </form>
               )}
+
+              {/* Interactive Outbreak Map */}
+              <div style={{ marginBottom: 20, borderRadius: 12, overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid #e5e7eb', background: '#fafafa' }}>
+                  <h3 style={{ margin: 0 }}>🗺️ Outbreak Zone Map</h3>
+                  <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
+                    {outbreakZones.length} outbreak zone{outbreakZones.length !== 1 ? 's' : ''} · Circle size represents radius · Color represents severity
+                  </p>
+                </div>
+                <MapView
+                  height={420}
+                  circles={[
+                    ...outbreakZones.filter(z => (z.centerLat || (z as any).center_lat) && (z.centerLng || (z as any).center_lng)).map(z => ({
+                      id: z.id,
+                      lat: +(z.centerLat || (z as any).center_lat),
+                      lng: +(z.centerLng || (z as any).center_lng),
+                      radius: (+(z.radiusKm || (z as any).radius_km || 1)) * 1000,
+                      color: SEVERITY_COLORS[z.severity] || '#6b7280',
+                      fillOpacity: z.severity === 'critical' ? 0.35 : z.severity === 'high' ? 0.25 : 0.15,
+                      popup: (
+                        <div>
+                          <strong>{z.diseaseName || (z as any).disease_name}</strong><br />
+                          <span style={{ fontSize: 12, color: SEVERITY_COLORS[z.severity] }}>{z.severity.toUpperCase()}</span><br />
+                          <span style={{ fontSize: 12 }}>Affected: {z.affectedCount || (z as any).affected_count} · At risk: {z.totalAtRisk || (z as any).total_at_risk}</span><br />
+                          <span style={{ fontSize: 12 }}>Radius: {z.radiusKm || (z as any).radius_km}km</span><br />
+                          <span style={{ fontSize: 11, color: '#888' }}>Status: {z.containmentStatus || (z as any).containment_status}</span>
+                        </div>
+                      ),
+                    })),
+                    ...(outbreakForm.centerLat && outbreakForm.centerLng && showOutbreakForm ? [{
+                      id: 'new-outbreak',
+                      lat: +outbreakForm.centerLat,
+                      lng: +outbreakForm.centerLng,
+                      radius: (+outbreakForm.radiusKm || 1) * 1000,
+                      color: SEVERITY_COLORS[outbreakForm.severity] || '#ec4899',
+                      fillOpacity: 0.3,
+                      popup: <div><strong>New Outbreak Zone</strong><br /><span style={{ fontSize: 12 }}>{outbreakForm.centerLat}, {outbreakForm.centerLng}</span></div>,
+                    }] : []),
+                  ]}
+                  markers={outbreakForm.centerLat && outbreakForm.centerLng && showOutbreakForm ? [{
+                    id: 'new-outbreak-center',
+                    lat: +outbreakForm.centerLat,
+                    lng: +outbreakForm.centerLng,
+                    color: SEVERITY_COLORS[outbreakForm.severity] || '#ec4899',
+                    pulse: true,
+                    popup: <div><strong>New Outbreak Center</strong></div>,
+                  }] : []}
+                  onClick={(lat, lng) => {
+                    if (showOutbreakForm) {
+                      setOutbreakForm(f => ({ ...f, centerLat: lat.toFixed(6), centerLng: lng.toFixed(6) }))
+                    }
+                  }}
+                  fitToData={outbreakZones.filter(z => (z.centerLat || (z as any).center_lat)).length > 0}
+                />
+              </div>
+
+              {/* Severity Legend */}
+              <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap', fontSize: 12 }}>
+                {Object.entries(SEVERITY_COLORS).map(([sev, color]) => (
+                  <span key={sev}><span style={{ display: 'inline-block', width: 12, height: 12, borderRadius: '50%', background: color, marginRight: 4, opacity: 0.7 }}></span>{sev.charAt(0).toUpperCase() + sev.slice(1)}</span>
+                ))}
+              </div>
 
               <div className="cards-grid">
                 {outbreakZones.map(z => (
@@ -280,6 +344,9 @@ const DiseasePredictionPage: React.FC = () => {
                       <div><strong>{z.totalAtRisk || (z as any).total_at_risk}</strong> at risk</div>
                       {(z.radiusKm || (z as any).radius_km) && <div><strong>{z.radiusKm || (z as any).radius_km} km</strong> radius</div>}
                     </div>
+                    {(z.centerLat || (z as any).center_lat) && (
+                      <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>📍 {(+(z.centerLat || (z as any).center_lat)).toFixed(4)}, {(+(z.centerLng || (z as any).center_lng)).toFixed(4)}</div>
+                    )}
                     <div className="card-footer">
                       <small>Started {(z.startedAt || (z as any).started_at) ? new Date(z.startedAt || (z as any).started_at).toLocaleDateString() : '–'}</small>
                       {(z.containmentStatus || (z as any).containment_status) !== 'resolved' && (
@@ -288,7 +355,7 @@ const DiseasePredictionPage: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                {!outbreakZones.length && <div className="empty-state">No outbreak zones reported</div>}
+                {!outbreakZones.length && <div className="empty-state">No outbreak zones reported. Click the map to place an outbreak zone.</div>}
               </div>
             </div>
           )}

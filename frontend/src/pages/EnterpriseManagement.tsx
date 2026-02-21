@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, ENTERPRISE_TYPE_LABELS, EnterpriseType, EnterpriseStats } from '../types'
+import MapView from '../components/MapView'
 
 const EnterpriseManagement: React.FC = () => {
   const { user } = useAuth()
@@ -16,8 +17,10 @@ const EnterpriseManagement: React.FC = () => {
     name: '', enterpriseType: '' as EnterpriseType, description: '',
     address: '', city: '', state: '', country: 'US', postalCode: '',
     totalArea: '', areaUnit: 'acres', licenseNumber: '', regulatoryId: '',
-    taxId: '', phone: '', email: '', website: ''
+    taxId: '', phone: '', email: '', website: '',
+    gpsLatitude: '', gpsLongitude: ''
   })
+  const [showMapOverview, setShowMapOverview] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
@@ -47,7 +50,8 @@ const EnterpriseManagement: React.FC = () => {
       name: '', enterpriseType: '' as EnterpriseType, description: '',
       address: '', city: '', state: '', country: 'US', postalCode: '',
       totalArea: '', areaUnit: 'acres', licenseNumber: '', regulatoryId: '',
-      taxId: '', phone: '', email: '', website: ''
+      taxId: '', phone: '', email: '', website: '',
+      gpsLatitude: '', gpsLongitude: ''
     })
     setEditingEnterprise(null)
     setError('')
@@ -61,7 +65,8 @@ const EnterpriseManagement: React.FC = () => {
       country: ent.country || 'US', postalCode: ent.postalCode || '',
       totalArea: ent.totalArea?.toString() || '', areaUnit: ent.areaUnit || 'acres',
       licenseNumber: ent.licenseNumber || '', regulatoryId: ent.regulatoryId || '',
-      taxId: ent.taxId || '', phone: ent.phone || '', email: ent.email || '', website: ent.website || ''
+      taxId: ent.taxId || '', phone: ent.phone || '', email: ent.email || '', website: ent.website || '',
+      gpsLatitude: ent.gpsLatitude?.toString() || '', gpsLongitude: ent.gpsLongitude?.toString() || ''
     })
     setShowForm(true)
   }
@@ -76,7 +81,9 @@ const EnterpriseManagement: React.FC = () => {
     try {
       const payload: any = {
         ...formData,
-        totalArea: formData.totalArea ? parseFloat(formData.totalArea) : undefined
+        totalArea: formData.totalArea ? parseFloat(formData.totalArea) : undefined,
+        gpsLatitude: formData.gpsLatitude ? parseFloat(formData.gpsLatitude) : undefined,
+        gpsLongitude: formData.gpsLongitude ? parseFloat(formData.gpsLongitude) : undefined,
       }
       if (editingEnterprise) {
         await apiService.updateEnterprise(editingEnterprise.id, payload)
@@ -135,6 +142,9 @@ const EnterpriseManagement: React.FC = () => {
           <p className="subtitle">Manage your farms, clinics, and animal enterprises</p>
         </div>
         <div className="header-actions">
+          <button className={`btn ${showMapOverview ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowMapOverview(!showMapOverview)}>
+            🗺️ {showMapOverview ? 'Hide Map' : 'Map View'}
+          </button>
           <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>
             + New Enterprise
           </button>
@@ -151,6 +161,39 @@ const EnterpriseManagement: React.FC = () => {
           value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
+
+      {/* Enterprise Map Overview */}
+      {showMapOverview && (
+        <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 20 }}>
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+            <h3 style={{ margin: 0 }}>🗺️ Enterprise Locations</h3>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+              {enterprises.filter(e => e.gpsLatitude && e.gpsLongitude).length} of {enterprises.length} enterprises have GPS coordinates
+            </p>
+          </div>
+          <MapView
+            height={400}
+            markers={enterprises.filter(e => e.gpsLatitude && e.gpsLongitude).map(ent => ({
+              id: ent.id,
+              lat: +(ent.gpsLatitude || 0),
+              lng: +(ent.gpsLongitude || 0),
+              color: selectedEnterprise?.id === ent.id ? '#3b82f6' : '#22c55e',
+              pulse: selectedEnterprise?.id === ent.id,
+              popup: (
+                <div>
+                  <strong>{typeIcon(ent.enterpriseType)} {ent.name}</strong><br />
+                  <span style={{ fontSize: 12 }}>{ENTERPRISE_TYPE_LABELS[ent.enterpriseType] || ent.enterpriseType}</span><br />
+                  {ent.city && <span style={{ fontSize: 12 }}>{ent.city}{ent.state ? `, ${ent.state}` : ''}</span>}
+                  <div style={{ fontSize: 12, marginTop: 4 }}>
+                    👥 {ent.memberCount || 0} members · 🐾 {ent.animalCount || 0} animals
+                  </div>
+                </div>
+              ),
+            }))}
+            fitToData={enterprises.filter(e => e.gpsLatitude && e.gpsLongitude).length > 0}
+          />
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
         {/* Enterprise List */}
@@ -239,6 +282,22 @@ const EnterpriseManagement: React.FC = () => {
             {selectedEnterprise.regulatoryId && (
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                 🏛️ Regulatory ID: {selectedEnterprise.regulatoryId}
+              </div>
+            )}
+            {selectedEnterprise.gpsLatitude && selectedEnterprise.gpsLongitude && (
+              <div style={{ marginTop: '0.75rem', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                <MapView
+                  height={180}
+                  center={[+(selectedEnterprise.gpsLatitude), +(selectedEnterprise.gpsLongitude)]}
+                  zoom={14}
+                  markers={[{
+                    id: 'selected-ent',
+                    lat: +(selectedEnterprise.gpsLatitude),
+                    lng: +(selectedEnterprise.gpsLongitude),
+                    color: '#3b82f6',
+                    popup: <div><strong>{selectedEnterprise.name}</strong></div>,
+                  }]}
+                />
               </div>
             )}
           </div>
@@ -340,6 +399,35 @@ const EnterpriseManagement: React.FC = () => {
                 <div className="form-group">
                   <label>Website</label>
                   <input type="url" value={formData.website} onChange={e => setFormData(f => ({ ...f, website: e.target.value }))} placeholder="https://" />
+                </div>
+
+                <div className="form-group">
+                  <label>GPS Latitude</label>
+                  <input type="number" step="0.000001" placeholder="Click map below" value={formData.gpsLatitude} onChange={e => setFormData(f => ({ ...f, gpsLatitude: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label>GPS Longitude</label>
+                  <input type="number" step="0.000001" placeholder="Click map below" value={formData.gpsLongitude} onChange={e => setFormData(f => ({ ...f, gpsLongitude: e.target.value }))} />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label>📍 Set Location on Map</label>
+                  <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                    <MapView
+                      height={200}
+                      markers={formData.gpsLatitude && formData.gpsLongitude ? [{
+                        id: 'ent-form-loc',
+                        lat: +formData.gpsLatitude,
+                        lng: +formData.gpsLongitude,
+                        color: '#3b82f6',
+                        pulse: true,
+                        popup: <div><strong>{formData.name || 'Enterprise'}</strong></div>,
+                      }] : []}
+                      onClick={(lat, lng) => setFormData(f => ({ ...f, gpsLatitude: lat.toFixed(6), gpsLongitude: lng.toFixed(6) }))}
+                      center={formData.gpsLatitude && formData.gpsLongitude ? [+formData.gpsLatitude, +formData.gpsLongitude] : undefined}
+                      zoom={formData.gpsLatitude ? 13 : undefined}
+                    />
+                  </div>
                 </div>
               </div>
 

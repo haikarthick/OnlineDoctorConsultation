@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, ProductBatch, TraceabilityEvent, QRCode as QRCodeType } from '../types'
+import MapView from '../components/MapView'
 
 const STATUS_COLORS: Record<string, string> = {
   in_production: '#3b82f6', quality_check: '#f59e0b', in_transit: '#8b5cf6', delivered: '#22c55e', recalled: '#ef4444'
@@ -26,7 +27,8 @@ const SupplyChainPage: React.FC = () => {
     productionDate: '', expiryDate: '', qualityGrade: '', currentHolder: ''
   })
   const [eventForm, setEventForm] = useState({
-    batchId: '', eventType: 'production', title: '', description: '', location: ''
+    batchId: '', eventType: 'production', title: '', description: '', location: '',
+    gpsLat: '', gpsLng: ''
   })
 
   useEffect(() => {
@@ -87,10 +89,12 @@ const SupplyChainPage: React.FC = () => {
         enterpriseId: selectedEnterpriseId, batchId: eventForm.batchId || undefined,
         eventType: eventForm.eventType, title: eventForm.title,
         description: eventForm.description || undefined, location: eventForm.location || undefined,
+        gpsLat: eventForm.gpsLat ? parseFloat(eventForm.gpsLat) : undefined,
+        gpsLng: eventForm.gpsLng ? parseFloat(eventForm.gpsLng) : undefined,
       })
       setSuccessMsg('Traceability event logged!')
       setShowEventForm(false)
-      setEventForm({ batchId: '', eventType: 'production', title: '', description: '', location: '' })
+      setEventForm({ batchId: '', eventType: 'production', title: '', description: '', location: '', gpsLat: '', gpsLng: '' })
       fetchData()
     } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
   }
@@ -263,6 +267,7 @@ const SupplyChainPage: React.FC = () => {
 
               {showEventForm && (
                 <form className="module-form" onSubmit={handleCreateEvent}>
+                  <p style={{ fontSize: 13, color: '#888', margin: '0 0 12px' }}>💡 Click on the map below to set GPS location for this event</p>
                   <div className="form-grid">
                     <div className="form-group"><label>Batch</label>
                       <select value={eventForm.batchId} onChange={e => setEventForm({ ...eventForm, batchId: e.target.value })}>
@@ -278,12 +283,73 @@ const SupplyChainPage: React.FC = () => {
                       </select>
                     </div>
                     <div className="form-group"><label>Title *</label><input required value={eventForm.title} onChange={e => setEventForm({ ...eventForm, title: e.target.value })} /></div>
-                    <div className="form-group"><label>Location</label><input value={eventForm.location} onChange={e => setEventForm({ ...eventForm, location: e.target.value })} /></div>
+                    <div className="form-group"><label>Location (text)</label><input value={eventForm.location} onChange={e => setEventForm({ ...eventForm, location: e.target.value })} /></div>
+                    <div className="form-group"><label>GPS Latitude</label><input type="number" step="0.000001" placeholder="Click map" value={eventForm.gpsLat} onChange={e => setEventForm({ ...eventForm, gpsLat: e.target.value })} /></div>
+                    <div className="form-group"><label>GPS Longitude</label><input type="number" step="0.000001" placeholder="Click map" value={eventForm.gpsLng} onChange={e => setEventForm({ ...eventForm, gpsLng: e.target.value })} /></div>
                     <div className="form-group full-width"><label>Description</label><textarea value={eventForm.description} onChange={e => setEventForm({ ...eventForm, description: e.target.value })} /></div>
                   </div>
                   <button type="submit" className="btn-primary">Log Event</button>
                 </form>
               )}
+
+              {/* Traceability Route Map */}
+              {(() => {
+                const geoEvents = events.filter(ev => (ev.gpsLat || (ev as any).gps_lat) && (ev.gpsLng || (ev as any).gps_lng))
+                return geoEvents.length > 0 || showEventForm ? (
+                  <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e5e7eb', marginBottom: 20 }}>
+                    <div style={{ padding: '14px 20px', borderBottom: '1px solid #e5e7eb', background: '#fafafa' }}>
+                      <h3 style={{ margin: 0 }}>🗺️ Traceability Route Map</h3>
+                      <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
+                        {geoEvents.length} event{geoEvents.length !== 1 ? 's' : ''} with GPS coordinates
+                        {showEventForm && ' · Click map to set event location'}
+                      </p>
+                    </div>
+                    <MapView
+                      height={380}
+                      markers={[
+                        ...geoEvents.map((ev) => ({
+                          id: ev.id,
+                          lat: +(ev.gpsLat || (ev as any).gps_lat),
+                          lng: +(ev.gpsLng || (ev as any).gps_lng),
+                          color: ev.eventType === 'recall' || (ev as any).event_type === 'recall' ? '#ef4444'
+                            : ev.eventType === 'delivery' || (ev as any).event_type === 'delivery' ? '#22c55e'
+                            : ev.eventType === 'shipment' || (ev as any).event_type === 'shipment' ? '#8b5cf6'
+                            : '#3b82f6',
+                          popup: (
+                            <div>
+                              <strong>{ev.title}</strong><br />
+                              <span style={{ fontSize: 12 }}>{ev.eventType || (ev as any).event_type}</span><br />
+                              {ev.location && <span style={{ fontSize: 12 }}>{ev.location}</span>}
+                              {ev.batchNumber && <><br /><span style={{ fontSize: 11 }}>Batch: {ev.batchNumber}</span></>}
+                            </div>
+                          ),
+                        })),
+                        ...(eventForm.gpsLat && eventForm.gpsLng && showEventForm ? [{
+                          id: 'new-trace-event',
+                          lat: +eventForm.gpsLat,
+                          lng: +eventForm.gpsLng,
+                          color: '#ec4899',
+                          pulse: true,
+                          popup: <div><strong>New Event Location</strong></div>,
+                        }] : []),
+                      ]}
+                      polylines={geoEvents.length > 1 ? [{
+                        id: 'trace-route',
+                        positions: geoEvents.map(ev => [+(ev.gpsLat || (ev as any).gps_lat), +(ev.gpsLng || (ev as any).gps_lng)] as [number, number]),
+                        color: '#3b82f6',
+                        weight: 2,
+                        dashArray: '6, 4',
+                      }] : []}
+                      onClick={(lat, lng) => {
+                        if (showEventForm) {
+                          setEventForm(f => ({ ...f, gpsLat: lat.toFixed(6), gpsLng: lng.toFixed(6) }))
+                        }
+                      }}
+                      fitToData={geoEvents.length > 0}
+                    />
+                  </div>
+                ) : null
+              })()}
 
               <table className="data-table">
                 <thead><tr><th>Title</th><th>Type</th><th>Batch</th><th>Location</th><th>Verified</th><th>Date</th><th>Actions</th></tr></thead>
