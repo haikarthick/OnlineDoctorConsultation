@@ -156,12 +156,21 @@ const MapView: React.FC<MapViewProps> = ({
 }) => {
   const mapRef = useRef<any>(null)
 
-  // Compute bounds from all data
+  const isValidCoord = (lat: number, lng: number) =>
+    Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0)
+
+  // Filter markers/circles with invalid coords before computing bounds
+  const validMarkers = markers.filter(m => isValidCoord(m.lat, m.lng))
+  const validCircles = circles.filter(c => isValidCoord(c.lat, c.lng))
+  const validPolylines = polylines.filter(p => p.positions.every(([lat, lng]) => isValidCoord(lat, lng)))
+  const validHeatmap = heatmap.filter(h => isValidCoord(h.lat, h.lng))
+
+  // Compute bounds from all valid data
   const allPoints: [number, number][] = [
-    ...markers.map(m => [m.lat, m.lng] as [number, number]),
-    ...circles.map(c => [c.lat, c.lng] as [number, number]),
-    ...polylines.flatMap(p => p.positions),
-    ...heatmap.map(h => [h.lat, h.lng] as [number, number]),
+    ...validMarkers.map(m => [m.lat, m.lng] as [number, number]),
+    ...validCircles.map(c => [c.lat, c.lng] as [number, number]),
+    ...validPolylines.flatMap(p => p.positions),
+    ...validHeatmap.map(h => [h.lat, h.lng] as [number, number]),
   ]
 
   const bounds = allPoints.length >= 2 ? L.latLngBounds(allPoints) : null
@@ -191,7 +200,7 @@ const MapView: React.FC<MapViewProps> = ({
 
         {onClick && <ClickHandler onClick={onClick} />}
 
-        {markers.map(m => (
+        {validMarkers.map(m => (
           <Marker
             key={m.id}
             position={[m.lat, m.lng]}
@@ -201,7 +210,7 @@ const MapView: React.FC<MapViewProps> = ({
           </Marker>
         ))}
 
-        {circles.map(c => (
+        {validCircles.map(c => (
           <Circle
             key={c.id}
             center={[c.lat, c.lng]}
@@ -217,7 +226,7 @@ const MapView: React.FC<MapViewProps> = ({
           </Circle>
         ))}
 
-        {polylines.map((pl, i) => (
+        {validPolylines.map((pl, i) => (
           <Polyline
             key={i}
             positions={pl.positions}
@@ -231,8 +240,8 @@ const MapView: React.FC<MapViewProps> = ({
           </Polyline>
         ))}
 
-        {heatmap.length > 0 && (
-          <HeatmapLayer points={heatmap.map(h => [h.lat, h.lng, h.intensity])} />
+        {validHeatmap.length > 0 && (
+          <HeatmapLayer points={validHeatmap.map(h => [h.lat, h.lng, h.intensity])} />
         )}
 
         {children}

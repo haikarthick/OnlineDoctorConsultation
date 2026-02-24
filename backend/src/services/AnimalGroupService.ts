@@ -125,9 +125,13 @@ export class AnimalGroupService {
     await database.query(`UPDATE animal_groups SET is_active = false, updated_at = NOW() WHERE id = $1`, [id]);
   }
 
-  /** Assign animal to group */
+  /** Assign animal to group (also sets enterprise_id so enterprise queries find it) */
   async assignAnimal(groupId: string, animalId: string): Promise<void> {
-    await database.query(`UPDATE animals SET group_id = $1, updated_at = NOW() WHERE id = $2`, [groupId, animalId]);
+    const group = await this.getGroup(groupId);
+    await database.query(
+      `UPDATE animals SET group_id = $1, enterprise_id = $2, updated_at = NOW() WHERE id = $3`,
+      [groupId, group.enterpriseId, animalId]
+    );
     await this.updateGroupCount(groupId);
   }
 

@@ -43,6 +43,8 @@ export interface AnimalCreateDTO {
   insurancePolicyNumber?: string;
   insuranceExpiry?: string;
   medicalNotes?: string;
+  enterpriseId?: string;
+  groupId?: string;
 }
 
 export class AnimalService {
@@ -74,13 +76,14 @@ export class AnimalService {
       const query = `
         INSERT INTO animals (id, owner_id, unique_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id,
                              ear_tag_id, registration_number, is_neutered, insurance_provider, insurance_policy_number, insurance_expiry,
-                             medical_notes, is_active, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, true, NOW(), NOW())
+                             medical_notes, enterprise_id, group_id, is_active, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, true, NOW(), NOW())
         RETURNING id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
                   gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
                   registration_number as "registrationNumber", is_neutered as "isNeutered",
                   insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
                   insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
+                  enterprise_id as "enterpriseId", group_id as "groupId",
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [
@@ -88,7 +91,8 @@ export class AnimalService {
         data.dateOfBirth || null, data.gender || null, data.weight || null,
         data.color || null, microchipId, data.earTagId || null, data.registrationNumber || null,
         data.isNeutered || false, data.insuranceProvider || null, data.insurancePolicyNumber || null,
-        data.insuranceExpiry || null, data.medicalNotes || null
+        data.insuranceExpiry || null, data.medicalNotes || null,
+        data.enterpriseId || null, data.groupId || null
       ]);
       logger.info('Animal created', { id, ownerId, uniqueId, trackingNumber });
       return result.rows[0];

@@ -1,7 +1,50 @@
 import React, { useState, useEffect, useRef } from 'react'
+import ReactMarkdown from 'react-markdown'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { AIChatSession, AIChatMessage } from '../types'
+
+// Render AI markdown responses nicely
+const AIMessage: React.FC<{ content: string; confidence?: number; sources?: string[] }> = ({ content, confidence, sources }) => (
+  <div style={{ maxWidth: '78%' }}>
+    <div style={{
+      padding: '14px 18px', borderRadius: '18px 18px 18px 4px',
+      background: 'white', border: '1px solid #e8ecf0',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.06)', fontSize: 14, lineHeight: 1.7, color: '#2d3748'
+    }}>
+      <div className="ai-markdown">
+        <ReactMarkdown
+          components={{
+            h1: ({children}) => <h3 style={{margin:'0 0 8px',fontSize:16,color:'#1a202c'}}>{children}</h3>,
+            h2: ({children}) => <h4 style={{margin:'12px 0 6px',fontSize:15,color:'#2d3748'}}>{children}</h4>,
+            h3: ({children}) => <h4 style={{margin:'12px 0 6px',fontSize:14,fontWeight:700,color:'#4a5568'}}>{children}</h4>,
+            p: ({children}) => <p style={{margin:'0 0 10px'}}>{children}</p>,
+            ul: ({children}) => <ul style={{margin:'0 0 10px',paddingLeft:20}}>{children}</ul>,
+            ol: ({children}) => <ol style={{margin:'0 0 10px',paddingLeft:20}}>{children}</ol>,
+            li: ({children}) => <li style={{marginBottom:4}}>{children}</li>,
+            strong: ({children}) => <strong style={{color:'#2d3748',fontWeight:700}}>{children}</strong>,
+            code: ({children}) => <code style={{background:'#edf2f7',padding:'2px 6px',borderRadius:4,fontSize:13}}>{children}</code>,
+            blockquote: ({children}) => <blockquote style={{borderLeft:'3px solid #667eea',paddingLeft:12,margin:'8px 0',color:'#555'}}>{children}</blockquote>,
+          }}
+        >{content}</ReactMarkdown>
+      </div>
+      {(confidence !== undefined || (sources && sources.length > 0)) && (
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #eef0f3', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          {confidence !== undefined && (
+            <span style={{ fontSize: 11, color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%',
+                background: confidence >= 80 ? '#22c55e' : confidence >= 60 ? '#f59e0b' : '#ef4444', display: 'inline-block' }} />
+              Confidence: {confidence}%
+            </span>
+          )}
+          {sources && sources.length > 0 && (
+            <span style={{ fontSize: 11, color: '#888' }}>📚 {sources.join(' · ')}</span>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+)
 
 const AICopilot: React.FC = () => {
   const [sessions, setSessions] = useState<AIChatSession[]>([])
@@ -163,18 +206,36 @@ const AICopilot: React.FC = () => {
                 </div>
                 <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
                   {messages.map((msg, i) => (
-                    <div key={msg.id || i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: 16 }}>
-                      <div style={{
-                        maxWidth: '70%', padding: '12px 16px', borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                        background: msg.role === 'user' ? 'linear-gradient(135deg, #667eea, #764ba2)' : '#f0f2f5',
-                        color: msg.role === 'user' ? 'white' : '#333', fontSize: 14, lineHeight: 1.6
-                      }}>
-                        {msg.content}
-                        {msg.confidence && <div style={{ fontSize: 11, marginTop: 8, opacity: 0.7 }}>Confidence: {msg.confidence}%</div>}
-                        {msg.sources && msg.sources.length > 0 && <div style={{ fontSize: 11, marginTop: 4, opacity: 0.7 }}>Sources: {msg.sources.join(', ')}</div>}
-                      </div>
+                    <div key={msg.id || i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: 20, gap: 10, alignItems: 'flex-end' }}>
+                      {msg.role === 'assistant' && (
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🤖</div>
+                      )}
+                      {msg.role === 'user' ? (
+                        <div style={{ maxWidth: '72%', padding: '12px 18px', borderRadius: '18px 18px 4px 18px',
+                          background: 'linear-gradient(135deg, #667eea, #764ba2)', color: 'white', fontSize: 14, lineHeight: 1.6 }}>
+                          {msg.content}
+                        </div>
+                      ) : (
+                        <AIMessage content={msg.content} confidence={msg.confidence} sources={msg.sources} />
+                      )}
                     </div>
                   ))}
+                  {sending && (
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, marginBottom: 16 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🤖</div>
+                      <div style={{ padding: '14px 20px', borderRadius: '18px 18px 18px 4px', background: 'white',
+                        border: '1px solid #e8ecf0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                        <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                          {[0,1,2].map(d => (
+                            <div key={d} style={{ width: 8, height: 8, borderRadius: '50%', background: '#667eea',
+                              animation: 'pulse 1.2s ease-in-out infinite', animationDelay: `${d * 0.2}s`, opacity: 0.7 }} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {messages.length === 0 && (
                     <div style={{ textAlign: 'center', padding: 40 }}>
                       <div style={{ fontSize: 48, marginBottom: 16 }}>🐾</div>
@@ -192,13 +253,16 @@ const AICopilot: React.FC = () => {
                   )}
                   <div ref={chatEndRef} />
                 </div>
-                <div style={{ padding: '12px 20px', borderTop: '1px solid #eee', display: 'flex', gap: 12 }}>
+                <div style={{ padding: '12px 20px', borderTop: '1px solid #eee', display: 'flex', gap: 12, alignItems: 'center' }}>
                   <input value={messageInput} onChange={e => setMessageInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && sendMessage()}
+                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                     placeholder="Type your question..." disabled={sending}
-                    style={{ flex: 1, padding: '12px 16px', borderRadius: 24, border: '1px solid #ddd', fontSize: 14, outline: 'none' }} />
-                  <button className="module-btn primary" onClick={sendMessage} disabled={sending}
-                    style={{ borderRadius: 24, padding: '12px 24px' }}>{sending ? '...' : '▹ Send'}</button>
+                    style={{ flex: 1, padding: '12px 18px', borderRadius: 24, border: '1px solid #ddd', fontSize: 14, outline: 'none',
+                      background: sending ? '#f9f9f9' : 'white' }} />
+                  <button className="module-btn primary" onClick={sendMessage} disabled={sending || !messageInput.trim()}
+                    style={{ borderRadius: 24, padding: '12px 24px', opacity: (sending || !messageInput.trim()) ? 0.6 : 1 }}>
+                    {sending ? 'Sending…' : '▹ Send'}
+                  </button>
                 </div>
               </>
             ) : (
@@ -229,7 +293,25 @@ const AICopilot: React.FC = () => {
               <div style={{ padding: 16, borderRadius: 8, background: drugResults.hasInteractions ? '#fef2f2' : '#f0fdf4', marginBottom: 16, border: `1px solid ${drugResults.hasInteractions ? '#fecaca' : '#bbf7d0'}` }}>
                 <strong>{drugResults.hasInteractions ? '⚠️ Interactions Found' : '✅ No Interactions Detected'}</strong>
                 <p style={{ margin: '8px 0 0', color: '#666' }}>Checked: {drugResults.drugs?.join(', ')}</p>
+                {drugResults.provider && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#888' }}>Powered by: {drugResults.provider}</p>}
               </div>
+              {/* AI full analysis (Groq/GPT response) */}
+              {drugResults.aiAnalysis && (
+                <div style={{ padding: '16px 20px', borderRadius: 10, background: 'white', border: '1px solid #e8ecf0', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', marginBottom: 16 }}>
+                  <div className="ai-markdown" style={{ fontSize: 14, lineHeight: 1.7, color: '#2d3748' }}>
+                    <ReactMarkdown
+                      components={{
+                        h3: ({children}) => <h4 style={{margin:'10px 0 4px',fontSize:14,color:'#4a5568'}}>{children}</h4>,
+                        p: ({children}) => <p style={{margin:'0 0 8px'}}>{children}</p>,
+                        ul: ({children}) => <ul style={{margin:'0 0 8px',paddingLeft:18}}>{children}</ul>,
+                        li: ({children}) => <li style={{marginBottom:3}}>{children}</li>,
+                        strong: ({children}) => <strong style={{fontWeight:700}}>{children}</strong>,
+                      }}
+                    >{drugResults.aiAnalysis}</ReactMarkdown>
+                  </div>
+                </div>
+              )}
+              {/* Local fallback interaction cards */}
               {drugResults.interactions?.map((interaction: any, i: number) => (
                 <div key={i} style={{ padding: 16, borderRadius: 8, background: '#fff', border: '1px solid #eee', marginBottom: 8 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -259,10 +341,46 @@ const AICopilot: React.FC = () => {
           </div>
           {symptomResults && (
             <div>
-              <div style={{ padding: 16, borderRadius: 8, background: '#f8fafc', marginBottom: 16, border: '1px solid #e2e8f0' }}>
-                <strong>Urgency: {symptomResults.overallUrgency}</strong>
-                <span style={{ marginLeft: 12, color: '#888' }}>Species: {symptomResults.species}</span>
+              <div style={{ padding: '14px 18px', borderRadius: 10, marginBottom: 16, border: '1px solid #e2e8f0',
+                background: symptomResults.overallUrgency === 'high' || symptomResults.overallUrgency === 'emergency'
+                  ? '#fef2f2' : symptomResults.overallUrgency === 'moderate' ? '#fffbeb' : '#f0fdf4',
+                display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                <div>
+                  <span style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Urgency</span>
+                  <div style={{ fontWeight: 700, fontSize: 16, marginTop: 2,
+                    color: symptomResults.overallUrgency === 'high' || symptomResults.overallUrgency === 'emergency' ? '#dc2626'
+                      : symptomResults.overallUrgency === 'moderate' ? '#d97706' : '#16a34a' }}>
+                    {symptomResults.overallUrgency?.toUpperCase()}
+                  </div>
+                </div>
+                <div style={{ width: 1, height: 36, background: '#ddd' }} />
+                <div>
+                  <span style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Species</span>
+                  <div style={{ fontWeight: 600, marginTop: 2 }}>{symptomResults.species}</div>
+                </div>
+                {symptomResults.provider && (
+                  <div style={{ marginLeft: 'auto', fontSize: 12, color: '#888' }}>Powered by: {symptomResults.provider}</div>
+                )}
               </div>
+
+              {/* AI full analysis */}
+              {symptomResults.aiAnalysis && (
+                <div style={{ padding: '16px 20px', borderRadius: 10, background: 'white', border: '1px solid #e8ecf0', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', marginBottom: 16 }}>
+                  <div className="ai-markdown" style={{ fontSize: 14, lineHeight: 1.7, color: '#2d3748' }}>
+                    <ReactMarkdown
+                      components={{
+                        h3: ({children}) => <h4 style={{margin:'10px 0 4px',fontSize:14,color:'#4a5568'}}>{children}</h4>,
+                        p: ({children}) => <p style={{margin:'0 0 8px'}}>{children}</p>,
+                        ul: ({children}) => <ul style={{margin:'0 0 8px',paddingLeft:18}}>{children}</ul>,
+                        ol: ({children}) => <ol style={{margin:'0 0 8px',paddingLeft:18}}>{children}</ol>,
+                        li: ({children}) => <li style={{marginBottom:3}}>{children}</li>,
+                        strong: ({children}) => <strong style={{fontWeight:700}}>{children}</strong>,
+                      }}
+                    >{symptomResults.aiAnalysis}</ReactMarkdown>
+                  </div>
+                </div>
+              )}
+              {/* Local fallback finding cards */}
               {symptomResults.findings?.map((finding: any, i: number) => (
                 <div key={i} style={{ padding: 16, borderRadius: 8, background: '#fff', border: '1px solid #eee', marginBottom: 12 }}>
                   <div style={{ fontWeight: 600, marginBottom: 8, color: '#333' }}>{finding.symptom}</div>

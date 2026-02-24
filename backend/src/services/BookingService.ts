@@ -59,16 +59,17 @@ class BookingService {
     }
 
     const result = await database.query(
-      `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, scheduled_date, 
+      `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, enterprise_id, group_id, scheduled_date, 
        time_slot_start, time_slot_end, status, booking_type, priority, reason_for_visit, 
        symptoms, notes, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
        RETURNING id, pet_owner_id as "petOwnerId", veterinarian_id as "veterinarianId", 
-       animal_id as "animalId", scheduled_date as "scheduledDate", 
+       animal_id as "animalId", enterprise_id as "enterpriseId", group_id as "groupId",
+       scheduled_date as "scheduledDate", 
        time_slot_start as "timeSlotStart", time_slot_end as "timeSlotEnd",
        status, booking_type as "bookingType", priority, reason_for_visit as "reasonForVisit",
        symptoms, notes, created_at as "createdAt", updated_at as "updatedAt"`,
-      [id, petOwnerId, data.veterinarianId, data.animalId || null, data.scheduledDate,
+      [id, petOwnerId, data.veterinarianId, data.animalId || null, data.enterpriseId || null, data.groupId || null, data.scheduledDate,
        data.timeSlotStart, data.timeSlotEnd, 'pending', data.bookingType,
        data.priority || 'normal', data.reasonForVisit, data.symptoms || null,
        data.notes || null, now, now]
@@ -81,7 +82,8 @@ class BookingService {
   async getBooking(id: string): Promise<Booking> {
     const result = await database.query(
       `SELECT id, pet_owner_id as "petOwnerId", veterinarian_id as "veterinarianId",
-       animal_id as "animalId", consultation_id as "consultationId",
+       animal_id as "animalId", enterprise_id as "enterpriseId", group_id as "groupId",
+       consultation_id as "consultationId",
        scheduled_date as "scheduledDate", time_slot_start as "timeSlotStart",
        time_slot_end as "timeSlotEnd", status, booking_type as "bookingType",
        priority, reason_for_visit as "reasonForVisit", symptoms, notes,
@@ -128,16 +130,24 @@ class BookingService {
 
     const result = await database.query(
       `SELECT b.id, b.pet_owner_id as "petOwnerId", b.veterinarian_id as "veterinarianId",
-       b.animal_id as "animalId", b.consultation_id as "consultationId",
+       b.animal_id as "animalId", b.enterprise_id as "enterpriseId", b.group_id as "groupId",
+       b.consultation_id as "consultationId",
        b.scheduled_date as "scheduledDate", b.time_slot_start as "timeSlotStart",
        b.time_slot_end as "timeSlotEnd", b.status, b.booking_type as "bookingType",
        b.priority, b.reason_for_visit as "reasonForVisit", b.symptoms, b.notes,
        b.created_at as "createdAt", b.updated_at as "updatedAt",
        CONCAT(po.first_name, ' ', po.last_name) as "petOwnerName",
-       CONCAT('Dr. ', v.first_name, ' ', v.last_name) as "vetName"
+       CONCAT('Dr. ', v.first_name, ' ', v.last_name) as "vetName",
+       a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+       a.unique_id as "animalUniqueId",
+       e.name as "enterpriseName", e.enterprise_type as "enterpriseType",
+       ag.name as "groupName", ag.group_type as "groupType"
        FROM bookings b
        LEFT JOIN users po ON po.id = b.pet_owner_id
        LEFT JOIN users v ON v.id = b.veterinarian_id
+       LEFT JOIN animals a ON a.id = b.animal_id
+       LEFT JOIN enterprises e ON e.id = b.enterprise_id
+       LEFT JOIN animal_groups ag ON ag.id = b.group_id
        ${whereClause}
        ORDER BY b.scheduled_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
       [...queryParams, limit, offset]
@@ -239,17 +249,19 @@ class BookingService {
     const confirmedAt = initiatorRole === 'veterinarian' ? now : null;
 
     const result = await database.query(
-      `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, scheduled_date,
+      `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, enterprise_id, group_id, scheduled_date,
        time_slot_start, time_slot_end, status, booking_type, priority, reason_for_visit,
        symptoms, notes, rescheduled_from, confirmed_at, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
        RETURNING id, pet_owner_id as "petOwnerId", veterinarian_id as "veterinarianId",
-       animal_id as "animalId", scheduled_date as "scheduledDate",
+       animal_id as "animalId", enterprise_id as "enterpriseId", group_id as "groupId",
+       scheduled_date as "scheduledDate",
        time_slot_start as "timeSlotStart", time_slot_end as "timeSlotEnd",
        status, booking_type as "bookingType", priority, reason_for_visit as "reasonForVisit",
        symptoms, notes, rescheduled_from as "rescheduledFrom",
        created_at as "createdAt", updated_at as "updatedAt"`,
       [newId, oldBooking.petOwnerId, oldBooking.veterinarianId, oldBooking.animalId || null,
+       (oldBooking as any).enterpriseId || null, (oldBooking as any).groupId || null,
        newDate, newStart, newEnd, newStatus, oldBooking.bookingType || 'video_call',
        oldBooking.priority || 'normal', oldBooking.reasonForVisit || null,
        oldBooking.symptoms || null, oldBooking.notes || null, id, confirmedAt, now, now]

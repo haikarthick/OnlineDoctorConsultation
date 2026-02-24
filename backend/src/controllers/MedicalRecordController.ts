@@ -221,6 +221,44 @@ export class MedicalRecordController {
     const stats = await MedicalRecordService.getMedicalStats(req.userId!, isAdmin, animalId);
     res.json({ success: true, data: stats });
   }
+
+  // ═══ ENTERPRISE / HERD MEDICAL ════════════════════════════
+
+  async listEnterpriseRecords(req: AuthRequest, res: Response): Promise<void> {
+    const { enterpriseId } = req.params;
+    const filters: any = {
+      limit: Math.min(parseInt(req.query.limit as string) || 20, 100),
+      offset: parseInt(req.query.offset as string) || 0,
+    };
+    if (req.query.animalId) filters.animalId = req.query.animalId;
+    if (req.query.groupId) filters.groupId = req.query.groupId;
+    if (req.query.recordType) filters.recordType = req.query.recordType;
+    if (req.query.status) filters.status = req.query.status;
+    if (req.query.severity) filters.severity = req.query.severity;
+    if (req.query.search) filters.search = req.query.search;
+    const result = await MedicalRecordService.listEnterpriseRecords(enterpriseId, filters);
+    res.json({ success: true, data: result });
+  }
+
+  async listEnterpriseVaccinations(req: AuthRequest, res: Response): Promise<void> {
+    const { enterpriseId } = req.params;
+    const filters: any = {
+      limit: Math.min(parseInt(req.query.limit as string) || 50, 200),
+      offset: parseInt(req.query.offset as string) || 0,
+    };
+    if (req.query.animalId) filters.animalId = req.query.animalId;
+    if (req.query.groupId) filters.groupId = req.query.groupId;
+    if (req.query.overdueOnly === 'true') filters.overdueOnly = true;
+    if (req.query.upcomingOnly === 'true') filters.upcomingOnly = true;
+    const result = await MedicalRecordService.listEnterpriseVaccinations(enterpriseId, filters);
+    res.json({ success: true, data: result });
+  }
+
+  async getEnterpriseMedicalStats(req: AuthRequest, res: Response): Promise<void> {
+    const { enterpriseId } = req.params;
+    const stats = await MedicalRecordService.getEnterpriseMedicalStats(enterpriseId);
+    res.json({ success: true, data: stats });
+  }
 }
 
 export default new MedicalRecordController();

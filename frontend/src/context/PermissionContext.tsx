@@ -17,7 +17,7 @@ interface PermissionContextType {
 export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   dashboard: ['/dashboard'],
   consultations: ['/consultations'],
-  find_doctor: ['/find-doctor'],
+  find_doctor: ['/find-doctor', '/vet-profile'],
   book_consultation: ['/book-consultation'],
   animals: ['/animals'],
   medical_records: ['/medical-records'],
@@ -41,6 +41,7 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   enterprise_locations: ['/locations'],
   enterprise_movements: ['/movement-log'],
   enterprise_campaigns: ['/campaigns'],
+  herd_medical: ['/herd-medical'],
   // Advanced
   health_analytics: ['/health-analytics'],
   breeding_manage: ['/breeding'],
@@ -100,6 +101,7 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'locations': 'enterprise_locations',
   'movement-log': 'enterprise_movements',
   'campaigns': 'enterprise_campaigns',
+  'herd-medical': 'herd_medical',
   // Advanced
   'health-analytics': 'health_analytics',
   'breeding': 'breeding_manage',

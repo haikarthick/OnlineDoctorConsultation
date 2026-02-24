@@ -174,6 +174,8 @@ export const createAnimalSchema = Joi.object({
   insurancePolicyNumber: shortText().optional().allow('', null),
   insuranceExpiry: Joi.string().optional().allow('', null),
   medicalNotes: longText(10000).optional().allow('', null),
+  enterpriseId: uuid.optional().allow(null, ''),
+  groupId: uuid.optional().allow(null, ''),
 });
 
 export const updateAnimalSchema = createAnimalSchema.fork(

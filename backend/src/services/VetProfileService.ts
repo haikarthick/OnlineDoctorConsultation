@@ -129,15 +129,34 @@ export class VetProfileService {
     }
   }
 
-  async listVets(limit: number = 20, offset: number = 0, specialization?: string): Promise<{ vets: VetProfile[]; total: number }> {
+  async listVets(
+    limit: number = 20,
+    offset: number = 0,
+    filters?: {
+      specialization?: string;
+      language?: string;
+      acceptsEmergency?: boolean;
+      minRating?: number;
+      maxFee?: number;
+      minFee?: number;
+      search?: string;
+      availableOnly?: boolean;
+      sortBy?: string;
+      sortOrder?: string;
+    }
+  ): Promise<{ vets: VetProfile[]; total: number }> {
     try {
       let query = `
         SELECT vp.id, vp.user_id as "userId", vp.license_number as "licenseNumber",
                vp.specializations, vp.qualifications,
                vp.years_of_experience as "yearsOfExperience", vp.bio,
-               vp.clinic_name as "clinicName", vp.consultation_fee as "consultationFee",
+               vp.clinic_name as "clinicName", vp.clinic_address as "clinicAddress",
+               vp.consultation_fee as "consultationFee",
                vp.currency, vp.is_verified as "isVerified",
                vp.is_available as "isAvailable", vp.accepts_emergency as "acceptsEmergency",
+               vp.available_days as "availableDays",
+               vp.available_hours_start as "availableHoursStart",
+               vp.available_hours_end as "availableHoursEnd",
                vp.languages, vp.rating, vp.total_reviews as "totalReviews",
                vp.total_consultations as "totalConsultations",
                u.first_name as "firstName", u.last_name as "lastName", u.email,
@@ -145,19 +164,92 @@ export class VetProfileService {
         FROM vet_profiles vp JOIN users u ON u.id = vp.user_id
         WHERE u.is_active = true
       `;
+      let countWhere = ' WHERE u.is_active = true';
       const params: any[] = [];
+      const countParams: any[] = [];
       let idx = 0;
+      let cIdx = 0;
 
-      if (specialization) {
-        idx++;
+      if (filters?.specialization) {
+        idx++; cIdx++;
         query += ` AND $${idx} = ANY(vp.specializations)`;
-        params.push(specialization);
+        countWhere += ` AND $${cIdx} = ANY(vp.specializations)`;
+        params.push(filters.specialization);
+        countParams.push(filters.specialization);
       }
 
-      const countQuery = `SELECT COUNT(*) as count FROM vet_profiles vp JOIN users u ON u.id = vp.user_id WHERE u.is_active = true${specialization ? ` AND $1 = ANY(vp.specializations)` : ''}`;
-      const countParams = specialization ? [specialization] : [];
+      if (filters?.language) {
+        idx++; cIdx++;
+        query += ` AND $${idx} = ANY(vp.languages)`;
+        countWhere += ` AND $${cIdx} = ANY(vp.languages)`;
+        params.push(filters.language);
+        countParams.push(filters.language);
+      }
 
-      query += ` ORDER BY vp.rating DESC LIMIT $${idx + 1} OFFSET $${idx + 2}`;
+      if (filters?.acceptsEmergency) {
+        query += ` AND vp.accepts_emergency = true`;
+        countWhere += ` AND vp.accepts_emergency = true`;
+      }
+
+      if (filters?.availableOnly) {
+        query += ` AND vp.is_available = true`;
+        countWhere += ` AND vp.is_available = true`;
+      }
+
+      if (filters?.minRating != null && filters.minRating > 0) {
+        idx++; cIdx++;
+        query += ` AND vp.rating >= $${idx}`;
+        countWhere += ` AND vp.rating >= $${cIdx}`;
+        params.push(filters.minRating);
+        countParams.push(filters.minRating);
+      }
+
+      if (filters?.minFee != null) {
+        idx++; cIdx++;
+        query += ` AND vp.consultation_fee >= $${idx}`;
+        countWhere += ` AND vp.consultation_fee >= $${cIdx}`;
+        params.push(filters.minFee);
+        countParams.push(filters.minFee);
+      }
+
+      if (filters?.maxFee != null) {
+        idx++; cIdx++;
+        query += ` AND vp.consultation_fee <= $${idx}`;
+        countWhere += ` AND vp.consultation_fee <= $${cIdx}`;
+        params.push(filters.maxFee);
+        countParams.push(filters.maxFee);
+      }
+
+      if (filters?.search) {
+        idx++; cIdx++;
+        const searchClause = ` AND (
+          u.first_name ILIKE $${idx} OR u.last_name ILIKE $${idx}
+          OR vp.clinic_name ILIKE $${idx}
+          OR EXISTS (SELECT 1 FROM unnest(vp.specializations) s WHERE s ILIKE $${idx})
+          OR EXISTS (SELECT 1 FROM unnest(vp.qualifications) q WHERE q ILIKE $${idx})
+        )`;
+        query += searchClause;
+        countWhere += searchClause.replace(new RegExp(`\\$\\{${idx}\\}`, 'g'), `$${cIdx}`);
+        const like = `%${filters.search}%`;
+        params.push(like);
+        countParams.push(like);
+      }
+
+      // Sorting
+      const sortMap: Record<string, string> = {
+        rating: 'vp.rating', fee_asc: 'vp.consultation_fee', fee_desc: 'vp.consultation_fee',
+        experience: 'vp.years_of_experience', consultations: 'vp.total_consultations',
+        reviews: 'vp.total_reviews', name: 'u.first_name', newest: 'vp.created_at'
+      };
+      const sortCol = sortMap[filters?.sortBy || ''] || 'vp.rating';
+      const sortDir = (filters?.sortBy === 'fee_asc') ? 'ASC' :
+                      (filters?.sortBy === 'name') ? 'ASC' :
+                      (filters?.sortOrder === 'asc') ? 'ASC' : 'DESC';
+      query += ` ORDER BY ${sortCol} ${sortDir}`;
+
+      const countQuery = `SELECT COUNT(*) as count FROM vet_profiles vp JOIN users u ON u.id = vp.user_id${countWhere}`;
+
+      query += ` LIMIT $${idx + 1} OFFSET $${idx + 2}`;
       params.push(limit, offset);
 
       const [vetsResult, countResult] = await Promise.all([

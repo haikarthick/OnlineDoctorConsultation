@@ -2,10 +2,75 @@
  * AI Veterinary Copilot Service
  * Conversational AI assistant with symptom analysis, drug interaction checks,
  * treatment suggestions, and contextual animal health intelligence.
+ *
+ * Provider priority:
+ *   1. Groq  (GROQ_API_KEY)  — free, fast, llama-3.3-70b
+ *   2. OpenAI (OPENAI_API_KEY) — GPT-4o (requires paid plan)
+ *   3. Local knowledge-base fallback
  */
+import path from 'path';
+import dotenv from 'dotenv';
+// Load .env before any env-variable checks
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
 import pool from '../utils/database';
 import logger from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
+import OpenAI from 'openai';
+
+interface AiClient {
+  client: OpenAI;
+  model: string;
+  provider: string;
+}
+
+// Lazy-initialised after dotenv has loaded
+let _ai: AiClient | null | undefined;
+function getAI(): AiClient | null {
+  if (_ai === undefined) {
+    const groqKey = process.env.GROQ_API_KEY?.trim();
+    const openaiKey = process.env.OPENAI_API_KEY?.trim();
+
+    if (groqKey) {
+      _ai = {
+        client: new OpenAI({ apiKey: groqKey, baseURL: 'https://api.groq.com/openai/v1' }),
+        model: 'llama-3.3-70b-versatile',
+        provider: 'Groq (llama-3.3-70b)'
+      };
+      logger.info('AI Copilot: using Groq llama-3.3-70b (free tier)');
+    } else if (openaiKey) {
+      _ai = {
+        client: new OpenAI({ apiKey: openaiKey }),
+        model: 'gpt-4o',
+        provider: 'OpenAI GPT-4o'
+      };
+      logger.info('AI Copilot: using OpenAI GPT-4o');
+    } else {
+      _ai = null;
+      logger.warn('AI Copilot: no GROQ_API_KEY or OPENAI_API_KEY — running in offline mode');
+    }
+  }
+  return _ai;
+}
+
+// Keep backward-compat helper used in existing methods
+function getOpenAI(): OpenAI | null { return getAI()?.client ?? null; }
+
+const SYSTEM_PROMPT = `You are an expert AI Veterinary Copilot integrated into a professional veterinary consultation platform. Your role is to assist veterinarians and farmers with:
+- Symptom analysis and differential diagnoses across all common livestock and companion animal species (cattle, sheep, goats, pigs, poultry, dogs, cats, horses, etc.)
+- Drug interaction checks and pharmacology guidance
+- Treatment protocol suggestions based on current evidence-based veterinary medicine
+- Preventive care, vaccination schedules, and nutritional recommendations
+- Emergency triage guidance
+
+Always:
+- Be concise, practical, and clinically relevant
+- Include confidence level when uncertain
+- Recommend consulting a licensed veterinarian for any diagnosis or treatment decision
+- Mention when symptoms warrant emergency care
+- Cite relevant guidelines (AVMA, AAHA, WSAVA, Merck Veterinary Manual) where appropriate
+
+Respond in a structured, easy-to-read format. Never give harmful advice or encourage bypassing professional veterinary care.`;
 
 // ── Veterinary knowledge base for AI responses ──
 const VET_KNOWLEDGE: Record<string, { response: string; confidence: number; sources: string[] }> = {
@@ -89,8 +154,14 @@ class AiCopilotService {
       [userMsgId, sessionId, content]
     );
 
-    // Generate AI response
-    const aiResponse = this.generateAiResponse(content);
+    // Build conversation history for context
+    const history = await pool.query(
+      `SELECT role, content FROM ai_chat_messages WHERE session_id = $1 ORDER BY created_at ASC`,
+      [sessionId]
+    );
+
+    // Generate AI response (real GPT or fallback)
+    const aiResponse = await this.generateAiResponse(content, history.rows);
 
     // Save AI response
     const aiMsgId = uuidv4();
@@ -114,9 +185,31 @@ class AiCopilotService {
 
   // ── Drug Interaction Check ──
   async checkDrugInteractions(drugs: string[]) {
-    const interactions: any[] = [];
     const normalized = drugs.map(d => d.toLowerCase().trim());
 
+    const ai = getAI();
+    if (ai) {
+      try {
+        const prompt = `Check for drug interactions between the following veterinary medications: ${drugs.join(', ')}. For each interaction found, state: drug pair, severity (low/medium/high), and clinical note. If no interactions, say so clearly.`;
+        const completion = await ai.client.chat.completions.create({
+          model: ai.model,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 500,
+          temperature: 0.3
+        });
+        const text = completion.choices[0]?.message?.content ?? '';
+        return { drugs: normalized, aiAnalysis: text, interactions: [], hasInteractions: text.toLowerCase().includes('interaction'), provider: ai.provider };
+      } catch (err: any) {
+        const hint = err?.status === 429 ? ' (quota exceeded — add billing or switch to Groq)' : '';
+        logger.warn(`AI drug check failed${hint}`, { error: err?.message });
+      }
+    }
+
+    // Local fallback
+    const interactions: any[] = [];
     for (const drug of normalized) {
       const known = DRUG_INTERACTIONS[drug];
       if (!known) continue;
@@ -128,11 +221,41 @@ class AiCopilotService {
         }
       }
     }
-    return { drugs: normalized, interactions, hasInteractions: interactions.length > 0 };
+    return { drugs: normalized, interactions, hasInteractions: interactions.length > 0, provider: 'local' };
   }
 
   // ── Symptom Analysis ──
   async analyzeSymptoms(symptoms: string[], species?: string) {
+    const ai = getAI();
+    if (ai) {
+      try {
+        const prompt = `Analyze the following symptoms in a ${species || 'animal'}: ${symptoms.join(', ')}. Provide: 1) Most likely differential diagnoses, 2) Urgency level (low/moderate/high/emergency), 3) Recommended immediate actions, 4) Diagnostic tests to consider.`;
+        const completion = await ai.client.chat.completions.create({
+          model: ai.model,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 600,
+          temperature: 0.3
+        });
+        const text = completion.choices[0]?.message?.content ?? '';
+        const isUrgent = /emergency|urgent|immediate/i.test(text);
+        return {
+          symptoms, species: species || 'unspecified',
+          aiAnalysis: text,
+          findings: [],
+          overallUrgency: isUrgent ? 'high' : 'moderate',
+          disclaimer: 'AI-assisted analysis. Always consult a licensed veterinarian for diagnosis and treatment.',
+          provider: ai.provider
+        };
+      } catch (err: any) {
+        const hint = err?.status === 429 ? ' (quota exceeded — add billing or switch to Groq)' : '';
+        logger.warn(`AI symptom analysis failed${hint}`, { error: err?.message });
+      }
+    }
+
+    // Local fallback
     const findings: any[] = [];
     for (const symptom of symptoms) {
       const lcSymptom = symptom.toLowerCase();
@@ -145,41 +268,91 @@ class AiCopilotService {
     return {
       symptoms, species: species || 'unspecified',
       findings, overallUrgency: findings.some(f => f.confidence > 85) ? 'moderate' : 'low',
-      disclaimer: 'This is AI-assisted analysis. Always consult a licensed veterinarian for diagnosis and treatment.'
+      disclaimer: 'This is AI-assisted analysis. Always consult a licensed veterinarian for diagnosis and treatment.',
+      provider: 'local'
     };
   }
 
   // ── Private: AI response generation ──
-  private generateAiResponse(userMessage: string): { content: string; confidence: number; sources: string[]; tokens: number } {
+  private async generateAiResponse(
+    userMessage: string,
+    history: { role: string; content: string }[] = []
+  ): Promise<{ content: string; confidence: number; sources: string[]; tokens: number }> {
+
+    // ── AI path ──
+    const ai = getAI();
+    if (ai) {
+      try {
+        // Build message list: system + history + new user message
+        const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...history.map(m => ({
+            role: m.role as 'user' | 'assistant',
+            content: m.content
+          }))
+        ];
+        // Remove the last entry because it's the user message we just inserted
+        // (history already includes it from the DB query in sendMessage)
+        if (messages[messages.length - 1]?.role === 'user') {
+          messages.pop();
+        }
+        messages.push({ role: 'user', content: userMessage });
+
+        const completion = await ai.client.chat.completions.create({
+          model: ai.model,
+          messages,
+          max_tokens: 800,
+          temperature: 0.5
+        });
+
+        const content = completion.choices[0]?.message?.content ?? 'I was unable to generate a response. Please try again.';
+        const tokens = completion.usage?.total_tokens ?? Math.ceil(content.length / 4);
+
+        return { content, confidence: 90, sources: [ai.provider, 'Veterinary Knowledge Base'], tokens };
+      } catch (err: any) {
+        if (err?.status === 429) {
+          logger.error('AI quota exceeded (429). Add billing on OpenAI or switch to Groq (free).', { provider: ai.provider });
+          return {
+            content: `⚠️ The AI provider (${ai.provider}) returned a quota/billing error (429).
+
+To fix this:
+- **OpenAI users**: Add billing at https://platform.openai.com/settings/billing
+- **Free alternative**: Get a free Groq key at https://console.groq.com, set GROQ_API_KEY in your backend .env, and restart the backend.
+
+In the meantime, please use the Symptom Analysis or Drug Interactions tabs.`,
+            confidence: 0, sources: ['System'], tokens: 50
+          };
+        }
+        logger.error('AI API error, falling back to local KB', { error: err?.message });
+      }
+    }
+
+    // ── Local fallback knowledge base ──
     const lc = userMessage.toLowerCase();
 
-    // Check knowledge base
     for (const [key, knowledge] of Object.entries(VET_KNOWLEDGE)) {
       if (lc.includes(key)) {
         return { content: knowledge.response, confidence: knowledge.confidence, sources: knowledge.sources, tokens: Math.ceil(knowledge.response.length / 4) };
       }
     }
 
-    // Drug interaction query
     if (lc.includes('interaction') || lc.includes('drug') || lc.includes('medication')) {
       return {
-        content: 'I can help check drug interactions. Please provide the specific medications you\'d like me to analyze. Common veterinary drug categories include NSAIDs, antibiotics, antiparasitics, and corticosteroids. Use the Drug Interaction Checker for a detailed compatibility report.',
+        content: 'I can help check drug interactions. Please provide the specific medications you\'d like me to analyze. Use the Drug Interaction Checker tab for a detailed compatibility report.',
         confidence: 75, sources: ['Veterinary Pharmacology Database'], tokens: 45
       };
     }
 
-    // Emergency detection
     if (lc.includes('emergency') || lc.includes('bleeding') || lc.includes('not breathing') || lc.includes('seizure') || lc.includes('poison')) {
       return {
-        content: '🚨 EMERGENCY: If your animal is in immediate danger, contact your nearest emergency veterinary clinic immediately. While waiting: 1) Keep the animal calm and still. 2) Do not attempt to give medication without vet guidance. 3) Note the time symptoms started. 4) If poisoning is suspected, bring the substance container to the vet.',
+        content: '🚨 EMERGENCY: If your animal is in immediate danger, contact your nearest emergency veterinary clinic immediately. Keep the animal calm, do not give medication without guidance, and note when symptoms started.',
         confidence: 95, sources: ['Emergency Veterinary Protocol'], tokens: 60
       };
     }
 
-    // General response
     return {
-      content: `Thank you for your question about "${userMessage.substring(0, 50)}...". Based on veterinary best practices, I'd recommend: 1) Observing the animal closely for 24-48 hours. 2) Documenting any changes in behavior, appetite, or activity. 3) Scheduling a check-up if symptoms persist. Would you like me to help with symptom analysis, drug interaction checks, or treatment protocol suggestions?`,
-      confidence: 60, sources: ['General Veterinary Practice'], tokens: 55
+      content: `⚠️ AI Copilot offline — no AI provider configured.\n\nSet one of these in your backend .env and restart:\n- **Free**: GROQ_API_KEY=<key from https://console.groq.com>\n- **Paid**: OPENAI_API_KEY=<key from https://platform.openai.com>`,
+      confidence: 40, sources: ['Local Knowledge Base'], tokens: 55
     };
   }
 }

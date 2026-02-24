@@ -156,6 +156,9 @@ router.put('/enterprises/:id', authMiddleware, validateBody(updateEnterpriseSche
 router.delete('/enterprises/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.deleteEnterprise(req, res)));
 router.get('/enterprises/:id/stats', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getEnterpriseStats(req, res)));
 
+// Enterprise Animals
+router.get('/enterprises/:enterpriseId/animals', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listEnterpriseAnimals(req, res)));
+
 // Enterprise Members
 router.get('/enterprises/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listMembers(req, res)));
 router.post('/enterprises/:id/members', authMiddleware, validateBody(addMemberSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.addMember(req, res)));
@@ -293,6 +296,11 @@ router.get('/enterprises/:enterpriseId/health/dashboard', authMiddleware, asyncH
 router.get('/enterprises/:enterpriseId/health/observations', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listObservations(req, res)));
 router.post('/enterprises/:enterpriseId/health/observations', authMiddleware, validateBody(createObservationSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.createObservation(req, res)));
 router.patch('/health/observations/:id/resolve', authMiddleware, validateBody(resolveObservationSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.resolveObservation(req, res)));
+
+// ─── Enterprise / Herd Medical Management ────────────
+router.get('/enterprises/:enterpriseId/medical-records', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseRecords(req, res)));
+router.get('/enterprises/:enterpriseId/medical-records/stats', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getEnterpriseMedicalStats(req, res)));
+router.get('/enterprises/:enterpriseId/vaccinations', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseVaccinations(req, res)));
 
 // ─── Breeding & Genetics ────────────────────────────
 router.get('/enterprises/:enterpriseId/breeding', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listBreedingRecords(req, res)));

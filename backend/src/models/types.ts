@@ -61,6 +61,8 @@ export interface Booking {
   petOwnerId: string;
   veterinarianId: string;
   animalId?: string;
+  enterpriseId?: string;
+  groupId?: string;
   consultationId?: string;
   scheduledDate: Date;
   timeSlotStart: string; // HH:mm
@@ -330,6 +332,8 @@ export interface Animal {
 export interface CreateBookingDTO {
   veterinarianId: string;
   animalId?: string;
+  enterpriseId?: string;
+  groupId?: string;
   scheduledDate: string;
   timeSlotStart: string;
   timeSlotEnd: string;

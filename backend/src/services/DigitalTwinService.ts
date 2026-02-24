@@ -104,14 +104,18 @@ class DigitalTwinService {
     // Auto-populate model_data from enterprise stats
     let modelData = data.modelData || {};
     if (!data.modelData) {
-      const stats = await pool.query(
-        `SELECT
-           (SELECT COUNT(*) FROM animals WHERE enterprise_id = $1) as animal_count,
-           (SELECT COUNT(*) FROM enterprise_members WHERE enterprise_id = $1) as member_count,
-           (SELECT COUNT(*) FROM enterprise_locations WHERE enterprise_id = $1) as location_count`,
-        [data.enterpriseId]
-      );
-      modelData = stats.rows[0] || {};
+      try {
+        const stats = await pool.query(
+          `SELECT
+             (SELECT COUNT(*) FROM animals WHERE enterprise_id = $1) as animal_count,
+             (SELECT COUNT(*) FROM enterprise_members WHERE enterprise_id = $1) as member_count,
+             (SELECT COUNT(*) FROM locations WHERE enterprise_id = $1) as location_count`,
+          [data.enterpriseId]
+        );
+        modelData = stats.rows[0] || {};
+      } catch {
+        modelData = { animal_count: 0, member_count: 0, location_count: 0 };
+      }
     }
 
     await pool.query(

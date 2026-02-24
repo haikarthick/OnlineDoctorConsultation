@@ -289,6 +289,21 @@ CREATE INDEX IF NOT EXISTS idx_animals_enterprise_id ON animals(enterprise_id);
 CREATE INDEX IF NOT EXISTS idx_animals_group_id ON animals(group_id);
 CREATE INDEX IF NOT EXISTS idx_animals_location_id ON animals(current_location_id);
 CREATE INDEX IF NOT EXISTS idx_animals_status ON animals(status);
+
+-- ============================================================
+-- E9. EXTEND BOOKINGS TABLE (add enterprise + group context)
+-- ============================================================
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='bookings' AND column_name='enterprise_id') THEN
+    ALTER TABLE bookings ADD COLUMN enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='bookings' AND column_name='group_id') THEN
+    ALTER TABLE bookings ADD COLUMN group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_bookings_enterprise_id ON bookings(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_group_id ON bookings(group_id);
 `;
 
 async function runMigration() {

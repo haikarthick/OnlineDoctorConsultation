@@ -61,6 +61,7 @@ export const PERMISSION_CATEGORIES = {
       'enterprise_movements',
       'enterprise_campaigns',
       'enterprise_members',
+      'herd_medical',
     ]
   },
   dashboard_widgets: {
@@ -121,7 +122,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard', 'consultations', 'medical_records', 'schedule',
     'prescriptions', 'reviews', 'video_consultation', 'settings',
     // Enterprise (vet serves enterprise clients per Home page)
-    'enterprise_campaigns',
+    'enterprise_campaigns', 'herd_medical',
     // Advanced (vet needs analytics for clinical oversight)
     'health_analytics', 'alert_manage',
     // Innovation (vet-relevant modules)
@@ -159,7 +160,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'animals', 'medical_records', 'video_consultation', 'settings', 'write_review',
     // Enterprise
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
-    'enterprise_movements', 'enterprise_campaigns', 'enterprise_members',
+    'enterprise_movements', 'enterprise_campaigns', 'enterprise_members', 'herd_medical',
     // Advanced
     'health_analytics', 'breeding_manage', 'feed_manage',
     'compliance_manage', 'financial_analytics', 'alert_manage',
@@ -185,7 +186,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'admin_reviews', 'admin_settings', 'admin_audit', 'admin_permissions', 'admin_medical_records',
     // Enterprise (full access)
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
-    'enterprise_movements', 'enterprise_campaigns', 'enterprise_members',
+    'enterprise_movements', 'enterprise_campaigns', 'enterprise_members', 'herd_medical',
     // Advanced (full access)
     'health_analytics', 'breeding_manage', 'feed_manage',
     'compliance_manage', 'financial_analytics', 'alert_manage',
@@ -247,6 +248,7 @@ export const PERMISSION_LABELS: Record<string, string> = {
   enterprise_movements: 'Movement Log',
   enterprise_campaigns: 'Treatment Campaigns',
   enterprise_members: 'Enterprise Members',
+  herd_medical: 'Herd Medical Management',
   // Advanced Modules
   health_analytics: 'Health Analytics',
   breeding_manage: 'Breeding & Genetics',

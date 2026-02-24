@@ -2,19 +2,31 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import AnimalService from '../services/AnimalService';
 import { ValidationError, ForbiddenError } from '../utils/errors';
+import database from '../utils/database';
 
 export class AnimalController {
   async createAnimal(req: AuthRequest, res: Response): Promise<void> {
     const { name, species, breed, dateOfBirth, gender, weight, color, microchipId,
             earTagId, registrationNumber, isNeutered, insuranceProvider, insurancePolicyNumber,
-            insuranceExpiry, medicalNotes } = req.body;
+            insuranceExpiry, medicalNotes, enterpriseId, groupId } = req.body;
     if (!name || !species) throw new ValidationError('Name and species are required');
 
     const animal = await AnimalService.createAnimal(req.userId!, {
       name, species, breed, dateOfBirth, gender, weight, color, microchipId,
       earTagId, registrationNumber, isNeutered, insuranceProvider, insurancePolicyNumber,
-      insuranceExpiry, medicalNotes,
+      insuranceExpiry, medicalNotes, enterpriseId: enterpriseId || undefined,
+      groupId: groupId || undefined,
     });
+
+    // If assigned to a group, update the group's count
+    if (groupId) {
+      try {
+        await database.query(
+          `UPDATE animal_groups SET current_count = (SELECT COUNT(*) FROM animals WHERE group_id = $1 AND is_active = true), updated_at = NOW() WHERE id = $1`,
+          [groupId]
+        );
+      } catch { /* non-critical */ }
+    }
 
     res.status(201).json({ success: true, data: animal });
   }

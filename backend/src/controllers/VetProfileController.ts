@@ -28,8 +28,18 @@ export class VetProfileController {
   async listVets(req: AuthRequest, res: Response): Promise<void> {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
     const offset = parseInt(req.query.offset as string) || 0;
-    const specialization = req.query.specialization as string | undefined;
-    const result = await VetProfileService.listVets(limit, offset, specialization);
+    const filters: any = {};
+    if (req.query.specialization) filters.specialization = req.query.specialization;
+    if (req.query.language) filters.language = req.query.language;
+    if (req.query.acceptsEmergency === 'true') filters.acceptsEmergency = true;
+    if (req.query.availableOnly === 'true') filters.availableOnly = true;
+    if (req.query.minRating) filters.minRating = parseFloat(req.query.minRating as string);
+    if (req.query.minFee) filters.minFee = parseFloat(req.query.minFee as string);
+    if (req.query.maxFee) filters.maxFee = parseFloat(req.query.maxFee as string);
+    if (req.query.search) filters.search = req.query.search;
+    if (req.query.sortBy) filters.sortBy = req.query.sortBy;
+    if (req.query.sortOrder) filters.sortOrder = req.query.sortOrder;
+    const result = await VetProfileService.listVets(limit, offset, filters);
     res.json({ success: true, data: result });
   }
 

@@ -35,6 +35,9 @@ interface AnimalData {
   insuranceExpiry?: string; medicalNotes?: string; ownerName?: string;
 }
 
+interface EnterpriseOption { id: string; name: string }
+interface GroupOption { id: string; name: string }
+
 const Animals: React.FC = () => {
   const { user } = useAuth()
   const { formatDate } = useSettings()
@@ -48,19 +51,40 @@ const Animals: React.FC = () => {
     name: '', species: '', breed: '', customBreed: '', gender: '', weight: '', color: '',
     dateOfBirth: '', microchipId: '', earTagId: '', registrationNumber: '',
     isNeutered: false, insuranceProvider: '', insurancePolicyNumber: '', insuranceExpiry: '',
-    medicalNotes: ''
+    medicalNotes: '', enterpriseId: '', groupId: ''
   })
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [speciesFilter, setSpeciesFilter] = useState('')
 
+  // Enterprise / group options for farmer role
+  const [enterpriseOptions, setEnterpriseOptions] = useState<EnterpriseOption[]>([])
+  const [groupOptions, setGroupOptions] = useState<GroupOption[]>([])
+
   const isVet = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
+  const isFarmer = user?.role === 'farmer'
   const isPetOwner = user?.role === 'pet_owner' || user?.role === 'farmer'
 
   const breeds = useMemo(() => BREED_DATABASE[formData.species] || [], [formData.species])
   const showEarTag = EAR_TAG_SPECIES.includes(formData.species)
+
+  // Load enterprises for farmer
+  useEffect(() => {
+    if (!isFarmer && !isAdmin) return
+    apiService.listEnterprises({ limit: 100 }).then(res => {
+      setEnterpriseOptions((res.data?.items || []).map((e: any) => ({ id: e.id, name: e.name })))
+    }).catch(() => {})
+  }, [isFarmer, isAdmin])
+
+  // Load groups when enterprise changes in form
+  useEffect(() => {
+    if (!formData.enterpriseId) { setGroupOptions([]); return }
+    apiService.listAnimalGroups(formData.enterpriseId, { limit: 100 }).then(res => {
+      setGroupOptions((res.data?.items || []).map((g: any) => ({ id: g.id, name: g.name })))
+    }).catch(() => setGroupOptions([]))
+  }, [formData.enterpriseId])
 
   const fetchAnimals = async () => {
     try {
@@ -81,7 +105,7 @@ const Animals: React.FC = () => {
       name: '', species: '', breed: '', customBreed: '', gender: '', weight: '', color: '',
       dateOfBirth: '', microchipId: '', earTagId: '', registrationNumber: '',
       isNeutered: false, insuranceProvider: '', insurancePolicyNumber: '', insuranceExpiry: '',
-      medicalNotes: ''
+      medicalNotes: '', enterpriseId: '', groupId: ''
     })
     setEditingAnimal(null)
   }
@@ -99,7 +123,9 @@ const Animals: React.FC = () => {
       isNeutered: a.isNeutered || false,
       insuranceProvider: a.insuranceProvider || '', insurancePolicyNumber: a.insurancePolicyNumber || '',
       insuranceExpiry: a.insuranceExpiry ? a.insuranceExpiry.split('T')[0] : '',
-      medicalNotes: a.medicalNotes || ''
+      medicalNotes: a.medicalNotes || '',
+      enterpriseId: (a as any).enterpriseId || (a as any).enterprise_id || '',
+      groupId: (a as any).groupId || (a as any).group_id || ''
     })
     setEditingAnimal(a)
     setShowForm(true)
@@ -119,6 +145,8 @@ const Animals: React.FC = () => {
       insurancePolicyNumber: formData.insurancePolicyNumber || undefined,
       insuranceExpiry: formData.insuranceExpiry || undefined,
       medicalNotes: formData.medicalNotes || undefined,
+      enterpriseId: formData.enterpriseId || undefined,
+      groupId: formData.groupId || undefined,
     }
     try {
       if (editingAnimal) {
@@ -330,6 +358,37 @@ const Animals: React.FC = () => {
               rows={3} style={{ ...fieldStyle, resize: 'vertical' }}
               placeholder="Any known conditions, allergies, dietary requirements, or special needs..." />
 
+            {/* ── Enterprise & Group (Farmer/Admin only) ── */}
+            {(isFarmer || isAdmin) && enterpriseOptions.length > 0 && (
+              <>
+                {sectionTitle('🏢', 'Farm / Enterprise Assignment')}
+                <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 12px' }}>
+                  Optionally assign this animal to a farm enterprise and herd/group. This makes it available when booking consultations at the herd level.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+                  <div>
+                    <label style={labelStyle}>Enterprise</label>
+                    <select value={formData.enterpriseId} onChange={e => setFormData(p => ({ ...p, enterpriseId: e.target.value, groupId: '' }))} style={fieldStyle}>
+                      <option value="">-- None (individual animal) --</option>
+                      {enterpriseOptions.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
+                    </select>
+                  </div>
+                  {formData.enterpriseId && (
+                    <div>
+                      <label style={labelStyle}>Herd / Group</label>
+                      <select value={formData.groupId} onChange={e => setFormData(p => ({ ...p, groupId: e.target.value }))} style={fieldStyle}>
+                        <option value="">-- No group --</option>
+                        {groupOptions.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                      </select>
+                      {groupOptions.length === 0 && (
+                        <span style={{ fontSize: 11, color: '#6b7280' }}>No groups for this enterprise. <span style={{ color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate('/animal-groups')}>Create one</span></span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
               <button type="submit" className="btn-primary" style={{ padding: '10px 28px', fontSize: 14, fontWeight: 600 }}>
                 {editingAnimal ? '💾 Update Animal' : '✅ Register Animal'}
@@ -435,7 +494,7 @@ const Animals: React.FC = () => {
                     )}
                     {isPetOwner && (
                       <button className="btn-small" style={{ marginLeft: 'auto', background: '#667eea', color: 'white', border: 'none' }}
-                        onClick={() => navigate('/book-consultation')}>📅 Book</button>
+                        onClick={() => navigate(`/book-consultation?animalId=${animal.id}`)}>📅 Book Consultation</button>
                     )}
                   </div>
                 </div>

@@ -62,16 +62,20 @@ const startServer = async () => {
   }
 };
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-  logger.error('Unhandled Rejection at:', { promise, reason });
-  process.exit(1);
+// Handle unhandled promise rejections — log but do NOT crash.
+// Crashing on transient DB/network errors kills the server and causes
+// cascading ECONNREFUSED errors for every connected client.
+process.on('unhandledRejection', (reason: any, _promise: Promise<any>) => {
+  logger.error('Unhandled Rejection:', { reason: reason?.message || reason });
 });
 
-// Handle uncaught exceptions
+// Handle uncaught exceptions — log but do NOT crash.
 process.on('uncaughtException', (err: Error) => {
-  logger.error('Uncaught Exception:', { error: err.message });
-  process.exit(1);
+  logger.error('Uncaught Exception:', { error: err.message, stack: err.stack });
+  // Only exit for truly fatal low-level errors (out of memory, etc.)
+  if (err.message?.includes('out of memory') || err.message?.includes('ENOMEM')) {
+    process.exit(1);
+  }
 });
 
 startServer();

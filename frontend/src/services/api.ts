@@ -139,7 +139,8 @@ class ApiService {
 
   // ─── Bookings ─────────────────────────────────────────────
   async createBooking(data: {
-    veterinarianId: string; animalId?: string; scheduledDate: string;
+    veterinarianId: string; animalId?: string; enterpriseId?: string; groupId?: string;
+    scheduledDate: string;
     timeSlotStart: string; timeSlotEnd: string; bookingType: string;
     priority?: string; reasonForVisit: string; symptoms?: string; notes?: string
   }) {
@@ -331,7 +332,12 @@ class ApiService {
     return response.data
   }
 
-  async listVets(params?: { limit?: number; offset?: number; specialization?: string }) {
+  async listVets(params?: {
+    limit?: number; offset?: number; specialization?: string;
+    language?: string; acceptsEmergency?: string; availableOnly?: string;
+    minRating?: number; minFee?: number; maxFee?: number;
+    search?: string; sortBy?: string; sortOrder?: string;
+  }) {
     const response = await this.client.get('/vet-profiles', { params })
     return response.data
   }
@@ -765,6 +771,30 @@ class ApiService {
 
   async resolveHealthObservation(id: string) {
     const response = await this.client.patch(`/health/observations/${id}/resolve`)
+    return response.data
+  }
+
+  // ─── Enterprise Animals ────────────────────────────────
+
+  async listEnterpriseAnimals(enterpriseId: string, params?: Record<string, unknown>) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/animals`, { params })
+    return response.data
+  }
+
+  // ─── Enterprise / Herd Medical Management ────────────
+
+  async getEnterpriseMedicalRecords(enterpriseId: string, params?: Record<string, unknown>) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/medical-records`, { params })
+    return response.data
+  }
+
+  async getEnterpriseMedicalStats(enterpriseId: string) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/medical-records/stats`)
+    return response.data
+  }
+
+  async getEnterpriseVaccinations(enterpriseId: string, params?: Record<string, unknown>) {
+    const response = await this.client.get(`/enterprises/${enterpriseId}/vaccinations`, { params })
     return response.data
   }
 

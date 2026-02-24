@@ -23,6 +23,7 @@ const FindDoctor = lazy(() => import('./pages/petowner/FindDoctor'))
 const BookConsultation = lazy(() => import('./pages/petowner/BookConsultation'))
 const VideoConsultation = lazy(() => import('./pages/petowner/VideoConsultation'))
 const WriteReview = lazy(() => import('./pages/petowner/WriteReview'))
+const VetProfilePage = lazy(() => import('./pages/petowner/VetProfilePage'))
 // Doctor Module
 const ManageSchedule = lazy(() => import('./pages/doctor/ManageSchedule'))
 const ConsultationRoom = lazy(() => import('./pages/doctor/ConsultationRoom'))
@@ -45,6 +46,7 @@ const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
 const LocationManagement = lazy(() => import('./pages/LocationManagement'))
 const MovementLog = lazy(() => import('./pages/MovementLog'))
 const TreatmentCampaigns = lazy(() => import('./pages/TreatmentCampaigns'))
+const HerdMedicalManagement = lazy(() => import('./pages/HerdMedicalManagement'))
 // Advanced Modules
 const HealthAnalytics = lazy(() => import('./pages/HealthAnalytics'))
 const BreedingManager = lazy(() => import('./pages/BreedingManager'))
@@ -177,6 +179,7 @@ function AppRoutes() {
       <Route path="/my-bookings" element={<Navigate to="/consultations" replace />} />
       <Route path="/video-consultation/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VideoConsultation} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />
       <Route path="/write-review" element={<RoleRoute path="/write-review"><AppLayout><RoutedPage Component={WriteReview} /></AppLayout></RoleRoute>} />
+      <Route path="/vet-profile/:userId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VetProfilePage} paramKey="userId" /></AppLayout></ProtectedRoute>} />
 
       {/* ── Enterprise Module ── */}
       <Route path="/enterprises" element={<RoleRoute path="/enterprises"><AppLayout><EnterpriseManagement /></AppLayout></RoleRoute>} />
@@ -184,6 +187,7 @@ function AppRoutes() {
       <Route path="/locations" element={<RoleRoute path="/locations"><AppLayout><LocationManagement /></AppLayout></RoleRoute>} />
       <Route path="/movement-log" element={<RoleRoute path="/movement-log"><AppLayout><MovementLog /></AppLayout></RoleRoute>} />
       <Route path="/campaigns" element={<RoleRoute path="/campaigns"><AppLayout><TreatmentCampaigns /></AppLayout></RoleRoute>} />
+      <Route path="/herd-medical" element={<RoleRoute path="/herd-medical"><AppLayout><HerdMedicalManagement /></AppLayout></RoleRoute>} />
 
       {/* ── Advanced Modules ── */}
       <Route path="/health-analytics" element={<RoleRoute path="/health-analytics"><AppLayout><HealthAnalytics /></AppLayout></RoleRoute>} />

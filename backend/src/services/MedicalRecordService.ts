@@ -836,7 +836,7 @@ export class MedicalRecordService {
         database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active FROM allergy_records ar LEFT JOIN animals a ON a.id = ar.animal_id ${vetAnimalFilter}`),
         database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN lr.status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${vetAnimalFilter}`),
         database.query(`SELECT COUNT(*) as count FROM medical_records mr ${userFilter ? userFilter + ' AND' : 'WHERE'} follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN is_active THEN 1 END) as active FROM prescriptions p ${prescriptionFilter}`),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN p.is_active THEN 1 END) as active FROM prescriptions p ${prescriptionFilter}`),
         database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN c.status = 'completed' THEN 1 END) as completed FROM consultations c ${consultationFilter}`),
       ]);
 
@@ -917,6 +917,249 @@ export class MedicalRecordService {
       return uniqueId;
     } catch (error) {
       throw new DatabaseError('Error ensuring animal unique ID', { originalError: error });
+    }
+  }
+
+  // ═══ ENTERPRISE / HERD MEDICAL MANAGEMENT ═════════════════
+
+  /**
+   * Get all medical records across an enterprise's animals.
+   */
+  async listEnterpriseRecords(enterpriseId: string, filters: {
+    animalId?: string; groupId?: string; recordType?: string;
+    status?: string; severity?: string; search?: string;
+    limit?: number; offset?: number;
+  } = {}): Promise<{ records: MedicalRecord[]; total: number }> {
+    try {
+      const conditions: string[] = [`a.enterprise_id = $1`];
+      const params: any[] = [enterpriseId];
+      let idx = 1;
+
+      if (filters.animalId) { idx++; conditions.push(`mr.animal_id = $${idx}`); params.push(filters.animalId); }
+      if (filters.groupId) { idx++; conditions.push(`a.group_id = $${idx}`); params.push(filters.groupId); }
+      if (filters.recordType) { idx++; conditions.push(`mr.record_type = $${idx}`); params.push(filters.recordType); }
+      if (filters.status) { idx++; conditions.push(`mr.status = $${idx}`); params.push(filters.status); }
+      if (filters.severity) { idx++; conditions.push(`mr.severity = $${idx}`); params.push(filters.severity); }
+      if (filters.search) {
+        idx++; conditions.push(`(mr.title ILIKE $${idx} OR mr.content ILIKE $${idx} OR a.name ILIKE $${idx})`);
+        params.push(`%${filters.search}%`);
+      }
+
+      const where = `WHERE ${conditions.join(' AND ')}`;
+      const limit = Math.min(filters.limit || 20, 100);
+      const offset = filters.offset || 0;
+
+      const query = `
+        SELECT mr.id, mr.user_id as "userId", mr.animal_id as "animalId",
+               mr.consultation_id as "consultationId", mr.veterinarian_id as "veterinarianId",
+               mr.record_type as "recordType", mr.record_number as "recordNumber",
+               mr.title, mr.content, mr.severity, mr.status,
+               mr.medications, mr.attachments, mr.is_confidential as "isConfidential",
+               mr.follow_up_date as "followUpDate", mr.tags, mr.file_url as "fileUrl",
+               mr.created_by as "createdBy", mr.created_at as "createdAt", mr.updated_at as "updatedAt",
+               a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+               a.unique_id as "animalUniqueId",
+               ag.name as "groupName",
+               COALESCE(vet.first_name || ' ' || vet.last_name, '') as "veterinarianName"
+        FROM medical_records mr
+        JOIN animals a ON a.id = mr.animal_id
+        LEFT JOIN animal_groups ag ON ag.id = a.group_id
+        LEFT JOIN users vet ON vet.id = mr.veterinarian_id
+        ${where}
+        ORDER BY mr.created_at DESC LIMIT $${idx + 1} OFFSET $${idx + 2}
+      `;
+      const countQuery = `
+        SELECT COUNT(*) as count FROM medical_records mr
+        JOIN animals a ON a.id = mr.animal_id ${where}
+      `;
+
+      const [recordsResult, countResult] = await Promise.all([
+        database.query(query, [...params, limit, offset]),
+        database.query(countQuery, params),
+      ]);
+
+      return {
+        records: recordsResult.rows,
+        total: parseInt(countResult.rows[0]?.count || '0', 10),
+      };
+    } catch (error) {
+      throw new DatabaseError('Error fetching enterprise medical records', { originalError: error });
+    }
+  }
+
+  /**
+   * Get all vaccination records across an enterprise's animals.
+   */
+  async listEnterpriseVaccinations(enterpriseId: string, filters: {
+    animalId?: string; groupId?: string; status?: string;
+    overdueOnly?: boolean; upcomingOnly?: boolean;
+    limit?: number; offset?: number;
+  } = {}): Promise<{ vaccinations: any[]; total: number }> {
+    try {
+      const conditions: string[] = [`a.enterprise_id = $1`];
+      const params: any[] = [enterpriseId];
+      let idx = 1;
+
+      if (filters.animalId) { idx++; conditions.push(`vr.animal_id = $${idx}`); params.push(filters.animalId); }
+      if (filters.groupId) { idx++; conditions.push(`a.group_id = $${idx}`); params.push(filters.groupId); }
+      if (filters.overdueOnly) { conditions.push(`vr.next_due_date < CURRENT_DATE`); }
+      if (filters.upcomingOnly) { conditions.push(`vr.next_due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'`); }
+
+      const where = `WHERE ${conditions.join(' AND ')}`;
+      const limit = Math.min(filters.limit || 50, 200);
+      const offset = filters.offset || 0;
+
+      const query = `
+        SELECT vr.id, vr.animal_id as "animalId", vr.vaccine_name as "vaccineName",
+               vr.vaccine_type as "vaccineType", vr.batch_number as "batchNumber",
+               vr.manufacturer, vr.date_administered as "dateAdministered",
+               vr.next_due_date as "nextDueDate", vr.administered_by as "administeredBy",
+               vr.is_valid as "isValid", vr.dosage, vr.reaction_notes as "reactionNotes",
+               vr.created_at as "createdAt",
+               a.name as "animalName", a.species as "animalSpecies", a.unique_id as "animalUniqueId",
+               ag.name as "groupName",
+               CASE
+                 WHEN vr.next_due_date < CURRENT_DATE THEN 'overdue'
+                 WHEN vr.next_due_date <= CURRENT_DATE + INTERVAL '30 days' THEN 'upcoming'
+                 ELSE 'current'
+               END as "dueStatus"
+        FROM vaccination_records vr
+        JOIN animals a ON a.id = vr.animal_id
+        LEFT JOIN animal_groups ag ON ag.id = a.group_id
+        ${where}
+        ORDER BY vr.next_due_date ASC NULLS LAST, vr.date_administered DESC
+        LIMIT $${idx + 1} OFFSET $${idx + 2}
+      `;
+      const countQuery = `
+        SELECT COUNT(*) as count FROM vaccination_records vr
+        JOIN animals a ON a.id = vr.animal_id ${where}
+      `;
+
+      const [data, cnt] = await Promise.all([
+        database.query(query, [...params, limit, offset]),
+        database.query(countQuery, params),
+      ]);
+
+      return { vaccinations: data.rows, total: parseInt(cnt.rows[0]?.count || '0', 10) };
+    } catch (error) {
+      throw new DatabaseError('Error fetching enterprise vaccinations', { originalError: error });
+    }
+  }
+
+  /**
+   * Comprehensive medical stats across an entire enterprise.
+   */
+  async getEnterpriseMedicalStats(enterpriseId: string): Promise<any> {
+    try {
+      const [
+        totalAnimals, records, vaccinations, allergies, labs,
+        upcoming, recentRecords, groupStats
+      ] = await Promise.all([
+        database.query(
+          `SELECT COUNT(*) as total, COUNT(CASE WHEN is_active THEN 1 END) as active FROM animals WHERE enterprise_id = $1`,
+          [enterpriseId]
+        ),
+        database.query(
+          `SELECT COUNT(*) as count, mr.record_type as type
+           FROM medical_records mr JOIN animals a ON a.id = mr.animal_id
+           WHERE a.enterprise_id = $1 GROUP BY mr.record_type`,
+          [enterpriseId]
+        ),
+        database.query(
+          `SELECT COUNT(*) as total,
+                  COUNT(CASE WHEN vr.next_due_date < CURRENT_DATE THEN 1 END) as overdue,
+                  COUNT(CASE WHEN vr.next_due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days' THEN 1 END) as upcoming_due,
+                  COUNT(CASE WHEN vr.date_administered >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as recent
+           FROM vaccination_records vr JOIN animals a ON a.id = vr.animal_id
+           WHERE a.enterprise_id = $1`,
+          [enterpriseId]
+        ),
+        database.query(
+          `SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active
+           FROM allergy_records ar JOIN animals a ON a.id = ar.animal_id
+           WHERE a.enterprise_id = $1`,
+          [enterpriseId]
+        ),
+        database.query(
+          `SELECT COUNT(*) as total,
+                  COUNT(CASE WHEN lr.status = 'pending' THEN 1 END) as pending,
+                  COUNT(CASE WHEN lr.status = 'completed' THEN 1 END) as completed
+           FROM lab_results lr JOIN animals a ON a.id = lr.animal_id
+           WHERE a.enterprise_id = $1`,
+          [enterpriseId]
+        ),
+        database.query(
+          `SELECT COUNT(*) as count FROM medical_records mr
+           JOIN animals a ON a.id = mr.animal_id
+           WHERE a.enterprise_id = $1
+             AND mr.follow_up_date IS NOT NULL
+             AND mr.follow_up_date >= CURRENT_DATE
+             AND mr.follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`,
+          [enterpriseId]
+        ),
+        database.query(
+          `SELECT mr.id, mr.title, mr.record_type as "recordType", mr.severity, mr.status,
+                  mr.created_at as "createdAt", a.name as "animalName", a.species as "animalSpecies"
+           FROM medical_records mr JOIN animals a ON a.id = mr.animal_id
+           WHERE a.enterprise_id = $1
+           ORDER BY mr.created_at DESC LIMIT 10`,
+          [enterpriseId]
+        ),
+        database.query(
+          `SELECT ag.id, ag.name, ag.group_type as "groupType",
+                  COUNT(DISTINCT a.id) as "animalCount",
+                  COUNT(DISTINCT mr.id) as "recordCount",
+                  COUNT(DISTINCT CASE WHEN vr.next_due_date < CURRENT_DATE THEN vr.id END) as "overdueVaccinations"
+           FROM animal_groups ag
+           LEFT JOIN animals a ON a.group_id = ag.id AND a.is_active = true
+           LEFT JOIN medical_records mr ON mr.animal_id = a.id
+           LEFT JOIN vaccination_records vr ON vr.animal_id = a.id
+           WHERE ag.enterprise_id = $1 AND ag.is_active = true
+           GROUP BY ag.id, ag.name, ag.group_type
+           ORDER BY ag.name`,
+          [enterpriseId]
+        ),
+      ]);
+
+      const recordsByType: Record<string, number> = {};
+      records.rows.forEach((r: any) => { recordsByType[r.type] = parseInt(r.count); });
+      const totalRecords = Object.values(recordsByType).reduce((a: number, b: number) => a + b, 0);
+
+      const vaccRow = vaccinations.rows[0] || {};
+      const labRow = labs.rows[0] || {};
+      const allergyRow = allergies.rows[0] || {};
+
+      return {
+        totalAnimals: parseInt(totalAnimals.rows[0]?.total || '0'),
+        activeAnimals: parseInt(totalAnimals.rows[0]?.active || '0'),
+        totalRecords,
+        recordsByType,
+        vaccinations: {
+          total: parseInt(vaccRow.total || '0'),
+          overdue: parseInt(vaccRow.overdue || '0'),
+          upcomingDue: parseInt(vaccRow.upcoming_due || '0'),
+          recentlyAdministered: parseInt(vaccRow.recent || '0'),
+        },
+        allergies: {
+          total: parseInt(allergyRow.total || '0'),
+          active: parseInt(allergyRow.active || '0'),
+        },
+        labResults: {
+          total: parseInt(labRow.total || '0'),
+          pending: parseInt(labRow.pending || '0'),
+          completed: parseInt(labRow.completed || '0'),
+        },
+        upcomingFollowUps: parseInt(upcoming.rows[0]?.count || '0'),
+        recentRecords: recentRecords.rows,
+        groupHealth: groupStats.rows.map((g: any) => ({
+          ...g,
+          animalCount: parseInt(g.animalCount || '0'),
+          recordCount: parseInt(g.recordCount || '0'),
+          overdueVaccinations: parseInt(g.overdueVaccinations || '0'),
+        })),
+      };
+    } catch (error) {
+      throw new DatabaseError('Error fetching enterprise medical stats', { originalError: error });
     }
   }
 }

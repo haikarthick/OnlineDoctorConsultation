@@ -294,6 +294,7 @@ export interface VetProfile {
   specializations: string[]
   qualifications: string[]
   experience: number
+  yearsOfExperience?: number
   bio?: string
   consultationFee: number
   currency: string
@@ -301,17 +302,22 @@ export interface VetProfile {
   totalReviews: number
   totalConsultations: number
   isAvailable: boolean
+  isVerified?: boolean
   acceptsEmergency?: boolean
   languages: string[]
   clinicName?: string
   clinicAddress?: string
   profileImage?: string
+  availableDays?: string
+  availableHoursStart?: string
+  availableHoursEnd?: string
   createdAt: string
   updatedAt: string
   // joined user fields for display
   firstName?: string
   lastName?: string
   email?: string
+  phone?: string
 }
 
 export interface VetSchedule {

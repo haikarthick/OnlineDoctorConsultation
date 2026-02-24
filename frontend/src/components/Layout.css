@@ -32,22 +32,28 @@
   display: flex;
   width: 100%;
   height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%);
+  background: #f7f8fc;
 }
 
 .layout-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: 280px;
+  margin-left: var(--sidebar-width, 260px);
   overflow-y: auto;
-  background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%);
+  background: #f7f8fc;
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Collapsed sidebar → adjust main content */
+.layout-sidebar-collapsed .layout-main {
+  margin-left: var(--sidebar-collapsed-width, 68px);
 }
 
 .layout-content {
   flex: 1;
-  padding: 32px;
-  max-width: 1500px;
+  padding: 24px 32px;
+  max-width: 1600px;
   margin: 0 auto;
   width: 100%;
 }
@@ -60,23 +66,27 @@
 
   .layout-main {
     margin-left: 0;
-    margin-top: 60px;
+    margin-top: 56px;
   }
 
-  .layout-content {
-    padding: 20px;
+  .layout-sidebar-collapsed .layout-main {
+    margin-left: 0;
   }
-}
 
-@media (max-width: 480px) {
   .layout-content {
     padding: 16px;
   }
 }
 
+@media (max-width: 480px) {
+  .layout-content {
+    padding: 12px;
+  }
+}
+
 /* Scrollbar styling */
 .layout-main::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 .layout-main::-webkit-scrollbar-track {
@@ -85,7 +95,7 @@
 
 .layout-main::-webkit-scrollbar-thumb {
   background: #ddd;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 .layout-main::-webkit-scrollbar-thumb:hover {

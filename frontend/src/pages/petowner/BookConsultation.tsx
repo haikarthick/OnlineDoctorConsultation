@@ -4,12 +4,15 @@ import apiService from '../../services/api'
 import { VetProfile, TimeSlot, Animal } from '../../types'
 import '../../styles/modules.css'
 
+interface Enterprise { id: string; name: string; type: string; location?: string }
+interface AnimalGroup { id: string; name: string; type: string; animalCount?: number }
+
 interface BookConsultationProps {
   onNavigate: (path: string) => void
 }
 
 const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
-  const { } = useAuth()
+  const { user } = useAuth()
   const [step, setStep] = useState(1)
   const [vets, setVets] = useState<VetProfile[]>([])
   const [animals, setAnimals] = useState<Animal[]>([])
@@ -28,24 +31,62 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
+  // Enterprise / Herd / Group state (farmers)
+  const isFarmer = user?.role === 'farmer'
+  const isAdmin = user?.role === 'admin'
+  const [selectionMode, setSelectionMode] = useState<'individual' | 'enterprise'>(isFarmer ? 'enterprise' : 'individual')
+  const [enterprises, setEnterprises] = useState<Enterprise[]>([])
+  const [selectedEnterprise, setSelectedEnterprise] = useState<string>('')
+  const [selectedEnterpriseName, setSelectedEnterpriseName] = useState('')
+  const [groups, setGroups] = useState<AnimalGroup[]>([])
+  const [selectedGroup, setSelectedGroup] = useState<string>('')
+  const [selectedGroupName, setSelectedGroupName] = useState('')
+  const [enterpriseAnimals, setEnterpriseAnimals] = useState<Animal[]>([])
+  const [loadingEnterpriseData, setLoadingEnterpriseData] = useState(false)
+
+  // Track pre-filled context from URL for the info banner
+  const [prefilledContext, setPrefilledContext] = useState<{ animalName?: string; groupName?: string; enterpriseName?: string } | null>(null)
+
   // Pre-fill from URL params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const vetId = params.get('vetId')
-    loadInitialData(vetId)
+    const animalId = params.get('animalId')
+    const enterpriseId = params.get('enterpriseId')
+    const groupId = params.get('groupId')
+    loadInitialData(vetId, animalId, enterpriseId, groupId)
   }, [])
 
-  const loadInitialData = async (preselectedVetId?: string | null) => {
+  const loadInitialData = async (
+    preselectedVetId?: string | null,
+    preselectedAnimalId?: string | null,
+    preselectedEnterpriseId?: string | null,
+    preselectedGroupId?: string | null
+  ) => {
     try {
       setLoading(true)
-      const [vetsRes, animalsRes] = await Promise.all([
+      const promises: Promise<any>[] = [
         apiService.listVets({ limit: 50 }),
         apiService.listAnimals({ limit: 50 })
-      ])
+      ]
+      // Farmers & admins: also load enterprises
+      if (isFarmer || isAdmin) {
+        promises.push(apiService.listEnterprises({ limit: 50 }))
+      }
+      const results = await Promise.all(promises)
+
+      const vetsRes = results[0]
+      const animalsRes = results[1]
       const vetList = vetsRes.data?.vets || vetsRes.data?.items || (Array.isArray(vetsRes.data) ? vetsRes.data : [])
       const animalList = animalsRes.data?.animals || animalsRes.data?.items || (Array.isArray(animalsRes.data) ? animalsRes.data : [])
       setVets(vetList)
       setAnimals(animalList)
+
+      let entList: any[] = []
+      if (results[2]) {
+        entList = results[2].data?.items || results[2].data?.enterprises || (Array.isArray(results[2].data) ? results[2].data : [])
+        setEnterprises(entList)
+      }
 
       if (preselectedVetId) {
         const vet = vetList.find((v: VetProfile) => v.userId === preselectedVetId)
@@ -54,11 +95,108 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
           setStep(2)
         }
       }
+
+      // ── Pre-select animal from URL (individual mode) ──
+      if (preselectedAnimalId && !preselectedEnterpriseId) {
+        const animal = animalList.find((a: Animal) => a.id === preselectedAnimalId)
+        if (animal) {
+          setSelectionMode('individual')
+          setSelectedAnimal(preselectedAnimalId)
+          setPrefilledContext({ animalName: `${animal.name} (${animal.species}${animal.breed ? ' • ' + animal.breed : ''})` })
+        }
+      }
+
+      // ── Pre-select enterprise + group from URL (enterprise mode) ──
+      if (preselectedEnterpriseId && entList.length > 0) {
+        const ent = entList.find((e: any) => e.id === preselectedEnterpriseId)
+        if (ent) {
+          setSelectionMode('enterprise')
+          setSelectedEnterprise(preselectedEnterpriseId)
+          setSelectedEnterpriseName(ent.name || '')
+          const prefillCtx: { enterpriseName?: string; groupName?: string; animalName?: string } = { enterpriseName: ent.name }
+          // Load groups + animals for this enterprise
+          try {
+            const [groupsRes, animalsRes] = await Promise.all([
+              apiService.listAnimalGroups(preselectedEnterpriseId, { limit: 100 }),
+              apiService.listEnterpriseAnimals(preselectedEnterpriseId, { limit: 200 })
+            ])
+            const groupList = groupsRes.data?.items || groupsRes.data?.groups || (Array.isArray(groupsRes.data) ? groupsRes.data : [])
+            const entAnimalList = animalsRes.data?.items || animalsRes.data?.animals || (Array.isArray(animalsRes.data) ? animalsRes.data : [])
+            setGroups(groupList)
+            setEnterpriseAnimals(entAnimalList)
+
+            if (preselectedGroupId) {
+              const grp = groupList.find((g: any) => g.id === preselectedGroupId)
+              if (grp) {
+                setSelectedGroup(preselectedGroupId)
+                setSelectedGroupName(grp.name || '')
+                prefillCtx.groupName = grp.name
+              }
+            }
+
+            // If animalId was also passed, pre-select that animal
+            if (preselectedAnimalId) {
+              const animal = entAnimalList.find((a: any) => a.id === preselectedAnimalId)
+              if (animal) {
+                setSelectedAnimal(preselectedAnimalId)
+                prefillCtx.animalName = `${animal.name} (${animal.species})`
+              }
+            }
+          } catch { /* ignore */ }
+          setPrefilledContext(prefillCtx)
+        }
+      }
     } catch (err) {
-} finally {
+      /* ignore */
+    } finally {
       setLoading(false)
     }
   }
+
+  // Load groups & animals when enterprise selected
+  const handleEnterpriseChange = async (enterpriseId: string) => {
+    setSelectedEnterprise(enterpriseId)
+    setSelectedGroup('')
+    setSelectedGroupName('')
+    setSelectedAnimal('')
+    setEnterpriseAnimals([])
+    setGroups([])
+    const ent = enterprises.find(e => e.id === enterpriseId)
+    setSelectedEnterpriseName(ent?.name || '')
+
+    if (!enterpriseId) return
+    try {
+      setLoadingEnterpriseData(true)
+      const [groupsRes, animalsRes] = await Promise.all([
+        apiService.listAnimalGroups(enterpriseId, { limit: 100 }),
+        apiService.listEnterpriseAnimals(enterpriseId, { limit: 200 })
+      ])
+      const groupList = groupsRes.data?.items || groupsRes.data?.groups || (Array.isArray(groupsRes.data) ? groupsRes.data : [])
+      const animalList = animalsRes.data?.items || animalsRes.data?.animals || (Array.isArray(animalsRes.data) ? animalsRes.data : [])
+      setGroups(groupList)
+      setEnterpriseAnimals(animalList)
+    } catch {
+      /* ignore */
+    } finally {
+      setLoadingEnterpriseData(false)
+    }
+  }
+
+  const handleGroupChange = (groupId: string) => {
+    setSelectedGroup(groupId)
+    setSelectedAnimal('')
+    const grp = groups.find(g => g.id === groupId)
+    setSelectedGroupName(grp?.name || '')
+  }
+
+  // Filter enterprise animals by selected group
+  const filteredEnterpriseAnimals = selectedGroup
+    ? enterpriseAnimals.filter((a: any) => a.groupId === selectedGroup || a.group_id === selectedGroup)
+    : enterpriseAnimals
+
+  // Get the current animals list based on mode
+  const displayAnimals = selectionMode === 'enterprise' ? filteredEnterpriseAnimals : animals
+  const selectedAnimalObj = displayAnimals.find(a => a.id === selectedAnimal)
 
   const loadAvailability = async (date: string) => {
     if (!selectedVet) return
@@ -122,6 +260,8 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       await apiService.createBooking({
         veterinarianId: selectedVet.userId,
         animalId: selectedAnimal || undefined,
+        enterpriseId: (selectionMode === 'enterprise' && selectedEnterprise) ? selectedEnterprise : undefined,
+        groupId: (selectionMode === 'enterprise' && selectedGroup) ? selectedGroup : undefined,
         scheduledDate: selectedDate,
         timeSlotStart: selectedSlot.startTime,
         timeSlotEnd: selectedSlot.endTime,
@@ -348,21 +488,181 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       {step === 3 && (
         <div>
           <h2 style={{ marginBottom: 16 }}>Consultation Details</h2>
+
+          {/* Pre-filled context banner */}
+          {prefilledContext && (
+            <div style={{
+              background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8,
+              padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#1e40af'
+            }}>
+              <strong>ℹ️ Pre-selected:</strong>{' '}
+              {prefilledContext.animalName && <span>Animal: <strong>{prefilledContext.animalName}</strong></span>}
+              {prefilledContext.enterpriseName && <span>Enterprise: <strong>{prefilledContext.enterpriseName}</strong></span>}
+              {prefilledContext.groupName && <span> → Group: <strong>{prefilledContext.groupName}</strong></span>}
+              <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>
+                (You can change the selection below if needed)
+              </span>
+            </div>
+          )}
+
+          {/* Selection Mode Toggle (Farmers & Admins) */}
+          {(isFarmer || isAdmin) && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div className="card-body" style={{ padding: '12px 16px' }}>
+                <label className="form-label" style={{ marginBottom: 8 }}>Booking For</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    type="button"
+                    style={{
+                      flex: 1, padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                      border: selectionMode === 'individual' ? '2px solid #2563eb' : '1px solid #d1d5db',
+                      background: selectionMode === 'individual' ? '#eff6ff' : 'white',
+                      color: selectionMode === 'individual' ? '#2563eb' : '#374151'
+                    }}
+                    onClick={() => { setSelectionMode('individual'); setSelectedEnterprise(''); setSelectedGroup(''); setSelectedAnimal('') }}
+                  >
+                    🐾 Individual Pet
+                  </button>
+                  <button
+                    type="button"
+                    style={{
+                      flex: 1, padding: '10px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                      border: selectionMode === 'enterprise' ? '2px solid #059669' : '1px solid #d1d5db',
+                      background: selectionMode === 'enterprise' ? '#ecfdf5' : 'white',
+                      color: selectionMode === 'enterprise' ? '#059669' : '#374151'
+                    }}
+                    onClick={() => { setSelectionMode('enterprise'); setSelectedAnimal('') }}
+                  >
+                    🏢 Farm / Enterprise
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="card">
             <div className="card-body">
-              <div className="form-group">
-                <label className="form-label">Select Your Pet</label>
-                <select
-                  className="form-select"
-                  value={selectedAnimal}
-                  onChange={(e) => setSelectedAnimal(e.target.value)}
-                >
-                  <option value="">-- Select a pet (optional) --</option>
-                  {animals.map(a => (
-                    <option key={a.id} value={a.id}>{a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
-                  ))}
-                </select>
-              </div>
+
+              {/* Enterprise Mode: Farm → Group → Animal cascade */}
+              {selectionMode === 'enterprise' && (isFarmer || isAdmin) && (
+                <>
+                  <div className="form-group">
+                    <label className="form-label">🏢 Select Farm / Enterprise *</label>
+                    <select
+                      className="form-select"
+                      value={selectedEnterprise}
+                      onChange={(e) => handleEnterpriseChange(e.target.value)}
+                    >
+                      <option value="">-- Select your farm --</option>
+                      {enterprises.map(ent => (
+                        <option key={ent.id} value={ent.id}>
+                          {ent.name} — {ent.type}{ent.location ? ` (${ent.location})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                    {enterprises.length === 0 && (
+                      <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>
+                        No enterprises found. Register a farm first.
+                      </p>
+                    )}
+                  </div>
+
+                  {selectedEnterprise && (
+                    <div className="form-group">
+                      <label className="form-label">🐄 Select Herd / Group</label>
+                      {loadingEnterpriseData ? (
+                        <div style={{ padding: 10, textAlign: 'center' }}>
+                          <div className="loading-spinner" style={{ width: 20, height: 20, margin: '0 auto' }} />
+                        </div>
+                      ) : (
+                        <select
+                          className="form-select"
+                          value={selectedGroup}
+                          onChange={(e) => handleGroupChange(e.target.value)}
+                        >
+                          <option value="">-- All animals (no group filter) --</option>
+                          {groups.map(g => (
+                            <option key={g.id} value={g.id}>
+                              {g.name} — {g.type}{g.animalCount != null ? ` (${g.animalCount} animals)` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  )}
+
+                  {selectedEnterprise && !loadingEnterpriseData && (
+                    <div className="form-group">
+                      <label className="form-label">🐾 Select Animal</label>
+                      <select
+                        className="form-select"
+                        value={selectedAnimal}
+                        onChange={(e) => setSelectedAnimal(e.target.value)}
+                      >
+                        <option value="">-- Select an animal (optional) --</option>
+                        {filteredEnterpriseAnimals.map((a: any) => (
+                          <option key={a.id} value={a.id}>
+                            {a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}
+                          </option>
+                        ))}
+                      </select>
+                      {filteredEnterpriseAnimals.length === 0 && (
+                        <div style={{ fontSize: 13, color: '#6b7280', marginTop: 6, padding: '10px 14px', background: '#fefce8', border: '1px solid #fde68a', borderRadius: 8 }}>
+                          <strong style={{ color: '#92400e' }}>⚠️ {selectedGroup ? 'No animals in this group.' : 'No animals in this enterprise.'}</strong>
+                          <p style={{ margin: '6px 0 0', fontSize: 12, lineHeight: 1.5 }}>
+                            To add animals:{' '}
+                            <button type="button" onClick={() => onNavigate('/animals')}
+                              style={{ background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline', fontSize: 12, padding: 0, fontWeight: 600 }}>
+                              Register a new animal
+                            </button>
+                            {' '}and assign it to an enterprise/group, or go to{' '}
+                            <button type="button" onClick={() => onNavigate('/animal-groups')}
+                              style={{ background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline', fontSize: 12, padding: 0, fontWeight: 600 }}>
+                              Herds &amp; Groups
+                            </button>
+                            {' '}to assign existing animals.
+                          </p>
+                          <p style={{ margin: '4px 0 0', fontSize: 12, color: '#78716c' }}>
+                            You can still proceed with a herd-level (general) consultation without selecting a specific animal.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Quick summary of selection */}
+                  {selectedEnterprise && (
+                    <div style={{
+                      background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8,
+                      padding: '10px 14px', marginBottom: 8, fontSize: 13
+                    }}>
+                      <strong style={{ color: '#166534' }}>📋 Selection:</strong>{' '}
+                      <span style={{ color: '#15803d' }}>
+                        {selectedEnterpriseName}
+                        {selectedGroupName ? ` → ${selectedGroupName}` : ''}
+                        {selectedAnimalObj ? ` → ${selectedAnimalObj.name}` : ' (general / herd-level)'}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Individual Mode: Flat pet selection */}
+              {selectionMode === 'individual' && (
+                <div className="form-group">
+                  <label className="form-label">Select Your Pet</label>
+                  <select
+                    className="form-select"
+                    value={selectedAnimal}
+                    onChange={(e) => setSelectedAnimal(e.target.value)}
+                  >
+                    <option value="">-- Select a pet (optional) --</option>
+                    {animals.map(a => (
+                      <option key={a.id} value={a.id}>{a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label">Reason for Visit *</label>
@@ -462,6 +762,50 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                     </p>
                   </div>
                 </div>
+
+                {/* Enterprise / Group / Animal info */}
+                {selectionMode === 'enterprise' && selectedEnterprise && (
+                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '12px 16px' }}>
+                    <strong style={{ color: '#166534', fontSize: 13 }}>🏢 FARM / ENTERPRISE DETAILS</strong>
+                    <div style={{ margin: '6px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <div>
+                        <span style={{ fontSize: 12, color: '#6b7280' }}>Enterprise:</span>
+                        <p style={{ margin: '2px 0', fontWeight: 600 }}>{selectedEnterpriseName}</p>
+                      </div>
+                      {selectedGroupName && (
+                        <div>
+                          <span style={{ fontSize: 12, color: '#6b7280' }}>Herd/Group:</span>
+                          <p style={{ margin: '2px 0', fontWeight: 600 }}>{selectedGroupName}</p>
+                        </div>
+                      )}
+                    </div>
+                    {selectedAnimalObj && (
+                      <div style={{ marginTop: 4 }}>
+                        <span style={{ fontSize: 12, color: '#6b7280' }}>Animal:</span>
+                        <p style={{ margin: '2px 0', fontWeight: 600 }}>
+                          {selectedAnimalObj.name} — {selectedAnimalObj.species}
+                          {selectedAnimalObj.breed ? ` / ${selectedAnimalObj.breed}` : ''}
+                        </p>
+                      </div>
+                    )}
+                    {!selectedAnimalObj && (
+                      <p style={{ margin: '4px 0 0', fontSize: 12, color: '#059669', fontStyle: 'italic' }}>
+                        General / herd-level consultation
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {selectionMode === 'individual' && selectedAnimalObj && (
+                  <div>
+                    <strong style={{ color: '#6b7280', fontSize: 13 }}>PET</strong>
+                    <p style={{ margin: '4px 0' }}>
+                      {selectedAnimalObj.name} — {selectedAnimalObj.species}
+                      {selectedAnimalObj.breed ? ` / ${selectedAnimalObj.breed}` : ''}
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <strong style={{ color: '#6b7280', fontSize: 13 }}>REASON</strong>
                   <p style={{ margin: '4px 0' }}>{reasonForVisit}</p>

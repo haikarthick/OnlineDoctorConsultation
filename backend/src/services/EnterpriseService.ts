@@ -280,15 +280,53 @@ export class EnterpriseService {
     return result.rows.length > 0;
   }
 
+  // ─── Enterprise Animals ─────────────────────────────────────
+  async listEnterpriseAnimals(enterpriseId: string, limit = 100, offset = 0, groupId?: string): Promise<{ items: any[]; total: number }> {
+    const conditions = ['a.enterprise_id = $1', 'a.is_active = true'];
+    const params: any[] = [enterpriseId];
+    if (groupId) { params.push(groupId); conditions.push(`a.group_id = $${params.length}`); }
+    const where = conditions.join(' AND ');
+    const [rows, count] = await Promise.all([
+      database.query(
+        `SELECT a.id, a.name, a.species, a.breed, a.gender, a.date_of_birth,
+                a.weight, a.unique_id as "uniqueId", a.group_id as "groupId",
+                ag.name as "groupName", a.owner_id as "ownerId"
+         FROM animals a LEFT JOIN animal_groups ag ON ag.id = a.group_id
+         WHERE ${where} ORDER BY a.name LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limit, offset]
+      ),
+      database.query(`SELECT COUNT(*) as count FROM animals a WHERE ${where}`, params),
+    ]);
+    return { items: rows.rows, total: parseInt(count.rows[0]?.count || '0') };
+  }
+
   // ─── Dashboard Stats ──────────────────────────────────────
   async getEnterpriseStats(enterpriseId: string): Promise<any> {
-    const [animals, groups, locations, campaigns, members] = await Promise.all([
+    const [animals, groups, locations, campaigns, members, vaccStats, medRecords] = await Promise.all([
       database.query(`SELECT COUNT(*) as count, species FROM animals WHERE enterprise_id = $1 AND is_active = true GROUP BY species`, [enterpriseId]),
       database.query(`SELECT COUNT(*) as count FROM animal_groups WHERE enterprise_id = $1 AND is_active = true`, [enterpriseId]),
       database.query(`SELECT COUNT(*) as count FROM locations WHERE enterprise_id = $1 AND is_active = true`, [enterpriseId]),
       database.query(`SELECT COUNT(*) as count, status FROM treatment_campaigns WHERE enterprise_id = $1 GROUP BY status`, [enterpriseId]),
       database.query(`SELECT COUNT(*) as count FROM enterprise_members WHERE enterprise_id = $1 AND is_active = true`, [enterpriseId]),
+      database.query(
+        `SELECT COUNT(*) as total,
+                COUNT(CASE WHEN vr.next_due_date < CURRENT_DATE THEN 1 END) as overdue,
+                COUNT(CASE WHEN vr.next_due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days' THEN 1 END) as upcoming
+         FROM vaccination_records vr JOIN animals a ON a.id = vr.animal_id
+         WHERE a.enterprise_id = $1`,
+        [enterpriseId]
+      ),
+      database.query(
+        `SELECT COUNT(*) as total,
+                COUNT(CASE WHEN mr.created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as recent
+         FROM medical_records mr JOIN animals a ON a.id = mr.animal_id
+         WHERE a.enterprise_id = $1`,
+        [enterpriseId]
+      ),
     ]);
+
+    const vRow = vaccStats.rows[0] || {};
+    const mRow = medRecords.rows[0] || {};
 
     return {
       totalAnimals: animals.rows.reduce((sum: number, r: any) => sum + parseInt(r.count), 0),
@@ -297,6 +335,13 @@ export class EnterpriseService {
       totalLocations: parseInt(locations.rows[0]?.count || '0'),
       campaignsByStatus: campaigns.rows.reduce((acc: any, r: any) => { acc[r.status] = parseInt(r.count); return acc; }, {}),
       totalMembers: parseInt(members.rows[0]?.count || '0'),
+      health: {
+        totalMedicalRecords: parseInt(mRow.total || '0'),
+        recentMedicalRecords: parseInt(mRow.recent || '0'),
+        totalVaccinations: parseInt(vRow.total || '0'),
+        overdueVaccinations: parseInt(vRow.overdue || '0'),
+        upcomingVaccinations: parseInt(vRow.upcoming || '0'),
+      },
     };
   }
 

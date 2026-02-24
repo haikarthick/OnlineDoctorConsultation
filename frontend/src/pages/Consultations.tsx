@@ -11,6 +11,11 @@ interface BookingRow {
   reasonForVisit?: string; reason?: string; symptoms?: string;
   priority?: string; status: string; veterinarianId?: string;
   consultationId?: string | null; animalId?: string;
+  // Enterprise / group / animal context
+  enterpriseId?: string; groupId?: string;
+  animalName?: string; animalSpecies?: string; animalBreed?: string; animalUniqueId?: string;
+  enterpriseName?: string; enterpriseType?: string;
+  groupName?: string; groupType?: string;
 }
 interface ConsultRow {
   id: string; animalType?: string; symptomDescription?: string;
@@ -308,6 +313,7 @@ const Consultations: React.FC = () => {
                   <tr>
                     {isVet ? <th>Patient</th> : <th>Doctor</th>}
                     {isAdmin && <><th>Patient</th><th>Doctor</th></>}
+                    <th>Animal / Farm</th>
                     <th>Date</th><th>Time</th><th>Type</th><th>Reason</th><th>Priority</th><th>Status</th><th>Actions</th>
                   </tr>
                 </thead>
@@ -317,6 +323,22 @@ const Consultations: React.FC = () => {
                       {isVet && <td><strong>{b.petOwnerName || 'Patient'}</strong></td>}
                       {isPetOwner && <td><strong>{b.vetName || 'Doctor'}</strong></td>}
                       {isAdmin && <><td>{b.petOwnerName || '—'}</td><td>{b.vetName || '—'}</td></>}
+                      <td style={{ maxWidth: 180 }}>
+                        {b.enterpriseName ? (
+                          <div style={{ fontSize: 13, lineHeight: 1.4 }}>
+                            <div style={{ fontWeight: 600, color: '#059669' }}>🏢 {b.enterpriseName}</div>
+                            {b.groupName && <div style={{ fontSize: 12, color: '#6b7280' }}>📋 {b.groupName}</div>}
+                            {b.animalName && <div style={{ fontSize: 12 }}>🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</div>}
+                            {!b.animalName && <div style={{ fontSize: 11, color: '#9ca3af', fontStyle: 'italic' }}>Herd-level</div>}
+                          </div>
+                        ) : b.animalName ? (
+                          <div style={{ fontSize: 13 }}>
+                            🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}{b.animalBreed ? ` / ${b.animalBreed}` : ''}
+                          </div>
+                        ) : (
+                          <span style={{ color: '#9ca3af', fontSize: 12 }}>—</span>
+                        )}
+                      </td>
                       <td>{fmt(b.scheduledDate)}</td>
                       <td>{b.timeSlotStart} - {b.timeSlotEnd}</td>
                       <td><span style={{ fontSize: 12 }}>{b.bookingType === 'video_call' ? '📹 Video' : b.bookingType === 'phone' ? '📞 Phone' : b.bookingType === 'in_person' ? '🏥 In-person' : '💬 Chat'}</span></td>
@@ -380,6 +402,7 @@ const Consultations: React.FC = () => {
                   <tr>
                     {isVet ? <th>Patient</th> : <th>Doctor</th>}
                     {isAdmin && <><th>Patient</th><th>Doctor</th></>}
+                    <th>Animal / Farm</th>
                     <th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Diagnosis</th><th>Actions</th>
                   </tr>
                 </thead>
@@ -391,6 +414,21 @@ const Consultations: React.FC = () => {
                         {isVet && <td><strong>{b.petOwnerName || 'Patient'}</strong></td>}
                         {isPetOwner && <td><strong>{b.vetName || 'Doctor'}</strong></td>}
                         {isAdmin && <><td>{b.petOwnerName || '—'}</td><td>{b.vetName || '—'}</td></>}
+                        <td style={{ maxWidth: 180 }}>
+                          {b.enterpriseName ? (
+                            <div style={{ fontSize: 13, lineHeight: 1.4 }}>
+                              <div style={{ fontWeight: 600, color: '#059669' }}>🏢 {b.enterpriseName}</div>
+                              {b.groupName && <div style={{ fontSize: 12, color: '#6b7280' }}>📋 {b.groupName}</div>}
+                              {b.animalName && <div style={{ fontSize: 12 }}>🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</div>}
+                            </div>
+                          ) : b.animalName ? (
+                            <div style={{ fontSize: 13 }}>
+                              🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}
+                            </div>
+                          ) : (
+                            <span style={{ color: '#9ca3af', fontSize: 12 }}>—</span>
+                          )}
+                        </td>
                         <td>{fmt(b.scheduledDate)}</td>
                         <td>{b.timeSlotStart} - {b.timeSlotEnd}</td>
                         <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.reasonForVisit || b.reason || '—'}</td>

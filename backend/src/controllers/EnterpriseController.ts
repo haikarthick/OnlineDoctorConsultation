@@ -246,6 +246,17 @@ class EnterpriseController {
     res.json({ success: true, message: 'Campaign deleted' });
   }
 
+  // ─── Enterprise Animals ─────────────────────────────────────
+  async listEnterpriseAnimals(req: AuthRequest, res: Response): Promise<void> {
+    const enterpriseId = req.params.enterpriseId;
+    await this.ensureEnterpriseAccess(enterpriseId, req.userId!, req.userRole!);
+    const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+    const offset = parseInt(req.query.offset as string) || 0;
+    const groupId = req.query.groupId as string | undefined;
+    const result = await EnterpriseService.listEnterpriseAnimals(enterpriseId, limit, offset, groupId);
+    res.json({ success: true, data: result });
+  }
+
   // ─── Helper ────────────────────────────────────────────────
   private async ensureEnterpriseAccess(
     enterpriseId: string,

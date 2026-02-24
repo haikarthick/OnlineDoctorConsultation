@@ -30,7 +30,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const [consultationStatus, setConsultationStatus] = useState<string>('scheduled')
 
   // UI state
-  const [activePanel, setActivePanel] = useState<'chat' | 'notes' | 'prescribe'>('chat')
+  const [activePanel, setActivePanel] = useState<'chat' | 'notes' | 'prescribe' | 'history'>('chat')
   const [isMuted, setIsMuted] = useState(false)
   const [isCameraOff, setIsCameraOff] = useState(false)
   const [isScreenSharing, setIsScreenSharing] = useState(false)
@@ -38,6 +38,15 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const [cameraError, setCameraError] = useState('')
   const [mediaMode, setMediaMode] = useState<'video' | 'audio-only' | 'none'>('none')
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
+
+  // Medical history state (for doctors)
+  const [animalInfo, setAnimalInfo] = useState<any>(null)
+  const [medicalRecords, setMedicalRecords] = useState<any[]>([])
+  const [vaccinations, setVaccinations] = useState<any[]>([])
+  const [allergies, setAllergies] = useState<any[]>([])
+  const [labResults, setLabResults] = useState<any[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
 
   // Refs
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -91,7 +100,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       setMediaMode('audio-only')
       setIsCameraOff(true)
       setIsMuted(false)
-      setCameraError('Camera unavailable � audio-only mode.')
+      setCameraError('Camera unavailable � audio-only mode.')
       return
     } catch (err: any) {
 }
@@ -173,7 +182,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       } catch { /* no existing session */ }
 
       if (existingSession) {
-        // Skip ended sessions � allow creating a new one
+        // Skip ended sessions � allow creating a new one
         if (existingSession.status === 'ended') {
           setSession(existingSession)
           loadMessages(existingSession.id)
@@ -189,11 +198,11 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         } else if (existingSession.status === 'waiting') {
           // Start polling to detect when patient starts/joins
           startSessionPolling(existingSession.id)
-          // Also start message polling � patient might chat while waiting
+          // Also start message polling � patient might chat while waiting
           startMessagePolling(existingSession.id)
         }
       } else {
-        // No session exists � check consultation status before creating one
+        // No session exists � check consultation status before creating one
         try {
           const consultRes = await apiService.getConsultation(conId)
           const consult = consultRes.data
@@ -241,8 +250,34 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         if (res.data.diagnosis) setDiagnosis(res.data.diagnosis)
         if (res.data.notes) setNotes(res.data.notes)
         if (res.data.status) setConsultationStatus(res.data.status)
+        // Load medical history if there's an animal associated
+        const animalId = res.data.animalId || res.data.animal_id
+        if (animalId && !historyLoaded) {
+          loadMedicalHistory(animalId)
+        }
       }
     } catch { /* ignore */ }
+  }
+
+  const loadMedicalHistory = async (animalId: string) => {
+    if (historyLoaded || historyLoading) return
+    try {
+      setHistoryLoading(true)
+      const [animalRes, recordsRes, vaccsRes, allergiesRes, labRes] = await Promise.all([
+        apiService.getAnimal(animalId).catch(() => null),
+        apiService.listMedicalRecords({ animalId, limit: 20 }).catch(() => ({ data: { items: [] } })),
+        apiService.listVaccinations(animalId, { limit: 20 }).catch(() => ({ data: { items: [] } })),
+        apiService.listAllergies(animalId).catch(() => ({ data: { items: [] } })),
+        apiService.listLabResults(animalId, { limit: 20 }).catch(() => ({ data: { items: [] } }))
+      ])
+      if (animalRes?.data) setAnimalInfo(animalRes.data)
+      setMedicalRecords(recordsRes?.data?.items || recordsRes?.data?.records || (Array.isArray(recordsRes?.data) ? recordsRes.data : []))
+      setVaccinations(vaccsRes?.data?.items || vaccsRes?.data?.vaccinations || (Array.isArray(vaccsRes?.data) ? vaccsRes.data : []))
+      setAllergies(allergiesRes?.data?.items || allergiesRes?.data?.allergies || (Array.isArray(allergiesRes?.data) ? allergiesRes.data : []))
+      setLabResults(labRes?.data?.items || labRes?.data?.results || (Array.isArray(labRes?.data) ? labRes.data : []))
+      setHistoryLoaded(true)
+    } catch { /* ignore */ }
+    finally { setHistoryLoading(false) }
   }
 
   // --- Session Polling --------------------------------------
@@ -270,7 +305,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         try {
           const res2 = await apiService.getVideoSessionByConsultation(conId)
           if (res2.data && res2.data.id !== sessionId) {
-            // A different session was created � switch to that one
+            // A different session was created � switch to that one
             if (sessionPollRef.current) { clearInterval(sessionPollRef.current); sessionPollRef.current = null }
             setSession(res2.data)
             if (res2.data.status === 'active') {
@@ -637,7 +672,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           <h1>Consultation Room</h1>
           <p className="page-subtitle">
             {session?.status === 'active' ? (
-              <span style={{ color: '#dc2626', fontWeight: 600 }}>?? Live � {formatDuration(callDuration)}</span>
+              <span style={{ color: '#dc2626', fontWeight: 600 }}>?? Live � {formatDuration(callDuration)}</span>
             ) : 'Waiting for session to start...'}
           </p>
         </div>
@@ -760,12 +795,12 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
         <div className="chat-panel" style={{ minWidth: 340 }}>
           {/* Panel Tabs */}
           <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
-            {(['chat', 'notes', 'prescribe'] as const).map(tab => (
+            {(['chat', 'history', 'notes', 'prescribe'] as const).map(tab => (
               <button key={tab}
                 className={`tab ${activePanel === tab ? 'active' : ''}`}
                 style={{ flex: 1, border: 'none', padding: '10px', fontSize: 13 }}
-                onClick={() => setActivePanel(tab)}>
-                {tab === 'chat' ? `?? Chat${messages.length > 0 ? ` (${messages.length})` : ''}` : tab === 'notes' ? '?? Notes' : '?? Rx'}
+                onClick={() => { setActivePanel(tab); if (tab === 'history' && !historyLoaded && !historyLoading) { /* auto-load on first click is handled in loadConsultationData */ } }}>
+                {tab === 'chat' ? `💬 Chat${messages.length > 0 ? ` (${messages.length})` : ''}` : tab === 'history' ? '📋 History' : tab === 'notes' ? '📝 Notes' : '💊 Rx'}
               </button>
             ))}
           </div>
@@ -794,9 +829,143 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
                   value={newMessage}
                   onChange={e => setNewMessage(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSendMessage()} />
-                <button className="chat-send-btn" onClick={handleSendMessage}>?</button>
+                <button className="chat-send-btn" onClick={handleSendMessage}>➤</button>
               </div>
             </>
+          )}
+
+          {/* Medical History Tab */}
+          {activePanel === 'history' && (
+            <div style={{ padding: 16, flex: 1, overflowY: 'auto' }}>
+              {historyLoading && (
+                <div style={{ textAlign: 'center', padding: 30 }}>
+                  <div className="loading-spinner" style={{ margin: '0 auto' }} />
+                  <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>Loading medical history...</p>
+                </div>
+              )}
+
+              {!historyLoading && !animalInfo && (
+                <div style={{ textAlign: 'center', padding: '30px 16px', color: '#9ca3af' }}>
+                  <div style={{ fontSize: 40, marginBottom: 8 }}>📋</div>
+                  <p style={{ fontWeight: 500 }}>No animal linked</p>
+                  <p style={{ fontSize: 13 }}>Medical history will appear here when an animal is associated with this consultation.</p>
+                </div>
+              )}
+
+              {!historyLoading && animalInfo && (
+                <>
+                  {/* Animal Info Card */}
+                  <div style={{ background: '#eff6ff', borderRadius: 8, padding: '10px 14px', marginBottom: 12, border: '1px solid #bfdbfe' }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: '#1e40af' }}>
+                      🐾 {animalInfo.name || 'Unknown'}
+                    </div>
+                    <div style={{ fontSize: 13, color: '#3b82f6', marginTop: 2 }}>
+                      {animalInfo.species || ''}{animalInfo.breed ? ` / ${animalInfo.breed}` : ''}
+                      {animalInfo.age ? ` — ${animalInfo.age}` : ''}
+                      {animalInfo.weight ? ` — ${animalInfo.weight}kg` : ''}
+                    </div>
+                    {animalInfo.uniqueId && <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>ID: {animalInfo.uniqueId}</div>}
+                  </div>
+
+                  {/* Allergies */}
+                  <div style={{ marginBottom: 12 }}>
+                    <h4 style={{ fontSize: 13, fontWeight: 700, color: '#991b1b', margin: '0 0 6px' }}>
+                      ⚠️ Allergies ({allergies.length})
+                    </h4>
+                    {allergies.length === 0 ? (
+                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>No known allergies</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {allergies.map((a: any, i: number) => (
+                          <span key={i} style={{
+                            background: a.severity === 'severe' ? '#fef2f2' : '#fef3c7',
+                            color: a.severity === 'severe' ? '#991b1b' : '#92400e',
+                            padding: '3px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600
+                          }}>
+                            {a.allergen || a.name || 'Unknown'} ({a.severity || 'unknown'})
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Vaccinations */}
+                  <div style={{ marginBottom: 12 }}>
+                    <h4 style={{ fontSize: 13, fontWeight: 700, color: '#065f46', margin: '0 0 6px' }}>
+                      💉 Vaccinations ({vaccinations.length})
+                    </h4>
+                    {vaccinations.length === 0 ? (
+                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>No vaccination records</p>
+                    ) : (
+                      <div style={{ maxHeight: 120, overflowY: 'auto' }}>
+                        {vaccinations.slice(0, 10).map((v: any, i: number) => (
+                          <div key={i} style={{ fontSize: 12, padding: '4px 0', borderBottom: '1px solid #f3f4f6' }}>
+                            <strong>{v.vaccineName || v.vaccine_name || v.name || 'Vaccine'}</strong>
+                            {v.dateAdministered || v.date_administered ? (
+                              <span style={{ color: '#6b7280', marginLeft: 6 }}>
+                                {new Date(v.dateAdministered || v.date_administered).toLocaleDateString()}
+                              </span>
+                            ) : null}
+                            {v.status && <span style={{ marginLeft: 6, color: v.status === 'completed' ? '#059669' : '#d97706' }}>({v.status})</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Recent Medical Records */}
+                  <div style={{ marginBottom: 12 }}>
+                    <h4 style={{ fontSize: 13, fontWeight: 700, color: '#1e3a5f', margin: '0 0 6px' }}>
+                      🩺 Medical Records ({medicalRecords.length})
+                    </h4>
+                    {medicalRecords.length === 0 ? (
+                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>No medical records</p>
+                    ) : (
+                      <div style={{ maxHeight: 150, overflowY: 'auto' }}>
+                        {medicalRecords.slice(0, 10).map((r: any, i: number) => (
+                          <div key={i} style={{ fontSize: 12, padding: '6px 0', borderBottom: '1px solid #f3f4f6' }}>
+                            <div style={{ fontWeight: 600 }}>{r.recordType || r.record_type || r.type || 'Record'}</div>
+                            {r.diagnosis && <div style={{ color: '#374151' }}>Dx: {r.diagnosis}</div>}
+                            {r.treatment && <div style={{ color: '#6b7280' }}>Tx: {r.treatment}</div>}
+                            {(r.createdAt || r.created_at || r.date) && (
+                              <div style={{ color: '#9ca3af', fontSize: 11 }}>
+                                {new Date(r.createdAt || r.created_at || r.date).toLocaleDateString()}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Lab Results */}
+                  <div style={{ marginBottom: 8 }}>
+                    <h4 style={{ fontSize: 13, fontWeight: 700, color: '#7c3aed', margin: '0 0 6px' }}>
+                      🔬 Lab Results ({labResults.length})
+                    </h4>
+                    {labResults.length === 0 ? (
+                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>No lab results</p>
+                    ) : (
+                      <div style={{ maxHeight: 120, overflowY: 'auto' }}>
+                        {labResults.slice(0, 10).map((l: any, i: number) => (
+                          <div key={i} style={{ fontSize: 12, padding: '4px 0', borderBottom: '1px solid #f3f4f6' }}>
+                            <strong>{l.testName || l.test_name || l.name || 'Test'}</strong>
+                            {l.result && <span style={{ marginLeft: 6, color: '#374151' }}>→ {l.result}</span>}
+                            {l.status && (
+                              <span style={{
+                                marginLeft: 6, fontSize: 11, padding: '1px 6px', borderRadius: 4,
+                                background: l.status === 'completed' ? '#d1fae5' : '#fef3c7',
+                                color: l.status === 'completed' ? '#065f46' : '#92400e'
+                              }}>{l.status}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
           {/* Notes Tab */}
