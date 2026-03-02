@@ -9,13 +9,13 @@ RUN npm ci
 
 COPY frontend/ .
 
-# Build production bundle
-RUN npm run build
+# Build production bundle (no source maps)
+RUN GENERATE_SOURCEMAP=false npm run build
 
 # Serve stage – lightweight nginx
 FROM nginx:1.25-alpine
 
-# Remove default nginx site
+# Security: remove default configs and server tokens
 RUN rm /etc/nginx/conf.d/default.conf
 
 # Copy custom nginx config
@@ -24,6 +24,15 @@ COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# nginx user already exists in alpine image
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    touch /var/run/nginx.pid && chown nginx:nginx /var/run/nginx.pid
+
 EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]

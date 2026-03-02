@@ -16,6 +16,7 @@ body {
   background: #f5f7fa;
   color: #1a1a1a;
   letter-spacing: 0.3px;
+  overflow-x: hidden; /* prevent horizontal scrollbar */
 }
 
 #root {
@@ -23,7 +24,7 @@ body {
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  overflow-y: auto;
+  /* No overflow here – body scrolls for public pages; .layout-main scrolls for dashboard */
 }
 
 button {
@@ -73,9 +74,9 @@ input, textarea, select {
   background: #999;
 }
 
+/* layout-content padding is owned by Layout.css – no extra overflow here */
 .layout-content {
   flex: 1;
-  overflow-y: auto;
 }
 
 @media (max-width: 768px) {

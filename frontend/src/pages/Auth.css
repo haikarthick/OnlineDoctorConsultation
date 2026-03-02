@@ -8,7 +8,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
   position: relative;
   overflow-x: hidden;
-  overflow-y: auto;
+  /* overflow-y intentionally unset – body scroll handles auth pages */
 }
 
 .auth-page::before {
@@ -1090,6 +1090,106 @@
   }
 
   .login-features {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Vet Hospital info card in role selector ── */
+.register-form .role-selector {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.role-option--info {
+  border: 2px dashed #6366f1;
+  background: #f5f3ff;
+  cursor: default;
+  opacity: 0.92;
+}
+
+.role-option--info:hover {
+  border-color: #6366f1;
+  background: #ede9fe;
+}
+
+.role-option--info .role-label {
+  color: #4f46e5;
+}
+
+.role-option--info .role-desc {
+  color: #7c3aed;
+}
+
+/* ── Hospital pathway callout ── */
+.hospital-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);
+  border: 1px solid #c7d2fe;
+  border-left: 4px solid #6366f1;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.hospital-callout-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.hospital-callout-body {
+  font-size: 0.82rem;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.hospital-callout-body strong {
+  display: block;
+  color: #1e1b4b;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+}
+
+.hospital-callout-body p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.hospital-callout-body em {
+  font-style: italic;
+  color: #4338ca;
+}
+
+@media (max-width: 720px) {
+  .register-form .role-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .register-form .role-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .role-option--info {
+    flex-direction: row;
+    text-align: left;
+    gap: 0.6rem;
+    padding: 0.6rem 0.8rem;
+  }
+  .role-option--info .role-icon {
+    margin-bottom: 0;
+  }
+  .hospital-callout {
+    padding: 0.75rem 0.85rem;
+  }
+  .hospital-callout-icon {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .register-form .role-selector {
     grid-template-columns: 1fr;
   }
 }

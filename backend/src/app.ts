@@ -18,6 +18,10 @@ import cacheManager from './utils/cacheManager';
 
 const app: Express = express();
 
+// Trust reverse proxy (nginx / ALB / Cloudflare) – required for correct
+// client IP in rate limiting, logging, and req.ip
+app.set('trust proxy', 1);
+
 // Security Middleware
 app.use(helmet());
 app.use(cors(config.cors));

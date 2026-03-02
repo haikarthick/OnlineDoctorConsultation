@@ -1,0 +1,74 @@
+# Git
+.git
+.gitignore
+
+# Dependencies (rebuilt inside container)
+node_modules
+backend/node_modules
+frontend/node_modules
+
+# Build artifacts
+dist
+build
+backend/dist
+frontend/dist
+
+# Environment files (secrets never baked into images)
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Documentation
+*.md
+docs/
+ARCHITECTURE.md
+DELIVERY_REPORT.md
+DEMO_WALKTHROUGH.md
+PROJECT_SUMMARY.md
+
+# Test / Coverage
+coverage
+backend/coverage
+.nyc_output
+**/*.test.ts
+**/*.spec.ts
+backend/tests
+
+# Logs
+logs
+backend/logs
+*.log
+
+# CI/CD
+.github
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Scripts (dev-only)
+*.ps1
+*.sh
+*.txt
+
+# Docker (don't nest docker context)
+docker-compose*.yml
+
+# Terraform / Infra
+terraform
+.terraform
+
+# Uploads
+uploads
+backend/uploads
+
+# Temporary
+tmp
+temp
+*.tmp

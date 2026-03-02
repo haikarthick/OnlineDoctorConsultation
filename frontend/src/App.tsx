@@ -68,6 +68,11 @@ const Marketplace = lazy(() => import('./pages/Marketplace'))
 const Sustainability = lazy(() => import('./pages/Sustainability'))
 const WellnessPortal = lazy(() => import('./pages/WellnessPortal'))
 const GeospatialAnalytics = lazy(() => import('./pages/GeospatialAnalytics'))
+// Vet Hospital Module
+const VetHospitals = lazy(() => import('./pages/VetHospitals'))
+const VetHospitalProfile = lazy(() => import('./pages/VetHospitalProfile'))
+const VetHospitalManage = lazy(() => import('./pages/VetHospitalManage'))
+const VetHospitalAdmin = lazy(() => import('./pages/admin/VetHospitalAdmin'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -212,6 +217,12 @@ function AppRoutes() {
       <Route path="/sustainability" element={<RoleRoute path="/sustainability"><AppLayout><Sustainability /></AppLayout></RoleRoute>} />
       <Route path="/wellness" element={<RoleRoute path="/wellness"><AppLayout><WellnessPortal /></AppLayout></RoleRoute>} />
       <Route path="/geospatial" element={<RoleRoute path="/geospatial"><AppLayout><GeospatialAnalytics /></AppLayout></RoleRoute>} />
+
+      {/* ── Vet Hospital Module ── */}
+      <Route path="/vet-hospitals" element={<RoleRoute path="/vet-hospitals"><AppLayout><VetHospitals /></AppLayout></RoleRoute>} />
+      <Route path="/vet-hospitals/manage" element={<RoleRoute path="/vet-hospitals/manage"><AppLayout><VetHospitalManage /></AppLayout></RoleRoute>} />
+      <Route path="/vet-hospitals/:id" element={<ProtectedRoute><AppLayout><VetHospitalProfile /></AppLayout></ProtectedRoute>} />
+      <Route path="/admin/vet-hospitals" element={<RoleRoute path="/admin/vet-hospitals"><AppLayout><VetHospitalAdmin /></AppLayout></RoleRoute>} />
 
       {/* ── Doctor/Vet Module ── */}
       <Route path="/doctor/dashboard" element={<Navigate to="/dashboard" replace />} />

@@ -43,13 +43,13 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
   }
 
   const avgRating = reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    ? reviews.reduce((sum, r) => sum + Number(r.rating), 0) / reviews.length
     : 0
 
   const ratingDist = [5, 4, 3, 2, 1].map(star => ({
     star,
-    count: reviews.filter(r => r.rating === star).length,
-    pct: reviews.length > 0 ? (reviews.filter(r => r.rating === star).length / reviews.length * 100) : 0
+    count: reviews.filter(r => Number(r.rating) === star).length,
+    pct: reviews.length > 0 ? (reviews.filter(r => Number(r.rating) === star).length / reviews.length * 100) : 0
   }))
 
   if (loading) {

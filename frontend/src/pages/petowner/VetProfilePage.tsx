@@ -121,8 +121,8 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
             {(vet.specializations || []).join(', ') || 'General Veterinarian'}
           </p>
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            {renderStars(vet.rating || 0, 18)}
-            <span style={{ fontWeight: 600, fontSize: 16 }}>{(vet.rating || 0).toFixed(1)}</span>
+            {renderStars(Number(vet.rating) || 0, 18)}
+            <span style={{ fontWeight: 600, fontSize: 16 }}>{Number(vet.rating || 0).toFixed(1)}</span>
             <span style={{ opacity: 0.8, fontSize: 13 }}>({vet.totalReviews || 0} reviews)</span>
             {vet.isVerified && <span style={{ background: 'rgba(255,255,255,0.2)', padding: '2px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600 }}>✓ Verified</span>}
           </div>
@@ -163,7 +163,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
               <div style={{ fontSize: 12, color: '#6b7280' }}>Consultations</div>
             </div>
             <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#f59e0b' }}>{(vet.rating || 0).toFixed(1)}</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#f59e0b' }}>{Number(vet.rating || 0).toFixed(1)}</div>
               <div style={{ fontSize: 12, color: '#6b7280' }}>Rating</div>
             </div>
             <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>

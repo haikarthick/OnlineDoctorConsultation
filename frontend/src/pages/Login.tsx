@@ -44,9 +44,10 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
               <div className="login-feat"><span className="login-feat-check">✓</span><span>Quick Response Time</span></div>
               <div className="login-feat"><span className="login-feat-check">✓</span><span>Enterprise-Grade Security</span></div>
               <div className="login-feat"><span className="login-feat-check">✓</span><span>Complete Health Records</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>Vet Hospital Network</span></div>
             </div>
             <div className="login-trust">
-              <span>Trusted by <strong>3,000+</strong> enterprises worldwide</span>
+              <span>Trusted by <strong>3,000+</strong> enterprises &amp; <strong>500+</strong> hospitals</span>
             </div>
           </div>
         </div>
@@ -62,6 +63,14 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
             <div className="login-form-header">
               <h1>Sign in to your account</h1>
               <p>Enter your credentials to continue</p>
+            </div>
+
+            <div className="hospital-callout" role="note" style={{ marginBottom: '1rem' }}>
+              <span className="hospital-callout-icon">🏥</span>
+              <div className="hospital-callout-body">
+                <strong>Hospital or Clinic Staff?</strong>
+                <p>Login with your <em>Veterinarian</em> account — your hospital dashboard is inside.</p>
+              </div>
             </div>
 
             {message && (

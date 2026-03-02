@@ -23,6 +23,7 @@ import * as enterprise from './enterpriseApi'
 import * as tier2 from './tier2Api'
 import * as tier3 from './tier3Api'
 import * as tier4 from './tier4Api'
+import * as vetHospital from './vetHospitalApi'
 
 const apiService = {
   fetchCsrfToken,
@@ -77,7 +78,11 @@ const apiService = {
 
   // Tier 4 — AI Copilot, Digital Twin, Marketplace, Sustainability, Wellness, Geospatial
   ...tier4,
+
+  // Vet Hospitals — hospital groups, departments, services, staff
+  ...vetHospital,
 }
 
 export { apiService }
+export { vetHospitalApi } from './vetHospitalApi'
 export default apiService

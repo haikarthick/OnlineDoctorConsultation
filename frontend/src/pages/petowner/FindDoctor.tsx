@@ -206,8 +206,8 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
 
           {/* Rating + Reviews */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, justifyContent: isGrid ? 'center' : 'flex-start' }}>
-            {renderStars(vet.rating || 0)}
-            <span style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>{(vet.rating || 0).toFixed(1)}</span>
+            {renderStars(Number(vet.rating) || 0)}
+            <span style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>{Number(vet.rating || 0).toFixed(1)}</span>
             <span style={{ color: '#9ca3af', fontSize: 12 }}>({vet.totalReviews || 0})</span>
           </div>
 

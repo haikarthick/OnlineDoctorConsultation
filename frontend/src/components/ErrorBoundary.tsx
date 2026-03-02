@@ -20,8 +20,10 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-}
+  componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
+    // Error is already captured by getDerivedStateFromError.
+    // Add external error reporting here (e.g. Sentry) if needed.
+  }
 
   handleReset = () => {
     this.setState({ hasError: false, error: null })

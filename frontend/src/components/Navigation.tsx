@@ -126,6 +126,12 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'geospatial', label: 'Geospatial', icon: '🗺️', path: '/geospatial',
       roles: ['farmer', 'admin'], section: 'Intelligence' },
 
+    // ── Vet Hospital Network ──
+    { id: 'vet-hospitals', label: 'Vet Hospitals', icon: '🏥', path: '/vet-hospitals',
+      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Vet Network' },
+    { id: 'vet-hospitals-manage', label: 'My Hospital', icon: '🏨', path: '/vet-hospitals/manage',
+      roles: ['veterinarian'], section: 'Vet Network' },
+
     // ── Administration (admin only) ──
     { id: 'admin-dashboard', label: 'Admin Panel', icon: '🛡️', path: '/admin/dashboard',
       roles: ['admin'], section: 'Administration' },
@@ -142,6 +148,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'admin-permissions', label: 'Permissions', icon: '🔐', path: '/admin/permissions',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-medical-records', label: 'Medical Records', icon: '📋', path: '/admin/medical-records',
+      roles: ['admin'], section: 'Administration' },
+    { id: 'admin-hospitals', label: 'Hospital Mgmt', icon: '🏥', path: '/admin/vet-hospitals',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-audit', label: 'Audit Logs', icon: '📜', path: '/admin/audit-logs',
       roles: ['admin'], section: 'Administration' },

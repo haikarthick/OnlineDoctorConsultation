@@ -10,13 +10,14 @@ interface HomeProps {
 const SECTIONS = [
   { id: 'hero', label: 'Home' },
   { id: 'enterprises', label: 'Enterprises' },
+  { id: 'hospitals', label: 'Hospitals' },
   { id: 'features', label: 'Features' },
   { id: 'how-it-works', label: 'How It Works' },
   { id: 'testimonials', label: 'Testimonials' },
 ] as const
 
 export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomeProps) {
-  const [activeTab, setActiveTab] = useState<'owner' | 'enterprise' | 'vet'>('owner')
+  const [activeTab, setActiveTab] = useState<'owner' | 'enterprise' | 'vet' | 'hospital'>('owner')
   const [activeSection, setActiveSection] = useState('hero')
   const [scrollProgress, setScrollProgress] = useState(0)
   const [showBackToTop, setShowBackToTop] = useState(false)
@@ -97,6 +98,15 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
     { icon: '🌍', title: 'Global Network', description: 'Connect with animal businesses worldwide' }
   ]
 
+  const hospitalBenefits = [
+    { icon: '🏥', title: 'Hospital Profile', description: 'Create a verified public profile for your clinic or multi-doctor hospital' },
+    { icon: '👨‍⚕️', title: 'Multi-Doctor Teams', description: 'Add doctors, assign departments and manage staff roles in one place' },
+    { icon: '🗂️', title: 'Department Management', description: 'Organise by Surgery, Dermatology, Oncology and custom specialties' },
+    { icon: '📅', title: 'Centralised Booking', description: 'Patients book directly with your hospital; auto-route to the right vet' },
+    { icon: '🚨', title: 'Emergency Services', description: 'Flag 24/7 emergency availability and highlight critical care capacity' },
+    { icon: '⭐', title: 'Reviews & Ratings', description: 'Build trust with verified patient reviews and public ratings' }
+  ]
+
   const enterpriseTypes = [
     { icon: '🐄', label: 'Dairy Farms' },
     { icon: '🐔', label: 'Poultry' },
@@ -140,15 +150,22 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       image: '👩‍💼',
       text: 'Location tracking, species grouping and campaign management for our 800+ animals across 40 enclosures — all in one place.',
       rating: 5
+    },
+    {
+      name: 'Dr. Priya Nair',
+      role: 'Director — City Paws Veterinary Hospital',
+      image: '👩‍⚕️',
+      text: 'We set up our hospital profile, added 8 doctors across 4 departments and went live in one afternoon. Bookings started the same day. VetCare is the best thing to happen to our clinic.',
+      rating: 5
     }
   ]
 
   const stats = [
     { number: '50K+', label: 'Pet Owners' },
     { number: '3K+', label: 'Enterprises' },
+    { number: '500+', label: 'Hospitals' },
     { number: '2K+', label: 'Verified Vets' },
     { number: '2M+', label: 'Animals Managed' },
-    { number: '1M+', label: 'Consultations' },
     { number: '4.9★', label: 'Average Rating' }
   ]
 
@@ -245,7 +262,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       <section className="hero-section" id="hero">
         <div className="hero-content">
           <div className="hero-text">
-            <div className="hero-tag">Trusted by 3,000+ animal enterprises worldwide</div>
+            <div className="hero-tag">Trusted by 3,000+ animal enterprises & 500+ hospitals worldwide</div>
             <h1 className="hero-title">
               The Complete Platform for<br />
               <span className="hero-gradient-text">Animal Health & Enterprise Management</span>
@@ -262,12 +279,15 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
               <button className="btn btn-enterprise btn-large" onClick={onGetStarted}>
                 🏢 Enterprise Sign Up
               </button>
+              <button className="btn btn-hospital btn-large" onClick={() => { onGetStarted() }}>
+                🏥 Register Hospital
+              </button>
               <button className="btn btn-secondary-outline btn-large" onClick={onViewForDoctors}>
                 Join as Veterinarian
               </button>
             </div>
             <p className="hero-subtext">
-              ✓ Free for pet owners • ✓ 30-day enterprise trial • ✓ No credit card required
+              ✓ Free for pet owners • ✓ 30-day enterprise trial • ✓ Hospital setup in minutes
             </p>
             <p className="hero-login-link">
               Already have an account? <button className="link-button" onClick={onLogin || (() => {})}>Sign in here →</button>
@@ -327,6 +347,78 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
         </div>
       </section>
 
+      {/* Vet Hospitals Section */}
+      <section className="hospitals-section" id="hospitals">
+        <h2 className="section-title">🏥 Vet Hospital Network</h2>
+        <p className="section-subtitle">Create, manage and grow your veterinary hospital — all in one platform</p>
+
+        <div className="hospitals-stats-row">
+          <div className="hosp-stat"><span className="hosp-stat-number">500+</span><span className="hosp-stat-label">Hospitals</span></div>
+          <div className="hosp-stat"><span className="hosp-stat-number">2,000+</span><span className="hosp-stat-label">Doctors Networked</span></div>
+          <div className="hosp-stat"><span className="hosp-stat-number">50+</span><span className="hosp-stat-label">Specialties</span></div>
+          <div className="hosp-stat"><span className="hosp-stat-number">4.8★</span><span className="hosp-stat-label">Avg Hospital Rating</span></div>
+        </div>
+
+        <div className="hospitals-content">
+          <div className="hospitals-feature-grid">
+            <div className="hosp-feat-card">
+              <div className="hosp-feat-icon">🏥</div>
+              <h3>Public Hospital Profile</h3>
+              <p>A verified listing that patients can find, browse services, read reviews and book appointments directly.</p>
+            </div>
+            <div className="hosp-feat-card">
+              <div className="hosp-feat-icon">👨‍⚕️</div>
+              <h3>Multi-Doctor Management</h3>
+              <p>Invite veterinarians to join your hospital, assign departments, set specialties and manage schedules.</p>
+            </div>
+            <div className="hosp-feat-card">
+              <div className="hosp-feat-icon">🗂️</div>
+              <h3>Departments & Services</h3>
+              <p>Organise by Surgery, Dermatology, Emergency, Oncology and any custom specialty your hospital offers.</p>
+            </div>
+            <div className="hosp-feat-card">
+              <div className="hosp-feat-icon">🚨</div>
+              <h3>Emergency Ready</h3>
+              <p>Flag 24/7 emergency availability, ICU capacity and critical care services so patients can reach you fast.</p>
+            </div>
+            <div className="hosp-feat-card">
+              <div className="hosp-feat-icon">📅</div>
+              <h3>Online Booking</h3>
+              <p>Patients book with your hospital in seconds. Appointments are routed to the right doctor automatically.</p>
+            </div>
+            <div className="hosp-feat-card">
+              <div className="hosp-feat-icon">⭐</div>
+              <h3>Reviews & Trust</h3>
+              <p>Build a reputation with verified patient reviews, star ratings and transparent service quality scores.</p>
+            </div>
+          </div>
+
+          <div className="hospitals-cta-box">
+            <div className="hosp-cta-info">
+              <h3>Ready to put your hospital online?</h3>
+              <p>Register as a Veterinarian — then create your hospital profile from your dashboard in minutes. Add your team, set services and start accepting bookings today.</p>
+              <div className="hosp-cta-steps">
+                <span className="hosp-step-chip">1️⃣ Register as Vet</span>
+                <span className="hosp-step-arrow">→</span>
+                <span className="hosp-step-chip">2️⃣ Create Hospital</span>
+                <span className="hosp-step-arrow">→</span>
+                <span className="hosp-step-chip">3️⃣ Add Doctors</span>
+                <span className="hosp-step-arrow">→</span>
+                <span className="hosp-step-chip">4️⃣ Go Live</span>
+              </div>
+            </div>
+            <div className="hosp-cta-buttons">
+              <button className="btn btn-primary btn-large" onClick={onGetStarted}>
+                Register Your Hospital
+              </button>
+              <button className="btn btn-secondary-outline btn-large" onClick={onGetStarted}>
+                🔍 Browse Hospitals
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Tabs Section */}
       <section className="features-section" id="features">
         <h2 className="section-title">Why Choose VetCare?</h2>
@@ -338,13 +430,16 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
           <button className={`tab-button ${activeTab === 'enterprise' ? 'active' : ''}`} onClick={() => setActiveTab('enterprise')}>
             🏢 Enterprises
           </button>
+          <button className={`tab-button ${activeTab === 'hospital' ? 'active' : ''}`} onClick={() => setActiveTab('hospital')}>
+            🏥 Hospitals
+          </button>
           <button className={`tab-button ${activeTab === 'vet' ? 'active' : ''}`} onClick={() => setActiveTab('vet')}>
             👨‍⚕️ Veterinarians
           </button>
         </div>
 
         <div className="benefits-grid">
-          {(activeTab === 'owner' ? ownerBenefits : activeTab === 'enterprise' ? enterpriseBenefits : vetBenefits).map((benefit, idx) => (
+          {(activeTab === 'owner' ? ownerBenefits : activeTab === 'enterprise' ? enterpriseBenefits : activeTab === 'hospital' ? hospitalBenefits : vetBenefits).map((benefit, idx) => (
             <div key={idx} className="benefit-card">
               <div className="benefit-icon">{benefit.icon}</div>
               <h3 className="benefit-title">{benefit.title}</h3>
@@ -410,6 +505,9 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
           <button className={`tab-button ${activeTab === 'enterprise' ? 'active' : ''}`} onClick={() => setActiveTab('enterprise')}>
             🏢 Enterprises
           </button>
+          <button className={`tab-button ${activeTab === 'hospital' ? 'active' : ''}`} onClick={() => setActiveTab('hospital')}>
+            🏥 Hospitals
+          </button>
           <button className={`tab-button ${activeTab === 'vet' ? 'active' : ''}`} onClick={() => setActiveTab('vet')}>
             👨‍⚕️ Veterinarians
           </button>
@@ -434,6 +532,16 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
             <div className="step-card"><div className="step-number">3</div><h3>Onboard Animals</h3><p>Import herds, assign to locations</p><div className="step-icon">🐄</div></div>
             <div className="step-arrow">→</div>
             <div className="step-card"><div className="step-number">4</div><h3>Run & Scale</h3><p>Campaigns, analytics & vet care</p><div className="step-icon">📊</div></div>
+          </div>
+        ) : activeTab === 'hospital' ? (
+          <div className="steps-container">
+            <div className="step-card"><div className="step-number">1</div><h3>Register as Vet</h3><p>Create a veterinarian account</p><div className="step-icon">👨‍⚕️</div></div>
+            <div className="step-arrow">→</div>
+            <div className="step-card"><div className="step-number">2</div><h3>Create Hospital</h3><p>Set up your clinic profile & departments</p><div className="step-icon">🏥</div></div>
+            <div className="step-arrow">→</div>
+            <div className="step-card"><div className="step-number">3</div><h3>Add Doctors & Staff</h3><p>Invite vets, assign roles & specialties</p><div className="step-icon">👥</div></div>
+            <div className="step-arrow">→</div>
+            <div className="step-card"><div className="step-number">4</div><h3>Accept Bookings</h3><p>Patients find & book your hospital online</p><div className="step-icon">📅</div></div>
           </div>
         ) : (
           <div className="steps-container">
@@ -472,13 +580,16 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       <section className="cta-section">
         <div className="cta-content">
           <h2>Ready to Transform Your Animal Care?</h2>
-          <p>Join thousands of pet owners, enterprises, and veterinarians on VetCare</p>
+          <p>Join thousands of pet owners, enterprises, hospitals and veterinarians on VetCare</p>
           <div className="cta-buttons">
             <button className="btn btn-primary btn-large" onClick={onGetStarted}>
               Start Free — Pet Owner
             </button>
             <button className="btn btn-enterprise btn-large" onClick={onGetStarted}>
               🏢 Enterprise Trial
+            </button>
+            <button className="btn btn-hospital btn-large" onClick={onGetStarted}>
+              🏥 Register Hospital
             </button>
             <button className="btn btn-secondary-outline btn-large" onClick={onViewForDoctors}>
               Join as Veterinarian

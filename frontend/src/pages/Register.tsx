@@ -91,9 +91,10 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
               <div className="register-feat"><span className="register-feat-icon">⚡</span><div><strong>Instant Access</strong><span>24/7 availability</span></div></div>
               <div className="register-feat"><span className="register-feat-icon">🔒</span><div><strong>Secure</strong><span>HIPAA-grade privacy</span></div></div>
               <div className="register-feat"><span className="register-feat-icon">🏢</span><div><strong>Enterprise Ready</strong><span>Scale from 1 to 10,000+</span></div></div>
+              <div className="register-feat"><span className="register-feat-icon">🏥</span><div><strong>Hospital Network</strong><span>Create &amp; manage multi-doctor clinics</span></div></div>
             </div>
             <div className="register-trust">
-              <span>Trusted by <strong>3,000+</strong> enterprises</span>
+              <span>Trusted by <strong>3,000+</strong> enterprises &amp; <strong>500+</strong> hospitals</span>
             </div>
           </div>
         </div>
@@ -156,8 +157,23 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
                     <span className="role-desc" id={`role-desc-${opt.value}`}>{opt.desc}</span>
                   </label>
                 ))}
+                {/* Hospital info card — not a selectable role, it's created after vet registration */}
+                <div className="role-option role-option--info" aria-label="Vet Hospital info">
+                  <span className="role-icon" aria-hidden="true">🏥</span>
+                  <span className="role-label">Vet Hospital</span>
+                  <span className="role-desc">Register as a Veterinarian, then create your hospital from the dashboard</span>
+                </div>
               </div>
             </fieldset>
+
+            {/* Hospital pathway callout */}
+            <div className="hospital-callout" role="note">
+              <span className="hospital-callout-icon">🏥</span>
+              <div className="hospital-callout-body">
+                <strong>Running a Vet Hospital or Multi-Doctor Clinic?</strong>
+                <p>Register as a <em>Veterinarian</em> above. After signing in, you can <strong>create your hospital profile</strong>, add departments, staff, services and accept bookings — all from your dashboard. No separate account needed.</p>
+              </div>
+            </div>
 
             {/* Password row */}
             <div className="form-row">

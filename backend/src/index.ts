@@ -5,6 +5,7 @@ import logger from './utils/logger';
 import database from './utils/database';
 import cacheManager from './utils/cacheManager';
 import { initSocketIO } from './utils/socketIO';
+import { startScheduler } from './utils/scheduler';
 
 const startServer = async () => {
   try {
@@ -17,6 +18,9 @@ const startServer = async () => {
       await cacheManager.connect();
     }
     logger.info('Cache initialized');
+
+    // Start background scheduler (document expiry checks, etc.)
+    startScheduler();
 
     // Start server
     const httpServer = http.createServer(app);

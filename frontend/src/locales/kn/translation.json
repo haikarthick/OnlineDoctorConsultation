@@ -1,0 +1,150 @@
+{
+  "common": {
+    "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "cancel": "ರದ್ದುಮಾಡಿ",
+    "save": "ಉಳಿಸಿ",
+    "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ...",
+    "delete": "ಅಳಿಸಿ",
+    "edit": "ಸಂಪಾದಿಸಿ",
+    "create": "ರಚಿಸಿ",
+    "update": "ನವೀಕರಿಸಿ",
+    "close": "ಮುಚ್ಚಿ",
+    "confirm": "ಖಚಿತಪಡಿಸಿ",
+    "back": "ಹಿಂದೆ",
+    "next": "ಮುಂದೆ",
+    "search": "ಹುಡುಕಿ",
+    "filter": "ಫಿಲ್ಟರ್",
+    "all": "ಎಲ್ಲಾ",
+    "refresh": "↻ ರಿಫ್ರೆಶ್",
+    "yes": "ಹೌದು",
+    "no": "ಇಲ್ಲ",
+    "actions": "ಕ್ರಿಯೆಗಳು",
+    "status": "ಸ್ಥಿತಿ",
+    "date": "ದಿನಾಂಕ",
+    "type": "ಪ್ರಕಾರ",
+    "name": "ಹೆಸರು",
+    "description": "ವಿವರಣೆ",
+    "notes": "ಟಿಪ್ಪಣಿಗಳು",
+    "submit": "ಸಲ್ಲಿಸಿ",
+    "retry": "ಮರುಪ್ರಯತ್ನಿಸಿ",
+    "selectEnterprise": "ಉದ್ಯಮ ಆಯ್ಕೆಮಾಡಿ",
+    "noData": "ಡೇಟಾ ಇಲ್ಲ",
+    "required": "ಅಗತ್ಯವಿದೆ",
+    "optional": "ಐಚ್ಛಿಕ",
+    "enabled": "✅ ಸಕ್ರಿಯ",
+    "disabled": "⏸ ನಿಷ್ಕ್ರಿಯ",
+    "active": "ಸಕ್ರಿಯ",
+    "inactive": "ನಿಷ್ಕ್ರಿಯ",
+    "verified": "✓ ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
+    "unverified": "ಪರಿಶೀಲಿಸಲಾಗಿಲ್ಲ",
+    "resolved": "ಪರಿಹರಿಸಲಾಗಿದೆ",
+    "pending": "ಬಾಕಿ",
+    "completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+    "newborn": "ನವಜಾತ",
+    "male": "ಗಂಡು",
+    "female": "ಹೆಣ್ಣು",
+    "loadingPage": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+    "brand": "VetCare",
+    "enterprise": "ಉದ್ಯಮ",
+    "trustBadge": "ವಿಶ್ವಾದ್ಯಂತ 3,000+ ಉದ್ಯಮಗಳ ವಿಶ್ವಾಸ"
+  },
+  "nav": {
+    "home": "ಮನೆ",
+    "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "consultations": "ಸಮಾಲೋಚನೆಗಳು",
+    "animals": "ಪ್ರಾಣಿಗಳು",
+    "appointments": "ನೇಮಕಾತಿಗಳು",
+    "medicalRecords": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
+    "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+    "logout": "ಲಾಗ್ ಔಟ್",
+    "login": "ಲಾಗ್ ಇನ್",
+    "register": "ನೋಂದಣಿ",
+    "findDoctor": "ವೈದ್ಯರನ್ನು ಹುಡುಕಿ",
+    "profile": "ಪ್ರೊಫೈಲ್",
+    "admin": "ನಿರ್ವಾಹಕ"
+  },
+  "login": {
+    "title": "ನಿಮ್ಮ ಖಾತೆಗೆ ಲಾಗಿನ್ ಮಾಡಿ",
+    "email": "ಇಮೇಲ್ ವಿಳಾಸ",
+    "password": "ಪಾಸ್‌ವರ್ಡ್",
+    "submit": "ಲಾಗ್ ಇನ್",
+    "noAccount": "ಖಾತೆ ಇಲ್ಲವೇ?",
+    "registerHere": "ಇಲ್ಲಿ ನೋಂದಾಯಿಸಿ",
+    "forgotPassword": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?"
+  },
+  "register": {
+    "title": "ಹೊಸ ಖಾತೆ ರಚಿಸಿ",
+    "name": "ಪೂರ್ಣ ಹೆಸರು",
+    "email": "ಇಮೇಲ್ ವಿಳಾಸ",
+    "password": "ಪಾಸ್‌ವರ್ಡ್",
+    "confirmPassword": "ಪಾಸ್‌ವರ್ಡ್ ಖಚಿತಪಡಿಸಿ",
+    "role": "ಪಾತ್ರ",
+    "submit": "ನೋಂದಾಯಿಸಿ",
+    "hasAccount": "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ?",
+    "loginHere": "ಇಲ್ಲಿ ಲಾಗಿನ್ ಮಾಡಿ"
+  },
+  "home": {
+    "title": "VetCare ಗೆ ಸ್ವಾಗತ",
+    "subtitle": "ನಿಮ್ಮ ಪ್ರಾಣಿಗಳಿಗೆ ವೃತ್ತಿಪರ ಪಶುವೈದ್ಯ ಸಮಾಲೋಚನೆ",
+    "getStarted": "ಪ್ರಾರಂಭಿಸಿ",
+    "learnMore": "ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"
+  },
+  "dashboard": {
+    "title": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    "welcome": "ಸ್ವಾಗತ",
+    "totalAnimals": "ಒಟ್ಟು ಪ್ರಾಣಿಗಳು",
+    "activeConsultations": "ಸಕ್ರಿಯ ಸಮಾಲೋಚನೆಗಳು",
+    "upcomingAppointments": "ಮುಂಬರುವ ನೇಮಕಾತಿಗಳು",
+    "recentActivity": "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ"
+  },
+  "consultations": {
+    "title": "ಸಮಾಲೋಚನೆಗಳು",
+    "new": "ಹೊಸ ಸಮಾಲೋಚನೆ",
+    "history": "ಸಮಾಲೋಚನೆ ಇತಿಹಾಸ",
+    "active": "ಸಕ್ರಿಯ ಸಮಾಲೋಚನೆಗಳು",
+    "details": "ಸಮಾಲೋಚನೆ ವಿವರಗಳು",
+    "startChat": "ಚಾಟ್ ಪ್ರಾರಂಭಿಸಿ",
+    "endConsultation": "ಸಮಾಲೋಚನೆ ಮುಗಿಸಿ"
+  },
+  "animals": {
+    "title": "ನನ್ನ ಪ್ರಾಣಿಗಳು",
+    "addAnimal": "ಪ್ರಾಣಿ ಸೇರಿಸಿ",
+    "species": "ಜಾತಿ",
+    "breed": "ತಳಿ",
+    "age": "ವಯಸ್ಸು",
+    "weight": "ತೂಕ",
+    "gender": "ಲಿಂಗ",
+    "healthStatus": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ"
+  },
+  "appointments": {
+    "title": "ನೇಮಕಾತಿಗಳು",
+    "schedule": "ನೇಮಕಾತಿ ನಿಗದಿಪಡಿಸಿ",
+    "upcoming": "ಮುಂಬರುವ",
+    "past": "ಹಿಂದಿನ",
+    "cancelled": "ರದ್ದಾಗಿದೆ"
+  },
+  "medicalRecords": {
+    "title": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
+    "addRecord": "ದಾಖಲೆ ಸೇರಿಸಿ",
+    "diagnosis": "ರೋಗನಿರ್ಣಯ",
+    "treatment": "ಚಿಕಿತ್ಸೆ",
+    "prescription": "ಔಷಧಿ ಚೀಟಿ",
+    "vaccinations": "ಲಸಿಕೆಗಳು"
+  },
+  "settings": {
+    "title": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+    "profile": "ಪ್ರೊಫೈಲ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+    "notifications": "ಅಧಿಸೂಚನೆಗಳು",
+    "language": "ಭಾಷೆ",
+    "theme": "ಥೀಮ್"
+  },
+  "errorBoundary": {
+    "title": "ಏನೋ ತಪ್ಪಾಗಿದೆ",
+    "message": "ಅನಿರೀಕ್ಷಿತ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಪುಟವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ.",
+    "retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+    "reload": "ಪುಟವನ್ನು ಮರುಲೋಡ್ ಮಾಡಿ"
+  },
+  "languageSwitcher": {
+    "selectLanguage": "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ"
+  }
+}

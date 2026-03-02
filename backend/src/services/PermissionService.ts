@@ -19,6 +19,8 @@ export const PERMISSION_CATEGORIES = {
       'video_consultation',
       'settings',
       'write_review',
+      'hospital_browse',
+      'hospital_manage',
     ]
   },
   admin_pages: {
@@ -33,6 +35,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_audit',
       'admin_permissions',
       'admin_medical_records',
+      'admin_hospitals',
     ]
   },
   actions: {
@@ -108,6 +111,17 @@ export const PERMISSION_CATEGORIES = {
       'wellness_portal',
       'geospatial_analytics',
     ]
+  },
+  hospital: {
+    label: 'Vet Hospital',
+    permissions: [
+      'hospital_browse',
+      'hospital_create',
+      'hospital_manage',
+      'hospital_departments',
+      'hospital_services',
+      'hospital_staff',
+    ]
   }
 };
 
@@ -121,6 +135,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'medical_records', 'schedule',
     'prescriptions', 'reviews', 'video_consultation', 'settings',
+    // Hospital
+    'hospital_browse', 'hospital_create', 'hospital_manage',
+    'hospital_departments', 'hospital_services', 'hospital_staff',
     // Enterprise (vet serves enterprise clients per Home page)
     'enterprise_campaigns', 'herd_medical',
     // Advanced (vet needs analytics for clinical oversight)
@@ -143,6 +160,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
     'animals', 'medical_records', 'video_consultation',
     'settings', 'write_review',
+    // Hospital (browse only)
+    'hospital_browse',
     // Enterprise (basic access)
     'enterprise_manage',
     // (user-scoped)
@@ -158,6 +177,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
     'animals', 'medical_records', 'video_consultation', 'settings', 'write_review',
+    // Hospital (browse to find vets)
+    'hospital_browse',
     // Enterprise
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
     'enterprise_movements', 'enterprise_campaigns', 'enterprise_members', 'herd_medical',
@@ -184,6 +205,10 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Admin pages
     'admin_dashboard', 'admin_users', 'admin_consultations', 'admin_payments',
     'admin_reviews', 'admin_settings', 'admin_audit', 'admin_permissions', 'admin_medical_records',
+    'admin_hospitals',
+    // Hospital (full access)
+    'hospital_browse', 'hospital_create', 'hospital_manage',
+    'hospital_departments', 'hospital_services', 'hospital_staff',
     // Enterprise (full access)
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
     'enterprise_movements', 'enterprise_campaigns', 'enterprise_members', 'herd_medical',
@@ -228,6 +253,7 @@ export const PERMISSION_LABELS: Record<string, string> = {
   admin_audit: 'Audit Logs',
   admin_permissions: 'Permission Management',
   admin_medical_records: 'Medical Record Management',
+  admin_hospitals: 'Hospital Management',
   // Actions
   booking_create: 'Create Bookings',
   booking_confirm: 'Confirm Bookings',
@@ -241,6 +267,13 @@ export const PERMISSION_LABELS: Record<string, string> = {
   animal_manage: 'Manage Animals',
   schedule_manage: 'Manage Schedule',
   medical_record_create: 'Create Medical Records',
+  // Hospital
+  hospital_browse: 'Browse Vet Hospitals',
+  hospital_create: 'Create Vet Hospital',
+  hospital_manage: 'Manage Vet Hospital',
+  hospital_departments: 'Manage Hospital Departments',
+  hospital_services: 'Manage Hospital Services',
+  hospital_staff: 'Manage Hospital Staff',
   // Enterprise Management
   enterprise_manage: 'Enterprise Management',
   enterprise_groups: 'Animal Groups',

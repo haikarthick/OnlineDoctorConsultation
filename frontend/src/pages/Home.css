@@ -453,6 +453,16 @@
   background: linear-gradient(135deg, #f59e0b, #d97706) !important;
   transform: translateY(-2px) !important;
 }
+.btn-hospital {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 700 !important;
+}
+.btn-hospital:hover {
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  transform: translateY(-2px) !important;
+}
 .hero-subtext {
   font-size: 0.9rem;
   opacity: 0.85;
@@ -916,30 +926,233 @@
   .hero-content { grid-template-columns: 1fr; gap: 40px; text-align: center; }
   .hero-text { text-align: center; }
   .hero-title { font-size: 2.2rem; }
-  .hero-buttons { justify-content: center; }
+  .hero-buttons { justify-content: center; flex-wrap: wrap; gap: 10px; }
   .hero-visual { height: 280px; }
   .hero-icon-large { font-size: 100px; }
   .hero-card { display: none; }
 
-  .stats-container { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stats-container { grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .stat-number { font-size: 1.8rem; }
 
   .enterprise-types-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .enterprise-type-card { padding: 0.85rem 0.3rem; }
 
   .section-title { font-size: 1.8rem; }
-  .steps-container { flex-direction: column; }
+  .steps-container { flex-direction: column; align-items: center; }
   .step-arrow { transform: rotate(90deg); }
-  .step-card { max-width: 100%; }
+  .step-card { max-width: 100%; width: 100%; }
 
   .advanced-grid { grid-template-columns: 1fr; }
 
   .cta-content h2 { font-size: 1.6rem; }
   .cta-buttons { flex-direction: column; align-items: center; }
+  .cta-buttons .btn { width: 100%; max-width: 340px; text-align: center; }
 }
 
 @media (max-width: 480px) {
+  .hero-section { padding: 80px 12px 50px; }
+  .hero-title { font-size: 1.8rem; }
+  .hero-subtitle { font-size: 1rem; }
+  .hero-tag { font-size: 0.75rem; padding: 0.3rem 0.75rem; }
+  .hero-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .hero-buttons .btn {
+    width: 100%;
+    text-align: center;
+    padding: 0.875rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
   .enterprise-types-grid { grid-template-columns: repeat(2, 1fr); }
   .stats-container { grid-template-columns: repeat(2, 1fr); }
-  .hero-title { font-size: 1.8rem; }
+  .tabs-container { gap: 8px; padding: 0 12px; }
+  .tab-button { padding: 8px 16px; font-size: 0.85rem; }
+  .section-title { font-size: 1.5rem; }
+  .section-subtitle { font-size: 0.9rem; }
+  .benefit-card { padding: 1.25rem 1rem; }
+  .advanced-card { padding: 1.1rem; }
+  .cta-buttons .btn { max-width: 100%; }
+  .footer-content { padding: 0 1rem; }
+}
+
+@media (max-width: 360px) {
+  .hero-title { font-size: 1.5rem; }
+  .hero-nav-title { font-size: 1rem; }
+  .tab-button { padding: 6px 12px; font-size: 0.8rem; }
+  .hosp-step-chip { font-size: 0.72rem; padding: 0.25rem 0.6rem; }
+}
+
+/* ── Vet Hospitals Section ── */
+.hospitals-section {
+  padding: 5rem 20px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0f9ff 100%);
+}
+
+.hospitals-stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin: 2rem 0 3rem;
+}
+
+.hosp-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.1);
+  border: 1px solid #d1fae5;
+  min-width: 130px;
+}
+
+.hosp-stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #059669;
+  line-height: 1;
+}
+
+.hosp-stat-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.3rem;
+  font-weight: 500;
+}
+
+.hospitals-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.hospitals-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.hosp-feat-card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  border: 1px solid #d1fae5;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hosp-feat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(16,185,129,0.15);
+}
+
+.hosp-feat-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.hosp-feat-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #064e3b;
+  margin: 0 0 0.5rem;
+}
+
+.hosp-feat-card p {
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.hospitals-cta-box {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+  border-radius: 20px;
+  padding: 2.5rem;
+  color: white;
+  flex-wrap: wrap;
+}
+
+.hosp-cta-info {
+  flex: 1;
+  min-width: 280px;
+}
+
+.hosp-cta-info h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0 0 0.75rem;
+  color: #ecfdf5;
+}
+
+.hosp-cta-info p {
+  font-size: 0.9rem;
+  color: #a7f3d0;
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+}
+
+.hosp-cta-steps {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hosp-step-chip {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ecfdf5;
+  white-space: nowrap;
+}
+
+.hosp-step-arrow {
+  color: #6ee7b7;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.hosp-cta-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 200px;
+}
+
+.hosp-cta-buttons .btn {
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .hospitals-stats-row {
+    gap: 1rem;
+  }
+  .hosp-stat {
+    min-width: 100px;
+    padding: 0.75rem 1rem;
+  }
+  .hospitals-cta-box {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .hosp-cta-buttons {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }

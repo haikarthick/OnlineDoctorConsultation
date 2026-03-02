@@ -63,6 +63,10 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   sustainability_manage: ['/sustainability'],
   wellness_portal: ['/wellness'],
   geospatial_analytics: ['/geospatial'],
+  // Vet Hospitals
+  hospital_browse: ['/vet-hospitals'],
+  hospital_manage: ['/vet-hospitals/manage'],
+  admin_hospitals: ['/admin/vet-hospitals'],
 }
 
 // Reverse map: route path → required permission
@@ -123,6 +127,10 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'sustainability': 'sustainability_manage',
   'wellness': 'wellness_portal',
   'geospatial': 'geospatial_analytics',
+  // Vet Hospitals
+  'vet-hospitals': 'hospital_browse',
+  'vet-hospitals-manage': 'hospital_manage',
+  'admin-hospitals': 'admin_hospitals',
 }
 
 // ─── Context ────────────────────────────────────────────────

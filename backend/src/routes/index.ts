@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
+import database from '../utils/database';
+import cacheManager from '../utils/cacheManager';
 import {
   // Auth
   registerSchema, loginSchema, refreshTokenSchema, logoutSchema,
@@ -54,6 +56,12 @@ import {
   createSustainabilityMetricSchema, updateSustainabilityMetricSchema, createSustainabilityGoalSchema, updateSustainabilityGoalSchema,
   createWellnessScorecardSchema, updateWellnessScorecardSchema, createWellnessReminderSchema, snoozeReminderSchema,
   createGeofenceZoneSchema, updateGeofenceZoneSchema, createGeospatialEventSchema,
+  // Vet Hospital
+  createHospitalSchema, updateHospitalSchema, addHospitalDoctorSchema, updateHospitalDoctorSchema,
+  createDepartmentSchema, updateDepartmentSchema,
+  createHospitalServiceSchema, updateHospitalServiceSchema, verifyHospitalSchema,
+  // Hospital Documents
+  uploadHospitalDocSchema, reviewHospitalDocSchema,
 } from '../middleware/validation';
 import { requireFeature, getAllFeatureFlags } from '../config/featureFlags';
 import AuthController from '../controllers/AuthController';
@@ -73,6 +81,8 @@ import EnterpriseController from '../controllers/EnterpriseController';
 import Tier2Controller from '../controllers/Tier2Controller';
 import Tier3Controller from '../controllers/Tier3Controller';
 import Tier4Controller from '../controllers/Tier4Controller';
+import VetHospitalController from '../controllers/VetHospitalController';
+import HospitalDocumentController from '../controllers/HospitalDocumentController';
 import { FileController } from '../controllers/FileController';
 import { uploadAny } from '../middleware/upload';
 import AdminService from '../services/AdminService';
@@ -490,8 +500,36 @@ router.get('/settings/public', asyncHandler(async (_req: Request, res: Response)
 }));
 
 // ─── Health check & feature flags ────────────────────────────
-router.get('/health', (_req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+router.get('/health', async (_req, res) => {
+  const checks: Record<string, string> = { api: 'ok' };
+  let httpStatus = 200;
+
+  // Database connectivity check
+  try {
+    const dbResult = await database.query('SELECT 1 AS ok');
+    checks.database = dbResult.rows?.[0]?.ok === 1 ? 'ok' : 'degraded';
+  } catch {
+    checks.database = 'down';
+    httpStatus = 503;
+  }
+
+  // Cache check
+  try {
+    const cacheOk = cacheManager !== undefined;
+    checks.cache = cacheOk ? 'ok' : 'unavailable';
+  } catch {
+    checks.cache = 'unavailable';
+  }
+
+  const overall = httpStatus === 200 ? 'healthy' : 'unhealthy';
+
+  res.status(httpStatus).json({
+    status: overall,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: process.env.npm_package_version || '1.0.0',
+    checks,
+  });
 });
 
 router.get('/features', (_req, res) => {
@@ -503,5 +541,36 @@ router.post('/files/upload', authMiddleware, uploadAny.single('file'), asyncHand
 router.post('/files/upload-multiple', authMiddleware, uploadAny.array('files', 10), asyncHandler((req: Request, res: Response) => FileController.uploadMultiple(req, res)));
 router.get('/files', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.list(req, res)));
 router.delete('/files/*', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.remove(req, res)));
+
+// ─── Vet Hospital routes ─────────────────────────────────────
+router.post('/vet-hospitals', authMiddleware, validateBody(createHospitalSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.createHospital(req, res)));
+router.get('/vet-hospitals', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.listHospitals(req, res)));
+router.get('/vet-hospitals/my', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.listMyHospitals(req, res)));
+router.get('/vet-hospitals/admin/stats', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.getAdminStats(req, res)));
+router.get('/vet-hospitals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.getHospital(req, res)));
+router.put('/vet-hospitals/:id', authMiddleware, validateBody(updateHospitalSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.updateHospital(req, res)));
+router.delete('/vet-hospitals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.deleteHospital(req, res)));
+router.put('/vet-hospitals/:id/verify', authMiddleware, validateBody(verifyHospitalSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.verifyHospital(req, res)));
+router.get('/vet-hospitals/:id/stats', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.getHospitalStats(req, res)));
+// Doctors
+router.get('/vet-hospitals/:id/doctors', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.listDoctors(req, res)));
+router.post('/vet-hospitals/:id/doctors', authMiddleware, validateBody(addHospitalDoctorSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.addDoctor(req, res)));
+router.put('/vet-hospitals/:id/doctors/:doctorId', authMiddleware, validateBody(updateHospitalDoctorSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.updateDoctor(req, res)));
+router.delete('/vet-hospitals/:id/doctors/:doctorId', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.removeDoctor(req, res)));
+// Departments
+router.get('/vet-hospitals/:id/departments', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.listDepartments(req, res)));
+router.post('/vet-hospitals/:id/departments', authMiddleware, validateBody(createDepartmentSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.createDepartment(req, res)));
+router.put('/vet-hospitals/:id/departments/:deptId', authMiddleware, validateBody(updateDepartmentSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.updateDepartment(req, res)));
+router.delete('/vet-hospitals/:id/departments/:deptId', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.deleteDepartment(req, res)));
+// Services
+router.get('/vet-hospitals/:id/services', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.listServices(req, res)));
+router.post('/vet-hospitals/:id/services', authMiddleware, validateBody(createHospitalServiceSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.addService(req, res)));
+router.put('/vet-hospitals/:id/services/:serviceId', authMiddleware, validateBody(updateHospitalServiceSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.updateService(req, res)));
+router.delete('/vet-hospitals/:id/services/:serviceId', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.deleteService(req, res)));
+// Documents (KYC / Compliance)
+router.get('/vet-hospitals/admin/pending', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalDocumentController.listPendingVerification(req, res)));
+router.get('/vet-hospitals/:id/documents', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalDocumentController.listDocuments(req, res)));
+router.post('/vet-hospitals/:id/documents', authMiddleware, uploadAny.any(), asyncHandler((req: Request, res: Response) => HospitalDocumentController.uploadDocument(req, res)));
+router.put('/vet-hospitals/:id/documents/:docId/review', authMiddleware, validateBody(reviewHospitalDocSchema), asyncHandler((req: Request, res: Response) => HospitalDocumentController.reviewDocument(req, res)));
 
 export default router;

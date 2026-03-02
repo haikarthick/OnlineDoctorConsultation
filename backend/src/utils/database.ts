@@ -1,10 +1,18 @@
-import { Pool } from 'pg';
+import { Pool, types } from 'pg';
 import config from '../config';
 import logger from './logger';
 import * as fs from 'fs';
 import * as path from 'path';
 import PermissionService from '../services/PermissionService';
 import RefreshTokenService from '../services/RefreshTokenService';
+import VetHospitalService from '../services/VetHospitalService';
+
+// ── Fix node-postgres: NUMERIC/DECIMAL columns return as strings by default ──
+// OID 1700 = NUMERIC/DECIMAL → parse to float
+types.setTypeParser(1700, (val: string) => parseFloat(val));
+// OID 700 = FLOAT4, 701 = FLOAT8 (already returns as number but be safe)
+types.setTypeParser(700, (val: string) => parseFloat(val));
+types.setTypeParser(701, (val: string) => parseFloat(val));
 
 class PostgresDatabase {
   private pool: Pool;
@@ -18,8 +26,9 @@ class PostgresDatabase {
       database: config.database.database,
       max: config.database.pool.max,
       min: config.database.pool.min,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      idleTimeoutMillis: config.database.pool.idleTimeoutMillis,
+      connectionTimeoutMillis: config.database.pool.connectionTimeoutMillis,
+      maxUses: config.database.pool.maxUses,
     });
 
     this.pool.on('error', (err: Error) => {
@@ -52,6 +61,9 @@ class PostgresDatabase {
 
       // Ensure refresh tokens table
       await RefreshTokenService.ensureTable();
+
+      // Ensure vet hospital tables
+      await VetHospitalService.ensureTables();
     } catch (error: any) {
       logger.error('Failed to connect to PostgreSQL', { error: error.message });
       throw error;
