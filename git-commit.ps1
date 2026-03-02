@@ -111,8 +111,16 @@ if (-not $NoPush) {
     Write-Host ""
     Write-Host "Pushing to origin/$branch..." -ForegroundColor Cyan
 
-    # git writes progress to stderr, so capture both streams
-    $pushOutput = git push origin $branch 2>&1 | Out-String
+    # git writes progress/info to stderr; temporarily suppress PowerShell's
+    # NativeCommandError so those lines don't throw, then restore.
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $pushOutput = git push origin $branch 2>&1 | ForEach-Object { "$_" } | Out-String
+    } catch {
+        $pushOutput = $_.Exception.Message
+    }
+    $ErrorActionPreference = $prevEAP
 
     # Check if push actually succeeded by verifying local matches remote
     $localHash  = git rev-parse HEAD 2>&1
