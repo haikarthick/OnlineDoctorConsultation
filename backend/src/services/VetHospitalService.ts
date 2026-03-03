@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
-import { DatabaseError, NotFoundError, ForbiddenError } from '../utils/errors';
+import { DatabaseError, NotFoundError, ForbiddenError, ConflictError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 import HospitalDocumentService from './HospitalDocumentService';
 
@@ -9,6 +9,7 @@ import HospitalDocumentService from './HospitalDocumentService';
 export interface VetHospital {
   id: string;
   name: string;
+  tagline?: string;
   hospitalType: string;
   registrationNumber?: string;
   accreditationBody?: string;
@@ -123,6 +124,7 @@ export interface HospitalService {
 
 export interface CreateHospitalDTO {
   name: string;
+  tagline?: string;
   hospitalType: string;
   registrationNumber?: string;
   accreditationBody?: string;
@@ -175,6 +177,7 @@ export class VetHospitalService {
               'multi_specialty','specialty','clinic','emergency_center',
               'mobile_vet','research','teaching','other'
             )),
+          tagline VARCHAR(500),
           registration_number VARCHAR(100),
           accreditation_body VARCHAR(100),
           accreditation_number VARCHAR(100),
@@ -286,8 +289,38 @@ export class VetHospitalService {
         CREATE INDEX IF NOT EXISTS idx_hospital_doctors_doctor ON hospital_doctors(doctor_id);
         CREATE INDEX IF NOT EXISTS idx_hospital_departments_hospital ON hospital_departments(hospital_id);
       `);
+
+      // Add hospital_id FK to bookings (links bookings to hospitals)
+      await database.query(`
+        ALTER TABLE bookings ADD COLUMN IF NOT EXISTS hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL;
+        CREATE INDEX IF NOT EXISTS idx_bookings_hospital ON bookings(hospital_id) WHERE hospital_id IS NOT NULL;
+      `);
+
       // Bootstrap document tables / columns
       await HospitalDocumentService.ensureTables();
+
+      // Hospital invites table
+      await database.query(`
+        CREATE TABLE IF NOT EXISTS hospital_invites (
+          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
+          email VARCHAR(255) NOT NULL,
+          first_name VARCHAR(100),
+          last_name VARCHAR(100),
+          phone VARCHAR(20),
+          invite_token VARCHAR(128) NOT NULL UNIQUE,
+          hospital_role VARCHAR(50) DEFAULT 'staff',
+          department_id UUID REFERENCES hospital_departments(id) ON DELETE SET NULL,
+          status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending','accepted','expired','revoked')),
+          invited_by UUID REFERENCES users(id) ON DELETE SET NULL,
+          expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_hospital_invites_token ON hospital_invites(invite_token);
+        CREATE INDEX IF NOT EXISTS idx_hospital_invites_hospital ON hospital_invites(hospital_id);
+      `);
+
       logger.info('VetHospital tables ensured');
     } catch (error: any) {
       logger.error('Failed to ensure VetHospital tables', { error: error.message });
@@ -302,7 +335,7 @@ export class VetHospitalService {
       const id = uuidv4();
       const result = await database.query(
         `INSERT INTO vet_hospitals (
-          id, name, hospital_type, registration_number, accreditation_body,
+          id, name, tagline, hospital_type, registration_number, accreditation_body,
           accreditation_number, accreditation_expiry, description, address, city,
           state, country, postal_code, gps_latitude, gps_longitude,
           phone, emergency_phone, email, website, logo_url, cover_image_url,
@@ -312,10 +345,10 @@ export class VetHospitalService {
           specializations, facilities, accepted_species, operating_hours, owner_id
         ) VALUES (
           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,
-          $22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37
+          $22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38
         ) RETURNING *`,
         [
-          id, data.name, data.hospitalType || 'multi_specialty',
+          id, data.name, data.tagline || null, data.hospitalType || 'multi_specialty',
           data.registrationNumber, data.accreditationBody, data.accreditationNumber,
           data.accreditationExpiry || null, data.description,
           data.address, data.city, data.state, data.country || 'US',
@@ -425,7 +458,7 @@ export class VetHospitalService {
     const params: any[] = [];
     let idx = 1;
     const map: Record<string, string> = {
-      name: 'name', hospitalType: 'hospital_type', registrationNumber: 'registration_number',
+      name: 'name', tagline: 'tagline', hospitalType: 'hospital_type', registrationNumber: 'registration_number',
       accreditationBody: 'accreditation_body', accreditationNumber: 'accreditation_number',
       accreditationExpiry: 'accreditation_expiry', description: 'description',
       address: 'address', city: 'city', state: 'state', country: 'country',
@@ -734,7 +767,7 @@ export class VetHospitalService {
 
   private mapHospitalRow(row: any): VetHospital {
     return {
-      id: row.id, name: row.name, hospitalType: row.hospital_type,
+      id: row.id, name: row.name, tagline: row.tagline, hospitalType: row.hospital_type,
       registrationNumber: row.registration_number, accreditationBody: row.accreditation_body,
       accreditationNumber: row.accreditation_number, accreditationExpiry: row.accreditation_expiry,
       description: row.description, address: row.address, city: row.city,
@@ -804,6 +837,163 @@ export class VetHospitalService {
       requiresAppointment: row.requires_appointment,
       isAvailable: row.is_available, createdAt: row.created_at,
     };
+  }
+
+  // ─── Doctor Invites ────────────────────────────────────────
+
+  async inviteDoctor(hospitalId: string, data: {
+    email: string; firstName?: string; lastName?: string; phone?: string;
+    hospitalRole?: string; departmentId?: string;
+  }, invitedBy: string): Promise<any> {
+    // Check if there's already a pending invite for this email+hospital
+    const existing = await database.query(
+      `SELECT id FROM hospital_invites WHERE hospital_id = $1 AND email = $2 AND status = 'pending' AND expires_at > NOW()`,
+      [hospitalId, data.email.toLowerCase()]
+    );
+    if (existing.rows.length > 0) {
+      throw new ConflictError('An active invite already exists for this email');
+    }
+
+    // Check if user already exists and is already linked to this hospital
+    const existingUser = await database.query(
+      `SELECT u.id FROM users u JOIN hospital_doctors hd ON hd.doctor_id = u.id
+       WHERE u.email = $1 AND hd.hospital_id = $2 AND hd.is_active = true`,
+      [data.email.toLowerCase(), hospitalId]
+    );
+    if (existingUser.rows.length > 0) {
+      throw new ConflictError('This user is already a doctor at this hospital');
+    }
+
+    const token = uuidv4() + '-' + uuidv4(); // long unique token
+    const result = await database.query(
+      `INSERT INTO hospital_invites (hospital_id, email, first_name, last_name, phone, invite_token, hospital_role, department_id, invited_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING *`,
+      [hospitalId, data.email.toLowerCase(), data.firstName || null, data.lastName || null,
+       data.phone || null, token, data.hospitalRole || 'staff', data.departmentId || null, invitedBy]
+    );
+
+    // Send invite email (best-effort)
+    try {
+      const hospital = await this.getHospital(hospitalId);
+      const EmailService = (await import('./EmailService')).default;
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      await EmailService.send({
+        to: data.email,
+        subject: `You're invited to join ${hospital.name} on VetConnect`,
+        html: `
+          <div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
+            <h2 style="color:#1e3a5f;">You've Been Invited! 🎉</h2>
+            <p><strong>${hospital.name}</strong> has invited you to join their veterinary team as <strong>${(data.hospitalRole || 'staff').replace(/_/g, ' ')}</strong>.</p>
+            <p>Click the button below to set up your account and start:</p>
+            <a href="${frontendUrl}/accept-invite?token=${token}"
+               style="display:inline-block;background:#2563eb;color:#fff;padding:.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:700;margin:1rem 0;">
+               Accept Invitation
+            </a>
+            <p style="color:#888;font-size:.85rem;margin-top:1rem;">This invitation expires in 7 days. If you didn't expect this, you can safely ignore this email.</p>
+          </div>
+        `
+      });
+      logger.info(`Invite email sent to ${data.email}`);
+    } catch (err) {
+      logger.warn('Failed to send invite email — share the invite link manually', { email: data.email, error: (err as any).message });
+    }
+
+    return result.rows[0];
+  }
+
+  async listInvites(hospitalId: string): Promise<any[]> {
+    const result = await database.query(
+      `SELECT hi.*, u.first_name || ' ' || u.last_name as invited_by_name
+       FROM hospital_invites hi
+       LEFT JOIN users u ON u.id = hi.invited_by
+       WHERE hi.hospital_id = $1
+       ORDER BY hi.created_at DESC`,
+      [hospitalId]
+    );
+    return result.rows;
+  }
+
+  async revokeInvite(hospitalId: string, inviteId: string): Promise<void> {
+    const result = await database.query(
+      `UPDATE hospital_invites SET status = 'revoked', updated_at = NOW()
+       WHERE id = $1 AND hospital_id = $2 AND status = 'pending'`,
+      [inviteId, hospitalId]
+    );
+    if (result.rowCount === 0) throw new NotFoundError('Invite not found or already processed');
+  }
+
+  async getInviteByToken(token: string): Promise<any> {
+    const result = await database.query(
+      `SELECT hi.*, vh.name as hospital_name, vh.city as hospital_city,
+              vh.logo_url as hospital_logo_url, vh.hospital_type
+       FROM hospital_invites hi
+       JOIN vet_hospitals vh ON vh.id = hi.hospital_id
+       WHERE hi.invite_token = $1`,
+      [token]
+    );
+    if (result.rows.length === 0) throw new NotFoundError('Invalid invitation link');
+    const invite = result.rows[0];
+    if (invite.status !== 'pending') throw new ConflictError(`This invitation has already been ${invite.status}`);
+    if (new Date(invite.expires_at) < new Date()) {
+      await database.query(`UPDATE hospital_invites SET status = 'expired' WHERE id = $1`, [invite.id]);
+      throw new ConflictError('This invitation has expired');
+    }
+    return invite;
+  }
+
+  async acceptInvite(token: string, password: string): Promise<{ user: any; hospital: any }> {
+    const invite = await this.getInviteByToken(token);
+
+    // Check if user already exists
+    const existingUser = await database.query(`SELECT * FROM users WHERE email = $1`, [invite.email]);
+    let userId: string;
+
+    if (existingUser.rows.length > 0) {
+      userId = existingUser.rows[0].id;
+      // Update role to veterinarian if not already
+      if (existingUser.rows[0].role !== 'veterinarian') {
+        await database.query(`UPDATE users SET role = 'veterinarian' WHERE id = $1`, [userId]);
+      }
+    } else {
+      // Create new user
+      const bcrypt = await import('bcryptjs');
+      const passwordHash = await bcrypt.hash(password, 12);
+      userId = uuidv4();
+      await database.query(
+        `INSERT INTO users (id, email, first_name, last_name, phone, password_hash, role, is_active)
+         VALUES ($1, $2, $3, $4, $5, $6, 'veterinarian', true)`,
+        [userId, invite.email, invite.first_name || 'Doctor', invite.last_name || '',
+         invite.phone || '', passwordHash]
+      );
+
+      // Create vet profile
+      try {
+        await database.query(
+          `INSERT INTO vet_profiles (user_id, license_number, specializations, years_of_experience, consultation_fee)
+           VALUES ($1, '', '{}', 0, 0)
+           ON CONFLICT (user_id) DO NOTHING`,
+          [userId]
+        );
+      } catch { /* vet_profiles might not have ON CONFLICT, ignore */ }
+    }
+
+    // Link to hospital
+    await this.addDoctor(invite.hospital_id, {
+      doctorId: userId,
+      hospitalRole: invite.hospital_role || 'staff',
+      employmentType: 'full_time',
+      departmentId: invite.department_id || undefined,
+    });
+
+    // Mark invite as accepted
+    await database.query(
+      `UPDATE hospital_invites SET status = 'accepted', updated_at = NOW() WHERE id = $1`,
+      [invite.id]
+    );
+
+    const hospital = await this.getHospital(invite.hospital_id);
+    return { user: { id: userId, email: invite.email }, hospital };
   }
 }
 

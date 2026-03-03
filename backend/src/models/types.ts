@@ -63,6 +63,7 @@ export interface Booking {
   animalId?: string;
   enterpriseId?: string;
   groupId?: string;
+  hospitalId?: string;
   consultationId?: string;
   scheduledDate: Date;
   timeSlotStart: string; // HH:mm
@@ -334,6 +335,7 @@ export interface CreateBookingDTO {
   animalId?: string;
   enterpriseId?: string;
   groupId?: string;
+  hospitalId?: string;
   scheduledDate: string;
   timeSlotStart: string;
   timeSlotEnd: string;

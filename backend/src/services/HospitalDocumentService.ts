@@ -96,6 +96,12 @@ export class HospitalDocumentService {
           ADD COLUMN IF NOT EXISTS registration_renewal_date DATE;
       `);
 
+      // Add tagline column if it doesn't exist
+      await database.query(`
+        ALTER TABLE vet_hospitals
+          ADD COLUMN IF NOT EXISTS tagline VARCHAR(500);
+      `);
+
       // hospital_documents table
       await database.query(`
         CREATE TABLE IF NOT EXISTS hospital_documents (

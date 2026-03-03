@@ -73,6 +73,8 @@ const VetHospitals = lazy(() => import('./pages/VetHospitals'))
 const VetHospitalProfile = lazy(() => import('./pages/VetHospitalProfile'))
 const VetHospitalManage = lazy(() => import('./pages/VetHospitalManage'))
 const VetHospitalAdmin = lazy(() => import('./pages/admin/VetHospitalAdmin'))
+const HospitalBooking = lazy(() => import('./pages/HospitalBooking'))
+const AcceptInvite = lazy(() => import('./pages/AcceptInvite'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -170,6 +172,7 @@ function AppRoutes() {
           <Register onSwitchToLogin={() => navigate('/login')} onGoHome={() => navigate('/')} />
         </PublicOnlyRoute>
       } />
+      <Route path="/accept-invite" element={<AcceptInvite />} />
 
       {/* Protected pages (inside AppLayout) */}
       <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
@@ -222,6 +225,7 @@ function AppRoutes() {
       <Route path="/vet-hospitals" element={<RoleRoute path="/vet-hospitals"><AppLayout><VetHospitals /></AppLayout></RoleRoute>} />
       <Route path="/vet-hospitals/manage" element={<RoleRoute path="/vet-hospitals/manage"><AppLayout><VetHospitalManage /></AppLayout></RoleRoute>} />
       <Route path="/vet-hospitals/:id" element={<ProtectedRoute><AppLayout><VetHospitalProfile /></AppLayout></ProtectedRoute>} />
+      <Route path="/vet-hospitals/:id/book" element={<ProtectedRoute><AppLayout><HospitalBooking /></AppLayout></ProtectedRoute>} />
       <Route path="/admin/vet-hospitals" element={<RoleRoute path="/admin/vet-hospitals"><AppLayout><VetHospitalAdmin /></AppLayout></RoleRoute>} />
 
       {/* ── Doctor/Vet Module ── */}

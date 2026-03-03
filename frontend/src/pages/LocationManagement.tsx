@@ -153,7 +153,7 @@ const LocationManagement: React.FC = () => {
       </div>
 
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && !showForm && <div className="alert alert-error">{error}</div>}
 
       <div className="filters-bar">
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input" style={{ maxWidth: '350px' }}>

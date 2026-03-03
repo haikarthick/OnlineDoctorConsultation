@@ -74,10 +74,10 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 export const validateBody = (schema: any) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { error, value } = schema.validate(req.body, { abortEarly: false });
+      const { error, value } = schema.validate(req.body, { abortEarly: false, stripUnknown: true });
       if (error) {
         const messages = error.details.map((d: any) => d.message).join(', ');
-        return res.status(400).json({ error: messages });
+        return res.status(400).json({ message: messages });
       }
       req.body = value;
       next();

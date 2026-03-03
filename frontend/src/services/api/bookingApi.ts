@@ -1,7 +1,7 @@
 import { client } from './client'
 
 export async function createBooking(data: {
-  veterinarianId: string; animalId?: string; scheduledDate: string;
+  veterinarianId: string; animalId?: string; hospitalId?: string; scheduledDate: string;
   timeSlotStart: string; timeSlotEnd: string; bookingType: string;
   priority?: string; reasonForVisit: string; symptoms?: string; notes?: string
 }) {

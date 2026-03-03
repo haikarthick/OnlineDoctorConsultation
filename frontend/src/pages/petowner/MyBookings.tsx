@@ -19,6 +19,7 @@ const MyBookings: React.FC<MyBookingsProps> = ({ onNavigate }) => {
     show: false, bookingId: '', reason: ''
   })
   const [cancelError, setCancelError] = useState('')
+  const [rescheduleError, setRescheduleError] = useState('')
 
   // Reschedule state
   const [rescheduleTarget, setRescheduleTarget] = useState<Booking | null>(null)
@@ -103,6 +104,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
 
   const handleRescheduleSubmit = async () => {
     if (!rescheduleTarget || !rescheduleDate || !rescheduleSelectedSlot) return
+    setRescheduleError('')
     try {
       setRescheduleSubmitting(true)
       await apiService.rescheduleBooking(rescheduleTarget.id, {
@@ -110,10 +112,11 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
         timeSlotStart: rescheduleSelectedSlot.startTime,
         timeSlotEnd: rescheduleSelectedSlot.endTime
       })
+      setRescheduleError('')
       setRescheduleTarget(null)
       loadBookings()
     } catch (err: any) {
-      setCancelError(err?.response?.data?.error?.message || 'Failed to reschedule')
+      setRescheduleError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to reschedule')
     } finally { setRescheduleSubmitting(false) }
   }
 
@@ -330,15 +333,21 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
           justifyContent: 'center', zIndex: 1000
-        }} onClick={() => setRescheduleTarget(null)}>
+        }} onClick={() => { setRescheduleTarget(null); setRescheduleError('') }}>
           <div style={{
             background: 'white', borderRadius: 12, padding: 24, width: '90%',
             maxWidth: 480, maxHeight: '80vh', overflowY: 'auto'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ margin: 0 }}>Reschedule Appointment</h2>
-              <button onClick={() => setRescheduleTarget(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <button onClick={() => { setRescheduleTarget(null); setRescheduleError('') }} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
+
+            {rescheduleError && (
+              <div style={{ padding: '10px 14px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 16 }}>
+                ⚠ {rescheduleError}
+              </div>
+            )}
 
             <div style={{ padding: '10px 14px', background: '#fef3c7', color: '#92400e', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
               ⚠️ Your appointment on <strong>{rescheduleTarget.scheduledDate}</strong> at{' '}
@@ -397,7 +406,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-              <button className="btn btn-outline" onClick={() => setRescheduleTarget(null)}>Cancel</button>
+              <button className="btn btn-outline" onClick={() => { setRescheduleTarget(null); setRescheduleError('') }}>Cancel</button>
               <button
                 className="btn btn-primary"
                 disabled={!rescheduleSelectedSlot || rescheduleSubmitting}

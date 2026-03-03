@@ -23,6 +23,9 @@ const VetHospitalAdmin: React.FC = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
+  const [adminTab, setAdminTab] = useState<'hospitals' | 'documents'>('hospitals')
+  const [pendingHospitals, setPendingHospitals] = useState<any[]>([])
+  const [pendingLoading, setPendingLoading] = useState(false)
 
   const loadData = async () => {
     setLoading(true)
@@ -43,6 +46,16 @@ const VetHospitalAdmin: React.FC = () => {
   }
 
   useEffect(() => { loadData() }, [search, typeFilter, verifiedFilter])
+
+  useEffect(() => {
+    if (adminTab === 'documents' && pendingHospitals.length === 0 && !pendingLoading) {
+      setPendingLoading(true)
+      vetHospitalApi.listPendingVerification({ limit: 50 })
+        .then(data => setPendingHospitals(data?.hospitals || data || []))
+        .catch(() => {})
+        .finally(() => setPendingLoading(false))
+    }
+  }, [adminTab])
 
   const flash = (msg: string, isErr = false) => {
     if (isErr) { setError(msg); setTimeout(() => setError(''), 4000) }
@@ -90,6 +103,17 @@ const VetHospitalAdmin: React.FC = () => {
         </div>
       )}
 
+      {/* Admin Tabs */}
+      <div className="vh-profile-tabs" style={{ marginBottom: '1.25rem' }}>
+        <button className={`vh-tab${adminTab === 'hospitals' ? ' active' : ''}`} onClick={() => setAdminTab('hospitals')}>
+          🏥 Hospitals ({hospitals.length})
+        </button>
+        <button className={`vh-tab${adminTab === 'documents' ? ' active' : ''}`} onClick={() => setAdminTab('documents')}>
+          📄 Document Review {pendingHospitals.length > 0 ? `(${pendingHospitals.length})` : ''}
+        </button>
+      </div>
+
+      {adminTab === 'hospitals' && (<>
       {/* Filters */}
       <div className="vh-filters" style={{ marginBottom: '1.25rem' }}>
         <div className="vh-search-row">
@@ -177,6 +201,46 @@ const VetHospitalAdmin: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      </>)}
+
+      {/* ── Document Review Tab ── */}
+      {adminTab === 'documents' && (
+        <div>
+          <h3 style={{ margin: '0 0 1rem' }}>Hospitals with Pending Document Reviews</h3>
+          {pendingLoading ? (
+            <div className="loading-container"><div className="loading-spinner" /></div>
+          ) : pendingHospitals.length === 0 ? (
+            <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '.5rem' }}>✅</div>
+              <p>No pending document reviews! All hospitals are up to date.</p>
+            </div>
+          ) : (
+            <div className="doc-cards-grid">
+              {pendingHospitals.map((h: any) => (
+                <div key={h.id} className="doc-card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/vet-hospitals/${h.id}`)}>
+                  <div className="doc-card-top">
+                    <div>
+                      <div className="doc-type-label">{h.name}</div>
+                      <div className="doc-expiry-hint">{h.city || ''}{h.state ? `, ${h.state}` : ''}</div>
+                    </div>
+                    <span className="doc-status-badge pending_review">
+                      {h.pending_docs || h.pendingDocs || 0} pending
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap', marginTop: '.4rem' }}>
+                    <span className="dac-item approved">{h.approved_docs || h.approvedDocs || 0} Approved</span>
+                    <span className="dac-item rejected">{h.rejected_docs || h.rejectedDocs || 0} Rejected</span>
+                    <span className="dac-item missing">{h.missing_docs || h.missingDocs || 0} Missing</span>
+                  </div>
+                  <div style={{ marginTop: '.5rem', textAlign: 'right' }}>
+                    <span style={{ fontSize: '.82rem', color: '#2563eb', fontWeight: 600 }}>Review Documents →</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

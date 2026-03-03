@@ -26,6 +26,8 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
     isAvailable: true
   })
   const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState('')
+  const [pageMsg, setPageMsg] = useState<{ text: string; isError: boolean } | null>(null)
 
   useEffect(() => {
     loadSchedules()
@@ -46,6 +48,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
     e.preventDefault()
     try {
       setSubmitting(true)
+      setFormError('')
       if (editingId) {
         await apiService.updateSchedule(editingId, form)
       } else {
@@ -55,8 +58,11 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       setEditingId(null)
       resetForm()
       loadSchedules()
-    } catch (err) {
-} finally {
+      setPageMsg({ text: editingId ? 'Schedule updated ✓' : 'Schedule created ✓', isError: false })
+      setTimeout(() => setPageMsg(null), 3000)
+    } catch (err: any) {
+      setFormError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save schedule')
+    } finally {
       setSubmitting(false)
     }
   }
@@ -70,6 +76,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       isAvailable: sched.isAvailable
     })
     setEditingId(sched.id)
+    setFormError('')
     setShowForm(true)
   }
 
@@ -78,8 +85,12 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
     try {
       await apiService.deleteSchedule(id)
       loadSchedules()
-    } catch (err) {
-}
+      setPageMsg({ text: 'Schedule deleted', isError: false })
+      setTimeout(() => setPageMsg(null), 3000)
+    } catch (err: any) {
+      setPageMsg({ text: err?.response?.data?.message || 'Failed to delete schedule', isError: true })
+      setTimeout(() => setPageMsg(null), 4000)
+    }
   }
 
   const resetForm = () => {
@@ -104,21 +115,28 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           <p className="page-subtitle">Set your availability for patient bookings</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-primary" onClick={() => { resetForm(); setEditingId(null); setShowForm(true) }}>
+          <button className="btn btn-primary" onClick={() => { resetForm(); setEditingId(null); setFormError(''); setShowForm(true) }}>
             + Add Time Slot
           </button>
         </div>
       </div>
 
+      {pageMsg && (
+        <div className={`modal-alert ${pageMsg.isError ? 'error' : 'success'}`} style={{ marginBottom: 16 }}>
+          {pageMsg.text}
+        </div>
+      )}
+
       {/* Schedule Form Modal */}
       {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
+        <div className="modal-overlay" onClick={() => { setShowForm(false); setFormError('') }}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{editingId ? 'Edit Schedule' : 'Add Schedule'}</h2>
-              <button className="modal-close" onClick={() => setShowForm(false)}>✕</button>
+              <button className="modal-close" onClick={() => { setShowForm(false); setFormError('') }}>✕</button>
             </div>
             <div className="modal-body">
+              {formError && <div className="modal-alert error" style={{ marginBottom: 16 }}>{formError}</div>}
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label className="form-label">Day of Week</label>
@@ -153,7 +171,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   </label>
                 </div>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowForm(false)}>Cancel</button>
+                  <button type="button" className="btn btn-outline" onClick={() => { setShowForm(false); setFormError('') }}>Cancel</button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>
                     {submitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
                   </button>

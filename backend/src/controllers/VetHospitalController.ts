@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import VetHospitalService from '../services/VetHospitalService';
+import BookingService from '../services/BookingService';
 import { ValidationError, ForbiddenError, NotFoundError } from '../utils/errors';
 
 class VetHospitalController {
@@ -156,6 +157,57 @@ class VetHospitalController {
     await this.ensureHospitalAccess(req.params.id, req.userId!, req.userRole!);
     await VetHospitalService.deleteService(req.params.serviceId);
     res.json({ success: true, message: 'Service removed' });
+  }
+
+  // ─── Hospital Bookings ─────────────────────────────────────
+
+  async listHospitalBookings(req: AuthRequest, res: Response): Promise<void> {
+    await this.ensureHospitalAccess(req.params.id, req.userId!, req.userRole!);
+    const { limit, offset, status } = req.query as any;
+    const result = await BookingService.listHospitalBookings(req.params.id, {
+      limit: parseInt(limit) || 20,
+      offset: parseInt(offset) || 0,
+      status: status || undefined,
+    });
+    res.json({ success: true, data: result });
+  }
+
+  // ─── Doctor Invites ────────────────────────────────────────
+
+  async inviteDoctor(req: AuthRequest, res: Response): Promise<void> {
+    await this.ensureHospitalAccess(req.params.id, req.userId!, req.userRole!);
+    const { email } = req.body;
+    if (!email) throw new ValidationError('email is required');
+    const invite = await VetHospitalService.inviteDoctor(req.params.id, req.body, req.userId!);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.status(201).json({ success: true, data: { ...invite, inviteUrl: `${frontendUrl}/accept-invite?token=${invite.invite_token}` } });
+  }
+
+  async listInvites(req: AuthRequest, res: Response): Promise<void> {
+    await this.ensureHospitalAccess(req.params.id, req.userId!, req.userRole!);
+    const invites = await VetHospitalService.listInvites(req.params.id);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const enriched = invites.map(inv => ({ ...inv, inviteUrl: inv.status === 'pending' ? `${frontendUrl}/accept-invite?token=${inv.invite_token}` : undefined }));
+    res.json({ success: true, data: enriched });
+  }
+
+  async revokeInvite(req: AuthRequest, res: Response): Promise<void> {
+    await this.ensureHospitalAccess(req.params.id, req.userId!, req.userRole!);
+    await VetHospitalService.revokeInvite(req.params.id, req.params.inviteId);
+    res.json({ success: true, message: 'Invite revoked' });
+  }
+
+  async getInviteByToken(req: AuthRequest, res: Response): Promise<void> {
+    const invite = await VetHospitalService.getInviteByToken(req.params.token);
+    res.json({ success: true, data: invite });
+  }
+
+  async acceptInvite(req: AuthRequest, res: Response): Promise<void> {
+    const { token, password } = req.body;
+    if (!token || !password) throw new ValidationError('token and password are required');
+    if (password.length < 8) throw new ValidationError('Password must be at least 8 characters');
+    const result = await VetHospitalService.acceptInvite(token, password);
+    res.json({ success: true, data: result });
   }
 
   // ─── Access Guards ─────────────────────────────────────────

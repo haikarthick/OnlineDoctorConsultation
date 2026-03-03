@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
@@ -64,11 +64,13 @@ const Consultations: React.FC = () => {
   const [rescheduleSelectedSlot, setRescheduleSelectedSlot] = useState<TimeSlot | null>(null)
   const [rescheduleSlotsLoading, setRescheduleSlotsLoading] = useState(false)
   const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false)
+  const [rescheduleError, setRescheduleError] = useState('')
 
   // Cancel modal state
   const [cancelModal, setCancelModal] = useState<{ show: boolean; bookingId: string; reason: string }>({
     show: false, bookingId: '', reason: ''
   })
+  const [cancelError, setCancelError] = useState('')
 
   // Action Log modal state
   const [actionLogBookingId, setActionLogBookingId] = useState<string | null>(null)
@@ -78,6 +80,15 @@ const Consultations: React.FC = () => {
   const isVet = user?.role === 'veterinarian'
   const isPetOwner = user?.role === 'pet_owner' || user?.role === 'farmer'
   const isAdmin = user?.role === 'admin'
+
+  const [searchParams] = useSearchParams()
+  // Sync tab and status filter from URL whenever navigation occurs
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    const status = searchParams.get('status') || ''
+    setActiveTab(tab === 'consultations' ? 'consultations' : 'bookings')
+    setStatusFilter(status)
+  }, [searchParams])
 
   const actionLabel = (action: string): string => {
     const map: Record<string, string> = {
@@ -131,9 +142,10 @@ const Consultations: React.FC = () => {
     try {
       await apiService.cancelBooking(bookingId, cancelModal.reason.trim())
       setCancelModal({ show: false, bookingId: '', reason: '' })
+      setCancelError('')
       loadData()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to cancel booking')
+      setCancelError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to cancel booking')
     }
   }
 
@@ -143,6 +155,7 @@ const Consultations: React.FC = () => {
     setRescheduleDate('')
     setRescheduleSlots([])
     setRescheduleSelectedSlot(null)
+    setRescheduleError('')
   }
 
   const loadRescheduleSlots = async (date: string) => {
@@ -170,9 +183,10 @@ const Consultations: React.FC = () => {
         timeSlotEnd: rescheduleSelectedSlot.endTime
       })
       setRescheduleBooking(null)
+      setRescheduleError('')
       loadData()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to reschedule booking')
+      setRescheduleError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to reschedule booking')
     } finally {
       setRescheduleSubmitting(false)
     }
@@ -466,14 +480,14 @@ const Consultations: React.FC = () => {
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999
-        }} onClick={() => setRescheduleBooking(null)}>
+        }} onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}>
           <div style={{
             background: 'white', borderRadius: 16, padding: 32, width: '95%', maxWidth: 520,
             maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h2 style={{ margin: 0 }}>🔄 Reschedule Appointment</h2>
-              <button onClick={() => setRescheduleBooking(null)}
+              <button onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
                 style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
@@ -537,10 +551,17 @@ const Consultations: React.FC = () => {
               </div>
             )}
 
+            {/* Error banner */}
+            {rescheduleError && (
+              <div style={{ padding: '10px 14px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 12 }}>
+                ⚠ {rescheduleError}
+              </div>
+            )}
+
             {/* Confirm reschedule */}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <button
-                onClick={() => setRescheduleBooking(null)}
+                onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
                 style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontWeight: 500 }}
               >Cancel</button>
               <button
@@ -641,14 +662,14 @@ const Consultations: React.FC = () => {
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999
-        }} onClick={() => setCancelModal({ show: false, bookingId: '', reason: '' })}>
+        }} onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}>
           <div style={{
             background: 'white', borderRadius: 12, padding: 24, width: '90%', maxWidth: 440,
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ margin: 0, fontSize: 18 }}>❌ Cancel Booking</h2>
-              <button onClick={() => setCancelModal({ show: false, bookingId: '', reason: '' })}
+              <button onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
                 style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
             <div style={{ background: '#fef2f2', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13, color: '#991b1b' }}>
@@ -663,9 +684,14 @@ const Consultations: React.FC = () => {
                 style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, minHeight: 80, resize: 'vertical', boxSizing: 'border-box' }}
               />
             </div>
+            {cancelError && (
+              <div style={{ padding: '10px 14px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 12 }}>
+                ⚠ {cancelError}
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <button
-                onClick={() => setCancelModal({ show: false, bookingId: '', reason: '' })}
+                onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
                 style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontWeight: 500 }}
               >Keep Booking</button>
               <button

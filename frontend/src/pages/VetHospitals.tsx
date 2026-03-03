@@ -133,7 +133,7 @@ const VetHospitals: React.FC = () => {
       setShowCreateModal(false)
       navigate(`/vet-hospitals/${hospital.id}/manage`)
     } catch (err: any) {
-      setCreateError(err?.response?.data?.message || 'Failed to create hospital')
+      setCreateError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to create hospital')
     } finally { setCreateLoading(false) }
   }
 

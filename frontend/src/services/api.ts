@@ -140,7 +140,7 @@ class ApiService {
   // ─── Bookings ─────────────────────────────────────────────
   async createBooking(data: {
     veterinarianId: string; animalId?: string; enterpriseId?: string; groupId?: string;
-    scheduledDate: string;
+    hospitalId?: string; scheduledDate: string;
     timeSlotStart: string; timeSlotEnd: string; bookingType: string;
     priority?: string; reasonForVisit: string; symptoms?: string; notes?: string
   }) {

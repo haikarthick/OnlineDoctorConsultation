@@ -1591,6 +1591,7 @@ export interface HospitalAdminStats {
 
 export interface CreateHospitalData {
   name: string
+  tagline?: string
   hospitalType: HospitalType
   registrationNumber?: string
   accreditationBody?: string

@@ -57,6 +57,7 @@ const MedicalRecords: React.FC = () => {
   const [showModal, setShowModal] = useState<string | null>(null)
   const [modalData, setModalData] = useState<any>({})
   const [saving, setSaving] = useState(false)
+  const [modalError, setModalError] = useState('')
   const [detailRecord, setDetailRecord] = useState<any>(null)
 
   const fmtDate = useCallback((d: string) => {
@@ -199,6 +200,7 @@ const MedicalRecords: React.FC = () => {
 
   const handleSaveRecord = async () => {
     setSaving(true)
+    setModalError('')
     try {
       await apiService.createMedicalRecord({
         ...modalData,
@@ -208,56 +210,61 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadRecords(); loadStats()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to save record')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save record')
     } finally { setSaving(false) }
   }
 
   const handleSaveVaccination = async () => {
     setSaving(true)
+    setModalError('')
     try {
       await apiService.createVaccination({ ...modalData, animalId: selectedAnimal })
       setShowModal(null); setModalData({})
       loadVaccinations()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to save vaccination')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save vaccination')
     } finally { setSaving(false) }
   }
 
   const handleSaveWeight = async () => {
     setSaving(true)
+    setModalError('')
     try {
       await apiService.addWeight({ animalId: selectedAnimal, weight: parseFloat(modalData.weight), unit: modalData.unit || 'kg', notes: modalData.notes })
       setShowModal(null); setModalData({})
       loadWeightHistory()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to save weight')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save weight')
     } finally { setSaving(false) }
   }
 
   const handleSaveAllergy = async () => {
     setSaving(true)
+    setModalError('')
     try {
       await apiService.createAllergy({ ...modalData, animalId: selectedAnimal })
       setShowModal(null); setModalData({})
       loadAllergies()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to save allergy')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save allergy')
     } finally { setSaving(false) }
   }
 
   const handleSaveLabResult = async () => {
     setSaving(true)
+    setModalError('')
     try {
       await apiService.createLabResult({ ...modalData, animalId: selectedAnimal })
       setShowModal(null); setModalData({})
       loadLabResults()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to save lab result')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save lab result')
     } finally { setSaving(false) }
   }
 
   // ═══ UI HELPERS ═══════════════════════════════════════════
 
+  const closeModal = () => { setShowModal(null); setModalData({}); setModalError('') }
   const getRecordTypeInfo = (type: string) => RECORD_TYPES.find(r => r.value === type) || RECORD_TYPES[7]
   const getSeverityInfo = (sev: string) => SEVERITY_OPTIONS.find(s => s.value === sev) || SEVERITY_OPTIONS[1]
   const selectedAnimalData = animals.find((a: any) => a.id === selectedAnimal)
@@ -843,9 +850,15 @@ const MedicalRecords: React.FC = () => {
       {/* ═══ CREATE MODALS ═══════════════════════════════════ */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-          onClick={() => { setShowModal(null); setModalData({}) }}>
+          onClick={closeModal}>
           <div style={{ background: '#fff', borderRadius: 12, maxWidth: 600, width: '100%', maxHeight: '90vh', overflow: 'auto', padding: 24 }}
             onClick={(e) => e.stopPropagation()}>
+            {modalError && (
+              <div style={{ padding: '10px 14px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>⚠ {modalError}</span>
+                <button onClick={() => setModalError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#b91c1c', padding: 0, marginLeft: 8 }}>✕</button>
+              </div>
+            )}
 
             {/* Medical Record Modal */}
             {showModal === 'record' && (
@@ -866,7 +879,7 @@ const MedicalRecords: React.FC = () => {
                 <ModalField label="Follow-up Date (optional)">
                   <input type="date" value={modalData.followUpDate || ''} onChange={(e) => setModalData({ ...modalData, followUpDate: e.target.value })} style={inputStyle} />
                 </ModalField>
-                <ModalActions onCancel={() => { setShowModal(null); setModalData({}) }} onSave={handleSaveRecord} saving={saving}
+                <ModalActions onCancel={closeModal} onSave={handleSaveRecord} saving={saving}
                   disabled={!modalData.recordType || !modalData.title || !modalData.content} />
               </>
             )}
@@ -884,7 +897,7 @@ const MedicalRecords: React.FC = () => {
                 <ModalField label="Manufacturer"><input value={modalData.manufacturer || ''} onChange={(e) => setModalData({ ...modalData, manufacturer: e.target.value })} style={inputStyle} /></ModalField>
                 <ModalField label="Certificate Number"><input value={modalData.certificateNumber || ''} onChange={(e) => setModalData({ ...modalData, certificateNumber: e.target.value })} style={inputStyle} /></ModalField>
                 <ModalField label="Reaction Notes"><textarea value={modalData.reactionNotes || ''} onChange={(e) => setModalData({ ...modalData, reactionNotes: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder="Any adverse reactions..." /></ModalField>
-                <ModalActions onCancel={() => { setShowModal(null); setModalData({}) }} onSave={handleSaveVaccination} saving={saving}
+                <ModalActions onCancel={closeModal} onSave={handleSaveVaccination} saving={saving}
                   disabled={!modalData.vaccineName || !modalData.dateAdministered} />
               </>
             )}
@@ -900,7 +913,7 @@ const MedicalRecords: React.FC = () => {
                   </select>
                 </ModalField>
                 <ModalField label="Notes"><textarea value={modalData.notes || ''} onChange={(e) => setModalData({ ...modalData, notes: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder="Any notes..." /></ModalField>
-                <ModalActions onCancel={() => { setShowModal(null); setModalData({}) }} onSave={handleSaveWeight} saving={saving}
+                <ModalActions onCancel={closeModal} onSave={handleSaveWeight} saving={saving}
                   disabled={!modalData.weight} />
               </>
             )}
@@ -918,7 +931,7 @@ const MedicalRecords: React.FC = () => {
                 </ModalField>
                 <ModalField label="Date Identified"><input type="date" value={modalData.identifiedDate || ''} onChange={(e) => setModalData({ ...modalData, identifiedDate: e.target.value })} style={inputStyle} /></ModalField>
                 <ModalField label="Notes"><textarea value={modalData.notes || ''} onChange={(e) => setModalData({ ...modalData, notes: e.target.value })} style={{ ...inputStyle, height: 60 }} /></ModalField>
-                <ModalActions onCancel={() => { setShowModal(null); setModalData({}) }} onSave={handleSaveAllergy} saving={saving}
+                <ModalActions onCancel={closeModal} onSave={handleSaveAllergy} saving={saving}
                   disabled={!modalData.allergen} />
               </>
             )}
@@ -947,7 +960,7 @@ const MedicalRecords: React.FC = () => {
                 </ModalField>
                 <ModalField label="Interpretation"><textarea value={modalData.interpretation || ''} onChange={(e) => setModalData({ ...modalData, interpretation: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder="Clinical interpretation..." /></ModalField>
                 <ModalField label="Notes"><textarea value={modalData.notes || ''} onChange={(e) => setModalData({ ...modalData, notes: e.target.value })} style={{ ...inputStyle, height: 60 }} /></ModalField>
-                <ModalActions onCancel={() => { setShowModal(null); setModalData({}) }} onSave={handleSaveLabResult} saving={saving}
+                <ModalActions onCancel={closeModal} onSave={handleSaveLabResult} saving={saving}
                   disabled={!modalData.testName || !modalData.testDate} />
               </>
             )}

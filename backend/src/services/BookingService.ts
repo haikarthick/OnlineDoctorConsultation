@@ -59,23 +59,24 @@ class BookingService {
     }
 
     const result = await database.query(
-      `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, enterprise_id, group_id, scheduled_date, 
+      `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, enterprise_id, group_id, hospital_id, scheduled_date, 
        time_slot_start, time_slot_end, status, booking_type, priority, reason_for_visit, 
        symptoms, notes, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
        RETURNING id, pet_owner_id as "petOwnerId", veterinarian_id as "veterinarianId", 
        animal_id as "animalId", enterprise_id as "enterpriseId", group_id as "groupId",
+       hospital_id as "hospitalId",
        scheduled_date as "scheduledDate", 
        time_slot_start as "timeSlotStart", time_slot_end as "timeSlotEnd",
        status, booking_type as "bookingType", priority, reason_for_visit as "reasonForVisit",
        symptoms, notes, created_at as "createdAt", updated_at as "updatedAt"`,
-      [id, petOwnerId, data.veterinarianId, data.animalId || null, data.enterpriseId || null, data.groupId || null, data.scheduledDate,
+      [id, petOwnerId, data.veterinarianId, data.animalId || null, data.enterpriseId || null, data.groupId || null, data.hospitalId || null, data.scheduledDate,
        data.timeSlotStart, data.timeSlotEnd, 'pending', data.bookingType,
        data.priority || 'normal', data.reasonForVisit, data.symptoms || null,
        data.notes || null, now, now]
     );
 
-    logger.info('Booking created', { bookingId: id, petOwnerId, vetId: data.veterinarianId });
+    logger.info('Booking created', { bookingId: id, petOwnerId, vetId: data.veterinarianId, hospitalId: data.hospitalId });
     return result.rows[0];
   }
 
@@ -83,7 +84,7 @@ class BookingService {
     const result = await database.query(
       `SELECT id, pet_owner_id as "petOwnerId", veterinarian_id as "veterinarianId",
        animal_id as "animalId", enterprise_id as "enterpriseId", group_id as "groupId",
-       consultation_id as "consultationId",
+       hospital_id as "hospitalId", consultation_id as "consultationId",
        scheduled_date as "scheduledDate", time_slot_start as "timeSlotStart",
        time_slot_end as "timeSlotEnd", status, booking_type as "bookingType",
        priority, reason_for_visit as "reasonForVisit", symptoms, notes,
@@ -131,7 +132,7 @@ class BookingService {
     const result = await database.query(
       `SELECT b.id, b.pet_owner_id as "petOwnerId", b.veterinarian_id as "veterinarianId",
        b.animal_id as "animalId", b.enterprise_id as "enterpriseId", b.group_id as "groupId",
-       b.consultation_id as "consultationId",
+       b.hospital_id as "hospitalId", b.consultation_id as "consultationId",
        b.scheduled_date as "scheduledDate", b.time_slot_start as "timeSlotStart",
        b.time_slot_end as "timeSlotEnd", b.status, b.booking_type as "bookingType",
        b.priority, b.reason_for_visit as "reasonForVisit", b.symptoms, b.notes,
@@ -141,13 +142,15 @@ class BookingService {
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.unique_id as "animalUniqueId",
        e.name as "enterpriseName", e.enterprise_type as "enterpriseType",
-       ag.name as "groupName", ag.group_type as "groupType"
+       ag.name as "groupName", ag.group_type as "groupType",
+       vh.name as "hospitalName"
        FROM bookings b
        LEFT JOIN users po ON po.id = b.pet_owner_id
        LEFT JOIN users v ON v.id = b.veterinarian_id
        LEFT JOIN animals a ON a.id = b.animal_id
        LEFT JOIN enterprises e ON e.id = b.enterprise_id
        LEFT JOIN animal_groups ag ON ag.id = b.group_id
+       LEFT JOIN vet_hospitals vh ON vh.id = b.hospital_id
        ${whereClause}
        ORDER BY b.scheduled_date DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
       [...queryParams, limit, offset]
@@ -249,12 +252,13 @@ class BookingService {
     const confirmedAt = initiatorRole === 'veterinarian' ? now : null;
 
     const result = await database.query(
-      `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, enterprise_id, group_id, scheduled_date,
+      `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, enterprise_id, group_id, hospital_id, scheduled_date,
        time_slot_start, time_slot_end, status, booking_type, priority, reason_for_visit,
        symptoms, notes, rescheduled_from, confirmed_at, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
        RETURNING id, pet_owner_id as "petOwnerId", veterinarian_id as "veterinarianId",
        animal_id as "animalId", enterprise_id as "enterpriseId", group_id as "groupId",
+       hospital_id as "hospitalId",
        scheduled_date as "scheduledDate",
        time_slot_start as "timeSlotStart", time_slot_end as "timeSlotEnd",
        status, booking_type as "bookingType", priority, reason_for_visit as "reasonForVisit",
@@ -262,6 +266,7 @@ class BookingService {
        created_at as "createdAt", updated_at as "updatedAt"`,
       [newId, oldBooking.petOwnerId, oldBooking.veterinarianId, oldBooking.animalId || null,
        (oldBooking as any).enterpriseId || null, (oldBooking as any).groupId || null,
+       (oldBooking as any).hospitalId || null,
        newDate, newStart, newEnd, newStatus, oldBooking.bookingType || 'video_call',
        oldBooking.priority || 'normal', oldBooking.reasonForVisit || null,
        oldBooking.symptoms || null, oldBooking.notes || null, id, confirmedAt, now, now]
@@ -269,6 +274,56 @@ class BookingService {
 
     logger.info('Booking rescheduled', { oldBookingId: id, newBookingId: newId, newStatus, initiatorRole });
     return result.rows[0];
+  }
+
+  // ─── Hospital-specific bookings listing ──────────────────────
+  async listHospitalBookings(hospitalId: string, params: {
+    limit?: number; offset?: number; status?: string;
+  }): Promise<PaginatedResponse<Booking>> {
+    await this.markMissedBookings();
+    const limit = params.limit || 20;
+    const offset = params.offset || 0;
+    const conditions: string[] = [];
+    const qp: any[] = [];
+
+    // Bookings explicitly linked to this hospital, OR bookings for doctors who belong to this hospital
+    qp.push(hospitalId);
+    conditions.push(`(b.hospital_id = $1 OR b.veterinarian_id IN (SELECT doctor_id FROM hospital_doctors WHERE hospital_id = $1 AND is_active = true))`);
+
+    if (params.status) {
+      qp.push(params.status);
+      conditions.push(`b.status = $${qp.length}`);
+    }
+
+    const where = `WHERE ${conditions.join(' AND ')}`;
+
+    const countResult = await database.query(`SELECT COUNT(*) as count FROM bookings b ${where}`, qp);
+    const result = await database.query(
+      `SELECT b.id, b.pet_owner_id as "petOwnerId", b.veterinarian_id as "veterinarianId",
+       b.animal_id as "animalId", b.hospital_id as "hospitalId",
+       b.scheduled_date as "scheduledDate", b.time_slot_start as "timeSlotStart",
+       b.time_slot_end as "timeSlotEnd", b.status, b.booking_type as "bookingType",
+       b.priority, b.reason_for_visit as "reasonForVisit", b.symptoms, b.notes,
+       b.created_at as "createdAt", b.updated_at as "updatedAt",
+       CONCAT(po.first_name, ' ', po.last_name) as "petOwnerName",
+       CONCAT('Dr. ', v.first_name, ' ', v.last_name) as "vetName",
+       a.name as "animalName", a.species as "animalSpecies"
+       FROM bookings b
+       LEFT JOIN users po ON po.id = b.pet_owner_id
+       LEFT JOIN users v ON v.id = b.veterinarian_id
+       LEFT JOIN animals a ON a.id = b.animal_id
+       ${where}
+       ORDER BY b.scheduled_date DESC, b.time_slot_start DESC
+       LIMIT $${qp.length + 1} OFFSET $${qp.length + 2}`,
+      [...qp, limit, offset]
+    );
+
+    return {
+      items: result.rows,
+      total: parseInt(countResult.rows[0]?.count || '0', 10),
+      limit, offset,
+      hasMore: result.rows.length === limit,
+    };
   }
 }
 

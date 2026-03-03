@@ -182,6 +182,43 @@ export const vetHospitalApi = {
     const res = await apiClient.get('/vet-hospitals/admin/pending', { params });
     return res.data.data;
   },
+
+  /** List bookings/appointments for a specific hospital */
+  listHospitalBookings: async (hospitalId: string, params?: {
+    limit?: number; offset?: number; status?: string;
+  }): Promise<any> => {
+    const res = await apiClient.get(`/vet-hospitals/${hospitalId}/bookings`, { params });
+    return res.data.data;
+  },
+
+  // ─── Doctor Invites ─────────────────────────────────────────
+
+  inviteDoctor: async (hospitalId: string, data: {
+    email: string; firstName?: string; lastName?: string; phone?: string;
+    hospitalRole?: string; departmentId?: string;
+  }): Promise<any> => {
+    const res = await apiClient.post(`/vet-hospitals/${hospitalId}/invites`, data);
+    return res.data.data;
+  },
+
+  listInvites: async (hospitalId: string): Promise<any[]> => {
+    const res = await apiClient.get(`/vet-hospitals/${hospitalId}/invites`);
+    return res.data.data || [];
+  },
+
+  revokeInvite: async (hospitalId: string, inviteId: string): Promise<void> => {
+    await apiClient.delete(`/vet-hospitals/${hospitalId}/invites/${inviteId}`);
+  },
+
+  getInviteByToken: async (token: string): Promise<any> => {
+    const res = await apiClient.get(`/vet-hospitals/invites/token/${token}`);
+    return res.data.data;
+  },
+
+  acceptInvite: async (token: string, password: string): Promise<any> => {
+    const res = await apiClient.post(`/vet-hospitals/invites/accept`, { token, password });
+    return res.data.data;
+  },
 };
 
 export default vetHospitalApi;

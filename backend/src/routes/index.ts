@@ -547,6 +547,9 @@ router.post('/vet-hospitals', authMiddleware, validateBody(createHospitalSchema)
 router.get('/vet-hospitals', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.listHospitals(req, res)));
 router.get('/vet-hospitals/my', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.listMyHospitals(req, res)));
 router.get('/vet-hospitals/admin/stats', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.getAdminStats(req, res)));
+// Doctor Invite public routes (must come before :id param)
+router.get('/vet-hospitals/invites/token/:token', asyncHandler((req: Request, res: Response) => VetHospitalController.getInviteByToken(req, res)));
+router.post('/vet-hospitals/invites/accept', asyncHandler((req: Request, res: Response) => VetHospitalController.acceptInvite(req, res)));
 router.get('/vet-hospitals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.getHospital(req, res)));
 router.put('/vet-hospitals/:id', authMiddleware, validateBody(updateHospitalSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.updateHospital(req, res)));
 router.delete('/vet-hospitals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.deleteHospital(req, res)));
@@ -567,6 +570,12 @@ router.get('/vet-hospitals/:id/services', authMiddleware, asyncHandler((req: Req
 router.post('/vet-hospitals/:id/services', authMiddleware, validateBody(createHospitalServiceSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.addService(req, res)));
 router.put('/vet-hospitals/:id/services/:serviceId', authMiddleware, validateBody(updateHospitalServiceSchema), asyncHandler((req: Request, res: Response) => VetHospitalController.updateService(req, res)));
 router.delete('/vet-hospitals/:id/services/:serviceId', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.deleteService(req, res)));
+// Hospital Bookings (appointments at this hospital)
+router.get('/vet-hospitals/:id/bookings', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.listHospitalBookings(req, res)));
+// Doctor Invites
+router.post('/vet-hospitals/:id/invites', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.inviteDoctor(req, res)));
+router.get('/vet-hospitals/:id/invites', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.listInvites(req, res)));
+router.delete('/vet-hospitals/:id/invites/:inviteId', authMiddleware, asyncHandler((req: Request, res: Response) => VetHospitalController.revokeInvite(req, res)));
 // Documents (KYC / Compliance)
 router.get('/vet-hospitals/admin/pending', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalDocumentController.listPendingVerification(req, res)));
 router.get('/vet-hospitals/:id/documents', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalDocumentController.listDocuments(req, res)));

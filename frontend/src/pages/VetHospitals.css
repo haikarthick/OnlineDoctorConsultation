@@ -321,3 +321,273 @@
   .vh-form .form-row { grid-template-columns: 1fr; }
   .vh-manage-stats { grid-template-columns: repeat(2,1fr); }
 }
+
+/* ── Vet search autocomplete ─────────────────────────────── */
+.vet-selected-chip {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+  padding: .5rem .75rem; font-size: .9rem; color: #1e40af;
+}
+.vet-chip-clear {
+  background: none; border: none; cursor: pointer;
+  color: #6b7280; font-size: 1rem; padding: 0 0 0 .5rem; line-height: 1;
+}
+.vet-chip-clear:hover { color: #ef4444; }
+.vet-search-dropdown {
+  position: absolute; left: 0; right: 0; top: calc(100% + 2px);
+  background: #fff; border: 1px solid #d1d5db; border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 999;
+  list-style: none; margin: 0; padding: .25rem 0;
+  max-height: 220px; overflow-y: auto;
+}
+.vet-search-dropdown li {
+  display: flex; flex-direction: column; gap: .1rem;
+  padding: .55rem .9rem; cursor: pointer; border-bottom: 1px solid #f3f4f6;
+}
+.vet-search-dropdown li:last-child { border-bottom: none; }
+.vet-search-dropdown li:hover { background: #f0f9ff; }
+.vet-search-dropdown li strong { font-size: .9rem; color: #111827; }
+.vet-search-dropdown li span { font-size: .8rem; color: #6b7280; }
+.vet-search-dropdown li em { font-size: .78rem; color: #059669; font-style: normal; }
+.vet-search-spinner, .vet-search-empty {
+  font-size: .82rem; color: #6b7280; padding: .35rem 0; text-align: center;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Hospital Booking Page  (hb- prefix)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Breadcrumb */
+.hb-breadcrumb {
+  font-size: .85rem; color: var(--text-muted,#666); margin-bottom: 1rem;
+}
+.hb-breadcrumb a { color: var(--primary,#2563eb); text-decoration: none; }
+.hb-breadcrumb a:hover { text-decoration: underline; }
+
+/* Hospital mini header */
+.hb-hospital-header {
+  background: var(--surface,#fff); border-radius: 14px;
+  padding: 1rem 1.25rem; margin-bottom: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.hb-hospital-info {
+  display: flex; align-items: center; gap: 1rem;
+}
+.hb-hospital-logo {
+  width: 52px; height: 52px; border-radius: 12px;
+  object-fit: cover; background: linear-gradient(135deg,#1e3a5f,#2563eb);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: #fff; flex-shrink: 0;
+}
+.hb-hospital-info img.hb-hospital-logo { background: #fff; border: 1px solid var(--border,#e5e7eb); }
+.hb-hospital-info h1 { margin: 0; font-size: 1.3rem; }
+.hb-hospital-meta {
+  display: flex; gap: .6rem; align-items: center; flex-wrap: wrap;
+  font-size: .85rem; color: var(--text-muted,#666); margin-top: .15rem;
+}
+
+/* Step progress bar */
+.hb-steps {
+  display: flex; justify-content: center; gap: 0; margin-bottom: 1.5rem;
+  background: var(--surface,#fff); border-radius: 12px;
+  padding: .75rem 1rem; box-shadow: 0 1px 4px rgba(0,0,0,.07);
+}
+.hb-step {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .4rem .85rem; position: relative; opacity: .5;
+  transition: opacity .2s;
+}
+.hb-step.active { opacity: 1; }
+.hb-step.completed { opacity: .8; }
+.hb-step + .hb-step::before {
+  content: ''; position: absolute; left: -.5rem; top: 50%;
+  width: 1rem; height: 2px; background: var(--border,#d1d5db);
+  transform: translateY(-50%);
+}
+.hb-step.completed + .hb-step::before,
+.hb-step.active + .hb-step::before { background: var(--primary,#2563eb); }
+.hb-step-circle {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; font-weight: 700;
+  background: #e5e7eb; color: #6b7280;
+}
+.hb-step.active .hb-step-circle { background: var(--primary,#2563eb); color: #fff; }
+.hb-step.completed .hb-step-circle { background: #22c55e; color: #fff; }
+.hb-step-label { font-size: .82rem; font-weight: 600; color: #6b7280; white-space: nowrap; }
+.hb-step.active .hb-step-label { color: var(--primary,#2563eb); }
+.hb-step.completed .hb-step-label { color: #16a34a; }
+
+/* Step content card */
+.hb-step-content {
+  background: var(--surface,#fff); border-radius: 14px;
+  padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.hb-step-content h2 {
+  margin: 0 0 1rem; font-size: 1.2rem;
+}
+
+/* Back button */
+.hb-back-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--primary,#2563eb); font-size: .88rem; font-weight: 500;
+  padding: 0; margin-bottom: .75rem; display: inline-block;
+}
+.hb-back-btn:hover { text-decoration: underline; }
+
+/* Doctor selection grid */
+.hb-doctor-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 1rem;
+}
+.hb-doctor-card {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1rem; border-radius: 12px;
+  border: 2px solid var(--border,#e5e7eb);
+  cursor: pointer; transition: border-color .15s, box-shadow .15s;
+  background: var(--surface,#fff);
+}
+.hb-doctor-card:hover { border-color: var(--primary,#2563eb); box-shadow: 0 2px 12px rgba(37,99,235,.12); }
+.hb-doctor-card.selected { border-color: var(--primary,#2563eb); background: #eff6ff; }
+.hb-doc-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #e0e7ff; display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; flex-shrink: 0; overflow: hidden;
+}
+.hb-doc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.hb-doc-info { flex: 1; min-width: 0; }
+.hb-doc-name { font-weight: 700; font-size: .98rem; margin-bottom: .15rem; }
+.hb-doc-role { font-size: .78rem; color: var(--text-muted,#666); text-transform: capitalize; }
+.hb-doc-dept { font-size: .82rem; color: var(--text-muted,#666); margin-top: .15rem; }
+.hb-doc-specs { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
+.hb-doc-fee { font-size: .88rem; font-weight: 700; color: #059669; margin-top: .3rem; }
+.hb-doc-rating { font-size: .82rem; color: #f59e0b; font-weight: 600; margin-top: .2rem; }
+.hb-doc-select-indicator {
+  font-size: 1.2rem; color: var(--border,#d1d5db); transition: color .15s;
+}
+.hb-doctor-card:hover .hb-doc-select-indicator,
+.hb-doctor-card.selected .hb-doc-select-indicator { color: var(--primary,#2563eb); }
+
+/* Department filter */
+.hb-dept-filter { margin-bottom: 1rem; }
+
+/* Doctor banner on datetime step */
+.hb-selected-doctor-banner {
+  display: flex; align-items: center; gap: .75rem;
+  background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+  padding: .65rem 1rem; margin-bottom: 1.25rem; font-size: .9rem;
+}
+.hb-selected-doctor-banner span:first-child { font-size: 1.2rem; flex-shrink: 0; }
+.hb-selected-doctor-banner div { flex: 1; }
+.hb-change-btn {
+  font-size: .82rem; color: var(--primary,#2563eb); border: none;
+  background: none; cursor: pointer; font-weight: 600; white-space: nowrap;
+}
+.hb-change-btn:hover { text-decoration: underline; }
+
+/* Date & time layout */
+.hb-datetime-grid {
+  display: grid; grid-template-columns: 250px 1fr; gap: 1.5rem;
+}
+.hb-date-section .form-label { display: block; margin-bottom: .4rem; font-weight: 600; font-size: .88rem; }
+.hb-slots-section .form-label { display: block; margin-bottom: .4rem; font-weight: 600; font-size: .88rem; }
+.hb-hint { font-size: .85rem; color: var(--text-muted,#888); }
+
+/* Time slots */
+.hb-slot-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: .5rem;
+}
+.hb-slot {
+  padding: .5rem .75rem; border-radius: 8px;
+  border: 1.5px solid var(--border,#d1d5db);
+  background: var(--surface,#fff); cursor: pointer;
+  font-size: .85rem; font-weight: 500; text-align: center;
+  transition: border-color .15s, background .15s;
+}
+.hb-slot:hover { border-color: var(--primary,#2563eb); }
+.hb-slot.selected { background: var(--primary,#2563eb); color: #fff; border-color: var(--primary,#2563eb); }
+
+/* Details form */
+.hb-form { display: flex; flex-direction: column; gap: 1rem; }
+.hb-form-group { display: flex; flex-direction: column; gap: .3rem; }
+.hb-form-group .form-label { font-weight: 600; font-size: .88rem; }
+.hb-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* Booking type cards */
+.hb-type-grid { display: flex; gap: .75rem; flex-wrap: wrap; }
+.hb-type-card {
+  display: flex; flex-direction: column; align-items: center; gap: .3rem;
+  padding: .75rem 1rem; border-radius: 10px;
+  border: 2px solid var(--border,#e5e7eb);
+  cursor: pointer; flex: 1; min-width: 120px; text-align: center;
+  transition: border-color .15s, background .15s;
+}
+.hb-type-card:hover { border-color: var(--primary,#2563eb); }
+.hb-type-card.selected { border-color: var(--primary,#2563eb); background: #eff6ff; }
+.hb-type-icon { font-size: 1.5rem; }
+.hb-type-label { font-size: .88rem; font-weight: 700; }
+.hb-type-desc { font-size: .77rem; color: var(--text-muted,#666); }
+
+/* Step actions */
+.hb-step-actions {
+  display: flex; justify-content: flex-end; gap: .75rem; margin-top: 1.25rem;
+}
+
+/* Confirm card */
+.hb-confirm-card {
+  border: 1.5px solid var(--border,#e5e7eb); border-radius: 12px;
+  overflow: hidden;
+}
+.hb-confirm-section {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border,#f0f0f0);
+}
+.hb-confirm-section:last-child { border-bottom: none; }
+.hb-confirm-section h3 {
+  margin: 0 0 .35rem; font-size: .92rem; color: var(--text-muted,#555);
+}
+.hb-confirm-section p { margin: .15rem 0; font-size: .92rem; }
+.hb-confirm-sub { font-size: .82rem; color: var(--text-muted,#888); }
+.hb-confirm-fee { font-size: .9rem; font-weight: 700; color: #059669; }
+.hb-confirm-note {
+  font-size: .85rem; color: #475569;
+  background: #f8fafc; border-radius: 8px;
+  padding: .65rem 1rem; margin-top: 1rem;
+}
+.hb-confirm-btn { min-width: 180px; }
+
+/* Success */
+.hb-success-card {
+  background: var(--surface,#fff); border-radius: 16px;
+  padding: 2.5rem 2rem; text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,.08);
+  max-width: 500px; margin: 2rem auto;
+}
+.hb-success-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: #22c55e; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; font-weight: 700; margin: 0 auto 1rem;
+}
+.hb-success-card h2 { margin: 0 0 .5rem; font-size: 1.4rem; }
+.hb-success-details {
+  background: #f8fafc; border-radius: 10px; padding: .85rem 1rem;
+  text-align: left; margin: 1rem 0; font-size: .9rem; line-height: 1.8;
+}
+.hb-success-note {
+  font-size: .85rem; color: var(--text-muted,#666); margin-top: .75rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hb-steps { flex-wrap: wrap; justify-content: center; gap: .2rem; }
+  .hb-step-label { display: none; }
+  .hb-datetime-grid { grid-template-columns: 1fr; }
+  .hb-form-row { grid-template-columns: 1fr; }
+  .hb-doctor-grid { grid-template-columns: 1fr; }
+  .hb-type-grid { flex-direction: column; }
+  .hb-hospital-info h1 { font-size: 1.1rem; }
+}
+@media (max-width: 480px) {
+  .hb-step-content { padding: 1rem; }
+  .hb-slot-grid { grid-template-columns: repeat(2,1fr); }
+}

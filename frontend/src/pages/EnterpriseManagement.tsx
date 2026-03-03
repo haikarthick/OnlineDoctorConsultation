@@ -152,7 +152,7 @@ const EnterpriseManagement: React.FC = () => {
       </div>
 
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && !showForm && <div className="alert alert-error">{error}</div>}
 
       {/* Search */}
       <div className="filters-bar">

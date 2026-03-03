@@ -107,9 +107,10 @@ const VetHospitalProfile: React.FC = () => {
           </div>
         </div>
         <div className="vh-hero-actions">
+          <button className="btn-primary" onClick={() => navigate(`/vet-hospitals/${id}/book`)} style={{ fontWeight: 700 }}>📅 Book Appointment</button>
           {hospital.phone && <a href={`tel:${hospital.phone}`} className="btn-secondary" style={{ textDecoration: 'none' }}>📞 Call</a>}
           {hospital.email && <a href={`mailto:${hospital.email}`} className="btn-secondary" style={{ textDecoration: 'none' }}>✉ Email</a>}
-          {canManage && <button className="btn-primary" onClick={() => navigate(`/vet-hospitals/manage`)}>Manage Hospital</button>}
+          {canManage && <button className="btn-secondary" onClick={() => navigate(`/vet-hospitals/manage`)}>⚙ Manage</button>}
         </div>
       </div>
 

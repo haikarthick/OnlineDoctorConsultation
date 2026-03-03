@@ -32,11 +32,14 @@ class HospitalDocumentController {
     let fileUrl: string;
     let fileName: string;
 
-    if (req.file) {
+    // multer .any() populates req.files (array), not req.file
+    const uploadedFile = req.file || (req.files as Express.Multer.File[] | undefined)?.[0];
+
+    if (uploadedFile) {
       // Actual file upload via multipart/form-data
-      const stored = await storage.save(req.file, `hospital-docs/${hospitalId}`);
+      const stored = await storage.save(uploadedFile, `hospital-docs/${hospitalId}`);
       fileUrl = stored.url;
-      fileName = req.file.originalname;
+      fileName = uploadedFile.originalname;
     } else if (req.body.fileUrl) {
       // Allow passing a pre-uploaded URL (e.g. from /api/files/upload)
       fileUrl = req.body.fileUrl;

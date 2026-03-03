@@ -83,6 +83,9 @@ export const updateConsultationSchema = Joi.object({
 export const createBookingSchema = Joi.object({
   veterinarianId: requiredUuid,
   animalId: uuid.optional(),
+  enterpriseId: uuid.optional(),
+  groupId: uuid.optional(),
+  hospitalId: uuid.optional(),
   scheduledDate: Joi.string().required().pattern(/^\d{4}-\d{2}-\d{2}$/).messages({ 'string.pattern.base': 'Date must be YYYY-MM-DD' }),
   timeSlotStart: Joi.string().required().pattern(/^\d{2}:\d{2}/).messages({ 'string.pattern.base': 'Time must be HH:MM format' }),
   timeSlotEnd: Joi.string().required().pattern(/^\d{2}:\d{2}/).messages({ 'string.pattern.base': 'Time must be HH:MM format' }),
@@ -1131,6 +1134,7 @@ const serviceCategoryValues = ['consultation','diagnostics','surgery','vaccinati
 
 export const createHospitalSchema = Joi.object({
   name: Joi.string().min(2).max(255).required().messages({ 'any.required': 'Hospital name is required' }),
+  tagline: Joi.string().max(500).optional().allow('', null),
   hospitalType: Joi.string().valid(...hospitalTypeValues).required().messages({ 'any.required': 'Hospital type is required' }),
   registrationNumber: shortText(100).optional().allow('', null),
   accreditationBody: shortText(100).optional().allow('', null),

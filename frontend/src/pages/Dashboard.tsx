@@ -60,9 +60,12 @@ const Dashboard: React.FC = () => {
       const bookings = bRes.data?.items || (Array.isArray(bRes.data) ? bRes.data : [])
       const consults = cRes.data?.items || (Array.isArray(cRes.data) ? cRes.data : [])
       const animals = aRes.data?.animals || aRes.data?.items || (Array.isArray(aRes.data) ? aRes.data : [])
-      const pending = bookings.filter((b: any) => b.status === 'pending').length
-      const consultationsDone = bookings.filter((b: any) => b.consultationId).length
-      setStats({ bookings: bookings.length, consultations: consultationsDone, animals: animals.length, pending, enterprises: eCount })
+      // Counts aligned to match what each destination page tab shows
+      const activeStatList = ['pending', 'confirmed', 'rescheduled', 'missed']
+      const activeBookingsCount = bookings.filter((b: any) => activeStatList.includes(b.status)).length
+      const historyBookingsCount = bookings.filter((b: any) => ['completed', 'cancelled'].includes(b.status)).length
+      const pendingCount = bookings.filter((b: any) => b.status === 'pending').length
+      setStats({ bookings: activeBookingsCount, consultations: historyBookingsCount, animals: animals.length, pending: pendingCount, enterprises: eCount })
 
       // Vet-specific
       if (hasPermission('dashboard_pending_approvals')) {
@@ -120,8 +123,8 @@ const Dashboard: React.FC = () => {
   // Stat cards — different per role
   const statCards = useMemo(() => {
     const base = [
-      { label: 'Appointments', value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations' },
-      { label: 'Consultations', value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations' },
+      { label: 'Appointments', value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
+      { label: 'Consultation History', value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
     ]
 
     if (isFarmer) {
@@ -129,7 +132,7 @@ const Dashboard: React.FC = () => {
         ...base,
         { label: 'My Animals', value: stats.animals, icon: '🐄', color: '#10b981', path: '/animals' },
         { label: 'Enterprises', value: stats.enterprises || 0, icon: '🏢', color: '#f59e0b', path: '/enterprises' },
-        { label: 'Pending', value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations' },
+        { label: 'Pending', value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
       ]
     }
 
@@ -137,23 +140,25 @@ const Dashboard: React.FC = () => {
       return [
         ...base,
         { label: 'My Pets', value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
-        { label: 'Pending', value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations' },
+        { label: 'Pending', value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
       ]
     }
 
     if (isVeterinarian) {
       return [
-        ...base,
-        { label: 'Patients Seen', value: stats.animals, icon: '🐾', color: '#10b981', path: '/consultations' },
-        { label: 'Pending Approvals', value: stats.pending, icon: '🔔', color: '#ef4444', path: '/consultations' },
+        { label: 'Appointments', value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
+        { label: 'Consultation History', value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
+        { label: 'Patients Seen', value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
+        { label: 'Pending Approvals', value: stats.pending, icon: '🔔', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
       ]
     }
 
     // Admin
     return [
-      ...base,
-      { label: 'Total Animals', value: stats.animals, icon: '🐾', color: '#10b981', path: '/admin/dashboard' },
-      { label: 'Pending', value: stats.pending, icon: '⏳', color: '#ef4444', path: '/admin/consultations' },
+      { label: 'Appointments', value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
+      { label: 'Consultation History', value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
+      { label: 'Total Animals', value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
+      { label: 'Pending', value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
     ]
   }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin])
 
@@ -169,6 +174,7 @@ const Dashboard: React.FC = () => {
         { icon: '💊', label: 'Herd Medical', path: '/herd-medical', color: '#ec4899', description: 'Herd health management' },
         { icon: '💉', label: 'Campaigns', path: '/campaigns', color: '#14b8a6', description: 'Treatment campaigns' },
         { icon: '📈', label: 'Health Analytics', path: '/health-analytics', color: '#6366f1', description: 'Insights & trends' },
+        { icon: '🏥', label: 'Find Hospital', path: '/vet-hospitals', color: '#0ea5e9', description: 'Browse vet hospitals' },
       ]
     }
 
@@ -180,6 +186,7 @@ const Dashboard: React.FC = () => {
         { icon: '📋', label: 'Medical Records', path: '/medical-records', color: '#06b6d4', description: 'Pet health history' },
         { icon: '💚', label: 'Wellness Portal', path: '/wellness', color: '#14b8a6', description: 'Pet wellness tips' },
         { icon: '✍️', label: 'Write Review', path: '/write-review', color: '#f59e0b', description: 'Rate your vet' },
+        { icon: '🏥', label: 'Find Hospital', path: '/vet-hospitals', color: '#0ea5e9', description: 'Browse vet hospitals' },
       ]
     }
 
@@ -193,6 +200,7 @@ const Dashboard: React.FC = () => {
         { icon: '🧠', label: 'Disease AI', path: '/disease-prediction', color: '#ec4899', description: 'AI diagnosis assist' },
         { icon: '⭐', label: 'My Reviews', path: '/doctor/reviews', color: '#14b8a6', description: 'Patient feedback' },
         { icon: '🔔', label: 'Smart Alerts', path: '/alerts', color: '#ef4444', description: 'Health notifications' },
+        { icon: '🏨', label: 'My Hospital', path: '/vet-hospitals/manage', color: '#0ea5e9', description: 'Hospital dashboard' },
       ]
     }
 
@@ -204,6 +212,7 @@ const Dashboard: React.FC = () => {
       { icon: '💳', label: 'Payments', path: '/admin/payments', color: '#f59e0b', description: 'Payment management' },
       { icon: '⚖️', label: 'Reviews', path: '/admin/reviews', color: '#06b6d4', description: 'Review moderation' },
       { icon: '📜', label: 'Audit Logs', path: '/admin/audit-logs', color: '#ef4444', description: 'System activity' },
+      { icon: '🏥', label: 'Hospital Mgmt', path: '/admin/vet-hospitals', color: '#0ea5e9', description: 'Hospital oversight' },
     ]
   }, [isFarmer, isPetOwner, isVeterinarian, isAdmin])
 
@@ -317,7 +326,7 @@ const Dashboard: React.FC = () => {
           <section className="dashboard-section activity-section">
             <div className="section-header">
               <h2 className="section-title">Recent Activity</h2>
-              <button className="section-link" onClick={() => navigate('/consultations')}>View All</button>
+              <button className="section-link" onClick={() => navigate('/consultations?tab=bookings')}>View All</button>
             </div>
             <div className="activity-list">
               {activities.length === 0 && !loading && (
@@ -358,7 +367,7 @@ const Dashboard: React.FC = () => {
             <section className="dashboard-section">
               <div className="section-header">
                 <h2 className="section-title">📅 Upcoming Bookings</h2>
-                <button className="section-link" onClick={() => navigate('/consultations')}>View All</button>
+                <button className="section-link" onClick={() => navigate('/consultations?tab=bookings&status=confirmed')}>View All</button>
               </div>
               {upcomingBookings.length === 0 ? (
                 <div className="empty-state"><p>No upcoming bookings</p></div>
