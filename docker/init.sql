@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   time_slot_start VARCHAR(10) NOT NULL,
   time_slot_end VARCHAR(10) NOT NULL,
   status VARCHAR(30) NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rescheduled', 'completed')),
+    CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rescheduled', 'completed', 'missed')),
   booking_type VARCHAR(30) NOT NULL DEFAULT 'video_call'
     CHECK (booking_type IN ('video_call', 'in_person', 'phone', 'chat')),
   priority VARCHAR(20) DEFAULT 'normal'
@@ -574,3 +574,57 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
 
 CREATE INDEX IF NOT EXISTS idx_system_settings_key ON system_settings(key);
+
+-- ============================================================
+-- FIX: Update bookings status CHECK to include 'missed'
+-- ============================================================
+DO $$
+BEGIN
+  -- Drop old constraint and re-create with 'missed' status included
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'bookings_status_check'
+  ) THEN
+    ALTER TABLE bookings DROP CONSTRAINT bookings_status_check;
+  END IF;
+  ALTER TABLE bookings ADD CONSTRAINT bookings_status_check
+    CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rescheduled', 'completed', 'missed'));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- ============================================================
+-- VET HOSPITALS (needed for booking LEFT JOIN)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS vet_hospitals (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL,
+  hospital_type VARCHAR(50) NOT NULL DEFAULT 'multi_specialty',
+  tagline VARCHAR(500),
+  registration_number VARCHAR(100),
+  description TEXT,
+  address TEXT,
+  city VARCHAR(100),
+  state VARCHAR(100),
+  country VARCHAR(100) DEFAULT 'US',
+  postal_code VARCHAR(20),
+  phone VARCHAR(30),
+  emergency_phone VARCHAR(30),
+  email VARCHAR(255),
+  website VARCHAR(500),
+  logo_url VARCHAR(500),
+  cover_image_url VARCHAR(500),
+  is_24_hours BOOLEAN DEFAULT false,
+  has_emergency BOOLEAN DEFAULT false,
+  specializations TEXT[] DEFAULT '{}',
+  facilities TEXT[] DEFAULT '{}',
+  accepted_species TEXT[] DEFAULT '{}',
+  operating_hours JSONB DEFAULT '{}',
+  owner_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  is_verified BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  rating DECIMAL(3,2) DEFAULT 0,
+  total_reviews INTEGER DEFAULT 0,
+  total_consultations INTEGER DEFAULT 0,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
