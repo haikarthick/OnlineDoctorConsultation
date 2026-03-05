@@ -15,13 +15,17 @@ import path from 'path';
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres123',
-  database: process.env.DB_NAME || 'veterinary_consultation'
-});
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
+    : {
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5432', 10),
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres123',
+        database: process.env.DB_NAME || 'veterinary_consultation',
+      }
+);
 
 async function runTier4Migration() {
   const client = await pool.connect();

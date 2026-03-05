@@ -877,7 +877,7 @@ export class VetHospitalService {
     try {
       const hospital = await this.getHospital(hospitalId);
       const EmailService = (await import('./EmailService')).default;
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const frontendUrl = (await import('../config')).getFrontendUrl();
       await EmailService.send({
         to: data.email,
         subject: `You're invited to join ${hospital.name} on VetConnect`,

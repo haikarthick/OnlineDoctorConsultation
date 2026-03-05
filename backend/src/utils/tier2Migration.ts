@@ -6,14 +6,22 @@
  *         health_observations
  */
 import { Pool } from 'pg';
+import dotenv from 'dotenv';
+import path from 'path';
 
-const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  user: 'postgres',
-  password: 'postgres123',
-  database: 'veterinary_consultation'
-});
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
+    : {
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5432', 10),
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres123',
+        database: process.env.DB_NAME || 'veterinary_consultation',
+      }
+);
 
 async function runTier2Migration() {
   const client = await pool.connect();

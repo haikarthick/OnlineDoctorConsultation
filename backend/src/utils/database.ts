@@ -18,18 +18,30 @@ class PostgresDatabase {
   private pool: Pool;
 
   constructor() {
-    this.pool = new Pool({
-      host: config.database.host,
-      port: config.database.port,
-      user: config.database.user,
-      password: config.database.password,
-      database: config.database.database,
-      max: config.database.pool.max,
-      min: config.database.pool.min,
-      idleTimeoutMillis: config.database.pool.idleTimeoutMillis,
-      connectionTimeoutMillis: config.database.pool.connectionTimeoutMillis,
-      maxUses: config.database.pool.maxUses,
-    });
+    // Use DATABASE_URL (Render.com) when available, else individual params
+    const poolConfig = config.database.connectionString
+      ? {
+          connectionString: config.database.connectionString,
+          ssl: config.database.ssl || undefined,
+          max: config.database.pool.max,
+          min: config.database.pool.min,
+          idleTimeoutMillis: config.database.pool.idleTimeoutMillis,
+          connectionTimeoutMillis: config.database.pool.connectionTimeoutMillis,
+          maxUses: config.database.pool.maxUses,
+        }
+      : {
+          host: config.database.host,
+          port: config.database.port,
+          user: config.database.user,
+          password: config.database.password,
+          database: config.database.database,
+          max: config.database.pool.max,
+          min: config.database.pool.min,
+          idleTimeoutMillis: config.database.pool.idleTimeoutMillis,
+          connectionTimeoutMillis: config.database.pool.connectionTimeoutMillis,
+          maxUses: config.database.pool.maxUses,
+        };
+    this.pool = new Pool(poolConfig);
 
     this.pool.on('error', (err: Error) => {
       logger.error('Unexpected idle client error', { error: err.message });

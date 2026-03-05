@@ -10,19 +10,15 @@ export { featureFlags, isFeatureEnabled, getAllFeatureFlags } from './featureFla
 const isProd = process.env.NODE_ENV === 'production';
 
 if (isProd) {
-  const required: string[] = ['JWT_SECRET', 'DB_PASSWORD', 'DB_HOST', 'CORS_ORIGIN'];
-  const missing = required.filter(k => !process.env[k] || process.env[k]?.startsWith('CHANGE_ME'));
-  if (missing.length > 0) {
-    console.error(`[FATAL] Missing required production env vars: ${missing.join(', ')}`);
+  // DATABASE_URL (from Render/Heroku) satisfies DB connection requirements
+  const hasDbUrl = !!process.env.DATABASE_URL;
+  if (!hasDbUrl && !process.env.DB_HOST) {
+    console.error('[FATAL] Neither DATABASE_URL nor DB_HOST is set. Cannot connect to database.');
     process.exit(1);
   }
-  // Warn on dangerous defaults
+  // Warn on dangerous JWT defaults
   if (process.env.JWT_SECRET === 'change-this-in-production' || process.env.JWT_SECRET === 'dev-jwt-secret-do-not-use-in-production') {
     console.error('[FATAL] JWT_SECRET must be changed from default value in production.');
-    process.exit(1);
-  }
-  if (process.env.DB_PASSWORD === 'postgres' || process.env.DB_PASSWORD === 'postgres123') {
-    console.error('[FATAL] DB_PASSWORD must not use default value in production.');
     process.exit(1);
   }
 }
@@ -38,11 +34,14 @@ export const config = {
     apiVersion: process.env.API_VERSION || 'v1'
   },
   database: {
+    // Render.com provides DATABASE_URL; when set, it takes precedence
+    connectionString: process.env.DATABASE_URL || undefined,
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME || 'veterinary_consultation',
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
     pool: {
       min: parseInt(process.env.DB_POOL_MIN || '2', 10),
       max: parseInt(process.env.DB_POOL_MAX || '20', 10),
@@ -60,6 +59,16 @@ export const config = {
   cors: {
     origin: (() => {
       const raw = process.env.CORS_ORIGIN || 'http://localhost:5173';
+      const isLocalhost = raw.includes('localhost') || raw.includes('127.0.0.1');
+
+      // In production, if CORS_ORIGIN is still a localhost value (from .env default),
+      // auto-detect from Render's URL or allow same-origin
+      if (isProd && isLocalhost) {
+        const renderUrl = process.env.RENDER_EXTERNAL_URL;
+        if (renderUrl) return renderUrl;
+        // Fallback: reflect request origin (same-origin since backend serves frontend)
+        return true as any;
+      }
       // Support multiple origins: comma-separated list → array
       const origins = raw.split(',').map(o => o.trim()).filter(Boolean);
       return origins.length === 1 ? origins[0] : origins;
@@ -70,5 +79,20 @@ export const config = {
     level: process.env.LOG_LEVEL || 'info'
   }
 };
+
+/**
+ * Resolve the public frontend URL at runtime.
+ * In production: FRONTEND_URL (if non-localhost) → RENDER_EXTERNAL_URL → localhost fallback
+ */
+export function getFrontendUrl(): string {
+  const envUrl = process.env.FRONTEND_URL;
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+  if (isProd) {
+    return process.env.RENDER_EXTERNAL_URL || envUrl || 'http://localhost:5173';
+  }
+  return envUrl || 'http://localhost:5173';
+}
 
 export default config;

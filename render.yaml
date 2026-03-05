@@ -1,0 +1,39 @@
+# ─────────────────────────────────────────────────────────────
+# Render.com Blueprint  —  Infrastructure as Code
+# ─────────────────────────────────────────────────────────────
+# Push this file to your repo, then go to:
+#   https://dashboard.render.com/select-repo?type=blueprint
+# and select the repo. Render will auto-create:
+#   1. PostgreSQL database (free tier)
+#   2. Web service (frontend + backend together)
+# ─────────────────────────────────────────────────────────────
+
+databases:
+  - name: vetcare-db
+    plan: free
+    databaseName: vetcare
+    user: vetcare
+
+services:
+  - type: web
+    name: vetcare-app
+    runtime: node
+    plan: free
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    startCommand: chmod +x render-start.sh && ./render-start.sh
+    envVars:
+      # ── Auto-provided by Render ──────────────────────────
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vetcare-db
+          property: connectionString
+      # ── App Config ──────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+      - key: SEED_ON_STARTUP
+        value: "true"
+      # ── All other config (JWT, SMTP, feature flags, API keys)
+      #    is baked into the .env file that ships with the code.
+      #    No need to add them here — the app reads from .env
+      #    at startup. Only DATABASE_URL must come from Render
+      #    because the DB credentials are generated at deploy time.

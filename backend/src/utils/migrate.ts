@@ -23,13 +23,17 @@ const MIGRATION_DIR = path.resolve(__dirname, '..', '..', 'migrations');
 const TRACKING_TABLE = '_migrations';
 
 function getPool(): Pool {
-  return new Pool({
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres123',
-    database: process.env.DB_NAME || 'veterinary_consultation',
-  });
+  return new Pool(
+    process.env.DATABASE_URL
+      ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
+      : {
+          host: process.env.DB_HOST || 'localhost',
+          port: parseInt(process.env.DB_PORT || '5432', 10),
+          user: process.env.DB_USER || 'postgres',
+          password: process.env.DB_PASSWORD || 'postgres123',
+          database: process.env.DB_NAME || 'veterinary_consultation',
+        }
+  );
 }
 
 // ── Helpers ───────────────────────────────────────────────────

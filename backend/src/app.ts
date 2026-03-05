@@ -23,7 +23,11 @@ const app: Express = express();
 app.set('trust proxy', 1);
 
 // Security Middleware
-app.use(helmet());
+// In production, relax CSP so the backend can serve the React SPA
+app.use(helmet({
+  contentSecurityPolicy: config.app.nodeEnv === 'production' ? false : undefined,
+  crossOriginEmbedderPolicy: config.app.nodeEnv === 'production' ? false : undefined,
+}));
 app.use(cors(config.cors));
 app.use(cookieParser());
 
@@ -119,8 +123,18 @@ app.get('/', (_req: Request, res: Response) => {
 // API Routes
 app.use(`/api/${config.app.apiVersion}`, routes);
 
+// ─── Production: Serve frontend static files ──────────────────
+const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
+if (config.app.nodeEnv === 'production') {
+  app.use(express.static(frontendDistPath));
+}
+
 // 404 Handler - must come before error handler
 app.use((req: Request, res: Response) => {
+  // In production, serve index.html for non-API routes (SPA client-side routing)
+  if (config.app.nodeEnv === 'production' && !req.path.startsWith('/api/')) {
+    return res.sendFile(path.join(frontendDistPath, 'index.html'));
+  }
   res.status(404).json({
     success: false,
     error: {
