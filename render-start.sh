@@ -4,8 +4,7 @@
 # Runs DB migrations then starts the backend server
 # (Backend also serves the frontend static files in production)
 # ─────────────────────────────────────────────────
-set -e
-
+# Don't use set -e globally — only the final server start must succeed
 echo "══════════════════════════════════════════"
 echo "  VetCare Platform — Starting"
 echo "══════════════════════════════════════════"
@@ -20,31 +19,33 @@ const fs = require('fs');
 const path = require('path');
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
 const sqlPath = path.join(__dirname, '..', 'docker', 'init.sql');
-if (!fs.existsSync(sqlPath)) { console.log('  init.sql not found at ' + sqlPath + ' — skipping'); process.exit(0); }
-const sql = fs.readFileSync(sqlPath, 'utf8');
-pool.query(sql)
-  .then(() => { console.log('✓ Base schema ready'); return pool.end(); })
-  .catch(e => { console.error('Schema setup error:', e.message); return pool.end().then(() => process.exit(1)); });
-"
+if (!fs.existsSync(sqlPath)) { console.log('  init.sql not found — skipping'); pool.end().then(() => process.exit(0)); }
+else {
+  const sql = fs.readFileSync(sqlPath, 'utf8');
+  pool.query(sql)
+    .then(() => { console.log('  ✓ Base schema ready'); return pool.end(); })
+    .catch(e => { console.error('  ⚠ Schema setup warning:', e.message); return pool.end(); });
+}
+" || echo "  (schema setup had warnings — continuing)"
 echo ""
 
 # Step 1: Run enterprise/tier migrations (idempotent — safe to re-run)
 echo "━━━ Running database migrations ━━━"
-node dist/utils/enterpriseMigration.js  2>/dev/null || echo "  (enterprise migration already applied or skipped)"
-node dist/utils/tier2Migration.js       2>/dev/null || echo "  (tier2 migration already applied or skipped)"
-node dist/utils/tier3Migration.js       2>/dev/null || echo "  (tier3 migration already applied or skipped)"
-node dist/utils/tier4Migration.js       2>/dev/null || echo "  (tier4 migration already applied or skipped)"
+node dist/utils/enterpriseMigration.js  2>&1 || echo "  (enterprise migration warning — continuing)"
+node dist/utils/tier2Migration.js       2>&1 || echo "  (tier2 migration warning — continuing)"
+node dist/utils/tier3Migration.js       2>&1 || echo "  (tier3 migration warning — continuing)"
+node dist/utils/tier4Migration.js       2>&1 || echo "  (tier4 migration warning — continuing)"
 echo "✓ Migrations complete"
 
-# Seed demo data if SEED_ON_STARTUP=true (first deploy only)
+# Step 2: Seed demo data if SEED_ON_STARTUP=true (first deploy only)
 if [ "$SEED_ON_STARTUP" = "true" ]; then
   echo ""
   echo "━━━ Seeding demo data ━━━"
-  node dist/utils/seed-demo-data.js 2>&1 || echo "  (seed may have partially failed — check logs)"
+  node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings — continuing"
   echo "✓ Seed complete"
 fi
 
-# Start the server
+# Step 3: Start the server (this MUST succeed)
 echo ""
 echo "━━━ Starting server ━━━"
 exec node dist/index.js

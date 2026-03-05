@@ -114,6 +114,7 @@ CREATE TABLE IF NOT EXISTS consultations (
   prescription TEXT,
   follow_up_date DATE,
   notes TEXT,
+  booking_id UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -127,6 +128,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+  hospital_id UUID,
   scheduled_date DATE NOT NULL,
   time_slot_start VARCHAR(10) NOT NULL,
   time_slot_end VARCHAR(10) NOT NULL,
@@ -443,47 +445,61 @@ CREATE TABLE IF NOT EXISTS system_settings (
 );
 
 -- ============================================================
--- AUTO-UPDATE TRIGGERS
+-- AUTO-UPDATE TRIGGERS  (drop+create for idempotency)
 -- ============================================================
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_vet_profiles_updated_at ON vet_profiles;
 CREATE TRIGGER update_vet_profiles_updated_at BEFORE UPDATE ON vet_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_animals_updated_at ON animals;
 CREATE TRIGGER update_animals_updated_at BEFORE UPDATE ON animals
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_consultations_updated_at ON consultations;
 CREATE TRIGGER update_consultations_updated_at BEFORE UPDATE ON consultations
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_bookings_updated_at ON bookings;
 CREATE TRIGGER update_bookings_updated_at BEFORE UPDATE ON bookings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_vet_schedules_updated_at ON vet_schedules;
 CREATE TRIGGER update_vet_schedules_updated_at BEFORE UPDATE ON vet_schedules
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_video_sessions_updated_at ON video_sessions;
 CREATE TRIGGER update_video_sessions_updated_at BEFORE UPDATE ON video_sessions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_prescriptions_updated_at ON prescriptions;
 CREATE TRIGGER update_prescriptions_updated_at BEFORE UPDATE ON prescriptions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_medical_records_updated_at ON medical_records;
 CREATE TRIGGER update_medical_records_updated_at BEFORE UPDATE ON medical_records
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_vaccination_records_updated_at ON vaccination_records;
 CREATE TRIGGER update_vaccination_records_updated_at BEFORE UPDATE ON vaccination_records
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_allergy_records_updated_at ON allergy_records;
 CREATE TRIGGER update_allergy_records_updated_at BEFORE UPDATE ON allergy_records
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_lab_results_updated_at ON lab_results;
 CREATE TRIGGER update_lab_results_updated_at BEFORE UPDATE ON lab_results
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_payments_updated_at ON payments;
 CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_reviews_updated_at ON reviews;
 CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
