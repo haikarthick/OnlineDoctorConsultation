@@ -109,8 +109,15 @@ app.use(`/api/${config.app.apiVersion}`, (req, res, next) => {
   return csrfProtection(req, res, next);
 });
 
-// Root welcome route (so localhost:3000 doesn't show 404)
-app.get('/', (_req: Request, res: Response) => {
+// ─── Production: Serve frontend static files ──────────────────
+// Must come BEFORE the API welcome route so "/" serves the React app
+const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
+if (config.app.nodeEnv === 'production') {
+  app.use(express.static(frontendDistPath));
+}
+
+// API welcome route (only in development, or as /api fallback)
+app.get('/api', (_req: Request, res: Response) => {
   res.json({
     name: 'VetCare API',
     version: config.app.apiVersion,
@@ -122,12 +129,6 @@ app.get('/', (_req: Request, res: Response) => {
 
 // API Routes
 app.use(`/api/${config.app.apiVersion}`, routes);
-
-// ─── Production: Serve frontend static files ──────────────────
-const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
-if (config.app.nodeEnv === 'production') {
-  app.use(express.static(frontendDistPath));
-}
 
 // 404 Handler - must come before error handler
 app.use((req: Request, res: Response) => {
