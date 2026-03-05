@@ -17,15 +17,21 @@ node -e "
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-const sqlPath = path.join(__dirname, '..', 'docker', 'init.sql');
-if (!fs.existsSync(sqlPath)) { console.log('  init.sql not found — skipping'); pool.end().then(() => process.exit(0)); }
-else {
-  const sql = fs.readFileSync(sqlPath, 'utf8');
-  pool.query(sql)
-    .then(() => { console.log('  ✓ Base schema ready'); return pool.end(); })
-    .catch(e => { console.error('  ⚠ Schema setup warning:', e.message); return pool.end(); });
+async function main() {
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  const sqlPath = path.join(process.cwd(), '..', 'docker', 'init.sql');
+  if (!fs.existsSync(sqlPath)) { console.log('  init.sql not found — skipping'); await pool.end(); return; }
+  try {
+    const sql = fs.readFileSync(sqlPath, 'utf8');
+    await pool.query(sql);
+    console.log('  ✓ Base schema ready');
+  } catch (e) {
+    console.error('  ⚠ Schema setup warning:', e.message);
+  } finally {
+    await pool.end();
+  }
 }
+main().catch(e => { console.error(e); process.exit(1); });
 " || echo "  (schema setup had warnings — continuing)"
 echo ""
 

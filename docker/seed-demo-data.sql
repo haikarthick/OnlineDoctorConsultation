@@ -12,17 +12,17 @@
 --   Farmer:  Farmer@123
 -- ============================================================
 
-BEGIN;
+-- No global transaction — each section runs independently for resilience
+-- (if a tier migration didn't create certain tables, other sections still succeed)
 
 -- ============================================================
 -- STEP 0: CLEAN ALL TRANSACTIONAL DATA
 -- ============================================================
 -- CASCADE from root tables cleans all dependent tables.
--- Using separate statements to handle any missing tables gracefully.
-
-TRUNCATE TABLE users CASCADE;
-TRUNCATE TABLE enterprises CASCADE;
-TRUNCATE TABLE system_settings CASCADE;
+-- Safe TRUNCATE: silently skips tables that don't exist yet.
+DO $$ BEGIN EXECUTE 'TRUNCATE TABLE users CASCADE';            EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN EXECUTE 'TRUNCATE TABLE enterprises CASCADE';      EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN EXECUTE 'TRUNCATE TABLE system_settings CASCADE';  EXCEPTION WHEN undefined_table THEN NULL; END $$;
 
 -- ============================================================
 -- STEP 1: USERS (4 roles, 8 users total)
@@ -779,4 +779,4 @@ INSERT INTO geospatial_events (id, enterprise_id, animal_id, event_type, latitud
   (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000008', 'location_update', 42.5291, -92.4442, 5.2, '{"source":"collar_gps","battery":85}'),
   (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000008', 'zone_exit',       42.5295, -92.4448, 8.1, '{"zone":"North Pasture Grazing","alert":"exited grazing zone at 4:15 PM"}');
 
-COMMIT;
+-- (end of seed data)

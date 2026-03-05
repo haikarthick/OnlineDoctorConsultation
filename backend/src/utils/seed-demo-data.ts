@@ -22,7 +22,8 @@ const config = process.env.DATABASE_URL
 
 async function run() {
   const pool = new Pool(config);
-  console.log(`\n🔗 Connecting to PostgreSQL at ${config.host}:${config.port}/${config.database}...\n`);
+  const dbLabel = (config as any).connectionString ? 'DATABASE_URL' : `${(config as any).host}:${(config as any).port}/${(config as any).database}`;
+  console.log(`\n🔗 Connecting to PostgreSQL (${dbLabel})...\n`);
 
   try {
     // 1. Verify migration tables exist (migrations should already be run)
@@ -39,16 +40,50 @@ async function run() {
       console.log('    npx ts-node src/utils/tier4Migration.ts');
     }
 
-    // 2. Execute the SQL seed file
+    // 2. Execute the SQL seed file section by section
     console.log('\n━━━ Step 2: Executing seed SQL ━━━');
     const sqlPath = path.join(__dirname, '..', '..', '..', 'docker', 'seed-demo-data.sql');
     if (!fs.existsSync(sqlPath)) {
       throw new Error(`Seed SQL not found at: ${sqlPath}`);
     }
-    const sql = fs.readFileSync(sqlPath, 'utf-8');
+    const sql = fs.readFileSync(sqlPath, 'utf-8').replace(/\r\n/g, '\n');
     console.log(`  → Loading ${(sql.length / 1024).toFixed(1)} KB of seed SQL...`);
-    await pool.query(sql);
-    console.log('  ✓ Seed data inserted successfully');
+
+    // Split by STEP headers and execute each independently.
+    // This way if a tier migration didn't create certain tables, the core
+    // data (users, animals, bookings) still gets inserted.
+    const stepHeaderRegex = /-- ={10,}\n-- STEP \d+:\s*(.+)\n-- ={10,}/g;
+    const stepMatches: { name: string; start: number; end: number }[] = [];
+    let m;
+    while ((m = stepHeaderRegex.exec(sql)) !== null) {
+      stepMatches.push({ name: m[1].trim(), start: m.index, end: stepHeaderRegex.lastIndex });
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < stepMatches.length; i++) {
+      const contentStart = stepMatches[i].end;
+      const contentEnd = i + 1 < stepMatches.length ? stepMatches[i + 1].start : sql.length;
+      const sectionSql = sql.substring(contentStart, contentEnd).trim();
+      const sectionName = stepMatches[i].name;
+
+      if (!sectionSql || !/\b(INSERT|TRUNCATE|DELETE|UPDATE|DO)\b/i.test(sectionSql)) continue;
+
+      try {
+        await pool.query(sectionSql);
+        successCount++;
+        console.log(`  ✓ ${sectionName}`);
+      } catch (err: any) {
+        failCount++;
+        console.error(`  ⚠ ${sectionName}: ${err.message.substring(0, 150)}`);
+      }
+    }
+
+    console.log(`\n  Sections: ${successCount} succeeded, ${failCount} failed`);
+    if (failCount > 0) {
+      console.log('  (Failed sections are usually from optional tier migrations that were skipped)');
+    }
 
     // 3. Verify counts
     console.log('\n━━━ Step 3: Verification ━━━');
@@ -96,6 +131,13 @@ async function run() {
     console.log('  Pet Owner:    robert.chen@email.com           / Owner@123');
     console.log('  Farmer:       john.miller@greenpastures.com   / Farmer@123');
     console.log('  Farmer:       maria.garcia@sunrisefarm.com    / Farmer@123');
+
+    // Check critical data
+    const { rows: userRows } = await pool.query('SELECT COUNT(*)::int AS cnt FROM users');
+    if (userRows[0].cnt === 0) {
+      console.error('\n❌ CRITICAL: No users were inserted! Login will not work.');
+      process.exit(1);
+    }
 
     console.log('\n✅ Demo data seeding complete!\n');
   } catch (err) {
