@@ -70,10 +70,6 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream
       }
-      // Also display in main video area
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = stream
-      }
       setMediaMode('video')
       setIsCameraOff(false)
       setIsMuted(false)
@@ -155,9 +151,6 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
         : localStreamRef.current
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = activeStream
-      }
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = activeStream
       }
     }
   }, [isCameraOff, mediaMode])
@@ -467,9 +460,6 @@ setError('Failed to start recording — your browser may not support MediaRecord
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = localStreamRef.current
         }
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = localStreamRef.current
-        }
         setMediaMode('video')
         setIsCameraOff(false)
         setCameraError('')
@@ -493,32 +483,22 @@ setError('Failed to start recording — your browser may not support MediaRecord
         screenStreamRef.current.getTracks().forEach(track => track.stop())
         screenStreamRef.current = null
       }
-      // Re-attach camera stream to local video
-      if (localVideoRef.current && localStreamRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current
-      }
-      if (remoteVideoRef.current && localStreamRef.current) {
-        remoteVideoRef.current.srcObject = localStreamRef.current
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = null
       }
       setIsScreenSharing(false)
     } else {
       try {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true })
         screenStreamRef.current = screenStream
-        // Show screen share in the main video area (self-view)
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = screenStream
-        }
+        // Show screen share in main video area
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = screenStream
         }
         // When user stops sharing via browser UI
         screenStream.getVideoTracks()[0].onended = () => {
-          if (localVideoRef.current && localStreamRef.current) {
-            localVideoRef.current.srcObject = localStreamRef.current
-          }
-          if (remoteVideoRef.current && localStreamRef.current) {
-            remoteVideoRef.current.srcObject = localStreamRef.current
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = null
           }
           screenStreamRef.current = null
           setIsScreenSharing(false)
@@ -682,8 +662,8 @@ setError('Failed to start recording — your browser may not support MediaRecord
         <div className="video-container">
           {/* Main Video Area */}
           <div className="video-main">
-            {/* Main view: show local camera as simulated remote feed */}
-            {session.status === 'active' && mediaMode === 'video' && !isCameraOff && !isScreenSharing ? (
+            {/* Main view: screen share preview when sharing, otherwise connected placeholder */}
+            {session.status === 'active' && isScreenSharing ? (
               <video
                 ref={remoteVideoRef}
                 autoPlay
@@ -692,14 +672,10 @@ setError('Failed to start recording — your browser may not support MediaRecord
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover'
+                  objectFit: 'contain',
+                  background: '#000'
                 }}
               />
-            ) : session.status === 'active' && isScreenSharing ? (
-              <div className="video-placeholder">
-                <div className="video-avatar">🖥️</div>
-                <p>Screen Sharing Active</p>
-              </div>
             ) : session.status === 'active' ? (
               <div className="video-placeholder">
                 <div className="video-avatar">{user?.role === 'veterinarian' ? '🧑' : '👨‍⚕️'}</div>

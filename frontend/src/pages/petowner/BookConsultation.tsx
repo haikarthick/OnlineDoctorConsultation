@@ -5,7 +5,7 @@ import { VetProfile, TimeSlot, Animal } from '../../types'
 import '../../styles/modules.css'
 
 /** Filter out past time slots for today using browser local time + 15min buffer */
-const filterFutureSlots = (slots: { startTime: string; isAvailable: boolean }[], forDate: string) => {
+const filterFutureSlots = <T extends { startTime: string; isAvailable: boolean }>(slots: T[], forDate: string): T[] => {
   const now = new Date()
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   return slots.filter(s => {
@@ -458,7 +458,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                       ))}
                     </div>
                   )
-                })()
+                })()}
               </div>
             </div>
           )}

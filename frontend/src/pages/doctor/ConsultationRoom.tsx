@@ -86,7 +86,6 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       })
       localStreamRef.current = stream
       if (localVideoRef.current) localVideoRef.current.srcObject = stream
-      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = stream
       setMediaMode('video')
       setIsCameraOff(false)
       setIsMuted(false)
@@ -100,7 +99,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       setMediaMode('audio-only')
       setIsCameraOff(true)
       setIsMuted(false)
-      setCameraError('Camera unavailable � audio-only mode.')
+      setCameraError('Camera unavailable — audio-only mode.')
       return
     } catch (err: any) {
 }
@@ -164,7 +163,6 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         ? screenStreamRef.current
         : localStreamRef.current
       if (localVideoRef.current) localVideoRef.current.srcObject = active
-      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = active
     }
   }, [isCameraOff, mediaMode])
 
@@ -182,7 +180,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       } catch { /* no existing session */ }
 
       if (existingSession) {
-        // Skip ended sessions � allow creating a new one
+        // Skip ended sessions — allow creating a new one
         if (existingSession.status === 'ended') {
           setSession(existingSession)
           loadMessages(existingSession.id)
@@ -198,11 +196,11 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         } else if (existingSession.status === 'waiting') {
           // Start polling to detect when patient starts/joins
           startSessionPolling(existingSession.id)
-          // Also start message polling � patient might chat while waiting
+          // Also start message polling — patient might chat while waiting
           startMessagePolling(existingSession.id)
         }
       } else {
-        // No session exists � check consultation status before creating one
+        // No session exists — check consultation status before creating one
         try {
           const consultRes = await apiService.getConsultation(conId)
           const consult = consultRes.data
@@ -305,7 +303,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         try {
           const res2 = await apiService.getVideoSessionByConsultation(conId)
           if (res2.data && res2.data.id !== sessionId) {
-            // A different session was created � switch to that one
+            // A different session was created — switch to that one
             if (sessionPollRef.current) { clearInterval(sessionPollRef.current); sessionPollRef.current = null }
             setSession(res2.data)
             if (res2.data.status === 'active') {
@@ -389,7 +387,6 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
           localStreamRef.current = stream
         }
         if (localVideoRef.current) localVideoRef.current.srcObject = localStreamRef.current
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = localStreamRef.current
         setMediaMode('video')
         setIsCameraOff(false)
         setCameraError('')
@@ -410,18 +407,15 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         screenStreamRef.current.getTracks().forEach(t => t.stop())
         screenStreamRef.current = null
       }
-      if (localVideoRef.current && localStreamRef.current) localVideoRef.current.srcObject = localStreamRef.current
-      if (remoteVideoRef.current && localStreamRef.current) remoteVideoRef.current.srcObject = localStreamRef.current
+      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
       setIsScreenSharing(false)
     } else {
       try {
         const screen = await navigator.mediaDevices.getDisplayMedia({ video: true })
         screenStreamRef.current = screen
-        if (localVideoRef.current) localVideoRef.current.srcObject = screen
         if (remoteVideoRef.current) remoteVideoRef.current.srcObject = screen
         screen.getVideoTracks()[0].onended = () => {
-          if (localVideoRef.current && localStreamRef.current) localVideoRef.current.srcObject = localStreamRef.current
-          if (remoteVideoRef.current && localStreamRef.current) remoteVideoRef.current.srcObject = localStreamRef.current
+          if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
           screenStreamRef.current = null
           setIsScreenSharing(false)
         }
@@ -451,7 +445,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         recorder.start(1000)
         mediaRecorderRef.current = recorder
         setIsRecording(true)
-        if (session) apiService.sendVideoMessage(session.id, '?? Recording started').catch(() => {})
+        if (session) apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => {})
       } catch {
         setError('Failed to start recording')
       }
@@ -461,7 +455,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         mediaRecorderRef.current = null
       }
       setIsRecording(false)
-      if (session) apiService.sendVideoMessage(session.id, '?? Recording stopped').catch(() => {})
+      if (session) apiService.sendVideoMessage(session.id, '⏹️ Recording stopped').catch(() => {})
     }
   }
 
@@ -576,7 +570,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
     return (
       <div className="module-page">
         <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>{isCompleted ? '?' : '??'}</div>
+          <div style={{ fontSize: 64, marginBottom: 20 }}>{isCompleted ? '✅' : '📹'}</div>
           <h1 style={{ marginBottom: 8 }}>{isCompleted ? 'Consultation Completed' : 'Consultation Session Ended'}</h1>
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 8 }}>
             Duration: {formatDuration(session.duration || callDuration)}
@@ -590,19 +584,19 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           {/* Recording playback */}
           {recordingUrl && (
             <div style={{ marginTop: 20, marginBottom: 16 }}>
-              <p style={{ color: '#059669', fontSize: 14, marginBottom: 12 }}>?? Recording available</p>
+              <p style={{ color: '#059669', fontSize: 14, marginBottom: 12 }}>🎬 Recording available</p>
               <video src={recordingUrl} controls style={{ maxWidth: 500, width: '100%', borderRadius: 8, marginBottom: 12 }} />
               <br />
               <a href={recordingUrl} download={`consultation-${conId}-${new Date().toISOString().slice(0,10)}.webm`}
                 className="btn btn-outline" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                ?? Download Recording
+                ⬇️ Download Recording
               </a>
             </div>
           )}
 
           {/* Notes section */}
           <div style={{ maxWidth: 600, margin: '24px auto', textAlign: 'left' }}>
-            <h3>?? Consultation Notes</h3>
+            <h3>📝 Consultation Notes</h3>
             <div style={{ marginBottom: 12 }}>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>Diagnosis</label>
               <textarea className="form-input" rows={2} placeholder="Enter diagnosis..."
@@ -619,19 +613,19 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
               {!isCompleted && (
                 <>
                   <button className="btn btn-outline" onClick={handleSaveNotes} disabled={savingNotes}>
-                    {savingNotes ? '?? Saving...' : notesSaved ? '? Saved!' : '?? Save Notes'}
+                    {savingNotes ? '⏳ Saving...' : notesSaved ? '✅ Saved!' : '💾 Save Notes'}
                   </button>
                   <button className="btn btn-primary" onClick={handleCompleteConsultation}>
-                    ? Complete Consultation
+                    ✅ Complete Consultation
                   </button>
                   <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                    ?? Write Prescription
+                    💊 Write Prescription
                   </button>
                 </>
               )}
               {isCompleted && (
                 <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                  ?? Write Prescription
+                  💊 Write Prescription
                 </button>
               )}
             </div>
@@ -640,7 +634,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           {/* Chat transcript */}
           {messages.length > 0 && (
             <div style={{ maxWidth: 600, margin: '24px auto', textAlign: 'left' }}>
-              <h3>?? Chat Transcript ({messages.length} messages)</h3>
+              <h3>💬 Chat Transcript ({messages.length} messages)</h3>
               <div style={{ background: '#f9fafb', borderRadius: 8, padding: 16, maxHeight: 300, overflow: 'auto' }}>
                 {messages.map(msg => (
                   <div key={msg.id} style={{ marginBottom: 8, fontSize: 13 }}>
@@ -672,17 +666,17 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           <h1>Consultation Room</h1>
           <p className="page-subtitle">
             {session?.status === 'active' ? (
-              <span style={{ color: '#dc2626', fontWeight: 600 }}>?? Live � {formatDuration(callDuration)}</span>
+              <span style={{ color: '#dc2626', fontWeight: 600 }}>🔴 Live — {formatDuration(callDuration)}</span>
             ) : 'Waiting for session to start...'}
           </p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-            ?? Prescription
+            💊 Prescription
           </button>
           {session?.status === 'active' && (
             <button className="btn btn-danger" onClick={handleEndCall} style={{ background: '#dc2626', color: 'white', border: 'none' }}>
-              ?? End Call
+              📞 End Call
             </button>
           )}
         </div>
@@ -690,7 +684,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
 
       {error && (
         <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
-          ?? {error}
+          ⚠️ {error}
           <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }}
             onClick={() => setError('')}>Dismiss</button>
         </div>
@@ -700,24 +694,19 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
         {/* Video Area */}
         <div className="video-main">
           {/* Main video: Show camera feed when active, placeholder otherwise */}
-          {session?.status === 'active' && mediaMode === 'video' && !isCameraOff && !isScreenSharing ? (
+          {session?.status === 'active' && isScreenSharing ? (
             <video ref={remoteVideoRef} autoPlay playsInline muted
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : session?.status === 'active' && isScreenSharing ? (
-            <div className="video-placeholder">
-              <div className="video-avatar">???</div>
-              <p>Screen Sharing Active</p>
-            </div>
+              style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }} />
           ) : session?.status === 'active' ? (
             <div className="video-placeholder">
-              <div className="video-avatar">??</div>
+              <div className="video-avatar">🧑</div>
               <p>Patient Connected</p>
-              {mediaMode === 'audio-only' && <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>?? Audio-only mode</p>}
-              {mediaMode === 'none' && <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>?? Chat-only mode</p>}
+              {mediaMode === 'audio-only' && <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 Audio-only mode</p>}
+              {mediaMode === 'none' && <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 Chat-only mode</p>}
             </div>
           ) : (
             <div className="video-placeholder">
-              <div className="video-avatar">??</div>
+              <div className="video-avatar">👨‍⚕️</div>
               <p>Waiting for patient to join...</p>
               <p style={{ fontSize: 13, color: '#9ca3af', marginTop: 4 }}>
                 {session ? `Room: ${session.roomId}` : 'Creating room...'}
@@ -733,7 +722,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
               color: 'white', padding: '8px 16px', borderRadius: 8, fontSize: 13,
               maxWidth: '80%', textAlign: 'center', zIndex: 10
             }}>
-              {mediaMode === 'audio-only' ? '??' : '??'} {cameraError}
+              {mediaMode === 'audio-only' ? '🎤' : '⚠️'} {cameraError}
             </div>
           )}
 
@@ -742,7 +731,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
             {isCameraOff || mediaMode !== 'video' ? (
               <span style={{ textAlign: 'center', fontSize: 13 }}>
                 {session?.status !== 'active' ? `Dr. ${user?.lastName?.charAt(0) || ''}` :
-                  mediaMode === 'audio-only' ? '?? Audio' : mediaMode === 'none' ? '?? Chat' : '?? Off'}
+                  mediaMode === 'audio-only' ? '🎤 Audio' : mediaMode === 'none' ? '💬 Chat' : '📷 Off'}
               </span>
             ) : (
               <video ref={localVideoRef} autoPlay playsInline muted
@@ -759,23 +748,23 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
               <>
                 <button className={`video-control-btn ${!isMuted ? 'active' : ''}`}
                   onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}>
-                  {isMuted ? '??' : '??'}
+                  {isMuted ? '🔇' : '🎤'}
                 </button>
                 <button className={`video-control-btn ${!isCameraOff ? 'active' : ''}`}
                   onClick={toggleCamera} title={isCameraOff ? 'Turn on camera' : 'Turn off camera'}>
-                  {isCameraOff ? '??' : '??'}
+                  {isCameraOff ? '📷' : '📹'}
                 </button>
                 <button className={`video-control-btn ${isScreenSharing ? 'active' : ''}`}
                   onClick={toggleScreenShare} title="Share screen">
-                  ???
+                  🖥️
                 </button>
                 <button className={`video-control-btn ${isRecording ? 'recording' : ''}`}
                   onClick={toggleRecording} title={isRecording ? 'Stop Recording' : 'Start Recording'}
                   style={isRecording ? { background: '#dc2626', color: 'white', animation: 'pulse 1.5s infinite' } : {}}>
-                  {isRecording ? '??' : '??'}
+                  {isRecording ? '⏹️' : '⏺️'}
                 </button>
                 <button className="video-control-btn end-call" onClick={handleEndCall} title="End call">
-                  ??
+                  📞
                 </button>
               </>
             )}
@@ -983,7 +972,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
                   value={notes} onChange={e => setNotes(e.target.value)} style={{ resize: 'vertical' }} />
               </div>
               <button className="btn btn-primary" onClick={handleSaveNotes} disabled={savingNotes}>
-                {savingNotes ? '?? Saving...' : notesSaved ? '? Saved!' : '?? Save Notes'}
+                {savingNotes ? '⏳ Saving...' : notesSaved ? '✅ Saved!' : '💾 Save Notes'}
               </button>
             </div>
           )}
@@ -996,7 +985,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
               </p>
               <button className="btn btn-primary"
                 onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                ?? Open Prescription Writer
+                💊 Open Prescription Writer
               </button>
               <div style={{ marginTop: 12 }}>
                 <h4>Common Prescriptions</h4>
