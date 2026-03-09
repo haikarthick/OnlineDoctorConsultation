@@ -41,9 +41,12 @@ class BookingService {
     const id = uuidv4();
     const now = new Date();
 
-    // ── Validate: no bookings in the past ──
-    const scheduledDateTime = new Date(`${data.scheduledDate}T${data.timeSlotStart}:00`);
-    if (scheduledDateTime <= now) {
+    // ── Validate: no bookings in the past (date-only check; time-of-day
+    //    validation is done on the frontend using the user's local timezone) ──
+    const requestedDate = new Date(data.scheduledDate + 'T12:00:00Z');
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+    if (requestedDate < todayStart) {
       throw new ValidationError('Cannot book a consultation in the past. Please select a future date and time.');
     }
     
@@ -213,9 +216,12 @@ class BookingService {
   }
 
   async rescheduleBooking(id: string, newDate: string, newStart: string, newEnd: string, initiatorRole?: string): Promise<Booking> {
-    // Prevent rescheduling to a past time
-    const newDateTime = new Date(`${newDate}T${newStart}:00`);
-    if (newDateTime <= new Date()) {
+    // Prevent rescheduling to a past date (date-only check; time-of-day
+    // validation is done on the frontend using the user's local timezone)
+    const requestedDate = new Date(newDate + 'T12:00:00Z');
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+    if (requestedDate < todayStart) {
       throw new ValidationError('Cannot reschedule to a past date/time. Please select a future time.');
     }
 

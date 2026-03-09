@@ -24,6 +24,18 @@ interface ConsultRow {
 }
 interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
 
+/** Filter out past time slots for today using browser local time + 15min buffer */
+const filterFutureSlots = (slots: TimeSlot[], forDate: string) => {
+  const now = new Date()
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  return slots.filter(s => {
+    if (!s.isAvailable) return false
+    if (forDate !== todayStr) return true
+    const [h, m] = s.startTime.split(':').map(Number)
+    return h * 60 + m > now.getHours() * 60 + now.getMinutes() + 15
+  })
+}
+
 const Consultations: React.FC = () => {
   const { user } = useAuth()
   const { formatDate, isJoinable, settings: appSettings } = useSettings()
@@ -175,6 +187,12 @@ const Consultations: React.FC = () => {
 
   const handleRescheduleSubmit = async () => {
     if (!rescheduleBooking || !rescheduleDate || !rescheduleSelectedSlot) return
+    // Validate: cannot reschedule to a past time
+    const slotDateTime = new Date(`${rescheduleDate}T${rescheduleSelectedSlot.startTime}:00`)
+    if (slotDateTime <= new Date()) {
+      setRescheduleError('Cannot reschedule to a past time. Please select a future slot.')
+      return
+    }
     try {
       setRescheduleSubmitting(true)
       await apiService.rescheduleBooking(rescheduleBooking.id, {
@@ -512,20 +530,22 @@ const Consultations: React.FC = () => {
             </div>
 
             {/* Available slots */}
-            {rescheduleDate && (
+            {rescheduleDate && (() => {
+              const futureSlots = filterFutureSlots(rescheduleSlots, rescheduleDate)
+              return (
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>Available Time Slots</label>
                 {rescheduleSlotsLoading ? (
                   <div style={{ textAlign: 'center', padding: 20 }}>
                     <div className="loading-spinner" style={{ margin: '0 auto' }} />
                   </div>
-                ) : rescheduleSlots.filter(s => s.isAvailable).length === 0 ? (
+                ) : futureSlots.length === 0 ? (
                   <p style={{ color: '#9ca3af', fontSize: 13, textAlign: 'center', padding: 16 }}>
                     No available slots for this date. Please select another date.
                   </p>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                    {rescheduleSlots.filter(s => s.isAvailable).map((slot, idx) => (
+                    {futureSlots.map((slot, idx) => (
                       <button
                         key={idx}
                         onClick={() => setRescheduleSelectedSlot(slot)}
@@ -542,7 +562,8 @@ const Consultations: React.FC = () => {
                   </div>
                 )}
               </div>
-            )}
+              )
+            })()}
 
             {/* Doctor approval note for pet owners */}
             {isPetOwner && rescheduleSelectedSlot && (

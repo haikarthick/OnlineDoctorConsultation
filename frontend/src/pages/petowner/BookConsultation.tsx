@@ -4,6 +4,18 @@ import apiService from '../../services/api'
 import { VetProfile, TimeSlot, Animal } from '../../types'
 import '../../styles/modules.css'
 
+/** Filter out past time slots for today using browser local time + 15min buffer */
+const filterFutureSlots = (slots: { startTime: string; isAvailable: boolean }[], forDate: string) => {
+  const now = new Date()
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  return slots.filter(s => {
+    if (!s.isAvailable) return false
+    if (forDate !== todayStr) return true
+    const [h, m] = s.startTime.split(':').map(Number)
+    return h * 60 + m > now.getHours() * 60 + now.getMinutes() + 15
+  })
+}
+
 interface Enterprise { id: string; name: string; type: string; location?: string }
 interface AnimalGroup { id: string; name: string; type: string; animalCount?: number }
 
@@ -425,29 +437,28 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                   <div className="loading-container" style={{ padding: 30 }}>
                     <div className="loading-spinner" />
                   </div>
-                ) : availableSlots.length === 0 ? (
-                  <div className="empty-state" style={{ padding: 20 }}>
-                    <p>{selectedDate === new Date().toISOString().split('T')[0]
-                      ? 'No remaining time slots for today. All available slots have passed — please select a future date.'
-                      : 'No slots available for this date. The doctor may not have a schedule on this day.'}</p>
-                  </div>
-                ) : (
-                  <div className="time-slots-grid">
-                    {availableSlots.filter(s => s.isAvailable).length === 0 ? (
-                      <div className="empty-state" style={{ padding: 20 }}>
-                        <p>All time slots for this date are already booked. Please select a different date.</p>
-                      </div>
-                    ) : availableSlots.filter(s => s.isAvailable).map((slot, idx) => (
-                      <div
-                        key={idx}
-                        className={`time-slot ${selectedSlot?.startTime === slot.startTime ? 'selected' : ''}`}
-                        onClick={() => setSelectedSlot(slot)}
-                      >
-                        {slot.startTime} - {slot.endTime}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                ) : (() => {
+                  const futureSlots = filterFutureSlots(availableSlots, selectedDate)
+                  return futureSlots.length === 0 ? (
+                    <div className="empty-state" style={{ padding: 20 }}>
+                      <p>{availableSlots.length === 0
+                        ? 'No slots available for this date. The doctor may not have a schedule on this day.'
+                        : 'All time slots for this date have passed or are already booked. Please select a different date.'}</p>
+                    </div>
+                  ) : (
+                    <div className="time-slots-grid">
+                      {futureSlots.map((slot, idx) => (
+                        <div
+                          key={idx}
+                          className={`time-slot ${selectedSlot?.startTime === slot.startTime ? 'selected' : ''}`}
+                          onClick={() => setSelectedSlot(slot)}
+                        >
+                          {slot.startTime} - {slot.endTime}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()
               </div>
             </div>
           )}

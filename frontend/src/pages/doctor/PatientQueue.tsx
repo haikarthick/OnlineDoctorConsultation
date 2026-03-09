@@ -11,6 +11,18 @@ interface TimeSlot {
   isAvailable: boolean
 }
 
+/** Filter out past time slots for today using browser local time + 15min buffer */
+const filterFutureSlots = (slots: TimeSlot[], forDate: string) => {
+  const now = new Date()
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  return slots.filter(s => {
+    if (!s.isAvailable) return false
+    if (forDate !== todayStr) return true
+    const [h, m] = s.startTime.split(':').map(Number)
+    return h * 60 + m > now.getHours() * 60 + now.getMinutes() + 15
+  })
+}
+
 interface PatientQueueProps {
   onNavigate: (path: string) => void
 }
@@ -153,6 +165,12 @@ setRescheduleSlots([])
 
   const handleRescheduleSubmit = async () => {
     if (!rescheduleTarget || !rescheduleSelectedSlot || !rescheduleDate) return
+    // Validate: cannot reschedule to a past time
+    const slotDateTime = new Date(`${rescheduleDate}T${rescheduleSelectedSlot.startTime}:00`)
+    if (slotDateTime <= new Date()) {
+      setError('Cannot reschedule to a past time. Please select a future slot.')
+      return
+    }
     try {
       setRescheduleSubmitting(true)
       await apiService.rescheduleBooking(rescheduleTarget.id, {
@@ -368,11 +386,16 @@ setRescheduleSlots([])
 
             {rescheduleSlotsLoading && <p>Loading available slots...</p>}
 
-            {!rescheduleSlotsLoading && rescheduleSlots.length > 0 && (
+            {!rescheduleSlotsLoading && rescheduleSlots.length > 0 && (() => {
+              const futureSlots = filterFutureSlots(rescheduleSlots, rescheduleDate)
+              return (
               <div style={{ marginBottom: 16 }}>
                 <label className="form-label">Available Slots</label>
+                {futureSlots.length === 0 ? (
+                  <p style={{ color: '#6b7280', fontSize: 14 }}>No available slots on this date.</p>
+                ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                  {rescheduleSlots.filter(s => s.isAvailable).map(slot => (
+                  {futureSlots.map(slot => (
                     <button
                       key={slot.startTime}
                       onClick={() => setRescheduleSelectedSlot(slot)}
@@ -387,11 +410,10 @@ setRescheduleSlots([])
                     </button>
                   ))}
                 </div>
-                {rescheduleSlots.filter(s => s.isAvailable).length === 0 && (
-                  <p style={{ color: '#6b7280', fontSize: 14 }}>No available slots on this date.</p>
                 )}
               </div>
-            )}
+              )
+            })()}
 
             {!rescheduleSlotsLoading && rescheduleDate && rescheduleSlots.length === 0 && (
               <p style={{ color: '#6b7280', fontSize: 14 }}>No slots found for this date.</p>

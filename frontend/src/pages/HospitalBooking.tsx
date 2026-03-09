@@ -9,6 +9,18 @@ import './VetHospitals.css'
 
 interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
 
+/** Filter out past time slots for today using browser local time + 15min buffer */
+const filterFutureSlots = (slots: TimeSlot[], forDate: string) => {
+  const now = new Date()
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  return slots.filter(s => {
+    if (!s.isAvailable) return false
+    if (forDate !== todayStr) return true
+    const [h, m] = s.startTime.split(':').map(Number)
+    return h * 60 + m > now.getHours() * 60 + now.getMinutes() + 15
+  })
+}
+
 type Step = 'doctor' | 'datetime' | 'details' | 'confirm'
 
 const BOOKING_TYPES = [
@@ -105,6 +117,12 @@ const HospitalBooking: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!selectedDoctor || !selectedDate || !selectedSlot || !reasonForVisit.trim()) return
+    // Validate: cannot book in the past
+    const slotDateTime = new Date(`${selectedDate}T${selectedSlot.startTime}:00`)
+    if (slotDateTime <= new Date()) {
+      setError('Cannot book a consultation in the past. Please select a future date and time.')
+      return
+    }
     setSubmitting(true)
     setError('')
     try {
@@ -136,7 +154,7 @@ const HospitalBooking: React.FC = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   })()
 
-  const availableSlots = slots.filter(s => s.isAvailable)
+  const availableSlots = filterFutureSlots(slots, selectedDate)
 
   if (loading) return <div className="loading-container"><div className="loading-spinner" /></div>
   if (!hospital) return <div className="module-page"><p>Hospital not found</p></div>

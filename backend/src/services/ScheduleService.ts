@@ -92,15 +92,6 @@ class ScheduleService {
   }
 
   async getAvailability(veterinarianId: string, date: string): Promise<VetAvailability> {
-    // Reject past dates entirely
-    const requestedDate = new Date(date + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (requestedDate < today) {
-      return { veterinarianId, date, slots: [] };
-    }
-
-    const isToday = requestedDate.getTime() === today.getTime();
     // Use T12:00:00 to avoid timezone day-shift when parsing date-only strings
     const dayOfWeek = this.getDayOfWeek(new Date(date + 'T12:00:00'));
     
@@ -127,28 +118,16 @@ class ScheduleService {
 
     const bookedSlots = new Set(bookingsResult.rows.map((b: any) => b.timeSlotStart));
     
-    // Generate time slots
+    // Generate time slots — return ALL slots and let the frontend
+    // filter out past ones using the user's local timezone
     const slots: TimeSlot[] = [];
     const slotDuration = schedule.slotDuration || 30;
     let currentTime = this.parseTime(schedule.startTime);
     const endTime = this.parseTime(schedule.endTime);
 
-    // For today, calculate current time + 15 min buffer so users
-    // can't book a slot that starts in the next few minutes
-    const BOOKING_BUFFER_MINUTES = 15;
-    const now = new Date();
-    const currentMinutesOfDay = now.getHours() * 60 + now.getMinutes();
-    const cutoffMinutes = currentMinutesOfDay + BOOKING_BUFFER_MINUTES;
-
     while (currentTime < endTime) {
       const startStr = this.formatTime(currentTime);
       const endStr = this.formatTime(currentTime + slotDuration);
-      
-      // Skip slots that are in the past or within the buffer window (for today)
-      if (isToday && currentTime <= cutoffMinutes) {
-        currentTime += slotDuration;
-        continue;
-      }
 
       slots.push({
         startTime: startStr,
