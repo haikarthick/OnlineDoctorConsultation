@@ -31,7 +31,7 @@ class ScheduleService {
        max_appointments as "maxAppointments", is_active as "isActive",
        created_at as "createdAt", updated_at as "updatedAt"`,
       [id, veterinarianId, data.dayOfWeek, data.startTime, data.endTime,
-       slotDuration, data.maxAppointments || 10, true, now, now]
+       slotDuration, data.maxAppointments || 10, (data as any).isAvailable !== undefined ? (data as any).isAvailable : true, now, now]
     );
 
     logger.info('Vet schedule created', { scheduleId: id, veterinarianId, dayOfWeek: data.dayOfWeek });
@@ -133,16 +133,19 @@ class ScheduleService {
     let currentTime = this.parseTime(schedule.startTime);
     const endTime = this.parseTime(schedule.endTime);
 
-    // For today, calculate current time in minutes to filter past slots
+    // For today, calculate current time + 15 min buffer so users
+    // can't book a slot that starts in the next few minutes
+    const BOOKING_BUFFER_MINUTES = 15;
     const now = new Date();
     const currentMinutesOfDay = now.getHours() * 60 + now.getMinutes();
+    const cutoffMinutes = currentMinutesOfDay + BOOKING_BUFFER_MINUTES;
 
     while (currentTime < endTime) {
       const startStr = this.formatTime(currentTime);
       const endStr = this.formatTime(currentTime + slotDuration);
       
-      // Skip slots that are already in the past (for today)
-      if (isToday && currentTime <= currentMinutesOfDay) {
+      // Skip slots that are in the past or within the buffer window (for today)
+      if (isToday && currentTime <= cutoffMinutes) {
         currentTime += slotDuration;
         continue;
       }

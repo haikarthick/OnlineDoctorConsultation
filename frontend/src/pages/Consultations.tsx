@@ -216,7 +216,7 @@ const Consultations: React.FC = () => {
 
       const res = await apiService.createConsultation({
         veterinarianId: booking.veterinarianId || '',
-        animalType: reason.length >= 2 ? reason : 'General',
+        animalType: booking.animalSpecies ? `${booking.animalSpecies}${booking.animalBreed ? ' - ' + booking.animalBreed : ''}` : 'General',
         symptomDescription: description,
         animalId: booking.animalId || undefined,
         bookingId: booking.id,
@@ -359,8 +359,8 @@ const Consultations: React.FC = () => {
                       <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.reasonForVisit || b.reason || '—'}</td>
                       <td>
                         <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: 11, fontWeight: 600,
-                          background: b.priority === 'urgent' || b.priority === 'emergency' ? '#fef2f2' : '#f0f0f0',
-                          color: b.priority === 'urgent' || b.priority === 'emergency' ? '#dc2626' : '#555'
+                          background: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#fef2f2' : '#f0f0f0',
+                          color: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#dc2626' : '#555'
                         }}>{b.priority || 'normal'}</span>
                       </td>
                       <td>{badge(b.status)}</td>
@@ -379,7 +379,7 @@ const Consultations: React.FC = () => {
                               ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>📹 Join</button>
                               : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}>🔒 Not Yet</button>
                           )}
-                          {b.status === 'missed' && (
+                          {(b.status === 'missed' || b.status === 'confirmed') && (
                             <button className="btn-small" style={{ background: '#f59e0b', color: 'white', border: 'none' }} onClick={() => openRescheduleModal(b)}>🔄 Reschedule</button>
                           )}
                           {(b.status === 'pending' || b.status === 'confirmed') && (

@@ -72,8 +72,8 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       dayOfWeek: sched.dayOfWeek,
       startTime: sched.startTime,
       endTime: sched.endTime,
-      slotDurationMinutes: sched.slotDurationMinutes,
-      isAvailable: sched.isAvailable
+      slotDurationMinutes: sched.slotDuration || sched.slotDurationMinutes || 30,
+      isAvailable: sched.isActive ?? sched.isAvailable ?? true
     })
     setEditingId(sched.id)
     setFormError('')
@@ -201,13 +201,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   daySched.map(s => (
                     <div key={s.id} style={{
                       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      padding: '8px 12px', backgroundColor: s.isAvailable ? '#f0fdf4' : '#fef2f2',
-                      borderRadius: 8, marginBottom: 8, border: `1px solid ${s.isAvailable ? '#bbf7d0' : '#fecaca'}`
+                      padding: '8px 12px', backgroundColor: (s.isActive ?? s.isAvailable) ? '#f0fdf4' : '#fef2f2',
+                      borderRadius: 8, marginBottom: 8, border: `1px solid ${(s.isActive ?? s.isAvailable) ? '#bbf7d0' : '#fecaca'}`
                     }}>
                       <div>
                         <strong style={{ fontSize: 14 }}>{s.startTime} - {s.endTime}</strong>
                         <p style={{ margin: 0, fontSize: 12, color: '#6b7280' }}>
-                          {s.slotDurationMinutes}min slots • {s.isAvailable ? '✅ Available' : '❌ Unavailable'}
+                          {s.slotDuration || s.slotDurationMinutes}min slots • {(s.isActive ?? s.isAvailable) ? '✅ Available' : '❌ Unavailable'}
                         </p>
                       </div>
                       <div style={{ display: 'flex', gap: 6 }}>

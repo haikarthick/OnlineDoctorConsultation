@@ -204,31 +204,8 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       setSlotsLoading(true)
       const result = await apiService.getVetAvailability(selectedVet.userId, date)
       setAvailableSlots(result.data?.slots || [])
-    } catch (err) {
-// Generate sample slots for demo
-      const demoSlots: TimeSlot[] = []
-      const now = new Date()
-      const isToday = date === now.toISOString().split('T')[0]
-      const currentMinutes = now.getHours() * 60 + now.getMinutes()
-      for (let h = 9; h < 17; h++) {
-        const slot1Start = h * 60
-        const slot2Start = h * 60 + 30
-        if (!isToday || slot1Start > currentMinutes) {
-          demoSlots.push({
-            startTime: `${h.toString().padStart(2, '0')}:00`,
-            endTime: `${h.toString().padStart(2, '0')}:30`,
-            isAvailable: Math.random() > 0.3
-          })
-        }
-        if (!isToday || slot2Start > currentMinutes) {
-          demoSlots.push({
-            startTime: `${h.toString().padStart(2, '0')}:30`,
-            endTime: `${(h + 1).toString().padStart(2, '0')}:00`,
-            isAvailable: Math.random() > 0.3
-          })
-        }
-      }
-      setAvailableSlots(demoSlots)
+    } catch (err: any) {
+      setAvailableSlots([])
     } finally {
       setSlotsLoading(false)
     }
@@ -285,9 +262,9 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       <div className="module-page">
         <div style={{ textAlign: 'center', padding: '80px 20px' }}>
           <div style={{ fontSize: 64, marginBottom: 20 }}>✅</div>
-          <h1 style={{ marginBottom: 8 }}>Booking Confirmed!</h1>
+          <h1 style={{ marginBottom: 8 }}>Booking Submitted!</h1>
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 24 }}>
-            Your consultation has been booked successfully. You'll receive a confirmation notification.
+            Your consultation request has been submitted and is pending confirmation by the veterinarian.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button className="btn btn-primary" onClick={() => onNavigate('/my-bookings')}>
@@ -456,11 +433,15 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                   </div>
                 ) : (
                   <div className="time-slots-grid">
-                    {availableSlots.map((slot, idx) => (
+                    {availableSlots.filter(s => s.isAvailable).length === 0 ? (
+                      <div className="empty-state" style={{ padding: 20 }}>
+                        <p>All time slots for this date are already booked. Please select a different date.</p>
+                      </div>
+                    ) : availableSlots.filter(s => s.isAvailable).map((slot, idx) => (
                       <div
                         key={idx}
-                        className={`time-slot ${!slot.isAvailable ? 'unavailable' : ''} ${selectedSlot?.startTime === slot.startTime ? 'selected' : ''}`}
-                        onClick={() => slot.isAvailable && setSelectedSlot(slot)}
+                        className={`time-slot ${selectedSlot?.startTime === slot.startTime ? 'selected' : ''}`}
+                        onClick={() => setSelectedSlot(slot)}
                       >
                         {slot.startTime} - {slot.endTime}
                       </div>
