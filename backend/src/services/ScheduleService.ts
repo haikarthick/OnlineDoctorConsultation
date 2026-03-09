@@ -7,10 +7,11 @@ import logger from '../utils/logger';
 class ScheduleService {
   async createSchedule(veterinarianId: string, data: {
     dayOfWeek: DayOfWeek; startTime: string; endTime: string;
-    slotDuration?: number; maxAppointments?: number;
+    slotDuration?: number; slotDurationMinutes?: number; maxAppointments?: number;
   }): Promise<VetSchedule> {
     const id = uuidv4();
     const now = new Date();
+    const slotDuration = data.slotDuration || data.slotDurationMinutes || 30;
 
     // Check for conflict
     const existing = await database.query(
@@ -30,7 +31,7 @@ class ScheduleService {
        max_appointments as "maxAppointments", is_active as "isActive",
        created_at as "createdAt", updated_at as "updatedAt"`,
       [id, veterinarianId, data.dayOfWeek, data.startTime, data.endTime,
-       data.slotDuration || 30, data.maxAppointments || 10, true, now, now]
+       slotDuration, data.maxAppointments || 10, true, now, now]
     );
 
     logger.info('Vet schedule created', { scheduleId: id, veterinarianId, dayOfWeek: data.dayOfWeek });
@@ -53,16 +54,18 @@ class ScheduleService {
     return result.rows;
   }
 
-  async updateSchedule(id: string, veterinarianId: string, data: Partial<VetSchedule>): Promise<VetSchedule> {
+  async updateSchedule(id: string, veterinarianId: string, data: Partial<VetSchedule> & Record<string, any>): Promise<VetSchedule> {
     const updates: string[] = [];
     const params: any[] = [];
     let idx = 1;
 
     if (data.startTime) { updates.push(`start_time = $${idx++}`); params.push(data.startTime); }
     if (data.endTime) { updates.push(`end_time = $${idx++}`); params.push(data.endTime); }
-    if (data.slotDuration) { updates.push(`slot_duration = $${idx++}`); params.push(data.slotDuration); }
+    const slotDur = data.slotDuration || data.slotDurationMinutes;
+    if (slotDur) { updates.push(`slot_duration = $${idx++}`); params.push(slotDur); }
     if (data.maxAppointments) { updates.push(`max_appointments = $${idx++}`); params.push(data.maxAppointments); }
-    if (data.isActive !== undefined) { updates.push(`is_active = $${idx++}`); params.push(data.isActive); }
+    const isActive = data.isActive !== undefined ? data.isActive : data.isAvailable;
+    if (isActive !== undefined) { updates.push(`is_active = $${idx++}`); params.push(isActive); }
     updates.push(`updated_at = $${idx++}`); params.push(new Date());
     params.push(id);
     params.push(veterinarianId);

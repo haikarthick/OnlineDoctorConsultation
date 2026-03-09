@@ -122,22 +122,28 @@ export const sendVideoMessageSchema = Joi.object({
 });
 
 // ─── Schedule ────────────────────────────────────────────────
+const dayOfWeekValidator = Joi.string().valid('monday','tuesday','wednesday','thursday','friday','saturday','sunday');
+
 export const createScheduleSchema = Joi.object({
   veterinarianId: uuid.optional(),
-  dayOfWeek: Joi.number().integer().min(0).max(6).required(),
+  dayOfWeek: dayOfWeekValidator.required(),
   startTime: Joi.string().required().pattern(/^\d{2}:\d{2}/),
   endTime: Joi.string().required().pattern(/^\d{2}:\d{2}/),
   slotDuration: Joi.number().integer().min(5).max(240).optional(),
+  slotDurationMinutes: Joi.number().integer().min(5).max(240).optional(),
   maxAppointments: Joi.number().integer().min(1).max(100).optional(),
+  isAvailable: Joi.boolean().optional(),
 });
 
 export const updateScheduleSchema = Joi.object({
   veterinarianId: uuid.optional(),
-  dayOfWeek: Joi.number().integer().min(0).max(6).optional(),
+  dayOfWeek: dayOfWeekValidator.optional(),
   startTime: Joi.string().pattern(/^\d{2}:\d{2}/).optional(),
   endTime: Joi.string().pattern(/^\d{2}:\d{2}/).optional(),
   slotDuration: Joi.number().integer().min(5).max(240).optional(),
+  slotDurationMinutes: Joi.number().integer().min(5).max(240).optional(),
   maxAppointments: Joi.number().integer().min(1).max(100).optional(),
+  isAvailable: Joi.boolean().optional(),
 }).min(1);
 
 // ─── Prescription ────────────────────────────────────────────
