@@ -74,7 +74,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Farm / Enterprise Module ──
     { id: 'enterprises', label: 'Farm / Enterprise', icon: '🏢', path: '/enterprises',
-      roles: ['farmer', 'admin', 'pet_owner'], section: 'Farm Management' },
+      roles: ['farmer', 'admin'], section: 'Farm Management' },
     { id: 'animal-groups', label: 'Herds & Groups', icon: '🐄', path: '/animal-groups',
       roles: ['farmer', 'admin'], section: 'Farm Management' },
     { id: 'herd-medical', label: 'Herd Medical', icon: '💊', path: '/herd-medical',

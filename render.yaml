@@ -32,6 +32,9 @@ services:
         value: production
       - key: SEED_ON_STARTUP
         value: "true"
+      # ── AI Chatbot (Groq - free tier) ───────────────────
+      - key: GROQ_API_KEY
+        sync: false  # Set manually in Render dashboard
       # ── All other config (JWT, SMTP, feature flags, API keys)
       #    is baked into the .env file that ships with the code.
       #    No need to add them here — the app reads from .env

@@ -162,8 +162,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'prescriptions', 'settings', 'write_review',
     // Hospital (browse only)
     'hospital_browse',
-    // Enterprise (basic access)
-    'enterprise_manage',
     // (user-scoped)
     'ai_copilot', 'marketplace_access', 'wellness_portal',
     // Actions

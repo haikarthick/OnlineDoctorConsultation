@@ -5,6 +5,7 @@ import { SettingsProvider } from './context/SettingsContext'
 import { PermissionProvider, usePermission, ROUTE_PERMISSION_MAP } from './context/PermissionContext'
 import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
+import FloatingChatWidget from './components/FloatingChatWidget'
 // Eagerly loaded public pages (needed at first paint)
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -264,6 +265,7 @@ function App() {
           <PermissionProvider>
             <SocketProvider>
               <AppRoutes />
+              <FloatingChatWidget />
             </SocketProvider>
           </PermissionProvider>
         </AuthProvider>
