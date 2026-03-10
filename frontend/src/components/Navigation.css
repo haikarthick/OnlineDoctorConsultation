@@ -381,7 +381,6 @@
 
 /* ─── Overlay ─── */
 .nav-overlay {
-  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -410,7 +409,6 @@
   .nav-sidebar-open { left: 0; }
   .nav-sidebar-collapsed { width: 280px; } /* No collapse on mobile */
 
-  .nav-overlay { display: block; }
   .nav-brand-desktop { display: none; }
   .nav-collapse-btn { display: none; }
 

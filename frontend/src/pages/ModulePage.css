@@ -4,7 +4,9 @@
   padding: 32px;
   animation: fadeIn 0.3s ease;
   background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%);
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .module-header {
