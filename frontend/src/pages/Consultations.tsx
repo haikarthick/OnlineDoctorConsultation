@@ -339,80 +339,84 @@ const Consultations: React.FC = () => {
               {isPetOwner && !statusFilter && <button className="btn-primary" style={{ marginTop: 4 }} onClick={() => navigate('/book-consultation')}>Book a Consultation</button>}
             </div>
           ) : (
-            <div className="table-wrapper">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    {isVet ? <th>Patient</th> : <th>Doctor</th>}
-                    {isAdmin && <><th>Patient</th><th>Doctor</th></>}
-                    <th>Animal / Farm</th>
-                    <th>Date</th><th>Time</th><th>Type</th><th>Reason</th><th>Priority</th><th>Status</th><th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredActive.map(b => (
-                    <tr key={b.id}>
-                      {isVet && <td><strong>{b.petOwnerName || 'Patient'}</strong></td>}
-                      {isPetOwner && <td><strong>{b.vetName || 'Doctor'}</strong></td>}
-                      {isAdmin && <><td>{b.petOwnerName || '—'}</td><td>{b.vetName || '—'}</td></>}
-                      <td style={{ maxWidth: 180 }}>
-                        {b.enterpriseName ? (
-                          <div style={{ fontSize: 13, lineHeight: 1.4 }}>
-                            <div style={{ fontWeight: 600, color: '#059669' }}>🏢 {b.enterpriseName}</div>
-                            {b.groupName && <div style={{ fontSize: 12, color: '#6b7280' }}>📋 {b.groupName}</div>}
-                            {b.animalName && <div style={{ fontSize: 12 }}>🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</div>}
-                            {!b.animalName && <div style={{ fontSize: 11, color: '#9ca3af', fontStyle: 'italic' }}>Herd-level</div>}
-                          </div>
-                        ) : b.animalName ? (
-                          <div style={{ fontSize: 13 }}>
-                            🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}{b.animalBreed ? ` / ${b.animalBreed}` : ''}
-                          </div>
-                        ) : (
-                          <span style={{ color: '#9ca3af', fontSize: 12 }}>—</span>
-                        )}
-                      </td>
-                      <td>{fmt(b.scheduledDate)}</td>
-                      <td>{b.timeSlotStart} - {b.timeSlotEnd}</td>
-                      <td><span style={{ fontSize: 12 }}>{b.bookingType === 'video_call' ? '📹 Video' : b.bookingType === 'phone' ? '📞 Phone' : b.bookingType === 'in_person' ? '🏥 In-person' : '💬 Chat'}</span></td>
-                      <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.reasonForVisit || b.reason || '—'}</td>
-                      <td>
-                        <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: 11, fontWeight: 600,
-                          background: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#fef2f2' : '#f0f0f0',
-                          color: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#dc2626' : '#555'
-                        }}>{b.priority || 'normal'}</span>
-                      </td>
-                      <td>{badge(b.status)}</td>
-                      <td>
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                          {isVet && b.status === 'pending' && (
-                            <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>✓ Confirm</button>
-                          )}
-                          {(isVet || isAdmin) && b.status === 'confirmed' && b.bookingType === 'video_call' && (
-                            isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
-                              ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>▶ Start</button>
-                              : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}>🔒 Not Yet</button>
-                          )}
-                          {isPetOwner && b.status === 'confirmed' && b.bookingType === 'video_call' && (
-                            isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
-                              ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>📹 Join</button>
-                              : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}>🔒 Not Yet</button>
-                          )}
-                          {(b.status === 'missed' || b.status === 'confirmed') && (
-                            <button className="btn-small" style={{ background: '#f59e0b', color: 'white', border: 'none' }} onClick={() => openRescheduleModal(b)}>🔄 Reschedule</button>
-                          )}
-                          {(b.status === 'pending' || b.status === 'confirmed') && (
-                            <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #dc2626', background: 'white' }} onClick={() => handleCancelBooking(b.id)}>✕ Cancel</button>
-                          )}
-                          {isAdmin && b.status === 'pending' && (
-                            <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>✓ Confirm</button>
-                          )}
-                          <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View Action History">📋 Log</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="appt-card-grid">
+              {filteredActive.map(b => (
+                <div key={b.id} className="appt-card">
+                  {/* Card Header */}
+                  <div className="appt-card-header">
+                    <div className="appt-card-who">
+                      {isVet && <strong>{b.petOwnerName || 'Patient'}</strong>}
+                      {isPetOwner && <strong>{b.vetName || 'Doctor'}</strong>}
+                      {isAdmin && <span>{b.petOwnerName || '—'} / {b.vetName || '—'}</span>}
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
+                      <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: 11, fontWeight: 600,
+                        background: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#fef2f2' : '#f0f0f0',
+                        color: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#dc2626' : '#555'
+                      }}>{b.priority || 'normal'}</span>
+                      {badge(b.status)}
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="appt-card-body">
+                    {/* Animal / Farm info */}
+                    <div className="appt-card-animal">
+                      {b.enterpriseName ? (
+                        <>
+                          <span style={{ fontWeight: 600, color: '#059669' }}>🏢 {b.enterpriseName}</span>
+                          {b.groupName && <span style={{ color: '#6b7280' }}> · 📋 {b.groupName}</span>}
+                          {b.animalName ? <span> · 🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</span>
+                            : <span style={{ color: '#9ca3af', fontStyle: 'italic' }}> · Herd-level</span>}
+                        </>
+                      ) : b.animalName ? (
+                        <span>🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}{b.animalBreed ? ` / ${b.animalBreed}` : ''}</span>
+                      ) : (
+                        <span style={{ color: '#9ca3af' }}>—</span>
+                      )}
+                    </div>
+
+                    {/* Date, Time, Type row */}
+                    <div className="appt-card-meta">
+                      <span>📅 {fmt(b.scheduledDate)}</span>
+                      <span>⏰ {b.timeSlotStart} - {b.timeSlotEnd}</span>
+                      <span>{b.bookingType === 'video_call' ? '📹 Video' : b.bookingType === 'phone' ? '📞 Phone' : b.bookingType === 'in_person' ? '🏥 In-person' : '💬 Chat'}</span>
+                    </div>
+
+                    {/* Reason */}
+                    {(b.reasonForVisit || b.reason) && (
+                      <div className="appt-card-reason">{b.reasonForVisit || b.reason}</div>
+                    )}
+                  </div>
+
+                  {/* Card Actions */}
+                  <div className="appt-card-actions">
+                    {isVet && b.status === 'pending' && (
+                      <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>✓ Confirm</button>
+                    )}
+                    {(isVet || isAdmin) && b.status === 'confirmed' && b.bookingType === 'video_call' && (
+                      isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
+                        ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>▶ Start</button>
+                        : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}>🔒 Not Yet</button>
+                    )}
+                    {isPetOwner && b.status === 'confirmed' && b.bookingType === 'video_call' && (
+                      isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
+                        ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>📹 Join</button>
+                        : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}>🔒 Not Yet</button>
+                    )}
+                    {(b.status === 'missed' || b.status === 'confirmed') && (
+                      <button className="btn-small" style={{ background: '#f59e0b', color: 'white', border: 'none' }} onClick={() => openRescheduleModal(b)}>🔄 Reschedule</button>
+                    )}
+                    {(b.status === 'pending' || b.status === 'confirmed') && (
+                      <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #dc2626', background: 'white' }} onClick={() => handleCancelBooking(b.id)}>✕ Cancel</button>
+                    )}
+                    {isAdmin && b.status === 'pending' && (
+                      <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>✓ Confirm</button>
+                    )}
+                    <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View Action History">📋 Log</button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -428,66 +432,70 @@ const Consultations: React.FC = () => {
               <p style={{ fontSize: 13 }}>Completed and cancelled consultations will appear here for reference</p>
             </div>
           ) : (
-            <div className="table-wrapper">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    {isVet ? <th>Patient</th> : <th>Doctor</th>}
-                    {isAdmin && <><th>Patient</th><th>Doctor</th></>}
-                    <th>Animal / Farm</th>
-                    <th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Diagnosis</th><th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredHistory.map(b => {
-                    const diagnosis = b.consultationId ? diagnosisMap.get(b.consultationId) : ''
-                    return (
-                      <tr key={b.id}>
-                        {isVet && <td><strong>{b.petOwnerName || 'Patient'}</strong></td>}
-                        {isPetOwner && <td><strong>{b.vetName || 'Doctor'}</strong></td>}
-                        {isAdmin && <><td>{b.petOwnerName || '—'}</td><td>{b.vetName || '—'}</td></>}
-                        <td style={{ maxWidth: 180 }}>
-                          {b.enterpriseName ? (
-                            <div style={{ fontSize: 13, lineHeight: 1.4 }}>
-                              <div style={{ fontWeight: 600, color: '#059669' }}>🏢 {b.enterpriseName}</div>
-                              {b.groupName && <div style={{ fontSize: 12, color: '#6b7280' }}>📋 {b.groupName}</div>}
-                              {b.animalName && <div style={{ fontSize: 12 }}>🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</div>}
-                            </div>
-                          ) : b.animalName ? (
-                            <div style={{ fontSize: 13 }}>
-                              🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}
-                            </div>
-                          ) : (
-                            <span style={{ color: '#9ca3af', fontSize: 12 }}>—</span>
-                          )}
-                        </td>
-                        <td>{fmt(b.scheduledDate)}</td>
-                        <td>{b.timeSlotStart} - {b.timeSlotEnd}</td>
-                        <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.reasonForVisit || b.reason || '—'}</td>
-                        <td>{badge(b.status)}</td>
-                        <td style={{ maxWidth: 200, fontSize: 13 }}>{diagnosis || '—'}</td>
-                        <td>
-                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                            {b.status === 'completed' && b.consultationId && (
-                              <button className="btn-small" style={{ background: '#f0fdf4', color: '#059669', border: '1px solid #059669' }}
-                                onClick={() => {
-                                  if (isVet) navigate(`/doctor/consultation-room/${b.consultationId}`)
-                                  else navigate(`/video-consultation/${b.consultationId}`)
-                                }}>📋 View</button>
-                            )}
-                            {b.status === 'completed' && isPetOwner && b.consultationId && (
-                              <button className="btn-small" onClick={() => navigate(`/write-review?consultationId=${b.consultationId}&veterinarianId=${b.veterinarianId}`)}>⭐ Review</button>
-                            )}
-                            {b.status === 'cancelled' && (
-                              <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View cancellation details">📋 Details</button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+            <div className="appt-card-grid">
+              {filteredHistory.map(b => {
+                const diagnosis = b.consultationId ? diagnosisMap.get(b.consultationId) : ''
+                return (
+                  <div key={b.id} className="appt-card">
+                    {/* Card Header */}
+                    <div className="appt-card-header">
+                      <div className="appt-card-who">
+                        {isVet && <strong>{b.petOwnerName || 'Patient'}</strong>}
+                        {isPetOwner && <strong>{b.vetName || 'Doctor'}</strong>}
+                        {isAdmin && <span>{b.petOwnerName || '—'} / {b.vetName || '—'}</span>}
+                      </div>
+                      {badge(b.status)}
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="appt-card-body">
+                      <div className="appt-card-animal">
+                        {b.enterpriseName ? (
+                          <>
+                            <span style={{ fontWeight: 600, color: '#059669' }}>🏢 {b.enterpriseName}</span>
+                            {b.groupName && <span style={{ color: '#6b7280' }}> · 📋 {b.groupName}</span>}
+                            {b.animalName && <span> · 🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</span>}
+                          </>
+                        ) : b.animalName ? (
+                          <span>🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}</span>
+                        ) : (
+                          <span style={{ color: '#9ca3af' }}>—</span>
+                        )}
+                      </div>
+
+                      <div className="appt-card-meta">
+                        <span>📅 {fmt(b.scheduledDate)}</span>
+                        <span>⏰ {b.timeSlotStart} - {b.timeSlotEnd}</span>
+                      </div>
+
+                      {(b.reasonForVisit || b.reason) && (
+                        <div className="appt-card-reason">{b.reasonForVisit || b.reason}</div>
+                      )}
+
+                      {diagnosis && (
+                        <div style={{ fontSize: 13, color: '#059669', marginTop: 4 }}>🩺 {diagnosis}</div>
+                      )}
+                    </div>
+
+                    {/* Card Actions */}
+                    <div className="appt-card-actions">
+                      {b.status === 'completed' && b.consultationId && (
+                        <button className="btn-small" style={{ background: '#f0fdf4', color: '#059669', border: '1px solid #059669' }}
+                          onClick={() => {
+                            if (isVet) navigate(`/doctor/consultation-room/${b.consultationId}`)
+                            else navigate(`/video-consultation/${b.consultationId}`)
+                          }}>📋 View</button>
+                      )}
+                      {b.status === 'completed' && isPetOwner && b.consultationId && (
+                        <button className="btn-small" onClick={() => navigate(`/write-review?consultationId=${b.consultationId}&veterinarianId=${b.veterinarianId}`)}>⭐ Review</button>
+                      )}
+                      {b.status === 'cancelled' && (
+                        <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View cancellation details">📋 Details</button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
