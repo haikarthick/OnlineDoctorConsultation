@@ -22,7 +22,7 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   animals: ['/animals'],
   medical_records: ['/medical-records'],
   schedule: ['/doctor/manage-schedule'],
-  prescriptions: ['/doctor/prescriptions', '/doctor/prescriptions/new'],
+  prescriptions: ['/doctor/prescriptions', '/doctor/prescriptions/new', '/prescriptions'],
   reviews: ['/doctor/reviews'],
   video_consultation: ['/video-consultation'],
   settings: ['/settings'],

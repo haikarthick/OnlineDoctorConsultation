@@ -68,7 +68,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       })
       setSubmitted(true)
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to create prescription')
+      setError(err.response?.data?.error?.message || err.response?.data?.message || 'Failed to create prescription')
     } finally {
       setSubmitting(false)
     }

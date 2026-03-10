@@ -152,7 +152,7 @@ const medicationSchema = Joi.object({
   name: Joi.string().max(255).required(),
   dosage: Joi.string().max(255).required(),
   frequency: Joi.string().max(255).required(),
-  duration: Joi.string().max(255).required(),
+  duration: Joi.string().max(255).optional().allow('', null),
   instructions: shortText(500).optional().allow('', null),
 });
 
@@ -161,7 +161,7 @@ export const createPrescriptionSchema = Joi.object({
   petOwnerId: uuid.optional(),
   animalId: uuid.optional(),
   medications: Joi.array().items(medicationSchema).min(1).required(),
-  instructions: Joi.string().max(5000).required(),
+  instructions: Joi.string().max(5000).optional().allow('', null),
   validUntil: Joi.string().optional().allow('', null),
   diagnosis: longText().optional().allow('', null),
   followUpDate: Joi.string().optional().allow('', null),

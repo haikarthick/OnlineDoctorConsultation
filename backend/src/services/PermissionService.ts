@@ -159,7 +159,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
     'animals', 'medical_records', 'video_consultation',
-    'settings', 'write_review',
+    'prescriptions', 'settings', 'write_review',
     // Hospital (browse only)
     'hospital_browse',
     // Enterprise (basic access)
@@ -176,7 +176,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   farmer: [
     // Pages
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
-    'animals', 'medical_records', 'video_consultation', 'settings', 'write_review',
+    'animals', 'medical_records', 'video_consultation', 'prescriptions', 'settings', 'write_review',
     // Hospital (browse to find vets)
     'hospital_browse',
     // Enterprise

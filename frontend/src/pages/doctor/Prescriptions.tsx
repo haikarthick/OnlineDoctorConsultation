@@ -40,7 +40,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
       const items = res.data?.items || (Array.isArray(res.data) ? res.data : [])
       setPrescriptions(items)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to load prescriptions')
+      setError(err?.response?.data?.error?.message || err?.response?.data?.message || 'Failed to load prescriptions')
     } finally {
       setLoading(false)
     }

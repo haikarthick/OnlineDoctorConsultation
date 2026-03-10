@@ -235,6 +235,7 @@ function AppRoutes() {
       <Route path="/doctor/consultation-room/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={ConsultationRoom} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />
       <Route path="/doctor/prescriptions/new" element={<RoleRoute path="/doctor/prescriptions/new"><AppLayout><RoutedPage Component={PrescriptionWriter} /></AppLayout></RoleRoute>} />
       <Route path="/doctor/prescriptions" element={<RoleRoute path="/doctor/prescriptions"><AppLayout><RoutedPage Component={Prescriptions} /></AppLayout></RoleRoute>} />
+      <Route path="/prescriptions" element={<RoleRoute path="/prescriptions"><AppLayout><RoutedPage Component={Prescriptions} /></AppLayout></RoleRoute>} />
       <Route path="/doctor/reviews" element={<RoleRoute path="/doctor/reviews"><AppLayout><RoutedPage Component={MyReviews} /></AppLayout></RoleRoute>} />
 
       {/* ── Admin Module ── */}

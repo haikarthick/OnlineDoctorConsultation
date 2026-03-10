@@ -58,6 +58,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['veterinarian'], section: 'Consultations' },
     { id: 'prescriptions', label: 'Prescriptions', icon: '💊', path: '/doctor/prescriptions',
       roles: ['veterinarian'], section: 'Consultations' },
+    { id: 'prescriptions', label: 'My Prescriptions', icon: '💊', path: '/prescriptions',
+      roles: ['pet_owner', 'farmer'], section: 'Consultations' },
 
     // ── Animals & Health ──
     { id: 'animals', label: isPetOwner ? 'My Pets' : 'My Animals',

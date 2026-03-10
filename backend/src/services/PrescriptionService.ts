@@ -97,11 +97,18 @@ class PrescriptionService {
 
   async listByConsultation(consultationId: string): Promise<Prescription[]> {
     const result = await database.query(
-      `SELECT id, consultation_id as "consultationId", veterinarian_id as "veterinarianId",
-       pet_owner_id as "petOwnerId", medications, instructions,
-       valid_until as "validUntil", is_active as "isActive",
-       created_at as "createdAt", updated_at as "updatedAt"
-       FROM prescriptions WHERE consultation_id = $1 ORDER BY created_at DESC`,
+      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.medications, p.instructions,
+       p.valid_until as "validUntil", p.is_active as "isActive",
+       p.created_at as "createdAt", p.updated_at as "updatedAt",
+       COALESCE(v.first_name || ' ' || v.last_name, 'Unknown') as "vetName",
+       COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
+       c.diagnosis
+       FROM prescriptions p
+       LEFT JOIN users v ON v.id = p.veterinarian_id
+       LEFT JOIN users o ON o.id = p.pet_owner_id
+       LEFT JOIN consultations c ON c.id = p.consultation_id
+       WHERE p.consultation_id = $1 ORDER BY p.created_at DESC`,
       [consultationId]
     );
     return result.rows.map((row: any) => {
@@ -115,11 +122,16 @@ class PrescriptionService {
     const offset = params?.offset || 0;
 
     const result = await database.query(
-      `SELECT id, consultation_id as "consultationId", veterinarian_id as "veterinarianId",
-       pet_owner_id as "petOwnerId", medications, instructions,
-       valid_until as "validUntil", is_active as "isActive",
-       created_at as "createdAt", updated_at as "updatedAt"
-       FROM prescriptions WHERE pet_owner_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.medications, p.instructions,
+       p.valid_until as "validUntil", p.is_active as "isActive",
+       p.created_at as "createdAt", p.updated_at as "updatedAt",
+       COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "vetName",
+       c.diagnosis
+       FROM prescriptions p
+       LEFT JOIN users u ON u.id = p.veterinarian_id
+       LEFT JOIN consultations c ON c.id = p.consultation_id
+       WHERE p.pet_owner_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
       [petOwnerId, limit, offset]
     );
     return result.rows.map((row: any) => {
@@ -133,11 +145,16 @@ class PrescriptionService {
     const offset = params?.offset || 0;
 
     const result = await database.query(
-      `SELECT id, consultation_id as "consultationId", veterinarian_id as "veterinarianId",
-       pet_owner_id as "petOwnerId", medications, instructions,
-       valid_until as "validUntil", is_active as "isActive",
-       created_at as "createdAt", updated_at as "updatedAt"
-       FROM prescriptions WHERE veterinarian_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.medications, p.instructions,
+       p.valid_until as "validUntil", p.is_active as "isActive",
+       p.created_at as "createdAt", p.updated_at as "updatedAt",
+       COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "petOwnerName",
+       c.diagnosis
+       FROM prescriptions p
+       LEFT JOIN users u ON u.id = p.pet_owner_id
+       LEFT JOIN consultations c ON c.id = p.consultation_id
+       WHERE p.veterinarian_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
       [veterinarianId, limit, offset]
     );
     return result.rows.map((row: any) => {
