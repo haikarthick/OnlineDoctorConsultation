@@ -168,7 +168,7 @@ class ApiService {
     return response.data
   }
 
-  async rescheduleBooking(id: string, data: { scheduledDate: string; timeSlotStart: string; timeSlotEnd: string }) {
+  async rescheduleBooking(id: string, data: { scheduledDate: string; timeSlotStart: string; timeSlotEnd: string; veterinarianId?: string }) {
     const response = await this.client.put(`/bookings/${id}/reschedule`, data)
     return response.data
   }

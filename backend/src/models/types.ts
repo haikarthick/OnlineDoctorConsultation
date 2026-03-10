@@ -76,6 +76,7 @@ export interface Booking {
   notes?: string;
   cancellationReason?: string;
   rescheduledFrom?: string;
+  rescheduleCount?: number;
   confirmedAt?: Date;
   createdAt: Date;
   updatedAt: Date;

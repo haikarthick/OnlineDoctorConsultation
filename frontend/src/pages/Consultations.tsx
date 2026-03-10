@@ -16,6 +16,7 @@ interface BookingRow {
   animalName?: string; animalSpecies?: string; animalBreed?: string; animalUniqueId?: string;
   enterpriseName?: string; enterpriseType?: string;
   groupName?: string; groupType?: string;
+  rescheduleCount?: number;
 }
 interface ConsultRow {
   id: string; animalType?: string; symptomDescription?: string;
@@ -34,6 +35,23 @@ const filterFutureSlots = (slots: TimeSlot[], forDate: string) => {
     const [h, m] = s.startTime.split(':').map(Number)
     return h * 60 + m > now.getHours() * 60 + now.getMinutes() + 15
   })
+}
+
+/** Check if a booking's scheduled time has already passed (browser local time) */
+const isExpiredPending = (b: BookingRow): boolean => {
+  if (b.status !== 'pending') return false
+  const d = new Date(b.scheduledDate + 'T' + b.timeSlotEnd + ':00')
+  return d < new Date()
+}
+
+/** Check if a user can reschedule (within limit) */
+const canReschedule = (b: BookingRow, maxReschedules: number): boolean => {
+  // Expired pending → always allowed (not user's fault)
+  if (isExpiredPending(b)) return true
+  // For pending pre-acceptance reschedules, check limit
+  if (b.status === 'pending') return maxReschedules === 0 || (b.rescheduleCount || 0) < maxReschedules
+  // confirmed/missed → always allowed (existing behavior)
+  return true
 }
 
 const Consultations: React.FC = () => {
@@ -77,6 +95,10 @@ const Consultations: React.FC = () => {
   const [rescheduleSlotsLoading, setRescheduleSlotsLoading] = useState(false)
   const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false)
   const [rescheduleError, setRescheduleError] = useState('')
+  // Doctor selection for reschedule (when changing vet)
+  const [rescheduleVetId, setRescheduleVetId] = useState<string>('')
+  const [vetList, setVetList] = useState<{ id: string; name: string; specialization?: string }[]>([])
+  const [vetListLoading, setVetListLoading] = useState(false)
 
   // Cancel modal state
   const [cancelModal, setCancelModal] = useState<{ show: boolean; bookingId: string; reason: string }>({
@@ -162,26 +184,50 @@ const Consultations: React.FC = () => {
   }
 
   // ─── Reschedule helpers ─────────────────────────────────
-  const openRescheduleModal = (b: BookingRow) => {
+  const openRescheduleModal = async (b: BookingRow) => {
     setRescheduleBooking(b)
     setRescheduleDate('')
     setRescheduleSlots([])
     setRescheduleSelectedSlot(null)
     setRescheduleError('')
+    setRescheduleVetId(b.veterinarianId || '')
+    // Load vet list so user can optionally change doctor
+    if (vetList.length === 0) {
+      try {
+        setVetListLoading(true)
+        const res = await apiService.listVets({ limit: 100 })
+        const vets = (res.data?.items || res.data || []).map((v: any) => ({
+          id: v.userId || v.id,
+          name: `Dr. ${v.firstName || ''} ${v.lastName || ''}`.trim(),
+          specialization: v.specialization || ''
+        }))
+        setVetList(vets)
+      } catch { /* ignore */ }
+      finally { setVetListLoading(false) }
+    }
   }
 
-  const loadRescheduleSlots = async (date: string) => {
-    if (!rescheduleBooking?.veterinarianId) return
+  const loadRescheduleSlots = async (date: string, vetId?: string) => {
+    const targetVetId = vetId || rescheduleVetId || rescheduleBooking?.veterinarianId
+    if (!targetVetId) return
     setRescheduleDate(date)
     setRescheduleSelectedSlot(null)
     try {
       setRescheduleSlotsLoading(true)
-      const result = await apiService.getVetAvailability(rescheduleBooking.veterinarianId, date)
+      const result = await apiService.getVetAvailability(targetVetId, date)
       setRescheduleSlots(result.data?.slots || [])
     } catch {
       setRescheduleSlots([])
     } finally {
       setRescheduleSlotsLoading(false)
+    }
+  }
+
+  const handleVetChange = (newVetId: string) => {
+    setRescheduleVetId(newVetId)
+    setRescheduleSelectedSlot(null)
+    if (rescheduleDate) {
+      loadRescheduleSlots(rescheduleDate, newVetId)
     }
   }
 
@@ -195,11 +241,16 @@ const Consultations: React.FC = () => {
     }
     try {
       setRescheduleSubmitting(true)
-      await apiService.rescheduleBooking(rescheduleBooking.id, {
+      const payload: any = {
         scheduledDate: rescheduleDate,
         timeSlotStart: rescheduleSelectedSlot.startTime,
         timeSlotEnd: rescheduleSelectedSlot.endTime
-      })
+      }
+      // Include veterinarianId if changed
+      if (rescheduleVetId && rescheduleVetId !== rescheduleBooking.veterinarianId) {
+        payload.veterinarianId = rescheduleVetId
+      }
+      await apiService.rescheduleBooking(rescheduleBooking.id, payload)
       setRescheduleBooking(null)
       setRescheduleError('')
       loadData()
@@ -387,11 +438,18 @@ const Consultations: React.FC = () => {
                     {(b.reasonForVisit || b.reason) && (
                       <div className="appt-card-reason">{b.reasonForVisit || b.reason}</div>
                     )}
+
+                    {/* Expired pending warning */}
+                    {isExpiredPending(b) && (
+                      <div style={{ padding: '8px 12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, fontSize: 12, color: '#991b1b', marginTop: 6 }}>
+                        ⚠️ Scheduled time has passed without doctor confirmation. Please reschedule{isPetOwner ? ' with any available doctor' : ''}.
+                      </div>
+                    )}
                   </div>
 
                   {/* Card Actions */}
                   <div className="appt-card-actions">
-                    {isVet && b.status === 'pending' && (
+                    {isVet && b.status === 'pending' && !isExpiredPending(b) && (
                       <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>✓ Confirm</button>
                     )}
                     {(isVet || isAdmin) && b.status === 'confirmed' && b.bookingType === 'video_call' && (
@@ -404,13 +462,19 @@ const Consultations: React.FC = () => {
                         ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>📹 Join</button>
                         : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}>🔒 Not Yet</button>
                     )}
-                    {(b.status === 'missed' || b.status === 'confirmed') && (
-                      <button className="btn-small" style={{ background: '#f59e0b', color: 'white', border: 'none' }} onClick={() => openRescheduleModal(b)}>🔄 Reschedule</button>
+                    {/* Reschedule: for missed, confirmed, or pending bookings (with limit check) */}
+                    {(b.status === 'missed' || b.status === 'confirmed' || (b.status === 'pending' && canReschedule(b, appSettings.maxReschedules))) && (
+                      <button className="btn-small" style={{
+                        background: isExpiredPending(b) ? '#dc2626' : '#f59e0b',
+                        color: 'white', border: 'none'
+                      }} onClick={() => openRescheduleModal(b)}>
+                        {isExpiredPending(b) ? '⚠️ Reschedule' : '🔄 Reschedule'}
+                      </button>
                     )}
                     {(b.status === 'pending' || b.status === 'confirmed') && (
                       <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #dc2626', background: 'white' }} onClick={() => handleCancelBooking(b.id)}>✕ Cancel</button>
                     )}
-                    {isAdmin && b.status === 'pending' && (
+                    {isAdmin && b.status === 'pending' && !isExpiredPending(b) && (
                       <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>✓ Confirm</button>
                     )}
                     <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View Action History">📋 Log</button>
@@ -523,6 +587,42 @@ const Consultations: React.FC = () => {
               <p style={{ margin: '6px 0 0', fontSize: 13, color: '#92400e' }}>
                 {rescheduleBooking.vetName || 'Doctor'} — {fmt(rescheduleBooking.scheduledDate)} at {rescheduleBooking.timeSlotStart} - {rescheduleBooking.timeSlotEnd}
               </p>
+            </div>
+
+            {/* Reschedule count info */}
+            {rescheduleBooking.status === 'pending' && !isExpiredPending(rescheduleBooking) && appSettings.maxReschedules > 0 && (
+              <div style={{ padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#1e40af' }}>
+                📊 Reschedule {(rescheduleBooking.rescheduleCount || 0) + 1} of {appSettings.maxReschedules} allowed
+              </div>
+            )}
+
+            {/* Expired pending notice */}
+            {isExpiredPending(rescheduleBooking) && (
+              <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#991b1b' }}>
+                ⚠️ The original appointment time has passed without doctor confirmation. You may select a <strong>different doctor</strong> for faster availability.
+              </div>
+            )}
+
+            {/* Doctor selection */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>
+                Select Doctor {isExpiredPending(rescheduleBooking) ? '*' : '(optional)'}
+              </label>
+              {vetListLoading ? (
+                <div style={{ padding: 10, textAlign: 'center', color: '#6b7280', fontSize: 13 }}>Loading doctors...</div>
+              ) : (
+                <select
+                  value={rescheduleVetId}
+                  onChange={(e) => handleVetChange(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box', background: 'white' }}
+                >
+                  {vetList.map(v => (
+                    <option key={v.id} value={v.id}>
+                      {v.name}{v.specialization ? ` — ${v.specialization}` : ''}{v.id === rescheduleBooking.veterinarianId ? ' (current)' : ''}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* New date picker */}

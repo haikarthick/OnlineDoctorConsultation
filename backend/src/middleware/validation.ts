@@ -100,6 +100,7 @@ export const rescheduleBookingSchema = Joi.object({
   scheduledDate: Joi.string().required().pattern(/^\d{4}-\d{2}-\d{2}$/),
   timeSlotStart: Joi.string().required().pattern(/^\d{2}:\d{2}/),
   timeSlotEnd: Joi.string().required().pattern(/^\d{2}:\d{2}/),
+  veterinarianId: Joi.string().uuid().optional(),
 });
 
 export const cancelBookingSchema = Joi.object({

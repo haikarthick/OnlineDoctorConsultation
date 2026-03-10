@@ -92,6 +92,7 @@ class BookingService {
        time_slot_end as "timeSlotEnd", status, booking_type as "bookingType",
        priority, reason_for_visit as "reasonForVisit", symptoms, notes,
        cancellation_reason as "cancellationReason", confirmed_at as "confirmedAt",
+       reschedule_count as "rescheduleCount",
        created_at as "createdAt", updated_at as "updatedAt"
        FROM bookings WHERE id = $1`,
       [id]
@@ -139,6 +140,7 @@ class BookingService {
        b.scheduled_date as "scheduledDate", b.time_slot_start as "timeSlotStart",
        b.time_slot_end as "timeSlotEnd", b.status, b.booking_type as "bookingType",
        b.priority, b.reason_for_visit as "reasonForVisit", b.symptoms, b.notes,
+       b.reschedule_count as "rescheduleCount",
        b.created_at as "createdAt", b.updated_at as "updatedAt",
        CONCAT(po.first_name, ' ', po.last_name) as "petOwnerName",
        CONCAT('Dr. ', v.first_name, ' ', v.last_name) as "vetName",
@@ -215,7 +217,7 @@ class BookingService {
     return this.updateBookingStatus(id, 'cancelled', reason);
   }
 
-  async rescheduleBooking(id: string, newDate: string, newStart: string, newEnd: string, initiatorRole?: string): Promise<Booking> {
+  async rescheduleBooking(id: string, newDate: string, newStart: string, newEnd: string, initiatorRole?: string, newVeterinarianId?: string): Promise<Booking> {
     // Prevent rescheduling to a past date (date-only check; time-of-day
     // validation is done on the frontend using the user's local timezone)
     const requestedDate = new Date(newDate + 'T12:00:00Z');
@@ -228,16 +230,31 @@ class BookingService {
     // Get the original booking details
     const oldBooking = await this.getBooking(id);
 
-    // Only missed or confirmed bookings can be rescheduled
-    if (!['confirmed', 'missed'].includes(oldBooking.status)) {
-      throw new ValidationError(`Cannot reschedule a booking with status '${oldBooking.status}'. Only missed or confirmed bookings can be rescheduled.`);
+    // Allow pending, confirmed, or missed bookings to be rescheduled
+    if (!['pending', 'confirmed', 'missed'].includes(oldBooking.status)) {
+      throw new ValidationError(`Cannot reschedule a booking with status '${oldBooking.status}'. Only pending, confirmed, or missed bookings can be rescheduled.`);
     }
+
+    // Determine if this is an expired pending booking (time has passed, never confirmed)
+    const isExpiredPending = oldBooking.status === 'pending' && this.isBookingPastDue(oldBooking);
+
+    // For non-expired pending reschedules, enforce the max reschedule limit
+    if (oldBooking.status === 'pending' && !isExpiredPending) {
+      const maxReschedules = await this.getMaxReschedules();
+      const currentCount = (oldBooking as any).rescheduleCount || 0;
+      if (maxReschedules > 0 && currentCount >= maxReschedules) {
+        throw new ValidationError(`You have reached the maximum number of reschedules (${maxReschedules}). Please cancel and create a new booking.`);
+      }
+    }
+
+    // Determine which vet to use (allow changing vet for reschedules)
+    const vetId = newVeterinarianId || oldBooking.veterinarianId;
 
     // Check for conflicting bookings on the new slot
     const conflicts = await database.query(
       `SELECT id FROM bookings WHERE veterinarian_id = $1 AND scheduled_date = $2
        AND time_slot_start = $3 AND status NOT IN ('cancelled', 'rescheduled')`,
-      [oldBooking.veterinarianId, newDate, newStart]
+      [vetId, newDate, newStart]
     );
     if (conflicts.rows.length > 0) {
       throw new ConflictError('This time slot is already booked');
@@ -256,12 +273,14 @@ class BookingService {
     const newId = uuidv4();
     const newStatus = initiatorRole === 'veterinarian' ? 'confirmed' : 'pending';
     const confirmedAt = initiatorRole === 'veterinarian' ? now : null;
+    // Carry forward reschedule count (+1 only for non-expired-pending reschedules)
+    const newRescheduleCount = isExpiredPending ? ((oldBooking as any).rescheduleCount || 0) : ((oldBooking as any).rescheduleCount || 0) + 1;
 
     const result = await database.query(
       `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, enterprise_id, group_id, hospital_id, scheduled_date,
        time_slot_start, time_slot_end, status, booking_type, priority, reason_for_visit,
-       symptoms, notes, rescheduled_from, confirmed_at, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+       symptoms, notes, rescheduled_from, reschedule_count, confirmed_at, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
        RETURNING id, pet_owner_id as "petOwnerId", veterinarian_id as "veterinarianId",
        animal_id as "animalId", enterprise_id as "enterpriseId", group_id as "groupId",
        hospital_id as "hospitalId",
@@ -269,17 +288,36 @@ class BookingService {
        time_slot_start as "timeSlotStart", time_slot_end as "timeSlotEnd",
        status, booking_type as "bookingType", priority, reason_for_visit as "reasonForVisit",
        symptoms, notes, rescheduled_from as "rescheduledFrom",
+       reschedule_count as "rescheduleCount",
        created_at as "createdAt", updated_at as "updatedAt"`,
-      [newId, oldBooking.petOwnerId, oldBooking.veterinarianId, oldBooking.animalId || null,
+      [newId, oldBooking.petOwnerId, vetId, oldBooking.animalId || null,
        (oldBooking as any).enterpriseId || null, (oldBooking as any).groupId || null,
        (oldBooking as any).hospitalId || null,
        newDate, newStart, newEnd, newStatus, oldBooking.bookingType || 'video_call',
        oldBooking.priority || 'normal', oldBooking.reasonForVisit || null,
-       oldBooking.symptoms || null, oldBooking.notes || null, id, confirmedAt, now, now]
+       oldBooking.symptoms || null, oldBooking.notes || null, id, newRescheduleCount, confirmedAt, now, now]
     );
 
-    logger.info('Booking rescheduled', { oldBookingId: id, newBookingId: newId, newStatus, initiatorRole });
+    logger.info('Booking rescheduled', { oldBookingId: id, newBookingId: newId, newStatus, initiatorRole, vetChanged: vetId !== oldBooking.veterinarianId });
     return result.rows[0];
+  }
+
+  /** Check if a booking's scheduled time has already passed */
+  private isBookingPastDue(booking: Booking): boolean {
+    const d = new Date(booking.scheduledDate);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const scheduledEnd = new Date(`${dateStr}T${booking.timeSlotEnd}:00`);
+    return scheduledEnd < new Date();
+  }
+
+  /** Get max reschedules setting from system_settings */
+  private async getMaxReschedules(): Promise<number> {
+    try {
+      const result = await database.query(
+        `SELECT value FROM system_settings WHERE key = 'booking.maxReschedules'`
+      );
+      return result.rows.length > 0 ? parseInt(result.rows[0].value, 10) || 0 : 1;
+    } catch { return 1; }
   }
 
   // ─── Hospital-specific bookings listing ──────────────────────

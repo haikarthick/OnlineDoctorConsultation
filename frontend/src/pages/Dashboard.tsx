@@ -271,7 +271,12 @@ const Dashboard: React.FC = () => {
               <h3>Pending Booking Confirmations ({pendingBookings.length})</h3>
             </div>
             <div className="alert-body">
-              {pendingBookings.map(booking => (
+              {pendingBookings.map(booking => {
+                const expired = booking.status === 'pending' && (() => {
+                  const d = new Date(booking.scheduledDate + 'T' + (booking.timeSlotEnd || '23:59') + ':00')
+                  return d < new Date()
+                })()
+                return (
                 <div key={booking.id} className="alert-item">
                   <div className="alert-item-info">
                     <strong>{booking.petOwnerName || 'Patient'}</strong>
@@ -285,13 +290,19 @@ const Dashboard: React.FC = () => {
                         <span className="priority-tag"> ⚠️ {booking.priority?.toUpperCase()}</span>
                       )}
                     </span>
+                    {expired && (
+                      <span style={{ display: 'inline-block', marginTop: 4, padding: '2px 8px', background: '#fef2f2', color: '#dc2626', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>
+                        ⏰ Expired — scheduled time has passed
+                      </span>
+                    )}
                   </div>
                   <div className="alert-item-actions">
-                    <button className="btn-confirm" onClick={() => handleConfirm(booking.id)}>✓ Confirm</button>
+                    {!expired && <button className="btn-confirm" onClick={() => handleConfirm(booking.id)}>✓ Confirm</button>}
                     <button className="btn-decline" onClick={() => handleCancel(booking.id)}>✕ Decline</button>
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>

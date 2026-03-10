@@ -112,6 +112,7 @@ class PostgresDatabase {
       { key: 'display.timeFormat', value: '12h', category: 'display', description: 'Time display format: 12h (AM/PM) or 24h' },
       { key: 'display.dateFormat', value: 'MMM d, yyyy', category: 'display', description: 'Date display format' },
       { key: 'consultation.joinWindowMinutes', value: '5', category: 'consultation', description: 'Minutes before scheduled time when Join/Start button becomes available' },
+      { key: 'booking.maxReschedules', value: '1', category: 'booking', description: 'Maximum times a user can reschedule before doctor acceptance (0 = unlimited)' },
     ];
     for (const d of defaults) {
       await this.pool.query(
@@ -121,6 +122,10 @@ class PostgresDatabase {
         [d.key, d.value, d.category, d.description]
       );
     }
+    // Ensure reschedule_count column exists on bookings (safe for existing DBs)
+    await this.pool.query(
+      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reschedule_count INTEGER NOT NULL DEFAULT 0`
+    ).catch(() => { /* column may already exist */ });
     logger.info('Default system settings seeded');
   }
 

@@ -120,12 +120,12 @@ class BookingController {
       throw new ForbiddenError('Not authorized to reschedule this booking');
     }
 
-    const { scheduledDate, timeSlotStart, timeSlotEnd } = req.body;
+    const { scheduledDate, timeSlotStart, timeSlotEnd, veterinarianId } = req.body;
     if (!scheduledDate || !timeSlotStart || !timeSlotEnd) {
       throw new ValidationError('scheduledDate, timeSlotStart, and timeSlotEnd are required');
     }
 
-    const updated = await BookingService.rescheduleBooking(req.params.id, scheduledDate, timeSlotStart, timeSlotEnd, authReq.userRole);
+    const updated = await BookingService.rescheduleBooking(req.params.id, scheduledDate, timeSlotStart, timeSlotEnd, authReq.userRole, veterinarianId);
 
     await logBookingAction(authReq.userId!, authReq.userRole || 'unknown', 'BOOKING_RESCHEDULED', updated.id, {
       oldBookingId: req.params.id,

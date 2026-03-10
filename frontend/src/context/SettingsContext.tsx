@@ -6,6 +6,7 @@ export type TimeFormatType = '12h' | '24h'
 export interface AppSettings {
   timeFormat: TimeFormatType
   joinWindowMinutes: number
+  maxReschedules: number
 }
 
 interface SettingsContextType {
@@ -22,7 +23,7 @@ interface SettingsContextType {
   reloadSettings: () => Promise<void>
 }
 
-const defaults: AppSettings = { timeFormat: '12h', joinWindowMinutes: 5 }
+const defaults: AppSettings = { timeFormat: '12h', joinWindowMinutes: 5, maxReschedules: 1 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
@@ -38,9 +39,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         const list: { key: string; value: string }[] = json.data || []
         const tfEntry = list.find(s => s.key === 'display.timeFormat')
         const jwEntry = list.find(s => s.key === 'consultation.joinWindowMinutes')
+        const mrEntry = list.find(s => s.key === 'booking.maxReschedules')
         setSettings({
           timeFormat: (tfEntry?.value === '24h' ? '24h' : '12h') as TimeFormatType,
           joinWindowMinutes: jwEntry?.value ? parseInt(jwEntry.value, 10) || 5 : 5,
+          maxReschedules: mrEntry?.value ? parseInt(mrEntry.value, 10) : 1,
         })
       }
     } catch {

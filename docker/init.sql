@@ -143,6 +143,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   notes TEXT,
   cancellation_reason TEXT,
   rescheduled_from UUID,
+  reschedule_count INTEGER NOT NULL DEFAULT 0,
   confirmed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
