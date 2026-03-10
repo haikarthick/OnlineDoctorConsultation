@@ -17,6 +17,7 @@ interface BookingRow {
   enterpriseName?: string; enterpriseType?: string;
   groupName?: string; groupType?: string;
   rescheduleCount?: number;
+  missedBy?: 'doctor' | 'patient' | 'both';
 }
 interface ConsultRow {
   id: string; animalType?: string; symptomDescription?: string;
@@ -45,18 +46,27 @@ const isExpiredPending = (b: BookingRow): boolean => {
 }
 
 /** Check if a user can reschedule (within limit) */
-const canReschedule = (b: BookingRow, maxReschedules: number): boolean => {
+const canReschedule = (b: BookingRow, maxReschedules: number, patientNoShowLimit: number): boolean => {
   // Expired pending → always allowed (not user's fault)
   if (isExpiredPending(b)) return true
   // For pending pre-acceptance reschedules, check limit
   if (b.status === 'pending') return maxReschedules === 0 || (b.rescheduleCount || 0) < maxReschedules
-  // confirmed/missed → always allowed (existing behavior)
+  // Missed booking logic
+  if (b.status === 'missed') {
+    const missedBy = b.missedBy
+    // Doctor no-show → unlimited reschedules for patient
+    if (!missedBy || missedBy === 'doctor') return true
+    // Patient/both no-show → check patientNoShowLimit
+    return patientNoShowLimit === 0 || (b.rescheduleCount || 0) < patientNoShowLimit
+  }
+  // confirmed → always allowed
   return true
 }
 
 const Consultations: React.FC = () => {
   const { user } = useAuth()
   const { formatDate, isJoinable, settings: appSettings } = useSettings()
+  const { maxReschedules, patientNoShowRescheduleLimit } = appSettings
   const navigate = useNavigate()
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [consultations, setConsultations] = useState<ConsultRow[]>([])
@@ -319,6 +329,21 @@ const Consultations: React.FC = () => {
     return <span style={{ background: s.bg, color: s.fg, padding: '4px 12px', borderRadius: 12, fontSize: 12, fontWeight: 600, textTransform: 'capitalize' as const }}>{status.replace(/_/g, ' ')}</span>
   }
 
+  const missedBadge = (missedBy?: 'doctor' | 'patient' | 'both') => {
+    if (!missedBy) return null
+    const config = {
+      doctor:  { bg: '#fef3c7', fg: '#92400e', icon: '🩺', label: 'Doctor No-Show' },
+      patient: { bg: '#ede9fe', fg: '#6d28d9', icon: '🙋', label: 'Patient No-Show' },
+      both:    { bg: '#f1f5f9', fg: '#475569', icon: '❌', label: 'Both No-Show' },
+    }
+    const c = config[missedBy]
+    return (
+      <span style={{ background: c.bg, color: c.fg, padding: '3px 10px', borderRadius: 10, fontSize: 11, fontWeight: 600, display: 'inline-block', marginTop: 4 }}>
+        {c.icon} {c.label}
+      </span>
+    )
+  }
+
   if (loading) return (
     <div className="module-page">
       <div style={{ textAlign: 'center', padding: 60 }}>
@@ -445,6 +470,43 @@ const Consultations: React.FC = () => {
                         ⚠️ Scheduled time has passed without doctor confirmation. Please reschedule{isPetOwner ? ' with any available doctor' : ''}.
                       </div>
                     )}
+
+                    {/* Who missed badge + contextual info for missed bookings */}
+                    {b.status === 'missed' && (
+                      <div style={{ marginTop: 8 }}>
+                        {missedBadge(b.missedBy)}
+                        {isPetOwner && b.missedBy === 'doctor' && (
+                          <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                            🩺 The doctor did not join. You may reschedule this appointment with any available doctor — <strong>no limit</strong> on reschedules.
+                          </div>
+                        )}
+                        {isPetOwner && (b.missedBy === 'patient' || b.missedBy === 'both') && (() => {
+                          const used = b.rescheduleCount || 0
+                          const limit = patientNoShowRescheduleLimit
+                          const remaining = limit === 0 ? null : Math.max(0, limit - used)
+                          return (
+                            <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
+                              ⚠️ You missed this appointment.{' '}
+                              {limit === 0
+                                ? 'You may reschedule at any time.'
+                                : remaining !== null && remaining > 0
+                                  ? `You have ${remaining} reschedule${remaining !== 1 ? 's' : ''} remaining.`
+                                  : 'You have used your reschedule allowance for this booking.'}
+                            </div>
+                          )
+                        })()}
+                        {isVet && b.missedBy === 'patient' && (
+                          <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
+                            🙋 The patient did not join the session.
+                          </div>
+                        )}
+                        {isVet && b.missedBy === 'doctor' && (
+                          <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                            🩺 You did not join this session. The patient may reschedule.
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Card Actions */}
@@ -462,8 +524,8 @@ const Consultations: React.FC = () => {
                         ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>📹 Join</button>
                         : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}>🔒 Not Yet</button>
                     )}
-                    {/* Reschedule: for missed, confirmed, or pending bookings (with limit check) */}
-                    {(b.status === 'missed' || b.status === 'confirmed' || (b.status === 'pending' && canReschedule(b, appSettings.maxReschedules))) && (
+                    {/* Reschedule button — conditional on who missed and reschedule limits */}
+                    {(b.status === 'confirmed' || (b.status === 'pending' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit)) || (b.status === 'missed' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit))) && (
                       <button className="btn-small" style={{
                         background: isExpiredPending(b) ? '#dc2626' : '#f59e0b',
                         color: 'white', border: 'none'
@@ -593,6 +655,26 @@ const Consultations: React.FC = () => {
             {rescheduleBooking.status === 'pending' && !isExpiredPending(rescheduleBooking) && appSettings.maxReschedules > 0 && (
               <div style={{ padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#1e40af' }}>
                 📊 Reschedule {(rescheduleBooking.rescheduleCount || 0) + 1} of {appSettings.maxReschedules} allowed
+              </div>
+            )}
+
+            {/* Missed booking context */}
+            {rescheduleBooking.status === 'missed' && (
+              <div style={{ padding: '10px 14px', borderRadius: 8, marginBottom: 16, fontSize: 13,
+                background: !rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor' ? '#fef9c3' : '#f5f3ff',
+                border: !rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor' ? '1px solid #fde68a' : '1px solid #ddd6fe',
+                color: !rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor' ? '#78350f' : '#5b21b6',
+              }}>
+                {!rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor'
+                  ? '🩺 Doctor no-show — you may reschedule with any available doctor. No reschedule limit applies.'
+                  : (() => {
+                      const used = rescheduleBooking.rescheduleCount || 0
+                      const limit = patientNoShowRescheduleLimit
+                      return limit === 0
+                        ? '🙋 Patient no-show — you may reschedule (no limit configured).'
+                        : `🙋 Patient no-show — reschedule ${used + 1} of ${limit} allowed.`
+                    })()
+                }
               </div>
             )}
 

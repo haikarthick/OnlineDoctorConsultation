@@ -6,32 +6,55 @@ import logger from '../utils/logger';
 
 class BookingService {
   /**
-   * Auto-mark confirmed bookings as 'missed' if their time window has passed
-   * without a consultation being started. Uses local date to avoid timezone issues.
+   * Auto-mark confirmed bookings as 'missed' if their time window has passed.
+   * Detects WHO missed using video_sessions:
+   *   - doctor: no video session was created (doctor never opened the room)
+   *   - patient: video session exists in 'waiting' state (doctor opened room, patient didn't join)
+   * Skips bookings whose linked consultation is completed or in progress.
    */
   async markMissedBookings(): Promise<number> {
     const now = new Date();
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-    // Mark as missed: confirmed bookings where scheduled_date < today,
-    // OR scheduled_date = today AND time_slot_end <= current time,
-    // AND no linked consultation (consultation_id is null or consultation not started)
+    // Mark confirmed bookings as missed whose scheduled window has passed.
+    // Determines missed_by:
+    //   'patient'  — video session created (doctor opened room) but stuck in 'waiting'
+    //   'doctor'   — no video session created at all (doctor never started the room)
+    // Skips bookings whose consultation is already completed or in_progress.
     const result = await database.query(
-      `UPDATE bookings SET status = 'missed', updated_at = NOW()
-       WHERE status = 'confirmed'
-         AND consultation_id IS NULL
-         AND (
-           scheduled_date < $1::date
-           OR (scheduled_date = $1::date AND time_slot_end <= $2)
+      `UPDATE bookings AS b
+       SET status = 'missed',
+           missed_by = CASE
+             WHEN b.consultation_id IS NOT NULL AND EXISTS (
+               SELECT 1 FROM video_sessions vs
+               WHERE vs.consultation_id = b.consultation_id
+                 AND vs.status = 'waiting'
+             ) THEN 'patient'
+             ELSE 'doctor'
+           END,
+           updated_at = NOW()
+       WHERE b.status = 'confirmed'
+         AND NOT (
+           b.consultation_id IS NOT NULL AND EXISTS (
+             SELECT 1 FROM consultations c
+             WHERE c.id = b.consultation_id
+               AND c.status IN ('completed', 'in_progress')
+           )
          )
-       RETURNING id`,
+         AND (
+           b.scheduled_date < $1::date
+           OR (b.scheduled_date = $1::date AND b.time_slot_end <= $2)
+         )
+       RETURNING b.id, b.missed_by`,
       [dateStr, timeStr]
     );
 
     if (result.rows.length > 0) {
       logger.info(`Auto-marked ${result.rows.length} booking(s) as missed`, {
-        bookingIds: result.rows.map((r: any) => r.id)
+        bookingIds: result.rows.map((r: any) => r.id),
+        byDoctor: result.rows.filter((r: any) => r.missed_by === 'doctor').length,
+        byPatient: result.rows.filter((r: any) => r.missed_by === 'patient').length,
       });
     }
     return result.rows.length;
@@ -92,7 +115,7 @@ class BookingService {
        time_slot_end as "timeSlotEnd", status, booking_type as "bookingType",
        priority, reason_for_visit as "reasonForVisit", symptoms, notes,
        cancellation_reason as "cancellationReason", confirmed_at as "confirmedAt",
-       reschedule_count as "rescheduleCount",
+       reschedule_count as "rescheduleCount", missed_by as "missedBy",
        created_at as "createdAt", updated_at as "updatedAt"
        FROM bookings WHERE id = $1`,
       [id]
@@ -140,7 +163,7 @@ class BookingService {
        b.scheduled_date as "scheduledDate", b.time_slot_start as "timeSlotStart",
        b.time_slot_end as "timeSlotEnd", b.status, b.booking_type as "bookingType",
        b.priority, b.reason_for_visit as "reasonForVisit", b.symptoms, b.notes,
-       b.reschedule_count as "rescheduleCount",
+       b.reschedule_count as "rescheduleCount", b.missed_by as "missedBy",
        b.created_at as "createdAt", b.updated_at as "updatedAt",
        CONCAT(po.first_name, ' ', po.last_name) as "petOwnerName",
        CONCAT('Dr. ', v.first_name, ' ', v.last_name) as "vetName",
@@ -247,6 +270,24 @@ class BookingService {
       }
     }
 
+    // For missed bookings, apply role-based reschedule limits:
+    //   - missed_by = 'doctor' → unlimited (not the patient's fault)
+    //   - missed_by = 'patient' or 'both' → patientNoShowRescheduleLimit
+    //   - missed_by = null/undefined → allow (no penalty for legacy records)
+    if (oldBooking.status === 'missed') {
+      const missedBy = (oldBooking as any).missedBy;
+      if (missedBy === 'patient' || missedBy === 'both') {
+        const patientLimit = await this.getPatientNoShowRescheduleLimit();
+        const currentCount = (oldBooking as any).rescheduleCount || 0;
+        if (patientLimit > 0 && currentCount >= patientLimit) {
+          throw new ValidationError(
+            `You have used your reschedule allowance (${patientLimit} time${patientLimit !== 1 ? 's' : ''}) for a patient no-show. Please contact support to book a new appointment.`
+          );
+        }
+      }
+      // missed_by = 'doctor' or null → no limit enforced
+    }
+
     // Determine which vet to use (allow changing vet for reschedules)
     const vetId = newVeterinarianId || oldBooking.veterinarianId;
 
@@ -315,6 +356,16 @@ class BookingService {
     try {
       const result = await database.query(
         `SELECT value FROM system_settings WHERE key = 'booking.maxReschedules'`
+      );
+      return result.rows.length > 0 ? parseInt(result.rows[0].value, 10) || 0 : 1;
+    } catch { return 1; }
+  }
+
+  /** Get patient no-show reschedule limit from system_settings (0 = unlimited) */
+  private async getPatientNoShowRescheduleLimit(): Promise<number> {
+    try {
+      const result = await database.query(
+        `SELECT value FROM system_settings WHERE key = 'booking.patientNoShowRescheduleLimit'`
       );
       return result.rows.length > 0 ? parseInt(result.rows[0].value, 10) || 0 : 1;
     } catch { return 1; }

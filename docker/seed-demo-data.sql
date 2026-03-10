@@ -444,6 +444,7 @@ INSERT INTO system_settings (id, key, value, category, description) VALUES
   (uuid_generate_v4(), 'booking.advanceBookingDays',      '60',             'booking',       'How many days in advance bookings are allowed'),
   (uuid_generate_v4(), 'booking.cancellationWindowHours', '24',             'booking',       'Hours before appointment when cancellation is free'),
   (uuid_generate_v4(), 'booking.maxReschedules',          '1',              'booking',       'Maximum number of times a user can reschedule a booking before doctor acceptance'),
+  (uuid_generate_v4(), 'booking.patientNoShowRescheduleLimit', '1',         'booking',       'Maximum times a patient can reschedule after a patient no-show (0 = unlimited)'),
   (uuid_generate_v4(), 'payment.currency',                'USD',            'payment',       'Default platform currency'),
   (uuid_generate_v4(), 'payment.taxRate',                 '9',              'payment',       'Default tax percentage applied to consultation fees'),
   (uuid_generate_v4(), 'notification.emailEnabled',       'true',           'notification',  'Enable email notifications'),

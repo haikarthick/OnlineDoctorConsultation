@@ -85,6 +85,7 @@ VALUES
   (uuid_generate_v4(), 'site_name', 'VetCare Platform', 'general', 'Application name'),
   (uuid_generate_v4(), 'max_booking_days_ahead', '30', 'booking', 'Maximum days in advance a booking can be made'),
   (uuid_generate_v4(), 'default_slot_duration', '30', 'booking', 'Default consultation slot duration in minutes'),
+  (uuid_generate_v4(), 'booking.patientNoShowRescheduleLimit', '1', 'booking', 'Maximum times a patient can reschedule after a patient no-show (0 = unlimited)'),
   (uuid_generate_v4(), 'payment_currency', 'USD', 'payment', 'Default payment currency'),
   (uuid_generate_v4(), 'video_quality', 'high', 'video', 'Default video call quality'),
   (uuid_generate_v4(), 'session_timeout', '86400', 'security', 'Session timeout in seconds'),

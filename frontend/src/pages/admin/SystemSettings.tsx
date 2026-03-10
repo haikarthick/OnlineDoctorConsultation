@@ -23,6 +23,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const [joinWindow, setJoinWindow] = useState(appSettings.joinWindowMinutes)
   const [savingJoinWindow, setSavingJoinWindow] = useState(false)
   const [joinWindowSaved, setJoinWindowSaved] = useState(false)
+  const [patientNoShowLimit, setPatientNoShowLimit] = useState(appSettings.patientNoShowRescheduleLimit)
+  const [savingPatientLimit, setSavingPatientLimit] = useState(false)
+  const [patientLimitSaved, setPatientLimitSaved] = useState(false)
 
   useEffect(() => {
     loadSettings()
@@ -96,6 +99,22 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     } catch (err) {
 } finally {
       setSavingJoinWindow(false)
+    }
+  }
+
+  const handlePatientNoShowLimitChange = async (limit: number) => {
+    try {
+      setSavingPatientLimit(true)
+      setPatientLimitSaved(false)
+      await apiService.adminUpdateSetting('booking.patientNoShowRescheduleLimit', String(limit))
+      setPatientNoShowLimit(limit)
+      setSettings(settings.map(s => s.key === 'booking.patientNoShowRescheduleLimit' ? { ...s, value: String(limit) } : s))
+      await reloadSettings()
+      setPatientLimitSaved(true)
+      setTimeout(() => setPatientLimitSaved(false), 3000)
+    } catch (err) {
+} finally {
+      setSavingPatientLimit(false)
     }
   }
 
@@ -250,6 +269,74 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>
               <strong>Current:</strong> Join/Start button becomes available <strong>{joinWindow} minutes</strong> before the scheduled appointment time.
               {joinWindow === 0 && ' (0 = always available)'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Booking Settings — No-Show Reschedule Rules ─── */}
+      <div className="card" style={{ marginBottom: 24 }}>
+        <div className="card-header">
+          <h2>📅 Booking — No-Show Reschedule Rules</h2>
+        </div>
+        <div className="card-body">
+          {/* Doctor no-show — always unlimited */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: 0, fontSize: 15 }}>🩺 Doctor No-Show</h3>
+              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                When a doctor doesn't join their confirmed appointment, the patient may reschedule with any available doctor.
+                This is <strong>always unlimited</strong> — it's the doctor's fault.
+              </p>
+            </div>
+            <div style={{ minWidth: 120, textAlign: 'right' }}>
+              <span style={{ background: '#d1fae5', color: '#065f46', padding: '5px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600 }}>♾ Unlimited</span>
+            </div>
+          </div>
+
+          <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: 15 }}>🙋 Patient No-Show Reschedule Limit</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                  When a patient misses their confirmed appointment, how many times they may reschedule that booking.
+                  Set to <strong>0</strong> for unlimited.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {[0, 1, 2, 3].map(n => (
+                  <button
+                    key={n}
+                    className={`btn btn-sm ${patientNoShowLimit === n ? 'btn-primary' : 'btn-outline'}`}
+                    disabled={savingPatientLimit}
+                    onClick={() => handlePatientNoShowLimitChange(n)}
+                    style={{ minWidth: 52 }}
+                  >
+                    {n === 0 ? '∞' : n}
+                  </button>
+                ))}
+                <input
+                  type="number"
+                  className="form-input"
+                  style={{ width: 70, padding: '4px 8px', fontSize: 13, textAlign: 'center' }}
+                  value={patientNoShowLimit}
+                  min={0}
+                  max={10}
+                  disabled={savingPatientLimit}
+                  onChange={e => {
+                    const v = parseInt(e.target.value, 10)
+                    if (!isNaN(v) && v >= 0 && v <= 10) setPatientNoShowLimit(v)
+                  }}
+                  onBlur={() => handlePatientNoShowLimitChange(patientNoShowLimit)}
+                  onKeyDown={e => { if (e.key === 'Enter') handlePatientNoShowLimitChange(patientNoShowLimit) }}
+                />
+                {savingPatientLimit && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                {patientLimitSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+              </div>
+            </div>
+            <p style={{ margin: '8px 0 0', fontSize: 13, color: '#6b7280' }}>
+              <strong>Current:</strong> Patient may reschedule a no-show booking{' '}
+              {patientNoShowLimit === 0 ? <strong>unlimited times</strong> : <><strong>{patientNoShowLimit} time{patientNoShowLimit !== 1 ? 's' : ''}</strong> before needing to contact support</>}.
             </p>
           </div>
         </div>

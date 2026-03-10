@@ -77,6 +77,7 @@ export interface Booking {
   cancellationReason?: string;
   rescheduledFrom?: string;
   rescheduleCount?: number;
+  missedBy?: 'doctor' | 'patient' | 'both';
   confirmedAt?: Date;
   createdAt: Date;
   updatedAt: Date;

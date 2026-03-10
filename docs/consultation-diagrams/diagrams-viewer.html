@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VetCare Consultation Module Diagrams</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .diagram-section {
+            margin-bottom: 50px;
+            padding: 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            background: #fafbfc;
+        }
+        .diagram-title {
+            color: #34495e;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .diagram-description {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .export-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .export-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        .export-btn:hover {
+            background: #2980b9;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #95a5a6;
+            font-size: 14px;
+        }
+        .nav {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            margin: -30px -30px 30px -30px;
+            border-radius: 10px 10px 0 0;
+        }
+        .nav h1 {
+            margin: 0;
+            color: white;
+            border: none;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <h1>🏥 VetCare Consultation Module Diagrams</h1>
+            <p>Comprehensive functional workflow analysis - March 10, 2026</p>
+        </div>
+
+        <div class="diagram-section">
+            <div class="diagram-title">1. Pet Owner Consultation Booking and Management Workflow</div>
+            <div class="diagram-description">Complete journey from booking request through consultation completion and review process.</div>
+            <div class="mermaid">
+flowchart TD
+    A[Pet Owner/Farmer] --> B{Select Consultation Type}
+    B --> C[Video Call]
+    B --> D[Phone Call]
+    B --> E[In-Person]
+    B --> F[Chat Only]
+
+    C --> G[Find Available Doctor]
+    D --> G
+    E --> G
+    F --> G
+
+    G --> H[Select Date & Time Slot]
+    H --> I[Provide Consultation Details]
+    I --> J[Animal Information]
+    I --> K[Symptoms Description]
+    I --> L[Priority Level]
+
+    J --> M[Submit Booking Request]
+    K --> M
+    L --> M
+
+    M --> N{Doctor Role}
+    N --> O[Veterinarian Receives Notification]
+    N --> P[Admin Receives Notification]
+
+    O --> Q{Doctor Action}
+    P --> Q
+
+    Q --> R[Confirm Booking]
+    Q --> S[Reschedule Request]
+    Q --> T[Cancel Booking]
+
+    R --> U[Booking Confirmed - Status: confirmed]
+    S --> V[Pet Owner Selects New Slot]
+    T --> W[Booking Cancelled - Status: cancelled]
+
+    V --> X{Doctor Approves?}
+    X --> Y[New Booking Confirmed]
+    X --> Z[Reschedule Rejected]
+
+    U --> AA[Consultation Day Approaches]
+    Y --> AA
+
+    AA --> BB{15 min before scheduled time}
+    BB --> CC[Join Button Available]
+    BB --> DD[Not Yet Available]
+
+    CC --> EE[Start Consultation]
+    EE --> FF[Video Session Created]
+    FF --> GG[WebRTC Connection Established]
+    GG --> HH[Real-time Video/Audio Chat]
+    HH --> II[Doctor Takes Notes]
+    HH --> JJ[Doctor Makes Diagnosis]
+    HH --> KK[Doctor Creates Prescription]
+
+    II --> LL[Consultation Completed]
+    JJ --> LL
+    KK --> LL
+
+    LL --> MM[Session Ended]
+    MM --> NN[Consultation Status: completed]
+    NN --> OO[Pet Owner Can Write Review]
+    NN --> PP[Medical Records Updated]
+            </div>
+        </div>
+
+        <div class="diagram-section">
+            <div class="diagram-title">2. Veterinarian Consultation Management Workflow</div>
+            <div class="diagram-description">Doctor's perspective on managing consultation queue, confirmations, and medical assessments.</div>
+            <div class="mermaid">
+flowchart TD
+    A[Veterinarian] --> B[Login to Dashboard]
+    B --> C[View Consultation Queue]
+    C --> D{Booking Status}
+
+    D --> E[Pending Bookings]
+    D --> F[Confirmed Bookings]
+    D --> G[Rescheduled Bookings]
+    D --> H[Missed Bookings]
+
+    E --> I{Action Required}
+    I --> J[Confirm Booking]
+    I --> K[Reschedule Request]
+    I --> L[Cancel Booking]
+
+    J --> M[Booking Status: confirmed]
+    K --> N[Pet Owner Selects New Time]
+    L --> O[Booking Status: cancelled]
+
+    N --> P{Approve Reschedule?}
+    P --> Q[New Booking Confirmed]
+    P --> R[Reschedule Rejected]
+
+    F --> S[Consultation Day]
+    G --> S
+    Q --> S
+
+    S --> T{15 min before appointment}
+    T --> U[Join Button Available]
+    T --> V[Waiting for Patient]
+
+    U --> W[Start Consultation]
+    W --> X[Create Video Session]
+    X --> Y[WebRTC Host Setup]
+    Y --> Z[Wait for Patient Connection]
+
+    Z --> AA[Patient Joins]
+    AA --> BB[Real-time Consultation]
+    BB --> CC[Video/Audio Communication]
+    BB --> DD[Text Chat]
+    BB --> EE[Screen Sharing]
+    BB --> FF[Session Recording]
+
+    CC --> GG[Medical Assessment]
+    DD --> GG
+    EE --> GG
+    FF --> GG
+
+    GG --> HH[Review Medical History]
+    GG --> II[Examine Symptoms]
+    GG --> JJ[Ask Questions]
+
+    HH --> KK[Take Notes]
+    II --> KK
+    JJ --> KK
+
+    KK --> LL[Make Diagnosis]
+    LL --> MM[Create Prescription]
+    MM --> NN[Update Medical Records]
+
+    NN --> OO[End Consultation]
+    OO --> PP[Mark as Completed]
+    PP --> QQ[Generate Session Summary]
+    QQ --> RR[Send to Pet Owner]
+
+    H --> SS[Handle Missed Appointments]
+    SS --> TT[Contact Pet Owner]
+    TT --> UU[Reschedule if Needed]
+
+    M --> VV[Send Confirmation Email]
+    O --> WW[Send Cancellation Notice]
+    Q --> VV
+    R --> XX[Notify Rejection Reason]
+            </div>
+        </div>
+
+        <div class="diagram-section">
+            <div class="diagram-title">3. Video Consultation Session Technical Flow</div>
+            <div class="diagram-description">Technical implementation of WebRTC connections, media streaming, and fallback mechanisms.</div>
+            <div class="mermaid">
+flowchart TD
+    A[Consultation Started] --> B[Doctor Initiates Video Session]
+    B --> C[Create Video Session Record in DB]
+    C --> D[Doctor: WebRTC Host Mode]
+    D --> E[Doctor: Request Camera/Microphone Access]
+
+    E --> F{Device Access Granted?}
+    F --> G[Video + Audio Stream]
+    F --> H[Audio Only Stream]
+    F --> I[No Media Stream]
+
+    G --> J[Doctor: Create WebRTC Peer Connection]
+    H --> J
+    I --> J
+
+    J --> K[Doctor: Create Offer (SDP)]
+    K --> L[Send Offer to Signaling Server]
+    L --> M[Patient Receives Notification]
+
+    M --> N[Patient: Join Consultation Room]
+    N --> O[Patient: WebRTC Guest Mode]
+    O --> P[Patient: Request Camera/Microphone Access]
+
+    P --> Q{Device Access Granted?}
+    Q --> R[Video + Audio Stream]
+    Q --> S[Audio Only Stream]
+    Q --> T[No Media Stream]
+
+    R --> U[Patient: Create WebRTC Peer Connection]
+    S --> U
+    T --> U
+
+    U --> V[Patient: Send Answer to Signaling Server]
+    V --> W[WebRTC Connection Established]
+
+    W --> X[ICE Candidate Exchange]
+    X --> Y[STUN/TURN Server Coordination]
+    Y --> Z[Peer-to-Peer Connection]
+
+    Z --> AA[Real-time Media Streaming]
+    AA --> BB[Video Frames]
+    AA --> CC[Audio Stream]
+    AA --> DD[Data Channel for Chat]
+
+    BB --> EE[Doctor Video Element]
+    CC --> FF[Audio Playback]
+    DD --> GG[Text Messages]
+
+    EE --> HH[Consultation Active]
+    FF --> HH
+    GG --> HH
+
+    HH --> II{Consultation Actions}
+    II --> JJ[Doctor: Take Notes]
+    II --> KK[Doctor: Make Diagnosis]
+    II --> LL[Doctor: Create Prescription]
+    II --> MM[Screen Sharing]
+    II --> NN[Session Recording]
+    II --> OO[End Consultation]
+
+    JJ --> PP[Save to Consultation Record]
+    KK --> PP
+    LL --> PP
+    MM --> QQ[Share Screen Stream]
+    NN --> RR[Record Media Stream]
+
+    OO --> SS[Close WebRTC Connection]
+    SS --> TT[Update Session Status: ended]
+    TT --> UU[Update Consultation Status: completed]
+    UU --> VV[Generate Session Summary]
+    VV --> WW[Send to Pet Owner]
+            </div>
+        </div>
+
+        <div class="diagram-section">
+            <div class="diagram-title">4. Consultation Status State Transitions</div>
+            <div class="diagram-description">All possible status changes for bookings and consultations with valid transitions.</div>
+            <div class="mermaid">
+stateDiagram-v2
+    [*] --> scheduled: Consultation Created
+
+    scheduled --> in_progress: Start Consultation
+    scheduled --> cancelled: Cancel Booking
+    scheduled --> missed: No Show
+
+    in_progress --> completed: End Consultation
+    in_progress --> cancelled: Cancel During Session
+
+    completed --> [*]: Consultation Finished
+    cancelled --> [*]: Consultation Cancelled
+    missed --> [*]: Consultation Missed
+
+    scheduled --> rescheduled: Reschedule Request
+    rescheduled --> scheduled: New Time Confirmed
+    rescheduled --> cancelled: Reschedule Rejected
+
+    missed --> scheduled: Reschedule After Miss
+    cancelled --> scheduled: Rebook After Cancel
+            </div>
+        </div>
+
+        <div class="diagram-section">
+            <div class="diagram-title">5. Farmer Enterprise Consultation Workflow</div>
+            <div class="diagram-description">Farm/enterprise-level consultations with herd and group context.</div>
+            <div class="mermaid">
+flowchart TD
+    A[Farmer] --> B[Login to VetCare Platform]
+    B --> C[Access Enterprise Dashboard]
+    C --> D{Consultation Context}
+
+    D --> E[Individual Animal Consultation]
+    D --> F[Herd/Enterprise Consultation]
+    D --> G[Animal Group Consultation]
+
+    E --> H[Select Specific Animal]
+    F --> I[Select Enterprise/Farm]
+    G --> J[Select Animal Group]
+
+    H --> K[Choose Consultation Type]
+    I --> K
+    J --> K
+
+    K --> L[Video Call]
+    K --> M[Phone Call]
+    K --> N[In-Person Visit]
+    K --> O[Chat Consultation]
+
+    L --> P[Find Available Veterinarian]
+    M --> P
+    N --> P
+    O --> P
+
+    P --> Q[Select Date & Time Slot]
+    Q --> R[Provide Consultation Details]
+
+    R --> S[Animal Information]
+    R --> T[Symptoms Description]
+    R --> U[Priority Level]
+    R --> V[Enterprise Context]
+    R --> W[Group Information]
+
+    S --> X[Submit Booking Request]
+    T --> X
+    U --> X
+    V --> X
+    W --> X
+
+    X --> Y[Veterinarian Receives Notification]
+    Y --> Z{Doctor Review}
+
+    Z --> AA[Confirm Booking]
+    Z --> BB[Request Reschedule]
+    Z --> CC[Cancel Booking]
+
+    AA --> DD[Booking Status: confirmed]
+    BB --> EE[Farmer Selects New Time]
+    CC --> FF[Booking Status: cancelled]
+
+    EE --> GG{Doctor Approves?}
+    GG --> HH[New Booking Confirmed]
+    GG --> II[Reschedule Rejected]
+
+    DD --> JJ[Consultation Day]
+    HH --> JJ
+
+    JJ --> KK{15 min before appointment}
+    KK --> LL[Join Consultation]
+    KK --> MM[Wait for Join Window]
+
+    LL --> NN[Start Video Consultation]
+    NN --> OO[WebRTC Connection]
+    OO --> PP[Real-time Communication]
+
+    PP --> QQ[Doctor Reviews Farm Context]
+    PP --> RR[Doctor Examines Animals]
+    PP --> SS[Doctor Assesses Herd Health]
+
+    QQ --> TT[Take Medical Notes]
+    RR --> TT
+    SS --> TT
+
+    TT --> UU[Make Diagnosis]
+    UU --> VV[Create Prescriptions]
+    VV --> WW[Update Medical Records]
+
+    WW --> XX[End Consultation]
+    XX --> YY[Mark as Completed]
+    YY --> ZZ[Generate Farm Report]
+    ZZ --> AAA[Update Enterprise Records]
+
+    FF --> BBB[Handle Cancellation]
+    II --> CCC[Handle Rejection]
+
+    BBB --> DDD[Rebook if Needed]
+    CCC --> DDD
+
+    DDD --> EEE[Select New Doctor/Time]
+    EEE --> X
+            </div>
+        </div>
+
+        <div class="export-buttons">
+            <button class="export-btn" onclick="exportAllDiagrams()">Export All Diagrams (PNG)</button>
+            <button class="export-btn" onclick="printPage()">Print/Save as PDF</button>
+        </div>
+
+        <div class="footer">
+            <p>Generated: March 10, 2026 | VetCare Platform v1.0 | Consultation Module Analysis</p>
+            <p>For detailed export instructions, see the README.md file in this directory.</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: 'arial',
+            fontSize: 14
+        });
+
+        // Export function (placeholder - would need additional libraries for full export)
+        function exportAllDiagrams() {
+            alert('To export diagrams:\n\n1. Use the Mermaid Live editor (mermaid.live)\n2. Copy diagram code from the markdown file\n3. Export as PNG/SVG/PDF\n\nSee README.md for detailed instructions.');
+        }
+
+        function printPage() {
+            window.print();
+        }
+
+        // Add print styles
+        const printStyles = `
+            @media print {
+                body { background: white !important; }
+                .container { box-shadow: none !important; max-width: none !important; }
+                .export-buttons { display: none !important; }
+                .nav { background: white !important; color: black !important; }
+                .nav h1 { color: black !important; }
+            }
+        `;
+
+        const style = document.createElement('style');
+        style.textContent = printStyles;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

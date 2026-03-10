@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   cancellation_reason TEXT,
   rescheduled_from UUID,
   reschedule_count INTEGER NOT NULL DEFAULT 0,
+  missed_by VARCHAR(20) CHECK (missed_by IN ('doctor', 'patient', 'both')),
   confirmed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -590,6 +591,20 @@ BEGIN
   ALTER TABLE bookings ADD CONSTRAINT bookings_status_check
     CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rescheduled', 'completed', 'missed'));
 EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- ============================================================
+-- FIX: Add missed_by column to bookings if not exists
+-- ============================================================
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'bookings' AND column_name = 'missed_by'
+  ) THEN
+    ALTER TABLE bookings ADD COLUMN missed_by VARCHAR(20)
+      CHECK (missed_by IN ('doctor', 'patient', 'both'));
+  END IF;
 END $$;
 
 -- ============================================================
