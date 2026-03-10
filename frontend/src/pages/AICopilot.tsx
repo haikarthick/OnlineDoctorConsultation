@@ -244,7 +244,7 @@ const AICopilot: React.FC = () => {
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
                         {SUGGESTED_PROMPTS.map(p => (
                           <button key={p} onClick={() => { setMessageInput(p) }}
-                            style={{ padding: '8px 16px', borderRadius: 20, border: '1px solid #ddd', background: '#fafafa', cursor: 'pointer', fontSize: 13 }}>
+                            style={{ padding: '8px 16px', borderRadius: 20, border: '1px solid #ddd', background: '#fafafa', cursor: 'pointer', fontSize: 13, color: '#555' }}>
                             {p}
                           </button>
                         ))}

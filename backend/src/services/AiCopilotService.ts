@@ -98,7 +98,17 @@ class AiCopilotService {
   // ── Sessions ──
   async listSessions(userId: string, filters: any = {}) {
     const { limit = 50, offset = 0, status } = filters;
-    let query = `SELECT s.*, a.name as animal_name, a.species, e.name as enterprise_name
+    let query = `SELECT s.id, s.title, s.status,
+                   s.enterprise_id AS "enterpriseId",
+                   s.user_id       AS "userId",
+                   s.animal_id     AS "animalId",
+                   s.context_type  AS "contextType",
+                   s.message_count AS "messageCount",
+                   s.last_message_at AS "lastMessageAt",
+                   s.created_at    AS "createdAt",
+                   s.updated_at    AS "updatedAt",
+                   a.name AS "animalName", a.species, a.breed,
+                   e.name AS "enterpriseName"
                  FROM ai_chat_sessions s
                  LEFT JOIN animals a ON s.animal_id = a.id
                  LEFT JOIN enterprises e ON s.enterprise_id = e.id
@@ -119,13 +129,25 @@ class AiCopilotService {
        VALUES ($1,$2,$3,$4,$5,$6)`,
       [id, data.enterpriseId || null, data.userId, data.animalId || null, data.title || 'New Chat', data.contextType || 'general']
     );
-    const result = await pool.query('SELECT * FROM ai_chat_sessions WHERE id = $1', [id]);
+    const result = await pool.query(
+      `SELECT id, title, status,
+              enterprise_id AS "enterpriseId", user_id AS "userId",
+              animal_id AS "animalId", context_type AS "contextType",
+              message_count AS "messageCount", last_message_at AS "lastMessageAt",
+              created_at AS "createdAt", updated_at AS "updatedAt"
+       FROM ai_chat_sessions WHERE id = $1`, [id]);
     return result.rows[0];
   }
 
   async getSession(sessionId: string) {
     const result = await pool.query(
-      `SELECT s.*, a.name as animal_name, a.species, a.breed, e.name as enterprise_name
+      `SELECT s.id, s.title, s.status,
+              s.enterprise_id AS "enterpriseId", s.user_id AS "userId",
+              s.animal_id AS "animalId", s.context_type AS "contextType",
+              s.message_count AS "messageCount", s.last_message_at AS "lastMessageAt",
+              s.created_at AS "createdAt", s.updated_at AS "updatedAt",
+              a.name AS "animalName", a.species, a.breed,
+              e.name AS "enterpriseName"
        FROM ai_chat_sessions s
        LEFT JOIN animals a ON s.animal_id = a.id
        LEFT JOIN enterprises e ON s.enterprise_id = e.id
@@ -141,7 +163,10 @@ class AiCopilotService {
   // ── Messages ──
   async listMessages(sessionId: string) {
     const result = await pool.query(
-      `SELECT * FROM ai_chat_messages WHERE session_id = $1 ORDER BY created_at ASC`, [sessionId]
+      `SELECT id, session_id AS "sessionId", role, content, content_type AS "contentType",
+              tokens_used AS "tokensUsed", confidence, sources,
+              created_at AS "createdAt"
+       FROM ai_chat_messages WHERE session_id = $1 ORDER BY created_at ASC`, [sessionId]
     );
     return result.rows;
   }
@@ -178,8 +203,8 @@ class AiCopilotService {
     );
 
     return {
-      userMessage: { id: userMsgId, role: 'user', content, created_at: new Date().toISOString() },
-      aiMessage: { id: aiMsgId, role: 'assistant', content: aiResponse.content, confidence: aiResponse.confidence, sources: aiResponse.sources, created_at: new Date().toISOString() }
+      userMessage: { id: userMsgId, sessionId, role: 'user', content, createdAt: new Date().toISOString() },
+      aiMessage: { id: aiMsgId, sessionId, role: 'assistant', content: aiResponse.content, confidence: aiResponse.confidence, sources: aiResponse.sources, createdAt: new Date().toISOString() }
     };
   }
 
