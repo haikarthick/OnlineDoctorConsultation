@@ -90,8 +90,8 @@ export const createBookingSchema = Joi.object({
   timeSlotStart: Joi.string().required().pattern(/^\d{2}:\d{2}/).messages({ 'string.pattern.base': 'Time must be HH:MM format' }),
   timeSlotEnd: Joi.string().required().pattern(/^\d{2}:\d{2}/).messages({ 'string.pattern.base': 'Time must be HH:MM format' }),
   bookingType: Joi.string().valid('video_call', 'in_person', 'phone', 'chat').required(),
-  priority: Joi.string().valid('normal', 'urgent', 'emergency').default('normal'),
-  reasonForVisit: Joi.string().min(5).max(1000).required(),
+  priority: Joi.string().valid('low', 'normal', 'high', 'emergency').default('normal'),
+  reasonForVisit: Joi.string().min(3).max(1000).required(),
   symptoms: longText().optional().allow('', null),
   notes: longText().optional().allow('', null),
 });
