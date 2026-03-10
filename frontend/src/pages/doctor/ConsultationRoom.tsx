@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { VideoSession, ChatMessage } from '../../types'
+import { useWebRTC } from '../../hooks/useWebRTC'
 import '../../styles/modules.css'
 
 interface ConsultationRoomProps {
@@ -38,6 +39,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const [cameraError, setCameraError] = useState('')
   const [mediaMode, setMediaMode] = useState<'video' | 'audio-only' | 'none'>('none')
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
+  const [streamToSend, setStreamToSend] = useState<MediaStream | null>(null)
 
   // Medical history state (for doctors)
   const [animalInfo, setAnimalInfo] = useState<any>(null)
@@ -60,6 +62,14 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const screenStreamRef = useRef<MediaStream | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const recordedChunksRef = useRef<Blob[]>([])
+
+  // WebRTC peer connection (doctor = host = creates offer)
+  const { remoteStream, connectionState, cleanup: webrtcCleanup } = useWebRTC(
+    session?.id || null,
+    streamToSend,
+    true,
+    session?.status === 'active' && !!streamToSend
+  )
 
   const conId = consultationId || window.location.pathname.split('/').pop() || ''
 
@@ -86,6 +96,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       })
       localStreamRef.current = stream
       if (localVideoRef.current) localVideoRef.current.srcObject = stream
+      setStreamToSend(stream)
       setMediaMode('video')
       setIsCameraOff(false)
       setIsMuted(false)
@@ -96,6 +107,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       localStreamRef.current = stream
+      setStreamToSend(stream)
       setMediaMode('audio-only')
       setIsCameraOff(true)
       setIsMuted(false)
@@ -105,6 +117,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
 }
     // Attempt 3: No media
     setMediaMode('none')
+    setStreamToSend(null)
     setIsCameraOff(true)
     setIsMuted(true)
     setCameraError('Camera & microphone unavailable. Chat still works.')
@@ -119,6 +132,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       screenStreamRef.current.getTracks().forEach(t => t.stop())
       screenStreamRef.current = null
     }
+    setStreamToSend(null)
     if (localVideoRef.current) localVideoRef.current.srcObject = null
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
   }, [])
@@ -155,6 +169,13 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Attach remote stream from WebRTC to video element
+  useEffect(() => {
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream
+    }
+  }, [remoteStream])
 
   // Re-attach stream when camera is toggled
   useEffect(() => {
@@ -353,6 +374,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
       if (sessionPollRef.current) { clearInterval(sessionPollRef.current); sessionPollRef.current = null }
 
+      webrtcCleanup()
       const result = await apiService.endVideoSession(session.id)
       if (result.data) setSession(result.data)
       stopLocalStream()
@@ -407,16 +429,16 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         screenStreamRef.current.getTracks().forEach(t => t.stop())
         screenStreamRef.current = null
       }
-      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
+      setStreamToSend(localStreamRef.current)
       setIsScreenSharing(false)
     } else {
       try {
         const screen = await navigator.mediaDevices.getDisplayMedia({ video: true })
         screenStreamRef.current = screen
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = screen
+        setStreamToSend(screen)
         screen.getVideoTracks()[0].onended = () => {
-          if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
           screenStreamRef.current = null
+          setStreamToSend(localStreamRef.current)
           setIsScreenSharing(false)
         }
         setIsScreenSharing(true)
@@ -693,17 +715,27 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
       <div className="video-container">
         {/* Video Area */}
         <div className="video-main">
-          {/* Main video: Show camera feed when active, placeholder otherwise */}
-          {session?.status === 'active' && isScreenSharing ? (
-            <video ref={remoteVideoRef} autoPlay playsInline muted
-              style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }} />
-          ) : session?.status === 'active' ? (
-            <div className="video-placeholder">
-              <div className="video-avatar">🧑</div>
-              <p>Patient Connected</p>
-              {mediaMode === 'audio-only' && <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 Audio-only mode</p>}
-              {mediaMode === 'none' && <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 Chat-only mode</p>}
-            </div>
+          {/* Main video: Show remote peer video when connected, placeholder otherwise */}
+          {session?.status === 'active' ? (
+            <>
+              <video ref={remoteVideoRef} autoPlay playsInline
+                style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000',
+                  display: remoteStream ? 'block' : 'none' }} />
+              {!remoteStream && (
+                <div className="video-placeholder">
+                  <div className="video-avatar">🧑</div>
+                  <p>{connectionState === 'connecting' ? 'Connecting to patient...' : 'Waiting for patient video...'}</p>
+                  {mediaMode === 'audio-only' && <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 Audio-only mode</p>}
+                  {mediaMode === 'none' && <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 Chat-only mode</p>}
+                </div>
+              )}
+              {isScreenSharing && (
+                <div style={{ position: 'absolute', bottom: 70, left: 16, background: 'rgba(0,0,0,.75)',
+                  color: '#fff', padding: '4px 12px', borderRadius: 8, fontSize: 13, zIndex: 10 }}>
+                  🖥️ Screen sharing active
+                </div>
+              )}
+            </>
           ) : (
             <div className="video-placeholder">
               <div className="video-avatar">👨‍⚕️</div>

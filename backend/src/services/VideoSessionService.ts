@@ -4,6 +4,27 @@ import { VideoSession, ChatMessage, CreateVideoSessionDTO, VideoSessionStatus } 
 import { NotFoundError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 
+// ─── WebRTC Signaling Store (in-memory) ──────────────────────
+interface SignalMessage {
+  id: string;
+  fromUserId: string;
+  type: 'offer' | 'answer' | 'ice-candidate';
+  data: string;
+  timestamp: number;
+}
+
+const signalStore = new Map<string, SignalMessage[]>();
+
+// Clean up stale signals older than 5 minutes every 2 minutes
+setInterval(() => {
+  const cutoff = Date.now() - 5 * 60 * 1000;
+  for (const [sessionId, signals] of signalStore) {
+    const fresh = signals.filter(s => s.timestamp > cutoff);
+    if (fresh.length === 0) signalStore.delete(sessionId);
+    else signalStore.set(sessionId, fresh);
+  }
+}, 2 * 60 * 1000);
+
 class VideoSessionService {
   async createSession(hostUserId: string, data: CreateVideoSessionDTO): Promise<VideoSession> {
     const id = uuidv4();
@@ -177,6 +198,34 @@ class VideoSessionService {
       []
     );
     return result.rows;
+  }
+
+  // ─── WebRTC Signaling ──────────────────────────────────────
+  sendSignal(sessionId: string, fromUserId: string, type: 'offer' | 'answer' | 'ice-candidate', data: string): void {
+    const signals = signalStore.get(sessionId) || [];
+    // For offer/answer, replace any previous one from the same user
+    if (type === 'offer' || type === 'answer') {
+      const filtered = signals.filter(s => !(s.fromUserId === fromUserId && s.type === type));
+      filtered.push({ id: uuidv4(), fromUserId, type, data, timestamp: Date.now() });
+      signalStore.set(sessionId, filtered);
+    } else {
+      signals.push({ id: uuidv4(), fromUserId, type, data, timestamp: Date.now() });
+      signalStore.set(sessionId, signals);
+    }
+  }
+
+  getSignals(sessionId: string, forUserId: string): SignalMessage[] {
+    const signals = signalStore.get(sessionId) || [];
+    // Return signals NOT from the requesting user (i.e. signals sent by the other party)
+    const forMe = signals.filter(s => s.fromUserId !== forUserId);
+    // Remove consumed signals (keep only unconsumed ones from same user)
+    const remaining = signals.filter(s => s.fromUserId === forUserId);
+    signalStore.set(sessionId, remaining);
+    return forMe;
+  }
+
+  clearSignals(sessionId: string): void {
+    signalStore.delete(sessionId);
   }
 }
 

@@ -224,6 +224,17 @@ class ApiService {
     return response.data
   }
 
+  // ─── WebRTC Signaling ─────────────────────────────────────
+  async sendSignal(sessionId: string, type: string, data: string) {
+    const response = await this.client.post(`/video-sessions/${sessionId}/signal`, { type, data })
+    return response.data
+  }
+
+  async getSignals(sessionId: string) {
+    const response = await this.client.get(`/video-sessions/${sessionId}/signals`)
+    return response.data
+  }
+
   // ─── Schedule & Availability ──────────────────────────────
   async createSchedule(data: { dayOfWeek: string; startTime: string; endTime: string; slotDuration?: number; maxAppointments?: number }) {
     const response = await this.client.post('/schedules', data)

@@ -127,6 +127,8 @@ router.put('/video-sessions/:id/end', authMiddleware, validateBody(endVideoSessi
 router.post('/video-sessions/join/:roomId', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.joinSession(req, res)));
 router.post('/video-sessions/:id/messages', authMiddleware, validateBody(sendVideoMessageSchema), asyncHandler((req: Request, res: Response) => VideoSessionController.sendMessage(req, res)));
 router.get('/video-sessions/:id/messages', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getMessages(req, res)));
+router.post('/video-sessions/:id/signal', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.sendSignal(req, res)));
+router.get('/video-sessions/:id/signals', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getSignals(req, res)));
 
 // ─── Schedule & Availability routes ─────────────────────────
 router.post('/schedules', authMiddleware, validateBody(createScheduleSchema), asyncHandler((req: Request, res: Response) => ScheduleController.createSchedule(req, res)));

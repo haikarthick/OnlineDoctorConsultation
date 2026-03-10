@@ -154,6 +154,23 @@ class VideoSessionController {
     const sessions = await VideoSessionService.listActiveSessions();
     res.json({ success: true, data: sessions });
   }
+
+  // ─── WebRTC Signaling ──────────────────────────────────────
+  async sendSignal(req: Request, res: Response) {
+    const authReq = req as AuthRequest;
+    const { type, data } = req.body;
+    if (!type || !data) {
+      throw new ValidationError('type and data are required');
+    }
+    VideoSessionService.sendSignal(req.params.id, authReq.userId!, type, data);
+    res.json({ success: true });
+  }
+
+  async getSignals(req: Request, res: Response) {
+    const authReq = req as AuthRequest;
+    const signals = VideoSessionService.getSignals(req.params.id, authReq.userId!);
+    res.json({ success: true, data: signals });
+  }
 }
 
 export default new VideoSessionController();

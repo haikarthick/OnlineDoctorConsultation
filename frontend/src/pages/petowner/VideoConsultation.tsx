@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { VideoSession, ChatMessage } from '../../types'
+import { useWebRTC } from '../../hooks/useWebRTC'
 import '../../styles/modules.css'
 
 interface VideoConsultationProps {
@@ -41,6 +42,15 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
   const recordedChunksRef = useRef<Blob[]>([])
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
   const [prescriptions, setPrescriptions] = useState<any[]>([])
+  const [streamToSend, setStreamToSend] = useState<MediaStream | null>(null)
+
+  // WebRTC peer connection (patient = guest = waits for offer)
+  const { remoteStream, connectionState, cleanup: webrtcCleanup } = useWebRTC(
+    session?.id || null,
+    streamToSend,
+    false,
+    session?.status === 'active' && !!streamToSend
+  )
 
   const conId = consultationId || window.location.pathname.split('/').pop() || ''
 
@@ -70,6 +80,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream
       }
+      setStreamToSend(stream)
       setMediaMode('video')
       setIsCameraOff(false)
       setIsMuted(false)
@@ -81,6 +92,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       localStreamRef.current = stream
+      setStreamToSend(stream)
       setMediaMode('audio-only')
       setIsCameraOff(true)
       setIsMuted(false)
@@ -91,6 +103,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
 
     // Attempt 3: No media at all — still allow chat
     setMediaMode('none')
+    setStreamToSend(null)
     setIsCameraOff(true)
     setIsMuted(true)
     setCameraError('Camera & microphone unavailable. You can still use chat.')
@@ -106,6 +119,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       screenStreamRef.current.getTracks().forEach(track => track.stop())
       screenStreamRef.current = null
     }
+    setStreamToSend(null)
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = null
     }
@@ -142,6 +156,13 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Attach remote stream from WebRTC to video element
+  useEffect(() => {
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream
+    }
+  }, [remoteStream])
 
   // Re-attach stream to video element when camera is toggled back on
   useEffect(() => {
@@ -305,6 +326,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       if (sessionPollRef.current) { clearInterval(sessionPollRef.current); sessionPollRef.current = null }
       if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
       if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
+      webrtcCleanup()
       const result = await apiService.endVideoSession(session.id)
       if (result.data) setSession(result.data)
       stopLocalStream()
@@ -478,29 +500,20 @@ setError('Failed to start recording — your browser may not support MediaRecord
 
   const toggleScreenShare = async () => {
     if (isScreenSharing) {
-      // Stop screen sharing, restore camera
       if (screenStreamRef.current) {
         screenStreamRef.current.getTracks().forEach(track => track.stop())
         screenStreamRef.current = null
       }
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = null
-      }
+      setStreamToSend(localStreamRef.current)
       setIsScreenSharing(false)
     } else {
       try {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true })
         screenStreamRef.current = screenStream
-        // Show screen share in main video area
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = screenStream
-        }
-        // When user stops sharing via browser UI
+        setStreamToSend(screenStream)
         screenStream.getVideoTracks()[0].onended = () => {
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = null
-          }
           screenStreamRef.current = null
+          setStreamToSend(localStreamRef.current)
           setIsScreenSharing(false)
         }
         setIsScreenSharing(true)
@@ -662,31 +675,40 @@ setError('Failed to start recording — your browser may not support MediaRecord
         <div className="video-container">
           {/* Main Video Area */}
           <div className="video-main">
-            {/* Main view: screen share preview when sharing, otherwise connected placeholder */}
-            {session.status === 'active' && isScreenSharing ? (
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  background: '#000'
-                }}
-              />
-            ) : session.status === 'active' ? (
-              <div className="video-placeholder">
-                <div className="video-avatar">{user?.role === 'veterinarian' ? '🧑' : '👨‍⚕️'}</div>
-                <p>Connected</p>
-                {mediaMode === 'audio-only' && (
-                  <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 Audio-only mode — camera unavailable</p>
+            {/* Main view: remote peer video when connected, placeholder otherwise */}
+            {session.status === 'active' ? (
+              <>
+                <video
+                  ref={remoteVideoRef}
+                  autoPlay
+                  playsInline
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    background: '#000',
+                    display: remoteStream ? 'block' : 'none'
+                  }}
+                />
+                {!remoteStream && (
+                  <div className="video-placeholder">
+                    <div className="video-avatar">{user?.role === 'veterinarian' ? '🧑' : '👨‍⚕️'}</div>
+                    <p>{connectionState === 'connecting' ? 'Connecting to doctor...' : 'Waiting for doctor video...'}</p>
+                    {mediaMode === 'audio-only' && (
+                      <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 Audio-only mode — camera unavailable</p>
+                    )}
+                    {mediaMode === 'none' && (
+                      <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 Chat-only mode</p>
+                    )}
+                  </div>
                 )}
-                {mediaMode === 'none' && (
-                  <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 Chat-only mode</p>
+                {isScreenSharing && (
+                  <div style={{ position: 'absolute', bottom: 70, left: 16, background: 'rgba(0,0,0,.75)',
+                    color: '#fff', padding: '4px 12px', borderRadius: 8, fontSize: 13, zIndex: 10 }}>
+                    🖥️ Screen sharing active
+                  </div>
                 )}
-              </div>
+              </>
             ) : (
               <div className="video-placeholder">
                 <div className="video-avatar">👨‍⚕️</div>
