@@ -45,17 +45,16 @@ button {
   font-size: 1em;
   font-weight: 600;
   font-family: inherit;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  /* No global background or color — component-level classes/inline styles set these.
+     This prevents white-text-on-white-background when a button overrides background
+     but inherits the old color: white from here. */
   cursor: pointer;
   transition: all 0.3s ease;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
 button:active {
@@ -74,8 +73,5 @@ button:focus-visible {
   }
   a:hover {
     color: #535bf2;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }

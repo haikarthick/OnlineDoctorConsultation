@@ -169,7 +169,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       {error && (
         <div style={{ padding: '14px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
           ⚠️ {error}
-          <button style={{ marginLeft: 12, padding: '4px 12px', border: '1px solid #dc2626', borderRadius: 4, background: 'white', cursor: 'pointer' }} onClick={() => setError('')}>✕</button>
+          <button style={{ marginLeft: 12, padding: '4px 12px', border: '1px solid #dc2626', borderRadius: 4, background: 'white', color: '#dc2626', cursor: 'pointer' }} onClick={() => setError('')}>✕</button>
         </div>
       )}
       {success && (

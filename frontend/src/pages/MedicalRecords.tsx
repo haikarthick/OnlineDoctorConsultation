@@ -321,7 +321,7 @@ const MedicalRecords: React.FC = () => {
       {error && (
         <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 12, fontSize: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>⚠️ {error}</span>
-          <button onClick={() => setError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16 }}>✕</button>
+          <button onClick={() => setError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#dc2626' }}>✕</button>
         </div>
       )}
 
@@ -807,7 +807,7 @@ const MedicalRecords: React.FC = () => {
             onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700 }}>{getRecordTypeInfo(detailRecord.recordType).icon} {detailRecord.title}</h2>
-              <button onClick={() => setDetailRecord(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setDetailRecord(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16, fontSize: 13 }}>
               <div><strong>Record #:</strong> {detailRecord.recordNumber || 'N/A'}</div>

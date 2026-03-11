@@ -33,6 +33,9 @@ button {
   transition: all 0.3s ease;
   border-radius: 10px;
   font-weight: 600;
+  /* Ensure button text is always readable.
+     Component-level classes (btn-primary, btn-small, etc.) override this where needed. */
+  color: inherit;
 }
 
 button:disabled {

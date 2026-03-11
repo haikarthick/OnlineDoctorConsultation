@@ -394,7 +394,7 @@ const Animals: React.FC = () => {
                 {editingAnimal ? '💾 Update Animal' : '✅ Register Animal'}
               </button>
               <button type="button" onClick={() => { setShowForm(false); resetForm() }}
-                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontSize: 14 }}>
+                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontSize: 14 }}>
                 Cancel
               </button>
             </div>

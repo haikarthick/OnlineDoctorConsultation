@@ -808,8 +808,8 @@ const HerdMedicalManagement: React.FC = () => {
 
       {renderRoleInfo()}
 
-      {error && <div className="alert alert-error" style={{ marginBottom: '12px' }}>{error} <button onClick={() => setError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>X</button></div>}
-      {success && <div className="alert alert-success" style={{ marginBottom: '12px' }}>{success} <button onClick={() => setSuccess('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>X</button></div>}
+      {error && <div className="alert alert-error" style={{ marginBottom: '12px' }}>{error} <button onClick={() => setError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c' }}>X</button></div>}
+      {success && <div className="alert alert-success" style={{ marginBottom: '12px' }}>{success} <button onClick={() => setSuccess('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', color: '#166534' }}>X</button></div>}
 
       <div className="enterprise-selector">
         <label>Select Enterprise:</label>

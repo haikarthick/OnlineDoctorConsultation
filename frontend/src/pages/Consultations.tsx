@@ -206,13 +206,15 @@ const Consultations: React.FC = () => {
       try {
         setVetListLoading(true)
         const res = await apiService.listVets({ limit: 100 })
-        const vets = (res.data?.items || res.data || []).map((v: any) => ({
+        // API returns { success, data: { vets: [...], total: N } }
+        const rawVets = res.data?.vets || res.data?.items || (Array.isArray(res.data) ? res.data : []) || []
+        const vets = rawVets.map((v: any) => ({
           id: v.userId || v.id,
           name: `Dr. ${v.firstName || ''} ${v.lastName || ''}`.trim(),
-          specialization: v.specialization || ''
+          specialization: (v.specializations && v.specializations[0]) || v.specialization || ''
         }))
         setVetList(vets)
-      } catch { /* ignore */ }
+      } catch { /* ignore — dropdown will be empty, user can still proceed */ }
       finally { setVetListLoading(false) }
     }
   }
@@ -696,8 +698,9 @@ const Consultations: React.FC = () => {
                 <select
                   value={rescheduleVetId}
                   onChange={(e) => handleVetChange(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box', background: 'white' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '2px solid #d1d5db', fontSize: 14, boxSizing: 'border-box', background: 'white', color: '#1a1a1a' }}
                 >
+                  <option value="">— Keep current doctor —</option>
                   {vetList.map(v => (
                     <option key={v.id} value={v.id}>
                       {v.name}{v.specialization ? ` — ${v.specialization}` : ''}{v.id === rescheduleBooking.veterinarianId ? ' (current)' : ''}
@@ -773,7 +776,7 @@ const Consultations: React.FC = () => {
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <button
                 onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
-                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontWeight: 500 }}
+                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 500 }}
               >Cancel</button>
               <button
                 onClick={handleRescheduleSubmit}
@@ -781,7 +784,7 @@ const Consultations: React.FC = () => {
                 style={{
                   padding: '10px 24px', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer',
                   background: (!rescheduleDate || !rescheduleSelectedSlot) ? '#e5e7eb' : '#667eea',
-                  color: (!rescheduleDate || !rescheduleSelectedSlot) ? '#9ca3af' : 'white'
+                  color: (!rescheduleDate || !rescheduleSelectedSlot) ? '#6b7280' : 'white'
                 }}
               >
                 {rescheduleSubmitting ? 'Rescheduling...' : '✓ Confirm Reschedule'}
@@ -804,7 +807,7 @@ const Consultations: React.FC = () => {
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ margin: 0, fontSize: 18 }}>📋 Action Log</h2>
-              <button onClick={() => setActionLogBookingId(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setActionLogBookingId(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
             {actionLogsLoading && <p style={{ color: '#6b7280' }}>Loading action history...</p>}
@@ -903,7 +906,7 @@ const Consultations: React.FC = () => {
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <button
                 onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
-                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontWeight: 500 }}
+                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 500 }}
               >Keep Booking</button>
               <button
                 onClick={() => handleCancelBooking()}
