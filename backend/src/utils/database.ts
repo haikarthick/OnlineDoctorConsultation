@@ -126,6 +126,34 @@ class PostgresDatabase {
     await this.pool.query(
       `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reschedule_count INTEGER NOT NULL DEFAULT 0`
     ).catch(() => { /* column may already exist */ });
+
+    // Ensure enterprise-related tables exist (safety net if enterpriseMigration fails)
+    await this.pool.query(
+      `CREATE TABLE IF NOT EXISTS enterprises (
+         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+         name VARCHAR(255) NOT NULL,
+         enterprise_type VARCHAR(50),
+         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+       )`
+    ).catch(() => { /* table may already exist */ });
+    await this.pool.query(
+      `CREATE TABLE IF NOT EXISTS animal_groups (
+         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+         name VARCHAR(255) NOT NULL,
+         group_type VARCHAR(50),
+         enterprise_id UUID,
+         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+       )`
+    ).catch(() => { /* table may already exist */ });
+
+    // Ensure enterprise_id and group_id columns exist on bookings
+    await this.pool.query(
+      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS enterprise_id UUID`
+    ).catch(() => { /* column may already exist */ });
+    await this.pool.query(
+      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS group_id UUID`
+    ).catch(() => { /* column may already exist */ });
+
     logger.info('Default system settings seeded');
   }
 

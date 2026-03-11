@@ -120,6 +120,32 @@ CREATE TABLE IF NOT EXISTS consultations (
 );
 
 -- ============================================================
+-- 4b. ENTERPRISES & ANIMAL GROUPS (required before bookings FK)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS enterprises (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL,
+  enterprise_type VARCHAR(50),
+  description TEXT,
+  address TEXT,
+  city VARCHAR(100),
+  state VARCHAR(100),
+  country VARCHAR(100) DEFAULT 'US',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS animal_groups (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  enterprise_id UUID REFERENCES enterprises(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  group_type VARCHAR(50),
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
 -- 5. BOOKINGS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS bookings (
@@ -128,6 +154,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+  enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL,
+  group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL,
   hospital_id UUID,
   scheduled_date DATE NOT NULL,
   time_slot_start VARCHAR(10) NOT NULL,

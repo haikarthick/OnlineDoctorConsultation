@@ -132,8 +132,12 @@ class BookingService {
   }
 
   async listBookings(userId: string, role: string, params: { limit?: number; offset?: number; status?: string }): Promise<PaginatedResponse<Booking>> {
-    // Auto-mark missed bookings before listing
-    await this.markMissedBookings();
+    // Auto-mark missed bookings before listing (non-blocking — listing must succeed even if marking fails)
+    try {
+      await this.markMissedBookings();
+    } catch (err: any) {
+      logger.warn('markMissedBookings failed — continuing with listing', { error: err.message });
+    }
 
     const limit = params.limit || 10;
     const offset = params.offset || 0;
