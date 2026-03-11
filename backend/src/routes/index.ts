@@ -549,6 +549,86 @@ router.get('/features', (_req, res) => {
   res.json({ success: true, data: getAllFeatureFlags() });
 });
 
+// ─── Temporary diagnostic endpoint for bookings query ────────
+router.get('/debug/bookings-check', async (_req, res) => {
+  const results: Record<string, any> = {};
+  try {
+    // Check tables exist
+    const tables = await database.query(
+      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('bookings','enterprises','animal_groups','vet_hospitals','video_sessions','consultations','users','animals') ORDER BY table_name`
+    );
+    results.tables = tables.rows.map((r: any) => r.table_name);
+
+    // Check bookings columns
+    const cols = await database.query(
+      `SELECT column_name FROM information_schema.columns WHERE table_name = 'bookings' ORDER BY ordinal_position`
+    );
+    results.bookingColumns = cols.rows.map((r: any) => r.column_name);
+
+    // Test markMissedBookings query
+    try {
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const missedResult = await database.query(
+        `UPDATE bookings AS b SET status = 'missed', missed_by = CASE WHEN b.consultation_id IS NOT NULL AND EXISTS (SELECT 1 FROM video_sessions vs WHERE vs.consultation_id = b.consultation_id AND vs.status = 'waiting') THEN 'patient' ELSE 'doctor' END, updated_at = NOW() WHERE b.status = 'confirmed' AND NOT (b.consultation_id IS NOT NULL AND EXISTS (SELECT 1 FROM consultations c WHERE c.id = b.consultation_id AND c.status IN ('completed', 'in_progress'))) AND (b.scheduled_date < $1::date OR (b.scheduled_date = $1::date AND b.time_slot_end <= $2)) RETURNING b.id, b.missed_by`,
+        [dateStr, timeStr]
+      );
+      results.markMissed = { ok: true, count: missedResult.rows.length };
+    } catch (e: any) {
+      results.markMissed = { ok: false, error: e.message };
+    }
+
+    // Test listBookings query
+    try {
+      const listResult = await database.query(
+        `SELECT b.id, b.pet_owner_id as "petOwnerId", b.veterinarian_id as "veterinarianId",
+         b.animal_id as "animalId", b.enterprise_id as "enterpriseId", b.group_id as "groupId",
+         b.hospital_id as "hospitalId", b.consultation_id as "consultationId",
+         b.scheduled_date as "scheduledDate", b.time_slot_start as "timeSlotStart",
+         b.time_slot_end as "timeSlotEnd", b.status, b.booking_type as "bookingType",
+         b.priority, b.reason_for_visit as "reasonForVisit", b.symptoms, b.notes,
+         b.reschedule_count as "rescheduleCount", b.missed_by as "missedBy",
+         b.cancelled_by as "cancelledBy", b.cancelled_at as "cancelledAt",
+         b.created_at as "createdAt", b.updated_at as "updatedAt",
+         CONCAT(po.first_name, ' ', po.last_name) as "petOwnerName",
+         CONCAT('Dr. ', v.first_name, ' ', v.last_name) as "vetName",
+         a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+         a.unique_id as "animalUniqueId",
+         e.name as "enterpriseName", e.enterprise_type as "enterpriseType",
+         ag.name as "groupName", ag.group_type as "groupType",
+         vh.name as "hospitalName"
+         FROM bookings b
+         LEFT JOIN users po ON po.id = b.pet_owner_id
+         LEFT JOIN users v ON v.id = b.veterinarian_id
+         LEFT JOIN animals a ON a.id = b.animal_id
+         LEFT JOIN enterprises e ON e.id = b.enterprise_id
+         LEFT JOIN animal_groups ag ON ag.id = b.group_id
+         LEFT JOIN vet_hospitals vh ON vh.id = b.hospital_id
+         ORDER BY b.scheduled_date DESC LIMIT 5`,
+        []
+      );
+      results.listBookings = { ok: true, count: listResult.rows.length };
+    } catch (e: any) {
+      results.listBookings = { ok: false, error: e.message };
+    }
+
+    // Test consultations query
+    try {
+      const consResult = await database.query(
+        `SELECT id, user_id, veterinarian_id, animal_id, status FROM consultations LIMIT 5`
+      );
+      results.listConsultations = { ok: true, count: consResult.rows.length };
+    } catch (e: any) {
+      results.listConsultations = { ok: false, error: e.message };
+    }
+
+    res.json({ success: true, results });
+  } catch (e: any) {
+    res.status(500).json({ success: false, error: e.message, stack: e.stack });
+  }
+});
+
 // ─── File Uploads ────────────────────────────────────────────
 router.post('/files/upload', authMiddleware, uploadAny.single('file'), asyncHandler((req: Request, res: Response) => FileController.upload(req, res)));
 router.post('/files/upload-multiple', authMiddleware, uploadAny.array('files', 10), asyncHandler((req: Request, res: Response) => FileController.uploadMultiple(req, res)));
