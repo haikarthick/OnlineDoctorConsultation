@@ -75,6 +75,8 @@ export interface Booking {
   symptoms?: string;
   notes?: string;
   cancellationReason?: string;
+  cancelledBy?: string;
+  cancelledAt?: Date;
   rescheduledFrom?: string;
   rescheduleCount?: number;
   missedBy?: 'doctor' | 'patient' | 'both';
@@ -279,7 +281,7 @@ export interface SystemSetting {
   id: string;
   key: string;
   value: string;
-  category: 'general' | 'booking' | 'payment' | 'notification' | 'video' | 'security';
+  category: 'general' | 'booking' | 'payment' | 'notification' | 'video' | 'security' | 'cancellation' | 'display' | 'consultation';
   description?: string;
   updatedBy?: string;
   updatedAt: Date;
@@ -378,6 +380,30 @@ export interface PaginationParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   search?: string;
+}
+
+// ─── Wallet ─────────────────────────────────────────────────
+export type WalletTransactionType = 'credit' | 'debit' | 'refund' | 'bonus' | 'withdrawal';
+
+export interface Wallet {
+  id: string;
+  userId: string;
+  balance: number;
+  bonusCredits: number;
+  currency: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WalletTransaction {
+  id: string;
+  walletId: string;
+  type: WalletTransactionType;
+  amount: number;
+  description?: string;
+  referenceId?: string;
+  referenceType?: string;
+  createdAt: Date;
 }
 
 export interface PaginatedResponse<T> {

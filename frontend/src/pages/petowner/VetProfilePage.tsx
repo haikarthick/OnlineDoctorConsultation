@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../../services/api'
-import { VetProfile, Review } from '../../types'
+import { VetProfile, Review, DoctorReliability } from '../../types'
 import '../../styles/modules.css'
 
 interface VetProfilePageProps {
@@ -16,6 +16,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
   const [error, setError] = useState('')
   const [reviewPage, setReviewPage] = useState(0)
   const [hasMoreReviews, setHasMoreReviews] = useState(false)
+  const [reliability, setReliability] = useState<DoctorReliability | null>(null)
 
   const vetUserId = new URLSearchParams(window.location.search).get('id') ||
     window.location.pathname.split('/vet-profile/')[1]?.split('?')[0] || ''
@@ -24,6 +25,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
     if (!vetUserId) { setError('No vet specified'); setLoading(false); return }
     loadProfile()
     loadReviews(0)
+    loadReliability()
   }, [vetUserId])
 
   const loadProfile = async () => {
@@ -52,6 +54,13 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
       setReviewPage(page)
     } catch { /* ignore */ }
     finally { setReviewsLoading(false) }
+  }
+
+  const loadReliability = async () => {
+    try {
+      const res = await apiService.getDoctorReliability(vetUserId)
+      setReliability(res.data)
+    } catch { /* ignore */ }
   }
 
   const renderStars = (rating: number, size = 16) => (
@@ -129,6 +138,18 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
           <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {vet.isAvailable && <span style={{ background: '#059669', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>● Available</span>}
             {vet.acceptsEmergency && <span style={{ background: '#dc2626', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>🚨 Emergency</span>}
+            {reliability?.isReliable && (
+              <span style={{ background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}
+                title={`Reliability score: ${reliability.reliabilityScore}% (${reliability.totalBookings} bookings, ${reliability.totalCancellations} cancellations)`}>
+                ✅ Guaranteed
+              </span>
+            )}
+            {reliability && !reliability.isReliable && (
+              <span style={{ background: 'rgba(255,200,0,0.3)', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}
+                title={`Reliability score: ${reliability.reliabilityScore}% — This doctor has had ${reliability.monthCancellations} cancellation(s) this month`}>
+                ⚠️ {reliability.reliabilityScore}% reliable
+              </span>
+            )}
           </div>
         </div>
         <div style={{ textAlign: 'center', flexShrink: 0 }}>

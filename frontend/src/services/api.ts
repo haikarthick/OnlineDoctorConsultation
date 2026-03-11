@@ -481,13 +481,35 @@ class ApiService {
   }
 
   // ─── Payments ─────────────────────────────────────────────
-  async createPayment(data: { consultationId: string; amount: number; currency?: string; paymentMethod?: string }) {
+  async createPayment(data: { consultationId: string; bookingId?: string; amount: number; currency?: string; paymentMethod?: string }) {
     const response = await this.client.post('/payments', data)
     return response.data
   }
 
   async listPayments(params?: { limit?: number; offset?: number }) {
     const response = await this.client.get('/payments', { params })
+    return response.data
+  }
+
+  async getPaymentByBooking(bookingId: string) {
+    const response = await this.client.get(`/payments/booking/${bookingId}`)
+    return response.data
+  }
+
+  // ─── Wallet ───────────────────────────────────────────────
+  async getWallet() {
+    const response = await this.client.get('/wallet')
+    return response.data
+  }
+
+  async getWalletTransactions(params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get('/wallet/transactions', { params })
+    return response.data
+  }
+
+  // ─── Doctor Reliability ───────────────────────────────────
+  async getDoctorReliability(vetId: string) {
+    const response = await this.client.get(`/doctors/${vetId}/reliability`)
     return response.data
   }
 
@@ -560,6 +582,16 @@ class ApiService {
 
   async adminGetAuditLogs(params?: { limit?: number; offset?: number; userId?: string; action?: string }) {
     const response = await this.client.get('/admin/audit-logs', { params })
+    return response.data
+  }
+
+  async adminGetCancellationStats() {
+    const response = await this.client.get('/admin/cancellation-stats')
+    return response.data
+  }
+
+  async adminGetGatewaySettings() {
+    const response = await this.client.get('/payments/gateway-settings')
     return response.data
   }
 

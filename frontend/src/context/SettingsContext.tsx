@@ -3,11 +3,22 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 // ─── Types ───────────────────────────────────────────────────
 export type TimeFormatType = '12h' | '24h'
 
+export interface CancellationPolicy {
+  autoRefundOnDoctorCancel: boolean
+  patientFreeWindowHours: number
+  partialRefundPercent: number
+  partialRefundWindowHours: number
+  goodwillBonusPercent: number
+  doctorMaxCancellationsPerMonth: number
+}
+
 export interface AppSettings {
   timeFormat: TimeFormatType
   joinWindowMinutes: number
   maxReschedules: number
   patientNoShowRescheduleLimit: number
+  paymentGatewayMode: string
+  cancellationPolicy: CancellationPolicy
 }
 
 interface SettingsContextType {
@@ -22,9 +33,25 @@ interface SettingsContextType {
   isJoinable: (scheduledDate: string, timeSlotStart: string, timeSlotEnd: string) => boolean
   /** Reload settings from server */
   reloadSettings: () => Promise<void>
+  /** Calculate estimated refund for a booking based on timing */
+  estimateRefund: (appointmentDate: string, appointmentTime: string, amount: number) => { percent: number; amount: number; reason: string }
 }
 
-const defaults: AppSettings = { timeFormat: '12h', joinWindowMinutes: 5, maxReschedules: 1, patientNoShowRescheduleLimit: 1 }
+const defaults: AppSettings = {
+  timeFormat: '12h',
+  joinWindowMinutes: 5,
+  maxReschedules: 1,
+  patientNoShowRescheduleLimit: 1,
+  paymentGatewayMode: 'demo',
+  cancellationPolicy: {
+    autoRefundOnDoctorCancel: true,
+    patientFreeWindowHours: 24,
+    partialRefundPercent: 50,
+    partialRefundWindowHours: 2,
+    goodwillBonusPercent: 10,
+    doctorMaxCancellationsPerMonth: 3,
+  },
+}
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
@@ -42,11 +69,22 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         const jwEntry = list.find(s => s.key === 'consultation.joinWindowMinutes')
         const mrEntry = list.find(s => s.key === 'booking.maxReschedules')
         const pnEntry = list.find(s => s.key === 'booking.patientNoShowRescheduleLimit')
+        const gmEntry = list.find(s => s.key === 'payment.gatewayMode')
+        const findCancellation = (k: string) => list.find(s => s.key === `cancellation.${k}`)?.value
         setSettings({
           timeFormat: (tfEntry?.value === '24h' ? '24h' : '12h') as TimeFormatType,
           joinWindowMinutes: jwEntry?.value ? parseInt(jwEntry.value, 10) || 5 : 5,
           maxReschedules: mrEntry?.value ? parseInt(mrEntry.value, 10) : 1,
           patientNoShowRescheduleLimit: pnEntry?.value ? parseInt(pnEntry.value, 10) : 1,
+          paymentGatewayMode: gmEntry?.value || 'demo',
+          cancellationPolicy: {
+            autoRefundOnDoctorCancel: findCancellation('autoRefundOnDoctorCancel') !== 'false',
+            patientFreeWindowHours: parseInt(findCancellation('patientFreeWindowHours') || '24', 10),
+            partialRefundPercent: parseInt(findCancellation('partialRefundPercent') || '50', 10),
+            partialRefundWindowHours: parseInt(findCancellation('partialRefundWindowHours') || '2', 10),
+            goodwillBonusPercent: parseInt(findCancellation('goodwillBonusPercent') || '10', 10),
+            doctorMaxCancellationsPerMonth: parseInt(findCancellation('doctorMaxCancellationsPerMonth') || '3', 10),
+          },
         })
       }
     } catch {
@@ -116,8 +154,31 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [settings.joinWindowMinutes])
 
+  // ─── Refund estimation for patient cancellation ──────────
+  const estimateRefund = useCallback((appointmentDate: string, appointmentTime: string, amount: number) => {
+    try {
+      const d = new Date(appointmentDate)
+      const datePart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      const appointmentDateTime = new Date(`${datePart}T${appointmentTime}:00`)
+      const now = new Date()
+      const hoursUntil = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60)
+      const policy = settings.cancellationPolicy
+
+      if (hoursUntil >= policy.patientFreeWindowHours) {
+        return { percent: 100, amount, reason: `Full refund (cancelled ${policy.patientFreeWindowHours}+ hours before appointment)` }
+      } else if (hoursUntil >= policy.partialRefundWindowHours) {
+        const refundAmount = Math.round((amount * policy.partialRefundPercent) / 100)
+        return { percent: policy.partialRefundPercent, amount: refundAmount, reason: `${policy.partialRefundPercent}% partial refund (cancelled ${Math.round(hoursUntil)} hours before appointment)` }
+      } else {
+        return { percent: 0, amount: 0, reason: `No refund (cancelled less than ${policy.partialRefundWindowHours} hours before appointment)` }
+      }
+    } catch {
+      return { percent: 100, amount, reason: 'Full refund' }
+    }
+  }, [settings.cancellationPolicy])
+
   return (
-    <SettingsContext.Provider value={{ settings, formatTime, formatDate, formatDateTime, isJoinable, reloadSettings: loadSettings }}>
+    <SettingsContext.Provider value={{ settings, formatTime, formatDate, formatDateTime, isJoinable, reloadSettings: loadSettings, estimateRefund }}>
       {children}
     </SettingsContext.Provider>
   )

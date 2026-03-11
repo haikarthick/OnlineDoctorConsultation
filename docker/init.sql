@@ -145,6 +145,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   rescheduled_from UUID,
   reschedule_count INTEGER NOT NULL DEFAULT 0,
   missed_by VARCHAR(20) CHECK (missed_by IN ('doctor', 'patient', 'both')),
+  cancelled_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  cancelled_at TIMESTAMP,
   confirmed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -357,6 +359,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE TABLE IF NOT EXISTS payments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+  booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
   user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   payer_id UUID REFERENCES users(id) ON DELETE SET NULL,
   payee_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -447,6 +450,33 @@ CREATE TABLE IF NOT EXISTS system_settings (
 );
 
 -- ============================================================
+-- 17. WALLETS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS wallets (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  balance DECIMAL(10,2) DEFAULT 0.00,
+  bonus_credits DECIMAL(10,2) DEFAULT 0.00,
+  currency VARCHAR(10) DEFAULT 'USD',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 18. WALLET TRANSACTIONS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS wallet_transactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  wallet_id UUID NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
+  type VARCHAR(30) NOT NULL CHECK (type IN ('credit', 'debit', 'refund', 'bonus', 'withdrawal')),
+  amount DECIMAL(10,2) NOT NULL,
+  description TEXT,
+  reference_id UUID,
+  reference_type VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
 -- AUTO-UPDATE TRIGGERS  (drop+create for idempotency)
 -- ============================================================
 DROP TRIGGER IF EXISTS update_users_updated_at ON users;
@@ -503,6 +533,10 @@ CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments
 
 DROP TRIGGER IF EXISTS update_reviews_updated_at ON reviews;
 CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_wallets_updated_at ON wallets;
+CREATE TRIGGER update_wallets_updated_at BEFORE UPDATE ON wallets
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================
@@ -562,8 +596,12 @@ CREATE INDEX IF NOT EXISTS idx_animals_unique_id ON animals(unique_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
 
 CREATE INDEX IF NOT EXISTS idx_payments_consultation_id ON payments(consultation_id);
+CREATE INDEX IF NOT EXISTS idx_payments_booking_id ON payments(booking_id);
 CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
 CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+
+CREATE INDEX IF NOT EXISTS idx_wallets_user_id ON wallets(user_id);
+CREATE INDEX IF NOT EXISTS idx_wallet_transactions_wallet_id ON wallet_transactions(wallet_id);
 
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(is_read);

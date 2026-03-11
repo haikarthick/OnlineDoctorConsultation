@@ -134,6 +134,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'vet-hospitals-manage', label: 'My Hospital', icon: '🏨', path: '/vet-hospitals/manage',
       roles: ['veterinarian'], section: 'Vet Network' },
 
+    // ── Wallet ──
+    { id: 'wallet', label: 'My Wallet', icon: '💰', path: '/wallet',
+      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Account' },
+
     // ── Administration (admin only) ──
     { id: 'admin-dashboard', label: 'Admin Panel', icon: '🛡️', path: '/admin/dashboard',
       roles: ['admin'], section: 'Administration' },
@@ -154,6 +158,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'admin-hospitals', label: 'Hospital Mgmt', icon: '🏥', path: '/admin/vet-hospitals',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-audit', label: 'Audit Logs', icon: '📜', path: '/admin/audit-logs',
+      roles: ['admin'], section: 'Administration' },
+    { id: 'admin-cancellation-dashboard', label: 'Cancellations', icon: '📊', path: '/admin/cancellation-dashboard',
       roles: ['admin'], section: 'Administration' },
 
     // ── Preferences (bottom) ──

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
-import { SystemSetting } from '../../types'
+import { SystemSetting, GatewaySettings } from '../../types'
 import '../../styles/modules.css'
 
 interface SystemSettingsProps {
@@ -27,8 +27,22 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const [savingPatientLimit, setSavingPatientLimit] = useState(false)
   const [patientLimitSaved, setPatientLimitSaved] = useState(false)
 
+  // Payment Gateway state
+  const [gatewayMode, setGatewayMode] = useState(appSettings.paymentGatewayMode || 'demo')
+  const [gatewayUrl, setGatewayUrl] = useState('')
+  const [gatewayApiKey, setGatewayApiKey] = useState('')
+  const [gatewayProvider, setGatewayProvider] = useState('stripe')
+  const [savingGateway, setSavingGateway] = useState(false)
+  const [gatewaySaved, setGatewaySaved] = useState(false)
+
+  // Cancellation Policy state
+  const [cancellationPolicy, setCancellationPolicy] = useState(appSettings.cancellationPolicy)
+  const [savingCancellation, setSavingCancellation] = useState(false)
+  const [cancellationSaved, setCancellationSaved] = useState(false)
+
   useEffect(() => {
     loadSettings()
+    loadGatewaySettings()
   }, [])
 
   const loadSettings = async () => {
@@ -115,6 +129,59 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     } catch (err) {
 } finally {
       setSavingPatientLimit(false)
+    }
+  }
+
+  const loadGatewaySettings = async () => {
+    try {
+      const result = await apiService.adminGetGatewaySettings()
+      const gw = result.data as GatewaySettings
+      if (gw) {
+        setGatewayMode(gw.gatewayMode || 'demo')
+        setGatewayUrl(gw.gatewayUrl || '')
+        setGatewayApiKey(gw.gatewayApiKey || '')
+        setGatewayProvider(gw.gatewayProvider || 'stripe')
+      }
+    } catch { /* ignore */ }
+  }
+
+  const handleSaveGateway = async () => {
+    try {
+      setSavingGateway(true)
+      setGatewaySaved(false)
+      await Promise.all([
+        apiService.adminUpdateSetting('payment.gatewayMode', gatewayMode),
+        apiService.adminUpdateSetting('payment.gatewayUrl', gatewayUrl),
+        apiService.adminUpdateSetting('payment.gatewayApiKey', gatewayApiKey),
+        apiService.adminUpdateSetting('payment.gatewayProvider', gatewayProvider),
+      ])
+      await reloadSettings()
+      setGatewaySaved(true)
+      setTimeout(() => setGatewaySaved(false), 3000)
+    } catch (err) {
+    } finally {
+      setSavingGateway(false)
+    }
+  }
+
+  const handleSaveCancellation = async () => {
+    try {
+      setSavingCancellation(true)
+      setCancellationSaved(false)
+      await Promise.all([
+        apiService.adminUpdateSetting('cancellation.autoRefundOnDoctorCancel', String(cancellationPolicy.autoRefundOnDoctorCancel)),
+        apiService.adminUpdateSetting('cancellation.patientFreeWindowHours', String(cancellationPolicy.patientFreeWindowHours)),
+        apiService.adminUpdateSetting('cancellation.partialRefundPercent', String(cancellationPolicy.partialRefundPercent)),
+        apiService.adminUpdateSetting('cancellation.partialRefundWindowHours', String(cancellationPolicy.partialRefundWindowHours)),
+        apiService.adminUpdateSetting('cancellation.goodwillBonusPercent', String(cancellationPolicy.goodwillBonusPercent)),
+        apiService.adminUpdateSetting('cancellation.doctorMaxCancellationsPerMonth', String(cancellationPolicy.doctorMaxCancellationsPerMonth)),
+      ])
+      await reloadSettings()
+      setCancellationSaved(true)
+      setTimeout(() => setCancellationSaved(false), 3000)
+    } catch (err) {
+    } finally {
+      setSavingCancellation(false)
     }
   }
 
@@ -338,6 +405,267 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
               <strong>Current:</strong> Patient may reschedule a no-show booking{' '}
               {patientNoShowLimit === 0 ? <strong>unlimited times</strong> : <><strong>{patientNoShowLimit} time{patientNoShowLimit !== 1 ? 's' : ''}</strong> before needing to contact support</>}.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Payment Gateway Settings ─── */}
+      <div className="card" style={{ marginBottom: 24 }}>
+        <div className="card-header">
+          <h2>💳 Payment Gateway</h2>
+        </div>
+        <div className="card-body">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: 0, fontSize: 15 }}>Gateway Mode</h3>
+              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                <strong>Demo:</strong> Simulated payments (no real charges). <strong>Test:</strong> Gateway sandbox mode. <strong>Live:</strong> Real payment processing.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              {(['demo', 'test', 'live'] as const).map(mode => (
+                <button
+                  key={mode}
+                  className={`btn btn-sm ${gatewayMode === mode ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setGatewayMode(mode)}
+                  style={{ minWidth: 80, textTransform: 'capitalize' }}
+                >
+                  {mode === 'demo' ? '🧪 Demo' : mode === 'test' ? '🔧 Test' : '🟢 Live'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {gatewayMode !== 'demo' && (
+            <>
+              <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <label className="form-label" style={{ fontSize: 13 }}>Provider</label>
+                    <select className="form-input" value={gatewayProvider} onChange={e => setGatewayProvider(e.target.value)}>
+                      <option value="stripe">Stripe</option>
+                      <option value="razorpay">Razorpay</option>
+                      <option value="paypal">PayPal</option>
+                      <option value="square">Square</option>
+                    </select>
+                  </div>
+                  <div style={{ flex: 2, minWidth: 280 }}>
+                    <label className="form-label" style={{ fontSize: 13 }}>Gateway URL</label>
+                    <input className="form-input" placeholder="https://api.stripe.com/v1" value={gatewayUrl}
+                      onChange={e => setGatewayUrl(e.target.value)} />
+                  </div>
+                  <div style={{ flex: 2, minWidth: 280 }}>
+                    <label className="form-label" style={{ fontSize: 13 }}>API Key</label>
+                    <input className="form-input" type="password" placeholder="sk_test_..." value={gatewayApiKey}
+                      onChange={e => setGatewayApiKey(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {gatewayMode === 'demo' && (
+            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+              <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
+                ⚠️ <strong>Demo Mode Active</strong> — All payments are simulated. No real charges are processed. Payment flows behave identically to production but use stub transactions.
+              </div>
+            </div>
+          )}
+
+          {gatewayMode === 'live' && (
+            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+              <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
+                🔴 <strong>Live Mode</strong> — Real payments will be processed. Ensure your API key and gateway URL are correctly configured before enabling this mode.
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6' }}>
+            {gatewaySaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ Gateway settings saved!</span>}
+            <button className="btn btn-primary" disabled={savingGateway} onClick={handleSaveGateway}>
+              {savingGateway ? 'Saving...' : 'Save Gateway Settings'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Cancellation & Refund Policy ─── */}
+      <div className="card" style={{ marginBottom: 24 }}>
+        <div className="card-header">
+          <h2>🔄 Cancellation & Refund Policy</h2>
+        </div>
+        <div className="card-body">
+          {/* Auto-refund on doctor cancel */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: 0, fontSize: 15 }}>Auto-Refund on Doctor Cancellation</h3>
+              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                When a doctor cancels an appointment, automatically process a full refund to the patient's wallet.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button
+                className={`btn btn-sm ${cancellationPolicy.autoRefundOnDoctorCancel ? 'btn-primary' : 'btn-outline'}`}
+                onClick={() => setCancellationPolicy({ ...cancellationPolicy, autoRefundOnDoctorCancel: true })}
+                style={{ minWidth: 80 }}
+              >
+                ✅ Enabled
+              </button>
+              <button
+                className={`btn btn-sm ${!cancellationPolicy.autoRefundOnDoctorCancel ? 'btn-primary' : 'btn-outline'}`}
+                onClick={() => setCancellationPolicy({ ...cancellationPolicy, autoRefundOnDoctorCancel: false })}
+                style={{ minWidth: 80 }}
+              >
+                ❌ Disabled
+              </button>
+            </div>
+          </div>
+
+          {/* Goodwill bonus */}
+          <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: 15 }}>Goodwill Bonus (%)</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                  Extra bonus credit added to the patient's wallet when a doctor cancels their appointment (as compensation for inconvenience).
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {[0, 5, 10, 15, 20].map(n => (
+                  <button key={n}
+                    className={`btn btn-sm ${cancellationPolicy.goodwillBonusPercent === n ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setCancellationPolicy({ ...cancellationPolicy, goodwillBonusPercent: n })}
+                    style={{ minWidth: 52 }}
+                  >
+                    {n}%
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Patient free cancellation window */}
+          <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: 15 }}>Patient Free Cancellation Window (hours)</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                  Patients receive a 100% refund if they cancel at least this many hours before the appointment.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {[12, 24, 48, 72].map(h => (
+                  <button key={h}
+                    className={`btn btn-sm ${cancellationPolicy.patientFreeWindowHours === h ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setCancellationPolicy({ ...cancellationPolicy, patientFreeWindowHours: h })}
+                    style={{ minWidth: 52 }}
+                  >
+                    {h}h
+                  </button>
+                ))}
+                <input type="number" className="form-input" style={{ width: 70, padding: '4px 8px', fontSize: 13, textAlign: 'center' }}
+                  value={cancellationPolicy.patientFreeWindowHours} min={1} max={168}
+                  onChange={e => {
+                    const v = parseInt(e.target.value, 10)
+                    if (!isNaN(v) && v >= 1 && v <= 168) setCancellationPolicy({ ...cancellationPolicy, patientFreeWindowHours: v })
+                  }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Partial refund window */}
+          <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: 15 }}>Partial Refund Window (hours)</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                  Patients get a partial refund if they cancel between this time and the free window. Below this threshold, no refund.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {[1, 2, 4, 6].map(h => (
+                  <button key={h}
+                    className={`btn btn-sm ${cancellationPolicy.partialRefundWindowHours === h ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setCancellationPolicy({ ...cancellationPolicy, partialRefundWindowHours: h })}
+                    style={{ minWidth: 52 }}
+                  >
+                    {h}h
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Partial refund percentage */}
+          <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: 15 }}>Partial Refund Percentage</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                  The percentage refunded when a patient cancels within the partial refund window.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {[25, 50, 75].map(n => (
+                  <button key={n}
+                    className={`btn btn-sm ${cancellationPolicy.partialRefundPercent === n ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setCancellationPolicy({ ...cancellationPolicy, partialRefundPercent: n })}
+                    style={{ minWidth: 52 }}
+                  >
+                    {n}%
+                  </button>
+                ))}
+                <input type="number" className="form-input" style={{ width: 70, padding: '4px 8px', fontSize: 13, textAlign: 'center' }}
+                  value={cancellationPolicy.partialRefundPercent} min={0} max={100}
+                  onChange={e => {
+                    const v = parseInt(e.target.value, 10)
+                    if (!isNaN(v) && v >= 0 && v <= 100) setCancellationPolicy({ ...cancellationPolicy, partialRefundPercent: v })
+                  }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Doctor max cancellations per month */}
+          <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: 15 }}>Doctor Max Cancellations / Month</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                  Maximum cancellations a doctor can make per month before being flagged as unreliable. Set 0 for unlimited.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {[0, 3, 5, 10].map(n => (
+                  <button key={n}
+                    className={`btn btn-sm ${cancellationPolicy.doctorMaxCancellationsPerMonth === n ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setCancellationPolicy({ ...cancellationPolicy, doctorMaxCancellationsPerMonth: n })}
+                    style={{ minWidth: 52 }}
+                  >
+                    {n === 0 ? '∞' : n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Refund policy preview */}
+          <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+            <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: '12px 14px', fontSize: 13 }}>
+              <strong>📋 Policy Preview (for a ₹1000 consultation):</strong>
+              <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
+                <li>Cancel {cancellationPolicy.patientFreeWindowHours}+ hours before → <strong style={{ color: '#059669' }}>₹1000 full refund</strong></li>
+                <li>Cancel {cancellationPolicy.partialRefundWindowHours}–{cancellationPolicy.patientFreeWindowHours} hours before → <strong style={{ color: '#d97706' }}>₹{cancellationPolicy.partialRefundPercent * 10} ({cancellationPolicy.partialRefundPercent}%) partial refund</strong></li>
+                <li>Cancel less than {cancellationPolicy.partialRefundWindowHours} hours before → <strong style={{ color: '#dc2626' }}>No refund</strong></li>
+                <li>Doctor cancels → <strong style={{ color: '#059669' }}>₹1000 refund + ₹{cancellationPolicy.goodwillBonusPercent * 10} bonus credit ({cancellationPolicy.goodwillBonusPercent}%)</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6' }}>
+            {cancellationSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ Cancellation policy saved!</span>}
+            <button className="btn btn-primary" disabled={savingCancellation} onClick={handleSaveCancellation}>
+              {savingCancellation ? 'Saving...' : 'Save Cancellation Policy'}
+            </button>
           </div>
         </div>
       </div>

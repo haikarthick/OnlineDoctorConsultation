@@ -84,6 +84,8 @@ export interface Booking {
   symptoms?: string
   notes?: string
   cancellationReason?: string
+  cancelledBy?: string
+  cancelledAt?: string
   confirmedAt?: string
   petOwnerName?: string
   vetName?: string
@@ -668,6 +670,53 @@ export interface SystemSetting {
   description?: string
   updatedBy?: string
   updatedAt?: string
+}
+
+// ─── Wallet ─────────────────────────────────────────────────
+export interface Wallet {
+  id: string
+  userId: string
+  balance: number
+  bonusCredits: number
+  currency: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface WalletTransaction {
+  id: string
+  walletId: string
+  type: 'credit' | 'debit' | 'refund' | 'bonus'
+  amount: number
+  description: string
+  referenceId?: string
+  referenceType?: string
+  createdAt: string
+}
+
+// ─── Cancellation & Reliability ─────────────────────────────
+export interface DoctorReliability {
+  totalCancellations: number
+  monthCancellations: number
+  totalBookings: number
+  reliabilityScore: number
+  isReliable: boolean
+}
+
+export interface CancellationStats {
+  totalCancellations: number
+  doctorCancellations: number
+  patientCancellations: number
+  adminCancellations: number
+  totalRefunded: number
+  avgRefundAmount: number
+}
+
+export interface GatewaySettings {
+  gatewayMode: string
+  gatewayUrl: string
+  gatewayApiKey: string
+  gatewayProvider: string
 }
 
 // ─── Pagination & Common ────────────────────────────────────

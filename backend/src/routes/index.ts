@@ -83,6 +83,7 @@ import Tier3Controller from '../controllers/Tier3Controller';
 import Tier4Controller from '../controllers/Tier4Controller';
 import VetHospitalController from '../controllers/VetHospitalController';
 import HospitalDocumentController from '../controllers/HospitalDocumentController';
+import WalletController from '../controllers/WalletController';
 import { FileController } from '../controllers/FileController';
 import { uploadAny } from '../middleware/upload';
 import AdminService from '../services/AdminService';
@@ -246,7 +247,16 @@ router.put('/notifications/read-all', authMiddleware, asyncHandler((req: Request
 // ─── Payment routes ──────────────────────────────────────────
 router.post('/payments', authMiddleware, validateBody(createPaymentSchema), asyncHandler((req: Request, res: Response) => PaymentController.createPayment(req, res)));
 router.get('/payments', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.listPayments(req, res)));
+router.get('/payments/booking/:bookingId', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.getPaymentByBooking(req, res)));
+router.get('/payments/gateway-settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => PaymentController.getGatewaySettings(req, res)));
 router.get('/payments/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.getPayment(req, res)));
+
+// ─── Wallet routes ───────────────────────────────────────────
+router.get('/wallet', authMiddleware, asyncHandler((req: Request, res: Response) => WalletController.getWallet(req, res)));
+router.get('/wallet/transactions', authMiddleware, asyncHandler((req: Request, res: Response) => WalletController.listTransactions(req, res)));
+
+// ─── Doctor reliability ──────────────────────────────────────
+router.get('/doctors/:vetId/reliability', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getDoctorReliability(req, res)));
 
 // ─── Review routes ───────────────────────────────────────────
 router.post('/reviews', authMiddleware, validateBody(createReviewSchema), asyncHandler((req: Request, res: Response) => ReviewController.createReview(req, res)));
@@ -265,6 +275,7 @@ router.put('/admin/reviews/:id/moderate', authMiddleware, roleMiddleware(['admin
 router.get('/admin/settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getSystemSettings(req, res)));
 router.put('/admin/settings', authMiddleware, roleMiddleware(['admin']), validateBody(updateSystemSettingSchema), asyncHandler((req: Request, res: Response) => AdminController.updateSystemSetting(req, res)));
 router.get('/admin/audit-logs', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));
+router.get('/admin/cancellation-stats', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => BookingController.getCancellationStats(req, res)));
 
 // ─── Permission routes ───────────────────────────────────────
 router.get('/permissions/my', authMiddleware, asyncHandler(async (req: Request, res: Response) => {

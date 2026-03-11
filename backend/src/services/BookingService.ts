@@ -3,6 +3,9 @@ import database from '../utils/database';
 import { Booking, CreateBookingDTO, BookingStatus, PaginatedResponse } from '../models/types';
 import { NotFoundError, ValidationError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
+import PaymentService from './PaymentService';
+import WalletService from './WalletService';
+import NotificationService from './NotificationService';
 
 class BookingService {
   /**
@@ -114,7 +117,8 @@ class BookingService {
        scheduled_date as "scheduledDate", time_slot_start as "timeSlotStart",
        time_slot_end as "timeSlotEnd", status, booking_type as "bookingType",
        priority, reason_for_visit as "reasonForVisit", symptoms, notes,
-       cancellation_reason as "cancellationReason", confirmed_at as "confirmedAt",
+       cancellation_reason as "cancellationReason", cancelled_by as "cancelledBy",
+       cancelled_at as "cancelledAt", confirmed_at as "confirmedAt",
        reschedule_count as "rescheduleCount", missed_by as "missedBy",
        created_at as "createdAt", updated_at as "updatedAt"
        FROM bookings WHERE id = $1`,
@@ -164,6 +168,7 @@ class BookingService {
        b.time_slot_end as "timeSlotEnd", b.status, b.booking_type as "bookingType",
        b.priority, b.reason_for_visit as "reasonForVisit", b.symptoms, b.notes,
        b.reschedule_count as "rescheduleCount", b.missed_by as "missedBy",
+       b.cancelled_by as "cancelledBy", b.cancelled_at as "cancelledAt",
        b.created_at as "createdAt", b.updated_at as "updatedAt",
        CONCAT(po.first_name, ' ', po.last_name) as "petOwnerName",
        CONCAT('Dr. ', v.first_name, ' ', v.last_name) as "vetName",
@@ -236,8 +241,138 @@ class BookingService {
     return this.updateBookingStatus(id, 'confirmed');
   }
 
-  async cancelBooking(id: string, reason: string): Promise<Booking> {
-    return this.updateBookingStatus(id, 'cancelled', reason);
+  async cancelBooking(id: string, reason: string, cancelledByUserId?: string, cancellerRole?: string): Promise<Booking> {
+    const booking = await this.getBooking(id);
+
+    // Determine cancellation details
+    const isByDoctor = cancellerRole === 'veterinarian';
+    const isByPatient = cancellerRole === 'pet_owner' || cancellerRole === 'farmer';
+    const isByAdmin = cancellerRole === 'admin';
+
+    // Update booking with cancelled_by info
+    const updates: string[] = ['status = $1', 'updated_at = $2', 'cancellation_reason = $3', 'cancelled_at = $4'];
+    const params: any[] = ['cancelled', new Date(), reason, new Date()];
+    if (cancelledByUserId) {
+      updates.push(`cancelled_by = $${params.length + 1}`);
+      params.push(cancelledByUserId);
+    }
+    params.push(id);
+    const result = await database.query(
+      `UPDATE bookings SET ${updates.join(', ')} WHERE id = $${params.length}
+       RETURNING id, pet_owner_id as "petOwnerId", veterinarian_id as "veterinarianId",
+       status, booking_type as "bookingType", scheduled_date as "scheduledDate",
+       time_slot_start as "timeSlotStart", time_slot_end as "timeSlotEnd",
+       cancelled_by as "cancelledBy", cancelled_at as "cancelledAt",
+       created_at as "createdAt", updated_at as "updatedAt"`,
+      params
+    );
+    if (result.rows.length === 0) throw new NotFoundError('Booking', id);
+    const updatedBooking = result.rows[0];
+    logger.info('Booking cancelled', { bookingId: id, cancellerRole, reason });
+
+    // ─── Auto-refund logic ──────────────────────────────────
+    try {
+      const payment = await PaymentService.getPaymentByBooking(id);
+      if (payment) {
+        const paymentAmount = parseFloat(String(payment.amount));
+
+        if (isByDoctor || isByAdmin) {
+          // Doctor/admin cancellation: full refund + goodwill bonus
+          const autoRefund = await this.getSetting('cancellation.autoRefundOnDoctorCancel', 'true');
+          if (autoRefund === 'true') {
+            await PaymentService.processRefund(payment.id, paymentAmount, `Auto-refund: ${isByDoctor ? 'Doctor' : 'Admin'} cancelled booking`);
+            await WalletService.refund(booking.petOwnerId, paymentAmount, `Refund for cancelled booking`, id, 'booking');
+
+            // Goodwill bonus for doctor cancellation
+            if (isByDoctor) {
+              const bonusPercent = parseInt(await this.getSetting('cancellation.goodwillBonusPercent', '10'), 10);
+              if (bonusPercent > 0) {
+                const bonusAmount = Math.round(paymentAmount * bonusPercent) / 100;
+                await WalletService.addBonus(booking.petOwnerId, bonusAmount, `Goodwill bonus — doctor cancelled your appointment`, id, 'booking');
+              }
+            }
+          }
+        } else if (isByPatient) {
+          // Patient cancellation: time-based refund policy
+          const refundResult = await this.calculatePatientRefund(booking, paymentAmount);
+          if (refundResult.refundAmount > 0) {
+            await PaymentService.processRefund(payment.id, refundResult.refundAmount, refundResult.reason);
+            await WalletService.refund(booking.petOwnerId, refundResult.refundAmount, refundResult.reason, id, 'booking');
+          }
+        }
+      }
+    } catch (err) {
+      logger.error('Auto-refund failed (non-blocking)', { bookingId: id, error: err });
+    }
+
+    // ─── Send cancellation notifications ─────────────────────
+    try {
+      const cancelerLabel = isByDoctor ? 'Doctor' : isByPatient ? 'Patient' : 'Admin';
+      // Notify the other party
+      if (isByDoctor) {
+        await NotificationService.createNotification(
+          booking.petOwnerId, 'booking',
+          'Appointment Cancelled by Doctor',
+          `Your appointment has been cancelled by the doctor. Reason: ${reason}. A refund has been initiated.`,
+          'all', { bookingId: id, cancelledBy: 'doctor' }
+        );
+      } else if (isByPatient) {
+        await NotificationService.createNotification(
+          booking.veterinarianId, 'booking',
+          'Appointment Cancelled by Patient',
+          `A patient has cancelled their appointment. Reason: ${reason}`,
+          'all', { bookingId: id, cancelledBy: 'patient' }
+        );
+      } else if (isByAdmin && cancelledByUserId) {
+        // Notify both parties
+        await NotificationService.createNotification(
+          booking.petOwnerId, 'booking',
+          'Appointment Cancelled by Admin',
+          `Your appointment has been cancelled by an administrator. Reason: ${reason}`,
+          'all', { bookingId: id, cancelledBy: 'admin' }
+        );
+        await NotificationService.createNotification(
+          booking.veterinarianId, 'booking',
+          'Appointment Cancelled by Admin',
+          `An appointment has been cancelled by an administrator. Reason: ${reason}`,
+          'all', { bookingId: id, cancelledBy: 'admin' }
+        );
+      }
+    } catch (err) {
+      logger.error('Cancellation notification failed (non-blocking)', { bookingId: id, error: err });
+    }
+
+    return updatedBooking;
+  }
+
+  /** Calculate patient refund based on time-based cancellation policy */
+  private async calculatePatientRefund(booking: Booking, paymentAmount: number): Promise<{ refundAmount: number; reason: string }> {
+    const freeWindowHours = parseInt(await this.getSetting('cancellation.patientFreeWindowHours', '24'), 10);
+    const partialPercent = parseInt(await this.getSetting('cancellation.partialRefundPercent', '50'), 10);
+    const partialWindowHours = parseInt(await this.getSetting('cancellation.partialRefundWindowHours', '2'), 10);
+
+    // Calculate hours until appointment
+    const d = new Date(booking.scheduledDate);
+    const datePart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const appointmentTime = new Date(`${datePart}T${booking.timeSlotStart}:00`);
+    const hoursUntilAppt = (appointmentTime.getTime() - Date.now()) / (1000 * 60 * 60);
+
+    if (hoursUntilAppt >= freeWindowHours) {
+      return { refundAmount: paymentAmount, reason: `Full refund — cancelled ${Math.floor(hoursUntilAppt)}h before appointment` };
+    } else if (hoursUntilAppt >= partialWindowHours) {
+      const refund = Math.round(paymentAmount * partialPercent) / 100;
+      return { refundAmount: refund, reason: `Partial refund (${partialPercent}%) — cancelled ${Math.floor(hoursUntilAppt)}h before appointment` };
+    } else {
+      return { refundAmount: 0, reason: 'No refund — cancelled too close to appointment time' };
+    }
+  }
+
+  /** Helper to read a system setting with default */
+  private async getSetting(key: string, defaultValue: string): Promise<string> {
+    try {
+      const result = await database.query(`SELECT value FROM system_settings WHERE key = $1`, [key]);
+      return result.rows[0]?.value || defaultValue;
+    } catch { return defaultValue; }
   }
 
   async rescheduleBooking(id: string, newDate: string, newStart: string, newEnd: string, initiatorRole?: string, newVeterinarianId?: string): Promise<Booking> {
@@ -369,6 +504,81 @@ class BookingService {
       );
       return result.rows.length > 0 ? parseInt(result.rows[0].value, 10) || 0 : 1;
     } catch { return 1; }
+  }
+
+  /** Get doctor cancellation stats (for reliability scoring) */
+  async getDoctorCancellationStats(veterinarianId: string): Promise<{
+    totalCancellations: number;
+    monthCancellations: number;
+    totalBookings: number;
+    reliabilityScore: number;
+    isReliable: boolean;
+  }> {
+    const totalResult = await database.query(
+      `SELECT COUNT(*) as count FROM bookings WHERE veterinarian_id = $1 AND status = 'cancelled' AND cancelled_by = $1`,
+      [veterinarianId]
+    );
+    const monthResult = await database.query(
+      `SELECT COUNT(*) as count FROM bookings WHERE veterinarian_id = $1 AND status = 'cancelled' AND cancelled_by = $1
+       AND cancelled_at >= NOW() - INTERVAL '30 days'`,
+      [veterinarianId]
+    );
+    const totalBookingsResult = await database.query(
+      `SELECT COUNT(*) as count FROM bookings WHERE veterinarian_id = $1 AND status IN ('completed', 'cancelled', 'missed')`,
+      [veterinarianId]
+    );
+
+    const totalCancellations = parseInt(totalResult.rows[0]?.count || '0', 10);
+    const monthCancellations = parseInt(monthResult.rows[0]?.count || '0', 10);
+    const totalBookings = parseInt(totalBookingsResult.rows[0]?.count || '0', 10);
+
+    const maxMonthly = parseInt(await this.getSetting('cancellation.doctorMaxCancellationsPerMonth', '3'), 10);
+
+    // Reliability score: 100 - (cancellation_ratio * 100), min 0
+    const reliabilityScore = totalBookings > 0
+      ? Math.max(0, Math.round(100 - (totalCancellations / totalBookings * 100)))
+      : 100;
+    const isReliable = monthCancellations <= maxMonthly;
+
+    return { totalCancellations, monthCancellations, totalBookings, reliabilityScore, isReliable };
+  }
+
+  /** Get cancellation statistics for admin dashboard */
+  async getCancellationStats(): Promise<{
+    totalCancellations: number;
+    doctorCancellations: number;
+    patientCancellations: number;
+    adminCancellations: number;
+    totalRefunded: number;
+    avgRefundAmount: number;
+  }> {
+    const statsResult = await database.query(`
+      SELECT
+        COUNT(*) as total,
+        COUNT(*) FILTER (WHERE b.cancelled_by = b.veterinarian_id) as by_doctor,
+        COUNT(*) FILTER (WHERE b.cancelled_by = b.pet_owner_id) as by_patient,
+        COUNT(*) FILTER (WHERE b.cancelled_by IS NOT NULL
+          AND b.cancelled_by != b.veterinarian_id
+          AND b.cancelled_by != b.pet_owner_id) as by_admin
+      FROM bookings b WHERE b.status = 'cancelled'
+    `);
+    const refundResult = await database.query(`
+      SELECT COALESCE(SUM(refund_amount), 0) as total_refunded,
+             COALESCE(AVG(refund_amount), 0) as avg_refund
+      FROM payments WHERE status = 'refunded'
+    `);
+
+    const stats = statsResult.rows[0] || {};
+    const refunds = refundResult.rows[0] || {};
+
+    return {
+      totalCancellations: parseInt(stats.total || '0', 10),
+      doctorCancellations: parseInt(stats.by_doctor || '0', 10),
+      patientCancellations: parseInt(stats.by_patient || '0', 10),
+      adminCancellations: parseInt(stats.by_admin || '0', 10),
+      totalRefunded: parseFloat(refunds.total_refunded || '0'),
+      avgRefundAmount: parseFloat(refunds.avg_refund || '0'),
+    };
   }
 
   // ─── Hospital-specific bookings listing ──────────────────────

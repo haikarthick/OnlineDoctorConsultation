@@ -76,6 +76,8 @@ const VetHospitalManage = lazy(() => import('./pages/VetHospitalManage'))
 const VetHospitalAdmin = lazy(() => import('./pages/admin/VetHospitalAdmin'))
 const HospitalBooking = lazy(() => import('./pages/HospitalBooking'))
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite'))
+const WalletPage = lazy(() => import('./pages/Wallet'))
+const CancellationDashboard = lazy(() => import('./pages/admin/CancellationDashboard'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -229,6 +231,9 @@ function AppRoutes() {
       <Route path="/vet-hospitals/:id/book" element={<ProtectedRoute><AppLayout><HospitalBooking /></AppLayout></ProtectedRoute>} />
       <Route path="/admin/vet-hospitals" element={<RoleRoute path="/admin/vet-hospitals"><AppLayout><VetHospitalAdmin /></AppLayout></RoleRoute>} />
 
+      {/* ── Wallet ── */}
+      <Route path="/wallet" element={<RoleRoute path="/wallet"><AppLayout><RoutedPage Component={WalletPage} /></AppLayout></RoleRoute>} />
+
       {/* ── Doctor/Vet Module ── */}
       <Route path="/doctor/dashboard" element={<Navigate to="/dashboard" replace />} />
       <Route path="/doctor/manage-schedule" element={<RoleRoute path="/doctor/manage-schedule"><AppLayout><RoutedPage Component={ManageSchedule} /></AppLayout></RoleRoute>} />
@@ -249,6 +254,7 @@ function AppRoutes() {
       <Route path="/admin/audit-logs" element={<RoleRoute path="/admin/audit-logs"><AppLayout><RoutedPage Component={AuditLogs} /></AppLayout></RoleRoute>} />
       <Route path="/admin/permissions" element={<RoleRoute path="/admin/permissions"><AppLayout><RoutedPage Component={PermissionManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/medical-records" element={<RoleRoute path="/admin/medical-records"><AppLayout><RoutedPage Component={MedicalRecordManagement} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/cancellation-dashboard" element={<RoleRoute path="/admin/cancellation-dashboard"><AppLayout><RoutedPage Component={CancellationDashboard} /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -56,6 +56,8 @@ export class NotificationService {
       'consultation_completed': 'consultation_completed',
       'payment_received': 'payment_receipt',
       'password_reset': 'password_reset',
+      'booking_cancelled': 'booking_cancelled',
+      'booking_refund': 'booking_refund',
     };
 
     const template = templateMap[type];

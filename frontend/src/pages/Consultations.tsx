@@ -18,6 +18,8 @@ interface BookingRow {
   groupName?: string; groupType?: string;
   rescheduleCount?: number;
   missedBy?: 'doctor' | 'patient' | 'both';
+  cancelledBy?: string;
+  cancelledAt?: string;
 }
 interface ConsultRow {
   id: string; animalType?: string; symptomDescription?: string;
@@ -65,7 +67,7 @@ const canReschedule = (b: BookingRow, maxReschedules: number, patientNoShowLimit
 
 const Consultations: React.FC = () => {
   const { user } = useAuth()
-  const { formatDate, isJoinable, settings: appSettings } = useSettings()
+  const { formatDate, isJoinable, settings: appSettings, estimateRefund } = useSettings()
   const { maxReschedules, patientNoShowRescheduleLimit } = appSettings
   const navigate = useNavigate()
   const [bookings, setBookings] = useState<BookingRow[]>([])
@@ -603,6 +605,18 @@ const Consultations: React.FC = () => {
                       {diagnosis && (
                         <div style={{ fontSize: 13, color: '#059669', marginTop: 4 }}>🩺 {diagnosis}</div>
                       )}
+
+                      {/* Cancelled by indicator */}
+                      {b.status === 'cancelled' && b.cancelledBy && (
+                        <div style={{ fontSize: 12, marginTop: 6, padding: '4px 10px', borderRadius: 6,
+                          background: b.cancelledBy === user?.id ? '#fef3c7' : '#fef2f2',
+                          color: b.cancelledBy === user?.id ? '#92400e' : '#991b1b' }}>
+                          {b.cancelledBy === user?.id ? '🙋 Cancelled by you' : '🔔 Cancelled by the other party'}
+                          {b.cancelledAt && <span style={{ marginLeft: 8, fontSize: 11, color: '#9ca3af' }}>
+                            {formatDate(b.cancelledAt)}
+                          </span>}
+                        </div>
+                      )}
                     </div>
 
                     {/* Card Actions */}
@@ -872,14 +886,20 @@ const Consultations: React.FC = () => {
       )}
 
       {/* ─── Cancel Booking Modal ──────────────────────────── */}
-      {cancelModal.show && (
+      {cancelModal.show && (() => {
+        const cancelBooking = bookings.find(b => b.id === cancelModal.bookingId)
+        const refundEstimate = cancelBooking ? estimateRefund(cancelBooking.scheduledDate, cancelBooking.timeSlotStart, 500) : null
+        const reasonPresets = isVet
+          ? ['Schedule conflict', 'Emergency', 'Patient request', 'Unable to attend']
+          : ['Found another doctor', 'Schedule conflict', 'No longer needed', 'Financial reasons']
+        return (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999
         }} onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}>
           <div style={{
-            background: 'white', borderRadius: 12, padding: 24, width: '90%', maxWidth: 440,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+            background: 'white', borderRadius: 12, padding: 24, width: '90%', maxWidth: 480,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)', maxHeight: '90vh', overflowY: 'auto'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ margin: 0, fontSize: 18 }}>❌ Cancel Booking</h2>
@@ -889,6 +909,33 @@ const Consultations: React.FC = () => {
             <div style={{ background: '#fef2f2', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13, color: '#991b1b' }}>
               ⚠️ This action cannot be undone. The appointment will be cancelled.
             </div>
+
+            {/* Refund Policy Preview (for patients) */}
+            {isPetOwner && refundEstimate && (
+              <div style={{
+                background: refundEstimate.percent === 100 ? '#d1fae5' : refundEstimate.percent > 0 ? '#fef3c7' : '#fee2e2',
+                border: `1px solid ${refundEstimate.percent === 100 ? '#6ee7b7' : refundEstimate.percent > 0 ? '#fcd34d' : '#fca5a5'}`,
+                borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13
+              }}>
+                <strong>{refundEstimate.percent === 100 ? '✅' : refundEstimate.percent > 0 ? '⚠️' : '❌'} Refund Policy:</strong>
+                <div style={{ marginTop: 4 }}>{refundEstimate.reason}</div>
+              </div>
+            )}
+
+            {/* Quick reason presets */}
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Quick reasons:</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {reasonPresets.map(r => (
+                  <button key={r}
+                    className={`btn btn-sm ${cancelModal.reason === r ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setCancelModal({ ...cancelModal, reason: r })}
+                    style={{ fontSize: 12 }}
+                  >{r}</button>
+                ))}
+              </div>
+            </div>
+
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Reason for cancellation</label>
               <textarea
@@ -916,7 +963,8 @@ const Consultations: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

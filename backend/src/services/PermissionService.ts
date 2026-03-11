@@ -146,6 +146,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'disease_prediction', 'report_builder',
     // Intelligence
     'ai_copilot', 'marketplace_access', 'wellness_portal',
+    // Wallet
+    'wallet',
     // Actions
     'booking_confirm', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'consultation_start', 'prescription_create',
@@ -164,6 +166,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'hospital_browse',
     // (user-scoped)
     'ai_copilot', 'marketplace_access', 'wellness_portal',
+    // Wallet
+    'wallet',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'review_create', 'animal_manage',
@@ -189,6 +193,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Futuristic Modules
     'ai_copilot', 'digital_twin', 'marketplace_access',
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
+    // Wallet
+    'wallet',
     // Actions
     'booking_create', 'booking_cancel', 'booking_reschedule',
     'consultation_create', 'review_create', 'animal_manage',
@@ -219,6 +225,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Futuristic Modules
     'ai_copilot', 'digital_twin', 'marketplace_access',
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
+    // Wallet & Cancellation
+    'wallet', 'admin_cancellation_dashboard',
     // Actions
     'booking_confirm', 'booking_cancel', 'review_moderate',
     // Dashboard widgets

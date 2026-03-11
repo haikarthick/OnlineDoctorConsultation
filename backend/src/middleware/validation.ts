@@ -315,6 +315,7 @@ export const updateLabResultSchema = createLabResultSchema.fork(
 // ─── Payment ─────────────────────────────────────────────────
 export const createPaymentSchema = Joi.object({
   consultationId: requiredUuid,
+  bookingId: Joi.string().uuid().optional(),
   amount: Joi.number().positive().required(),
   currency: Joi.string().max(3).optional().default('USD'),
   paymentMethod: Joi.string().valid('credit_card', 'debit_card', 'bank_transfer', 'e_wallet', 'cash').optional(),

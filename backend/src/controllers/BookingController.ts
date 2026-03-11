@@ -99,7 +99,7 @@ class BookingController {
 
     const reason = req.body.reason || 'No reason provided';
     const roleName = authReq.userRole === 'veterinarian' ? 'Doctor' : authReq.userRole === 'pet_owner' ? 'Pet Owner' : authReq.userRole === 'admin' ? 'Admin' : 'User';
-    const updated = await BookingService.cancelBooking(req.params.id, reason);
+    const updated = await BookingService.cancelBooking(req.params.id, reason, authReq.userId!, authReq.userRole);
 
     await logBookingAction(authReq.userId!, authReq.userRole || 'unknown', 'BOOKING_CANCELLED', req.params.id, {
       reason,
@@ -186,6 +186,16 @@ class BookingController {
     );
 
     res.json({ success: true, data: result.rows });
+  }
+
+  async getCancellationStats(req: Request, res: Response) {
+    const stats = await BookingService.getCancellationStats();
+    res.json({ success: true, data: stats });
+  }
+
+  async getDoctorReliability(req: Request, res: Response) {
+    const stats = await BookingService.getDoctorCancellationStats(req.params.vetId);
+    res.json({ success: true, data: stats });
   }
 }
 

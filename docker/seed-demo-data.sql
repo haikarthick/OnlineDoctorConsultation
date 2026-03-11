@@ -450,7 +450,17 @@ INSERT INTO system_settings (id, key, value, category, description) VALUES
   (uuid_generate_v4(), 'notification.emailEnabled',       'true',           'notification',  'Enable email notifications'),
   (uuid_generate_v4(), 'video.maxParticipants',           '2',              'video',         'Maximum participants per video session'),
   (uuid_generate_v4(), 'security.maxLoginAttempts',       '5',              'security',      'Maximum login attempts before temporary lockout'),
-  (uuid_generate_v4(), 'security.lockoutDurationMinutes', '15',             'security',      'Lockout duration after max failed login attempts');
+  (uuid_generate_v4(), 'security.lockoutDurationMinutes', '15',             'security',      'Lockout duration after max failed login attempts'),
+  (uuid_generate_v4(), 'payment.gatewayMode',             'demo',           'payment',       'Payment gateway mode: demo (stub payments), test (sandbox), live (real gateway)'),
+  (uuid_generate_v4(), 'payment.gatewayUrl',              '',               'payment',       'Payment gateway API base URL (leave empty for demo/stub mode)'),
+  (uuid_generate_v4(), 'payment.gatewayApiKey',           '',               'payment',       'Payment gateway API key (encrypted in production)'),
+  (uuid_generate_v4(), 'payment.gatewayProvider',         'stripe',         'payment',       'Payment gateway provider: stripe, paypal, razorpay'),
+  (uuid_generate_v4(), 'cancellation.autoRefundOnDoctorCancel', 'true',     'cancellation',  'Automatically refund patient when doctor cancels a paid booking'),
+  (uuid_generate_v4(), 'cancellation.patientFreeWindowHours',  '24',        'cancellation',  'Hours before appointment when patient can cancel for free'),
+  (uuid_generate_v4(), 'cancellation.partialRefundPercent',    '50',        'cancellation',  'Refund percentage for patient cancellation within partial window'),
+  (uuid_generate_v4(), 'cancellation.partialRefundWindowHours','2',         'cancellation',  'Hours before appointment for partial refund (0 = direct no-refund)'),
+  (uuid_generate_v4(), 'cancellation.goodwillBonusPercent',    '10',        'cancellation',  'Bonus wallet credit on top of refund when doctor cancels'),
+  (uuid_generate_v4(), 'cancellation.doctorMaxCancellationsPerMonth', '3',  'cancellation',  'Max doctor cancellations per month before reliability penalty');
 
 -- ============================================================
 -- STEP 16: MOVEMENT RECORDS
