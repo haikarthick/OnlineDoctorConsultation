@@ -11,9 +11,16 @@ interface SystemSettingsProps {
 // Keys managed by dedicated UI cards — excluded from the generic table
 const MANAGED_KEYS = new Set([
   'display.timeFormat',
+  'display.dateFormat',
   'consultation.joinWindowMinutes',
+  'consultation.maxDurationMinutes',
   'booking.maxReschedules',
   'booking.patientNoShowRescheduleLimit',
+  'booking.advanceBookingDays',
+  'booking.cancellationWindowHours',
+  // Legacy aliases from seed.sql — same concepts, different key names
+  'max_booking_days_ahead',
+  'default_slot_duration',
   'payment.gatewayMode',
   'payment.gatewayUrl',
   'payment.gatewayApiKey',
@@ -64,6 +71,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const [savingCancellation, setSavingCancellation] = useState(false)
   const [cancellationSaved, setCancellationSaved] = useState(false)
 
+  // Additional managed settings state (loaded from DB)
+  const [dateFormat, setDateFormat] = useState('MMM d, yyyy')
+  const [maxDurationMinutes, setMaxDurationMinutes] = useState(60)
+  const [advanceBookingDays, setAdvanceBookingDays] = useState(60)
+  const [cancellationWindowHours, setCancellationWindowHours] = useState(24)
+  const [maxReschedules, setMaxReschedules] = useState(1)
+
   useEffect(() => {
     loadSettings()
     loadGatewaySettings()
@@ -73,7 +87,15 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     try {
       setLoading(true)
       const result = await apiService.adminGetSettings()
-      setSettings(result.data || [])
+      const list: SystemSetting[] = result.data || []
+      setSettings(list)
+      // Hydrate additional card-managed settings from DB
+      const find = (k: string) => list.find(s => s.key === k)?.value
+      if (find('display.dateFormat')) setDateFormat(find('display.dateFormat')!)
+      if (find('consultation.maxDurationMinutes')) setMaxDurationMinutes(parseInt(find('consultation.maxDurationMinutes')!, 10) || 60)
+      if (find('booking.advanceBookingDays')) setAdvanceBookingDays(parseInt(find('booking.advanceBookingDays')!, 10) || 60)
+      if (find('booking.cancellationWindowHours')) setCancellationWindowHours(parseInt(find('booking.cancellationWindowHours')!, 10) || 24)
+      if (find('booking.maxReschedules')) setMaxReschedules(parseInt(find('booking.maxReschedules')!, 10) || 1)
     } catch {
     } finally {
       setLoading(false)
@@ -208,6 +230,23 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     }
   }
 
+  // Generic inline-save helper for card-managed settings
+  const [savingInline, setSavingInline] = useState<string | null>(null)
+  const [savedInline, setSavedInline] = useState<string | null>(null)
+  const saveInlineSetting = async (key: string, value: string) => {
+    try {
+      setSavingInline(key)
+      await apiService.adminUpdateSetting(key, value)
+      setSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s))
+      await reloadSettings()
+      setSavedInline(key)
+      setTimeout(() => setSavedInline(null), 3000)
+    } catch {
+    } finally {
+      setSavingInline(null)
+    }
+  }
+
   // Filter out managed keys and apply search
   const unmanagedSettings = useMemo(() => {
     return settings.filter(s => !MANAGED_KEYS.has(s.key))
@@ -250,9 +289,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     return text.toLowerCase().includes(searchQuery.toLowerCase())
   }
 
-  const showDisplayCard = matchesSearch('display time format 12h 24h')
-  const showConsultationCard = matchesSearch('consultation join window minutes')
-  const showBookingCard = matchesSearch('booking no-show reschedule patient doctor limit')
+  const showDisplayCard = matchesSearch('display time format 12h 24h date format')
+  const showConsultationCard = matchesSearch('consultation join window minutes duration max')
+  const showBookingCard = matchesSearch('booking no-show reschedule patient doctor limit advance days cancellation window hours')
   const showPaymentCard = matchesSearch('payment gateway mode provider url api key stripe demo test live')
   const showCancellationCard = matchesSearch('cancellation refund policy goodwill bonus patient doctor')
 
@@ -371,7 +410,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
         </div>
       )}
 
-      {/* ─── Display Settings — Time Format ─── */}
+      {/* ─── Display Settings ─── */}
       {showDisplayCard && (
         <div id="settings-section-display" className="card" style={{ marginBottom: 20 }}>
           <div className="card-header"><h2 style={{ color: '#111827' }}>🕐 Display Settings</h2></div>
@@ -400,11 +439,32 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   : new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
               </p>
             </div>
+
+            {/* Date Format */}
+            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Date Format</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>How dates are displayed across the application.</p>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {['MMM d, yyyy', 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd'].map(fmt => (
+                    <button key={fmt} className={`btn btn-sm ${dateFormat === fmt ? 'btn-primary' : 'btn-outline'}`}
+                      disabled={savingInline === 'display.dateFormat'}
+                      onClick={() => { setDateFormat(fmt); saveInlineSetting('display.dateFormat', fmt) }}>
+                      {fmt}
+                    </button>
+                  ))}
+                  {savingInline === 'display.dateFormat' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                  {savedInline === 'display.dateFormat' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ─── Consultation Settings — Join Window ─── */}
+      {/* ─── Consultation Settings ─── */}
       {showConsultationCard && (
         <div id="settings-section-consultation" className="card" style={{ marginBottom: 20 }}>
           <div className="card-header"><h2 style={{ color: '#111827' }}>🩺 Consultation Settings</h2></div>
@@ -437,25 +497,130 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                 {joinWindow === 0 && ' (0 = always available)'}
               </p>
             </div>
+
+            {/* Max Duration */}
+            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Max Duration (minutes)</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Maximum consultation duration in minutes.</p>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {[30, 45, 60, 90].map(mins => (
+                    <button key={mins} className={`btn btn-sm ${maxDurationMinutes === mins ? 'btn-primary' : 'btn-outline'}`}
+                      disabled={savingInline === 'consultation.maxDurationMinutes'}
+                      onClick={() => { setMaxDurationMinutes(mins); saveInlineSetting('consultation.maxDurationMinutes', String(mins)) }}>
+                      {mins} min
+                    </button>
+                  ))}
+                  <input type="number" className="form-input"
+                    style={{ width: 70, padding: '4px 8px', fontSize: 13, textAlign: 'center', ...inputStyle }}
+                    value={maxDurationMinutes} min={10} max={240}
+                    disabled={savingInline === 'consultation.maxDurationMinutes'}
+                    onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 10 && v <= 240) setMaxDurationMinutes(v) }}
+                    onBlur={() => saveInlineSetting('consultation.maxDurationMinutes', String(maxDurationMinutes))}
+                    onKeyDown={e => { if (e.key === 'Enter') saveInlineSetting('consultation.maxDurationMinutes', String(maxDurationMinutes)) }} />
+                  {savingInline === 'consultation.maxDurationMinutes' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                  {savedInline === 'consultation.maxDurationMinutes' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ─── Booking Settings — No-Show Reschedule Rules ─── */}
+      {/* ─── Booking Settings ─── */}
       {showBookingCard && (
         <div id="settings-section-booking" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>📅 Booking — No-Show Reschedule Rules</h2></div>
+          <div className="card-header"><h2 style={{ color: '#111827' }}>📅 Booking Settings</h2></div>
           <div className="card-body">
+            {/* Advance Booking Days */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>🩺 Doctor No-Show</h3>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
-                  When a doctor doesn't join, the patient may reschedule with any available doctor.
-                </p>
+                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Advance Booking Window (days)</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>How many days in advance bookings are allowed.</p>
               </div>
-              <span style={{ background: '#d1fae5', color: '#065f46', padding: '5px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600 }}>♾ Unlimited</span>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                {[7, 14, 30, 60, 90].map(d => (
+                  <button key={d} className={`btn btn-sm ${advanceBookingDays === d ? 'btn-primary' : 'btn-outline'}`}
+                    disabled={savingInline === 'booking.advanceBookingDays'}
+                    onClick={() => { setAdvanceBookingDays(d); saveInlineSetting('booking.advanceBookingDays', String(d)) }}>
+                    {d}d
+                  </button>
+                ))}
+                <input type="number" className="form-input"
+                  style={{ width: 70, padding: '4px 8px', fontSize: 13, textAlign: 'center', ...inputStyle }}
+                  value={advanceBookingDays} min={1} max={365}
+                  disabled={savingInline === 'booking.advanceBookingDays'}
+                  onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 1 && v <= 365) setAdvanceBookingDays(v) }}
+                  onBlur={() => saveInlineSetting('booking.advanceBookingDays', String(advanceBookingDays))}
+                  onKeyDown={e => { if (e.key === 'Enter') saveInlineSetting('booking.advanceBookingDays', String(advanceBookingDays)) }} />
+                {savingInline === 'booking.advanceBookingDays' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                {savedInline === 'booking.advanceBookingDays' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+              </div>
             </div>
 
+            {/* Cancellation Window Hours */}
+            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Free Cancellation Window (hours)</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Hours before appointment when cancellation is free.</p>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {[6, 12, 24, 48].map(h => (
+                    <button key={h} className={`btn btn-sm ${cancellationWindowHours === h ? 'btn-primary' : 'btn-outline'}`}
+                      disabled={savingInline === 'booking.cancellationWindowHours'}
+                      onClick={() => { setCancellationWindowHours(h); saveInlineSetting('booking.cancellationWindowHours', String(h)) }}>
+                      {h}h
+                    </button>
+                  ))}
+                  {savingInline === 'booking.cancellationWindowHours' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                  {savedInline === 'booking.cancellationWindowHours' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                </div>
+              </div>
+            </div>
+
+            {/* Max Reschedules */}
+            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Max Reschedules</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Maximum times a user can reschedule before doctor acceptance. 0 = unlimited.</p>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {[0, 1, 2, 3, 5].map(n => (
+                    <button key={n} className={`btn btn-sm ${maxReschedules === n ? 'btn-primary' : 'btn-outline'}`}
+                      disabled={savingInline === 'booking.maxReschedules'}
+                      onClick={() => { setMaxReschedules(n); saveInlineSetting('booking.maxReschedules', String(n)) }}>
+                      {n === 0 ? '∞' : n}
+                    </button>
+                  ))}
+                  {savingInline === 'booking.maxReschedules' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                  {savedInline === 'booking.maxReschedules' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                </div>
+              </div>
+            </div>
+
+            {/* No-Show Rules Divider */}
+            <div style={{ borderTop: '2px solid #e5e7eb', padding: '12px 0 4px', marginTop: 4 }}>
+              <h3 style={{ margin: 0, fontSize: 14, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>No-Show Reschedule Rules</h3>
+            </div>
+
+            {/* Doctor No-Show */}
+            <div style={{ padding: '12px 0', borderTop: '1px solid #f3f4f6' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>🩺 Doctor No-Show</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                    When a doctor doesn't join, the patient may reschedule with any available doctor.
+                  </p>
+                </div>
+                <span style={{ background: '#d1fae5', color: '#065f46', padding: '5px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600 }}>♾ Unlimited</span>
+              </div>
+            </div>
+
+            {/* Patient No-Show */}
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
