@@ -550,7 +550,7 @@
 /* ═══ Appointment Card Grid ═══ */
 .appt-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
 }
 .appt-card {
@@ -569,7 +569,8 @@
 .appt-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
   padding: 14px 16px;
   background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
   border-bottom: 1px solid #eef0f6;
@@ -671,11 +672,12 @@
 /* Responsive */
 @media (max-width: 768px) {
   .module-page {
-    padding: 20px;
+    padding: 16px;
   }
 
   .module-header {
     flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
     margin-bottom: 24px;
     padding-bottom: 20px;
@@ -685,8 +687,21 @@
     font-size: 20px;
   }
 
+  /* Wrap header actions so they don't overflow on small screens */
+  .module-header > div, .module-header > span {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Scrollable tables on mobile */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .data-table {
     font-size: 12px;
+    min-width: 480px; /* ensures horizontal scroll rather than column squish */
   }
 
   .data-table th,
@@ -696,6 +711,17 @@
 
   .appointment-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Appt card actions wrap on mobile */
+  .appt-card-actions {
+    flex-wrap: wrap;
+  }
+  .appt-card-actions button, .appt-card-actions a {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    justify-content: center;
   }
 
   .record-item {
