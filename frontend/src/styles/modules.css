@@ -184,29 +184,34 @@
 .btn-primary {
   background: var(--primary);
   color: white;
+  -webkit-text-fill-color: white;
 }
 .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
 
 .btn-success {
   background: var(--success);
   color: white;
+  -webkit-text-fill-color: white;
 }
 .btn-success:hover:not(:disabled) { background: #047857; }
 
 .btn-danger {
   background: var(--danger);
   color: white;
+  -webkit-text-fill-color: white;
 }
 .btn-danger:hover:not(:disabled) { background: #b91c1c; }
 
 .btn-warning {
   background: var(--warning);
   color: white;
+  -webkit-text-fill-color: white;
 }
 
 .btn-outline {
   background: white;
-  color: var(--gray-700);
+  color: #374151;
+  -webkit-text-fill-color: #374151;
   border: 1px solid var(--gray-300);
 }
 .btn-outline:hover:not(:disabled) { background: var(--gray-50); border-color: var(--gray-400); }
@@ -309,7 +314,8 @@
   border: 1px solid var(--gray-300);
   border-radius: var(--radius);
   font-size: 14px;
-  color: var(--gray-900);
+  color: #111827;
+  -webkit-text-fill-color: #111827;
   background: white;
   transition: border-color 0.15s;
   box-sizing: border-box;
@@ -602,6 +608,8 @@
   border: 1px solid var(--gray-300);
   border-radius: var(--radius);
   font-size: 14px;
+  color: #111827;
+  -webkit-text-fill-color: #111827;
   background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E") 10px center / 18px no-repeat;
 }
 

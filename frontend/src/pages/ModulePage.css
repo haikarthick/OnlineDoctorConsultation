@@ -174,7 +174,8 @@
 /* Prevent gradient text fill from cascading to interactive elements */
 .module-header button,
 .module-header select,
-.module-header input {
+.module-header input,
+.module-header textarea {
   -webkit-text-fill-color: initial;
 }
 
