@@ -617,6 +617,104 @@ Indexes:
 
 ---
 
+## Payment, Wallet & Cancellation Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                     PAYMENT GATEWAY LAYER                            │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌─────────────┐    ┌──────────────────────────────────────────┐     │
+│  │ Admin Panel  │───▶│  system_settings (payment.gatewayMode)  │     │
+│  │ Gateway     │    │  ┌──────┐  ┌──────┐  ┌──────┐           │     │
+│  │ Config      │    │  │ demo │  │ test │  │ live │           │     │
+│  └─────────────┘    │  │(stub)│  │(sand)│  │(real)│           │     │
+│                     │  └──┬───┘  └──┬───┘  └──┬───┘           │     │
+│                     └─────┼─────────┼─────────┼───────────────┘     │
+│                           │         │         │                      │
+│                     ┌─────▼─────────▼─────────▼───────────────┐     │
+│                     │        PaymentService                    │     │
+│                     │  createPayment() → booking_id link       │     │
+│                     │  processRefund() → wallet credit         │     │
+│                     │  getPaymentByBooking()                   │     │
+│                     └──────────────────────────────────────────┘     │
+└──────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────┐
+│                     WALLET SYSTEM                                    │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌──────────────────┐    ┌──────────────────────────────────────┐    │
+│  │ wallets           │    │ wallet_transactions                  │    │
+│  │ ├─ user_id (1:1)  │    │ ├─ type: credit|debit|refund|bonus  │    │
+│  │ ├─ balance        │    │ ├─ amount                            │    │
+│  │ ├─ bonus_credits  │    │ ├─ reference_id (booking/payment)    │    │
+│  │ └─ currency       │    │ └─ description                       │    │
+│  └──────────────────┘    └──────────────────────────────────────┘    │
+│                                                                      │
+│  WalletService: credit() | debit() | refund() | addBonus()          │
+└──────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────┐
+│                 CANCELLATION POLICY ENGINE                           │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  Doctor Cancels                    Patient Cancels                   │
+│  ┌────────────┐                   ┌───────────────────────────┐     │
+│  │ Always:    │                   │ Time-Based Policy:         │     │
+│  │ 100% refund│                   │                           │     │
+│  │ + goodwill │                   │ ≥24h → 100% refund        │     │
+│  │   bonus    │                   │ 2-24h → 50% partial       │     │
+│  │   (10%)    │                   │ <2h → no refund            │     │
+│  └────────────┘                   └───────────────────────────┘     │
+│                                                                      │
+│  All configurable via Admin → System Settings                        │
+│                                                                      │
+│  BookingService.cancelBooking():                                     │
+│    1. Set cancelled_by + cancelled_at                                │
+│    2. Calculate refund based on canceller role + timing              │
+│    3. Process refund → WalletService.refund()                        │
+│    4. Optional goodwill bonus → WalletService.addBonus()             │
+│    5. Notify both parties (in-app + email)                           │
+│                                                                      │
+│  Doctor Reliability:                                                 │
+│    reliabilityScore = ((total - cancellations) / total) × 100        │
+│    isReliable = monthCancellations < maxPerMonth                    │
+│    Badge: ✅ Guaranteed (reliable) | ⚠️ X% (unreliable)            │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### New Database Tables
+
+| Table | Purpose |
+|-------|---------|
+| `wallets` | Per-user wallet with balance + bonus_credits (1:1 with users) |
+| `wallet_transactions` | Ledger of all wallet movements (credit, debit, refund, bonus) |
+
+### Modified Tables
+
+| Table | New Columns | Purpose |
+|-------|-------------|---------|
+| `bookings` | `cancelled_by UUID`, `cancelled_at TIMESTAMP` | Track who cancelled and when |
+| `payments` | `booking_id UUID` | Link payments to bookings for refund processing |
+
+### New System Settings
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `payment.gatewayMode` | `demo` | Payment processing mode (demo/test/live) |
+| `payment.gatewayUrl` | `` | Gateway API endpoint URL |
+| `payment.gatewayApiKey` | `` | Gateway API authentication key |
+| `payment.gatewayProvider` | `stripe` | Payment provider (stripe/razorpay/paypal/square) |
+| `cancellation.autoRefundOnDoctorCancel` | `true` | Auto-refund when doctor cancels |
+| `cancellation.patientFreeWindowHours` | `24` | Hours before appointment for free cancellation |
+| `cancellation.partialRefundPercent` | `50` | Partial refund percentage |
+| `cancellation.partialRefundWindowHours` | `2` | Hours threshold for partial vs no refund |
+| `cancellation.goodwillBonusPercent` | `10` | Bonus credit on doctor cancellation |
+| `cancellation.doctorMaxCancellationsPerMonth` | `3` | Max monthly cancellations before flagged |
+
+---
+
 ## Security Architecture
 
 ```

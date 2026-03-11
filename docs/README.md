@@ -56,6 +56,11 @@ graph TD
 - **Geospatial Analytics**: Location tracking and zone management
 - **Supply Chain**: Traceability from farm to consumer
 - **Payment Integration**: Secure billing and invoicing
+- **Payment Gateway**: Configurable gateway (demo/test/live), admin settings for Stripe/Razorpay/PayPal/Square
+- **Wallet System**: Per-user wallet with refund balance, bonus credits, and transaction history
+- **Cancellation Protection**: Auto-refund on doctor cancellation, time-based patient refund policy, goodwill bonus credits
+- **Doctor Reliability**: Cancellation tracking, reliability scoring, Guaranteed badge for trusted doctors
+- **Admin Cancellation Dashboard**: Cancellation analytics, breakdown by role, refund metrics
 
 ## Support
 
