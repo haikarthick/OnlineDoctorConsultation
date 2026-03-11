@@ -127,6 +127,18 @@ class PostgresDatabase {
       `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reschedule_count INTEGER NOT NULL DEFAULT 0`
     ).catch(() => { /* column may already exist */ });
 
+    // Ensure ALL bookings columns that may have been added after initial table creation
+    const bookingColumns = [
+      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS missed_by VARCHAR(20)`,
+      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS cancelled_by UUID`,
+      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMP`,
+      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS enterprise_id UUID`,
+      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS group_id UUID`,
+    ];
+    for (const ddl of bookingColumns) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
     // Ensure enterprise-related tables exist (safety net if enterpriseMigration fails)
     await this.pool.query(
       `CREATE TABLE IF NOT EXISTS enterprises (
@@ -145,14 +157,6 @@ class PostgresDatabase {
          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
        )`
     ).catch(() => { /* table may already exist */ });
-
-    // Ensure enterprise_id and group_id columns exist on bookings
-    await this.pool.query(
-      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS enterprise_id UUID`
-    ).catch(() => { /* column may already exist */ });
-    await this.pool.query(
-      `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS group_id UUID`
-    ).catch(() => { /* column may already exist */ });
 
     logger.info('Default system settings seeded');
   }
