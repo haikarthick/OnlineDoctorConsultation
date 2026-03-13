@@ -6,6 +6,7 @@ import type { VetHospital, HospitalDepartment, HospitalDoctor, HospitalService, 
 import { DOC_LABELS } from '../types'
 import './ModulePage.css'
 import './VetHospitals.css'
+import { useSettings } from '../context/SettingsContext'
 import { useTranslation } from 'react-i18next'
 
 type Tab = 'overview' | 'departments' | 'doctors' | 'services'
@@ -30,6 +31,7 @@ const StarRating: React.FC<{ value: number }> = ({ value }) => (
 
 const VetHospitalProfile: React.FC = () => {
   const { t } = useTranslation()
+  const { formatCurrency } = useSettings()
 
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
@@ -263,7 +265,7 @@ const VetHospitalProfile: React.FC = () => {
                     {doc.title && <div style={{ fontSize: '.82rem' }}>{doc.title}</div>}
                     {doc.departmentId && <div className="vh-doctor-dept">{departments.find(d => d.id === doc.departmentId)?.name}</div>}
                     {doc.employmentType && <div style={{ fontSize: '.78rem', color: 'var(--text-muted,#888)' }}>{doc.employmentType.replace(/_/g,'  ')}</div>}
-                    {doc.consultationFee && <div style={{ fontSize: '.85rem', color: '#059669', fontWeight: 600 }}>₹{doc.consultationFee}</div>}
+                    {doc.consultationFee && <div style={{ fontSize: '.85rem', color: '#059669', fontWeight: 600 }}>{formatCurrency(doc.consultationFee)}</div>}
                     {doc.isAcceptingPatients !== undefined && (
                       <div style={{ fontSize: '.78rem', color: doc.isAcceptingPatients ? '#059669' : '#dc2626' }}>
                         {doc.isAcceptingPatients ? '✓ Accepting patients' : '✗ Not accepting'}
@@ -293,8 +295,8 @@ const VetHospitalProfile: React.FC = () => {
                         {(svc.priceMin || svc.priceMax) && (
                           <div className="vh-service-price">
                             {svc.priceMin && svc.priceMax && svc.priceMin !== svc.priceMax
-                              ? `${svc.currency || '₹'}${svc.priceMin} – ${svc.currency || '₹'}${svc.priceMax}`
-                              : `${svc.currency || '₹'}${svc.priceMin || svc.priceMax}`}
+                              ? `${formatCurrency(svc.priceMin)} – ${formatCurrency(svc.priceMax)}`
+                              : `${formatCurrency(svc.priceMin || svc.priceMax || 0)}`}
                           </div>
                         )}
                         {svc.durationMinutes && <div className="vh-service-duration">⏱ {svc.durationMinutes} min</div>}

@@ -9,7 +9,7 @@ interface PaymentManagementProps {
 }
 
 const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => {
-  const { formatDate } = useSettings()
+  const { formatDate, formatCurrency } = useSettings()
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
@@ -74,12 +74,12 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 24 }}>
         <div className="stat-card">
           <div className="stat-icon">💰</div>
-          <div className="stat-value">${(totalRevenue / 100).toLocaleString()}</div>
+          <div className="stat-value">{formatCurrency(totalRevenue / 100)}</div>
           <div className="stat-label">Total Revenue</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">↩️</div>
-          <div className="stat-value">${(totalRefunded / 100).toLocaleString()}</div>
+          <div className="stat-value">{formatCurrency(totalRefunded / 100)}</div>
           <div className="stat-label">Total Refunded</div>
         </div>
         <div className="stat-card">
@@ -152,8 +152,8 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
               {payments.map(p => (
                 <tr key={p.id}>
                   <td><code style={{ fontSize: 12 }}>{p.invoiceNumber || p.id.slice(0, 8)}</code></td>
-                  <td><strong>${(p.amount / 100).toFixed(2)}</strong></td>
-                  <td>${((p.taxAmount || 0) / 100).toFixed(2)}</td>
+                  <td><strong>{formatCurrency(p.amount / 100)}</strong></td>
+                  <td>{formatCurrency((p.taxAmount || 0) / 100)}</td>
                   <td>{p.paymentMethod || '—'}</td>
                   <td>{getStatusBadge(p.status)}</td>
                   <td>{formatDate(p.createdAt || '')}</td>

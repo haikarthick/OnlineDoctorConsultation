@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { CancellationStats } from '../../types'
 import '../../styles/modules.css'
@@ -8,6 +9,7 @@ interface CancellationDashboardProps {
 }
 
 const CancellationDashboard: React.FC<CancellationDashboardProps> = ({ onNavigate }) => {
+  const { formatCurrency } = useSettings()
   const [stats, setStats] = useState<CancellationStats | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -78,11 +80,11 @@ const CancellationDashboard: React.FC<CancellationDashboardProps> = ({ onNavigat
         </div>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
           <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>Total Refunded</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#059669' }}>₹{totalRefunded.toFixed(2)}</div>
+          <div style={{ fontSize: 28, fontWeight: 600, color: '#059669' }}>{formatCurrency(totalRefunded)}</div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
           <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>Avg Refund</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#059669' }}>₹{avgRefund.toFixed(2)}</div>
+          <div style={{ fontSize: 28, fontWeight: 600, color: '#059669' }}>{formatCurrency(avgRefund)}</div>
         </div>
       </div>
 
@@ -151,7 +153,7 @@ const CancellationDashboard: React.FC<CancellationDashboardProps> = ({ onNavigat
             )}
             {totalRefunded > 10000 && (
               <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
-                ⚠️ <strong>High Refund Volume (₹{totalRefunded.toFixed(0)})</strong> — Consider tightening cancellation windows to reduce financial impact.
+                ⚠️ <strong>High Refund Volume ({formatCurrency(totalRefunded)})</strong> — Consider tightening cancellation windows to reduce financial impact.
               </div>
             )}
             {totalCancellations === 0 && (

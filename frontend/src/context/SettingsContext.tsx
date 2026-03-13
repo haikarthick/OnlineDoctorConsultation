@@ -18,7 +18,16 @@ export interface AppSettings {
   maxReschedules: number
   patientNoShowRescheduleLimit: number
   paymentGatewayMode: string
+  currency: string
   cancellationPolicy: CancellationPolicy
+}
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$', INR: '₹', EUR: '€', GBP: '£', AUD: 'A$', CAD: 'C$', JPY: '¥', CNY: '¥', KES: 'KSh', ZAR: 'R', BRL: 'R$',
+}
+
+function getCurrencySymbol(code: string): string {
+  return CURRENCY_SYMBOLS[code.toUpperCase()] || code
 }
 
 interface SettingsContextType {
@@ -35,6 +44,8 @@ interface SettingsContextType {
   reloadSettings: () => Promise<void>
   /** Calculate estimated refund for a booking based on timing */
   estimateRefund: (appointmentDate: string, appointmentTime: string, amount: number) => { percent: number; amount: number; reason: string }
+  /** Format a number as currency using the platform currency setting */
+  formatCurrency: (amount: number | string) => string
 }
 
 const defaults: AppSettings = {
@@ -43,6 +54,7 @@ const defaults: AppSettings = {
   maxReschedules: 1,
   patientNoShowRescheduleLimit: 1,
   paymentGatewayMode: 'demo',
+  currency: 'INR',
   cancellationPolicy: {
     autoRefundOnDoctorCancel: true,
     patientFreeWindowHours: 24,
@@ -70,6 +82,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         const mrEntry = list.find(s => s.key === 'booking.maxReschedules')
         const pnEntry = list.find(s => s.key === 'booking.patientNoShowRescheduleLimit')
         const gmEntry = list.find(s => s.key === 'payment.gatewayMode')
+        const curEntry = list.find(s => s.key === 'payment.currency')
         const findCancellation = (k: string) => list.find(s => s.key === `cancellation.${k}`)?.value
         setSettings({
           timeFormat: (tfEntry?.value === '24h' ? '24h' : '12h') as TimeFormatType,
@@ -77,6 +90,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           maxReschedules: mrEntry?.value ? parseInt(mrEntry.value, 10) : 1,
           patientNoShowRescheduleLimit: pnEntry?.value ? parseInt(pnEntry.value, 10) : 1,
           paymentGatewayMode: gmEntry?.value || 'demo',
+          currency: curEntry?.value || 'INR',
           cancellationPolicy: {
             autoRefundOnDoctorCancel: findCancellation('autoRefundOnDoctorCancel') !== 'false',
             patientFreeWindowHours: parseInt(findCancellation('patientFreeWindowHours') || '24', 10),
@@ -177,8 +191,15 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [settings.cancellationPolicy])
 
+  // ─── Currency formatting ─────────────────────────────────
+  const formatCurrency = useCallback((amount: number | string): string => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount
+    if (isNaN(num)) return `${getCurrencySymbol(settings.currency)}0`
+    return `${getCurrencySymbol(settings.currency)}${num.toLocaleString()}`
+  }, [settings.currency])
+
   return (
-    <SettingsContext.Provider value={{ settings, formatTime, formatDate, formatDateTime, isJoinable, reloadSettings: loadSettings, estimateRefund }}>
+    <SettingsContext.Provider value={{ settings, formatTime, formatDate, formatDateTime, isJoinable, reloadSettings: loadSettings, estimateRefund, formatCurrency }}>
       {children}
     </SettingsContext.Provider>
   )

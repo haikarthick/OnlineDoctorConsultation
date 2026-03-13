@@ -6,6 +6,7 @@ import apiService from '../services/api'
 import type { VetHospital, HospitalDoctor, HospitalDepartment } from '../types'
 import './ModulePage.css'
 import './VetHospitals.css'
+import { useSettings } from '../context/SettingsContext'
 import { useTranslation } from 'react-i18next'
 
 interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
@@ -33,6 +34,7 @@ const BOOKING_TYPES = [
 
 const HospitalBooking: React.FC = () => {
   const { t } = useTranslation()
+  const { formatCurrency } = useSettings()
   const { id: hospitalId } = useParams<{ id: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -279,7 +281,7 @@ const HospitalBooking: React.FC = () => {
                       </div>
                     )}
                     {doc.consultationFee && (
-                      <div className="hb-doc-fee">₹{doc.consultationFee}</div>
+                      <div className="hb-doc-fee">{formatCurrency(doc.consultationFee)}</div>
                     )}
                     {doc.vetProfileRating && doc.vetProfileRating > 0 && (
                       <div className="hb-doc-rating">★ {doc.vetProfileRating.toFixed(1)}</div>
@@ -303,7 +305,7 @@ const HospitalBooking: React.FC = () => {
             <div>
               <strong>{selectedDoctor.doctorName}</strong>
               {selectedDoctor.departmentName && <span> · {selectedDoctor.departmentName}</span>}
-              {selectedDoctor.consultationFee && <span> · ₹{selectedDoctor.consultationFee}</span>}
+              {selectedDoctor.consultationFee && <span> · {formatCurrency(selectedDoctor.consultationFee)}</span>}
             </div>
             <button className="hb-change-btn" onClick={() => setStep('doctor')}>Change</button>
           </div>
@@ -464,7 +466,7 @@ const HospitalBooking: React.FC = () => {
               <h3>👨‍⚕️ Doctor</h3>
               <p>{selectedDoctor?.doctorName}</p>
               {selectedDoctor?.departmentName && <p className="hb-confirm-sub">{selectedDoctor.departmentName}</p>}
-              {selectedDoctor?.consultationFee && <p className="hb-confirm-fee">Fee: ₹{selectedDoctor.consultationFee}</p>}
+              {selectedDoctor?.consultationFee && <p className="hb-confirm-fee">Fee: {formatCurrency(selectedDoctor.consultationFee)}</p>}
             </div>
 
             <div className="hb-confirm-section">

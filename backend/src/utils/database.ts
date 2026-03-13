@@ -113,6 +113,7 @@ class PostgresDatabase {
       { key: 'display.dateFormat', value: 'MMM d, yyyy', category: 'display', description: 'Date display format' },
       { key: 'consultation.joinWindowMinutes', value: '5', category: 'consultation', description: 'Minutes before scheduled time when Join/Start button becomes available' },
       { key: 'booking.maxReschedules', value: '1', category: 'booking', description: 'Maximum times a user can reschedule before doctor acceptance (0 = unlimited)' },
+      { key: 'payment.currency', value: 'INR', category: 'payment', description: 'Platform currency code (e.g. USD, INR, EUR, GBP)' },
     ];
     for (const d of defaults) {
       await this.pool.query(

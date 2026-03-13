@@ -36,7 +36,7 @@ const MANAGED_KEYS = new Set([
 const inputStyle: React.CSSProperties = { color: '#111827', WebkitTextFillColor: '#111827' }
 
 const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
-  const { settings: appSettings, reloadSettings } = useSettings()
+  const { settings: appSettings, reloadSettings, formatCurrency } = useSettings()
   const [settings, setSettings] = useState<SystemSetting[]>([])
   const [loading, setLoading] = useState(true)
   const [editingKey, setEditingKey] = useState<string | null>(null)
@@ -843,12 +843,12 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             {/* Refund policy preview */}
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: '12px 14px', fontSize: 13, color: '#1e3a5f' }}>
-                <strong>📋 Policy Preview (for a ₹1000 consultation):</strong>
+                <strong>📋 Policy Preview (for a {formatCurrency(1000)} consultation):</strong>
                 <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
-                  <li>Cancel {cancellationPolicy.patientFreeWindowHours}+ hours before → <strong style={{ color: '#059669' }}>₹1000 full refund</strong></li>
-                  <li>Cancel {cancellationPolicy.partialRefundWindowHours}–{cancellationPolicy.patientFreeWindowHours} hours before → <strong style={{ color: '#d97706' }}>₹{cancellationPolicy.partialRefundPercent * 10} ({cancellationPolicy.partialRefundPercent}%)</strong></li>
+                  <li>Cancel {cancellationPolicy.patientFreeWindowHours}+ hours before → <strong style={{ color: '#059669' }}>{formatCurrency(1000)} full refund</strong></li>
+                  <li>Cancel {cancellationPolicy.partialRefundWindowHours}–{cancellationPolicy.patientFreeWindowHours} hours before → <strong style={{ color: '#d97706' }}>{formatCurrency(cancellationPolicy.partialRefundPercent * 10)} ({cancellationPolicy.partialRefundPercent}%)</strong></li>
                   <li>Cancel &lt; {cancellationPolicy.partialRefundWindowHours} hours before → <strong style={{ color: '#dc2626' }}>No refund</strong></li>
-                  <li>Doctor cancels → <strong style={{ color: '#059669' }}>₹1000 + ₹{cancellationPolicy.goodwillBonusPercent * 10} bonus ({cancellationPolicy.goodwillBonusPercent}%)</strong></li>
+                  <li>Doctor cancels → <strong style={{ color: '#059669' }}>{formatCurrency(1000)} + {formatCurrency(cancellationPolicy.goodwillBonusPercent * 10)} bonus ({cancellationPolicy.goodwillBonusPercent}%)</strong></li>
                 </ul>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useSettings } from '../context/SettingsContext'
 import { Enterprise, FinancialRecord, FinancialDashboard } from '../types'
 import { useTranslation } from 'react-i18next'
 
@@ -11,7 +12,9 @@ const CATEGORIES = {
   expense: ['feed', 'veterinary', 'medication', 'equipment', 'labor', 'utilities', 'transport', 'insurance', 'maintenance', 'rent', 'taxes', 'marketing', 'other_expense']
 }
 
-const FinancialAnalytics: React.FC = () => {  const { t } = useTranslation()
+const FinancialAnalytics: React.FC = () => {
+  const { t } = useTranslation()
+  const { formatCurrency } = useSettings()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -179,16 +182,16 @@ const FinancialAnalytics: React.FC = () => {  const { t } = useTranslation()
               {/* Summary cards */}
               <div className="card">
                 <h3>Total Income</h3>
-                <div className="big-stat success">${Number(dashboard.totalIncome || 0).toLocaleString('en', { minimumFractionDigits: 2 })}</div>
+                <div className="big-stat success">{formatCurrency(dashboard.totalIncome || 0)}</div>
               </div>
               <div className="card">
                 <h3>Total Expenses</h3>
-                <div className="big-stat danger">${Number(dashboard.totalExpenses || 0).toLocaleString('en', { minimumFractionDigits: 2 })}</div>
+                <div className="big-stat danger">{formatCurrency(dashboard.totalExpenses || 0)}</div>
               </div>
               <div className="card">
                 <h3>Net Profit</h3>
                 <div className={`big-stat ${Number(dashboard.netProfit) >= 0 ? 'success' : 'danger'}`}>
-                  ${Number(dashboard.netProfit || 0).toLocaleString('en', { minimumFractionDigits: 2 })}
+                  {formatCurrency(dashboard.netProfit || 0)}
                 </div>
               </div>
 
@@ -202,9 +205,9 @@ const FinancialAnalytics: React.FC = () => {  const { t } = useTranslation()
                       {(dashboard.monthlyBreakdown || []).map(m => (
                         <tr key={m.month}>
                           <td>{m.month}</td>
-                          <td className="text-success">${Number(m.income).toLocaleString('en', { minimumFractionDigits: 2 })}</td>
-                          <td className="text-danger">${Number(m.expenses).toLocaleString('en', { minimumFractionDigits: 2 })}</td>
-                          <td className={Number(m.profit) >= 0 ? 'text-success' : 'text-danger'}>${Number(m.profit).toLocaleString('en', { minimumFractionDigits: 2 })}</td>
+                          <td className="text-success">{formatCurrency(m.income)}</td>
+                          <td className="text-danger">{formatCurrency(m.expenses)}</td>
+                          <td className={Number(m.profit) >= 0 ? 'text-success' : 'text-danger'}>{formatCurrency(m.profit)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -219,7 +222,7 @@ const FinancialAnalytics: React.FC = () => {  const { t } = useTranslation()
                   <thead><tr><th>Category</th><th>Total</th></tr></thead>
                   <tbody>
                     {(dashboard.topExpenseCategories || []).map(c => (
-                      <tr key={c.category}><td>{c.category.replace(/_/g, ' ')}</td><td className="text-danger">${Number(c.total).toLocaleString('en', { minimumFractionDigits: 2 })}</td></tr>
+                      <tr key={c.category}><td>{c.category.replace(/_/g, ' ')}</td><td className="text-danger">{formatCurrency(c.total)}</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -232,7 +235,7 @@ const FinancialAnalytics: React.FC = () => {  const { t } = useTranslation()
                   <thead><tr><th>Category</th><th>Total</th></tr></thead>
                   <tbody>
                     {(dashboard.revenueByCategory || []).map(c => (
-                      <tr key={c.category}><td>{c.category.replace(/_/g, ' ')}</td><td className="text-success">${Number(c.total).toLocaleString('en', { minimumFractionDigits: 2 })}</td></tr>
+                      <tr key={c.category}><td>{c.category.replace(/_/g, ' ')}</td><td className="text-success">{formatCurrency(c.total)}</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -250,7 +253,7 @@ const FinancialAnalytics: React.FC = () => {  const { t } = useTranslation()
                         <td>{r.transactionDate ? new Date(r.transactionDate).toLocaleDateString() : '–'}</td>
                         <td><span className="badge" style={{ background: TYPE_COLORS[r.recordType] }}>{r.recordType}</span></td>
                         <td>{r.category.replace(/_/g, ' ')}</td>
-                        <td className={r.recordType === 'income' ? 'text-success' : 'text-danger'}>${Number(r.amount).toLocaleString('en', { minimumFractionDigits: 2 })}</td>
+                        <td className={r.recordType === 'income' ? 'text-success' : 'text-danger'}>{formatCurrency(r.amount)}</td>
                         <td>{r.description || '–'}</td>
                         <td>{r.referenceNumber || '–'}</td>
                         <td>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import apiService from '../../services/api'
+import { useSettings } from '../../context/SettingsContext'
 import { VetProfile } from '../../types'
 import '../../styles/modules.css'
 
@@ -21,6 +22,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ]
 
 const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
+  const { formatCurrency } = useSettings()
   const [vets, setVets] = useState<VetProfile[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -225,7 +227,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
               <div style={{ color: '#9ca3af', fontSize: 11 }}>Consults</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#8b5cf6', fontSize: 16 }}>{vet.currency || '$'}{vet.consultationFee || 0}</div>
+              <div style={{ fontWeight: 700, color: '#8b5cf6', fontSize: 16 }}>{formatCurrency(vet.consultationFee || 0)}</div>
               <div style={{ color: '#9ca3af', fontSize: 11 }}>Per Session</div>
             </div>
           </div>

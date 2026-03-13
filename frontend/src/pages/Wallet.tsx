@@ -9,9 +9,10 @@ interface WalletProps {
   onNavigate: (path: string) => void
 }
 
-const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {  const { t } = useTranslation()
+const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
 
-  const { formatDateTime, settings } = useSettings()
+  const { formatDateTime, settings, formatCurrency } = useSettings()
   const [wallet, setWallet] = useState<WalletType | null>(null)
   const [transactions, setTransactions] = useState<WalletTransaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -113,15 +114,15 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {  const { t } = useT
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
           <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>Total Balance</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: '#059669' }}>₹{total.toFixed(2)}</div>
+          <div style={{ fontSize: 32, fontWeight: 700, color: '#059669' }}>{formatCurrency(total)}</div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
           <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>Refund Balance</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#2563eb' }}>₹{balance.toFixed(2)}</div>
+          <div style={{ fontSize: 28, fontWeight: 600, color: '#2563eb' }}>{formatCurrency(balance)}</div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
           <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>Bonus Credits</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#d97706' }}>₹{bonus.toFixed(2)}</div>
+          <div style={{ fontSize: 28, fontWeight: 600, color: '#d97706' }}>{formatCurrency(bonus)}</div>
           <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>From doctor cancellation goodwill</div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
@@ -173,7 +174,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {  const { t } = useT
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     {getTypeBadge(tx.type)}
                     <span style={{ fontSize: 16, fontWeight: 600, color: getTypeColor(tx.type), minWidth: 80, textAlign: 'right' }}>
-                      {tx.type === 'debit' ? '-' : '+'}₹{tx.amount.toFixed(2)}
+                      {tx.type === 'debit' ? '-' : '+'}{formatCurrency(tx.amount)}
                     </span>
                   </div>
                 </div>

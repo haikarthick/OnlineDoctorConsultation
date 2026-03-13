@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../../services/api'
+import { useSettings } from '../../context/SettingsContext'
 import { VetProfile, Review, DoctorReliability } from '../../types'
 import '../../styles/modules.css'
 
@@ -9,6 +10,7 @@ interface VetProfilePageProps {
 }
 
 const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
+  const { formatCurrency } = useSettings()
   const [vet, setVet] = useState<VetProfile | null>(null)
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
@@ -153,7 +155,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
           </div>
         </div>
         <div style={{ textAlign: 'center', flexShrink: 0 }}>
-          <div style={{ fontSize: 28, fontWeight: 700 }}>{vet.currency || '$'}{vet.consultationFee || 0}</div>
+          <div style={{ fontSize: 28, fontWeight: 700 }}>{formatCurrency(vet.consultationFee || 0)}</div>
           <div style={{ fontSize: 12, opacity: 0.8 }}>per session</div>
           <button className="btn" onClick={() => onNavigate(`/book-consultation?vetId=${vet.userId}`)}
             style={{ marginTop: 12, background: 'white', color: '#4F46E5', fontWeight: 700, padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}>

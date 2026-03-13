@@ -7,6 +7,7 @@ import type { VetHospital, HospitalDepartment, HospitalDoctor, HospitalService, 
 import { DOC_LABELS, REQUIRED_DOC_TYPES, EXPIRY_DOC_TYPES } from '../types'
 import './ModulePage.css'
 import './VetHospitals.css'
+import { useSettings } from '../context/SettingsContext'
 import { useTranslation } from 'react-i18next'
 
 type Tab = 'overview' | 'doctors' | 'departments' | 'services' | 'appointments' | 'documents' | 'settings'
@@ -27,7 +28,9 @@ const HOSPITAL_TYPE_LABELS: Record<string, string> = {
   other:            'Other / Shelter Clinic',
 }
 
-const VetHospitalManage: React.FC = () => {  const { t } = useTranslation()
+const VetHospitalManage: React.FC = () => {
+  const { t } = useTranslation()
+  const { formatCurrency, settings } = useSettings()
 
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -653,8 +656,8 @@ const VetHospitalManage: React.FC = () => {  const { t } = useTranslation()
                     {(svc.priceMin || svc.priceMax) && (
                       <div className="vh-service-price">
                         {svc.priceMin && svc.priceMax && svc.priceMin !== svc.priceMax
-                          ? `₹${svc.priceMin}–₹${svc.priceMax}`
-                          : `₹${svc.priceMin || svc.priceMax}`}
+                          ? `${formatCurrency(svc.priceMin)}–${formatCurrency(svc.priceMax)}`
+                          : `${formatCurrency(svc.priceMin || svc.priceMax || 0)}`}
                       </div>
                     )}
                     {svc.durationMinutes && <div className="vh-service-duration">⏱ {svc.durationMinutes} min</div>}
@@ -1112,7 +1115,7 @@ const VetHospitalManage: React.FC = () => {  const { t } = useTranslation()
                 </div>
               </div>
               <div className="form-group">
-                <label>Consultation Fee (₹)</label>
+                <label>Consultation Fee ({settings.currency})</label>
                 <input type="number" value={doctorForm.consultationFee} onChange={e => setDoctorForm(f => ({ ...f, consultationFee: e.target.value }))} placeholder="e.g. 500" min="0" />
               </div>
               <label className="vh-toggle" style={{ marginBottom: '.75rem' }}>
@@ -1202,11 +1205,11 @@ const VetHospitalManage: React.FC = () => {  const { t } = useTranslation()
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Min Price (₹)</label>
+                  <label>Min Price ({settings.currency})</label>
                   <input type="number" value={serviceForm.priceMin} onChange={e => setServiceForm(f => ({ ...f, priceMin: e.target.value }))} min="0" />
                 </div>
                 <div className="form-group">
-                  <label>Max Price (₹)</label>
+                  <label>Max Price ({settings.currency})</label>
                   <input type="number" value={serviceForm.priceMax} onChange={e => setServiceForm(f => ({ ...f, priceMax: e.target.value }))} min="0" />
                 </div>
               </div>

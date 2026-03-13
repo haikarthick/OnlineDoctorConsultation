@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import apiService from '../../services/api'
+import { useSettings } from '../../context/SettingsContext'
 import { VetProfile, TimeSlot, Animal } from '../../types'
 import '../../styles/modules.css'
 
@@ -25,6 +26,7 @@ interface BookConsultationProps {
 
 const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   const { user } = useAuth()
+  const { formatCurrency } = useSettings()
   const [step, setStep] = useState(1)
   const [vets, setVets] = useState<VetProfile[]>([])
   const [animals, setAnimals] = useState<Animal[]>([])
@@ -367,7 +369,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                 </div>
                 <h3 className="vet-name">Dr. {vet.firstName || ''} {vet.lastName || ''}</h3>
                 <p className="vet-specialty">{(vet.specializations || []).join(', ') || 'General Veterinarian'}</p>
-                <div className="vet-fee">{vet.currency || '$'}{vet.consultationFee || 0}/session</div>
+                <div className="vet-fee">{formatCurrency(vet.consultationFee || 0)}/session</div>
               </div>
             ))}
           </div>
@@ -736,7 +738,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                   <div>
                     <strong style={{ color: '#6b7280', fontSize: 13 }}>FEE</strong>
                     <p style={{ margin: '4px 0', fontSize: 16, fontWeight: 700, color: '#2563eb' }}>
-                      {selectedVet?.currency || '$'}{selectedVet?.consultationFee || 0}
+                      {formatCurrency(selectedVet?.consultationFee || 0)}
                     </p>
                   </div>
                 </div>

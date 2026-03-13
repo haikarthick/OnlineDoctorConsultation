@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useSettings } from '../context/SettingsContext'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder } from '../types'
 import { useTranslation } from 'react-i18next'
 
@@ -17,7 +18,9 @@ const CATEGORIES = [
 
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
 
-const Marketplace: React.FC = () => {  const { t } = useTranslation()
+const Marketplace: React.FC = () => {
+  const { t } = useTranslation()
+  const { formatCurrency, settings } = useSettings()
 
   const [listings, setListings] = useState<MarketplaceListing[]>([])
   const [dashboard, setDashboard] = useState<any>(null)
@@ -150,7 +153,7 @@ const Marketplace: React.FC = () => {  const { t } = useTranslation()
                       <span className="module-badge">{l.listing_type}</span>
                     </div>
                     <h4 style={{ margin: '8px 0 4px' }}>{l.title}</h4>
-                    <div style={{ fontWeight: 700, color: '#667eea', fontSize: 18 }}>${l.price || '—'}</div>
+                    <div style={{ fontWeight: 700, color: '#667eea', fontSize: 18 }}>{l.price ? formatCurrency(l.price) : '—'}</div>
                     <div style={{ fontSize: 12, color: '#888' }}>by {l.seller_name} · {l.views_count} views</div>
                   </div>
                 ))}
@@ -171,7 +174,7 @@ const Marketplace: React.FC = () => {  const { t } = useTranslation()
                   <span className="module-badge" style={{ marginLeft: 8 }}>{selectedListing.listingType}</span>
                   <h2 style={{ marginTop: 12 }}>{selectedListing.title}</h2>
                   <p style={{ color: '#555', lineHeight: 1.6 }}>{selectedListing.description || 'No description'}</p>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: '#667eea', margin: '16px 0' }}>${selectedListing.price || 'Contact for price'}</div>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: '#667eea', margin: '16px 0' }}>{selectedListing.price ? formatCurrency(selectedListing.price) : 'Contact for price'}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 14 }}>
                     <div><strong>Quantity:</strong> {selectedListing.quantity} {selectedListing.unit}</div>
                     <div><strong>Condition:</strong> {selectedListing.condition}</div>
@@ -187,12 +190,12 @@ const Marketplace: React.FC = () => {  const { t } = useTranslation()
                   {selectedListing.listingType === 'fixed_price' ? (
                     <div className="module-card" style={{ background: '#f8fafc' }}>
                       <h4>Buy Now</h4>
-                      <button className="module-btn primary" style={{ width: '100%' }} onClick={() => buyNow(selectedListing)}>Purchase - ${selectedListing.price}</button>
+                      <button className="module-btn primary" style={{ width: '100%' }} onClick={() => buyNow(selectedListing)}>Purchase - {formatCurrency(selectedListing.price || 0)}</button>
                     </div>
                   ) : (
                     <div className="module-card" style={{ background: '#f8fafc' }}>
                       <h4>Place Bid</h4>
-                      <p style={{ fontSize: 13, color: '#888' }}>Current highest: ${selectedListing.highestBid || selectedListing.price || 0}</p>
+                      <p style={{ fontSize: 13, color: '#888' }}>Current highest: {formatCurrency(selectedListing.highestBid || selectedListing.price || 0)}</p>
                       <input className="module-input" type="number" placeholder="Your bid amount" value={bidAmount} onChange={e => setBidAmount(e.target.value)} />
                       <textarea className="module-input" placeholder="Message (optional)" value={bidMessage} onChange={e => setBidMessage(e.target.value)} style={{ marginTop: 8, height: 60 }} />
                       <button className="module-btn primary" style={{ width: '100%', marginTop: 8 }} onClick={placeBid}>Place Bid</button>
@@ -201,7 +204,7 @@ const Marketplace: React.FC = () => {  const { t } = useTranslation()
                           <h5>Bid History ({bids.length})</h5>
                           {bids.slice(0, 5).map(b => (
                             <div key={b.id} style={{ padding: 8, borderBottom: '1px solid #eee', fontSize: 13 }}>
-                              <strong>${b.amount}</strong> by {b.bidderName}
+                              <strong>{formatCurrency(b.amount)}</strong> by {b.bidderName}
                               {b.isWinning && <span style={{ color: '#22c55e', marginLeft: 8 }}>★ Winning</span>}
                             </div>
                           ))}
@@ -238,7 +241,7 @@ const Marketplace: React.FC = () => {  const { t } = useTranslation()
                       </div>
                       <h4 style={{ margin: '0 0 8px', fontSize: 16 }}>{l.title}</h4>
                       <div style={{ fontWeight: 700, color: '#667eea', fontSize: 20, marginBottom: 8 }}>
-                        ${l.price || '—'}
+                        {l.price ? formatCurrency(l.price) : '—'}
                         {l.listingType === 'auction' && l.bidCount && <span style={{ fontSize: 12, color: '#888', fontWeight: 400, marginLeft: 8 }}>{l.bidCount} bids</span>}
                       </div>
                       <div style={{ fontSize: 12, color: '#888' }}>{l.sellerName} · Qty: {l.quantity} · {l.viewsCount} views</div>
@@ -268,7 +271,7 @@ const Marketplace: React.FC = () => {  const { t } = useTranslation()
               </select></div>
             </div>
             <div style={{ display: 'flex', gap: 16 }}>
-              <div style={{ flex: 1 }}><label className="module-label">Price ($)</label><input className="module-input" type="number" value={listingForm.price} onChange={e => setListingForm(f => ({ ...f, price: e.target.value }))} /></div>
+              <div style={{ flex: 1 }}><label className="module-label">Price ({settings.currency})</label><input className="module-input" type="number" value={listingForm.price} onChange={e => setListingForm(f => ({ ...f, price: e.target.value }))} /></div>
               <div style={{ flex: 1 }}><label className="module-label">Quantity</label><input className="module-input" type="number" value={listingForm.quantity} onChange={e => setListingForm(f => ({ ...f, quantity: e.target.value }))} /></div>
               <div style={{ flex: 1 }}><label className="module-label">Condition</label><select className="module-input" value={listingForm.condition} onChange={e => setListingForm(f => ({ ...f, condition: e.target.value }))}>
                 <option value="new">New</option><option value="used">Used</option><option value="refurbished">Refurbished</option>
@@ -288,7 +291,7 @@ const Marketplace: React.FC = () => {  const { t } = useTranslation()
             <tbody>
               {orders.map(o => (
                 <tr key={o.id}><td>{o.listingTitle}</td><td>{o.sellerName}</td><td>{o.quantity}</td>
-                <td style={{ fontWeight: 700, color: '#667eea' }}>${o.totalPrice}</td>
+                <td style={{ fontWeight: 700, color: '#667eea' }}>{formatCurrency(o.totalPrice)}</td>
                 <td><span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{o.status}</span></td>
                 <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '–'}</td></tr>
               ))}

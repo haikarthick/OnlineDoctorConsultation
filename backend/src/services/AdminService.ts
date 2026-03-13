@@ -254,7 +254,7 @@ class AdminService {
     // Return display.* and consultation.* settings — safe for unauthenticated access
     const result = await database.query(
       `SELECT key, value, description FROM system_settings
-       WHERE key LIKE 'display.%' OR key LIKE 'consultation.%' OR key LIKE 'booking.%' OR key LIKE 'cancellation.%' OR key LIKE 'payment.gatewayMode' ORDER BY key`,
+       WHERE key LIKE 'display.%' OR key LIKE 'consultation.%' OR key LIKE 'booking.%' OR key LIKE 'cancellation.%' OR key LIKE 'payment.%' ORDER BY key`,
       []
     );
     return result.rows;
