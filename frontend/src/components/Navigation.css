@@ -418,8 +418,12 @@
 
 @media (max-width: 480px) {
   .nav-sidebar { width: 100%; left: -100%; }
+  .nav-sidebar-open { left: 0; }
   .nav-user-info { font-size: 12px; }
   .nav-menu-label { font-size: 12px; }
+  .nav-menu-link { padding: 11px 14px; min-height: 44px; }
+  .nav-section-header { padding: 8px 14px; min-height: 36px; }
+  .nav-logout-btn { padding: 11px 14px; min-height: 44px; }
 }
 
 /* ═══════════ Scrollbar ═══════════ */

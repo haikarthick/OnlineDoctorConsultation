@@ -1167,46 +1167,403 @@
 .priority-high { border-left: 3px solid var(--warning); }
 .priority-emergency { border-left: 3px solid var(--danger); }
 
-/* Responsive */
+/* ═══════════ RESPONSIVE DESIGN SYSTEM ═══════════
+   Breakpoints:
+   - 1200px: Large desktops → standard desktop
+   - 1024px: Tablets landscape / small desktops
+   - 768px:  Tablets portrait / large phones landscape
+   - 480px:  Mobile phones
+   - 360px:  Small mobile phones
+   ═══════════════════════════════════════════════ */
+
+/* -- Touch-friendly: ensure min 44px touch targets -- */
+@media (pointer: coarse) {
+  .btn, .tab, .module-tab, .time-slot,
+  .pagination button, .filter-select {
+    min-height: 44px;
+  }
+  .data-table td, .data-table th {
+    padding: 12px 10px;
+  }
+}
+
+/* -- Large desktops / wide screens -- */
+@media (max-width: 1200px) {
+  .booking-cards {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  .vet-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+/* -- Tablets landscape / small desktops -- */
+@media (max-width: 1024px) {
+  .module-page {
+    padding: 20px;
+  }
+  .module-page h1 {
+    font-size: 24px;
+  }
+  .video-container {
+    grid-template-columns: 1fr 280px;
+  }
+  .video-self {
+    width: 160px;
+    height: 120px;
+  }
+  .stat-content .stat-value {
+    font-size: 24px;
+  }
+  .toast {
+    max-width: 340px;
+  }
+}
+
+/* -- Tablets portrait -- */
 @media (max-width: 768px) {
   .module-page {
     padding: 16px;
   }
-  
+  .module-page h1 {
+    font-size: 22px;
+  }
+  .module-page .page-subtitle {
+    font-size: 14px;
+  }
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
-  
+  .stat-card {
+    padding: 14px;
+    gap: 12px;
+  }
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  .stat-content .stat-value {
+    font-size: 22px;
+  }
+  .stat-content h3 {
+    font-size: 11px;
+  }
   .form-row {
     grid-template-columns: 1fr;
   }
-  
   .video-container {
     grid-template-columns: 1fr;
     height: auto;
+    min-height: auto;
   }
-  
+  .video-main {
+    min-height: 300px;
+    aspect-ratio: 16 / 9;
+  }
+  .video-self {
+    width: 120px;
+    height: 90px;
+    bottom: 70px;
+    right: 12px;
+  }
+  .video-controls {
+    gap: 8px;
+    bottom: 12px;
+  }
+  .video-control-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+  .video-control-btn.end-call {
+    width: 52px;
+    height: 52px;
+  }
+  .chat-panel {
+    max-height: 400px;
+  }
   .booking-cards, .vet-grid {
     grid-template-columns: 1fr;
   }
-  
+  .booking-card {
+    padding: 16px;
+  }
+  .vet-card {
+    padding: 18px;
+  }
   .search-bar {
     flex-direction: column;
   }
-  
   .search-input {
     min-width: 100%;
   }
-  
+  .filter-select {
+    min-width: 100%;
+  }
   .page-header {
     flex-direction: column;
+    gap: 12px;
   }
-  
+  .page-header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
   .data-table {
     font-size: 13px;
   }
-  
   .data-table th, .data-table td {
     padding: 8px 10px;
+  }
+  .data-table .actions-cell {
+    flex-wrap: wrap;
+  }
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+  .modal, .modal-content {
+    max-width: 100%;
+    max-height: 85vh;
+    padding: 20px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+  .modal h2, .modal-content h2 {
+    font-size: 18px;
+  }
+  .modal-header {
+    padding: 16px;
+  }
+  .modal-body {
+    padding: 16px;
+  }
+  .modal-footer {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+  .modal-footer .btn {
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+  }
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .schedule-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  .toast {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+  }
+  .pagination {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .pagination button {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  .card-header {
+    padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card-body {
+    padding: 16px;
+  }
+  .search-filter-bar {
+    flex-direction: column;
+  }
+  .search-filter-bar .form-input,
+  .search-filter-bar .form-select {
+    width: 100%;
+  }
+}
+
+/* -- Mobile phones -- */
+@media (max-width: 480px) {
+  .module-page {
+    padding: 12px;
+  }
+  .module-page h1 {
+    font-size: 20px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-card {
+    padding: 12px;
+    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .stat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  .stat-content .stat-value {
+    font-size: 20px;
+  }
+  .stat-content h3 {
+    font-size: 10px;
+  }
+  .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  .btn-lg {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+  .video-main {
+    min-height: 220px;
+  }
+  .video-placeholder .video-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+  }
+  .video-placeholder p {
+    font-size: 14px;
+  }
+  .video-self {
+    width: 100px;
+    height: 75px;
+    bottom: 60px;
+    right: 8px;
+  }
+  .video-control-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  .video-control-btn.end-call {
+    width: 48px;
+    height: 48px;
+  }
+  .booking-card-actions {
+    flex-direction: column;
+  }
+  .booking-card-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .vet-card .vet-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  .vet-card .vet-name {
+    font-size: 16px;
+  }
+  .vet-card .vet-fee {
+    font-size: 18px;
+  }
+  .vet-card .vet-stats {
+    gap: 12px;
+  }
+  .schedule-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .time-slots-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .time-slot {
+    padding: 8px;
+    font-size: 12px;
+  }
+  .modal, .modal-content {
+    padding: 16px;
+  }
+  .modal h2, .modal-content h2 {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+  .form-input, .form-select, .form-textarea {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .form-label {
+    font-size: 13px;
+  }
+  .empty-state {
+    padding: 40px 16px;
+  }
+  .empty-state .empty-icon {
+    font-size: 36px;
+  }
+  .empty-state h3 {
+    font-size: 16px;
+  }
+  .loading-container {
+    padding: 40px 16px;
+  }
+  .chat-message {
+    max-width: 90%;
+    font-size: 13px;
+  }
+  .chat-input-area {
+    padding: 8px;
+  }
+  .star-rating .star {
+    font-size: 20px;
+  }
+  .badge {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+  .card-header h2, .card-header h3 {
+    font-size: 15px;
+  }
+}
+
+/* -- Small mobile phones -- */
+@media (max-width: 360px) {
+  .module-page {
+    padding: 8px;
+  }
+  .module-page h1 {
+    font-size: 18px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-card {
+    flex-direction: row;
+    text-align: left;
+  }
+  .page-header-actions {
+    flex-direction: column;
+  }
+  .page-header-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .schedule-grid {
+    grid-template-columns: 1fr;
+  }
+  .booking-card-details .detail-row {
+    font-size: 13px;
   }
 }

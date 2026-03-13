@@ -65,6 +65,12 @@
 }
 
 /* Mobile Responsive */
+@media (max-width: 1024px) {
+  .layout-content {
+    padding: 20px 24px;
+  }
+}
+
 @media (max-width: 768px) {
   .layout-container {
     flex-direction: column;
@@ -73,6 +79,7 @@
   .layout-main {
     margin-left: 0;
     margin-top: 56px;
+    height: calc(100vh - 56px);
   }
 
   .layout-sidebar-collapsed .layout-main {
@@ -87,6 +94,17 @@
 @media (max-width: 480px) {
   .layout-content {
     padding: 12px;
+  }
+
+  .layout-main {
+    /* Account for iOS safe area */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@media (max-width: 360px) {
+  .layout-content {
+    padding: 8px;
   }
 }
 

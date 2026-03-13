@@ -16,13 +16,14 @@
 -- (if a tier migration didn't create certain tables, other sections still succeed)
 
 -- ============================================================
--- STEP 0: CLEAN ALL TRANSACTIONAL DATA
+-- STEP 0: SKIP — DATA IS PRESERVED ACROSS DEPLOYMENTS
 -- ============================================================
--- CASCADE from root tables cleans all dependent tables.
--- Safe TRUNCATE: silently skips tables that don't exist yet.
-DO $$ BEGIN EXECUTE 'TRUNCATE TABLE users CASCADE';            EXCEPTION WHEN undefined_table THEN NULL; END $$;
-DO $$ BEGIN EXECUTE 'TRUNCATE TABLE enterprises CASCADE';      EXCEPTION WHEN undefined_table THEN NULL; END $$;
-DO $$ BEGIN EXECUTE 'TRUNCATE TABLE system_settings CASCADE';  EXCEPTION WHEN undefined_table THEN NULL; END $$;
+-- Previously this section ran TRUNCATE CASCADE which wiped all
+-- user data on every deploy. Removed to preserve records.
+-- To do a full clean re-seed, use FORCE_RESEED=true env var
+-- which triggers this script only on an empty database.
+-- The INSERT statements below use ON CONFLICT DO NOTHING
+-- so existing records are never overwritten.
 
 -- ============================================================
 -- STEP 1: USERS (4 roles, 8 users total)
@@ -39,7 +40,8 @@ INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash,
   ('c0000000-0000-0000-0000-000000000002', 'robert.chen@email.com',   'Robert',    'Chen',     'pet_owner',    '+1-555-300-0002', '$2a$10$v5rq0xPVzJ7zM1B8IEB3hOFzFBQg3V6WCMhn3bmi.5lU1IVpSgLaq', true, 'USR-PET-002'),
   -- Farmers (password: Farmer@123)
   ('f0000000-0000-0000-0000-000000000001', 'john.miller@greenpastures.com','John',   'Miller',   'farmer',       '+1-555-400-0001', '$2a$10$LKi/uyJ8wxy.CAhQc8/6l.AIwssM5NS6cIOS8ji7RICs9qPzWGJCq', true, 'USR-FRM-001'),
-  ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$LKi/uyJ8wxy.CAhQc8/6l.AIwssM5NS6cIOS8ji7RICs9qPzWGJCq', true, 'USR-FRM-002');
+  ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$LKi/uyJ8wxy.CAhQc8/6l.AIwssM5NS6cIOS8ji7RICs9qPzWGJCq', true, 'USR-FRM-002')
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 2: VET PROFILES
@@ -61,7 +63,8 @@ INSERT INTO vet_profiles (id, user_id, license_number, specializations, qualific
    ARRAY['Emergency Care','Exotic Animals','Avian Medicine'], ARRAY['DVM - University of Florida','DACZM','Board Certified ECZM'],
    18, 'Dr. Reyes is a leading exotic and avian medicine specialist with 18 years in emergency veterinary care, treating species from parrots to reptiles. He consults for zoos and wildlife reserves internationally.',
    'Reyes Exotic & Emergency Vet Center', '780 Sunrise Blvd, Miami, FL 33101',
-   120.00, 'USD', true, true, true, ARRAY['English','Spanish','Portuguese'], 4.93, 15, 52);
+   120.00, 'USD', true, true, true, ARRAY['English','Spanish','Portuguese'], 4.93, 15, 52)
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 3: VET SCHEDULES
@@ -102,7 +105,8 @@ INSERT INTO animals (id, owner_id, name, species, breed, date_of_birth, gender, 
   ('aa000000-0000-0000-0000-000000000010', 'f0000000-0000-0000-0000-000000000001', 'Rex',        'Dog',   'Border Collie',     '2020-08-05', 'male',    22.0,'Black/White', 'MCHP-BC-1001', true,  'Working farm dog. Excellent herder.',                        true, 'ANI-DOG-004'),
 -- Farmer Maria Garcia's animals
   ('aa000000-0000-0000-0000-000000000011', 'f0000000-0000-0000-0000-000000000002', 'Clucky',     'Poultry','Rhode Island Red',  '2023-03-01', 'female',   3.2,'Red',         NULL, false, 'Layer hen. Produces ~280 eggs/year.',  true, 'ANI-HEN-001'),
-  ('aa000000-0000-0000-0000-000000000012', 'f0000000-0000-0000-0000-000000000002', 'Bella',      'Goat',  'Saanen',            '2022-05-15', 'female',  65.0,'White',       'MCHP-GT-5001', false, 'Dairy goat. Milking 4L/day. Due for deworming.',             true, 'ANI-GOT-001');
+  ('aa000000-0000-0000-0000-000000000012', 'f0000000-0000-0000-0000-000000000002', 'Bella',      'Goat',  'Saanen',            '2022-05-15', 'female',  65.0,'White',       'MCHP-GT-5001', false, 'Dairy goat. Milking 4L/day. Due for deworming.',             true, 'ANI-GOT-001')
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 5: ENTERPRISES
@@ -120,7 +124,8 @@ INSERT INTO enterprises (id, name, enterprise_type, description, address, city, 
    '890 Hilltop Lane', 'Asheville', 'North Carolina', 'US', '28801',
    35.5951, -82.5515, 45.0, 'acres', 'FARM-NC-2024-1193', 'NCDA-LK-77412',
    '+1-555-400-0002', 'hello@sunrisefarm.com', 'https://sunrisefarm.com',
-   'f0000000-0000-0000-0000-000000000002', true);
+   'f0000000-0000-0000-0000-000000000002', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 5b: ENTERPRISE MEMBERS
@@ -144,7 +149,8 @@ INSERT INTO locations (id, enterprise_id, name, location_type, capacity, current
   ('10000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000001', 'Feed Storage',           'feed_storage',   0,  0, 1200, 'sqft', 'Climate-controlled grain and hay storage.', true),
   ('10000000-0000-0000-0000-000000000007', 'e0000000-0000-0000-0000-000000000002', 'Hen House A',            'barn',         200,150, 1500, 'sqft', 'Main free-range layer house with nesting boxes.', true),
   ('10000000-0000-0000-0000-000000000008', 'e0000000-0000-0000-0000-000000000002', 'Goat Paddock',           'paddock',       30, 12, 5,    'acres','Fenced paddock with shelter for Saanen dairy goats.', true),
-  ('10000000-0000-0000-0000-000000000009', 'e0000000-0000-0000-0000-000000000002', 'Processing Kitchen',     'warehouse',      0,  0, 600,  'sqft', 'USDA-inspected cheese and egg processing facility.', true);
+  ('10000000-0000-0000-0000-000000000009', 'e0000000-0000-0000-0000-000000000002', 'Processing Kitchen',     'warehouse',      0,  0, 600,  'sqft', 'USDA-inspected cheese and egg processing facility.', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 5d: ANIMAL GROUPS
@@ -154,7 +160,8 @@ INSERT INTO animal_groups (id, enterprise_id, name, group_type, species, breed, 
   ('ab000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000001', 'Jersey Milking Herd',     'herd',  'Cattle', 'Jersey',            'dairy',     20, 15, 'Jersey cows for premium butterfat production.',        '#f59e0b', true),
   ('ab000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000001', 'Young Calves Nursery',    'nursery','Cattle', NULL,                'breeding',  15,  8, 'Calves under 6 months in nursery care.',               '#10b981', true),
   ('ab000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000002', 'RIR Layer Flock',         'flock', 'Poultry','Rhode Island Red',  'layer',    200,150, 'Free-range layer hens for egg production.',            '#ef4444', true),
-  ('ab000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', 'Saanen Dairy Does',       'herd',  'Goat',  'Saanen',            'dairy',     30, 12, 'Saanen dairy goats for milk and cheese production.',   '#8b5cf6', true);
+  ('ab000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', 'Saanen Dairy Does',       'herd',  'Goat',  'Saanen',            'dairy',     30, 12, 'Saanen dairy goats for milk and cheese production.',   '#8b5cf6', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 6: BOOKINGS (various statuses)
@@ -194,7 +201,8 @@ INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, scheduled_da
   -- Cancelled booking
   ('bb000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000001',
    '2026-02-10', '15:00','15:30', 'cancelled', 'phone', 'low',
-   'Follow-up on Buddy hip dysplasia', NULL, 'Owner rescheduled due to travel');
+   'Follow-up on Buddy hip dysplasia', NULL, 'Owner rescheduled due to travel')
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 7: CONSULTATIONS (linked to completed bookings + standalone)
@@ -238,7 +246,8 @@ INSERT INTO consultations (id, user_id, veterinarian_id, animal_id, animal_type,
   ('cc000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000003',
    'Dog - French Bulldog', 'Louder snoring and occasional reverse sneezing episodes',
    'scheduled', 'normal', '2026-02-25 14:00:00', NULL, NULL, NULL,
-   NULL, NULL, NULL, 'Brachycephalic airway assessment. May need soft palate evaluation.');
+   NULL, NULL, NULL, 'Brachycephalic airway assessment. May need soft palate evaluation.')
+ON CONFLICT (id) DO NOTHING;
 
 -- Link completed bookings to consultations
 UPDATE bookings SET consultation_id = 'cc000000-0000-0000-0000-000000000001' WHERE id = 'bb000000-0000-0000-0000-000000000001';
@@ -257,7 +266,8 @@ INSERT INTO video_sessions (id, consultation_id, room_id, host_user_id, particip
 
   ('dd000000-0000-0000-0000-000000000002', 'cc000000-0000-0000-0000-000000000002', 'room-whiskers-derm-20260122',
    'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001',
-   'ended', '2026-01-22 14:04:00', '2026-01-22 14:42:00', 2280, 'high');
+   'ended', '2026-01-22 14:04:00', '2026-01-22 14:42:00', 2280, 'high')
+ON CONFLICT (id) DO NOTHING;
 
 -- Chat messages from video sessions
 INSERT INTO chat_messages (id, session_id, sender_id, sender_name, message, message_type, timestamp) VALUES
@@ -285,7 +295,8 @@ INSERT INTO prescriptions (id, consultation_id, veterinarian_id, pet_owner_id, a
   ('ee000000-0000-0000-0000-000000000003', 'cc000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000002', 'aa000000-0000-0000-0000-000000000004',
    '[{"name":"Meloxicam","dosage":"1.5mg","frequency":"Once daily","duration":"Ongoing","instructions":"Give with food. Do not combine with other NSAIDs."},{"name":"Adequan Canine","dosage":"2mg/lb IM","frequency":"Every 4 weeks","duration":"6 months","instructions":"Administered at clinic by veterinary staff only."},{"name":"Nordic Naturals Omega-3","dosage":"2 capsules","frequency":"Once daily","duration":"Ongoing","instructions":"Pierce capsule and mix with food."}]',
    'Meloxicam daily with food. Adequan injections scheduled at clinic monthly. Omega-3 for joint inflammation support. Recheck radiographs in 3 months.',
-   '2026-08-01', true);
+   '2026-08-01', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 10: MEDICAL RECORDS
@@ -319,7 +330,8 @@ INSERT INTO medical_records (id, user_id, animal_id, consultation_id, veterinari
    'MR-2026-00005', 'diagnosis', 'Acute Milk Drop — Daisy (Holstein)',
    'Holstein cow presented with 30% decline in milk production over 48 hours. Slight bilateral nasal discharge (serous). Temp 39.8°C (mildly elevated). Rumen motility reduced. Differential diagnosis: early pneumonia vs. subclinical ketosis vs. transition cow syndrome. Blood sample collected — awaiting BHB, NEFA, and CBC results. Started on IV fluids and propylene glycol drench pending labs.',
    'high', 'active', '[]',
-   false, NULL, ARRAY['bovine','production','emergency'], 'b0000000-0000-0000-0000-000000000001');
+   false, NULL, ARRAY['bovine','production','emergency'], 'b0000000-0000-0000-0000-000000000001')
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 10b: VACCINATION RECORDS
@@ -460,7 +472,8 @@ INSERT INTO system_settings (id, key, value, category, description) VALUES
   (uuid_generate_v4(), 'cancellation.partialRefundPercent',    '50',        'cancellation',  'Refund percentage for patient cancellation within partial window'),
   (uuid_generate_v4(), 'cancellation.partialRefundWindowHours','2',         'cancellation',  'Hours before appointment for partial refund (0 = direct no-refund)'),
   (uuid_generate_v4(), 'cancellation.goodwillBonusPercent',    '10',        'cancellation',  'Bonus wallet credit on top of refund when doctor cancels'),
-  (uuid_generate_v4(), 'cancellation.doctorMaxCancellationsPerMonth', '3',  'cancellation',  'Max doctor cancellations per month before reliability penalty');
+  (uuid_generate_v4(), 'cancellation.doctorMaxCancellationsPerMonth', '3',  'cancellation',  'Max doctor cancellations per month before reliability penalty')
+ON CONFLICT (key) DO NOTHING;
 
 -- ============================================================
 -- STEP 16: MOVEMENT RECORDS
@@ -492,7 +505,8 @@ INSERT INTO treatment_campaigns (id, enterprise_id, group_id, campaign_type, nam
   ('1c000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000002', 'ab000000-0000-0000-0000-000000000005', 'deworming', 'Goat Herd Deworming — Spring',
    'FAMACHA-guided targeted deworming for Saanen dairy does.',
    'Cydectin (Moxidectin)', '0.2 mg/kg oral', 12, 8, 'in_progress', '2026-02-15', '2026-02-15 10:00:00', NULL,
-   'b0000000-0000-0000-0000-000000000003', 180.00, '8 of 12 does treated so far. Remaining 4 have low FAMACHA scores — skipping.');
+   'b0000000-0000-0000-0000-000000000003', 180.00, '8 of 12 does treated so far. Remaining 4 have low FAMACHA scores — skipping.')
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
 -- STEP 18: HEALTH OBSERVATIONS
@@ -527,7 +541,8 @@ INSERT INTO feed_inventory (id, enterprise_id, feed_name, feed_type, unit, curre
   ('1f000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000001', 'Alfalfa Hay (Premium)', 'forage',  'kg', 8500, 2000, 0.28, 'Green Valley Hay',    'AH-2026-0112', '2026-12-01', 'Hay Barn',           true),
   ('1f000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000001', 'Mineral Lick Block',    'supplement','pcs', 24,   5,  12.50, 'AgriSupply',          'ML-2025-1101', '2027-01-01', 'Feed Storage Bin B', true),
   ('1f000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000002', 'Layer Mash 16% CP',     'grain',   'kg', 800,  200,  0.38, 'Southern Feeds',      'LM-2026-0201', '2026-07-01', 'Hen House Storage',  true),
-  ('1f000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', 'Goat Dairy Ration',     'grain',   'kg', 350,  100,  0.55, 'Southern Feeds',      'GD-2026-0201', '2026-06-15', 'Goat Feed Shed',     true);
+  ('1f000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', 'Goat Dairy Ration',     'grain',   'kg', 350,  100,  0.55, 'Southern Feeds',      'GD-2026-0201', '2026-06-15', 'Goat Feed Shed',     true)
+ON CONFLICT (id) DO NOTHING;
 
 -- Feed consumption logs
 INSERT INTO feed_consumption_logs (id, enterprise_id, feed_id, group_id, quantity, unit, consumption_date, recorded_by, cost, notes) VALUES
@@ -567,7 +582,8 @@ INSERT INTO alert_rules (id, enterprise_id, name, alert_type, conditions, severi
   ('1a000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'Low Feed Stock Alert',        'low_feed_stock',   '{"threshold_pct": 20}',  'warning',  true, 'f0000000-0000-0000-0000-000000000001'),
   ('1a000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000001', 'Vaccination Overdue Alert',   'vaccination_due',  '{"days_overdue": 14}',   'critical', true, 'f0000000-0000-0000-0000-000000000001'),
   ('1a000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000001', 'Document Expiry Warning',     'document_expiry',  '{"days_before": 30}',    'warning',  true, 'f0000000-0000-0000-0000-000000000001'),
-  ('1a000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000002', 'Health Observation Critical', 'health_threshold', '{"severity": "high"}',   'critical', true, 'f0000000-0000-0000-0000-000000000002');
+  ('1a000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000002', 'Health Observation Critical', 'health_threshold', '{"severity": "high"}',   'critical', true, 'f0000000-0000-0000-0000-000000000002')
+ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO alert_events (id, enterprise_id, rule_id, alert_type, severity, title, message, is_read, is_acknowledged) VALUES
   (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000001', '1a000000-0000-0000-0000-000000000002', 'vaccination_due', 'critical', 'Vaccination Overdue: Clostridial 7-way Booster',
@@ -585,7 +601,8 @@ INSERT INTO iot_sensors (id, enterprise_id, location_id, sensor_type, sensor_nam
   ('a5000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'humidity',    'Barn Humidity Sensor',     'SN-HUM-001', 'FarmTech', '%',  40, 85,  300, 'active', 92.0, NOW() - INTERVAL '5 minutes', 'v2.1.4', '{"zone":"main_floor"}'),
   ('a5000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000005', 'flow_rate',   'Milking Parlor Flow Meter','SN-FLW-001', 'DairyTech','L/min', 0, 15, 60,  'active', 78.0, NOW() - INTERVAL '2 minutes', 'v3.0.1', '{}'),
   ('a5000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000006', 'weight',      'Feed Bin Scale',           'SN-WGT-001', 'AgriScale','kg',   0, 5000,3600,'active', 95.0, NOW() - INTERVAL '1 hour',    'v1.5.0', '{}'),
-  ('a5000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000007', 'temperature', 'Hen House Temp Sensor',    'SN-TMP-002', 'FarmTech', '°C', 10, 35,  300, 'active', 63.0, NOW() - INTERVAL '5 minutes', 'v2.1.4', '{"zone":"nesting_area"}');
+  ('a5000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000007', 'temperature', 'Hen House Temp Sensor',    'SN-TMP-002', 'FarmTech', '°C', 10, 35,  300, 'active', 63.0, NOW() - INTERVAL '5 minutes', 'v2.1.4', '{"zone":"nesting_area"}')
+ON CONFLICT (id) DO NOTHING;;
 
 -- Sensor readings (recent)
 INSERT INTO sensor_readings (id, sensor_id, enterprise_id, value, unit, is_anomaly, anomaly_type, recorded_at) VALUES
@@ -644,7 +661,8 @@ INSERT INTO product_batches (id, enterprise_id, batch_number, product_type, desc
   ('a6000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000002', 'EGG-20260218-001', 'eggs',
    'Free-range eggs — daily collection from RIR flock', 240, 'dozen',
    'ab000000-0000-0000-0000-000000000004', '2026-02-18', '2026-03-18', 'AA',
-   '["Free Range","NCDA Certified"]', 'Sunrise Farm Cold Storage', 'quality_check');
+   '["Free Range","NCDA Certified"]', 'Sunrise Farm Cold Storage', 'quality_check')
+ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO traceability_events (id, enterprise_id, batch_id, event_type, title, description, location, recorded_by, event_date) VALUES
   (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000001', 'a6000000-0000-0000-0000-000000000001', 'collection',   'Morning Milking Complete',  'Collected 850L from 42 Holstein cows. Temperature at collection: 38°C.', 'Milking Parlor', 'f0000000-0000-0000-0000-000000000001', '2026-02-18 06:30:00'),
@@ -693,7 +711,8 @@ INSERT INTO digital_twins (id, enterprise_id, name, twin_type, description, mode
    'Digital replica of the entire dairy farm — barns, pastures, herd, equipment, and supply chain.',
    '{"total_animals":59,"locations":6,"sensors":4,"active_campaigns":0}',
    '{"herd_health":"at_risk","milk_production_L":18200,"feed_stock_days":18,"revenue_mtd":6100,"active_alerts":2}',
-   'f0000000-0000-0000-0000-000000000001');
+   'f0000000-0000-0000-0000-000000000001')
+ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO simulation_runs (id, twin_id, enterprise_id, name, scenario_type, parameters, input_state, result_data, status, duration_ms, created_by) VALUES
   (uuid_generate_v4(), 'a7000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001',
@@ -710,7 +729,8 @@ INSERT INTO ai_chat_sessions (id, enterprise_id, user_id, animal_id, title, cont
   ('a8000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000007',
    'Help with Daisy''s Milk Drop', 'animal', 'active', 4, NOW() - INTERVAL '2 hours'),
   ('a8000000-0000-0000-0000-000000000002', NULL, 'c0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000001',
-   'Buddy Hip Dysplasia Questions', 'animal', 'active', 2, NOW() - INTERVAL '1 day');
+   'Buddy Hip Dysplasia Questions', 'animal', 'active', 2, NOW() - INTERVAL '1 day')
+ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO ai_chat_messages (id, session_id, role, content, confidence, sources, tokens_used) VALUES
   (uuid_generate_v4(), 'a8000000-0000-0000-0000-000000000001', 'user',      'Daisy''s milk production dropped 30% in 2 days and she has a slight nasal discharge. What could be wrong?', NULL, '[]', 28),

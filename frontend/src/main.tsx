@@ -3,7 +3,12 @@ import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
+import { registerServiceWorker, initInstallPrompt } from './pwa.ts'
 import './index.css'
+
+// Register PWA service worker & install prompt
+registerServiceWorker();
+initInstallPrompt();
 
 const queryClient = new QueryClient({
   defaultOptions: {

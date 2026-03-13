@@ -43,12 +43,36 @@ node dist/utils/tier3Migration.js       2>&1 || echo "  (tier3 migration warning
 node dist/utils/tier4Migration.js       2>&1 || echo "  (tier4 migration warning — continuing)"
 echo "✓ Migrations complete"
 
-# Step 2: Seed demo data if SEED_ON_STARTUP=true (first deploy only)
-if [ "$SEED_ON_STARTUP" = "true" ]; then
+# Step 2: Seed demo data only if the database is EMPTY (no users exist)
+# This ensures data is never wiped on subsequent deploys.
+# To force a full re-seed, set FORCE_RESEED=true in Render env vars.
+USER_COUNT=$(node -e "
+const { Pool } = require('pg');
+async function main() {
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  try {
+    const r = await pool.query('SELECT COUNT(*)::int AS c FROM users');
+    console.log(r.rows[0].c);
+  } catch (e) { console.log('0'); }
+  finally { await pool.end(); }
+}
+main();
+" 2>/dev/null || echo "0")
+
+echo "  Database has $USER_COUNT user(s)"
+
+if [ "$FORCE_RESEED" = "true" ]; then
   echo ""
-  echo "━━━ Seeding demo data ━━━"
+  echo "━━━ FORCE_RESEED=true — Re-seeding demo data ━━━"
   node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings — continuing"
   echo "✓ Seed complete"
+elif [ "$USER_COUNT" = "0" ]; then
+  echo ""
+  echo "━━━ Empty database detected — Seeding demo data ━━━"
+  node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings — continuing"
+  echo "✓ Seed complete"
+else
+  echo "  ✓ Database already has data — skipping seed (data preserved)"
 fi
 
 # Step 3: Start the server (this MUST succeed)

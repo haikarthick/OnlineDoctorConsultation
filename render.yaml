@@ -31,7 +31,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: SEED_ON_STARTUP
-        value: "true"
+        value: "false"
       # ── AI Chatbot (Groq - free tier) ───────────────────
       - key: GROQ_API_KEY
         sync: false  # Set manually in Render dashboard
