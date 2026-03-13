@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, ReportTemplate, GeneratedReport } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const REPORT_TYPES = [
   { value: 'animal_census', label: '🐄 Animal Census', desc: 'Comprehensive animal inventory by species, breed, gender' },
@@ -13,7 +14,8 @@ const REPORT_TYPES = [
   { value: 'sensor_analytics', label: '📡 Sensor Analytics', desc: 'IoT sensor readings, anomalies, averages across devices' }
 ]
 
-const ReportBuilderPage: React.FC = () => {
+const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [templates, setTemplates] = useState<ReportTemplate[]>([])
@@ -142,7 +144,7 @@ const ReportBuilderPage: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>📊 Report Builder & Export Center</h1>
+        <h1>{t('reportBuilder.pageTitle')}</h1>
         <p>Custom reports, scheduled exports, and cross-module analytical dashboards</p>
       </div>
 

@@ -3,6 +3,7 @@ import apiService from '../services/api'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
 import './ModulePage.css'
+import { useTranslation } from 'react-i18next'
 
 interface Enterprise { id: string; name: string }
 interface Animal { id: string; name: string; species: string; breed?: string; uniqueId?: string; groupName?: string; groupId?: string }
@@ -26,6 +27,7 @@ const RECORD_TYPES = [
 ]
 
 const HerdMedicalManagement: React.FC = () => {
+  const { t } = useTranslation()
   const { formatDate } = useSettings()
   const { user } = useAuth()
   const role = user?.role || ''
@@ -607,7 +609,7 @@ const HerdMedicalManagement: React.FC = () => {
       {modal === 'add-record' && (
         <div style={modalOverlayStyle} onClick={() => setModal(null)}>
           <div style={modalStyle} onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginBottom: '16px' }}>Add Medical Record</h2>
+            <h2 style={{ marginBottom: '16px' }}>{t('medicalRecords.pageTitle')}</h2>
             <p style={{ color: '#666', fontSize: '0.9em', marginBottom: '16px' }}>
               {isVet ? 'Creating record as veterinarian - you will be recorded as the attending vet.' : isAdmin ? 'Creating record as admin.' : 'Creating record for your enterprise animal.'}
             </p>

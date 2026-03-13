@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useTranslation } from 'react-i18next'
 
 interface BookingRow {
   id: string; petOwnerName?: string; petOwnerId?: string; vetName?: string; scheduledDate: string;
@@ -35,6 +36,7 @@ const filterFutureSlots = (slots: TimeSlot[], forDate: string) => {
   return slots.filter(s => {
     if (!s.isAvailable) return false
     if (forDate !== todayStr) return true
+
     const [h, m] = s.startTime.split(':').map(Number)
     return h * 60 + m > now.getHours() * 60 + now.getMinutes() + 15
   })
@@ -66,6 +68,7 @@ const canReschedule = (b: BookingRow, maxReschedules: number, patientNoShowLimit
 }
 
 const Consultations: React.FC = () => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate, isJoinable, settings: appSettings, estimateRefund } = useSettings()
   const { maxReschedules, patientNoShowRescheduleLimit } = appSettings
@@ -361,7 +364,7 @@ const Consultations: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🏥 Consultations & Appointments</h1>
+          <h1>{t('consultations.pageTitle')}</h1>
           <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>
             {isAdmin ? 'All system appointments & consultations' : isVet ? 'Your scheduled appointments & consultations' : 'Your booked appointments & consultation history'}
           </p>

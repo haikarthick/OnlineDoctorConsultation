@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, GeneticProfile, LineagePair } from '../types'
+import { useTranslation } from 'react-i18next'
 
-const GenomicLineagePage: React.FC = () => {
+const GenomicLineagePage: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [profiles, setProfiles] = useState<GeneticProfile[]>([])
@@ -101,7 +103,7 @@ const GenomicLineagePage: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>🧬 Genomic Lineage & Genetic Diversity</h1>
+        <h1>{t('genomicLineage.pageTitle')}</h1>
         <p>Track ancestry trees, inbreeding coefficients, and find optimal breeding pairs</p>
       </div>
 

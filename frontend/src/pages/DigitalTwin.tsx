@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, DigitalTwin, SimulationRun } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const SCENARIO_TYPES = [
   { value: 'disease_spread', label: '🦠 Disease Spread', desc: 'Model pathogen transmission through animal populations' },
@@ -12,7 +13,8 @@ const SCENARIO_TYPES = [
 
 const TWIN_TYPES = ['farm', 'herd', 'facility', 'supply_chain']
 
-const DigitalTwinPage: React.FC = () => {
+const DigitalTwinPage: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [twins, setTwins] = useState<DigitalTwin[]>([])
@@ -153,7 +155,7 @@ const DigitalTwinPage: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🔮 Digital Twin & Simulator</h1>
+          <h1>{t('digitalTwin.pageTitle')}</h1>
           <p style={{ color: '#666', margin: '8px 0 0' }}>Virtual farm models with scenario simulation and predictive analysis</p>
         </div>
         <select className="module-input" value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} style={{ width: 260 }}>

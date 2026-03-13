@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, BreedingRecord, BreedingStats } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const STATUS_COLORS: Record<string, string> = {
   bred: '#3b82f6', confirmed_pregnant: '#22c55e', not_pregnant: '#94a3b8',
   delivered: '#8b5cf6', aborted: '#ef4444', reabsorbed: '#f97316'
 }
 
-const BreedingManager: React.FC = () => {
+const BreedingManager: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [records, setRecords] = useState<BreedingRecord[]>([])
@@ -100,7 +102,7 @@ const BreedingManager: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>🧬 Breeding & Genetics Manager</h1>
+        <h1>{t('breedingManager.pageTitle')}</h1>
         <p>Track breeding records, monitor pregnancies, and analyze reproductive performance</p>
       </div>
 

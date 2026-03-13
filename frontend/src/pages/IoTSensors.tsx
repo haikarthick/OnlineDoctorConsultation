@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, IoTSensor, SensorReading } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const SENSOR_ICONS: Record<string, string> = {
   temperature: '🌡️', humidity: '💧', weight: '⚖️', activity: '🏃', air_quality: '🌬️',
   heart_rate: '💓', water_flow: '🚿', gps: '📍', camera: '📷', pressure: '🔵'
 }
 
-const IoTSensorPage: React.FC = () => {
+const IoTSensorPage: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [sensors, setSensors] = useState<IoTSensor[]>([])
@@ -102,7 +104,7 @@ const IoTSensorPage: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>📡 IoT Sensor Integration Dashboard</h1>
+        <h1>{t('iotSensors.pageTitle')}</h1>
         <p>Real-time environmental monitoring, automated telemetry, and anomaly detection</p>
       </div>
 

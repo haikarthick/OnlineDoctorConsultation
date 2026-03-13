@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, FeedItem, FeedAnalytics } from '../types'
+import { useTranslation } from 'react-i18next'
 
-const FeedInventory: React.FC = () => {
+const FeedInventory: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [feeds, setFeeds] = useState<FeedItem[]>([])
@@ -138,7 +140,7 @@ const FeedInventory: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>🌾 Feed & Inventory Management</h1>
+        <h1>{t('feedInventory.pageTitle')}</h1>
         <p>Track feed stock levels, log consumption, and get low-stock alerts</p>
       </div>
 

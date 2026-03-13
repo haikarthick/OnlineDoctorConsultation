@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, AlertRule, AlertEvent } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const SEVERITY_COLORS: Record<string, string> = { info: '#3b82f6', warning: '#f97316', critical: '#ef4444' }
 const RULE_TYPES = ['vaccination_due', 'breeding_due', 'low_feed_stock', 'document_expiry', 'health_threshold', 'custom']
 
-const AlertCenter: React.FC = () => {
+const AlertCenter: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [rules, setRules] = useState<AlertRule[]>([])
@@ -141,7 +143,7 @@ const AlertCenter: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>🔔 Smart Alert Center</h1>
+        <h1>{t('alertCenter.pageTitle')}</h1>
         <p>Configure alert rules, monitor events, and stay on top of critical issues</p>
       </div>
 

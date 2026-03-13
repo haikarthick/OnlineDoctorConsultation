@@ -3,12 +3,14 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, DiseasePrediction, OutbreakZone, RiskDashboard } from '../types'
 import MapView from '../components/MapView'
+import { useTranslation } from 'react-i18next'
 
 const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
 }
 
-const DiseasePredictionPage: React.FC = () => {
+const DiseasePredictionPage: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [dashboard, setDashboard] = useState<RiskDashboard | null>(null)
@@ -116,7 +118,7 @@ const DiseasePredictionPage: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>🧠 AI Disease Prediction & Outbreak Mapping</h1>
+        <h1>{t('diseasePrediction.pageTitle')}</h1>
         <p>Predictive risk scoring, geographic outbreak heatmaps, and recommended preventive actions</p>
       </div>
 

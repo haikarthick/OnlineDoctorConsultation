@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
+import i18n from '../i18n'
 
 interface Props {
   children: ReactNode
@@ -50,9 +51,9 @@ export class ErrorBoundary extends Component<Props, State> {
           }}
         >
           <div style={{ fontSize: '64px', marginBottom: '20px' }} aria-hidden="true">⚠️</div>
-          <h2 style={{ color: '#1a1a1a', marginBottom: '12px' }}>Something went wrong</h2>
+          <h2 style={{ color: '#1a1a1a', marginBottom: '12px' }}>{i18n.t('errorBoundary.heading')}</h2>
           <p style={{ color: '#666', marginBottom: '24px', maxWidth: '500px' }}>
-            An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
+            {i18n.t('errorBoundary.description')}
           </p>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
@@ -67,7 +68,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 fontWeight: '600',
               }}
             >
-              Try Again
+              {i18n.t('errorBoundary.tryAgain')}
             </button>
             <button
               onClick={() => window.location.reload()}
@@ -81,7 +82,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 fontWeight: '600',
               }}
             >
-              Reload Page
+              {i18n.t('errorBoundary.reloadPage')}
             </button>
           </div>
           {this.state.error && (
@@ -95,7 +96,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 fontSize: '13px',
                 color: '#991b1b',
               }}>
-                <strong>Error: </strong>{this.state.error.message}
+                <strong>{i18n.t('errorBoundary.errorLabel')}</strong>{this.state.error.message}
               </div>
               {import.meta.env.DEV && (
                 <pre style={{

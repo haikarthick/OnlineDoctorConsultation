@@ -3,12 +3,14 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, ProductBatch, TraceabilityEvent, QRCode as QRCodeType } from '../types'
 import MapView from '../components/MapView'
+import { useTranslation } from 'react-i18next'
 
 const STATUS_COLORS: Record<string, string> = {
   in_production: '#3b82f6', quality_check: '#f59e0b', in_transit: '#8b5cf6', delivered: '#22c55e', recalled: '#ef4444'
 }
 
-const SupplyChainPage: React.FC = () => {
+const SupplyChainPage: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [batches, setBatches] = useState<ProductBatch[]>([])
@@ -117,7 +119,7 @@ const SupplyChainPage: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>🔗 Supply Chain & Traceability (Farm-to-Fork)</h1>
+        <h1>{t('supplyChain.pageTitle')}</h1>
         <p>Full birth-to-sale traceability, QR code generation, and blockchain-style audit trail</p>
       </div>
 

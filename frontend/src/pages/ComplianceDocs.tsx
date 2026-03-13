@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, ComplianceDocument, ComplianceSummary } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const STATUS_COLORS: Record<string, string> = {
   draft: '#94a3b8', active: '#22c55e', expired: '#ef4444', revoked: '#dc2626', pending_renewal: '#f97316'
@@ -13,7 +14,8 @@ const DOC_TYPES = [
   'breeding_certificate', 'organic_certification', 'environmental_permit', 'other'
 ]
 
-const ComplianceDocs: React.FC = () => {
+const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [documents, setDocuments] = useState<ComplianceDocument[]>([])
@@ -116,7 +118,7 @@ const ComplianceDocs: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>📜 Compliance & Regulatory Documents</h1>
+        <h1>{t('complianceDocs.pageTitle')}</h1>
         <p>Manage licenses, permits, certifications and track expiry dates</p>
       </div>
 

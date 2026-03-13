@@ -48,7 +48,6 @@
     "enterprise": "ENTERPRISE",
     "trustBadge": "Trusted by 3,000+ enterprises worldwide"
   },
-
   "nav": {
     "brand": "VetCare",
     "dashboard": "Dashboard",
@@ -93,9 +92,39 @@
     "settings": "Settings",
     "logout": "Logout",
     "openMenu": "Open navigation menu",
-    "closeMenu": "Close navigation menu"
+    "closeMenu": "Close navigation menu",
+    "myConsultations": "My Consultations",
+    "myPrescriptions": "My Prescriptions",
+    "myPets": "My Pets",
+    "writeReview": "Write Review",
+    "farmEnterprise": "Farm / Enterprise",
+    "herdsGroups": "Herds & Groups",
+    "herdMedical": "Herd Medical",
+    "vetHospitals": "Vet Hospitals",
+    "myHospital": "My Hospital",
+    "myWallet": "My Wallet",
+    "hospitalMgmt": "Hospital Mgmt",
+    "cancellations": "Cancellations",
+    "sections": {
+      "main": "Main",
+      "consultations": "Consultations",
+      "animalsHealth": "Animals & Health",
+      "farmManagement": "Farm Management",
+      "analyticsTools": "Analytics & Tools",
+      "innovation": "Innovation",
+      "intelligence": "Intelligence",
+      "vetNetwork": "Vet Network",
+      "account": "Account",
+      "administration": "Administration",
+      "preferences": "Preferences"
+    },
+    "roles": {
+      "veterinarian": "Veterinarian",
+      "petOwner": "Pet Owner",
+      "farmer": "Farmer",
+      "admin": "Administrator"
+    }
   },
-
   "login": {
     "welcome": "Welcome back",
     "title": "Sign in to your account",
@@ -121,7 +150,6 @@
     "success": "✓ Login successful! Redirecting...",
     "error": "Login failed"
   },
-
   "register": {
     "title": "Create your account",
     "subtitle": "Get started in under 2 minutes",
@@ -169,7 +197,6 @@
       "passwordLength": "Password must be at least 6 characters"
     }
   },
-
   "home": {
     "signIn": "Sign In",
     "getStarted": "Get Started Free",
@@ -232,7 +259,6 @@
       "veterinarians": "For Veterinarians"
     }
   },
-
   "dashboard": {
     "greeting": "Welcome, {{name}}!",
     "subtitles": {
@@ -281,9 +307,9 @@
     "explore": "Explore →",
     "join": "Join →",
     "cancelBooking": "Cancel this booking?",
-    "declinedByDoctor": "Declined by doctor"
+    "declinedByDoctor": "Declined by doctor",
+    "pageTitle": "Recent Consultations"
   },
-
   "consultations": {
     "pageTitle": "🏥 Consultations & Appointments",
     "subtitles": {
@@ -364,7 +390,6 @@
       "confirmCancel": "Confirm Cancellation"
     }
   },
-
   "animals": {
     "pageTitles": {
       "petOwner": "🐾 My Animals",
@@ -457,9 +482,9 @@
       "registered": "Animal registered successfully!",
       "confirmRemove": "Are you sure you want to remove this animal?",
       "removed": "Animal removed successfully"
-    }
+    },
+    "pageTitle": "My Animals"
   },
-
   "appointments": {
     "pageTitle": "📅 Appointments",
     "scheduleNew": "Schedule New",
@@ -472,7 +497,6 @@
       "followUp": "Follow-up"
     }
   },
-
   "medicalRecords": {
     "pageTitle": "📋 Medical Records",
     "allAnimals": "All Animals",
@@ -665,7 +689,6 @@
       "critical": "Critical"
     }
   },
-
   "settings": {
     "pageTitle": "⚙️ Settings",
     "profile": {
@@ -701,7 +724,6 @@
       "deleteAccountDesc": "Permanently delete your account and all associated data"
     }
   },
-
   "enterpriseManagement": {
     "pageTitle": "🏢 Enterprise Management",
     "subtitle": "Manage your farms, clinics, and animal enterprises",
@@ -736,7 +758,6 @@
     "deactivateConfirm": "Are you sure you want to deactivate this enterprise?",
     "deactivated": "Enterprise deactivated"
   },
-
   "animalGroups": {
     "pageTitle": "🐾 Animal Groups",
     "subtitle": "Manage herds, flocks, pens, and animal groups",
@@ -788,7 +809,6 @@
       "deleteConfirm": "Delete this group? Animals will be unlinked."
     }
   },
-
   "locationManagement": {
     "pageTitle": "📍 Location Management",
     "subtitle": "Manage barns, pens, paddocks, and facility locations",
@@ -812,7 +832,6 @@
       "validation": "Name and type are required"
     }
   },
-
   "movementLog": {
     "pageTitle": "🔄 Movement Log",
     "subtitle": "Track animal transfers, births, sales, and more",
@@ -863,7 +882,6 @@
       "failed": "Failed"
     }
   },
-
   "treatmentCampaigns": {
     "pageTitle": "💉 Treatment Campaigns",
     "subtitle": "Manage vaccination, deworming, testing, and other campaigns",
@@ -921,7 +939,6 @@
       "failed": "Failed"
     }
   },
-
   "healthAnalytics": {
     "pageTitle": "🏥 Health Analytics",
     "subtitle": "Monitor herd health, track observations, and analyze health trends",
@@ -959,7 +976,6 @@
     "resolve": "Resolve",
     "emptyObservations": "No observations recorded yet."
   },
-
   "breedingManager": {
     "pageTitle": "🧬 Breeding & Genetics Manager",
     "subtitle": "Track breeding records, monitor pregnancies, and analyze reproductive performance",
@@ -1021,7 +1037,6 @@
       "failed": "Failed to save breeding record"
     }
   },
-
   "feedInventory": {
     "pageTitle": "🌾 Feed & Inventory Management",
     "subtitle": "Track feed stock levels, log consumption, and get low-stock alerts",
@@ -1042,7 +1057,6 @@
     "consumptionByType": "Consumption by Type (30 days)",
     "dailyTrend": "Daily Consumption Trend"
   },
-
   "complianceDocs": {
     "pageTitle": "📜 Compliance & Regulatory Documents",
     "subtitle": "Manage licenses, permits, certifications and track expiry dates",
@@ -1098,7 +1112,6 @@
       "deleteConfirm": "Delete this document?"
     }
   },
-
   "financialAnalytics": {
     "pageTitle": "💰 Financial Analytics",
     "subtitle": "Track income, expenses, and analyze financial performance",
@@ -1129,7 +1142,6 @@
     "emptyRecords": "No records yet.",
     "deleteConfirm": "Delete this financial record?"
   },
-
   "alertCenter": {
     "pageTitle": "🔔 Smart Alert Center",
     "subtitle": "Configure alert rules, monitor events, and stay on top of critical issues",
@@ -1188,7 +1200,6 @@
       "invalidJson": "Invalid JSON in conditions"
     }
   },
-
   "diseasePrediction": {
     "pageTitle": "🧠 AI Disease Prediction & Outbreak Mapping",
     "subtitle": "Predictive risk scoring, geographic outbreak heatmaps, and recommended preventive actions",
@@ -1220,7 +1231,6 @@
     "radius": "radius",
     "outbreakResolved": "Outbreak resolved!"
   },
-
   "genomicLineage": {
     "pageTitle": "🧬 Genomic Lineage & Genetic Diversity",
     "subtitle": "Track ancestry trees, inbreeding coefficients, and find optimal breeding pairs",
@@ -1246,7 +1256,6 @@
     "emptyEnterprise": "Select an enterprise to view genetic data",
     "loading": "Loading genetic data…"
   },
-
   "iotSensors": {
     "pageTitle": "📡 IoT Sensor Integration Dashboard",
     "subtitle": "Real-time environmental monitoring, automated telemetry, and anomaly detection",
@@ -1259,7 +1268,6 @@
     "recordReading": "📊 Record Reading",
     "loading": "Connecting to sensor network…"
   },
-
   "supplyChain": {
     "pageTitle": "🔗 Supply Chain & Traceability (Farm-to-Fork)",
     "subtitle": "Full birth-to-sale traceability, QR code generation, and blockchain-style audit trail",
@@ -1292,7 +1300,6 @@
     "emptyEvents": "No traceability events",
     "emptyQR": "No QR codes generated yet — create one from a batch"
   },
-
   "workforce": {
     "pageTitle": "👷 Workforce & Task Management",
     "subtitle": "Shift scheduling, task boards with checklists, and performance analytics",
@@ -1327,7 +1334,6 @@
     "checkIn": "Check In",
     "checkOut": "Check Out"
   },
-
   "reportBuilder": {
     "pageTitle": "📊 Report Builder & Export Center",
     "subtitle": "Custom reports, scheduled exports, and cross-module analytical dashboards",
@@ -1369,7 +1375,6 @@
     "emptyView": "Select a report from History or Generate a new one",
     "createTemplate": "+ Create Template"
   },
-
   "aiCopilot": {
     "pageTitle": "🤖 AI Veterinary Copilot",
     "subtitle": "Intelligent assistant for symptom analysis, drug checks & treatment guidance",
@@ -1422,7 +1427,6 @@
       "deleteFailed": "Failed to delete"
     }
   },
-
   "digitalTwin": {
     "pageTitle": "🔮 Digital Twin & Simulator",
     "subtitle": "Virtual farm models with scenario simulation and predictive analysis",
@@ -1456,7 +1460,6 @@
     "twinCreated": "Digital twin created!",
     "simulationCompleted": "Simulation completed!"
   },
-
   "marketplace": {
     "pageTitle": "🏪 Marketplace & Auctions",
     "subtitle": "Buy, sell, and auction animals, equipment, and veterinary supplies",
@@ -1507,7 +1510,6 @@
     "bidPlaced": "Bid placed!",
     "orderPlaced": "Order placed!"
   },
-
   "sustainability": {
     "pageTitle": "🌱 Sustainability & Carbon",
     "subtitle": "ESG scoring, carbon footprint tracking, and sustainability goal management",
@@ -1574,7 +1576,6 @@
       "goalCreated": "Goal created!"
     }
   },
-
   "wellnessPortal": {
     "pageTitle": "💚 Wellness Portal",
     "subtitle": "Pet health scorecards, vaccination reminders, and wellness tracking",
@@ -1620,7 +1621,6 @@
       "snoozed": "Snoozed 3 days"
     }
   },
-
   "geospatialAnalytics": {
     "pageTitle": "🗺️ Geospatial Analytics",
     "subtitle": "Geofencing, location tracking, heatmaps, and movement trails",
@@ -1648,7 +1648,6 @@
     "animalIdPlaceholder": "Enter Animal ID",
     "loadTrail": "Load Trail"
   },
-
   "errorBoundary": {
     "heading": "Something went wrong",
     "description": "An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.",
@@ -1656,11 +1655,9 @@
     "reloadPage": "Reload Page",
     "errorLabel": "Error: "
   },
-
   "layout": {
     "skipToContent": "Skip to main content"
   },
-
   "languageSwitcher": {
     "label": "Language",
     "ariaLabel": "Select language"

@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import './ModulePage.css'
+import { useTranslation } from 'react-i18next'
 
 const Settings: React.FC = () => {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
@@ -17,114 +20,114 @@ const Settings: React.FC = () => {
   }
 
   const handleSave = () => {
-    alert('Settings saved! (This is a demo)')
+    alert(t('settings.profile.saved'))
   }
 
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>⚙️ Settings</h1>
+        <h1>{t('settings.pageTitle')}</h1>
       </div>
 
       <div className="module-content">
         <div className="settings-container">
           <div className="settings-section">
-            <h2>Profile Information</h2>
+            <h2>{t('settings.profile.title')}</h2>
             <div className="settings-form">
               <div className="form-group">
-                <label>First Name</label>
+                <label>{t('settings.profile.firstName')}</label>
                 <input
                   type="text"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
-                  placeholder="First name"
+                  placeholder={t('settings.profile.firstName')}
                 />
               </div>
               <div className="form-group">
-                <label>Last Name</label>
+                <label>{t('settings.profile.lastName')}</label>
                 <input
                   type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
-                  placeholder="Last name"
+                  placeholder={t('settings.profile.lastName')}
                 />
               </div>
               <div className="form-group">
-                <label>Email</label>
+                <label>{t('settings.profile.email')}</label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Email address"
+                  placeholder={t('settings.profile.email')}
                   disabled
                 />
               </div>
               <div className="form-group">
-                <label>Phone</label>
+                <label>{t('settings.profile.phone')}</label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="Phone number"
+                  placeholder={t('settings.profile.phone')}
                 />
               </div>
-              <button className="btn-primary" onClick={handleSave}>Save Changes</button>
+              <button className="btn-primary" onClick={handleSave}>{t('settings.profile.saveChanges')}</button>
             </div>
           </div>
 
           <div className="settings-section">
-            <h2>Preferences</h2>
+            <h2>{t('settings.preferences.title')}</h2>
             <div className="preferences-list">
               <label className="preference-item">
                 <input type="checkbox" defaultChecked />
-                <span>Email notifications for appointments</span>
+                <span>{t('settings.preferences.emailNotifications')}</span>
               </label>
               <label className="preference-item">
                 <input type="checkbox" defaultChecked />
-                <span>SMS reminders for consultations</span>
+                <span>{t('settings.preferences.smsReminders')}</span>
               </label>
               <label className="preference-item">
                 <input type="checkbox" />
-                <span>Marketing emails and offers</span>
+                <span>{t('settings.preferences.marketingEmails')}</span>
               </label>
               <label className="preference-item">
                 <input type="checkbox" defaultChecked />
-                <span>Share health data with doctors</span>
+                <span>{t('settings.preferences.shareHealth')}</span>
               </label>
             </div>
           </div>
 
           <div className="settings-section">
-            <h2>Security</h2>
+            <h2>{t('settings.security.title')}</h2>
             <div className="security-list">
               <div className="security-item">
-                <h4>Change Password</h4>
-                <p>Update your password regularly for better security</p>
-                <button className="btn-small">Change Password</button>
+                <h4>{t('settings.security.changePassword')}</h4>
+                <p>{t('settings.security.changePasswordDesc')}</p>
+                <button className="btn-small">{t('settings.security.changePassword')}</button>
               </div>
               <div className="security-item">
-                <h4>Two-Factor Authentication</h4>
-                <p>Add an extra layer of security to your account</p>
-                <button className="btn-small">Enable 2FA</button>
+                <h4>{t('settings.security.twoFactor')}</h4>
+                <p>{t('settings.security.twoFactorDesc')}</p>
+                <button className="btn-small">{t('settings.security.enable2FA')}</button>
               </div>
               <div className="security-item">
-                <h4>Active Sessions</h4>
-                <p>Manage your active login sessions</p>
-                <button className="btn-small">View Sessions</button>
+                <h4>{t('settings.security.activeSessions')}</h4>
+                <p>{t('settings.security.activeSessionsDesc')}</p>
+                <button className="btn-small">{t('settings.security.viewSessions')}</button>
               </div>
             </div>
           </div>
 
           <div className="settings-section danger-zone">
-            <h2>Danger Zone</h2>
+            <h2>{t('settings.dangerZone.title')}</h2>
             <div className="danger-item">
-              <h4>Delete Account</h4>
-              <p>Permanently delete your account and all associated data</p>
-              <button className="btn-danger">Delete Account</button>
+              <h4>{t('settings.dangerZone.deleteAccount')}</h4>
+              <p>{t('settings.dangerZone.deleteAccountDesc')}</p>
+              <button className="btn-danger">{t('settings.dangerZone.deleteAccount')}</button>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useTranslation } from 'react-i18next'
 
 type Tab = 'overview' | 'records' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline'
 
@@ -24,7 +25,8 @@ const SEVERITY_OPTIONS = [
   { value: 'critical', label: 'Critical', color: '#dc2626' },
 ]
 
-const MedicalRecords: React.FC = () => {
+const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
+
   const { formatDate } = useSettings()
   const { user } = useAuth()
   const isVet = user?.role === 'veterinarian'
@@ -282,7 +284,7 @@ const MedicalRecords: React.FC = () => {
   if (loading) {
     return (
       <div className="module-page">
-        <div className="module-header"><h1>📋 Medical Records</h1></div>
+        <div className="module-header"><h1>{t('medicalRecords.pageTitle')}</h1></div>
         <div className="module-content" style={{ textAlign: 'center', padding: 60 }}>
           <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
           <p>Loading medical records...</p>

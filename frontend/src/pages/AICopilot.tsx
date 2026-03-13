@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { AIChatSession, AIChatMessage } from '../types'
+import { useTranslation } from 'react-i18next'
 
 // Render AI markdown responses nicely
 const AIMessage: React.FC<{ content: string; confidence?: number; sources?: string[] }> = ({ content, confidence, sources }) => (
@@ -46,7 +47,8 @@ const AIMessage: React.FC<{ content: string; confidence?: number; sources?: stri
   </div>
 )
 
-const AICopilot: React.FC = () => {
+const AICopilot: React.FC = () => {  const { t } = useTranslation()
+
   const [sessions, setSessions] = useState<AIChatSession[]>([])
   const [selectedSession, setSelectedSession] = useState<AIChatSession | null>(null)
   const [messages, setMessages] = useState<AIChatMessage[]>([])
@@ -161,7 +163,7 @@ const AICopilot: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🤖 AI Veterinary Copilot</h1>
+          <h1>{t('aiCopilot.pageTitle')}</h1>
           <p style={{ color: '#666', margin: '8px 0 0' }}>Intelligent assistant for symptom analysis, drug checks & treatment guidance</p>
         </div>
       </div>

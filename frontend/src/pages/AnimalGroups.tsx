@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, AnimalGroup, GROUP_TYPE_LABELS, AnimalGroupType } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const PURPOSE_OPTIONS = [
   { value: 'dairy', label: 'Dairy' }, { value: 'meat', label: 'Meat' },
@@ -16,7 +17,8 @@ const PURPOSE_OPTIONS = [
 
 interface SimpleAnimal { id: string; name: string; species: string; breed?: string; uniqueId?: string; groupId?: string; groupName?: string }
 
-const AnimalGroups: React.FC = () => {
+const AnimalGroups: React.FC = () => {  const { t } = useTranslation()
+
   const navigate = useNavigate()
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -201,7 +203,7 @@ const AnimalGroups: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🐾 Animal Groups</h1>
+          <h1>{t('animalGroups.pageTitle')}</h1>
           <p className="subtitle">Manage herds, flocks, pens, and animal groups</p>
         </div>
         <div className="header-actions" style={{ display: 'flex', gap: '0.5rem' }}>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, SustainabilityMetric, SustainabilityGoal } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const METRIC_TYPES = [
   { value: 'carbon_emissions', label: '🏭 Carbon Emissions', unit: 'kg CO2e' },
@@ -16,7 +17,8 @@ const METRIC_TYPES = [
 
 const SCOPE_LABELS: Record<string, string> = { scope_1: 'Direct Emissions', scope_2: 'Energy Indirect', scope_3: 'Value Chain' }
 
-const Sustainability: React.FC = () => {
+const Sustainability: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [dashboard, setDashboard] = useState<any>(null)
@@ -105,7 +107,7 @@ const Sustainability: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🌱 Sustainability & Carbon</h1>
+          <h1>{t('sustainability.pageTitle')}</h1>
           <p style={{ color: '#666', margin: '8px 0 0' }}>ESG scoring, carbon footprint tracking, and sustainability goal management</p>
         </div>
         <select className="module-input" value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} style={{ width: 260 }}>

@@ -6,6 +6,7 @@ import type { VetHospital, HospitalDepartment, HospitalDoctor, HospitalService, 
 import { DOC_LABELS } from '../types'
 import './ModulePage.css'
 import './VetHospitals.css'
+import { useTranslation } from 'react-i18next'
 
 type Tab = 'overview' | 'departments' | 'doctors' | 'services'
 
@@ -28,6 +29,8 @@ const StarRating: React.FC<{ value: number }> = ({ value }) => (
 )
 
 const VetHospitalProfile: React.FC = () => {
+  const { t } = useTranslation()
+
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -107,7 +110,7 @@ const VetHospitalProfile: React.FC = () => {
           </div>
         </div>
         <div className="vh-hero-actions">
-          <button className="btn-primary" onClick={() => navigate(`/vet-hospitals/${id}/book`)} style={{ fontWeight: 700 }}>📅 Book Appointment</button>
+          <button className="btn-primary" onClick={() => navigate(`/vet-hospitals/${id}/book`)} style={{ fontWeight: 700 }}>📅 {t('common.submit')}</button>
           {hospital.phone && <a href={`tel:${hospital.phone}`} className="btn-secondary" style={{ textDecoration: 'none' }}>📞 Call</a>}
           {hospital.email && <a href={`mailto:${hospital.email}`} className="btn-secondary" style={{ textDecoration: 'none' }}>✉ Email</a>}
           {canManage && <button className="btn-secondary" onClick={() => navigate(`/vet-hospitals/manage`)}>⚙ Manage</button>}

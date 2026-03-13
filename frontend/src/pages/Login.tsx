@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import './Auth.css'
 
@@ -9,6 +10,7 @@ interface LoginProps {
 
 export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
   const { login } = useAuth()
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -23,7 +25,7 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
       await login(email, password)
       setMessage('✓ Login successful! Redirecting...')
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Login failed')
+      setMessage(error instanceof Error ? error.message : t('login.error'))
     } finally {
       setLoading(false)
     }
@@ -37,13 +39,13 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
           <div className="login-brand-inner">
             <div className="login-logo">🏥</div>
             <h2>VetCare</h2>
-            <p className="login-tagline">Welcome back</p>
+            <p className="login-tagline">{t('login.welcome')}</p>
             <div className="login-features">
-              <div className="login-feat"><span className="login-feat-check">✓</span><span>24/7 Online Consultations</span></div>
-              <div className="login-feat"><span className="login-feat-check">✓</span><span>Licensed Veterinarians</span></div>
-              <div className="login-feat"><span className="login-feat-check">✓</span><span>Quick Response Time</span></div>
-              <div className="login-feat"><span className="login-feat-check">✓</span><span>Enterprise-Grade Security</span></div>
-              <div className="login-feat"><span className="login-feat-check">✓</span><span>Complete Health Records</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.consultations')}</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.vets')}</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.response')}</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.security')}</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.records')}</span></div>
               <div className="login-feat"><span className="login-feat-check">✓</span><span>Vet Hospital Network</span></div>
             </div>
             <div className="login-trust">
@@ -55,14 +57,14 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
         {/* Right form panel */}
         <div className="login-form-panel">
           <div className="login-topbar">
-            {onGoHome && <button className="back-home-btn" onClick={onGoHome} title="Back to Home">← Home</button>}
-            <span className="login-topbar-register">New here? <button className="link-btn" onClick={onSwitchToRegister}>Create account</button></span>
+            {onGoHome && <button className="back-home-btn" onClick={onGoHome} title={t('login.backHome')}>{t('login.backHome')}</button>}
+            <span className="login-topbar-register">{t('login.newHere')} <button className="link-btn" onClick={onSwitchToRegister}>{t('login.createAccount')}</button></span>
           </div>
 
           <div className="login-form-center">
             <div className="login-form-header">
-              <h1>Sign in to your account</h1>
-              <p>Enter your credentials to continue</p>
+              <h1>{t('login.title')}</h1>
+              <p>{t('login.subtitle')}</p>
             </div>
 
             <div className="hospital-callout" role="note" style={{ marginBottom: '1rem' }}>
@@ -83,9 +85,9 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="login-form" aria-label="Sign in form">
+            <form onSubmit={handleSubmit} className="login-form" aria-label={t('login.signIn')}>
               <div className="form-group">
-                <label htmlFor="login-email">Email Address</label>
+                <label htmlFor="login-email">{t('login.email')}</label>
                 <input
                   id="login-email"
                   type="email"
@@ -99,11 +101,11 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
               </div>
 
               <div className="form-group">
-                <label htmlFor="login-password">Password</label>
+                <label htmlFor="login-password">{t('login.password')}</label>
                 <input
                   id="login-password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t('login.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -114,16 +116,16 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
 
               <button type="submit" className="btn btn-primary login-submit" disabled={loading} aria-busy={loading}>
                 {loading ? (
-                  <span className="btn-loading"><span className="spinner" aria-hidden="true" /> Signing in...</span>
+                  <span className="btn-loading"><span className="spinner" aria-hidden="true" /> {t('login.signingIn')}</span>
                 ) : (
-                  'Sign In'
+                  t('login.signIn')
                 )}
               </button>
             </form>
 
             <div className="login-footer">
-              <span>Don't have an account?</span>
-              <button className="link-btn" onClick={onSwitchToRegister}>Create one free</button>
+              <span>{t('login.noAccount')}</span>
+              <button className="link-btn" onClick={onSwitchToRegister}>{t('login.createFree')}</button>
             </div>
           </div>
         </div>

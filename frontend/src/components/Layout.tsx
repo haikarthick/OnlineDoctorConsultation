@@ -1,4 +1,5 @@
 import React, { ReactNode, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Navigation } from './Navigation'
 import './Layout.css'
 
@@ -11,6 +12,7 @@ interface LayoutProps {
 const SIDEBAR_COLLAPSED_KEY = 'vetcare_sidebar_collapsed'
 
 export const Layout: React.FC<LayoutProps> = ({ children, currentPath, onNavigate }) => {
+  const { t } = useTranslation()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true' } catch { return false }
   })
@@ -30,7 +32,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPath, onNavigat
     <div className={`layout-container ${sidebarCollapsed ? 'layout-sidebar-collapsed' : ''}`}>
       {/* Skip navigation link for keyboard users */}
       <a href="#main-content" className="skip-to-main">
-        Skip to main content
+        {t('layout.skipToContent')}
       </a>
       <Navigation currentPath={currentPath} onNavigate={onNavigate} />
       <main className="layout-main" id="main-content" role="main" aria-label="Main content">

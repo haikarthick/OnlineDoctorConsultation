@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import './Auth.css'
 
@@ -9,6 +10,7 @@ interface RegisterProps {
 
 export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const { register } = useAuth()
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -36,19 +38,19 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
 
     // Validation
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-      setMessage('All fields are required')
+      setMessage(t('register.validation.allRequired'))
       setLoading(false)
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setMessage('Passwords do not match')
+      setMessage(t('register.validation.passwordMismatch'))
       setLoading(false)
       return
     }
 
     if (formData.password.length < 6) {
-      setMessage('Password must be at least 6 characters')
+      setMessage(t('register.validation.passwordLength'))
       setLoading(false)
       return
     }
@@ -63,18 +65,18 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
         confirmPassword: formData.confirmPassword,
         role: formData.role as 'pet_owner' | 'farmer' | 'veterinarian'
       })
-      setMessage('✓ Registration successful! Logging you in...')
+      setMessage(t('register.success'))
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Registration failed')
+      setMessage(error instanceof Error ? error.message : t('register.error'))
     } finally {
       setLoading(false)
     }
   }
 
   const roleOptions = [
-    { value: 'pet_owner', label: 'Pet Owner', icon: '🐕', desc: 'Manage pets & book consultations' },
-    { value: 'farmer', label: 'Farmer', icon: '🐄', desc: 'Enterprise livestock management' },
-    { value: 'veterinarian', label: 'Veterinarian', icon: '👨‍⚕️', desc: 'Provide consultations & care' },
+    { value: 'pet_owner', label: t('register.rolePetOwner'), icon: '🐕', desc: t('register.rolePetOwnerDesc') },
+    { value: 'farmer', label: t('register.roleFarmer'), icon: '🐄', desc: t('register.roleFarmerDesc') },
+    { value: 'veterinarian', label: t('register.roleVet'), icon: '👨‍⚕️', desc: t('register.roleVetDesc') },
   ]
 
   return (
@@ -85,12 +87,12 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
           <div className="register-brand-inner">
             <div className="register-logo">🏥</div>
             <h2>VetCare</h2>
-            <p className="register-tagline">The Complete Animal Health Platform</p>
+            <p className="register-tagline">{t('register.tagline')}</p>
             <div className="register-features">
-              <div className="register-feat"><span className="register-feat-icon">🩺</span><div><strong>Expert Care</strong><span>Licensed veterinarians</span></div></div>
-              <div className="register-feat"><span className="register-feat-icon">⚡</span><div><strong>Instant Access</strong><span>24/7 availability</span></div></div>
-              <div className="register-feat"><span className="register-feat-icon">🔒</span><div><strong>Secure</strong><span>HIPAA-grade privacy</span></div></div>
-              <div className="register-feat"><span className="register-feat-icon">🏢</span><div><strong>Enterprise Ready</strong><span>Scale from 1 to 10,000+</span></div></div>
+              <div className="register-feat"><span className="register-feat-icon">🩺</span><div><strong>{t('register.features.expertCare')}</strong><span>{t('register.features.expertCareDesc')}</span></div></div>
+              <div className="register-feat"><span className="register-feat-icon">⚡</span><div><strong>{t('register.features.instantAccess')}</strong><span>{t('register.features.instantAccessDesc')}</span></div></div>
+              <div className="register-feat"><span className="register-feat-icon">🔒</span><div><strong>{t('register.features.secure')}</strong><span>{t('register.features.secureDesc')}</span></div></div>
+              <div className="register-feat"><span className="register-feat-icon">🏢</span><div><strong>{t('register.features.enterpriseReady')}</strong><span>{t('register.features.enterpriseReadyDesc')}</span></div></div>
               <div className="register-feat"><span className="register-feat-icon">🏥</span><div><strong>Hospital Network</strong><span>Create &amp; manage multi-doctor clinics</span></div></div>
             </div>
             <div className="register-trust">
@@ -102,12 +104,12 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
         {/* Right: Registration form */}
         <div className="register-form-panel">
           <div className="register-form-topbar">
-            {onGoHome && <button className="back-home-btn" onClick={onGoHome} title="Back to Home">← Home</button>}
-            <span className="register-topbar-login">Already a member? <button className="link-btn" onClick={onSwitchToLogin}>Sign in</button></span>
+            {onGoHome && <button className="back-home-btn" onClick={onGoHome} title={t('login.backHome')}>{t('login.backHome')}</button>}
+            <span className="register-topbar-login">{t('register.alreadyMember')} <button className="link-btn" onClick={onSwitchToLogin}>{t('register.signIn')}</button></span>
           </div>
           <div className="register-form-header">
-            <h1>Create your account</h1>
-            <p>Get started in under 2 minutes</p>
+            <h1>{t('register.title')}</h1>
+            <p>{t('register.subtitle')}</p>
           </div>
 
           {message && (
@@ -124,11 +126,11 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             {/* Name row */}
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="reg-firstName">First Name</label>
+                <label htmlFor="reg-firstName">{t('register.firstName')}</label>
                 <input id="reg-firstName" type="text" name="firstName" placeholder="John" value={formData.firstName} onChange={handleChange} required autoComplete="given-name" aria-required="true" />
               </div>
               <div className="form-group">
-                <label htmlFor="reg-lastName">Last Name</label>
+                <label htmlFor="reg-lastName">{t('register.lastName')}</label>
                 <input id="reg-lastName" type="text" name="lastName" placeholder="Doe" value={formData.lastName} onChange={handleChange} required autoComplete="family-name" aria-required="true" />
               </div>
             </div>
@@ -136,18 +138,18 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             {/* Email + Phone row */}
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="reg-email">Email</label>
+                <label htmlFor="reg-email">{t('register.email')}</label>
                 <input id="reg-email" type="email" name="email" placeholder="you@email.com" value={formData.email} onChange={handleChange} required autoComplete="email" aria-required="true" />
               </div>
               <div className="form-group">
-                <label htmlFor="reg-phone">Phone</label>
+                <label htmlFor="reg-phone">{t('register.phone')}</label>
                 <input id="reg-phone" type="tel" name="phone" placeholder="+1 (555) 000-0000" value={formData.phone} onChange={handleChange} required autoComplete="tel" aria-required="true" />
               </div>
             </div>
 
             {/* Role selector cards */}
             <fieldset className="form-group" style={{ border: 'none', margin: 0, padding: 0 }}>
-              <legend style={{ fontWeight: 600, marginBottom: '8px' }}>I am a...</legend>
+              <legend style={{ fontWeight: 600, marginBottom: '8px' }}>{t('register.roleTitle')}</legend>
               <div className="role-selector" role="radiogroup" aria-label="Select your role">
                 {roleOptions.map(opt => (
                   <label key={opt.value} className={`role-option ${formData.role === opt.value ? 'selected' : ''}`}>
@@ -178,21 +180,21 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             {/* Password row */}
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="reg-password">Password</label>
+                <label htmlFor="reg-password">{t('register.password')}</label>
                 <input id="reg-password" type="password" name="password" placeholder="Min 6 characters" value={formData.password} onChange={handleChange} required autoComplete="new-password" aria-required="true" aria-describedby="password-hint" />
                 <span id="password-hint" className="sr-only">Must be at least 6 characters</span>
               </div>
               <div className="form-group">
-                <label htmlFor="reg-confirmPassword">Confirm Password</label>
+                <label htmlFor="reg-confirmPassword">{t('register.confirmPassword')}</label>
                 <input id="reg-confirmPassword" type="password" name="confirmPassword" placeholder="Re-enter password" value={formData.confirmPassword} onChange={handleChange} required autoComplete="new-password" aria-required="true" />
               </div>
             </div>
 
             <button type="submit" className="btn btn-primary register-submit" disabled={loading} aria-busy={loading}>
               {loading ? (
-                <span className="btn-loading"><span className="spinner" aria-hidden="true" /> Creating Account...</span>
+                <span className="btn-loading"><span className="spinner" aria-hidden="true" /> {t('register.creatingAccount')}</span>
               ) : (
-                'Create Account'
+                t('register.createAccountBtn')
               )}
             </button>
           </form>

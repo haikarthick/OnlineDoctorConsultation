@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { usePermission, NAV_PERMISSION_MAP } from '../context/PermissionContext'
+import { LanguageSwitcher } from './LanguageSwitcher'
 import { MenuItem, UserRole } from '../types'
 import './Navigation.css'
 
@@ -14,6 +16,7 @@ const SIDEBAR_COLLAPSED_KEY = 'vetcare_sidebar_collapsed'
 export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath }) => {
   const { user, logout } = useAuth()
   const { hasPermission } = usePermission()
+  const { t } = useTranslation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try { return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true' } catch { return false }
@@ -44,126 +47,126 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
    * ════════════════════════════════════════════════════════ */
   const menuItems: MenuItem[] = [
     // ── Dashboard (always first, ungrouped) ──
-    { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/dashboard',
+    { id: 'dashboard', label: t('nav.dashboard'), icon: '📊', path: '/dashboard',
       roles: ['veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Main' },
 
     // ── Consultation & Booking ──
-    { id: 'consultations', label: 'My Consultations', icon: '🏥', path: '/consultations',
+    { id: 'consultations', label: t('nav.myConsultations'), icon: '🏥', path: '/consultations',
       roles: ['veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Consultations' },
-    { id: 'find-doctor', label: 'Find Doctor', icon: '🔍', path: '/find-doctor',
+    { id: 'find-doctor', label: t('nav.findDoctor'), icon: '🔍', path: '/find-doctor',
       roles: ['pet_owner', 'farmer'], section: 'Consultations' },
-    { id: 'book-consultation', label: 'Book Consultation', icon: '📝', path: '/book-consultation',
+    { id: 'book-consultation', label: t('nav.bookConsultation'), icon: '📝', path: '/book-consultation',
       roles: ['pet_owner', 'farmer'], section: 'Consultations' },
-    { id: 'manage-schedule', label: 'My Schedule', icon: '🗓️', path: '/doctor/manage-schedule',
+    { id: 'manage-schedule', label: t('nav.mySchedule'), icon: '🗓️', path: '/doctor/manage-schedule',
       roles: ['veterinarian'], section: 'Consultations' },
-    { id: 'prescriptions', label: 'Prescriptions', icon: '💊', path: '/doctor/prescriptions',
+    { id: 'prescriptions', label: t('nav.prescriptions'), icon: '💊', path: '/doctor/prescriptions',
       roles: ['veterinarian'], section: 'Consultations' },
-    { id: 'prescriptions', label: 'My Prescriptions', icon: '💊', path: '/prescriptions',
+    { id: 'prescriptions', label: t('nav.myPrescriptions'), icon: '💊', path: '/prescriptions',
       roles: ['pet_owner', 'farmer'], section: 'Consultations' },
 
     // ── Animals & Health ──
-    { id: 'animals', label: isPetOwner ? 'My Pets' : 'My Animals',
+    { id: 'animals', label: t(isPetOwner ? 'nav.myPets' : 'nav.myAnimals'),
       icon: isPetOwner ? '🐾' : '🐄', path: '/animals',
       roles: ['pet_owner', 'farmer'], section: 'Animals & Health' },
-    { id: 'medical', label: 'Medical Records', icon: '📋', path: '/medical-records',
+    { id: 'medical', label: t('nav.medicalRecords'), icon: '📋', path: '/medical-records',
       roles: ['veterinarian', 'pet_owner', 'farmer'], section: 'Animals & Health' },
-    { id: 'write-review', label: 'Write Review', icon: '✍️', path: '/write-review',
+    { id: 'write-review', label: t('nav.writeReview'), icon: '✍️', path: '/write-review',
       roles: ['pet_owner', 'farmer'], section: 'Animals & Health' },
-    { id: 'my-reviews', label: 'My Reviews', icon: '⭐', path: '/doctor/reviews',
+    { id: 'my-reviews', label: t('nav.myReviews'), icon: '⭐', path: '/doctor/reviews',
       roles: ['veterinarian'], section: 'Animals & Health' },
 
     // ── Farm / Enterprise Module ──
-    { id: 'enterprises', label: 'Farm / Enterprise', icon: '🏢', path: '/enterprises',
+    { id: 'enterprises', label: t('nav.farmEnterprise'), icon: '🏢', path: '/enterprises',
       roles: ['farmer', 'admin'], section: 'Farm Management' },
-    { id: 'animal-groups', label: 'Herds & Groups', icon: '🐄', path: '/animal-groups',
+    { id: 'animal-groups', label: t('nav.herdsGroups'), icon: '🐄', path: '/animal-groups',
       roles: ['farmer', 'admin'], section: 'Farm Management' },
-    { id: 'herd-medical', label: 'Herd Medical', icon: '💊', path: '/herd-medical',
+    { id: 'herd-medical', label: t('nav.herdMedical'), icon: '💊', path: '/herd-medical',
       roles: ['farmer', 'admin', 'veterinarian'], section: 'Farm Management' },
-    { id: 'locations', label: 'Locations', icon: '📍', path: '/locations',
+    { id: 'locations', label: t('nav.locations'), icon: '📍', path: '/locations',
       roles: ['farmer', 'admin'], section: 'Farm Management' },
-    { id: 'movement-log', label: 'Movement Log', icon: '🔄', path: '/movement-log',
+    { id: 'movement-log', label: t('nav.movementLog'), icon: '🔄', path: '/movement-log',
       roles: ['farmer', 'admin'], section: 'Farm Management' },
-    { id: 'campaigns', label: 'Campaigns', icon: '💉', path: '/campaigns',
+    { id: 'campaigns', label: t('nav.campaigns'), icon: '💉', path: '/campaigns',
       roles: ['farmer', 'admin', 'veterinarian'], section: 'Farm Management' },
 
     // ── Analytics & Tools ──
-    { id: 'health-analytics', label: 'Health Analytics', icon: '📈', path: '/health-analytics',
+    { id: 'health-analytics', label: t('nav.healthAnalytics'), icon: '📈', path: '/health-analytics',
       roles: ['farmer', 'admin', 'veterinarian'], section: 'Analytics & Tools' },
-    { id: 'breeding', label: 'Breeding & Genetics', icon: '🧬', path: '/breeding',
+    { id: 'breeding', label: t('nav.breedingGenetics'), icon: '🧬', path: '/breeding',
       roles: ['farmer', 'admin'], section: 'Analytics & Tools' },
-    { id: 'feed-inventory', label: 'Feed & Inventory', icon: '🌾', path: '/feed-inventory',
+    { id: 'feed-inventory', label: t('nav.feedInventory'), icon: '🌾', path: '/feed-inventory',
       roles: ['farmer', 'admin'], section: 'Analytics & Tools' },
-    { id: 'compliance', label: 'Compliance Docs', icon: '📜', path: '/compliance',
+    { id: 'compliance', label: t('nav.complianceDocs'), icon: '📜', path: '/compliance',
       roles: ['farmer', 'admin'], section: 'Analytics & Tools' },
-    { id: 'financial', label: 'Financial Analytics', icon: '💰', path: '/financial',
+    { id: 'financial', label: t('nav.financialAnalytics'), icon: '💰', path: '/financial',
       roles: ['farmer', 'admin'], section: 'Analytics & Tools' },
-    { id: 'alerts', label: 'Smart Alerts', icon: '🔔', path: '/alerts',
+    { id: 'alerts', label: t('nav.smartAlerts'), icon: '🔔', path: '/alerts',
       roles: ['farmer', 'admin', 'veterinarian'], section: 'Analytics & Tools' },
 
     // ── Innovation Modules ──
-    { id: 'disease-prediction', label: 'Disease AI', icon: '🧠', path: '/disease-prediction',
+    { id: 'disease-prediction', label: t('nav.diseaseAI'), icon: '🧠', path: '/disease-prediction',
       roles: ['farmer', 'admin', 'veterinarian'], section: 'Innovation' },
-    { id: 'genomic-lineage', label: 'Genomic Lineage', icon: '🧬', path: '/genomic-lineage',
+    { id: 'genomic-lineage', label: t('nav.genomicLineage'), icon: '🧬', path: '/genomic-lineage',
       roles: ['farmer', 'admin'], section: 'Innovation' },
-    { id: 'iot-sensors', label: 'IoT Sensors', icon: '📡', path: '/iot-sensors',
+    { id: 'iot-sensors', label: t('nav.iotSensors'), icon: '📡', path: '/iot-sensors',
       roles: ['farmer', 'admin'], section: 'Innovation' },
-    { id: 'supply-chain', label: 'Supply Chain', icon: '🔗', path: '/supply-chain',
+    { id: 'supply-chain', label: t('nav.supplyChain'), icon: '🔗', path: '/supply-chain',
       roles: ['farmer', 'admin'], section: 'Innovation' },
-    { id: 'workforce', label: 'Workforce', icon: '👷', path: '/workforce',
+    { id: 'workforce', label: t('nav.workforce'), icon: '👷', path: '/workforce',
       roles: ['farmer', 'admin'], section: 'Innovation' },
-    { id: 'report-builder', label: 'Report Builder', icon: '📊', path: '/report-builder',
+    { id: 'report-builder', label: t('nav.reportBuilder'), icon: '📊', path: '/report-builder',
       roles: ['farmer', 'admin', 'veterinarian'], section: 'Innovation' },
 
     // ── Intelligence Modules ──
-    { id: 'ai-copilot', label: 'AI Copilot', icon: '🤖', path: '/ai-copilot',
+    { id: 'ai-copilot', label: t('nav.aiCopilot'), icon: '🤖', path: '/ai-copilot',
       roles: ['veterinarian', 'farmer', 'admin', 'pet_owner'], section: 'Intelligence' },
-    { id: 'digital-twin', label: 'Digital Twin', icon: '🔮', path: '/digital-twin',
+    { id: 'digital-twin', label: t('nav.digitalTwin'), icon: '🔮', path: '/digital-twin',
       roles: ['farmer', 'admin'], section: 'Intelligence' },
-    { id: 'marketplace', label: 'Marketplace', icon: '🏪', path: '/marketplace',
+    { id: 'marketplace', label: t('nav.marketplace'), icon: '🏪', path: '/marketplace',
       roles: ['farmer', 'admin', 'pet_owner', 'veterinarian'], section: 'Intelligence' },
-    { id: 'sustainability', label: 'Sustainability', icon: '🌱', path: '/sustainability',
+    { id: 'sustainability', label: t('nav.sustainability'), icon: '🌱', path: '/sustainability',
       roles: ['farmer', 'admin'], section: 'Intelligence' },
-    { id: 'wellness', label: 'Wellness Portal', icon: '💚', path: '/wellness',
+    { id: 'wellness', label: t('nav.wellnessPortal'), icon: '💚', path: '/wellness',
       roles: ['pet_owner', 'farmer', 'admin', 'veterinarian'], section: 'Intelligence' },
-    { id: 'geospatial', label: 'Geospatial', icon: '🗺️', path: '/geospatial',
+    { id: 'geospatial', label: t('nav.geospatial'), icon: '🗺️', path: '/geospatial',
       roles: ['farmer', 'admin'], section: 'Intelligence' },
 
     // ── Vet Hospital Network ──
-    { id: 'vet-hospitals', label: 'Vet Hospitals', icon: '🏥', path: '/vet-hospitals',
+    { id: 'vet-hospitals', label: t('nav.vetHospitals'), icon: '🏥', path: '/vet-hospitals',
       roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Vet Network' },
-    { id: 'vet-hospitals-manage', label: 'My Hospital', icon: '🏨', path: '/vet-hospitals/manage',
+    { id: 'vet-hospitals-manage', label: t('nav.myHospital'), icon: '🏨', path: '/vet-hospitals/manage',
       roles: ['veterinarian'], section: 'Vet Network' },
 
     // ── Wallet ──
-    { id: 'wallet', label: 'My Wallet', icon: '💰', path: '/wallet',
+    { id: 'wallet', label: t('nav.myWallet'), icon: '💰', path: '/wallet',
       roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Account' },
 
     // ── Administration (admin only) ──
-    { id: 'admin-dashboard', label: 'Admin Panel', icon: '🛡️', path: '/admin/dashboard',
+    { id: 'admin-dashboard', label: t('nav.adminPanel'), icon: '🛡️', path: '/admin/dashboard',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-users', label: 'User Management', icon: '👥', path: '/admin/users',
+    { id: 'admin-users', label: t('nav.userManagement'), icon: '👥', path: '/admin/users',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-consultations', label: 'Consultations', icon: '🩺', path: '/admin/consultations',
+    { id: 'admin-consultations', label: t('nav.consultations'), icon: '🩺', path: '/admin/consultations',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-payments', label: 'Payments', icon: '💳', path: '/admin/payments',
+    { id: 'admin-payments', label: t('nav.payments'), icon: '💳', path: '/admin/payments',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-reviews', label: 'Review Moderation', icon: '⚖️', path: '/admin/reviews',
+    { id: 'admin-reviews', label: t('nav.reviewModeration'), icon: '⚖️', path: '/admin/reviews',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-settings', label: 'System Settings', icon: '⚙️', path: '/admin/settings',
+    { id: 'admin-settings', label: t('nav.systemSettings'), icon: '⚙️', path: '/admin/settings',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-permissions', label: 'Permissions', icon: '🔐', path: '/admin/permissions',
+    { id: 'admin-permissions', label: t('nav.permissions'), icon: '🔐', path: '/admin/permissions',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-medical-records', label: 'Medical Records', icon: '📋', path: '/admin/medical-records',
+    { id: 'admin-medical-records', label: t('nav.medicalRecords'), icon: '📋', path: '/admin/medical-records',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-hospitals', label: 'Hospital Mgmt', icon: '🏥', path: '/admin/vet-hospitals',
+    { id: 'admin-hospitals', label: t('nav.hospitalMgmt'), icon: '🏥', path: '/admin/vet-hospitals',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-audit', label: 'Audit Logs', icon: '📜', path: '/admin/audit-logs',
+    { id: 'admin-audit', label: t('nav.auditLogs'), icon: '📜', path: '/admin/audit-logs',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-cancellation-dashboard', label: 'Cancellations', icon: '📊', path: '/admin/cancellation-dashboard',
+    { id: 'admin-cancellation-dashboard', label: t('nav.cancellations'), icon: '📊', path: '/admin/cancellation-dashboard',
       roles: ['admin'], section: 'Administration' },
 
     // ── Preferences (bottom) ──
-    { id: 'settings', label: 'Settings', icon: '⚙️', path: '/settings',
+    { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',
       roles: ['veterinarian', 'pet_owner', 'farmer'], section: 'Preferences' }
   ]
 
@@ -234,15 +237,30 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     'Intelligence': '🤖', 'Veterinarian': '🩺', 'Administration': '🛡️', 'Preferences': '⚙️',
   }
 
+  // Section name translation map
+  const sectionNameMap: Record<string, string> = {
+    'Main': t('nav.sections.main'),
+    'Consultations': t('nav.sections.consultations'),
+    'Animals & Health': t('nav.sections.animalsHealth'),
+    'Farm Management': t('nav.sections.farmManagement'),
+    'Analytics & Tools': t('nav.sections.analyticsTools'),
+    'Innovation': t('nav.sections.innovation'),
+    'Intelligence': t('nav.sections.intelligence'),
+    'Vet Network': t('nav.sections.vetNetwork'),
+    'Account': t('nav.sections.account'),
+    'Administration': t('nav.sections.administration'),
+    'Preferences': t('nav.sections.preferences'),
+  }
+
   const roleLabel = useMemo(() => {
     switch (user?.role) {
-      case 'veterinarian': return 'Veterinarian'
-      case 'pet_owner': return 'Pet Owner'
-      case 'farmer': return 'Farmer'
-      case 'admin': return 'Administrator'
+      case 'veterinarian': return t('nav.roles.veterinarian')
+      case 'pet_owner': return t('nav.roles.petOwner')
+      case 'farmer': return t('nav.roles.farmer')
+      case 'admin': return t('nav.roles.admin')
       default: return String(user?.role || '').replace('_', ' ')
     }
-  }, [user?.role])
+  }, [user?.role, t])
 
   return (
     <>
@@ -257,7 +275,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-expanded={isMobileMenuOpen}
           aria-controls="nav-sidebar"
-          aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-label={isMobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
         >
           {isMobileMenuOpen ? '✕' : '☰'}
         </button>
@@ -322,7 +340,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
                       <span className="nav-section-icon" aria-hidden="true">{sectionIcons[group.section] || '📁'}</span>
                     ) : (
                       <>
-                        <span className="nav-section-title">{group.section}</span>
+                        <span className="nav-section-title">{sectionNameMap[group.section] || group.section}</span>
                         <span className={`nav-section-chevron ${sectionCollapsed ? 'collapsed' : ''}`} aria-hidden="true">▾</span>
                       </>
                     )}
@@ -356,14 +374,15 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
         {/* Bottom Section */}
         <div className="nav-bottom">
+          <LanguageSwitcher collapsed={isCollapsed} />
           <button
             className="nav-logout-btn"
             onClick={handleLogout}
-            aria-label="Log out of your account"
-            title={isCollapsed ? 'Logout' : undefined}
+            aria-label={t('nav.logout')}
+            title={isCollapsed ? t('nav.logout') : undefined}
           >
             <span className="nav-menu-icon" aria-hidden="true">🚪</span>
-            {!isCollapsed && <span className="nav-menu-label">Logout</span>}
+            {!isCollapsed && <span className="nav-menu-label">{t('nav.logout')}</span>}
           </button>
         </div>
       </nav>

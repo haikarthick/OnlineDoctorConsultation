@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const CATEGORIES = [
   { value: '', label: 'All Categories' },
@@ -16,7 +17,8 @@ const CATEGORIES = [
 
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
 
-const Marketplace: React.FC = () => {
+const Marketplace: React.FC = () => {  const { t } = useTranslation()
+
   const [listings, setListings] = useState<MarketplaceListing[]>([])
   const [dashboard, setDashboard] = useState<any>(null)
   const [orders, setOrders] = useState<MarketplaceOrder[]>([])
@@ -115,7 +117,7 @@ const Marketplace: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🏪 Marketplace & Auctions</h1>
+          <h1>{t('marketplace.pageTitle')}</h1>
           <p style={{ color: '#666', margin: '8px 0 0' }}>Buy, sell, and auction animals, equipment, and veterinary supplies</p>
         </div>
       </div>

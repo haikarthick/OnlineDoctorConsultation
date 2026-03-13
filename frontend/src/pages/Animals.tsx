@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useTranslation } from 'react-i18next'
 
 // ─── Breed Database by Species ──────────────────────────────
 const BREED_DATABASE: Record<string, string[]> = {
@@ -39,6 +40,8 @@ interface EnterpriseOption { id: string; name: string }
 interface GroupOption { id: string; name: string }
 
 const Animals: React.FC = () => {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const { formatDate } = useSettings()
   const navigate = useNavigate()
@@ -213,7 +216,7 @@ const Animals: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🐾 {isVet ? 'Patient Animals' : isAdmin ? 'Animal Registry' : 'My Animals'}</h1>
+          <h1>🐾 {isVet ? t('animals.pageTitles.vet') : isAdmin ? t('animals.pageTitles.admin') : t('animals.pageTitles.petOwner')}</h1>
           <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>
             {isVet ? 'Animals from your consultations' : isAdmin ? 'All registered animals in the system' : 'Manage your pets and farm animals'}
           </p>

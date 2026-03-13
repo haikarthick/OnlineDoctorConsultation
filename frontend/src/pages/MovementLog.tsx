@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, MovementRecord } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
   transfer: 'Transfer', intake: 'Intake', discharge: 'Discharge',
@@ -14,7 +15,8 @@ const MOVEMENT_TYPE_ICONS: Record<string, string> = {
   sale: '💰', death: '✝️', birth: '🐣', import: '🚛', export: '📦'
 }
 
-const MovementLog: React.FC = () => {
+const MovementLog: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [movements, setMovements] = useState<MovementRecord[]>([])
@@ -86,7 +88,7 @@ const MovementLog: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🔄 Movement Log</h1>
+          <h1>{t('movementLog.pageTitle')}</h1>
           <p className="subtitle">Track animal transfers, births, sales, and more</p>
         </div>
         <div className="header-actions">

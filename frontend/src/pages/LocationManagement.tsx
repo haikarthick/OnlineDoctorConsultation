@@ -3,6 +3,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, FarmLocation, LocationType } from '../types'
 import MapView from '../components/MapView'
+import { useTranslation } from 'react-i18next'
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
   barn: 'Barn', stable: 'Stable', pen: 'Pen', paddock: 'Paddock',
@@ -20,7 +21,8 @@ const LOCATION_TYPE_ICONS: Record<string, string> = {
   feed_storage: '🌽', other: '📍'
 }
 
-const LocationManagement: React.FC = () => {
+const LocationManagement: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [locations, setLocations] = useState<FarmLocation[]>([])
@@ -137,7 +139,7 @@ const LocationManagement: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>📍 Location Management</h1>
+          <h1>{t('locationManagement.pageTitle')}</h1>
           <p className="subtitle">Manage barns, pens, paddocks, and facility locations</p>
         </div>
         <div className="header-actions">

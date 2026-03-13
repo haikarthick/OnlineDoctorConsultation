@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, WorkforceTask, ShiftSchedule } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const PRIORITY_COLORS: Record<string, string> = {
   low: '#6b7280', medium: '#3b82f6', high: '#f97316', critical: '#ef4444'
 }
 
-const WorkforcePage: React.FC = () => {
+const WorkforcePage: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [tasks, setTasks] = useState<WorkforceTask[]>([])
@@ -114,7 +116,7 @@ const WorkforcePage: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>👷 Workforce & Task Management</h1>
+        <h1>{t('workforce.pageTitle')}</h1>
         <p>Shift scheduling, task boards with checklists, and performance analytics</p>
       </div>
 

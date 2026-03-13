@@ -1,7 +1,9 @@
 import React from 'react'
 import './ModulePage.css'
+import { useTranslation } from 'react-i18next'
 
 const Appointments: React.FC = () => {
+  const { t } = useTranslation()
   const appointments = [
     { id: 1, doctor: 'Dr. Smith', date: '2026-01-25', time: '10:00 AM', type: 'Regular Checkup', confirmed: true },
     { id: 2, doctor: 'Dr. Johnson', date: '2026-01-27', time: '2:00 PM', type: 'Vaccination', confirmed: false },
@@ -11,7 +13,7 @@ const Appointments: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>📅 Appointments</h1>
+        <h1>{t('appointments.pageTitle')}</h1>
         <button className="btn-primary">Schedule New</button>
       </div>
 

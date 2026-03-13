@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, HealthObservation, HealthDashboard } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
 }
 
-const HealthAnalytics: React.FC = () => {
+const HealthAnalytics: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [dashboard, setDashboard] = useState<HealthDashboard | null>(null)
@@ -83,7 +85,7 @@ const HealthAnalytics: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>🏥 Health Analytics</h1>
+        <h1>{t('healthAnalytics.pageTitle')}</h1>
         <p>Monitor herd health, track observations, and analyze health trends</p>
       </div>
 

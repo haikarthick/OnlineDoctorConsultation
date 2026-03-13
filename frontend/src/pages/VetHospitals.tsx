@@ -5,6 +5,7 @@ import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import type { VetHospital } from '../types'
 import './ModulePage.css'
 import './VetHospitals.css'
+import { useTranslation } from 'react-i18next'
 
 const HOSPITAL_TYPE_LABELS: Record<string, string> = {
   clinic:           'General Practice',
@@ -74,7 +75,8 @@ const HospitalCard: React.FC<{ hospital: VetHospital; onView: (h: VetHospital) =
   </div>
 )
 
-const VetHospitals: React.FC = () => {
+const VetHospitals: React.FC = () => {  const { t } = useTranslation()
+
   const { user } = useAuth()
   const navigate = useNavigate()
   const [hospitals, setHospitals] = useState<VetHospital[]>([])
@@ -146,7 +148,7 @@ const VetHospitals: React.FC = () => {
       {/* ── Header ── */}
       <div className="module-header vh-header">
         <div className="vh-header-left">
-          <h1 className="module-title">🏥 Vet Hospitals</h1>
+          <h1 className="module-title">{t('consultations.pageTitle')}</h1>
           <p className="module-subtitle">Find verified veterinary hospitals and specialist centres near you</p>
         </div>
         {isVet && (

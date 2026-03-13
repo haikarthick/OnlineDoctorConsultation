@@ -29,7 +29,7 @@
     "retry": "ಮರುಪ್ರಯತ್ನಿಸಿ",
     "selectEnterprise": "ಉದ್ಯಮ ಆಯ್ಕೆಮಾಡಿ",
     "noData": "ಡೇಟಾ ಇಲ್ಲ",
-    "required": "ಅಗತ್ಯವಿದೆ",
+    "required": "ಅಗತ್ಯ",
     "optional": "ಐಚ್ಛಿಕ",
     "enabled": "✅ ಸಕ್ರಿಯ",
     "disabled": "⏸ ನಿಷ್ಕ್ರಿಯ",
@@ -49,102 +49,1617 @@
     "trustBadge": "ವಿಶ್ವಾದ್ಯಂತ 3,000+ ಉದ್ಯಮಗಳ ವಿಶ್ವಾಸ"
   },
   "nav": {
-    "home": "ಮನೆ",
+    "brand": "VetCare",
     "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     "consultations": "ಸಮಾಲೋಚನೆಗಳು",
-    "animals": "ಪ್ರಾಣಿಗಳು",
-    "appointments": "ನೇಮಕಾತಿಗಳು",
+    "findDoctor": "ವೈದ್ಯರನ್ನು ಹುಡುಕಿ",
+    "bookConsultation": "ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿ",
+    "myAnimals": "ನನ್ನ ಪ್ರಾಣಿಗಳು",
     "medicalRecords": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
+    "enterprises": "ಉದ್ಯಮಗಳು",
+    "animalGroups": "ಪ್ರಾಣಿ ಗುಂಪುಗಳು",
+    "locations": "ಸ್ಥಳಗಳು",
+    "movementLog": "ಚಲನೆ ದಾಖಲೆ",
+    "campaigns": "ಅಭಿಯಾನಗಳು",
+    "healthAnalytics": "ಆರೋಗ್ಯ ವಿಶ್ಲೇಷಣೆ",
+    "breedingGenetics": "ಸಂತಾನೋತ್ಪತ್ತಿ ಮತ್ತು ತಳಿಶಾಸ್ತ್ರ",
+    "feedInventory": "ಆಹಾರ ಮತ್ತು ದಾಸ್ತಾನು",
+    "complianceDocs": "ಅನುಸರಣೆ ದಾಖಲೆಗಳು",
+    "financialAnalytics": "ಆರ್ಥಿಕ ವಿಶ್ಲೇಷಣೆ",
+    "smartAlerts": "ಸ್ಮಾರ್ಟ್ ಎಚ್ಚರಿಕೆಗಳು",
+    "diseaseAI": "ರೋಗ AI",
+    "genomicLineage": "ಜೀನೋಮಿಕ್ ವಂಶಾವಳಿ",
+    "iotSensors": "IoT ಸಂವೇದಕಗಳು",
+    "supplyChain": "ಪೂರೈಕೆ ಸರಪಳಿ",
+    "workforce": "ಕಾರ್ಮಿಕ ಶಕ್ತಿ",
+    "reportBuilder": "ವರದಿ ನಿರ್ಮಾಪಕ",
+    "aiCopilot": "AI ಕೋಪೈಲಟ್",
+    "digitalTwin": "ಡಿಜಿಟಲ್ ಟ್ವಿನ್",
+    "marketplace": "ಮಾರುಕಟ್ಟೆ",
+    "sustainability": "ಸುಸ್ಥಿರತೆ",
+    "wellnessPortal": "ಆರೋಗ್ಯ ಪೋರ್ಟಲ್",
+    "geospatial": "ಭೌಗೋಳಿಕ",
+    "mySchedule": "ನನ್ನ ವೇಳಾಪಟ್ಟಿ",
+    "prescriptions": "ಔಷಧಿ ಚೀಟಿಗಳು",
+    "myReviews": "ನನ್ನ ಸಮೀಕ್ಷೆಗಳು",
+    "adminPanel": "ನಿರ್ವಾಹಕ ಫಲಕ",
+    "userManagement": "ಬಳಕೆದಾರ ನಿರ್ವಹಣೆ",
+    "payments": "ಪಾವತಿಗಳು",
+    "reviewModeration": "ಸಮೀಕ್ಷೆ ನಿಯಂತ್ರಣ",
+    "systemSettings": "ವ್ಯವಸ್ಥೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+    "permissions": "ಅನುಮತಿಗಳು",
+    "auditLogs": "ಆಡಿಟ್ ದಾಖಲೆಗಳು",
     "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
     "logout": "ಲಾಗ್ ಔಟ್",
-    "login": "ಲಾಗ್ ಇನ್",
-    "register": "ನೋಂದಣಿ",
-    "findDoctor": "ವೈದ್ಯರನ್ನು ಹುಡುಕಿ",
-    "profile": "ಪ್ರೊಫೈಲ್",
-    "admin": "ನಿರ್ವಾಹಕ"
+    "openMenu": "ನ್ಯಾವಿಗೇಶನ್ ಮೆನು ತೆರೆಯಿರಿ",
+    "closeMenu": "ನ್ಯಾವಿಗೇಶನ್ ಮೆನು ಮುಚ್ಚಿ",
+    "myConsultations": "ನನ್ನ ಸಮಾಲೋಚನೆಗಳು",
+    "myPrescriptions": "ನನ್ನ ಔಷಧಿ ಚೀಟಿಗಳು",
+    "myPets": "ನನ್ನ ಸಾಕುಪ್ರಾಣಿಗಳು",
+    "writeReview": "ಸಮೀಕ್ಷೆ ಬರೆಯಿರಿ",
+    "farmEnterprise": "ಕೃಷಿ / ಉದ್ಯಮ",
+    "herdsGroups": "ಹಿಂಡುಗಳು ಮತ್ತು ಗುಂಪುಗಳು",
+    "herdMedical": "ಹಿಂಡು ವೈದ್ಯಕೀಯ",
+    "vetHospitals": "ಪಶುವೈದ್ಯ ಆಸ್ಪತ್ರೆಗಳು",
+    "myHospital": "ನನ್ನ ಆಸ್ಪತ್ರೆ",
+    "myWallet": "ನನ್ನ ವಾಲೆಟ್",
+    "hospitalMgmt": "ಆಸ್ಪತ್ರೆ ನಿರ್ವಹಣೆ",
+    "cancellations": "ರದ್ದತಿಗಳು",
+    "sections": {
+      "main": "ಮುಖ್ಯ",
+      "consultations": "ಸಮಾಲೋಚನೆಗಳು",
+      "animalsHealth": "ಪ್ರಾಣಿಗಳು ಮತ್ತು ಆರೋಗ್ಯ",
+      "farmManagement": "ಕೃಷಿ ನಿರ್ವಹಣೆ",
+      "analyticsTools": "ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಪರಿಕರಗಳು",
+      "innovation": "ನಾವೀನ್ಯತೆ",
+      "intelligence": "ಬುದ್ಧಿಮತ್ತೆ",
+      "vetNetwork": "ಪಶುವೈದ್ಯ ನೆಟ್‌ವರ್ಕ್",
+      "account": "ಖಾತೆ",
+      "administration": "ಆಡಳಿತ",
+      "preferences": "ಆದ್ಯತೆಗಳು"
+    },
+    "roles": {
+      "veterinarian": "ಪಶುವೈದ್ಯ",
+      "petOwner": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ",
+      "farmer": "ರೈತ",
+      "admin": "ನಿರ್ವಾಹಕ"
+    }
   },
   "login": {
-    "title": "ನಿಮ್ಮ ಖಾತೆಗೆ ಲಾಗಿನ್ ಮಾಡಿ",
+    "welcome": "ಮತ್ತೆ ಸ್ವಾಗತ",
+    "title": "ನಿಮ್ಮ ಖಾತೆಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    "subtitle": "ಮುಂದುವರಿಸಲು ನಿಮ್ಮ ರುಜುವಾತುಗಳನ್ನು ನಮೂದಿಸಿ",
     "email": "ಇಮೇಲ್ ವಿಳಾಸ",
+    "emailPlaceholder": "you@email.com",
     "password": "ಪಾಸ್‌ವರ್ಡ್",
-    "submit": "ಲಾಗ್ ಇನ್",
+    "passwordPlaceholder": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
+    "signIn": "ಸೈನ್ ಇನ್",
+    "signingIn": "ಸೈನ್ ಇನ್ ಆಗುತ್ತಿದೆ...",
     "noAccount": "ಖಾತೆ ಇಲ್ಲವೇ?",
-    "registerHere": "ಇಲ್ಲಿ ನೋಂದಾಯಿಸಿ",
-    "forgotPassword": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?"
+    "createFree": "ಉಚಿತವಾಗಿ ಒಂದನ್ನು ರಚಿಸಿ",
+    "newHere": "ಇಲ್ಲಿ ಹೊಸಬರೇ?",
+    "createAccount": "ಖಾತೆ ರಚಿಸಿ",
+    "backHome": "← ಮನೆ",
+    "features": {
+      "consultations": "24/7 ಆನ್‌ಲೈನ್ ಸಮಾಲೋಚನೆಗಳು",
+      "vets": "ಲೈಸೆನ್ಸ್ ಪಡೆದ ಪಶುವೈದ್ಯರು",
+      "response": "ತ್ವರಿತ ಪ್ರತಿಕ್ರಿಯೆ ಸಮಯ",
+      "security": "ಉದ್ಯಮ-ದರ್ಜೆ ಭದ್ರತೆ",
+      "records": "ಸಂಪೂರ್ಣ ಆರೋಗ್ಯ ದಾಖಲೆಗಳು"
+    },
+    "success": "✓ ಲಾಗಿನ್ ಯಶಸ್ವಿ! ಮರುನಿರ್ದೇಶಿಸಲಾಗುತ್ತಿದೆ...",
+    "error": "ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ"
   },
   "register": {
-    "title": "ಹೊಸ ಖಾತೆ ರಚಿಸಿ",
-    "name": "ಪೂರ್ಣ ಹೆಸರು",
-    "email": "ಇಮೇಲ್ ವಿಳಾಸ",
+    "title": "ನಿಮ್ಮ ಖಾತೆ ರಚಿಸಿ",
+    "subtitle": "2 ನಿಮಿಷಗಳಲ್ಲಿ ಪ್ರಾರಂಭಿಸಿ",
+    "tagline": "ಸಂಪೂರ್ಣ ಪ್ರಾಣಿ ಆರೋಗ್ಯ ವೇದಿಕೆ",
+    "firstName": "ಮೊದಲ ಹೆಸರು",
+    "lastName": "ಕೊನೆಯ ಹೆಸರು",
+    "email": "ಇಮೇಲ್",
+    "phone": "ಫೋನ್",
     "password": "ಪಾಸ್‌ವರ್ಡ್",
     "confirmPassword": "ಪಾಸ್‌ವರ್ಡ್ ಖಚಿತಪಡಿಸಿ",
-    "role": "ಪಾತ್ರ",
-    "submit": "ನೋಂದಾಯಿಸಿ",
-    "hasAccount": "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ?",
-    "loginHere": "ಇಲ್ಲಿ ಲಾಗಿನ್ ಮಾಡಿ"
+    "firstNamePlaceholder": "ರಾಜ",
+    "lastNamePlaceholder": "ಕುಮಾರ್",
+    "emailPlaceholder": "you@email.com",
+    "phonePlaceholder": "+91 (000) 000-0000",
+    "passwordPlaceholder": "ಕನಿಷ್ಠ 6 ಅಕ್ಷರಗಳು",
+    "confirmPasswordPlaceholder": "ಪಾಸ್‌ವರ್ಡ್ ಮತ್ತೆ ನಮೂದಿಸಿ",
+    "passwordHint": "ಕನಿಷ್ಠ 6 ಅಕ್ಷರಗಳಿರಬೇಕು",
+    "roleTitle": "ನಾನು ಒಬ್ಬ...",
+    "rolePetOwner": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ",
+    "rolePetOwnerDesc": "ಸಾಕುಪ್ರಾಣಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ ಮತ್ತು ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿ",
+    "roleFarmer": "ರೈತ",
+    "roleFarmerDesc": "ಉದ್ಯಮ ಜಾನುವಾರು ನಿರ್ವಹಣೆ",
+    "roleVet": "ಪಶುವೈದ್ಯ",
+    "roleVetDesc": "ಸಮಾಲೋಚನೆ ಮತ್ತು ಆರೈಕೆ ಒದಗಿಸಿ",
+    "createAccountBtn": "ಖಾತೆ ರಚಿಸಿ",
+    "creatingAccount": "ಖಾತೆ ರಚಿಸಲಾಗುತ್ತಿದೆ...",
+    "alreadyMember": "ಈಗಾಗಲೇ ಸದಸ್ಯರೇ?",
+    "signIn": "ಸೈನ್ ಇನ್",
+    "termsNote": "ಖಾತೆ ರಚಿಸುವ ಮೂಲಕ ನೀವು ನಮ್ಮ ಸೇವಾ ನಿಯಮಗಳಿಗೆ ಒಪ್ಪುತ್ತೀರಿ",
+    "features": {
+      "expertCare": "ತಜ್ಞ ಆರೈಕೆ",
+      "expertCareDesc": "ಲೈಸೆನ್ಸ್ ಪಡೆದ ಪಶುವೈದ್ಯರು",
+      "instantAccess": "ತ್ವರಿತ ಪ್ರವೇಶ",
+      "instantAccessDesc": "24/7 ಲಭ್ಯತೆ",
+      "secure": "ಸುರಕ್ಷಿತ",
+      "secureDesc": "HIPAA-ದರ್ಜೆ ಗೌಪ್ಯತೆ",
+      "enterpriseReady": "ಉದ್ಯಮ ಸಿದ್ಧ",
+      "enterpriseReadyDesc": "1 ರಿಂದ 10,000+ ವರೆಗೆ ಅಳೆಯಿರಿ"
+    },
+    "success": "✓ ನೋಂದಣಿ ಯಶಸ್ವಿ! ನಿಮ್ಮನ್ನು ಲಾಗಿನ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
+    "error": "ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ",
+    "validation": {
+      "allRequired": "ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳು ಅಗತ್ಯ",
+      "passwordMismatch": "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ",
+      "passwordLength": "ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 6 ಅಕ್ಷರಗಳಿರಬೇಕು"
+    }
   },
   "home": {
-    "title": "VetCare ಗೆ ಸ್ವಾಗತ",
-    "subtitle": "ನಿಮ್ಮ ಪ್ರಾಣಿಗಳಿಗೆ ವೃತ್ತಿಪರ ಪಶುವೈದ್ಯ ಸಮಾಲೋಚನೆ",
-    "getStarted": "ಪ್ರಾರಂಭಿಸಿ",
-    "learnMore": "ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"
+    "signIn": "ಸೈನ್ ಇನ್",
+    "getStarted": "ಉಚಿತವಾಗಿ ಪ್ರಾರಂಭಿಸಿ",
+    "heroTitle": "ಪ್ರಾಣಿ ಆರೋಗ್ಯ ಮತ್ತು ಉದ್ಯಮ ನಿರ್ವಹಣೆಗೆ ಸಂಪೂರ್ಣ ವೇದಿಕೆ",
+    "heroSubtitle": "ಒಂದೇ ಸಾಕುಪ್ರಾಣಿಯಿಂದ 10,000 ತಲೆ ಜಾನುವಾರು ಕಾರ್ಯಾಚರಣೆಗಳವರೆಗೆ — VetCare 24/7 ಪಶುವೈದ್ಯ ಸಮಾಲೋಚನೆಗಳು, AI-ಚಾಲಿತ ರೋಗ ಭವಿಷ್ಯ, IoT ಮೇಲ್ವಿಚಾರಣೆ, ಮತ್ತು ಸಂಪೂರ್ಣ ಉದ್ಯಮ ನಿರ್ವಹಣೆಯನ್ನು ಒಂದೇ ಏಕೀಕೃತ ವೇದಿಕೆಯಲ್ಲಿ ಒದಗಿಸುತ್ತದೆ.",
+    "ctaPrimary": "ಉಚಿತ ಪ್ರಾರಂಭ — ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ",
+    "ctaEnterprise": "🏢 ಉದ್ಯಮ ಸೈನ್ ಅಪ್",
+    "ctaVet": "ಪಶುವೈದ್ಯರಾಗಿ ಸೇರಿ",
+    "guarantees": "✓ ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರಿಗೆ ಉಚಿತ • ✓ 30-ದಿನ ಉದ್ಯಮ ಪ್ರಯೋಗ • ✓ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಅಗತ್ಯವಿಲ್ಲ",
+    "signinLink": "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ? ಇಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಿ →",
+    "benefitOwner": {
+      "access": "24/7 Expert Access",
+      "records": "Complete Health Records",
+      "reminders": "Smart Reminders",
+      "dashboard": "Multi-Pet Dashboard",
+      "chat": "Instant Chat",
+      "savings": "Cost Savings"
+    },
+    "benefitEnterprise": {
+      "herdAI": "Herd Health AI",
+      "iot": "IoT Integration",
+      "supplyChain": "Supply Chain Tracking",
+      "financial": "ಆರ್ಥಿಕ ವಿಶ್ಲೇಷಣೆ",
+      "workforce": "Workforce Management",
+      "compliance": "Compliance Automation"
+    },
+    "benefitVet": {
+      "schedule": "Flexible Schedule",
+      "prescriptions": "Digital Prescriptions",
+      "history": "Patient History",
+      "revenue": "Revenue Growth",
+      "copilot": "AI ಕೋಪೈಲಟ್",
+      "network": "Professional Network"
+    },
+    "enterpriseTypes": {
+      "dairy": "🐄 Dairy Farms",
+      "poultry": "🐓 Poultry Operations",
+      "swine": "🐖 Swine Production",
+      "sheep": "🐑 Sheep & Goat",
+      "aqua": "🐟 Aquaculture",
+      "equine": "🏇 Equine Centers",
+      "petClinics": "🐕 Pet Clinics",
+      "apiaries": "🐝 Apiaries",
+      "multiSpecies": "🏢 Multi-Species",
+      "research": "🔬 Research Labs",
+      "wildlife": "🌿 Wildlife",
+      "government": "📋 Government"
+    },
+    "ctaTitle": "ನಿಮ್ಮ ಪ್ರಾಣಿ ಆರೈಕೆಯನ್ನು ಪರಿವರ್ತಿಸಲು ಸಿದ್ಧರೇ?",
+    "ctaSubtitle": "VetCare ನಲ್ಲಿ ಸಾವಿರಾರು ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರು, ಉದ್ಯಮಗಳು ಮತ್ತು ಪಶುವೈದ್ಯರನ್ನು ಸೇರಿ",
+    "footer": {
+      "privacy": "ಗೌಪ್ಯತೆ ನೀತಿ",
+      "terms": "ಸೇವಾ ನಿಯಮಗಳು",
+      "contact": "ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ",
+      "signIn": "ಸೈನ್ ಇನ್"
+    },
+    "howItWorks": {
+      "petOwners": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರಿಗೆ",
+      "enterprises": "ಉದ್ಯಮಗಳಿಗೆ",
+      "veterinarians": "ಪಶುವೈದ್ಯರಿಗೆ"
+    }
   },
   "dashboard": {
-    "title": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
-    "welcome": "ಸ್ವಾಗತ",
-    "totalAnimals": "ಒಟ್ಟು ಪ್ರಾಣಿಗಳು",
-    "activeConsultations": "ಸಕ್ರಿಯ ಸಮಾಲೋಚನೆಗಳು",
-    "upcomingAppointments": "ಮುಂಬರುವ ನೇಮಕಾತಿಗಳು",
-    "recentActivity": "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ"
+    "greeting": "ಸ್ವಾಗತ, {{name}}!",
+    "subtitles": {
+      "petOwner": "ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿ ಆರೈಕೆ ಅವಲೋಕನ ಇಲ್ಲಿದೆ",
+      "vet": "ನಿಮ್ಮ ಪ್ರಾಕ್ಟೀಸ್ ಅವಲೋಕನ ಇಲ್ಲಿದೆ",
+      "admin": "ವ್ಯವಸ್ಥೆ ನಿರ್ವಹಣೆ ಅವಲೋಕನ",
+      "farmer": "ನಿಮ್ಮ ಕೃಷಿ ನಿರ್ವಹಣೆ ಅವಲೋಕನ ಇಲ್ಲಿದೆ"
+    },
+    "stats": {
+      "appointments": "ನೇಮಕಾತಿಗಳು",
+      "consultations": "ಸಮಾಲೋಚನೆಗಳು",
+      "myAnimals": "ನನ್ನ ಪ್ರಾಣಿಗಳು",
+      "patients": "ರೋಗಿಗಳು",
+      "pending": "ಬಾಕಿ ಕ್ರಿಯೆಗಳು"
+    },
+    "pendingBookings": "🔔 ಬಾಕಿ ಬುಕಿಂಗ್ ಖಚಿತೀಕರಣಗಳು",
+    "quickActions": {
+      "viewConsultations": "ಸಮಾಲೋಚನೆಗಳನ್ನು ನೋಡಿ",
+      "bookConsultation": "ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿ",
+      "myAnimals": "ನನ್ನ ಪ್ರಾಣಿಗಳು",
+      "myReviews": "ನನ್ನ ಸಮೀಕ್ಷೆಗಳು",
+      "newConsultation": "ಹೊಸ ಸಮಾಲೋಚನೆ",
+      "manageSchedule": "ವೇಳಾಪಟ್ಟಿ ನಿರ್ವಹಿಸಿ",
+      "prescriptions": "ಔಷಧಿ ಚೀಟಿಗಳು",
+      "medicalRecords": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
+      "herdManagement": "ಹಿಂಡು ನಿರ್ವಹಣೆ"
+    },
+    "recentActivity": "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ",
+    "viewAll": "ಎಲ್ಲಾ ನೋಡಿ",
+    "noActivity": "ಇನ್ನೂ ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ ಇಲ್ಲ",
+    "bookFirst": "ನಿಮ್ಮ ಮೊದಲ ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿ",
+    "upcomingBookings": "📅 ಮುಂಬರುವ ಬುಕಿಂಗ್‌ಗಳು",
+    "noUpcoming": "ಮುಂಬರುವ ಬುಕಿಂಗ್‌ಗಳಿಲ್ಲ",
+    "recentConsultations": "🩺 ಇತ್ತೀಚಿನ ಸಮಾಲೋಚನೆಗಳು",
+    "noRecent": "ಇತ್ತೀಚಿನ ಸಮಾಲೋಚನೆಗಳಿಲ್ಲ",
+    "proTips": "ಪ್ರೋ ಸಲಹೆಗಳು ಮತ್ತು ಸಂಪನ್ಮೂಲಗಳು",
+    "tips": {
+      "appointmentTitle": "ನೇಮಕಾತಿ ಉತ್ತಮ ಅಭ್ಯಾಸಗಳು",
+      "appointmentDesc": "ಉತ್ತಮ ಲಭ್ಯತೆಗಾಗಿ ಸಮಾಲೋಚನೆಗಳನ್ನು ಮುಂಚಿತವಾಗಿ ಬುಕ್ ಮಾಡಿ",
+      "healthTitle": "ಆರೋಗ್ಯ ಸಂಪನ್ಮೂಲಗಳು",
+      "healthDesc": "ನಮ್ಮ ಸಮಗ್ರ ಆರೋಗ್ಯ ಲೇಖನಗಳು ಮತ್ತು ಮಾರ್ಗದರ್ಶಿಗಳನ್ನು ಪ್ರವೇಶಿಸಿ",
+      "communityTitle": "ಸಮುದಾಯ ವೇದಿಕೆ",
+      "communityDesc": "ಇತರ ಬಳಕೆದಾರರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ ಮತ್ತು ಅನುಭವಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"
+    },
+    "learnMore": "ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ →",
+    "explore": "ಅನ್ವೇಷಿಸಿ →",
+    "join": "ಸೇರಿ →",
+    "cancelBooking": "ಈ ಬುಕಿಂಗ್ ರದ್ದುಮಾಡಬೇಕೇ?",
+    "declinedByDoctor": "ವೈದ್ಯರಿಂದ ನಿರಾಕರಿಸಲಾಗಿದೆ",
+    "pageTitle": "ಇತ್ತೀಚಿನ ಸಮಾಲೋಚನೆಗಳು"
   },
   "consultations": {
-    "title": "ಸಮಾಲೋಚನೆಗಳು",
-    "new": "ಹೊಸ ಸಮಾಲೋಚನೆ",
-    "history": "ಸಮಾಲೋಚನೆ ಇತಿಹಾಸ",
-    "active": "ಸಕ್ರಿಯ ಸಮಾಲೋಚನೆಗಳು",
-    "details": "ಸಮಾಲೋಚನೆ ವಿವರಗಳು",
-    "startChat": "ಚಾಟ್ ಪ್ರಾರಂಭಿಸಿ",
-    "endConsultation": "ಸಮಾಲೋಚನೆ ಮುಗಿಸಿ"
+    "pageTitle": "🏥 Consultations & Appointments",
+    "subtitles": {
+      "petOwner": "Schedule consultations, manage appointments, and review your visit history",
+      "vet": "Manage your appointments, conduct consultations, and track patient interactions",
+      "admin": "Monitor and manage all consultations and appointments across the platform"
+    },
+    "bookConsultation": "+ ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿ",
+    "dismiss": "Dismiss",
+    "tabs": {
+      "appointments": "📅 ನೇಮಕಾತಿಗಳು",
+      "history": "🩺 Consultation History"
+    },
+    "filterAll": "ಎಲ್ಲಾ",
+    "headers": {
+      "patient": "ರೋಗಿ",
+      "doctor": "ವೈದ್ಯ",
+      "date": "ದಿನಾಂಕ",
+      "time": "ಸಮಯ",
+      "type": "ಪ್ರಕಾರ",
+      "reason": "ಕಾರಣ",
+      "priority": "ಆದ್ಯತೆ",
+      "status": "ಸ್ಥಿತಿ",
+      "actions": "ಕ್ರಿಯೆಗಳು"
+    },
+    "types": {
+      "video": "📹 Video",
+      "phone": "📞 ಫೋನ್",
+      "inPerson": "🏥 In-person",
+      "chat": "💬 Chat"
+    },
+    "actions": {
+      "confirm": "✓ ಖಚಿತಪಡಿಸಿ",
+      "start": "▶ Start",
+      "notYet": "🔒 Not Yet",
+      "join": "📹 Join",
+      "reschedule": "🔄 Reschedule",
+      "cancelBooking": "✕ ರದ್ದುಮಾಡಿ",
+      "log": "📋 Log",
+      "view": "📋 View",
+      "review": "⭐ Review",
+      "details": "📋 Details"
+    },
+    "emptyAppointments": "No upcoming appointments",
+    "appointmentHint": "Appointments requiring your attention will appear here",
+    "bookButton": "Book a Consultation",
+    "noMatchFilter": "No consultations match this filter",
+    "noHistory": "No consultation history yet",
+    "historyHint": "Completed and cancelled consultations will appear here for reference",
+    "reschedule": {
+      "title": "🔄 Reschedule Appointment",
+      "originalLabel": "⚠️ Original Appointment",
+      "dateLabel": "Select New Date *",
+      "slotsTitle": "Available Time Slots",
+      "noSlots": "No available slots for this date. Please select another date.",
+      "confirming": "Rescheduling...",
+      "confirmBtn": "✓ Confirm Reschedule"
+    },
+    "actionLog": {
+      "title": "📋 Action Log",
+      "loading": "Loading action history...",
+      "empty": "No action history found for this booking.",
+      "by": "by",
+      "system": "System",
+      "newSlot": "New slot:",
+      "approved": "(approved ✓)",
+      "awaitingApproval": "(awaiting doctor approval)",
+      "autoConfirmed": "(auto-confirmed)",
+      "cancelledBy": "Cancelled by",
+      "reason": "Reason:"
+    },
+    "cancelModal": {
+      "title": "❌ Cancel Booking",
+      "warning": "⚠️ This action cannot be undone. The appointment will be cancelled.",
+      "reasonLabel": "Reason for cancellation",
+      "reasonPlaceholder": "Please provide a reason for cancellation...",
+      "keepBooking": "Keep Booking",
+      "confirmCancel": "Confirm Cancellation"
+    }
   },
   "animals": {
-    "title": "ನನ್ನ ಪ್ರಾಣಿಗಳು",
-    "addAnimal": "ಪ್ರಾಣಿ ಸೇರಿಸಿ",
-    "species": "ಜಾತಿ",
-    "breed": "ತಳಿ",
-    "age": "ವಯಸ್ಸು",
-    "weight": "ತೂಕ",
-    "gender": "ಲಿಂಗ",
-    "healthStatus": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ"
+    "pageTitles": {
+      "petOwner": "🐾 ನನ್ನ ಪ್ರಾಣಿಗಳು",
+      "vet": "🐾 Patient Animals",
+      "admin": "🐾 Animal Registry"
+    },
+    "subtitles": {
+      "petOwner": "Manage your pets and farm animals",
+      "vet": "Animals from your consultations",
+      "admin": "All registered animals in the system"
+    },
+    "registerAnimal": "+ Register Animal",
+    "searchPlaceholder": "Search by name, ID, ear tag, microchip...",
+    "allSpecies": "All Species",
+    "animalCount": "ಪ್ರಾಣಿ",
+    "animalsCount": "ಪ್ರಾಣಿಗಳು",
+    "registerModal": {
+      "titleNew": "📋 Register New Animal",
+      "titleEdit": "Edit {{name}}",
+      "requiredNote": "Fields marked with * are required",
+      "sections": {
+        "basic": "📝 Basic Information",
+        "identification": "🏷️ Identification & Tracking",
+        "insurance": "🛡️ Insurance Details",
+        "medical": "📋 Medical Notes"
+      },
+      "name": "Name *",
+      "species": "Species *",
+      "breed": "ತಳಿ",
+      "selectBreed": "Select breed",
+      "otherBreed": "Other (specify)",
+      "customBreed": "Custom Breed *",
+      "gender": "ಲಿಂಗ",
+      "dob": "Date of Birth",
+      "color": "Color / Markings",
+      "weight": "Weight (kg)",
+      "neutered": "Spayed / Neutered",
+      "microchip": "Microchip ID",
+      "earTag": "Ear Tag ID",
+      "regNumber": "Registration / Pedigree Number",
+      "insuranceProvider": "Insurance Provider",
+      "policyNumber": "Policy Number",
+      "policyExpiry": "Policy Expiry Date",
+      "policyExpired": "⚠️ Policy expired",
+      "updateBtn": "💾 Update Animal",
+      "registerBtn": "✅ Register Animal"
+    },
+    "emptySearch": "No animals match your search",
+    "emptyAnimals": "No animals registered yet",
+    "petOwnerCTA": "Register your first pet or farm animal to get started.",
+    "adminCTA": "No animals found in the system.",
+    "cardLabels": {
+      "gender": "Gender:",
+      "weight": "Weight:",
+      "color": "Color:",
+      "neutered": "Neutered:",
+      "dob": "DOB:",
+      "owner": "Owner:",
+      "identification": "🏷️ Identification",
+      "microchip": "Microchip:",
+      "earTag": "Ear Tag:",
+      "regNumber": "Reg #:",
+      "insuranceExpired": "🛡️ Insurance Expired",
+      "insured": "Insured",
+      "expires": "Expires:",
+      "details": "📋 Details"
+    },
+    "cardActions": {
+      "records": "📁 Records",
+      "edit": "✏️ ಸಂಪಾದಿಸಿ",
+      "book": "📅 Book"
+    },
+    "detailModal": {
+      "species": "Species:",
+      "breed": "Breed:",
+      "gender": "Gender:",
+      "age": "Age:",
+      "weight": "Weight:",
+      "dob": "Date of Birth:",
+      "color": "Color:",
+      "neutered": "Spayed/Neutered:",
+      "uniqueId": "Unique ID:",
+      "owner": "Owner:",
+      "medicalRecords": "📁 ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
+      "editBtn": "✏️ ಸಂಪಾದಿಸಿ",
+      "closeBtn": "ಮುಚ್ಚಿ"
+    },
+    "toasts": {
+      "updated": "Animal updated successfully!",
+      "registered": "Animal registered successfully!",
+      "confirmRemove": "Are you sure you want to remove this animal?",
+      "removed": "Animal removed successfully"
+    },
+    "pageTitle": "ನನ್ನ ಪ್ರಾಣಿಗಳು"
   },
   "appointments": {
-    "title": "ನೇಮಕಾತಿಗಳು",
-    "schedule": "ನೇಮಕಾತಿ ನಿಗದಿಪಡಿಸಿ",
-    "upcoming": "ಮುಂಬರುವ",
-    "past": "ಹಿಂದಿನ",
-    "cancelled": "ರದ್ದಾಗಿದೆ"
+    "pageTitle": "📅 ನೇಮಕಾತಿಗಳು",
+    "scheduleNew": "Schedule New",
+    "confirmed": "✓ Confirmed",
+    "pending": "⏳ ಬಾಕಿ",
+    "reschedule": "Reschedule",
+    "types": {
+      "regular": "Regular Checkup",
+      "vaccination": "ಲಸಿಕೆ",
+      "followUp": "ಮರುಪರಿಶೀಲನೆ"
+    }
   },
   "medicalRecords": {
-    "title": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
-    "addRecord": "ದಾಖಲೆ ಸೇರಿಸಿ",
-    "diagnosis": "ರೋಗನಿರ್ಣಯ",
-    "treatment": "ಚಿಕಿತ್ಸೆ",
-    "prescription": "ಔಷಧಿ ಚೀಟಿ",
-    "vaccinations": "ಲಸಿಕೆಗಳು"
+    "pageTitle": "📋 ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
+    "allAnimals": "All Animals",
+    "newRecord": "+ New Record",
+    "tabs": {
+      "overview": "📊 ಅವಲೋಕನ",
+      "consultations": "🩺 ಸಮಾಲೋಚನೆಗಳು",
+      "prescriptions": "💊 ಔಷಧಿ ಚೀಟಿಗಳು",
+      "records": "📄 Records",
+      "vaccinations": "💉 ಲಸಿಕೆಗಳು",
+      "labResults": "🔬 Lab Results",
+      "allergies": "⚠️ Allergies",
+      "weight": "⚖️ ತೂಕ",
+      "timeline": "📅 Timeline"
+    },
+    "animalInfo": {
+      "owner": "Owner:",
+      "gender": "Gender:",
+      "weight": "Weight:",
+      "dob": "DOB:",
+      "neutered": "Neutered ✓",
+      "microchip": "Microchip:",
+      "earTag": "Ear Tag:",
+      "regNumber": "Reg#:",
+      "insurance": "Insurance:",
+      "maleSymbol": "♂ ಗಂಡು",
+      "femaleSymbol": "♀ ಹೆಣ್ಣು"
+    },
+    "overview": {
+      "stats": {
+        "consultations": "ಸಮಾಲೋಚನೆಗಳು",
+        "prescriptions": "ಔಷಧಿ ಚೀಟಿಗಳು",
+        "vaccinations": "ಲಸಿಕೆಗಳು",
+        "labResults": "Lab Results",
+        "activeAllergies": "Active Allergies",
+        "medicalRecords": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
+        "followUps": "Follow-ups (7d)"
+      },
+      "completed": "completed",
+      "active": "active",
+      "dueSoon": "due soon",
+      "pending": "pending",
+      "recordsByType": "Records by Type",
+      "quickActions": "Quick Actions",
+      "addRecord": "+ Record",
+      "addVaccination": "+ ಲಸಿಕೆ",
+      "addWeight": "+ ತೂಕ",
+      "addAllergy": "+ Allergy",
+      "addLabResult": "+ Lab Result",
+      "recentPrescriptions": "Recent Prescriptions",
+      "diagnosis": "Diagnosis:",
+      "viewAllPrescriptions": "View all {{count}} prescriptions →",
+      "recentRecords": "Recent Records",
+      "viewAllRecords": "View all {{count}} records →",
+      "medication": "ಔಷಧಿ"
+    },
+    "records": {
+      "searchPlaceholder": "Search records...",
+      "allTypes": "All Types",
+      "emptyTitle": "No medical records found",
+      "emptySubtitle": "Records created by veterinarians during consultations will appear here"
+    },
+    "consultationsTab": {
+      "selectPet": "Select a pet",
+      "selectPetSubtitle": "Choose a pet from the dropdown above to view consultation history",
+      "emptyTitle": "No consultations found",
+      "emptySubtitle": "Consultation history for this pet will appear here",
+      "consultWith": "Consultation with Dr. {{name}}",
+      "unknown": "Unknown",
+      "prescriptionCount": "{{count}} prescription(s)",
+      "diagnosis": "Diagnosis:",
+      "date": "Date:",
+      "owner": "Owner:",
+      "followUp": "Follow-up:"
+    },
+    "prescriptionsTab": {
+      "emptyTitle": "No prescriptions yet",
+      "emptySubtitle": "No prescriptions found for this pet",
+      "medication": "ಔಷಧಿ",
+      "diagnosis": "Diagnosis:",
+      "prescribed": "Prescribed:",
+      "validUntil": "Valid until:",
+      "active": "active",
+      "expired": "expired"
+    },
+    "vaccinationsTab": {
+      "addButton": "+ Add Vaccination",
+      "selectPet": "Select a pet",
+      "emptyTitle": "No vaccination records",
+      "emptySubtitle": "Vaccination records will appear here once added",
+      "administered": "Administered:",
+      "dosage": "Dosage:",
+      "batch": "Batch:",
+      "nextDue": "Next due:",
+      "overdue": "(OVERDUE)",
+      "certificate": "Certificate:",
+      "reaction": "⚠️ Reaction:",
+      "valid": "Valid",
+      "invalid": "Invalid"
+    },
+    "labResultsTab": {
+      "addButton": "+ Add Lab Result",
+      "selectPet": "Select a pet",
+      "emptyTitle": "No lab results",
+      "emptySubtitle": "Lab test results will appear here once added",
+      "testDate": "Test Date:",
+      "orderedBy": "Ordered by:",
+      "result": "Result:",
+      "normal": "Normal:",
+      "lab": "Lab:",
+      "abnormal": "⚠️ Abnormal"
+    },
+    "allergiesTab": {
+      "addButton": "+ Report Allergy",
+      "selectPet": "Select a pet",
+      "emptyTitle": "No known allergies",
+      "emptySubtitle": "No allergies have been recorded for this pet",
+      "reaction": "Reaction:",
+      "severity": "Severity:",
+      "identified": "Identified:",
+      "reportedBy": "Reported by:",
+      "active": "⚠️ ಸಕ್ರಿಯ",
+      "resolved": "ಪರಿಹರಿಸಲಾಗಿದೆ"
+    },
+    "weightTab": {
+      "addButton": "+ Record Weight",
+      "selectPet": "Select a pet",
+      "emptyTitle": "No weight records",
+      "emptySubtitle": "Weight measurements will appear here once added",
+      "weightTrend": "Weight Trend",
+      "latest": "Latest:",
+      "fromLast": "from last",
+      "recorded": "Recorded:"
+    },
+    "timelineTab": {
+      "selectPet": "Select a pet",
+      "selectSubtitle": "Choose a pet from the dropdown above to view its complete medical timeline",
+      "emptyTitle": "No medical history",
+      "emptySubtitle": "Medical events will appear here as records are created",
+      "by": "By:"
+    },
+    "modals": {
+      "newRecord": "📄 New Medical Record",
+      "recordType": "Record Type",
+      "title": "ಶೀರ್ಷಿಕೆ",
+      "content": "ವಿಷಯ",
+      "severity": "ತೀವ್ರತೆ",
+      "followUpDate": "Follow-up Date (optional)",
+      "addVaccination": "💉 Add Vaccination",
+      "vaccineName": "Vaccine Name *",
+      "vaccineType": "Vaccine Type",
+      "dateAdministered": "Date Administered *",
+      "nextDueDate": "Next Due Date",
+      "dosage": "Dosage",
+      "batchNumber": "Batch Number",
+      "manufacturer": "Manufacturer",
+      "certificateNumber": "Certificate Number",
+      "reactionNotes": "Reaction Notes",
+      "recordWeight": "⚖️ Record Weight",
+      "weightValue": "Weight *",
+      "unit": "Unit",
+      "reportAllergy": "⚠️ Report Allergy",
+      "allergen": "Allergen *",
+      "reaction": "Reaction",
+      "dateIdentified": "Date Identified",
+      "addLabResult": "🔬 Add Lab Result",
+      "testName": "Test Name *",
+      "testCategory": "Test Category",
+      "testDate": "Test Date *",
+      "resultValue": "Result Value",
+      "normalRange": "Normal Range",
+      "labName": "Lab Name",
+      "abnormalLabel": "Result is abnormal",
+      "interpretation": "Interpretation"
+    },
+    "recordTypes": {
+      "diagnosis": "ರೋಗನಿರ್ಣಯ",
+      "prescription": "ಔಷಧಿ ಚೀಟಿ",
+      "labReport": "ಪ್ರಯೋಗಾಲಯ ವರದಿ",
+      "vaccination": "ಲಸಿಕೆ",
+      "surgery": "ಶಸ್ತ್ರಚಿಕಿತ್ಸೆ",
+      "imaging": "ಇಮೇಜಿಂಗ್",
+      "followUp": "ಮರುಪರಿಶೀಲನೆ",
+      "other": "ಇತರ"
+    },
+    "severityLevels": {
+      "low": "ಕಡಿಮೆ",
+      "normal": "ಸಾಮಾನ್ಯ",
+      "high": "ಹೆಚ್ಚು",
+      "critical": "ಗಂಭೀರ"
+    }
   },
   "settings": {
-    "title": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
-    "profile": "ಪ್ರೊಫೈಲ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
-    "notifications": "ಅಧಿಸೂಚನೆಗಳು",
-    "language": "ಭಾಷೆ",
-    "theme": "ಥೀಮ್"
+    "pageTitle": "⚙️ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+    "profile": {
+      "title": "ಪ್ರೊಫೈಲ್ ಮಾಹಿತಿ",
+      "firstName": "ಮೊದಲ ಹೆಸರು",
+      "lastName": "ಕೊನೆಯ ಹೆಸರು",
+      "email": "ಇಮೇಲ್",
+      "phone": "ಫೋನ್",
+      "saveChanges": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ",
+      "saved": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಉಳಿಸಲಾಗಿದೆ! (ಇದು ಡೆಮೊ)"
+    },
+    "preferences": {
+      "title": "ಆದ್ಯತೆಗಳು",
+      "emailNotifications": "ನೇಮಕಾತಿಗಳಿಗೆ ಇಮೇಲ್ ಅಧಿಸೂಚನೆಗಳು",
+      "smsReminders": "ಸಮಾಲೋಚನೆಗಳಿಗೆ SMS ಜ್ಞಾಪನೆಗಳು",
+      "marketingEmails": "ಮಾರ್ಕೆಟಿಂಗ್ ಇಮೇಲ್‌ಗಳು ಮತ್ತು ಆಫರ್‌ಗಳು",
+      "shareHealth": "ವೈದ್ಯರೊಂದಿಗೆ ಆರೋಗ್ಯ ಡೇಟಾ ಹಂಚಿ"
+    },
+    "security": {
+      "title": "ಭದ್ರತೆ",
+      "changePassword": "ಪಾಸ್‌ವರ್ಡ್ ಬದಲಿಸಿ",
+      "changePasswordDesc": "ಉತ್ತಮ ಭದ್ರತೆಗಾಗಿ ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಿಯಮಿತವಾಗಿ ನವೀಕರಿಸಿ",
+      "twoFactor": "ಎರಡು-ಹಂತ ದೃಢೀಕರಣ",
+      "twoFactorDesc": "ನಿಮ್ಮ ಖಾತೆಗೆ ಹೆಚ್ಚುವರಿ ಭದ್ರತೆ ಸೇರಿಸಿ",
+      "enable2FA": "2FA ಸಕ್ರಿಯಗೊಳಿಸಿ",
+      "activeSessions": "ಸಕ್ರಿಯ ಸೆಷನ್‌ಗಳು",
+      "activeSessionsDesc": "ನಿಮ್ಮ ಸಕ್ರಿಯ ಲಾಗಿನ್ ಸೆಷನ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+      "viewSessions": "ಸೆಷನ್‌ಗಳನ್ನು ನೋಡಿ"
+    },
+    "dangerZone": {
+      "title": "ಅಪಾಯ ವಲಯ",
+      "deleteAccount": "ಖಾತೆ ಅಳಿಸಿ",
+      "deleteAccountDesc": "ನಿಮ್ಮ ಖಾತೆ ಮತ್ತು ಎಲ್ಲಾ ಸಂಬಂಧಿತ ಡೇಟಾವನ್ನು ಶಾಶ್ವತವಾಗಿ ಅಳಿಸಿ"
+    }
+  },
+  "enterpriseManagement": {
+    "pageTitle": "🏢 Enterprise Management",
+    "subtitle": "Manage your farms, clinics, and animal enterprises",
+    "newEnterprise": "+ New Enterprise",
+    "searchPlaceholder": "Search enterprises...",
+    "loading": "Loading enterprises...",
+    "emptyTitle": "No Enterprises Yet",
+    "emptySubtitle": "Create your first enterprise to start managing animals at scale.",
+    "createBtn": "+ Create Enterprise",
+    "members": "ಸದಸ್ಯರು",
+    "animals": "ಪ್ರಾಣಿಗಳು",
+    "tabs": {
+      "overview": "ಅವಲೋಕನ",
+      "animals": "ಪ್ರಾಣಿಗಳು",
+      "groups": "ಗುಂಪುಗಳು",
+      "locations": "ಸ್ಥಳಗಳು",
+      "members": "ಸದಸ್ಯರು"
+    },
+    "license": "License:",
+    "regulatoryId": "Regulatory ID:",
+    "modal": {
+      "editTitle": "Edit Enterprise",
+      "createTitle": "Create New Enterprise",
+      "name": "Name *",
+      "license": "License #",
+      "regulatoryId": "Regulatory ID",
+      "address": "Address",
+      "description": "ವಿವರಣೆ",
+      "timezone": "Timezone",
+      "type": "Enterprise Type"
+    },
+    "deactivateConfirm": "Are you sure you want to deactivate this enterprise?",
+    "deactivated": "Enterprise deactivated"
+  },
+  "animalGroups": {
+    "pageTitle": "🐾 ಪ್ರಾಣಿ ಗುಂಪುಗಳು",
+    "subtitle": "Manage herds, flocks, pens, and animal groups",
+    "newGroup": "+ New Group",
+    "selectEnterprise": "Select Enterprise...",
+    "emptyEnterprise": "Select an Enterprise",
+    "emptyEnterpriseSubtitle": "Choose an enterprise above to manage its animal groups.",
+    "loading": "Loading groups...",
+    "emptyTitle": "No Groups Yet",
+    "emptySubtitle": "Create your first animal group for this enterprise.",
+    "createBtn": "+ Create Group",
+    "species": "Species:",
+    "purpose": "Purpose:",
+    "animals": "ಪ್ರಾಣಿಗಳು",
+    "target": "ಗುರಿ",
+    "modal": {
+      "editTitle": "Edit Group",
+      "createTitle": "Create Animal Group",
+      "name": "Group Name *",
+      "type": "Group Type *",
+      "purpose": "Purpose",
+      "species": "ಜಾತಿ",
+      "breed": "ತಳಿ",
+      "targetCount": "Target Count",
+      "colorCode": "Color Code",
+      "description": "ವಿವರಣೆ",
+      "updateBtn": "Update Group",
+      "createBtn": "Create Group"
+    },
+    "purposeOptions": {
+      "dairy": "ಹೈನುಗಾರಿಕೆ",
+      "meat": "ಮಾಂಸ",
+      "breeding": "ಸಂತಾನೋತ್ಪತ್ತಿ",
+      "wool": "ಉಣ್ಣೆ",
+      "eggProduction": "ಮೊಟ್ಟೆ ಉತ್ಪಾದನೆ",
+      "draftWork": "Draft/Work",
+      "companion": "ಸಂಗಾತಿ",
+      "research": "ಸಂಶೋಧನೆ",
+      "showExhibition": "Show/Exhibition",
+      "conservation": "ಸಂರಕ್ಷಣೆ",
+      "mixed": "ಮಿಶ್ರ",
+      "other": "ಇತರ"
+    },
+    "toasts": {
+      "nameRequired": "Name and group type are required",
+      "updated": "Group updated",
+      "created": "Group created",
+      "deleted": "Group deleted",
+      "deleteConfirm": "Delete this group? Animals will be unlinked."
+    }
+  },
+  "locationManagement": {
+    "pageTitle": "📍 Location Management",
+    "subtitle": "Manage barns, pens, paddocks, and facility locations",
+    "viewGrid": "ಗ್ರಿಡ್",
+    "viewTree": "ಟ್ರೀ",
+    "newLocation": "+ New Location",
+    "selectEnterprise": "Select Enterprise...",
+    "emptyEnterprise": "Select an Enterprise",
+    "emptyEnterpriseSubtitle": "Choose an enterprise to manage locations.",
+    "loading": "Loading locations...",
+    "emptyTitle": "No Locations Yet",
+    "emptySubtitle": "Add your first location to track where animals are housed.",
+    "createBtn": "+ Create Location",
+    "occupancy": "Occupancy",
+    "inside": "Inside:",
+    "area": "Area:",
+    "modal": {
+      "editTitle": "Edit Location",
+      "createTitle": "Create Location",
+      "parentDefault": "None (Top Level)",
+      "validation": "Name and type are required"
+    }
+  },
+  "movementLog": {
+    "pageTitle": "🔄 ಚಲನೆ ದಾಖಲೆ",
+    "subtitle": "Track animal transfers, births, sales, and more",
+    "recordMovement": "+ Record Movement",
+    "selectEnterprise": "Select Enterprise...",
+    "emptyEnterprise": "Select an Enterprise",
+    "emptyEnterpriseSubtitle": "Choose an enterprise to view movement history.",
+    "emptyTitle": "No Movements Recorded",
+    "emptySubtitle": "Movement records track animal transfers, births, sales, and other events.",
+    "headers": {
+      "type": "ಪ್ರಕಾರ",
+      "animalGroup": "Animal/Group",
+      "from": "From",
+      "to": "To",
+      "reason": "ಕಾರಣ",
+      "date": "ದಿನಾಂಕ"
+    },
+    "types": {
+      "transfer": "ವರ್ಗಾವಣೆ",
+      "intake": "ಸೇರ್ಪಡೆ",
+      "discharge": "ಬಿಡುಗಡೆ",
+      "quarantine": "ಸಂಪರ್ಕ ತಡೆ",
+      "sale": "ಮಾರಾಟ",
+      "death": "ಸಾವು",
+      "birth": "ಜನನ",
+      "import": "ಆಮದು",
+      "export": "ರಫ್ತು"
+    },
+    "form": {
+      "title": "Record Movement",
+      "type": "Movement Type *",
+      "animalId": "Animal ID",
+      "group": "Or Group",
+      "fromLocation": "From Location",
+      "toLocation": "To Location",
+      "reason": "ಕಾರಣ",
+      "notes": "ಟಿಪ್ಪಣಿಗಳು",
+      "groupDefault": "None",
+      "locationDefault": "—",
+      "recordBtn": "Record Movement"
+    },
+    "validation": {
+      "typeRequired": "Movement type required",
+      "selectAnimal": "Select animal or group"
+    },
+    "toasts": {
+      "recorded": "Movement recorded",
+      "failed": "ವಿಫಲ"
+    }
+  },
+  "treatmentCampaigns": {
+    "pageTitle": "💉 Treatment Campaigns",
+    "subtitle": "Manage vaccination, deworming, testing, and other campaigns",
+    "newCampaign": "+ New Campaign",
+    "selectEnterprise": "Select Enterprise...",
+    "emptyEnterprise": "Select an Enterprise",
+    "emptyEnterpriseSubtitle": "Choose an enterprise to manage treatment campaigns.",
+    "emptyTitle": "No Campaigns Yet",
+    "emptySubtitle": "Create campaigns for vaccinations, deworming, testing, and more.",
+    "createBtn": "+ Create Campaign",
+    "types": {
+      "vaccination": "ಲಸಿಕೆ",
+      "deworming": "ಜಂತುನಾಶಕ",
+      "testing": "ಪರೀಕ್ಷೆ",
+      "treatment": "ಚಿಕಿತ್ಸೆ",
+      "supplement": "ಪೂರಕ",
+      "other": "ಇತರ"
+    },
+    "cardLabels": {
+      "species": "Species:",
+      "medication": "Medication:",
+      "dosage": "Dosage:",
+      "scheduled": "Scheduled:",
+      "started": "Started:",
+      "completed": "Completed:",
+      "treated": "Treated:"
+    },
+    "modal": {
+      "editTitle": "Edit Campaign",
+      "createTitle": "Create Campaign",
+      "name": "Campaign Name *",
+      "type": "Campaign Type *",
+      "status": "ಸ್ಥಿತಿ",
+      "targetSpecies": "Target Species",
+      "scheduledDate": "Scheduled Date",
+      "medication": "ಔಷಧಿ",
+      "dosage": "Dosage",
+      "description": "ವಿವರಣೆ",
+      "notes": "ಟಿಪ್ಪಣಿಗಳು",
+      "statusOptions": {
+        "planned": "ಯೋಜಿತ",
+        "inProgress": "ಪ್ರಗತಿಯಲ್ಲಿದೆ",
+        "completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+        "cancelled": "ರದ್ದಾಗಿದೆ"
+      },
+      "updateBtn": "Update Campaign",
+      "createBtn": "Create Campaign"
+    },
+    "toasts": {
+      "updated": "Campaign updated",
+      "created": "Campaign created",
+      "deleted": "Campaign deleted",
+      "nameRequired": "Name and type required",
+      "deleteConfirm": "Delete this campaign?",
+      "failed": "ವಿಫಲ"
+    }
+  },
+  "healthAnalytics": {
+    "pageTitle": "🏥 ಆರೋಗ್ಯ ವಿಶ್ಲೇಷಣೆ",
+    "subtitle": "Monitor herd health, track observations, and analyze health trends",
+    "tabs": {
+      "dashboard": "📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "observations": "📋 Observations"
+    },
+    "newObservation": "+ New Observation",
+    "form": {
+      "title": "Record Health Observation",
+      "observationTitle": "Title *",
+      "type": "Observation Type",
+      "severity": "ತೀವ್ರತೆ",
+      "animalId": "Animal ID (optional)",
+      "bodyTemp": "Body Temperature",
+      "heartRate": "Heart Rate (bpm)",
+      "respiratoryRate": "Respiratory Rate",
+      "weight": "Weight (kg)",
+      "description": "ವಿವರಣೆ",
+      "saveBtn": "Save Observation"
+    },
+    "charts": {
+      "severityDistribution": "Severity Distribution (90 days)",
+      "healthScore": "Health Score Distribution",
+      "observationTimeline": "Observation Timeline (12 weeks)",
+      "mortalityTrend": "Mortality Trend (12 months)",
+      "unresolvedByType": "Unresolved by Type"
+    },
+    "critical": "🚨 Critical / Unresolved Observations",
+    "noCritical": "No critical observations!",
+    "headers": {
+      "resolved": "✅ ಪರಿಹರಿಸಲಾಗಿದೆ",
+      "open": "⏳ Open"
+    },
+    "resolve": "Resolve",
+    "emptyObservations": "No observations recorded yet."
+  },
+  "breedingManager": {
+    "pageTitle": "🧬 Breeding & Genetics Manager",
+    "subtitle": "Track breeding records, monitor pregnancies, and analyze reproductive performance",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "tabs": {
+      "records": "📋 Records",
+      "upcomingDue": "🍼 Upcoming Due",
+      "statistics": "📊 Statistics"
+    },
+    "newRecord": "+ New Record",
+    "modal": {
+      "editTitle": "Edit Breeding Record",
+      "createTitle": "New Breeding Record",
+      "dam": "Dam (Mother) ID *",
+      "sire": "Sire (Father) ID",
+      "breedingDate": "Breeding Date *",
+      "method": "Method",
+      "status": "ಸ್ಥಿತಿ",
+      "offspringCount": "Offspring Count",
+      "liveOffspring": "Live Offspring",
+      "stillborn": "Stillborn",
+      "notes": "ಟಿಪ್ಪಣಿಗಳು",
+      "updateBtn": "ನವೀಕರಿಸಿ",
+      "createBtn": "ರಚಿಸಿ"
+    },
+    "recordsTable": {
+      "title": "Breeding Records",
+      "empty": "No breeding records yet.",
+      "headers": {
+        "dam": "Dam",
+        "sire": "Sire",
+        "date": "ದಿನಾಂಕ",
+        "method": "Method",
+        "status": "ಸ್ಥಿತಿ",
+        "dueDate": "Due Date",
+        "offspring": "Offspring",
+        "actions": "ಕ್ರಿಯೆಗಳು"
+      }
+    },
+    "upcomingDue": {
+      "title": "🍼 Upcoming Due Dates (next 60 days)",
+      "empty": "No upcoming births expected.",
+      "daysLeft": "Days Left",
+      "dayUnit": "days"
+    },
+    "statistics": {
+      "totalRecords": "Total Records",
+      "currentlyBred": "Currently Bred",
+      "confirmedPregnant": "Confirmed Pregnant",
+      "delivered": "Delivered",
+      "liveBirths": "Live Births",
+      "stillbirths": "Stillbirths",
+      "avgGestation": "Avg Gestation (days)"
+    },
+    "toasts": {
+      "updated": "Breeding record updated!",
+      "created": "Breeding record created!",
+      "failed": "Failed to save breeding record"
+    }
+  },
+  "feedInventory": {
+    "pageTitle": "🌾 Feed & Inventory Management",
+    "subtitle": "Track feed stock levels, log consumption, and get low-stock alerts",
+    "tabs": {
+      "inventory": "📦 Inventory",
+      "analytics": "📊 Analytics"
+    },
+    "addFeed": "+ Add Feed",
+    "logConsumption": "📝 Log Consumption",
+    "inventoryTitle": "Feed Inventory",
+    "emptyInventory": "No feed items in inventory.",
+    "lowStock": "Low Stock",
+    "ok": "OK",
+    "restock": "Restock",
+    "totalValue": "Total Inventory Value",
+    "lowStockAlerts": "⚠️ Low Stock Alerts",
+    "allOk": "All stock levels OK!",
+    "consumptionByType": "Consumption by Type (30 days)",
+    "dailyTrend": "Daily Consumption Trend"
+  },
+  "complianceDocs": {
+    "pageTitle": "📜 Compliance & Regulatory Documents",
+    "subtitle": "Manage licenses, permits, certifications and track expiry dates",
+    "tabs": {
+      "documents": "📄 Documents",
+      "summary": "📊 Summary"
+    },
+    "addDocument": "+ Add Document",
+    "modal": {
+      "editTitle": "Edit Document",
+      "createTitle": "Add Compliance Document",
+      "title": "Title *",
+      "type": "Document Type",
+      "number": "Document Number",
+      "authority": "Issuing Authority",
+      "issueDate": "Issue Date",
+      "expiryDate": "Expiry Date",
+      "status": "ಸ್ಥಿತಿ",
+      "fileUrl": "File URL",
+      "notes": "ಟಿಪ್ಪಣಿಗಳು",
+      "updateBtn": "ನವೀಕರಿಸಿ",
+      "addBtn": "Add Document"
+    },
+    "table": {
+      "title": "All Compliance Documents",
+      "empty": "No documents yet.",
+      "headers": {
+        "title": "ಶೀರ್ಷಿಕೆ",
+        "type": "ಪ್ರಕಾರ",
+        "number": "Number",
+        "authority": "Authority",
+        "expiry": "Expiry",
+        "status": "ಸ್ಥಿತಿ",
+        "verified": "Verified",
+        "actions": "ಕ್ರಿಯೆಗಳು"
+      },
+      "verify": "Verify",
+      "del": "Del"
+    },
+    "summary": {
+      "expiringSoon": "⚠️ Expiring Soon (30 days)",
+      "noExpiring": "No documents expiring soon!",
+      "expired": "🚨 Expired",
+      "noExpired": "No expired documents!",
+      "byType": "By Document Type",
+      "byStatus": "By Status"
+    },
+    "toasts": {
+      "updated": "Document updated!",
+      "created": "Document created!",
+      "deleted": "Document deleted!",
+      "verified": "Document verified!",
+      "deleteConfirm": "Delete this document?"
+    }
+  },
+  "financialAnalytics": {
+    "pageTitle": "💰 ಆರ್ಥಿಕ ವಿಶ್ಲೇಷಣೆ",
+    "subtitle": "Track income, expenses, and analyze financial performance",
+    "tabs": {
+      "dashboard": "📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "records": "📋 Records"
+    },
+    "addRecord": "+ Add Record",
+    "form": {
+      "type": "Type *",
+      "income": "💚 ಆದಾಯ",
+      "expense": "🔴 ವೆಚ್ಚ",
+      "category": "Category *",
+      "amount": "Amount *",
+      "date": "Transaction Date *",
+      "description": "ವಿವರಣೆ",
+      "reference": "Reference #",
+      "notes": "ಟಿಪ್ಪಣಿಗಳು"
+    },
+    "dashboard": {
+      "totalIncome": "Total Income",
+      "totalExpenses": "Total Expenses",
+      "netProfit": "Net Profit",
+      "monthlyBreakdown": "Monthly Breakdown",
+      "topExpenses": "Top Expense Categories",
+      "revenueByCategory": "Revenue by Category"
+    },
+    "emptyRecords": "No records yet.",
+    "deleteConfirm": "Delete this financial record?"
+  },
+  "alertCenter": {
+    "pageTitle": "🔔 Smart Alert Center",
+    "subtitle": "Configure alert rules, monitor events, and stay on top of critical issues",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "tabs": {
+      "events": "🔔 Events",
+      "rules": "⚙️ Rules"
+    },
+    "runChecks": "🔍 Run Alert Checks",
+    "markAllRead": "✓ Mark All Read",
+    "newRule": "+ New Rule",
+    "ruleModal": {
+      "editTitle": "Edit Alert Rule",
+      "createTitle": "Create Alert Rule",
+      "name": "Rule Name *",
+      "type": "Rule Type",
+      "severity": "ತೀವ್ರತೆ",
+      "conditions": "Conditions (JSON)",
+      "examples": "Examples:",
+      "updateBtn": "Update Rule",
+      "createBtn": "Create Rule"
+    },
+    "events": {
+      "title": "Alert Events",
+      "empty": "No alert events. Run alert checks to scan for issues.",
+      "rule": "Rule:",
+      "animal": "Animal:",
+      "acknowledgedBy": "Acknowledged by:",
+      "markRead": "Mark Read",
+      "acknowledge": "Acknowledge"
+    },
+    "rules": {
+      "title": "Alert Rules",
+      "empty": "No alert rules configured. Create one to start monitoring.",
+      "headers": {
+        "name": "ಹೆಸರು",
+        "type": "ಪ್ರಕಾರ",
+        "severity": "ತೀವ್ರತೆ",
+        "status": "ಸ್ಥಿತಿ",
+        "actions": "ಕ್ರಿಯೆಗಳು"
+      },
+      "del": "Del"
+    },
+    "toasts": {
+      "ruleUpdated": "Rule updated!",
+      "ruleCreated": "Rule created!",
+      "ruleDeleted": "Rule deleted!",
+      "saveFailed": "Failed to save rule",
+      "toggleFailed": "Failed to toggle rule",
+      "deleteFailed": "Failed to delete",
+      "allRead": "All alerts marked as read",
+      "acknowledged": "Alert acknowledged",
+      "checksComplete": "Alert checks complete: {{count}} alert(s) triggered",
+      "deleteConfirm": "Delete this alert rule?",
+      "invalidJson": "Invalid JSON in conditions"
+    }
+  },
+  "diseasePrediction": {
+    "pageTitle": "🧠 AI Disease Prediction & Outbreak Mapping",
+    "subtitle": "Predictive risk scoring, geographic outbreak heatmaps, and recommended preventive actions",
+    "tabs": {
+      "dashboard": "Risk Dashboard",
+      "predictions": "Predictions",
+      "outbreaks": "Outbreak Zones"
+    },
+    "emptyEnterprise": "Select an enterprise to view AI disease predictions",
+    "loading": "Analyzing risk data…",
+    "stats": {
+      "activePredictions": "Active Predictions",
+      "avgRiskScore": "Avg Risk Score",
+      "diseasesTracked": "Diseases Tracked",
+      "activeOutbreaks": "Active Outbreaks"
+    },
+    "riskDistribution": "🔬 Disease Risk Distribution",
+    "highestRisk": "⚠️ Highest Risk Animals",
+    "newPrediction": "+ New Prediction",
+    "submitPrediction": "Submit Prediction",
+    "emptyPredictions": "No predictions yet",
+    "newOutbreak": "+ Report Outbreak Zone",
+    "createOutbreak": "Create Outbreak Zone",
+    "emptyOutbreaks": "No outbreak zones reported",
+    "resolvedBtn": "Resolved!",
+    "enterpriseWide": "Enterprise-wide",
+    "affected": "affected",
+    "atRisk": "at risk",
+    "radius": "radius",
+    "outbreakResolved": "Outbreak resolved!"
+  },
+  "genomicLineage": {
+    "pageTitle": "🧬 Genomic Lineage & Genetic Diversity",
+    "subtitle": "Track ancestry trees, inbreeding coefficients, and find optimal breeding pairs",
+    "tabs": {
+      "dashboard": "Diversity Dashboard",
+      "profiles": "Genetic Profiles",
+      "pairs": "Pair Recommendations"
+    },
+    "stats": {
+      "totalProfiles": "Total Profiles",
+      "avgInbreeding": "Avg Inbreeding Coeff.",
+      "highRisk": "High-Risk (>0.0625)",
+      "speciesTracked": "Species Tracked"
+    },
+    "diversityChart": "📊 Genetic Diversity by Species",
+    "highRiskAnimals": "⚠️ High Inbreeding Risk Animals",
+    "addProfile": "+ Add Genetic Profile",
+    "createProfile": "Create Profile",
+    "emptyProfiles": "No genetic profiles",
+    "addPair": "+ Add Pair Recommendation",
+    "createPair": "Create Pair Recommendation",
+    "emptyPairs": "No pair recommendations yet",
+    "emptyEnterprise": "Select an enterprise to view genetic data",
+    "loading": "Loading genetic data…"
+  },
+  "iotSensors": {
+    "pageTitle": "📡 IoT Sensor Integration Dashboard",
+    "subtitle": "Real-time environmental monitoring, automated telemetry, and anomaly detection",
+    "tabs": {
+      "dashboard": "Telemetry Dashboard",
+      "sensors": "Sensors",
+      "readings": "Readings"
+    },
+    "registerSensor": "Register Sensor",
+    "recordReading": "📊 Record Reading",
+    "loading": "Connecting to sensor network…"
+  },
+  "supplyChain": {
+    "pageTitle": "🔗 Supply Chain & Traceability (Farm-to-Fork)",
+    "subtitle": "Full birth-to-sale traceability, QR code generation, and blockchain-style audit trail",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "emptyEnterprise": "Select an enterprise to view supply chain data",
+    "loading": "Loading traceability data…",
+    "tabs": {
+      "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "batches": "Product Batches",
+      "events": "Traceability Events",
+      "qrCodes": "QR Codes"
+    },
+    "stats": {
+      "totalBatches": "Total Batches",
+      "inProduction": "In Production",
+      "expiring": "Expiring (30d)",
+      "qrCodes": "QR Codes"
+    },
+    "batchStatus": "📦 Batch Status Distribution",
+    "eventTypes": "📋 Event Types (90d)",
+    "expiringSoon": "⏰ Expiring Soon",
+    "createBatch": "+ Create Batch",
+    "batchCreated": "Batch created!",
+    "eventLogged": "Traceability event logged!",
+    "eventVerified": "Event verified!",
+    "qrGenerated": "QR code generated!",
+    "logEvent": "+ Log Event",
+    "emptyBatches": "No batches",
+    "emptyEvents": "No traceability events",
+    "emptyQR": "No QR codes generated yet — create one from a batch"
+  },
+  "workforce": {
+    "pageTitle": "👷 Workforce & Task Management",
+    "subtitle": "Shift scheduling, task boards with checklists, and performance analytics",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "emptyEnterprise": "Select an enterprise to manage workforce",
+    "loading": "Loading workforce data…",
+    "tabs": {
+      "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "taskBoard": "Task Board",
+      "shiftSchedule": "Shift Schedule"
+    },
+    "stats": {
+      "totalTasks": "Total Tasks",
+      "pending": "ಬಾಕಿ",
+      "overdue": "Overdue",
+      "todayShifts": "Today's Shifts"
+    },
+    "priorityChart": "🏷️ Open Tasks by Priority",
+    "topWorkers": "🏆 Top Workers",
+    "overdueTasks": "🚨 Overdue Tasks",
+    "todayShifts": "📅 Today's Shifts",
+    "createTask": "+ Create Task",
+    "createShift": "+ Schedule Shift",
+    "taskCreated": "Task created!",
+    "shiftScheduled": "Shift scheduled!",
+    "startTask": "▶ Start",
+    "completeTask": "✓ Complete",
+    "unassigned": "Unassigned",
+    "emptyTasks": "No tasks yet",
+    "emptyShifts": "No shifts scheduled",
+    "checkIn": "Check In",
+    "checkOut": "Check Out"
+  },
+  "reportBuilder": {
+    "pageTitle": "📊 Report Builder & Export Center",
+    "subtitle": "Custom reports, scheduled exports, and cross-module analytical dashboards",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "emptyEnterprise": "Select an enterprise to generate reports",
+    "loading": "Loading report center…",
+    "tabs": {
+      "generate": "Generate Report",
+      "history": "Report History",
+      "view": "View Report",
+      "templates": "Templates"
+    },
+    "reportTypes": {
+      "animalCensus": "🐄 Animal Census",
+      "animalCensusDesc": "Comprehensive animal inventory by species, breed, gender",
+      "healthSummary": "🏥 Health Summary",
+      "healthSummaryDesc": "Health observations, resolution rates, severity analysis",
+      "financialSummary": "💰 Financial Summary",
+      "financialSummaryDesc": "Income vs expenses by category over time",
+      "breedingReport": "🧬 Breeding Report",
+      "breedingReportDesc": "Breeding outcomes, pregnancy rates, offspring stats",
+      "complianceAudit": "📋 Compliance Audit",
+      "complianceAuditDesc": "Document verification status, expiring certifications",
+      "taskPerformance": "👷 Task Performance",
+      "taskPerformanceDesc": "Worker productivity, completion rates, overdue analysis",
+      "sensorAnalytics": "📡 Sensor Analytics",
+      "sensorAnalyticsDesc": "IoT sensor readings, anomalies, averages across devices"
+    },
+    "selectType": "Select Report Type",
+    "reportName": "Report Name",
+    "format": "Format",
+    "generateBtn": "🚀 Generate Report",
+    "generating": "⏳ Generating Report…",
+    "generated": "Report generated!",
+    "deleted": "Report deleted!",
+    "templateCreated": "Template created!",
+    "emptyHistory": "No reports generated yet",
+    "emptyView": "Select a report from History or Generate a new one",
+    "createTemplate": "+ Create Template"
+  },
+  "aiCopilot": {
+    "pageTitle": "🤖 AI Veterinary Copilot",
+    "subtitle": "Intelligent assistant for symptom analysis, drug checks & treatment guidance",
+    "tabs": {
+      "chat": "💬 Chat Assistant",
+      "drugInteractions": "💊 Drug Interactions",
+      "symptomAnalysis": "🔬 Symptom Analysis"
+    },
+    "chat": {
+      "newChat": "+ New Chat",
+      "emptySessions": "No sessions yet. Start a new chat!",
+      "greeting": "How can I help today?",
+      "placeholder": "Ask about symptoms, treatments, nutrition, or any veterinary topic",
+      "send": "▹ Send",
+      "inputPlaceholder": "Type your question...",
+      "emptyTitle": "AI Veterinary Copilot",
+      "emptySubtitle": "Select a session or start a new chat",
+      "startNew": "Start New Chat"
+    },
+    "suggestedPrompts": {
+      "respiratory": "What are common signs of respiratory infection in cattle?",
+      "drugCheck": "Drug interaction check: NSAIDs + Corticosteroids",
+      "vaccination": "Recommended vaccination schedule for puppies",
+      "mastitis": "How to manage mastitis in dairy cows?",
+      "nutrition": "Nutritional requirements for pregnant ewes",
+      "emergency": "Emergency first aid for colic in horses"
+    },
+    "drug": {
+      "title": "💊 Drug Interaction Checker",
+      "description": "Enter medication names separated by commas to check for interactions",
+      "placeholder": "e.g. nsaids, corticosteroids, metronidazole",
+      "checkBtn": "Check Interactions",
+      "found": "⚠️ Interactions Found",
+      "none": "✅ No Interactions Detected"
+    },
+    "symptom": {
+      "title": "🔬 Symptom Analysis",
+      "description": "Describe symptoms to receive AI-assisted preliminary analysis",
+      "placeholder": "e.g. fever, vomiting, lameness",
+      "speciesPlaceholder": "Species (optional)",
+      "analyzeBtn": "Analyze",
+      "confidence": "Confidence:",
+      "sources": "Sources:",
+      "urgency": "Urgency:",
+      "species": "Species:"
+    },
+    "errors": {
+      "sendFailed": "Failed to send message",
+      "deleted": "Session deleted",
+      "deleteFailed": "Failed to delete"
+    }
+  },
+  "digitalTwin": {
+    "pageTitle": "🔮 Digital Twin & Simulator",
+    "subtitle": "Virtual farm models with scenario simulation and predictive analysis",
+    "selectEnterprise": "ಉದ್ಯಮ ಆಯ್ಕೆಮಾಡಿ",
+    "tabs": {
+      "dashboard": "📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "twins": "🏗️ Digital Twins",
+      "simulate": "🧪 Simulate"
+    },
+    "stats": {
+      "digitalTwins": "Digital Twins",
+      "simulationsRun": "Simulations Run",
+      "scenarioTypes": "Scenario Types Used",
+      "recentSimulations": "Recent Simulations"
+    },
+    "emptyDashboard": "Select an enterprise to view dashboard",
+    "createTwin": "+ Create Twin",
+    "createTwinModal": "Create Digital Twin",
+    "twinName": "ಹೆಸರು",
+    "twinType": "ಪ್ರಕಾರ",
+    "twinDescription": "ವಿವರಣೆ",
+    "emptyTwins": "No digital twins yet",
+    "newSimulation": "+ New Simulation",
+    "runSimulation": "Run Simulation",
+    "simName": "Simulation name",
+    "selectTwin": "Select twin...",
+    "scenarioType": "Scenario Type",
+    "runBtn": "▸ Run Simulation",
+    "results": "Results:",
+    "emptySimulations": "No simulations yet. Create a digital twin first, then run simulations.",
+    "twinCreated": "Digital twin created!",
+    "simulationCompleted": "Simulation completed!"
+  },
+  "marketplace": {
+    "pageTitle": "🏪 Marketplace & Auctions",
+    "subtitle": "Buy, sell, and auction animals, equipment, and veterinary supplies",
+    "tabs": {
+      "dashboard": "📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "browse": "🛒 Browse",
+      "create": "➕ Create Listing",
+      "orders": "📦 My Orders"
+    },
+    "categories": {
+      "all": "All Categories",
+      "animals": "🐄 ಪ್ರಾಣಿಗಳು",
+      "feed": "🌾 Feed & Nutrition",
+      "equipment": "🔧 Equipment",
+      "medicine": "💊 Medicine",
+      "semenEmbryo": "🧬 Semen/Embryo",
+      "services": "🩺 Services",
+      "other": "📦 ಇತರ"
+    },
+    "stats": {
+      "activeListings": "Active Listings",
+      "itemsSold": "Items Sold",
+      "categories": "Categories",
+      "activeSellers": "Active Sellers"
+    },
+    "latestListings": "Latest Listings",
+    "backToListings": "← Back to listings",
+    "contactForPrice": "Contact for price",
+    "searchPlaceholder": "Search listings...",
+    "allTypes": "All Types",
+    "fixedPrice": "Fixed Price",
+    "auction": "Auction",
+    "searchBtn": "ಹುಡುಕಿ",
+    "emptyListings": "No listings found",
+    "auctionBadge": "🔨 Auction",
+    "fixedBadge": "💵 Fixed",
+    "featuredBadge": "⭐ Featured",
+    "bids": "bids",
+    "buyNow": "Buy Now",
+    "placeBid": "Place Bid",
+    "currentHighest": "Current highest: ${{amount}}",
+    "bidHistory": "Bid History ({{count}})",
+    "winningBadge": "★ Winning",
+    "createListing": "Create New Listing",
+    "publishBtn": "Publish Listing",
+    "emptyOrders": "No orders yet",
+    "listingCreated": "Listing created!",
+    "bidPlaced": "Bid placed!",
+    "orderPlaced": "Order placed!"
+  },
+  "sustainability": {
+    "pageTitle": "🌱 Sustainability & Carbon",
+    "subtitle": "ESG scoring, carbon footprint tracking, and sustainability goal management",
+    "selectEnterprise": "ಉದ್ಯಮ ಆಯ್ಕೆಮಾಡಿ",
+    "tabs": {
+      "dashboard": "📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "metrics": "📈 Metrics",
+      "goals": "🎯 Goals",
+      "carbon": "🌍 Carbon Footprint"
+    },
+    "stats": {
+      "metricEntries": "Metric Entries",
+      "metricTypes": "Metric Types",
+      "activeGoals": "Active Goals",
+      "avgProgress": "Avg Goal Progress",
+      "co2Estimate": "Est. CO₂ (tons/yr)"
+    },
+    "goalProgress": "🎯 Goal Progress",
+    "target": "Target:",
+    "metricsSummary": "📊 Metrics Summary",
+    "summaryHeaders": {
+      "type": "Metric Type",
+      "entries": "Entries",
+      "total": "Total",
+      "average": "Average",
+      "unit": "Unit"
+    },
+    "recordMetric": "+ Record Metric",
+    "formTitle": "Record Sustainability Metric",
+    "saveMetric": "Save Metric",
+    "emptyMetrics": "No metrics recorded yet",
+    "metricTypes": {
+      "carbon": "🏭 Carbon Emissions",
+      "water": "💧 Water Usage",
+      "energy": "⚡ Energy Consumption",
+      "waste": "🗑️ Waste Generated",
+      "feedWaste": "🌾 Feed Waste",
+      "methane": "💨 Methane Output",
+      "renewable": "☀️ Renewable Energy %",
+      "recycling": "♻️ Recycling Rate"
+    },
+    "scopes": {
+      "scope1": "Direct Emissions",
+      "scope2": "Energy Indirect",
+      "scope3": "Value Chain"
+    },
+    "addGoal": "+ Add Goal",
+    "createGoal": "Create Sustainability Goal",
+    "emptyGoals": "No goals set yet",
+    "carbonFootprint": {
+      "totalCO2": "Total CO₂ (tons/yr)",
+      "speciesGroups": "Species Groups",
+      "tableTitle": "Carbon Emissions by Species",
+      "species": "ಜಾತಿ",
+      "headCount": "Head Count",
+      "emissionFactor": "Emission Factor",
+      "annualKg": "Annual CO₂ (kg)",
+      "annualTons": "Annual CO₂ (tons)",
+      "calculating": "Calculating carbon footprint...",
+      "selectEnterprise": "Select an enterprise to view carbon footprint"
+    },
+    "toasts": {
+      "metricRecorded": "Metric recorded!",
+      "goalCreated": "Goal created!"
+    }
+  },
+  "wellnessPortal": {
+    "pageTitle": "💚 ಆರೋಗ್ಯ ಪೋರ್ಟಲ್",
+    "subtitle": "Pet health scorecards, vaccination reminders, and wellness tracking",
+    "tabs": {
+      "dashboard": "📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "scorecards": "📋 Scorecards",
+      "reminders": "⏰ Reminders"
+    },
+    "stats": {
+      "animals": "ಪ್ರಾಣಿಗಳು",
+      "avgScore": "Avg Wellness Score",
+      "overdueReminders": "Overdue Reminders",
+      "upcoming": "Upcoming (14d)"
+    },
+    "latestScorecards": "Latest Wellness Scorecards",
+    "scoreLabels": {
+      "nutrition": "Nutrition",
+      "activity": "Activity",
+      "vaccines": "Vaccines",
+      "dental": "Dental"
+    },
+    "weight": "Weight:",
+    "upcomingReminders": "⏰ Upcoming Reminders",
+    "due": "Due:",
+    "completeBtn": "✓",
+    "snoozeBtn": "💤",
+    "newScorecard": "+ New Scorecard",
+    "createScorecard": "Create Wellness Scorecard",
+    "selectAnimal": "Select animal...",
+    "nextCheckup": "Next checkup:",
+    "emptyScorecards": "No scorecards yet. Create one for your pet!",
+    "createScorecardBtn": "Create Scorecard",
+    "newReminder": "+ New Reminder",
+    "createReminder": "Create Reminder",
+    "createReminderBtn": "Create Reminder",
+    "doneBtn": "✓ Done",
+    "snooze3d": "💤 Snooze",
+    "emptyReminders": "No reminders yet",
+    "toasts": {
+      "scorecardCreated": "Scorecard created!",
+      "reminderCreated": "Reminder created!",
+      "completed": "Completed!",
+      "snoozed": "Snoozed 3 days"
+    }
+  },
+  "geospatialAnalytics": {
+    "pageTitle": "🗺️ Geospatial Analytics",
+    "subtitle": "Geofencing, location tracking, heatmaps, and movement trails",
+    "tabs": {
+      "dashboard": "📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+      "zones": "📍 Zones",
+      "events": "📡 Events",
+      "heatmap": "🔥 Heatmap & Trails"
+    },
+    "stats": {
+      "totalZones": "Total Zones",
+      "activeZones": "Active Zones",
+      "restricted": "Restricted",
+      "events24h": "Events (24h)",
+      "trackedAnimals": "Tracked Animals"
+    },
+    "zoneOverview": "Zone Overview",
+    "recentEvents": "Recent Events",
+    "createZone": "Create Geofence Zone",
+    "recordEvent": "Record Geospatial Event",
+    "heatmapTitle": "🔥 Location Heatmap Data",
+    "heatmapSubtitle": "Clustered location density data",
+    "trailTitle": "🐾 Movement Trail",
+    "trailSubtitle": "Track an animal's movement path over time",
+    "animalIdPlaceholder": "Enter Animal ID",
+    "loadTrail": "Load Trail"
   },
   "errorBoundary": {
-    "title": "ಏನೋ ತಪ್ಪಾಗಿದೆ",
-    "message": "ಅನಿರೀಕ್ಷಿತ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಪುಟವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ.",
-    "retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
-    "reload": "ಪುಟವನ್ನು ಮರುಲೋಡ್ ಮಾಡಿ"
+    "heading": "ಏನೋ ತಪ್ಪಾಗಿದೆ",
+    "description": "ಅನಿರೀಕ್ಷಿತ ದೋಷ ಸಂಭವಿಸಿದೆ. ಪುಟವನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ ಅಥವಾ ಸಮಸ್ಯೆ ಮುಂದುವರಿದರೆ ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+    "tryAgain": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+    "reloadPage": "ಪುಟವನ್ನು ಮರುಲೋಡ್ ಮಾಡಿ",
+    "errorLabel": "ದೋಷ: "
+  },
+  "layout": {
+    "skipToContent": "ಮುಖ್ಯ ವಿಷಯಕ್ಕೆ ಹೋಗಿ"
   },
   "languageSwitcher": {
-    "selectLanguage": "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ"
+    "label": "ಭಾಷೆ",
+    "ariaLabel": "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ"
   }
 }

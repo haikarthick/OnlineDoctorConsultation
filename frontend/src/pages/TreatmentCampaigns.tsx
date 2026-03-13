@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, TreatmentCampaign } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const CAMPAIGN_TYPE_LABELS: Record<string, string> = {
   vaccination: 'Vaccination', deworming: 'Deworming', testing: 'Testing',
@@ -18,7 +19,8 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: '#dc3545'
 }
 
-const TreatmentCampaigns: React.FC = () => {
+const TreatmentCampaigns: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [campaigns, setCampaigns] = useState<TreatmentCampaign[]>([])
@@ -114,7 +116,7 @@ const TreatmentCampaigns: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>💉 Treatment Campaigns</h1>
+          <h1>{t('treatmentCampaigns.pageTitle')}</h1>
           <p className="subtitle">Manage vaccination, deworming, testing, and other campaigns</p>
         </div>
         <div className="header-actions">

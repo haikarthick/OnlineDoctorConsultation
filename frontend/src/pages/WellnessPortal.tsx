@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { WellnessScorecard, WellnessReminder } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const SCORE_COLORS = (score: number) => score >= 80 ? '#22c55e' : score >= 60 ? '#eab308' : score >= 40 ? '#f97316' : '#ef4444'
 const PRIORITY_COLORS: Record<string, string> = { low: '#94a3b8', medium: '#3b82f6', high: '#f97316', urgent: '#ef4444' }
 const REMINDER_TYPES = ['vaccination', 'checkup', 'dental', 'grooming', 'medication', 'nutrition', 'exercise', 'lab_test']
 
-const WellnessPortal: React.FC = () => {
+const WellnessPortal: React.FC = () => {  const { t } = useTranslation()
+
   const [dashboard, setDashboard] = useState<any>(null)
   const [scorecards, setScorecards] = useState<WellnessScorecard[]>([])
   const [reminders, setReminders] = useState<WellnessReminder[]>([])
@@ -107,7 +109,7 @@ const WellnessPortal: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>💚 Wellness Portal</h1>
+          <h1>{t('wellnessPortal.pageTitle')}</h1>
           <p style={{ color: '#666', margin: '8px 0 0' }}>Pet health scorecards, vaccination reminders, and wellness tracking</p>
         </div>
       </div>

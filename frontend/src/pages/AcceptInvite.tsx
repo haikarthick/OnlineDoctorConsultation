@@ -3,8 +3,10 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import './ModulePage.css'
 import './VetHospitals.css'
+import { useTranslation } from 'react-i18next'
 
-const AcceptInvite: React.FC = () => {
+const AcceptInvite: React.FC = () => {  const { t } = useTranslation()
+
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const token = searchParams.get('token') || ''
@@ -50,7 +52,7 @@ const AcceptInvite: React.FC = () => {
       <div className="module-page" style={{ display: 'flex', justifyContent: 'center', paddingTop: '3rem' }}>
         <div className="hb-success-card">
           <div className="hb-success-icon">✓</div>
-          <h2>Welcome Aboard!</h2>
+          <h2>{t('common.pageTitle')}</h2>
           <p>Your account has been created and linked to the hospital. You can now log in to start managing patients and appointments.</p>
           <button className="btn-primary" onClick={() => navigate('/login')} style={{ marginTop: '1rem' }}>
             Go to Login

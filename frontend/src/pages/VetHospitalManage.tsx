@@ -7,6 +7,7 @@ import type { VetHospital, HospitalDepartment, HospitalDoctor, HospitalService, 
 import { DOC_LABELS, REQUIRED_DOC_TYPES, EXPIRY_DOC_TYPES } from '../types'
 import './ModulePage.css'
 import './VetHospitals.css'
+import { useTranslation } from 'react-i18next'
 
 type Tab = 'overview' | 'doctors' | 'departments' | 'services' | 'appointments' | 'documents' | 'settings'
 
@@ -26,7 +27,8 @@ const HOSPITAL_TYPE_LABELS: Record<string, string> = {
   other:            'Other / Shelter Clinic',
 }
 
-const VetHospitalManage: React.FC = () => {
+const VetHospitalManage: React.FC = () => {  const { t } = useTranslation()
+
   const { user } = useAuth()
   const navigate = useNavigate()
   const [hospital, setHospital] = useState<VetHospital | null>(null)
@@ -957,7 +959,7 @@ const VetHospitalManage: React.FC = () => {
         <div className="modal-overlay" onClick={() => setShowInviteDoctor(false)}>
           <div className="modal-content" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowInviteDoctor(false)}>✕</button>
-            <h2>✉ Invite New Doctor</h2>
+            <h2>{t('consultations.pageTitle')}</h2>
             <p style={{ fontSize: '.88rem', color: '#666', margin: '-.25rem 0 1rem' }}>
               Create an invitation for a new doctor to join your hospital. Share the invite link with them to set up their account.
             </p>

@@ -3,12 +3,14 @@ import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
 import { Wallet as WalletType, WalletTransaction } from '../types'
 import '../styles/modules.css'
+import { useTranslation } from 'react-i18next'
 
 interface WalletProps {
   onNavigate: (path: string) => void
 }
 
-const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
+const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {  const { t } = useTranslation()
+
   const { formatDateTime, settings } = useSettings()
   const [wallet, setWallet] = useState<WalletType | null>(null)
   const [transactions, setTransactions] = useState<WalletTransaction[]>([])
@@ -99,7 +101,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>💰 My Wallet</h1>
+          <h1>{t('common.pageTitle')}</h1>
           <p className="page-subtitle">Manage your balance, refunds, and bonus credits</p>
         </div>
         <div className="page-header-actions">

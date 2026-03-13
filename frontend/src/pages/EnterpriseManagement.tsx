@@ -4,8 +4,10 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, ENTERPRISE_TYPE_LABELS, EnterpriseType, EnterpriseStats } from '../types'
 import MapView from '../components/MapView'
+import { useTranslation } from 'react-i18next'
 
-const EnterpriseManagement: React.FC = () => {
+const EnterpriseManagement: React.FC = () => {  const { t } = useTranslation()
+
   const { user } = useAuth()
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [loading, setLoading] = useState(true)
@@ -138,7 +140,7 @@ const EnterpriseManagement: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🏢 Enterprise Management</h1>
+          <h1>{t('enterpriseManagement.pageTitle')}</h1>
           <p className="subtitle">Manage your farms, clinics, and animal enterprises</p>
         </div>
         <div className="header-actions">

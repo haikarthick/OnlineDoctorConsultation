@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, FinancialRecord, FinancialDashboard } from '../types'
+import { useTranslation } from 'react-i18next'
 
 const TYPE_COLORS: Record<string, string> = { income: '#22c55e', expense: '#ef4444' }
 
@@ -10,7 +11,8 @@ const CATEGORIES = {
   expense: ['feed', 'veterinary', 'medication', 'equipment', 'labor', 'utilities', 'transport', 'insurance', 'maintenance', 'rent', 'taxes', 'marketing', 'other_expense']
 }
 
-const FinancialAnalytics: React.FC = () => {
+const FinancialAnalytics: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [records, setRecords] = useState<FinancialRecord[]>([])
@@ -104,7 +106,7 @@ const FinancialAnalytics: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>💰 Financial Analytics</h1>
+        <h1>{t('financialAnalytics.pageTitle')}</h1>
         <p>Track income, expenses, and analyze financial performance</p>
       </div>
 

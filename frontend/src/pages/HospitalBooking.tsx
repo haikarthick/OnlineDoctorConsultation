@@ -6,6 +6,7 @@ import apiService from '../services/api'
 import type { VetHospital, HospitalDoctor, HospitalDepartment } from '../types'
 import './ModulePage.css'
 import './VetHospitals.css'
+import { useTranslation } from 'react-i18next'
 
 interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
 
@@ -16,6 +17,7 @@ const filterFutureSlots = (slots: TimeSlot[], forDate: string) => {
   return slots.filter(s => {
     if (!s.isAvailable) return false
     if (forDate !== todayStr) return true
+
     const [h, m] = s.startTime.split(':').map(Number)
     return h * 60 + m > now.getHours() * 60 + now.getMinutes() + 15
   })
@@ -30,6 +32,7 @@ const BOOKING_TYPES = [
 ]
 
 const HospitalBooking: React.FC = () => {
+  const { t } = useTranslation()
   const { id: hospitalId } = useParams<{ id: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -165,7 +168,7 @@ const HospitalBooking: React.FC = () => {
       <div className="module-page">
         <div className="hb-success-card">
           <div className="hb-success-icon">✓</div>
-          <h2>Appointment Booked!</h2>
+          <h2>{t('consultations.pageTitle')}</h2>
           <p>Your appointment at <strong>{hospital.name}</strong> has been submitted successfully.</p>
           <div className="hb-success-details">
             <div><strong>Doctor:</strong> {selectedDoctor?.doctorName}</div>

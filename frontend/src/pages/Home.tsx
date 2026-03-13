@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import './Home.css'
+import { useTranslation } from 'react-i18next'
 
 interface HomeProps {
   onGetStarted: () => void
@@ -17,6 +18,8 @@ const SECTIONS = [
 ] as const
 
 export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomeProps) {
+  const { t } = useTranslation()
+
   const [activeTab, setActiveTab] = useState<'owner' | 'enterprise' | 'vet' | 'hospital'>('owner')
   const [activeSection, setActiveSection] = useState('hero')
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -262,35 +265,32 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       <section className="hero-section" id="hero">
         <div className="hero-content">
           <div className="hero-text">
-            <div className="hero-tag">Trusted by 3,000+ animal enterprises & 500+ hospitals worldwide</div>
+            <div className="hero-tag">{t('common.trustBadge')}</div>
             <h1 className="hero-title">
-              The Complete Platform for<br />
-              <span className="hero-gradient-text">Animal Health & Enterprise Management</span>
+              {t('home.heroTitle')}
             </h1>
             <p className="hero-subtitle">
-              From a single pet to herds of thousands — connect with licensed veterinarians, 
-              manage treatment campaigns, track animal movements, and run your entire operation 
-              from one intelligent platform.
+              {t('home.heroSubtitle')}
             </p>
             <div className="hero-buttons">
               <button className="btn btn-primary btn-large" onClick={onGetStarted}>
-                Start Free — Pet Owner
+                {t('home.ctaPrimary')}
               </button>
               <button className="btn btn-enterprise btn-large" onClick={onGetStarted}>
-                🏢 Enterprise Sign Up
+                {t('home.ctaEnterprise')}
               </button>
               <button className="btn btn-hospital btn-large" onClick={() => { onGetStarted() }}>
                 🏥 Register Hospital
               </button>
               <button className="btn btn-secondary-outline btn-large" onClick={onViewForDoctors}>
-                Join as Veterinarian
+                {t('home.ctaVet')}
               </button>
             </div>
             <p className="hero-subtext">
-              ✓ Free for pet owners • ✓ 30-day enterprise trial • ✓ Hospital setup in minutes
+              {t('home.guarantees')}
             </p>
             <p className="hero-login-link">
-              Already have an account? <button className="link-button" onClick={onLogin || (() => {})}>Sign in here →</button>
+              {t('home.signinLink').split('→')[0]} <button className="link-button" onClick={onLogin || (() => {})}>{t('home.signIn')} →</button>
             </p>
           </div>
           <div className="hero-visual">
@@ -335,7 +335,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
 
       {/* Enterprise Types */}
       <section className="enterprise-types-section" id="enterprises">
-        <h2 className="section-title">Built for Every Animal Enterprise</h2>
+        <h2 className="section-title">{t('home.pageTitle')}</h2>
         <p className="section-subtitle">One platform. Every species. Every scale.</p>
         <div className="enterprise-types-grid">
           {enterpriseTypes.map((etype, idx) => (
@@ -579,11 +579,11 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-content">
-          <h2>Ready to Transform Your Animal Care?</h2>
-          <p>Join thousands of pet owners, enterprises, hospitals and veterinarians on VetCare</p>
+          <h2>{t('home.ctaTitle')}</h2>
+          <p>{t('home.ctaSubtitle')}</p>
           <div className="cta-buttons">
             <button className="btn btn-primary btn-large" onClick={onGetStarted}>
-              Start Free — Pet Owner
+              {t('home.ctaPrimary')}
             </button>
             <button className="btn btn-enterprise btn-large" onClick={onGetStarted}>
               🏢 Enterprise Trial
@@ -592,11 +592,11 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
               🏥 Register Hospital
             </button>
             <button className="btn btn-secondary-outline btn-large" onClick={onViewForDoctors}>
-              Join as Veterinarian
+              {t('home.ctaVet')}
             </button>
           </div>
           <p className="cta-login">
-            Already a member? <button className="link-button" onClick={onLogin || (() => {})}>Sign in →</button>
+            {t('register.alreadyMember')} <button className="link-button" onClick={onLogin || (() => {})}>{t('home.signIn')} →</button>
           </p>
         </div>
       </section>
@@ -609,13 +609,13 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
           </div>
           <p>© 2026 VetCare. All rights reserved.</p>
           <div className="footer-links">
-            <a href="#privacy">Privacy Policy</a>
+            <a href="#privacy">{t('home.footer.privacy')}</a>
             <span className="divider">•</span>
-            <a href="#terms">Terms of Service</a>
+            <a href="#terms">{t('home.footer.terms')}</a>
             <span className="divider">•</span>
-            <a href="#contact">Contact Us</a>
+            <a href="#contact">{t('home.footer.contact')}</a>
             <span className="divider">•</span>
-            <button className="link-button" onClick={onLogin || (() => {})}>Sign In</button>
+            <button className="link-button" onClick={onLogin || (() => {})}>{t('home.footer.signIn')}</button>
           </div>
         </div>
       </footer>

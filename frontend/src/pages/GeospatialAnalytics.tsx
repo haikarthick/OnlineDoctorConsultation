@@ -3,12 +3,14 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { GeofenceZone, GeospatialEvent } from '../types'
 import MapView from '../components/MapView'
+import { useTranslation } from 'react-i18next'
 
 const ZONE_TYPES = ['pasture', 'barn', 'medical', 'quarantine', 'feeding', 'water', 'boundary', 'custom']
 const ZONE_COLORS: Record<string, string> = { pasture: '#22c55e', barn: '#a78bfa', medical: '#ef4444', quarantine: '#f97316', feeding: '#eab308', water: '#3b82f6', boundary: '#64748b', custom: '#ec4899' }
 const EVENT_TYPES = ['location_update', 'zone_entry', 'zone_exit', 'zone_breach', 'sos_alert']
 
-const GeospatialAnalytics: React.FC = () => {
+const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
+
   const [enterprises, setEnterprises] = useState<any[]>([])
   const [enterpriseId, setEnterpriseId] = useState('')
   const [tab, setTab] = useState<'dashboard' | 'zones' | 'events' | 'heatmap'>('dashboard')
@@ -89,7 +91,7 @@ const GeospatialAnalytics: React.FC = () => {
   if (!enterpriseId) {
     return (
       <div className="module-page">
-        <div className="module-header"><h1>🗺️ Geospatial Analytics</h1></div>
+        <div className="module-header"><h1>{t('geospatialAnalytics.pageTitle')}</h1></div>
         <div className="module-card">
           <h3>Select Enterprise</h3>
           <select className="module-input" value="" onChange={e => setEnterpriseId(e.target.value)}>
