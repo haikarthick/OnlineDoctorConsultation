@@ -23,7 +23,9 @@ export interface AppSettings {
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
-  USD: '$', INR: '₹', EUR: '€', GBP: '£', AUD: 'A$', CAD: 'C$', JPY: '¥', CNY: '¥', KES: 'KSh', ZAR: 'R', BRL: 'R$',
+  USD: '$', INR: '₹', EUR: '€', GBP: '£', AUD: 'A$', CAD: 'C$', JPY: '¥', CNY: '¥',
+  KES: 'KSh', ZAR: 'R', BRL: 'R$', SGD: 'S$', AED: 'د.إ', SAR: '﷼', MYR: 'RM',
+  THB: '฿', PHP: '₱', IDR: 'Rp', NZD: 'NZ$', CHF: 'CHF',
 }
 
 function getCurrencySymbol(code: string): string {

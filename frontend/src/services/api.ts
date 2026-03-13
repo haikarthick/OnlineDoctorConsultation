@@ -116,6 +116,19 @@ class ApiService {
     return response.data
   }
 
+  async updateProfile(data: { firstName?: string; lastName?: string; phone?: string; avatar?: string }) {
+    const response = await this.client.put('/auth/profile', data)
+    return response.data
+  }
+
+  async uploadFile(file: File, folder?: string) {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (folder) formData.append('folder', folder)
+    const response = await this.client.post('/files/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+    return response.data
+  }
+
   // ─── Consultations ────────────────────────────────────────
   async createConsultation(data: { veterinarianId: string; animalType: string; symptomDescription: string; scheduledAt?: string; animalId?: string; bookingId?: string; petOwnerId?: string }) {
     const response = await this.client.post('/consultations', data)
@@ -358,6 +371,11 @@ class ApiService {
     return response.data
   }
 
+  async updateVetProfile(data: Record<string, unknown>) {
+    const response = await this.client.put('/vet-profiles', data)
+    return response.data
+  }
+
   // ─── Medical Records ──────────────────────────────────────
   async createMedicalRecord(data: { recordType: string; title: string; content: string; animalId?: string; consultationId?: string; veterinarianId?: string; severity?: string; medications?: any[]; attachments?: any[]; isConfidential?: boolean; followUpDate?: string; tags?: string[]; userId?: string }) {
     const response = await this.client.post('/medical-records', data)
@@ -587,6 +605,16 @@ class ApiService {
 
   async adminGetCancellationStats() {
     const response = await this.client.get('/admin/cancellation-stats')
+    return response.data
+  }
+
+  async adminGetVetProfile(userId: string) {
+    const response = await this.client.get(`/admin/vet-profiles/${userId}`)
+    return response.data
+  }
+
+  async adminUpdateVetProfile(userId: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/admin/vet-profiles/${userId}`, data)
     return response.data
   }
 

@@ -209,6 +209,7 @@ export const createVetProfileSchema = Joi.object({
   availableHoursStart: Joi.string().pattern(/^\d{2}:\d{2}/).optional().allow('', null),
   availableHoursEnd: Joi.string().pattern(/^\d{2}:\d{2}/).optional().allow('', null),
   languages: Joi.array().items(Joi.string().max(50)).optional(),
+  profileImage: Joi.string().uri({ allowRelative: true }).max(500).optional().allow('', null),
 });
 
 export const updateVetProfileSchema = createVetProfileSchema.fork(

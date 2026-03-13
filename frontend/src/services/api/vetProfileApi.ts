@@ -19,3 +19,8 @@ export async function getVetProfile(userId: string) {
   const response = await client.get(`/vet-profiles/${userId}`)
   return response.data
 }
+
+export async function updateVetProfile(data: Record<string, unknown>) {
+  const response = await client.put('/vet-profiles', data)
+  return response.data
+}

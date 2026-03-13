@@ -93,6 +93,17 @@ export async function adminResetPermissions(role: string) {
   return response.data
 }
 
+// ─── Admin Vet Profile Management ────────────────────────────
+export async function adminGetVetProfile(userId: string) {
+  const response = await client.get(`/admin/vet-profiles/${userId}`)
+  return response.data
+}
+
+export async function adminUpdateVetProfile(userId: string, data: Record<string, unknown>) {
+  const response = await client.put(`/admin/vet-profiles/${userId}`, data)
+  return response.data
+}
+
 // ─── Health check ─────────────────────────────────────────────
 export async function healthCheck() {
   const response = await client.get('/health')

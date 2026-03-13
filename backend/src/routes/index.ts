@@ -88,6 +88,8 @@ import { FileController } from '../controllers/FileController';
 import { uploadAny } from '../middleware/upload';
 import AdminService from '../services/AdminService';
 import PermissionService from '../services/PermissionService';
+import VetProfileService from '../services/VetProfileService';
+import UserService from '../services/UserService';
 import { asyncHandler } from '../utils/errorHandler';
 import { AuthRequest } from '../middleware/auth';
 
@@ -100,6 +102,19 @@ router.post('/auth/refresh', validateBody(refreshTokenSchema), asyncHandler((req
 router.post('/auth/logout', validateBody(logoutSchema), asyncHandler((req: Request, res: Response) => AuthController.logout(req, res)));
 router.post('/auth/logout-all', authMiddleware, asyncHandler((req: Request, res: Response) => AuthController.logoutAll(req, res)));
 router.get('/auth/profile', authMiddleware, asyncHandler((req: Request, res: Response) => AuthController.getProfile(req, res)));
+router.put('/auth/profile', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const allowed: Record<string, string> = { firstName: 'first_name', lastName: 'last_name', phone: 'phone', avatar: 'avatar_url' };
+  const updates: Record<string, unknown> = {};
+  for (const [key, _col] of Object.entries(allowed)) {
+    if (req.body[key] !== undefined) updates[key] = req.body[key];
+  }
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ success: false, message: 'No valid fields to update' });
+  }
+  const user = await UserService.updateUser(authReq.userId!, updates);
+  res.json({ success: true, data: user });
+}));
 
 // ─── Consultation routes ─────────────────────────────────────
 router.post('/consultations', authMiddleware, validateBody(createConsultationSchema), asyncHandler((req: Request, res: Response) => ConsultationController.createConsultation(req, res)));
@@ -276,6 +291,11 @@ router.get('/admin/settings', authMiddleware, roleMiddleware(['admin']), asyncHa
 router.put('/admin/settings', authMiddleware, roleMiddleware(['admin']), validateBody(updateSystemSettingSchema), asyncHandler((req: Request, res: Response) => AdminController.updateSystemSetting(req, res)));
 router.get('/admin/audit-logs', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));
 router.get('/admin/cancellation-stats', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => BookingController.getCancellationStats(req, res)));
+router.get('/admin/vet-profiles/:userId', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => VetProfileController.getProfile(req, res)));
+router.put('/admin/vet-profiles/:userId', authMiddleware, roleMiddleware(['admin']), validateBody(updateVetProfileSchema), asyncHandler(async (req: Request, res: Response) => {
+  const profile = await VetProfileService.updateProfile(req.params.userId, req.body);
+  res.json({ success: true, data: profile });
+}));
 
 // ─── Permission routes ───────────────────────────────────────
 router.get('/permissions/my', authMiddleware, asyncHandler(async (req: Request, res: Response) => {

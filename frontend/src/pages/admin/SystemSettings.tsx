@@ -21,6 +21,7 @@ const MANAGED_KEYS = new Set([
   // Legacy aliases from seed.sql — same concepts, different key names
   'max_booking_days_ahead',
   'default_slot_duration',
+  'payment.currency',
   'payment.gatewayMode',
   'payment.gatewayUrl',
   'payment.gatewayApiKey',
@@ -57,6 +58,11 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const [patientNoShowLimit, setPatientNoShowLimit] = useState(appSettings.patientNoShowRescheduleLimit)
   const [savingPatientLimit, setSavingPatientLimit] = useState(false)
   const [patientLimitSaved, setPatientLimitSaved] = useState(false)
+
+  // Currency state
+  const [selectedCurrency, setSelectedCurrency] = useState(appSettings.currency || 'INR')
+  const [savingCurrency, setSavingCurrency] = useState(false)
+  const [currencySaved, setCurrencySaved] = useState(false)
 
   // Payment Gateway state
   const [gatewayMode, setGatewayMode] = useState(appSettings.paymentGatewayMode || 'demo')
@@ -96,6 +102,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       if (find('booking.advanceBookingDays')) setAdvanceBookingDays(parseInt(find('booking.advanceBookingDays')!, 10) || 60)
       if (find('booking.cancellationWindowHours')) setCancellationWindowHours(parseInt(find('booking.cancellationWindowHours')!, 10) || 24)
       if (find('booking.maxReschedules')) setMaxReschedules(parseInt(find('booking.maxReschedules')!, 10) || 1)
+      if (find('payment.currency')) setSelectedCurrency(find('payment.currency')!)
     } catch {
     } finally {
       setLoading(false)
@@ -209,6 +216,22 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     }
   }
 
+  const handleSaveCurrency = async (code: string) => {
+    try {
+      setSavingCurrency(true)
+      setCurrencySaved(false)
+      setSelectedCurrency(code)
+      await apiService.adminUpdateSetting('payment.currency', code)
+      setSettings(settings.map(s => s.key === 'payment.currency' ? { ...s, value: code } : s))
+      await reloadSettings()
+      setCurrencySaved(true)
+      setTimeout(() => setCurrencySaved(false), 3000)
+    } catch {
+    } finally {
+      setSavingCurrency(false)
+    }
+  }
+
   const handleSaveCancellation = async () => {
     try {
       setSavingCancellation(true)
@@ -292,6 +315,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const showDisplayCard = matchesSearch('display time format 12h 24h date format')
   const showConsultationCard = matchesSearch('consultation join window minutes duration max')
   const showBookingCard = matchesSearch('booking no-show reschedule patient doctor limit advance days cancellation window hours')
+  const showCurrencyCard = matchesSearch('payment currency INR USD EUR GBP AUD CAD JPY')
   const showPaymentCard = matchesSearch('payment gateway mode provider url api key stripe demo test live')
   const showCancellationCard = matchesSearch('cancellation refund policy goodwill bonus patient doctor')
 
@@ -651,6 +675,59 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                 {patientNoShowLimit === 0 ? <strong>unlimited times</strong> : <><strong>{patientNoShowLimit} time{patientNoShowLimit !== 1 ? 's' : ''}</strong></>}.
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Platform Currency ─── */}
+      {showCurrencyCard && (
+        <div id="settings-section-currency" className="card" style={{ marginBottom: 20 }}>
+          <div className="card-header"><h2 style={{ color: '#111827' }}>💱 Platform Currency</h2></div>
+          <div className="card-body">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Default Currency</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                  Select the platform-wide currency for all prices, fees, and financial displays.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <select
+                  className="form-input"
+                  value={selectedCurrency}
+                  onChange={e => handleSaveCurrency(e.target.value)}
+                  disabled={savingCurrency}
+                  style={{ fontSize: 14, padding: '8px 12px', minWidth: 220, ...inputStyle }}
+                >
+                  <option value="INR">🇮🇳 INR — Indian Rupee (₹)</option>
+                  <option value="USD">🇺🇸 USD — US Dollar ($)</option>
+                  <option value="EUR">🇪🇺 EUR — Euro (€)</option>
+                  <option value="GBP">🇬🇧 GBP — British Pound (£)</option>
+                  <option value="AUD">🇦🇺 AUD — Australian Dollar (A$)</option>
+                  <option value="CAD">🇨🇦 CAD — Canadian Dollar (C$)</option>
+                  <option value="JPY">🇯🇵 JPY — Japanese Yen (¥)</option>
+                  <option value="CNY">🇨🇳 CNY — Chinese Yuan (¥)</option>
+                  <option value="KES">🇰🇪 KES — Kenyan Shilling (KSh)</option>
+                  <option value="ZAR">🇿🇦 ZAR — South African Rand (R)</option>
+                  <option value="BRL">🇧🇷 BRL — Brazilian Real (R$)</option>
+                  <option value="SGD">🇸🇬 SGD — Singapore Dollar (S$)</option>
+                  <option value="AED">🇦🇪 AED — UAE Dirham (د.إ)</option>
+                  <option value="SAR">🇸🇦 SAR — Saudi Riyal (﷼)</option>
+                  <option value="MYR">🇲🇾 MYR — Malaysian Ringgit (RM)</option>
+                  <option value="THB">🇹🇭 THB — Thai Baht (฿)</option>
+                  <option value="PHP">🇵🇭 PHP — Philippine Peso (₱)</option>
+                  <option value="IDR">🇮🇩 IDR — Indonesian Rupiah (Rp)</option>
+                  <option value="NZD">🇳🇿 NZD — New Zealand Dollar (NZ$)</option>
+                  <option value="CHF">🇨🇭 CHF — Swiss Franc (CHF)</option>
+                </select>
+                {savingCurrency && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                {currencySaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+              </div>
+            </div>
+            <p style={{ margin: '8px 0 0', fontSize: 13, color: '#6b7280' }}>
+              <strong>Current:</strong> All prices across the platform display in <strong>{selectedCurrency}</strong>.
+              Changing this will update currency symbols on all pages for all users.
+            </p>
           </div>
         </div>
       )}

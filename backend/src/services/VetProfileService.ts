@@ -276,6 +276,7 @@ export class VetProfileService {
         isAvailable: 'is_available', acceptsEmergency: 'accepts_emergency',
         availableDays: 'available_days', availableHoursStart: 'available_hours_start',
         availableHoursEnd: 'available_hours_end', languages: 'languages',
+        profileImage: 'profile_image',
       };
 
       const entries = Object.entries(updates).filter(([_, v]) => v !== undefined);
@@ -290,11 +291,16 @@ export class VetProfileService {
         RETURNING id, user_id as "userId", license_number as "licenseNumber",
                   specializations, qualifications,
                   years_of_experience as "yearsOfExperience", bio,
-                  clinic_name as "clinicName", consultation_fee as "consultationFee",
+                  clinic_name as "clinicName", clinic_address as "clinicAddress",
+                  consultation_fee as "consultationFee",
                   currency, is_verified as "isVerified",
                   is_available as "isAvailable", accepts_emergency as "acceptsEmergency",
                   rating, total_reviews as "totalReviews",
                   total_consultations as "totalConsultations",
+                  profile_image as "profileImage", languages,
+                  available_days as "availableDays",
+                  available_hours_start as "availableHoursStart",
+                  available_hours_end as "availableHoursEnd",
                   created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [userId, ...values]);
