@@ -1,11 +1,16 @@
 # ─────────────────────────────────────────────────────────────
-# Render.com Blueprint  —  Infrastructure as Code
+# Render.com Blueprint  —  Multi-Environment Setup
 # ─────────────────────────────────────────────────────────────
-# Push this file to your repo, then go to:
-#   https://dashboard.render.com/select-repo?type=blueprint
-# and select the repo. Render will auto-create:
-#   1. PostgreSQL database (free tier)
-#   2. Web service (frontend + backend together)
+# Each environment is a separate Render Web Service + Database.
+# Create each by pointing Render to the correct branch:
+#
+#   DEV  → branch: develop   → vetcare-dev
+#   TEST → branch: test      → vetcare-test
+#   DEMO → branch: demo      → vetcare-demo
+#   PROD → branch: main      → vetcare-app
+#
+# To deploy: push/merge to the target branch, or use the
+# GitHub Actions "Promote" workflow to move code forward.
 # ─────────────────────────────────────────────────────────────
 
 databases:
@@ -19,24 +24,19 @@ services:
     name: vetcare-app
     runtime: node
     plan: free
+    branch: main
     buildCommand: chmod +x render-build.sh && ./render-build.sh
     startCommand: chmod +x render-start.sh && ./render-start.sh
     envVars:
-      # ── Auto-provided by Render ──────────────────────────
       - key: DATABASE_URL
         fromDatabase:
           name: vetcare-db
           property: connectionString
-      # ── App Config ──────────────────────────────────────
       - key: NODE_ENV
         value: production
       - key: SEED_ON_STARTUP
         value: "false"
-      # ── AI Chatbot (Groq - free tier) ───────────────────
       - key: GROQ_API_KEY
-        sync: false  # Set manually in Render dashboard
-      # ── All other config (JWT, SMTP, feature flags, API keys)
-      #    is baked into the .env file that ships with the code.
-      #    No need to add them here — the app reads from .env
+        sync: false
       #    at startup. Only DATABASE_URL must come from Render
       #    because the DB credentials are generated at deploy time.

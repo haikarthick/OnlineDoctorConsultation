@@ -45,8 +45,13 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 3. Check error response format consistency (backend → frontend)
 4. Test that `.env` secrets are not committed (gitignored)
 
-## Deployment
-- Render.com free tier, auto-deploys from `demo` remote
+## Deployment & CI/CD
+- **Branch model**: `develop` → `test` → `demo` → `main` (production)
+- **All development** happens on `develop` branch (or feature branches merged into `develop`)
+- **Never push directly to `main`** — code must be promoted through environments
+- Render.com hosts 4 separate services, one per environment branch
+- GitHub Actions CI/CD runs tests on every push to any env branch
+- Use GitHub Actions "Promote" workflow to merge between environments
 - `.env` is gitignored — production env vars in Render dashboard
 - `render-build.sh` builds frontend then backend
 - `render-start.sh` runs schema → migrations → seed → server
