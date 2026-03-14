@@ -1360,6 +1360,17 @@ class ApiService {
     return response.data
   }
 
+  async analyzeScan(file: File, context?: { species?: string; scanType?: string; bodyPart?: string; notes?: string }) {
+    const formData = new FormData()
+    formData.append('image', file)
+    if (context?.species) formData.append('species', context.species)
+    if (context?.scanType) formData.append('scanType', context.scanType)
+    if (context?.bodyPart) formData.append('bodyPart', context.bodyPart)
+    if (context?.notes) formData.append('notes', context.notes)
+    const response = await this.client.post('/ai-copilot/analyze-scan', formData, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 })
+    return response.data
+  }
+
   // ─── Digital Twin & Simulator ───────────────────────────────
   async getDigitalTwinDashboard(enterpriseId: string) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/digital-twins/dashboard`)

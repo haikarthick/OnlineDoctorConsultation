@@ -95,6 +95,108 @@ const DRUG_INTERACTIONS: Record<string, { interactsWith: string[]; severity: str
 
 class AiCopilotService {
 
+  // ── AI Scan / MRI / X-Ray Analysis ──
+  async analyzeScan(imageBase64: string, mimeType: string, context: { species?: string; scanType?: string; bodyPart?: string; notes?: string } = {}) {
+    const ai = getAI();
+    if (!ai) {
+      return {
+        success: false,
+        analysis: null,
+        error: 'No AI provider configured. Set GROQ_API_KEY in the backend environment.',
+        provider: 'none'
+      };
+    }
+
+    const contextLines = [
+      context.species ? `Species: ${context.species}` : '',
+      context.scanType ? `Scan type: ${context.scanType}` : '',
+      context.bodyPart ? `Body part / region: ${context.bodyPart}` : '',
+      context.notes ? `Clinical notes: ${context.notes}` : '',
+    ].filter(Boolean).join('\n');
+
+    const scanPrompt = `You are an expert veterinary radiologist and diagnostic imaging specialist. Analyze the provided veterinary medical image (X-ray, MRI, ultrasound, CT scan, or clinical photo).
+
+${contextLines ? `Patient context:\n${contextLines}\n` : ''}
+Provide a structured analysis with these sections:
+
+## Image Type & Quality
+Identify the type of image and assess its diagnostic quality.
+
+## Key Findings
+List all observable findings, numbered, from most to least significant.
+
+## Triage Assessment
+Classify urgency: **Critical** (immediate intervention), **Urgent** (within 24h), **Moderate** (schedule follow-up), or **Routine** (monitor).
+
+## Differential Diagnoses
+List possible diagnoses ranked by likelihood with brief reasoning.
+
+## Recommended Next Steps
+Suggest follow-up diagnostics, treatments, or specialist referrals.
+
+## Confidence Level
+Rate your overall confidence (0-100%) and explain any limitations.
+
+IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and should be confirmed by a licensed veterinarian.`;
+
+    try {
+      // Use Groq vision model (llama-3.2-11b-vision-preview) or fall back to text description
+      const visionModel = ai.provider.includes('Groq') ? 'llama-3.2-11b-vision-preview' : ai.model;
+
+      const completion = await ai.client.chat.completions.create({
+        model: visionModel,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: scanPrompt },
+              { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } }
+            ]
+          }
+        ],
+        max_tokens: 1500,
+        temperature: 0.3
+      });
+
+      const content = completion.choices[0]?.message?.content ?? 'Unable to analyze the image.';
+      const tokens = completion.usage?.total_tokens ?? 0;
+
+      // Extract triage level from the response
+      const triageLower = content.toLowerCase();
+      let triageLevel: 'critical' | 'urgent' | 'moderate' | 'routine' = 'routine';
+      if (triageLower.includes('**critical**')) triageLevel = 'critical';
+      else if (triageLower.includes('**urgent**')) triageLevel = 'urgent';
+      else if (triageLower.includes('**moderate**')) triageLevel = 'moderate';
+
+      return {
+        success: true,
+        analysis: content,
+        triageLevel,
+        tokens,
+        provider: ai.provider,
+        disclaimer: 'This is AI-assisted analysis for veterinary professional reference only. All findings must be confirmed by a licensed veterinarian before clinical decisions are made.'
+      };
+    } catch (err: any) {
+      logger.error('AI scan analysis error', { error: err?.message });
+
+      if (err?.status === 429) {
+        return {
+          success: false,
+          analysis: null,
+          error: `AI provider rate limit exceeded. Please try again in a moment.`,
+          provider: ai.provider
+        };
+      }
+
+      return {
+        success: false,
+        analysis: null,
+        error: err?.message || 'Failed to analyze image',
+        provider: ai.provider
+      };
+    }
+  }
+
   // ── Sessions ──
   async listSessions(userId: string, filters: any = {}) {
     const { limit = 50, offset = 0, status } = filters;

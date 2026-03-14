@@ -47,7 +47,8 @@ const AIMessage: React.FC<{ content: string; confidence?: number; sources?: stri
   </div>
 )
 
-const AICopilot: React.FC = () => {  const { t } = useTranslation()
+const AICopilot: React.FC = () => {
+  const { t } = useTranslation()
 
   const [sessions, setSessions] = useState<AIChatSession[]>([])
   const [selectedSession, setSelectedSession] = useState<AIChatSession | null>(null)
@@ -55,7 +56,7 @@ const AICopilot: React.FC = () => {  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [messageInput, setMessageInput] = useState('')
   const [sending, setSending] = useState(false)
-  const [tab, setTab] = useState<'chat' | 'drugs' | 'symptoms'>('chat')
+  const [tab, setTab] = useState<'chat' | 'drugs' | 'symptoms' | 'scan'>('chat')
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -68,6 +69,17 @@ const AICopilot: React.FC = () => {  const { t } = useTranslation()
   const [symptomInput, setSymptomInput] = useState('')
   const [speciesInput, setSpeciesInput] = useState('')
   const [symptomResults, setSymptomResults] = useState<any>(null)
+
+  // Scan analysis state
+  const [scanFile, setScanFile] = useState<File | null>(null)
+  const [scanPreview, setScanPreview] = useState<string>('')
+  const [scanSpecies, setScanSpecies] = useState('')
+  const [scanType, setScanType] = useState('')
+  const [scanBodyPart, setScanBodyPart] = useState('')
+  const [scanNotes, setScanNotes] = useState('')
+  const [scanResults, setScanResults] = useState<any>(null)
+  const [scanAnalyzing, setScanAnalyzing] = useState(false)
+  const scanFileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { fetchSessions() }, [])
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
@@ -141,6 +153,36 @@ const AICopilot: React.FC = () => {  const { t } = useTranslation()
     setLoading(false)
   }
 
+  const handleScanFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setScanFile(file)
+      setScanResults(null)
+      const reader = new FileReader()
+      reader.onload = () => setScanPreview(reader.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const analyzeScan = async () => {
+    if (!scanFile) return
+    setScanAnalyzing(true)
+    setError('')
+    setScanResults(null)
+    try {
+      const res = await apiService.analyzeScan(scanFile, {
+        species: scanSpecies || undefined,
+        scanType: scanType || undefined,
+        bodyPart: scanBodyPart || undefined,
+        notes: scanNotes || undefined,
+      })
+      setScanResults(res.data)
+    } catch (e: any) {
+      setError(e?.response?.data?.error?.message || e.message || 'Scan analysis failed')
+    }
+    setScanAnalyzing(false)
+  }
+
   const deleteSession = async (id: string) => {
     try {
       await apiService.deleteChatSession(id)
@@ -164,7 +206,7 @@ const AICopilot: React.FC = () => {  const { t } = useTranslation()
       <div className="module-header">
         <div>
           <h1>{t('aiCopilot.pageTitle')}</h1>
-          <p style={{ color: '#666', margin: '8px 0 0' }}>Intelligent assistant for symptom analysis, drug checks & treatment guidance</p>
+          <p style={{ color: '#666', margin: '8px 0 0' }}>Intelligent assistant for symptom analysis, drug checks, scan analysis & treatment guidance</p>
         </div>
       </div>
 
@@ -172,9 +214,9 @@ const AICopilot: React.FC = () => {  const { t } = useTranslation()
       {successMsg && <div className="module-alert success" style={{ marginBottom: 16 }}>{successMsg} <button onClick={() => setSuccessMsg('')}>✕</button></div>}
 
       <div className="module-tabs">
-        {(['chat', 'drugs', 'symptoms'] as const).map(t => (
+        {(['chat', 'drugs', 'symptoms', 'scan'] as const).map(t => (
           <button key={t} className={`module-tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
-            {t === 'chat' ? '💬 Chat Assistant' : t === 'drugs' ? '💊 Drug Interactions' : '🔬 Symptom Analysis'}
+            {t === 'chat' ? '💬 Chat Assistant' : t === 'drugs' ? '💊 Drug Interactions' : t === 'symptoms' ? '🔬 Symptom Analysis' : '🩻 Scan Analysis'}
           </button>
         ))}
       </div>
@@ -393,6 +435,156 @@ const AICopilot: React.FC = () => {  const { t } = useTranslation()
               <div style={{ padding: 12, borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a', marginTop: 16, fontSize: 13, color: '#92400e' }}>
                 ⚠️ {symptomResults.disclaimer}
               </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══ SCAN ANALYSIS TAB ═══════════════════════════════ */}
+      {tab === 'scan' && (
+        <div className="module-card" style={{ marginTop: 24 }}>
+          <h3>🩻 AI Scan & Image Analysis</h3>
+          <p style={{ color: '#666', marginBottom: 16 }}>Upload a veterinary scan (X-ray, MRI, ultrasound, CT, or clinical photo) for AI-powered triage analysis</p>
+
+          {/* Upload area */}
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 320px' }}>
+              <input ref={scanFileRef} type="file" accept="image/*" onChange={handleScanFileChange} style={{ display: 'none' }} />
+              <div onClick={() => scanFileRef.current?.click()}
+                style={{
+                  border: '2px dashed #cbd5e1', borderRadius: 12, padding: scanPreview ? 0 : '40px 20px',
+                  textAlign: 'center', cursor: 'pointer', background: '#fafbfc', minHeight: 200,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+                  transition: 'border-color 0.2s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = '#667eea')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = '#cbd5e1')}
+              >
+                {scanPreview ? (
+                  <img src={scanPreview} alt="Scan preview" style={{ maxWidth: '100%', maxHeight: 350, borderRadius: 10 }} />
+                ) : (
+                  <div>
+                    <div style={{ fontSize: 48, marginBottom: 12 }}>🩻</div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#4a5568' }}>Click to upload scan image</div>
+                    <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>X-ray, MRI, Ultrasound, CT, or clinical photo</div>
+                    <div style={{ fontSize: 12, color: '#aaa', marginTop: 8 }}>JPEG, PNG, WebP — Max 10MB</div>
+                  </div>
+                )}
+              </div>
+              {scanFile && (
+                <div style={{ marginTop: 8, fontSize: 13, color: '#666', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>📎 {scanFile.name} ({(scanFile.size / 1024 / 1024).toFixed(1)} MB)</span>
+                  <button style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 13 }}
+                    onClick={() => { setScanFile(null); setScanPreview(''); setScanResults(null) }}>Remove</button>
+                </div>
+              )}
+            </div>
+
+            {/* Context inputs */}
+            <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Species</label>
+                <select value={scanSpecies} onChange={e => setScanSpecies(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14 }}>
+                  <option value="">Select species...</option>
+                  <option value="dog">Dog</option>
+                  <option value="cat">Cat</option>
+                  <option value="horse">Horse</option>
+                  <option value="cattle">Cattle</option>
+                  <option value="sheep">Sheep</option>
+                  <option value="goat">Goat</option>
+                  <option value="pig">Pig</option>
+                  <option value="poultry">Poultry</option>
+                  <option value="rabbit">Rabbit</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Scan Type</label>
+                <select value={scanType} onChange={e => setScanType(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14 }}>
+                  <option value="">Select type...</option>
+                  <option value="x-ray">X-Ray</option>
+                  <option value="mri">MRI</option>
+                  <option value="ct-scan">CT Scan</option>
+                  <option value="ultrasound">Ultrasound</option>
+                  <option value="clinical-photo">Clinical Photo</option>
+                  <option value="dermoscopy">Dermoscopy</option>
+                  <option value="endoscopy">Endoscopy</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Body Part / Region</label>
+                <input value={scanBodyPart} onChange={e => setScanBodyPart(e.target.value)} placeholder="e.g. left foreleg, thorax, abdomen"
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14 }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Clinical Notes (optional)</label>
+                <textarea value={scanNotes} onChange={e => setScanNotes(e.target.value)} placeholder="Any relevant history or symptoms..."
+                  rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14, resize: 'vertical' }} />
+              </div>
+              <button className="module-btn primary" onClick={analyzeScan} disabled={!scanFile || scanAnalyzing}
+                style={{ padding: '12px 20px', fontSize: 15, marginTop: 4 }}>
+                {scanAnalyzing ? '🔄 Analyzing...' : '🩻 Analyze Scan'}
+              </button>
+            </div>
+          </div>
+
+          {/* Results */}
+          {scanResults && (
+            <div style={{ marginTop: 24 }}>
+              {scanResults.success ? (
+                <>
+                  {/* Triage banner */}
+                  <div style={{
+                    padding: '16px 20px', borderRadius: 12, marginBottom: 16,
+                    border: '1px solid',
+                    ...(scanResults.triageLevel === 'critical' ? { background: '#fef2f2', borderColor: '#fca5a5', color: '#991b1b' }
+                      : scanResults.triageLevel === 'urgent' ? { background: '#fff7ed', borderColor: '#fdba74', color: '#9a3412' }
+                      : scanResults.triageLevel === 'moderate' ? { background: '#fffbeb', borderColor: '#fde68a', color: '#92400e' }
+                      : { background: '#f0fdf4', borderColor: '#86efac', color: '#166534' }),
+                    display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap'
+                  }}>
+                    <div style={{ fontSize: 32 }}>
+                      {scanResults.triageLevel === 'critical' ? '🚨' : scanResults.triageLevel === 'urgent' ? '⚠️' : scanResults.triageLevel === 'moderate' ? '📋' : '✅'}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Triage Level</div>
+                      <div style={{ fontSize: 22, fontWeight: 800, textTransform: 'uppercase' }}>{scanResults.triageLevel}</div>
+                    </div>
+                    {scanResults.provider && (
+                      <div style={{ marginLeft: 'auto', fontSize: 12, opacity: 0.7 }}>Powered by: {scanResults.provider}</div>
+                    )}
+                  </div>
+
+                  {/* Full AI analysis */}
+                  <div style={{ padding: '20px 24px', borderRadius: 12, background: 'white', border: '1px solid #e8ecf0', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                    <div className="ai-markdown" style={{ fontSize: 14, lineHeight: 1.8, color: '#2d3748' }}>
+                      <ReactMarkdown
+                        components={{
+                          h2: ({children}) => <h3 style={{margin:'18px 0 8px',fontSize:16,color:'#1a202c',borderBottom:'1px solid #eee',paddingBottom:6}}>{children}</h3>,
+                          h3: ({children}) => <h4 style={{margin:'14px 0 6px',fontSize:14,fontWeight:700,color:'#4a5568'}}>{children}</h4>,
+                          p: ({children}) => <p style={{margin:'0 0 10px'}}>{children}</p>,
+                          ul: ({children}) => <ul style={{margin:'0 0 10px',paddingLeft:20}}>{children}</ul>,
+                          ol: ({children}) => <ol style={{margin:'0 0 10px',paddingLeft:20}}>{children}</ol>,
+                          li: ({children}) => <li style={{marginBottom:4}}>{children}</li>,
+                          strong: ({children}) => <strong style={{color:'#1a202c',fontWeight:700}}>{children}</strong>,
+                        }}
+                      >{scanResults.analysis}</ReactMarkdown>
+                    </div>
+                  </div>
+
+                  {/* Disclaimer */}
+                  <div style={{ padding: 14, borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a', marginTop: 16, fontSize: 13, color: '#92400e' }}>
+                    ⚠️ {scanResults.disclaimer}
+                  </div>
+                </>
+              ) : (
+                <div style={{ padding: 16, borderRadius: 10, background: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b' }}>
+                  ❌ {scanResults.error}
+                </div>
+              )}
             </div>
           )}
         </div>

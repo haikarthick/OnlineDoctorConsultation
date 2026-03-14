@@ -88,6 +88,25 @@ class Tier4Controller {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
+  async analyzeScan(req: Request, res: Response) {
+    try {
+      const file = req.file;
+      if (!file) {
+        return res.status(400).json({ error: { message: 'No image file uploaded. Please attach a scan/X-ray/MRI image.' } });
+      }
+      const imageBase64 = file.buffer.toString('base64');
+      const mimeType = file.mimetype;
+      const context = {
+        species: req.body.species,
+        scanType: req.body.scanType,
+        bodyPart: req.body.bodyPart,
+        notes: req.body.notes,
+      };
+      const data = await aiCopilotService.analyzeScan(imageBase64, mimeType, context);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
   // ═══════════════════ Digital Twin & Simulator ═══════════════════
 
   async listDigitalTwins(req: Request, res: Response) {
