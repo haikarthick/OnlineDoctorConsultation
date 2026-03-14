@@ -140,42 +140,59 @@ Rate your overall confidence (0-100%) and explain any limitations.
 IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and should be confirmed by a licensed veterinarian.`;
 
     try {
-      // Use Groq vision model (llama-3.2-90b-vision-preview is the current supported model)
-      const visionModel = ai.provider.includes('Groq') ? 'llama-3.2-90b-vision-preview' : ai.model;
+      // Try vision models in order — fallback chain so deprecations don't break the feature
+      const visionModels = ai.provider.includes('Groq')
+        ? ['meta-llama/llama-4-scout-17b-16e-instruct', 'llama-3.3-70b-versatile']
+        : [ai.model];
 
-      const completion = await ai.client.chat.completions.create({
-        model: visionModel,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: scanPrompt },
-              { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } }
-            ]
+      let lastError: any = null;
+      for (const visionModel of visionModels) {
+        try {
+          const completion = await ai.client.chat.completions.create({
+            model: visionModel,
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: scanPrompt },
+                  { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } }
+                ]
+              }
+            ],
+            max_tokens: 1500,
+            temperature: 0.3
+          });
+
+          const content = completion.choices[0]?.message?.content ?? 'Unable to analyze the image.';
+          const tokens = completion.usage?.total_tokens ?? 0;
+
+          // Extract triage level from the response
+          const triageLower = content.toLowerCase();
+          let triageLevel: 'critical' | 'urgent' | 'moderate' | 'routine' = 'routine';
+          if (triageLower.includes('**critical**')) triageLevel = 'critical';
+          else if (triageLower.includes('**urgent**')) triageLevel = 'urgent';
+          else if (triageLower.includes('**moderate**')) triageLevel = 'moderate';
+
+          return {
+            success: true,
+            analysis: content,
+            triageLevel,
+            tokens,
+            provider: ai.provider,
+            disclaimer: 'This is AI-assisted analysis for veterinary professional reference only. All findings must be confirmed by a licensed veterinarian before clinical decisions are made.'
+          };
+        } catch (modelErr: any) {
+          lastError = modelErr;
+          // If model is decommissioned/not found, try next; otherwise rethrow
+          if (modelErr?.status === 400 || modelErr?.status === 404) {
+            logger.warn(`Vision model ${visionModel} unavailable, trying next`, { error: modelErr?.message });
+            continue;
           }
-        ],
-        max_tokens: 1500,
-        temperature: 0.3
-      });
-
-      const content = completion.choices[0]?.message?.content ?? 'Unable to analyze the image.';
-      const tokens = completion.usage?.total_tokens ?? 0;
-
-      // Extract triage level from the response
-      const triageLower = content.toLowerCase();
-      let triageLevel: 'critical' | 'urgent' | 'moderate' | 'routine' = 'routine';
-      if (triageLower.includes('**critical**')) triageLevel = 'critical';
-      else if (triageLower.includes('**urgent**')) triageLevel = 'urgent';
-      else if (triageLower.includes('**moderate**')) triageLevel = 'moderate';
-
-      return {
-        success: true,
-        analysis: content,
-        triageLevel,
-        tokens,
-        provider: ai.provider,
-        disclaimer: 'This is AI-assisted analysis for veterinary professional reference only. All findings must be confirmed by a licensed veterinarian before clinical decisions are made.'
-      };
+          throw modelErr;
+        }
+      }
+      // All models exhausted
+      throw lastError;
     } catch (err: any) {
       logger.error('AI scan analysis error', { error: err?.message });
 
