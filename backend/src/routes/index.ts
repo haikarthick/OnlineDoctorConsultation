@@ -290,6 +290,11 @@ router.put('/admin/reviews/:id/moderate', authMiddleware, roleMiddleware(['admin
 router.get('/admin/settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getSystemSettings(req, res)));
 router.put('/admin/settings', authMiddleware, roleMiddleware(['admin']), validateBody(updateSystemSettingSchema), asyncHandler((req: Request, res: Response) => AdminController.updateSystemSetting(req, res)));
 router.get('/admin/audit-logs', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));
+router.get('/admin/compliance/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getComplianceDashboard(req, res)));
+router.get('/admin/compliance/phi-access', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getPhiAccessLog(req, res)));
+router.get('/admin/compliance/user-data/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.getUserDataSummary(req, res)));
+router.get('/admin/compliance/my-data', authMiddleware, asyncHandler((req: Request, res: Response) => AdminController.getUserDataSummary(req, res)));
+router.post('/admin/compliance/revoke-sessions/:userId', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.revokeUserSessions(req, res)));
 router.get('/admin/cancellation-stats', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => BookingController.getCancellationStats(req, res)));
 router.get('/admin/vet-profiles/:userId', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => VetProfileController.getProfile(req, res)));
 router.put('/admin/vet-profiles/:userId', authMiddleware, roleMiddleware(['admin']), validateBody(updateVetProfileSchema), asyncHandler(async (req: Request, res: Response) => {

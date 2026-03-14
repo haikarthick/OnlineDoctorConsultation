@@ -603,6 +603,28 @@ class ApiService {
     return response.data
   }
 
+  // ── HIPAA Compliance ──────────────────────────────────────
+  async getComplianceDashboard() {
+    const response = await this.client.get('/admin/compliance/dashboard')
+    return response.data
+  }
+
+  async getPhiAccessLog(params?: { limit?: number; offset?: number; userId?: string; entityType?: string; startDate?: string; endDate?: string }) {
+    const response = await this.client.get('/admin/compliance/phi-access', { params })
+    return response.data
+  }
+
+  async getUserDataSummary(userId?: string) {
+    const url = userId ? `/admin/compliance/user-data/${userId}` : '/admin/compliance/my-data'
+    const response = await this.client.get(url)
+    return response.data
+  }
+
+  async revokeUserSessions(userId: string) {
+    const response = await this.client.post(`/admin/compliance/revoke-sessions/${userId}`)
+    return response.data
+  }
+
   async adminGetCancellationStats() {
     const response = await this.client.get('/admin/cancellation-stats')
     return response.data

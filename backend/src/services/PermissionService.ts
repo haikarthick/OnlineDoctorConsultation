@@ -36,6 +36,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_permissions',
       'admin_medical_records',
       'admin_hospitals',
+      'admin_compliance',
     ]
   },
   actions: {
@@ -209,7 +210,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Admin pages
     'admin_dashboard', 'admin_users', 'admin_consultations', 'admin_payments',
     'admin_reviews', 'admin_settings', 'admin_audit', 'admin_permissions', 'admin_medical_records',
-    'admin_hospitals',
+    'admin_hospitals', 'admin_compliance',
     // Hospital (full access)
     'hospital_browse', 'hospital_create', 'hospital_manage',
     'hospital_departments', 'hospital_services', 'hospital_staff',
@@ -260,6 +261,7 @@ export const PERMISSION_LABELS: Record<string, string> = {
   admin_permissions: 'Permission Management',
   admin_medical_records: 'Medical Record Management',
   admin_hospitals: 'Hospital Management',
+  admin_compliance: 'HIPAA Compliance Dashboard',
   // Actions
   booking_create: 'Create Bookings',
   booking_confirm: 'Confirm Bookings',

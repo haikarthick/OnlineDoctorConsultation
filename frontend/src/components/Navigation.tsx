@@ -162,6 +162,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-audit', label: t('nav.auditLogs'), icon: '📜', path: '/admin/audit-logs',
       roles: ['admin'], section: 'Administration' },
+    { id: 'admin-compliance', label: 'HIPAA Compliance', icon: '🛡️', path: '/admin/compliance',
+      roles: ['admin'], section: 'Administration' },
     { id: 'admin-cancellation-dashboard', label: t('nav.cancellations'), icon: '📊', path: '/admin/cancellation-dashboard',
       roles: ['admin'], section: 'Administration' },
 

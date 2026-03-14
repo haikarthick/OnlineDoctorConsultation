@@ -42,6 +42,7 @@ const SystemSettings = lazy(() => import('./pages/admin/SystemSettings'))
 const AuditLogs = lazy(() => import('./pages/admin/AuditLogs'))
 const PermissionManagement = lazy(() => import('./pages/admin/PermissionManagement'))
 const MedicalRecordManagement = lazy(() => import('./pages/admin/MedicalRecordManagement'))
+const ComplianceDashboardAdmin = lazy(() => import('./pages/admin/ComplianceDashboard'))
 // Enterprise Module
 const EnterpriseManagement = lazy(() => import('./pages/EnterpriseManagement'))
 const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
@@ -255,6 +256,7 @@ function AppRoutes() {
       <Route path="/admin/audit-logs" element={<RoleRoute path="/admin/audit-logs"><AppLayout><RoutedPage Component={AuditLogs} /></AppLayout></RoleRoute>} />
       <Route path="/admin/permissions" element={<RoleRoute path="/admin/permissions"><AppLayout><RoutedPage Component={PermissionManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/medical-records" element={<RoleRoute path="/admin/medical-records"><AppLayout><RoutedPage Component={MedicalRecordManagement} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/compliance" element={<RoleRoute path="/admin/compliance"><AppLayout><RoutedPage Component={ComplianceDashboardAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/cancellation-dashboard" element={<RoleRoute path="/admin/cancellation-dashboard"><AppLayout><RoutedPage Component={CancellationDashboard} /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}

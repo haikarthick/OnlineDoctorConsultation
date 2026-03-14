@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import AdminService from '../services/AdminService';
+import AuditService from '../services/AuditService';
 import { ForbiddenError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 
@@ -168,6 +169,47 @@ class AdminController {
     };
     const result = await AdminService.getAuditLogs(params);
     res.json({ success: true, data: result });
+  }
+
+  // ─── HIPAA Compliance Endpoints ─────────────────────────────
+
+  async getComplianceDashboard(req: Request, res: Response) {
+    this.assertAdmin(req);
+    const data = await AuditService.getComplianceDashboard();
+    res.json({ success: true, data });
+  }
+
+  async getPhiAccessLog(req: Request, res: Response) {
+    this.assertAdmin(req);
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const filters = {
+      userId: req.query.userId as string,
+      entityType: req.query.entityType as string,
+      startDate: req.query.startDate as string,
+      endDate: req.query.endDate as string,
+    };
+    const data = await AuditService.getPhiAccessLog(limit, offset, filters);
+    res.json({ success: true, data });
+  }
+
+  async getUserDataSummary(req: Request, res: Response) {
+    const authReq = req as AuthRequest;
+    // Users can view their own; admins can view anyone's
+    const targetUserId = req.params.userId || authReq.userId;
+    if (targetUserId !== authReq.userId && authReq.userRole !== 'admin') {
+      throw new ForbiddenError('You can only view your own data summary');
+    }
+    const data = await AuditService.getUserDataSummary(targetUserId!);
+    res.json({ success: true, data });
+  }
+
+  async revokeUserSessions(req: Request, res: Response) {
+    const authReq = this.assertAdmin(req);
+    await AuditService.revokeUserSessions(req.params.userId);
+    await AuditService.log(authReq.userId, 'admin.revoke_sessions', 'user', req.params.userId,
+      undefined, undefined, req.ip, req.get('user-agent'));
+    res.json({ success: true, message: 'All sessions revoked' });
   }
 }
 

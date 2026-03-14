@@ -9,13 +9,15 @@ import { VetProfile } from '../types'
 const Settings: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { formatCurrency } = useSettings()
+  const { formatCurrency, formatDateTime } = useSettings()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const isVet = user?.role === 'veterinarian'
 
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [dataSummary, setDataSummary] = useState<any>(null)
+  const [dataLoading, setDataLoading] = useState(false)
 
   // Basic profile
   const [formData, setFormData] = useState({
@@ -349,6 +351,63 @@ const Settings: React.FC = () => {
                 <input type="checkbox" defaultChecked />
                 <span>{t('settings.preferences.shareHealth')}</span>
               </label>
+            </div>
+          </div>
+
+          {/* Privacy & Data section */}
+          <div className="settings-section">
+            <h2>🔐 Privacy & Data</h2>
+            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
+              Review your data footprint and manage privacy settings. VetCare follows HIPAA-aligned data protection practices.
+            </p>
+
+            {!dataSummary ? (
+              <button className="btn btn-outline" onClick={async () => {
+                setDataLoading(true)
+                try {
+                  const result = await apiService.getUserDataSummary()
+                  setDataSummary(result.data || {})
+                } catch { /* */ } finally { setDataLoading(false) }
+              }} disabled={dataLoading}>
+                {dataLoading ? '⏳ Loading...' : '📊 View My Data Summary'}
+              </button>
+            ) : (
+              <div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
+                  {[
+                    { label: 'Medical Records', value: dataSummary.medicalRecords, icon: '📋' },
+                    { label: 'Consultations', value: dataSummary.consultations, icon: '🏥' },
+                    { label: 'Prescriptions', value: dataSummary.prescriptions, icon: '💊' },
+                    { label: 'Animals', value: dataSummary.animals, icon: '🐾' },
+                    { label: 'Audit Trail', value: dataSummary.auditEntries, icon: '📜' },
+                    { label: 'Active Sessions', value: dataSummary.activeSessions, icon: '🟢' },
+                  ].map((item, i) => (
+                    <div key={i} style={{ padding: '12px 16px', borderRadius: 8, background: '#f9fafb', border: '1px solid #e5e7eb', textAlign: 'center' }}>
+                      <div style={{ fontSize: 20 }}>{item.icon}</div>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: '#374151' }}>{item.value ?? 0}</div>
+                      <div style={{ fontSize: 11, color: '#6b7280' }}>{item.label}</div>
+                    </div>
+                  ))}
+                </div>
+                {dataSummary.lastLogin && (
+                  <p style={{ fontSize: 12, color: '#6b7280' }}>Last login: {formatDateTime(dataSummary.lastLogin)}</p>
+                )}
+              </div>
+            )}
+
+            <div style={{ marginTop: 16, padding: 16, borderRadius: 8, background: '#f0fdf4', border: '1px solid #86efac' }}>
+              <h4 style={{ margin: '0 0 8px', fontSize: 14 }}>🛡️ Your Data Rights</h4>
+              <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#166534', lineHeight: 1.8 }}>
+                <li><strong>Right to Access:</strong> View all your data through the dashboard above</li>
+                <li><strong>Right to Rectification:</strong> Update your profile information anytime</li>
+                <li><strong>Right to Data Portability:</strong> Contact admin for data export</li>
+                <li><strong>Right to Erasure:</strong> Contact admin for account deletion request</li>
+                <li><strong>Right to Restrict Processing:</strong> Toggle data sharing preferences above</li>
+              </ul>
+            </div>
+
+            <div style={{ marginTop: 16, padding: 12, borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a', fontSize: 12, color: '#92400e' }}>
+              ⚠️ Medical records may be retained as required by veterinary regulatory standards even after account deletion requests. All data access is logged for HIPAA compliance.
             </div>
           </div>
         </div>

@@ -67,6 +67,7 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   hospital_browse: ['/vet-hospitals'],
   hospital_manage: ['/vet-hospitals/manage'],
   admin_hospitals: ['/admin/vet-hospitals'],
+  admin_compliance: ['/admin/compliance'],
   // Wallet & Cancellation
   wallet: ['/wallet'],
   admin_cancellation_dashboard: ['/admin/cancellation-dashboard'],
@@ -134,6 +135,7 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'vet-hospitals': 'hospital_browse',
   'vet-hospitals-manage': 'hospital_manage',
   'admin-hospitals': 'admin_hospitals',
+  'admin-compliance': 'admin_compliance',
   // Wallet & Cancellation
   'wallet': 'wallet',
   'admin-cancellation-dashboard': 'admin_cancellation_dashboard',

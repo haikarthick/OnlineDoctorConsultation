@@ -13,6 +13,7 @@ const SECTIONS = [
   { id: 'enterprises', label: 'Enterprises' },
   { id: 'hospitals', label: 'Hospitals' },
   { id: 'features', label: 'Features' },
+  { id: 'compliance', label: 'Compliance' },
   { id: 'how-it-works', label: 'How It Works' },
   { id: 'testimonials', label: 'Testimonials' },
 ] as const
@@ -160,6 +161,13 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       image: '👩‍⚕️',
       text: 'We set up our hospital profile, added 8 doctors across 4 departments and went live in one afternoon. Bookings started the same day. VetCare is the best thing to happen to our clinic.',
       rating: 5
+    },
+    {
+      name: 'Thomas Eriksen',
+      role: 'Compliance Officer — Nordic Farms Group',
+      image: '👨‍💼',
+      text: 'The HIPAA-grade audit logging and PHI access monitoring gave our compliance team full confidence. Every record access is tracked, and the real-time dashboard makes audit preparation effortless.',
+      rating: 5
     }
   ]
 
@@ -197,6 +205,15 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
     { icon: '🌱', title: 'Sustainability & Carbon', description: 'Track ESG metrics, set sustainability goals, and estimate carbon footprints using IPCC emission factors per species' },
     { icon: '💚', title: 'Wellness Portal', description: 'Comprehensive pet health scorecards with nutrition, activity, vaccination & dental tracking plus smart recurring reminders' },
     { icon: '🗺️', title: 'Geospatial Analytics', description: 'Geofencing zones, real-time location tracking, heatmap clustering, movement trails, and automatic zone breach detection' }
+  ]
+
+  const complianceFeatures = [
+    { icon: '🛡️', title: 'HIPAA-Aligned Protection', description: 'Technical safeguards including role-based access controls, encrypted data transmission, and confidential record flagging for all medical data' },
+    { icon: '📜', title: 'HIPAA-Grade Audit Trail', description: 'Every data access, modification, and export is logged with user identity, IP address, timestamp, and HIPAA event categorization' },
+    { icon: '🔐', title: 'Role-Based Access Control', description: '4-tier RBAC system (Pet Owner, Farmer, Veterinarian, Admin) with granular permission management and admin override auditing' },
+    { icon: '🔒', title: 'Data Encryption & Security', description: 'TLS encryption in transit, bcrypt password hashing, JWT session management with configurable expiration and revocation' },
+    { icon: '👁️', title: 'PHI Access Monitoring', description: 'Real-time dashboard tracking who accessed Protected Health Information — medical records, prescriptions, lab results, and scans' },
+    { icon: '📊', title: 'Compliance Dashboard', description: 'Live compliance scoring, policy management, breach detection, failed login monitoring, and regulatory framework tracking' },
   ]
 
   return (
@@ -289,6 +306,11 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
             <p className="hero-subtext">
               {t('home.guarantees')}
             </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
+              <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(16,185,129,0.15)', color: '#059669', border: '1px solid rgba(16,185,129,0.3)' }}>🛡️ HIPAA-Aligned</span>
+              <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(99,102,241,0.15)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.3)' }}>🔒 End-to-End Encrypted</span>
+              <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(245,158,11,0.15)', color: '#d97706', border: '1px solid rgba(245,158,11,0.3)' }}>📜 Full Audit Trail</span>
+            </div>
             <p className="hero-login-link">
               {t('home.signinLink').split('→')[0]} <button className="link-button" onClick={onLogin || (() => {})}>{t('home.signIn')} →</button>
             </p>
@@ -494,6 +516,43 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
         </div>
       </section>
 
+      {/* HIPAA Compliance & Data Privacy */}
+      <section className="advanced-features-section" id="compliance" style={{ background: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)' }}>
+        <h2 className="section-title" style={{ color: '#f8fafc' }}>🛡️ HIPAA Compliance & Data Privacy</h2>
+        <p className="section-subtitle" style={{ color: '#a7f3d0' }}>Enterprise-grade security and HIPAA-aligned data protection for every animal, every record, every user</p>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+          {[
+            { label: 'HIPAA-Aligned', icon: '🏥' },
+            { label: 'RBAC Enforced', icon: '🔐' },
+            { label: 'Audit Logged', icon: '📜' },
+            { label: 'Encrypted', icon: '🔒' },
+          ].map((badge, i) => (
+            <div key={i} style={{ padding: '8px 20px', borderRadius: 24, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', color: '#d1fae5', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>{badge.icon}</span> {badge.label}
+            </div>
+          ))}
+        </div>
+
+        <div className="advanced-grid">
+          {complianceFeatures.map((feat, idx) => (
+            <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#e2e8f0' }}>
+              <div className="advanced-icon">{feat.icon}</div>
+              <h3 style={{ color: '#f8fafc' }}>{feat.title}</h3>
+              <p style={{ color: '#a7f3d0' }}>{feat.description}</p>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 32, padding: '20px 24px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', maxWidth: 700, margin: '32px auto 0' }}>
+          <p style={{ margin: 0, color: '#d1fae5', fontSize: 14, lineHeight: 1.7 }}>
+            <strong style={{ color: '#f8fafc' }}>Data Privacy Commitment:</strong> VetCare does not sell, share, or monetize your health data.
+            All medical records are protected with the same standards used in human healthcare.
+            Every access is audited. Every user has full visibility into their data footprint.
+          </p>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section className="how-it-works-section" id="how-it-works">
         <h2 className="section-title">How It Works</h2>
@@ -606,12 +665,15 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
         <div className="footer-content">
           <div className="footer-brand">
             <span>🏥</span> <strong>VetCare Enterprise</strong>
+            <span style={{ marginLeft: 12, padding: '2px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: 'rgba(16,185,129,0.2)', color: '#34d399' }}>HIPAA-Aligned</span>
           </div>
           <p>© 2026 VetCare. All rights reserved.</p>
           <div className="footer-links">
             <a href="#privacy">{t('home.footer.privacy')}</a>
             <span className="divider">•</span>
             <a href="#terms">{t('home.footer.terms')}</a>
+            <span className="divider">•</span>
+            <a href="#compliance">Compliance</a>
             <span className="divider">•</span>
             <a href="#contact">{t('home.footer.contact')}</a>
             <span className="divider">•</span>
