@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import fs from 'fs';
 import 'express-async-errors';
 
 import config from './config';
@@ -109,10 +110,11 @@ app.use(`/api/${config.app.apiVersion}`, (req, res, next) => {
   return csrfProtection(req, res, next);
 });
 
-// ─── Production: Serve frontend static files ──────────────────
+// ─── Serve frontend static files when dist exists (Render deployments) ────
 // Must come BEFORE the API welcome route so "/" serves the React app
 const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
-if (config.app.nodeEnv === 'production') {
+const hasFrontendDist = fs.existsSync(frontendDistPath);
+if (hasFrontendDist) {
   app.use(express.static(frontendDistPath));
 }
 
@@ -132,8 +134,8 @@ app.use(`/api/${config.app.apiVersion}`, routes);
 
 // 404 Handler - must come before error handler
 app.use((req: Request, res: Response) => {
-  // In production, serve index.html for non-API routes (SPA client-side routing)
-  if (config.app.nodeEnv === 'production' && !req.path.startsWith('/api/')) {
+  // In production/Render, serve index.html for non-API routes (SPA client-side routing)
+  if (hasFrontendDist && !req.path.startsWith('/api/')) {
     return res.sendFile(path.join(frontendDistPath, 'index.html'));
   }
   res.status(404).json({
