@@ -1,25 +1,105 @@
 # ─────────────────────────────────────────────────────────────
 # Render.com Blueprint  —  Multi-Environment Setup
 # ─────────────────────────────────────────────────────────────
-# Each environment is a separate Render Web Service + Database.
-# Create each by pointing Render to the correct branch:
+# Creates 4 web services + 4 databases automatically:
+#   DEV  → branch: develop   → vetcare-dev   + vetcare-db-dev
+#   TEST → branch: test      → vetcare-test  + vetcare-db-test
+#   DEMO → branch: demo      → vetcare-demo  + vetcare-db-demo
+#   PROD → branch: main      → vetcare-app   + vetcare-db-prod
 #
-#   DEV  → branch: develop   → vetcare-dev
-#   TEST → branch: test      → vetcare-test
-#   DEMO → branch: demo      → vetcare-demo
-#   PROD → branch: main      → vetcare-app
-#
-# To deploy: push/merge to the target branch, or use the
-# GitHub Actions "Promote" workflow to move code forward.
+# To apply:
+#   1. Go to https://dashboard.render.com/select-repo?type=blueprint
+#   2. Select this repo → click "Apply"
+#   3. All 8 resources are created in one click
 # ─────────────────────────────────────────────────────────────
 
 databases:
-  - name: vetcare-db
+  # ── DEV Database ─────────────────────────────────────────
+  - name: vetcare-db-dev
     plan: free
-    databaseName: vetcare
+    databaseName: vetcare_dev
+    user: vetcare
+
+  # ── TEST Database ────────────────────────────────────────
+  - name: vetcare-db-test
+    plan: free
+    databaseName: vetcare_test
+    user: vetcare
+
+  # ── DEMO Database ────────────────────────────────────────
+  - name: vetcare-db-demo
+    plan: free
+    databaseName: vetcare_demo
+    user: vetcare
+
+  # ── PROD Database ────────────────────────────────────────
+  - name: vetcare-db-prod
+    plan: free
+    databaseName: vetcare_prod
     user: vetcare
 
 services:
+  # ── DEV Environment ─────────────────────────────────────
+  - type: web
+    name: vetcare-dev
+    runtime: node
+    plan: free
+    branch: develop
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    startCommand: chmod +x render-start.sh && ./render-start.sh
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vetcare-db-dev
+          property: connectionString
+      - key: NODE_ENV
+        value: development
+      - key: SEED_ON_STARTUP
+        value: "true"
+      - key: GROQ_API_KEY
+        sync: false
+
+  # ── TEST Environment ────────────────────────────────────
+  - type: web
+    name: vetcare-test
+    runtime: node
+    plan: free
+    branch: test
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    startCommand: chmod +x render-start.sh && ./render-start.sh
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vetcare-db-test
+          property: connectionString
+      - key: NODE_ENV
+        value: test
+      - key: SEED_ON_STARTUP
+        value: "true"
+      - key: GROQ_API_KEY
+        sync: false
+
+  # ── DEMO Environment ────────────────────────────────────
+  - type: web
+    name: vetcare-demo
+    runtime: node
+    plan: free
+    branch: demo
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    startCommand: chmod +x render-start.sh && ./render-start.sh
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vetcare-db-demo
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: SEED_ON_STARTUP
+        value: "true"
+      - key: GROQ_API_KEY
+        sync: false
+
+  # ── PROD Environment ────────────────────────────────────
   - type: web
     name: vetcare-app
     runtime: node
@@ -30,7 +110,7 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: vetcare-db
+          name: vetcare-db-prod
           property: connectionString
       - key: NODE_ENV
         value: production
@@ -38,5 +118,3 @@ services:
         value: "false"
       - key: GROQ_API_KEY
         sync: false
-      #    at startup. Only DATABASE_URL must come from Render
-      #    because the DB credentials are generated at deploy time.
