@@ -1337,6 +1337,114 @@ class ApiService {
     return response.data
   }
 
+  // ─── Staff & Workflow Management ────────────────────────────
+
+  // Staff Positions
+  async listStaffPositions(hospitalId: string) {
+    const response = await this.client.get(`/hospitals/${hospitalId}/staff`)
+    return response.data
+  }
+  async addStaffPosition(hospitalId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/hospitals/${hospitalId}/staff`, data)
+    return response.data
+  }
+  async updateStaffPosition(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/staff-positions/${id}`, data)
+    return response.data
+  }
+  async removeStaffPosition(id: string) {
+    const response = await this.client.delete(`/staff-positions/${id}`)
+    return response.data
+  }
+
+  // Appointment Queue
+  async getQueue(hospitalId: string, status?: string) {
+    const response = await this.client.get(`/hospitals/${hospitalId}/queue`, { params: { status } })
+    return response.data
+  }
+  async checkInToQueue(hospitalId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/hospitals/${hospitalId}/queue/check-in`, data)
+    return response.data
+  }
+  async triagePatient(queueId: string, data: Record<string, unknown>) {
+    const response = await this.client.patch(`/queue/${queueId}/triage`, data)
+    return response.data
+  }
+  async updateQueueStatus(queueId: string, status: string) {
+    const response = await this.client.patch(`/queue/${queueId}/status`, { status })
+    return response.data
+  }
+  async getQueueStats(hospitalId: string) {
+    const response = await this.client.get(`/hospitals/${hospitalId}/queue/stats`)
+    return response.data
+  }
+
+  // Workflow Cases
+  async getWorkflowDashboard(hospitalId: string) {
+    const response = await this.client.get(`/hospitals/${hospitalId}/workflow/dashboard`)
+    return response.data
+  }
+  async listWorkflowCases(hospitalId: string, filters?: Record<string, unknown>) {
+    const response = await this.client.get(`/hospitals/${hospitalId}/workflow/cases`, { params: filters })
+    return response.data
+  }
+  async createWorkflowCase(hospitalId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/hospitals/${hospitalId}/workflow/cases`, data)
+    return response.data
+  }
+  async getWorkflowCaseDetail(caseId: string) {
+    const response = await this.client.get(`/workflow/cases/${caseId}`)
+    return response.data
+  }
+  async updateWorkflowCase(caseId: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/workflow/cases/${caseId}`, data)
+    return response.data
+  }
+  async transitionWorkflowStage(caseId: string, toStage: string, notes?: string) {
+    const response = await this.client.patch(`/workflow/cases/${caseId}/transition`, { toStage, notes })
+    return response.data
+  }
+
+  // Referrals
+  async listReferrals(hospitalId: string, filters?: Record<string, unknown>) {
+    const response = await this.client.get(`/hospitals/${hospitalId}/referrals`, { params: filters })
+    return response.data
+  }
+  async createReferral(hospitalId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/hospitals/${hospitalId}/referrals`, data)
+    return response.data
+  }
+  async updateReferralStatus(referralId: string, status: string, responseNotes?: string) {
+    const response = await this.client.patch(`/referrals/${referralId}/status`, { status, responseNotes })
+    return response.data
+  }
+
+  // Inpatient / Boarding
+  async getInpatientDashboard(hospitalId: string) {
+    const response = await this.client.get(`/hospitals/${hospitalId}/inpatient/dashboard`)
+    return response.data
+  }
+  async listInpatients(hospitalId: string, status?: string) {
+    const response = await this.client.get(`/hospitals/${hospitalId}/inpatient`, { params: { status } })
+    return response.data
+  }
+  async admitPatient(hospitalId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/hospitals/${hospitalId}/inpatient/admit`, data)
+    return response.data
+  }
+  async updateInpatientStatus(admissionId: string, status: string, notes?: string) {
+    const response = await this.client.patch(`/inpatient/${admissionId}/status`, { status, notes })
+    return response.data
+  }
+  async addVitalsLog(admissionId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/inpatient/${admissionId}/vitals`, data)
+    return response.data
+  }
+  async updateInpatientDetails(admissionId: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/inpatient/${admissionId}`, data)
+    return response.data
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // Next-Generation Innovative Features
   // ═══════════════════════════════════════════════════════════════

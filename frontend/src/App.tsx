@@ -80,6 +80,9 @@ const HospitalBooking = lazy(() => import('./pages/HospitalBooking'))
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite'))
 const WalletPage = lazy(() => import('./pages/Wallet'))
 const CancellationDashboard = lazy(() => import('./pages/admin/CancellationDashboard'))
+const HospitalWorkflow = lazy(() => import('./pages/HospitalWorkflow'))
+const InpatientManagement = lazy(() => import('./pages/InpatientManagement'))
+const StaffSettingsAdmin = lazy(() => import('./pages/admin/StaffSettings'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -258,6 +261,11 @@ function AppRoutes() {
       <Route path="/admin/medical-records" element={<RoleRoute path="/admin/medical-records"><AppLayout><RoutedPage Component={MedicalRecordManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/compliance" element={<RoleRoute path="/admin/compliance"><AppLayout><RoutedPage Component={ComplianceDashboardAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/cancellation-dashboard" element={<RoleRoute path="/admin/cancellation-dashboard"><AppLayout><RoutedPage Component={CancellationDashboard} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/staff-settings" element={<RoleRoute path="/admin/staff-settings"><AppLayout><RoutedPage Component={StaffSettingsAdmin} /></AppLayout></RoleRoute>} />
+
+      {/* ── Hospital Workflow Module ── */}
+      <Route path="/hospital-workflow" element={<RoleRoute path="/hospital-workflow"><AppLayout><HospitalWorkflow /></AppLayout></RoleRoute>} />
+      <Route path="/inpatient" element={<RoleRoute path="/inpatient"><AppLayout><InpatientManagement /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />

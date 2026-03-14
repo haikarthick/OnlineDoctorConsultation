@@ -84,6 +84,7 @@ import Tier4Controller from '../controllers/Tier4Controller';
 import VetHospitalController from '../controllers/VetHospitalController';
 import HospitalDocumentController from '../controllers/HospitalDocumentController';
 import WalletController from '../controllers/WalletController';
+import StaffWorkflowController from '../controllers/StaffWorkflowController';
 import { FileController } from '../controllers/FileController';
 import { uploadAny } from '../middleware/upload';
 import AdminService from '../services/AdminService';
@@ -447,6 +448,37 @@ router.put('/workforce/shifts/:id', authMiddleware, validateBody(updateShiftSche
 router.patch('/workforce/shifts/:id/check-in', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.checkInShift(req, res)));
 router.patch('/workforce/shifts/:id/check-out', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.checkOutShift(req, res)));
 router.delete('/workforce/shifts/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.deleteShift(req, res)));
+
+// ─── Staff & Workflow Management ─────────────────────
+// Staff Positions
+router.get('/hospitals/:hospitalId/staff', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listStaffPositions(req, res)));
+router.post('/hospitals/:hospitalId/staff', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.addStaffPosition(req, res)));
+router.put('/staff-positions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateStaffPosition(req, res)));
+router.delete('/staff-positions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.removeStaffPosition(req, res)));
+// Appointment Queue
+router.get('/hospitals/:hospitalId/queue', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getQueue(req, res)));
+router.post('/hospitals/:hospitalId/queue/check-in', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.checkInToQueue(req, res)));
+router.patch('/queue/:id/triage', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.triagePatient(req, res)));
+router.patch('/queue/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateQueueStatus(req, res)));
+router.get('/hospitals/:hospitalId/queue/stats', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getQueueStats(req, res)));
+// Clinical Workflow
+router.get('/hospitals/:hospitalId/workflow/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getWorkflowDashboard(req, res)));
+router.get('/hospitals/:hospitalId/workflow/cases', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listWorkflowCases(req, res)));
+router.post('/hospitals/:hospitalId/workflow/cases', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.createWorkflowCase(req, res)));
+router.get('/workflow/cases/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getWorkflowCaseDetail(req, res)));
+router.put('/workflow/cases/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateWorkflowCase(req, res)));
+router.patch('/workflow/cases/:id/transition', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.transitionWorkflowStage(req, res)));
+// Referrals
+router.get('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listReferrals(req, res)));
+router.post('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.createReferral(req, res)));
+router.patch('/referrals/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateReferralStatus(req, res)));
+// Inpatient / Boarding
+router.get('/hospitals/:hospitalId/inpatient/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getInpatientDashboard(req, res)));
+router.get('/hospitals/:hospitalId/inpatient', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listInpatients(req, res)));
+router.post('/hospitals/:hospitalId/inpatient/admit', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.admitPatient(req, res)));
+router.patch('/inpatient/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateInpatientStatus(req, res)));
+router.post('/inpatient/:id/vitals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.addVitalsLog(req, res)));
+router.put('/inpatient/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateInpatientDetails(req, res)));
 
 // ─── Report Builder & Export Center ──────────────────
 router.get('/enterprises/:enterpriseId/reports/templates', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listReportTemplates(req, res)));

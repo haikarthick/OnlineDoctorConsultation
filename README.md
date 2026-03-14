@@ -52,6 +52,14 @@ backend/
 - **Rate Limiting**: Express rate limiter
 - **SQL Injection Prevention**: Parameterized queries
 
+### Staff & Workflow Management
+- **Appointment Queue**: Priority-based waiting room with triage levels, emergency escalation, and real-time stats
+- **Clinical Workflow**: Triage → Examination → Treatment → Observation → Discharge pipeline with transition audit trails
+- **Specialist Referrals**: Multi-doctor consultation with referral requests, acceptance tracking, and clinical notes
+- **Inpatient & Boarding**: ICU, surgery recovery, boarding with vitals logging, medications, and daily rate billing
+- **12+ Staff Positions**: Veterinarian, surgeon, vet technician, nurse, lab tech, radiology tech, pharmacist, anesthesiologist, receptionist, kennel attendant, hospital admin
+- **Department Management**: Staff grouped by Emergency, Surgery, ICU, Internal Medicine, Radiology, Lab, Pharmacy, and more
+
 ### Database
 - **Transaction Support**: ACID compliance for critical operations
 - **Connection Pooling**: Optimized database connections

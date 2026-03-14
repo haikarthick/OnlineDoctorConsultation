@@ -122,6 +122,9 @@ export const PERMISSION_CATEGORIES = {
       'hospital_departments',
       'hospital_services',
       'hospital_staff',
+      'hospital_workflow',
+      'inpatient_manage',
+      'admin_staff_settings',
     ]
   }
 };
@@ -139,6 +142,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Hospital
     'hospital_browse', 'hospital_create', 'hospital_manage',
     'hospital_departments', 'hospital_services', 'hospital_staff',
+    'hospital_workflow', 'inpatient_manage', 'admin_staff_settings',
     // Enterprise (vet serves enterprise clients per Home page)
     'enterprise_campaigns', 'herd_medical',
     // Advanced (vet needs analytics for clinical oversight)
@@ -214,6 +218,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Hospital (full access)
     'hospital_browse', 'hospital_create', 'hospital_manage',
     'hospital_departments', 'hospital_services', 'hospital_staff',
+    'hospital_workflow', 'inpatient_manage', 'admin_staff_settings',
     // Enterprise (full access)
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
     'enterprise_movements', 'enterprise_campaigns', 'enterprise_members', 'herd_medical',
@@ -282,6 +287,9 @@ export const PERMISSION_LABELS: Record<string, string> = {
   hospital_departments: 'Manage Hospital Departments',
   hospital_services: 'Manage Hospital Services',
   hospital_staff: 'Manage Hospital Staff',
+  hospital_workflow: 'Hospital Workflow & Queue',
+  inpatient_manage: 'Inpatient & Boarding',
+  admin_staff_settings: 'Staff & Positions Admin',
   // Enterprise Management
   enterprise_manage: 'Enterprise Management',
   enterprise_groups: 'Animal Groups',

@@ -136,6 +136,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Vet Network' },
     { id: 'vet-hospitals-manage', label: t('nav.myHospital'), icon: '🏨', path: '/vet-hospitals/manage',
       roles: ['veterinarian'], section: 'Vet Network' },
+    { id: 'hospital-workflow', label: 'Hospital Workflow', icon: '🔄', path: '/hospital-workflow',
+      roles: ['veterinarian', 'admin'], section: 'Vet Network' },
+    { id: 'inpatient', label: 'Inpatient & Boarding', icon: '🛏️', path: '/inpatient',
+      roles: ['veterinarian', 'admin'], section: 'Vet Network' },
 
     // ── Wallet ──
     { id: 'wallet', label: t('nav.myWallet'), icon: '💰', path: '/wallet',
@@ -163,6 +167,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'admin-audit', label: t('nav.auditLogs'), icon: '📜', path: '/admin/audit-logs',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-compliance', label: 'HIPAA Compliance', icon: '🛡️', path: '/admin/compliance',
+      roles: ['admin'], section: 'Administration' },
+    { id: 'admin-staff-settings', label: 'Staff & Positions', icon: '👥', path: '/admin/staff-settings',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-cancellation-dashboard', label: t('nav.cancellations'), icon: '📊', path: '/admin/cancellation-dashboard',
       roles: ['admin'], section: 'Administration' },

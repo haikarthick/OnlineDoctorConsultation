@@ -53,6 +53,8 @@ graph TD
 - **Consultation System**: Book, conduct, and manage virtual consultations
 - **Medical Records**: Comprehensive health history and prescriptions
 - **Enterprise Management**: Multi-farm operations and analytics
+- **Staff & Workflow**: Hospital queue management, clinical workflow pipeline (triage → discharge), specialist referrals, inpatient/boarding management with 12+ staff positions
+- **HIPAA Compliance**: Audit logging, PHI monitoring, compliance dashboard
 - **Geospatial Analytics**: Location tracking and zone management
 - **Supply Chain**: Traceability from farm to consumer
 - **Payment Integration**: Secure billing and invoicing

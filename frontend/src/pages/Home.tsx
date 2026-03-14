@@ -13,6 +13,7 @@ const SECTIONS = [
   { id: 'enterprises', label: 'Enterprises' },
   { id: 'hospitals', label: 'Hospitals' },
   { id: 'features', label: 'Features' },
+  { id: 'workflow', label: 'Workflow' },
   { id: 'compliance', label: 'Compliance' },
   { id: 'how-it-works', label: 'How It Works' },
   { id: 'testimonials', label: 'Testimonials' },
@@ -205,6 +206,15 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
     { icon: '🌱', title: 'Sustainability & Carbon', description: 'Track ESG metrics, set sustainability goals, and estimate carbon footprints using IPCC emission factors per species' },
     { icon: '💚', title: 'Wellness Portal', description: 'Comprehensive pet health scorecards with nutrition, activity, vaccination & dental tracking plus smart recurring reminders' },
     { icon: '🗺️', title: 'Geospatial Analytics', description: 'Geofencing zones, real-time location tracking, heatmap clustering, movement trails, and automatic zone breach detection' }
+  ]
+
+  const workflowFeatures = [
+    { icon: '📋', title: 'Smart Queue & Triage', description: 'Priority-based waiting room with emergency escalation, triage levels, and real-time average wait time tracking' },
+    { icon: '🔄', title: 'Clinical Workflow Pipeline', description: 'Full triage → examination → treatment → observation → discharge pipeline with stage transitions and audit trails' },
+    { icon: '🔀', title: 'Specialist Referrals', description: 'Multi-doctor consultation workflow with referral requests, specialty routing, clinical notes sharing, and acceptance tracking' },
+    { icon: '🛏️', title: 'Inpatient & Boarding', description: 'ICU, surgery recovery, boarding management with vitals logging, medication tracking, and daily rate billing' },
+    { icon: '👥', title: '12+ Staff Positions', description: 'Vet technicians, nurses, surgeons, lab techs, pharmacists, anesthesiologists — all mapped to departments with role-based access' },
+    { icon: '📊', title: 'Workflow Analytics', description: 'Real-time dashboard showing active cases by stage, average case duration, queue stats, and staff utilization metrics' },
   ]
 
   const complianceFeatures = [
@@ -511,6 +521,26 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
               <div className="advanced-icon">{feat.icon}</div>
               <h3 style={{ color: '#f8fafc' }}>{feat.title}</h3>
               <p style={{ color: '#c4b5fd' }}>{feat.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Staff & Workflow Management */}
+      <section className="advanced-features-section" id="workflow" style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #0ea5e9 100%)' }}>
+        <h2 className="section-title" style={{ color: '#f8fafc' }}>🏥 Hospital Workflow & Staff Management</h2>
+        <p className="section-subtitle" style={{ color: '#bfdbfe' }}>Enterprise-grade clinical workflow: triage → examination → treatment → discharge, with 12+ staff categories</p>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
+          {['Queue & Triage', 'Clinical Pipeline', 'Referral Workflows', 'Inpatient/ICU', '12 Staff Roles'].map(b => (
+            <span key={b} style={{ padding: '6px 14px', borderRadius: 20, background: 'rgba(255,255,255,.15)', color: '#e0f2fe', fontSize: 13, fontWeight: 600 }}>{b}</span>
+          ))}
+        </div>
+        <div className="advanced-grid">
+          {workflowFeatures.map((feat, idx) => (
+            <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#e2e8f0' }}>
+              <div className="advanced-icon">{feat.icon}</div>
+              <h3 style={{ color: '#f8fafc' }}>{feat.title}</h3>
+              <p style={{ color: '#bfdbfe' }}>{feat.description}</p>
             </div>
           ))}
         </div>
