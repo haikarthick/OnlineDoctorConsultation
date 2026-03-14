@@ -140,8 +140,8 @@ Rate your overall confidence (0-100%) and explain any limitations.
 IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and should be confirmed by a licensed veterinarian.`;
 
     try {
-      // Use Groq vision model (llama-3.2-11b-vision-preview) or fall back to text description
-      const visionModel = ai.provider.includes('Groq') ? 'llama-3.2-11b-vision-preview' : ai.model;
+      // Use Groq vision model (llama-3.2-90b-vision-preview is the current supported model)
+      const visionModel = ai.provider.includes('Groq') ? 'llama-3.2-90b-vision-preview' : ai.model;
 
       const completion = await ai.client.chat.completions.create({
         model: visionModel,
