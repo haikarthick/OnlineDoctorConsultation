@@ -41,6 +41,7 @@ export const config = {
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_NAME || 'veterinary_consultation',
+    schema: process.env.DB_SCHEMA || 'public',
     ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
     pool: {
       min: parseInt(process.env.DB_POOL_MIN || '2', 10),

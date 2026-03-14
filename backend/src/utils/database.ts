@@ -19,6 +19,9 @@ class PostgresDatabase {
 
   constructor() {
     // Use DATABASE_URL (Render.com) when available, else individual params
+    const schemaOpt = config.database.schema && config.database.schema !== 'public'
+      ? `-c search_path=${config.database.schema},public`
+      : undefined;
     const poolConfig = config.database.connectionString
       ? {
           connectionString: config.database.connectionString,
@@ -28,6 +31,7 @@ class PostgresDatabase {
           idleTimeoutMillis: config.database.pool.idleTimeoutMillis,
           connectionTimeoutMillis: config.database.pool.connectionTimeoutMillis,
           maxUses: config.database.pool.maxUses,
+          ...(schemaOpt ? { options: schemaOpt } : {}),
         }
       : {
           host: config.database.host,
@@ -40,6 +44,7 @@ class PostgresDatabase {
           idleTimeoutMillis: config.database.pool.idleTimeoutMillis,
           connectionTimeoutMillis: config.database.pool.connectionTimeoutMillis,
           maxUses: config.database.pool.maxUses,
+          ...(schemaOpt ? { options: schemaOpt } : {}),
         };
     this.pool = new Pool(poolConfig);
 
@@ -85,8 +90,10 @@ class PostgresDatabase {
   private async ensureSchema(): Promise<void> {
     try {
       // Check if the users table exists
+      const schemaName = config.database.schema || 'public';
       const check = await this.pool.query(
-        `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users')`
+        `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'users')`,
+        [schemaName]
       );
       if (!check.rows[0].exists) {
         logger.info('Tables not found — running init.sql schema...');

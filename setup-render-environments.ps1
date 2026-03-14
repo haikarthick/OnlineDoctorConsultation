@@ -1,7 +1,12 @@
 # ─────────────────────────────────────────────────────────────
 # setup-render-environments.ps1
 # ─────────────────────────────────────────────────────────────
-# Automatically creates all 4 VetCare Render services + databases.
+# Creates 1 free PostgreSQL database + 2 web services (DEV + PROD)
+# on Render.com using the REST API.
+#
+# Both services share ONE database with schema-based separation:
+#   DEV  → vetcare-dev  → schema: vetcare_dev
+#   PROD → vetcare-app  → schema: vetcare_prod
 #
 # Usage:
 #   1. Create a Render API key at https://dashboard.render.com/u/settings#api-keys
@@ -37,26 +42,24 @@ $Headers = @{
 
 # ── Environment definitions ──────────────────────────────────
 $Environments = @(
-    @{ Name = "dev";  Branch = "develop"; NodeEnv = "development"; Seed = "true";  SvcName = "vetcare-dev";  DbName = "vetcare-db-dev";  DbDatabase = "vetcare_dev" }
-    @{ Name = "test"; Branch = "test";    NodeEnv = "test";        Seed = "true";  SvcName = "vetcare-test"; DbName = "vetcare-db-test"; DbDatabase = "vetcare_test" }
-    @{ Name = "demo"; Branch = "demo";    NodeEnv = "production";  Seed = "true";  SvcName = "vetcare-demo"; DbName = "vetcare-db-demo"; DbDatabase = "vetcare_demo" }
-    @{ Name = "prod"; Branch = "main";    NodeEnv = "production";  Seed = "false"; SvcName = "vetcare-app";  DbName = "vetcare-db-prod"; DbDatabase = "vetcare_prod" }
+    @{ Name = "dev";  Branch = "develop"; NodeEnv = "development"; Seed = "true";  Schema = "vetcare_dev";  SvcName = "vetcare-dev" }
+    @{ Name = "prod"; Branch = "main";    NodeEnv = "production";  Seed = "false"; Schema = "vetcare_prod"; SvcName = "vetcare-app" }
 )
 
 # ── Verify API key ────────────────────────────────────────────
-Write-Host "🔑 Verifying Render API key..." -ForegroundColor Cyan
+Write-Host "Verifying Render API key..." -ForegroundColor Cyan
 try {
     $owners = Invoke-RestMethod -Uri "$API/owners" -Headers $Headers -Method Get
     $ownerId = $owners[0].owner.id
-    Write-Host "✅ Authenticated (owner: $ownerId)" -ForegroundColor Green
+    Write-Host "Authenticated (owner: $ownerId)" -ForegroundColor Green
 } catch {
-    Write-Host "❌ Invalid API key or API unreachable" -ForegroundColor Red
+    Write-Host "Invalid API key or API unreachable" -ForegroundColor Red
     exit 1
 }
 
 Write-Host ""
 Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Yellow
-Write-Host "  VetCare — Multi-Environment Render Setup" -ForegroundColor Yellow
+Write-Host "  VetCare — Free-Tier Render Setup (1 DB + 2 Services)" -ForegroundColor Yellow
 Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Yellow
 Write-Host ""
 
@@ -64,67 +67,52 @@ Write-Host ""
 $existingDbs = try { Invoke-RestMethod -Uri "$API/postgres" -Headers $Headers -Method Get } catch { @() }
 $existingSvcs = try { Invoke-RestMethod -Uri "$API/services?type=web_service&limit=50" -Headers $Headers -Method Get } catch { @() }
 
-# ── Create Databases ──────────────────────────────────────────
-Write-Host "━━━ Creating Databases ━━━" -ForegroundColor Cyan
-$dbIds = @{}
-$dbConnStrings = @{}
+# ── Create Single Database ────────────────────────────────────
+Write-Host "━━━ Creating Database ━━━" -ForegroundColor Cyan
+$dbName = "vetcare-db"
+Write-Host -NoNewline "  $dbName ... "
 
-foreach ($env in $Environments) {
-    $dbName = $env.DbName
-    Write-Host -NoNewline "  $dbName ... "
+$existing = $existingDbs | Where-Object { $_.postgres.name -eq $dbName }
+if ($existing) {
+    $dbId = $existing.postgres.id
+    Write-Host "exists ($dbId)" -ForegroundColor Gray
+} else {
+    $body = @{
+        name         = $dbName
+        databaseName = "vetcare"
+        databaseUser = "vetcare"
+        plan         = "free"
+        region       = "oregon"
+        version      = "16"
+    } | ConvertTo-Json
 
-    $existing = $existingDbs | Where-Object { $_.postgres.name -eq $dbName }
-    if ($existing) {
-        $dbId = $existing.postgres.id
-        Write-Host "exists ($dbId)" -ForegroundColor Gray
-    } else {
-        $body = @{
-            name         = $dbName
-            databaseName = $env.DbDatabase
-            databaseUser = "vetcare"
-            plan         = "free"
-            region       = "oregon"
-            version      = "16"
-        } | ConvertTo-Json
-
-        $result = Invoke-RestMethod -Uri "$API/postgres" -Headers $Headers -Method Post -Body $body
-        $dbId = $result.postgres.id
-        Write-Host "created ($dbId)" -ForegroundColor Green
-    }
-    $dbIds[$env.Name] = $dbId
+    $result = Invoke-RestMethod -Uri "$API/postgres" -Headers $Headers -Method Post -Body $body
+    $dbId = $result.postgres.id
+    Write-Host "created ($dbId)" -ForegroundColor Green
 }
 
-# Wait for databases
+# Wait for database
 Write-Host ""
-Write-Host "━━━ Waiting for databases to be available ━━━" -ForegroundColor Cyan
-foreach ($env in $Environments) {
-    Write-Host -NoNewline "  $($env.DbName) ... "
-    $ready = $false
-    for ($i = 0; $i -lt 30; $i++) {
-        try {
-            $status = (Invoke-RestMethod -Uri "$API/postgres/$($dbIds[$env.Name])" -Headers $Headers -Method Get).status
-            if ($status -eq "available" -or $status -eq "running" -or $status -eq "created") {
-                $ready = $true
-                break
-            }
-        } catch { }
-        Start-Sleep -Seconds 5
-    }
-
-    # Get connection string
+Write-Host "━━━ Waiting for database to be available ━━━" -ForegroundColor Cyan
+Write-Host -NoNewline "  $dbName ... "
+for ($i = 0; $i -lt 30; $i++) {
     try {
-        $connInfo = Invoke-RestMethod -Uri "$API/postgres/$($dbIds[$env.Name])/connection-info" -Headers $Headers -Method Get
-        $dbConnStrings[$env.Name] = if ($connInfo.internalConnectionString) { $connInfo.internalConnectionString } else { $connInfo.externalConnectionString }
-    } catch {
-        $dbConnStrings[$env.Name] = ""
-    }
-    Write-Host "ready" -ForegroundColor Green
+        $status = (Invoke-RestMethod -Uri "$API/postgres/$dbId" -Headers $Headers -Method Get).status
+        if ($status -eq "available" -or $status -eq "running" -or $status -eq "created") { break }
+    } catch { }
+    Start-Sleep -Seconds 5
 }
+
+$dbConnString = ""
+try {
+    $connInfo = Invoke-RestMethod -Uri "$API/postgres/$dbId/connection-info" -Headers $Headers -Method Get
+    $dbConnString = if ($connInfo.internalConnectionString) { $connInfo.internalConnectionString } else { $connInfo.externalConnectionString }
+} catch { }
+Write-Host "ready" -ForegroundColor Green
 
 # ── Create Web Services ──────────────────────────────────────
 Write-Host ""
 Write-Host "━━━ Creating Web Services ━━━" -ForegroundColor Cyan
-$svcIds = @{}
 $deployHooks = @{}
 
 foreach ($env in $Environments) {
@@ -148,7 +136,8 @@ foreach ($env in $Environments) {
             startCommand = "chmod +x render-start.sh && ./render-start.sh"
             autoDeploy   = "yes"
             envVars      = @(
-                @{ key = "DATABASE_URL";    value = $dbConnStrings[$env.Name] }
+                @{ key = "DATABASE_URL";    value = $dbConnString }
+                @{ key = "DB_SCHEMA";       value = $env.Schema }
                 @{ key = "NODE_ENV";        value = $env.NodeEnv }
                 @{ key = "SEED_ON_STARTUP"; value = $env.Seed }
             )
@@ -158,9 +147,8 @@ foreach ($env in $Environments) {
         $svcId = $result.service.id
         Write-Host "created ($svcId)" -ForegroundColor Green
     }
-    $svcIds[$env.Name] = $svcId
 
-    # Get deploy hook URL from service details
+    # Get deploy hook URL
     try {
         $svcDetails = Invoke-RestMethod -Uri "$API/services/$svcId" -Headers $Headers -Method Get
         $hook = $svcDetails.serviceDetails.deployHookUrl
@@ -174,17 +162,17 @@ foreach ($env in $Environments) {
 # ── Summary ──────────────────────────────────────────────────
 Write-Host ""
 Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Green
-Write-Host "  ✅ ALL ENVIRONMENTS CREATED!" -ForegroundColor Green
+Write-Host "  ALL RESOURCES CREATED!" -ForegroundColor Green
 Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Green
 Write-Host ""
 
-Write-Host "┌──────────┬──────────────────────┬──────────────┐"
-Write-Host "│ Env      │ Service              │ Branch       │"
-Write-Host "├──────────┼──────────────────────┼──────────────┤"
+Write-Host "┌──────────┬──────────────────────┬──────────────┬──────────────────┐"
+Write-Host "│ Env      │ Service              │ Branch       │ DB Schema        │"
+Write-Host "├──────────┼──────────────────────┼──────────────┼──────────────────┤"
 foreach ($env in $Environments) {
-    Write-Host ("│ {0,-8} │ {1,-20} │ {2,-12} │" -f $env.Name, $env.SvcName, $env.Branch)
+    Write-Host ("│ {0,-8} │ {1,-20} │ {2,-12} │ {3,-16} │" -f $env.Name, $env.SvcName, $env.Branch, $env.Schema)
 }
-Write-Host "└──────────┴──────────────────────┴──────────────┘"
+Write-Host "└──────────┴──────────────────────┴──────────────┴──────────────────┘"
 
 Write-Host ""
 Write-Host "━━━ Service URLs ━━━" -ForegroundColor Cyan

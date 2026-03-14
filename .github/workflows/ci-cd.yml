@@ -2,9 +2,9 @@ name: CI/CD Pipeline — Build, Test & Deploy
 
 on:
   push:
-    branches: [develop, test, demo, main]
+    branches: [develop, main]
   pull_request:
-    branches: [develop, test, demo, main]
+    branches: [develop, main]
 
 env:
   DOCKER_REGISTRY: ghcr.io/${{ github.repository_owner }}/vetcare
@@ -152,16 +152,6 @@ jobs:
               echo "deploy_url=https://vetcare-dev.onrender.com" >> "$GITHUB_OUTPUT"
               echo "should_deploy=true" >> "$GITHUB_OUTPUT"
               ;;
-            test)
-              echo "environment=test" >> "$GITHUB_OUTPUT"
-              echo "deploy_url=https://vetcare-test.onrender.com" >> "$GITHUB_OUTPUT"
-              echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-              ;;
-            demo)
-              echo "environment=demo" >> "$GITHUB_OUTPUT"
-              echo "deploy_url=https://vetcare-demo.onrender.com" >> "$GITHUB_OUTPUT"
-              echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-              ;;
             main)
               echo "environment=production" >> "$GITHUB_OUTPUT"
               echo "deploy_url=https://vetcare-app.onrender.com" >> "$GITHUB_OUTPUT"
@@ -195,13 +185,9 @@ jobs:
           # Each environment has its own Render deploy hook secret
           # Set these in GitHub repo Settings → Secrets:
           #   RENDER_DEPLOY_HOOK_DEV
-          #   RENDER_DEPLOY_HOOK_TEST
-          #   RENDER_DEPLOY_HOOK_DEMO
           #   RENDER_DEPLOY_HOOK_PROD
           case "$ENV" in
             dev)   HOOK_URL="${{ secrets.RENDER_DEPLOY_HOOK_DEV }}" ;;
-            test)  HOOK_URL="${{ secrets.RENDER_DEPLOY_HOOK_TEST }}" ;;
-            demo)  HOOK_URL="${{ secrets.RENDER_DEPLOY_HOOK_DEMO }}" ;;
             production) HOOK_URL="${{ secrets.RENDER_DEPLOY_HOOK_PROD }}" ;;
           esac
 

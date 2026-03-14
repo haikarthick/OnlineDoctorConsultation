@@ -1,41 +1,20 @@
 # ─────────────────────────────────────────────────────────────
-# Render.com Blueprint  —  Multi-Environment Setup
+# Render.com Blueprint  —  Free-Tier Setup (1 DB, 2 Services)
 # ─────────────────────────────────────────────────────────────
-# Creates 4 web services + 4 databases automatically:
-#   DEV  → branch: develop   → vetcare-dev   + vetcare-db-dev
-#   TEST → branch: test      → vetcare-test  + vetcare-db-test
-#   DEMO → branch: demo      → vetcare-demo  + vetcare-db-demo
-#   PROD → branch: main      → vetcare-app   + vetcare-db-prod
+# Uses ONE free PostgreSQL database with schema-based separation:
+#   DEV  → branch: develop → vetcare-dev  → schema: vetcare_dev
+#   PROD → branch: main    → vetcare-app  → schema: vetcare_prod
 #
 # To apply:
 #   1. Go to https://dashboard.render.com/select-repo?type=blueprint
 #   2. Select this repo → click "Apply"
-#   3. All 8 resources are created in one click
+#   3. All 3 resources are created in one click
 # ─────────────────────────────────────────────────────────────
 
 databases:
-  # ── DEV Database ─────────────────────────────────────────
-  - name: vetcare-db-dev
+  - name: vetcare-db
     plan: free
-    databaseName: vetcare_dev
-    user: vetcare
-
-  # ── TEST Database ────────────────────────────────────────
-  - name: vetcare-db-test
-    plan: free
-    databaseName: vetcare_test
-    user: vetcare
-
-  # ── DEMO Database ────────────────────────────────────────
-  - name: vetcare-db-demo
-    plan: free
-    databaseName: vetcare_demo
-    user: vetcare
-
-  # ── PROD Database ────────────────────────────────────────
-  - name: vetcare-db-prod
-    plan: free
-    databaseName: vetcare_prod
+    databaseName: vetcare
     user: vetcare
 
 services:
@@ -50,50 +29,12 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: vetcare-db-dev
+          name: vetcare-db
           property: connectionString
+      - key: DB_SCHEMA
+        value: vetcare_dev
       - key: NODE_ENV
         value: development
-      - key: SEED_ON_STARTUP
-        value: "true"
-      - key: GROQ_API_KEY
-        sync: false
-
-  # ── TEST Environment ────────────────────────────────────
-  - type: web
-    name: vetcare-test
-    runtime: node
-    plan: free
-    branch: test
-    buildCommand: chmod +x render-build.sh && ./render-build.sh
-    startCommand: chmod +x render-start.sh && ./render-start.sh
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: vetcare-db-test
-          property: connectionString
-      - key: NODE_ENV
-        value: test
-      - key: SEED_ON_STARTUP
-        value: "true"
-      - key: GROQ_API_KEY
-        sync: false
-
-  # ── DEMO Environment ────────────────────────────────────
-  - type: web
-    name: vetcare-demo
-    runtime: node
-    plan: free
-    branch: demo
-    buildCommand: chmod +x render-build.sh && ./render-build.sh
-    startCommand: chmod +x render-start.sh && ./render-start.sh
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: vetcare-db-demo
-          property: connectionString
-      - key: NODE_ENV
-        value: production
       - key: SEED_ON_STARTUP
         value: "true"
       - key: GROQ_API_KEY
@@ -110,8 +51,10 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: vetcare-db-prod
+          name: vetcare-db
           property: connectionString
+      - key: DB_SCHEMA
+        value: vetcare_prod
       - key: NODE_ENV
         value: production
       - key: SEED_ON_STARTUP

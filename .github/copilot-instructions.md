@@ -46,12 +46,13 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 4. Test that `.env` secrets are not committed (gitignored)
 
 ## Deployment & CI/CD
-- **Branch model**: `develop` → `test` → `demo` → `main` (production)
+- **Branch model**: `develop` (DEV) → `main` (PROD)
 - **All development** happens on `develop` branch (or feature branches merged into `develop`)
-- **Never push directly to `main`** — code must be promoted through environments
-- Render.com hosts 4 separate services, one per environment branch
-- GitHub Actions CI/CD runs tests on every push to any env branch
-- Use GitHub Actions "Promote" workflow to merge between environments
+- **Never push directly to `main`** — use the GitHub Actions "Promote DEV to PROD" workflow
+- **Database**: 1 free PostgreSQL on Render, schema-separated (`DB_SCHEMA` env var)
+  - DEV uses schema `vetcare_dev`, PROD uses schema `vetcare_prod`
+- Render.com hosts 2 web services: `vetcare-dev` (develop) + `vetcare-app` (main)
+- GitHub Actions CI/CD runs tests on every push to develop or main
 - `.env` is gitignored — production env vars in Render dashboard
 - `render-build.sh` builds frontend then backend
-- `render-start.sh` runs schema → migrations → seed → server
+- `render-start.sh` creates schema → runs init.sql → migrations → seed → server
