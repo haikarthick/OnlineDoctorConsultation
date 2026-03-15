@@ -279,6 +279,65 @@ class ApiService {
     return response.data
   }
 
+  async getMonthlyAvailability(vetId: string, year: number, month: number) {
+    const response = await this.client.get(`/availability/${vetId}/monthly/summary`, { params: { year, month } })
+    return response.data
+  }
+
+  // ─── Date Overrides & Time Blocks ─────────────────────────
+  async createDateOverride(data: { veterinarianId?: string; overrideDate: string; overrideType: string; startTime?: string; endTime?: string; slotDuration?: number; reason?: string }) {
+    const response = await this.client.post('/schedules/date-overrides', data)
+    return response.data
+  }
+
+  async bulkCreateDateOverrides(data: { veterinarianId?: string; dates: string[]; overrideType: string; startTime?: string; endTime?: string; slotDuration?: number; reason?: string }) {
+    const response = await this.client.post('/schedules/date-overrides/bulk', data)
+    return response.data
+  }
+
+  async listDateOverrides(vetId?: string, fromDate?: string, toDate?: string) {
+    const url = vetId ? `/schedules/date-overrides/vet/${vetId}` : '/schedules/date-overrides/me'
+    const response = await this.client.get(url, { params: { fromDate, toDate } })
+    return response.data
+  }
+
+  async deleteDateOverride(id: string) {
+    const response = await this.client.delete(`/schedules/date-overrides/${id}`)
+    return response.data
+  }
+
+  async createBlockedSlot(data: { veterinarianId?: string; blockDate?: string; startTime: string; endTime: string; reason?: string; isRecurring?: boolean; recurringDay?: string }) {
+    const response = await this.client.post('/schedules/blocked-slots', data)
+    return response.data
+  }
+
+  async listBlockedSlots(vetId?: string) {
+    const url = vetId ? `/schedules/blocked-slots/vet/${vetId}` : '/schedules/blocked-slots/me'
+    const response = await this.client.get(url)
+    return response.data
+  }
+
+  async deleteBlockedSlot(id: string) {
+    const response = await this.client.delete(`/schedules/blocked-slots/${id}`)
+    return response.data
+  }
+
+  // ─── Hospital Holidays ────────────────────────────────────
+  async createHoliday(data: { hospitalId?: string; holidayDate: string; name: string; holidayType?: string; isFullDay?: boolean; startTime?: string; endTime?: string }) {
+    const response = await this.client.post('/holidays', data)
+    return response.data
+  }
+
+  async listHolidays(params?: { hospitalId?: string; fromDate?: string; toDate?: string; year?: number }) {
+    const response = await this.client.get('/holidays', { params })
+    return response.data
+  }
+
+  async deleteHoliday(id: string) {
+    const response = await this.client.delete(`/holidays/${id}`)
+    return response.data
+  }
+
   // ─── Prescriptions ────────────────────────────────────────
   async createPrescription(data: {
     consultationId: string; petOwnerId?: string; animalId?: string;

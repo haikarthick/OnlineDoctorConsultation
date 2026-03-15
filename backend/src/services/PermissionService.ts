@@ -37,6 +37,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_medical_records',
       'admin_hospitals',
       'admin_compliance',
+      'admin_holidays',
     ]
   },
   actions: {
@@ -151,6 +152,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'disease_prediction', 'report_builder',
     // Intelligence
     'ai_copilot', 'marketplace_access', 'wellness_portal',
+    // Holiday management
+    'admin_holidays',
     // Wallet
     'wallet',
     // Actions
@@ -233,6 +236,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
     // Wallet & Cancellation
     'wallet', 'admin_cancellation_dashboard',
+    // Holiday management
+    'admin_holidays',
     // Actions
     'booking_confirm', 'booking_cancel', 'review_moderate',
     // Dashboard widgets
@@ -267,6 +272,7 @@ export const PERMISSION_LABELS: Record<string, string> = {
   admin_medical_records: 'Medical Record Management',
   admin_hospitals: 'Hospital Management',
   admin_compliance: 'HIPAA Compliance Dashboard',
+  admin_holidays: 'Holiday Management',
   // Actions
   booking_create: 'Create Bookings',
   booking_confirm: 'Confirm Bookings',

@@ -886,3 +886,76 @@ CREATE TRIGGER update_referrals_updated_at BEFORE UPDATE ON referrals
 DROP TRIGGER IF EXISTS update_inpatient_admissions_updated_at ON inpatient_admissions;
 CREATE TRIGGER update_inpatient_admissions_updated_at BEFORE UPDATE ON inpatient_admissions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- 25. VET DATE OVERRIDES (day off / custom hours for specific dates)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS vet_date_overrides (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  override_date DATE NOT NULL,
+  override_type VARCHAR(20) NOT NULL CHECK (override_type IN ('unavailable', 'custom_hours')),
+  start_time VARCHAR(10),
+  end_time VARCHAR(10),
+  slot_duration INTEGER,
+  reason TEXT,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(veterinarian_id, override_date)
+);
+
+-- ============================================================
+-- 26. VET BLOCKED SLOTS (block specific time ranges, one-time or recurring)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS vet_blocked_slots (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  block_date DATE,
+  start_time VARCHAR(10) NOT NULL,
+  end_time VARCHAR(10) NOT NULL,
+  reason TEXT,
+  is_recurring BOOLEAN DEFAULT false,
+  recurring_day VARCHAR(10) CHECK (recurring_day IN ('monday','tuesday','wednesday','thursday','friday','saturday','sunday')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 27. HOSPITAL HOLIDAYS (system-wide or hospital-specific)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS hospital_holidays (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
+  holiday_date DATE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  holiday_type VARCHAR(30) NOT NULL DEFAULT 'general'
+    CHECK (holiday_type IN ('general', 'hospital_specific', 'emergency_closure')),
+  is_full_day BOOLEAN DEFAULT true,
+  start_time VARCHAR(10),
+  end_time VARCHAR(10),
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Availability Indexes
+CREATE INDEX IF NOT EXISTS idx_vet_date_overrides_vet ON vet_date_overrides(veterinarian_id);
+CREATE INDEX IF NOT EXISTS idx_vet_date_overrides_date ON vet_date_overrides(override_date);
+CREATE INDEX IF NOT EXISTS idx_vet_blocked_slots_vet ON vet_blocked_slots(veterinarian_id);
+CREATE INDEX IF NOT EXISTS idx_vet_blocked_slots_date ON vet_blocked_slots(block_date);
+CREATE INDEX IF NOT EXISTS idx_hospital_holidays_date ON hospital_holidays(holiday_date);
+CREATE INDEX IF NOT EXISTS idx_hospital_holidays_hospital ON hospital_holidays(hospital_id);
+
+-- Availability Triggers
+DROP TRIGGER IF EXISTS update_vet_date_overrides_updated_at ON vet_date_overrides;
+CREATE TRIGGER update_vet_date_overrides_updated_at BEFORE UPDATE ON vet_date_overrides
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_vet_blocked_slots_updated_at ON vet_blocked_slots;
+CREATE TRIGGER update_vet_blocked_slots_updated_at BEFORE UPDATE ON vet_blocked_slots
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_hospital_holidays_updated_at ON hospital_holidays;
+CREATE TRIGGER update_hospital_holidays_updated_at BEFORE UPDATE ON hospital_holidays
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

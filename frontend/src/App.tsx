@@ -43,6 +43,7 @@ const AuditLogs = lazy(() => import('./pages/admin/AuditLogs'))
 const PermissionManagement = lazy(() => import('./pages/admin/PermissionManagement'))
 const MedicalRecordManagement = lazy(() => import('./pages/admin/MedicalRecordManagement'))
 const ComplianceDashboardAdmin = lazy(() => import('./pages/admin/ComplianceDashboard'))
+const HolidayManagementAdmin = lazy(() => import('./pages/admin/HolidayManagement'))
 // Enterprise Module
 const EnterpriseManagement = lazy(() => import('./pages/EnterpriseManagement'))
 const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
@@ -262,6 +263,7 @@ function AppRoutes() {
       <Route path="/admin/compliance" element={<RoleRoute path="/admin/compliance"><AppLayout><RoutedPage Component={ComplianceDashboardAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/cancellation-dashboard" element={<RoleRoute path="/admin/cancellation-dashboard"><AppLayout><RoutedPage Component={CancellationDashboard} /></AppLayout></RoleRoute>} />
       <Route path="/admin/staff-settings" element={<RoleRoute path="/admin/staff-settings"><AppLayout><RoutedPage Component={StaffSettingsAdmin} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/holidays" element={<RoleRoute path="/admin/holidays"><AppLayout><RoutedPage Component={HolidayManagementAdmin} /></AppLayout></RoleRoute>} />
 
       {/* ── Hospital Workflow Module ── */}
       <Route path="/hospital-workflow" element={<RoleRoute path="/hospital-workflow"><AppLayout><HospitalWorkflow /></AppLayout></RoleRoute>} />

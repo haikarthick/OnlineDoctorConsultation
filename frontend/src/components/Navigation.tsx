@@ -172,6 +172,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-cancellation-dashboard', label: t('nav.cancellations'), icon: '📊', path: '/admin/cancellation-dashboard',
       roles: ['admin'], section: 'Administration' },
+    { id: 'admin-holidays', label: 'Holiday Management', icon: '🎉', path: '/admin/holidays',
+      roles: ['admin', 'veterinarian'], section: 'Administration' },
 
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',

@@ -54,6 +54,7 @@ const HospitalBooking: React.FC = () => {
   const [slots, setSlots] = useState<TimeSlot[]>([])
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
+  const [dateMessage, setDateMessage] = useState('')
   const [bookingType, setBookingType] = useState('in_person')
   const [reasonForVisit, setReasonForVisit] = useState('')
   const [symptoms, setSymptoms] = useState('')
@@ -99,9 +100,13 @@ const HospitalBooking: React.FC = () => {
   const loadSlots = useCallback(async (doctorId: string, date: string) => {
     setSlotsLoading(true)
     setSelectedSlot(null)
+    setDateMessage('')
     try {
       const res = await apiService.getVetAvailability(doctorId, date)
-      const allSlots = res?.data?.slots || res?.slots || res?.data || []
+      const data = res?.data || res || {}
+      const allSlots = data.slots || []
+      if (data.holiday) setDateMessage(`\uD83C\uDF89 Holiday: ${data.holiday} — No appointments available`)
+      else if (data.unavailableReason) setDateMessage(`\uD83D\uDEAB ${data.unavailableReason}`)
       setSlots(allSlots)
     } catch { setSlots([]) }
     finally { setSlotsLoading(false) }
@@ -326,7 +331,12 @@ const HospitalBooking: React.FC = () => {
               <label className="form-label">Available Time Slots</label>
               {!selectedDate && <p className="hb-hint">Please select a date first</p>}
               {slotsLoading && <p className="hb-hint">Loading available slots...</p>}
-              {selectedDate && !slotsLoading && availableSlots.length === 0 && (
+              {dateMessage && !slotsLoading && (
+                <div style={{ padding: '12px 16px', borderRadius: 8, background: '#fefce8', border: '1px solid #fde047', marginBottom: 8, fontSize: 14, color: '#854d0e' }}>
+                  {dateMessage}
+                </div>
+              )}
+              {selectedDate && !slotsLoading && !dateMessage && availableSlots.length === 0 && (
                 <p className="hb-hint">No available slots on this date. Try another day.</p>
               )}
               {availableSlots.length > 0 && (

@@ -107,6 +107,7 @@ const Consultations: React.FC = () => {
   const [rescheduleDate, setRescheduleDate] = useState('')
   const [rescheduleSlots, setRescheduleSlots] = useState<TimeSlot[]>([])
   const [rescheduleSelectedSlot, setRescheduleSelectedSlot] = useState<TimeSlot | null>(null)
+  const [rescheduleDateMsg, setRescheduleDateMsg] = useState('')
   const [rescheduleSlotsLoading, setRescheduleSlotsLoading] = useState(false)
   const [rescheduleSubmitting, setRescheduleSubmitting] = useState(false)
   const [rescheduleError, setRescheduleError] = useState('')
@@ -229,10 +230,14 @@ const Consultations: React.FC = () => {
     if (!targetVetId) return
     setRescheduleDate(date)
     setRescheduleSelectedSlot(null)
+    setRescheduleDateMsg('')
     try {
       setRescheduleSlotsLoading(true)
       const result = await apiService.getVetAvailability(targetVetId, date)
-      setRescheduleSlots(result.data?.slots || [])
+      const data = result.data || result || {}
+      if (data.holiday) setRescheduleDateMsg(`\uD83C\uDF89 Holiday: ${data.holiday}`)
+      else if (data.unavailableReason) setRescheduleDateMsg(`\uD83D\uDEAB ${data.unavailableReason}`)
+      setRescheduleSlots(data.slots || [])
     } catch {
       setRescheduleSlots([])
     } finally {
@@ -748,6 +753,10 @@ const Consultations: React.FC = () => {
                 {rescheduleSlotsLoading ? (
                   <div style={{ textAlign: 'center', padding: 20 }}>
                     <div className="loading-spinner" style={{ margin: '0 auto' }} />
+                  </div>
+                ) : rescheduleDateMsg ? (
+                  <div style={{ padding: '12px 16px', borderRadius: 8, background: '#fefce8', border: '1px solid #fde047', fontSize: 13, color: '#854d0e', textAlign: 'center' }}>
+                    {rescheduleDateMsg} — Please select another date.
                   </div>
                 ) : futureSlots.length === 0 ? (
                   <p style={{ color: '#9ca3af', fontSize: 13, textAlign: 'center', padding: 16 }}>

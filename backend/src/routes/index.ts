@@ -154,6 +154,23 @@ router.get('/schedules/vet/:vetId', authMiddleware, asyncHandler((req: Request, 
 router.put('/schedules/:id', authMiddleware, validateBody(updateScheduleSchema), asyncHandler((req: Request, res: Response) => ScheduleController.updateSchedule(req, res)));
 router.delete('/schedules/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.deleteSchedule(req, res)));
 router.get('/availability/:vetId/:date', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getAvailability(req, res)));
+router.get('/availability/:vetId/monthly/summary', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getMonthlyAvailability(req, res)));
+
+// ─── Date Overrides & Time Blocks ───────────────────────────
+router.post('/schedules/date-overrides', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.createDateOverride(req, res)));
+router.post('/schedules/date-overrides/bulk', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.bulkCreateDateOverrides(req, res)));
+router.get('/schedules/date-overrides/me', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.listDateOverrides(req, res)));
+router.get('/schedules/date-overrides/vet/:vetId', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.listDateOverrides(req, res)));
+router.delete('/schedules/date-overrides/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.deleteDateOverride(req, res)));
+router.post('/schedules/blocked-slots', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.createBlockedSlot(req, res)));
+router.get('/schedules/blocked-slots/me', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.listBlockedSlots(req, res)));
+router.get('/schedules/blocked-slots/vet/:vetId', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.listBlockedSlots(req, res)));
+router.delete('/schedules/blocked-slots/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.deleteBlockedSlot(req, res)));
+
+// ─── Hospital Holidays ──────────────────────────────────────
+router.post('/holidays', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.createHoliday(req, res)));
+router.get('/holidays', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.listHolidays(req, res)));
+router.delete('/holidays/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.deleteHoliday(req, res)));
 
 // ─── Prescription routes ─────────────────────────────────────
 router.post('/prescriptions', authMiddleware, validateBody(createPrescriptionSchema), asyncHandler((req: Request, res: Response) => PrescriptionController.createPrescription(req, res)));

@@ -110,6 +110,8 @@ export interface VetAvailability {
   veterinarianId: string;
   date: string;
   slots: TimeSlot[];
+  holiday?: string;
+  unavailableReason?: string;
 }
 
 // ─── Video Consultation ─────────────────────────────────────

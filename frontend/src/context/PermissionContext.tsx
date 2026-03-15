@@ -75,6 +75,7 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   // Wallet & Cancellation
   wallet: ['/wallet'],
   admin_cancellation_dashboard: ['/admin/cancellation-dashboard'],
+  admin_holidays: ['/admin/holidays'],
 }
 
 // Reverse map: route path → required permission
@@ -147,6 +148,7 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   // Wallet & Cancellation
   'wallet': 'wallet',
   'admin-cancellation-dashboard': 'admin_cancellation_dashboard',
+  'admin-holidays': 'admin_holidays',
 }
 
 // ─── Context ────────────────────────────────────────────────
