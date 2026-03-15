@@ -61,6 +61,9 @@ runCheck('Frontend TypeScript', 'npx tsc --noEmit', FRONTEND);
 // 3. Schema validation
 runCheck('Schema Validation', 'node scripts/schema-check.js', BACKEND);
 
+// 4. E2E route coverage (ensure all routes have tests)
+runCheck('E2E Route Coverage', 'node e2e/generate-tests.cjs', FRONTEND);
+
 // Summary
 console.log('');
 if (failed === 0) {

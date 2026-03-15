@@ -222,7 +222,7 @@ function main() {
     console.log('   Review and expand with specific assertions.')
   } else {
     console.log('\n💡 Run with --write to generate test stubs:')
-    console.log('   node e2e/generate-tests.js --write')
+    console.log('   node e2e/generate-tests.cjs --write')
   }
 
   // 5. Coverage summary
@@ -230,6 +230,11 @@ function main() {
   const coveredCount = totalTestable - testableRoutes.length
   const pct = ((coveredCount / totalTestable) * 100).toFixed(1)
   console.log(`\n📊 Route Coverage: ${coveredCount}/${totalTestable} (${pct}%)`)
+
+  // Exit with failure in non-write mode (CI will catch this)
+  if (!writeMode) {
+    process.exit(1)
+  }
 }
 
 main()
