@@ -166,6 +166,36 @@ class PostgresDatabase {
        )`
     ).catch(() => { /* table may already exist */ });
 
+    // Ensure animals columns added after initial table creation
+    const animalColumns = [
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS enterprise_id UUID`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS group_id UUID`,
+    ];
+    for (const ddl of animalColumns) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
+    // Ensure vet_hospitals columns added after initial table creation
+    const hospitalColumns = [
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS accreditation_body VARCHAR(255)`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS accreditation_number VARCHAR(100)`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS accreditation_expiry DATE`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS gps_latitude DECIMAL(10,8)`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS gps_longitude DECIMAL(11,8)`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS has_ambulance BOOLEAN DEFAULT false`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS has_pharmacy BOOLEAN DEFAULT false`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS has_lab BOOLEAN DEFAULT false`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS has_imaging BOOLEAN DEFAULT false`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS has_surgery BOOLEAN DEFAULT false`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS has_icu BOOLEAN DEFAULT false`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS established_year INTEGER`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS total_beds INTEGER DEFAULT 0`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS icu_beds INTEGER DEFAULT 0`,
+    ];
+    for (const ddl of hospitalColumns) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
     logger.info('Default system settings seeded');
   }
 
