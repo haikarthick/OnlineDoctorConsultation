@@ -11,7 +11,13 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix"
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed",
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:e2e:report": "npx playwright show-report",
+    "test:e2e:generate": "node e2e/generate-tests.cjs",
+    "test:e2e:generate:write": "node e2e/generate-tests.cjs --write"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",
@@ -32,6 +38,7 @@
     "zustand": "^4.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^14.1.2",
     "@types/react": "^18.2.43",

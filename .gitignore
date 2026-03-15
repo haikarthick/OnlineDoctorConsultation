@@ -32,6 +32,12 @@ lerna-debug.log*
 coverage/
 .nyc_output/
 
+# Playwright E2E
+playwright-report/
+test-results/
+frontend/e2e/.auth/
+blob-report/
+
 # Docker
 docker-compose.override.yml
 
