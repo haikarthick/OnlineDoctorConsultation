@@ -18,7 +18,9 @@
     "migrate": "ts-node --project tsconfig.json src/utils/migrate.ts",
     "migrate:status": "ts-node --project tsconfig.json src/utils/migrate.ts --status",
     "migrate:create": "ts-node --project tsconfig.json src/utils/migrate.ts --create",
-    "seed": "ts-node --project tsconfig.json src/utils/seedDatabase.ts"
+    "seed": "ts-node --project tsconfig.json src/utils/seedDatabase.ts",
+    "schema-check": "node scripts/schema-check.js",
+    "pre-deploy": "node scripts/pre-deploy.js"
   },
   "keywords": [
     "veterinary",

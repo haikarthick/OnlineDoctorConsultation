@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
   is_active BOOLEAN DEFAULT true,
   avatar_url VARCHAR(500),
   unique_id VARCHAR(20) UNIQUE,
+  default_enterprise_id UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -88,6 +89,13 @@ CREATE TABLE IF NOT EXISTS animals (
   unique_id VARCHAR(20) UNIQUE,
   enterprise_id UUID,
   group_id UUID,
+  breeding_status VARCHAR(50),
+  last_breeding_date DATE,
+  expected_due_date DATE,
+  current_weight DECIMAL(8,2),
+  weight_unit VARCHAR(10) DEFAULT 'kg',
+  last_weighed_at TIMESTAMP,
+  current_location_id UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -133,6 +141,19 @@ CREATE TABLE IF NOT EXISTS enterprises (
   city VARCHAR(100),
   state VARCHAR(100),
   country VARCHAR(100) DEFAULT 'US',
+  postal_code VARCHAR(20),
+  gps_latitude DECIMAL(10,8),
+  gps_longitude DECIMAL(11,8),
+  total_area DECIMAL(12,2),
+  area_unit VARCHAR(50),
+  license_number VARCHAR(100),
+  regulatory_id VARCHAR(100),
+  tax_id VARCHAR(100),
+  phone VARCHAR(30),
+  email VARCHAR(255),
+  website VARCHAR(500),
+  owner_id UUID REFERENCES users(id) ON DELETE RESTRICT,
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -142,7 +163,14 @@ CREATE TABLE IF NOT EXISTS animal_groups (
   enterprise_id UUID REFERENCES enterprises(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
   group_type VARCHAR(50),
+  species VARCHAR(100),
+  breed VARCHAR(100),
+  purpose VARCHAR(255),
+  target_count INTEGER DEFAULT 0,
+  current_count INTEGER DEFAULT 0,
+  color_code VARCHAR(20),
   description TEXT,
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -295,9 +323,11 @@ CREATE TABLE IF NOT EXISTS vaccination_records (
   batch_number VARCHAR(100),
   manufacturer VARCHAR(255),
   administered_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  site_of_administration VARCHAR(255),
   certificate_number VARCHAR(100),
   reaction_notes TEXT,
   is_valid BOOLEAN DEFAULT true,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -312,7 +342,8 @@ CREATE TABLE IF NOT EXISTS weight_history (
   unit VARCHAR(10) DEFAULT 'kg',
   notes TEXT,
   recorded_by UUID REFERENCES users(id) ON DELETE SET NULL,
-  recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================
@@ -342,6 +373,12 @@ CREATE TABLE IF NOT EXISTS medical_record_audit_log (
   record_type VARCHAR(50),
   action VARCHAR(50) NOT NULL,
   performed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  changed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  changed_by_name VARCHAR(255),
+  old_values JSONB,
+  new_values JSONB,
+  change_reason TEXT,
+  ip_address VARCHAR(45),
   details JSONB,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -365,6 +402,9 @@ CREATE TABLE IF NOT EXISTS lab_results (
     CHECK (status IN ('pending', 'in_progress', 'completed')),
   lab_name VARCHAR(255),
   ordered_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  verified_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  consultation_id UUID,
+  attachments JSONB DEFAULT '[]',
   notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -719,6 +759,10 @@ CREATE TABLE IF NOT EXISTS vet_hospitals (
   owner_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   is_verified BOOLEAN DEFAULT false,
   is_active BOOLEAN DEFAULT true,
+  verification_status VARCHAR(50) DEFAULT 'pending_documents',
+  drug_license_expiry DATE,
+  trade_license_expiry DATE,
+  registration_renewal_date DATE,
   rating DECIMAL(3,2) DEFAULT 0,
   total_reviews INTEGER DEFAULT 0,
   total_consultations INTEGER DEFAULT 0,

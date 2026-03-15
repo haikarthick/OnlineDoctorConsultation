@@ -170,6 +170,13 @@ class PostgresDatabase {
     const animalColumns = [
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS enterprise_id UUID`,
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS group_id UUID`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS breeding_status VARCHAR(50)`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS last_breeding_date DATE`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS expected_due_date DATE`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS current_weight DECIMAL(8,2)`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS weight_unit VARCHAR(10) DEFAULT 'kg'`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS last_weighed_at TIMESTAMP`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS current_location_id UUID`,
     ];
     for (const ddl of animalColumns) {
       await this.pool.query(ddl).catch(() => {});
@@ -191,8 +198,73 @@ class PostgresDatabase {
       `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS established_year INTEGER`,
       `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS total_beds INTEGER DEFAULT 0`,
       `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS icu_beds INTEGER DEFAULT 0`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS verification_status VARCHAR(50) DEFAULT 'pending_documents'`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS drug_license_expiry DATE`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS trade_license_expiry DATE`,
+      `ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS registration_renewal_date DATE`,
     ];
     for (const ddl of hospitalColumns) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
+    // Ensure enterprise-related columns added after initial table creation
+    const enterpriseColumns = [
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS postal_code VARCHAR(20)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS gps_latitude DECIMAL(10,8)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS gps_longitude DECIMAL(11,8)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS total_area DECIMAL(12,2)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS area_unit VARCHAR(50)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS license_number VARCHAR(100)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS regulatory_id VARCHAR(100)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS tax_id VARCHAR(100)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS phone VARCHAR(30)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS email VARCHAR(255)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS website VARCHAR(500)`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS owner_id UUID`,
+      `ALTER TABLE enterprises ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true`,
+    ];
+    for (const ddl of enterpriseColumns) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
+    // Ensure animal_groups columns added after initial table creation
+    const animalGroupColumns = [
+      `ALTER TABLE animal_groups ADD COLUMN IF NOT EXISTS species VARCHAR(100)`,
+      `ALTER TABLE animal_groups ADD COLUMN IF NOT EXISTS breed VARCHAR(100)`,
+      `ALTER TABLE animal_groups ADD COLUMN IF NOT EXISTS purpose VARCHAR(255)`,
+      `ALTER TABLE animal_groups ADD COLUMN IF NOT EXISTS target_count INTEGER DEFAULT 0`,
+      `ALTER TABLE animal_groups ADD COLUMN IF NOT EXISTS current_count INTEGER DEFAULT 0`,
+      `ALTER TABLE animal_groups ADD COLUMN IF NOT EXISTS color_code VARCHAR(20)`,
+      `ALTER TABLE animal_groups ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true`,
+    ];
+    for (const ddl of animalGroupColumns) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
+    // Ensure users columns added after initial table creation
+    const userColumns = [
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS default_enterprise_id UUID`,
+    ];
+    for (const ddl of userColumns) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
+    // Ensure medical record related columns added after initial table creation
+    const medicalColumns = [
+      `ALTER TABLE medical_record_audit_log ADD COLUMN IF NOT EXISTS changed_by UUID`,
+      `ALTER TABLE medical_record_audit_log ADD COLUMN IF NOT EXISTS changed_by_name VARCHAR(255)`,
+      `ALTER TABLE medical_record_audit_log ADD COLUMN IF NOT EXISTS old_values JSONB`,
+      `ALTER TABLE medical_record_audit_log ADD COLUMN IF NOT EXISTS new_values JSONB`,
+      `ALTER TABLE medical_record_audit_log ADD COLUMN IF NOT EXISTS change_reason TEXT`,
+      `ALTER TABLE medical_record_audit_log ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45)`,
+      `ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS site_of_administration VARCHAR(255)`,
+      `ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS created_by UUID`,
+      `ALTER TABLE weight_history ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`,
+      `ALTER TABLE lab_results ADD COLUMN IF NOT EXISTS consultation_id UUID`,
+      `ALTER TABLE lab_results ADD COLUMN IF NOT EXISTS verified_by UUID`,
+      `ALTER TABLE lab_results ADD COLUMN IF NOT EXISTS attachments JSONB DEFAULT '[]'`,
+    ];
+    for (const ddl of medicalColumns) {
       await this.pool.query(ddl).catch(() => {});
     }
 
