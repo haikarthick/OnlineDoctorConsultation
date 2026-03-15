@@ -140,6 +140,17 @@ export interface MapViewProps {
 }
 
 // ─── Main MapView Component ─────────────────────────────────────────────────────
+// Invalidate map size after render (fixes grey tiles in modals / conditional containers)
+const InvalidateSize: React.FC = () => {
+  const map = useMap()
+  useEffect(() => {
+    // Small delay to let the container settle its dimensions
+    const timer = setTimeout(() => map.invalidateSize(), 200)
+    return () => clearTimeout(timer)
+  }, [map])
+  return null
+}
+
 const MapView: React.FC<MapViewProps> = ({
   height = 400,
   center,
@@ -195,6 +206,8 @@ const MapView: React.FC<MapViewProps> = ({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        <InvalidateSize />
 
         {fitToData && bounds && <FitBounds bounds={bounds} />}
 

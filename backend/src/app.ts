@@ -24,10 +24,21 @@ const app: Express = express();
 app.set('trust proxy', 1);
 
 // Security Middleware
-// In production, relax CSP so the backend can serve the React SPA
 app.use(helmet({
-  contentSecurityPolicy: config.app.nodeEnv === 'production' ? false : undefined,
-  crossOriginEmbedderPolicy: config.app.nodeEnv === 'production' ? false : undefined,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://unpkg.com"],
+      connectSrc: ["'self'", "https://*.tile.openstreetmap.org", "wss:", "ws:", "https://api.groq.com"],
+      fontSrc: ["'self'", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'", "blob:"],
+      frameSrc: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
 }));
 app.use(cors(config.cors));
 app.use(cookieParser());
