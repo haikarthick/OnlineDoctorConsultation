@@ -26,10 +26,15 @@ async function run() {
   console.log(`\n🔗 Connecting to PostgreSQL (${dbLabel})...\n`);
 
   try {
+    // 0. Set search_path to the correct schema (Render uses DB_SCHEMA env var)
+    const schema = process.env.DB_SCHEMA || 'public';
+    await pool.query(`SET search_path TO ${schema}, public`);
+    console.log(`  → Using schema: ${schema}`);
+
     // 1. Verify migration tables exist (migrations should already be run)
     console.log('━━━ Step 1: Verifying tables ━━━');
     const { rows: tableRows } = await pool.query(
-      `SELECT COUNT(*)::int AS cnt FROM pg_tables WHERE schemaname='public'`
+      `SELECT COUNT(*)::int AS cnt FROM pg_tables WHERE schemaname=$1`, [schema]
     );
     console.log(`  ✓ ${tableRows[0].cnt} tables found in database`);
     if (tableRows[0].cnt < 50) {

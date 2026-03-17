@@ -41,7 +41,7 @@ INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash,
   -- Farmers (password: Farmer@123)
   ('f0000000-0000-0000-0000-000000000001', 'john.miller@greenpastures.com','John',   'Miller',   'farmer',       '+1-555-400-0001', '$2a$10$bQIWJjkOSE6.KF9N7DM2YO1qZSLqV6MjI8AOxDX02gfk5/oRjroqC', true, 'USR-FRM-001'),
   ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$bQIWJjkOSE6.KF9N7DM2YO1qZSLqV6MjI8AOxDX02gfk5/oRjroqC', true, 'USR-FRM-002')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, email = EXCLUDED.email, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, role = EXCLUDED.role, phone = EXCLUDED.phone, is_active = EXCLUDED.is_active;
 
 -- ============================================================
 -- STEP 2: VET PROFILES
@@ -823,7 +823,7 @@ INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash,
   ('b0000000-0000-0000-0000-000000000004', 'dr.priya.sharma@vetcare.com', 'Priya',   'Sharma',   'veterinarian', '+1-555-200-0004', '$2a$10$HH1yq2osUEdtByarwBFq0eBy.ko6Rv33jI2TtIcSJqGh382x5tqeu', true, 'USR-VET-004'),
   -- Farmer (password: Farmer@123)
   ('f0000000-0000-0000-0000-000000000003', 'thomas.green@greenmeadows.com','Thomas',  'Green',    'farmer',       '+1-555-400-0003', '$2a$10$bQIWJjkOSE6.KF9N7DM2YO1qZSLqV6MjI8AOxDX02gfk5/oRjroqC', true, 'USR-FRM-003')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, email = EXCLUDED.email, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, role = EXCLUDED.role, phone = EXCLUDED.phone, is_active = EXCLUDED.is_active;
 
 -- ============================================================
 -- STEP 37: ADDITIONAL VET PROFILE
