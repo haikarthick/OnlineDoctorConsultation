@@ -90,6 +90,41 @@ else
   echo "  ✓ Database already has data — skipping seed (data preserved)"
 fi
 
+# Step 2c: Fix demo passwords — hash at runtime to guarantee correctness
+echo ""
+echo "━━━ Fixing demo passwords (runtime bcrypt) ━━━"
+node -e "
+const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
+async function fix() {
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  const schema = process.env.DB_SCHEMA || 'public';
+  await pool.query('SET search_path TO ' + schema + ', public');
+  const users = [
+    ['admin@vetcare.com','Admin@123'],
+    ['dr.james.carter@vetcare.com','Doctor@123'],
+    ['dr.sarah.bennett@vetcare.com','Doctor@123'],
+    ['dr.michael.reyes@vetcare.com','Doctor@123'],
+    ['dr.priya.sharma@vetcare.com','Doctor@123'],
+    ['emily.davis@email.com','Owner@123'],
+    ['robert.chen@email.com','Owner@123'],
+    ['sarah.kim@email.com','Owner@123'],
+    ['michael.torres@email.com','Owner@123'],
+    ['john.miller@greenpastures.com','Farmer@123'],
+    ['maria.garcia@sunrisefarm.com','Farmer@123'],
+    ['thomas.green@greenmeadows.com','Farmer@123'],
+  ];
+  for (const [email, pw] of users) {
+    const hash = bcrypt.hashSync(pw, 10);
+    const r = await pool.query('UPDATE users SET password_hash = \$1 WHERE email = \$2', [hash, email]);
+    console.log('  ' + (r.rowCount ? 'OK' : 'SKIP') + ' ' + email);
+  }
+  await pool.end();
+  console.log('  Done');
+}
+fix().catch(e => { console.error('  Password fix error:', e.message); });
+" 2>&1 || echo "  ⚠ Password fix had warnings"
+
 # Step 3: Start the server (this MUST succeed)
 echo ""
 echo "━━━ Starting server ━━━"

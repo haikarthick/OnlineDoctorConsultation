@@ -6,7 +6,7 @@
 import { Pool } from 'pg';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 const config = process.env.DATABASE_URL
   ? {
