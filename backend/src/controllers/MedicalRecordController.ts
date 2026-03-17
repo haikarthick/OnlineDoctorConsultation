@@ -181,7 +181,13 @@ export class MedicalRecordController {
     const animalId = req.params.animalId;
     if (!animalId) throw new ValidationError('animalId is required');
     const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
-    const timeline = await MedicalRecordService.getAnimalTimeline(animalId, limit);
+    const filters: { types?: string[]; dateFrom?: string; dateTo?: string } = {};
+    if (req.query.types) {
+      filters.types = (req.query.types as string).split(',').map(t => t.trim()).filter(Boolean);
+    }
+    if (req.query.dateFrom) filters.dateFrom = req.query.dateFrom as string;
+    if (req.query.dateTo) filters.dateTo = req.query.dateTo as string;
+    const timeline = await MedicalRecordService.getAnimalTimeline(animalId, limit, filters);
     res.json({ success: true, data: timeline });
   }
 

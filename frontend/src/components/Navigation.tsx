@@ -70,6 +70,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer'], section: 'Animals & Health' },
     { id: 'medical', label: t('nav.medicalRecords'), icon: '📋', path: '/medical-records',
       roles: ['veterinarian', 'pet_owner', 'farmer'], section: 'Animals & Health' },
+    { id: 'animal-timeline', label: t('nav.animalTimeline'), icon: '📅', path: '/animal-timeline',
+      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Animals & Health' },
     { id: 'write-review', label: t('nav.writeReview'), icon: '✍️', path: '/write-review',
       roles: ['pet_owner', 'farmer'], section: 'Animals & Health' },
     { id: 'my-reviews', label: t('nav.myReviews'), icon: '⭐', path: '/doctor/reviews',

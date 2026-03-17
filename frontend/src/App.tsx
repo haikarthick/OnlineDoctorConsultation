@@ -84,6 +84,7 @@ const CancellationDashboard = lazy(() => import('./pages/admin/CancellationDashb
 const HospitalWorkflow = lazy(() => import('./pages/HospitalWorkflow'))
 const InpatientManagement = lazy(() => import('./pages/InpatientManagement'))
 const StaffSettingsAdmin = lazy(() => import('./pages/admin/StaffSettings'))
+const AnimalTimeline = lazy(() => import('./pages/AnimalTimeline'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -188,6 +189,7 @@ function AppRoutes() {
       <Route path="/consultations" element={<RoleRoute path="/consultations"><AppLayout><Consultations /></AppLayout></RoleRoute>} />
       <Route path="/medical-records" element={<RoleRoute path="/medical-records"><AppLayout><MedicalRecords /></AppLayout></RoleRoute>} />
       <Route path="/animals" element={<RoleRoute path="/animals"><AppLayout><Animals /></AppLayout></RoleRoute>} />
+      <Route path="/animal-timeline" element={<RoleRoute path="/animal-timeline"><AppLayout><AnimalTimeline /></AppLayout></RoleRoute>} />
       <Route path="/settings" element={<RoleRoute path="/settings"><AppLayout><Settings /></AppLayout></RoleRoute>} />
 
       {/* ── Pet Owner Module ── */}

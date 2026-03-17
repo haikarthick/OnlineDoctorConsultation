@@ -101,7 +101,7 @@ export async function updateLabResult(id: string, data: Record<string, unknown>)
 }
 
 // ─── Medical Timeline ─────────────────────────────────────────
-export async function getAnimalTimeline(animalId: string, params?: { limit?: number }) {
+export async function getAnimalTimeline(animalId: string, params?: { limit?: number; types?: string; dateFrom?: string; dateTo?: string }) {
   const response = await client.get(`/timeline/animal/${animalId}`, { params })
   return response.data
 }

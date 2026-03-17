@@ -536,7 +536,7 @@ class ApiService {
   }
 
   // ─── Medical Timeline ────────────────────────────────────
-  async getAnimalTimeline(animalId: string, params?: { limit?: number }) {
+  async getAnimalTimeline(animalId: string, params?: { limit?: number; types?: string; dateFrom?: string; dateTo?: string }) {
     const response = await this.client.get(`/timeline/animal/${animalId}`, { params })
     return response.data
   }

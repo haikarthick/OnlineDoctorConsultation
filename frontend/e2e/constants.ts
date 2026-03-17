@@ -34,6 +34,7 @@ export const ROUTE_ROLES: Record<string, UserRole[]> = {
   '/consultations':           ['admin', 'veterinarian', 'pet_owner', 'farmer'],
   '/medical-records':         ['admin', 'veterinarian', 'pet_owner', 'farmer'],
   '/animals':                 ['pet_owner', 'farmer'],
+  '/animal-timeline':         ['pet_owner', 'farmer', 'veterinarian', 'admin'],
   '/settings':                ['veterinarian', 'pet_owner', 'farmer'],
   '/find-doctor':             ['pet_owner', 'farmer'],
   '/book-consultation':       ['pet_owner', 'farmer'],

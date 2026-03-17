@@ -140,6 +140,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'medical_records', 'schedule',
     'prescriptions', 'reviews', 'video_consultation', 'settings',
+    'animal_timeline',
     // Hospital
     'hospital_browse', 'hospital_create', 'hospital_manage',
     'hospital_departments', 'hospital_services', 'hospital_staff',
@@ -170,6 +171,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
     'animals', 'medical_records', 'video_consultation',
     'prescriptions', 'settings', 'write_review',
+    'animal_timeline',
     // Hospital (browse only)
     'hospital_browse',
     // (user-scoped)
@@ -187,6 +189,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'find_doctor', 'book_consultation',
     'animals', 'medical_records', 'video_consultation', 'prescriptions', 'settings', 'write_review',
+    'animal_timeline',
     // Hospital (browse to find vets)
     'hospital_browse',
     // Enterprise
@@ -214,6 +217,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   admin: [
     // Pages
     'dashboard', 'consultations', 'settings',
+    'animal_timeline',
     // Admin pages
     'admin_dashboard', 'admin_users', 'admin_consultations', 'admin_payments',
     'admin_reviews', 'admin_settings', 'admin_audit', 'admin_permissions', 'admin_medical_records',
@@ -325,6 +329,8 @@ export const PERMISSION_LABELS: Record<string, string> = {
   sustainability_manage: 'Sustainability & ESG',
   wellness_portal: 'Wellness Portal',
   geospatial_analytics: 'Geospatial Analytics',
+  // Timeline
+  animal_timeline: 'Animal Life Timeline',
   // Dashboard widgets
   dashboard_stats: 'Dashboard Stats Cards',
   dashboard_quick_actions: 'Dashboard Quick Actions',

@@ -683,72 +683,205 @@ export class MedicalRecordService {
 
   // ═══ TIMELINE ═════════════════════════════════════════════
 
-  async getAnimalTimeline(animalId: string, limit = 100): Promise<MedicalTimeline[]> {
+  async getAnimalTimeline(
+    animalId: string,
+    limit = 100,
+    filters?: { types?: string[]; dateFrom?: string; dateTo?: string }
+  ): Promise<MedicalTimeline[]> {
     try {
       const timeline: MedicalTimeline[] = [];
+      const typeFilter = filters?.types;
+      const shouldInclude = (t: string) => !typeFilter || typeFilter.length === 0 || typeFilter.includes(t);
 
-      const [mrResult, vaxResult, labResultData, rxResult, weightResult] = await Promise.all([
-        database.query(`
+      const queries: Promise<any>[] = [];
+      const queryTypes: string[] = [];
+
+      if (shouldInclude('medical_record')) {
+        let dateClause = '';
+        const params: any[] = [animalId, limit];
+        if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND mr.created_at >= $${params.length}`; }
+        if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND mr.created_at <= $${params.length}`; }
+        queries.push(database.query(`
           SELECT mr.id, mr.record_type as type, mr.title, mr.content as description,
                  mr.created_at as date, mr.severity, mr.status,
                  mr.created_by, COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
           FROM medical_records mr LEFT JOIN users u ON u.id = mr.created_by
-          WHERE mr.animal_id = $1 AND mr.status != 'archived' ORDER BY mr.created_at DESC LIMIT $2
-        `, [animalId, limit]),
-        database.query(`
+          WHERE mr.animal_id = $1 AND mr.status != 'archived'${dateClause} ORDER BY mr.created_at DESC LIMIT $2
+        `, params));
+        queryTypes.push('medical_record');
+      }
+
+      if (shouldInclude('vaccination')) {
+        let dateClause = '';
+        const params: any[] = [animalId, limit];
+        if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND vr.date_administered >= $${params.length}`; }
+        if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND vr.date_administered <= $${params.length}`; }
+        queries.push(database.query(`
           SELECT vr.id, vr.vaccine_name, vr.date_administered as date, vr.next_due_date, vr.is_valid,
                  COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
           FROM vaccination_records vr LEFT JOIN users u ON u.id = vr.administered_by
-          WHERE vr.animal_id = $1 ORDER BY vr.date_administered DESC LIMIT $2
-        `, [animalId, limit]),
-        database.query(`
+          WHERE vr.animal_id = $1${dateClause} ORDER BY vr.date_administered DESC LIMIT $2
+        `, params));
+        queryTypes.push('vaccination');
+      }
+
+      if (shouldInclude('lab_result')) {
+        let dateClause = '';
+        const params: any[] = [animalId, limit];
+        if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND lr.test_date >= $${params.length}`; }
+        if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND lr.test_date <= $${params.length}`; }
+        queries.push(database.query(`
           SELECT lr.id, lr.test_name, lr.test_date as date, lr.status, lr.is_abnormal,
                  lr.result_value, lr.normal_range,
                  COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
           FROM lab_results lr LEFT JOIN users u ON u.id = lr.ordered_by
-          WHERE lr.animal_id = $1 ORDER BY lr.test_date DESC LIMIT $2
-        `, [animalId, limit]),
-        database.query(`
+          WHERE lr.animal_id = $1${dateClause} ORDER BY lr.test_date DESC LIMIT $2
+        `, params));
+        queryTypes.push('lab_result');
+      }
+
+      if (shouldInclude('prescription')) {
+        let dateClause = '';
+        const params: any[] = [animalId, limit];
+        if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND p.created_at >= $${params.length}`; }
+        if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND p.created_at <= $${params.length}`; }
+        queries.push(database.query(`
           SELECT p.id, p.medications, p.instructions, p.created_at as date, p.is_active,
                  COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
           FROM prescriptions p LEFT JOIN users u ON u.id = p.veterinarian_id
-          WHERE p.animal_id = $1 ORDER BY p.created_at DESC LIMIT $2
-        `, [animalId, limit]),
-        database.query(`
+          WHERE p.animal_id = $1${dateClause} ORDER BY p.created_at DESC LIMIT $2
+        `, params));
+        queryTypes.push('prescription');
+      }
+
+      if (shouldInclude('weight')) {
+        let dateClause = '';
+        const params: any[] = [animalId, limit];
+        if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND wh.recorded_at >= $${params.length}`; }
+        if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND wh.recorded_at <= $${params.length}`; }
+        queries.push(database.query(`
           SELECT wh.id, wh.weight, wh.unit, wh.recorded_at as date, wh.notes,
                  COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
           FROM weight_history wh LEFT JOIN users u ON u.id = wh.recorded_by
-          WHERE wh.animal_id = $1 ORDER BY wh.recorded_at DESC LIMIT $2
-        `, [animalId, limit])
-      ]);
+          WHERE wh.animal_id = $1${dateClause} ORDER BY wh.recorded_at DESC LIMIT $2
+        `, params));
+        queryTypes.push('weight');
+      }
 
-      mrResult.rows.forEach((r: any) => timeline.push({
-        id: r.id, type: `record_${r.type}`, title: r.title || r.type,
-        description: r.description?.substring(0, 200) || '', date: r.date,
-        severity: r.severity, status: r.status, createdBy: r.created_by, createdByName: r.createdByName
-      }));
-      vaxResult.rows.forEach((r: any) => timeline.push({
-        id: r.id, type: 'vaccination', title: `Vaccination: ${r.vaccine_name}`,
-        description: r.next_due_date ? `Next due: ${r.next_due_date}` : 'No follow-up scheduled',
-        date: r.date, status: r.is_valid ? 'valid' : 'expired', createdByName: r.createdByName
-      }));
-      labResultData.rows.forEach((r: any) => timeline.push({
-        id: r.id, type: 'lab_result', title: `Lab: ${r.test_name}`,
-        description: r.result_value ? `Result: ${r.result_value}${r.normal_range ? ` (Normal: ${r.normal_range})` : ''}` : 'Pending',
-        date: r.date, status: r.status, severity: r.is_abnormal ? 'high' : 'normal', createdByName: r.createdByName
-      }));
-      rxResult.rows.forEach((r: any) => {
-        const meds = Array.isArray(r.medications) ? r.medications.map((m: any) => m.name).join(', ') : '';
-        timeline.push({
-          id: r.id, type: 'prescription', title: `Prescription: ${meds || 'Medications'}`,
-          description: r.instructions || '', date: r.date,
-          status: r.is_active ? 'active' : 'expired', createdByName: r.createdByName
+      if (shouldInclude('booking')) {
+        let dateClause = '';
+        const params: any[] = [animalId, limit];
+        if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND b.scheduled_date >= $${params.length}`; }
+        if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND b.scheduled_date <= $${params.length}`; }
+        queries.push(database.query(`
+          SELECT b.id, b.scheduled_date as date, b.time_slot_start, b.time_slot_end,
+                 b.status, b.booking_type, b.reason_for_visit, b.priority,
+                 COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
+          FROM bookings b LEFT JOIN users u ON u.id = b.veterinarian_id
+          WHERE b.animal_id = $1${dateClause} ORDER BY b.scheduled_date DESC LIMIT $2
+        `, params));
+        queryTypes.push('booking');
+      }
+
+      if (shouldInclude('consultation')) {
+        let dateClause = '';
+        const params: any[] = [animalId, limit];
+        if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND c.scheduled_at >= $${params.length}`; }
+        if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND c.scheduled_at <= $${params.length}`; }
+        queries.push(database.query(`
+          SELECT c.id, c.status, c.diagnosis, c.symptom_description,
+                 c.consultation_type, c.scheduled_at as date, c.started_at, c.completed_at,
+                 COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
+          FROM consultations c LEFT JOIN users u ON u.id = c.veterinarian_id
+          WHERE c.animal_id = $1${dateClause} ORDER BY c.scheduled_at DESC LIMIT $2
+        `, params));
+        queryTypes.push('consultation');
+      }
+
+      if (shouldInclude('allergy')) {
+        let dateClause = '';
+        const params: any[] = [animalId, limit];
+        if (filters?.dateFrom) { params.push(filters.dateFrom); dateClause += ` AND ar.identified_date >= $${params.length}`; }
+        if (filters?.dateTo) { params.push(filters.dateTo); dateClause += ` AND ar.identified_date <= $${params.length}`; }
+        queries.push(database.query(`
+          SELECT ar.id, ar.allergen, ar.reaction, ar.severity, ar.identified_date as date,
+                 ar.is_active, ar.notes,
+                 COALESCE(u.first_name || ' ' || u.last_name, '') as "createdByName"
+          FROM allergy_records ar LEFT JOIN users u ON u.id = ar.reported_by
+          WHERE ar.animal_id = $1${dateClause} ORDER BY ar.identified_date DESC LIMIT $2
+        `, params));
+        queryTypes.push('allergy');
+      }
+
+      const results = await Promise.all(queries);
+
+      results.forEach((result, idx) => {
+        const qType = queryTypes[idx];
+        result.rows.forEach((r: any) => {
+          switch (qType) {
+            case 'medical_record':
+              timeline.push({
+                id: r.id, type: `record_${r.type}`, title: r.title || r.type,
+                description: r.description?.substring(0, 200) || '', date: r.date,
+                severity: r.severity, status: r.status, createdBy: r.created_by, createdByName: r.createdByName
+              });
+              break;
+            case 'vaccination':
+              timeline.push({
+                id: r.id, type: 'vaccination', title: `Vaccination: ${r.vaccine_name}`,
+                description: r.next_due_date ? `Next due: ${r.next_due_date}` : 'No follow-up scheduled',
+                date: r.date, status: r.is_valid ? 'valid' : 'expired', createdByName: r.createdByName
+              });
+              break;
+            case 'lab_result':
+              timeline.push({
+                id: r.id, type: 'lab_result', title: `Lab: ${r.test_name}`,
+                description: r.result_value ? `Result: ${r.result_value}${r.normal_range ? ` (Normal: ${r.normal_range})` : ''}` : 'Pending',
+                date: r.date, status: r.status, severity: r.is_abnormal ? 'high' : 'normal', createdByName: r.createdByName
+              });
+              break;
+            case 'prescription': {
+              const meds = Array.isArray(r.medications) ? r.medications.map((m: any) => m.name).join(', ') : '';
+              timeline.push({
+                id: r.id, type: 'prescription', title: `Prescription: ${meds || 'Medications'}`,
+                description: r.instructions || '', date: r.date,
+                status: r.is_active ? 'active' : 'expired', createdByName: r.createdByName
+              });
+              break;
+            }
+            case 'weight':
+              timeline.push({
+                id: r.id, type: 'weight', title: `Weight: ${r.weight} ${r.unit}`,
+                description: r.notes || '', date: r.date, createdByName: r.createdByName
+              });
+              break;
+            case 'booking':
+              timeline.push({
+                id: r.id, type: 'booking', title: `Booking: ${r.booking_type || 'Appointment'}`,
+                description: r.reason_for_visit || `${r.time_slot_start || ''} - ${r.time_slot_end || ''}`,
+                date: r.date, status: r.status, severity: r.priority === 'urgent' ? 'high' : undefined,
+                createdByName: r.createdByName
+              });
+              break;
+            case 'consultation':
+              timeline.push({
+                id: r.id, type: 'consultation', title: `Consultation: ${r.consultation_type || 'General'}`,
+                description: r.diagnosis || r.symptom_description || '',
+                date: r.date, status: r.status, createdByName: r.createdByName,
+                metadata: { startedAt: r.started_at, completedAt: r.completed_at }
+              });
+              break;
+            case 'allergy':
+              timeline.push({
+                id: r.id, type: 'allergy', title: `Allergy: ${r.allergen}`,
+                description: r.reaction || r.notes || '',
+                date: r.date, severity: r.severity,
+                status: r.is_active ? 'active' : 'resolved', createdByName: r.createdByName
+              });
+              break;
+          }
         });
       });
-      weightResult.rows.forEach((r: any) => timeline.push({
-        id: r.id, type: 'weight', title: `Weight: ${r.weight} ${r.unit}`,
-        description: r.notes || '', date: r.date, createdByName: r.createdByName
-      }));
 
       timeline.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       return timeline.slice(0, limit);

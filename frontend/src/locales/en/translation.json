@@ -103,6 +103,7 @@
     "vetHospitals": "Vet Hospitals",
     "myHospital": "My Hospital",
     "myWallet": "My Wallet",
+    "animalTimeline": "Life Timeline",
     "hospitalMgmt": "Hospital Mgmt",
     "cancellations": "Cancellations",
     "sections": {
@@ -495,6 +496,37 @@
       "regular": "Regular Checkup",
       "vaccination": "Vaccination",
       "followUp": "Follow-up"
+    }
+  },
+  "timeline": {
+    "title": "Animal Life Timeline",
+    "subtitle": "Complete chronological view of health events, treatments, and milestones",
+    "selectAnimal": "Animal",
+    "noAnimals": "No animals found",
+    "from": "From",
+    "to": "To",
+    "clearFilters": "Clear Filters",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical",
+    "totalEvents": "Total Events",
+    "eventTypes": "Event Types",
+    "activeItems": "Active Items",
+    "highSeverity": "High Severity",
+    "showing": "Showing",
+    "of": "of",
+    "events": "events",
+    "loadingEvents": "Loading timeline events...",
+    "noEvents": "No Timeline Events",
+    "noEventsDesc": "No events found for this animal with the current filters.",
+    "selectAnimalFirst": "Select an animal to view their life timeline.",
+    "distribution": "Event Distribution",
+    "detail": {
+      "type": "Type",
+      "date": "Date",
+      "description": "Description",
+      "status": "Status",
+      "severity": "Severity",
+      "recordedBy": "Recorded By"
     }
   },
   "medicalRecords": {
