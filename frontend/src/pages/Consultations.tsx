@@ -21,6 +21,7 @@ interface BookingRow {
   missedBy?: 'doctor' | 'patient' | 'both';
   cancelledBy?: string;
   cancelledAt?: string;
+  confirmedAt?: string;
 }
 interface ConsultRow {
   id: string; animalType?: string; symptomDescription?: string;
@@ -81,8 +82,9 @@ const Consultations: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('')
 
   // Split bookings into active (needs attention) vs history (reference only)
-  const activeStatuses = ['pending', 'confirmed', 'rescheduled', 'missed']
-  const historyStatuses = ['completed', 'cancelled']
+  // 'rescheduled' goes to history — the old booking is superseded, the new one appears separately
+  const activeStatuses = ['pending', 'confirmed', 'missed']
+  const historyStatuses = ['completed', 'cancelled', 'rescheduled']
 
   const activeBookings = bookings.filter(b => activeStatuses.includes(b.status))
   const historyBookings = bookings.filter(b => historyStatuses.includes(b.status))
@@ -476,29 +478,88 @@ const Consultations: React.FC = () => {
                       <div className="appt-card-reason">{b.reasonForVisit || b.reason}</div>
                     )}
 
-                    {/* Expired pending warning */}
+                    {/* ─── Status-specific info banners ─── */}
+
+                    {/* PENDING — awaiting vet confirmation */}
+                    {b.status === 'pending' && !isExpiredPending(b) && (
+                      <div style={{ padding: '8px 12px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#92400e', marginTop: 6 }}>
+                        {isPetOwner && '⏳ Awaiting doctor confirmation. You\u2019ll be notified once confirmed.'}
+                        {isVet && '📋 This booking needs your confirmation. Please confirm or decline.'}
+                        {isAdmin && '⏳ Pending — awaiting veterinarian confirmation.'}
+                      </div>
+                    )}
+
+                    {/* PENDING but expired (safety fallback — backend normally auto-expires these) */}
                     {isExpiredPending(b) && (
                       <div style={{ padding: '8px 12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, fontSize: 12, color: '#991b1b', marginTop: 6 }}>
                         ⚠️ Scheduled time has passed without doctor confirmation. Please reschedule{isPetOwner ? ' with any available doctor' : ''}.
                       </div>
                     )}
 
-                    {/* Who missed badge + contextual info for missed bookings */}
+                    {/* CONFIRMED — appointment is set */}
+                    {b.status === 'confirmed' && (
+                      <div style={{ padding: '8px 12px', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 6, fontSize: 12, color: '#065f46', marginTop: 6 }}>
+                        {isPetOwner && '✅ Your appointment is confirmed! Join at the scheduled time.'}
+                        {isVet && '✅ Confirmed. Start the consultation at the scheduled time.'}
+                        {isAdmin && '✅ Appointment confirmed by the veterinarian.'}
+                      </div>
+                    )}
+
+                    {/* MISSED — distinguish pending→missed vs confirmed→missed */}
                     {b.status === 'missed' && (
                       <div style={{ marginTop: 8 }}>
                         {missedBadge(b.missedBy)}
-                        {isPetOwner && b.missedBy === 'doctor' && (
-                          <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
-                            🩺 The doctor did not join. You may reschedule this appointment with any available doctor — <strong>no limit</strong> on reschedules.
-                          </div>
+
+                        {/* Doctor missed — was never confirmed (pending → missed) */}
+                        {b.missedBy === 'doctor' && !b.confirmedAt && (
+                          <>
+                            {isPetOwner && (
+                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                                🩺 The doctor did not respond to your booking request in time. You may reschedule with any available doctor — <strong>no limit</strong> on reschedules.
+                              </div>
+                            )}
+                            {isVet && (
+                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                                🩺 You did not confirm this booking before the scheduled time. The patient may reschedule.
+                              </div>
+                            )}
+                            {isAdmin && (
+                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                                🩺 Doctor did not confirm this booking. Pending → Missed.
+                              </div>
+                            )}
+                          </>
                         )}
+
+                        {/* Doctor missed — was confirmed but didn't show up (confirmed → missed) */}
+                        {b.missedBy === 'doctor' && b.confirmedAt && (
+                          <>
+                            {isPetOwner && (
+                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                                🩺 The doctor confirmed but did not join the appointment. You may reschedule with any available doctor — <strong>no limit</strong> on reschedules.
+                              </div>
+                            )}
+                            {isVet && (
+                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                                🩺 You confirmed but did not join this session. The patient may reschedule.
+                              </div>
+                            )}
+                            {isAdmin && (
+                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                                🩺 Doctor confirmed but did not attend. Confirmed → Missed.
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {/* Patient missed */}
                         {isPetOwner && (b.missedBy === 'patient' || b.missedBy === 'both') && (() => {
                           const used = b.rescheduleCount || 0
                           const limit = patientNoShowRescheduleLimit
                           const remaining = limit === 0 ? null : Math.max(0, limit - used)
                           return (
                             <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
-                              ⚠️ You missed this appointment.{' '}
+                              ⚠️ You {b.missedBy === 'both' ? 'and the doctor both' : ''} missed this appointment.{' '}
                               {limit === 0
                                 ? 'You may reschedule at any time.'
                                 : remaining !== null && remaining > 0
@@ -509,12 +570,17 @@ const Consultations: React.FC = () => {
                         })()}
                         {isVet && b.missedBy === 'patient' && (
                           <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
-                            🙋 The patient did not join the session.
+                            🙋 The patient did not join the session. They may reschedule.
                           </div>
                         )}
-                        {isVet && b.missedBy === 'doctor' && (
-                          <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
-                            🩺 You did not join this session. The patient may reschedule.
+                        {isVet && b.missedBy === 'both' && (
+                          <div style={{ padding: '8px 12px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, color: '#475569', marginTop: 6 }}>
+                            ❌ Neither party joined this session. The patient may reschedule.
+                          </div>
+                        )}
+                        {isAdmin && (b.missedBy === 'patient' || b.missedBy === 'both') && (
+                          <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
+                            {b.missedBy === 'patient' ? '🙋 Patient no-show.' : '❌ Both parties missed.'} Confirmed → Missed.
                           </div>
                         )}
                       </div>
@@ -625,6 +691,14 @@ const Consultations: React.FC = () => {
                           </span>}
                         </div>
                       )}
+
+                      {/* Rescheduled indicator — this is the OLD booking that was superseded */}
+                      {b.status === 'rescheduled' && (
+                        <div style={{ fontSize: 12, marginTop: 6, padding: '8px 12px', borderRadius: 6,
+                          background: '#fef3c7', border: '1px solid #fcd34d', color: '#92400e' }}>
+                          🔄 This booking was rescheduled. A new appointment was created to replace it.
+                        </div>
+                      )}
                     </div>
 
                     {/* Card Actions */}
@@ -690,7 +764,9 @@ const Consultations: React.FC = () => {
                 color: !rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor' ? '#78350f' : '#5b21b6',
               }}>
                 {!rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor'
-                  ? '🩺 Doctor no-show — you may reschedule with any available doctor. No reschedule limit applies.'
+                  ? (rescheduleBooking.confirmedAt
+                    ? '🩺 Doctor confirmed but did not attend — you may reschedule with any available doctor. No reschedule limit applies.'
+                    : '🩺 Doctor did not confirm in time — you may reschedule with any available doctor. No reschedule limit applies.')
                   : (() => {
                       const used = rescheduleBooking.rescheduleCount || 0
                       const limit = patientNoShowRescheduleLimit

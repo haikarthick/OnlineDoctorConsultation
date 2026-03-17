@@ -20,12 +20,12 @@ class BookingService {
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-    // Mark confirmed bookings as missed whose scheduled window has passed.
+    // 1. Mark CONFIRMED bookings as missed whose scheduled window has passed.
     // Determines missed_by:
     //   'patient'  — video session created (doctor opened room) but stuck in 'waiting'
     //   'doctor'   — no video session created at all (doctor never started the room)
     // Skips bookings whose consultation is already completed or in_progress.
-    const result = await database.query(
+    const confirmedResult = await database.query(
       `UPDATE bookings AS b
        SET status = 'missed',
            missed_by = CASE
@@ -53,14 +53,33 @@ class BookingService {
       [dateStr, timeStr]
     );
 
-    if (result.rows.length > 0) {
-      logger.info(`Auto-marked ${result.rows.length} booking(s) as missed`, {
-        bookingIds: result.rows.map((r: any) => r.id),
-        byDoctor: result.rows.filter((r: any) => r.missed_by === 'doctor').length,
-        byPatient: result.rows.filter((r: any) => r.missed_by === 'patient').length,
+    // 2. Mark PENDING bookings as missed — doctor never confirmed before time passed.
+    // Always missed_by = 'doctor' (vet's responsibility to confirm).
+    const pendingResult = await database.query(
+      `UPDATE bookings AS b
+       SET status = 'missed',
+           missed_by = 'doctor',
+           updated_at = NOW()
+       WHERE b.status = 'pending'
+         AND (
+           b.scheduled_date < $1::date
+           OR (b.scheduled_date = $1::date AND b.time_slot_end <= $2)
+         )
+       RETURNING b.id, b.missed_by`,
+      [dateStr, timeStr]
+    );
+
+    const totalMarked = confirmedResult.rows.length + pendingResult.rows.length;
+    if (totalMarked > 0) {
+      logger.info(`Auto-marked ${totalMarked} booking(s) as missed`, {
+        confirmedToMissed: confirmedResult.rows.length,
+        pendingToMissed: pendingResult.rows.length,
+        bookingIds: [...confirmedResult.rows, ...pendingResult.rows].map((r: any) => r.id),
+        byDoctor: [...confirmedResult.rows, ...pendingResult.rows].filter((r: any) => r.missed_by === 'doctor').length,
+        byPatient: confirmedResult.rows.filter((r: any) => r.missed_by === 'patient').length,
       });
     }
-    return result.rows.length;
+    return totalMarked;
   }
 
   async createBooking(petOwnerId: string, data: CreateBookingDTO): Promise<Booking> {
@@ -173,6 +192,7 @@ class BookingService {
        b.priority, b.reason_for_visit as "reasonForVisit", b.symptoms, b.notes,
        b.reschedule_count as "rescheduleCount", b.missed_by as "missedBy",
        b.cancelled_by as "cancelledBy", b.cancelled_at as "cancelledAt",
+       b.confirmed_at as "confirmedAt",
        b.created_at as "createdAt", b.updated_at as "updatedAt",
        CONCAT(po.first_name, ' ', po.last_name) as "petOwnerName",
        CONCAT('Dr. ', v.first_name, ' ', v.last_name) as "vetName",
