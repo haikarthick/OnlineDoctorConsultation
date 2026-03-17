@@ -26,15 +26,18 @@ async function run() {
   const dbLabel = (config as any).connectionString ? 'DATABASE_URL' : `${(config as any).host}:${(config as any).port}/${(config as any).database}`;
   console.log(`\n🔗 Connecting to PostgreSQL (${dbLabel})...\n`);
 
+  // Use a SINGLE client to ensure search_path persists across all queries
+  const client = await pool.connect();
+
   try {
     // 0. Set search_path to the correct schema (Render uses DB_SCHEMA env var)
     const schema = process.env.DB_SCHEMA || 'public';
-    await pool.query(`SET search_path TO ${schema}, public`);
+    await client.query(`SET search_path TO ${schema}, public`);
     console.log(`  → Using schema: ${schema}`);
 
     // 1. Verify migration tables exist (migrations should already be run)
     console.log('━━━ Step 1: Verifying tables ━━━');
-    const { rows: tableRows } = await pool.query(
+    const { rows: tableRows } = await client.query(
       `SELECT COUNT(*)::int AS cnt FROM pg_tables WHERE schemaname=$1`, [schema]
     );
     console.log(`  ✓ ${tableRows[0].cnt} tables found in database`);
@@ -77,7 +80,7 @@ async function run() {
       if (!sectionSql || !/\b(INSERT|TRUNCATE|DELETE|UPDATE|DO)\b/i.test(sectionSql)) continue;
 
       try {
-        await pool.query(sectionSql);
+        await client.query(sectionSql);
         successCount++;
         console.log(`  ✓ ${sectionName}`);
       } catch (err: any) {
@@ -110,7 +113,7 @@ async function run() {
     ];
     for (const u of demoPasswords) {
       const hash = bcrypt.hashSync(u.password, 10);
-      const res = await pool.query('UPDATE users SET password_hash = $1 WHERE email = $2', [hash, u.email]);
+      const res = await client.query('UPDATE users SET password_hash = $1 WHERE email = $2', [hash, u.email]);
       console.log(`  ${res.rowCount ? '✓' : '⚠'} ${u.email} (${res.rowCount} row)`);
     }
 
@@ -136,7 +139,7 @@ async function run() {
     let totalRows = 0;
     for (const t of tables) {
       try {
-        const { rows } = await pool.query(`SELECT COUNT(*)::int AS cnt FROM ${t}`);
+        const { rows } = await client.query(`SELECT COUNT(*)::int AS cnt FROM ${t}`);
         const cnt = rows[0].cnt;
         totalRows += cnt;
         if (cnt > 0) {
@@ -162,7 +165,7 @@ async function run() {
     console.log('  Farmer:       maria.garcia@sunrisefarm.com    / Farmer@123');
 
     // Check critical data
-    const { rows: userRows } = await pool.query('SELECT COUNT(*)::int AS cnt FROM users');
+    const { rows: userRows } = await client.query('SELECT COUNT(*)::int AS cnt FROM users');
     if (userRows[0].cnt === 0) {
       console.error('\n❌ CRITICAL: No users were inserted! Login will not work.');
       process.exit(1);
@@ -173,6 +176,7 @@ async function run() {
     console.error('\n❌ Seed failed:', err);
     process.exit(1);
   } finally {
+    client.release();
     await pool.end();
   }
 }
