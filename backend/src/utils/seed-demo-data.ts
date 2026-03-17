@@ -6,6 +6,7 @@
 import { Pool } from 'pg';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as bcrypt from 'bcryptjs';
 
 const config = process.env.DATABASE_URL
   ? {
@@ -88,6 +89,29 @@ async function run() {
     console.log(`\n  Sections: ${successCount} succeeded, ${failCount} failed`);
     if (failCount > 0) {
       console.log('  (Failed sections are usually from optional tier migrations that were skipped)');
+    }
+
+    // 2b. Fix all demo user passwords at RUNTIME using bcrypt
+    // This guarantees correct hashes regardless of file encoding/serialization
+    console.log('\n━━━ Step 2b: Fixing demo passwords (runtime bcrypt) ━━━');
+    const demoPasswords: Array<{ email: string; password: string }> = [
+      { email: 'admin@vetcare.com', password: 'Admin@123' },
+      { email: 'dr.james.carter@vetcare.com', password: 'Doctor@123' },
+      { email: 'dr.sarah.bennett@vetcare.com', password: 'Doctor@123' },
+      { email: 'dr.michael.reyes@vetcare.com', password: 'Doctor@123' },
+      { email: 'dr.priya.sharma@vetcare.com', password: 'Doctor@123' },
+      { email: 'emily.davis@email.com', password: 'Owner@123' },
+      { email: 'robert.chen@email.com', password: 'Owner@123' },
+      { email: 'sarah.kim@email.com', password: 'Owner@123' },
+      { email: 'michael.torres@email.com', password: 'Owner@123' },
+      { email: 'john.miller@greenpastures.com', password: 'Farmer@123' },
+      { email: 'maria.garcia@sunrisefarm.com', password: 'Farmer@123' },
+      { email: 'thomas.green@greenmeadows.com', password: 'Farmer@123' },
+    ];
+    for (const u of demoPasswords) {
+      const hash = bcrypt.hashSync(u.password, 10);
+      const res = await pool.query('UPDATE users SET password_hash = $1 WHERE email = $2', [hash, u.email]);
+      console.log(`  ${res.rowCount ? '✓' : '⚠'} ${u.email} (${res.rowCount} row)`);
     }
 
     // 3. Verify counts
