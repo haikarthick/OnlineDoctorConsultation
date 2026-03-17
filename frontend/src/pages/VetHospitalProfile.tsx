@@ -174,7 +174,7 @@ const VetHospitalProfile: React.FC = () => {
               {hospital.phone && <div>📞 {hospital.phone}</div>}
               {(hospital as any).emergencyPhone && <div>🚨 {(hospital as any).emergencyPhone}</div>}
               {hospital.email && <div>✉ {hospital.email}</div>}
-              {hospital.website && <div>🌐 <a href={hospital.website} target="_blank" rel="noopener noreferrer">{hospital.website}</a></div>}
+              {hospital.website && <div>🌐 <a href={hospital.website} rel="noopener noreferrer">{hospital.website}</a></div>}
               {hospital.address && <div>📍 {hospital.address}{hospital.city ? `, ${hospital.city}` : ''}</div>}
               {hospital.establishedYear && <div>🏛 Est. {hospital.establishedYear}</div>}
             </div>

@@ -77,6 +77,8 @@ const VetHospitalManage: React.FC = () => {
   const [docError, setDocError] = useState<Record<string, string>>({})
   const [reviewForm, setReviewForm] = useState<{ docId: string; status: 'approved'|'rejected'; reason: string } | null>(null)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  const [expiryDates, setExpiryDates] = useState<Record<string, string>>({})
+  const [docViewModal, setDocViewModal] = useState<{ url: string; name: string } | null>(null)
 
   // Appointments
   const [bookings, setBookings] = useState<any[]>([])
@@ -718,7 +720,12 @@ const VetHospitalManage: React.FC = () => {
                           Exp: {new Date(existing.expiryDate).toLocaleDateString('en-IN')}
                         </span>
                       )}
-                      <a href={existing.fileUrl} target="_blank" rel="noreferrer" className="doc-view-link">View</a>
+                      <button
+                        type="button"
+                        className="doc-view-link"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit', color: 'inherit', textDecoration: 'underline' }}
+                        onClick={() => setDocViewModal({ url: existing.fileUrl, name: existing.fileName })}
+                      >View</button>
                     </div>
                   )}
 
@@ -742,9 +749,10 @@ const VetHospitalManage: React.FC = () => {
                           <label style={{ fontSize: '.8rem' }}>Expiry Date</label>
                           <input
                             type="date"
-                            id={`expiry-${dt}`}
                             className="doc-expiry-input"
+                            value={expiryDates[dt] || ''}
                             min={new Date().toISOString().split('T')[0]}
+                            onChange={e => setExpiryDates(p => ({ ...p, [dt]: e.target.value }))}
                           />
                         </div>
                       )}
@@ -756,8 +764,7 @@ const VetHospitalManage: React.FC = () => {
                         onChange={async e => {
                           const file = e.target.files?.[0]
                           if (!file) return
-                          const expiryInput = document.getElementById(`expiry-${dt}`) as HTMLInputElement
-                          const expiryDate = needsExpiry ? expiryInput?.value || undefined : undefined
+                          const expiryDate = needsExpiry ? expiryDates[dt] || undefined : undefined
                           if (needsExpiry && !expiryDate) {
                             setDocError(p => ({ ...p, [dt]: 'Please enter the expiry date before uploading' }))
                             return
@@ -1266,6 +1273,33 @@ const VetHospitalManage: React.FC = () => {
               >
                 {reviewForm.status === 'approved' ? 'Approve' : 'Reject'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Document Viewer Modal ──────────────────────────── */}
+      {docViewModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center',
+          alignItems: 'center', zIndex: 9999
+        }} onClick={() => setDocViewModal(null)}>
+          <div style={{
+            background: 'white', borderRadius: 12, width: '90%', maxWidth: 800,
+            maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h3 style={{ margin: 0, fontSize: 16 }}>📄 {docViewModal.name}</h3>
+              <button onClick={() => setDocViewModal(null)}
+                style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#6b7280', lineHeight: 1 }}>✕</button>
+            </div>
+            <div style={{ flex: 1, overflow: 'auto', padding: 16, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', minHeight: 300 }}>
+              {/\.(jpe?g|png|gif|webp|svg)$/i.test(docViewModal.name)
+                ? <img src={docViewModal.url} alt={docViewModal.name} style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: 8 }} />
+                : <iframe src={docViewModal.url} title={docViewModal.name} style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }} />
+              }
             </div>
           </div>
         </div>
