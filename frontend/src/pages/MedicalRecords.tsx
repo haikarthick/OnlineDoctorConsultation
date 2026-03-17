@@ -5,7 +5,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 
-type Tab = 'overview' | 'records' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline'
+type Tab = 'overview' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline'
 
 const RECORD_TYPES = [
   { value: 'diagnosis', label: 'Diagnosis', icon: '🩺', color: '#667eea' },
@@ -25,7 +25,8 @@ const SEVERITY_OPTIONS = [
   { value: 'critical', label: 'Critical', color: '#dc2626' },
 ]
 
-const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
+const MedicalRecords: React.FC = () => {
+  const { t } = useTranslation()
 
   const { formatDate } = useSettings()
   const { user } = useAuth()
@@ -40,8 +41,6 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
 
   // Data states
   const [stats, setStats] = useState<any>(null)
-  const [records, setRecords] = useState<any[]>([])
-  const [recordsTotal, setRecordsTotal] = useState(0)
   const [vaccinations, setVaccinations] = useState<any[]>([])
   const [labResults, setLabResults] = useState<any[]>([])
   const [allergies, setAllergies] = useState<any[]>([])
@@ -51,16 +50,11 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
   const [consultations, setConsultations] = useState<any[]>([])
   const [consultationsTotal, setConsultationsTotal] = useState(0)
   const [prescriptionsTotal, setPrescriptionsTotal] = useState(0)
-  // Filters
-  const [recordTypeFilter, setRecordTypeFilter] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-
   // Modal states
   const [showModal, setShowModal] = useState<string | null>(null)
   const [modalData, setModalData] = useState<any>({})
   const [saving, setSaving] = useState(false)
   const [modalError, setModalError] = useState('')
-  const [detailRecord, setDetailRecord] = useState<any>(null)
 
   const fmtDate = useCallback((d: string) => {
     if (!d) return 'N/A'
@@ -88,19 +82,6 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
       setStats(res.data)
     } catch { /* ignore */ }
   }, [selectedAnimal])
-
-  const loadRecords = useCallback(async () => {
-    try {
-      const params: any = { limit: 50, offset: 0 }
-      if (selectedAnimal) params.animalId = selectedAnimal
-      if (recordTypeFilter) params.recordType = recordTypeFilter
-      if (searchQuery) params.search = searchQuery
-      const res = await apiService.listMedicalRecords(params)
-      const data = res.data
-      setRecords(data?.records || [])
-      setRecordsTotal(data?.total || 0)
-    } catch { setRecords([]); setRecordsTotal(0) }
-  }, [selectedAnimal, recordTypeFilter, searchQuery])
 
   const loadVaccinations = useCallback(async () => {
     if (!selectedAnimal) return
@@ -172,31 +153,29 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
     setLoading(true)
     setError('')
     try {
-      await Promise.all([loadAnimals(), loadStats(), loadPrescriptions()])
+      await Promise.all([loadAnimals(), loadStats(), loadPrescriptions(), loadConsultations()])
     } catch (err: any) {
       setError(err?.response?.data?.error?.message || err?.message || 'Failed to load data')
     } finally { setLoading(false) }
-  }, [loadAnimals, loadStats, loadPrescriptions])
+  }, [loadAnimals, loadStats, loadPrescriptions, loadConsultations])
 
   useEffect(() => { loadAllData() }, [])
 
   useEffect(() => {
     if (selectedAnimal) {
-      loadRecords()
       loadPrescriptions()
       loadStats()
-      if (activeTab === 'consultations') loadConsultations()
+      loadConsultations()
       if (activeTab === 'vaccinations') loadVaccinations()
       if (activeTab === 'lab_results') loadLabResults()
       if (activeTab === 'allergies') loadAllergies()
       if (activeTab === 'weight') loadWeightHistory()
       if (activeTab === 'timeline') loadTimeline()
     } else {
-      loadRecords()
       loadPrescriptions()
       loadStats()
     }
-  }, [selectedAnimal, activeTab, recordTypeFilter, searchQuery])
+  }, [selectedAnimal, activeTab])
 
   // ═══ CRUD HANDLERS ════════════════════════════════════════
 
@@ -210,7 +189,7 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
         veterinarianId: isVet ? user?.id : undefined,
       })
       setShowModal(null); setModalData({})
-      loadRecords(); loadStats()
+      loadStats()
     } catch (err: any) {
       setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save record')
     } finally { setSaving(false) }
@@ -271,13 +250,16 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
   const getSeverityInfo = (sev: string) => SEVERITY_OPTIONS.find(s => s.value === sev) || SEVERITY_OPTIONS[1]
   const selectedAnimalData = animals.find((a: any) => a.id === selectedAnimal)
 
-  const tabStyle = (tab: Tab) => ({
-    padding: '10px 16px', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
-    background: activeTab === tab ? '#fff' : 'transparent',
-    color: activeTab === tab ? '#667eea' : '#6b7280',
-    borderBottom: activeTab === tab ? '2px solid #667eea' : '2px solid transparent',
-    marginBottom: -2, whiteSpace: 'nowrap' as const
-  })
+  const TAB_ITEMS: { key: Tab; icon: string; label: string; count?: number }[] = [
+    { key: 'overview', icon: '📊', label: 'Overview' },
+    { key: 'consultations', icon: '🩺', label: 'Consultations', count: stats?.consultations?.total ?? consultationsTotal },
+    { key: 'prescriptions', icon: '💊', label: 'Prescriptions', count: stats?.prescriptions?.total ?? prescriptionsTotal },
+    { key: 'vaccinations', icon: '💉', label: 'Vaccinations', count: stats?.vaccinations?.total ?? vaccinations.length },
+    { key: 'lab_results', icon: '🔬', label: 'Lab Results', count: stats?.labResults?.total ?? labResults.length },
+    { key: 'allergies', icon: '⚠️', label: 'Allergies', count: stats?.allergies?.total ?? allergies.length },
+    { key: 'weight', icon: '⚖️', label: 'Weight', count: weightHistory.length },
+    { key: 'timeline', icon: '📅', label: 'Timeline' },
+  ]
 
   // ═══ RENDER ═══════════════════════════════════════════════
 
@@ -348,17 +330,21 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
         </div>
       )}
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderBottom: '2px solid #e5e7eb', overflowX: 'auto' }}>
-        <button onClick={() => setActiveTab('overview')} style={tabStyle('overview')}>📊 Overview</button>
-        <button onClick={() => setActiveTab('consultations')} style={tabStyle('consultations')}>🩺 Consultations ({stats?.consultations?.total ?? consultationsTotal})</button>
-        <button onClick={() => setActiveTab('prescriptions')} style={tabStyle('prescriptions')}>💊 Prescriptions ({stats?.prescriptions?.total ?? prescriptionsTotal})</button>
-        <button onClick={() => setActiveTab('records')} style={tabStyle('records')}>📄 Records ({recordsTotal})</button>
-        <button onClick={() => setActiveTab('vaccinations')} style={tabStyle('vaccinations')}>💉 Vaccinations ({stats?.vaccinations?.total ?? vaccinations.length})</button>
-        <button onClick={() => setActiveTab('lab_results')} style={tabStyle('lab_results')}>🔬 Lab Results ({stats?.labResults?.total ?? labResults.length})</button>
-        <button onClick={() => setActiveTab('allergies')} style={tabStyle('allergies')}>⚠️ Allergies ({stats?.allergies?.total ?? allergies.length})</button>
-        <button onClick={() => setActiveTab('weight')} style={tabStyle('weight')}>⚖️ Weight ({weightHistory.length})</button>
-        <button onClick={() => setActiveTab('timeline')} style={tabStyle('timeline')}>📅 Timeline</button>
+      {/* Tabs — responsive pill navigation */}
+      <div className="med-tabs">
+        {TAB_ITEMS.map(tab => (
+          <button
+            key={tab.key}
+            className={`med-tab${activeTab === tab.key ? ' med-tab--active' : ''}`}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            <span className="med-tab__icon">{tab.icon}</span>
+            <span className="med-tab__label">{tab.label}</span>
+            {tab.count !== undefined && tab.count > 0 && (
+              <span className="med-tab__badge">{tab.count}</span>
+            )}
+          </button>
+        ))}
       </div>
 
       <div className="module-content">
@@ -383,34 +369,11 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
               </div>
             )}
 
-            {/* Records by Type */}
-            {stats?.recordsByType && Object.keys(stats.recordsByType).length > 0 && (
-              <div style={{ marginBottom: 24 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>Records by Type</h3>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {Object.entries(stats.recordsByType).map(([type, count]: [string, any]) => {
-                    const info = getRecordTypeInfo(type)
-                    return (
-                      <div key={type} style={{
-                        padding: '8px 14px', borderRadius: 8, background: '#fff', border: '1px solid #e5e7eb',
-                        display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
-                      }} onClick={() => { setRecordTypeFilter(type); setActiveTab('records') }}>
-                        <span>{info.icon}</span>
-                        <span style={{ fontWeight: 500, fontSize: 13 }}>{info.label}</span>
-                        <span style={{ background: info.color, color: '#fff', borderRadius: 12, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>{count}</span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
             {/* Quick Actions */}
             {(isVet || isAdmin) && selectedAnimal && (
               <div style={{ marginBottom: 24 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>Quick Actions</h3>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <QuickBtn label="+ Record" onClick={() => { setShowModal('record'); setModalData({ recordType: 'diagnosis', severity: 'normal' }) }} />
                   <QuickBtn label="+ Vaccination" onClick={() => { setShowModal('vaccination'); setModalData({}) }} />
                   <QuickBtn label="+ Weight" onClick={() => { setShowModal('weight'); setModalData({ unit: 'kg' }) }} />
                   <QuickBtn label="+ Allergy" onClick={() => { setShowModal('allergy'); setModalData({ severity: 'mild' }) }} />
@@ -449,46 +412,6 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
               </div>
             )}
 
-            {records.length > 0 && (
-              <div>
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>Recent Records</h3>
-                <div className="records-list">
-                  {records.slice(0, 5).map((rec: any) => (
-                    <RecordRow key={rec.id} rec={rec} fmtDate={fmtDate} getRecordTypeInfo={getRecordTypeInfo} getSeverityInfo={getSeverityInfo} onView={() => setDetailRecord(rec)} />
-                  ))}
-                </div>
-                {records.length > 5 && (
-                  <button onClick={() => setActiveTab('records')} style={{ marginTop: 8, color: '#667eea', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
-                    View all {recordsTotal} records →
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ═══ RECORDS TAB ═══════════════════════════════════ */}
-        {activeTab === 'records' && (
-          <div>
-            <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-              <input type="text" placeholder="Search records..."
-                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, flex: 1, minWidth: 200 }} />
-              <select value={recordTypeFilter} onChange={(e) => setRecordTypeFilter(e.target.value)}
-                style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
-                <option value="">All Types</option>
-                {RECORD_TYPES.map(t => <option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
-              </select>
-            </div>
-            {records.length === 0 ? (
-              <EmptyState icon="📄" title="No medical records found" subtitle="Records created by veterinarians during consultations will appear here" />
-            ) : (
-              <div className="records-list">
-                {records.map((rec: any) => (
-                  <RecordRow key={rec.id} rec={rec} fmtDate={fmtDate} getRecordTypeInfo={getRecordTypeInfo} getSeverityInfo={getSeverityInfo} onView={() => setDetailRecord(rec)} />
-                ))}
-              </div>
-            )}
           </div>
         )}
 
@@ -801,54 +724,6 @@ const MedicalRecords: React.FC = () => {  const { t } = useTranslation()
         )}
       </div>
 
-      {/* ═══ DETAIL MODAL ════════════════════════════════════ */}
-      {detailRecord && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-          onClick={() => setDetailRecord(null)}>
-          <div style={{ background: '#fff', borderRadius: 12, maxWidth: 700, width: '100%', maxHeight: '90vh', overflow: 'auto', padding: 24 }}
-            onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700 }}>{getRecordTypeInfo(detailRecord.recordType).icon} {detailRecord.title}</h2>
-              <button onClick={() => setDetailRecord(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16, fontSize: 13 }}>
-              <div><strong>Record #:</strong> {detailRecord.recordNumber || 'N/A'}</div>
-              <div><strong>Type:</strong> {getRecordTypeInfo(detailRecord.recordType).label}</div>
-              <div><strong>Severity:</strong> <span style={{ color: getSeverityInfo(detailRecord.severity).color }}>{detailRecord.severity}</span></div>
-              <div><strong>Status:</strong> {detailRecord.status}</div>
-              <div><strong>Pet:</strong> {detailRecord.animalName || 'N/A'} {detailRecord.animalUniqueId ? `(${detailRecord.animalUniqueId})` : ''}</div>
-              <div><strong>Owner:</strong> {detailRecord.ownerName || 'N/A'} {detailRecord.ownerUniqueId ? `(${detailRecord.ownerUniqueId})` : ''}</div>
-              <div><strong>Veterinarian:</strong> {detailRecord.veterinarianName || 'N/A'}</div>
-              <div><strong>Created:</strong> {fmtDate(detailRecord.createdAt)}</div>
-              {detailRecord.followUpDate && <div><strong>Follow-up:</strong> {fmtDate(detailRecord.followUpDate)}</div>}
-              {detailRecord.isConfidential && <div><strong>🔒 Confidential</strong></div>}
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <strong>Content:</strong>
-              <div style={{ padding: 12, background: '#f9fafb', borderRadius: 6, marginTop: 4, whiteSpace: 'pre-wrap', fontSize: 13 }}>{detailRecord.content}</div>
-            </div>
-            {detailRecord.medications && detailRecord.medications.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <strong>Medications:</strong>
-                {detailRecord.medications.map((m: any, i: number) => (
-                  <div key={i} style={{ padding: 8, background: '#f0fdf4', borderRadius: 6, marginTop: 4, fontSize: 13 }}>
-                    <strong>{m.name}</strong> {m.dosage ? `— ${m.dosage}` : ''} {m.frequency ? `, ${m.frequency}` : ''} {m.duration ? `for ${m.duration}` : ''}
-                    {m.instructions && <div className="text-muted" style={{ marginTop: 2 }}>📝 {m.instructions}</div>}
-                  </div>
-                ))}
-              </div>
-            )}
-            {detailRecord.tags && detailRecord.tags.length > 0 && (
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {detailRecord.tags.map((tag: string, i: number) => (
-                  <span key={i} style={{ padding: '2px 8px', background: '#e5e7eb', borderRadius: 12, fontSize: 11 }}>{tag}</span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* ═══ CREATE MODALS ═══════════════════════════════════ */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
@@ -1016,35 +891,5 @@ const ModalActions: React.FC<{ onCancel: () => void; onSave: () => void; saving:
     </button>
   </div>
 )
-
-const RecordRow: React.FC<{ rec: any; fmtDate: (d: string) => string; getRecordTypeInfo: (type: string) => any; getSeverityInfo: (sev: string) => any; onView: () => void }> = ({ rec, fmtDate, getRecordTypeInfo, getSeverityInfo, onView }) => {
-  const typeInfo = getRecordTypeInfo(rec.recordType)
-  const sevInfo = getSeverityInfo(rec.severity || 'normal')
-  return (
-    <div className="record-item" style={{ borderLeft: `4px solid ${typeInfo.color}`, cursor: 'pointer' }} onClick={onView}>
-      <div className="record-icon">{typeInfo.icon}</div>
-      <div className="record-details">
-        <h4>
-          {rec.title}
-          {rec.recordNumber && <span style={{ fontSize: 11, color: '#9ca3af', marginLeft: 8 }}>{rec.recordNumber}</span>}
-        </h4>
-        <p style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{(rec.content || '').substring(0, 120)}{(rec.content || '').length > 120 ? '...' : ''}</p>
-        <p className="text-muted" style={{ fontSize: 11, marginTop: 4 }}>
-          {rec.animalName && `🐾 ${rec.animalName}`}
-          {rec.animalUniqueId && ` (${rec.animalUniqueId})`}
-          {rec.veterinarianName && ` • 👨‍⚕️ ${rec.veterinarianName}`}
-          {' • '}{fmtDate(rec.createdAt)}
-        </p>
-      </div>
-      <div className="record-actions" style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
-        <span className={`badge ${rec.status === 'active' ? 'badge-completed' : rec.status === 'archived' ? 'badge-cancelled' : 'badge-info'}`}>{rec.status || 'active'}</span>
-        {rec.severity && rec.severity !== 'normal' && (
-          <span className="badge" style={{ background: sevInfo.color, color: '#fff', fontSize: 10 }}>{rec.severity}</span>
-        )}
-        {rec.isConfidential && <span style={{ fontSize: 10, color: '#d97706' }}>🔒</span>}
-      </div>
-    </div>
-  )
-}
 
 export default MedicalRecords
