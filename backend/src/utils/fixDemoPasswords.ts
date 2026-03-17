@@ -50,9 +50,9 @@ export async function fixDemoPasswords(): Promise<void> {
       logger.info(`Demo users: ${created} created, ${fixed} passwords fixed`);
     }
 
-    // 2. Seed demo data if missing (check animals table)
-    const { rows: animalRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM animals');
-    if (animalRows[0].cnt > 0) return; // Data already exists
+    // 2. Seed demo data if missing (check vet_profiles — only populated by seed, never by user registration)
+    const { rows: vpRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM vet_profiles');
+    if (vpRows[0].cnt > 0) return; // Seed data already exists
 
     logger.info('No demo data found — seeding via app database connection...');
 

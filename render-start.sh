@@ -56,18 +56,18 @@ node dist/utils/tier3Migration.js       2>&1 || echo "  (tier3 migration warning
 node dist/utils/tier4Migration.js       2>&1 || echo "  (tier4 migration warning — continuing)"
 echo "✓ Migrations complete"
 
-# Step 2: Seed demo data if core data is missing (animals table empty)
+# Step 2: Seed demo data if core data is missing (vet_profiles table empty)
 # Users are created by fixDemoPasswords at server start, but the rest
 # of the demo data (animals, vet profiles, consultations, etc.) only
 # comes from the seed SQL file.
-ANIMAL_COUNT=$(node -e "
+VET_PROFILE_COUNT=$(node -e "
 const { Pool } = require('pg');
 async function main() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
   const schema = process.env.DB_SCHEMA || 'public';
   try {
     await pool.query('SET search_path TO ' + schema + ', public');
-    const r = await pool.query('SELECT COUNT(*)::int AS c FROM animals');
+    const r = await pool.query('SELECT COUNT(*)::int AS c FROM vet_profiles');
     console.log(r.rows[0].c);
   } catch (e) { console.log('0'); }
   finally { await pool.end(); }
@@ -75,14 +75,14 @@ async function main() {
 main();
 " 2>/dev/null || echo "0")
 
-echo "  Database has $ANIMAL_COUNT animal(s)"
+echo "  Database has $VET_PROFILE_COUNT vet profile(s)"
 
 if [ "$FORCE_RESEED" = "true" ]; then
   echo ""
   echo "━━━ FORCE_RESEED=true — Re-seeding demo data ━━━"
   node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings — continuing"
   echo "✓ Seed complete"
-elif [ "$ANIMAL_COUNT" = "0" ]; then
+elif [ "$VET_PROFILE_COUNT" = "0" ]; then
   echo ""
   echo "━━━ No demo data detected — Seeding demo data ━━━"
   node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings — continuing"

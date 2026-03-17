@@ -651,10 +651,10 @@ router.get('/debug/seed-status', async (_req, res) => {
 
   // Parse all step sections
   const headerRe = /-- ={10,}\n-- STEP (\d+):\s*(.+)\n-- ={10,}/g;
-  const headers: { idx: number; name: string; pos: number }[] = [];
+  const headers: { idx: number; name: string; start: number; end: number }[] = [];
   let m;
   while ((m = headerRe.exec(sql)) !== null) {
-    headers.push({ idx: parseInt(m[1]), name: m[2].trim(), pos: m.index + m[0].length });
+    headers.push({ idx: parseInt(m[1]), name: m[2].trim(), start: m.index, end: headerRe.lastIndex });
   }
   out.totalSteps = headers.length;
 
@@ -663,11 +663,13 @@ router.get('/debug/seed-status', async (_req, res) => {
   for (let i = 0; i < headers.length && headers[i].idx <= 15; i++) {
     const h = headers[i];
     if (h.idx === 0) continue;
-    const nextPos = (i + 1 < headers.length) ? headers[i + 1].pos - 200 : sql.length;
-    // Find the section content between this header end and next header start
-    const nextHeaderStart = (i + 1 < headers.length) ? sql.lastIndexOf('-- =', nextPos) : sql.length;
-    const sectionSql = sql.substring(h.pos, nextHeaderStart).trim();
-    if (!sectionSql) { stepResults[`STEP ${h.idx}: ${h.name}`] = 'EMPTY'; continue; }
+    const contentStart = h.end;
+    const contentEnd = (i + 1 < headers.length) ? headers[i + 1].start : sql.length;
+    const sectionSql = sql.substring(contentStart, contentEnd).trim();
+    if (!sectionSql || !/\b(INSERT|TRUNCATE|DELETE|UPDATE|DO)\b/i.test(sectionSql)) {
+      stepResults[`STEP ${h.idx}: ${h.name}`] = `SKIP (${sectionSql.length} chars, no DML)`;
+      continue;
+    }
     try {
       await database.query(sectionSql);
       stepResults[`STEP ${h.idx}: ${h.name}`] = `OK (${sectionSql.length} chars)`;
