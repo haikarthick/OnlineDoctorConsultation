@@ -620,6 +620,81 @@ router.get('/health', async (_req, res) => {
   });
 });
 
+// Temporary diagnostic endpoint to debug seed data issues
+router.get('/debug/seed-status', async (_req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const results: Record<string, any> = {};
+
+  // Check table counts
+  const tables = ['users', 'animals', 'vet_profiles', 'bookings', 'consultations', 'medical_records', 'vet_schedules'];
+  for (const t of tables) {
+    try {
+      const { rows } = await database.query(`SELECT COUNT(*)::int AS cnt FROM ${t}`);
+      results[t] = rows[0].cnt;
+    } catch (e: any) { results[t] = `ERROR: ${e.message}`; }
+  }
+
+  // Check SQL file paths
+  const possiblePaths = [
+    path.join(__dirname, '..', '..', '..', 'docker', 'seed-demo-data.sql'),
+    path.join(__dirname, '..', '..', 'docker', 'seed-demo-data.sql'),
+    path.join(process.cwd(), '..', 'docker', 'seed-demo-data.sql'),
+    path.join(process.cwd(), 'docker', 'seed-demo-data.sql'),
+  ];
+  const pathResults: Record<string, boolean> = {};
+  let foundPath: string | null = null;
+  for (const p of possiblePaths) {
+    const exists = fs.existsSync(p);
+    pathResults[p] = exists;
+    if (exists && !foundPath) foundPath = p;
+  }
+
+  // If file found, try to parse and execute step 3 (animals)
+  let seedTest: any = null;
+  if (foundPath) {
+    try {
+      const sql = fs.readFileSync(foundPath, 'utf-8').replace(/\r\n/g, '\n');
+      const stepHeaderRegex = /-- ={10,}\n-- STEP \d+:\s*(.+)\n-- ={10,}/g;
+      const steps: string[] = [];
+      let m;
+      while ((m = stepHeaderRegex.exec(sql)) !== null) steps.push(m[1].trim());
+      seedTest = { fileSize: sql.length, stepsFound: steps.length, stepNames: steps.slice(0, 10) };
+
+      // Try executing STEP 3 (ANIMALS)
+      const animalRegex = /-- ={10,}\n-- STEP 3:.*\n-- ={10,}\n([\s\S]*?)(?=-- ={10,}\n-- STEP 4:|$)/;
+      const animalMatch = sql.match(animalRegex);
+      if (animalMatch) {
+        const animalSql = animalMatch[1].trim();
+        seedTest.animalSqlLength = animalSql.length;
+        seedTest.animalSqlPreview = animalSql.substring(0, 200);
+        try {
+          await database.query(animalSql);
+          seedTest.animalInsertResult = 'SUCCESS';
+          const { rows } = await database.query('SELECT COUNT(*)::int AS cnt FROM animals');
+          seedTest.animalCountAfter = rows[0].cnt;
+        } catch (e: any) {
+          seedTest.animalInsertResult = `ERROR: ${e.message}`;
+        }
+      } else {
+        seedTest.animalSqlFound = false;
+      }
+    } catch (e: any) {
+      seedTest = { error: e.message };
+    }
+  }
+
+  res.json({
+    cwd: process.cwd(),
+    dirname: __dirname,
+    dbSchema: process.env.DB_SCHEMA,
+    tableCounts: results,
+    sqlFilePaths: pathResults,
+    foundPath,
+    seedTest,
+  });
+});
+
 router.get('/features', (_req, res) => {
   res.json({ success: true, data: getAllFeatureFlags() });
 });
