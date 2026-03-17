@@ -1,4 +1,6 @@
 import bcrypt from 'bcryptjs';
+import * as fs from 'fs';
+import * as path from 'path';
 import database from './database';
 import logger from './logger';
 
@@ -15,16 +17,15 @@ const DEMO_USERS = [
 
 export async function fixDemoPasswords(): Promise<void> {
   try {
+    // 1. Ensure demo users exist with correct passwords
     let fixed = 0;
     let created = 0;
     for (const u of DEMO_USERS) {
-      // Check if user exists
       const { rows } = await database.query(
         'SELECT id, password_hash FROM users WHERE email = $1', [u.email]
       );
 
       if (rows.length === 0) {
-        // User doesn't exist — create it with correct hash
         const hash = await bcrypt.hash(u.password, 10);
         await database.query(
           `INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active, unique_id)
@@ -33,27 +34,88 @@ export async function fixDemoPasswords(): Promise<void> {
           [u.id, u.email, u.firstName, u.lastName, u.role, u.phone, hash, u.uniqueId]
         );
         created++;
-        logger.info(`Created demo user: ${u.email} (${u.role})`);
         continue;
       }
 
-      // User exists — verify hash
-      const currentHash = rows[0].password_hash;
-      const alreadyCorrect = await bcrypt.compare(u.password, currentHash);
+      const alreadyCorrect = await bcrypt.compare(u.password, rows[0].password_hash);
       if (alreadyCorrect) continue;
 
-      // Hash is wrong — fix it
       const newHash = await bcrypt.hash(u.password, 10);
       await database.query(
         'UPDATE users SET password_hash = $1 WHERE email = $2', [newHash, u.email]
       );
       fixed++;
-      logger.info(`Fixed password for: ${u.email}`);
     }
     if (fixed > 0 || created > 0) {
       logger.info(`Demo users: ${created} created, ${fixed} passwords fixed`);
     }
+
+    // 2. Seed demo data if missing (check animals table)
+    const { rows: animalRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM animals');
+    if (animalRows[0].cnt > 0) return; // Data already exists
+
+    logger.info('No demo data found — seeding via app database connection...');
+
+    // Try multiple paths to find the seed SQL file
+    const possiblePaths = [
+      path.join(__dirname, '..', '..', '..', 'docker', 'seed-demo-data.sql'),  // from dist/utils/
+      path.join(__dirname, '..', '..', 'docker', 'seed-demo-data.sql'),        // from src/utils/
+      path.join(process.cwd(), '..', 'docker', 'seed-demo-data.sql'),          // CWD = backend/
+      path.join(process.cwd(), 'docker', 'seed-demo-data.sql'),                // CWD = project root
+    ];
+
+    let sqlPath: string | null = null;
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) { sqlPath = p; break; }
+    }
+
+    if (!sqlPath) {
+      logger.warn('seed-demo-data.sql not found at any expected path: ' + possiblePaths.join(', '));
+      return;
+    }
+
+    logger.info(`Found seed SQL at: ${sqlPath}`);
+    const sql = fs.readFileSync(sqlPath, 'utf-8').replace(/\r\n/g, '\n');
+
+    // Split by STEP headers and execute each independently
+    const stepHeaderRegex = /-- ={10,}\n-- STEP \d+:\s*(.+)\n-- ={10,}/g;
+    const stepMatches: { name: string; start: number; end: number }[] = [];
+    let m;
+    while ((m = stepHeaderRegex.exec(sql)) !== null) {
+      stepMatches.push({ name: m[1].trim(), start: m.index, end: stepHeaderRegex.lastIndex });
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < stepMatches.length; i++) {
+      const contentStart = stepMatches[i].end;
+      const contentEnd = i + 1 < stepMatches.length ? stepMatches[i + 1].start : sql.length;
+      const sectionSql = sql.substring(contentStart, contentEnd).trim();
+      const sectionName = stepMatches[i].name;
+
+      if (!sectionSql || !/\b(INSERT|TRUNCATE|DELETE|UPDATE|DO)\b/i.test(sectionSql)) continue;
+
+      try {
+        await database.query(sectionSql);
+        successCount++;
+        logger.info(`Seed: ✓ ${sectionName}`);
+      } catch (err: any) {
+        failCount++;
+        logger.warn(`Seed: ⚠ ${sectionName}: ${err.message.substring(0, 200)}`);
+      }
+    }
+
+    logger.info(`Seed complete: ${successCount} succeeded, ${failCount} failed`);
+
+    // Fix passwords again after seed (seed SQL may have inserted wrong hashes)
+    for (const u of DEMO_USERS) {
+      const hash = await bcrypt.hash(u.password, 10);
+      await database.query('UPDATE users SET password_hash = $1 WHERE email = $2', [hash, u.email]);
+    }
+    logger.info('Demo passwords re-verified after seed');
+
   } catch (err: any) {
-    logger.error('Demo password fix failed: ' + (err.message || err));
+    logger.error('Demo data fix failed: ' + (err.message || err));
   }
 }
