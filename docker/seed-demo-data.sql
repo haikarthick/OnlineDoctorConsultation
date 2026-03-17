@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- VetCare Platform — Comprehensive Demo Seed Data
 -- ============================================================
 -- Cleans ALL transactional data and populates every module with
@@ -811,4 +811,717 @@ INSERT INTO geospatial_events (id, enterprise_id, animal_id, event_type, latitud
   (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000008', 'location_update', 42.5291, -92.4442, 5.2, '{"source":"collar_gps","battery":85}'),
   (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000008', 'zone_exit',       42.5295, -92.4448, 8.1, '{"zone":"North Pasture Grazing","alert":"exited grazing zone at 4:15 PM"}');
 
+
+-- ============================================================
+-- STEP 36: ADDITIONAL USERS (4 new — 2 pet owners, 1 vet, 1 farmer)
+-- ============================================================
+INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active, unique_id) VALUES
+  -- Pet Owners (password: Owner@123)
+  ('c0000000-0000-0000-0000-000000000003', 'sarah.kim@email.com',         'Sarah',   'Kim',      'pet_owner',    '+1-555-300-0003', '$2a$10$v5rq0xPVzJ7zM1B8IEB3hOFzFBQg3V6WCMhn3bmi.5lU1IVpSgLaq', true, 'USR-PET-003'),
+  ('c0000000-0000-0000-0000-000000000004', 'michael.torres@email.com',    'Michael', 'Torres',   'pet_owner',    '+1-555-300-0004', '$2a$10$v5rq0xPVzJ7zM1B8IEB3hOFzFBQg3V6WCMhn3bmi.5lU1IVpSgLaq', true, 'USR-PET-004'),
+  -- Veterinarian (password: Doctor@123)
+  ('b0000000-0000-0000-0000-000000000004', 'dr.priya.sharma@vetcare.com', 'Priya',   'Sharma',   'veterinarian', '+1-555-200-0004', '$2a$10$9aFDD5AIKpoIa1vKbSPcF.deHblZ5OOlPllX3dOvxsz8TJFDb.Ds6', true, 'USR-VET-004'),
+  -- Farmer (password: Farmer@123)
+  ('f0000000-0000-0000-0000-000000000003', 'thomas.green@greenmeadows.com','Thomas',  'Green',    'farmer',       '+1-555-400-0003', '$2a$10$LKi/uyJ8wxy.CAhQc8/6l.AIwssM5NS6cIOS8ji7RICs9qPzWGJCq', true, 'USR-FRM-003')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 37: ADDITIONAL VET PROFILE
+-- ============================================================
+INSERT INTO vet_profiles (id, user_id, license_number, specializations, qualifications, years_of_experience, bio, clinic_name, clinic_address, consultation_fee, currency, is_verified, is_available, accepts_emergency, languages, rating, total_reviews, total_consultations) VALUES
+  ('d0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000004', 'VET-2024-40718',
+   ARRAY['Exotic Animals','Reptile Medicine','Small Mammal Medicine','Avian Medicine'], ARRAY['BVSc - Tamil Nadu Veterinary University','MVSc Exotic Animal Medicine','DACZM'],
+   12, 'Dr. Sharma is an exotic animal specialist with expertise in reptiles, small mammals, birds, and aquatic species. She has worked with over 30 species and consults for wildlife rehabilitation centers across the US.',
+   'Sharma Exotic Pet Clinic', '420 Palm Ave, San Diego, CA 92101',
+   110.00, 'USD', true, true, true, ARRAY['English','Hindi','Tamil'], 4.88, 9, 31)
+ON CONFLICT (id) DO NOTHING;
+
+-- Additional vet schedule for Dr. Sharma
+INSERT INTO vet_schedules (id, veterinarian_id, day_of_week, start_time, end_time, slot_duration, max_appointments, is_active) VALUES
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000004', 'monday',    '09:00','18:00', 45, 12, true),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000004', 'tuesday',   '09:00','18:00', 45, 12, true),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000004', 'wednesday', '09:00','18:00', 45, 12, true),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000004', 'thursday',  '09:00','18:00', 45, 12, true),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000004', 'friday',    '09:00','15:00', 45,  8, true)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 38: ADDITIONAL ENTERPRISE (Sheep & Pig Farm)
+-- ============================================================
+INSERT INTO enterprises (id, name, enterprise_type, description, address, city, state, country, postal_code, gps_latitude, gps_longitude, total_area, area_unit, license_number, regulatory_id, tax_id, phone, email, website, owner_id, is_active) VALUES
+  ('e0000000-0000-0000-0000-000000000003', 'Green Meadows Farm', 'mixed_livestock',
+   'Family-owned sheep and pig farm in Vermont specializing in heritage breeds. Produces premium wool, lamb, and artisan pork products. Certified humane and pasture-raised.',
+   '1455 Mountain View Rd', 'Stowe', 'Vermont', 'US', '05672',
+   44.4654, -72.6874, 280.00, 'acres', 'VT-LIV-2025-0331', 'USDA-VT-2025-0871', '83-7614552',
+   '+1-802-555-0103', 'info@greenmeadowsvt.com', 'https://greenmeadowsvt.com',
+   'f0000000-0000-0000-0000-000000000003', true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO enterprise_members (enterprise_id, user_id, role, title, permissions, is_active) VALUES
+  ('e0000000-0000-0000-0000-000000000003', 'f0000000-0000-0000-0000-000000000003', 'owner', 'Farm Owner', '["all"]', true),
+  ('e0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000001', 'farm_vet', 'Consulting Veterinarian', '["health","breeding","treatment"]', true)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO locations (id, enterprise_id, name, location_type, capacity, current_occupancy, area, area_unit, gps_latitude, gps_longitude, description, is_active) VALUES
+  ('10000000-0000-0000-0000-000000000010', 'e0000000-0000-0000-0000-000000000003', 'Main Sheep Barn', 'barn', 80, 45, 4200, 'sqft', 44.4660, -72.6880, 'Climate-controlled barn for ewes and lambs', true),
+  ('10000000-0000-0000-0000-000000000011', 'e0000000-0000-0000-0000-000000000003', 'Pig House',       'pen',  30, 18, 2800, 'sqft', 44.4655, -72.6870, 'Heritage breed pig housing with outdoor access', true),
+  ('10000000-0000-0000-0000-000000000012', 'e0000000-0000-0000-0000-000000000003', 'Lambing Shed',    'barn', 20,  3, 1200, 'sqft', 44.4662, -72.6878, 'Dedicated lambing area with heat lamps', true),
+  ('10000000-0000-0000-0000-000000000013', 'e0000000-0000-0000-0000-000000000003', 'North Hill Pasture','pasture',60,40,120000,'sqft',44.4675, -72.6860, 'Rolling pasture for sheep grazing — rotational grazing system', true),
+  ('10000000-0000-0000-0000-000000000014', 'e0000000-0000-0000-0000-000000000003', 'Working Dog Kennel','kennel', 4, 1, 400, 'sqft', 44.4652, -72.6882, 'Heated kennel for Border Collie working dogs', true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO animal_groups (id, enterprise_id, name, group_type, species, breed, purpose, target_count, current_count, color_code, description, is_active) VALUES
+  ('ab000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000003', 'Merino Ewe Flock', 'breeding_flock', 'Sheep', 'Merino', 'Wool production and breeding', 50, 42, '#a78bfa', 'Fine wool Merino breeding ewes — primary wool flock', true),
+  ('ab000000-0000-0000-0000-000000000007', 'e0000000-0000-0000-0000-000000000003', 'Heritage Pig Herd', 'production', 'Pig', 'Mixed Heritage', 'Artisan pork and breeding', 20, 18, '#f97316', 'Yorkshire and Berkshire pigs for heritage pork production', true),
+  ('ab000000-0000-0000-0000-000000000008', 'e0000000-0000-0000-0000-000000000003', 'Alpine Dairy Goats', 'dairy', 'Goat', 'Alpine', 'Goat milk production', 8, 6, '#22d3ee', 'Alpine dairy does for milk and cheese', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 39: ADDITIONAL ANIMALS (23 new — diverse species and breeds)
+-- ============================================================
+INSERT INTO animals (id, owner_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id, ear_tag_id, registration_number, is_neutered, insurance_provider, insurance_policy_number, insurance_expiry, medical_notes, is_active, unique_id, enterprise_id, group_id, breeding_status, last_breeding_date, expected_due_date, current_weight, weight_unit, last_weighed_at, current_location_id) VALUES
+  -- Sarah Kim's pets (exotic pet enthusiast)
+  ('aa000000-0000-0000-0000-000000000013', 'c0000000-0000-0000-0000-000000000003', 'Charlie',   'Dog',     'Labrador Retriever', '2022-06-10', 'Male',   28.5, 'Chocolate',       '985121067890001', NULL, 'AKC-LR-2022-7821',  true,  'Nationwide',  'NW-2025-3341',  '2027-06-01', 'Up to date on all vaccines. Energetic and food-motivated.',                                true, 'ANI-DOG-013', NULL, NULL, NULL, NULL, NULL, 28.5, 'kg', '2026-02-01', NULL),
+  ('aa000000-0000-0000-0000-000000000014', 'c0000000-0000-0000-0000-000000000003', 'Princess',  'Cat',     'Persian',            '2021-11-20', 'Female', 4.1,  'White',           '985121067890002', NULL, 'CFA-PS-2021-5519',  true,  'ASPCA',       'ASP-2025-8872', '2027-03-15', 'Long coat requires daily grooming. Prone to tear staining.',                               true, 'ANI-CAT-014', NULL, NULL, NULL, NULL, NULL, 4.1,  'kg', '2026-01-20', NULL),
+  ('aa000000-0000-0000-0000-000000000015', 'c0000000-0000-0000-0000-000000000003', 'Snowball',  'Rabbit',  'Holland Lop',        '2024-02-14', 'Female', 1.8,  'White/Brown',     NULL,              NULL, NULL,                 true,  NULL,          NULL,            NULL,         'Indoor rabbit. Hay-based diet. Dental check due.',                                          true, 'ANI-RBT-015', NULL, NULL, NULL, NULL, NULL, 1.8,  'kg', '2026-01-15', NULL),
+  ('aa000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000003', 'Monty',     'Reptile', 'Ball Python',        '2023-05-01', 'Male',   1.2,  'Normal morph',    NULL,              NULL, NULL,                 false, NULL,          NULL,            NULL,         'Feeding on frozen-thawed rats every 10-14 days. Humidity 55-65%.',                          true, 'ANI-RPT-016', NULL, NULL, NULL, NULL, NULL, 1.2,  'kg', '2026-01-10', NULL),
+  ('aa000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000003', 'Rex',       'Reptile', 'Bearded Dragon',     '2023-09-15', 'Male',   0.45, 'Citrus/Orange',   NULL,              NULL, NULL,                 false, NULL,          NULL,            NULL,         'UVB light 12hrs/day. Eats live crickets, greens, and calcium dusted insects.',               true, 'ANI-RPT-017', NULL, NULL, NULL, NULL, NULL, 0.45, 'kg', '2026-02-05', NULL),
+  ('aa000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000003', 'Sunny',     'Bird',    'Cockatiel',          '2024-01-10', 'Female', 0.09, 'Lutino Yellow',   NULL,              NULL, NULL,                 false, NULL,          NULL,            NULL,         'Hand-raised. Whistles tunes. Eats pellets + fresh fruit/veggies.',                          true, 'ANI-BRD-018', NULL, NULL, NULL, NULL, NULL, 0.09, 'kg', '2026-01-28', NULL),
+
+  -- Michael Torres's pets (multi-pet household)
+  ('aa000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000004', 'Duke',      'Dog',     'Standard Poodle',    '2021-09-22', 'Male',   27.0, 'Black',           '985121078901001', NULL, 'AKC-SP-2021-9312',  true,  'Trupanion',   'TP-2025-1142',  '2027-09-01', 'Hypoallergenic coat. Professional grooming every 6 weeks. Joint supplements started.',     true, 'ANI-DOG-019', NULL, NULL, NULL, NULL, NULL, 27.0, 'kg', '2026-01-28', NULL),
+  ('aa000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000004', 'Copper',    'Dog',     'Beagle',             '2023-03-08', 'Male',   11.5, 'Tri-color',       '985121078901002', NULL, 'AKC-BG-2023-2205',  true,  'Trupanion',   'TP-2025-1143',  '2027-09-01', 'Very food-driven. Tends to overeat — strict portion control.',                              true, 'ANI-DOG-020', NULL, NULL, NULL, NULL, NULL, 11.5, 'kg', '2026-02-10', NULL),
+  ('aa000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000004', 'Oscar',     'Dog',     'Miniature Dachshund','2022-12-01', 'Male',   5.2,  'Red',             '985121078901003', NULL, 'AKC-DH-2022-6618',  true,  'Trupanion',   'TP-2025-1144',  '2027-09-01', 'IVDD risk — no jumping from furniture. Ramp access everywhere.',                            true, 'ANI-DOG-021', NULL, NULL, NULL, NULL, NULL, 5.2,  'kg', '2026-02-01', NULL),
+  ('aa000000-0000-0000-0000-000000000022', 'c0000000-0000-0000-0000-000000000004', 'Shadow',    'Cat',     'Bengal',             '2023-07-14', 'Male',   5.8,  'Brown Spotted',   '985121078901004', NULL, 'TICA-BG-2023-8901', false, 'Healthy Paws','HP-2025-5521',  '2027-07-01', 'Very active breed — needs daily play and climbing space. Raw diet supplemented.',           true, 'ANI-CAT-022', NULL, NULL, NULL, NULL, NULL, 5.8,  'kg', '2026-02-08', NULL),
+  ('aa000000-0000-0000-0000-000000000023', 'c0000000-0000-0000-0000-000000000004', 'Muffin',    'Cat',     'Ragdoll',            '2022-04-18', 'Female', 4.5,  'Seal Bicolor',    '985121078901005', NULL, 'CFA-RD-2022-3342',  true,  'Healthy Paws','HP-2025-5522',  '2027-07-01', 'Docile indoor cat. Annual blood panel recommended for HCM screening.',                      true, 'ANI-CAT-023', NULL, NULL, NULL, NULL, NULL, 4.5,  'kg', '2026-01-18', NULL),
+  ('aa000000-0000-0000-0000-000000000024', 'c0000000-0000-0000-0000-000000000004', 'Patches',   'Guinea Pig','Abyssinian',       '2024-08-20', 'Female', 0.95, 'Brown/White',     NULL,              NULL, NULL,                 false, NULL,          NULL,            NULL,         'Vitamin C supplement daily. Needs hay ad libitum. Cage mate needed.',                       true, 'ANI-GP-024',  NULL, NULL, NULL, NULL, NULL, 0.95, 'kg', '2026-02-12', NULL),
+  ('aa000000-0000-0000-0000-000000000025', 'c0000000-0000-0000-0000-000000000004', 'Nibbles',   'Hamster', 'Syrian Golden',      '2025-01-15', 'Male',   0.14, 'Golden',          NULL,              NULL, NULL,                 false, NULL,          NULL,            NULL,         'Solitary — must be housed alone. Runs on wheel 5+ miles/night.',                            true, 'ANI-HAM-025', NULL, NULL, NULL, NULL, NULL, 0.14, 'kg', '2026-02-14', NULL),
+  ('aa000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000004', 'Neptune',   'Fish',    'Betta Splendens',    '2025-03-01', 'Male',   0.006,'Blue/Red Crown',  NULL,              NULL, NULL,                 false, NULL,          NULL,            NULL,         '5-gallon heated tank at 78°F. Eats Betta pellets + frozen bloodworms.',                     true, 'ANI-FSH-026', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,         NULL),
+
+  -- Thomas Green's farm animals (sheep, pigs, goat, working dog)
+  ('aa000000-0000-0000-0000-000000000027', 'f0000000-0000-0000-0000-000000000003', 'Woolly',    'Sheep',   'Merino',             '2022-03-10', 'Female', 65.0, 'White',           NULL, 'VT-SH-001', 'NSIP-MR-2022-1101', false, NULL, NULL, NULL, 'Lead ewe. Excellent fine wool producer — 18 micron fleece.',                                  true, 'ANI-SHP-027', 'e0000000-0000-0000-0000-000000000003', 'ab000000-0000-0000-0000-000000000006', 'bred',   '2025-11-15', '2026-04-15', 65.0, 'kg', '2026-02-01', '10000000-0000-0000-0000-000000000010'),
+  ('aa000000-0000-0000-0000-000000000028', 'f0000000-0000-0000-0000-000000000003', 'Baxter',    'Sheep',   'Suffolk',            '2023-01-25', 'Male',   110.0,'Black Face/White',NULL, 'VT-SH-002', 'NSIP-SF-2023-2204', false, NULL, NULL, NULL, 'Primary stud ram. Excellent conformation and growth traits.',                                true, 'ANI-SHP-028', 'e0000000-0000-0000-0000-000000000003', 'ab000000-0000-0000-0000-000000000006', 'active', NULL,         NULL,         110.0,'kg', '2026-02-01', '10000000-0000-0000-0000-000000000013'),
+  ('aa000000-0000-0000-0000-000000000029', 'f0000000-0000-0000-0000-000000000003', 'Dotty',     'Sheep',   'Dorper',             '2023-06-05', 'Female', 72.0, 'White/Black Head',NULL, 'VT-SH-003', 'NSIP-DP-2023-3305', false, NULL, NULL, NULL, 'Hair sheep — no shearing needed. Good meat production genetics.',                           true, 'ANI-SHP-029', 'e0000000-0000-0000-0000-000000000003', 'ab000000-0000-0000-0000-000000000006', 'open',   NULL,         NULL,         72.0, 'kg', '2026-02-01', '10000000-0000-0000-0000-000000000010'),
+  ('aa000000-0000-0000-0000-000000000030', 'f0000000-0000-0000-0000-000000000003', 'Wilbur',    'Pig',     'Yorkshire',          '2024-04-12', 'Male',   180.0,'White/Pink',      NULL, 'VT-PG-001', NULL,                 false, NULL, NULL, NULL, 'Terminal sire. Excellent growth rate and loin depth.',                                       true, 'ANI-PIG-030', 'e0000000-0000-0000-0000-000000000003', 'ab000000-0000-0000-0000-000000000007', 'active', NULL,         NULL,         180.0,'kg', '2026-01-20', '10000000-0000-0000-0000-000000000011'),
+  ('aa000000-0000-0000-0000-000000000031', 'f0000000-0000-0000-0000-000000000003', 'Charlotte', 'Pig',     'Berkshire',          '2024-02-28', 'Female', 145.0,'Black/White pts', NULL, 'VT-PG-002', NULL,                 false, NULL, NULL, NULL, 'Heritage breed sow. Marbled meat genetics. First litter expected April.',                    true, 'ANI-PIG-031', 'e0000000-0000-0000-0000-000000000003', 'ab000000-0000-0000-0000-000000000007', 'bred',   '2025-12-10', '2026-04-08', 145.0,'kg', '2026-01-20', '10000000-0000-0000-0000-000000000011'),
+  ('aa000000-0000-0000-0000-000000000032', 'f0000000-0000-0000-0000-000000000003', 'Scout',     'Dog',     'Border Collie',      '2021-08-05', 'Male',   19.5, 'Black/White',     '985121089012001', NULL, 'AKC-BC-2021-4401',  true,  NULL, NULL, NULL, 'Trained working sheepdog. Herds Merino flock. Needs high-energy diet.',                      true, 'ANI-DOG-032', 'e0000000-0000-0000-0000-000000000003', NULL, NULL, NULL, NULL, 19.5, 'kg', '2026-02-10', '10000000-0000-0000-0000-000000000014'),
+  ('aa000000-0000-0000-0000-000000000033', 'f0000000-0000-0000-0000-000000000003', 'Heidi',     'Goat',    'Alpine',             '2023-03-18', 'Female', 62.0, 'Chamoisee',       NULL, 'VT-GT-001', 'ADGA-AP-2023-6601', false, NULL, NULL, NULL, 'Alpine dairy doe. Producing 3.8L/day. Clean bill of health.',                               true, 'ANI-GOT-033', 'e0000000-0000-0000-0000-000000000003', 'ab000000-0000-0000-0000-000000000008', 'open',   NULL,         NULL,         62.0, 'kg', '2026-02-01', '10000000-0000-0000-0000-000000000010'),
+
+  -- Additional farm animals for existing farmer John Miller
+  ('aa000000-0000-0000-0000-000000000034', 'f0000000-0000-0000-0000-000000000001', 'Brutus',    'Cattle',  'Angus',              '2022-08-15', 'Male',   680.0,'Black',           NULL, 'IA-CT-003', 'AAA-AG-2022-8815',  false, NULL, NULL, NULL, 'Prime Angus bull. Sire for crossbreeding with Holsteins.',                                   true, 'ANI-COW-034', 'e0000000-0000-0000-0000-000000000001', NULL, 'active', NULL,         NULL,         680.0,'kg', '2026-01-15', '10000000-0000-0000-0000-000000000002'),
+  ('aa000000-0000-0000-0000-000000000035', 'f0000000-0000-0000-0000-000000000001', 'Rosie',     'Cattle',  'Hereford',           '2023-04-20', 'Female', 520.0,'Red/White Face',  NULL, 'IA-CT-004', 'AHA-HF-2023-1122',  false, NULL, NULL, NULL, 'Hereford heifer. Good maternal genetics. First calf expected May 2026.',                     true, 'ANI-COW-035', 'e0000000-0000-0000-0000-000000000001', NULL, 'bred',   '2025-08-10', '2026-05-20', 520.0,'kg', '2026-01-15', '10000000-0000-0000-0000-000000000002')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 40: VET HOSPITALS (2 hospitals — ALL columns populated)
+-- ============================================================
+INSERT INTO vet_hospitals (id, name, hospital_type, tagline, registration_number, accreditation_body, accreditation_number, accreditation_expiry, description, address, city, state, country, postal_code, gps_latitude, gps_longitude, phone, emergency_phone, email, website, logo_url, cover_image_url, established_year, total_beds, icu_beds, is_24_hours, has_emergency, has_ambulance, has_pharmacy, has_lab, has_imaging, has_surgery, has_icu, specializations, facilities, accepted_species, operating_hours, owner_id, is_verified, is_active, verification_status, drug_license_expiry, trade_license_expiry, registration_renewal_date, rating, total_reviews, total_consultations, metadata) VALUES
+  ('h0000000-0000-0000-0000-000000000001', 'VetCare Central Hospital', 'multi_specialty',
+   'Excellence in Veterinary Care — 24/7 Emergency & Specialty Services',
+   'HOSP-TX-2020-0482', 'AAHA', 'AAHA-TX-2024-1182', '2027-03-15',
+   'VetCare Central is a premier AAHA-accredited multi-specialty veterinary hospital offering 24/7 emergency care, advanced surgery, diagnostic imaging (CT, MRI, X-ray, ultrasound), in-house laboratory, ICU, and boarding. Our team of 12 doctors covers all species from companion animals to exotics.',
+   '245 Oak Valley Dr', 'Austin', 'Texas', 'US', '78701',
+   30.2672, -97.7431, '+1-512-555-0100', '+1-512-555-0199',
+   'info@vetcarecentral.com', 'https://vetcarecentral.com',
+   '/uploads/hospitals/vetcare-central-logo.png', '/uploads/hospitals/vetcare-central-cover.jpg',
+   2020, 32, 8, true, true, true, true, true, true, true, true,
+   ARRAY['General Practice','Surgery','Orthopedics','Dermatology','Cardiology','Oncology','Emergency Medicine','Exotic Animals'],
+   ARRAY['CT Scanner','MRI','Digital X-Ray','Ultrasound','Endoscopy','Dental Suite','Surgical Theater x3','ICU','Isolation Ward','Rehabilitation Pool','Pharmacy','Grooming Salon','Boarding Kennels'],
+   ARRAY['Dog','Cat','Rabbit','Bird','Reptile','Guinea Pig','Hamster','Ferret','Fish'],
+   '{"monday":{"open":"00:00","close":"23:59","is_24h":true},"tuesday":{"open":"00:00","close":"23:59","is_24h":true},"wednesday":{"open":"00:00","close":"23:59","is_24h":true},"thursday":{"open":"00:00","close":"23:59","is_24h":true},"friday":{"open":"00:00","close":"23:59","is_24h":true},"saturday":{"open":"00:00","close":"23:59","is_24h":true},"sunday":{"open":"00:00","close":"23:59","is_24h":true}}',
+   'b0000000-0000-0000-0000-000000000001', true, true, 'verified',
+   '2027-06-30', '2027-12-31', '2027-03-15', 4.87, 156, 2480,
+   '{"parking":"Free parking for 50 vehicles","wifi":"Free WiFi in waiting areas","payment_methods":["Visa","MasterCard","Amex","CareCredit","Scratchpay"],"insurance_accepted":["PetPlan","Nationwide","Trupanion","ASPCA","Healthy Paws"]}'),
+
+  ('h0000000-0000-0000-0000-000000000002', 'Sunrise Rural Animal Clinic', 'general_practice',
+   'Compassionate Care for Companions and Livestock',
+   'HOSP-NC-2022-1104', 'AAHA', 'AAHA-NC-2024-0891', '2026-09-30',
+   'Sunrise Rural Animal Clinic serves both companion animals and farm livestock in the Asheville area. We provide routine wellness, dentistry, soft tissue surgery, farm calls, and reproductive services. Our large-animal facilities include a bovine chute, equine stocks, and mobile ultrasound.',
+   '340 Hilltop Farm Rd', 'Asheville', 'North Carolina', 'US', '28801',
+   35.5951, -82.5515, '+1-828-555-0200', '+1-828-555-0299',
+   'hello@sunriserural.com', 'https://sunriserural.com',
+   '/uploads/hospitals/sunrise-rural-logo.png', '/uploads/hospitals/sunrise-rural-cover.jpg',
+   2022, 12, 2, false, true, false, true, true, true, true, false,
+   ARRAY['General Practice','Farm Animal Medicine','Dentistry','Reproductive Services','Surgery'],
+   ARRAY['Digital X-Ray','Ultrasound (Portable)','Dental Suite','Surgical Theater','Bovine Chute','Equine Stocks','Pharmacy','Small Boarding Area'],
+   ARRAY['Dog','Cat','Horse','Cattle','Sheep','Goat','Pig','Poultry','Rabbit'],
+   '{"monday":{"open":"07:30","close":"18:00"},"tuesday":{"open":"07:30","close":"18:00"},"wednesday":{"open":"07:30","close":"18:00"},"thursday":{"open":"07:30","close":"18:00"},"friday":{"open":"07:30","close":"17:00"},"saturday":{"open":"08:00","close":"13:00"},"sunday":{"open":"closed","close":"closed"}}',
+   'b0000000-0000-0000-0000-000000000002', true, true, 'verified',
+   '2027-04-15', '2027-10-31', '2026-09-30', 4.65, 42, 890,
+   '{"parking":"Gravel lot for 20 vehicles + trailer parking","farm_calls":"Available Mon-Fri within 30-mile radius","payment_methods":["Visa","MasterCard","Cash","CareCredit"]}')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 41: HOSPITAL DEPARTMENTS
+-- ============================================================
+INSERT INTO hospital_departments (id, hospital_id, name, code, description, specializations, floor_number, room_numbers, head_doctor_id, is_active) VALUES
+  ('hd000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'General Medicine',         'GEN', 'Primary care consultations, wellness exams, and preventive medicine.',       ARRAY['General Practice','Preventive Care','Geriatrics'],     '1', 'R101-R108', 'b0000000-0000-0000-0000-000000000001', true),
+  ('hd000000-0000-0000-0000-000000000002', 'h0000000-0000-0000-0000-000000000001', 'Surgery & Orthopedics',    'SRG', 'Orthopedic, soft tissue, and emergency surgical procedures.',                ARRAY['General Surgery','Orthopedics','TPLO','Fracture Repair'],'2', 'OR-201,OR-202,OR-203', 'b0000000-0000-0000-0000-000000000001', true),
+  ('hd000000-0000-0000-0000-000000000003', 'h0000000-0000-0000-0000-000000000001', 'Dermatology & Allergy',    'DRM', 'Skin conditions, allergy testing, immunotherapy, and ear disease.',           ARRAY['Dermatology','Allergy','Immunotherapy'],               '1', 'R109-R112', 'b0000000-0000-0000-0000-000000000002', true),
+  ('hd000000-0000-0000-0000-000000000004', 'h0000000-0000-0000-0000-000000000001', 'Emergency & Critical Care','ER',  'Round-the-clock emergency triage, stabilization, and critical care.',        ARRAY['Emergency Medicine','Critical Care','Toxicology'],     '1', 'ER-101,ER-102,ICU-1,ICU-2', NULL, true),
+  ('hd000000-0000-0000-0000-000000000005', 'h0000000-0000-0000-0000-000000000001', 'Exotic & Avian Medicine',  'EXO', 'Specialized care for birds, reptiles, small mammals, and aquatic species.', ARRAY['Avian Medicine','Reptile Medicine','Small Mammals'],   '2', 'R213-R216', 'b0000000-0000-0000-0000-000000000004', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 42: HOSPITAL DOCTORS
+-- ============================================================
+INSERT INTO hospital_doctors (id, hospital_id, doctor_id, department_id, hospital_role, title, employment_type, is_primary_hospital, consultation_fee, is_accepting_patients, is_active) VALUES
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'hd000000-0000-0000-0000-000000000001', 'owner',            'Chief of Surgery & Hospital Director',  'full_time', true,  85.00,  true, true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000002', 'hd000000-0000-0000-0000-000000000003', 'department_head',  'Head of Dermatology',                   'full_time', true,  95.00,  true, true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000003', 'hd000000-0000-0000-0000-000000000004', 'consultant',       'Emergency & Exotic Consultant',         'part_time', false, 120.00, true, true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000004', 'hd000000-0000-0000-0000-000000000005', 'department_head',  'Head of Exotic Animal Medicine',         'full_time', true,  110.00, true, true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', NULL,                                   'medical_director', 'Medical Director',                      'full_time', false, 85.00,  true, true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000003', NULL,                                   'visiting',         'Visiting Exotic Specialist',             'visiting',  false, 120.00, true, true)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 43: HOSPITAL SERVICES
+-- ============================================================
+INSERT INTO hospital_services (id, hospital_id, service_name, category, description, price_min, price_max, currency, duration_minutes, requires_appointment, is_available) VALUES
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Wellness Exam',                 'consultation',   'Complete physical examination with wellness blood panel.',                   65.00, 120.00, 'USD', 30, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Emergency Triage & Stabilization','emergency',     '24/7 emergency assessment, triage, and stabilization.',                     150.00,500.00, 'USD', 60, false, true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Dental Cleaning & Extractions',  'dental',         'Ultrasonic dental cleaning under anesthesia. Extractions priced separately.',250.00,600.00, 'USD', 90, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Spay/Neuter Surgery',            'surgery',        'Routine spay or neuter with pre-surgical blood work and post-op pain mgmt.',200.00,450.00, 'USD', 60, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Digital Radiographs (X-Ray)',     'diagnostics',    'High-resolution digital X-rays with same-day results.',                     120.00,220.00, 'USD', 20, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Ultrasound',                     'diagnostics',    'Abdominal or cardiac ultrasound by board-certified specialist.',             200.00,350.00, 'USD', 45, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'CT Scan',                        'diagnostics',    'Full-body or targeted CT scan under sedation.',                             800.00,1500.00,'USD', 60, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'TPLO Cruciate Surgery',          'surgery',        'Tibial plateau leveling osteotomy for cruciate ligament rupture.',           3500.00,5000.00,'USD',120,true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Allergy Testing (Intradermal)',   'diagnostics',    'Intradermal skin testing for environmental and food allergens.',             300.00,500.00, 'USD', 90, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Exotic Pet Consultation',         'consultation',   'Specialized consultation for reptiles, birds, and small mammals.',          110.00,150.00, 'USD', 45, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Boarding (Per Night)',             'boarding',       'Climate-controlled boarding with daily walks and feeding.',                  35.00, 65.00,  'USD', NULL, true, true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'Pet Grooming',                    'grooming',       'Full grooming service — bath, haircut, nail trim, ear cleaning.',            45.00, 120.00, 'USD', 90, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'Farm Call — Routine',              'consultation',   'On-farm visit for routine health checks, vaccinations, and herd assessment.',150.00,250.00, 'USD', 120,true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'Reproductive Ultrasound',          'reproduction',   'Pregnancy detection and fetal assessment for cattle, sheep, goats.',         75.00, 120.00, 'USD', 30, true,  true),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'Hoof Trimming & Treatment',        'other',          'Corrective hoof trimming and treatment for laminitis/foot rot.',             40.00, 80.00,  'USD', 20, true,  true)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 44: HOSPITAL INVITES
+-- ============================================================
+INSERT INTO hospital_invites (id, hospital_id, email, first_name, last_name, phone, invite_token, hospital_role, department_id, status, invited_by, expires_at) VALUES
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'dr.new.intern@email.com',  'Alex',  'Rivera',  '+1-555-600-0001', 'inv_vetcare_central_001_' || md5(random()::text), 'intern',  'hd000000-0000-0000-0000-000000000001', 'pending',  'b0000000-0000-0000-0000-000000000001', NOW() + INTERVAL '7 days'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'nurse.jen@email.com',      'Jennifer','Park',   '+1-555-600-0002', 'inv_vetcare_central_002_' || md5(random()::text), 'staff',   'hd000000-0000-0000-0000-000000000004', 'accepted', 'b0000000-0000-0000-0000-000000000001', NOW() + INTERVAL '7 days'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'vet.locum@email.com',      'David',  'Walsh',   '+1-828-555-0301', 'inv_sunrise_rural_001_' || md5(random()::text),   'visiting','hd000000-0000-0000-0000-000000000001', 'pending',  'b0000000-0000-0000-0000-000000000002', NOW() + INTERVAL '7 days')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 45: HOSPITAL DOCUMENTS
+-- ============================================================
+INSERT INTO hospital_documents (id, hospital_id, doc_type, file_name, file_url, expiry_date, status, reviewed_by, reviewed_at) VALUES
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'trade_license', 'vetcare_central_trade_license_2025.pdf', '/uploads/hospitals/docs/vetcare_trade_license.pdf', '2027-12-31', 'approved', 'a0000000-0000-0000-0000-000000000001', '2025-01-15'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'drug_license',  'vetcare_central_drug_license_2025.pdf',  '/uploads/hospitals/docs/vetcare_drug_license.pdf',  '2027-06-30', 'approved', 'a0000000-0000-0000-0000-000000000001', '2025-01-15'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'vet_council',   'vetcare_central_council_reg.pdf',        '/uploads/hospitals/docs/vetcare_council_reg.pdf',   '2027-03-15', 'approved', 'a0000000-0000-0000-0000-000000000001', '2025-01-15'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'trade_license', 'sunrise_rural_trade_license_2025.pdf',   '/uploads/hospitals/docs/sunrise_trade_license.pdf', '2027-10-31', 'approved', 'a0000000-0000-0000-0000-000000000001', '2025-03-10'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'drug_license',  'sunrise_rural_drug_license_2025.pdf',    '/uploads/hospitals/docs/sunrise_drug_license.pdf',  '2027-04-15', 'approved', 'a0000000-0000-0000-0000-000000000001', '2025-03-10'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'gst',           'sunrise_rural_gst_certificate.pdf',      '/uploads/hospitals/docs/sunrise_gst.pdf',           NULL,         'pending_review', NULL, NULL)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 46: STAFF POSITIONS
+-- ============================================================
+INSERT INTO staff_positions (id, hospital_id, user_id, position, department, is_active, hired_date, notes) VALUES
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'veterinarian',    'Surgery & Orthopedics',    true, '2020-01-15', 'Founding veterinarian and hospital owner.'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000002', 'veterinarian',    'Dermatology & Allergy',    true, '2021-06-01', 'Joined as dermatology specialist.'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000003', 'veterinarian',    'Emergency & Critical Care', true, '2022-03-15', 'Part-time emergency and exotic consultant.'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000004', 'veterinarian',    'Exotic & Avian Medicine',  true, '2023-09-01', 'Head of exotic animal department.'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'veterinarian',    'General Practice',         true, '2022-04-01', 'Medical director at Sunrise Rural.')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 47: APPOINTMENT QUEUE
+-- ============================================================
+INSERT INTO appointment_queue (id, hospital_id, animal_id, owner_id, assigned_vet_id, queue_number, priority, triage_level, status, reason, triage_notes, triaged_by, checked_in_at, estimated_wait_minutes) VALUES
+  ('aq000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000001',
+   1, 'normal', 3, 'in_examination', 'Annual wellness exam for Duke (Standard Poodle)', 'Weight stable, no acute issues. Routine checkup.', 'b0000000-0000-0000-0000-000000000002', NOW() - INTERVAL '25 minutes', 0),
+  ('aq000000-0000-0000-0000-000000000002', 'h0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000002',
+   2, 'high', 2, 'in_triage', 'Copper (Beagle) ate chocolate — possible toxicity', 'Owner reports ~50g dark chocolate ingested 1hr ago. Weight 11.5kg. Calculating theobromine dose.', 'b0000000-0000-0000-0000-000000000002', NOW() - INTERVAL '10 minutes', 15),
+  ('aq000000-0000-0000-0000-000000000003', 'h0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000004',
+   3, 'normal', 3, 'waiting', 'Monty (Ball Python) not eating for 3 weeks — wellness check', NULL, NULL, NOW() - INTERVAL '5 minutes', 30),
+  ('aq000000-0000-0000-0000-000000000004', 'h0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000004', NULL,
+   4, 'urgent', 2, 'waiting', 'Oscar (Dachshund) sudden hind leg weakness — possible IVDD', NULL, NULL, NOW() - INTERVAL '2 minutes', 20)
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 48: WORKFLOW CASES
+-- ============================================================
+INSERT INTO workflow_cases (id, queue_entry_id, hospital_id, animal_id, owner_id, current_stage, assigned_vet_id, priority, chief_complaint, diagnosis, treatment_plan, status) VALUES
+  ('wc000000-0000-0000-0000-000000000001', 'aq000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001',
+   'aa000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000004', 'examination',
+   'b0000000-0000-0000-0000-000000000001', 'normal',
+   'Annual wellness exam — Standard Poodle, 4 years old',
+   'Healthy on physical exam. Mild tartar buildup on premolars. Joint palpation normal.',
+   'Dental cleaning recommended within 3 months. Continue joint supplements. Update DHPP vaccine today.',
+   'active'),
+  ('wc000000-0000-0000-0000-000000000002', 'aq000000-0000-0000-0000-000000000002', 'h0000000-0000-0000-0000-000000000001',
+   'aa000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000004', 'treatment',
+   'b0000000-0000-0000-0000-000000000002', 'high',
+   'Chocolate toxicity — ~50g dark chocolate ingested by 11.5kg Beagle',
+   'Theobromine dose estimated at 130mg/kg — toxic range. Mild tachycardia (HR 140).',
+   'Induce emesis with apomorphine. Activated charcoal 2g/kg. IV fluids. Monitor ECG for 6 hours.',
+   'active'),
+  ('wc000000-0000-0000-0000-000000000003', NULL, 'h0000000-0000-0000-0000-000000000001',
+   'aa000000-0000-0000-0000-000000000013', 'c0000000-0000-0000-0000-000000000003', 'discharge',
+   'b0000000-0000-0000-0000-000000000001', 'normal',
+   'Charlie (Lab) post-neuter recovery — day surgery',
+   'Routine castration completed successfully. No complications.',
+   'E-collar for 10 days. Restricted activity 14 days. Recheck incision day 10.',
+   'completed')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 49: WORKFLOW TRANSITIONS
+-- ============================================================
+INSERT INTO workflow_transitions (id, case_id, from_stage, to_stage, transitioned_by, staff_position, notes) VALUES
+  (uuid_generate_v4(), 'wc000000-0000-0000-0000-000000000001', 'triage',      'examination', 'b0000000-0000-0000-0000-000000000002', 'veterinarian', 'Vitals normal. Transferred to Dr. Carter for wellness exam.'),
+  (uuid_generate_v4(), 'wc000000-0000-0000-0000-000000000002', 'triage',      'examination', 'b0000000-0000-0000-0000-000000000002', 'veterinarian', 'Priority elevated — chocolate toxicity. Immediate assessment.'),
+  (uuid_generate_v4(), 'wc000000-0000-0000-0000-000000000002', 'examination', 'treatment',   'b0000000-0000-0000-0000-000000000002', 'veterinarian', 'Emesis induced. Charcoal administered. Moving to treatment bay for IV and monitoring.'),
+  (uuid_generate_v4(), 'wc000000-0000-0000-0000-000000000003', 'triage',      'examination', 'b0000000-0000-0000-0000-000000000001', 'veterinarian', 'Pre-surgical assessment for neuter.'),
+  (uuid_generate_v4(), 'wc000000-0000-0000-0000-000000000003', 'examination', 'treatment',   'b0000000-0000-0000-0000-000000000001', 'veterinarian', 'Pre-op blood work normal. Proceeding to surgery.'),
+  (uuid_generate_v4(), 'wc000000-0000-0000-0000-000000000003', 'treatment',   'observation', 'b0000000-0000-0000-0000-000000000001', 'veterinarian', 'Surgery complete. Recovering from anesthesia in recovery ward.'),
+  (uuid_generate_v4(), 'wc000000-0000-0000-0000-000000000003', 'observation', 'discharge',   'b0000000-0000-0000-0000-000000000001', 'veterinarian', 'Fully recovered. Discharged with post-op instructions and pain medication.')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 50: REFERRALS
+-- ============================================================
+INSERT INTO referrals (id, case_id, hospital_id, from_vet_id, to_vet_id, animal_id, reason, specialty_needed, priority, status, clinical_notes, response_notes) VALUES
+  ('rf000000-0000-0000-0000-000000000001', 'wc000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001',
+   'b0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000002',
+   'aa000000-0000-0000-0000-000000000019',
+   'Poodle Duke has mild chronic ear canal inflammation during wellness exam. Refer to Dr. Bennett for dermatology workup.',
+   'Dermatology', 'normal', 'accepted',
+   'Bilateral erythematous ear canals with slight ceruminous discharge. No pain on palpation. Recommend cytology and allergy evaluation.',
+   'Will schedule intradermal allergy testing. Ear cytology added to next visit.'),
+  ('rf000000-0000-0000-0000-000000000002', NULL, 'h0000000-0000-0000-0000-000000000001',
+   'b0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000004',
+   'aa000000-0000-0000-0000-000000000016',
+   'Ball python Monty has been anorexic for 3 weeks. Initial exam by Dr. Carter found no obvious issues. Referring to Dr. Sharma for exotic specialist evaluation.',
+   'Reptile Medicine', 'normal', 'pending',
+   'Physical exam: good body condition (BCS 3/5), no retained shed, no oral lesions, no respiratory signs. Husbandry appears adequate. Fecal parasite check negative.',
+   NULL)
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 51: INPATIENT ADMISSIONS
+-- ============================================================
+INSERT INTO inpatient_admissions (id, hospital_id, animal_id, owner_id, admitted_by, case_id, admission_type, room_number, bed_number, status, estimated_discharge, care_instructions, medications, vitals_log, special_needs, daily_rate) VALUES
+  ('ia000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001',
+   'aa000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000002',
+   'wc000000-0000-0000-0000-000000000002', 'post_treatment', 'ER-102', 'B2',
+   'in_treatment', NOW() + INTERVAL '6 hours',
+   'Monitor ECG continuously. Check HR every 30 min. Offer water after 2 hours. No food for 4 hours after charcoal.',
+   '[{"name":"Activated Charcoal","dosage":"23g","route":"oral","frequency":"single dose","given_at":"2026-02-19T10:15:00"},{"name":"IV Lactated Ringers","dosage":"20 mL/hr","route":"IV","frequency":"continuous","given_at":"2026-02-19T10:20:00"}]',
+   '[{"time":"2026-02-19T10:10:00","hr":140,"rr":28,"temp":39.1,"spo2":98,"notes":"Pre-treatment. Tachycardic."},{"time":"2026-02-19T10:45:00","hr":128,"rr":24,"temp":38.9,"spo2":99,"notes":"Post-emesis. HR improving."},{"time":"2026-02-19T11:15:00","hr":118,"rr":22,"temp":38.8,"spo2":99,"notes":"Charcoal administered. Resting comfortably."}]',
+   'Owner authorized all emergency treatments. Allergic to acepromazine (previous reaction).',
+   125.00),
+  ('ia000000-0000-0000-0000-000000000002', 'h0000000-0000-0000-0000-000000000001',
+   'aa000000-0000-0000-0000-000000000013', 'c0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000001',
+   'wc000000-0000-0000-0000-000000000003', 'surgery_recovery', 'R105', 'B1',
+   'ready_to_discharge', NOW() - INTERVAL '1 hour',
+   'E-collar must stay on at all times. Restrict running/jumping for 14 days. Monitor incision daily for redness/swelling.',
+   '[{"name":"Meloxicam","dosage":"1.5mg","route":"oral","frequency":"once daily for 5 days","given_at":"2026-02-19T14:00:00"},{"name":"Cefpodoxime","dosage":"100mg","route":"oral","frequency":"twice daily for 7 days","given_at":"2026-02-19T14:00:00"}]',
+   '[{"time":"2026-02-19T12:00:00","hr":92,"rr":18,"temp":38.4,"spo2":99,"notes":"Fully recovered from anesthesia. Alert and responsive."},{"time":"2026-02-19T14:00:00","hr":88,"rr":16,"temp":38.3,"spo2":100,"notes":"Ate small meal. Walked outside. Ready for discharge."}]',
+   NULL, 0),
+  ('ia000000-0000-0000-0000-000000000003', 'h0000000-0000-0000-0000-000000000001',
+   'aa000000-0000-0000-0000-000000000023', 'c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000001',
+   NULL, 'boarding', 'K-3', NULL,
+   'admitted', NOW() + INTERVAL '3 days',
+   'Feed Royal Canin Indoor Adult twice daily. Litter box cleaned twice daily. Brush coat once daily. Owner visiting Saturday.',
+   '[]',
+   '[]',
+   'Very shy cat — needs quiet room. Owner provided personal blanket from home.', 45.00)
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 52: WALLETS (one per user)
+-- ============================================================
+INSERT INTO wallets (id, user_id, balance, bonus_credits, currency) VALUES
+  ('w0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001',    0.00,   0.00, 'USD'),
+  ('w0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000001', 1250.00,   0.00, 'USD'),
+  ('w0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000002',  980.00,   0.00, 'USD'),
+  ('w0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000003', 1560.00,   0.00, 'USD'),
+  ('w0000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000004',  520.00,   0.00, 'USD'),
+  ('w0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000001',   42.50,  12.50, 'USD'),
+  ('w0000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000002',   18.75,   8.50, 'USD'),
+  ('w0000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000003',   75.00,   0.00, 'USD'),
+  ('w0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000004',  120.00,  25.00, 'USD'),
+  ('w0000000-0000-0000-0000-000000000010', 'f0000000-0000-0000-0000-000000000001',   85.00,   0.00, 'USD'),
+  ('w0000000-0000-0000-0000-000000000011', 'f0000000-0000-0000-0000-000000000002',   60.00,   0.00, 'USD'),
+  ('w0000000-0000-0000-0000-000000000012', 'f0000000-0000-0000-0000-000000000003',  200.00,   0.00, 'USD')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 53: WALLET TRANSACTIONS
+-- ============================================================
+INSERT INTO wallet_transactions (id, wallet_id, type, amount, description, reference_type) VALUES
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000002', 'credit',  85.00,  'Payment received — Buddy hip dysplasia consultation',       'consultation'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000002', 'credit',  85.00,  'Payment received — Max osteoarthritis assessment',          'consultation'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000002', 'credit',  85.00,  'Payment received — Daisy emergency farm call',              'consultation'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000002', 'debit',   50.00,  'Withdrawal to bank account',                                 'withdrawal'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000003', 'credit',  95.00,  'Payment received — Whiskers dermatology consultation',      'consultation'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000004', 'credit', 120.00,  'Payment received — Kiwi avian consultation',                'consultation'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000006', 'credit',  42.50,  'Refund — Doctor cancelled appointment (50% of $85)',        'refund'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000006', 'bonus',   12.50,  'Goodwill bonus — Doctor cancellation compensation',         'bonus'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000009', 'credit', 120.00,  'Added funds via credit card',                                'deposit'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000009', 'bonus',   25.00,  'Welcome bonus for new user',                                 'bonus'),
+  (uuid_generate_v4(), 'w0000000-0000-0000-0000-000000000012', 'credit', 200.00,  'Added funds for marketplace purchase',                       'deposit')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 54: VET DATE OVERRIDES
+-- ============================================================
+INSERT INTO vet_date_overrides (id, veterinarian_id, override_date, override_type, start_time, end_time, slot_duration, reason, created_by) VALUES
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', '2026-03-14', 'unavailable',  NULL,    NULL,    NULL, 'Attending ACVS Conference in Chicago',   'b0000000-0000-0000-0000-000000000001'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', '2026-03-15', 'unavailable',  NULL,    NULL,    NULL, 'Attending ACVS Conference in Chicago',   'b0000000-0000-0000-0000-000000000001'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000002', '2026-02-28', 'custom_hours', '10:00', '14:00', 30,   'Half-day — annual vet license renewal',  'b0000000-0000-0000-0000-000000000002'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000003', '2026-03-01', 'unavailable',  NULL,    NULL,    NULL, 'Personal day',                           'b0000000-0000-0000-0000-000000000003'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000004', '2026-03-10', 'custom_hours', '09:00', '12:00', 45,   'Morning only — zoo consultation in PM',  'b0000000-0000-0000-0000-000000000004')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 55: VET BLOCKED SLOTS
+-- ============================================================
+INSERT INTO vet_blocked_slots (id, veterinarian_id, block_date, start_time, end_time, reason, is_recurring, recurring_day) VALUES
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', NULL,          '12:00', '13:00', 'Lunch break',                     true,  'monday'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', NULL,          '12:00', '13:00', 'Lunch break',                     true,  'tuesday'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', NULL,          '12:00', '13:00', 'Lunch break',                     true,  'wednesday'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', NULL,          '12:00', '13:00', 'Lunch break',                     true,  'thursday'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', NULL,          '12:00', '13:00', 'Lunch break',                     true,  'friday'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', '2026-02-20', '14:00', '15:30', 'Staff meeting',                   false, NULL),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000002', NULL,          '12:30', '13:30', 'Lunch break',                     true,  'monday'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000002', NULL,          '12:30', '13:30', 'Lunch break',                     true,  'wednesday'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000002', NULL,          '12:30', '13:30', 'Lunch break',                     true,  'friday'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000004', '2026-03-05', '15:00', '18:00', 'Research paper review deadline',  false, NULL)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 56: HOSPITAL HOLIDAYS
+-- ============================================================
+INSERT INTO hospital_holidays (id, hospital_id, holiday_date, name, holiday_type, is_full_day, start_time, end_time, created_by) VALUES
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', '2026-12-25', 'Christmas Day',       'general',           false, NULL, NULL, 'b0000000-0000-0000-0000-000000000001'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', '2026-01-01', 'New Year''s Day',      'general',           false, NULL, NULL, 'b0000000-0000-0000-0000-000000000001'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', '2026-07-04', 'Independence Day',    'general',           true,  NULL, NULL, 'b0000000-0000-0000-0000-000000000001'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', '2026-11-26', 'Thanksgiving',        'general',           true,  NULL, NULL, 'b0000000-0000-0000-0000-000000000001'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000001', '2026-03-20', 'Staff Training Day',  'hospital_specific', true,  NULL, NULL, 'b0000000-0000-0000-0000-000000000001'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', '2026-12-25', 'Christmas Day',       'general',           true,  NULL, NULL, 'b0000000-0000-0000-0000-000000000002'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', '2026-01-01', 'New Year''s Day',      'general',           true,  NULL, NULL, 'b0000000-0000-0000-0000-000000000002'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', '2026-07-04', 'Independence Day',    'general',           true,  NULL, NULL, 'b0000000-0000-0000-0000-000000000002'),
+  (uuid_generate_v4(), 'h0000000-0000-0000-0000-000000000002', '2026-02-16', 'Emergency Closure — Snowstorm', 'emergency_closure', true, NULL, NULL, 'b0000000-0000-0000-0000-000000000002')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 57: MARKETPLACE BIDS
+-- ============================================================
+-- Bids on the livestock scale (auction listing from existing data)
+INSERT INTO marketplace_bids (id, listing_id, bidder_id, amount, message, status, is_winning) VALUES
+  (uuid_generate_v4(), (SELECT id FROM marketplace_listings WHERE title LIKE '%Digital Livestock Weight Scale%' LIMIT 1),
+   'f0000000-0000-0000-0000-000000000001', 650.00, 'Interested for our dairy farm. Can pick up in Austin.', 'active', false),
+  (uuid_generate_v4(), (SELECT id FROM marketplace_listings WHERE title LIKE '%Digital Livestock Weight Scale%' LIMIT 1),
+   'f0000000-0000-0000-0000-000000000003', 750.00, 'Great condition. Would use for sheep weighing. Can pay via bank transfer.', 'active', false),
+  (uuid_generate_v4(), (SELECT id FROM marketplace_listings WHERE title LIKE '%Digital Livestock Weight Scale%' LIMIT 1),
+   'f0000000-0000-0000-0000-000000000002', 820.00, 'Willing to pay asking price. Need shipping to NC.', 'active', true)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 58: MARKETPLACE ORDERS
+-- ============================================================
+INSERT INTO marketplace_orders (id, listing_id, buyer_id, seller_id, quantity, unit_price, total_price, status, payment_status, shipping_address, tracking_number, notes) VALUES
+  (uuid_generate_v4(),
+   (SELECT id FROM marketplace_listings WHERE title LIKE '%Organic Aged Cheddar%' LIMIT 1),
+   'c0000000-0000-0000-0000-000000000003', 'f0000000-0000-0000-0000-000000000001',
+   3, 45.00, 135.00, 'shipped', 'paid',
+   '{"name":"Sarah Kim","address":"890 Pine St","city":"San Diego","state":"CA","zip":"92101"}',
+   'USPS-9400111899223344556677', 'Gift for friends who love artisan cheese.'),
+  (uuid_generate_v4(),
+   (SELECT id FROM marketplace_listings WHERE title LIKE '%Free-Range RIR%' LIMIT 1),
+   'f0000000-0000-0000-0000-000000000003', 'f0000000-0000-0000-0000-000000000002',
+   6, 25.00, 150.00, 'completed', 'paid',
+   '{"name":"Thomas Green","address":"1455 Mountain View Rd","city":"Stowe","state":"VT","zip":"05672"}',
+   NULL, 'Picked up in person. Healthy birds, started laying within a week.')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 59: MEDICAL RECORD AUDIT LOG
+-- ============================================================
+INSERT INTO medical_record_audit_log (id, record_id, record_type, action, performed_by, changed_by, changed_by_name, old_values, new_values, change_reason, ip_address) VALUES
+  (uuid_generate_v4(), 'ff000000-0000-0000-0000-000000000001', 'medical_record', 'create', 'b0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Dr. James Carter',
+   NULL, '{"title":"Hip Dysplasia Diagnosis — Buddy","severity":"normal","status":"active"}', 'Initial diagnosis record created', '10.0.0.5'),
+  (uuid_generate_v4(), 'ff000000-0000-0000-0000-000000000001', 'medical_record', 'update', 'b0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Dr. James Carter',
+   '{"follow_up_date":null}', '{"follow_up_date":"2026-04-15"}', 'Added follow-up date after radiograph review', '10.0.0.5'),
+  (uuid_generate_v4(), 'ff000000-0000-0000-0000-000000000002', 'medical_record', 'create', 'b0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'Dr. Sarah Bennett',
+   NULL, '{"title":"Atopic Dermatitis — Whiskers","severity":"high","status":"active"}', 'Diagnosis after skin scraping and culture', '10.0.0.6'),
+  (uuid_generate_v4(), 'ff000000-0000-0000-0000-000000000005', 'medical_record', 'view', 'f0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000001', 'John Miller',
+   NULL, NULL, 'Owner viewed Daisy emergency record', '192.168.1.55')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- STEP 60: ADDITIONAL BOOKINGS & CONSULTATIONS (new users/animals)
+-- ============================================================
+INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, hospital_id, scheduled_date, time_slot_start, time_slot_end, status, booking_type, priority, reason_for_visit, symptoms) VALUES
+  ('bb000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000016',
+   'h0000000-0000-0000-0000-000000000001', '2026-03-01', '10:00', '10:45', 'confirmed', 'in_person', 'normal',
+   'Ball python Monty not eating for 3 weeks', 'Anorexia, hiding more than usual'),
+  ('bb000000-0000-0000-0000-000000000010', 'c0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000017',
+   'h0000000-0000-0000-0000-000000000001', '2026-03-01', '11:00', '11:45', 'confirmed', 'in_person', 'normal',
+   'Bearded dragon Rex annual wellness check', 'Routine — no concerns'),
+  ('bb000000-0000-0000-0000-000000000011', 'c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000019',
+   'h0000000-0000-0000-0000-000000000001', '2026-03-05', '09:00', '09:30', 'confirmed', 'in_person', 'normal',
+   'Duke annual wellness exam', NULL),
+  ('bb000000-0000-0000-0000-000000000012', 'c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000002', 'aa000000-0000-0000-0000-000000000022',
+   'h0000000-0000-0000-0000-000000000001', '2026-03-08', '14:00', '14:30', 'pending', 'video_call', 'normal',
+   'Bengal Shadow scratching ears — possible ear mites', 'Head shaking, dark ear discharge'),
+  ('bb000000-0000-0000-0000-000000000013', 'c0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000015',
+   'h0000000-0000-0000-0000-000000000001', '2026-03-12', '14:00', '14:45', 'pending', 'in_person', 'normal',
+   'Rabbit Snowball dental check', 'Slightly reduced hay intake'),
+  ('bb000000-0000-0000-0000-000000000014', 'f0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000027',
+   NULL, '2026-03-15', '08:00', '09:00', 'confirmed', 'in_person', 'normal',
+   'Pre-lambing check for Woolly (Merino ewe)', 'Pregnant — due mid-April')
+ON CONFLICT (id) DO NOTHING;
+
+-- Additional consultations for new pets
+INSERT INTO consultations (id, user_id, veterinarian_id, animal_id, animal_type, symptom_description, status, priority, scheduled_at, started_at, completed_at, duration, diagnosis, prescription, follow_up_date, notes) VALUES
+  ('cc000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000014',
+   'Cat - Persian', 'Excessive tearing and staining around eyes, sneezing',
+   'completed', 'normal', '2026-01-20 10:00:00', '2026-01-20 10:05:00', '2026-01-20 10:35:00', 30,
+   'Brachycephalic obstructive airway syndrome with secondary epiphora. Nasolacrimal duct partially blocked. Mild dental disease noted.',
+   'Tobramycin ophthalmic drops 0.3% — 1 drop each eye twice daily for 10 days. Daily eye cleaning with sterile saline. Dental cleaning recommended.',
+   '2026-04-20', 'Persian breed predisposition. Advised daily eye wiping routine. Dental under anesthesia needed within 3 months.'),
+  ('cc000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000021',
+   'Dog - Miniature Dachshund', 'Occasional yelping when jumping down from couch despite ramp availability',
+   'completed', 'high', '2026-02-01 11:00:00', '2026-02-01 11:03:00', '2026-02-01 11:38:00', 35,
+   'Mild IVDD — Stage 1. Cervical pain on palpation C3-C5. No neurological deficits. Radiographs show mild disc space narrowing at C4-C5.',
+   'Gabapentin 50mg twice daily for 14 days. Strict cage rest for 4 weeks. Anti-inflammatory: Carprofen 12.5mg once daily for 7 days.',
+   '2026-03-01', 'CRITICAL: No jumping, no stairs, no rough play. Carry dog up/down. Consider MRI if symptoms worsen. Weight management essential.')
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- STEP 61: ADDITIONAL VACCINATION RECORDS (new animals)
+-- ============================================================
+INSERT INTO vaccination_records (id, animal_id, vaccine_name, vaccine_type, date_administered, next_due_date, dosage, batch_number, manufacturer, administered_by, certificate_number, reaction_notes, is_valid) VALUES
+  -- Charlie (Labrador)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000013', 'Rabies (3-year)',  'Core', '2025-06-10', '2028-06-10', '1 mL SC', 'RB-3Y-4421', 'Boehringer Ingelheim', 'b0000000-0000-0000-0000-000000000001', 'VAX-2025-E001', NULL, true),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000013', 'DHPP (DA2PP)',     'Core', '2025-06-10', '2026-06-10', '1 mL SC', 'DH-5W-8812', 'Zoetis',               'b0000000-0000-0000-0000-000000000001', 'VAX-2025-E002', NULL, true),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000013', 'Lyme Disease',    'Non-Core', '2025-06-10', '2026-06-10', '1 mL SC', 'LY-VX-1102', 'Zoetis', 'b0000000-0000-0000-0000-000000000001', 'VAX-2025-E003', NULL, true),
+  -- Princess (Persian)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000014', 'FVRCP',           'Core', '2025-11-20', '2026-11-20', '1 mL SC', 'FV-3C-2218', 'Zoetis',               'b0000000-0000-0000-0000-000000000004', 'VAX-2025-F001', NULL, true),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000014', 'Rabies (1-year)', 'Core', '2025-11-20', '2026-11-20', '1 mL SC', 'RB-1Y-9981', 'Boehringer Ingelheim', 'b0000000-0000-0000-0000-000000000004', 'VAX-2025-F002', NULL, true),
+  -- Duke (Poodle)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000019', 'Rabies (3-year)',  'Core', '2024-09-22', '2027-09-22', '1 mL SC', 'RB-3Y-6654', 'Boehringer Ingelheim', 'b0000000-0000-0000-0000-000000000001', 'VAX-2024-G001', NULL, true),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000019', 'DHPP (DA2PP)',     'Core', '2025-09-22', '2026-09-22', '1 mL SC', 'DH-5W-7738', 'Zoetis',               'b0000000-0000-0000-0000-000000000001', 'VAX-2025-G002', NULL, true),
+  -- Copper (Beagle)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000020', 'Rabies (1-year)',  'Core', '2025-03-08', '2026-03-08', '1 mL SC', 'RB-1Y-5542', 'Boehringer Ingelheim', 'b0000000-0000-0000-0000-000000000001', 'VAX-2025-H001', NULL, true),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000020', 'DHPP (DA2PP)',     'Core', '2025-03-08', '2026-03-08', '1 mL SC', 'DH-5W-3390', 'Zoetis',               'b0000000-0000-0000-0000-000000000001', 'VAX-2025-H002', NULL, true),
+  -- Oscar (Dachshund)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000021', 'Rabies (3-year)',  'Core', '2025-12-01', '2028-12-01', '1 mL SC', 'RB-3Y-1178', 'Boehringer Ingelheim', 'b0000000-0000-0000-0000-000000000001', 'VAX-2025-I001', NULL, true),
+  -- Shadow (Bengal)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000022', 'FVRCP',           'Core', '2025-07-14', '2026-07-14', '1 mL SC', 'FV-3C-5567', 'Zoetis',               'b0000000-0000-0000-0000-000000000002', 'VAX-2025-J001', NULL, true),
+  -- Muffin (Ragdoll)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000023', 'FVRCP',           'Core', '2025-04-18', '2026-04-18', '1 mL SC', 'FV-3C-8891', 'Zoetis',               'b0000000-0000-0000-0000-000000000002', 'VAX-2025-K001', NULL, true),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000023', 'Rabies (3-year)', 'Core', '2025-04-18', '2028-04-18', '1 mL SC', 'RB-3Y-2248', 'Boehringer Ingelheim', 'b0000000-0000-0000-0000-000000000002', 'VAX-2025-K002', NULL, true),
+  -- Scout (Border Collie)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000032', 'Rabies (3-year)',  'Core', '2024-08-05', '2027-08-05', '1 mL SC', 'RB-3Y-9914', 'Boehringer Ingelheim', 'b0000000-0000-0000-0000-000000000001', 'VAX-2024-L001', NULL, true),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000032', 'DHPP (DA2PP)',     'Core', '2025-08-05', '2026-08-05', '1 mL SC', 'DH-5W-4456', 'Zoetis',               'b0000000-0000-0000-0000-000000000001', 'VAX-2025-L002', NULL, true),
+  -- Woolly (Merino Sheep)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000027', 'Clostridial 8-way','Core', '2025-09-01', '2026-09-01', '2 mL SC', 'CL-8W-7701', 'Merck', 'b0000000-0000-0000-0000-000000000001', 'VAX-2025-M001', NULL, true),
+  -- Wilbur (Yorkshire Pig)
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000030', 'Erysipelas',      'Core', '2025-04-12', '2026-04-12', '2 mL IM', 'ER-PG-3301', 'Zoetis', 'b0000000-0000-0000-0000-000000000001', 'VAX-2025-N001', NULL, true);
+
+-- ============================================================
+-- STEP 62: ADDITIONAL WEIGHT HISTORY (new animals)
+-- ============================================================
+INSERT INTO weight_history (id, animal_id, weight, unit, notes, recorded_by, recorded_at) VALUES
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000013', 26.0, 'kg', 'Post-neuter weight',          'b0000000-0000-0000-0000-000000000001', '2025-06-10'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000013', 28.5, 'kg', 'Annual checkup weight',       'b0000000-0000-0000-0000-000000000001', '2026-02-01'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000014',  3.5, 'kg', 'Spay recovery weight',        'b0000000-0000-0000-0000-000000000004', '2025-05-20'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000014',  4.1, 'kg', 'Wellness visit weight',       'b0000000-0000-0000-0000-000000000004', '2026-01-20'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000019', 26.2, 'kg', 'Year 3 checkup',              'b0000000-0000-0000-0000-000000000001', '2024-09-22'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000019', 27.0, 'kg', 'Year 4 checkup',              'b0000000-0000-0000-0000-000000000001', '2025-09-22'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000020', 10.8, 'kg', 'Puppy final weight',          'b0000000-0000-0000-0000-000000000001', '2025-03-08'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000020', 11.5, 'kg', 'Slightly over ideal weight',  'b0000000-0000-0000-0000-000000000001', '2026-02-10'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000021',  4.8, 'kg', 'Post-IVDD baseline',          'b0000000-0000-0000-0000-000000000001', '2025-12-01'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000021',  5.2, 'kg', 'Gained weight during rest',   'b0000000-0000-0000-0000-000000000001', '2026-02-01'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000027', 58.0, 'kg', 'Pre-breeding weight',         'f0000000-0000-0000-0000-000000000003', '2025-11-01'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000027', 65.0, 'kg', 'Mid-pregnancy weight',        'f0000000-0000-0000-0000-000000000003', '2026-02-01'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000030', 155.0,'kg', 'Monthly weigh-in',            'f0000000-0000-0000-0000-000000000003', '2025-12-20'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000030', 180.0,'kg', 'Monthly weigh-in',            'f0000000-0000-0000-0000-000000000003', '2026-01-20'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000034', 650.0,'kg', 'Quarterly weigh-in',          'f0000000-0000-0000-0000-000000000001', '2025-10-15'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000034', 680.0,'kg', 'Quarterly weigh-in',          'f0000000-0000-0000-0000-000000000001', '2026-01-15');
+
+-- ============================================================
+-- STEP 63: ADDITIONAL ALLERGY RECORDS (new animals)
+-- ============================================================
+INSERT INTO allergy_records (id, animal_id, allergen, reaction, severity, identified_date, is_active, notes, reported_by) VALUES
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000019', 'Flea Saliva',   'Intense scratching, hot spots on lower back',     'moderate', '2025-04-15', true, 'Flea allergy dermatitis. Monthly flea prevention critical.',  'b0000000-0000-0000-0000-000000000001'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000021', 'Acepromazine',  'Paradoxical excitement, tremors',                  'severe',   '2025-01-10', true, 'Do NOT use acepromazine for sedation. Use alternative protocols.', 'b0000000-0000-0000-0000-000000000001'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000022', 'Pollen (Grass)','Watery eyes, sneezing, mild facial swelling',      'mild',     '2025-09-01', true, 'Seasonal — worse in spring/summer. Antihistamines PRN.',       'b0000000-0000-0000-0000-000000000002'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000013', 'Lamb Protein',  'Vomiting, diarrhea within 4 hours of ingestion',   'moderate', '2025-08-20', true, 'Confirmed via elimination diet. Feed chicken or fish based only.','b0000000-0000-0000-0000-000000000001');
+
+-- ============================================================
+-- STEP 64: ADDITIONAL WELLNESS SCORECARDS (new animals)
+-- ============================================================
+INSERT INTO wellness_scorecards (id, animal_id, owner_id, overall_score, nutrition_score, activity_score, vaccination_score, dental_score, weight_status, next_checkup, recommendations, risk_flags, assessed_by, assessed_at) VALUES
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000013', 'c0000000-0000-0000-0000-000000000003', 90, 85, 95, 100, 90, 'normal', '2026-06-10',
+   '["Maintain current exercise routine","Annual dental cleaning","Continue Lyme vaccine annually"]',
+   '["Lamb protein allergy - strict avoidance"]',
+   'b0000000-0000-0000-0000-000000000001', '2026-02-01'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000014', 'c0000000-0000-0000-0000-000000000003', 78, 80, 60, 95, 65, 'normal', '2026-04-20',
+   '["Daily eye cleaning routine","Dental cleaning needed","Indoor-only — increase play/enrichment","Weight monitoring quarterly"]',
+   '["Brachycephalic breed - airway monitoring","Dental disease - needs professional cleaning","Epiphora - chronic tear staining"]',
+   'b0000000-0000-0000-0000-000000000004', '2026-01-20'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000004', 88, 90, 85, 100, 75, 'normal', '2026-09-22',
+   '["Monthly grooming essential","Dental cleaning within 3 months","Continue ear cleaning weekly","Joint supplements for breed predisposition"]',
+   '["Mild ear canal inflammation - monitor","Flea allergy - monthly prevention critical"]',
+   'b0000000-0000-0000-0000-000000000001', '2026-02-15'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000004', 72, 65, 80, 92, 85, 'overweight', '2026-06-01',
+   '["Reduce food by 15%","No table scraps","Increase walks to 45 min daily","Weight check monthly"]',
+   '["Overweight - target 10.5kg","Beagle breed - high food drive, counter-surfing risk","Chocolate toxicity history"]',
+   'b0000000-0000-0000-0000-000000000001', '2026-02-10'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000004', 65, 75, 40, 95, 80, 'overweight', '2026-03-01',
+   '["CRITICAL: No jumping - ramps everywhere","Cage rest 4 weeks","Weight loss program needed","Continue gabapentin as prescribed"]',
+   '["IVDD Stage 1 - high risk breed","Acepromazine allergy - AVOID","Overweight - target 4.5kg","Cervical disc disease C4-C5"]',
+   'b0000000-0000-0000-0000-000000000001', '2026-02-01'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000032', 'f0000000-0000-0000-0000-000000000003', 95, 90, 100, 100, 95, 'normal', '2026-08-05',
+   '["Continue high-energy working dog diet","Annual dental check","Paw pad check monthly during herding season"]',
+   '[]',
+   'b0000000-0000-0000-0000-000000000001', '2026-02-10');
+
+-- ============================================================
+-- STEP 65: ADDITIONAL WELLNESS REMINDERS (new animals)
+-- ============================================================
+INSERT INTO wellness_reminders (id, animal_id, owner_id, reminder_type, title, description, due_date, status, priority, recurrence) VALUES
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000013', 'c0000000-0000-0000-0000-000000000003', 'vaccination', 'DHPP Booster Due — Charlie',       'Annual DHPP vaccination due. Schedule with clinic.',                  '2026-06-10', 'pending', 'high',   'yearly'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000014', 'c0000000-0000-0000-0000-000000000003', 'dental',      'Dental Cleaning — Princess',       'Professional dental cleaning under anesthesia recommended.',           '2026-04-01', 'pending', 'medium', NULL),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000014', 'c0000000-0000-0000-0000-000000000003', 'checkup',     'Eye Follow-Up — Princess',         'Recheck epiphora and nasolacrimal duct status.',                       '2026-04-20', 'pending', 'medium', NULL),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000003', 'checkup',     'Annual Wellness — Monty (Python)', 'Annual fecal parasite test and weight check for ball python.',          '2026-05-01', 'pending', 'low',    'yearly'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000003', 'checkup',     'UVB Bulb Replacement — Rex',       'Replace UVB bulb every 6 months. Due for replacement.',                 '2026-03-15', 'pending', 'medium', NULL),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000004', 'dental',      'Dental Cleaning — Duke',           'Mild tartar noted at wellness exam. Schedule within 3 months.',         '2026-06-01', 'pending', 'medium', NULL),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000004', 'vaccination', 'Rabies Booster Due — Copper',      'Rabies vaccine due. Schedule ASAP.',                                    '2026-03-08', 'pending', 'urgent', 'yearly'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000004', 'checkup',     'Weight Check — Copper',            'Monthly weight check — target 10.5kg. Currently 11.5kg.',              '2026-03-10', 'pending', 'high',   'monthly'),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000004', 'checkup',     'IVDD Follow-Up — Oscar',           'Recheck cervical pain and neurological status after rest period.',      '2026-03-01', 'pending', 'urgent', NULL),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000027', 'f0000000-0000-0000-0000-000000000003', 'checkup',     'Pre-Lambing Check — Woolly',       'Pregnancy ultrasound and condition scoring before lambing.',            '2026-03-15', 'pending', 'high',   NULL),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000031', 'f0000000-0000-0000-0000-000000000003', 'checkup',     'Pre-Farrowing Check — Charlotte',  'Berkshire sow due mid-April. Pre-farrowing health assessment.',         '2026-03-28', 'pending', 'high',   NULL),
+  (uuid_generate_v4(), 'aa000000-0000-0000-0000-000000000032', 'f0000000-0000-0000-0000-000000000003', 'vaccination', 'DHPP Booster Due — Scout',         'Annual DHPP + Leptospirosis for Border Collie working dog.',            '2026-08-05', 'pending', 'medium', 'yearly');
+
+-- ============================================================
+-- STEP 66: ADDITIONAL NOTIFICATIONS (new users)
+-- ============================================================
+INSERT INTO notifications (id, user_id, type, title, message, is_read, channel) VALUES
+  (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000003', 'booking',       'Booking Confirmed',          'Your appointment with Dr. Sharma for Monty on March 1 at 10:00 AM has been confirmed.', false, 'in_app'),
+  (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000003', 'consultation',  'Prescription Ready',         'Dr. Sharma has issued a prescription for Princess (Persian). View in medical records.',    true,  'in_app'),
+  (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000003', 'reminder',      'Dental Cleaning Reminder',   'Princess needs a dental cleaning within 3 months. Schedule your appointment.',              false, 'in_app'),
+  (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000004', 'booking',       'Booking Confirmed',          'Your appointment with Dr. Carter for Duke on March 5 at 9:00 AM has been confirmed.',      false, 'in_app'),
+  (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000004', 'consultation',  'URGENT: IVDD Diagnosis',     'Oscar has been diagnosed with IVDD Stage 1. Follow strict rest protocol immediately.',     false, 'in_app'),
+  (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000004', 'reminder',      'Weight Check Due — Copper',  'Monthly weight check for Copper is due. Target: 10.5kg. Currently: 11.5kg.',               false, 'in_app'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000004', 'booking',       'New Booking Request',        'Sarah Kim has requested an exotic pet consultation for Monty (Ball Python) on March 1.',    false, 'in_app'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000004', 'consultation',  'Referral Received',          'Dr. Carter referred Ball Python Monty for specialist evaluation. View referral details.',   false, 'in_app'),
+  (uuid_generate_v4(), 'f0000000-0000-0000-0000-000000000003', 'reminder',      'Pre-Lambing Season',         'Woolly (Merino ewe) is due mid-April. Schedule pre-lambing veterinary check.',              false, 'in_app'),
+  (uuid_generate_v4(), 'f0000000-0000-0000-0000-000000000003', 'reminder',      'Farrowing Preparation',      'Charlotte (Berkshire sow) expected to farrow April 8. Prepare farrowing pen.',              false, 'in_app');
+
+-- ============================================================
+-- STEP 67: ADDITIONAL FARM DATA (enterprise 3 records)
+-- ============================================================
+-- Health observations for enterprise 3
+INSERT INTO health_observations (id, enterprise_id, animal_id, observer_id, observation_type, severity, title, description, body_temperature, heart_rate, respiratory_rate, symptoms, is_resolved, resolved_at) VALUES
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000027', 'f0000000-0000-0000-0000-000000000003', 'pregnancy', 'normal', 'Woolly — Mid-Pregnancy Check',
+   'Woolly at approximately 100 days gestation. Good body condition score 3.5/5. Eating well. Udder development starting.',
+   39.0, 80, 20, ARRAY['normal_pregnancy'], true, NOW() - INTERVAL '5 days'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000030', 'f0000000-0000-0000-0000-000000000003', 'general', 'low', 'Wilbur — Routine Observation',
+   'Wilbur active and eating well. Good muscle development. Slight favoring of left hind leg after playing in mud — likely minor strain.',
+   38.6, 90, 22, NULL, true, NOW() - INTERVAL '2 days');
+
+-- Breeding records for enterprise 3
+INSERT INTO breeding_records (id, enterprise_id, dam_id, sire_id, breeding_method, breeding_date, expected_due_date, status, technician_id, pregnancy_confirmed, pregnancy_check_date, notes) VALUES
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000027', 'aa000000-0000-0000-0000-000000000028', 'natural', '2025-11-15', '2026-04-15', 'confirmed_pregnant',
+   'b0000000-0000-0000-0000-000000000001', true, '2025-12-20', 'Natural mating with Suffolk ram Baxter. Confirmed pregnant by ultrasound — single or twin expected.'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000031', NULL, 'artificial_insemination', '2025-12-10', '2026-04-08', 'confirmed_pregnant',
+   'b0000000-0000-0000-0000-000000000001', true, '2026-01-15', 'AI with premium Berkshire semen. Ultrasound confirmed 8-10 piglets estimated.');
+
+-- Feed inventory for enterprise 3
+INSERT INTO feed_inventory (id, enterprise_id, feed_name, feed_type, unit, current_stock, minimum_stock, cost_per_unit, supplier, batch_number, expiry_date, storage_location, is_active) VALUES
+  ('1f000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000003', 'Sheep Pellet 14% CP',  'grain',      'kg', 1200, 300, 0.35, 'Vermont Feed Supply', 'SP-2026-0201', '2026-09-01', 'Main Barn Feed Room', true),
+  ('1f000000-0000-0000-0000-000000000007', 'e0000000-0000-0000-0000-000000000003', 'Timothy/Orchard Hay',  'forage',     'kg', 5500, 1500,0.22, 'Green Mountain Hay',  'TH-2026-0115', '2026-11-01', 'Hay Loft',            true),
+  ('1f000000-0000-0000-0000-000000000008', 'e0000000-0000-0000-0000-000000000003', 'Pig Grower 16% CP',    'grain',      'kg',  800, 200, 0.40, 'Vermont Feed Supply', 'PG-2026-0201', '2026-08-15', 'Pig House Feed Bin',  true),
+  ('1f000000-0000-0000-0000-000000000009', 'e0000000-0000-0000-0000-000000000003', 'Sheep Mineral Block',   'supplement', 'pcs',  12,   3, 14.00, 'AgriSupply',         'SM-2025-1201', '2027-06-01', 'Main Barn Feed Room', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Financial records for enterprise 3
+INSERT INTO financial_records (id, enterprise_id, record_type, category, description, amount, currency, transaction_date, recorded_by, notes) VALUES
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'income',  'wool_sales',     'Spring wool clip — 42 fleeces sold to Vermont Fiber Mill',  6300.00, 'USD', '2025-06-15', 'f0000000-0000-0000-0000-000000000003', '42 Merino fleeces @ $150 avg'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'income',  'lamb_sales',     'Market lambs — Stowe Farmers Market',                        4500.00, 'USD', '2025-10-20', 'f0000000-0000-0000-0000-000000000003', '15 lambs @ $300 avg'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'income',  'pork_sales',     'Heritage pork — direct to restaurants',                      3200.00, 'USD', '2026-01-30', 'f0000000-0000-0000-0000-000000000003', 'Artisan Berkshire pork to 4 restaurants'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'expense', 'feed',           'Monthly feed purchase — sheep + pig ration',                 1800.00, 'USD', '2026-02-01', 'f0000000-0000-0000-0000-000000000003', 'Vermont Feed Supply February order'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'expense', 'veterinary',     'Herd health check + pregnancy scanning',                      350.00, 'USD', '2025-12-20', 'f0000000-0000-0000-0000-000000000003', 'Dr. Carter farm visit — ultrasound scanning'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'expense', 'equipment',      'Electric fence charger replacement',                          420.00, 'USD', '2026-01-10', 'f0000000-0000-0000-0000-000000000003', 'Gallagher MBS800i — rotational grazing system');
+
+-- Geofence zones for enterprise 3
+INSERT INTO geofence_zones (id, enterprise_id, name, zone_type, center_lat, center_lng, radius_meters, polygon_coords, color, alert_on_entry, alert_on_exit, is_restricted, status, created_by) VALUES
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'Farm Perimeter',       'boundary',    44.4660, -72.6875, 800,  '[]', '#22c55e', false, true,  false, 'active', 'f0000000-0000-0000-0000-000000000003'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'Lambing Paddock',      'restricted',  44.4662, -72.6878, 100,  '[]', '#f59e0b', true,  true,  true,  'active', 'f0000000-0000-0000-0000-000000000003'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'Rotational Pasture A', 'pasture',     44.4675, -72.6860, 250,  '[]', '#3b82f6', false, false, false, 'active', 'f0000000-0000-0000-0000-000000000003');
+
+-- Geospatial events for enterprise 3
+INSERT INTO geospatial_events (id, enterprise_id, animal_id, event_type, latitude, longitude, speed_kmh, metadata) VALUES
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000032', 'location_update', 44.4676, -72.6862, 12.5, '{"source":"collar_gps","battery":91,"note":"Scout herding flock to north pasture"}'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000027', 'location_update', 44.4674, -72.6858, 1.2,  '{"source":"ear_tag_gps","battery":68,"note":"Woolly grazing in rotation A"}'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000030', 'zone_exit',       44.4653, -72.6868, 3.5,  '{"zone":"Pig House","alert":"Wilbur escaped pig pen — recaptured within 10 min"}');
+
+-- ============================================================
+-- STEP 68: ADDITIONAL PAYMENTS (new consultations)
+-- ============================================================
+INSERT INTO payments (id, consultation_id, user_id, payer_id, payee_id, amount, currency, status, payment_method, transaction_id, invoice_number, gateway, tax_amount, paid_at) VALUES
+  (uuid_generate_v4(), 'cc000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000004',
+   110.00, 'USD', 'completed', 'credit_card', 'TXN-2026-C001', 'INV-2026-006', 'stripe', 9.90, '2026-01-20 10:40:00'),
+  (uuid_generate_v4(), 'cc000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000001',
+   85.00, 'USD', 'completed', 'wallet', 'TXN-2026-D001', 'INV-2026-007', 'wallet', 7.65, '2026-02-01 11:40:00');
+
+-- ============================================================
+-- STEP 69: ADDITIONAL REVIEWS (new consultations)
+-- ============================================================
+INSERT INTO reviews (id, consultation_id, reviewer_id, veterinarian_id, rating, comment, response_from_vet, is_public, status, helpful_count, report_count) VALUES
+  (uuid_generate_v4(), 'cc000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000004',
+   5, 'Dr. Sharma was amazing with my Persian cat Princess! She immediately identified the eye issue and explained the brachycephalic syndrome link. Very gentle with cats. The eye drops are already helping after 1 week.',
+   'Thank you Sarah! Princess is such a sweet patient. Keep up with the daily eye cleaning — it makes a huge difference for Persians.', true, 'active', 4, 0),
+  (uuid_generate_v4(), 'cc000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000001',
+   5, 'Dr. Carter caught Oscar''s IVDD early and his strict rest protocol has been critical. Oscar is already improving after 2 weeks. The ramp instructions for the whole house were incredibly detailed and helpful.',
+   NULL, true, 'active', 7, 0);
+
+-- ============================================================
+-- STEP 70: ADDITIONAL AI CHAT SESSIONS (new users)
+-- ============================================================
+INSERT INTO ai_chat_sessions (id, enterprise_id, user_id, animal_id, title, context_type, status, message_count, last_message_at) VALUES
+  ('a8000000-0000-0000-0000-000000000003', NULL, 'c0000000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000016',
+   'Ball Python Feeding Issues', 'animal', 'active', 4, NOW() - INTERVAL '3 hours'),
+  ('a8000000-0000-0000-0000-000000000004', NULL, 'c0000000-0000-0000-0000-000000000004', 'aa000000-0000-0000-0000-000000000021',
+   'Dachshund IVDD Care Guide', 'animal', 'active', 2, NOW() - INTERVAL '12 hours'),
+  ('a8000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000003', 'f0000000-0000-0000-0000-000000000003', NULL,
+   'Lambing Season Preparation', 'enterprise', 'active', 2, NOW() - INTERVAL '6 hours')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO ai_chat_messages (id, session_id, role, content, confidence, sources, tokens_used) VALUES
+  (uuid_generate_v4(), 'a8000000-0000-0000-0000-000000000003', 'user',      'My ball python Monty hasn''t eaten in 3 weeks. His last shed was perfect. Husbandry is 88°F hot side, 78°F cool side, 60% humidity. What should I do?', NULL, '[]', 35),
+  (uuid_generate_v4(), 'a8000000-0000-0000-0000-000000000003', 'assistant', 'A 3-week fast for a ball python is common and usually not concerning — they can safely fast for 4-8 weeks. Since your husbandry looks good, here are things to try: 1) **Offer prey at night** — cover the tank, leave a thawed rat in a dark hide. 2) **Try a different prey type** — switch from rats to mice, or try African Soft Furs. 3) **Check for stress** — is the enclosure near high traffic? Ball pythons need seclusion. 4) **Breeding season** — adult males often fast Nov-March during breeding season. If he''s otherwise active and maintaining weight, this is likely normal seasonal behavior. See your vet if weight loss exceeds 10%.', 90.0, '["Ball Python Care Guide","Reptile Nutrition Manual"]', 145),
+  (uuid_generate_v4(), 'a8000000-0000-0000-0000-000000000003', 'user',      'He is a 2-year-old male. Could this be breeding season related?', NULL, '[]', 16),
+  (uuid_generate_v4(), 'a8000000-0000-0000-0000-000000000003', 'assistant', 'Yes! A 2-year-old male ball python is at prime breeding age. **Breeding season fasting** is extremely common from November through March. Males often refuse food for 2-4 months while seeking a mate. Signs this is breeding-season related: restless behavior, roaming the enclosure at night, refusing food but still drinking water, no weight loss. **Do not force-feed.** Continue offering prey every 10-14 days, and he should resume eating by April. Your vet Dr. Sharma can confirm he''s healthy at his upcoming appointment on March 1.', 94.0, '["Ball Python Breeding Biology","Reptile Veterinary Medicine"]', 132),
+  (uuid_generate_v4(), 'a8000000-0000-0000-0000-000000000004', 'user',      'Oscar was just diagnosed with Stage 1 IVDD. What exactly does cage rest mean and how long?', NULL, '[]', 20),
+  (uuid_generate_v4(), 'a8000000-0000-0000-0000-000000000004', 'assistant', '**Cage rest for IVDD** means strictly limiting Oscar''s movement to allow the disc to heal. Here''s your guide: 1) **Duration**: 4-6 weeks minimum. Dr. Carter prescribed 4 weeks. 2) **Space**: A crate just big enough to stand, turn, and lie down. ~24-30 inch crate for a Miniature Dachshund. 3) **NO**: jumping, stairs, rough play, running, being on furniture. 4) **YES**: Carry him outside for bathroom breaks (3-5 min only), gentle short leash walks after week 3 if improving. 5) **At home**: Ramps on ALL furniture permanently. Remove access to stairs. Non-slip flooring. 6) **Medications**: Continue gabapentin 50mg BID and carprofen as prescribed. The good news: Stage 1 IVDD (pain only, no neurological deficits) has an **85-90% recovery rate** with strict conservative management.', 96.0, '["ACVIM IVDD Treatment Guidelines","Dachshund Health Foundation"]', 178),
+  (uuid_generate_v4(), 'a8000000-0000-0000-0000-000000000005', 'user',      'This is our first lambing season with Merinos. What should I prepare?', NULL, '[]', 15),
+  (uuid_generate_v4(), 'a8000000-0000-0000-0000-000000000005', 'assistant', 'Congratulations on your first Merino lambing season! Here''s your preparation checklist: **Supplies**: Iodine (7% for navel dipping), clean towels, lamb tube feeder, colostrum replacer (frozen ewe colostrum is best), heat lamps, digital thermometer, lubricant, lambing ropes. **Facility**: Clean and bed the lambing shed deeply with straw. Set up individual lambing jugs (5x5 ft pens) — you have a dedicated lambing shed which is perfect. Heat lamps at 18-20°C. **Timeline**: For Woolly (due ~April 15): Start monitoring 2 weeks before due date. Watch for udder development, vulvar swelling, behavioral changes (isolating from flock). **Nutrition**: Increase ewe nutrition in last 6 weeks — switch to higher energy feed. Provide selenium/vitamin E supplement. **Emergency contacts**: Have Dr. Carter''s emergency number ready. Most Merino lambings are natural, but dystocia rate is ~5-8%.', 88.0, '["Sheep Lambing Guide - Cornell Extension","Merino Breed Standards"]', 195);
+
+-- ============================================================
+-- STEP 71: ADDITIONAL SUSTAINABILITY DATA (enterprise 3)
+-- ============================================================
+INSERT INTO sustainability_metrics (id, enterprise_id, metric_type, metric_name, value, unit, period_start, period_end, category, scope, data_source, recorded_by) VALUES
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'ghg_emissions',  'Enteric Methane — Sheep & Goats',     1200, 'kgCO2e', '2026-01-01', '2026-01-31', 'emissions',      'scope_1', 'IPCC Tier 1 Sheep Factor', 'f0000000-0000-0000-0000-000000000003'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'water_usage',    'Total Farm Water Consumption',       42000, 'liters', '2026-01-01', '2026-01-31', 'water',           'scope_1', 'Well meter readings',      'f0000000-0000-0000-0000-000000000003'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'energy',         'Electricity — Barn Heating & Lights', 1800, 'kWh',    '2026-01-01', '2026-01-31', 'energy',          'scope_2', 'Utility bill',             'f0000000-0000-0000-0000-000000000003'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'waste',          'Manure Composted for Garden Sales',   8500, 'kg',     '2026-01-01', '2026-01-31', 'waste_management','scope_1', 'Farm records',             'f0000000-0000-0000-0000-000000000003'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'biodiversity',   'Pasture Species Count',                18,  'species','2026-01-01', '2026-01-31', 'biodiversity',    'scope_1', 'Pasture survey',           'f0000000-0000-0000-0000-000000000003');
+
+INSERT INTO sustainability_goals (id, enterprise_id, goal_name, description, metric_type, target_value, current_value, unit, baseline_value, baseline_date, target_date, status, progress_pct, created_by) VALUES
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'Carbon Neutral by 2028', 'Offset all Scope 1 and 2 emissions through composting, tree planting, and renewable energy.',
+   'ghg_emissions', 0, 3000, 'kgCO2e/month', 3000, '2026-01-01', '2028-12-31', 'active', 0, 'f0000000-0000-0000-0000-000000000003'),
+  (uuid_generate_v4(), 'e0000000-0000-0000-0000-000000000003', 'Rotational Grazing Optimization', 'Implement 8-paddock rotational grazing to improve pasture health and reduce overgrazing.',
+   'biodiversity', 25, 18, 'species', 15, '2025-06-01', '2027-06-01', 'active', 30, 'f0000000-0000-0000-0000-000000000003');
+
 -- (end of seed data)
+
