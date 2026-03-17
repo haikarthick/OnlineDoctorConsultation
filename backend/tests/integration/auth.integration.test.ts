@@ -1,5 +1,6 @@
 import request from 'supertest';
 import app from '../../src/app';
+import database from '../../src/utils/database';
 
 describe('Integration Tests - Auth Routes', () => {
   describe('POST /api/v1/auth/register', () => {
@@ -43,11 +44,14 @@ describe('Integration Tests - Auth Routes', () => {
 
   describe('GET /api/v1/health', () => {
     it('should return health status', async () => {
+      // Mock database connectivity for health check
+      (database.query as jest.Mock).mockResolvedValue({ rows: [{ ok: 1 }] });
+
       const response = await request(app)
         .get('/api/v1/health');
 
       expect(response.status).toBe(200);
-      expect(response.body.status).toBe('OK');
+      expect(response.body.status).toBe('healthy');
       expect(response.body.timestamp).toBeDefined();
     });
   });

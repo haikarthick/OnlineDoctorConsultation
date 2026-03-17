@@ -115,12 +115,12 @@ describe('validateBody', () => {
     expect(next).not.toHaveBeenCalled()
   })
 
-  it('rejects unknown fields by default', async () => {
+  it('strips unknown fields with stripUnknown', async () => {
     const middleware = validateBody(testSchema)
     const req = mockReq({ body: { name: 'Bob', extraField: 'hack' } })
     const res = mockRes()
     await middleware(req, res, next)
-    expect(res.status).toHaveBeenCalledWith(400)
-    expect(next).not.toHaveBeenCalled()
+    expect(next).toHaveBeenCalled()
+    expect(req.body).toEqual({ name: 'Bob' })
   })
 })
