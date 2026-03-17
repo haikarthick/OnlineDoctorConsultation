@@ -1,4 +1,4 @@
-﻿-- ============================================================
+-- ============================================================
 -- VetCare Platform — Comprehensive Demo Seed Data
 -- ============================================================
 -- Cleans ALL transactional data and populates every module with
@@ -30,17 +30,17 @@
 -- ============================================================
 -- Admin@123
 INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active, unique_id) VALUES
-  ('a0000000-0000-0000-0000-000000000001', 'admin@vetcare.com',       'System',    'Administrator', 'admin',        '+1-555-100-0001', '$2a$10$00NZp4Yf7FUXO.8of0GD3OVBm/qx16ICcEJHInelAUzid1qY5LPDq', true, 'USR-ADM-001'),
+  ('a0000000-0000-0000-0000-000000000001', 'admin@vetcare.com',       'System',    'Administrator', 'admin',        '+1-555-100-0001', '$2a$10$tu6znQ3bZKCZlv38rEym8evqP0Q25.eMpF0CIrsN6rlyfuTcQzos2', true, 'USR-ADM-001'),
   -- Veterinarians (password: Doctor@123)
-  ('b0000000-0000-0000-0000-000000000001', 'dr.james.carter@vetcare.com',  'James',   'Carter',   'veterinarian', '+1-555-200-0001', '$2a$10$9aFDD5AIKpoIa1vKbSPcF.deHblZ5OOlPllX3dOvxsz8TJFDb.Ds6', true, 'USR-VET-001'),
-  ('b0000000-0000-0000-0000-000000000002', 'dr.sarah.bennett@vetcare.com', 'Sarah',   'Bennett',  'veterinarian', '+1-555-200-0002', '$2a$10$9aFDD5AIKpoIa1vKbSPcF.deHblZ5OOlPllX3dOvxsz8TJFDb.Ds6', true, 'USR-VET-002'),
-  ('b0000000-0000-0000-0000-000000000003', 'dr.michael.reyes@vetcare.com', 'Michael',  'Reyes',   'veterinarian', '+1-555-200-0003', '$2a$10$9aFDD5AIKpoIa1vKbSPcF.deHblZ5OOlPllX3dOvxsz8TJFDb.Ds6', true, 'USR-VET-003'),
+  ('b0000000-0000-0000-0000-000000000001', 'dr.james.carter@vetcare.com',  'James',   'Carter',   'veterinarian', '+1-555-200-0001', '$2a$10$HH1yq2osUEdtByarwBFq0eBy.ko6Rv33jI2TtIcSJqGh382x5tqeu', true, 'USR-VET-001'),
+  ('b0000000-0000-0000-0000-000000000002', 'dr.sarah.bennett@vetcare.com', 'Sarah',   'Bennett',  'veterinarian', '+1-555-200-0002', '$2a$10$HH1yq2osUEdtByarwBFq0eBy.ko6Rv33jI2TtIcSJqGh382x5tqeu', true, 'USR-VET-002'),
+  ('b0000000-0000-0000-0000-000000000003', 'dr.michael.reyes@vetcare.com', 'Michael',  'Reyes',   'veterinarian', '+1-555-200-0003', '$2a$10$HH1yq2osUEdtByarwBFq0eBy.ko6Rv33jI2TtIcSJqGh382x5tqeu', true, 'USR-VET-003'),
   -- Pet Owners (password: Owner@123)
-  ('c0000000-0000-0000-0000-000000000001', 'emily.davis@email.com',    'Emily',     'Davis',    'pet_owner',    '+1-555-300-0001', '$2a$10$v5rq0xPVzJ7zM1B8IEB3hOFzFBQg3V6WCMhn3bmi.5lU1IVpSgLaq', true, 'USR-PET-001'),
-  ('c0000000-0000-0000-0000-000000000002', 'robert.chen@email.com',   'Robert',    'Chen',     'pet_owner',    '+1-555-300-0002', '$2a$10$v5rq0xPVzJ7zM1B8IEB3hOFzFBQg3V6WCMhn3bmi.5lU1IVpSgLaq', true, 'USR-PET-002'),
+  ('c0000000-0000-0000-0000-000000000001', 'emily.davis@email.com',    'Emily',     'Davis',    'pet_owner',    '+1-555-300-0001', '$2a$10$GXZlMN9itGYk/kxFAKpJme6HAOBIlfKtIcAZmBWGH264UDOGuebVC', true, 'USR-PET-001'),
+  ('c0000000-0000-0000-0000-000000000002', 'robert.chen@email.com',   'Robert',    'Chen',     'pet_owner',    '+1-555-300-0002', '$2a$10$GXZlMN9itGYk/kxFAKpJme6HAOBIlfKtIcAZmBWGH264UDOGuebVC', true, 'USR-PET-002'),
   -- Farmers (password: Farmer@123)
-  ('f0000000-0000-0000-0000-000000000001', 'john.miller@greenpastures.com','John',   'Miller',   'farmer',       '+1-555-400-0001', '$2a$10$LKi/uyJ8wxy.CAhQc8/6l.AIwssM5NS6cIOS8ji7RICs9qPzWGJCq', true, 'USR-FRM-001'),
-  ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$LKi/uyJ8wxy.CAhQc8/6l.AIwssM5NS6cIOS8ji7RICs9qPzWGJCq', true, 'USR-FRM-002')
+  ('f0000000-0000-0000-0000-000000000001', 'john.miller@greenpastures.com','John',   'Miller',   'farmer',       '+1-555-400-0001', '$2a$10$bQIWJjkOSE6.KF9N7DM2YO1qZSLqV6MjI8AOxDX02gfk5/oRjroqC', true, 'USR-FRM-001'),
+  ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$bQIWJjkOSE6.KF9N7DM2YO1qZSLqV6MjI8AOxDX02gfk5/oRjroqC', true, 'USR-FRM-002')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -817,12 +817,12 @@ INSERT INTO geospatial_events (id, enterprise_id, animal_id, event_type, latitud
 -- ============================================================
 INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active, unique_id) VALUES
   -- Pet Owners (password: Owner@123)
-  ('c0000000-0000-0000-0000-000000000003', 'sarah.kim@email.com',         'Sarah',   'Kim',      'pet_owner',    '+1-555-300-0003', '$2a$10$v5rq0xPVzJ7zM1B8IEB3hOFzFBQg3V6WCMhn3bmi.5lU1IVpSgLaq', true, 'USR-PET-003'),
-  ('c0000000-0000-0000-0000-000000000004', 'michael.torres@email.com',    'Michael', 'Torres',   'pet_owner',    '+1-555-300-0004', '$2a$10$v5rq0xPVzJ7zM1B8IEB3hOFzFBQg3V6WCMhn3bmi.5lU1IVpSgLaq', true, 'USR-PET-004'),
+  ('c0000000-0000-0000-0000-000000000003', 'sarah.kim@email.com',         'Sarah',   'Kim',      'pet_owner',    '+1-555-300-0003', '$2a$10$GXZlMN9itGYk/kxFAKpJme6HAOBIlfKtIcAZmBWGH264UDOGuebVC', true, 'USR-PET-003'),
+  ('c0000000-0000-0000-0000-000000000004', 'michael.torres@email.com',    'Michael', 'Torres',   'pet_owner',    '+1-555-300-0004', '$2a$10$GXZlMN9itGYk/kxFAKpJme6HAOBIlfKtIcAZmBWGH264UDOGuebVC', true, 'USR-PET-004'),
   -- Veterinarian (password: Doctor@123)
-  ('b0000000-0000-0000-0000-000000000004', 'dr.priya.sharma@vetcare.com', 'Priya',   'Sharma',   'veterinarian', '+1-555-200-0004', '$2a$10$9aFDD5AIKpoIa1vKbSPcF.deHblZ5OOlPllX3dOvxsz8TJFDb.Ds6', true, 'USR-VET-004'),
+  ('b0000000-0000-0000-0000-000000000004', 'dr.priya.sharma@vetcare.com', 'Priya',   'Sharma',   'veterinarian', '+1-555-200-0004', '$2a$10$HH1yq2osUEdtByarwBFq0eBy.ko6Rv33jI2TtIcSJqGh382x5tqeu', true, 'USR-VET-004'),
   -- Farmer (password: Farmer@123)
-  ('f0000000-0000-0000-0000-000000000003', 'thomas.green@greenmeadows.com','Thomas',  'Green',    'farmer',       '+1-555-400-0003', '$2a$10$LKi/uyJ8wxy.CAhQc8/6l.AIwssM5NS6cIOS8ji7RICs9qPzWGJCq', true, 'USR-FRM-003')
+  ('f0000000-0000-0000-0000-000000000003', 'thomas.green@greenmeadows.com','Thomas',  'Green',    'farmer',       '+1-555-400-0003', '$2a$10$bQIWJjkOSE6.KF9N7DM2YO1qZSLqV6MjI8AOxDX02gfk5/oRjroqC', true, 'USR-FRM-003')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
