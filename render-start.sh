@@ -56,17 +56,18 @@ node dist/utils/tier3Migration.js       2>&1 || echo "  (tier3 migration warning
 node dist/utils/tier4Migration.js       2>&1 || echo "  (tier4 migration warning — continuing)"
 echo "✓ Migrations complete"
 
-# Step 2: Seed demo data only if the database is EMPTY (no users exist)
-# This ensures data is never wiped on subsequent deploys.
-# To force a full re-seed, set FORCE_RESEED=true in Render env vars.
-USER_COUNT=$(node -e "
+# Step 2: Seed demo data if core data is missing (animals table empty)
+# Users are created by fixDemoPasswords at server start, but the rest
+# of the demo data (animals, vet profiles, consultations, etc.) only
+# comes from the seed SQL file.
+ANIMAL_COUNT=$(node -e "
 const { Pool } = require('pg');
 async function main() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
   const schema = process.env.DB_SCHEMA || 'public';
   try {
     await pool.query('SET search_path TO ' + schema + ', public');
-    const r = await pool.query('SELECT COUNT(*)::int AS c FROM users');
+    const r = await pool.query('SELECT COUNT(*)::int AS c FROM animals');
     console.log(r.rows[0].c);
   } catch (e) { console.log('0'); }
   finally { await pool.end(); }
@@ -74,56 +75,21 @@ async function main() {
 main();
 " 2>/dev/null || echo "0")
 
-echo "  Database has $USER_COUNT user(s)"
+echo "  Database has $ANIMAL_COUNT animal(s)"
 
 if [ "$FORCE_RESEED" = "true" ]; then
   echo ""
   echo "━━━ FORCE_RESEED=true — Re-seeding demo data ━━━"
   node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings — continuing"
   echo "✓ Seed complete"
-elif [ "$USER_COUNT" = "0" ]; then
+elif [ "$ANIMAL_COUNT" = "0" ]; then
   echo ""
-  echo "━━━ Empty database detected — Seeding demo data ━━━"
+  echo "━━━ No demo data detected — Seeding demo data ━━━"
   node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings — continuing"
   echo "✓ Seed complete"
 else
-  echo "  ✓ Database already has data — skipping seed (data preserved)"
+  echo "  ✓ Database already has demo data — skipping seed"
 fi
-
-# Step 2c: Fix demo passwords — hash at runtime to guarantee correctness
-echo ""
-echo "━━━ Fixing demo passwords (runtime bcrypt) ━━━"
-node -e "
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
-async function fix() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
-  const schema = process.env.DB_SCHEMA || 'public';
-  await pool.query('SET search_path TO ' + schema + ', public');
-  const users = [
-    ['admin@vetcare.com','Admin@123'],
-    ['dr.james.carter@vetcare.com','Doctor@123'],
-    ['dr.sarah.bennett@vetcare.com','Doctor@123'],
-    ['dr.michael.reyes@vetcare.com','Doctor@123'],
-    ['dr.priya.sharma@vetcare.com','Doctor@123'],
-    ['emily.davis@email.com','Owner@123'],
-    ['robert.chen@email.com','Owner@123'],
-    ['sarah.kim@email.com','Owner@123'],
-    ['michael.torres@email.com','Owner@123'],
-    ['john.miller@greenpastures.com','Farmer@123'],
-    ['maria.garcia@sunrisefarm.com','Farmer@123'],
-    ['thomas.green@greenmeadows.com','Farmer@123'],
-  ];
-  for (const [email, pw] of users) {
-    const hash = bcrypt.hashSync(pw, 10);
-    const r = await pool.query('UPDATE users SET password_hash = \$1 WHERE email = \$2', [hash, email]);
-    console.log('  ' + (r.rowCount ? 'OK' : 'SKIP') + ' ' + email);
-  }
-  await pool.end();
-  console.log('  Done');
-}
-fix().catch(e => { console.error('  Password fix error:', e.message); });
-" 2>&1 || echo "  ⚠ Password fix had warnings"
 
 # Step 3: Start the server (this MUST succeed)
 echo ""
