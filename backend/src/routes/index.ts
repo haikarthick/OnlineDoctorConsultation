@@ -620,79 +620,72 @@ router.get('/health', async (_req, res) => {
   });
 });
 
-// Temporary diagnostic endpoint to debug seed data issues
+// Temporary diagnostic endpoint — tries to execute seed steps 1-15 one at a time
 router.get('/debug/seed-status', async (_req, res) => {
   const fs = require('fs');
-  const path = require('path');
-  const results: Record<string, any> = {};
+  const pathMod = require('path');
+  const out: Record<string, any> = { cwd: process.cwd(), dirname: __dirname, dbSchema: process.env.DB_SCHEMA };
 
-  // Check table counts
-  const tables = ['users', 'animals', 'vet_profiles', 'bookings', 'consultations', 'medical_records', 'vet_schedules'];
+  // Table counts before
+  const tables = ['users','animals','vet_profiles','bookings','consultations','medical_records','vet_schedules','enterprises','prescriptions','reviews'];
+  const counts: Record<string, number | string> = {};
   for (const t of tables) {
-    try {
-      const { rows } = await database.query(`SELECT COUNT(*)::int AS cnt FROM ${t}`);
-      results[t] = rows[0].cnt;
-    } catch (e: any) { results[t] = `ERROR: ${e.message}`; }
+    try { const { rows } = await database.query(`SELECT COUNT(*)::int AS cnt FROM ${t}`); counts[t] = rows[0].cnt; }
+    catch (e: any) { counts[t] = `ERR: ${e.message.substring(0,80)}`; }
   }
+  out.countsBefore = counts;
 
-  // Check SQL file paths
-  const possiblePaths = [
-    path.join(__dirname, '..', '..', '..', 'docker', 'seed-demo-data.sql'),
-    path.join(__dirname, '..', '..', 'docker', 'seed-demo-data.sql'),
-    path.join(process.cwd(), '..', 'docker', 'seed-demo-data.sql'),
-    path.join(process.cwd(), 'docker', 'seed-demo-data.sql'),
+  // Find SQL file
+  const paths = [
+    pathMod.join(__dirname, '..', '..', '..', 'docker', 'seed-demo-data.sql'),
+    pathMod.join(process.cwd(), '..', 'docker', 'seed-demo-data.sql'),
+    pathMod.join(process.cwd(), 'docker', 'seed-demo-data.sql'),
   ];
-  const pathResults: Record<string, boolean> = {};
   let foundPath: string | null = null;
-  for (const p of possiblePaths) {
-    const exists = fs.existsSync(p);
-    pathResults[p] = exists;
-    if (exists && !foundPath) foundPath = p;
+  for (const p of paths) { if (fs.existsSync(p)) { foundPath = p; break; } }
+  out.foundPath = foundPath;
+  if (!foundPath) return res.json(out);
+
+  const sql = fs.readFileSync(foundPath, 'utf-8').replace(/\r\n/g, '\n');
+  out.fileSize = sql.length;
+
+  // Parse all step sections
+  const headerRe = /-- ={10,}\n-- STEP (\d+):\s*(.+)\n-- ={10,}/g;
+  const headers: { idx: number; name: string; pos: number }[] = [];
+  let m;
+  while ((m = headerRe.exec(sql)) !== null) {
+    headers.push({ idx: parseInt(m[1]), name: m[2].trim(), pos: m.index + m[0].length });
   }
+  out.totalSteps = headers.length;
 
-  // If file found, try to parse and execute step 3 (animals)
-  let seedTest: any = null;
-  if (foundPath) {
+  // Execute steps 1-15 (skip step 0)
+  const stepResults: Record<string, string> = {};
+  for (let i = 0; i < headers.length && headers[i].idx <= 15; i++) {
+    const h = headers[i];
+    if (h.idx === 0) continue;
+    const nextPos = (i + 1 < headers.length) ? headers[i + 1].pos - 200 : sql.length;
+    // Find the section content between this header end and next header start
+    const nextHeaderStart = (i + 1 < headers.length) ? sql.lastIndexOf('-- =', nextPos) : sql.length;
+    const sectionSql = sql.substring(h.pos, nextHeaderStart).trim();
+    if (!sectionSql) { stepResults[`STEP ${h.idx}: ${h.name}`] = 'EMPTY'; continue; }
     try {
-      const sql = fs.readFileSync(foundPath, 'utf-8').replace(/\r\n/g, '\n');
-      const stepHeaderRegex = /-- ={10,}\n-- STEP \d+:\s*(.+)\n-- ={10,}/g;
-      const steps: string[] = [];
-      let m;
-      while ((m = stepHeaderRegex.exec(sql)) !== null) steps.push(m[1].trim());
-      seedTest = { fileSize: sql.length, stepsFound: steps.length, stepNames: steps.slice(0, 10) };
-
-      // Try executing STEP 3 (ANIMALS)
-      const animalRegex = /-- ={10,}\n-- STEP 3:.*\n-- ={10,}\n([\s\S]*?)(?=-- ={10,}\n-- STEP 4:|$)/;
-      const animalMatch = sql.match(animalRegex);
-      if (animalMatch) {
-        const animalSql = animalMatch[1].trim();
-        seedTest.animalSqlLength = animalSql.length;
-        seedTest.animalSqlPreview = animalSql.substring(0, 200);
-        try {
-          await database.query(animalSql);
-          seedTest.animalInsertResult = 'SUCCESS';
-          const { rows } = await database.query('SELECT COUNT(*)::int AS cnt FROM animals');
-          seedTest.animalCountAfter = rows[0].cnt;
-        } catch (e: any) {
-          seedTest.animalInsertResult = `ERROR: ${e.message}`;
-        }
-      } else {
-        seedTest.animalSqlFound = false;
-      }
+      await database.query(sectionSql);
+      stepResults[`STEP ${h.idx}: ${h.name}`] = `OK (${sectionSql.length} chars)`;
     } catch (e: any) {
-      seedTest = { error: e.message };
+      stepResults[`STEP ${h.idx}: ${h.name}`] = `FAIL: ${e.message.substring(0, 150)}`;
     }
   }
+  out.stepResults = stepResults;
 
-  res.json({
-    cwd: process.cwd(),
-    dirname: __dirname,
-    dbSchema: process.env.DB_SCHEMA,
-    tableCounts: results,
-    sqlFilePaths: pathResults,
-    foundPath,
-    seedTest,
-  });
+  // Table counts after
+  const countsAfter: Record<string, number | string> = {};
+  for (const t of tables) {
+    try { const { rows } = await database.query(`SELECT COUNT(*)::int AS cnt FROM ${t}`); countsAfter[t] = rows[0].cnt; }
+    catch (e: any) { countsAfter[t] = `ERR: ${e.message.substring(0,80)}`; }
+  }
+  out.countsAfter = countsAfter;
+
+  res.json(out);
 });
 
 router.get('/features', (_req, res) => {
