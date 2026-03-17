@@ -6,12 +6,16 @@ import database from './utils/database';
 import cacheManager from './utils/cacheManager';
 import { initSocketIO } from './utils/socketIO';
 import { startScheduler } from './utils/scheduler';
+import { fixDemoPasswords } from './utils/fixDemoPasswords';
 
 const startServer = async () => {
   try {
     // Connect to database
     await database.connect();
     logger.info('Database initialized');
+
+    // Fix demo user passwords (runtime bcrypt — runs on every start)
+    await fixDemoPasswords();
 
     // Initialize cache
     if (cacheManager.connect) {
