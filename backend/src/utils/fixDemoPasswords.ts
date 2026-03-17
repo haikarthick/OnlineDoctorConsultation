@@ -17,7 +17,7 @@ const DEMO_USERS = [
 
 export async function fixDemoPasswords(): Promise<void> {
   try {
-    // 1. Ensure demo users exist with correct passwords
+    // 1. Ensure demo users exist with correct passwords AND correct IDs
     let fixed = 0;
     let created = 0;
     for (const u of DEMO_USERS) {
@@ -25,7 +25,33 @@ export async function fixDemoPasswords(): Promise<void> {
         'SELECT id, password_hash FROM users WHERE email = $1', [u.email]
       );
 
-      if (rows.length === 0) {
+      if (rows.length > 0 && rows[0].id !== u.id) {
+        // User exists with WRONG ID (e.g. registered via UI with random UUID).
+        // Delete dependent data and recreate with the correct hardcoded ID.
+        const oldId = rows[0].id;
+        const depDeletes = [
+          'DELETE FROM notifications WHERE user_id = $1',
+          'DELETE FROM audit_logs WHERE user_id = $1',
+          'DELETE FROM reviews WHERE user_id = $1',
+          'DELETE FROM payments WHERE user_id = $1',
+          'DELETE FROM prescriptions WHERE prescribed_by = $1',
+          'DELETE FROM medical_records WHERE veterinarian_id = $1',
+          'DELETE FROM consultations WHERE pet_owner_id = $1 OR veterinarian_id = $1',
+          'DELETE FROM bookings WHERE pet_owner_id = $1 OR veterinarian_id = $1',
+          'DELETE FROM vet_schedules WHERE veterinarian_id = $1',
+          'DELETE FROM vet_profiles WHERE user_id = $1',
+          'DELETE FROM animals WHERE owner_id = $1',
+          'DELETE FROM enterprise_members WHERE user_id = $1',
+        ];
+        for (const sql of depDeletes) {
+          try { await database.query(sql, [oldId]); } catch (_e) { /* table may not exist */ }
+        }
+        await database.query('DELETE FROM users WHERE id = $1', [oldId]);
+        logger.info(`Deleted user ${u.email} with wrong ID ${oldId}, will recreate with ${u.id}`);
+        // Fall through to create below
+      }
+
+      if (rows.length === 0 || (rows.length > 0 && rows[0].id !== u.id)) {
         const hash = await bcrypt.hash(u.password, 10);
         await database.query(
           `INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active, unique_id)
@@ -50,9 +76,10 @@ export async function fixDemoPasswords(): Promise<void> {
       logger.info(`Demo users: ${created} created, ${fixed} passwords fixed`);
     }
 
-    // 2. Seed demo data if missing (check vet_profiles — only populated by seed, never by user registration)
+    // 2. Seed demo data if missing (check multiple indicators — vet_profiles AND consultations must both exist)
     const { rows: vpRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM vet_profiles');
-    if (vpRows[0].cnt > 0) return; // Seed data already exists
+    const { rows: cRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM consultations');
+    if (vpRows[0].cnt >= 3 && cRows[0].cnt > 0) return; // Full seed data already exists
 
     logger.info('No demo data found — seeding via app database connection...');
 
