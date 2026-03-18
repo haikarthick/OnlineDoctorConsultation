@@ -134,6 +134,15 @@ class ScheduleController {
     res.json({ success: true, data: holidays });
   }
 
+  async updateHoliday(req: Request, res: Response) {
+    const authReq = req as AuthRequest;
+    if (authReq.userRole !== 'admin' && authReq.userRole !== 'veterinarian') {
+      throw new ForbiddenError('Only admins can manage holidays');
+    }
+    const holiday = await ScheduleService.updateHoliday(req.params.id, req.body);
+    res.json({ success: true, data: holiday });
+  }
+
   async deleteHoliday(req: Request, res: Response) {
     const authReq = req as AuthRequest;
     if (authReq.userRole !== 'admin') {

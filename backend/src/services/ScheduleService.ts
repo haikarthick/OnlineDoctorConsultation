@@ -357,6 +357,35 @@ class ScheduleService {
     return result.rows;
   }
 
+  async updateHoliday(id: string, data: {
+    holidayDate?: string; name?: string; holidayType?: string;
+    isFullDay?: boolean; startTime?: string; endTime?: string;
+  }): Promise<HospitalHoliday> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+    if (data.holidayDate !== undefined) { fields.push(`holiday_date = $${idx++}`); values.push(data.holidayDate); }
+    if (data.name !== undefined) { fields.push(`name = $${idx++}`); values.push(data.name); }
+    if (data.holidayType !== undefined) { fields.push(`holiday_type = $${idx++}`); values.push(data.holidayType); }
+    if (data.isFullDay !== undefined) { fields.push(`is_full_day = $${idx++}`); values.push(data.isFullDay); }
+    if (data.startTime !== undefined) { fields.push(`start_time = $${idx++}`); values.push(data.startTime || null); }
+    if (data.endTime !== undefined) { fields.push(`end_time = $${idx++}`); values.push(data.endTime || null); }
+    if (fields.length === 0) throw new ValidationError('No fields to update');
+    fields.push(`updated_at = NOW()`);
+    values.push(id);
+    const result = await database.query(
+      `UPDATE hospital_holidays SET ${fields.join(', ')} WHERE id = $${idx}
+       RETURNING id, hospital_id as "hospitalId", holiday_date as "holidayDate",
+       name, holiday_type as "holidayType", is_full_day as "isFullDay",
+       start_time as "startTime", end_time as "endTime", created_by as "createdBy",
+       created_at as "createdAt", updated_at as "updatedAt"`,
+      values
+    );
+    if (result.rowCount === 0) throw new NotFoundError('Holiday', id);
+    logger.info('Holiday updated', { id });
+    return result.rows[0];
+  }
+
   async deleteHoliday(id: string): Promise<void> {
     const result = await database.query(`DELETE FROM hospital_holidays WHERE id = $1`, [id]);
     if (result.rowCount === 0) throw new NotFoundError('Holiday', id);

@@ -170,6 +170,7 @@ router.delete('/schedules/blocked-slots/:id', authMiddleware, asyncHandler((req:
 // ─── Hospital Holidays ──────────────────────────────────────
 router.post('/holidays', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.createHoliday(req, res)));
 router.get('/holidays', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.listHolidays(req, res)));
+router.put('/holidays/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.updateHoliday(req, res)));
 router.delete('/holidays/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.deleteHoliday(req, res)));
 
 // ─── Prescription routes ─────────────────────────────────────

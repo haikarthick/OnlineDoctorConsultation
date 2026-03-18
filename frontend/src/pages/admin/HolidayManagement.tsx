@@ -1,19 +1,40 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import apiService from '../../services/api'
+import './HolidayManagement.css'
 
 interface Holiday {
   id: string; holidayDate: string; name: string; holidayType: string;
   isFullDay: boolean; startTime?: string; endTime?: string; createdAt: string;
 }
 
+const EMPTY_FORM = { holidayDate: '', name: '', holidayType: 'general', isFullDay: true, startTime: '09:00', endTime: '17:00' }
+const TYPE_LABELS: Record<string, string> = { general: 'General', hospital_specific: 'Hospital Specific', emergency_closure: 'Emergency Closure' }
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+function parseDate(raw: string): string {
+  // Safely extract YYYY-MM-DD from ISO or DATE string
+  return raw ? raw.toString().split('T')[0] : ''
+}
+
+function formatDisplayDate(raw: string, opts?: Intl.DateTimeFormatOptions): string {
+  const dateStr = parseDate(raw)
+  if (!dateStr) return ''
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const dt = new Date(y, m - 1, d)
+  return dt.toLocaleDateString('en-US', opts || { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 export default function HolidayManagement() {
   const [holidays, setHolidays] = useState<Holiday[]>([])
   const [loading, setLoading] = useState(true)
   const [year, setYear] = useState(new Date().getFullYear())
-  const [showForm, setShowForm] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [editId, setEditId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [pageMsg, setPageMsg] = useState<{ text: string; isError: boolean } | null>(null)
-  const [form, setForm] = useState({ holidayDate: '', name: '', holidayType: 'general', isFullDay: true, startTime: '09:00', endTime: '17:00' })
+  const [form, setForm] = useState({ ...EMPTY_FORM })
+  const [search, setSearch] = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
 
   const msg = (text: string, isError = false) => { setPageMsg({ text, isError }); setTimeout(() => setPageMsg(null), 3500) }
 
@@ -27,17 +48,73 @@ export default function HolidayManagement() {
 
   useEffect(() => { loadHolidays() }, [loadHolidays])
 
+  // Filtered holidays
+  const filtered = useMemo(() => {
+    let list = holidays
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter(h => h.name.toLowerCase().includes(q))
+    }
+    if (typeFilter !== 'all') {
+      list = list.filter(h => h.holidayType === typeFilter)
+    }
+    return list
+  }, [holidays, search, typeFilter])
+
+  const todayStr = new Date().toISOString().split('T')[0]
+  const upcoming = filtered.filter(h => parseDate(h.holidayDate) >= todayStr)
+  const past = filtered.filter(h => parseDate(h.holidayDate) < todayStr)
+
+  // Group holidays by month
+  function groupByMonth(list: Holiday[]) {
+    const groups: { month: number; holidays: Holiday[] }[] = []
+    for (const h of list) {
+      const m = parseInt(parseDate(h.holidayDate).split('-')[1], 10) - 1
+      const last = groups[groups.length - 1]
+      if (last && last.month === m) {
+        last.holidays.push(h)
+      } else {
+        groups.push({ month: m, holidays: [h] })
+      }
+    }
+    return groups
+  }
+
+  // Open add modal
+  const openAdd = () => { setEditId(null); setForm({ ...EMPTY_FORM }); setShowModal(true) }
+
+  // Open edit modal
+  const openEdit = (h: Holiday) => {
+    setEditId(h.id)
+    setForm({
+      holidayDate: parseDate(h.holidayDate),
+      name: h.name,
+      holidayType: h.holidayType,
+      isFullDay: h.isFullDay,
+      startTime: h.startTime || '09:00',
+      endTime: h.endTime || '17:00',
+    })
+    setShowModal(true)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       setSubmitting(true)
-      await apiService.createHoliday({
+      const payload = {
         holidayDate: form.holidayDate, name: form.name,
         holidayType: form.holidayType, isFullDay: form.isFullDay,
         ...(form.isFullDay ? {} : { startTime: form.startTime, endTime: form.endTime })
-      })
-      setShowForm(false); loadHolidays(); msg('Holiday added ✓')
-    } catch (err: any) { msg(err?.response?.data?.message || 'Failed to add holiday', true) }
+      }
+      if (editId) {
+        await apiService.updateHoliday(editId, payload)
+        msg('Holiday updated ✓')
+      } else {
+        await apiService.createHoliday(payload)
+        msg('Holiday added ✓')
+      }
+      setShowModal(false); loadHolidays()
+    } catch (err: any) { msg(err?.response?.data?.message || 'Failed to save holiday', true) }
     finally { setSubmitting(false) }
   }
 
@@ -47,105 +124,154 @@ export default function HolidayManagement() {
     catch { msg('Failed to remove', true) }
   }
 
-  const todayStr = new Date().toISOString().split('T')[0]
-  const upcoming = holidays.filter(h => h.holidayDate >= todayStr)
-  const past = holidays.filter(h => h.holidayDate < todayStr)
+  // Year range for dropdown
+  const currentYear = new Date().getFullYear()
+  const yearOptions = Array.from({ length: 21 }, (_, i) => currentYear - 5 + i)
+
+  // Stats from unfiltered holidays
+  const stats = [
+    { label: 'Total', value: holidays.length, color: '#ca8a04', icon: '📅' },
+    { label: 'Upcoming', value: holidays.filter(h => parseDate(h.holidayDate) >= todayStr).length, color: '#16a34a', icon: '🔜' },
+    { label: 'General', value: holidays.filter(h => h.holidayType === 'general').length, color: '#2563eb', icon: '🌐' },
+    { label: 'Hospital', value: holidays.filter(h => h.holidayType === 'hospital_specific').length, color: '#f97316', icon: '🏥' },
+    { label: 'Emergency', value: holidays.filter(h => h.holidayType === 'emergency_closure').length, color: '#dc2626', icon: '🚨' },
+  ]
+
+  const renderTable = (list: Holiday[], isPast = false) => {
+    if (list.length === 0) {
+      return (
+        <div className="empty-state">
+          <div className="empty-icon">{isPast ? '📭' : '🎊'}</div>
+          <div>{isPast ? 'No past holidays' : 'No upcoming holidays'} for {year}{search || typeFilter !== 'all' ? ' matching filters' : ''}.</div>
+        </div>
+      )
+    }
+    const groups = groupByMonth(list)
+    return (
+      <table className="holiday-table">
+        <thead>
+          <tr>
+            <th>Holiday Name</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Duration</th>
+            <th style={{ textAlign: 'right' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {groups.map(g => (
+            <>
+              <tr key={`m-${g.month}`} className="month-group-row">
+                <td colSpan={5}>📆 {MONTH_NAMES[g.month]} {year}</td>
+              </tr>
+              {g.holidays.map(h => (
+                <tr key={h.id}>
+                  <td className="td-name">{h.name}</td>
+                  <td className="td-date">{formatDisplayDate(h.holidayDate)}</td>
+                  <td>
+                    <span className={`type-badge ${h.holidayType}`}>
+                      {TYPE_LABELS[h.holidayType] || h.holidayType}
+                    </span>
+                  </td>
+                  <td>
+                    {h.isFullDay
+                      ? <span className="time-info">Full Day</span>
+                      : <span className="time-info partial">{h.startTime} – {h.endTime}</span>
+                    }
+                  </td>
+                  <td className="td-actions">
+                    <button className="btn-edit" onClick={() => openEdit(h)} title="Edit">✏️ Edit</button>
+                    <button className="btn-delete" onClick={() => handleDelete(h.id)} title="Delete">🗑️ Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </>
+          ))}
+        </tbody>
+      </table>
+    )
+  }
 
   if (loading) {
     return <div className="module-page"><div className="loading-container"><div className="loading-spinner" /><p>Loading holidays...</p></div></div>
   }
 
   return (
-    <div className="module-page">
+    <div className="module-page holiday-page">
       <div className="page-header">
         <div>
           <h1>🎉 Holiday Management</h1>
-          <p className="page-subtitle">Manage system-wide and hospital-specific holidays. These dates will be blocked for all doctor bookings.</p>
+          <p className="page-subtitle">Manage system-wide and hospital-specific holidays. These dates will be blocked for all bookings.</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-primary" onClick={() => { setForm({ holidayDate: '', name: '', holidayType: 'general', isFullDay: true, startTime: '09:00', endTime: '17:00' }); setShowForm(true) }}>
-            + Add Holiday
-          </button>
+          <button className="btn btn-primary" onClick={openAdd}>+ Add Holiday</button>
         </div>
       </div>
 
       {pageMsg && <div className={`modal-alert ${pageMsg.isError ? 'error' : 'success'}`} style={{ marginBottom: 16 }}>{pageMsg.text}</div>}
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 20 }}>
-        {[
-          { label: 'Total Holidays', value: holidays.length, color: '#ca8a04', icon: '📅' },
-          { label: 'Upcoming', value: upcoming.length, color: '#16a34a', icon: '🔜' },
-          { label: 'General', value: holidays.filter(h => h.holidayType === 'general').length, color: '#2563eb', icon: '🌐' },
-          { label: 'Emergency', value: holidays.filter(h => h.holidayType === 'emergency_closure').length, color: '#dc2626', icon: '🚨' },
-        ].map((s, i) => (
-          <div key={i} className="card" style={{ padding: '14px 16px', textAlign: 'center' }}>
-            <div style={{ fontSize: 24 }}>{s.icon}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 12, color: '#6b7280' }}>{s.label}</div>
+      <div className="holiday-stats">
+        {stats.map((s, i) => (
+          <div key={i} className="holiday-stat-card">
+            <div className="stat-icon">{s.icon}</div>
+            <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+            <div className="stat-label">{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Year filter */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {[year - 1, year, year + 1].map(y => (
-          <button key={y} className={`btn btn-sm ${year === y ? 'btn-primary' : 'btn-outline'}`} onClick={() => setYear(y)}>{y}</button>
-        ))}
-      </div>
-
-      {/* Upcoming */}
-      <h3 style={{ fontSize: 15, marginBottom: 8, color: '#374151' }}>Upcoming Holidays ({upcoming.length})</h3>
-      {upcoming.length === 0 ? (
-        <div className="card" style={{ padding: 24, textAlign: 'center', color: '#6b7280', marginBottom: 16 }}>No upcoming holidays for {year}.</div>
-      ) : (
-        <div style={{ display: 'grid', gap: 8, marginBottom: 20 }}>
-          {upcoming.map(h => (
-            <div key={h.id} className="card" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              borderLeft: `4px solid ${h.holidayType === 'emergency_closure' ? '#ef4444' : h.holidayType === 'hospital_specific' ? '#f97316' : '#eab308'}` }}>
-              <div>
-                <strong style={{ fontSize: 14 }}>{h.name}</strong>
-                <span style={{ marginLeft: 10, fontSize: 13, color: '#6b7280' }}>
-                  {new Date(h.holidayDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-                </span>
-                <span style={{ marginLeft: 8 }} className={`badge ${h.holidayType === 'general' ? 'badge-active' : h.holidayType === 'emergency_closure' ? 'badge-danger' : 'badge-warning'}`}>
-                  {h.holidayType.replace('_', ' ')}
-                </span>
-                {!h.isFullDay && <span style={{ marginLeft: 8, fontSize: 12, color: '#6b7280' }}>({h.startTime}–{h.endTime})</span>}
-              </div>
-              <button className="btn btn-sm btn-danger" onClick={() => handleDelete(h.id)}>🗑️</button>
-            </div>
-          ))}
+      {/* Toolbar: Search + Type filter + Year nav */}
+      <div className="holiday-toolbar">
+        <div className="holiday-search">
+          <span className="search-icon">🔍</span>
+          <input
+            placeholder="Search holidays..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
-      )}
+        <div className="holiday-type-filter">
+          <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+            <option value="all">All Types</option>
+            <option value="general">General</option>
+            <option value="hospital_specific">Hospital Specific</option>
+            <option value="emergency_closure">Emergency Closure</option>
+          </select>
+        </div>
+        <div className="year-nav">
+          <button onClick={() => setYear(y => y - 1)} title="Previous year">◀</button>
+          <select value={year} onChange={e => setYear(Number(e.target.value))}>
+            {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <button onClick={() => setYear(y => y + 1)} title="Next year">▶</button>
+          <button className={year === currentYear ? 'active' : ''} onClick={() => setYear(currentYear)}>Today</button>
+        </div>
+      </div>
 
-      {/* Past */}
-      {past.length > 0 && (
-        <>
-          <h3 style={{ fontSize: 15, marginBottom: 8, color: '#9ca3af' }}>Past Holidays ({past.length})</h3>
-          <div style={{ display: 'grid', gap: 6, opacity: 0.6 }}>
-            {past.map(h => (
-              <div key={h.id} className="card" style={{ padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span style={{ fontSize: 13 }}>{h.name}</span>
-                  <span style={{ marginLeft: 8, fontSize: 12, color: '#9ca3af' }}>
-                    {new Date(h.holidayDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(h.id)}>✕</button>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      {/* Upcoming Holidays */}
+      <div className="section-header">
+        <h3>🔜 Upcoming Holidays</h3>
+        <span className="section-count">{upcoming.length}</span>
+      </div>
+      {renderTable(upcoming)}
 
-      {/* Add Holiday Modal */}
-      {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
+      {/* Past Holidays */}
+      <div className="section-header past">
+        <h3>📋 Past Holidays</h3>
+        <span className="section-count">{past.length}</span>
+      </div>
+      <div className="past-section">
+        {renderTable(past, true)}
+      </div>
+
+      {/* Add/Edit Holiday Modal */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🎉 Add Holiday</h2>
-              <button className="modal-close" onClick={() => setShowForm(false)}>✕</button>
+              <h2>{editId ? '✏️ Edit Holiday' : '🎉 Add Holiday'}</h2>
+              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleSubmit}>
@@ -154,18 +280,20 @@ export default function HolidayManagement() {
                   <input className="form-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
                     placeholder="e.g., Christmas Day, New Year..." required />
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Date</label>
-                  <input className="form-input" type="date" value={form.holidayDate}
-                    onChange={e => setForm({ ...form, holidayDate: e.target.value })} required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Type</label>
-                  <select className="form-input" value={form.holidayType} onChange={e => setForm({ ...form, holidayType: e.target.value })}>
-                    <option value="general">General Holiday</option>
-                    <option value="hospital_specific">Hospital Specific</option>
-                    <option value="emergency_closure">Emergency Closure</option>
-                  </select>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Date</label>
+                    <input className="form-input" type="date" value={form.holidayDate}
+                      onChange={e => setForm({ ...form, holidayDate: e.target.value })} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Type</label>
+                    <select className="form-input" value={form.holidayType} onChange={e => setForm({ ...form, holidayType: e.target.value })}>
+                      <option value="general">General Holiday</option>
+                      <option value="hospital_specific">Hospital Specific</option>
+                      <option value="emergency_closure">Emergency Closure</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
@@ -174,20 +302,22 @@ export default function HolidayManagement() {
                   </label>
                 </div>
                 {!form.isFullDay && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="form-row">
                     <div className="form-group">
-                      <label className="form-label">Start</label>
+                      <label className="form-label">Start Time</label>
                       <input className="form-input" type="time" value={form.startTime} onChange={e => setForm({ ...form, startTime: e.target.value })} />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">End</label>
+                      <label className="form-label">End Time</label>
                       <input className="form-input" type="time" value={form.endTime} onChange={e => setForm({ ...form, endTime: e.target.value })} />
                     </div>
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowForm(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Saving...' : 'Add Holiday'}</button>
+                  <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    {submitting ? 'Saving...' : editId ? 'Update Holiday' : 'Add Holiday'}
+                  </button>
                 </div>
               </form>
             </div>

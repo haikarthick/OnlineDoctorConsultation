@@ -333,6 +333,11 @@ class ApiService {
     return response.data
   }
 
+  async updateHoliday(id: string, data: { holidayDate?: string; name?: string; holidayType?: string; isFullDay?: boolean; startTime?: string; endTime?: string }) {
+    const response = await this.client.put(`/holidays/${id}`, data)
+    return response.data
+  }
+
   async deleteHoliday(id: string) {
     const response = await this.client.delete(`/holidays/${id}`)
     return response.data

@@ -1,0 +1,370 @@
+/* Holiday Management Page */
+.holiday-page .holiday-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.holiday-page .holiday-search {
+  flex: 1;
+  min-width: 180px;
+  max-width: 320px;
+  position: relative;
+}
+
+.holiday-page .holiday-search input {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.holiday-page .holiday-search input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.holiday-page .holiday-search .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.holiday-page .holiday-type-filter {
+  min-width: 160px;
+}
+
+.holiday-page .holiday-type-filter select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.holiday-page .year-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.holiday-page .year-nav button {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  transition: all 0.15s;
+}
+
+.holiday-page .year-nav button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.holiday-page .year-nav button.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.holiday-page .year-nav select {
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #fff;
+  cursor: pointer;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Stats row */
+.holiday-page .holiday-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.holiday-page .holiday-stat-card {
+  padding: 14px 16px;
+  text-align: center;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.holiday-page .holiday-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.holiday-page .holiday-stat-card .stat-icon {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.holiday-page .holiday-stat-card .stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.holiday-page .holiday-stat-card .stat-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* Section headers */
+.holiday-page .section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.holiday-page .section-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  color: #374151;
+}
+
+.holiday-page .section-header .section-count {
+  background: #e5e7eb;
+  color: #4b5563;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.holiday-page .section-header.past h3 {
+  color: #9ca3af;
+}
+
+/* Holiday table */
+.holiday-page .holiday-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.holiday-page .holiday-table thead th {
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  background: #f9fafb;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.holiday-page .holiday-table tbody tr {
+  transition: background 0.1s;
+}
+
+.holiday-page .holiday-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.holiday-page .holiday-table tbody td {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.holiday-page .holiday-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.holiday-page .holiday-table .td-name {
+  font-weight: 600;
+}
+
+.holiday-page .holiday-table .td-date {
+  white-space: nowrap;
+}
+
+.holiday-page .holiday-table .td-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.holiday-page .holiday-table .td-actions button {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: 6px;
+}
+
+.holiday-page .holiday-table .btn-edit {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.holiday-page .holiday-table .btn-edit:hover {
+  background: #dbeafe;
+}
+
+.holiday-page .holiday-table .btn-delete {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.holiday-page .holiday-table .btn-delete:hover {
+  background: #fee2e2;
+}
+
+/* Past section dimming */
+.holiday-page .past-section {
+  opacity: 0.65;
+}
+
+.holiday-page .past-section:hover {
+  opacity: 0.85;
+}
+
+/* Type badges */
+.holiday-page .type-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.holiday-page .type-badge.general {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.holiday-page .type-badge.hospital_specific {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.holiday-page .type-badge.emergency_closure {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Full day indicator */
+.holiday-page .time-info {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.holiday-page .time-info.partial {
+  color: #d97706;
+  font-weight: 500;
+}
+
+/* Month group headers in table */
+.holiday-page .month-group-row td {
+  background: #f3f4f6;
+  font-weight: 600;
+  font-size: 12px;
+  color: #4b5563;
+  padding: 6px 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Empty state */
+.holiday-page .empty-state {
+  padding: 40px 24px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.holiday-page .empty-state .empty-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+/* Modal form */
+.holiday-page .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .holiday-page .holiday-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .holiday-page .holiday-search {
+    max-width: 100%;
+  }
+
+  .holiday-page .year-nav {
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .holiday-page .holiday-table {
+    font-size: 12px;
+  }
+
+  .holiday-page .holiday-table thead th,
+  .holiday-page .holiday-table tbody td {
+    padding: 8px 10px;
+  }
+
+  .holiday-page .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .holiday-page .holiday-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
