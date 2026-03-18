@@ -5,7 +5,13 @@ import { useAuth } from '../context/AuthContext'
 import { AIChatMessage } from '../types'
 import './FloatingChatWidget.css'
 
-const SUGGESTED_PROMPTS = [
+interface PetSummary {
+  id: string
+  name: string
+  species: string
+}
+
+const DEFAULT_PROMPTS = [
   'My pet is not eating 🍽️',
   'Vaccination schedule? 💉',
   'Emergency first aid 🚑',
@@ -13,7 +19,7 @@ const SUGGESTED_PROMPTS = [
 ]
 
 const FloatingChatWidget: React.FC = () => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const [open, setOpen] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [messages, setMessages] = useState<AIChatMessage[]>([])
@@ -21,11 +27,33 @@ const FloatingChatWidget: React.FC = () => {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const [initializing, setInitializing] = useState(false)
+  const [pets, setPets] = useState<PetSummary[]>([])
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const petsLoaded = useRef(false)
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Load user's pets once for personalized prompts
+  useEffect(() => {
+    if (!isAuthenticated || petsLoaded.current) return
+    petsLoaded.current = true
+    apiService.listAnimals({ limit: 10 }).then(res => {
+      const items = res.data?.items || res.data || []
+      setPets(items.map((a: any) => ({ id: a.id, name: a.name, species: a.species })))
+    }).catch(() => { /* ignore */ })
+  }, [isAuthenticated])
+
+  // Build suggested prompts — personalized if pets exist
+  const suggestedPrompts = pets.length > 0
+    ? [
+        `How is ${pets[0].name} doing based on recent records? 📋`,
+        `Are ${pets[0].name}'s vaccinations up to date? 💉`,
+        `Any medication reminders for my pets? 💊`,
+        `What should I feed ${pets[0].name}? 🥢`,
+      ]
+    : DEFAULT_PROMPTS
 
   // Ensure a session exists when panel opens
   const ensureSession = async (): Promise<string | null> => {
@@ -144,7 +172,7 @@ const FloatingChatWidget: React.FC = () => {
         <div className="chat-widget-header-info">
           <div className="chat-widget-header-title">AI Buddy Helper</div>
           <div className="chat-widget-header-status">
-            {sending ? 'Thinking...' : 'Your veterinary assistant'}
+            {sending ? 'Thinking...' : user ? `${user.firstName}'s veterinary assistant` : 'Your veterinary assistant'}
           </div>
         </div>
         <button className="chat-widget-close" onClick={handleNewSession} title="New chat">🔄</button>
@@ -169,10 +197,15 @@ const FloatingChatWidget: React.FC = () => {
         ) : messages.length === 0 ? (
           <div className="chat-widget-welcome">
             <div style={{ fontSize: 48 }}>🐕</div>
-            <h3>Hi! I'm AI Buddy 🐾</h3>
-            <p>Ask me anything about pet health, symptoms, or veterinary care!</p>
+            <h3>Hi{user ? ` ${user.firstName}` : ''}! I'm AI Buddy 🐾</h3>
+            <p>
+              {pets.length > 0
+                ? <>I know about <strong>{pets.map(p => p.name).join(', ')}</strong> and their health history. Ask me anything!</>
+                : 'Ask me anything about pet health, symptoms, or veterinary care!'
+              }
+            </p>
             <div className="chat-widget-prompts">
-              {SUGGESTED_PROMPTS.map(p => (
+              {suggestedPrompts.map(p => (
                 <button key={p} className="chat-widget-prompt-btn" onClick={() => handleSend(p)}>
                   {p}
                 </button>

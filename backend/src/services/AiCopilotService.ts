@@ -95,6 +95,132 @@ const DRUG_INTERACTIONS: Record<string, { interactsWith: string[]; severity: str
 
 class AiCopilotService {
 
+  // ── Build Personalized User Context ──
+  private async buildUserContext(userId: string): Promise<string> {
+    try {
+      const sections: string[] = [];
+
+      // 1. User profile
+      const userRes = await pool.query(
+        `SELECT first_name, last_name, email, role, phone FROM users WHERE id = $1`,
+        [userId]
+      );
+      const user = userRes.rows[0];
+      if (user) {
+        sections.push(`## Current User\nName: ${user.first_name} ${user.last_name}\nRole: ${user.role}`);
+      }
+
+      // 2. Animals owned by this user
+      const animalsRes = await pool.query(
+        `SELECT id, name, species, breed, date_of_birth, gender, weight, weight_unit,
+                microchip_number, is_neutered
+         FROM animals WHERE owner_id = $1 AND is_active = true
+         ORDER BY created_at DESC LIMIT 20`,
+        [userId]
+      );
+      if (animalsRes.rows.length > 0) {
+        const animalLines = animalsRes.rows.map((a: any) => {
+          const age = a.date_of_birth
+            ? `${Math.floor((Date.now() - new Date(a.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))}y`
+            : 'unknown age';
+          return `- **${a.name}**: ${a.species}${a.breed ? ` (${a.breed})` : ''}, ${a.gender || 'unknown gender'}, ${age}${a.weight ? `, ${a.weight}${a.weight_unit || 'kg'}` : ''}${a.is_neutered ? ', neutered' : ''}`;
+        });
+        sections.push(`## Their Animals (${animalsRes.rows.length})\n${animalLines.join('\n')}`);
+      }
+
+      const animalIds = animalsRes.rows.map((a: any) => a.id);
+      if (animalIds.length === 0) return sections.join('\n\n');
+
+      // 3. Recent medical records (last 10)
+      const medRes = await pool.query(
+        `SELECT mr.title, mr.record_type, mr.content, mr.created_at, a.name AS animal_name
+         FROM medical_records mr
+         JOIN animals a ON mr.animal_id = a.id
+         WHERE mr.animal_id = ANY($1)
+         ORDER BY mr.created_at DESC LIMIT 10`,
+        [animalIds]
+      );
+      if (medRes.rows.length > 0) {
+        const medLines = medRes.rows.map((r: any) =>
+          `- [${new Date(r.created_at).toLocaleDateString()}] **${r.animal_name}** — ${r.record_type}: ${r.title}${r.content ? ` (${r.content.substring(0, 120)})` : ''}`
+        );
+        sections.push(`## Recent Medical Records\n${medLines.join('\n')}`);
+      }
+
+      // 4. Vaccinations (last 10)
+      const vaccRes = await pool.query(
+        `SELECT v.vaccine_name, v.date_administered, v.next_due_date, v.batch_number, a.name AS animal_name
+         FROM vaccinations v
+         JOIN animals a ON v.animal_id = a.id
+         WHERE v.animal_id = ANY($1)
+         ORDER BY v.date_administered DESC LIMIT 10`,
+        [animalIds]
+      );
+      if (vaccRes.rows.length > 0) {
+        const vaccLines = vaccRes.rows.map((v: any) =>
+          `- **${v.animal_name}**: ${v.vaccine_name} on ${new Date(v.date_administered).toLocaleDateString()}${v.next_due_date ? ` (next due: ${new Date(v.next_due_date).toLocaleDateString()})` : ''}`
+        );
+        sections.push(`## Vaccination History\n${vaccLines.join('\n')}`);
+      }
+
+      // 5. Active prescriptions (last 10)
+      const rxRes = await pool.query(
+        `SELECT p.medication_name, p.dosage, p.frequency, p.duration, p.status, p.created_at,
+                a.name AS animal_name
+         FROM prescriptions p
+         JOIN consultations c ON p.consultation_id = c.id
+         JOIN animals a ON c.animal_id = a.id
+         WHERE c.animal_id = ANY($1)
+         ORDER BY p.created_at DESC LIMIT 10`,
+        [animalIds]
+      );
+      if (rxRes.rows.length > 0) {
+        const rxLines = rxRes.rows.map((p: any) =>
+          `- **${p.animal_name}**: ${p.medication_name} ${p.dosage || ''} ${p.frequency || ''} for ${p.duration || 'ongoing'} (${p.status})`
+        );
+        sections.push(`## Prescriptions\n${rxLines.join('\n')}`);
+      }
+
+      // 6. Recent consultations (last 5)
+      const consultRes = await pool.query(
+        `SELECT c.reason, c.status, c.diagnosis, c.created_at, a.name AS animal_name,
+                u.first_name AS vet_first, u.last_name AS vet_last
+         FROM consultations c
+         JOIN animals a ON c.animal_id = a.id
+         LEFT JOIN users u ON c.doctor_id = u.id
+         WHERE c.animal_id = ANY($1)
+         ORDER BY c.created_at DESC LIMIT 5`,
+        [animalIds]
+      );
+      if (consultRes.rows.length > 0) {
+        const cLines = consultRes.rows.map((c: any) =>
+          `- [${new Date(c.created_at).toLocaleDateString()}] **${c.animal_name}** — ${c.reason || 'General'}${c.diagnosis ? ` → Diagnosis: ${c.diagnosis}` : ''} (${c.status})${c.vet_first ? ` with Dr. ${c.vet_first} ${c.vet_last}` : ''}`
+        );
+        sections.push(`## Recent Consultations\n${cLines.join('\n')}`);
+      }
+
+      // 7. Allergies
+      const allergyRes = await pool.query(
+        `SELECT al.allergen, al.severity, al.reaction, a.name AS animal_name
+         FROM allergies al
+         JOIN animals a ON al.animal_id = a.id
+         WHERE al.animal_id = ANY($1)`,
+        [animalIds]
+      );
+      if (allergyRes.rows.length > 0) {
+        const alLines = allergyRes.rows.map((al: any) =>
+          `- **${al.animal_name}**: ${al.allergen} (${al.severity})${al.reaction ? ` — ${al.reaction}` : ''}`
+        );
+        sections.push(`## Known Allergies\n${alLines.join('\n')}`);
+      }
+
+      return sections.join('\n\n');
+    } catch (err: any) {
+      logger.warn('Failed to build user context for AI', { error: err?.message, userId });
+      return '';
+    }
+  }
+
   // ── AI Scan / MRI / X-Ray Analysis ──
   async analyzeScan(imageBase64: string, mimeType: string, context: { species?: string; scanType?: string; bodyPart?: string; notes?: string } = {}) {
     const ai = getAI();
@@ -304,8 +430,11 @@ IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and sho
       [sessionId]
     );
 
+    // Build personalized user context from their animals, records, prescriptions, etc.
+    const userContext = await this.buildUserContext(userId);
+
     // Generate AI response (real GPT or fallback)
-    const aiResponse = await this.generateAiResponse(content, history.rows);
+    const aiResponse = await this.generateAiResponse(content, history.rows, userContext);
 
     // Save AI response
     const aiMsgId = uuidv4();
@@ -420,8 +549,14 @@ IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and sho
   // ── Private: AI response generation ──
   private async generateAiResponse(
     userMessage: string,
-    history: { role: string; content: string }[] = []
+    history: { role: string; content: string }[] = [],
+    userContext: string = ''
   ): Promise<{ content: string; confidence: number; sources: string[]; tokens: number }> {
+
+    // Build personalized system prompt
+    const personalizedPrompt = userContext
+      ? `${SYSTEM_PROMPT}\n\n--- PERSONALIZED CONTEXT (current user's data from the platform) ---\n${userContext}\n---\nUse the above context to personalize your responses. Reference the user's specific animals by name, consider their medical history, current medications, known allergies, and past diagnoses when giving advice. If the user asks about one of their animals, use the relevant medical data. Do not repeat all the context back — use it naturally.`
+      : SYSTEM_PROMPT;
 
     // ── AI path ──
     const ai = getAI();
@@ -429,7 +564,7 @@ IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and sho
       try {
         // Build message list: system + history + new user message
         const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: personalizedPrompt },
           ...history.map(m => ({
             role: m.role as 'user' | 'assistant',
             content: m.content
