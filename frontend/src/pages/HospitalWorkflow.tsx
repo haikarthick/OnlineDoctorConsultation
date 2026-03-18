@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSettings } from '../context/SettingsContext'
 import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import apiService from '../services/api'
+import AnimalSearchPicker from '../components/AnimalSearchPicker'
 
 const STAGES = ['triage', 'examination', 'treatment', 'observation', 'discharge'] as const
 const PRIORITIES = ['emergency', 'urgent', 'high', 'normal', 'low'] as const
@@ -46,6 +47,13 @@ export default function HospitalWorkflow() {
   const [transTarget, setTransTarget] = useState<any>(null)
   const [transStage, setTransStage] = useState('')
   const [transNotes, setTransNotes] = useState('')
+
+  // Animal selections for modals
+  const [checkInAnimal, setCheckInAnimal] = useState<any>(null)
+  const [caseAnimal, setCaseAnimal] = useState<any>(null)
+  const [referralAnimal, setReferralAnimal] = useState<any>(null)
+  // Medical summary for case detail
+  const [caseMedicalSummary, setCaseMedicalSummary] = useState<any>(null)
 
   const [loading, setLoading] = useState(true)
 
@@ -101,11 +109,16 @@ export default function HospitalWorkflow() {
 
   // Actions
   async function handleCheckIn() {
-    if (!hospitalId) return
+    if (!hospitalId || !checkInAnimal) return
     try {
-      await apiService.checkInToQueue(hospitalId, checkInForm)
+      await apiService.checkInToQueue(hospitalId, {
+        ...checkInForm,
+        animalId: checkInAnimal.id,
+        ownerId: checkInAnimal.owner_id,
+      })
       setShowCheckIn(false)
       setCheckInForm({ reason: '', priority: 'normal', animalId: '', ownerId: '' })
+      setCheckInAnimal(null)
       loadQueue()
     } catch { /* empty */ }
   }
@@ -127,11 +140,16 @@ export default function HospitalWorkflow() {
   }
 
   async function handleCreateCase() {
-    if (!hospitalId) return
+    if (!hospitalId || !caseAnimal) return
     try {
-      await apiService.createWorkflowCase(hospitalId, caseForm)
+      await apiService.createWorkflowCase(hospitalId, {
+        ...caseForm,
+        animalId: caseAnimal.id,
+        ownerId: caseAnimal.owner_id,
+      })
       setShowNewCase(false)
       setCaseForm({ chiefComplaint: '', priority: 'normal', animalId: '', ownerId: '' })
+      setCaseAnimal(null)
       loadWorkflow()
     } catch { /* empty */ }
   }
@@ -150,9 +168,13 @@ export default function HospitalWorkflow() {
   async function handleCreateReferral() {
     if (!hospitalId) return
     try {
-      await apiService.createReferral(hospitalId, referralForm)
+      await apiService.createReferral(hospitalId, {
+        ...referralForm,
+        ...(referralAnimal ? { animalId: referralAnimal.id } : {}),
+      })
       setShowNewReferral(false)
       setReferralForm({ toVetId: '', reason: '', specialtyNeeded: '', priority: 'normal', clinicalNotes: '' })
+      setReferralAnimal(null)
       loadReferrals()
     } catch { /* empty */ }
   }
@@ -167,7 +189,17 @@ export default function HospitalWorkflow() {
   async function loadCaseDetail(id: string) {
     try {
       const res = await apiService.getWorkflowCaseDetail(id)
-      setSelectedCase(res.data || null)
+      const caseData = res.data || null
+      setSelectedCase(caseData)
+      // Load medical summary for the linked animal
+      if (caseData?.animal_id) {
+        try {
+          const medRes = await apiService.getAnimalMedicalSummary(caseData.animal_id)
+          setCaseMedicalSummary(medRes.data || null)
+        } catch { setCaseMedicalSummary(null) }
+      } else {
+        setCaseMedicalSummary(null)
+      }
     } catch { /* empty */ }
   }
 
@@ -271,16 +303,26 @@ export default function HospitalWorkflow() {
           {/* Check-in Modal */}
           {showCheckIn && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 420, maxWidth: '90vw' }}>
-                <h3 style={{ marginTop: 0 }}>Check In Patient</h3>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' }}>
+                <h3 style={{ marginTop: 0 }}>🏥 Check In Patient</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <input placeholder="Reason for visit" value={checkInForm.reason} onChange={e => setCheckInForm(f => ({ ...f, reason: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-                  <select value={checkInForm.priority} onChange={e => setCheckInForm(f => ({ ...f, priority: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
-                    {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <button onClick={() => setShowCheckIn(false)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Cancel</button>
-                    <button onClick={handleCheckIn} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Check In</button>
+                  <AnimalSearchPicker selectedAnimal={checkInAnimal} onSelect={setCheckInAnimal} />
+                  <div>
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Reason for Visit</label>
+                    <input placeholder="e.g., Vaccination, Limping, Skin rash..." value={checkInForm.reason} onChange={e => setCheckInForm(f => ({ ...f, reason: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Priority</label>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {PRIORITIES.map(p => (
+                        <button key={p} onClick={() => setCheckInForm(f => ({ ...f, priority: p }))}
+                          style={{ flex: 1, padding: '8px 4px', borderRadius: 8, border: checkInForm.priority === p ? `2px solid ${PRIORITY_COLORS[p]}` : '1px solid #d1d5db', background: checkInForm.priority === p ? PRIORITY_COLORS[p] + '15' : '#fff', fontWeight: 600, cursor: 'pointer', fontSize: 12, color: PRIORITY_COLORS[p], textTransform: 'capitalize' }}>{p}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+                    <button onClick={() => { setShowCheckIn(false); setCheckInAnimal(null) }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Cancel</button>
+                    <button onClick={handleCheckIn} disabled={!checkInAnimal} style={{ padding: '8px 16px', background: checkInAnimal ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Check In</button>
                   </div>
                 </div>
               </div>
@@ -427,6 +469,64 @@ export default function HospitalWorkflow() {
                   </div>
                 )}
 
+                {/* Medical History Panel */}
+                {caseMedicalSummary && (
+                  <div style={{ marginBottom: 16, border: '1px solid #e0e7ff', borderRadius: 10, overflow: 'hidden' }}>
+                    <div style={{ background: '#eef2ff', padding: '10px 14px', fontWeight: 700, fontSize: 14, color: '#3730a3' }}>📋 Medical History — {caseMedicalSummary.animal?.name}</div>
+                    <div style={{ padding: '12px 14px' }}>
+                      {/* Allergies */}
+                      {caseMedicalSummary.allergies?.length > 0 && (
+                        <div style={{ marginBottom: 10 }}>
+                          <div style={{ fontWeight: 600, fontSize: 12, color: '#dc2626', marginBottom: 4 }}>⚠️ ALLERGIES</div>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {caseMedicalSummary.allergies.map((a: any) => (
+                              <span key={a.id} style={{ padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#fef2f2', color: '#991b1b' }}>{a.allergen} ({a.severity})</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {/* Recent records */}
+                      {caseMedicalSummary.recentRecords?.length > 0 && (
+                        <div style={{ marginBottom: 10 }}>
+                          <div style={{ fontWeight: 600, fontSize: 12, color: '#374151', marginBottom: 4 }}>Recent Records</div>
+                          {caseMedicalSummary.recentRecords.slice(0, 5).map((r: any) => (
+                            <div key={r.id} style={{ padding: '6px 10px', borderRadius: 6, background: '#f9fafb', marginBottom: 4, fontSize: 12 }}>
+                              <span style={{ fontWeight: 600 }}>{r.title || r.record_type}</span>
+                              {r.diagnosis && <span style={{ color: '#6b7280' }}> — {r.diagnosis}</span>}
+                              <span style={{ color: '#94a3b8', marginLeft: 8 }}>{formatDateTime(r.created_at)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {/* Active prescriptions */}
+                      {caseMedicalSummary.recentPrescriptions?.length > 0 && (
+                        <div style={{ marginBottom: 10 }}>
+                          <div style={{ fontWeight: 600, fontSize: 12, color: '#374151', marginBottom: 4 }}>💊 Recent Prescriptions</div>
+                          {caseMedicalSummary.recentPrescriptions.slice(0, 3).map((p: any) => (
+                            <div key={p.id} style={{ padding: '4px 10px', fontSize: 12, color: '#4b5563' }}>
+                              {p.diagnosis || 'Prescription'} — Dr. {p.vet_first_name} {p.vet_last_name} <span style={{ color: '#94a3b8' }}>{formatDateTime(p.created_at)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {/* Vaccinations */}
+                      {caseMedicalSummary.recentVaccinations?.length > 0 && (
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 12, color: '#374151', marginBottom: 4 }}>💉 Vaccinations</div>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {caseMedicalSummary.recentVaccinations.map((v: any) => (
+                              <span key={v.id} style={{ padding: '3px 10px', borderRadius: 12, fontSize: 11, background: '#dcfce7', color: '#166534' }}>{v.vaccine_name}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {!caseMedicalSummary.recentRecords?.length && !caseMedicalSummary.allergies?.length && (
+                        <div style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', padding: 12 }}>No medical history available</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Advance Stage */}
                 {selectedCase.status === 'active' && (
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -459,16 +559,26 @@ export default function HospitalWorkflow() {
           {/* Create Case Modal */}
           {showNewCase && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 420, maxWidth: '90vw' }}>
-                <h3 style={{ marginTop: 0 }}>New Clinical Case</h3>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' }}>
+                <h3 style={{ marginTop: 0 }}>🔄 New Clinical Case</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <input placeholder="Chief complaint" value={caseForm.chiefComplaint} onChange={e => setCaseForm(f => ({ ...f, chiefComplaint: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-                  <select value={caseForm.priority} onChange={e => setCaseForm(f => ({ ...f, priority: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
-                    {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <button onClick={() => setShowNewCase(false)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Cancel</button>
-                    <button onClick={handleCreateCase} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Create</button>
+                  <AnimalSearchPicker selectedAnimal={caseAnimal} onSelect={setCaseAnimal} />
+                  <div>
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Chief Complaint</label>
+                    <textarea placeholder="Describe chief complaint or symptoms..." value={caseForm.chiefComplaint} onChange={e => setCaseForm(f => ({ ...f, chiefComplaint: e.target.value }))} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Priority</label>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {PRIORITIES.map(p => (
+                        <button key={p} onClick={() => setCaseForm(f => ({ ...f, priority: p }))}
+                          style={{ flex: 1, padding: '8px 4px', borderRadius: 8, border: caseForm.priority === p ? `2px solid ${PRIORITY_COLORS[p]}` : '1px solid #d1d5db', background: caseForm.priority === p ? PRIORITY_COLORS[p] + '15' : '#fff', fontWeight: 600, cursor: 'pointer', fontSize: 12, color: PRIORITY_COLORS[p], textTransform: 'capitalize' }}>{p}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+                    <button onClick={() => { setShowNewCase(false); setCaseAnimal(null) }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Cancel</button>
+                    <button onClick={handleCreateCase} disabled={!caseAnimal} style={{ padding: '8px 16px', background: caseAnimal ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Create Case</button>
                   </div>
                 </div>
               </div>
@@ -514,18 +624,34 @@ export default function HospitalWorkflow() {
           {/* Create Referral Modal */}
           {showNewReferral && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '90vw' }}>
-                <h3 style={{ marginTop: 0 }}>New Specialist Referral</h3>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 500, maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' }}>
+                <h3 style={{ marginTop: 0 }}>🔀 New Specialist Referral</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <input placeholder="Referring to (Vet ID)" value={referralForm.toVetId} onChange={e => setReferralForm(f => ({ ...f, toVetId: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-                  <input placeholder="Reason for referral" value={referralForm.reason} onChange={e => setReferralForm(f => ({ ...f, reason: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-                  <input placeholder="Specialty needed (e.g., Cardiology, Surgery)" value={referralForm.specialtyNeeded} onChange={e => setReferralForm(f => ({ ...f, specialtyNeeded: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-                  <select value={referralForm.priority} onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
-                    {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                  <textarea placeholder="Clinical notes..." value={referralForm.clinicalNotes} onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))} rows={3} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical' }} />
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <button onClick={() => setShowNewReferral(false)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Cancel</button>
+                  <AnimalSearchPicker selectedAnimal={referralAnimal} onSelect={setReferralAnimal} label="🔍 Patient (optional)" />
+                  <div>
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Referring To (Vet ID)</label>
+                    <input placeholder="Vet user ID" value={referralForm.toVetId} onChange={e => setReferralForm(f => ({ ...f, toVetId: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Reason for Referral</label>
+                    <input placeholder="e.g., Complex orthopedic case" value={referralForm.reason} onChange={e => setReferralForm(f => ({ ...f, reason: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Specialty Needed</label>
+                    <input placeholder="e.g., Cardiology, Orthopedics, Surgery" value={referralForm.specialtyNeeded} onChange={e => setReferralForm(f => ({ ...f, specialtyNeeded: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Priority</label>
+                    <select value={referralForm.priority} onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }}>
+                      {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Clinical Notes</label>
+                    <textarea placeholder="Clinical notes and observations..." value={referralForm.clinicalNotes} onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))} rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+                    <button onClick={() => { setShowNewReferral(false); setReferralAnimal(null) }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Cancel</button>
                     <button onClick={handleCreateReferral} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Create Referral</button>
                   </div>
                 </div>

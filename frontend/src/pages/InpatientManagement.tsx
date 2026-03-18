@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSettings } from '../context/SettingsContext'
 import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import apiService from '../services/api'
+import AnimalSearchPicker from '../components/AnimalSearchPicker'
 
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   admitted: { bg: '#dbeafe', color: '#1d4ed8' },
@@ -11,7 +12,7 @@ const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   discharged: { bg: '#f1f5f9', color: '#64748b' },
   icu: { bg: '#fecaca', color: '#991b1b' },
 }
-const ADMISSION_TYPES = ['general', 'surgery_recovery', 'icu', 'boarding', 'observation', 'quarantine'] as const
+const ADMISSION_TYPES = ['surgery_recovery', 'overnight_observation', 'boarding', 'icu', 'post_treatment', 'quarantine'] as const
 
 export default function InpatientManagement() {
   const { formatDateTime, formatCurrency } = useSettings()
@@ -24,9 +25,13 @@ export default function InpatientManagement() {
   const [showAdmit, setShowAdmit] = useState(false)
   const [showVitals, setShowVitals] = useState<any>(null)
   const [statusFilter, setStatusFilter] = useState('')
+  const [admitAnimal, setAdmitAnimal] = useState<any>(null)
+  const [viewHistory, setViewHistory] = useState<any>(null)
+  const [medicalHistory, setMedicalHistory] = useState<any>(null)
+  const [loadingHistory, setLoadingHistory] = useState(false)
 
   const [admitForm, setAdmitForm] = useState({
-    animalId: '', ownerId: '', admissionType: 'general', roomNumber: '', bedNumber: '',
+    admissionType: 'overnight_observation', roomNumber: '', bedNumber: '',
     careInstructions: '', specialNeeds: '', estimatedDischarge: '', dailyRate: 0,
   })
   const [vitalsForm, setVitalsForm] = useState({ temperature: '', heartRate: '', weight: '', notes: '' })
@@ -58,11 +63,16 @@ export default function InpatientManagement() {
   useEffect(() => { loadData() }, [loadData])
 
   async function handleAdmit() {
-    if (!hospitalId) return
+    if (!hospitalId || !admitAnimal) return
     try {
-      await apiService.admitPatient(hospitalId, admitForm)
+      await apiService.admitPatient(hospitalId, {
+        ...admitForm,
+        animalId: admitAnimal.id,
+        ownerId: admitAnimal.owner_id,
+      })
       setShowAdmit(false)
-      setAdmitForm({ animalId: '', ownerId: '', admissionType: 'general', roomNumber: '', bedNumber: '', careInstructions: '', specialNeeds: '', estimatedDischarge: '', dailyRate: 0 })
+      setAdmitAnimal(null)
+      setAdmitForm({ admissionType: 'overnight_observation', roomNumber: '', bedNumber: '', careInstructions: '', specialNeeds: '', estimatedDischarge: '', dailyRate: 0 })
       loadData()
     } catch { /* empty */ }
   }
@@ -86,6 +96,18 @@ export default function InpatientManagement() {
       setVitalsForm({ temperature: '', heartRate: '', weight: '', notes: '' })
       loadData()
     } catch { /* empty */ }
+  }
+
+  async function loadMedicalHistory(patient: any) {
+    if (!patient.animal_id) return
+    setViewHistory(patient)
+    setLoadingHistory(true)
+    setMedicalHistory(null)
+    try {
+      const res = await apiService.getAnimalMedicalSummary(patient.animal_id)
+      setMedicalHistory(res.data || null)
+    } catch { /* empty */ }
+    setLoadingHistory(false)
   }
 
   return (
@@ -178,6 +200,7 @@ export default function InpatientManagement() {
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 8 }}>
                   <button onClick={() => setShowVitals(p)} style={{ padding: '6px 10px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>📊 Vitals</button>
+                  <button onClick={() => loadMedicalHistory(p)} style={{ padding: '6px 10px', background: '#0891b2', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>📋 History</button>
                   {p.status === 'admitted' && <button onClick={() => handleStatusChange(p.id, 'in_treatment')} style={{ padding: '6px 10px', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Start Treatment</button>}
                   {p.status === 'in_treatment' && <button onClick={() => handleStatusChange(p.id, 'recovering')} style={{ padding: '6px 10px', background: '#059669', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Recovering</button>}
                   {p.status === 'recovering' && <button onClick={() => handleStatusChange(p.id, 'ready_to_discharge')} style={{ padding: '6px 10px', background: '#0ea5e9', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Ready to Discharge</button>}
@@ -192,25 +215,68 @@ export default function InpatientManagement() {
       {/* Admit Modal */}
       {showAdmit && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 500, maxWidth: '95vw', maxHeight: '85vh', overflowY: 'auto' }}>
-            <h3 style={{ marginTop: 0 }}>Admit Patient</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <select value={admitForm.admissionType} onChange={e => setAdmitForm(f => ({ ...f, admissionType: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
-                {ADMISSION_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
-              </select>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <input placeholder="Room Number" value={admitForm.roomNumber} onChange={e => setAdmitForm(f => ({ ...f, roomNumber: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-                <input placeholder="Bed Number" value={admitForm.bedNumber} onChange={e => setAdmitForm(f => ({ ...f, bedNumber: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
+          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 520, maxWidth: '95vw', maxHeight: '85vh', overflowY: 'auto' }}>
+            <h3 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 8 }}>🛏️ Admit Patient</h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Animal Search */}
+              <AnimalSearchPicker selectedAnimal={admitAnimal} onSelect={setAdmitAnimal} label="🔍 Search Patient to Admit" />
+
+              {/* Admission Type */}
+              <div>
+                <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Admission Type</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {ADMISSION_TYPES.map(t => (
+                    <button key={t} onClick={() => setAdmitForm(f => ({ ...f, admissionType: t }))}
+                      style={{ padding: '6px 12px', borderRadius: 8, border: admitForm.admissionType === t ? '2px solid #2563eb' : '1px solid #d1d5db', background: admitForm.admissionType === t ? '#eff6ff' : '#fff', color: admitForm.admissionType === t ? '#2563eb' : '#475569', cursor: 'pointer', fontSize: 12, fontWeight: admitForm.admissionType === t ? 700 : 400, textTransform: 'capitalize' }}>
+                      {t.replace(/_/g, ' ')}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <textarea placeholder="Care instructions..." value={admitForm.careInstructions} onChange={e => setAdmitForm(f => ({ ...f, careInstructions: e.target.value }))} rows={2} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical' }} />
-              <textarea placeholder="Special needs..." value={admitForm.specialNeeds} onChange={e => setAdmitForm(f => ({ ...f, specialNeeds: e.target.value }))} rows={2} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical' }} />
+
+              {/* Room & Bed */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <input type="datetime-local" placeholder="Est. Discharge" value={admitForm.estimatedDischarge} onChange={e => setAdmitForm(f => ({ ...f, estimatedDischarge: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-                <input type="number" placeholder="Daily Rate" value={admitForm.dailyRate || ''} onChange={e => setAdmitForm(f => ({ ...f, dailyRate: parseFloat(e.target.value) || 0 }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
+                <div>
+                  <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Room Number</label>
+                  <input placeholder="e.g. R101" value={admitForm.roomNumber} onChange={e => setAdmitForm(f => ({ ...f, roomNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                </div>
+                <div>
+                  <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Bed Number</label>
+                  <input placeholder="e.g. B1" value={admitForm.bedNumber} onChange={e => setAdmitForm(f => ({ ...f, bedNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => setShowAdmit(false)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Cancel</button>
-                <button onClick={handleAdmit} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Admit</button>
+
+              {/* Care Instructions */}
+              <div>
+                <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Care Instructions</label>
+                <textarea placeholder="Specific care instructions for the patient..." value={admitForm.careInstructions} onChange={e => setAdmitForm(f => ({ ...f, careInstructions: e.target.value }))} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }} />
+              </div>
+
+              {/* Special Needs */}
+              <div>
+                <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Special Needs</label>
+                <textarea placeholder="Allergies, dietary restrictions, behavioral notes..." value={admitForm.specialNeeds} onChange={e => setAdmitForm(f => ({ ...f, specialNeeds: e.target.value }))} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }} />
+              </div>
+
+              {/* Discharge & Rate */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div>
+                  <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Est. Discharge</label>
+                  <input type="datetime-local" value={admitForm.estimatedDischarge} onChange={e => setAdmitForm(f => ({ ...f, estimatedDischarge: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                </div>
+                <div>
+                  <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>Daily Rate ($)</label>
+                  <input type="number" placeholder="0.00" value={admitForm.dailyRate || ''} onChange={e => setAdmitForm(f => ({ ...f, dailyRate: parseFloat(e.target.value) || 0 }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
+                <button onClick={() => { setShowAdmit(false); setAdmitAnimal(null) }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>Cancel</button>
+                <button onClick={handleAdmit} disabled={!admitAnimal}
+                  style={{ padding: '8px 16px', background: admitAnimal ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: admitAnimal ? 'pointer' : 'not-allowed', fontWeight: 600 }}>
+                  Admit Patient
+                </button>
               </div>
             </div>
           </div>
@@ -232,6 +298,96 @@ export default function InpatientManagement() {
                 <button onClick={handleVitalsSubmit} style={{ padding: '8px 16px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Save Vitals</button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Medical History Modal */}
+      {viewHistory && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
+          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 560, maxWidth: '95vw', maxHeight: '85vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>📋 Medical History — {viewHistory.animal_name}</h3>
+              <button onClick={() => { setViewHistory(null); setMedicalHistory(null) }} style={{ background: '#f1f5f9', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontSize: 16 }}>✕</button>
+            </div>
+
+            {loadingHistory && <div style={{ textAlign: 'center', padding: 40 }}><div className="spinner" /></div>}
+
+            {medicalHistory && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Animal Info */}
+                {medicalHistory.animal && (
+                  <div style={{ background: '#f0f9ff', borderRadius: 10, padding: '12px 16px' }}>
+                    <div style={{ fontWeight: 700, fontSize: 16, color: '#0c4a6e' }}>🐾 {medicalHistory.animal.name}</div>
+                    <div style={{ fontSize: 13, color: '#0369a1' }}>{medicalHistory.animal.species}{medicalHistory.animal.breed ? ` — ${medicalHistory.animal.breed}` : ''}{medicalHistory.animal.weight ? ` • ${medicalHistory.animal.weight}kg` : ''}{medicalHistory.animal.age_years ? ` • ${medicalHistory.animal.age_years}y` : ''}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Owner: {medicalHistory.animal.owner_first_name} {medicalHistory.animal.owner_last_name}</div>
+                  </div>
+                )}
+
+                {/* Allergies */}
+                {medicalHistory.allergies?.length > 0 && (
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6, color: '#dc2626' }}>⚠️ Allergies</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {medicalHistory.allergies.map((a: any, i: number) => (
+                        <span key={i} style={{ background: '#fef2f2', color: '#dc2626', padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600, border: '1px solid #fecaca' }}>
+                          {a.allergen} {a.severity && `(${a.severity})`}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recent Medical Records */}
+                {medicalHistory.records?.length > 0 && (
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>🏥 Recent Medical Records</div>
+                    {medicalHistory.records.slice(0, 5).map((r: any, i: number) => (
+                      <div key={i} style={{ background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginBottom: 6, fontSize: 13 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ fontWeight: 600 }}>{r.record_type?.replace(/_/g, ' ')}</span>
+                          <span style={{ color: '#94a3b8', fontSize: 11 }}>{r.visit_date ? formatDateTime(r.visit_date) : ''}</span>
+                        </div>
+                        {r.diagnosis && <div style={{ color: '#475569', marginTop: 2 }}>Dx: {r.diagnosis}</div>}
+                        {r.treatment && <div style={{ color: '#059669', marginTop: 1 }}>Tx: {r.treatment}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Prescriptions */}
+                {medicalHistory.prescriptions?.length > 0 && (
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>💊 Recent Prescriptions</div>
+                    {medicalHistory.prescriptions.slice(0, 5).map((rx: any, i: number) => (
+                      <div key={i} style={{ background: '#faf5ff', borderRadius: 8, padding: '8px 12px', marginBottom: 6, fontSize: 13 }}>
+                        <span style={{ fontWeight: 600, color: '#7c3aed' }}>{rx.medication_name}</span>
+                        {rx.dosage && <span style={{ color: '#64748b' }}> — {rx.dosage}</span>}
+                        {rx.status && <span style={{ marginLeft: 8, fontSize: 11, padding: '2px 6px', borderRadius: 8, background: rx.status === 'active' ? '#dcfce7' : '#f1f5f9', color: rx.status === 'active' ? '#166534' : '#64748b' }}>{rx.status}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Vaccinations */}
+                {medicalHistory.vaccinations?.length > 0 && (
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>💉 Vaccinations</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {medicalHistory.vaccinations.map((v: any, i: number) => (
+                        <span key={i} style={{ background: '#ecfdf5', color: '#059669', padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600, border: '1px solid #a7f3d0' }}>
+                          {v.vaccine_name} {v.vaccination_date ? `(${new Date(v.vaccination_date).toLocaleDateString()})` : ''}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!medicalHistory.records?.length && !medicalHistory.prescriptions?.length && !medicalHistory.vaccinations?.length && !medicalHistory.allergies?.length && (
+                  <p style={{ textAlign: 'center', color: '#94a3b8', padding: 20 }}>No medical history found for this patient</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -6,6 +6,63 @@ const WORKFLOW_STAGES = ['triage', 'examination', 'treatment', 'observation', 'd
 
 class StaffWorkflowService {
 
+  // ═══════════════════ ANIMAL SEARCH (for workflow integration) ═══════════════════
+
+  async searchAnimals(query: string, limit = 15) {
+    const result = await database.query(`
+      SELECT a.id, a.name, a.species, a.breed, a.weight, a.date_of_birth,
+        a.gender, a.microchip_number, a.avatar_url,
+        u.id AS owner_id, u.first_name AS owner_first_name, u.last_name AS owner_last_name,
+        u.phone AS owner_phone, u.email AS owner_email
+      FROM animals a
+      JOIN users u ON u.id = a.owner_id
+      WHERE (a.name ILIKE $1 OR u.first_name ILIKE $1 OR u.last_name ILIKE $1
+        OR a.microchip_number ILIKE $1 OR a.species ILIKE $1)
+      ORDER BY a.name ASC
+      LIMIT $2
+    `, [`%${query}%`, limit]);
+    return result.rows;
+  }
+
+  async getAnimalMedicalSummary(animalId: string) {
+    const [animal, records, prescriptions, vaccinations, allergies] = await Promise.all([
+      database.query(`
+        SELECT a.*, u.first_name AS owner_first_name, u.last_name AS owner_last_name,
+          u.phone AS owner_phone, u.email AS owner_email
+        FROM animals a JOIN users u ON u.id = a.owner_id WHERE a.id = $1
+      `, [animalId]),
+      database.query(`
+        SELECT mr.id, mr.record_type, mr.title, mr.diagnosis, mr.treatment,
+          mr.notes, mr.created_at, u.first_name AS vet_first_name, u.last_name AS vet_last_name
+        FROM medical_records mr
+        LEFT JOIN users u ON u.id = mr.veterinarian_id
+        WHERE mr.animal_id = $1 ORDER BY mr.created_at DESC LIMIT 10
+      `, [animalId]),
+      database.query(`
+        SELECT p.id, p.diagnosis, p.instructions, p.created_at, p.valid_until,
+          u.first_name AS vet_first_name, u.last_name AS vet_last_name
+        FROM prescriptions p
+        LEFT JOIN users u ON u.id = p.veterinarian_id
+        WHERE p.animal_id = $1 ORDER BY p.created_at DESC LIMIT 5
+      `, [animalId]),
+      database.query(`
+        SELECT id, vaccine_name, date_administered, next_due_date, batch_number
+        FROM vaccination_records WHERE animal_id = $1 ORDER BY date_administered DESC LIMIT 5
+      `, [animalId]),
+      database.query(`
+        SELECT id, allergen, severity, reaction, diagnosed_date
+        FROM allergy_records WHERE animal_id = $1 ORDER BY diagnosed_date DESC
+      `, [animalId]),
+    ]);
+    return {
+      animal: animal.rows[0] || null,
+      recentRecords: records.rows,
+      recentPrescriptions: prescriptions.rows,
+      recentVaccinations: vaccinations.rows,
+      allergies: allergies.rows,
+    };
+  }
+
   // ═══════════════════ STAFF POSITIONS ═══════════════════
 
   async listStaffPositions(hospitalId: string) {
@@ -240,6 +297,28 @@ class StaffWorkflowService {
       VALUES ($1, $2, $3, $4, $5, $6)
     `, [uuidv4(), caseId, fromStage, toStage, userId, notes || null]);
 
+    // Auto-create medical record on discharge if animal is linked
+    if (toStage === 'discharge' && result.rows[0]?.animal_id) {
+      const c = result.rows[0];
+      try {
+        const contentParts = [
+          c.chief_complaint ? `Chief Complaint: ${c.chief_complaint}` : null,
+          c.diagnosis ? `Diagnosis: ${c.diagnosis}` : null,
+          c.treatment_plan ? `Treatment: ${c.treatment_plan}` : null,
+          c.discharge_summary || notes ? `Notes: ${c.discharge_summary || notes}` : null,
+        ].filter(Boolean).join('\n');
+        await database.query(`
+          INSERT INTO medical_records (id, user_id, animal_id, veterinarian_id, record_type, title, content, created_at)
+          VALUES ($1, $2, $3, $4, 'follow_up', $5, $6, NOW())
+        `, [uuidv4(), c.owner_id || userId, c.animal_id, c.assigned_vet_id || userId,
+            `Workflow Discharge: ${c.chief_complaint || 'Clinical case'}`,
+            contentParts || 'Clinical workflow discharge']);
+        logger.info('Medical record auto-created from workflow discharge', { caseId, animalId: c.animal_id });
+      } catch (err: any) {
+        logger.warn('Failed to auto-create medical record on discharge', { caseId, error: err.message });
+      }
+    }
+
     logger.info('Workflow stage transition', { caseId, fromStage, toStage, userId });
     return result.rows[0];
   }
@@ -451,7 +530,30 @@ class StaffWorkflowService {
     sql += ` WHERE id = $${idx++} RETURNING *`;
     params.push(admissionId);
     const result = await database.query(sql, params);
-    return result.rows[0] || null;
+    const admission = result.rows[0];
+
+    // Auto-create medical record on inpatient discharge
+    if (status === 'discharged' && admission?.animal_id) {
+      try {
+        const contentParts = [
+          `Admission Type: ${admission.admission_type?.replace(/_/g, ' ') || 'N/A'}`,
+          admission.care_instructions ? `Care Instructions: ${admission.care_instructions}` : null,
+          notes ? `Discharge Notes: ${notes}` : null,
+          admission.discharge_notes ? `Notes: ${admission.discharge_notes}` : null,
+        ].filter(Boolean).join('\n');
+        await database.query(`
+          INSERT INTO medical_records (id, user_id, animal_id, veterinarian_id, record_type, title, content, created_at)
+          VALUES ($1, $2, $3, $4, 'other', $5, $6, NOW())
+        `, [uuidv4(), admission.owner_id || userId, admission.animal_id, userId || admission.admitted_by,
+            `Inpatient Discharge: ${admission.admission_type?.replace(/_/g, ' ') || 'Admission'}`,
+            contentParts || 'Inpatient discharge record']);
+        logger.info('Medical record auto-created from inpatient discharge', { admissionId, animalId: admission.animal_id });
+      } catch (err: any) {
+        logger.warn('Failed to auto-create medical record on inpatient discharge', { admissionId, error: err.message });
+      }
+    }
+
+    return admission || null;
   }
 
   async addVitalsLog(admissionId: string, vitals: { temperature?: number; heartRate?: number; weight?: number; notes?: string; recordedBy: string }) {

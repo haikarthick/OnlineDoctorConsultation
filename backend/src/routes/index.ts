@@ -468,6 +468,9 @@ router.patch('/workforce/shifts/:id/check-out', authMiddleware, asyncHandler((re
 router.delete('/workforce/shifts/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.deleteShift(req, res)));
 
 // ─── Staff & Workflow Management ─────────────────────
+// Animal Search & Medical Summary (for workflow integration)
+router.get('/workflow/animals/search', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.searchAnimals(req, res)));
+router.get('/workflow/animals/:animalId/medical-summary', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalMedicalSummary(req, res)));
 // Staff Positions
 router.get('/hospitals/:hospitalId/staff', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listStaffPositions(req, res)));
 router.post('/hospitals/:hospitalId/staff', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.addStaffPosition(req, res)));

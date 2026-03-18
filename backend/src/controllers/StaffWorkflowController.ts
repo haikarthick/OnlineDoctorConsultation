@@ -4,6 +4,25 @@ import logger from '../utils/logger';
 
 class StaffWorkflowController {
 
+  // ═══════════════════ ANIMAL SEARCH (for workflow) ═══════════════════
+
+  async searchAnimals(req: Request, res: Response) {
+    try {
+      const query = (req.query.q as string) || '';
+      if (query.length < 2) return res.json({ data: [] });
+      const data = await staffWorkflowService.searchAnimals(query);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getAnimalMedicalSummary(req: Request, res: Response) {
+    try {
+      const data = await staffWorkflowService.getAnimalMedicalSummary(req.params.animalId);
+      if (!data.animal) return res.status(404).json({ error: { message: 'Animal not found' } });
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
   // ═══════════════════ STAFF POSITIONS ═══════════════════
 
   async listStaffPositions(req: Request, res: Response) {
