@@ -49,12 +49,12 @@ const VetHospitalManage: React.FC = () => {
   const [showAddDoctor, setShowAddDoctor] = useState(false)
   const [editDoctor, setEditDoctor] = useState<HospitalDoctor | null>(null)
   const [doctorForm, setDoctorForm] = useState({ doctorId: '', hospitalRole: 'staff', employmentType: 'full_time', departmentId: '', title: '', consultationFee: '', isPrimaryHospital: false })
-  // Vet search autocomplete
+  // Vet search / browse
   const [vetSearch, setVetSearch] = useState('')
-  const [vetResults, setVetResults] = useState<any[]>([])
+  const [allVets, setAllVets] = useState<any[]>([])
   const [vetSearchLoading, setVetSearchLoading] = useState(false)
   const [selectedVetName, setSelectedVetName] = useState('')
-  const [showVetDropdown, setShowVetDropdown] = useState(false)
+  const [specFilter, setSpecFilter] = useState('')
   // Per-modal feedback message (shared — only one modal open at a time)
   const [modalMsg, setModalMsg] = useState<{ text: string; isError: boolean } | null>(null)
 
@@ -234,26 +234,39 @@ const VetHospitalManage: React.FC = () => {
     } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || 'Review failed', true) }
   }
 
-  // Debounced vet search for Add Doctor autocomplete
+  // Load all vets when Add Doctor modal opens
   useEffect(() => {
-    if (!vetSearch.trim() || vetSearch.length < 2) { setVetResults([]); setShowVetDropdown(false); return }
+    if (!showAddDoctor || editDoctor) return
     setVetSearchLoading(true)
-    const t = setTimeout(async () => {
+    ;(async () => {
       try {
-        const res = await apiService.listVets({ search: vetSearch, limit: 5 })
+        const res = await apiService.listVets({ limit: 100 })
         const vets = res?.data?.vets || res?.vets || (Array.isArray(res?.data) ? res.data : [])
-        setVetResults(vets)
-        setShowVetDropdown(vets.length > 0)
-      } catch { setVetResults([]); setShowVetDropdown(false) }
+        setAllVets(vets)
+      } catch { setAllVets([]) }
       finally { setVetSearchLoading(false) }
-    }, 400)
-    return () => clearTimeout(t)
-  }, [vetSearch])
+    })()
+  }, [showAddDoctor, editDoctor])
+
+  // Filtered vet list (exclude already-added + search + specialization filter)
+  const existingDoctorIds = new Set(doctors.map(d => d.doctorId))
+  const filteredVets = allVets.filter(v => {
+    if (existingDoctorIds.has(v.userId)) return false
+    const q = vetSearch.toLowerCase().trim()
+    if (q) {
+      const match = `${v.firstName || ''} ${v.lastName || ''} ${v.email || ''}`.toLowerCase().includes(q)
+        || v.specializations?.some((s: string) => s.toLowerCase().includes(q))
+      if (!match) return false
+    }
+    if (specFilter && !v.specializations?.includes(specFilter)) return false
+    return true
+  })
+  const allSpecializations = [...new Set(allVets.flatMap((v: any) => v.specializations || []))].sort() as string[]
 
   // ── Doctor ops ──────────────────────────────────────────────────────────
   const closeDocModal = () => {
     setShowAddDoctor(false); setEditDoctor(null)
-    setVetSearch(''); setVetResults([]); setShowVetDropdown(false)
+    setVetSearch(''); setAllVets([]); setSpecFilter('')
     setSelectedVetName(''); setDoctorForm({ doctorId: '', hospitalRole: 'staff', employmentType: 'full_time', departmentId: '', title: '', consultationFee: '', isPrimaryHospital: false })
     setModalMsg(null)
   }
@@ -1050,14 +1063,13 @@ const VetHospitalManage: React.FC = () => {
             <form onSubmit={handleDoctorSubmit} className="vh-form">
               {modalMsg && <div className={`modal-alert ${modalMsg.isError ? 'error' : 'success'}`}>{modalMsg.text}</div>}
               {!editDoctor && (
-                <div className="form-group" style={{ position: 'relative' }}>
-                  <label>Search Veterinarian *</label>
+                <div className="form-group">
+                  <label>Select Veterinarian *</label>
                   {selectedVetName ? (
                     <div className="vet-selected-chip">
                       <span>👨‍⚕️ {selectedVetName}</span>
                       <button type="button" className="vet-chip-clear" onClick={() => {
                         setSelectedVetName(''); setDoctorForm(f => ({ ...f, doctorId: '' }))
-                        setVetSearch(''); setVetResults([]); setShowVetDropdown(false)
                       }}>✕</button>
                     </div>
                   ) : (
@@ -1065,32 +1077,61 @@ const VetHospitalManage: React.FC = () => {
                       <input
                         value={vetSearch}
                         onChange={e => setVetSearch(e.target.value)}
-                        placeholder="Type name or email to search..."
+                        placeholder="Search by name, email, or specialization..."
                         autoComplete="off"
-                        onFocus={() => vetResults.length > 0 && setShowVetDropdown(true)}
+                        style={{ marginBottom: 6 }}
                       />
-                      {vetSearchLoading && <div className="vet-search-spinner">Searching…</div>}
-                      {showVetDropdown && vetResults.length > 0 && (
-                        <ul className="vet-search-dropdown">
-                          {vetResults.map((v: any) => (
-                            <li key={v.userId} onMouseDown={() => {
+                      {allSpecializations.length > 0 && (
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
+                          <button type="button" onClick={() => setSpecFilter('')}
+                            style={{ padding: '3px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: specFilter === '' ? 700 : 400, background: specFilter === '' ? '#2563eb' : '#e2e8f0', color: specFilter === '' ? '#fff' : '#475569' }}>All</button>
+                          {allSpecializations.slice(0, 8).map(s => (
+                            <button type="button" key={s} onClick={() => setSpecFilter(specFilter === s ? '' : s)}
+                              style={{ padding: '3px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: specFilter === s ? 700 : 400, background: specFilter === s ? '#2563eb' : '#e2e8f0', color: specFilter === s ? '#fff' : '#475569' }}>{s}</button>
+                          ))}
+                        </div>
+                      )}
+                      <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #e5e7eb', borderRadius: 10, background: '#fafafa' }}>
+                        {vetSearchLoading && <div style={{ padding: 16, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>Loading veterinarians…</div>}
+                        {!vetSearchLoading && filteredVets.length === 0 && (
+                          <div style={{ padding: 16, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>
+                            {allVets.length === 0 ? 'No veterinarians registered in the system' : 'No matching veterinarians'}
+                          </div>
+                        )}
+                        {!vetSearchLoading && filteredVets.map((v: any) => (
+                          <div key={v.userId}
+                            onClick={() => {
                               setDoctorForm(f => ({ ...f, doctorId: v.userId }))
                               setSelectedVetName(`${v.firstName || ''} ${v.lastName || ''}`.trim() + (v.email ? ` (${v.email})` : ''))
-                              setVetSearch(''); setVetResults([]); setShowVetDropdown(false)
-                            }}>
-                              <strong>{v.firstName} {v.lastName}</strong>
-                              <span>{v.email}</span>
-                              {v.specializations?.length > 0 && <em>{v.specializations.slice(0,2).join(', ')}</em>}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      {!vetSearchLoading && vetSearch.length >= 2 && vetResults.length === 0 && !showVetDropdown && (
-                        <div className="vet-search-empty">No veterinarians found</div>
+                            }}
+                            style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background .1s' }}
+                            onMouseEnter={e => (e.currentTarget.style.background = '#eff6ff')}
+                            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: 600, fontSize: 14 }}>👨‍⚕️ {v.firstName} {v.lastName}</div>
+                              <div style={{ fontSize: 12, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.email}</div>
+                              {v.specializations?.length > 0 && (
+                                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 }}>
+                                  {v.specializations.slice(0, 3).map((s: string) => (
+                                    <span key={s} style={{ background: '#dbeafe', color: '#1d4ed8', padding: '1px 6px', borderRadius: 8, fontSize: 10, fontWeight: 600 }}>{s}</span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ textAlign: 'right', marginLeft: 12, flexShrink: 0 }}>
+                              {v.rating > 0 && <div style={{ fontSize: 12, fontWeight: 600, color: '#f59e0b' }}>⭐ {Number(v.rating).toFixed(1)}</div>}
+                              {v.yearsOfExperience > 0 && <div style={{ fontSize: 11, color: '#94a3b8' }}>{v.yearsOfExperience} yrs exp</div>}
+                              <div style={{ fontSize: 10, color: v.isAvailable ? '#059669' : '#dc2626', fontWeight: 600 }}>{v.isAvailable ? '● Available' : '○ Unavailable'}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {!vetSearchLoading && allVets.length > 0 && (
+                        <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>Showing {filteredVets.length} of {allVets.length} veterinarians{existingDoctorIds.size > 0 ? ` (${existingDoctorIds.size} already added)` : ''}</div>
                       )}
                     </>
                   )}
-                  {/* hidden required input so form validation fires when no vet selected */}
                   <input type="hidden" required value={doctorForm.doctorId} />
                 </div>
               )}
