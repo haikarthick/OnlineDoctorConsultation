@@ -765,7 +765,7 @@ const VetHospitalManage: React.FC = () => {
                             className="doc-expiry-input"
                             value={expiryDates[dt] || ''}
                             min={new Date().toISOString().split('T')[0]}
-                            onChange={e => setExpiryDates(p => ({ ...p, [dt]: e.target.value }))}
+                            onChange={e => { setExpiryDates(p => ({ ...p, [dt]: e.target.value })); setDocError(p => ({ ...p, [dt]: '' })) }}
                           />
                         </div>
                       )}
@@ -780,6 +780,7 @@ const VetHospitalManage: React.FC = () => {
                           const expiryDate = needsExpiry ? expiryDates[dt] || undefined : undefined
                           if (needsExpiry && !expiryDate) {
                             setDocError(p => ({ ...p, [dt]: 'Please enter the expiry date before uploading' }))
+                            if (fileInputRefs.current[dt]) fileInputRefs.current[dt]!.value = ''
                             return
                           }
                           await handleDocUpload(dt, file, expiryDate)
