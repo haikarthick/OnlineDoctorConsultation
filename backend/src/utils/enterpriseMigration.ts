@@ -316,21 +316,27 @@ CREATE INDEX IF NOT EXISTS idx_bookings_group_id ON bookings(group_id);
 
 async function runMigration() {
   console.log('Running enterprise schema migration...');
+  const client = await pool.connect();
   try {
-    await pool.query(migration);
+    // Align search_path with the schema used by render-start.sh / init.sql
+    const schema = process.env.DB_SCHEMA || 'public';
+    await client.query(`SET search_path TO ${schema}, public`);
+
+    await client.query(migration);
     console.log('✅ Enterprise migration completed successfully');
 
     // Verify tables
-    const tables = await pool.query(
+    const tables = await client.query(
       `SELECT table_name FROM information_schema.tables
-       WHERE table_schema = 'public' AND table_name IN
+       WHERE table_schema = $1 AND table_name IN
        ('enterprises','enterprise_members','animal_groups','locations','movement_records','treatment_campaigns')
-       ORDER BY table_name`
+       ORDER BY table_name`,
+      [schema]
     );
     console.log('Created tables:', tables.rows.map((r: any) => r.table_name).join(', '));
 
     // Verify animal columns
-    const cols = await pool.query(
+    const cols = await client.query(
       `SELECT column_name FROM information_schema.columns
        WHERE table_name = 'animals' AND column_name IN ('enterprise_id','group_id','current_location_id','status','dam_id','sire_id')
        ORDER BY column_name`
@@ -340,6 +346,7 @@ async function runMigration() {
     console.error('Migration failed:', error.message);
     process.exit(1);
   } finally {
+    client.release();
     await pool.end();
   }
 }

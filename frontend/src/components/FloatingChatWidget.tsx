@@ -55,35 +55,60 @@ const FloatingChatWidget: React.FC = () => {
       ]
     : DEFAULT_PROMPTS
 
+  // Helper: extract readable error from API response
+  const getApiError = (err: any): string => {
+    const data = err?.response?.data
+    return data?.error?.message || data?.message || err?.message || 'Unknown error'
+  }
+
+  // Create a brand-new session via the API
+  const createNewSession = async (): Promise<string | null> => {
+    const res = await apiService.createChatSession({
+      title: `AI Buddy ${new Date().toLocaleDateString()}`,
+      contextType: 'general',
+    })
+    const id = res.data?.id
+    if (!id) throw new Error('Empty session response')
+    setSessionId(id)
+    return id
+  }
+
   // Ensure a session exists when panel opens
   const ensureSession = async (): Promise<string | null> => {
     if (sessionId) return sessionId
 
     setInitializing(true)
+    setError('')
+
+    // Step 1: try to reuse an existing session
     try {
-      // Try to reuse the most recent session
       const listRes = await apiService.listChatSessions()
       const sessions = listRes.data?.items || []
       if (sessions.length > 0) {
         const existing = sessions[0]
         setSessionId(existing.id)
-        // Load existing messages
-        const msgRes = await apiService.listChatMessages(existing.id)
-        setMessages(msgRes.data || [])
+        try {
+          const msgRes = await apiService.listChatMessages(existing.id)
+          setMessages(msgRes.data || [])
+        } catch {
+          // Could not load messages — still use the session
+        }
         setInitializing(false)
         return existing.id
       }
+    } catch (listErr) {
+      // listSessions failed — fall through to create a new session
+      console.warn('[AI Chat] listSessions failed, will create new session:', getApiError(listErr))
+    }
 
-      // Create a new session
-      const res = await apiService.createChatSession({
-        title: `AI Buddy ${new Date().toLocaleDateString()}`,
-        contextType: 'general',
-      })
-      setSessionId(res.data.id)
+    // Step 2: create a new session
+    try {
+      const id = await createNewSession()
       setInitializing(false)
-      return res.data.id
-    } catch {
-      setError('Could not start chat session')
+      return id
+    } catch (createErr) {
+      console.error('[AI Chat] createSession failed:', getApiError(createErr))
+      setError('Could not start chat session. Tap 🔄 to retry.')
       setInitializing(false)
       return null
     }
@@ -129,7 +154,8 @@ const FloatingChatWidget: React.FC = () => {
         userMessage,
         aiMessage,
       ])
-    } catch {
+    } catch (sendErr) {
+      console.error('[AI Chat] sendMessage failed:', getApiError(sendErr))
       setError('Failed to send message')
       setMessages(prev => prev.filter(m => m.id !== tempMsg.id))
     }
@@ -141,13 +167,10 @@ const FloatingChatWidget: React.FC = () => {
     setMessages([])
     setError('')
     try {
-      const res = await apiService.createChatSession({
-        title: `AI Buddy ${new Date().toLocaleDateString()}`,
-        contextType: 'general',
-      })
-      setSessionId(res.data.id)
-    } catch {
-      setError('Could not create new session')
+      await createNewSession()
+    } catch (err) {
+      console.error('[AI Chat] new session failed:', getApiError(err))
+      setError('Could not create new session. Tap 🔄 to retry.')
     }
   }
 
@@ -183,6 +206,7 @@ const FloatingChatWidget: React.FC = () => {
       {error && (
         <div className="chat-widget-error">
           {error}
+          <button onClick={() => { setError(''); ensureSession() }} title="Retry">🔄</button>
           <button onClick={() => setError('')}>✕</button>
         </div>
       )}

@@ -33,7 +33,7 @@ class Tier4Controller {
       const userId = (req as any).userId;
       const data = await aiCopilotService.listSessions(userId, req.query);
       res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) { logger.error('listChatSessions failed', { error: err.message, userId: (req as any).userId }); res.status(500).json({ error: { message: err.message } }); }
   }
 
   async createChatSession(req: Request, res: Response) {
@@ -41,7 +41,7 @@ class Tier4Controller {
       const userId = (req as any).userId;
       const data = await aiCopilotService.createSession({ ...req.body, userId });
       res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) { logger.error('createChatSession failed', { error: err.message, userId: (req as any).userId, body: req.body }); res.status(500).json({ error: { message: err.message } }); }
   }
 
   async getChatSession(req: Request, res: Response) {
@@ -71,7 +71,7 @@ class Tier4Controller {
       const userId = (req as any).userId;
       const data = await aiCopilotService.sendMessage(req.params.sessionId, userId, req.body.content);
       res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) { logger.error('sendChatMessage failed', { error: err.message, sessionId: req.params.sessionId }); res.status(500).json({ error: { message: err.message } }); }
   }
 
   async checkDrugInteractions(req: Request, res: Response) {

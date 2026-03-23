@@ -30,6 +30,9 @@ const pool = new Pool(
 async function runTier3Migration() {
   const client = await pool.connect();
   try {
+    const schema = process.env.DB_SCHEMA || 'public';
+    await client.query(`SET search_path TO ${schema}, public`);
+
     await client.query('BEGIN');
 
     // ═══════════════════════════════════════════════════════════

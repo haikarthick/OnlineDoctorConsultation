@@ -30,6 +30,10 @@ const pool = new Pool(
 async function runTier4Migration() {
   const client = await pool.connect();
   try {
+    // Align search_path with the schema used by render-start.sh / init.sql
+    const schema = process.env.DB_SCHEMA || 'public';
+    await client.query(`SET search_path TO ${schema}, public`);
+
     await client.query('BEGIN');
 
     // ═══════════════════════════════════════════════════════════
