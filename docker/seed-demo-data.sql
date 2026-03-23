@@ -33,13 +33,13 @@ INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash,
   ('a0000000-0000-0000-0000-000000000001', 'admin@vetcare.com',       'System',    'Administrator', 'admin',        '+1-555-100-0001', '$2a$10$ygmN6ksCJOgVBm.AB0Wa3.OH.CjYNdNPLkGEPTWOJtPAnTRzP03TC', true, 'USR-ADM-001'),
   -- Veterinarians (password: Doctor@123)
   ('b0000000-0000-0000-0000-000000000001', 'dr.james.carter@vetcare.com',  'James',   'Carter',   'veterinarian', '+1-555-200-0001', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-VET-001'),
-  ('b0000000-0000-0000-0000-000000000002', 'dr.sarah.bennett@vetcare.com', 'Sarah',   'Bennett',  'veterinarian', '+1-555-200-0002', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-VET-002'),
+  ('b0000000-0000-0000-0000-000000000002', 'sarah.johnson@example.com',    'Sarah',   'Johnson',  'veterinarian', '+1-555-200-0002', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-VET-002'),
   ('b0000000-0000-0000-0000-000000000003', 'dr.michael.reyes@vetcare.com', 'Michael',  'Reyes',   'veterinarian', '+1-555-200-0003', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-VET-003'),
   -- Pet Owners (password: Owner@123)
-  ('c0000000-0000-0000-0000-000000000001', 'emily.davis@email.com',    'Emily',     'Davis',    'pet_owner',    '+1-555-300-0001', '$2a$10$OtuDm/nGqi3c8ymKklb1h.0XXbr.MN.TSVXTTb.JTYZjuku6Oqv2W', true, 'USR-PET-001'),
+  ('c0000000-0000-0000-0000-000000000001', 'emily.davis@example.com',  'Emily',     'Davis',    'pet_owner',    '+1-555-300-0001', '$2a$10$OtuDm/nGqi3c8ymKklb1h.0XXbr.MN.TSVXTTb.JTYZjuku6Oqv2W', true, 'USR-PET-001'),
   ('c0000000-0000-0000-0000-000000000002', 'robert.chen@email.com',   'Robert',    'Chen',     'pet_owner',    '+1-555-300-0002', '$2a$10$OtuDm/nGqi3c8ymKklb1h.0XXbr.MN.TSVXTTb.JTYZjuku6Oqv2W', true, 'USR-PET-002'),
   -- Farmers (password: Farmer@123)
-  ('f0000000-0000-0000-0000-000000000001', 'john.miller@greenpastures.com','John',   'Miller',   'farmer',       '+1-555-400-0001', '$2a$10$9lvpT/PhXramRLyjABSXfO7ks10U4KvWGlfYS6XZYeUNpTjuM.rtm', true, 'USR-FRM-001'),
+  ('f0000000-0000-0000-0000-000000000001', 'tom.wilson@example.com',       'Tom',     'Wilson',   'farmer',       '+1-555-400-0001', '$2a$10$9lvpT/PhXramRLyjABSXfO7ks10U4KvWGlfYS6XZYeUNpTjuM.rtm', true, 'USR-FRM-001'),
   ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$9lvpT/PhXramRLyjABSXfO7ks10U4KvWGlfYS6XZYeUNpTjuM.rtm', true, 'USR-FRM-002')
 ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, email = EXCLUDED.email, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, role = EXCLUDED.role, phone = EXCLUDED.phone, is_active = EXCLUDED.is_active;
 
@@ -98,7 +98,7 @@ INSERT INTO animals (id, owner_id, name, species, breed, date_of_birth, gender, 
   ('aa000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000002', 'Max',      'Dog', 'German Shepherd',      '2019-06-10', 'male',   38.0, 'Black & Tan',   'MCHP-9004-GS', true,  'Senior dog. Requires joint supplements. Slight arthritis.',   true, 'ANI-DOG-003'),
   ('aa000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-000000000002', 'Luna',     'Cat', 'Maine Coon',           '2020-12-25', 'female',  6.8, 'Silver Tabby',  'MCHP-9005-MC', true,  'Very long coat. Regular grooming essential.',                 true, 'ANI-CAT-002'),
   ('aa000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000002', 'Kiwi',     'Bird','Green Cheek Conure',   '2023-02-14', 'female',  0.07,'Green/Grey',    NULL,            false, 'Exotic bird. Hand-raised. Needs annual avian wellness exam.',  true, 'ANI-BRD-001'),
--- Farmer John Miller's livestock
+-- Farmer Tom Wilson's livestock
   ('aa000000-0000-0000-0000-000000000007', 'f0000000-0000-0000-0000-000000000001', 'Daisy',      'Cattle','Holstein Friesian', '2021-04-08', 'female', 580.0,'Black/White', NULL, false, 'Top milk producer. Calved twice. Due for TB test.', true, 'ANI-COW-001'),
   ('aa000000-0000-0000-0000-000000000008', 'f0000000-0000-0000-0000-000000000001', 'Thunder',    'Horse', 'Thoroughbred',      '2018-09-12', 'male',   520.0,'Bay',         'MCHP-EQ-8001', false, 'Retired racehorse. Occasional lameness in left foreleg.',    true, 'ANI-HRS-001'),
   ('aa000000-0000-0000-0000-000000000009', 'f0000000-0000-0000-0000-000000000001', 'Rosie',      'Cattle','Jersey',            '2022-01-20', 'female', 420.0,'Fawn',        NULL, false, 'High butterfat milk. Gentle temperament.',                   true, 'ANI-COW-002'),
@@ -275,7 +275,7 @@ INSERT INTO chat_messages (id, session_id, sender_id, sender_name, message, mess
   (uuid_generate_v4(), 'dd000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Emily Davis', 'Sure! Let me get his leash. You can see the limp is more noticeable after he''s been resting.', 'text', '2026-01-15 09:04:30'),
   (uuid_generate_v4(), 'dd000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Dr. James Carter', 'I can see the gait asymmetry. Based on his breed and age, this is consistent with hip dysplasia. I''d recommend getting radiographs done at our clinic.', 'text', '2026-01-15 09:08:00'),
   (uuid_generate_v4(), 'dd000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Dr. James Carter', 'I''m sending over the prescription for anti-inflammatory medication now.', 'text', '2026-01-15 09:22:00'),
-  (uuid_generate_v4(), 'dd000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'Dr. Sarah Bennett', 'Hi Emily! I''m reviewing the photos you uploaded. Can you hold Whiskers so I can see the belly area closer?', 'text', '2026-01-22 14:05:00'),
+  (uuid_generate_v4(), 'dd000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'Dr. Sarah Johnson', 'Hi Emily! I''m reviewing the photos you uploaded. Can you hold Whiskers so I can see the belly area closer?', 'text', '2026-01-22 14:05:00'),
   (uuid_generate_v4(), 'dd000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', 'Emily Davis', 'She doesn''t love being held but I''ll try! The patches have been getting worse over the past 2 weeks.', 'text', '2026-01-22 14:06:30');
 
 -- ============================================================
@@ -425,7 +425,7 @@ INSERT INTO notifications (id, user_id, type, title, message, is_read, channel) 
   (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000002', 'booking',       'Booking Confirmed', 'Your appointment with Dr. Bennett for Luna on Feb 27 at 9:00 AM has been confirmed.', false, 'in_app'),
   (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000002', 'review',        'Thank You for Your Review', 'Dr. Reyes appreciated your 5-star review for Kiwi''s consultation.', true, 'in_app'),
   -- Vet notifications
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'booking',       'New Booking Request', 'John Miller has requested an appointment for Thunder (Horse) on March 5.', false, 'in_app'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'booking',       'New Booking Request', 'Tom Wilson has requested an appointment for Thunder (Horse) on March 5.', false, 'in_app'),
   (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'consultation',  'Lab Results Ready', 'BHB results for Daisy (Holstein) are now available. Value: 1.8 mmol/L â€” elevated.', false, 'in_app'),
   (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'review',        'New Review Received', 'Robert Chen left a 5-star review for Max''s consultation.', true, 'in_app'),
   -- Admin notifications
@@ -441,8 +441,8 @@ INSERT INTO notifications (id, user_id, type, title, message, is_read, channel) 
 INSERT INTO audit_logs (id, user_id, user_email, action, resource, entity_type, details, ip_address, timestamp) VALUES
   (uuid_generate_v4(), 'a0000000-0000-0000-0000-000000000001', 'admin@vetcare.com',            'LOGIN',        'auth',          'user',         '{"method":"email_password"}',                          '10.0.0.1', '2026-02-18 07:45:00'),
   (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'dr.james.carter@vetcare.com',  'START_CONSULTATION', 'consultations','consultation','{"consultationId":"cc000000-0000-0000-0000-000000000005","animalName":"Daisy"}', '10.0.0.5', '2026-02-18 08:05:00'),
-  (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000001', 'emily.davis@email.com',        'CREATE_BOOKING', 'bookings',     'booking',      '{"bookingId":"bb000000-0000-0000-0000-000000000005","vetName":"Dr. Carter"}', '192.168.1.10', '2026-02-19 16:30:00'),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000002', 'dr.sarah.bennett@vetcare.com', 'ISSUE_PRESCRIPTION','prescriptions','prescription','{"prescriptionId":"ee000000-0000-0000-0000-000000000002","animal":"Whiskers"}', '10.0.0.6', '2026-01-22 14:43:00'),
+  (uuid_generate_v4(), 'c0000000-0000-0000-0000-000000000001', 'emily.davis@example.com',      'CREATE_BOOKING', 'bookings',     'booking',      '{"bookingId":"bb000000-0000-0000-0000-000000000005","vetName":"Dr. Carter"}', '192.168.1.10', '2026-02-19 16:30:00'),
+  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000002', 'sarah.johnson@example.com',    'ISSUE_PRESCRIPTION','prescriptions','prescription','{"prescriptionId":"ee000000-0000-0000-0000-000000000002","animal":"Whiskers"}', '10.0.0.6', '2026-01-22 14:43:00'),
   (uuid_generate_v4(), 'a0000000-0000-0000-0000-000000000001', 'admin@vetcare.com',            'UPDATE_SETTING', 'settings',     'system_setting','{"key":"display.timeFormat","oldValue":"24h","newValue":"12h"}', '10.0.0.1', '2026-02-17 10:00:00');
 
 -- ============================================================
@@ -907,7 +907,7 @@ INSERT INTO animals (id, owner_id, name, species, breed, date_of_birth, gender, 
   ('aa000000-0000-0000-0000-000000000032', 'f0000000-0000-0000-0000-000000000003', 'Scout',     'Dog',     'Border Collie',      '2021-08-05', 'Male',   19.5, 'Black/White',     '985121089012001', NULL, 'AKC-BC-2021-4401',  true,  NULL, NULL, NULL, 'Trained working sheepdog. Herds Merino flock. Needs high-energy diet.',                      true, 'ANI-DOG-032', 'e0000000-0000-0000-0000-000000000003', NULL, NULL, NULL, NULL, 19.5, 'kg', '2026-02-10', '10000000-0000-0000-0000-000000000014'),
   ('aa000000-0000-0000-0000-000000000033', 'f0000000-0000-0000-0000-000000000003', 'Heidi',     'Goat',    'Alpine',             '2023-03-18', 'Female', 62.0, 'Chamoisee',       NULL, 'VT-GT-001', 'ADGA-AP-2023-6601', false, NULL, NULL, NULL, 'Alpine dairy doe. Producing 3.8L/day. Clean bill of health.',                               true, 'ANI-GOT-033', 'e0000000-0000-0000-0000-000000000003', 'ab000000-0000-0000-0000-000000000008', 'open',   NULL,         NULL,         62.0, 'kg', '2026-02-01', '10000000-0000-0000-0000-000000000010'),
 
-  -- Additional farm animals for existing farmer John Miller
+  -- Additional farm animals for existing farmer Tom Wilson
   ('aa000000-0000-0000-0000-000000000034', 'f0000000-0000-0000-0000-000000000001', 'Brutus',    'Cattle',  'Angus',              '2022-08-15', 'Male',   680.0,'Black',           NULL, 'IA-CT-003', 'AAA-AG-2022-8815',  false, NULL, NULL, NULL, 'Prime Angus bull. Sire for crossbreeding with Holsteins.',                                   true, 'ANI-COW-034', 'e0000000-0000-0000-0000-000000000001', NULL, 'active', NULL,         NULL,         680.0,'kg', '2026-01-15', '10000000-0000-0000-0000-000000000002'),
   ('aa000000-0000-0000-0000-000000000035', 'f0000000-0000-0000-0000-000000000001', 'Rosie',     'Cattle',  'Hereford',           '2023-04-20', 'Female', 520.0,'Red/White Face',  NULL, 'IA-CT-004', 'AHA-HF-2023-1122',  false, NULL, NULL, NULL, 'Hereford heifer. Good maternal genetics. First calf expected May 2026.',                     true, 'ANI-COW-035', 'e0000000-0000-0000-0000-000000000001', NULL, 'bred',   '2025-08-10', '2026-05-20', 520.0,'kg', '2026-01-15', '10000000-0000-0000-0000-000000000002')
 ON CONFLICT (id) DO NOTHING;
@@ -1248,9 +1248,9 @@ INSERT INTO medical_record_audit_log (id, record_id, record_type, action, perfor
    NULL, '{"title":"Hip Dysplasia Diagnosis â€” Buddy","severity":"normal","status":"active"}', 'Initial diagnosis record created', '10.0.0.5'),
   (uuid_generate_v4(), 'ff000000-0000-0000-0000-000000000001', 'medical_record', 'update', 'b0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'Dr. James Carter',
    '{"follow_up_date":null}', '{"follow_up_date":"2026-04-15"}', 'Added follow-up date after radiograph review', '10.0.0.5'),
-  (uuid_generate_v4(), 'ff000000-0000-0000-0000-000000000002', 'medical_record', 'create', 'b0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'Dr. Sarah Bennett',
+  (uuid_generate_v4(), 'ff000000-0000-0000-0000-000000000002', 'medical_record', 'create', 'b0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'Dr. Sarah Johnson',
    NULL, '{"title":"Atopic Dermatitis â€” Whiskers","severity":"high","status":"active"}', 'Diagnosis after skin scraping and culture', '10.0.0.6'),
-  (uuid_generate_v4(), 'ff000000-0000-0000-0000-000000000005', 'medical_record', 'view', 'f0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000001', 'John Miller',
+  (uuid_generate_v4(), 'ff000000-0000-0000-0000-000000000005', 'medical_record', 'view', 'f0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000001', 'Tom Wilson',
    NULL, NULL, 'Owner viewed Daisy emergency record', '192.168.1.55')
 ON CONFLICT DO NOTHING;
 

@@ -155,14 +155,14 @@ async function run() {
     console.log(`  ═══════════════════════════════════════`);
 
     console.log('\n━━━ Demo Login Credentials ━━━');
-    console.log('  Admin:        admin@vetcare.com              / Admin@123');
-    console.log('  Veterinarian: dr.james.carter@vetcare.com    / Doctor@123');
-    console.log('  Veterinarian: dr.sarah.bennett@vetcare.com   / Doctor@123');
-    console.log('  Veterinarian: dr.michael.reyes@vetcare.com   / Doctor@123');
-    console.log('  Pet Owner:    emily.davis@email.com           / Owner@123');
-    console.log('  Pet Owner:    robert.chen@email.com           / Owner@123');
-    console.log('  Farmer:       john.miller@greenpastures.com   / Farmer@123');
-    console.log('  Farmer:       maria.garcia@sunrisefarm.com    / Farmer@123');
+    console.log('  Admin:        admin@vetcare.com             / Admin@123');
+    console.log('  Veterinarian: sarah.johnson@example.com     / Demo@123');
+    console.log('  Veterinarian: dr.james.carter@vetcare.com   / Demo@123');
+    console.log('  Veterinarian: dr.michael.reyes@vetcare.com  / Demo@123');
+    console.log('  Pet Owner:    emily.davis@example.com       / Demo@123');
+    console.log('  Pet Owner:    robert.chen@email.com         / Demo@123');
+    console.log('  Farmer:       tom.wilson@example.com        / Demo@123');
+    console.log('  Farmer:       maria.garcia@sunrisefarm.com  / Demo@123');
 
     // Check critical data
     const { rows: userRows } = await client.query('SELECT COUNT(*)::int AS cnt FROM users');
