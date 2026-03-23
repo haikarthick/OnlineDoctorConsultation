@@ -99,17 +99,17 @@ async function run() {
     console.log('\n━━━ Step 2b: Fixing demo passwords (runtime bcrypt) ━━━');
     const demoPasswords: Array<{ email: string; password: string }> = [
       { email: 'admin@vetcare.com', password: 'Admin@123' },
-      { email: 'dr.james.carter@vetcare.com', password: 'Doctor@123' },
-      { email: 'dr.sarah.bennett@vetcare.com', password: 'Doctor@123' },
-      { email: 'dr.michael.reyes@vetcare.com', password: 'Doctor@123' },
-      { email: 'dr.priya.sharma@vetcare.com', password: 'Doctor@123' },
-      { email: 'emily.davis@email.com', password: 'Owner@123' },
-      { email: 'robert.chen@email.com', password: 'Owner@123' },
-      { email: 'sarah.kim@email.com', password: 'Owner@123' },
-      { email: 'michael.torres@email.com', password: 'Owner@123' },
-      { email: 'john.miller@greenpastures.com', password: 'Farmer@123' },
-      { email: 'maria.garcia@sunrisefarm.com', password: 'Farmer@123' },
-      { email: 'thomas.green@greenmeadows.com', password: 'Farmer@123' },
+      { email: 'dr.james.carter@vetcare.com', password: 'Demo@123' },
+      { email: 'sarah.johnson@example.com', password: 'Demo@123' },
+      { email: 'dr.michael.reyes@vetcare.com', password: 'Demo@123' },
+      { email: 'dr.priya.sharma@vetcare.com', password: 'Demo@123' },
+      { email: 'emily.davis@example.com', password: 'Demo@123' },
+      { email: 'robert.chen@email.com', password: 'Demo@123' },
+      { email: 'sarah.kim@email.com', password: 'Demo@123' },
+      { email: 'michael.torres@email.com', password: 'Demo@123' },
+      { email: 'tom.wilson@example.com', password: 'Demo@123' },
+      { email: 'maria.garcia@sunrisefarm.com', password: 'Demo@123' },
+      { email: 'thomas.green@greenmeadows.com', password: 'Demo@123' },
     ];
     for (const u of demoPasswords) {
       const hash = bcrypt.hashSync(u.password, 10);
