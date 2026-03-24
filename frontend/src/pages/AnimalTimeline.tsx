@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+﻿import React, { useState, useEffect, useMemo, useCallback, useRef, useLayoutEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
@@ -26,36 +26,35 @@ interface AnimalOption {
 }
 
 // ─── Event type config ──────────────────────────────────────
-const EVENT_TYPES: Record<string, { label: string; icon: string; color: string; bg: string }> = {
-  vaccination:       { label: 'Vaccinations',   icon: '💉', color: '#4caf50', bg: '#e8f5e9' },
-  record_diagnosis:  { label: 'Diagnosis',      icon: '🩺', color: '#2196f3', bg: '#e3f2fd' },
-  record_surgery:    { label: 'Surgery',        icon: '🔪', color: '#f44336', bg: '#ffebee' },
-  record_imaging:    { label: 'Imaging',        icon: '📷', color: '#607d8b', bg: '#eceff1' },
-  record_follow_up:  { label: 'Follow-up',      icon: '🔄', color: '#00bcd4', bg: '#e0f7fa' },
-  record_vaccination:{ label: 'Vaccination Rec', icon: '💉', color: '#4caf50', bg: '#e8f5e9' },
-  record_prescription:{ label: 'Prescription Rec', icon: '💊', color: '#9c27b0', bg: '#f3e5f5' },
-  record_lab_report: { label: 'Lab Report Rec',  icon: '🧪', color: '#ff9800', bg: '#fff3e0' },
-  record_other:      { label: 'Other Record',   icon: '📄', color: '#78909c', bg: '#eceff1' },
-  prescription:      { label: 'Prescriptions',  icon: '💊', color: '#9c27b0', bg: '#f3e5f5' },
-  lab_result:        { label: 'Lab Results',     icon: '🧪', color: '#ff9800', bg: '#fff3e0' },
-  weight:            { label: 'Weight',          icon: '⚖️', color: '#009688', bg: '#e0f2f1' },
-  booking:           { label: 'Bookings',        icon: '📅', color: '#3f51b5', bg: '#e8eaf6' },
-  consultation:      { label: 'Consultations',   icon: '🏥', color: '#673ab7', bg: '#ede7f6' },
-  allergy:           { label: 'Allergies',       icon: '⚠️', color: '#ff5722', bg: '#fbe9e7' },
+const EVENT_TYPES: Record<string, { label: string; icon: string; color: string; bg: string; navPath?: string }> = {
+  vaccination:        { label: 'Vaccination',      icon: '💉', color: '#4caf50', bg: '#e8f5e9', navPath: '/medical-records' },
+  record_diagnosis:   { label: 'Diagnosis',        icon: '🩺', color: '#2196f3', bg: '#e3f2fd', navPath: '/medical-records' },
+  record_surgery:     { label: 'Surgery',          icon: '🔪', color: '#f44336', bg: '#ffebee', navPath: '/medical-records' },
+  record_imaging:     { label: 'Imaging',          icon: '📷', color: '#607d8b', bg: '#eceff1', navPath: '/medical-records' },
+  record_follow_up:   { label: 'Follow-up',        icon: '🔄', color: '#00bcd4', bg: '#e0f7fa', navPath: '/medical-records' },
+  record_vaccination: { label: 'Vaccination Rec',  icon: '💉', color: '#4caf50', bg: '#e8f5e9', navPath: '/medical-records' },
+  record_prescription:{ label: 'Prescription',     icon: '💊', color: '#9c27b0', bg: '#f3e5f5', navPath: '/prescriptions' },
+  record_lab_report:  { label: 'Lab Report',       icon: '🧪', color: '#ff9800', bg: '#fff3e0', navPath: '/medical-records' },
+  record_other:       { label: 'Other Record',     icon: '📄', color: '#78909c', bg: '#eceff1', navPath: '/medical-records' },
+  prescription:       { label: 'Prescription',     icon: '💊', color: '#9c27b0', bg: '#f3e5f5', navPath: '/prescriptions' },
+  lab_result:         { label: 'Lab Result',       icon: '🧪', color: '#ff9800', bg: '#fff3e0', navPath: '/medical-records' },
+  weight:             { label: 'Weight Entry',     icon: '⚖️', color: '#009688', bg: '#e0f2f1', navPath: '/medical-records' },
+  booking:            { label: 'Booking',          icon: '📅', color: '#3f51b5', bg: '#e8eaf6', navPath: '/consultations' },
+  consultation:       { label: 'Consultation',     icon: '🏥', color: '#673ab7', bg: '#ede7f6', navPath: '/consultations' },
+  allergy:            { label: 'Allergy',          icon: '⚠️', color: '#ff5722', bg: '#fbe9e7', navPath: '/medical-records' },
 }
 
-// Aggregate "record_*" types for chip filter grouping
-const FILTER_CATEGORIES: { key: string; label: string; icon: string; matchTypes: string[] }[] = [
-  { key: 'vaccination',  label: 'Vaccinations',  icon: '💉', matchTypes: ['vaccination', 'record_vaccination'] },
-  { key: 'diagnosis',    label: 'Diagnosis',      icon: '🩺', matchTypes: ['record_diagnosis'] },
-  { key: 'surgery',      label: 'Surgery',        icon: '🔪', matchTypes: ['record_surgery'] },
-  { key: 'prescription', label: 'Prescriptions',  icon: '💊', matchTypes: ['prescription', 'record_prescription'] },
-  { key: 'lab_result',   label: 'Lab Results',    icon: '🧪', matchTypes: ['lab_result', 'record_lab_report'] },
-  { key: 'weight',       label: 'Weight',         icon: '⚖️', matchTypes: ['weight'] },
-  { key: 'booking',      label: 'Bookings',       icon: '📅', matchTypes: ['booking'] },
-  { key: 'consultation', label: 'Consultations',  icon: '🏥', matchTypes: ['consultation'] },
-  { key: 'allergy',      label: 'Allergies',      icon: '⚠️', matchTypes: ['allergy'] },
-  { key: 'other',        label: 'Other',          icon: '📄', matchTypes: ['record_imaging', 'record_follow_up', 'record_other'] },
+const FILTER_CATEGORIES = [
+  { key: 'vaccination',  label: 'Vaccinations',   icon: '💉', matchTypes: ['vaccination', 'record_vaccination'] },
+  { key: 'diagnosis',    label: 'Diagnosis',       icon: '🩺', matchTypes: ['record_diagnosis'] },
+  { key: 'surgery',      label: 'Surgery',         icon: '🔪', matchTypes: ['record_surgery'] },
+  { key: 'prescription', label: 'Prescriptions',   icon: '💊', matchTypes: ['prescription', 'record_prescription'] },
+  { key: 'lab_result',   label: 'Lab Results',     icon: '🧪', matchTypes: ['lab_result', 'record_lab_report'] },
+  { key: 'weight',       label: 'Weight',          icon: '⚖️', matchTypes: ['weight'] },
+  { key: 'booking',      label: 'Bookings',        icon: '📅', matchTypes: ['booking'] },
+  { key: 'consultation', label: 'Consultations',   icon: '🏥', matchTypes: ['consultation'] },
+  { key: 'allergy',      label: 'Allergies',       icon: '⚠️', matchTypes: ['allergy'] },
+  { key: 'other',        label: 'Other',           icon: '📄', matchTypes: ['record_imaging', 'record_follow_up', 'record_other'] },
 ]
 
 const getEventConfig = (type: string) =>
@@ -64,532 +63,638 @@ const getEventConfig = (type: string) =>
 const severityColor = (sev?: string) => {
   switch (sev) {
     case 'critical': return '#d32f2f'
-    case 'high': return '#f44336'
-    case 'medium': return '#ff9800'
-    case 'low': return '#4caf50'
-    default: return ''
+    case 'high':     return '#f44336'
+    case 'medium':   return '#ff9800'
+    case 'low':      return '#4caf50'
+    default:         return ''
   }
 }
 
-// ─── Component ──────────────────────────────────────────────
-const AnimalTimeline: React.FC = () => {
+const ZOOM_LEVELS = [30, 60, 90, 180, 365, 730]
+
+function assignLanes(events: TimelineEvent[]): Map<string, number> {
+  const sorted = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const laneEndDate: number[] = []
+  const laneMap = new Map<string, number>()
+  sorted.forEach(ev => {
+    const d = new Date(ev.date).getTime()
+    let lane = laneEndDate.findIndex(end => d > end + 1000 * 60 * 60 * 24 * 3)
+    if (lane === -1) { lane = laneEndDate.length; laneEndDate.push(0) }
+    laneEndDate[lane] = d + 1000 * 60 * 60 * 24 * 14
+    laneMap.set(ev.id, lane)
+  })
+  return laneMap
+}
+
+interface AnimalTimelineProps {
+  onNavigate?: (path: string) => void
+}
+
+const AnimalTimeline: React.FC<AnimalTimelineProps> = ({ onNavigate }) => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
 
-  // State
-  const [animals, setAnimals] = useState<AnimalOption[]>([])
-  const [selectedAnimalId, setSelectedAnimalId] = useState('')
-  const [events, setEvents] = useState<TimelineEvent[]>([])
-  const [loading, setLoading] = useState(false)
-  const [animalsLoading, setAnimalsLoading] = useState(true)
-  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
-  const [viewMode, setViewMode] = useState<'horizontal' | 'vertical'>('horizontal')
-  const [sortAsc, setSortAsc] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null)
-
-  const isVet = user?.role === 'veterinarian'
+  const isVet   = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
+
+  const [animals, setAnimals]               = useState<AnimalOption[]>([])
+  const [selectedAnimalId, setSelectedAnimalId] = useState('')
+  const [events, setEvents]                 = useState<TimelineEvent[]>([])
+  const [loading, setLoading]               = useState(false)
+  const [animalsLoading, setAnimalsLoading] = useState(true)
+
+  const [searchQuery, setSearchQuery]       = useState('')
+  const [activeFilters, setActiveFilters]   = useState<Set<string>>(new Set())
+  const [dateFrom, setDateFrom]             = useState('')
+  const [dateTo, setDateTo]                 = useState('')
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
+  const [sortAsc, setSortAsc]               = useState(true)
+
+  const [zoomIndex, setZoomIndex]           = useState(2)
+  const [viewStartMs, setViewStartMs]       = useState(0)
+  const railRef                             = useRef<HTMLDivElement>(null)
+  const isDragging                          = useRef(false)
+  const dragStartX                          = useRef(0)
+  const dragStartViewMs                     = useRef(0)
+  const scrubberRef                         = useRef<HTMLDivElement>(null)
+
+  const [hoverEvent, setHoverEvent]         = useState<TimelineEvent | null>(null)
+  const [hoverPos, setHoverPos]             = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const hoverTimer                          = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const [drawerEvent, setDrawerEvent]       = useState<TimelineEvent | null>(null)
 
   // ── Load animals ──
   useEffect(() => {
-    const loadAnimals = async () => {
+    const load = async () => {
       try {
         setAnimalsLoading(true)
-        let list: AnimalOption[] = []
-        if (isVet || isAdmin) {
-          // Vets/admins see all animals via admin or medical-records context
-          const res = await apiService.listAnimals({ limit: 500 })
-          list = (res.data?.items || res.data || []).map((a: any) => ({
-            id: a.id, name: a.name, species: a.species
-          }))
-        } else {
-          const res = await apiService.listAnimals({ limit: 200 })
-          list = (res.data?.items || res.data || []).map((a: any) => ({
-            id: a.id, name: a.name, species: a.species
-          }))
-        }
+        const res = await apiService.listAnimals({ limit: isVet || isAdmin ? 500 : 200 })
+        const list: AnimalOption[] = (res.data?.items || res.data || []).map((a: any) => ({
+          id: a.id, name: a.name, species: a.species,
+        }))
         setAnimals(list)
         if (list.length > 0) setSelectedAnimalId(list[0].id)
-      } catch {
-        setAnimals([])
-      } finally {
-        setAnimalsLoading(false)
-      }
+      } catch { setAnimals([]) }
+      finally { setAnimalsLoading(false) }
     }
-    loadAnimals()
+    load()
   }, [isVet, isAdmin])
 
-  // ── Load timeline events ──
+  // ── Load events ──
   const loadTimeline = useCallback(async () => {
     if (!selectedAnimalId) return
     try {
       setLoading(true)
       const params: Record<string, string | number> = { limit: 500 }
       if (dateFrom) params.dateFrom = dateFrom
-      if (dateTo) params.dateTo = dateTo
+      if (dateTo)   params.dateTo   = dateTo
       const res = await apiService.getAnimalTimeline(selectedAnimalId, params as any)
       setEvents(res.data || [])
-    } catch {
-      setEvents([])
-    } finally {
-      setLoading(false)
-    }
+    } catch { setEvents([]) }
+    finally { setLoading(false) }
   }, [selectedAnimalId, dateFrom, dateTo])
 
   useEffect(() => { loadTimeline() }, [loadTimeline])
 
-  // ── Filter logic ──
-  const toggleFilter = (key: string) => {
-    setActiveFilters(prev => {
-      const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
-      return next
-    })
-  }
-
+  // ── Filtered events ──
   const filteredEvents = useMemo(() => {
     let ev = events
     if (activeFilters.size > 0) {
-      const allowedTypes = new Set<string>()
+      const allowed = new Set<string>()
       activeFilters.forEach(key => {
-        const cat = FILTER_CATEGORIES.find(c => c.key === key)
-        cat?.matchTypes.forEach(t => allowedTypes.add(t))
+        FILTER_CATEGORIES.find(c => c.key === key)?.matchTypes.forEach(t => allowed.add(t))
       })
-      ev = ev.filter(e => allowedTypes.has(e.type))
+      ev = ev.filter(e => allowed.has(e.type))
     }
-    const sorted = [...ev].sort((a, b) => {
-      const diff = new Date(a.date).getTime() - new Date(b.date).getTime()
-      return sortAsc ? diff : -diff
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      ev = ev.filter(e =>
+        e.title.toLowerCase().includes(q) ||
+        (e.description || '').toLowerCase().includes(q) ||
+        getEventConfig(e.type).label.toLowerCase().includes(q)
+      )
+    }
+    return [...ev].sort((a, b) => {
+      const d = new Date(a.date).getTime() - new Date(b.date).getTime()
+      return sortAsc ? d : -d
     })
-    return sorted
-  }, [events, activeFilters, sortAsc])
+  }, [events, activeFilters, searchQuery, sortAsc])
 
-  // ── Group by month ──
-  const groupedByMonth = useMemo(() => {
-    const groups: { label: string; key: string; items: TimelineEvent[] }[] = []
-    const map = new Map<string, TimelineEvent[]>()
-    filteredEvents.forEach(e => {
-      const d = new Date(e.date)
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      if (!map.has(key)) map.set(key, [])
-      map.get(key)!.push(e)
-    })
-    map.forEach((items, key) => {
-      const [y, m] = key.split('-')
-      const label = new Date(parseInt(y), parseInt(m) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-      groups.push({ label, key, items })
-    })
-    return groups
+  // ── Date range ──
+  const { minMs, maxMs } = useMemo(() => {
+    if (filteredEvents.length === 0) {
+      const now = Date.now()
+      return { minMs: now - 86400000 * 90, maxMs: now + 86400000 * 30 }
+    }
+    const times = filteredEvents.map(e => new Date(e.date).getTime())
+    const rawMin = Math.min(...times)
+    const rawMax = Math.max(...times)
+    const pad    = 86400000 * 14
+    return { minMs: rawMin - pad, maxMs: rawMax + pad }
   }, [filteredEvents])
 
-  // ── Category counts ──
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {}
-    FILTER_CATEGORIES.forEach(cat => {
-      counts[cat.key] = events.filter(e => cat.matchTypes.includes(e.type)).length
+  useEffect(() => {
+    const daysVisible = ZOOM_LEVELS[zoomIndex]
+    const start = maxMs - daysVisible * 86400000 * 0.75
+    setViewStartMs(Math.max(minMs, start))
+  }, [minMs, maxMs, zoomIndex])
+
+  const [railWidth, setRailWidth] = useState(900)
+  useLayoutEffect(() => {
+    const ro = new ResizeObserver(entries => {
+      for (const entry of entries) setRailWidth(entry.contentRect.width)
     })
-    return counts
-  }, [events])
+    if (railRef.current) ro.observe(railRef.current)
+    return () => ro.disconnect()
+  }, [])
+
+  const daysVisible = ZOOM_LEVELS[zoomIndex]
+  const msPerPx  = (daysVisible * 86400000) / railWidth
+  const msToX = useCallback((ms: number) => (ms - viewStartMs) / msPerPx, [viewStartMs, msPerPx])
+
+  const laneMap  = useMemo(() => assignLanes(filteredEvents), [filteredEvents])
+  const numLanes = useMemo(() => {
+    let max = 0
+    laneMap.forEach(v => { if (v > max) max = v })
+    return max + 1
+  }, [laneMap])
+
+  // ── Ticks ──
+  const ticks = useMemo(() => {
+    const result: { label: string; x: number }[] = []
+    const viewEndMs = viewStartMs + daysVisible * 86400000
+    const tickIntervalDays = daysVisible <= 30 ? 3 : daysVisible <= 90 ? 7 : daysVisible <= 180 ? 14 : 30
+    const dayInMs = 86400000
+    const d = new Date(viewStartMs); d.setHours(0, 0, 0, 0)
+    const originMs = d.getTime()
+    const firstTick = originMs + ((tickIntervalDays - (Math.floor((originMs - minMs) / dayInMs) % tickIntervalDays)) % tickIntervalDays) * dayInMs
+    let cur = firstTick
+    while (cur <= viewEndMs) {
+      const x = (cur - viewStartMs) / msPerPx
+      const label = new Date(cur).toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'short',
+        year: tickIntervalDays >= 28 ? 'numeric' : undefined,
+      })
+      result.push({ label, x })
+      cur += tickIntervalDays * dayInMs
+    }
+    return result
+  }, [viewStartMs, daysVisible, msPerPx, minMs])
+
+  // ── Scrubber ──
+  const fullRangeMs   = maxMs - minMs
+  const thumbWidthPct = Math.min(100, Math.max(5, (daysVisible * 86400000) / fullRangeMs * 100))
+  const thumbLeftPct  = Math.max(0, Math.min(100 - thumbWidthPct, ((viewStartMs - minMs) / fullRangeMs) * 100))
+
+  const scrubDots = useMemo(() => filteredEvents.map(ev => ({
+    id: ev.id,
+    pct: ((new Date(ev.date).getTime() - minMs) / fullRangeMs) * 100,
+    color: getEventConfig(ev.type).color,
+  })), [filteredEvents, minMs, fullRangeMs])
+
+  // ── Mouse drag rail ──
+  const onRailMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).classList.contains('tl-node') ||
+        (e.target as HTMLElement).closest('.tl-node')) return
+    isDragging.current = true
+    dragStartX.current = e.clientX
+    dragStartViewMs.current = viewStartMs
+    e.preventDefault()
+  }
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!isDragging.current) return
+      const dms = -(e.clientX - dragStartX.current) * msPerPx
+      const newStart = Math.max(minMs, Math.min(dragStartViewMs.current + dms, maxMs - daysVisible * 86400000))
+      setViewStartMs(newStart)
+    }
+    const onUp = () => { isDragging.current = false }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
+  }, [msPerPx, minMs, maxMs, daysVisible])
+
+  // ── Touch pan ──
+  const touchStart = useRef({ x: 0, startMs: 0 })
+  const onRailTouchStart = (e: React.TouchEvent) => {
+    touchStart.current = { x: e.touches[0].clientX, startMs: viewStartMs }
+  }
+  const onRailTouchMove = (e: React.TouchEvent) => {
+    const dx  = e.touches[0].clientX - touchStart.current.x
+    const newStart = Math.max(minMs, Math.min(touchStart.current.startMs - dx * msPerPx, maxMs - daysVisible * 86400000))
+    setViewStartMs(newStart)
+  }
+
+  // ── Wheel zoom ──
+  const onRailWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault()
+    setZoomIndex(z => e.deltaY < 0 ? Math.max(0, z - 1) : Math.min(ZOOM_LEVELS.length - 1, z + 1))
+  }, [])
+  useEffect(() => {
+    const el = railRef.current
+    if (!el) return
+    el.addEventListener('wheel', onRailWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onRailWheel)
+  }, [onRailWheel])
+
+  // ── Hover ──
+  const showHover = (ev: TimelineEvent, e: React.MouseEvent) => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    const x = e.clientX, y = e.clientY
+    hoverTimer.current = setTimeout(() => { setHoverEvent(ev); setHoverPos({ x, y }) }, 200)
+  }
+  const hideHover = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    hoverTimer.current = setTimeout(() => setHoverEvent(null), 300)
+  }
+  const keepHover = () => { if (hoverTimer.current) clearTimeout(hoverTimer.current) }
+
+  // ── Scrubber drag ──
+  const scrubDragging   = useRef(false)
+  const scrubDragStartX = useRef(0)
+  const scrubDragStartMs = useRef(0)
+  const onScrubThumbDown = (e: React.MouseEvent) => {
+    scrubDragging.current = true
+    scrubDragStartX.current = e.clientX
+    scrubDragStartMs.current = viewStartMs
+    e.preventDefault(); e.stopPropagation()
+  }
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!scrubDragging.current) return
+      const trackW = scrubberRef.current?.clientWidth || 600
+      const dms = (e.clientX - scrubDragStartX.current) * (fullRangeMs / trackW)
+      const newStart = Math.max(minMs, Math.min(scrubDragStartMs.current + dms, maxMs - daysVisible * 86400000))
+      setViewStartMs(newStart)
+    }
+    const onUp = () => { scrubDragging.current = false }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
+  }, [fullRangeMs, minMs, maxMs, daysVisible])
+
+  // ── Navigation ──
+  const navigate = (path: string) => {
+    if (onNavigate) { onNavigate(path); return }
+    window.location.hash = path
+  }
 
   // ── Stats ──
-  const stats = useMemo(() => {
-    const total = events.length
-    const highSeverity = events.filter(e => e.severity === 'high' || e.severity === 'critical').length
-    const activeCount = events.filter(e => e.status === 'active' || e.status === 'valid').length
-    const types = new Set(events.map(e => e.type)).size
-    return { total, highSeverity, activeCount, types }
+  const stats = useMemo(() => ({
+    total:    events.length,
+    types:    new Set(events.map(e => e.type)).size,
+    active:   events.filter(e => e.status === 'active' || e.status === 'valid').length,
+    highSev:  events.filter(e => e.severity === 'high' || e.severity === 'critical').length,
+  }), [events])
+
+  const categoryCounts = useMemo(() => {
+    const c: Record<string, number> = {}
+    FILTER_CATEGORIES.forEach(cat => {
+      c[cat.key] = events.filter(e => cat.matchTypes.includes(e.type)).length
+    })
+    return c
   }, [events])
 
-  // ── Minimap data ──
   const minimapSegments = useMemo(() => {
-    if (events.length === 0) return []
-    const segments: { type: string; pct: number; color: string }[] = []
-    const counts: Record<string, number> = {}
-    events.forEach(e => {
+    if (!filteredEvents.length) return []
+    const counts: Record<string, { count: number; color: string }> = {}
+    filteredEvents.forEach(e => {
       const cfg = getEventConfig(e.type)
-      const k = cfg.label
-      counts[k] = (counts[k] || 0) + 1
+      if (!counts[cfg.label]) counts[cfg.label] = { count: 0, color: cfg.color }
+      counts[cfg.label].count++
     })
-    const total = events.length
-    Object.entries(counts).forEach(([label, count]) => {
-      const evType = Object.entries(EVENT_TYPES).find(([, v]) => v.label === label)
-      segments.push({
-        type: label,
-        pct: (count / total) * 100,
-        color: evType ? evType[1].color : '#78909c'
-      })
-    })
-    return segments
-  }, [events])
+    const total = filteredEvents.length
+    return Object.entries(counts).map(([label, v]) => ({
+      label, color: v.color, pct: (v.count / total) * 100,
+    }))
+  }, [filteredEvents])
 
   const selectedAnimal = animals.find(a => a.id === selectedAnimalId)
+  const formatEventDate = (d: string) => { try { return formatDate(d) } catch { return new Date(d).toLocaleDateString() } }
+  const clearAll = () => { setActiveFilters(new Set()); setDateFrom(''); setDateTo(''); setSearchQuery('') }
+  const activeFilterCount = activeFilters.size + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0)
 
-  const clearFilters = () => {
-    setActiveFilters(new Set())
-    setDateFrom('')
-    setDateTo('')
-  }
+  const LANE_H     = 56
+  const RAIL_PAD_T = 52
+  const railHeight = RAIL_PAD_T + numLanes * LANE_H + 24
 
-  const formatEventDate = (dateStr: string) => {
-    try {
-      return formatDate(dateStr)
-    } catch {
-      return new Date(dateStr).toLocaleDateString()
-    }
-  }
-
-  // ── Render ──
   if (animalsLoading) {
     return (
-      <div className="timeline-page">
-        <div className="timeline-loading">
-          <div className="spinner" />
-          <p>{t('common.loading', 'Loading...')}</p>
-        </div>
+      <div className="tl-page">
+        <div className="tl-loading"><div className="tl-spinner" /><p>Loading animals...</p></div>
       </div>
     )
   }
 
   return (
-    <div className="timeline-page">
-      <h1>📅 {t('timeline.title', 'Animal Life Timeline')}</h1>
-      <p className="timeline-subtitle">
-        {t('timeline.subtitle', 'Complete chronological view of health events, treatments, and milestones')}
-      </p>
-
-      {/* ── Controls Bar ── */}
-      <div className="timeline-controls">
-        <div className="timeline-control-group">
-          <label>{t('timeline.selectAnimal', 'Animal')}</label>
-          <select
-            value={selectedAnimalId}
-            onChange={e => setSelectedAnimalId(e.target.value)}
-          >
-            {animals.length === 0 && <option value="">{t('timeline.noAnimals', 'No animals found')}</option>}
-            {animals.map(a => (
-              <option key={a.id} value={a.id}>
-                {a.name} ({a.species})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="timeline-control-group">
-          <label>{t('timeline.from', 'From')}</label>
-          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
-        </div>
-
-        <div className="timeline-control-group">
-          <label>{t('timeline.to', 'To')}</label>
-          <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} />
-        </div>
-
-        {(activeFilters.size > 0 || dateFrom || dateTo) && (
-          <button className="timeline-clear-btn" onClick={clearFilters}>
-            ✕ {t('timeline.clearFilters', 'Clear Filters')}
-          </button>
-        )}
-
-        <div className="timeline-view-toggle">
-          <button
-            className={`timeline-view-btn ${viewMode === 'horizontal' ? 'active' : ''}`}
-            onClick={() => setViewMode('horizontal')}
-          >↔ {t('timeline.horizontal', 'Horizontal')}</button>
-          <button
-            className={`timeline-view-btn ${viewMode === 'vertical' ? 'active' : ''}`}
-            onClick={() => setViewMode('vertical')}
-          >↕ {t('timeline.vertical', 'Vertical')}</button>
-        </div>
-      </div>
-
-      {/* ── Filter Chips ── */}
-      <div className="timeline-filter-chips">
-        {FILTER_CATEGORIES.map(cat => {
-          const count = categoryCounts[cat.key] || 0
-          if (count === 0 && activeFilters.size === 0) return null
-          const isActive = activeFilters.has(cat.key)
-          const matchCfg = getEventConfig(cat.matchTypes[0])
-          return (
-            <button
-              key={cat.key}
-              className={`timeline-chip ${isActive ? 'active' : ''}`}
-              style={isActive ? { background: matchCfg.bg, color: matchCfg.color, borderColor: matchCfg.color } : {}}
-              onClick={() => toggleFilter(cat.key)}
-            >
-              <span className="timeline-chip-icon">{cat.icon}</span>
-              {cat.label}
-              {count > 0 && <span className="timeline-chip-count">{count}</span>}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* ── Stats ── */}
-      {selectedAnimalId && !loading && events.length > 0 && (
-        <div className="timeline-stats">
-          <div className="timeline-stat-card">
-            <div className="timeline-stat-icon" style={{ background: '#e3f2fd' }}>📊</div>
-            <div className="timeline-stat-info">
-              <h4>{stats.total}</h4>
-              <p>{t('timeline.totalEvents', 'Total Events')}</p>
-            </div>
-          </div>
-          <div className="timeline-stat-card">
-            <div className="timeline-stat-icon" style={{ background: '#fff3e0' }}>📋</div>
-            <div className="timeline-stat-info">
-              <h4>{stats.types}</h4>
-              <p>{t('timeline.eventTypes', 'Event Types')}</p>
-            </div>
-          </div>
-          <div className="timeline-stat-card">
-            <div className="timeline-stat-icon" style={{ background: '#e8f5e9' }}>✅</div>
-            <div className="timeline-stat-info">
-              <h4>{stats.activeCount}</h4>
-              <p>{t('timeline.activeItems', 'Active Items')}</p>
-            </div>
-          </div>
-          {stats.highSeverity > 0 && (
-            <div className="timeline-stat-card">
-              <div className="timeline-stat-icon" style={{ background: '#ffebee' }}>🔴</div>
-              <div className="timeline-stat-info">
-                <h4>{stats.highSeverity}</h4>
-                <p>{t('timeline.highSeverity', 'High Severity')}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Sort & Count ── */}
-      {filteredEvents.length > 0 && (
-        <div className="timeline-sort-info">
-          <span>{t('timeline.showing', 'Showing')} {filteredEvents.length} {t('timeline.of', 'of')} {events.length} {t('timeline.events', 'events')}</span>
-          {selectedAnimal && <span>— <b>{selectedAnimal.name}</b></span>}
-          <button className="timeline-sort-btn" onClick={() => setSortAsc(!sortAsc)}>
-            {sortAsc ? '↑ Oldest First' : '↓ Newest First'}
-          </button>
-        </div>
-      )}
-
-      {/* ── Content ── */}
-      {loading ? (
-        <div className="timeline-loading">
-          <div className="spinner" />
-          <p>{t('timeline.loadingEvents', 'Loading timeline events...')}</p>
-        </div>
-      ) : filteredEvents.length === 0 ? (
-        <div className="timeline-empty">
-          <div className="timeline-empty-icon">📅</div>
-          <h3>{t('timeline.noEvents', 'No Timeline Events')}</h3>
-          <p>
-            {selectedAnimalId
-              ? t('timeline.noEventsDesc', 'No events found for this animal with the current filters.')
-              : t('timeline.selectAnimalFirst', 'Select an animal to view their life timeline.')}
+    <div className="tl-page">
+      {/* Header */}
+      <div className="tl-header">
+        <div className="tl-header-left">
+          <h1>📅 {t('timeline.title', 'Animal Life Timeline')}</h1>
+          <p className="tl-subtitle">
+            {t('timeline.showing', 'Showing')} {filteredEvents.length !== events.length ? `${filteredEvents.length} of` : ''} {events.length} {t('timeline.events', 'events')}
+            {selectedAnimal && <> — <strong>{selectedAnimal.name}</strong> ({selectedAnimal.species})</>}
           </p>
         </div>
-      ) : (
-        <>
-          {/* Horizontal View */}
-          {viewMode === 'horizontal' && (
-            <div className="timeline-horizontal-wrap">
-              <div className="timeline-horizontal">
-                {groupedByMonth.map((group, gi) => (
-                  <React.Fragment key={group.key}>
-                    {gi > 0 && <div className="timeline-h-separator" />}
-                    <div className="timeline-h-group">
-                      <div className="timeline-h-month-label">{group.label}</div>
-                      <div className="timeline-h-items">
-                        {group.items.map(ev => {
-                          const cfg = getEventConfig(ev.type)
-                          const sevColor = severityColor(ev.severity)
-                          return (
-                            <div
-                              key={ev.id}
-                              className="timeline-h-node"
-                              onClick={() => setSelectedEvent(ev)}
-                              title={ev.title}
-                            >
-                              {sevColor && (
-                                <div
-                                  className="timeline-h-severity-badge"
-                                  style={{ background: sevColor }}
-                                />
-                              )}
-                              <div className="timeline-h-dot" style={{ background: cfg.color, color: '#fff' }}>
-                                {cfg.icon}
-                              </div>
-                              <div className="timeline-h-label">
-                                <div className="timeline-h-label-title">{ev.title}</div>
-                                <div className="timeline-h-label-date">{formatEventDate(ev.date)}</div>
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
+        <div className="tl-toolbar">
+          <select className="tl-select" value={selectedAnimalId} onChange={e => setSelectedAnimalId(e.target.value)}>
+            {animals.length === 0 && <option value="">No animals</option>}
+            {animals.map(a => <option key={a.id} value={a.id}>{a.name} ({a.species})</option>)}
+          </select>
+          <div className="tl-search-wrap">
+            <span className="tl-search-icon">🔍</span>
+            <input type="text" className="tl-search" placeholder="Search events..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+            {searchQuery && <button className="tl-search-clear" onClick={() => setSearchQuery('')}>×</button>}
+          </div>
+          <div className="tl-zoom-group">
+            <button className="tl-zoom-btn" onClick={() => setZoomIndex(z => Math.max(0, z - 1))} disabled={zoomIndex === 0} title="Zoom in">+</button>
+            <span className="tl-zoom-label">{ZOOM_LEVELS[zoomIndex]}d</span>
+            <button className="tl-zoom-btn" onClick={() => setZoomIndex(z => Math.min(ZOOM_LEVELS.length - 1, z + 1))} disabled={zoomIndex === ZOOM_LEVELS.length - 1} title="Zoom out">−</button>
+          </div>
+          <button className="tl-sort-btn" onClick={() => setSortAsc(s => !s)}>{sortAsc ? '↑ Oldest' : '↓ Newest'}</button>
+          <button className={`tl-filter-btn ${filterPanelOpen ? 'active' : ''}`} onClick={() => setFilterPanelOpen(o => !o)}>
+            ▼ Filters {activeFilterCount > 0 && <span className="tl-filter-badge">{activeFilterCount}</span>}
+          </button>
+          <button className="tl-icon-btn" onClick={loadTimeline} title="Refresh">↻</button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      {events.length > 0 && (
+        <div className="tl-stats">
+          {[
+            { icon: '📊', value: stats.total,   label: 'Total Events'  },
+            { icon: '📋', value: stats.types,   label: 'Event Types'   },
+            { icon: '✅', value: stats.active,  label: 'Active Items'  },
+            ...(stats.highSev > 0 ? [{ icon: '🔴', value: stats.highSev, label: 'High Severity' }] : []),
+          ].map(s => (
+            <div className="tl-stat" key={s.label}>
+              <span className="tl-stat-icon">{s.icon}</span>
+              <span className="tl-stat-val">{s.value}</span>
+              <span className="tl-stat-lbl">{s.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Main area */}
+      <div className="tl-main">
+        {/* Filter panel */}
+        <div className={`tl-filter-panel ${filterPanelOpen ? 'open' : ''}`}>
+          <div className="tl-fp-header">
+            <span>Filters</span>
+            <button className="tl-fp-close" onClick={() => setFilterPanelOpen(false)}>×</button>
+          </div>
+          <div className="tl-fp-section">
+            <div className="tl-fp-label">TYPES TO SHOW</div>
+            {FILTER_CATEGORIES.map(cat => {
+              const count   = categoryCounts[cat.key] || 0
+              const isActive = activeFilters.has(cat.key)
+              return (
+                <label key={cat.key} className={`tl-fp-check ${isActive ? 'checked' : ''}`}>
+                  <input type="checkbox" checked={isActive} onChange={() => {
+                    setActiveFilters(prev => { const n = new Set(prev); isActive ? n.delete(cat.key) : n.add(cat.key); return n })
+                  }} />
+                  <span className="tl-fp-check-icon">{cat.icon}</span>
+                  <span className="tl-fp-check-label">{cat.label}</span>
+                  {count > 0 && <span className="tl-fp-check-count">{count}</span>}
+                </label>
+              )
+            })}
+          </div>
+          <div className="tl-fp-section">
+            <div className="tl-fp-label">DATE RANGE</div>
+            <label className="tl-fp-date-label">From</label>
+            <input type="date" className="tl-fp-date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
+            <label className="tl-fp-date-label">To</label>
+            <input type="date" className="tl-fp-date" value={dateTo} onChange={e => setDateTo(e.target.value)} />
+            {(dateFrom || dateTo) && (
+              <div className="tl-fp-date-range-badge">{dateFrom || '...'} to {dateTo || '...'}</div>
+            )}
+          </div>
+          {activeFilterCount > 0 && <button className="tl-fp-clear" onClick={clearAll}>✕ Clear All</button>}
+          <button className="tl-fp-apply" onClick={() => setFilterPanelOpen(false)}>Apply</button>
+        </div>
+
+        {/* Canvas */}
+        <div className="tl-canvas-wrap">
+          {loading ? (
+            <div className="tl-loading"><div className="tl-spinner" /><p>Loading timeline...</p></div>
+          ) : filteredEvents.length === 0 ? (
+            <div className="tl-empty">
+              <div className="tl-empty-icon">📅</div>
+              <h3>{searchQuery || activeFilters.size > 0 ? 'No matching events' : 'No events yet'}</h3>
+              <p>{activeFilterCount > 0 ? 'Try clearing filters.' : selectedAnimalId ? 'No timeline events found.' : 'Select an animal above.'}</p>
+              {activeFilterCount > 0 && <button className="tl-btn-outline" onClick={clearAll}>Clear Filters</button>}
+            </div>
+          ) : (
+            <>
+              {/* Rail */}
+              <div
+                className="tl-rail-wrap"
+                ref={railRef}
+                style={{ height: railHeight, cursor: 'grab' }}
+                onMouseDown={onRailMouseDown}
+                onTouchStart={onRailTouchStart}
+                onTouchMove={onRailTouchMove}
+              >
+                {ticks.map((tick, i) => (
+                  <React.Fragment key={i}>
+                    <div className="tl-tick-line"  style={{ left: tick.x }} />
+                    <div className="tl-tick-label" style={{ left: tick.x }}>{tick.label}</div>
                   </React.Fragment>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Vertical View (always visible on mobile via CSS) */}
-          <div
-            className={viewMode === 'vertical' ? 'timeline-vertical' : 'timeline-vertical timeline-force-vertical'}
-            style={viewMode === 'horizontal' ? { display: 'none' } : {}}
-          >
-            {groupedByMonth.map(group => (
-              <React.Fragment key={group.key}>
-                <div className="timeline-v-month-label">{group.label}</div>
-                {group.items.map(ev => {
-                  const cfg = getEventConfig(ev.type)
+                {(() => {
+                  const todayX = msToX(Date.now())
+                  if (todayX < 0 || todayX > railWidth) return null
+                  return (
+                    <div className="tl-today-line" style={{ left: todayX }}>
+                      <span className="tl-today-label">Today</span>
+                    </div>
+                  )
+                })()}
+                {filteredEvents.map(ev => {
+                  const cfg  = getEventConfig(ev.type)
+                  const x    = msToX(new Date(ev.date).getTime())
+                  const lane = laneMap.get(ev.id) ?? 0
+                  const top  = RAIL_PAD_T + lane * LANE_H
+                  const sevCol = severityColor(ev.severity)
+                  if (x < -60 || x > railWidth + 60) return null
                   return (
                     <div
                       key={ev.id}
-                      className="timeline-v-item"
-                      style={{ borderLeftColor: cfg.color }}
-                      onClick={() => setSelectedEvent(ev)}
+                      className="tl-node"
+                      style={{ left: x, top }}
+                      onMouseEnter={e => showHover(ev, e)}
+                      onMouseLeave={hideHover}
+                      onClick={e => { e.stopPropagation(); setHoverEvent(null); setDrawerEvent(ev) }}
                     >
-                      <div className="timeline-v-dot" style={{ background: cfg.color, color: '#fff' }}>
-                        {cfg.icon}
-                      </div>
-                      <div className="timeline-v-header">
-                        <span className="timeline-v-title">{ev.title}</span>
-                        <span className="timeline-v-date">{formatEventDate(ev.date)}</span>
-                      </div>
-                      {ev.description && <p className="timeline-v-desc">{ev.description}</p>}
-                      <div className="timeline-v-meta">
-                        {ev.status && (
-                          <span
-                            className="timeline-v-badge"
-                            style={{
-                              background: ev.status === 'active' || ev.status === 'valid' ? '#e8f5e9' : '#f5f5f5',
-                              color: ev.status === 'active' || ev.status === 'valid' ? '#2e7d32' : '#757575',
-                            }}
-                          >
-                            {ev.status}
-                          </span>
-                        )}
-                        {ev.severity && (
-                          <span
-                            className="timeline-v-badge"
-                            style={{
-                              background: severityColor(ev.severity) ? `${severityColor(ev.severity)}15` : '#f5f5f5',
-                              color: severityColor(ev.severity) || '#757575',
-                            }}
-                          >
-                            {ev.severity}
-                          </span>
-                        )}
-                        {ev.createdByName && (
-                          <span className="timeline-v-badge" style={{ background: '#f1f5f9', color: '#64748b' }}>
-                            👤 {ev.createdByName}
-                          </span>
-                        )}
+                      {sevCol && <div className="tl-node-sev-ring" style={{ borderColor: sevCol }} />}
+                      <div className="tl-node-dot" style={{ background: cfg.color }}>{cfg.icon}</div>
+                      <div className="tl-node-label">
+                        <span className="tl-node-title">{ev.title}</span>
+                        <span className="tl-node-date">{formatEventDate(ev.date)}</span>
                       </div>
                     </div>
                   )
                 })}
-              </React.Fragment>
-            ))}
-          </div>
+              </div>
 
-          {/* ── Minimap ── */}
-          {events.length > 0 && (
-            <div className="timeline-minimap">
-              <div className="timeline-minimap-label">{t('timeline.distribution', 'Event Distribution')}</div>
-              <div className="timeline-minimap-bar">
-                {minimapSegments.map(seg => (
+              {/* Distribution bar */}
+              <div className="tl-dist-bar-wrap">
+                <span className="tl-dist-label">Showing: {new Date(viewStartMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} – {new Date(viewStartMs + daysVisible * 86400000).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })} · {daysVisible} day(s) · {filteredEvents.length} item(s)</span>
+                <div className="tl-dist-bar">
+                  {minimapSegments.map(seg => (
+                    <div key={seg.label} className="tl-dist-seg" style={{ width: `${seg.pct}%`, background: seg.color }} title={`${seg.label} (${Math.round(seg.pct)}%)`} />
+                  ))}
+                </div>
+                <div className="tl-dist-legend">
+                  {minimapSegments.map(seg => (
+                    <span key={seg.label} className="tl-dist-legend-item">
+                      <span className="tl-dist-dot" style={{ background: seg.color }} />{seg.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Scrubber */}
+              <div className="tl-scrubber-wrap">
+                <div className="tl-scrubber-track" ref={scrubberRef}>
+                  <span className="tl-scrubber-min">{new Date(minMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}</span>
+                  <span className="tl-scrubber-max">{new Date(maxMs).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}</span>
+                  {scrubDots.map(dot => (
+                    <div key={dot.id} className="tl-scrubber-dot" style={{ left: `${Math.max(0, Math.min(100, dot.pct))}%`, background: dot.color }} />
+                  ))}
                   <div
-                    key={seg.type}
-                    className="timeline-minimap-segment"
-                    style={{ width: `${seg.pct}%`, background: seg.color }}
-                    title={`${seg.type}: ${Math.round(seg.pct)}%`}
+                    className="tl-scrubber-thumb"
+                    style={{ left: `${thumbLeftPct}%`, width: `${thumbWidthPct}%` }}
+                    onMouseDown={onScrubThumbDown}
                   />
-                ))}
+                </div>
+                <div className="tl-scrubber-years">
+                  {(() => {
+                    const years: { label: string; pct: number }[] = []
+                    for (let y = new Date(minMs).getFullYear(); y <= new Date(maxMs).getFullYear(); y++) {
+                      const ms  = new Date(y, 0, 1).getTime()
+                      const pct = ((ms - minMs) / fullRangeMs) * 100
+                      if (pct >= 0 && pct <= 100) years.push({ label: String(y), pct })
+                    }
+                    return years.map(y => (
+                      <span key={y.label} className="tl-scrubber-year" style={{ left: `${y.pct}%` }}>{y.label}</span>
+                    ))
+                  })()}
+                </div>
               </div>
-              <div className="timeline-minimap-legend">
-                {minimapSegments.map(seg => (
-                  <div key={seg.type} className="timeline-minimap-legend-item">
-                    <div className="timeline-minimap-legend-dot" style={{ background: seg.color }} />
-                    {seg.type} ({Math.round(seg.pct)}%)
-                  </div>
-                ))}
-              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Hover tooltip */}
+      {hoverEvent && (
+        <div
+          className="tl-tooltip"
+          style={{ left: Math.min(hoverPos.x + 14, window.innerWidth - 270), top: Math.min(hoverPos.y - 10, window.innerHeight - 260) }}
+          onMouseEnter={keepHover}
+          onMouseLeave={hideHover}
+        >
+          <div className="tl-tt-header">
+            <span className="tl-tt-icon" style={{ background: getEventConfig(hoverEvent.type).bg, color: getEventConfig(hoverEvent.type).color }}>
+              {getEventConfig(hoverEvent.type).icon}
+            </span>
+            <div>
+              <div className="tl-tt-title">{hoverEvent.title}</div>
+              <div className="tl-tt-meta">{formatEventDate(hoverEvent.date)}</div>
+            </div>
+          </div>
+          {hoverEvent.status && (
+            <div className="tl-tt-row">
+              <span className="tl-tt-key">Status</span>
+              <span className="tl-tt-val" style={{ color: hoverEvent.status === 'active' || hoverEvent.status === 'valid' ? '#2e7d32' : '#757575' }}>{hoverEvent.status}</span>
             </div>
           )}
-        </>
+          {hoverEvent.severity && (
+            <div className="tl-tt-row">
+              <span className="tl-tt-key">Severity</span>
+              <span className="tl-tt-val" style={{ color: severityColor(hoverEvent.severity) || undefined }}>{hoverEvent.severity}</span>
+            </div>
+          )}
+          {hoverEvent.description && (
+            <div className="tl-tt-desc">{hoverEvent.description.slice(0, 90)}{hoverEvent.description.length > 90 ? '...' : ''}</div>
+          )}
+          <div className="tl-tt-actions">
+            <button className="tl-tt-action" onClick={() => { setDrawerEvent(hoverEvent); setHoverEvent(null) }}>📋 Details</button>
+            {getEventConfig(hoverEvent.type).navPath && (
+              <button className="tl-tt-action" onClick={() => { navigate(getEventConfig(hoverEvent.type).navPath!); setHoverEvent(null) }}>🔗 Open Record</button>
+            )}
+            {(hoverEvent.type === 'booking' || hoverEvent.type === 'consultation') && (
+              <button className="tl-tt-action tl-tt-action-primary" onClick={() => { navigate('/consultations'); setHoverEvent(null) }}>🏥 Consultation</button>
+            )}
+          </div>
+        </div>
       )}
 
-      {/* ── Detail Modal ── */}
-      {selectedEvent && (
-        <div className="timeline-modal-overlay" onClick={() => setSelectedEvent(null)}>
-          <div className="timeline-modal" onClick={e => e.stopPropagation()}>
-            <div className="timeline-modal-header">
-              <div
-                className="timeline-modal-icon"
-                style={{ background: getEventConfig(selectedEvent.type).bg, color: getEventConfig(selectedEvent.type).color }}
-              >
-                {getEventConfig(selectedEvent.type).icon}
+      {/* Detail drawer */}
+      {drawerEvent && (
+        <div className="tl-drawer-overlay" onClick={() => setDrawerEvent(null)}>
+          <div className="tl-drawer" onClick={e => e.stopPropagation()}>
+            <div className="tl-drawer-header" style={{ background: getEventConfig(drawerEvent.type).bg }}>
+              <span className="tl-drawer-icon" style={{ color: getEventConfig(drawerEvent.type).color }}>{getEventConfig(drawerEvent.type).icon}</span>
+              <div className="tl-drawer-title-wrap">
+                <h2 className="tl-drawer-title">{drawerEvent.title}</h2>
+                <span className="tl-drawer-type-pill" style={{ background: getEventConfig(drawerEvent.type).color, color: '#fff' }}>{getEventConfig(drawerEvent.type).label}</span>
               </div>
-              <h3>{selectedEvent.title}</h3>
-              <button className="timeline-modal-close" onClick={() => setSelectedEvent(null)}>×</button>
+              <button className="tl-drawer-close" onClick={() => setDrawerEvent(null)}>×</button>
             </div>
-            <div className="timeline-modal-body">
-              <div className="timeline-modal-row">
-                <span className="timeline-modal-label">{t('timeline.detail.type', 'Type')}</span>
-                <span className="timeline-modal-value">{getEventConfig(selectedEvent.type).label}</span>
+            <div className="tl-drawer-body">
+              {[
+                { k: 'Date',        v: formatEventDate(drawerEvent.date) },
+                { k: 'Animal',      v: selectedAnimal ? `${selectedAnimal.name} (${selectedAnimal.species})` : undefined },
+                { k: 'Status',      v: drawerEvent.status,       col: drawerEvent.status === 'active' || drawerEvent.status === 'valid' ? '#2e7d32' : undefined },
+                { k: 'Severity',    v: drawerEvent.severity,     col: severityColor(drawerEvent.severity) || undefined },
+                { k: 'Recorded by', v: drawerEvent.createdByName },
+                { k: 'Description', v: drawerEvent.description },
+              ].filter(r => r.v).map(row => (
+                <div className="tl-drawer-row" key={row.k}>
+                  <span className="tl-drawer-key">{row.k}</span>
+                  <span className="tl-drawer-val" style={{ color: (row as any).col }}>{row.v}</span>
+                </div>
+              ))}
+              {drawerEvent.metadata && Object.entries(drawerEvent.metadata).filter(([, v]) => v).map(([k, v]) => (
+                <div className="tl-drawer-row" key={k}>
+                  <span className="tl-drawer-key">{k.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  <span className="tl-drawer-val">{String(v)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="tl-drawer-actions">
+              {getEventConfig(drawerEvent.type).navPath && (
+                <button className="tl-drawer-action-primary" onClick={() => navigate(getEventConfig(drawerEvent.type).navPath!)}>🔗 Open Full Record</button>
+              )}
+              {(drawerEvent.type === 'booking' || drawerEvent.type === 'consultation') && (
+                <button className="tl-drawer-action-primary" onClick={() => navigate('/consultations')}>🏥 View Consultation</button>
+              )}
+              {(drawerEvent.type === 'prescription' || drawerEvent.type === 'record_prescription') && (
+                <button className="tl-drawer-action" onClick={() => navigate('/prescriptions')}>💊 View Prescriptions</button>
+              )}
+              <div className="tl-drawer-nav">
+                <button className="tl-drawer-action"
+                  disabled={filteredEvents.findIndex(e => e.id === drawerEvent.id) === 0}
+                  onClick={() => { const i = filteredEvents.findIndex(e => e.id === drawerEvent.id); if (i > 0) setDrawerEvent(filteredEvents[i - 1]) }}>
+                  ← Prev
+                </button>
+                <span className="tl-drawer-nav-pos">
+                  {filteredEvents.findIndex(e => e.id === drawerEvent.id) + 1} / {filteredEvents.length}
+                </span>
+                <button className="tl-drawer-action"
+                  disabled={filteredEvents.findIndex(e => e.id === drawerEvent.id) === filteredEvents.length - 1}
+                  onClick={() => { const i = filteredEvents.findIndex(e => e.id === drawerEvent.id); if (i < filteredEvents.length - 1) setDrawerEvent(filteredEvents[i + 1]) }}>
+                  Next →
+                </button>
               </div>
-              <div className="timeline-modal-row">
-                <span className="timeline-modal-label">{t('timeline.detail.date', 'Date')}</span>
-                <span className="timeline-modal-value">{formatEventDate(selectedEvent.date)}</span>
-              </div>
-              {selectedEvent.description && (
-                <div className="timeline-modal-row">
-                  <span className="timeline-modal-label">{t('timeline.detail.description', 'Description')}</span>
-                  <span className="timeline-modal-value">{selectedEvent.description}</span>
-                </div>
-              )}
-              {selectedEvent.status && (
-                <div className="timeline-modal-row">
-                  <span className="timeline-modal-label">{t('timeline.detail.status', 'Status')}</span>
-                  <span className="timeline-modal-value" style={{
-                    color: selectedEvent.status === 'active' || selectedEvent.status === 'valid' ? '#2e7d32' : '#757575'
-                  }}>
-                    {selectedEvent.status}
-                  </span>
-                </div>
-              )}
-              {selectedEvent.severity && (
-                <div className="timeline-modal-row">
-                  <span className="timeline-modal-label">{t('timeline.detail.severity', 'Severity')}</span>
-                  <span className="timeline-modal-value" style={{ color: severityColor(selectedEvent.severity) || undefined }}>
-                    {selectedEvent.severity}
-                  </span>
-                </div>
-              )}
-              {selectedEvent.createdByName && (
-                <div className="timeline-modal-row">
-                  <span className="timeline-modal-label">{t('timeline.detail.recordedBy', 'Recorded By')}</span>
-                  <span className="timeline-modal-value">👤 {selectedEvent.createdByName}</span>
-                </div>
-              )}
-              {selectedEvent.metadata && Object.keys(selectedEvent.metadata).length > 0 && (
-                <>
-                  {Object.entries(selectedEvent.metadata).map(([key, val]) => (
-                    val ? (
-                      <div className="timeline-modal-row" key={key}>
-                        <span className="timeline-modal-label">{key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())}</span>
-                        <span className="timeline-modal-value">{String(val)}</span>
-                      </div>
-                    ) : null
-                  ))}
-                </>
-              )}
             </div>
           </div>
         </div>
