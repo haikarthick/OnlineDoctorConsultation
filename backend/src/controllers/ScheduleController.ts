@@ -49,6 +49,29 @@ class ScheduleController {
     res.json({ success: true, data: availability });
   }
 
+  async searchByAvailability(req: Request, res: Response) {
+    const { date, timeFrom, timeTo, specialization, language, acceptsEmergency,
+            minRating, maxFee, search, limit, offset } = req.query as Record<string, string>;
+
+    if (!date) throw new ValidationError('date parameter is required (YYYY-MM-DD)');
+
+    const result = await ScheduleService.searchVetsByAvailability({
+      date,
+      timeFrom:          timeFrom          || undefined,
+      timeTo:            timeTo            || undefined,
+      specialization:    specialization    || undefined,
+      language:          language          || undefined,
+      acceptsEmergency:  acceptsEmergency === 'true' ? true : undefined,
+      minRating:         minRating  ? Number(minRating)  : undefined,
+      maxFee:            maxFee     ? Number(maxFee)     : undefined,
+      search:            search             || undefined,
+      limit:             limit      ? Number(limit)      : 20,
+      offset:            offset     ? Number(offset)     : 0,
+    });
+
+    res.json({ success: true, data: result });
+  }
+
   // ── Date Overrides ────────────────────────────────────────
   async createDateOverride(req: Request, res: Response) {
     const authReq = req as AuthRequest;

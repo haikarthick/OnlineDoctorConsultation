@@ -440,6 +440,122 @@ class ScheduleService {
     return summary;
   }
 
+  // ── Search Vets By Availability ────────────────────────────
+  async searchVetsByAvailability(params: {
+    date: string;
+    timeFrom?: string;
+    timeTo?: string;
+    specialization?: string;
+    language?: string;
+    acceptsEmergency?: boolean;
+    minRating?: number;
+    maxFee?: number;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ vets: any[]; total: number }> {
+    const { date, timeFrom, timeTo, specialization, language, acceptsEmergency,
+            minRating, maxFee, search, limit = 20, offset = 0 } = params;
+
+    let vetQuery = `
+      SELECT vp.id, vp.user_id as "userId", vp.license_number as "licenseNumber",
+             vp.specializations, vp.qualifications,
+             vp.years_of_experience as "yearsOfExperience", vp.bio,
+             vp.clinic_name as "clinicName", vp.clinic_address as "clinicAddress",
+             vp.consultation_fee as "consultationFee", vp.currency,
+             vp.is_verified as "isVerified", vp.is_available as "isAvailable",
+             vp.accepts_emergency as "acceptsEmergency",
+             vp.available_days as "availableDays",
+             vp.available_hours_start as "availableHoursStart",
+             vp.available_hours_end as "availableHoursEnd",
+             vp.languages, vp.rating, vp.total_reviews as "totalReviews",
+             vp.total_consultations as "totalConsultations",
+             u.first_name as "firstName", u.last_name as "lastName",
+             vp.created_at as "createdAt", vp.updated_at as "updatedAt"
+      FROM vet_profiles vp JOIN users u ON u.id = vp.user_id
+      WHERE u.is_active = true
+    `;
+    const vetParams: any[] = [];
+    let idx = 0;
+
+    if (specialization) {
+      idx++;
+      vetQuery += ` AND $${idx} = ANY(vp.specializations)`;
+      vetParams.push(specialization);
+    }
+    if (language) {
+      idx++;
+      vetQuery += ` AND $${idx} = ANY(vp.languages)`;
+      vetParams.push(language);
+    }
+    if (acceptsEmergency) {
+      vetQuery += ` AND vp.accepts_emergency = true`;
+    }
+    if (minRating != null && minRating > 0) {
+      idx++;
+      vetQuery += ` AND vp.rating >= $${idx}`;
+      vetParams.push(minRating);
+    }
+    if (maxFee != null) {
+      idx++;
+      vetQuery += ` AND vp.consultation_fee <= $${idx}`;
+      vetParams.push(maxFee);
+    }
+    if (search) {
+      idx++;
+      vetQuery += ` AND (
+        u.first_name ILIKE $${idx} OR u.last_name ILIKE $${idx}
+        OR vp.clinic_name ILIKE $${idx}
+        OR EXISTS (SELECT 1 FROM unnest(vp.specializations) s WHERE s ILIKE $${idx})
+      )`;
+      vetParams.push(`%${search}%`);
+    }
+    vetQuery += ` LIMIT 200`;
+
+    const vetResult = await database.query(vetQuery, vetParams);
+    const allVets = vetResult.rows;
+
+    const fromMinutes = timeFrom ? this.parseTime(timeFrom) : null;
+    const toMinutes   = timeTo   ? this.parseTime(timeTo)   : null;
+
+    const results = await Promise.all(
+      allVets.map(async (vet: any) => {
+        try {
+          const availability = await this.getAvailability(vet.userId, date);
+          let slots = availability.slots.filter(s => s.isAvailable);
+
+          if (fromMinutes !== null || toMinutes !== null) {
+            slots = slots.filter(slot => {
+              const slotStart = this.parseTime(slot.startTime);
+              if (fromMinutes !== null && slotStart < fromMinutes) return false;
+              if (toMinutes   !== null && slotStart >= toMinutes)  return false;
+              return true;
+            });
+          }
+
+          if (slots.length === 0) return null;
+
+          return {
+            ...vet,
+            availableSlots:    slots,
+            totalAvailableSlots: slots.length,
+            nextAvailableTime: slots[0]?.startTime,
+          };
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const available = results.filter((v): v is NonNullable<typeof v> => v !== null);
+    available.sort((a, b) => {
+      if (b.totalAvailableSlots !== a.totalAvailableSlots) return b.totalAvailableSlots - a.totalAvailableSlots;
+      return Number(b.rating) - Number(a.rating);
+    });
+
+    return { vets: available.slice(offset, offset + limit), total: available.length };
+  }
+
   private getDayOfWeek(date: Date): DayOfWeek {
     const days: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     return days[date.getDay()];

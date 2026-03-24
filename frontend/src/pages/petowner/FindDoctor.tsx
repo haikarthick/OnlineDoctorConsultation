@@ -1,15 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import apiService from '../../services/api'
+import { searchVetsByAvailability } from '../../services/api/scheduleApi'
 import { useSettings } from '../../context/SettingsContext'
-import { VetProfile } from '../../types'
+import { VetProfile, TimeSlot } from '../../types'
 import '../../styles/modules.css'
 
 interface FindDoctorProps {
   onNavigate: (path: string) => void
 }
 
+interface VetWithAvailability extends VetProfile {
+  availableSlots?: TimeSlot[]
+  totalAvailableSlots?: number
+  nextAvailableTime?: string
+}
+
 type ViewMode = 'grid' | 'list'
 type SortOption = 'rating' | 'fee_asc' | 'fee_desc' | 'experience' | 'consultations' | 'reviews' | 'name'
+type TimeOfDay = '' | 'morning' | 'afternoon' | 'evening'
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'rating', label: '⭐ Highest Rated' },
@@ -21,14 +29,54 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'name', label: '🔤 Name A–Z' },
 ]
 
+const TIME_RANGES: Record<string, { label: string; from: string; to: string; desc: string }> = {
+  morning:   { label: '🌅 Morning',   from: '08:00', to: '12:00', desc: '8am–12pm' },
+  afternoon: { label: '☀️ Afternoon', from: '12:00', to: '17:00', desc: '12pm–5pm' },
+  evening:   { label: '🌆 Evening',   from: '17:00', to: '20:00', desc: '5pm–8pm'  },
+}
+
+function getDateChips() {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() + i)
+    const dateStr = d.toISOString().split('T')[0]
+    const label = i === 0 ? 'Today'
+      : i === 1 ? 'Tomorrow'
+      : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+    return { dateStr, label }
+  })
+}
+
+function formatTime12h(time24: string): string {
+  const [h, m] = time24.split(':').map(Number)
+  const period = h >= 12 ? 'PM' : 'AM'
+  const hour = h % 12 || 12
+  return `${hour}${m > 0 ? ':' + String(m).padStart(2, '0') : ''} ${period}`
+}
+
+function formatDateLabel(dateStr: string): string {
+  if (!dateStr) return ''
+  const today    = new Date().toISOString().split('T')[0]
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  if (dateStr === today)    return 'Today'
+  if (dateStr === tomorrow) return 'Tomorrow'
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
+    weekday: 'long', month: 'short', day: 'numeric',
+  })
+}
+
 const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
   const { formatCurrency } = useSettings()
-  const [vets, setVets] = useState<VetProfile[]>([])
+  const [vets, setVets] = useState<VetWithAvailability[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [page, setPage] = useState(0)
   const pageSize = 12
+
+  // Availability date/time state
+  const [selectedDate, setSelectedDate] = useState<string>('')
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('')
 
   // Search & Filters
   const [searchTerm, setSearchTerm] = useState('')
@@ -53,34 +101,60 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
   const [allSpecializations, setAllSpecializations] = useState<string[]>([])
   const [allLanguages, setAllLanguages] = useState<string[]>([])
 
+  const dateChips = getDateChips()
+
   const loadVets = useCallback(async (pageNum: number = 0) => {
     try {
       setLoading(true)
       setError('')
-      const params: Record<string, any> = {
-        limit: pageSize,
-        offset: pageNum * pageSize,
-        sortBy,
-      }
-      if (debouncedSearch) params.search = debouncedSearch
-      if (specialtyFilter) params.specialization = specialtyFilter
-      if (languageFilter) params.language = languageFilter
-      if (emergencyOnly) params.acceptsEmergency = 'true'
-      if (availableOnly) params.availableOnly = 'true'
-      if (minRating > 0) params.minRating = minRating
-      if (maxFee !== '' && maxFee > 0) params.maxFee = maxFee
 
-      const result = await apiService.listVets(params)
-      const vetList = result.data?.vets || result.data?.items || (Array.isArray(result.data) ? result.data : [])
-      const totalCount = result.data?.total || vetList.length
-      setVets(vetList)
-      setTotal(totalCount)
+      if (selectedDate) {
+        // ── Availability mode: search vets by date & optional time window ──
+        const timeInfo = timeOfDay ? TIME_RANGES[timeOfDay] : null
+        const result = await searchVetsByAvailability({
+          date: selectedDate,
+          timeFrom: timeInfo?.from,
+          timeTo:   timeInfo?.to,
+          specialization: specialtyFilter || undefined,
+          language:       languageFilter  || undefined,
+          acceptsEmergency: emergencyOnly || undefined,
+          minRating: minRating > 0 ? minRating : undefined,
+          maxFee:    maxFee !== '' && (maxFee as number) > 0 ? (maxFee as number) : undefined,
+          search:    debouncedSearch || undefined,
+          limit:     pageSize,
+          offset:    pageNum * pageSize,
+        })
+        const vetList    = result.data?.vets   || []
+        const totalCount = result.data?.total  ?? vetList.length
+        setVets(vetList)
+        setTotal(totalCount)
+      } else {
+        // ── Standard mode: list vets with regular filters ──
+        const params: Record<string, any> = {
+          limit:  pageSize,
+          offset: pageNum * pageSize,
+          sortBy,
+        }
+        if (debouncedSearch) params.search          = debouncedSearch
+        if (specialtyFilter) params.specialization  = specialtyFilter
+        if (languageFilter)  params.language        = languageFilter
+        if (emergencyOnly)   params.acceptsEmergency = 'true'
+        if (availableOnly)   params.availableOnly    = 'true'
+        if (minRating > 0)   params.minRating        = minRating
+        if (maxFee !== '' && maxFee > 0) params.maxFee = maxFee
+
+        const result     = await apiService.listVets(params)
+        const vetList    = result.data?.vets || result.data?.items || (Array.isArray(result.data) ? result.data : [])
+        const totalCount = result.data?.total || vetList.length
+        setVets(vetList)
+        setTotal(totalCount)
+      }
     } catch (err: any) {
       setError(err?.response?.data?.error?.message || err?.message || 'Failed to load veterinarians')
     } finally {
       setLoading(false)
     }
-  }, [debouncedSearch, specialtyFilter, languageFilter, emergencyOnly, availableOnly, minRating, maxFee, sortBy])
+  }, [selectedDate, timeOfDay, debouncedSearch, specialtyFilter, languageFilter, emergencyOnly, availableOnly, minRating, maxFee, sortBy])
 
   // Populate filter dropdown options on mount
   useEffect(() => {
@@ -105,6 +179,12 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
     setSearchTerm(''); setSpecialtyFilter(''); setLanguageFilter('')
     setEmergencyOnly(false); setAvailableOnly(false)
     setMinRating(0); setMaxFee(''); setSortBy('rating')
+  }
+
+  const clearDateFilter = () => { setSelectedDate(''); setTimeOfDay('') }
+
+  const handleSlotBook = (vet: VetWithAvailability, slotTime: string) => {
+    onNavigate(`/book-consultation?vetId=${vet.userId}&date=${selectedDate}&time=${slotTime}`)
   }
 
   const activeFilterCount = [
@@ -136,142 +216,182 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
     </div>
   )
 
+  // ── Slot chips displayed on each card in availability mode ──
+  const renderSlotChips = (vet: VetWithAvailability) => {
+    const slots = vet.availableSlots || []
+    if (!selectedDate || slots.length === 0) return null
+    const shown     = slots.slice(0, 8)
+    const remainder = slots.length - 8
+
+    return (
+      <div style={{
+        padding: '8px 16px 12px',
+        borderTop: '1px dashed #d1fae5',
+        background: 'linear-gradient(to bottom, #f0fdf4, #ffffff)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+          <span style={{
+            fontSize: 10, fontWeight: 700, color: '#15803d',
+            textTransform: 'uppercase', letterSpacing: '0.05em',
+          }}>
+            ✅ {slots.length} slot{slots.length !== 1 ? 's' : ''} · {formatDateLabel(selectedDate)}
+            {timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : ''}
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+          {shown.map(slot => (
+            <button
+              key={slot.startTime}
+              onClick={e => { e.stopPropagation(); handleSlotBook(vet, slot.startTime) }}
+              title={`Book ${formatTime12h(slot.startTime)} — pre-fills date & time`}
+              style={{
+                padding: '4px 10px', borderRadius: 20, cursor: 'pointer',
+                border: '1.5px solid #16a34a', background: 'white', color: '#16a34a',
+                fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => {
+                ;(e.currentTarget as HTMLElement).style.background = '#16a34a'
+                ;(e.currentTarget as HTMLElement).style.color = 'white'
+              }}
+              onMouseLeave={e => {
+                ;(e.currentTarget as HTMLElement).style.background = 'white'
+                ;(e.currentTarget as HTMLElement).style.color = '#16a34a'
+              }}
+            >
+              {formatTime12h(slot.startTime)}
+            </button>
+          ))}
+          {remainder > 0 && (
+            <span style={{ fontSize: 11, color: '#6b7280', fontStyle: 'italic' }}>
+              +{remainder} more
+            </span>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   // ── VET CARD ──
-  const renderVetCard = (vet: VetProfile) => {
+  const renderVetCard = (vet: VetWithAvailability) => {
     const experience = vet.yearsOfExperience || vet.experience || 0
-    const isGrid = viewMode === 'grid'
+    const isGrid     = viewMode === 'grid'
+    const hasSlots   = selectedDate && (vet.totalAvailableSlots ?? 0) > 0
 
     return (
       <div key={vet.id} style={{
-        background: 'white', borderRadius: 14, border: '1px solid #e5e7eb', overflow: 'hidden',
-        boxShadow: '0 1px 6px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s, transform 0.2s',
-        display: isGrid ? 'block' : 'flex', gap: isGrid ? 0 : 24, alignItems: isGrid ? undefined : 'center',
-        cursor: 'pointer', position: 'relative'
+        background: 'white', borderRadius: 14, overflow: 'hidden',
+        border: hasSlots ? '1px solid #d1fae5' : '1px solid #e5e7eb',
+        boxShadow: hasSlots ? '0 2px 12px rgba(22,163,74,0.10)' : '0 1px 6px rgba(0,0,0,0.04)',
+        transition: 'box-shadow 0.2s, transform 0.2s',
+        display: isGrid ? 'flex' : 'flex',
+        flexDirection: 'column',
+        cursor: 'pointer', position: 'relative',
       }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 6px rgba(0,0,0,0.04)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}
+        onMouseEnter={e => {
+          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.12)'
+          ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'
+        }}
+        onMouseLeave={e => {
+          ;(e.currentTarget as HTMLElement).style.boxShadow = hasSlots ? '0 2px 12px rgba(22,163,74,0.10)' : '0 1px 6px rgba(0,0,0,0.04)'
+          ;(e.currentTarget as HTMLElement).style.transform = 'none'
+        }}
         onClick={() => onNavigate(`/vet-profile/${vet.userId}`)}
       >
-        {/* Availability badge */}
-        <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 1 }}>
-          {vet.isAvailable ? (
-            <span style={{ background: '#059669', color: 'white', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>● Available</span>
-          ) : (
-            <span style={{ background: '#6b7280', color: 'white', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>Unavailable</span>
+        {/* ── Badge row (top-right) ── */}
+        <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+          {vet.isAvailable
+            ? <span style={{ background: '#059669', color: 'white', padding: '3px 10px', borderRadius: 12, fontSize: 10, fontWeight: 700 }}>● Available</span>
+            : <span style={{ background: '#6b7280', color: 'white', padding: '3px 10px', borderRadius: 12, fontSize: 10, fontWeight: 600 }}>Unavailable</span>
+          }
+          {hasSlots && (
+            <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 700 }}>
+              📅 {vet.totalAvailableSlots} open
+            </span>
           )}
         </div>
 
-        {/* Avatar section */}
-        <div style={{
-          padding: isGrid ? '24px 20px 16px' : '20px 0 20px 24px',
-          textAlign: isGrid ? 'center' : 'left',
-          display: isGrid ? 'block' : 'flex', alignItems: 'center', gap: 16, flexShrink: 0
-        }}>
+        {/* ── Avatar + name ── */}
+        <div style={{ padding: '22px 20px 10px', textAlign: 'center', paddingRight: 90 }}>
           <div style={{
-            width: isGrid ? 72 : 64, height: isGrid ? 72 : 64, borderRadius: '50%',
+            width: 68, height: 68, borderRadius: '50%',
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: isGrid ? 28 : 24, fontWeight: 700, color: 'white',
-            margin: isGrid ? '0 auto 12px' : '0', flexShrink: 0,
-            border: '3px solid #e5e7eb'
+            fontSize: 26, fontWeight: 700, color: 'white',
+            margin: '0 auto 10px',
+            border: hasSlots ? '3px solid #d1fae5' : '3px solid #e5e7eb',
           }}>
             {vet.firstName?.charAt(0) || '🐾'}
           </div>
-
-          {isGrid && (
-            <>
-              <h3 style={{ margin: '0 0 4px', fontSize: 17, fontWeight: 700, color: '#1f2937' }}>
-                Dr. {vet.firstName || ''} {vet.lastName || ''}
-              </h3>
-              <p style={{ margin: 0, color: '#6b7280', fontSize: 13, lineHeight: 1.4 }}>
-                {(vet.specializations || []).slice(0, 3).join(', ') || 'General Veterinarian'}
-              </p>
-            </>
-          )}
+          <h3 style={{ margin: '0 0 3px', fontSize: 16, fontWeight: 700, color: '#1f2937', lineHeight: 1.2 }}>
+            Dr. {vet.firstName || ''} {vet.lastName || ''}
+          </h3>
+          <p style={{ margin: 0, color: '#6b7280', fontSize: 12, lineHeight: 1.4 }}>
+            {(vet.specializations || []).slice(0, 2).join(' · ') || 'General Veterinarian'}
+          </p>
         </div>
 
-        {/* Info section */}
-        <div style={{
-          padding: isGrid ? '0 20px 16px' : '16px 20px 16px 0',
-          flex: isGrid ? undefined : 1, minWidth: 0
-        }}>
-          {!isGrid && (
-            <>
-              <h3 style={{ margin: '0 0 4px', fontSize: 17, fontWeight: 700, color: '#1f2937' }}>
-                Dr. {vet.firstName || ''} {vet.lastName || ''}
-              </h3>
-              <p style={{ margin: '0 0 8px', color: '#6b7280', fontSize: 13, lineHeight: 1.4 }}>
-                {(vet.specializations || []).join(', ') || 'General Veterinarian'}
-              </p>
-            </>
-          )}
-
-          {/* Rating + Reviews */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, justifyContent: isGrid ? 'center' : 'flex-start' }}>
+        {/* ── Ratings + stats ── */}
+        <div style={{ padding: '0 16px 10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8, justifyContent: 'center' }}>
             {renderStars(Number(vet.rating) || 0)}
             <span style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>{Number(vet.rating || 0).toFixed(1)}</span>
             <span style={{ color: '#9ca3af', fontSize: 12 }}>({vet.totalReviews || 0})</span>
           </div>
 
-          {/* Stats Row */}
-          <div style={{
-            display: 'flex', gap: isGrid ? 16 : 24, justifyContent: isGrid ? 'center' : 'flex-start',
-            marginBottom: 10, fontSize: 13
-          }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 10 }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#2563eb', fontSize: 16 }}>{experience}</div>
-              <div style={{ color: '#9ca3af', fontSize: 11 }}>Years Exp.</div>
+              <div style={{ fontWeight: 700, color: '#2563eb', fontSize: 15 }}>{experience}</div>
+              <div style={{ color: '#9ca3af', fontSize: 10 }}>Yrs Exp</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#059669', fontSize: 16 }}>{vet.totalConsultations || 0}</div>
-              <div style={{ color: '#9ca3af', fontSize: 11 }}>Consults</div>
+              <div style={{ fontWeight: 700, color: '#059669', fontSize: 15 }}>{vet.totalConsultations || 0}</div>
+              <div style={{ color: '#9ca3af', fontSize: 10 }}>Consults</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#8b5cf6', fontSize: 16 }}>{formatCurrency(vet.consultationFee || 0)}</div>
-              <div style={{ color: '#9ca3af', fontSize: 11 }}>Per Session</div>
+              <div style={{ fontWeight: 700, color: '#8b5cf6', fontSize: 15 }}>{formatCurrency(vet.consultationFee || 0)}</div>
+              <div style={{ color: '#9ca3af', fontSize: 10 }}>Per Session</div>
             </div>
           </div>
 
           {/* Tags */}
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8, justifyContent: isGrid ? 'center' : 'flex-start' }}>
-            {(vet.languages || []).map(l => (
-              <span key={l} style={{ background: '#f3f4f6', color: '#4b5563', padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 6 }}>
+            {(vet.languages || []).slice(0, 2).map(l => (
+              <span key={l} style={{ background: '#f3f4f6', color: '#4b5563', padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 500 }}>
                 🌐 {l}
               </span>
             ))}
             {vet.acceptsEmergency && (
-              <span style={{ background: '#fef2f2', color: '#dc2626', padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600 }}>
+              <span style={{ background: '#fef2f2', color: '#dc2626', padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 600 }}>
                 🚨 Emergency
               </span>
             )}
             {vet.isVerified && (
-              <span style={{ background: '#ecfdf5', color: '#059669', padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600 }}>
+              <span style={{ background: '#ecfdf5', color: '#059669', padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 600 }}>
                 ✓ Verified
               </span>
             )}
           </div>
 
           {vet.clinicName && (
-            <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 6, textAlign: isGrid ? 'center' : 'left' }}>
+            <div style={{ fontSize: 11, color: '#6b7280', textAlign: 'center', marginBottom: 4 }}>
               🏥 {vet.clinicName}
             </div>
           )}
         </div>
 
-        {/* Action buttons */}
-        <div style={{
-          padding: isGrid ? '0 20px 20px' : '16px 24px 16px 0',
-          display: 'flex', flexDirection: 'column', gap: 6,
-          flexShrink: 0, justifyContent: 'center'
-        }}
+        {/* ── Slot chips (availability mode) ── */}
+        {renderSlotChips(vet)}
+
+        {/* ── Action buttons ── */}
+        <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 'auto' }}
           onClick={e => e.stopPropagation()}>
           <button className="btn btn-primary"
-            style={{ width: '100%', fontSize: 13, padding: '8px 16px', whiteSpace: 'nowrap' }}
-            onClick={() => onNavigate(`/book-consultation?vetId=${vet.userId}`)}>
+            style={{ width: '100%', fontSize: 13, padding: '8px 16px' }}
+            onClick={() => onNavigate(`/book-consultation?vetId=${vet.userId}${selectedDate ? `&date=${selectedDate}` : ''}`)}>
             📅 Book Consultation
           </button>
           <button className="btn btn-outline"
-            style={{ width: '100%', fontSize: 13, padding: '8px 16px', whiteSpace: 'nowrap' }}
+            style={{ width: '100%', fontSize: 13, padding: '8px 16px' }}
             onClick={() => onNavigate(`/vet-profile/${vet.userId}`)}>
             View Profile & Reviews
           </button>
@@ -283,11 +403,93 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
   return (
     <div className="module-page">
       {/* ── Page Header ── */}
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 16 }}>
         <h1 style={{ margin: '0 0 4px', fontSize: 26, color: '#1f2937' }}>🔍 Find a Veterinarian</h1>
         <p style={{ margin: 0, color: '#6b7280', fontSize: 14 }}>
-          Browse {total > 0 ? `${total} ` : ''}qualified veterinarians — search by name, specialty, language, and more
+          {selectedDate
+            ? <>Showing doctors available on <strong>{formatDateLabel(selectedDate)}</strong>{timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : ''}</>
+            : <>Browse {total > 0 ? `${total} ` : ''}qualified veterinarians — search by name, specialty, language, and more</>
+          }
         </p>
+      </div>
+
+      {/* ── Smart Availability Panel ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 60%, #f0fdf4 100%)',
+        borderRadius: 14, border: '1px solid #bae6fd',
+        padding: '16px 20px', marginBottom: 16,
+        boxShadow: '0 2px 10px rgba(14,165,233,0.08)',
+      }}>
+        {/* Panel header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#0c4a6e' }}>📅 Find by Availability</span>
+            <span style={{ fontSize: 12, color: '#0369a1', marginLeft: 8 }}>
+              {selectedDate ? `Filtering to ${formatDateLabel(selectedDate)}` : 'Pick a date to see open slots on each card'}
+            </span>
+          </div>
+          {selectedDate && (
+            <button onClick={clearDateFilter} style={{
+              padding: '4px 12px', borderRadius: 20, border: '1px solid #bae6fd',
+              background: 'white', color: '#0369a1', fontSize: 12, cursor: 'pointer', fontWeight: 600,
+            }}>✕ Clear date</button>
+          )}
+        </div>
+
+        {/* Date chips */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+          {dateChips.map(({ dateStr, label }) => {
+            const active = selectedDate === dateStr
+            return (
+              <button key={dateStr}
+                onClick={() => { setSelectedDate(dateStr); setPage(0) }}
+                style={{
+                  padding: '6px 14px', borderRadius: 20, cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                  border: active ? '2px solid #0284c7' : '1px solid #bae6fd',
+                  background: active ? '#0284c7' : 'white',
+                  color: active ? 'white' : '#0369a1',
+                  transition: 'all 0.15s', whiteSpace: 'nowrap',
+                }}>
+                {label}
+              </button>
+            )
+          })}
+          <input
+            type="date"
+            value={selectedDate}
+            min={new Date().toISOString().split('T')[0]}
+            onChange={e => { setSelectedDate(e.target.value); setPage(0) }}
+            style={{
+              padding: '6px 10px', borderRadius: 20, border: '1px solid #bae6fd',
+              fontSize: 12, cursor: 'pointer', background: 'white', color: '#0369a1',
+              outline: 'none',
+            }}
+          />
+        </div>
+
+        {/* Time-of-day filter */}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: '#0369a1', fontWeight: 600 }}>🕐 Time:</span>
+          {([
+            { key: '' as TimeOfDay,        label: 'Any time'       },
+            { key: 'morning'   as TimeOfDay, label: '🌅 Morning',   sub: '8am–12pm' },
+            { key: 'afternoon' as TimeOfDay, label: '☀️ Afternoon', sub: '12pm–5pm' },
+            { key: 'evening'   as TimeOfDay, label: '🌆 Evening',   sub: '5pm–8pm'  },
+          ] as { key: TimeOfDay; label: string; sub?: string }[]).map(({ key, label, sub }) => {
+            const active = timeOfDay === key
+            return (
+              <button key={key || 'any'} onClick={() => setTimeOfDay(key)} style={{
+                padding: '5px 12px', borderRadius: 20, cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                border: active ? '2px solid #0284c7' : '1px solid #bae6fd',
+                background: active ? '#0284c7' : 'white',
+                color: active ? 'white' : '#0369a1',
+                transition: 'all 0.15s', whiteSpace: 'nowrap',
+              }}>
+                {label}{active && sub ? <span style={{ marginLeft: 4, fontSize: 10, opacity: 0.9 }}>{sub}</span> : null}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* ── Search Bar ── */}
@@ -390,7 +592,12 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 13, color: '#6b7280' }}>
-            {loading ? 'Searching...' : `${total} veterinarian${total !== 1 ? 's' : ''} found`}
+            {loading
+              ? 'Searching...'
+              : selectedDate
+                ? `${total} doctor${total !== 1 ? 's' : ''} with open slots on ${formatDateLabel(selectedDate)}`
+                : `${total} veterinarian${total !== 1 ? 's' : ''} found`
+            }
           </span>
         </div>
 
@@ -436,14 +643,29 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
       {/* ── Results ── */}
       {!loading && vets.length === 0 && !error ? (
         <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: 56, marginBottom: 16 }}>🔍</div>
-          <h3 style={{ fontSize: 20, color: '#1f2937', marginBottom: 8 }}>No veterinarians match your criteria</h3>
+          <div style={{ fontSize: 56, marginBottom: 16 }}>{selectedDate ? '📅' : '🔍'}</div>
+          <h3 style={{ fontSize: 20, color: '#1f2937', marginBottom: 8 }}>
+            {selectedDate
+              ? `No doctors available on ${formatDateLabel(selectedDate)}${timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : ''}`
+              : 'No veterinarians match your criteria'
+            }
+          </h3>
           <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 16 }}>
-            Try broadening your search or removing some filters.
+            {selectedDate
+              ? 'Try a different date, time of day, or broaden your filters.'
+              : 'Try broadening your search or removing some filters.'
+            }
           </p>
-          {activeFilterCount > 0 && (
-            <button onClick={clearFilters} className="btn btn-primary" style={{ fontSize: 14 }}>Clear All Filters</button>
-          )}
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {selectedDate && (
+              <button onClick={clearDateFilter} className="btn btn-primary" style={{ fontSize: 14 }}>
+                Browse All Doctors
+              </button>
+            )}
+            {activeFilterCount > 0 && (
+              <button onClick={clearFilters} className="btn btn-outline" style={{ fontSize: 14 }}>Clear Filters</button>
+            )}
+          </div>
         </div>
       ) : !loading && (
         <>

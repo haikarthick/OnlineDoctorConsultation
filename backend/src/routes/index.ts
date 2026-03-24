@@ -153,6 +153,7 @@ router.get('/schedules/me', authMiddleware, asyncHandler((req: Request, res: Res
 router.get('/schedules/vet/:vetId', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getSchedules(req, res)));
 router.put('/schedules/:id', authMiddleware, validateBody(updateScheduleSchema), asyncHandler((req: Request, res: Response) => ScheduleController.updateSchedule(req, res)));
 router.delete('/schedules/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.deleteSchedule(req, res)));
+router.get('/availability/search', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.searchByAvailability(req, res)));
 router.get('/availability/:vetId/:date', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getAvailability(req, res)));
 router.get('/availability/:vetId/monthly/summary', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.getMonthlyAvailability(req, res)));
 

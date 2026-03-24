@@ -29,3 +29,20 @@ export async function getVetAvailability(vetId: string, date: string) {
   const response = await client.get(`/availability/${vetId}/${date}`)
   return response.data
 }
+
+export async function searchVetsByAvailability(params: {
+  date: string
+  timeFrom?: string
+  timeTo?: string
+  specialization?: string
+  language?: string
+  acceptsEmergency?: boolean
+  minRating?: number
+  maxFee?: number
+  search?: string
+  limit?: number
+  offset?: number
+}) {
+  const response = await client.get('/availability/search', { params })
+  return response.data
+}
