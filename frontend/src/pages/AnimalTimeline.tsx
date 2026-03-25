@@ -131,7 +131,8 @@ const AnimalTimeline: React.FC<AnimalTimelineProps> = ({ onNavigate }) => {
       try {
         setAnimalsLoading(true)
         const res = await apiService.listAnimals({ limit: isVet || isAdmin ? 500 : 200 })
-        const list: AnimalOption[] = (res.data?.items || res.data || []).map((a: any) => ({
+        const rawList = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
+        const list: AnimalOption[] = rawList.map((a: any) => ({
           id: a.id, name: a.name, species: a.species,
         }))
         setAnimals(list)

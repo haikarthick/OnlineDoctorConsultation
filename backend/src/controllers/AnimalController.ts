@@ -40,13 +40,17 @@ export class AnimalController {
   }
 
   async listAnimals(req: AuthRequest, res: Response): Promise<void> {
-    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const isAdminOrVet = req.userRole === 'admin' || req.userRole === 'veterinarian';
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, isAdminOrVet ? 500 : 200);
     const offset = parseInt(req.query.offset as string) || 0;
 
     let result;
     if (req.userRole === 'veterinarian') {
-      // Vets see animals they've consulted with
+      // Vets see animals they've consulted with; fall back to all animals if none found
       result = await AnimalService.listAnimalsByVeterinarian(req.userId!, limit, offset);
+      if (result.total === 0) {
+        result = await AnimalService.listAllAnimals(limit, offset);
+      }
     } else if (req.userRole === 'admin') {
       // Admins see all animals
       result = await AnimalService.listAllAnimals(limit, offset);
