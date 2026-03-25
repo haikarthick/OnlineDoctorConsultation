@@ -21,6 +21,8 @@ export const PERMISSION_CATEGORIES = {
       'write_review',
       'hospital_browse',
       'hospital_manage',
+      'animal_timeline',
+      'wallet',
     ]
   },
   admin_pages: {
@@ -38,6 +40,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_hospitals',
       'admin_compliance',
       'admin_holidays',
+      'admin_cancellation_dashboard',
     ]
   },
   actions: {
@@ -384,17 +387,29 @@ class PermissionService {
 
   /** Get all permissions for a specific role (returns only enabled permission keys) */
   async getPermissionsForRole(role: string): Promise<string[]> {
-    // First check if any DB overrides exist for this role
+    // Read all DB rows for this role (both enabled and disabled, to know explicit overrides)
     const result = await database.query(
-      'SELECT permission FROM role_permissions WHERE role = $1 AND is_enabled = true',
+      'SELECT permission, is_enabled FROM role_permissions WHERE role = $1',
       [role]
     );
 
     if (result.rows.length > 0) {
-      return result.rows.map((r: any) => r.permission);
+      // Build a map of DB-managed permissions
+      const dbMap = new Map<string, boolean>(result.rows.map((r: any) => [r.permission, r.is_enabled]));
+      const defaults = DEFAULT_ROLE_PERMISSIONS[role] || [];
+      const enabled = new Set<string>();
+      // Add DB-enabled permissions
+      for (const [perm, isEnabled] of dbMap) {
+        if (isEnabled) enabled.add(perm);
+      }
+      // Add DEFAULT permissions not yet present in DB (new permissions added after initial seed)
+      for (const perm of defaults) {
+        if (!dbMap.has(perm)) enabled.add(perm);
+      }
+      return Array.from(enabled);
     }
 
-    // Fallback to defaults if no DB records (e.g., fresh install before seeding)
+    // Fallback to defaults if no DB records at all (fresh install)
     return DEFAULT_ROLE_PERMISSIONS[role] || [];
   }
 
