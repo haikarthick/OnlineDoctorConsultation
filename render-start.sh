@@ -77,7 +77,8 @@ main();
 
 echo "  Database has $VET_PROFILE_COUNT vet profile(s)"
 
-if [ "$FORCE_RESEED" = "true" ]; then
+FORCE_RESEED_LOWER=$(echo "$FORCE_RESEED" | tr '[:upper:]' '[:lower:]')
+if [ "$FORCE_RESEED_LOWER" = "true" ] || [ "$FORCE_RESEED" = "1" ]; then
   echo ""
   echo "━━━ FORCE_RESEED=true — Re-seeding demo data ━━━"
   node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings — continuing"
