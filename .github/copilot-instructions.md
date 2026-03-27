@@ -81,6 +81,32 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 - Timeline, medical records, analytics etc. must work across pet_owner, farmer, veterinarian, admin
 - When adding a nav item: always review ALL 4 roles and add to every role that should see it
 
+## UI/UX Consistency Rule (MANDATORY)
+
+**ALL UI components MUST follow the established design system.** Never invent ad-hoc CSS classes or use inline styles for standard patterns.
+
+### Design System Classes (from `modules.css` + `ModulePage.css`)
+| Pattern | CSS Classes | Notes |
+|---------|-------------|-------|
+| Form fields | `module-input`, `module-label`, `module-form-group` | Styled inputs with focus ring |
+| Form layout | `module-form`, `module-form-row`, `module-form-row-3` | Grid-based 2/3-col rows, collapses on mobile |
+| Cards | `module-card`, `card`, `card-body`, `card-header` | White bg, border, rounded corners, shadow |
+| Badges | `module-badge`, `badge`, `badge-pending/success/error` | Pill badges with status colors |
+| Buttons | `module-btn`, `module-btn primary/small`, `btn`, `btn-primary` | Gradient primary buttons |
+| Tables | `module-table` inside `data-table-container` | With `overflow-x: auto` for mobile |
+| Tabs | `module-tabs`, `module-tab` | Pill-style navigation tabs |
+| Stats | `module-stats`, `stat-card` | Auto-fit grid with icon + value + label |
+| Alerts | `module-alert error/success` | Dismissible top-of-page alerts |
+| Page | `module-page`, `module-header` | Max-width 1400px, gradient header |
+
+### Rules
+- **NEVER use ghost CSS classes** — always verify the class exists in CSS before using it in `className`
+- **NEVER use inline styles** (`style={{ }}`) for layout (flex, grid, gap), colors, font-weight, or spacing — use CSS classes instead
+- **Exception**: Inline styles are OK for truly dynamic values (e.g., `width: ${percentage}%`)
+- **Always wrap tables** in `<div className="data-table-container">` for mobile overflow
+- **Form rows**: Use `module-form-row` (2-col) or `module-form-row-3` (3-col) — never `<div style={{ display: 'flex', gap: 16 }}>`
+- **Reference pages**: `Settings.tsx`, `Animals.tsx`, `Dashboard.tsx` for correct patterns
+
 ## Past Bugs — LEARN FROM THESE (do not repeat)
 
 | Bug | Root Cause | Lesson |

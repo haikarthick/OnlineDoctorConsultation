@@ -144,24 +144,191 @@
 .mp-sell-container { max-width: 800px; margin: 0 auto; }
 .mp-steps {
   display: flex; gap: 4px; margin-bottom: 24px;
-  background: #f8fafc; border-radius: 12px; padding: 8px; border: 1px solid #e2e8f0;
+  background: #f8fafc; border-radius: 14px; padding: 8px; border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 .mp-step {
-  flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 12px;
-  border-radius: 8px; cursor: pointer; transition: all 0.2s;
+  flex: 1; display: flex; align-items: center; gap: 8px; padding: 12px 14px;
+  border-radius: 10px; cursor: pointer; transition: all 0.25s ease;
+  color: #94a3b8;
 }
-.mp-step.active { background: #667eea; color: #fff; }
+.mp-step:hover:not(.active):not(.done) { background: rgba(102, 126, 234, 0.06); color: #667eea; }
+.mp-step.active { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
 .mp-step.done { background: #dcfce7; color: #166534; }
 .mp-step-num {
-  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 13px; border: 2px solid currentColor; flex-shrink: 0;
+  transition: all 0.25s ease;
 }
 .mp-step.active .mp-step-num { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
+.mp-step.done .mp-step-num { background: #22c55e; color: #fff; border-color: #22c55e; }
 .mp-step-label { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.mp-sell-card { padding: 28px; }
-.mp-sell-step h3 { margin: 0 0 20px; font-size: 18px; color: #1e293b; }
-.mp-step-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+.mp-sell-card {
+  padding: 32px;
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.mp-sell-step h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.mp-sell-step-desc {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+.mp-step-actions {
+  display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px;
+  padding-top: 20px; border-top: 1px solid #e2e8f0;
+}
+
+/* Sell form section dividers */
+.mp-form-section {
+  margin-bottom: 8px;
+}
+.mp-form-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+/* Checkbox row for sell form */
+.mp-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  padding: 10px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+.mp-checkbox-label:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.04);
+}
+.mp-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #667eea;
+}
+
+/* Review step description */
+.mp-review-desc {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+.mp-review-desc strong {
+  color: #475569;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.mp-review-desc p {
+  color: #64748b;
+  margin: 6px 0 0;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* Orders role toggle */
+.mp-order-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 6px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+/* Admin controls section */
+.mp-admin-bg {
+  background: #fef9c3;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  border: 1px solid #fde68a;
+}
+.mp-admin-bg h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: #92400e;
+}
+
+/* Admin header bar */
+.mp-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Admin reject section */
+.mp-reject-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.mp-reject-row .module-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Inline price highlight for tables */
+.mp-price-highlight {
+  font-weight: 700;
+  color: #667eea;
+}
+
+/* Admin action cluster */
+.mp-action-cluster {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* Listing title link */
+.mp-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mp-title-link {
+  cursor: pointer;
+  color: #667eea;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.mp-title-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
 
 /* ─── Review Grid ─── */
 .mp-review-grid {
@@ -173,6 +340,11 @@
 .mp-review-value { font-size: 14px; color: #1e293b; font-weight: 500; }
 
 /* ─── Listing Detail ─── */
+.mp-detail { }
+.mp-detail > .module-btn { margin-bottom: 16px; }
+.mp-detail h2 { font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 8px; }
+.mp-detail .mp-card-badges { margin-bottom: 12px; }
+.mp-detail .mp-card-tags { margin-top: 16px; }
 .mp-detail-layout { display: flex; gap: 28px; }
 .mp-detail-main { flex: 1; min-width: 0; }
 .mp-detail-sidebar { width: 320px; flex-shrink: 0; }
@@ -194,10 +366,13 @@
 .mp-buy-panel, .mp-bid-panel {
   background: #fff; border: 2px solid #e2e8f0; border-radius: 12px;
   padding: 20px; position: sticky; top: 80px;
+  display: flex; flex-direction: column; gap: 10px;
 }
-.mp-buy-panel h4, .mp-bid-panel h4 { margin: 0 0 12px; font-size: 16px; color: #1e293b; }
-.mp-buy-price { font-size: 28px; font-weight: 700; color: #667eea; margin-bottom: 8px; }
-.mp-bid-current { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; color: #64748b; }
+.mp-buy-panel h4, .mp-bid-panel h4 { margin: 0; font-size: 16px; color: #1e293b; }
+.mp-buy-price { font-size: 28px; font-weight: 700; color: #667eea; }
+.mp-buy-panel .module-btn,
+.mp-bid-panel .module-btn { width: 100%; text-align: center; justify-content: center; }
+.mp-bid-current { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #64748b; }
 .mp-bid-amount { font-weight: 700; color: #667eea; font-size: 18px; }
 .mp-auction-end { font-size: 13px; color: #ef4444; font-weight: 600; margin-bottom: 12px; padding: 8px; background: #fef2f2; border-radius: 8px; }
 
@@ -212,13 +387,15 @@
   .mp-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
   .mp-species-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   .mp-detail-sidebar { width: 280px; }
+  .mp-sell-container { max-width: 100%; }
 }
 
 @media (max-width: 768px) {
   .mp-grid { grid-template-columns: 1fr 1fr; }
   .mp-detail-layout { flex-direction: column; }
   .mp-detail-sidebar { width: 100%; }
-  .mp-steps { flex-direction: column; }
+  .mp-steps { flex-direction: column; gap: 2px; }
+  .mp-step { padding: 10px 12px; }
   .mp-filter-bar { flex-direction: column; }
   .mp-filter-bar > * { width: 100% !important; min-width: 0 !important; }
   .mp-review-grid { grid-template-columns: 1fr; }
@@ -229,7 +406,13 @@
   .mp-chip { flex-shrink: 0; }
   .module-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .mp-sell-container { max-width: 100%; }
-  .mp-sell-card { padding: 16px; }
+  .mp-sell-card { padding: 20px; }
+  .mp-reject-row { flex-direction: column; }
+  .mp-reject-row .module-input { width: 100%; min-width: 0; }
+  .mp-order-toggle { width: 100%; }
+  .mp-order-toggle .module-btn,
+  .mp-order-toggle .module-tab { flex: 1; text-align: center; }
+  .mp-admin-header { flex-direction: column; align-items: stretch; }
 }
 
 @media (max-width: 640px) {
@@ -241,6 +424,10 @@
   .mp-detail-price { font-size: 24px; }
   .mp-buy-price { font-size: 22px; }
   .module-stats { grid-template-columns: repeat(2, 1fr) !important; }
+  .mp-sell-card { padding: 16px; }
+  .mp-sell-step h3 { font-size: 17px; }
+  .mp-step-actions { flex-direction: column; }
+  .mp-step-actions .module-btn { width: 100%; text-align: center; }
 }
 
 @media (max-width: 480px) {
@@ -249,4 +436,7 @@
   .mp-detail-price { font-size: 20px; }
   .mp-species-grid { grid-template-columns: 1fr 1fr; }
   .module-stats { grid-template-columns: 1fr !important; }
+  .mp-sell-card { padding: 14px; }
+  .mp-sell-step h3 { font-size: 16px; }
+  .mp-review-grid { gap: 8px; padding: 14px; }
 }

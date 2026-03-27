@@ -245,6 +245,127 @@
   padding: 0 4px;
 }
 
+/* ═══ Module Form Elements ═══ */
+.module-input,
+.module-input[type="number"],
+.module-input[type="datetime-local"],
+select.module-input,
+textarea.module-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1a1a1a;
+  -webkit-text-fill-color: #1a1a1a;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.module-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
+.module-input::placeholder {
+  color: #94a3b8;
+}
+
+textarea.module-input {
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.module-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+  letter-spacing: 0.2px;
+}
+
+.module-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.module-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.module-badge.success {
+  background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+  color: #2e7d32;
+}
+
+.module-badge.error {
+  background: linear-gradient(135deg, #fecdd3 0%, #fda4af 100%);
+  color: #be123c;
+}
+
+.module-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.module-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.module-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.module-form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.module-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .module-form-row,
+  .module-form-row-3 {
+    grid-template-columns: 1fr;
+  }
+  .module-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .module-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
 .module-page {
   padding: 32px;
   animation: fadeIn 0.3s ease;

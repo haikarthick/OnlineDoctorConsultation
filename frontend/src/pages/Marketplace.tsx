@@ -198,7 +198,7 @@ const Marketplace: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('marketplace.pageTitle')}</h1>
-          <p style={{ color: '#666', margin: '8px 0 0' }}>{t('marketplace.subtitle')}</p>
+          <p className="page-subtitle">{t('marketplace.subtitle')}</p>
         </div>
       </div>
 
@@ -355,23 +355,41 @@ const Marketplace: React.FC = () => {
             ))}
           </div>
 
-          <div className="module-card mp-sell-card">
+          <div className="mp-sell-card">
             {/* Step 0: Basic Info */}
             {sellStep === 0 && (
               <div className="mp-sell-step">
                 <h3>{t('marketplace.sell.basicInfoTitle')}</h3>
+                <p className="mp-sell-step-desc">{t('marketplace.sell.basicInfoDesc')}</p>
                 <div className="module-form">
-                  <div><label className="module-label">{t('marketplace.sell.title')}</label><input className="module-input" value={sellForm.title} onChange={e => sf('title', e.target.value)} placeholder={t('marketplace.sell.titlePlaceholder')} /></div>
-                  <div><label className="module-label">{t('marketplace.sell.description')}</label><textarea className="module-input" value={sellForm.description} onChange={e => sf('description', e.target.value)} rows={3} placeholder={t('marketplace.sell.descPlaceholder')} /></div>
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.sell.category')}</label><select className="module-input" value={sellForm.category} onChange={e => sf('category', e.target.value)}>
-                      {CATEGORY_KEYS.filter(c => c.value).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
-                    </select></div>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.sell.listingType')}</label><select className="module-input" value={sellForm.listingType} onChange={e => sf('listingType', e.target.value)}>
-                      <option value="sale">{t('marketplace.listingType.fixedPrice')}</option><option value="auction">{t('marketplace.listingType.auctionType')}</option><option value="wanted">{t('marketplace.listingType.wanted')}</option>
-                    </select></div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('marketplace.sell.title')}</label>
+                    <input className="module-input" value={sellForm.title} onChange={e => sf('title', e.target.value)} placeholder={t('marketplace.sell.titlePlaceholder')} />
                   </div>
-                  <div><label className="module-label">{t('marketplace.sell.tags')}</label><input className="module-input" value={sellForm.tags} onChange={e => sf('tags', e.target.value)} placeholder={t('marketplace.sell.tagsPlaceholder')} /></div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('marketplace.sell.description')}</label>
+                    <textarea className="module-input" value={sellForm.description} onChange={e => sf('description', e.target.value)} rows={3} placeholder={t('marketplace.sell.descPlaceholder')} />
+                  </div>
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.sell.category')}</label>
+                      <select className="module-input" value={sellForm.category} onChange={e => sf('category', e.target.value)}>
+                        {CATEGORY_KEYS.filter(c => c.value).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                      </select>
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.sell.listingType')}</label>
+                      <select className="module-input" value={sellForm.listingType} onChange={e => sf('listingType', e.target.value)}>
+                        <option value="sale">{t('marketplace.listingType.fixedPrice')}</option>
+                        <option value="auction">{t('marketplace.listingType.auctionType')}</option>
+                        <option value="wanted">{t('marketplace.listingType.wanted')}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('marketplace.sell.tags')}</label>
+                    <input className="module-input" value={sellForm.tags} onChange={e => sf('tags', e.target.value)} placeholder={t('marketplace.sell.tagsPlaceholder')} />
+                  </div>
                 </div>
                 <div className="mp-step-actions">
                   <button className="module-btn primary" onClick={() => { if (!sellForm.title.trim()) { setError(t('marketplace.sell.titleRequired')); return; } setSellStep(1) }}>{t('marketplace.sell.next')}</button>
@@ -383,33 +401,79 @@ const Marketplace: React.FC = () => {
             {sellStep === 1 && (
               <div className="mp-sell-step">
                 <h3>{t('marketplace.sell.animalDetailsTitle')}</h3>
+                <p className="mp-sell-step-desc">{t('marketplace.sell.animalDetailsDesc')}</p>
                 <div className="module-form">
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.species')}</label><select className="module-input" value={sellForm.species} onChange={e => sf('species', e.target.value)}>
-                      <option value="">{t('marketplace.livestock.selectSpecies')}</option>{SPECIES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select></div>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.breed')}</label><input className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} placeholder={t('marketplace.sell.breedPlaceholder')} /></div>
+                  <div className="mp-form-section">
+                    <div className="mp-form-section-title">{t('marketplace.sell.identificationSection')}</div>
+                    <div className="module-form-row">
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.livestock.species')}</label>
+                        <select className="module-input" value={sellForm.species} onChange={e => sf('species', e.target.value)}>
+                          <option value="">{t('marketplace.livestock.selectSpecies')}</option>
+                          {SPECIES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.livestock.breed')}</label>
+                        <input className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} placeholder={t('marketplace.sell.breedPlaceholder')} />
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.gender')}</label><select className="module-input" value={sellForm.gender} onChange={e => sf('gender', e.target.value)}>
-                      <option value="">{t('marketplace.livestock.selectGender')}</option><option value="female">{t('marketplace.genderLabel.female')}</option><option value="male">{t('marketplace.genderLabel.male')}</option>
-                    </select></div>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.ageMonths')}</label><input className="module-input" type="number" value={sellForm.animalAgeMonths} onChange={e => sf('animalAgeMonths', e.target.value)} placeholder={t('marketplace.sell.agePlaceholder')} /></div>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.weightKg')}</label><input className="module-input" type="number" value={sellForm.animalWeightKg} onChange={e => sf('animalWeightKg', e.target.value)} placeholder={t('marketplace.sell.weightPlaceholder')} /></div>
+                  <div className="mp-form-section">
+                    <div className="mp-form-section-title">{t('marketplace.sell.physicalSection')}</div>
+                    <div className="module-form-row-3">
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.livestock.gender')}</label>
+                        <select className="module-input" value={sellForm.gender} onChange={e => sf('gender', e.target.value)}>
+                          <option value="">{t('marketplace.livestock.selectGender')}</option>
+                          <option value="female">{t('marketplace.genderLabel.female')}</option>
+                          <option value="male">{t('marketplace.genderLabel.male')}</option>
+                        </select>
+                      </div>
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.livestock.ageMonths')}</label>
+                        <input className="module-input" type="number" value={sellForm.animalAgeMonths} onChange={e => sf('animalAgeMonths', e.target.value)} placeholder={t('marketplace.sell.agePlaceholder')} />
+                      </div>
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.livestock.weightKg')}</label>
+                        <input className="module-input" type="number" value={sellForm.animalWeightKg} onChange={e => sf('animalWeightKg', e.target.value)} placeholder={t('marketplace.sell.weightPlaceholder')} />
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.lactation')}</label><input className="module-input" type="number" value={sellForm.lactationNumber} onChange={e => sf('lactationNumber', e.target.value)} placeholder={t('marketplace.sell.lactationPlaceholder')} /></div>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.milkYield')}</label><input className="module-input" type="number" value={sellForm.dailyMilkYield} onChange={e => sf('dailyMilkYield', e.target.value)} placeholder={t('marketplace.sell.milkYieldPlaceholder')} /></div>
+                  <div className="mp-form-section">
+                    <div className="mp-form-section-title">{t('marketplace.sell.productionSection')}</div>
+                    <div className="module-form-row">
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.livestock.lactation')}</label>
+                        <input className="module-input" type="number" value={sellForm.lactationNumber} onChange={e => sf('lactationNumber', e.target.value)} placeholder={t('marketplace.sell.lactationPlaceholder')} />
+                      </div>
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.livestock.milkYield')}</label>
+                        <input className="module-input" type="number" value={sellForm.dailyMilkYield} onChange={e => sf('dailyMilkYield', e.target.value)} placeholder={t('marketplace.sell.milkYieldPlaceholder')} />
+                      </div>
+                    </div>
+                    <div className="module-form-row">
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.livestock.pregnancy')}</label>
+                        <select className="module-input" value={sellForm.pregnancyStatus} onChange={e => sf('pregnancyStatus', e.target.value)}>
+                          <option value="">{t('marketplace.livestock.select')}</option>
+                          <option value="pregnant">{t('marketplace.pregnancyLabel.pregnant')}</option>
+                          <option value="not_pregnant">{t('marketplace.pregnancyLabel.notPregnant')}</option>
+                          <option value="unknown">{t('marketplace.genderLabel.unknown')}</option>
+                        </select>
+                      </div>
+                      {sellForm.pregnancyStatus === 'pregnant' && (
+                        <div className="module-form-group">
+                          <label className="module-label">{t('marketplace.livestock.pregnancyMonth')}</label>
+                          <input className="module-input" type="number" value={sellForm.pregnancyMonth} onChange={e => sf('pregnancyMonth', e.target.value)} min="1" max="12" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.pregnancy')}</label><select className="module-input" value={sellForm.pregnancyStatus} onChange={e => sf('pregnancyStatus', e.target.value)}>
-                      <option value="">{t('marketplace.livestock.select')}</option><option value="pregnant">{t('marketplace.pregnancyLabel.pregnant')}</option><option value="not_pregnant">{t('marketplace.pregnancyLabel.notPregnant')}</option><option value="unknown">{t('marketplace.genderLabel.unknown')}</option>
-                    </select></div>
-                    {sellForm.pregnancyStatus === 'pregnant' && (
-                      <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.pregnancyMonth')}</label><input className="module-input" type="number" value={sellForm.pregnancyMonth} onChange={e => sf('pregnancyMonth', e.target.value)} min="1" max="12" /></div>
-                    )}
+                  <div className="module-form-group">
+                    <label className="module-label">{t('marketplace.livestock.quantity')}</label>
+                    <input className="module-input" type="number" value={sellForm.quantity} onChange={e => sf('quantity', e.target.value)} placeholder="1" />
                   </div>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.quantity')}</label><input className="module-input" type="number" value={sellForm.quantity} onChange={e => sf('quantity', e.target.value)} placeholder="1" /></div>
                 </div>
                 <div className="mp-step-actions">
                   <button className="module-btn" onClick={() => setSellStep(0)}>{t('marketplace.sell.back')}</button>
@@ -422,23 +486,37 @@ const Marketplace: React.FC = () => {
             {sellStep === 2 && (
               <div className="mp-sell-step">
                 <h3>{t('marketplace.sell.healthCertsTitle')}</h3>
+                <p className="mp-sell-step-desc">{t('marketplace.sell.healthCertsDesc')}</p>
                 <div className="module-form">
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.vaccination')}</label><select className="module-input" value={sellForm.vaccinationStatus} onChange={e => sf('vaccinationStatus', e.target.value)}>
-                      <option value="unknown">{t('marketplace.vaxLabel.unknown')}</option><option value="fully_vaccinated">{t('marketplace.vaxLabel.fully')}</option>
-                      <option value="partially_vaccinated">{t('marketplace.vaxLabel.partial')}</option><option value="not_vaccinated">{t('marketplace.vaxLabel.none')}</option>
-                    </select></div>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.livestock.condition')}</label><select className="module-input" value={sellForm.condition} onChange={e => sf('condition', e.target.value)}>
-                      <option value="new">{t('marketplace.conditionLabel.healthy')}</option><option value="used">{t('marketplace.conditionLabel.fair')}</option><option value="refurbished">{t('marketplace.conditionLabel.underTreatment')}</option>
-                    </select></div>
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.livestock.vaccination')}</label>
+                      <select className="module-input" value={sellForm.vaccinationStatus} onChange={e => sf('vaccinationStatus', e.target.value)}>
+                        <option value="unknown">{t('marketplace.vaxLabel.unknown')}</option>
+                        <option value="fully_vaccinated">{t('marketplace.vaxLabel.fully')}</option>
+                        <option value="partially_vaccinated">{t('marketplace.vaxLabel.partial')}</option>
+                        <option value="not_vaccinated">{t('marketplace.vaxLabel.none')}</option>
+                      </select>
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.livestock.condition')}</label>
+                      <select className="module-input" value={sellForm.condition} onChange={e => sf('condition', e.target.value)}>
+                        <option value="new">{t('marketplace.conditionLabel.healthy')}</option>
+                        <option value="used">{t('marketplace.conditionLabel.fair')}</option>
+                        <option value="refurbished">{t('marketplace.conditionLabel.underTreatment')}</option>
+                      </select>
+                    </div>
                   </div>
-                  <div>
-                    <label className="module-label" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="module-form-group">
+                    <label className="mp-checkbox-label">
                       <input type="checkbox" checked={sellForm.healthCertificate} onChange={e => sf('healthCertificate', e.target.checked)} />
                       {t('marketplace.sell.hasHealthCert')}
                     </label>
                   </div>
-                  <div><label className="module-label">{t('marketplace.livestock.contact')}</label><input className="module-input" value={sellForm.contactPhone} onChange={e => sf('contactPhone', e.target.value)} placeholder={t('marketplace.sell.contactPlaceholder')} /></div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('marketplace.livestock.contact')}</label>
+                    <input className="module-input" value={sellForm.contactPhone} onChange={e => sf('contactPhone', e.target.value)} placeholder={t('marketplace.sell.contactPlaceholder')} />
+                  </div>
                 </div>
                 <div className="mp-step-actions">
                   <button className="module-btn" onClick={() => setSellStep(1)}>{t('marketplace.sell.back')}</button>
@@ -451,22 +529,38 @@ const Marketplace: React.FC = () => {
             {sellStep === 3 && (
               <div className="mp-sell-step">
                 <h3>{t('marketplace.sell.pricingTitle')}</h3>
+                <p className="mp-sell-step-desc">{t('marketplace.sell.pricingDesc')}</p>
                 <div className="module-form">
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.reviewLabels.price')} ({settings.currency})</label><input className="module-input" type="number" value={sellForm.price} onChange={e => sf('price', e.target.value)} placeholder={t('marketplace.sell.pricePlaceholder')} /></div>
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.reviewLabels.price')} ({settings.currency})</label>
+                      <input className="module-input" type="number" value={sellForm.price} onChange={e => sf('price', e.target.value)} placeholder={t('marketplace.sell.pricePlaceholder')} />
+                    </div>
                     {sellForm.listingType === 'auction' && (
-                      <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.sell.reservePrice')}</label><input className="module-input" type="number" value={sellForm.reservePrice} onChange={e => sf('reservePrice', e.target.value)} placeholder={t('marketplace.sell.reservePricePlaceholder')} /></div>
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.sell.reservePrice')}</label>
+                        <input className="module-input" type="number" value={sellForm.reservePrice} onChange={e => sf('reservePrice', e.target.value)} placeholder={t('marketplace.sell.reservePricePlaceholder')} />
+                      </div>
                     )}
                   </div>
                   {sellForm.listingType === 'auction' && (
-                    <div><label className="module-label">{t('marketplace.sell.auctionEndTime')}</label><input className="module-input" type="datetime-local" value={sellForm.auctionEndTime} onChange={e => sf('auctionEndTime', e.target.value)} /></div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.sell.auctionEndTime')}</label>
+                      <input className="module-input" type="datetime-local" value={sellForm.auctionEndTime} onChange={e => sf('auctionEndTime', e.target.value)} />
+                    </div>
                   )}
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <div style={{ flex: 1 }}><label className="module-label">{t('marketplace.sell.listingTier')}</label><select className="module-input" value={sellForm.listingTier} onChange={e => sf('listingTier', e.target.value)}>
-                      <option value="standard">{t('marketplace.tier.standardFree')}</option><option value="premium">{t('marketplace.tier.premium')}</option><option value="spotlight">{t('marketplace.tier.spotlight')}</option>
-                    </select></div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('marketplace.sell.listingTier')}</label>
+                    <select className="module-input" value={sellForm.listingTier} onChange={e => sf('listingTier', e.target.value)}>
+                      <option value="standard">{t('marketplace.tier.standardFree')}</option>
+                      <option value="premium">{t('marketplace.tier.premium')}</option>
+                      <option value="spotlight">{t('marketplace.tier.spotlight')}</option>
+                    </select>
                   </div>
-                  <div><label className="module-label">{t('marketplace.sell.location')}</label><input className="module-input" value={sellForm.location} onChange={e => sf('location', e.target.value)} placeholder={t('marketplace.sell.locationPlaceholder')} /></div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('marketplace.sell.location')}</label>
+                    <input className="module-input" value={sellForm.location} onChange={e => sf('location', e.target.value)} placeholder={t('marketplace.sell.locationPlaceholder')} />
+                  </div>
                 </div>
                 <div className="mp-step-actions">
                   <button className="module-btn" onClick={() => setSellStep(2)}>{t('marketplace.sell.back')}</button>
@@ -479,6 +573,7 @@ const Marketplace: React.FC = () => {
             {sellStep === 4 && (
               <div className="mp-sell-step">
                 <h3>{t('marketplace.sell.reviewTitle')}</h3>
+                <p className="mp-sell-step-desc">{t('marketplace.sell.reviewDesc')}</p>
                 <div className="mp-review-grid">
                   <ReviewItem label={t('marketplace.sell.title').replace(' *', '')} value={sellForm.title} />
                   <ReviewItem label={t('marketplace.sell.category')} value={sellForm.category} />
@@ -497,7 +592,12 @@ const Marketplace: React.FC = () => {
                   <ReviewItem label={t('marketplace.reviewLabels.tier')} value={TIER_LABELS[sellForm.listingTier] || t('marketplace.tier.standard')} />
                   <ReviewItem label={t('marketplace.livestock.contact')} value={sellForm.contactPhone || '—'} />
                 </div>
-                {sellForm.description && <div style={{ marginTop: 12 }}><strong>{t('marketplace.sell.description')}:</strong> <p style={{ color: '#555' }}>{sellForm.description}</p></div>}
+                {sellForm.description && (
+                  <div className="mp-review-desc">
+                    <strong>{t('marketplace.sell.description')}:</strong>
+                    <p>{sellForm.description}</p>
+                  </div>
+                )}
                 <div className="mp-step-actions">
                   <button className="module-btn" onClick={() => setSellStep(3)}>{t('marketplace.sell.back')}</button>
                   <button className="module-btn primary" onClick={createListing}>{t('marketplace.sell.publish')}</button>
@@ -511,26 +611,28 @@ const Marketplace: React.FC = () => {
       {/* ════════ ORDERS ════════ */}
       {tab === 'orders' && (
         <div>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+          <div className="mp-order-toggle">
             <button className={`module-btn ${orderRole === 'buyer' ? 'primary' : ''}`} onClick={() => { setOrderRole('buyer'); fetchOrders('buyer') }}>{t('marketplace.orders.asBuyer')}</button>
             <button className={`module-btn ${orderRole === 'seller' ? 'primary' : ''}`} onClick={() => { setOrderRole('seller'); fetchOrders('seller') }}>{t('marketplace.orders.asSeller')}</button>
           </div>
-          <table className="module-table">
-            <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.livestock.species')}</th><th>{orderRole === 'buyer' ? t('marketplace.detail.seller') : t('marketplace.orders.asBuyer').replace('🛒 ', '')}</th><th>{t('marketplace.orders.qty')}</th><th>{t('marketplace.orders.total')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.orders.date')}</th></tr></thead>
-            <tbody>
-              {orders.map(o => (
-                <tr key={o.id}>
-                  <td>{g(o, 'listingTitle', 'listing_title') || '—'}</td>
-                  <td>{o.species || '—'}</td>
-                  <td>{orderRole === 'buyer' ? g(o, 'sellerName', 'seller_name') : g(o, 'buyerName', 'buyer_name')}</td>
-                  <td>{o.quantity}</td>
-                  <td style={{ fontWeight: 700, color: '#667eea' }}>{formatCurrency(g(o, 'totalPrice', 'total_price') || 0)}</td>
-                  <td><span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{o.status}</span></td>
-                  <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="data-table-container">
+            <table className="module-table">
+              <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.livestock.species')}</th><th>{orderRole === 'buyer' ? t('marketplace.detail.seller') : t('marketplace.orders.asBuyer').replace('🛒 ', '')}</th><th>{t('marketplace.orders.qty')}</th><th>{t('marketplace.orders.total')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.orders.date')}</th></tr></thead>
+              <tbody>
+                {orders.map(o => (
+                  <tr key={o.id}>
+                    <td>{g(o, 'listingTitle', 'listing_title') || '—'}</td>
+                    <td>{o.species || '—'}</td>
+                    <td>{orderRole === 'buyer' ? g(o, 'sellerName', 'seller_name') : g(o, 'buyerName', 'buyer_name')}</td>
+                    <td>{o.quantity}</td>
+                    <td className="mp-price-highlight">{formatCurrency(g(o, 'totalPrice', 'total_price') || 0)}</td>
+                    <td><span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{o.status}</span></td>
+                    <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {orders.length === 0 && <p className="mp-empty">{t('marketplace.orders.noOrders')}</p>}
         </div>
       )}
@@ -539,25 +641,27 @@ const Marketplace: React.FC = () => {
       {tab === 'prices' && (
         <div className="mp-section">
           <h3 className="mp-section-title">{t('marketplace.sections.marketPriceIntelligence')}</h3>
-          <p style={{ color: '#666', marginBottom: 16 }}>{t('marketplace.prices.subtitle')}</p>
+          <p className="mp-sell-step-desc">{t('marketplace.prices.subtitle')}</p>
           {marketPrices.length > 0 ? (
-            <table className="module-table">
-              <thead><tr><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.livestock.breed')}</th><th>{t('marketplace.prices.listings')}</th><th>{t('marketplace.prices.avgPrice')}</th><th>{t('marketplace.prices.min')}</th><th>{t('marketplace.prices.max')}</th><th>{t('marketplace.prices.avgMilkPerDay')}</th><th>{t('marketplace.prices.avgWeight')}</th></tr></thead>
-              <tbody>
-                {marketPrices.map((mp, i) => (
-                  <tr key={i}>
-                    <td><strong>{mp.species}</strong></td>
-                    <td>{mp.breed || '—'}</td>
-                    <td>{mp.total_listings}</td>
-                    <td style={{ fontWeight: 700, color: '#667eea' }}>{formatCurrency(Math.round(mp.avg_price || 0))}</td>
-                    <td>{formatCurrency(Math.round(mp.min_price || 0))}</td>
-                    <td>{formatCurrency(Math.round(mp.max_price || 0))}</td>
-                    <td>{mp.avg_milk_yield ? `${Number(mp.avg_milk_yield).toFixed(1)}L` : '—'}</td>
-                    <td>{mp.avg_weight ? `${Number(mp.avg_weight).toFixed(0)} ${t('marketplace.units.kg')}` : '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="data-table-container">
+              <table className="module-table">
+                <thead><tr><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.livestock.breed')}</th><th>{t('marketplace.prices.listings')}</th><th>{t('marketplace.prices.avgPrice')}</th><th>{t('marketplace.prices.min')}</th><th>{t('marketplace.prices.max')}</th><th>{t('marketplace.prices.avgMilkPerDay')}</th><th>{t('marketplace.prices.avgWeight')}</th></tr></thead>
+                <tbody>
+                  {marketPrices.map((mp, i) => (
+                    <tr key={i}>
+                      <td><strong>{mp.species}</strong></td>
+                      <td>{mp.breed || '—'}</td>
+                      <td>{mp.total_listings}</td>
+                      <td className="mp-price-highlight">{formatCurrency(Math.round(mp.avg_price || 0))}</td>
+                      <td>{formatCurrency(Math.round(mp.min_price || 0))}</td>
+                      <td>{formatCurrency(Math.round(mp.max_price || 0))}</td>
+                      <td>{mp.avg_milk_yield ? `${Number(mp.avg_milk_yield).toFixed(1)}L` : '—'}</td>
+                      <td>{mp.avg_weight ? `${Number(mp.avg_weight).toFixed(0)} ${t('marketplace.units.kg')}` : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : <p className="mp-empty">{t('marketplace.prices.noData')}</p>}
         </div>
       )}
@@ -609,55 +713,57 @@ const Marketplace: React.FC = () => {
 
           {/* All Listings Management */}
           <div className="mp-section">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 className="mp-section-title" style={{ margin: 0 }}>{t('marketplace.sections.listingManagement')}</h3>
-              <select className="module-input" value={adminFilter} onChange={e => { setAdminFilter(e.target.value); fetchAdminData() }} style={{ width: 180 }}>
+            <div className="mp-admin-header">
+              <h3 className="mp-section-title">{t('marketplace.sections.listingManagement')}</h3>
+              <select className="module-input" value={adminFilter} onChange={e => { setAdminFilter(e.target.value); fetchAdminData() }}>
                 <option value="">{t('marketplace.admin.allListings')}</option>
                 <option value="true">{t('marketplace.admin.approved')}</option>
                 <option value="false">{t('marketplace.admin.rejectedPending')}</option>
               </select>
             </div>
-            <table className="module-table">
-              <thead><tr><th>{t('marketplace.admin.titleCol')}</th><th>{t('marketplace.admin.sellerCol')}</th><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.admin.priceCol')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.admin.approvedCol')}</th><th>{t('marketplace.admin.actionsCol')}</th></tr></thead>
-              <tbody>
-                {adminListings.map(l => (
-                  <tr key={l.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {g(l, 'isHotDeal', 'is_hot_deal') && <span title="Hot Deal">🔥</span>}
-                        {l.featured && <span title="Featured">⭐</span>}
-                        <span style={{ cursor: 'pointer', color: '#667eea' }} onClick={() => { setTab('browse'); viewListing(l) }}>{l.title}</span>
-                      </div>
-                    </td>
-                    <td>{g(l, 'sellerName', 'seller_name') || '—'}</td>
-                    <td>{l.species || '—'}</td>
-                    <td>{l.price ? formatCurrency(l.price) : '—'}</td>
-                    <td><span className={`module-badge ${l.status === 'active' ? 'success' : l.status === 'rejected' ? 'error' : ''}`}>{l.status}</span></td>
-                    <td>{g(l, 'adminApproved', 'admin_approved') === true ? '✅' : g(l, 'adminApproved', 'admin_approved') === false ? '❌' : '⏳'}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                        {g(l, 'adminApproved', 'admin_approved') !== true && <button className="module-btn small" onClick={() => handleAdminApprove(l.id)} title="Approve">✅</button>}
-                        <button className="module-btn small" onClick={() => handleToggleHotDeal(l.id, g(l, 'isHotDeal', 'is_hot_deal') || false)} title="Toggle Hot Deal">{g(l, 'isHotDeal', 'is_hot_deal') ? '🔥' : '💤'}</button>
-                        <button className="module-btn small" onClick={() => handleToggleFeatured(l.id, l.featured || false)} title="Toggle Featured">{l.featured ? '⭐' : '☆'}</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="data-table-container">
+              <table className="module-table">
+                <thead><tr><th>{t('marketplace.admin.titleCol')}</th><th>{t('marketplace.admin.sellerCol')}</th><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.admin.priceCol')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.admin.approvedCol')}</th><th>{t('marketplace.admin.actionsCol')}</th></tr></thead>
+                <tbody>
+                  {adminListings.map(l => (
+                    <tr key={l.id}>
+                      <td>
+                        <div className="mp-title-cell">
+                          {g(l, 'isHotDeal', 'is_hot_deal') && <span title="Hot Deal">🔥</span>}
+                          {l.featured && <span title="Featured">⭐</span>}
+                          <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing(l) }}>{l.title}</span>
+                        </div>
+                      </td>
+                      <td>{g(l, 'sellerName', 'seller_name') || '—'}</td>
+                      <td>{l.species || '—'}</td>
+                      <td>{l.price ? formatCurrency(l.price) : '—'}</td>
+                      <td><span className={`module-badge ${l.status === 'active' ? 'success' : l.status === 'rejected' ? 'error' : ''}`}>{l.status}</span></td>
+                      <td>{g(l, 'adminApproved', 'admin_approved') === true ? '✅' : g(l, 'adminApproved', 'admin_approved') === false ? '❌' : '⏳'}</td>
+                      <td>
+                        <div className="mp-action-cluster">
+                          {g(l, 'adminApproved', 'admin_approved') !== true && <button className="module-btn small" onClick={() => handleAdminApprove(l.id)} title="Approve">✅</button>}
+                          <button className="module-btn small" onClick={() => handleToggleHotDeal(l.id, g(l, 'isHotDeal', 'is_hot_deal') || false)} title="Toggle Hot Deal">{g(l, 'isHotDeal', 'is_hot_deal') ? '🔥' : '💤'}</button>
+                          <button className="module-btn small" onClick={() => handleToggleFeatured(l.id, l.featured || false)} title="Toggle Featured">{l.featured ? '⭐' : '☆'}</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             {adminListings.length === 0 && <p className="mp-empty">{t('marketplace.admin.noListings')}</p>}
           </div>
 
           {/* Reject with reason */}
           <div className="mp-section">
             <h3 className="mp-section-title">{t('marketplace.sections.rejectListing')}</h3>
-            <div style={{ display: 'flex', gap: 12 }}>
-              <input className="module-input" value={adminRejectReason} onChange={e => setAdminRejectReason(e.target.value)} placeholder={t('marketplace.admin.rejectionReason')} style={{ flex: 1 }} />
-              <select className="module-input" style={{ width: 250 }} id="rejectListingSelect">
+            <div className="mp-reject-row">
+              <input className="module-input" value={adminRejectReason} onChange={e => setAdminRejectReason(e.target.value)} placeholder={t('marketplace.admin.rejectionReason')} />
+              <select className="module-input" id="rejectListingSelect">
                 <option value="">{t('marketplace.admin.selectToReject')}</option>
                 {adminListings.filter(l => g(l, 'adminApproved', 'admin_approved') !== false).map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
               </select>
-              <button className="module-btn" style={{ background: '#ef4444', color: '#fff' }} onClick={() => {
+              <button className="module-btn primary" onClick={() => {
                 const sel = (document.getElementById('rejectListingSelect') as HTMLSelectElement)?.value
                 if (sel) handleAdminReject(sel)
               }}>{t('marketplace.admin.reject')}</button>
@@ -781,12 +887,12 @@ const ListingDetail: React.FC<{
 
   return (
     <div className="mp-detail">
-      <button className="module-btn small" onClick={onBack} style={{ marginBottom: 16 }}>{t('marketplace.detail.backToListings')}</button>
+      <button className="module-btn small" onClick={onBack}>{t('marketplace.detail.backToListings')}</button>
 
       <div className="mp-detail-layout">
         <div className="mp-detail-main">
           {/* Header badges */}
-          <div className="mp-card-badges" style={{ marginBottom: 12 }}>
+          <div className="mp-card-badges">
             <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
             <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
             {tier && <span className="mp-badge premium">{{ standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }[tier as 'standard' | 'premium' | 'spotlight'] || tier}</span>}
@@ -794,8 +900,8 @@ const ListingDetail: React.FC<{
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
           </div>
 
-          <h2 style={{ margin: '0 0 8px' }}>{l.title}</h2>
-          <p style={{ color: '#555', lineHeight: 1.6, marginBottom: 16 }}>{l.description || t('marketplace.detail.noDescription')}</p>
+          <h2>{l.title}</h2>
+          <p className="mp-sell-step-desc">{l.description || t('marketplace.detail.noDescription')}</p>
 
           {/* Price */}
           <div className="mp-detail-price">{l.price ? formatCurrency(l.price) : t('marketplace.contactForPrice')}</div>
@@ -839,16 +945,16 @@ const ListingDetail: React.FC<{
           </div>
 
           {tags.length > 0 && (
-            <div className="mp-card-tags" style={{ marginTop: 16 }}>
+            <div className="mp-card-tags">
               {tags.map((tag: string) => <span key={tag} className="mp-tag">{tag}</span>)}
             </div>
           )}
 
           {/* Admin controls */}
           {isAdmin && (
-            <div className="mp-detail-section" style={{ background: '#fef9c3', borderRadius: 8, padding: 16, marginTop: 16 }}>
+            <div className="mp-admin-bg">
               <h3>{t('marketplace.detail.adminControls')}</h3>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div className="mp-action-cluster">
                 <button className="module-btn small" onClick={() => onToggleHotDeal(l.id, isHot || false)}>{isHot ? t('marketplace.detail.removeHotDeal') : t('marketplace.detail.makeHotDeal')}</button>
                 <button className="module-btn small" onClick={() => onToggleFeatured(l.id, l.featured || false)}>{l.featured ? t('marketplace.detail.unfeature') : t('marketplace.detail.feature')}</button>
               </div>
@@ -862,8 +968,8 @@ const ListingDetail: React.FC<{
             <div className="mp-buy-panel">
               <h4>{t('marketplace.detail.buyNowTitle')}</h4>
               <div className="mp-buy-price">{l.price ? formatCurrency(l.price) : t('marketplace.detail.contactSeller')}</div>
-              <div style={{ fontSize: 13, color: '#888', marginBottom: 12 }}>{t('marketplace.orders.qty')}: {l.quantity} {l.unit || t('marketplace.units.head')}</div>
-              {l.status === 'active' && <button className="module-btn primary" style={{ width: '100%' }} onClick={onBuyNow}>{t('marketplace.detail.purchaseNow')}</button>}
+              <div className="mp-sell-step-desc">{t('marketplace.orders.qty')}: {l.quantity} {l.unit || t('marketplace.units.head')}</div>
+              {l.status === 'active' && <button className="module-btn primary" onClick={onBuyNow}>{t('marketplace.detail.purchaseNow')}</button>}
             </div>
           ) : (
             <div className="mp-bid-panel">
@@ -878,8 +984,8 @@ const ListingDetail: React.FC<{
                 </div>
               )}
               <input className="module-input" type="number" placeholder={t('marketplace.detail.yourBidAmount')} value={bidAmount} onChange={e => onBidAmountChange(e.target.value)} />
-              <textarea className="module-input" placeholder={t('marketplace.detail.messageOptional')} value={bidMessage} onChange={e => onBidMessageChange(e.target.value)} style={{ marginTop: 8, height: 60 }} />
-              <button className="module-btn primary" style={{ width: '100%', marginTop: 8 }} onClick={onPlaceBid}>{t('marketplace.detail.placeBidTitle')}</button>
+              <textarea className="module-input" placeholder={t('marketplace.detail.messageOptional')} value={bidMessage} onChange={e => onBidMessageChange(e.target.value)} />
+              <button className="module-btn primary" onClick={onPlaceBid}>{t('marketplace.detail.placeBidTitle')}</button>
 
               {bids.length > 0 && (
                 <div className="mp-bid-history">
