@@ -44,6 +44,7 @@ const Marketplace: React.FC = () => {
   const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   // Filters
   const [filters, setFilters] = useState<Record<string, string>>({})
@@ -105,7 +106,7 @@ const Marketplace: React.FC = () => {
   }
 
   const createListing = async () => {
-    if (!sellForm.title.trim()) { setError(t('marketplace.sell.titleRequired')); return }
+    if (!sellForm.title.trim()) { setError(t('marketplace.sell.titleRequired')); setFieldErrors({ title: t('marketplace.sell.titleRequired') }); return }
     try {
       const payload: any = { ...sellForm }
       payload.price = +payload.price || null
@@ -364,7 +365,8 @@ const Marketplace: React.FC = () => {
                 <div className="module-form">
                   <div className="module-form-group">
                     <label className="module-label">{t('marketplace.sell.title')}</label>
-                    <input className="module-input" value={sellForm.title} onChange={e => sf('title', e.target.value)} placeholder={t('marketplace.sell.titlePlaceholder')} />
+                    <input className={`module-input${fieldErrors.title ? ' input-error' : ''}`} value={sellForm.title} onChange={e => { sf('title', e.target.value); if (fieldErrors.title) setFieldErrors(prev => { const n = { ...prev }; delete n.title; return n }) }} placeholder={t('marketplace.sell.titlePlaceholder')} />
+                    {fieldErrors.title && <div className="input-error-msg">{fieldErrors.title}</div>}
                   </div>
                   <div className="module-form-group">
                     <label className="module-label">{t('marketplace.sell.description')}</label>
@@ -392,7 +394,15 @@ const Marketplace: React.FC = () => {
                   </div>
                 </div>
                 <div className="mp-step-actions">
-                  <button className="module-btn primary" onClick={() => { if (!sellForm.title.trim()) { setError(t('marketplace.sell.titleRequired')); return; } setSellStep(1) }}>{t('marketplace.sell.next')}</button>
+                  <button className="module-btn primary" onClick={() => {
+                    if (!sellForm.title.trim()) {
+                      setError(t('marketplace.sell.titleRequired'))
+                      setFieldErrors({ title: t('marketplace.sell.titleRequired') })
+                      return
+                    }
+                    setFieldErrors({})
+                    setSellStep(1)
+                  }}>{t('marketplace.sell.next')}</button>
                 </div>
               </div>
             )}

@@ -7,6 +7,7 @@ import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
 import FloatingChatWidget from './components/FloatingChatWidget'
 import { PWAPrompt } from './components/PWAPrompt'
+import ErrorAutoScroll from './components/ErrorAutoScroll'
 // Eagerly loaded public pages (needed at first paint)
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -142,6 +143,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <Layout currentPath={location.pathname} onNavigate={handleNavigate}>
+      <ErrorAutoScroll />
       <div className="layout-content">
         {children}
       </div>
