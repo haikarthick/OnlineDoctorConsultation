@@ -639,6 +639,38 @@
       "followUp": "फॉलो-अप"
     }
   },
+  "timeline": {
+    "title": "पशु जीवन टाइमलाइन",
+    "subtitle": "स्वास्थ्य घटनाओं, उपचारों और मील के पत्थरों का पूर्ण कालानुक्रमिक दृश्य",
+    "selectAnimal": "पशु",
+    "noAnimals": "कोई पशु नहीं मिला",
+    "searchPlaceholder": "इवेंट खोजें...",
+    "from": "से",
+    "to": "तक",
+    "clearFilters": "फ़िल्टर साफ़ करें",
+    "horizontal": "क्षैतिज",
+    "vertical": "लंबवत",
+    "totalEvents": "कुल इवेंट",
+    "eventTypes": "इवेंट प्रकार",
+    "activeItems": "सक्रिय आइटम",
+    "highSeverity": "उच्च गंभीरता",
+    "showing": "दिखा रहा है",
+    "of": "का",
+    "events": "इवेंट",
+    "loadingEvents": "टाइमलाइन इवेंट लोड हो रहे हैं...",
+    "noEvents": "कोई टाइमलाइन इवेंट नहीं",
+    "noEventsDesc": "वर्तमान फ़िल्टर के साथ इस पशु के लिए कोई इवेंट नहीं मिला।",
+    "selectAnimalFirst": "उनकी जीवन टाइमलाइन देखने के लिए एक पशु चुनें।",
+    "distribution": "इवेंट वितरण",
+    "detail": {
+      "type": "प्रकार",
+      "date": "तारीख",
+      "description": "विवरण",
+      "status": "स्थिति",
+      "severity": "गंभीरता",
+      "recordedBy": "द्वारा दर्ज"
+    }
+  },
   "medicalRecords": {
     "pageTitle": "📋 चिकित्सा रिकॉर्ड",
     "allAnimals": "सभी पशु",

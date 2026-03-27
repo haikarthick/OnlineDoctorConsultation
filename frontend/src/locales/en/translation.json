@@ -644,6 +644,7 @@
     "subtitle": "Complete chronological view of health events, treatments, and milestones",
     "selectAnimal": "Animal",
     "noAnimals": "No animals found",
+    "searchPlaceholder": "Search events...",
     "from": "From",
     "to": "To",
     "clearFilters": "Clear Filters",

@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useMemo, useCallback, useRef, useLayoutEffect } from 'react'
+import { useNavigate as useRouterNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
@@ -86,14 +87,11 @@ function assignLanes(events: TimelineEvent[]): Map<string, number> {
   return laneMap
 }
 
-interface AnimalTimelineProps {
-  onNavigate?: (path: string) => void
-}
-
-const AnimalTimeline: React.FC<AnimalTimelineProps> = ({ onNavigate }) => {
+const AnimalTimeline: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
+  const routerNavigate = useRouterNavigate()
 
   const isVet   = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
@@ -105,6 +103,8 @@ const AnimalTimeline: React.FC<AnimalTimelineProps> = ({ onNavigate }) => {
   const [animalsLoading, setAnimalsLoading] = useState(true)
 
   const [searchQuery, setSearchQuery]       = useState('')
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false)
+  const searchWrapRef                       = useRef<HTMLDivElement>(null)
   const [activeFilters, setActiveFilters]   = useState<Set<string>>(new Set())
   const [dateFrom, setDateFrom]             = useState('')
   const [dateTo, setDateTo]                 = useState('')
@@ -174,7 +174,9 @@ const AnimalTimeline: React.FC<AnimalTimelineProps> = ({ onNavigate }) => {
       ev = ev.filter(e =>
         e.title.toLowerCase().includes(q) ||
         (e.description || '').toLowerCase().includes(q) ||
-        getEventConfig(e.type).label.toLowerCase().includes(q)
+        getEventConfig(e.type).label.toLowerCase().includes(q) ||
+        (e.status || '').toLowerCase().includes(q) ||
+        (e.severity || '').toLowerCase().includes(q)
       )
     }
     return [...ev].sort((a, b) => {
@@ -338,8 +340,7 @@ const AnimalTimeline: React.FC<AnimalTimelineProps> = ({ onNavigate }) => {
 
   // ── Navigation ──
   const navigate = (path: string) => {
-    if (onNavigate) { onNavigate(path); return }
-    window.location.hash = path
+    routerNavigate(path)
   }
 
   // ── Stats ──
@@ -357,7 +358,56 @@ const AnimalTimeline: React.FC<AnimalTimelineProps> = ({ onNavigate }) => {
     })
     return c
   }, [events])
+  // ── Search suggestions ──
+  const searchSuggestions = useMemo(() => {
+    const suggestions: { label: string; icon: string; color: string; type: 'type' | 'title' | 'status' | 'severity'; value: string; count: number }[] = []
+    // Event type labels
+    const typeCounts: Record<string, { cfg: { label: string; icon: string; color: string }; count: number }> = {}
+    events.forEach(e => {
+      const cfg = getEventConfig(e.type)
+      if (!typeCounts[cfg.label]) typeCounts[cfg.label] = { cfg, count: 0 }
+      typeCounts[cfg.label].count++
+    })
+    Object.entries(typeCounts).forEach(([, v]) => {
+      suggestions.push({ label: v.cfg.label, icon: v.cfg.icon, color: v.cfg.color, type: 'type', value: v.cfg.label, count: v.count })
+    })
+    // Unique titles
+    const titleCounts: Record<string, number> = {}
+    events.forEach(e => { titleCounts[e.title] = (titleCounts[e.title] || 0) + 1 })
+    Object.entries(titleCounts).forEach(([title, count]) => {
+      if (!suggestions.find(s => s.value === title)) {
+        suggestions.push({ label: title, icon: '📝', color: '#78909c', type: 'title', value: title, count })
+      }
+    })
+    // Unique statuses
+    const statusSet = new Set(events.map(e => e.status).filter(Boolean))
+    statusSet.forEach(status => {
+      suggestions.push({ label: `Status: ${status}`, icon: '🏷️', color: '#607d8b', type: 'status', value: status!, count: events.filter(e => e.status === status).length })
+    })
+    // Unique severities
+    const sevSet = new Set(events.map(e => e.severity).filter(Boolean))
+    sevSet.forEach(sev => {
+      suggestions.push({ label: `Severity: ${sev}`, icon: '⚡', color: severityColor(sev) || '#78909c', type: 'severity', value: sev!, count: events.filter(e => e.severity === sev).length })
+    })
+    return suggestions
+  }, [events])
 
+  const filteredSuggestions = useMemo(() => {
+    if (!searchQuery.trim()) return searchSuggestions
+    const q = searchQuery.toLowerCase()
+    return searchSuggestions.filter(s => s.label.toLowerCase().includes(q) || s.value.toLowerCase().includes(q))
+  }, [searchSuggestions, searchQuery])
+
+  // Close search dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target as Node)) {
+        setSearchDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
   const minimapSegments = useMemo(() => {
     if (!filteredEvents.length) return []
     const counts: Record<string, { count: number; color: string }> = {}
@@ -405,10 +455,34 @@ const AnimalTimeline: React.FC<AnimalTimelineProps> = ({ onNavigate }) => {
             {animals.length === 0 && <option value="">No animals</option>}
             {animals.map(a => <option key={a.id} value={a.id}>{a.name} ({a.species})</option>)}
           </select>
-          <div className="tl-search-wrap">
+          <div className="tl-search-wrap" ref={searchWrapRef}>
             <span className="tl-search-icon">🔍</span>
-            <input type="text" className="tl-search" placeholder="Search events..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            {searchQuery && <button className="tl-search-clear" onClick={() => setSearchQuery('')}>×</button>}
+            <input
+              type="text"
+              className="tl-search"
+              placeholder={t('timeline.searchPlaceholder', 'Search events...')}
+              value={searchQuery}
+              onChange={e => { setSearchQuery(e.target.value); setSearchDropdownOpen(true) }}
+              onFocus={() => setSearchDropdownOpen(true)}
+            />
+            {searchQuery && <button className="tl-search-clear" onClick={() => { setSearchQuery(''); setSearchDropdownOpen(false) }}>×</button>}
+            {searchDropdownOpen && filteredSuggestions.length > 0 && (
+              <div className="tl-search-dropdown">
+                {filteredSuggestions.map((s, i) => (
+                  <button
+                    key={`${s.type}-${s.value}-${i}`}
+                    className="tl-search-dropdown-item"
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={() => { setSearchQuery(s.value); setSearchDropdownOpen(false) }}
+                  >
+                    <span className="tl-search-dropdown-icon" style={{ color: s.color }}>{s.icon}</span>
+                    <span className="tl-search-dropdown-label">{s.label}</span>
+                    <span className="tl-search-dropdown-count">{s.count}</span>
+                    <span className="tl-search-dropdown-type">{s.type}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="tl-zoom-group">
             <button className="tl-zoom-btn" onClick={() => setZoomIndex(z => Math.max(0, z - 1))} disabled={zoomIndex === 0} title="Zoom in">+</button>

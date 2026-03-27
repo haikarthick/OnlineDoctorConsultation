@@ -81,6 +81,18 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 - Timeline, medical records, analytics etc. must work across pet_owner, farmer, veterinarian, admin
 - When adding a nav item: always review ALL 4 roles and add to every role that should see it
 
+## Feature Verification Rule (MANDATORY)
+
+**For ANY feature implementation, ALL of the following MUST be verified and fixed by default:**
+- All hyperlinks and navigation buttons work correctly (use react-router `useNavigate`, NOT `window.location.hash`)
+- All dropdown values, lists, and select options are populated and functional
+- Search functionality shows suggestions/autocomplete where appropriate
+- All navigation paths are correct and lead to existing routes
+- All event handlers (onClick, onChange, onSubmit etc.) are wired up properly
+- Error scenarios are handled with user-visible feedback
+- All user roles can access the feature as intended
+- UI/UX consistency: follows design system, no ghost CSS classes, no broken layouts
+
 ## UI/UX Consistency Rule (MANDATORY)
 
 **ALL UI components MUST follow the established design system.** Never invent ad-hoc CSS classes or use inline styles for standard patterns.
