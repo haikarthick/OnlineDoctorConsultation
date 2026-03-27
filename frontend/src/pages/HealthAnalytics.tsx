@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, HealthObservation, HealthDashboard } from '../types'
 import { useTranslation } from 'react-i18next'
 
@@ -8,7 +9,8 @@ const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
 }
 
-const HealthAnalytics: React.FC = () => {  const { t } = useTranslation()
+const HealthAnalytics: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -16,6 +18,7 @@ const HealthAnalytics: React.FC = () => {  const { t } = useTranslation()
   const [observations, setObservations] = useState<HealthObservation[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [tab, setTab] = useState<'dashboard' | 'observations'>('dashboard')
   const [formData, setFormData] = useState({
     animalId: '', observationType: 'general', severity: 'low' as string,
@@ -108,7 +111,9 @@ const HealthAnalytics: React.FC = () => {  const { t } = useTranslation()
             <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>+ New Observation</button>
           </div>
 
+          {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false) }} />}
           {showForm && (
+            <div ref={formRef} className="edit-form-panel">
             <form className="module-form" onSubmit={handleSubmit}>
               <h3>Record Health Observation</h3>
               <div className="form-grid">
@@ -158,6 +163,7 @@ const HealthAnalytics: React.FC = () => {  const { t } = useTranslation()
                 <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
               </div>
             </form>
+            </div>
           )}
 
           {loading ? <p className="loading-text">Loading...</p> : tab === 'dashboard' && dashboard ? (

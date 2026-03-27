@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, WorkforceTask, ShiftSchedule } from '../types'
 import { useTranslation } from 'react-i18next'
 
@@ -8,7 +9,8 @@ const PRIORITY_COLORS: Record<string, string> = {
   low: '#6b7280', medium: '#3b82f6', high: '#f97316', critical: '#ef4444'
 }
 
-const WorkforcePage: React.FC = () => {  const { t } = useTranslation()
+const WorkforcePage: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -18,6 +20,7 @@ const WorkforcePage: React.FC = () => {  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'dashboard' | 'tasks' | 'shifts'>('dashboard')
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [showShiftForm, setShowShiftForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -224,7 +227,9 @@ const WorkforcePage: React.FC = () => {  const { t } = useTranslation()
                 <button className="btn-primary" onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancel' : '+ Create Task'}</button>
               </div>
 
+              {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false) }} />}
               {showForm && (
+                <div ref={formRef} className="edit-form-panel">
                 <form className="module-form" onSubmit={handleCreateTask}>
                   <div className="form-grid">
                     <div className="form-group"><label>Title *</label><input required value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} /></div>
@@ -247,6 +252,7 @@ const WorkforcePage: React.FC = () => {  const { t } = useTranslation()
                   </div>
                   <button type="submit" className="btn-primary">Create Task</button>
                 </form>
+                </div>
               )}
 
               <div className="cards-grid">

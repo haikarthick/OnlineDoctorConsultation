@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, FarmLocation, LocationType } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
@@ -21,7 +22,8 @@ const LOCATION_TYPE_ICONS: Record<string, string> = {
   feed_storage: '🌽', other: '📍'
 }
 
-const LocationManagement: React.FC = () => {  const { t } = useTranslation()
+const LocationManagement: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -30,6 +32,7 @@ const LocationManagement: React.FC = () => {  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'tree' | 'map'>('grid')
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [editingLocation, setEditingLocation] = useState<FarmLocation | null>(null)
   const [formData, setFormData] = useState({
     name: '', locationType: '' as LocationType, parentLocationId: '',
@@ -262,9 +265,9 @@ const LocationManagement: React.FC = () => {  const { t } = useTranslation()
       )}
 
       {/* Create/Edit Form */}
+      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
-        <div className="modal-overlay" onClick={() => { setShowForm(false); resetForm() }}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+        <div ref={formRef} className="edit-form-panel">
             <h2>{editingLocation ? 'Edit Location' : 'Create Location'}</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
@@ -342,7 +345,6 @@ const LocationManagement: React.FC = () => {  const { t } = useTranslation()
                 <button type="submit" className="btn btn-primary">{editingLocation ? 'Update' : 'Create'} Location</button>
               </div>
             </form>
-          </div>
         </div>
       )}
     </div>

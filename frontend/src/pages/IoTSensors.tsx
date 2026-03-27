@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, IoTSensor, SensorReading } from '../types'
 import { useTranslation } from 'react-i18next'
 
@@ -9,7 +10,8 @@ const SENSOR_ICONS: Record<string, string> = {
   heart_rate: '💓', water_flow: '🚿', gps: '📍', camera: '📷', pressure: '🔵'
 }
 
-const IoTSensorPage: React.FC = () => {  const { t } = useTranslation()
+const IoTSensorPage: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -20,6 +22,7 @@ const IoTSensorPage: React.FC = () => {  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'dashboard' | 'sensors' | 'readings'>('dashboard')
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [showReadingForm, setShowReadingForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -224,7 +227,9 @@ const IoTSensorPage: React.FC = () => {  const { t } = useTranslation()
                 <button className="btn-secondary" onClick={() => setShowReadingForm(!showReadingForm)}>{showReadingForm ? 'Cancel' : '📊 Record Reading'}</button>
               </div>
 
+              {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false) }} />}
               {showForm && (
+                <div ref={formRef} className="edit-form-panel">
                 <form className="module-form" onSubmit={handleCreateSensor}>
                   <div className="form-grid">
                     <div className="form-group"><label>Sensor Type *</label>
@@ -244,6 +249,7 @@ const IoTSensorPage: React.FC = () => {  const { t } = useTranslation()
                   </div>
                   <button type="submit" className="btn-primary">Register Sensor</button>
                 </form>
+                </div>
               )}
 
               {showReadingForm && (

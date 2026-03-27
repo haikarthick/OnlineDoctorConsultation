@@ -3,11 +3,13 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, AlertRule, AlertEvent } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 
 const SEVERITY_COLORS: Record<string, string> = { info: '#3b82f6', warning: '#f97316', critical: '#ef4444' }
 const RULE_TYPES = ['vaccination_due', 'breeding_due', 'low_feed_stock', 'document_expiry', 'health_threshold', 'custom']
 
-const AlertCenter: React.FC = () => {  const { t } = useTranslation()
+const AlertCenter: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -16,6 +18,7 @@ const AlertCenter: React.FC = () => {  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'events' | 'rules'>('events')
   const [showRuleForm, setShowRuleForm] = useState(false)
+  const formRef = useScrollToForm(showRuleForm)
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null)
   const [ruleFormData, setRuleFormData] = useState({
     name: '', ruleType: 'vaccination_due', severity: 'warning' as string,
@@ -170,7 +173,9 @@ const AlertCenter: React.FC = () => {  const { t } = useTranslation()
             {tab === 'rules' && <button className="btn btn-primary" onClick={() => { setShowRuleForm(!showRuleForm); setEditingRuleId(null) }}>+ New Rule</button>}
           </div>
 
+          {showRuleForm && <div className="edit-form-overlay" onClick={() => { setShowRuleForm(false); setEditingRuleId(null) }} />}
           {showRuleForm && (
+            <div ref={formRef} className="edit-form-panel">
             <form className="module-form" onSubmit={handleCreateRule}>
               <h3>{editingRuleId ? 'Edit Alert Rule' : 'Create Alert Rule'}</h3>
               <div className="form-grid">
@@ -201,6 +206,7 @@ const AlertCenter: React.FC = () => {  const { t } = useTranslation()
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowRuleForm(false); setEditingRuleId(null) }}>Cancel</button>
               </div>
             </form>
+            </div>
           )}
 
           {loading ? <p className="loading-text">Loading...</p> : tab === 'events' ? (

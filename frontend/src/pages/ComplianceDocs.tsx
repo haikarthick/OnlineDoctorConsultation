@@ -3,6 +3,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, ComplianceDocument, ComplianceSummary } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 
 const STATUS_COLORS: Record<string, string> = {
   draft: '#94a3b8', active: '#22c55e', expired: '#ef4444', revoked: '#dc2626', pending_renewal: '#f97316'
@@ -24,6 +25,7 @@ const ComplianceDocs: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'documents' | 'summary'>('documents')
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     documentType: 'license', title: '', documentNumber: '',
@@ -142,7 +144,9 @@ const ComplianceDocs: React.FC = () => {
             <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); resetForm() }}>{t('complianceDocs.addDocument')}</button>
           </div>
 
+          {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); setEditingId(null) }} />}
           {showForm && (
+            <div ref={formRef} className="edit-form-panel">
             <form className="module-form" onSubmit={handleSubmit}>
               <h3>{editingId ? t('complianceDocs.modal.editTitle') : t('complianceDocs.modal.createTitle')}</h3>
               <div className="form-grid">
@@ -192,6 +196,7 @@ const ComplianceDocs: React.FC = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>{t('complianceDocs.modal.cancelBtn')}</button>
               </div>
             </form>
+            </div>
           )}
 
           {loading ? <p className="loading-text">{t('complianceDocs.loading')}</p> : tab === 'documents' ? (

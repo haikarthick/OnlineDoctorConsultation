@@ -3,6 +3,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, TreatmentCampaign } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 
 const CAMPAIGN_TYPE_LABELS: Record<string, string> = {
   vaccination: 'Vaccination', deworming: 'Deworming', testing: 'Testing',
@@ -19,13 +20,15 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: '#dc3545'
 }
 
-const TreatmentCampaigns: React.FC = () => {  const { t } = useTranslation()
+const TreatmentCampaigns: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [campaigns, setCampaigns] = useState<TreatmentCampaign[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [editingCampaign, setEditingCampaign] = useState<TreatmentCampaign | null>(null)
   const [formData, setFormData] = useState({
     name: '', campaignType: 'vaccination', description: '',
@@ -189,9 +192,9 @@ const TreatmentCampaigns: React.FC = () => {  const { t } = useTranslation()
         </div>
       )}
 
+      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
-        <div className="modal-overlay" onClick={() => { setShowForm(false); resetForm() }}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '550px' }}>
+        <div ref={formRef} className="edit-form-panel">
             <h2>{editingCampaign ? 'Edit Campaign' : 'Create Campaign'}</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
@@ -245,7 +248,6 @@ const TreatmentCampaigns: React.FC = () => {  const { t } = useTranslation()
                 <button type="submit" className="btn btn-primary">{editingCampaign ? 'Update' : 'Create'} Campaign</button>
               </div>
             </form>
-          </div>
         </div>
       )}
     </div>

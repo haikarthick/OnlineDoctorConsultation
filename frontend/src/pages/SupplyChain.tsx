@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, ProductBatch, TraceabilityEvent, QRCode as QRCodeType } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +10,8 @@ const STATUS_COLORS: Record<string, string> = {
   in_production: '#3b82f6', quality_check: '#f59e0b', in_transit: '#8b5cf6', delivered: '#22c55e', recalled: '#ef4444'
 }
 
-const SupplyChainPage: React.FC = () => {  const { t } = useTranslation()
+const SupplyChainPage: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -20,6 +22,7 @@ const SupplyChainPage: React.FC = () => {  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'dashboard' | 'batches' | 'events' | 'qrcodes'>('dashboard')
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [showEventForm, setShowEventForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -217,7 +220,9 @@ const SupplyChainPage: React.FC = () => {  const { t } = useTranslation()
                 <button className="btn-primary" onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancel' : '+ Create Batch'}</button>
               </div>
 
+              {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false) }} />}
               {showForm && (
+                <div ref={formRef} className="edit-form-panel">
                 <form className="module-form" onSubmit={handleCreateBatch}>
                   <div className="form-grid">
                     <div className="form-group"><label>Batch Number *</label><input required value={formData.batchNumber} onChange={e => setFormData({ ...formData, batchNumber: e.target.value })} /></div>
@@ -239,6 +244,7 @@ const SupplyChainPage: React.FC = () => {  const { t } = useTranslation()
                   </div>
                   <button type="submit" className="btn-primary">Create Batch</button>
                 </form>
+                </div>
               )}
 
               <table className="data-table">

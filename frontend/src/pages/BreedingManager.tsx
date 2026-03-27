@@ -3,6 +3,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, BreedingRecord, BreedingStats } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 
 const STATUS_COLORS: Record<string, string> = {
   bred: '#3b82f6', confirmed_pregnant: '#22c55e', not_pregnant: '#94a3b8',
@@ -19,6 +20,7 @@ const BreedingManager: React.FC = () => {
   const [upcomingDue, setUpcomingDue] = useState<BreedingRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [tab, setTab] = useState<'records' | 'upcoming' | 'stats'>('records')
   const [formData, setFormData] = useState({
@@ -127,7 +129,9 @@ const BreedingManager: React.FC = () => {
             <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null) }}>{t('breedingManager.newRecord')}</button>
           </div>
 
+          {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); setEditingId(null) }} />}
           {showForm && (
+            <div ref={formRef} className="edit-form-panel">
             <form className="module-form" onSubmit={handleSubmit}>
               <h3>{editingId ? t('breedingManager.modal.editTitle') : t('breedingManager.modal.createTitle')}</h3>
               <div className="form-grid">
@@ -177,6 +181,7 @@ const BreedingManager: React.FC = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>{t('breedingManager.modal.cancel')}</button>
               </div>
             </form>
+            </div>
           )}
 
           {loading ? <p className="loading-text">{t('breedingManager.loading')}</p> : tab === 'records' ? (

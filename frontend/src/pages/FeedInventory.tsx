@@ -3,8 +3,10 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, FeedItem, FeedAnalytics } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 
-const FeedInventory: React.FC = () => {  const { t } = useTranslation()
+const FeedInventory: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -13,6 +15,7 @@ const FeedInventory: React.FC = () => {  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'inventory' | 'analytics'>('inventory')
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [showConsumptionForm, setShowConsumptionForm] = useState(false)
   const [restockId, setRestockId] = useState<string | null>(null)
   const [restockQty, setRestockQty] = useState('')
@@ -164,7 +167,9 @@ const FeedInventory: React.FC = () => {  const { t } = useTranslation()
             <button className="btn btn-secondary" onClick={() => setShowConsumptionForm(!showConsumptionForm)}>📝 Log Consumption</button>
           </div>
 
+          {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); setEditingId(null) }} />}
           {showForm && (
+            <div ref={formRef} className="edit-form-panel">
             <form className="module-form" onSubmit={handleSubmit}>
               <h3>{editingId ? 'Edit Feed Item' : 'Add New Feed'}</h3>
               <div className="form-grid">
@@ -222,6 +227,7 @@ const FeedInventory: React.FC = () => {  const { t } = useTranslation()
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>Cancel</button>
               </div>
             </form>
+            </div>
           )}
 
           {showConsumptionForm && (

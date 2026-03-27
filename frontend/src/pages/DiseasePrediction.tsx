@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, DiseasePrediction, OutbreakZone, RiskDashboard } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +10,8 @@ const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
 }
 
-const DiseasePredictionPage: React.FC = () => {  const { t } = useTranslation()
+const DiseasePredictionPage: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -19,6 +21,7 @@ const DiseasePredictionPage: React.FC = () => {  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'dashboard' | 'predictions' | 'outbreaks'>('dashboard')
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [showOutbreakForm, setShowOutbreakForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -209,7 +212,9 @@ const DiseasePredictionPage: React.FC = () => {  const { t } = useTranslation()
                 </button>
               </div>
 
+              {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false) }} />}
               {showForm && (
+                <div ref={formRef} className="edit-form-panel">
                 <form className="module-form" onSubmit={handleCreatePrediction}>
                   <div className="form-grid">
                     <div className="form-group"><label>Disease Name *</label><input required value={formData.diseaseName} onChange={e => setFormData({ ...formData, diseaseName: e.target.value })} /></div>
@@ -221,6 +226,7 @@ const DiseasePredictionPage: React.FC = () => {  const { t } = useTranslation()
                   </div>
                   <button type="submit" className="btn-primary">Submit Prediction</button>
                 </form>
+                </div>
               )}
 
               <table className="data-table">

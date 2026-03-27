@@ -5,6 +5,7 @@ import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 
 // ─── Breed Database by Species ──────────────────────────────
 const BREED_DATABASE: Record<string, string[]> = {
@@ -48,6 +49,7 @@ const Animals: React.FC = () => {
   const [animals, setAnimals] = useState<AnimalData[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [editingAnimal, setEditingAnimal] = useState<AnimalData | null>(null)
   const [detailAnimal, setDetailAnimal] = useState<AnimalData | null>(null)
   const [formData, setFormData] = useState({
@@ -250,9 +252,11 @@ const Animals: React.FC = () => {
       )}
 
       {/* ─── Registration / Edit Form ──────────────────────── */}
+      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
-        <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 16, padding: 28, marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-          <h2 style={{ margin: '0 0 4px', fontSize: 18, color: '#1f2937' }}>
+        <div ref={formRef} className="edit-form-panel">
+          {editingAnimal && <div className="edit-form-badge">✏️ Editing Mode</div>}
+          <h2>
             {editingAnimal ? `✏️ ${t('animals.registerModal.titleEdit', { name: editingAnimal.name })}` : t('animals.registerModal.titleNew')}
           </h2>
           <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 16px' }}>{t('animals.registerModal.requiredNote')}</p>

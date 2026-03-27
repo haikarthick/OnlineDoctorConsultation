@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, GeneticProfile, LineagePair } from '../types'
 import { useTranslation } from 'react-i18next'
 
-const GenomicLineagePage: React.FC = () => {  const { t } = useTranslation()
+const GenomicLineagePage: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -14,6 +16,7 @@ const GenomicLineagePage: React.FC = () => {  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'dashboard' | 'profiles' | 'pairs'>('dashboard')
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [showPairForm, setShowPairForm] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -181,7 +184,9 @@ const GenomicLineagePage: React.FC = () => {  const { t } = useTranslation()
                 <button className="btn-primary" onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancel' : '+ Add Genetic Profile'}</button>
               </div>
 
+              {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false) }} />}
               {showForm && (
+                <div ref={formRef} className="edit-form-panel">
                 <form className="module-form" onSubmit={handleCreateProfile}>
                   <div className="form-grid">
                     <div className="form-group"><label>Animal ID *</label><input required value={formData.animalId} onChange={e => setFormData({ ...formData, animalId: e.target.value })} /></div>
@@ -197,6 +202,7 @@ const GenomicLineagePage: React.FC = () => {  const { t } = useTranslation()
                   </div>
                   <button type="submit" className="btn-primary">Create Profile</button>
                 </form>
+                </div>
               )}
 
               <table className="data-table">

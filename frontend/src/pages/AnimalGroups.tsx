@@ -4,6 +4,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, AnimalGroup, GROUP_TYPE_LABELS, AnimalGroupType } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 
 const PURPOSE_OPTIONS = [
   { value: 'dairy', label: 'Dairy' }, { value: 'meat', label: 'Meat' },
@@ -17,7 +18,8 @@ const PURPOSE_OPTIONS = [
 
 interface SimpleAnimal { id: string; name: string; species: string; breed?: string; uniqueId?: string; groupId?: string; groupName?: string }
 
-const AnimalGroups: React.FC = () => {  const { t } = useTranslation()
+const AnimalGroups: React.FC = () => {
+  const { t } = useTranslation()
 
   const navigate = useNavigate()
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
@@ -25,6 +27,7 @@ const AnimalGroups: React.FC = () => {  const { t } = useTranslation()
   const [groups, setGroups] = useState<AnimalGroup[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [editingGroup, setEditingGroup] = useState<AnimalGroup | null>(null)
   const [formData, setFormData] = useState({
     name: '', groupType: '' as AnimalGroupType, species: '', breed: '',
@@ -414,9 +417,9 @@ const AnimalGroups: React.FC = () => {  const { t } = useTranslation()
       )}
 
       {/* Create/Edit Form Modal */}
+      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
-        <div className="modal-overlay" onClick={() => { setShowForm(false); resetForm() }}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '550px' }}>
+        <div ref={formRef} className="edit-form-panel">
             <h2>{editingGroup ? 'Edit Group' : 'Create Animal Group'}</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
@@ -469,7 +472,6 @@ const AnimalGroups: React.FC = () => {  const { t } = useTranslation()
                 <button type="submit" className="btn btn-primary">{editingGroup ? 'Update' : 'Create'} Group</button>
               </div>
             </form>
-          </div>
         </div>
       )}
     </div>

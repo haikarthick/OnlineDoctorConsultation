@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import apiService from '../services/api'
 import './ModulePage.css'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, ENTERPRISE_TYPE_LABELS, EnterpriseType, EnterpriseStats } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
 
-const EnterpriseManagement: React.FC = () => {  const { t } = useTranslation()
+const EnterpriseManagement: React.FC = () => {
+  const { t } = useTranslation()
 
   const { user } = useAuth()
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [editingEnterprise, setEditingEnterprise] = useState<Enterprise | null>(null)
   const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null)
   const [stats, setStats] = useState<EnterpriseStats | null>(null)
@@ -307,9 +310,9 @@ const EnterpriseManagement: React.FC = () => {  const { t } = useTranslation()
       </div>
 
       {/* Create/Edit Form Modal */}
+      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
-        <div className="modal-overlay" onClick={() => { setShowForm(false); resetForm() }}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '700px', maxHeight: '85vh', overflow: 'auto' }}>
+        <div ref={formRef} className="edit-form-panel">
             <h2>{editingEnterprise ? 'Edit Enterprise' : 'Create New Enterprise'}</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
@@ -438,7 +441,6 @@ const EnterpriseManagement: React.FC = () => {  const { t } = useTranslation()
                 <button type="submit" className="btn btn-primary">{editingEnterprise ? 'Update' : 'Create'} Enterprise</button>
               </div>
             </form>
-          </div>
         </div>
       )}
     </div>

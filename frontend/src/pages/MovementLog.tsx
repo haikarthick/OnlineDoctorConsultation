@@ -3,6 +3,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, MovementRecord } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
   transfer: 'Transfer', intake: 'Intake', discharge: 'Discharge',
@@ -15,7 +16,8 @@ const MOVEMENT_TYPE_ICONS: Record<string, string> = {
   sale: '💰', death: '✝️', birth: '🐣', import: '🚛', export: '📦'
 }
 
-const MovementLog: React.FC = () => {  const { t } = useTranslation()
+const MovementLog: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -24,6 +26,7 @@ const MovementLog: React.FC = () => {  const { t } = useTranslation()
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [formData, setFormData] = useState({
     movementType: 'transfer', animalId: '', groupId: '',
     fromLocationId: '', toLocationId: '', reason: '', notes: ''
@@ -157,9 +160,9 @@ const MovementLog: React.FC = () => {  const { t } = useTranslation()
         </div>
       )}
 
+      {showForm && <div className="edit-form-overlay" onClick={() => setShowForm(false)} />}
       {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+        <div ref={formRef} className="edit-form-panel">
             <h2>Record Movement</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
@@ -209,7 +212,6 @@ const MovementLog: React.FC = () => {  const { t } = useTranslation()
                 <button type="submit" className="btn btn-primary">Record Movement</button>
               </div>
             </form>
-          </div>
         </div>
       )}
     </div>

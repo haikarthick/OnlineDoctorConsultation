@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { useSettings } from '../context/SettingsContext'
 import { Enterprise, FinancialRecord, FinancialDashboard } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useScrollToForm } from '../hooks/useScrollToForm'
 
 const TYPE_COLORS: Record<string, string> = { income: '#22c55e', expense: '#ef4444' }
 
@@ -23,6 +24,7 @@ const FinancialAnalytics: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'dashboard' | 'records'>('dashboard')
   const [showForm, setShowForm] = useState(false)
+  const formRef = useScrollToForm(showForm)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     recordType: 'expense' as 'income' | 'expense', category: 'feed',
@@ -132,7 +134,9 @@ const FinancialAnalytics: React.FC = () => {
             <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); resetForm() }}>+ Add Record</button>
           </div>
 
+          {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); setEditingId(null) }} />}
           {showForm && (
+            <div ref={formRef} className="edit-form-panel">
             <form className="module-form" onSubmit={handleSubmit}>
               <h3>{editingId ? 'Edit Financial Record' : 'Add Financial Record'}</h3>
               <div className="form-grid">
@@ -175,6 +179,7 @@ const FinancialAnalytics: React.FC = () => {
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>Cancel</button>
               </div>
             </form>
+            </div>
           )}
 
           {loading ? <p className="loading-text">Loading...</p> : tab === 'dashboard' && dashboard ? (
