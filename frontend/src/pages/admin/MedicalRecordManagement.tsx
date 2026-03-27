@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
@@ -23,6 +24,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 }
 
 const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNavigate: _onNavigate }) => {
+  const { t } = useTranslation()
   const { formatDate, formatDateTime } = useSettings()
   const [activeTab, setActiveTab] = useState<'records' | 'audit' | 'stats'>('records')
   const [loading, setLoading] = useState(true)
@@ -115,35 +117,35 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>📋 Medical Record Management</h1>
-          <p className="page-subtitle">Enterprise medical records administration • Compliance & audit</p>
+          <h1>📋 {t('medicalRecordManagement.title')}</h1>
+          <p className="page-subtitle">{t('medicalRecordManagement.subtitle')}</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-outline" onClick={() => {
             if (activeTab === 'records') loadRecords()
             else if (activeTab === 'audit') loadAuditLogs()
             else loadStats()
-          }}>🔄 Refresh</button>
+          }}>🔄 {t('medicalRecordManagement.refresh')}</button>
         </div>
       </div>
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '2px solid #e5e7eb' }}>
-        {tabBtn('records', `📄 All Records (${recordsTotal})`)}
-        {tabBtn('audit', '📜 Audit Trail')}
-        {tabBtn('stats', '📊 Statistics')}
+        {tabBtn('records', `📄 ${t('medicalRecordManagement.allRecords')} (${recordsTotal})`)}
+        {tabBtn('audit', '📜 ' + t('medicalRecordManagement.auditTrail'))}
+        {tabBtn('stats', '📊 ' + t('medicalRecordManagement.statistics'))}
       </div>
 
       {/* ═══ RECORDS TAB ═══════════════════════════════════ */}
       {activeTab === 'records' && (
         <div>
           <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-            <input type="text" placeholder="Search by title, pet ID, owner ID..."
+            <input type="text" placeholder={t('medicalRecordManagement.searchPlaceholder')}
               value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
               style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, flex: 1, minWidth: 220 }} />
             <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
               style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
-              <option value="">All Types</option>
+              <option value="">{t('medicalRecordManagement.allTypes')}</option>
               {RECORD_TYPES.map(t => <option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
             </select>
           </div>
@@ -151,27 +153,27 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40 }}>
               <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
-              <p>Loading records...</p>
+              <p>{t('medicalRecordManagement.loadingRecords')}</p>
             </div>
           ) : records.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, color: '#9ca3af' }}>
               <p style={{ fontSize: 48 }}>📄</p>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>No records found</p>
+              <p style={{ fontSize: 16, fontWeight: 500 }}>{t('medicalRecordManagement.noRecordsFound')}</p>
             </div>
           ) : (
             <div className="data-table-container">
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Record #</th>
-                    <th>Type</th>
-                    <th>Title</th>
-                    <th>Pet</th>
-                    <th>Owner</th>
-                    <th>Veterinarian</th>
-                    <th>Severity</th>
-                    <th>Status</th>
-                    <th>Created</th>
+                    <th>{t('medicalRecordManagement.recordNumber')}</th>
+                    <th>{t('medicalRecordManagement.type')}</th>
+                    <th>{t('medicalRecordManagement.titleHeader')}</th>
+                    <th>{t('medicalRecordManagement.pet')}</th>
+                    <th>{t('medicalRecordManagement.owner')}</th>
+                    <th>{t('medicalRecordManagement.veterinarian')}</th>
+                    <th>{t('medicalRecordManagement.severity')}</th>
+                    <th>{t('medicalRecordManagement.status')}</th>
+                    <th>{t('medicalRecordManagement.created')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -213,17 +215,17 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
                             <td colSpan={9} style={{ padding: 16, background: '#f9fafb' }}>
                               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 13 }}>
                                 <div>
-                                  <strong>Content:</strong>
+                                  <strong>{t('medicalRecordManagement.content')}:</strong>
                                   <div style={{ padding: 8, background: '#fff', borderRadius: 6, marginTop: 4, whiteSpace: 'pre-wrap' }}>
-                                    {rec.content || 'No content'}
+                                    {rec.content || t('medicalRecordManagement.noContent')}
                                   </div>
                                 </div>
                                 <div>
-                                  {rec.followUpDate && <p><strong>Follow-up:</strong> {fmtDate(rec.followUpDate)}</p>}
-                                  {rec.isConfidential && <p><strong>🔒 Confidential Record</strong></p>}
+                                  {rec.followUpDate && <p><strong>{t('medicalRecordManagement.followUp')}:</strong> {fmtDate(rec.followUpDate)}</p>}
+                                  {rec.isConfidential && <p><strong>🔒 {t('medicalRecordManagement.confidentialRecord')}</strong></p>}
                                   {rec.medications && rec.medications.length > 0 && (
                                     <div style={{ marginTop: 8 }}>
-                                      <strong>Medications:</strong>
+                                      <strong>{t('medicalRecordManagement.medications')}:</strong>
                                       {rec.medications.map((m: any, i: number) => (
                                         <div key={i} style={{ padding: 4, fontSize: 12 }}>
                                           • <strong>{m.name}</strong> {m.dosage || ''} {m.frequency || ''} {m.duration || ''}
@@ -259,13 +261,13 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40 }}>
               <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
-              <p>Loading audit trail...</p>
+              <p>{t('medicalRecordManagement.loadingAuditTrail')}</p>
             </div>
           ) : auditLogs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, color: '#9ca3af' }}>
               <p style={{ fontSize: 48 }}>📜</p>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>No audit entries found</p>
-              <p style={{ fontSize: 13 }}>Medical record changes will be tracked here</p>
+              <p style={{ fontSize: 16, fontWeight: 500 }}>{t('medicalRecordManagement.noAuditEntries')}</p>
+              <p style={{ fontSize: 13 }}>{t('medicalRecordManagement.auditTrackingNote')}</p>
             </div>
           ) : (
             <div className="data-table-container">
@@ -273,12 +275,12 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
                 <thead>
                   <tr>
                     <th></th>
-                    <th>Action</th>
-                    <th>Record Type</th>
-                    <th>Record ID</th>
-                    <th>Performed By</th>
-                    <th>Date/Time</th>
-                    <th>Details</th>
+                    <th>{t('medicalRecordManagement.actionHeader')}</th>
+                    <th>{t('medicalRecordManagement.recordType')}</th>
+                    <th>{t('medicalRecordManagement.recordId')}</th>
+                    <th>{t('medicalRecordManagement.performedBy')}</th>
+                    <th>{t('medicalRecordManagement.dateTime')}</th>
+                    <th>{t('medicalRecordManagement.details')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -302,7 +304,7 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
                       {expandedId === log.id && log.details && (
                         <tr>
                           <td colSpan={7} style={{ padding: 16, background: '#f9fafb' }}>
-                            <strong>Full Details:</strong>
+                            <strong>{t('medicalRecordManagement.fullDetails')}:</strong>
                             <pre style={{ fontSize: 11, background: '#fff', padding: 12, borderRadius: 6, marginTop: 4, overflow: 'auto', maxHeight: 200 }}>
                               {typeof log.details === 'string' ? log.details : JSON.stringify(log.details, null, 2)}
                             </pre>
@@ -324,30 +326,30 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40 }}>
               <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
-              <p>Loading statistics...</p>
+              <p>{t('medicalRecordManagement.loadingStatistics')}</p>
             </div>
           ) : !stats ? (
             <div style={{ textAlign: 'center', padding: 60, color: '#9ca3af' }}>
               <p style={{ fontSize: 48 }}>📊</p>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>No statistics available</p>
+              <p style={{ fontSize: 16, fontWeight: 500 }}>{t('medicalRecordManagement.noStatisticsAvailable')}</p>
             </div>
           ) : (
             <div>
               {/* Summary Cards */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
-                <StatsCard icon="📋" label="Total Medical Records" value={stats.totalRecords || 0} color="#667eea" />
-                <StatsCard icon="💉" label="Total Vaccinations" value={stats.vaccinations?.total || 0}
-                  sub={stats.vaccinations?.upcomingDue ? `${stats.vaccinations.upcomingDue} due within 30 days` : undefined} color="#7c3aed" />
-                <StatsCard icon="🔬" label="Lab Results" value={stats.labResults?.total || 0}
-                  sub={stats.labResults?.pending ? `${stats.labResults.pending} pending` : undefined} color="#d97706" />
-                <StatsCard icon="⚠️" label="Active Allergies" value={stats.allergies?.active || 0} color="#dc2626" />
-                <StatsCard icon="📅" label="Follow-ups (7 days)" value={stats.upcomingFollowUps || 0} color="#ea580c" />
+                <StatsCard icon="📋" label={t('medicalRecordManagement.totalMedicalRecords')} value={stats.totalRecords || 0} color="#667eea" />
+                <StatsCard icon="💉" label={t('medicalRecordManagement.totalVaccinations')} value={stats.vaccinations?.total || 0}
+                  sub={stats.vaccinations?.upcomingDue ? `${stats.vaccinations.upcomingDue} ${t('medicalRecordManagement.dueWithin30Days')}` : undefined} color="#7c3aed" />
+                <StatsCard icon="🔬" label={t('medicalRecordManagement.labResultsLabel')} value={stats.labResults?.total || 0}
+                  sub={stats.labResults?.pending ? `${stats.labResults.pending} ${t('medicalRecordManagement.pending')}` : undefined} color="#d97706" />
+                <StatsCard icon="⚠️" label={t('medicalRecordManagement.activeAllergies')} value={stats.allergies?.active || 0} color="#dc2626" />
+                <StatsCard icon="📅" label={t('medicalRecordManagement.followUps7Days')} value={stats.upcomingFollowUps || 0} color="#ea580c" />
               </div>
 
               {/* Records by Type */}
               {stats.recordsByType && Object.keys(stats.recordsByType).length > 0 && (
                 <div style={{ marginBottom: 24, padding: 20, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Records Distribution by Type</h3>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t('medicalRecordManagement.recordsDistribution')}</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {Object.entries(stats.recordsByType).map(([type, count]: [string, any]) => {
                       const info = getTypeInfo(type)
@@ -369,10 +371,9 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
 
               {/* Compliance note */}
               <div style={{ padding: 16, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8 }}>
-                <h4 style={{ fontSize: 14, fontWeight: 600, color: '#059669', marginBottom: 8 }}>✅ Compliance Status</h4>
+                <h4 style={{ fontSize: 14, fontWeight: 600, color: '#059669', marginBottom: 8 }}>✅ {t('medicalRecordManagement.complianceStatus')}</h4>
                 <p style={{ fontSize: 13, color: '#374151', margin: 0 }}>
-                  All medical records are tracked with unique identifiers (MR-XXXXXX), audit trail logging, 
-                  and role-based access controls. Records are soft-deleted (archived) to maintain data integrity.
+                  {t('medicalRecordManagement.complianceNote')}
                   Pet owners ({stats.allergies?.active || 0} active allergy alerts) and veterinarians can access records
                   based on RBAC permissions.
                 </p>

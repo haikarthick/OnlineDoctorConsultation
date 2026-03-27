@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { Booking } from '../../types'
@@ -23,6 +24,7 @@ interface MyBookingsProps {
 }
 
 const MyBookings: React.FC<MyBookingsProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { formatDate, isJoinable, settings: appSettings } = useSettings()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,10 +50,10 @@ const MyBookings: React.FC<MyBookingsProps> = ({ onNavigate }) => {
 
   const actionLabel = (action: string): string => {
     const map: Record<string, string> = {
-      BOOKING_CREATED: '📅 Booking Created',
-      BOOKING_CONFIRMED: '✅ Confirmed by Doctor',
-      BOOKING_CANCELLED: '❌ Booking Cancelled',
-      BOOKING_RESCHEDULED: '🔄 Rescheduled',
+      BOOKING_CREATED: t('myBookings.actionCreated'),
+      BOOKING_CONFIRMED: t('myBookings.actionConfirmed'),
+      BOOKING_CANCELLED: t('myBookings.actionCancelled'),
+      BOOKING_RESCHEDULED: t('myBookings.actionRescheduled'),
     }
     return map[action] || action
   }
@@ -156,12 +158,12 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>My Bookings</h1>
-          <p className="page-subtitle">Manage your consultation appointments</p>
+          <h1>{t('myBookings.title')}</h1>
+          <p className="page-subtitle">{t('myBookings.subtitle')}</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-primary" onClick={() => onNavigate('/book-consultation')}>
-            + New Booking
+            + {t('myBookings.newBooking')}
           </button>
         </div>
       </div>
@@ -181,15 +183,15 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
       {loading ? (
         <div className="loading-container">
           <div className="loading-spinner" />
-          <p>Loading bookings...</p>
+          <p>{t('myBookings.loadingBookings')}</p>
         </div>
       ) : bookings.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">📅</div>
-          <h3>No bookings found</h3>
-          <p>You haven't made any bookings yet</p>
+          <h3>{t('myBookings.noBookings')}</h3>
+          <p>{t('myBookings.noBookingsYet')}</p>
           <button className="btn btn-primary" onClick={() => onNavigate('/book-consultation')}>
-            Book Your First Consultation
+            {t('myBookings.bookFirst')}
           </button>
         </div>
       ) : (
@@ -257,16 +259,16 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
 }
                     }}
                   >
-                    📹 Join Video Call
+                    📹 {t('myBookings.joinVideoCall')}
                   </button>
                   ) : (
                   <button
                     className="btn btn-sm"
                     style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }}
                     disabled
-                    title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}
+                    title={t('myBookings.availableBefore', { minutes: appSettings.joinWindowMinutes })}
                   >
-                    🔒 Not Yet
+                    🔒 {t('myBookings.notYet')}
                   </button>
                   )
                 )}
@@ -276,7 +278,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
                     style={{ background: '#f59e0b', color: 'white', border: 'none' }}
                     onClick={() => openRescheduleModal(booking)}
                   >
-                    🔄 Reschedule
+                    🔄 {t('myBookings.reschedule')}
                   </button>
                 )}
                 {(booking.status === 'pending' || booking.status === 'confirmed') && (
@@ -284,7 +286,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
                     className="btn btn-danger btn-sm"
                     onClick={() => setCancelModal({ show: true, bookingId: booking.id, reason: '' })}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                 )}
                 {booking.status === 'completed' && (
@@ -292,16 +294,16 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
                     className="btn btn-primary btn-sm"
                     onClick={() => onNavigate(`/write-review/${booking.id}`)}
                   >
-                    ⭐ Write Review
+                    ⭐ {t('myBookings.writeReview')}
                   </button>
                 )}
                 <button
                   className="btn btn-sm"
                   style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }}
                   onClick={() => openActionLog(booking.id)}
-                  title="View Action History"
+                  title={t('myBookings.viewHistory')}
                 >
-                  📋 History
+                  📋 {t('myBookings.history')}
                 </button>
               </div>
             </div>
@@ -314,7 +316,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
         <div className="modal-overlay" onClick={() => setCancelModal({ show: false, bookingId: '', reason: '' })}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Cancel Booking</h2>
+              <h2>{t('myBookings.cancelBooking')}</h2>
               <button className="modal-close" onClick={() => setCancelModal({ show: false, bookingId: '', reason: '' })}>✕</button>
             </div>
             <div className="modal-body">
@@ -324,10 +326,10 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
                 </div>
               )}
               <div className="form-group">
-                <label className="form-label">Reason for cancellation</label>
+                <label className="form-label">{t('myBookings.cancelReason')}</label>
                 <textarea
                   className="form-textarea"
-                  placeholder="Please provide a reason..."
+                  placeholder={t('myBookings.cancelReasonPlaceholder')}
                   value={cancelModal.reason}
                   onChange={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
                 />
@@ -335,10 +337,10 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             </div>
             <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setCancelModal({ show: false, bookingId: '', reason: '' })}>
-                Keep Booking
+                {t('myBookings.keepBooking')}
               </button>
               <button className="btn btn-danger" onClick={handleCancelBooking}>
-                Confirm Cancellation
+                {t('myBookings.confirmCancellation')}
               </button>
             </div>
           </div>
@@ -357,7 +359,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             maxWidth: 480, maxHeight: '80vh', overflowY: 'auto'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ margin: 0 }}>Reschedule Appointment</h2>
+              <h2 style={{ margin: 0 }}>{t('myBookings.rescheduleAppointment')}</h2>
               <button onClick={() => { setRescheduleTarget(null); setRescheduleError('') }} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
@@ -373,7 +375,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             </div>
 
             <div className="form-group" style={{ marginBottom: 16 }}>
-              <label className="form-label">Select New Date</label>
+              <label className="form-label">{t('myBookings.selectNewDate')}</label>
               <input
                 type="date"
                 className="form-input"
@@ -386,15 +388,15 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
               />
             </div>
 
-            {rescheduleSlotsLoading && <p>Loading available slots...</p>}
+            {rescheduleSlotsLoading && <p>{t('myBookings.loadingSlots')}</p>}
 
             {!rescheduleSlotsLoading && rescheduleSlots.length > 0 && (() => {
               const futureSlots = filterFutureSlots(rescheduleSlots, rescheduleDate)
               return (
               <div style={{ marginBottom: 16 }}>
-                <label className="form-label">Available Slots</label>
+                <label className="form-label">{t('myBookings.availableSlots')}</label>
                 {futureSlots.length === 0 ? (
-                  <p style={{ color: '#6b7280', fontSize: 14 }}>No available slots on this date.</p>
+                  <p style={{ color: '#6b7280', fontSize: 14 }}>{t('myBookings.noSlotsOnDate')}</p>
                 ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                   {futureSlots.map(slot => (
@@ -418,7 +420,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             })()}
 
             {!rescheduleSlotsLoading && rescheduleDate && rescheduleSlots.length === 0 && (
-              <p style={{ color: '#6b7280', fontSize: 14 }}>No slots found for this date.</p>
+              <p style={{ color: '#6b7280', fontSize: 14 }}>{t('myBookings.noSlotsFound')}</p>
             )}
 
             {rescheduleSelectedSlot && (
@@ -428,13 +430,13 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-              <button className="btn btn-outline" onClick={() => { setRescheduleTarget(null); setRescheduleError('') }}>Cancel</button>
+              <button className="btn btn-outline" onClick={() => { setRescheduleTarget(null); setRescheduleError('') }}>{t('common.cancel')}</button>
               <button
                 className="btn btn-primary"
                 disabled={!rescheduleSelectedSlot || rescheduleSubmitting}
                 onClick={handleRescheduleSubmit}
               >
-                {rescheduleSubmitting ? 'Rescheduling...' : 'Confirm Reschedule'}
+                {rescheduleSubmitting ? t('myBookings.rescheduling') : t('myBookings.confirmReschedule')}
               </button>
             </div>
           </div>
@@ -453,14 +455,14 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             maxWidth: 520, maxHeight: '80vh', overflowY: 'auto'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ margin: 0, fontSize: 18 }}>📋 Action Log</h2>
+              <h2 style={{ margin: 0, fontSize: 18 }}>📋 {t('myBookings.actionLog')}</h2>
               <button onClick={() => setActionLogBookingId(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
-            {actionLogsLoading && <p style={{ color: '#6b7280' }}>Loading action history...</p>}
+            {actionLogsLoading && <p style={{ color: '#6b7280' }}>{t('myBookings.loadingHistory')}</p>}
 
             {!actionLogsLoading && actionLogs.length === 0 && (
-              <p style={{ color: '#9ca3af', textAlign: 'center', padding: 20 }}>No action history found for this booking.</p>
+              <p style={{ color: '#9ca3af', textAlign: 'center', padding: 20 }}>{t('myBookings.noHistory')}</p>
             )}
 
             {!actionLogsLoading && actionLogs.length > 0 && (
@@ -510,7 +512,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-              <button className="btn btn-outline" onClick={() => setActionLogBookingId(null)}>Close</button>
+              <button className="btn btn-outline" onClick={() => setActionLogBookingId(null)}>{t('common.close')}</button>
             </div>
           </div>
         </div>

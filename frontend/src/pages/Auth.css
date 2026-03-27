@@ -290,7 +290,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .auth-container {
     max-width: 500px;
   }
@@ -318,6 +318,21 @@
 
   .btn {
     padding: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-container {
+    gap: 1.5rem;
+  }
+
+  .auth-card,
+  .auth-info {
+    padding: 2rem;
+  }
+
+  .auth-info {
+    display: none;
   }
 }
 
@@ -748,7 +763,7 @@
 }
 
 /* ── Register responsive ── */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .register-brand {
     width: 260px;
     min-width: 260px;
@@ -790,6 +805,17 @@
   .register-form-panel {
     max-height: none;
     overflow-y: visible;
+  }
+}
+
+@media (max-width: 640px) {
+  .register-features {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .register-form-header h3 {
+    font-size: 1.1rem;
   }
 }
 
@@ -1039,7 +1065,7 @@
 }
 
 /* ── Login responsive ── */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .login-brand {
     width: 300px;
     min-width: 300px;
@@ -1077,6 +1103,17 @@
   .login-form-center {
     padding: 1.5rem;
     max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-features {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .login-form-center h2 {
+    font-size: 1.2rem;
   }
 }
 

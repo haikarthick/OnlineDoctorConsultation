@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import { VetProfile, Review, DoctorReliability } from '../../types'
@@ -10,6 +11,7 @@ interface VetProfilePageProps {
 }
 
 const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { formatCurrency } = useSettings()
   const [vet, setVet] = useState<VetProfile | null>(null)
   const [reviews, setReviews] = useState<Review[]>([])
@@ -74,7 +76,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
   )
 
   const formatDays = (days?: string) => {
-    if (!days) return 'Not specified'
+    if (!days) return t('vetProfile.notSpecified')
     return days.split(',').map(d => d.trim()).join(', ')
   }
 
@@ -83,7 +85,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
       <div className="module-page">
         <div className="loading-container">
           <div className="loading-spinner" />
-          <p>Loading profile...</p>
+          <p>{t('vetProfile.loadingProfile')}</p>
         </div>
       </div>
     )
@@ -94,9 +96,9 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
       <div className="module-page">
         <div className="empty-state">
           <div className="empty-icon">⚠️</div>
-          <h3>{error || 'Veterinarian not found'}</h3>
+          <h3>{error || t('vetProfile.notFound')}</h3>
           <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => onNavigate('/find-doctor')}>
-            ← Back to Find Doctor
+            {t('vetProfile.backToFindDoctor')}
           </button>
         </div>
       </div>
@@ -110,7 +112,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
       {/* Back button */}
       <button onClick={() => onNavigate('/find-doctor')}
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
-        ← Back to Find Doctor
+        {t('vetProfile.backToFindDoctor')}
       </button>
 
       {/* ── Profile Header ── */}
@@ -156,10 +158,10 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
         </div>
         <div style={{ textAlign: 'center', flexShrink: 0 }}>
           <div style={{ fontSize: 28, fontWeight: 700 }}>{formatCurrency(vet.consultationFee || 0)}</div>
-          <div style={{ fontSize: 12, opacity: 0.8 }}>per session</div>
+          <div style={{ fontSize: 12, opacity: 0.8 }}>{t('vetProfile.perSession')}</div>
           <button className="btn" onClick={() => onNavigate(`/book-consultation?vetId=${vet.userId}`)}
             style={{ marginTop: 12, background: 'white', color: '#4F46E5', fontWeight: 700, padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}>
-            📅 Book Consultation
+            📅 {t('vetProfile.bookConsultation')}
           </button>
         </div>
       </div>
@@ -167,31 +169,31 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
         {/* ── About ── */}
         <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '20px 24px' }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>📋 About</h3>
+          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>📋 {t('vetProfile.about')}</h3>
           <p style={{ color: '#4b5563', fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-            {vet.bio || 'No biography provided yet.'}
+            {vet.bio || t('vetProfile.noBio')}
           </p>
         </div>
 
         {/* ── Stats ── */}
         <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '20px 24px' }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>📊 Statistics</h3>
+          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>📊 {t('vetProfile.statistics')}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>
               <div style={{ fontSize: 24, fontWeight: 700, color: '#2563eb' }}>{experience}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>Years Experience</div>
+              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('vetProfile.yearsExperience')}</div>
             </div>
             <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>
               <div style={{ fontSize: 24, fontWeight: 700, color: '#059669' }}>{vet.totalConsultations || 0}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>Consultations</div>
+              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('vetProfile.consultations')}</div>
             </div>
             <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>
               <div style={{ fontSize: 24, fontWeight: 700, color: '#f59e0b' }}>{Number(vet.rating || 0).toFixed(1)}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>Rating</div>
+              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('vetProfile.rating')}</div>
             </div>
             <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>
               <div style={{ fontSize: 24, fontWeight: 700, color: '#8b5cf6' }}>{vet.totalReviews || 0}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>Reviews</div>
+              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('vetProfile.reviews')}</div>
             </div>
           </div>
         </div>
@@ -200,63 +202,63 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
         {/* ── Qualifications & Specializations ── */}
         <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '20px 24px' }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>🎓 Qualifications</h3>
+          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>🎓 {t('vetProfile.qualifications')}</h3>
           {(vet.qualifications || []).length > 0 ? (
             <ul style={{ margin: 0, paddingLeft: 20, color: '#374151', fontSize: 14, lineHeight: 2 }}>
               {vet.qualifications.map((q, i) => <li key={i}>{q}</li>)}
             </ul>
-          ) : <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>Not specified</p>}
+          ) : <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>{t('vetProfile.notSpecified')}</p>}
 
-          <h3 style={{ margin: '16px 0 12px', fontSize: 16, color: '#1f2937' }}>🩺 Specializations</h3>
+          <h3 style={{ margin: '16px 0 12px', fontSize: 16, color: '#1f2937' }}>🩺 {t('vetProfile.specializations')}</h3>
           {(vet.specializations || []).length > 0 ? (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {vet.specializations.map((s, i) => (
                 <span key={i} style={{ background: '#eef2ff', color: '#4338ca', padding: '4px 12px', borderRadius: 16, fontSize: 13, fontWeight: 500 }}>{s}</span>
               ))}
             </div>
-          ) : <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>General practice</p>}
+          ) : <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>{t('vetProfile.generalPractice')}</p>}
         </div>
 
         {/* ── Practice Details ── */}
         <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '20px 24px' }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>🏥 Practice Details</h3>
+          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>🏥 {t('vetProfile.practiceDetails')}</h3>
           <div style={{ display: 'grid', gap: 10, fontSize: 14, color: '#374151' }}>
             {vet.clinicName && (
-              <div><span style={{ color: '#6b7280' }}>Clinic:</span> <strong>{vet.clinicName}</strong></div>
+              <div><span style={{ color: '#6b7280' }}>{t('vetProfile.clinic')}:</span> <strong>{vet.clinicName}</strong></div>
             )}
             {vet.clinicAddress && (
-              <div><span style={{ color: '#6b7280' }}>Address:</span> <strong>{vet.clinicAddress}</strong></div>
+              <div><span style={{ color: '#6b7280' }}>{t('vetProfile.address')}:</span> <strong>{vet.clinicAddress}</strong></div>
             )}
             {vet.licenseNumber && (
-              <div><span style={{ color: '#6b7280' }}>License:</span> <strong style={{ fontFamily: 'monospace' }}>{vet.licenseNumber}</strong></div>
+              <div><span style={{ color: '#6b7280' }}>{t('vetProfile.license')}:</span> <strong style={{ fontFamily: 'monospace' }}>{vet.licenseNumber}</strong></div>
             )}
-            <div><span style={{ color: '#6b7280' }}>Available Days:</span> <strong>{formatDays(vet.availableDays)}</strong></div>
+            <div><span style={{ color: '#6b7280' }}>{t('vetProfile.availableDays')}:</span> <strong>{formatDays(vet.availableDays)}</strong></div>
             {vet.availableHoursStart && vet.availableHoursEnd && (
-              <div><span style={{ color: '#6b7280' }}>Hours:</span> <strong>{vet.availableHoursStart} – {vet.availableHoursEnd}</strong></div>
+              <div><span style={{ color: '#6b7280' }}>{t('vetProfile.hours')}:</span> <strong>{vet.availableHoursStart} – {vet.availableHoursEnd}</strong></div>
             )}
           </div>
 
-          <h3 style={{ margin: '16px 0 12px', fontSize: 16, color: '#1f2937' }}>🌐 Languages</h3>
+          <h3 style={{ margin: '16px 0 12px', fontSize: 16, color: '#1f2937' }}>🌐 {t('vetProfile.languages')}</h3>
           {(vet.languages || []).length > 0 ? (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {vet.languages.map((l, i) => (
                 <span key={i} style={{ background: '#f0fdf4', color: '#166534', padding: '4px 12px', borderRadius: 16, fontSize: 13, fontWeight: 500 }}>{l}</span>
               ))}
             </div>
-          ) : <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>Not specified</p>}
+          ) : <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>{t('vetProfile.notSpecified')}</p>}
         </div>
       </div>
 
       {/* ── Reviews Section ── */}
       <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '24px 28px', marginBottom: 24 }}>
         <h3 style={{ margin: '0 0 16px', fontSize: 18, color: '#1f2937' }}>
-          ⭐ Patient Reviews ({vet.totalReviews || 0})
+          ⭐ {t('vetProfile.patientReviews')} ({vet.totalReviews || 0})
         </h3>
 
         {reviews.length === 0 && !reviewsLoading ? (
           <div style={{ textAlign: 'center', padding: '24px 0', color: '#9ca3af' }}>
             <div style={{ fontSize: 40, marginBottom: 8 }}>💬</div>
-            <p>No reviews yet. Be the first to review after a consultation!</p>
+            <p>{t('vetProfile.noReviews')}</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -293,7 +295,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
                 )}
                 {review.responseFromVet && (
                   <div style={{ marginTop: 8, marginLeft: 46, padding: '10px 14px', background: '#fefce8', borderRadius: 8, borderLeft: '3px solid #f59e0b' }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#92400e', marginBottom: 4 }}>Doctor's Response:</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#92400e', marginBottom: 4 }}>{t('vetProfile.doctorResponse')}:</div>
                     <p style={{ color: '#4b5563', fontSize: 13, lineHeight: 1.5, margin: 0 }}>{review.responseFromVet}</p>
                   </div>
                 )}
@@ -311,7 +313,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
         {hasMoreReviews && !reviewsLoading && (
           <button onClick={() => loadReviews(reviewPage + 1)}
             className="btn btn-outline" style={{ display: 'block', margin: '16px auto 0' }}>
-            Load More Reviews
+            {t('vetProfile.loadMoreReviews')}
           </button>
         )}
       </div>

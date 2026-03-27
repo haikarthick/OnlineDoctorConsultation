@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
@@ -28,6 +29,7 @@ interface PatientQueueProps {
 }
 
 const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   void useAuth() // ensure auth context
   const { formatDate, isJoinable, settings: appSettings } = useSettings()
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -135,7 +137,7 @@ const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
         onNavigate(`/doctor/consultation-room/${res.data.id}`)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to start consultation')
+      setError(err?.response?.data?.error?.message || t('patientQueue.failedToStartConsultation'))
     } finally {
       setProcessing(null)
     }
@@ -168,7 +170,7 @@ setRescheduleSlots([])
     // Validate: cannot reschedule to a past time
     const slotDateTime = new Date(`${rescheduleDate}T${rescheduleSelectedSlot.startTime}:00`)
     if (slotDateTime <= new Date()) {
-      setError('Cannot reschedule to a past time. Please select a future slot.')
+      setError(t('patientQueue.cannotReschedulePast'))
       return
     }
     try {
@@ -181,19 +183,19 @@ setRescheduleSlots([])
       setRescheduleTarget(null)
       loadBookings()
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to reschedule')
+      setError(err?.response?.data?.error?.message || t('patientQueue.failedToReschedule'))
     } finally {
       setRescheduleSubmitting(false)
     }
   }
 
   const tabs = [
-    { key: 'pending', label: 'Pending', count: bookings.filter(b => b.status === 'pending').length },
-    { key: 'confirmed', label: 'Confirmed', count: bookings.filter(b => b.status === 'confirmed').length },
-    { key: 'missed', label: 'Missed', count: bookings.filter(b => b.status === 'missed').length },
-    { key: 'rescheduled', label: 'Rescheduled', count: bookings.filter(b => b.status === 'rescheduled').length },
-    { key: 'completed', label: 'Completed', count: bookings.filter(b => b.status === 'completed').length },
-    { key: 'cancelled', label: 'Cancelled', count: bookings.filter(b => b.status === 'cancelled').length }
+    { key: 'pending', label: t('patientQueue.pending'), count: bookings.filter(b => b.status === 'pending').length },
+    { key: 'confirmed', label: t('patientQueue.confirmed'), count: bookings.filter(b => b.status === 'confirmed').length },
+    { key: 'missed', label: t('patientQueue.missed'), count: bookings.filter(b => b.status === 'missed').length },
+    { key: 'rescheduled', label: t('patientQueue.rescheduled'), count: bookings.filter(b => b.status === 'rescheduled').length },
+    { key: 'completed', label: t('patientQueue.completed'), count: bookings.filter(b => b.status === 'completed').length },
+    { key: 'cancelled', label: t('patientQueue.cancelled'), count: bookings.filter(b => b.status === 'cancelled').length }
   ]
 
   const filteredBookings = bookings.filter(b => b.status === activeTab)
@@ -206,7 +208,7 @@ setRescheduleSlots([])
   if (loading) {
     return (
       <div className="module-page">
-        <div className="loading-container"><div className="loading-spinner" /><p>Loading patient queue...</p></div>
+        <div className="loading-container"><div className="loading-spinner" /><p>{t('patientQueue.loadingPatientQueue')}</p></div>
       </div>
     )
   }
@@ -215,11 +217,11 @@ setRescheduleSlots([])
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>Patient Queue</h1>
-          <p className="page-subtitle">Manage incoming booking requests — confirm bookings, then start consultations</p>
+          <h1>{t('patientQueue.title')}</h1>
+          <p className="page-subtitle">{t('patientQueue.subtitle')}</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-outline" onClick={loadBookings}>🔄 Refresh</button>
+          <button className="btn btn-outline" onClick={loadBookings}>🔄 {t('patientQueue.refresh')}</button>
         </div>
       </div>
 
@@ -248,8 +250,8 @@ setRescheduleSlots([])
       {sortedBookings.length === 0 ? (
         <div className="empty-state">
           <div style={{ fontSize: 48 }}>📋</div>
-          <h3>No {activeTab} bookings</h3>
-          <p>Check another tab or refresh</p>
+          <h3>{t('patientQueue.noBookings', { status: activeTab })}</h3>
+          <p>{t('patientQueue.checkAnotherTab')}</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -269,7 +271,7 @@ setRescheduleSlots([])
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                      <h3 style={{ margin: 0 }}>{booking.petOwnerName || 'Pet Owner'}</h3>
+                      <h3 style={{ margin: 0 }}>{booking.petOwnerName || t('patientQueue.petOwner')}</h3>
                       <span className={`badge badge-${booking.priority === 'urgent' ? 'danger' : booking.priority === 'high' ? 'warning' : 'active'}`}>
                         {booking.priority || 'normal'}
                       </span>
@@ -278,10 +280,10 @@ setRescheduleSlots([])
                       </span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 14, color: '#4b5563' }}>
-                      <div>📅 <strong>Date:</strong> {formatDate(booking.scheduledDate)}</div>
-                      <div>⏰ <strong>Time:</strong> {booking.timeSlotStart} - {booking.timeSlotEnd}</div>
-                      {booking.reason && <div style={{ gridColumn: '1/3' }}>📝 <strong>Reason:</strong> {booking.reason}</div>}
-                      {booking.symptoms && <div style={{ gridColumn: '1/3' }}>🤒 <strong>Symptoms:</strong> {booking.symptoms}</div>}
+                      <div>📅 <strong>{t('patientQueue.date')}:</strong> {formatDate(booking.scheduledDate)}</div>
+                      <div>⏰ <strong>{t('patientQueue.time')}:</strong> {booking.timeSlotStart} - {booking.timeSlotEnd}</div>
+                      {booking.reason && <div style={{ gridColumn: '1/3' }}>📝 <strong>{t('patientQueue.reason')}:</strong> {booking.reason}</div>}
+                      {booking.symptoms && <div style={{ gridColumn: '1/3' }}>🤒 <strong>{t('patientQueue.symptoms')}:</strong> {booking.symptoms}</div>}
                     </div>
                   </div>
 
@@ -293,14 +295,14 @@ setRescheduleSlots([])
                           disabled={processing === booking.id}
                           onClick={() => handleConfirm(booking.id)}
                         >
-                          {processing === booking.id ? '...' : '✓ Confirm'}
+                          {processing === booking.id ? '...' : `✓ ${t('patientQueue.confirmBtn')}`}
                         </button>
                         <button
                           className="btn btn-danger"
                           disabled={processing === booking.id}
                           onClick={() => handleCancel(booking.id)}
                         >
-                          ✕ Decline
+                          ✕ {t('patientQueue.declineBtn')}
                         </button>
                       </>
                     )}
@@ -311,7 +313,7 @@ setRescheduleSlots([])
                         disabled={processing === booking.id}
                         onClick={() => handleStartConsultation(booking)}
                       >
-                        {processing === booking.id ? '⏳ Creating...' : '🩺 Start Consultation'}
+                        {processing === booking.id ? `⏳ ${t('patientQueue.creatingConsultation')}` : `🩺 ${t('patientQueue.startConsultation')}`}
                       </button>
                       ) : (
                       <button
@@ -320,7 +322,7 @@ setRescheduleSlots([])
                         style={{ cursor: 'not-allowed', opacity: 0.6 }}
                         title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}
                       >
-                        🔒 Not Yet
+                        🔒 {t('patientQueue.notYet')}
                       </button>
                       )
                     )}
@@ -330,7 +332,7 @@ setRescheduleSlots([])
                         style={{ background: '#f59e0b', color: 'white', border: 'none' }}
                         onClick={() => openRescheduleModal(booking)}
                       >
-                        🔄 Reschedule
+                        🔄 {t('patientQueue.reschedule')}
                       </button>
                     )}
                     <button
@@ -339,7 +341,7 @@ setRescheduleSlots([])
                       onClick={() => openActionLog(booking.id)}
                       title="View Action History"
                     >
-                      📋 History
+                      📋 {t('patientQueue.history')}
                     </button>
                   </div>
                 </div>
@@ -361,7 +363,7 @@ setRescheduleSlots([])
             maxWidth: 480, maxHeight: '80vh', overflowY: 'auto'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ margin: 0 }}>Reschedule Appointment</h2>
+              <h2 style={{ margin: 0 }}>{t('patientQueue.rescheduleAppointment')}</h2>
               <button onClick={() => setRescheduleTarget(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
@@ -371,7 +373,7 @@ setRescheduleSlots([])
             </div>
 
             <div className="form-group" style={{ marginBottom: 16 }}>
-              <label className="form-label">Select New Date</label>
+              <label className="form-label">{t('patientQueue.selectNewDate')}</label>
               <input
                 type="date"
                 className="form-input"
@@ -384,15 +386,15 @@ setRescheduleSlots([])
               />
             </div>
 
-            {rescheduleSlotsLoading && <p>Loading available slots...</p>}
+            {rescheduleSlotsLoading && <p>{t('patientQueue.loadingAvailableSlots')}</p>}
 
             {!rescheduleSlotsLoading && rescheduleSlots.length > 0 && (() => {
               const futureSlots = filterFutureSlots(rescheduleSlots, rescheduleDate)
               return (
               <div style={{ marginBottom: 16 }}>
-                <label className="form-label">Available Slots</label>
+                <label className="form-label">{t('patientQueue.availableSlots')}</label>
                 {futureSlots.length === 0 ? (
-                  <p style={{ color: '#6b7280', fontSize: 14 }}>No available slots on this date.</p>
+                  <p style={{ color: '#6b7280', fontSize: 14 }}>{t('patientQueue.noAvailableSlots')}</p>
                 ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                   {futureSlots.map(slot => (
@@ -416,17 +418,17 @@ setRescheduleSlots([])
             })()}
 
             {!rescheduleSlotsLoading && rescheduleDate && rescheduleSlots.length === 0 && (
-              <p style={{ color: '#6b7280', fontSize: 14 }}>No slots found for this date.</p>
+              <p style={{ color: '#6b7280', fontSize: 14 }}>{t('patientQueue.noSlotsFound')}</p>
             )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-              <button className="btn btn-outline" onClick={() => setRescheduleTarget(null)}>Cancel</button>
+              <button className="btn btn-outline" onClick={() => setRescheduleTarget(null)}>{t('patientQueue.cancel')}</button>
               <button
                 className="btn btn-primary"
                 disabled={!rescheduleSelectedSlot || rescheduleSubmitting}
                 onClick={handleRescheduleSubmit}
               >
-                {rescheduleSubmitting ? 'Rescheduling...' : 'Confirm Reschedule'}
+                {rescheduleSubmitting ? t('patientQueue.rescheduling') : t('patientQueue.confirmReschedule')}
               </button>
             </div>
           </div>
@@ -445,14 +447,14 @@ setRescheduleSlots([])
             maxWidth: 520, maxHeight: '80vh', overflowY: 'auto'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ margin: 0, fontSize: 18 }}>📋 Action Log</h2>
+              <h2 style={{ margin: 0, fontSize: 18 }}>📋 {t('patientQueue.actionLog')}</h2>
               <button onClick={() => setActionLogBookingId(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
-            {actionLogsLoading && <p style={{ color: '#6b7280' }}>Loading action history...</p>}
+            {actionLogsLoading && <p style={{ color: '#6b7280' }}>{t('patientQueue.loadingActionHistory')}</p>}
 
             {!actionLogsLoading && actionLogs.length === 0 && (
-              <p style={{ color: '#9ca3af', textAlign: 'center', padding: 20 }}>No action history found for this booking.</p>
+              <p style={{ color: '#9ca3af', textAlign: 'center', padding: 20 }}>{t('patientQueue.noActionHistory')}</p>
             )}
 
             {!actionLogsLoading && actionLogs.length > 0 && (
@@ -502,7 +504,7 @@ setRescheduleSlots([])
             )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-              <button className="btn btn-outline" onClick={() => setActionLogBookingId(null)}>Close</button>
+              <button className="btn btn-outline" onClick={() => setActionLogBookingId(null)}>{t('patientQueue.close')}</button>
             </div>
           </div>
         </div>

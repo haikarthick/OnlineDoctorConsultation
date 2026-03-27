@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
 
@@ -9,6 +10,7 @@ interface WriteReviewProps {
 }
 
 const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavigate }) => {
+  const { t } = useTranslation()
   // auth context available for user info if needed
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
@@ -28,15 +30,15 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
     setError('')
 
     if (rating === 0) {
-      setError('Please select a rating')
+      setError(t('writeReview.errorSelectRating'))
       return
     }
     if (!comment.trim()) {
-      setError('Please write a comment')
+      setError(t('writeReview.errorWriteComment'))
       return
     }
     if (comment.trim().length < 10) {
-      setError('Comment must be at least 10 characters')
+      setError(t('writeReview.errorMinChars'))
       return
     }
 
@@ -61,9 +63,9 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
       <div className="module-page">
         <div style={{ textAlign: 'center', padding: '80px 20px' }}>
           <div style={{ fontSize: 64, marginBottom: 20 }}>🎉</div>
-          <h1 style={{ marginBottom: 8 }}>Thank You!</h1>
+          <h1 style={{ marginBottom: 8 }}>{t('writeReview.thankYou')}</h1>
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 24 }}>
-            Your review has been submitted successfully.
+            {t('writeReview.submittedSuccess')}
           </p>
           <div className="star-rating" style={{ justifyContent: 'center', marginBottom: 24 }}>
             {[1, 2, 3, 4, 5].map(star => 
@@ -74,10 +76,10 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
           </div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button className="btn btn-primary" onClick={() => onNavigate('/my-bookings')}>
-              My Bookings
+              {t('writeReview.myBookings')}
             </button>
             <button className="btn btn-outline" onClick={() => onNavigate('/dashboard')}>
-              Dashboard
+              {t('writeReview.dashboard')}
             </button>
           </div>
         </div>
@@ -89,21 +91,21 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>Write a Review</h1>
+          <h1>{t('writeReview.title')}</h1>
           <p className="page-subtitle">
-            Share your experience to help other pet owners
+            {t('writeReview.subtitle')}
           </p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-outline" onClick={() => onNavigate('/my-bookings')}>
-            ← Back to Bookings
+            {t('writeReview.backToBookings')}
           </button>
         </div>
       </div>
 
       <div className="card" style={{ maxWidth: 640, margin: '0 auto' }}>
         <div className="card-header">
-          <h2>📝 Your Feedback</h2>
+          <h2>{t('writeReview.yourFeedback')}</h2>
         </div>
         <div className="card-body">
           {error && (
@@ -122,7 +124,7 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
           <form onSubmit={handleSubmit}>
             {/* Star Rating */}
             <div className="form-group">
-              <label className="form-label">Overall Rating *</label>
+              <label className="form-label">{t('writeReview.overallRating')}</label>
               <div className="star-rating" style={{ gap: 8, marginTop: 4 }}>
                 {[1, 2, 3, 4, 5].map(star => (
                   <span
@@ -145,27 +147,27 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
                 ))}
               </div>
               <p style={{ color: '#6b7280', fontSize: 13, marginTop: 4 }}>
-                {rating === 1 && 'Poor'}
-                {rating === 2 && 'Fair'}
-                {rating === 3 && 'Good'}
-                {rating === 4 && 'Very Good'}
-                {rating === 5 && 'Excellent'}
+                {rating === 1 && t('writeReview.ratingPoor')}
+                {rating === 2 && t('writeReview.ratingFair')}
+                {rating === 3 && t('writeReview.ratingGood')}
+                {rating === 4 && t('writeReview.ratingVeryGood')}
+                {rating === 5 && t('writeReview.ratingExcellent')}
               </p>
             </div>
 
             {/* Comment */}
             <div className="form-group">
-              <label className="form-label">Your Review *</label>
+              <label className="form-label">{t('writeReview.yourReview')}</label>
               <textarea
                 className="form-input"
                 rows={6}
-                placeholder="Tell us about your experience with the veterinarian. What went well? How was the communication? Would you recommend them?"
+                placeholder={t('writeReview.reviewPlaceholder')}
                 value={comment}
                 onChange={e => setComment(e.target.value)}
                 style={{ resize: 'vertical' }}
               />
               <p style={{ color: '#6b7280', fontSize: 12, marginTop: 4, textAlign: 'right' }}>
-                {comment.length} characters (min 10)
+                {t('writeReview.charCount', { count: comment.length })}
               </p>
             </div>
 
@@ -179,10 +181,10 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
                   style={{ width: 18, height: 18 }}
                 />
                 <span>
-                  <strong>Make review public</strong>
+                  <strong>{t('writeReview.makePublic')}</strong>
                   <br />
                   <span style={{ color: '#6b7280', fontSize: 13 }}>
-                    Your review will be visible to other pet owners
+                    {t('writeReview.publicDescription')}
                   </span>
                 </span>
               </label>
@@ -190,7 +192,7 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
 
             {/* Quick Review Tags */}
             <div className="form-group">
-              <label className="form-label">Quick Tags</label>
+              <label className="form-label">{t('writeReview.quickTags')}</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {[
                   '👍 Professional',
@@ -228,14 +230,14 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
                 className="btn btn-outline"
                 onClick={() => onNavigate('/my-bookings')}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 className="btn btn-primary btn-lg"
                 disabled={submitting}
               >
-                {submitting ? 'Submitting...' : '⭐ Submit Review'}
+                {submitting ? t('writeReview.submitting') : t('writeReview.submitReview')}
               </button>
             </div>
           </form>

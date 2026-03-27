@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
@@ -10,6 +11,7 @@ interface MyReviewsProps {
 }
 
 const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
   const [reviews, setReviews] = useState<Review[]>([])
@@ -55,7 +57,7 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
   if (loading) {
     return (
       <div className="module-page">
-        <div className="loading-container"><div className="loading-spinner" /><p>Loading reviews...</p></div>
+        <div className="loading-container"><div className="loading-spinner" /><p>{t('doctorReviews.loadingReviews')}</p></div>
       </div>
     )
   }
@@ -64,8 +66,8 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>My Reviews</h1>
-          <p className="page-subtitle">{reviews.length} review{reviews.length !== 1 ? 's' : ''} from patients</p>
+          <h1>{t('doctorReviews.title')}</h1>
+          <p className="page-subtitle">{reviews.length} {t('doctorReviews.reviews')} {reviews.length !== 1 ? '' : ''}</p>
         </div>
       </div>
 
@@ -80,7 +82,7 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
                   <span key={s} style={{ fontSize: 24, color: s <= Math.round(avgRating) ? '#f59e0b' : '#d1d5db' }}>★</span>
                 ))}
               </div>
-              <p style={{ color: '#6b7280', fontSize: 14 }}>{reviews.length} reviews</p>
+              <p style={{ color: '#6b7280', fontSize: 14 }}>{reviews.length} {t('doctorReviews.reviews')}</p>
             </div>
             <div style={{ flex: 1 }}>
               {ratingDist.map(d => (
@@ -101,8 +103,8 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
       {reviews.length === 0 ? (
         <div className="empty-state">
           <div style={{ fontSize: 48 }}>⭐</div>
-          <h3>No reviews yet</h3>
-          <p>Reviews from patients will appear here</p>
+          <h3>{t('doctorReviews.noReviewsYet')}</h3>
+          <p>{t('doctorReviews.reviewsWillAppear')}</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -112,7 +114,7 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                      <strong>{review.petOwnerName || 'Pet Owner'}</strong>
+                      <strong>{review.petOwnerName || t('doctorReviews.petOwner')}</strong>
                       <div className="star-rating" style={{ gap: 2 }}>
                         {[1, 2, 3, 4, 5].map(s => (
                           <span key={s} style={{ fontSize: 16, color: s <= review.rating ? '#f59e0b' : '#d1d5db' }}>★</span>
@@ -133,7 +135,7 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
                 {/* Vet Response */}
                 {review.responseFromVet && (
                   <div style={{ marginTop: 12, padding: 12, background: '#eff6ff', borderRadius: 8, borderLeft: '3px solid #3b82f6' }}>
-                    <p style={{ fontSize: 12, color: '#3b82f6', fontWeight: 600, margin: '0 0 4px' }}>Your Response:</p>
+                    <p style={{ fontSize: 12, color: '#3b82f6', fontWeight: 600, margin: '0 0 4px' }}>{t('doctorReviews.yourResponse')}</p>
                     <p style={{ margin: 0, fontSize: 14 }}>{review.responseFromVet}</p>
                   </div>
                 )}
@@ -143,13 +145,13 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
                   <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
                     <input
                       className="form-input"
-                      placeholder="Write your response..."
+                      placeholder={t('doctorReviews.writeResponse')}
                       value={responseText}
                       onChange={e => setResponseText(e.target.value)}
                       style={{ flex: 1 }}
                     />
-                    <button className="btn btn-primary" onClick={() => handleRespond(review.id)}>Send</button>
-                    <button className="btn btn-outline" onClick={() => { setRespondingTo(null); setResponseText('') }}>Cancel</button>
+                    <button className="btn btn-primary" onClick={() => handleRespond(review.id)}>{t('doctorReviews.send')}</button>
+                    <button className="btn btn-outline" onClick={() => { setRespondingTo(null); setResponseText('') }}>{t('doctorReviews.cancel')}</button>
                   </div>
                 )}
 
@@ -159,7 +161,7 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
                     style={{ marginTop: 12 }}
                     onClick={() => setRespondingTo(review.id)}
                   >
-                    💬 Respond
+                    💬 {t('doctorReviews.respond')}
                   </button>
                 )}
               </div>

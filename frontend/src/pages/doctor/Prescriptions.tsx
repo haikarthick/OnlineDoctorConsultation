@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
@@ -24,6 +25,7 @@ interface PrescriptionItem {
 }
 
 const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
   const [prescriptions, setPrescriptions] = useState<PrescriptionItem[]>([])
@@ -52,15 +54,15 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>💊 Prescriptions</h1>
+          <h1>💊 {t('prescriptions.title')}</h1>
           <p className="page-subtitle">
-            {isVet ? 'Prescriptions you have written' : 'Your prescriptions'}
+            {isVet ? t('prescriptions.vetSubtitle') : t('prescriptions.ownerSubtitle')}
           </p>
         </div>
         {isVet && (
           <div className="page-header-actions">
             <button className="btn btn-primary" onClick={() => onNavigate('/doctor/prescriptions/new')}>
-              + Write Prescription
+              + {t('prescriptions.writePrescription')}
             </button>
           </div>
         )}
@@ -73,15 +75,15 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
       )}
 
       {loading ? (
-        <div className="loading-container"><div className="loading-spinner" /><p>Loading prescriptions...</p></div>
+        <div className="loading-container"><div className="loading-spinner" /><p>{t('prescriptions.loadingPrescriptions')}</p></div>
       ) : prescriptions.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#6b7280' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>💊</div>
-          <h2>No Prescriptions Yet</h2>
-          <p>{isVet ? 'Prescriptions you write during consultations will appear here.' : 'Prescriptions from your consultations will appear here.'}</p>
+          <h2>{t('prescriptions.noPrescriptionsYet')}</h2>
+          <p>{isVet ? t('prescriptions.vetEmptyMessage') : t('prescriptions.ownerEmptyMessage')}</p>
           {isVet && (
             <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => onNavigate('/doctor/prescriptions/new')}>
-              Write a Prescription
+              {t('prescriptions.writeAPrescription')}
             </button>
           )}
         </div>
@@ -96,8 +98,8 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                       {rx.medications.map(m => m.name).join(', ')}
                     </h3>
                     <p style={{ color: '#6b7280', fontSize: 13, margin: '4px 0 0' }}>
-                      Created: {formatDate(rx.createdAt)}
-                      {rx.validUntil && ` • Valid until: ${formatDate(rx.validUntil)}`}
+                      {t('prescriptions.created')}: {formatDate(rx.createdAt)}
+                      {rx.validUntil && ` • ${t('prescriptions.validUntil')}: ${formatDate(rx.validUntil)}`}
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -106,12 +108,12 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                       background: rx.isActive ? '#d1fae5' : '#f3f4f6',
                       color: rx.isActive ? '#065f46' : '#6b7280'
                     }}>
-                      {rx.isActive ? 'Active' : 'Inactive'}
+                      {rx.isActive ? t('prescriptions.active') : t('prescriptions.inactive')}
                     </span>
                     {rx.consultationId && (
                       <button className="btn btn-outline" style={{ fontSize: 12, padding: '4px 10px' }}
                         onClick={() => onNavigate(isVet ? `/doctor/consultation-room/${rx.consultationId}` : `/video-consultation/${rx.consultationId}`)}>
-                        View Consultation
+                        {t('prescriptions.viewConsultation')}
                       </button>
                     )}
                   </div>

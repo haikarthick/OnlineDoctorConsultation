@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { searchVetsByAvailability } from '../../services/api/scheduleApi'
 import { useSettings } from '../../context/SettingsContext'
@@ -66,6 +67,7 @@ function formatDateLabel(dateStr: string): string {
 }
 
 const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { formatCurrency } = useSettings()
   const [vets, setVets] = useState<VetWithAvailability[]>([])
   const [total, setTotal] = useState(0)
@@ -388,12 +390,12 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
           <button className="btn btn-primary"
             style={{ width: '100%', fontSize: 13, padding: '8px 16px' }}
             onClick={() => onNavigate(`/book-consultation?vetId=${vet.userId}${selectedDate ? `&date=${selectedDate}` : ''}`)}>
-            📅 Book Consultation
+            📅 {t('findDoctor.bookConsultation')}
           </button>
           <button className="btn btn-outline"
             style={{ width: '100%', fontSize: 13, padding: '8px 16px' }}
             onClick={() => onNavigate(`/vet-profile/${vet.userId}`)}>
-            View Profile & Reviews
+            {t('findDoctor.viewProfile')}
           </button>
         </div>
       </div>
@@ -404,7 +406,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
     <div className="module-page">
       {/* ── Page Header ── */}
       <div style={{ marginBottom: 16 }}>
-        <h1 style={{ margin: '0 0 4px', fontSize: 26, color: '#1f2937' }}>🔍 Find a Veterinarian</h1>
+        <h1 style={{ margin: '0 0 4px', fontSize: 26, color: '#1f2937' }}>🔍 {t('findDoctor.title')}</h1>
         <p style={{ margin: 0, color: '#6b7280', fontSize: 14 }}>
           {selectedDate
             ? <>Showing doctors available on <strong>{formatDateLabel(selectedDate)}</strong>{timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : ''}</>
@@ -423,16 +425,16 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
         {/* Panel header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#0c4a6e' }}>📅 Find by Availability</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#0c4a6e' }}>📅 {t('findDoctor.findByAvailability')}</span>
             <span style={{ fontSize: 12, color: '#0369a1', marginLeft: 8 }}>
-              {selectedDate ? `Filtering to ${formatDateLabel(selectedDate)}` : 'Pick a date to see open slots on each card'}
+              {selectedDate ? t('findDoctor.filteringTo', { date: formatDateLabel(selectedDate) }) : t('findDoctor.pickDate')}
             </span>
           </div>
           {selectedDate && (
             <button onClick={clearDateFilter} style={{
               padding: '4px 12px', borderRadius: 20, border: '1px solid #bae6fd',
               background: 'white', color: '#0369a1', fontSize: 12, cursor: 'pointer', fontWeight: 600,
-            }}>✕ Clear date</button>
+            }}>✕ {t('findDoctor.clearDate')}</button>
           )}
         </div>
 
@@ -502,7 +504,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
             <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: 16 }}>🔍</span>
             <input
               type="text"
-              placeholder="Search by name, specialization, clinic, qualification..."
+              placeholder={t('findDoctor.searchPlaceholder')}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               style={{
@@ -514,13 +516,13 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
 
           <select value={specialtyFilter} onChange={e => setSpecialtyFilter(e.target.value)}
             style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 13, minWidth: 160, background: 'white' }}>
-            <option value="">All Specializations</option>
+            <option value="">{t('findDoctor.allSpecializations')}</option>
             {allSpecializations.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
 
           <select value={languageFilter} onChange={e => setLanguageFilter(e.target.value)}
             style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 13, minWidth: 130, background: 'white' }}>
-            <option value="">All Languages</option>
+            <option value="">{t('findDoctor.allLanguages')}</option>
             {allLanguages.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
 
@@ -532,7 +534,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
               color: showFilters ? '#4F46E5' : '#374151',
               display: 'flex', alignItems: 'center', gap: 6
             }}>
-            ⚙️ Filters
+            ⚙️ {t('findDoctor.filters')}
             {activeFilterCount > 0 && (
               <span style={{ background: '#4F46E5', color: 'white', width: 20, height: 20, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>
                 {activeFilterCount}
@@ -548,12 +550,12 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
             display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, alignItems: 'end'
           }}>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Minimum Rating</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>{t('findDoctor.minimumRating')}</label>
               {renderRatingFilter()}
             </div>
 
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Max Fee ($)</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>{t('findDoctor.maxFee')}</label>
               <input type="number" min={0} step={10} placeholder="e.g. 100"
                 value={maxFee} onChange={e => setMaxFee(e.target.value ? Number(e.target.value) : '')}
                 style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 13, boxSizing: 'border-box' }}
@@ -564,12 +566,12 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
                 <input type="checkbox" checked={emergencyOnly} onChange={e => setEmergencyOnly(e.target.checked)}
                   style={{ width: 16, height: 16, accentColor: '#dc2626' }} />
-                <span>🚨 Accepts Emergency</span>
+                <span>🚨 {t('findDoctor.acceptsEmergency')}</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
                 <input type="checkbox" checked={availableOnly} onChange={e => setAvailableOnly(e.target.checked)}
                   style={{ width: 16, height: 16, accentColor: '#059669' }} />
-                <span>🟢 Available Only</span>
+                <span>🟢 {t('findDoctor.availableOnly')}</span>
               </label>
             </div>
 
@@ -577,7 +579,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
               {activeFilterCount > 0 && (
                 <button onClick={clearFilters}
                   style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid #fca5a5', background: '#fef2f2', cursor: 'pointer', fontSize: 12, color: '#dc2626', fontWeight: 600 }}>
-                  ✕ Clear All Filters
+                  ✕ {t('findDoctor.clearAllFilters')}
                 </button>
               )}
             </div>
@@ -646,24 +648,24 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
           <div style={{ fontSize: 56, marginBottom: 16 }}>{selectedDate ? '📅' : '🔍'}</div>
           <h3 style={{ fontSize: 20, color: '#1f2937', marginBottom: 8 }}>
             {selectedDate
-              ? `No doctors available on ${formatDateLabel(selectedDate)}${timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : ''}`
-              : 'No veterinarians match your criteria'
+              ? t('findDoctor.noAvailable', { date: formatDateLabel(selectedDate), time: timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : '' })
+              : t('findDoctor.noMatch')
             }
           </h3>
           <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 16 }}>
             {selectedDate
-              ? 'Try a different date, time of day, or broaden your filters.'
-              : 'Try broadening your search or removing some filters.'
+              ? t('findDoctor.tryDifferentDate')
+              : t('findDoctor.tryBroadening')
             }
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             {selectedDate && (
               <button onClick={clearDateFilter} className="btn btn-primary" style={{ fontSize: 14 }}>
-                Browse All Doctors
+                {t('findDoctor.browseAll')}
               </button>
             )}
             {activeFilterCount > 0 && (
-              <button onClick={clearFilters} className="btn btn-outline" style={{ fontSize: 14 }}>Clear Filters</button>
+              <button onClick={clearFilters} className="btn btn-outline" style={{ fontSize: 14 }}>{t('findDoctor.clearFiltersBtn')}</button>
             )}
           </div>
         </div>
@@ -690,7 +692,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
                   background: page === 0 ? '#f9fafb' : 'white', cursor: page === 0 ? 'default' : 'pointer',
                   color: page === 0 ? '#9ca3af' : '#374151', fontSize: 13, fontWeight: 600
                 }}>
-                ← Previous
+                ← {t('findDoctor.previous')}
               </button>
 
               {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
@@ -725,7 +727,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
                   cursor: page >= totalPages - 1 ? 'default' : 'pointer',
                   color: page >= totalPages - 1 ? '#9ca3af' : '#374151', fontSize: 13, fontWeight: 600
                 }}>
-                Next →
+                {t('findDoctor.next')} →
               </button>
             </div>
           )}

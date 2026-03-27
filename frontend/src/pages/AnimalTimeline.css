@@ -974,7 +974,7 @@
 .tl-btn-outline:hover { background: #eff6ff; }
 
 /* ─── Responsive ──────────────────────────────────────────── */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .tl-header { padding: 14px 14px 0; }
   .tl-stats  { padding: 10px 14px 0; }
   .tl-main   { padding: 12px 14px 14px; }
@@ -1001,6 +1001,12 @@
   .tl-drawer { width: 100vw; }
   .tl-node-label { display: none; }
   .tl-node:hover .tl-node-label { display: flex; }
+}
+
+@media (max-width: 640px) {
+  .tl-stats { flex-wrap: wrap; gap: 6px; }
+  .tl-stat { flex: 1 0 45%; }
+  .tl-sort-btn span, .tl-filter-btn span { display: none; }
 }
 
 @media (max-width: 480px) {

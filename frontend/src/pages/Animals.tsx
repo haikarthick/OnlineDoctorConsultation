@@ -154,29 +154,29 @@ const Animals: React.FC = () => {
     try {
       if (editingAnimal) {
         await apiService.updateAnimal(editingAnimal.id, payload)
-        setSuccessMsg('Animal updated successfully!')
+        setSuccessMsg(t('animals.toasts.updated'))
       } else {
         await apiService.createAnimal(payload)
-        setSuccessMsg('Animal registered successfully!')
+        setSuccessMsg(t('animals.toasts.registered'))
       }
       setShowForm(false)
       resetForm()
       fetchAnimals()
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err.message || 'Failed to save animal')
+      setError(err?.response?.data?.error?.message || err.message || t('animals.toasts.failedSave'))
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to remove this animal?')) return
+    if (!window.confirm(t('animals.toasts.confirmRemove'))) return
     try {
       await apiService.deleteAnimal(id)
-      setSuccessMsg('Animal removed successfully')
+      setSuccessMsg(t('animals.toasts.removed'))
       fetchAnimals()
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to remove animal')
+      setError(err?.response?.data?.error?.message || t('animals.toasts.failedRemove'))
     }
   }
 
@@ -187,7 +187,7 @@ const Animals: React.FC = () => {
     const years = now.getFullYear() - birth.getFullYear()
     const months = now.getMonth() - birth.getMonth()
     if (years > 0) return months < 0 ? `${years - 1}y ${12 + months}m` : `${years}y ${months}m`
-    return months <= 0 ? 'Newborn' : `${months}m`
+    return months <= 0 ? t('animals.newborn') : `${months}m`
   }
 
   // Filter animals
@@ -218,13 +218,13 @@ const Animals: React.FC = () => {
         <div>
           <h1>🐾 {isVet ? t('animals.pageTitles.vet') : isAdmin ? t('animals.pageTitles.admin') : t('animals.pageTitles.petOwner')}</h1>
           <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>
-            {isVet ? 'Animals from your consultations' : isAdmin ? 'All registered animals in the system' : 'Manage your pets and farm animals'}
+            {isVet ? t('animals.subtitles.vet') : isAdmin ? t('animals.subtitles.admin') : t('animals.subtitles.petOwner')}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {isPetOwner && (
             <button className="btn-primary" onClick={() => { resetForm(); setShowForm(!showForm) }}>
-              {showForm ? 'Cancel' : '+ Register Animal'}
+              {showForm ? t('animals.actions.cancel') : t('animals.registerAnimal')}
             </button>
           )}
         </div>
@@ -237,15 +237,15 @@ const Animals: React.FC = () => {
       {!showForm && animals.length > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
           <input
-            type="text" placeholder="Search by name, ID, ear tag, microchip..."
+            type="text" placeholder={t('animals.searchPlaceholder')}
             value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
             style={{ ...fieldStyle, maxWidth: 350 }}
           />
           <select value={speciesFilter} onChange={e => setSpeciesFilter(e.target.value)} style={{ ...fieldStyle, maxWidth: 160 }}>
-            <option value="">All Species</option>
+            <option value="">{t('animals.allSpecies')}</option>
             {uniqueSpecies.map(s => <option key={s} value={s}>{SPECIES_ICONS[s] || '🐾'} {s}</option>)}
           </select>
-          <span style={{ fontSize: 13, color: '#6b7280' }}>{filteredAnimals.length} animal{filteredAnimals.length !== 1 ? 's' : ''}</span>
+          <span style={{ fontSize: 13, color: '#6b7280' }}>{filteredAnimals.length} {filteredAnimals.length !== 1 ? t('animals.animalsCount') : t('animals.animalCount')}</span>
         </div>
       )}
 
@@ -253,138 +253,138 @@ const Animals: React.FC = () => {
       {showForm && (
         <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 16, padding: 28, marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
           <h2 style={{ margin: '0 0 4px', fontSize: 18, color: '#1f2937' }}>
-            {editingAnimal ? `✏️ Edit ${editingAnimal.name}` : '📋 Register New Animal'}
+            {editingAnimal ? `✏️ ${t('animals.registerModal.titleEdit', { name: editingAnimal.name })}` : t('animals.registerModal.titleNew')}
           </h2>
-          <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 16px' }}>Fields marked with * are required</p>
+          <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 16px' }}>{t('animals.registerModal.requiredNote')}</p>
 
           <form onSubmit={handleSubmit}>
             {/* ── Basic Information ── */}
-            {sectionTitle('📝', 'Basic Information')}
+            {sectionTitle('📝', t('animals.sections.basicInfo'))}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
               <div>
-                <label style={labelStyle}>Name *</label>
-                <input type="text" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} required style={fieldStyle} placeholder="e.g. Buddy" />
+                <label style={labelStyle}>{t('animals.registerModal.name')}</label>
+                <input type="text" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} required style={fieldStyle} placeholder={t('animals.form.placeholderName')} />
               </div>
               <div>
-                <label style={labelStyle}>Species *</label>
+                <label style={labelStyle}>{t('animals.registerModal.species')}</label>
                 <select value={formData.species} onChange={e => setFormData(p => ({ ...p, species: e.target.value, breed: '', customBreed: '' }))} required style={fieldStyle}>
-                  <option value="">Select species</option>
+                  <option value="">{t('animals.form.selectSpecies')}</option>
                   {Object.keys(BREED_DATABASE).map(s => <option key={s} value={s}>{SPECIES_ICONS[s] || '🐾'} {s}</option>)}
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Breed</label>
+                <label style={labelStyle}>{t('animals.registerModal.breed')}</label>
                 {breeds.length > 0 ? (
                   <select value={formData.breed} onChange={e => setFormData(p => ({ ...p, breed: e.target.value, customBreed: '' }))} style={fieldStyle}>
-                    <option value="">Select breed</option>
+                    <option value="">{t('animals.registerModal.selectBreed')}</option>
                     {breeds.map(b => <option key={b} value={b}>{b}</option>)}
-                    <option value="Other">Other (specify)</option>
+                    <option value="Other">{t('animals.registerModal.otherBreed')}</option>
                   </select>
                 ) : (
-                  <input type="text" value={formData.customBreed} onChange={e => setFormData(p => ({ ...p, customBreed: e.target.value }))} style={fieldStyle} placeholder="Enter breed" />
+                  <input type="text" value={formData.customBreed} onChange={e => setFormData(p => ({ ...p, customBreed: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderBreed')} />
                 )}
               </div>
               {formData.breed === 'Other' && (
                 <div>
-                  <label style={labelStyle}>Custom Breed *</label>
-                  <input type="text" value={formData.customBreed} onChange={e => setFormData(p => ({ ...p, customBreed: e.target.value }))} required style={fieldStyle} placeholder="Enter breed name" />
+                  <label style={labelStyle}>{t('animals.registerModal.customBreed')}</label>
+                  <input type="text" value={formData.customBreed} onChange={e => setFormData(p => ({ ...p, customBreed: e.target.value }))} required style={fieldStyle} placeholder={t('animals.form.placeholderBreedName')} />
                 </div>
               )}
               <div>
-                <label style={labelStyle}>Gender</label>
+                <label style={labelStyle}>{t('animals.registerModal.gender')}</label>
                 <select value={formData.gender} onChange={e => setFormData(p => ({ ...p, gender: e.target.value }))} style={fieldStyle}>
-                  <option value="">Select</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
+                  <option value="">{t('animals.form.selectGender')}</option>
+                  <option value="male">{t('animals.form.male')}</option>
+                  <option value="female">{t('animals.form.female')}</option>
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Date of Birth</label>
+                <label style={labelStyle}>{t('animals.registerModal.dob')}</label>
                 <input type="date" value={formData.dateOfBirth} onChange={e => setFormData(p => ({ ...p, dateOfBirth: e.target.value }))} style={fieldStyle} max={new Date().toISOString().split('T')[0]} />
               </div>
               <div>
-                <label style={labelStyle}>Color / Markings</label>
-                <input type="text" value={formData.color} onChange={e => setFormData(p => ({ ...p, color: e.target.value }))} style={fieldStyle} placeholder="e.g. Golden, Black & White" />
+                <label style={labelStyle}>{t('animals.registerModal.color')}</label>
+                <input type="text" value={formData.color} onChange={e => setFormData(p => ({ ...p, color: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderColor')} />
               </div>
               <div>
-                <label style={labelStyle}>Weight (kg)</label>
-                <input type="number" step="0.1" min="0" value={formData.weight} onChange={e => setFormData(p => ({ ...p, weight: e.target.value }))} style={fieldStyle} placeholder="e.g. 25.5" />
+                <label style={labelStyle}>{t('animals.registerModal.weight')}</label>
+                <input type="number" step="0.1" min="0" value={formData.weight} onChange={e => setFormData(p => ({ ...p, weight: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderWeight')} />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 22 }}>
                 <input type="checkbox" id="isNeutered" checked={formData.isNeutered} onChange={e => setFormData(p => ({ ...p, isNeutered: e.target.checked }))} style={{ width: 18, height: 18 }} />
-                <label htmlFor="isNeutered" style={{ fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>Spayed / Neutered</label>
+                <label htmlFor="isNeutered" style={{ fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>{t('animals.registerModal.neutered')}</label>
               </div>
             </div>
 
             {/* ── Identification ── */}
-            {sectionTitle('🏷️', 'Identification & Tracking')}
+            {sectionTitle('🏷️', t('animals.sections.identification'))}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
               <div>
-                <label style={labelStyle}>Microchip ID</label>
-                <input type="text" value={formData.microchipId} onChange={e => setFormData(p => ({ ...p, microchipId: e.target.value }))} style={fieldStyle} placeholder="e.g. 900118000123456" />
+                <label style={labelStyle}>{t('animals.registerModal.microchip')}</label>
+                <input type="text" value={formData.microchipId} onChange={e => setFormData(p => ({ ...p, microchipId: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderMicrochip')} />
               </div>
               {showEarTag && (
                 <div>
-                  <label style={labelStyle}>Ear Tag ID</label>
-                  <input type="text" value={formData.earTagId} onChange={e => setFormData(p => ({ ...p, earTagId: e.target.value }))} style={fieldStyle} placeholder="e.g. IN-08-MH-1234" />
+                  <label style={labelStyle}>{t('animals.registerModal.earTag')}</label>
+                  <input type="text" value={formData.earTagId} onChange={e => setFormData(p => ({ ...p, earTagId: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderEarTag')} />
                 </div>
               )}
               <div>
-                <label style={labelStyle}>Registration / Pedigree Number</label>
-                <input type="text" value={formData.registrationNumber} onChange={e => setFormData(p => ({ ...p, registrationNumber: e.target.value }))} style={fieldStyle} placeholder="e.g. KCI/REG/2024/12345" />
+                <label style={labelStyle}>{t('animals.registerModal.regNumber')}</label>
+                <input type="text" value={formData.registrationNumber} onChange={e => setFormData(p => ({ ...p, registrationNumber: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderRegNumber')} />
               </div>
             </div>
 
             {/* ── Insurance ── */}
-            {sectionTitle('🛡️', 'Insurance Details')}
+            {sectionTitle('🛡️', t('animals.sections.insurance'))}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
               <div>
-                <label style={labelStyle}>Insurance Provider</label>
-                <input type="text" value={formData.insuranceProvider} onChange={e => setFormData(p => ({ ...p, insuranceProvider: e.target.value }))} style={fieldStyle} placeholder="e.g. PetPlan, Bajaj Allianz" />
+                <label style={labelStyle}>{t('animals.registerModal.insuranceProvider')}</label>
+                <input type="text" value={formData.insuranceProvider} onChange={e => setFormData(p => ({ ...p, insuranceProvider: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderInsurance')} />
               </div>
               <div>
-                <label style={labelStyle}>Policy Number</label>
-                <input type="text" value={formData.insurancePolicyNumber} onChange={e => setFormData(p => ({ ...p, insurancePolicyNumber: e.target.value }))} style={fieldStyle} placeholder="e.g. POL-2024-123456" />
+                <label style={labelStyle}>{t('animals.registerModal.policyNumber')}</label>
+                <input type="text" value={formData.insurancePolicyNumber} onChange={e => setFormData(p => ({ ...p, insurancePolicyNumber: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderPolicy')} />
               </div>
               <div>
-                <label style={labelStyle}>Policy Expiry Date</label>
+                <label style={labelStyle}>{t('animals.registerModal.policyExpiry')}</label>
                 <input type="date" value={formData.insuranceExpiry} onChange={e => setFormData(p => ({ ...p, insuranceExpiry: e.target.value }))} style={fieldStyle} />
                 {formData.insuranceExpiry && new Date(formData.insuranceExpiry) < new Date() && (
-                  <span style={{ fontSize: 11, color: '#dc2626', fontWeight: 600 }}>⚠️ Policy expired</span>
+                  <span style={{ fontSize: 11, color: '#dc2626', fontWeight: 600 }}>{t('animals.registerModal.policyExpired')}</span>
                 )}
               </div>
             </div>
 
             {/* ── Medical Notes ── */}
-            {sectionTitle('📋', 'Medical Notes')}
+            {sectionTitle('📋', t('animals.sections.medicalNotes'))}
             <textarea value={formData.medicalNotes} onChange={e => setFormData(p => ({ ...p, medicalNotes: e.target.value }))}
               rows={3} style={{ ...fieldStyle, resize: 'vertical' }}
-              placeholder="Any known conditions, allergies, dietary requirements, or special needs..." />
+              placeholder={t('animals.form.placeholderMedical')} />
 
             {/* ── Enterprise & Group (Farmer/Admin only) ── */}
             {(isFarmer || isAdmin) && enterpriseOptions.length > 0 && (
               <>
-                {sectionTitle('🏢', 'Farm / Enterprise Assignment')}
+                {sectionTitle('🏢', t('animals.sections.enterprise'))}
                 <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 12px' }}>
-                  Optionally assign this animal to a farm enterprise and herd/group. This makes it available when booking consultations at the herd level.
+                  {t('animals.enterprise.description')}
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
                   <div>
-                    <label style={labelStyle}>Enterprise</label>
+                    <label style={labelStyle}>{t('animals.enterprise.label')}</label>
                     <select value={formData.enterpriseId} onChange={e => setFormData(p => ({ ...p, enterpriseId: e.target.value, groupId: '' }))} style={fieldStyle}>
-                      <option value="">-- None (individual animal) --</option>
+                      <option value="">{t('animals.enterprise.none')}</option>
                       {enterpriseOptions.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
                     </select>
                   </div>
                   {formData.enterpriseId && (
                     <div>
-                      <label style={labelStyle}>Herd / Group</label>
+                      <label style={labelStyle}>{t('animals.enterprise.herdGroup')}</label>
                       <select value={formData.groupId} onChange={e => setFormData(p => ({ ...p, groupId: e.target.value }))} style={fieldStyle}>
-                        <option value="">-- No group --</option>
+                        <option value="">{t('animals.enterprise.noGroup')}</option>
                         {groupOptions.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                       </select>
                       {groupOptions.length === 0 && (
-                        <span style={{ fontSize: 11, color: '#6b7280' }}>No groups for this enterprise. <span style={{ color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate('/animal-groups')}>Create one</span></span>
+                        <span style={{ fontSize: 11, color: '#6b7280' }}>{t('animals.enterprise.noGroupsFound')} <span style={{ color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate('/animal-groups')}>{t('animals.enterprise.createOne')}</span></span>
                       )}
                     </div>
                   )}
@@ -394,11 +394,11 @@ const Animals: React.FC = () => {
 
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
               <button type="submit" className="btn-primary" style={{ padding: '10px 28px', fontSize: 14, fontWeight: 600 }}>
-                {editingAnimal ? '💾 Update Animal' : '✅ Register Animal'}
+                {editingAnimal ? t('animals.registerModal.updateBtn') : t('animals.registerModal.registerBtn')}
               </button>
               <button type="button" onClick={() => { setShowForm(false); resetForm() }}
                 style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontSize: 14 }}>
-                Cancel
+                {t('animals.actions.cancel')}
               </button>
             </div>
           </form>
@@ -410,15 +410,15 @@ const Animals: React.FC = () => {
         {loading ? (
           <div style={{ textAlign: 'center', padding: 40 }}>
             <div className="loading-spinner" />
-            <p style={{ color: '#6b7280', marginTop: 12 }}>Loading animals...</p>
+            <p style={{ color: '#6b7280', marginTop: 12 }}>{t('animals.loading')}</p>
           </div>
         ) : filteredAnimals.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 60 }}>
             <div style={{ fontSize: 64, marginBottom: 16 }}>🐾</div>
-            <h3 style={{ fontSize: 20, color: '#333', marginBottom: 8 }}>{searchTerm || speciesFilter ? 'No animals match your search' : 'No animals registered yet'}</h3>
-            <p style={{ color: '#666' }}>{isPetOwner ? 'Register your first pet or farm animal to get started.' : 'No animals found in the system.'}</p>
+            <h3 style={{ fontSize: 20, color: '#333', marginBottom: 8 }}>{searchTerm || speciesFilter ? t('animals.emptySearch') : t('animals.emptyAnimals')}</h3>
+            <p style={{ color: '#666' }}>{isPetOwner ? t('animals.petOwnerCTA') : t('animals.adminCTA')}</p>
             {isPetOwner && !showForm && (
-              <button className="btn-primary" style={{ marginTop: 16 }} onClick={() => { resetForm(); setShowForm(true) }}>+ Register Animal</button>
+              <button className="btn-primary" style={{ marginTop: 16 }} onClick={() => { resetForm(); setShowForm(true) }}>{t('animals.registerAnimal')}</button>
             )}
           </div>
         ) : (
@@ -445,28 +445,28 @@ const Animals: React.FC = () => {
                       <div style={{ fontSize: 11, fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: 12, fontFamily: 'monospace' }}>
                         {animal.uniqueId || `ID-${animal.id.substring(0, 8).toUpperCase()}`}
                       </div>
-                      {age && <div style={{ fontSize: 11, marginTop: 4, opacity: 0.85 }}>Age: {age}</div>}
+                      {age && <div style={{ fontSize: 11, marginTop: 4, opacity: 0.85 }}>{t('animals.cardLabels.age')} {age}</div>}
                     </div>
                   </div>
 
                   {/* Card Body */}
                   <div style={{ padding: '14px 20px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px', fontSize: 13 }}>
-                      {animal.gender && <div><span style={{ color: '#6b7280' }}>Gender:</span> <strong>{animal.gender === 'male' ? '♂ Male' : '♀ Female'}</strong></div>}
-                      {animal.weight && <div><span style={{ color: '#6b7280' }}>Weight:</span> <strong>{animal.weight} kg</strong></div>}
-                      {animal.color && <div><span style={{ color: '#6b7280' }}>Color:</span> <strong>{animal.color}</strong></div>}
-                      {animal.isNeutered && <div><span style={{ color: '#6b7280' }}>Neutered:</span> <strong style={{ color: '#059669' }}>Yes ✓</strong></div>}
-                      {animal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>DOB:</span> <strong>{formatDate(animal.dateOfBirth)}</strong></div>}
-                      {animal.ownerName && (isVet || isAdmin) && <div><span style={{ color: '#6b7280' }}>Owner:</span> <strong>{animal.ownerName}</strong></div>}
+                      {animal.gender && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.gender')}</span> <strong>{animal.gender === 'male' ? t('animals.form.maleDisplay') : t('animals.form.femaleDisplay')}</strong></div>}
+                      {animal.weight && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.weight')}</span> <strong>{animal.weight} kg</strong></div>}
+                      {animal.color && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.color')}</span> <strong>{animal.color}</strong></div>}
+                      {animal.isNeutered && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.neutered')}</span> <strong style={{ color: '#059669' }}>{t('animals.cardLabels.yesCheck')}</strong></div>}
+                      {animal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.dob')}</span> <strong>{formatDate(animal.dateOfBirth)}</strong></div>}
+                      {animal.ownerName && (isVet || isAdmin) && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.owner')}</span> <strong>{animal.ownerName}</strong></div>}
                     </div>
 
                     {/* IDs Row */}
                     {(animal.microchipId || animal.earTagId || animal.registrationNumber) && (
                       <div style={{ marginTop: 10, padding: '8px 12px', background: '#f8fafc', borderRadius: 8, fontSize: 12 }}>
-                        <div style={{ fontWeight: 600, color: '#374151', marginBottom: 4 }}>🏷️ Identification</div>
-                        {animal.microchipId && <div style={{ color: '#4b5563' }}>Microchip: <span style={{ fontFamily: 'monospace', color: '#2563eb' }}>{animal.microchipId}</span></div>}
-                        {animal.earTagId && <div style={{ color: '#4b5563' }}>Ear Tag: <span style={{ fontFamily: 'monospace', color: '#2563eb' }}>{animal.earTagId}</span></div>}
-                        {animal.registrationNumber && <div style={{ color: '#4b5563' }}>Reg #: <span style={{ fontFamily: 'monospace', color: '#2563eb' }}>{animal.registrationNumber}</span></div>}
+                        <div style={{ fontWeight: 600, color: '#374151', marginBottom: 4 }}>{t('animals.cardLabels.identification')}</div>
+                        {animal.microchipId && <div style={{ color: '#4b5563' }}>{t('animals.cardLabels.microchip')} <span style={{ fontFamily: 'monospace', color: '#2563eb' }}>{animal.microchipId}</span></div>}
+                        {animal.earTagId && <div style={{ color: '#4b5563' }}>{t('animals.cardLabels.earTag')} <span style={{ fontFamily: 'monospace', color: '#2563eb' }}>{animal.earTagId}</span></div>}
+                        {animal.registrationNumber && <div style={{ color: '#4b5563' }}>{t('animals.cardLabels.regNumber')} <span style={{ fontFamily: 'monospace', color: '#2563eb' }}>{animal.registrationNumber}</span></div>}
                       </div>
                     )}
 
@@ -474,10 +474,10 @@ const Animals: React.FC = () => {
                     {insured && (
                       <div style={{ marginTop: 8, padding: '8px 12px', background: insExpired ? '#fef2f2' : '#f0fdf4', borderRadius: 8, fontSize: 12 }}>
                         <div style={{ fontWeight: 600, color: insExpired ? '#dc2626' : '#059669', marginBottom: 2 }}>
-                          🛡️ {insExpired ? 'Insurance Expired' : 'Insured'}
+                          {insExpired ? t('animals.cardLabels.insuranceExpired') : `🛡️ ${t('animals.cardLabels.insured')}`}
                         </div>
                         <div style={{ color: '#4b5563' }}>{animal.insuranceProvider} — {animal.insurancePolicyNumber}</div>
-                        {animal.insuranceExpiry && <div style={{ color: insExpired ? '#dc2626' : '#6b7280' }}>Expires: {formatDate(animal.insuranceExpiry)}</div>}
+                        {animal.insuranceExpiry && <div style={{ color: insExpired ? '#dc2626' : '#6b7280' }}>{t('animals.cardLabels.expires')} {formatDate(animal.insuranceExpiry)}</div>}
                       </div>
                     )}
                   </div>
@@ -485,19 +485,19 @@ const Animals: React.FC = () => {
                   {/* Card Footer */}
                   <div style={{ padding: '12px 20px', borderTop: '1px solid #f3f4f6', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <button className="btn-small" style={{ background: '#f0fdf4', color: '#059669', border: '1px solid #bbf7d0' }}
-                      onClick={() => setDetailAnimal(animal)}>📋 Details</button>
-                    <button className="btn-small" onClick={() => navigate('/medical-records')}>📁 Records</button>
+                      onClick={() => setDetailAnimal(animal)}>{t('animals.cardLabels.details')}</button>
+                    <button className="btn-small" onClick={() => navigate('/medical-records')}>{t('animals.cardActions.records')}</button>
                     {isPetOwner && (
                       <>
                         <button className="btn-small" style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }}
-                          onClick={() => openEditForm(animal)}>✏️ Edit</button>
+                          onClick={() => openEditForm(animal)}>{t('animals.cardActions.edit')}</button>
                         <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #fca5a5', background: '#fef2f2' }}
                           onClick={() => handleDelete(animal.id)}>🗑️</button>
                       </>
                     )}
                     {isPetOwner && (
                       <button className="btn-small" style={{ marginLeft: 'auto', background: '#667eea', color: 'white', border: 'none' }}
-                        onClick={() => navigate(`/book-consultation?animalId=${animal.id}`)}>📅 Book Consultation</button>
+                        onClick={() => navigate(`/book-consultation?animalId=${animal.id}`)}>{t('animals.actions.bookConsultation')}</button>
                     )}
                   </div>
                 </div>
@@ -526,50 +526,50 @@ const Animals: React.FC = () => {
             </div>
             {/* Modal Body */}
             <div style={{ padding: '20px 28px' }}>
-              {sectionTitle('📝', 'Basic Information')}
+              {sectionTitle('📝', t('animals.detailModal.basicInfo'))}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 24px', fontSize: 14 }}>
-                <div><span style={{ color: '#6b7280' }}>Name:</span> <strong>{detailAnimal.name}</strong></div>
-                <div><span style={{ color: '#6b7280' }}>Species:</span> <strong>{detailAnimal.species}</strong></div>
-                {detailAnimal.breed && <div><span style={{ color: '#6b7280' }}>Breed:</span> <strong>{detailAnimal.breed}</strong></div>}
-                {detailAnimal.gender && <div><span style={{ color: '#6b7280' }}>Gender:</span> <strong>{detailAnimal.gender === 'male' ? '♂ Male' : '♀ Female'}</strong></div>}
-                {detailAnimal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>Date of Birth:</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
-                {detailAnimal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>Age:</span> <strong>{calculateAge(detailAnimal.dateOfBirth)}</strong></div>}
-                {detailAnimal.weight && <div><span style={{ color: '#6b7280' }}>Weight:</span> <strong>{detailAnimal.weight} kg</strong></div>}
-                {detailAnimal.color && <div><span style={{ color: '#6b7280' }}>Color:</span> <strong>{detailAnimal.color}</strong></div>}
-                <div><span style={{ color: '#6b7280' }}>Neutered/Spayed:</span> <strong>{detailAnimal.isNeutered ? 'Yes ✓' : 'No'}</strong></div>
-                {detailAnimal.ownerName && <div><span style={{ color: '#6b7280' }}>Owner:</span> <strong>{detailAnimal.ownerName}</strong></div>}
+                <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.name')}</span> <strong>{detailAnimal.name}</strong></div>
+                <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.species')}</span> <strong>{detailAnimal.species}</strong></div>
+                {detailAnimal.breed && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.breed')}</span> <strong>{detailAnimal.breed}</strong></div>}
+                {detailAnimal.gender && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.gender')}</span> <strong>{detailAnimal.gender === 'male' ? t('animals.form.maleDisplay') : t('animals.form.femaleDisplay')}</strong></div>}
+                {detailAnimal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.dob')}</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
+                {detailAnimal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.age')}</span> <strong>{calculateAge(detailAnimal.dateOfBirth)}</strong></div>}
+                {detailAnimal.weight && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.weight')}</span> <strong>{detailAnimal.weight} kg</strong></div>}
+                {detailAnimal.color && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.color')}</span> <strong>{detailAnimal.color}</strong></div>}
+                <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.neutered')}</span> <strong>{detailAnimal.isNeutered ? t('animals.detailModal.yesCheck') : t('animals.detailModal.no')}</strong></div>
+                {detailAnimal.ownerName && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.owner')}</span> <strong>{detailAnimal.ownerName}</strong></div>}
               </div>
 
-              {sectionTitle('🏷️', 'Identification')}
+              {sectionTitle('🏷️', t('animals.detailModal.identificationSection'))}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 24px', fontSize: 14 }}>
-                <div><span style={{ color: '#6b7280' }}>System ID:</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.uniqueId}</strong></div>
-                {detailAnimal.microchipId && <div><span style={{ color: '#6b7280' }}>Microchip:</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.microchipId}</strong></div>}
-                {detailAnimal.earTagId && <div><span style={{ color: '#6b7280' }}>Ear Tag:</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.earTagId}</strong></div>}
-                {detailAnimal.registrationNumber && <div><span style={{ color: '#6b7280' }}>Registration #:</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.registrationNumber}</strong></div>}
+                <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.systemId')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.uniqueId}</strong></div>
+                {detailAnimal.microchipId && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.microchip')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.microchipId}</strong></div>}
+                {detailAnimal.earTagId && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.earTag')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.earTagId}</strong></div>}
+                {detailAnimal.registrationNumber && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.regNumber')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.registrationNumber}</strong></div>}
               </div>
 
               {(detailAnimal.insuranceProvider || detailAnimal.insurancePolicyNumber) && (
                 <>
-                  {sectionTitle('🛡️', 'Insurance')}
+                  {sectionTitle('🛡️', t('animals.detailModal.insuranceSection'))}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 24px', fontSize: 14 }}>
-                    {detailAnimal.insuranceProvider && <div><span style={{ color: '#6b7280' }}>Provider:</span> <strong>{detailAnimal.insuranceProvider}</strong></div>}
-                    {detailAnimal.insurancePolicyNumber && <div><span style={{ color: '#6b7280' }}>Policy #:</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.insurancePolicyNumber}</strong></div>}
-                    {detailAnimal.insuranceExpiry && <div><span style={{ color: '#6b7280' }}>Expiry:</span> <strong>{formatDate(detailAnimal.insuranceExpiry)}</strong></div>}
+                    {detailAnimal.insuranceProvider && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.provider')}</span> <strong>{detailAnimal.insuranceProvider}</strong></div>}
+                    {detailAnimal.insurancePolicyNumber && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.policyNumber')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.insurancePolicyNumber}</strong></div>}
+                    {detailAnimal.insuranceExpiry && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.expiry')}</span> <strong>{formatDate(detailAnimal.insuranceExpiry)}</strong></div>}
                   </div>
                 </>
               )}
 
               {detailAnimal.medicalNotes && (
                 <>
-                  {sectionTitle('📋', 'Medical Notes')}
+                  {sectionTitle('📋', t('animals.detailModal.medicalNotesSection'))}
                   <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.6, margin: 0 }}>{detailAnimal.medicalNotes}</p>
                 </>
               )}
             </div>
             <div style={{ padding: '16px 28px', borderTop: '1px solid #e5e7eb', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button className="btn-small" onClick={() => navigate('/medical-records')}>📁 Medical Records</button>
-              {isPetOwner && <button className="btn-small" style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }} onClick={() => { setDetailAnimal(null); openEditForm(detailAnimal) }}>✏️ Edit</button>}
-              <button className="btn-small" onClick={() => setDetailAnimal(null)} style={{ padding: '6px 20px' }}>Close</button>
+              <button className="btn-small" onClick={() => navigate('/medical-records')}>{t('animals.detailModal.medicalRecords')}</button>
+              {isPetOwner && <button className="btn-small" style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }} onClick={() => { setDetailAnimal(null); openEditForm(detailAnimal) }}>{t('animals.detailModal.editBtn')}</button>}
+              <button className="btn-small" onClick={() => setDetailAnimal(null)} style={{ padding: '6px 20px' }}>{t('animals.detailModal.closeBtn')}</button>
             </div>
           </div>
         </div>

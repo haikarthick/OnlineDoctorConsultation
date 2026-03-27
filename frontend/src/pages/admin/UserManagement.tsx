@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
@@ -43,6 +44,7 @@ interface UserManagementProps {
 }
 
 const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { formatDate, formatCurrency } = useSettings()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
@@ -169,7 +171,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setVetSaved(true)
       setTimeout(() => setVetSaved(false), 3000)
     } catch {
-      alert('Failed to update vet profile')
+      alert(t('userManagement.failedUpdateVet'))
     } finally {
       setVetSaving(false)
     }
@@ -179,11 +181,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>User Management</h1>
-          <p className="page-subtitle">{users.length} users total</p>
+          <h1>{t('userManagement.title')}</h1>
+          <p className="page-subtitle">{t('userManagement.subtitle', { count: users.length })}</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← Dashboard</button>
+          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('userManagement.dashboard')}</button>
         </div>
       </div>
 
@@ -191,16 +193,16 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       <div className="search-filter-bar" style={{ marginBottom: 24 }}>
         <input
           className="form-input"
-          placeholder="Search by name or email..."
+          placeholder={t('userManagement.searchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{ flex: 1 }}
         />
         <select className="form-input" value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={{ width: 160 }}>
-          <option value="">All Roles</option>
-          <option value="pet_owner">Pet Owners</option>
-          <option value="vet">Veterinarians</option>
-          <option value="admin">Admins</option>
+          <option value="">{t('userManagement.allRoles')}</option>
+          <option value="pet_owner">{t('userManagement.petOwners')}</option>
+          <option value="vet">{t('userManagement.veterinarians')}</option>
+          <option value="admin">{t('userManagement.admins')}</option>
         </select>
       </div>
 
@@ -209,25 +211,25 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         <div className="modal-overlay" onClick={() => setShowRoleModal(null)}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
             <div className="modal-header">
-              <h2>Change Role</h2>
+              <h2>{t('userManagement.changeRole')}</h2>
               <button className="modal-close" onClick={() => setShowRoleModal(null)}>✕</button>
             </div>
             <div className="modal-body">
-              <p>Change role for <strong>{showRoleModal.firstName} {showRoleModal.lastName}</strong></p>
-              <p style={{ fontSize: 13, color: '#6b7280' }}>Current role: {showRoleModal.role}</p>
+              <p>{t('userManagement.changeRoleFor')} <strong>{showRoleModal.firstName} {showRoleModal.lastName}</strong></p>
+              <p style={{ fontSize: 13, color: '#6b7280' }}>{t('userManagement.currentRole')}: {showRoleModal.role}</p>
               <div className="form-group">
-                <label className="form-label">New Role</label>
+                <label className="form-label">{t('userManagement.newRole')}</label>
                 <select className="form-input" value={newRole} onChange={e => setNewRole(e.target.value)}>
-                  <option value="">Select role...</option>
-                  <option value="pet_owner">Pet Owner</option>
-                  <option value="vet">Veterinarian</option>
-                  <option value="admin">Admin</option>
+                  <option value="">{t('userManagement.selectRole')}</option>
+                  <option value="pet_owner">{t('userManagement.petOwner')}</option>
+                  <option value="vet">{t('userManagement.veterinarian')}</option>
+                  <option value="admin">{t('userManagement.admin')}</option>
                 </select>
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
-                <button className="btn btn-outline" onClick={() => setShowRoleModal(null)}>Cancel</button>
+                <button className="btn btn-outline" onClick={() => setShowRoleModal(null)}>{t('userManagement.cancel')}</button>
                 <button className="btn btn-primary" disabled={!newRole || processing === showRoleModal.id} onClick={handleChangeRole}>
-                  {processing === showRoleModal.id ? 'Saving...' : 'Change Role'}
+                  {processing === showRoleModal.id ? t('userManagement.saving') : t('userManagement.changeRole')}
                 </button>
               </div>
             </div>
@@ -241,20 +243,20 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       ) : users.length === 0 ? (
         <div className="empty-state">
           <div style={{ fontSize: 48 }}>👥</div>
-          <h3>No users found</h3>
-          <p>Try adjusting your search</p>
+          <h3>{t('userManagement.noUsers')}</h3>
+          <p>{t('userManagement.adjustSearch')}</p>
         </div>
       ) : (
         <div className="data-table-container">
           <table className="data-table">
             <thead>
               <tr>
-                <th>User</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Joined</th>
-                <th>Actions</th>
+                <th>{t('userManagement.user')}</th>
+                <th>{t('userManagement.email')}</th>
+                <th>{t('userManagement.role')}</th>
+                <th>{t('userManagement.status')}</th>
+                <th>{t('userManagement.joined')}</th>
+                <th>{t('userManagement.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -276,7 +278,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                   <td>{getRoleBadge(u.role)}</td>
                   <td>
                     <span className={`badge badge-${u.isActive ? 'active' : 'danger'}`}>
-                      {u.isActive ? 'Active' : 'Inactive'}
+                      {u.isActive ? t('userManagement.activeStatus') : t('userManagement.inactiveStatus')}
                     </span>
                   </td>
                   <td>{formatDate(u.createdAt)}</td>
@@ -287,13 +289,13 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                         disabled={processing === u.id}
                         onClick={() => handleToggleStatus(u.id)}
                       >
-                        {u.isActive ? 'Deactivate' : 'Activate'}
+                        {u.isActive ? t('userManagement.deactivate') : t('userManagement.activate')}
                       </button>
                       <button
                         className="btn btn-sm btn-outline"
                         onClick={() => { setShowRoleModal(u); setNewRole('') }}
                       >
-                        Role
+                        {t('userManagement.role')}
                       </button>
                       {(u.role === 'vet' || u.role === 'veterinarian') && (
                         <button
@@ -317,7 +319,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         <div className="modal-overlay" onClick={() => setShowVetModal(null)}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 600, maxHeight: '90vh', overflow: 'auto' }}>
             <div className="modal-header">
-              <h2>🩺 Vet Profile — {showVetModal.firstName} {showVetModal.lastName}</h2>
+              <h2>🩺 {t('userManagement.vetProfile')} — {showVetModal.firstName} {showVetModal.lastName}</h2>
               <button className="modal-close" onClick={() => setShowVetModal(null)}>✕</button>
             </div>
             <div className="modal-body">
@@ -327,75 +329,75 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div className="form-group">
-                      <label className="form-label">License Number</label>
+                      <label className="form-label">{t('userManagement.licenseNumber')}</label>
                       <input className="form-input" name="licenseNumber" value={vetForm.licenseNumber} onChange={handleVetFormChange} />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Years of Experience</label>
+                      <label className="form-label">{t('userManagement.yearsExperience')}</label>
                       <input className="form-input" type="number" name="yearsOfExperience" value={vetForm.yearsOfExperience} onChange={handleVetFormChange} min="0" max="80" />
                     </div>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Bio</label>
+                      <label className="form-label">{t('userManagement.bio')}</label>
                     <textarea className="form-input" name="bio" value={vetForm.bio} onChange={handleVetFormChange} rows={3} style={{ resize: 'vertical' }} />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Consultation Fee</label>
+                      <label className="form-label">{t('userManagement.consultationFee')}</label>
                     <input className="form-input" type="number" name="consultationFee" value={vetForm.consultationFee} onChange={handleVetFormChange} min="0" step="0.01" />
                     {vetForm.consultationFee && <span style={{ fontSize: 12, color: '#6b7280' }}>Preview: {formatCurrency(parseFloat(vetForm.consultationFee) || 0)}</span>}
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Specializations (comma-separated)</label>
+                      <label className="form-label">{t('userManagement.specializations')}</label>
                     <input className="form-input" name="specializations" value={vetForm.specializations} onChange={handleVetFormChange} placeholder="Dermatology, Orthopedics" />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Qualifications (comma-separated)</label>
+                      <label className="form-label">{t('userManagement.qualifications')}</label>
                     <input className="form-input" name="qualifications" value={vetForm.qualifications} onChange={handleVetFormChange} placeholder="BVSc, MVSc" />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Languages (comma-separated)</label>
+                      <label className="form-label">{t('userManagement.languages')}</label>
                     <input className="form-input" name="languages" value={vetForm.languages} onChange={handleVetFormChange} placeholder="English, Hindi" />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div className="form-group">
-                      <label className="form-label">Clinic Name</label>
+                      <label className="form-label">{t('userManagement.clinicName')}</label>
                       <input className="form-input" name="clinicName" value={vetForm.clinicName} onChange={handleVetFormChange} />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Clinic Address</label>
+                      <label className="form-label">{t('userManagement.clinicAddress')}</label>
                       <input className="form-input" name="clinicAddress" value={vetForm.clinicAddress} onChange={handleVetFormChange} />
                     </div>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Available Days</label>
+                      <label className="form-label">{t('userManagement.availableDays')}</label>
                     <input className="form-input" name="availableDays" value={vetForm.availableDays} onChange={handleVetFormChange} placeholder="Mon-Fri" />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div className="form-group">
-                      <label className="form-label">Hours Start</label>
+                      <label className="form-label">{t('userManagement.hoursStart')}</label>
                       <input className="form-input" type="time" name="availableHoursStart" value={vetForm.availableHoursStart} onChange={handleVetFormChange} />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Hours End</label>
+                      <label className="form-label">{t('userManagement.hoursEnd')}</label>
                       <input className="form-input" type="time" name="availableHoursEnd" value={vetForm.availableHoursEnd} onChange={handleVetFormChange} />
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 20, padding: '4px 0' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                       <input type="checkbox" name="isAvailable" checked={vetForm.isAvailable} onChange={handleVetFormChange} />
-                      <span>Available</span>
+                      <span>{t('userManagement.available')}</span>
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                       <input type="checkbox" name="acceptsEmergency" checked={vetForm.acceptsEmergency} onChange={handleVetFormChange} />
-                      <span>Accept Emergencies</span>
+                      <span>{t('userManagement.acceptEmergencies')}</span>
                     </label>
                   </div>
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
-                    <button className="btn btn-outline" onClick={() => setShowVetModal(null)}>Cancel</button>
+                    <button className="btn btn-outline" onClick={() => setShowVetModal(null)}>{t('userManagement.cancel')}</button>
                     <button className="btn btn-primary" disabled={vetSaving} onClick={handleSaveVetProfile}>
-                      {vetSaving ? 'Saving...' : 'Save Vet Profile'}
+                      {vetSaving ? t('userManagement.saving') : t('userManagement.saveVetProfile')}
                     </button>
-                    {vetSaved && <span style={{ color: '#16a34a', alignSelf: 'center', fontSize: 13 }}>✓ Saved</span>}
+                    {vetSaved && <span style={{ color: '#16a34a', alignSelf: 'center', fontSize: 13 }}>✓ {t('userManagement.saved')}</span>}
                   </div>
                 </div>
               )}

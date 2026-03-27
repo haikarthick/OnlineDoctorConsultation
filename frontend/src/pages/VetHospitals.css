@@ -578,6 +578,11 @@
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+  .vh-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .vh-dept-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+  .hb-doctor-grid { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 768px) {
   .hb-steps { flex-wrap: wrap; justify-content: center; gap: .2rem; }
   .hb-step-label { display: none; }
@@ -586,6 +591,7 @@
   .hb-doctor-grid { grid-template-columns: 1fr; }
   .hb-type-grid { flex-direction: column; }
   .hb-hospital-info h1 { font-size: 1.1rem; }
+  .vh-admin-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 @media (max-width: 480px) {
   .hb-step-content { padding: 1rem; }

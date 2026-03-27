@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
@@ -12,6 +13,7 @@ interface ConsultationRoomProps {
 }
 
 const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onNavigate }) => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { formatTime } = useSettings()
 
@@ -581,7 +583,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
   if (loading) {
     return (
       <div className="module-page">
-        <div className="loading-container"><div className="loading-spinner" /><p>Setting up consultation room...</p></div>
+        <div className="loading-container"><div className="loading-spinner" /><p>{t('consultationRoom.settingUpRoom')}</p></div>
       </div>
     )
   }
@@ -593,9 +595,9 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
       <div className="module-page">
         <div style={{ textAlign: 'center', padding: '60px 20px' }}>
           <div style={{ fontSize: 64, marginBottom: 20 }}>{isCompleted ? '✅' : '📹'}</div>
-          <h1 style={{ marginBottom: 8 }}>{isCompleted ? 'Consultation Completed' : 'Consultation Session Ended'}</h1>
+          <h1 style={{ marginBottom: 8 }}>{isCompleted ? t('consultationRoom.consultationCompleted') : t('consultationRoom.sessionEnded')}</h1>
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 8 }}>
-            Duration: {formatDuration(session.duration || callDuration)}
+            {t('consultationRoom.duration')}: {formatDuration(session.duration || callDuration)}
           </p>
           {isCompleted && (
             <p style={{ color: '#059669', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
@@ -606,28 +608,28 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           {/* Recording playback */}
           {recordingUrl && (
             <div style={{ marginTop: 20, marginBottom: 16 }}>
-              <p style={{ color: '#059669', fontSize: 14, marginBottom: 12 }}>🎬 Recording available</p>
+              <p style={{ color: '#059669', fontSize: 14, marginBottom: 12 }}>🎬 {t('consultationRoom.recordingAvailable')}</p>
               <video src={recordingUrl} controls style={{ maxWidth: 500, width: '100%', borderRadius: 8, marginBottom: 12 }} />
               <br />
               <a href={recordingUrl} download={`consultation-${conId}-${new Date().toISOString().slice(0,10)}.webm`}
                 className="btn btn-outline" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                ⬇️ Download Recording
+                ⬇️ {t('consultationRoom.downloadRecording')}
               </a>
             </div>
           )}
 
           {/* Notes section */}
           <div style={{ maxWidth: 600, margin: '24px auto', textAlign: 'left' }}>
-            <h3>📝 Consultation Notes</h3>
+            <h3>📝 {t('consultationRoom.consultationNotes')}</h3>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>Diagnosis</label>
-              <textarea className="form-input" rows={2} placeholder="Enter diagnosis..."
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>{t('consultationRoom.diagnosis')}</label>
+              <textarea className="form-input" rows={2} placeholder={t('consultationRoom.enterDiagnosis')}
                 value={diagnosis} onChange={e => setDiagnosis(e.target.value)} style={{ width: '100%' }}
                 readOnly={isCompleted} />
             </div>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>Notes</label>
-              <textarea className="form-input" rows={4} placeholder="Notes..."
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>{t('consultationRoom.notes')}</label>
+              <textarea className="form-input" rows={4} placeholder={t('consultationRoom.notesPlaceholder')}
                 value={notes} onChange={e => setNotes(e.target.value)} style={{ width: '100%' }}
                 readOnly={isCompleted} />
             </div>
@@ -635,19 +637,19 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
               {!isCompleted && (
                 <>
                   <button className="btn btn-outline" onClick={handleSaveNotes} disabled={savingNotes}>
-                    {savingNotes ? '⏳ Saving...' : notesSaved ? '✅ Saved!' : '💾 Save Notes'}
+                    {savingNotes ? `⏳ ${t('consultationRoom.saving')}` : notesSaved ? `✅ ${t('consultationRoom.saved')}` : `💾 ${t('consultationRoom.saveNotes')}`}
                   </button>
                   <button className="btn btn-primary" onClick={handleCompleteConsultation}>
-                    ✅ Complete Consultation
+                    ✅ {t('consultationRoom.completeConsultation')}
                   </button>
                   <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                    💊 Write Prescription
+                    💊 {t('consultationRoom.writePrescription')}
                   </button>
                 </>
               )}
               {isCompleted && (
                 <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                  💊 Write Prescription
+                  💊 {t('consultationRoom.writePrescription')}
                 </button>
               )}
             </div>
@@ -656,7 +658,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           {/* Chat transcript */}
           {messages.length > 0 && (
             <div style={{ maxWidth: 600, margin: '24px auto', textAlign: 'left' }}>
-              <h3>💬 Chat Transcript ({messages.length} messages)</h3>
+              <h3>💬 {t('consultationRoom.chatTranscript', { count: messages.length })}</h3>
               <div style={{ background: '#f9fafb', borderRadius: 8, padding: 16, maxHeight: 300, overflow: 'auto' }}>
                 {messages.map(msg => (
                   <div key={msg.id} style={{ marginBottom: 8, fontSize: 13 }}>
@@ -672,7 +674,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
             <button className="btn btn-outline" onClick={() => onNavigate('/dashboard')}>
-              Return to Dashboard
+              {t('consultationRoom.returnToDashboard')}
             </button>
           </div>
         </div>
@@ -685,20 +687,20 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>Consultation Room</h1>
+          <h1>{t('consultationRoom.title')}</h1>
           <p className="page-subtitle">
             {session?.status === 'active' ? (
-              <span style={{ color: '#dc2626', fontWeight: 600 }}>🔴 Live — {formatDuration(callDuration)}</span>
-            ) : 'Waiting for session to start...'}
+              <span style={{ color: '#dc2626', fontWeight: 600 }}>🔴 {t('consultationRoom.live')} — {formatDuration(callDuration)}</span>
+            ) : t('consultationRoom.waitingForSession')}
           </p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-            💊 Prescription
+            💊 {t('consultationRoom.prescription')}
           </button>
           {session?.status === 'active' && (
             <button className="btn btn-danger" onClick={handleEndCall} style={{ background: '#dc2626', color: 'white', border: 'none' }}>
-              📞 End Call
+              📞 {t('consultationRoom.endCall')}
             </button>
           )}
         </div>
@@ -708,7 +710,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
         <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
           ⚠️ {error}
           <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }}
-            onClick={() => setError('')}>Dismiss</button>
+            onClick={() => setError('')}>{t('consultationRoom.dismiss')}</button>
         </div>
       )}
 
@@ -732,16 +734,16 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
               {isScreenSharing && (
                 <div style={{ position: 'absolute', bottom: 70, left: 16, background: 'rgba(0,0,0,.75)',
                   color: '#fff', padding: '4px 12px', borderRadius: 8, fontSize: 13, zIndex: 10 }}>
-                  🖥️ Screen sharing active
+                  🖥️ {t('consultationRoom.screenSharingActive')}
                 </div>
               )}
             </>
           ) : (
             <div className="video-placeholder">
               <div className="video-avatar">👨‍⚕️</div>
-              <p>Waiting for patient to join...</p>
+              <p>{t('consultationRoom.waitingForPatient')}</p>
               <p style={{ fontSize: 13, color: '#9ca3af', marginTop: 4 }}>
-                {session ? `Room: ${session.roomId}` : 'Creating room...'}
+                {session ? `${t('consultationRoom.room')}: ${session.roomId}` : t('consultationRoom.creatingRoom')}
               </p>
             </div>
           )}
@@ -774,7 +776,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           {/* Controls */}
           <div className="video-controls">
             {session?.status === 'waiting' && (
-              <button className="btn btn-success btn-lg" onClick={handleStartCall}>▶ Start Call</button>
+              <button className="btn btn-success btn-lg" onClick={handleStartCall}>▶ {t('consultationRoom.startCall')}</button>
             )}
             {session?.status === 'active' && (
               <>
@@ -821,7 +823,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
                 className={`tab ${activePanel === tab ? 'active' : ''}`}
                 style={{ flex: 1, border: 'none', padding: '10px', fontSize: 13 }}
                 onClick={() => { setActivePanel(tab); if (tab === 'history' && !historyLoaded && !historyLoading) { /* auto-load on first click is handled in loadConsultationData */ } }}>
-                {tab === 'chat' ? `💬 Chat${messages.length > 0 ? ` (${messages.length})` : ''}` : tab === 'history' ? '📋 History' : tab === 'notes' ? '📝 Notes' : '💊 Rx'}
+                {tab === 'chat' ? `💬 ${t('consultationRoom.chat')}${messages.length > 0 ? ` (${messages.length})` : ''}` : tab === 'history' ? `📋 ${t('consultationRoom.historyTab')}` : tab === 'notes' ? `📝 ${t('consultationRoom.notesTab')}` : `💊 ${t('consultationRoom.rx')}`}
               </button>
             ))}
           </div>
@@ -832,8 +834,8 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
               <div className="chat-messages">
                 {messages.length === 0 && (
                   <div style={{ textAlign: 'center', padding: '40px 16px', color: '#9ca3af' }}>
-                    <p>No messages yet</p>
-                    <p style={{ fontSize: 13 }}>Start the conversation</p>
+                    <p>{t('consultationRoom.noMessagesYet')}</p>
+                    <p style={{ fontSize: 13 }}>{t('consultationRoom.startConversation')}</p>
                   </div>
                 )}
                 {messages.map(msg => (
@@ -846,7 +848,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
                 <div ref={chatEndRef} />
               </div>
               <div className="chat-input-area">
-                <input className="chat-input" placeholder="Type a message..."
+                <input className="chat-input" placeholder={t('consultationRoom.typeMessage')}
                   value={newMessage}
                   onChange={e => setNewMessage(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSendMessage()} />
@@ -861,15 +863,15 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
               {historyLoading && (
                 <div style={{ textAlign: 'center', padding: 30 }}>
                   <div className="loading-spinner" style={{ margin: '0 auto' }} />
-                  <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>Loading medical history...</p>
+                  <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>{t('consultationRoom.loadingMedicalHistory')}</p>
                 </div>
               )}
 
               {!historyLoading && !animalInfo && (
                 <div style={{ textAlign: 'center', padding: '30px 16px', color: '#9ca3af' }}>
                   <div style={{ fontSize: 40, marginBottom: 8 }}>📋</div>
-                  <p style={{ fontWeight: 500 }}>No animal linked</p>
-                  <p style={{ fontSize: 13 }}>Medical history will appear here when an animal is associated with this consultation.</p>
+                  <p style={{ fontWeight: 500 }}>{t('consultationRoom.noAnimalLinked')}</p>
+                  <p style={{ fontSize: 13 }}>{t('consultationRoom.animalLinkMessage')}</p>
                 </div>
               )}
 
@@ -891,10 +893,10 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
                   {/* Allergies */}
                   <div style={{ marginBottom: 12 }}>
                     <h4 style={{ fontSize: 13, fontWeight: 700, color: '#991b1b', margin: '0 0 6px' }}>
-                      ⚠️ Allergies ({allergies.length})
+                      ⚠️ {t('consultationRoom.allergies')} ({allergies.length})
                     </h4>
                     {allergies.length === 0 ? (
-                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>No known allergies</p>
+                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>{t('consultationRoom.noKnownAllergies')}</p>
                     ) : (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                         {allergies.map((a: any, i: number) => (
@@ -913,10 +915,10 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
                   {/* Vaccinations */}
                   <div style={{ marginBottom: 12 }}>
                     <h4 style={{ fontSize: 13, fontWeight: 700, color: '#065f46', margin: '0 0 6px' }}>
-                      💉 Vaccinations ({vaccinations.length})
+                      💉 {t('consultationRoom.vaccinations')} ({vaccinations.length})
                     </h4>
                     {vaccinations.length === 0 ? (
-                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>No vaccination records</p>
+                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>{t('consultationRoom.noVaccinationRecords')}</p>
                     ) : (
                       <div style={{ maxHeight: 120, overflowY: 'auto' }}>
                         {vaccinations.slice(0, 10).map((v: any, i: number) => (
@@ -937,10 +939,10 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
                   {/* Recent Medical Records */}
                   <div style={{ marginBottom: 12 }}>
                     <h4 style={{ fontSize: 13, fontWeight: 700, color: '#1e3a5f', margin: '0 0 6px' }}>
-                      🩺 Medical Records ({medicalRecords.length})
+                      🩺 {t('consultationRoom.medicalRecords')} ({medicalRecords.length})
                     </h4>
                     {medicalRecords.length === 0 ? (
-                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>No medical records</p>
+                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>{t('consultationRoom.noMedicalRecords')}</p>
                     ) : (
                       <div style={{ maxHeight: 150, overflowY: 'auto' }}>
                         {medicalRecords.slice(0, 10).map((r: any, i: number) => (
@@ -962,10 +964,10 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
                   {/* Lab Results */}
                   <div style={{ marginBottom: 8 }}>
                     <h4 style={{ fontSize: 13, fontWeight: 700, color: '#7c3aed', margin: '0 0 6px' }}>
-                      🔬 Lab Results ({labResults.length})
+                      🔬 {t('consultationRoom.labResults')} ({labResults.length})
                     </h4>
                     {labResults.length === 0 ? (
-                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>No lab results</p>
+                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>{t('consultationRoom.noLabResults')}</p>
                     ) : (
                       <div style={{ maxHeight: 120, overflowY: 'auto' }}>
                         {labResults.slice(0, 10).map((l: any, i: number) => (
@@ -993,18 +995,18 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           {activePanel === 'notes' && (
             <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
               <div className="form-group">
-                <label className="form-label">Diagnosis</label>
-                <textarea className="form-input" rows={3} placeholder="Enter diagnosis..."
+                <label className="form-label">{t('consultationRoom.diagnosis')}</label>
+                <textarea className="form-input" rows={3} placeholder={t('consultationRoom.enterDiagnosis')}
                   value={diagnosis} onChange={e => setDiagnosis(e.target.value)} />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
-                <label className="form-label">Consultation Notes</label>
+                <label className="form-label">{t('consultationRoom.consultationNotesLabel')}</label>
                 <textarea className="form-input" rows={8}
-                  placeholder="Document findings, observations, recommendations..."
+                  placeholder={t('consultationRoom.notesDocumentPlaceholder')}
                   value={notes} onChange={e => setNotes(e.target.value)} style={{ resize: 'vertical' }} />
               </div>
               <button className="btn btn-primary" onClick={handleSaveNotes} disabled={savingNotes}>
-                {savingNotes ? '⏳ Saving...' : notesSaved ? '✅ Saved!' : '💾 Save Notes'}
+                {savingNotes ? `⏳ ${t('consultationRoom.saving')}` : notesSaved ? `✅ ${t('consultationRoom.saved')}` : `💾 ${t('consultationRoom.saveNotes')}`}
               </button>
             </div>
           )}
@@ -1013,14 +1015,14 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           {activePanel === 'prescribe' && (
             <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
               <p style={{ fontSize: 14, color: '#6b7280' }}>
-                Quick access to prescription writing during consultation.
+                {t('consultationRoom.quickPrescribeAccess')}
               </p>
               <button className="btn btn-primary"
                 onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
-                💊 Open Prescription Writer
+                💊 {t('consultationRoom.openPrescriptionWriter')}
               </button>
               <div style={{ marginTop: 12 }}>
-                <h4>Common Prescriptions</h4>
+                <h4>{t('consultationRoom.commonPrescriptions')}</h4>
                 {[
                   { label: 'Antibiotics Course (7 days)', name: 'Amoxicillin', dosage: '250mg', frequency: 'Twice daily', duration: '7 days', instructions: 'Give with food' },
                   { label: 'Pain Relief (5 days)', name: 'Meloxicam', dosage: '0.1mg/kg', frequency: 'Once daily', duration: '5 days', instructions: 'Give with food, monitor appetite' },

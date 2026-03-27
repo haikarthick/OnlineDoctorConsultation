@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import { SystemSetting, GatewaySettings } from '../../types'
@@ -37,6 +38,7 @@ const MANAGED_KEYS = new Set([
 const inputStyle: React.CSSProperties = { color: '#111827', WebkitTextFillColor: '#111827' }
 
 const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { settings: appSettings, reloadSettings, formatCurrency } = useSettings()
   const [settings, setSettings] = useState<SystemSetting[]>([])
   const [loading, setLoading] = useState(true)
@@ -330,12 +332,12 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       {/* Header */}
       <div className="page-header" style={{ flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 style={{ color: '#111827' }}>System Settings</h1>
-          <p className="page-subtitle">{settings.length} configuration entries</p>
+          <h1 style={{ color: '#111827' }}>{t('systemSettings.title')}</h1>
+          <p className="page-subtitle">{t('systemSettings.subtitle', { count: settings.length })}</p>
         </div>
         <div className="page-header-actions" style={{ flexWrap: 'wrap', gap: 8 }}>
-          <button className="btn btn-primary" onClick={() => setShowAdd(true)}>+ Add Setting</button>
-          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← Dashboard</button>
+          <button className="btn btn-primary" onClick={() => setShowAdd(true)}>+ {t('systemSettings.addSetting')}</button>
+          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('systemSettings.dashboard')}</button>
         </div>
       </div>
 
@@ -354,7 +356,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
           <span style={{ fontSize: 18, color: '#9ca3af' }}>🔍</span>
           <input
             type="text"
-            placeholder="Search settings by name, key, or value..."
+            placeholder={t('systemSettings.searchPlaceholder')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             style={{
@@ -404,29 +406,29 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
         <div className="modal-overlay" onClick={() => setShowAdd(false)}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
             <div className="modal-header">
-              <h2 style={{ color: '#111827' }}>Add Setting</h2>
+              <h2 style={{ color: '#111827' }}>{t('systemSettings.addSetting')}</h2>
               <button className="modal-close" onClick={() => setShowAdd(false)}>✕</button>
             </div>
             <div className="modal-body">
               <div className="form-group">
-                <label className="form-label">Key</label>
+                <label className="form-label">{t('systemSettings.key')}</label>
                 <input className="form-input" placeholder="e.g. system.maintenance_mode" value={newSetting.key}
                   onChange={e => setNewSetting({ ...newSetting, key: e.target.value })} style={inputStyle} />
               </div>
               <div className="form-group">
-                <label className="form-label">Value</label>
-                <input className="form-input" placeholder="Setting value" value={newSetting.value}
+                <label className="form-label">{t('systemSettings.value')}</label>
+                <input className="form-input" placeholder={t('systemSettings.settingValuePlaceholder')} value={newSetting.value}
                   onChange={e => setNewSetting({ ...newSetting, value: e.target.value })} style={inputStyle} />
               </div>
               <div className="form-group">
-                <label className="form-label">Description</label>
-                <input className="form-input" placeholder="What does this setting control?" value={newSetting.description}
+                <label className="form-label">{t('systemSettings.description')}</label>
+                <input className="form-input" placeholder={t('systemSettings.descriptionPlaceholder')} value={newSetting.description}
                   onChange={e => setNewSetting({ ...newSetting, description: e.target.value })} style={inputStyle} />
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
-                <button className="btn btn-outline" onClick={() => setShowAdd(false)}>Cancel</button>
+                <button className="btn btn-outline" onClick={() => setShowAdd(false)}>{t('systemSettings.cancel')}</button>
                 <button className="btn btn-primary" disabled={saving} onClick={handleAddSetting}>
-                  {saving ? 'Saving...' : 'Add Setting'}
+                  {saving ? t('systemSettings.saving') : t('systemSettings.addSetting')}
                 </button>
               </div>
             </div>
@@ -437,13 +439,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       {/* ─── Display Settings ─── */}
       {showDisplayCard && (
         <div id="settings-section-display" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>🕐 Display Settings</h2></div>
+          <div className="card-header"><h2 style={{ color: '#111827' }}>🕐 {t('systemSettings.displaySettings')}</h2></div>
           <div className="card-body">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Time Format</h3>
+                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.timeFormat')}</h3>
                 <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
-                  Choose how times are displayed across the application.
+                  {t('systemSettings.timeFormatDesc')}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -451,7 +453,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   disabled={savingTimeFormat} onClick={() => handleTimeFormatChange('12h')}>12h (AM/PM)</button>
                 <button className={`btn btn-sm ${timeFormat === '24h' ? 'btn-primary' : 'btn-outline'}`}
                   disabled={savingTimeFormat} onClick={() => handleTimeFormatChange('24h')}>24 Hour</button>
-                {savingTimeFormat && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                {savingTimeFormat && <span style={{ fontSize: 12, color: '#6b7280' }}>{t('systemSettings.saving')}</span>}
                 {timeFormatSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
               </div>
             </div>
@@ -468,8 +470,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Date Format</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>How dates are displayed across the application.</p>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.dateFormat')}</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.dateFormatDesc')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   {['MMM d, yyyy', 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd'].map(fmt => (
@@ -491,13 +493,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       {/* ─── Consultation Settings ─── */}
       {showConsultationCard && (
         <div id="settings-section-consultation" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>🩺 Consultation Settings</h2></div>
+          <div className="card-header"><h2 style={{ color: '#111827' }}>🩺 {t('systemSettings.consultationSettings')}</h2></div>
           <div className="card-body">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Join Window (minutes)</h3>
+                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.joinWindow')}</h3>
                 <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
-                  How many minutes before the scheduled time can users join a consultation.
+                  {t('systemSettings.joinWindowDesc')}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -511,7 +513,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 0 && v <= 120) setJoinWindow(v) }}
                   onBlur={() => handleJoinWindowChange(joinWindow)}
                   onKeyDown={e => { if (e.key === 'Enter') handleJoinWindowChange(joinWindow) }} />
-                {savingJoinWindow && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                {savingJoinWindow && <span style={{ fontSize: 12, color: '#6b7280' }}>{t('systemSettings.saving')}</span>}
                 {joinWindowSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
               </div>
             </div>
@@ -526,8 +528,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Max Duration (minutes)</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Maximum consultation duration in minutes.</p>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.maxDuration')}</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.maxDurationDesc')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[30, 45, 60, 90].map(mins => (
@@ -556,13 +558,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       {/* ─── Booking Settings ─── */}
       {showBookingCard && (
         <div id="settings-section-booking" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>📅 Booking Settings</h2></div>
+          <div className="card-header"><h2 style={{ color: '#111827' }}>📅 {t('systemSettings.bookingSettings')}</h2></div>
           <div className="card-body">
             {/* Advance Booking Days */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Advance Booking Window (days)</h3>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>How many days in advance bookings are allowed.</p>
+                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.advanceBooking')}</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.advanceBookingDesc')}</p>
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                 {[7, 14, 30, 60, 90].map(d => (
@@ -588,8 +590,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Free Cancellation Window (hours)</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Hours before appointment when cancellation is free.</p>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.freeCancellationWindow')}</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.freeCancellationWindowDesc')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[6, 12, 24, 48].map(h => (
@@ -609,8 +611,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Max Reschedules</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Maximum times a user can reschedule before doctor acceptance. 0 = unlimited.</p>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.maxReschedules')}</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.maxReschedulesDesc')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[0, 1, 2, 3, 5].map(n => (
@@ -628,19 +630,19 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
             {/* No-Show Rules Divider */}
             <div style={{ borderTop: '2px solid #e5e7eb', padding: '12px 0 4px', marginTop: 4 }}>
-              <h3 style={{ margin: 0, fontSize: 14, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>No-Show Reschedule Rules</h3>
+              <h3 style={{ margin: 0, fontSize: 14, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>{t('systemSettings.noShowRules')}</h3>
             </div>
 
             {/* Doctor No-Show */}
             <div style={{ padding: '12px 0', borderTop: '1px solid #f3f4f6' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>🩺 Doctor No-Show</h3>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>🩺 {t('systemSettings.doctorNoShow')}</h3>
                   <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
-                    When a doctor doesn't join, the patient may reschedule with any available doctor.
+                    {t('systemSettings.doctorNoShowDesc')}
                   </p>
                 </div>
-                <span style={{ background: '#d1fae5', color: '#065f46', padding: '5px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600 }}>♾ Unlimited</span>
+                <span style={{ background: '#d1fae5', color: '#065f46', padding: '5px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600 }}>♾ {t('systemSettings.unlimited')}</span>
               </div>
             </div>
 
@@ -648,9 +650,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>🙋 Patient No-Show Reschedule Limit</h3>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>🙋 {t('systemSettings.patientNoShowLimit')}</h3>
                   <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
-                    How many times a patient may reschedule after missing an appointment. 0 = unlimited.
+                    {t('systemSettings.patientNoShowLimitDesc')}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -666,7 +668,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                     onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 0 && v <= 10) setPatientNoShowLimit(v) }}
                     onBlur={() => handlePatientNoShowLimitChange(patientNoShowLimit)}
                     onKeyDown={e => { if (e.key === 'Enter') handlePatientNoShowLimitChange(patientNoShowLimit) }} />
-                  {savingPatientLimit && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                  {savingPatientLimit && <span style={{ fontSize: 12, color: '#6b7280' }}>{t('systemSettings.saving')}</span>}
                   {patientLimitSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
                 </div>
               </div>
@@ -682,13 +684,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       {/* ─── Platform Currency ─── */}
       {showCurrencyCard && (
         <div id="settings-section-currency" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>💱 Platform Currency</h2></div>
+          <div className="card-header"><h2 style={{ color: '#111827' }}>💱 {t('systemSettings.platformCurrency')}</h2></div>
           <div className="card-body">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Default Currency</h3>
+                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.defaultCurrency')}</h3>
                 <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
-                  Select the platform-wide currency for all prices, fees, and financial displays.
+                  {t('systemSettings.defaultCurrencyDesc')}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -720,7 +722,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   <option value="NZD">🇳🇿 NZD — New Zealand Dollar (NZ$)</option>
                   <option value="CHF">🇨🇭 CHF — Swiss Franc (CHF)</option>
                 </select>
-                {savingCurrency && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
+                {savingCurrency && <span style={{ fontSize: 12, color: '#6b7280' }}>{t('systemSettings.saving')}</span>}
                 {currencySaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
               </div>
             </div>
@@ -735,11 +737,11 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       {/* ─── Payment Gateway Settings ─── */}
       {showPaymentCard && (
         <div id="settings-section-payment" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>💳 Payment Gateway</h2></div>
+          <div className="card-header"><h2 style={{ color: '#111827' }}>💳 {t('systemSettings.paymentGateway')}</h2></div>
           <div className="card-body">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Gateway Mode</h3>
+                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.gatewayMode')}</h3>
                 <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
                   <strong>Demo:</strong> Simulated payments. <strong>Test:</strong> Sandbox. <strong>Live:</strong> Real processing.
                 </p>
@@ -783,7 +785,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             {gatewayMode === 'demo' && (
               <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
                 <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
-                  ⚠️ <strong>Demo Mode Active</strong> — All payments are simulated.
+                  ⚠️ <strong>{t('systemSettings.demoModeActive')}</strong> — {t('systemSettings.demoModeDesc')}
                 </div>
               </div>
             )}
@@ -791,15 +793,15 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             {gatewayMode === 'live' && (
               <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
                 <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
-                  🔴 <strong>Live Mode</strong> — Real payments will be processed.
+                  🔴 <strong>{t('systemSettings.liveMode')}</strong> — {t('systemSettings.liveModeDesc')}
                 </div>
               </div>
             )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6' }}>
-              {gatewaySaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ Gateway settings saved!</span>}
+              {gatewaySaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ {t('systemSettings.gatewaySaved')}</span>}
               <button className="btn btn-primary" disabled={savingGateway} onClick={handleSaveGateway}>
-                {savingGateway ? 'Saving...' : 'Save Gateway Settings'}
+                {savingGateway ? t('systemSettings.saving') : t('systemSettings.saveGateway')}
               </button>
             </div>
           </div>
@@ -809,14 +811,14 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       {/* ─── Cancellation & Refund Policy ─── */}
       {showCancellationCard && (
         <div id="settings-section-cancellation" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>🔄 Cancellation & Refund Policy</h2></div>
+          <div className="card-header"><h2 style={{ color: '#111827' }}>🔄 {t('systemSettings.cancellationPolicy')}</h2></div>
           <div className="card-body">
             {/* Auto-refund on doctor cancel */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
               <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Auto-Refund on Doctor Cancellation</h3>
+                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.autoRefund')}</h3>
                 <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
-                  Automatically process a full refund when a doctor cancels.
+                  {t('systemSettings.autoRefundDesc')}
                 </p>
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -831,8 +833,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Goodwill Bonus (%)</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Extra bonus credit when a doctor cancels.</p>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.goodwillBonus')}</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.goodwillBonusDesc')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[0, 5, 10, 15, 20].map(n => (
@@ -847,8 +849,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Free Cancellation Window (hours)</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>100% refund if cancelled this many hours before appointment.</p>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.freeCancellationHours')}</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.freeCancellationHoursDesc')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[12, 24, 48, 72].map(h => (
@@ -867,8 +869,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Partial Refund Window (hours)</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Partial refund if cancelled between this and the free window.</p>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.partialRefundWindow')}</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.partialRefundWindowDesc')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[1, 2, 4, 6].map(h => (
@@ -883,8 +885,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Partial Refund Percentage</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>Percentage refunded within the partial window.</p>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.partialRefundPercent')}</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.partialRefundPercentDesc')}</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[25, 50, 75].map(n => (
@@ -903,7 +905,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>Doctor Max Cancellations / Month</h3>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.doctorMaxCancellations')}</h3>
                   <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>0 = unlimited.</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -931,9 +933,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6' }}>
-              {cancellationSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ Cancellation policy saved!</span>}
+              {cancellationSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ {t('systemSettings.cancellationSaved')}</span>}
               <button className="btn btn-primary" disabled={savingCancellation} onClick={handleSaveCancellation}>
-                {savingCancellation ? 'Saving...' : 'Save Cancellation Policy'}
+                {savingCancellation ? t('systemSettings.saving') : t('systemSettings.saveCancellationPolicy')}
               </button>
             </div>
           </div>
@@ -948,18 +950,18 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
           <div className="card" style={{ marginBottom: 20 }}>
             <div className="card-body" style={{ textAlign: 'center', padding: 40 }}>
               <div style={{ fontSize: 40 }}>⚙️</div>
-              <h3 style={{ color: '#111827', marginTop: 12 }}>No additional settings</h3>
-              <p style={{ color: '#6b7280' }}>All current settings are managed via the cards above.</p>
-              <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => setShowAdd(true)}>+ Add Custom Setting</button>
+              <h3 style={{ color: '#111827', marginTop: 12 }}>{t('systemSettings.noAdditional')}</h3>
+              <p style={{ color: '#6b7280' }}>{t('systemSettings.noAdditionalDesc')}</p>
+              <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => setShowAdd(true)}>+ {t('systemSettings.addCustomSetting')}</button>
             </div>
           </div>
         ) : filteredSettings.length === 0 && searchQuery ? (
           <div className="card" style={{ marginBottom: 20 }}>
             <div className="card-body" style={{ textAlign: 'center', padding: 40 }}>
               <div style={{ fontSize: 40 }}>🔍</div>
-              <h3 style={{ color: '#111827', marginTop: 12 }}>No settings match "{searchQuery}"</h3>
-              <p style={{ color: '#6b7280' }}>Try a different search term.</p>
-              <button className="btn btn-outline" style={{ marginTop: 12 }} onClick={() => setSearchQuery('')}>Clear Search</button>
+              <h3 style={{ color: '#111827', marginTop: 12 }}>{t('systemSettings.noMatch', { query: searchQuery })}</h3>
+              <p style={{ color: '#6b7280' }}>{t('systemSettings.noMatchDesc')}</p>
+              <button className="btn btn-outline" style={{ marginTop: 12 }} onClick={() => setSearchQuery('')}>{t('systemSettings.clearSearch')}</button>
             </div>
           </div>
         ) : (

@@ -14,7 +14,8 @@ const DOC_TYPES = [
   'breeding_certificate', 'organic_certification', 'environmental_permit', 'other'
 ]
 
-const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
+const ComplianceDocs: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -72,16 +73,16 @@ const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
     try {
       if (editingId) {
         await apiService.updateComplianceDoc(editingId, payload)
-        setSuccessMsg('Document updated!')
+        setSuccessMsg(t('complianceDocs.toasts.updated'))
       } else {
         await apiService.createComplianceDoc(selectedEnterpriseId, payload)
-        setSuccessMsg('Document created!')
+        setSuccessMsg(t('complianceDocs.toasts.created'))
       }
       setShowForm(false); setEditingId(null)
       resetForm()
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to save document')
+      setError(err.response?.data?.error?.message || t('complianceDocs.toasts.saveFailed'))
     }
   }
 
@@ -90,18 +91,18 @@ const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
   const handleVerify = async (id: string) => {
     try {
       await apiService.verifyComplianceDoc(id)
-      setSuccessMsg('Document verified!')
+      setSuccessMsg(t('complianceDocs.toasts.verified'))
       fetchData()
-    } catch { setError('Failed to verify') }
+    } catch { setError(t('complianceDocs.toasts.verifyFailed')) }
   }
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this document?')) return
+    if (!window.confirm(t('complianceDocs.toasts.deleteConfirm'))) return
     try {
       await apiService.deleteComplianceDoc(id)
-      setSuccessMsg('Document deleted!')
+      setSuccessMsg(t('complianceDocs.toasts.deleted'))
       fetchData()
-    } catch { setError('Failed to delete') }
+    } catch { setError(t('complianceDocs.toasts.deleteFailed')) }
   }
 
   const startEdit = (doc: ComplianceDocument) => {
@@ -119,16 +120,16 @@ const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
     <div className="module-page">
       <div className="module-header">
         <h1>{t('complianceDocs.pageTitle')}</h1>
-        <p>Manage licenses, permits, certifications and track expiry dates</p>
+        <p>{t('complianceDocs.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('complianceDocs.selectEnterprise')}</label>
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
-          <option value="">-- Select --</option>
+          <option value="">{t('complianceDocs.selectPlaceholder')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
@@ -136,69 +137,69 @@ const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
       {selectedEnterpriseId && (
         <>
           <div className="tab-bar">
-            <button className={`tab-btn ${tab === 'documents' ? 'active' : ''}`} onClick={() => setTab('documents')}>📄 Documents</button>
-            <button className={`tab-btn ${tab === 'summary' ? 'active' : ''}`} onClick={() => setTab('summary')}>📊 Summary</button>
-            <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); resetForm() }}>+ Add Document</button>
+            <button className={`tab-btn ${tab === 'documents' ? 'active' : ''}`} onClick={() => setTab('documents')}>{t('complianceDocs.tabs.documents')}</button>
+            <button className={`tab-btn ${tab === 'summary' ? 'active' : ''}`} onClick={() => setTab('summary')}>{t('complianceDocs.tabs.summary')}</button>
+            <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); resetForm() }}>{t('complianceDocs.addDocument')}</button>
           </div>
 
           {showForm && (
             <form className="module-form" onSubmit={handleSubmit}>
-              <h3>{editingId ? 'Edit Document' : 'Add Compliance Document'}</h3>
+              <h3>{editingId ? t('complianceDocs.modal.editTitle') : t('complianceDocs.modal.createTitle')}</h3>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Title *</label>
+                  <label>{t('complianceDocs.modal.title')}</label>
                   <input required value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Document Type</label>
+                  <label>{t('complianceDocs.modal.type')}</label>
                   <select value={formData.documentType} onChange={e => setFormData({ ...formData, documentType: e.target.value })}>
                     {DOC_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Document Number</label>
+                  <label>{t('complianceDocs.modal.number')}</label>
                   <input value={formData.documentNumber} onChange={e => setFormData({ ...formData, documentNumber: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Issuing Authority</label>
+                  <label>{t('complianceDocs.modal.authority')}</label>
                   <input value={formData.issuingAuthority} onChange={e => setFormData({ ...formData, issuingAuthority: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Issue Date</label>
+                  <label>{t('complianceDocs.modal.issueDate')}</label>
                   <input type="date" value={formData.issueDate} onChange={e => setFormData({ ...formData, issueDate: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Expiry Date</label>
+                  <label>{t('complianceDocs.modal.expiryDate')}</label>
                   <input type="date" value={formData.expiryDate} onChange={e => setFormData({ ...formData, expiryDate: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Status</label>
+                  <label>{t('complianceDocs.modal.status')}</label>
                   <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
                     {['draft', 'active', 'expired', 'revoked', 'pending_renewal'].map(s => <option key={s} value={s}>{s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>File URL</label>
+                  <label>{t('complianceDocs.modal.fileUrl')}</label>
                   <input value={formData.fileUrl} onChange={e => setFormData({ ...formData, fileUrl: e.target.value })} />
                 </div>
               </div>
               <div className="form-group">
-                <label>Notes</label>
+                <label>{t('complianceDocs.modal.notes')}</label>
                 <textarea rows={2} value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} />
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">{editingId ? 'Update' : 'Add Document'}</button>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editingId ? t('complianceDocs.modal.updateBtn') : t('complianceDocs.modal.addBtn')}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>{t('complianceDocs.modal.cancelBtn')}</button>
               </div>
             </form>
           )}
 
-          {loading ? <p className="loading-text">Loading...</p> : tab === 'documents' ? (
+          {loading ? <p className="loading-text">{t('complianceDocs.loading')}</p> : tab === 'documents' ? (
             <div className="card full-width">
-              <h3>All Compliance Documents</h3>
-              {documents.length === 0 ? <p className="empty-text">No documents yet.</p> : (
+              <h3>{t('complianceDocs.table.title')}</h3>
+              {documents.length === 0 ? <p className="empty-text">{t('complianceDocs.table.empty')}</p> : (
                 <table className="data-table">
-                  <thead><tr><th>Title</th><th>Type</th><th>Number</th><th>Authority</th><th>Expiry</th><th>Status</th><th>Verified</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>{t('complianceDocs.table.headers.title')}</th><th>{t('complianceDocs.table.headers.type')}</th><th>{t('complianceDocs.table.headers.number')}</th><th>{t('complianceDocs.table.headers.authority')}</th><th>{t('complianceDocs.table.headers.expiry')}</th><th>{t('complianceDocs.table.headers.status')}</th><th>{t('complianceDocs.table.headers.verified')}</th><th>{t('complianceDocs.table.headers.actions')}</th></tr></thead>
                   <tbody>
                     {documents.map(d => {
                       const isExpiring = d.expiryDate && new Date(d.expiryDate) < new Date(Date.now() + 30 * 86400000)
@@ -213,9 +214,9 @@ const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
                           <td><span className="badge" style={{ background: STATUS_COLORS[d.status] || '#888' }}>{d.status.replace(/_/g, ' ')}</span></td>
                           <td>{d.verifiedAt ? `✅ ${d.verifiedByName || ''}` : '—'}</td>
                           <td>
-                            <button className="btn btn-sm" onClick={() => startEdit(d)}>Edit</button>
-                            {!d.verifiedAt && <button className="btn btn-sm btn-success" onClick={() => handleVerify(d.id)}>Verify</button>}
-                            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(d.id)}>Del</button>
+                            <button className="btn btn-sm" onClick={() => startEdit(d)}>{t('complianceDocs.table.edit')}</button>
+                            {!d.verifiedAt && <button className="btn btn-sm btn-success" onClick={() => handleVerify(d.id)}>{t('complianceDocs.table.verify')}</button>}
+                            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(d.id)}>{t('complianceDocs.table.del')}</button>
                           </td>
                         </tr>
                       )
@@ -227,12 +228,12 @@ const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
           ) : summary ? (
             <div className="dashboard-grid">
               <div className="card">
-                <h3>⚠️ Expiring Soon (30 days)</h3>
-                {(summary.expiringSoon || []).length === 0 ? <p className="empty-text">No documents expiring soon!</p> : (
+                <h3>{t('complianceDocs.summary.expiringSoon')}</h3>
+                {(summary.expiringSoon || []).length === 0 ? <p className="empty-text">{t('complianceDocs.summary.noExpiring')}</p> : (
                   <ul className="alert-list">
                     {summary.expiringSoon.map(d => (
                       <li key={d.id} className="alert-item warning">
-                        <strong>{d.title}</strong> – expires {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : ''}
+                        <strong>{d.title}</strong> {t('complianceDocs.summary.expiresPrefix')} {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : ''}
                       </li>
                     ))}
                   </ul>
@@ -240,12 +241,12 @@ const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
               </div>
 
               <div className="card">
-                <h3>🚨 Expired</h3>
-                {(summary.expired || []).length === 0 ? <p className="empty-text">No expired documents!</p> : (
+                <h3>{t('complianceDocs.summary.expired')}</h3>
+                {(summary.expired || []).length === 0 ? <p className="empty-text">{t('complianceDocs.summary.noExpired')}</p> : (
                   <ul className="alert-list">
                     {summary.expired.map(d => (
                       <li key={d.id} className="alert-item danger">
-                        <strong>{d.title}</strong> – expired {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : ''}
+                        <strong>{d.title}</strong> {t('complianceDocs.summary.expiredPrefix')} {d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : ''}
                       </li>
                     ))}
                   </ul>
@@ -253,9 +254,9 @@ const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
               </div>
 
               <div className="card">
-                <h3>By Document Type</h3>
+                <h3>{t('complianceDocs.summary.byType')}</h3>
                 <table className="data-table compact">
-                  <thead><tr><th>Type</th><th>Count</th></tr></thead>
+                  <thead><tr><th>{t('complianceDocs.summary.typeHeader')}</th><th>{t('complianceDocs.summary.countHeader')}</th></tr></thead>
                   <tbody>
                     {(summary.byType || []).map(t => (
                       <tr key={t.document_type}><td>{t.document_type.replace(/_/g, ' ')}</td><td>{t.count}</td></tr>
@@ -265,7 +266,7 @@ const ComplianceDocs: React.FC = () => {  const { t } = useTranslation()
               </div>
 
               <div className="card">
-                <h3>By Status</h3>
+                <h3>{t('complianceDocs.summary.byStatus')}</h3>
                 <div className="stats-row wrap">
                   {(summary.byStatus || []).map(s => (
                     <div key={s.status} className="stat-item" style={{ borderLeft: `4px solid ${STATUS_COLORS[s.status] || '#888'}` }}>

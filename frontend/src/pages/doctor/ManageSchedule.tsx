@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import { VetSchedule } from '../../types'
 import '../../styles/modules.css'
@@ -35,6 +36,7 @@ interface CalendarDay {
 }
 
 const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<'weekly' | 'calendar' | 'blocks' | 'holidays'>('weekly')
   const [schedules, setSchedules] = useState<VetSchedule[]>([])
   const [overrides, setOverrides] = useState<DateOverride[]>([])
@@ -244,7 +246,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
   if (loading) {
     return (
       <div className="module-page">
-        <div className="loading-container"><div className="loading-spinner" /><p>Loading schedule...</p></div>
+        <div className="loading-container"><div className="loading-spinner" /><p>{t('manageSchedule.loadingSchedule')}</p></div>
       </div>
     )
   }
@@ -258,8 +260,8 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>🗓️ Availability Manager</h1>
-          <p className="page-subtitle">Configure your weekly schedule, mark days off, block time slots, and manage holidays</p>
+          <h1>📆️ {t('manageSchedule.title')}</h1>
+          <p className="page-subtitle">{t('manageSchedule.subtitle')}</p>
         </div>
       </div>
 
@@ -268,10 +270,10 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       {/* Stats Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 20 }}>
         {[
-          { label: 'Active Days', value: `${activeDays}/7`, color: '#16a34a', icon: '📅' },
-          { label: 'Date Overrides', value: upcomingOverrides, color: '#dc2626', icon: '🚫' },
-          { label: 'Time Blocks', value: `${recurringBlocks} recurring`, color: '#2563eb', icon: '⏰' },
-          { label: 'Holidays', value: upcomingHolidays, color: '#ca8a04', icon: '🎉' },
+          { label: t('manageSchedule.activeDays'), value: `${activeDays}/7`, color: '#16a34a', icon: '📅' },
+          { label: t('manageSchedule.dateOverrides'), value: upcomingOverrides, color: '#dc2626', icon: '🚫' },
+          { label: t('manageSchedule.timeBlocks'), value: `${recurringBlocks} ${t('manageSchedule.recurring')}`, color: '#2563eb', icon: '⏰' },
+          { label: t('manageSchedule.holidays'), value: upcomingHolidays, color: '#ca8a04', icon: '🎉' },
         ].map((s, i) => (
           <div key={i} className="card" style={{ padding: '14px 16px', textAlign: 'center' }}>
             <div style={{ fontSize: 24 }}>{s.icon}</div>
@@ -284,10 +286,10 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#f3f4f6', borderRadius: 10, padding: 4 }}>
         {([
-          { key: 'weekly', label: '📅 Weekly Schedule', subtitle: 'Recurring hours' },
-          { key: 'calendar', label: '📆 Calendar', subtitle: 'Date overrides' },
-          { key: 'blocks', label: '⏰ Time Blocks', subtitle: 'Block slots' },
-          { key: 'holidays', label: '🎉 Holidays', subtitle: 'System holidays' },
+          { key: 'weekly', label: `📅 ${t('manageSchedule.weeklySchedule')}`, subtitle: t('manageSchedule.recurringHours') },
+          { key: 'calendar', label: `📆 ${t('manageSchedule.calendar')}`, subtitle: t('manageSchedule.dateOverridesSubtitle') },
+          { key: 'blocks', label: `⏰ ${t('manageSchedule.timeBlocksTab')}`, subtitle: t('manageSchedule.blockSlots') },
+          { key: 'holidays', label: `🎉 ${t('manageSchedule.holidays')}`, subtitle: t('manageSchedule.systemHolidays') },
         ] as { key: typeof activeTab; label: string; subtitle: string }[]).map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             style={{
@@ -306,9 +308,9 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       {activeTab === 'weekly' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>Weekly Recurring Schedule</h2>
+            <h2 style={{ margin: 0, fontSize: 18 }}>{t('manageSchedule.weeklyRecurringSchedule')}</h2>
             <button className="btn btn-primary" onClick={() => { resetSchedForm(); setEditingSchedId(null); setSchedFormError(''); setShowSchedForm(true) }}>
-              + Add Time Slot
+              + {t('manageSchedule.addTimeSlot')}
             </button>
           </div>
 
@@ -326,7 +328,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 }}>
                   <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4, color: isActive ? '#166534' : '#6b7280' }}>{DAY_SHORT[day]}</div>
                   {daySched.length === 0 ? (
-                    <div style={{ color: '#9ca3af', fontSize: 11, marginTop: 12 }}>Off</div>
+                    <div style={{ color: '#9ca3af', fontSize: 11, marginTop: 12 }}>{t('manageSchedule.off')}</div>
                   ) : daySched.map(s => (
                     <div key={s.id} style={{ fontSize: 12, marginTop: 4 }}>
                       <div style={{ fontWeight: 600 }}>{s.startTime}–{s.endTime}</div>
@@ -352,8 +354,8 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <button className="btn btn-sm btn-outline" title="Copy to all empty days" onClick={() => handleCopyDay(day)}>📋 Copy to All</button>
-                    <button className="btn btn-sm btn-outline" onClick={() => handleEditSched(daySched[0])}>✏️ Edit</button>
+                    <button className="btn btn-sm btn-outline" title="Copy to all empty days" onClick={() => handleCopyDay(day)}>📋 {t('manageSchedule.copyToAll')}</button>
+                    <button className="btn btn-sm btn-outline" onClick={() => handleEditSched(daySched[0])}>✏️ {t('manageSchedule.edit')}</button>
                     <button className="btn btn-sm btn-danger" onClick={() => handleDeleteSched(daySched[0].id)}>🗑️</button>
                   </div>
                 </div>
@@ -368,7 +370,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           {schedules.length === 0 && (
             <div className="card" style={{ padding: 32, textAlign: 'center', color: '#6b7280' }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}>📅</div>
-              <p>No weekly schedule configured yet. Add your first time slot to start accepting bookings.</p>
+              <p>{t('manageSchedule.noScheduleConfigured')}</p>
             </div>
           )}
         </div>
@@ -386,17 +388,17 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
               <button className="btn btn-sm btn-outline" onClick={() => setCalMonth(p => { const m = p.month + 1; return m > 12 ? { year: p.year + 1, month: 1 } : { ...p, month: m } })}>▶</button>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-outline" onClick={() => { setVacationForm({ startDate: '', endDate: '', reason: '' }); setShowVacationForm(true) }}>🏖️ Set Vacation</button>
-              <button className="btn btn-primary" onClick={() => { setOverrideForm({ overrideDate: '', overrideType: 'unavailable', startTime: '09:00', endTime: '17:00', slotDuration: 30, reason: '' }); setShowOverrideForm(true) }}>+ Day Override</button>
+              <button className="btn btn-outline" onClick={() => { setVacationForm({ startDate: '', endDate: '', reason: '' }); setShowVacationForm(true) }}>🏖️ {t('manageSchedule.setVacation')}</button>
+              <button className="btn btn-primary" onClick={() => { setOverrideForm({ overrideDate: '', overrideType: 'unavailable', startTime: '09:00', endTime: '17:00', slotDuration: 30, reason: '' }); setShowOverrideForm(true) }}>+ {t('manageSchedule.dayOverride')}</button>
             </div>
           </div>
 
           {/* Legend */}
           <div style={{ display: 'flex', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
             {[
-              { status: 'available', label: 'Available' }, { status: 'custom', label: 'Custom Hours' },
-              { status: 'unavailable', label: 'Day Off' }, { status: 'holiday', label: 'Holiday' },
-              { status: 'no_schedule', label: 'No Schedule' }
+              { status: 'available', label: t('manageSchedule.available') }, { status: 'custom', label: t('manageSchedule.customHours') },
+              { status: 'unavailable', label: t('manageSchedule.dayOff') }, { status: 'holiday', label: t('manageSchedule.holiday') },
+              { status: 'no_schedule', label: t('manageSchedule.noSchedule') }
             ].map(l => {
               const c = statusColor(l.status)
               return (
@@ -444,9 +446,9 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           </div>
 
           {/* Upcoming Overrides List */}
-          <h3 style={{ fontSize: 15, marginBottom: 8 }}>Upcoming Date Overrides</h3>
+          <h3 style={{ fontSize: 15, marginBottom: 8 }}>{t('manageSchedule.upcomingDateOverrides')}</h3>
           {overrides.filter(o => o.overrideDate >= todayStr).length === 0 ? (
-            <div className="card" style={{ padding: 20, textAlign: 'center', color: '#6b7280' }}>No upcoming overrides. Click a calendar date or use buttons above to set day off or custom hours.</div>
+            <div className="card" style={{ padding: 20, textAlign: 'center', color: '#6b7280' }}>{t('manageSchedule.noUpcomingOverrides')}</div>
           ) : (
             <div style={{ display: 'grid', gap: 8 }}>
               {overrides.filter(o => o.overrideDate >= todayStr).map(o => (
@@ -471,21 +473,20 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       {activeTab === 'blocks' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>Time Blocks</h2>
-            <button className="btn btn-primary" onClick={() => { setBlockForm({ blockDate: '', startTime: '12:00', endTime: '13:00', reason: '', isRecurring: false, recurringDay: 'monday' }); setShowBlockForm(true) }}>+ Add Time Block</button>
+            <h2 style={{ margin: 0, fontSize: 18 }}>{t('manageSchedule.timeBlocksTitle')}</h2>
+            <button className="btn btn-primary" onClick={() => { setBlockForm({ blockDate: '', startTime: '12:00', endTime: '13:00', reason: '', isRecurring: false, recurringDay: 'monday' }); setShowBlockForm(true) }}>+ {t('manageSchedule.addTimeBlock')}</button>
           </div>
 
           <div className="card" style={{ padding: 16, marginBottom: 16, background: '#eff6ff', border: '1px solid #bfdbfe' }}>
             <p style={{ margin: 0, fontSize: 13, color: '#1e40af' }}>
-              💡 <strong>Time blocks</strong> remove specific time ranges from your available slots. Use them for lunch breaks, meetings, surgeries, or any regular commitments.
-              <strong> Recurring blocks</strong> repeat weekly on the chosen day.
+              💡 <strong>{t('manageSchedule.timeBlocksInfo')}</strong>
             </p>
           </div>
 
           {/* Recurring blocks */}
-          <h3 style={{ fontSize: 15, marginBottom: 8, color: '#374151' }}>🔄 Recurring Weekly Blocks</h3>
+          <h3 style={{ fontSize: 15, marginBottom: 8, color: '#374151' }}>🔄 {t('manageSchedule.recurringWeeklyBlocks')}</h3>
           {blockedSlots.filter(b => b.isRecurring).length === 0 ? (
-            <div className="card" style={{ padding: 16, textAlign: 'center', color: '#6b7280', marginBottom: 16 }}>No recurring blocks. Create one for regular lunch breaks or meetings.</div>
+            <div className="card" style={{ padding: 16, textAlign: 'center', color: '#6b7280', marginBottom: 16 }}>{t('manageSchedule.noRecurringBlocks')}</div>
           ) : (
             <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
               {blockedSlots.filter(b => b.isRecurring).map(b => (
@@ -502,9 +503,9 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           )}
 
           {/* One-time blocks */}
-          <h3 style={{ fontSize: 15, marginBottom: 8, color: '#374151' }}>📌 One-Time Blocks</h3>
+          <h3 style={{ fontSize: 15, marginBottom: 8, color: '#374151' }}>📌 {t('manageSchedule.oneTimeBlocks')}</h3>
           {blockedSlots.filter(b => !b.isRecurring).length === 0 ? (
-            <div className="card" style={{ padding: 16, textAlign: 'center', color: '#6b7280' }}>No one-time blocks scheduled.</div>
+            <div className="card" style={{ padding: 16, textAlign: 'center', color: '#6b7280' }}>{t('manageSchedule.noOneTimeBlocks')}</div>
           ) : (
             <div style={{ display: 'grid', gap: 8 }}>
               {blockedSlots.filter(b => !b.isRecurring).map(b => (
@@ -526,14 +527,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       {activeTab === 'holidays' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>Hospital & System Holidays</h2>
-            <button className="btn btn-primary" onClick={() => { setHolidayForm({ holidayDate: '', name: '', holidayType: 'general', isFullDay: true, startTime: '09:00', endTime: '17:00' }); setShowHolidayForm(true) }}>+ Add Holiday</button>
+            <h2 style={{ margin: 0, fontSize: 18 }}>{t('manageSchedule.hospitalSystemHolidays')}</h2>
+            <button className="btn btn-primary" onClick={() => { setHolidayForm({ holidayDate: '', name: '', holidayType: 'general', isFullDay: true, startTime: '09:00', endTime: '17:00' }); setShowHolidayForm(true) }}>+ {t('manageSchedule.addHoliday')}</button>
           </div>
 
           <div className="card" style={{ padding: 16, marginBottom: 16, background: '#fefce8', border: '1px solid #fde047' }}>
             <p style={{ margin: 0, fontSize: 13, color: '#854d0e' }}>
-              🎉 <strong>System holidays</strong> automatically block all doctors from receiving bookings on these dates.
-              Patients will see these dates as unavailable in the booking calendar.
+              🎉 <strong>{t('manageSchedule.systemHolidaysInfo')}</strong>
             </p>
           </div>
 
@@ -548,7 +548,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           {holidays.length === 0 ? (
             <div className="card" style={{ padding: 32, textAlign: 'center', color: '#6b7280' }}>
               <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
-              <p>No holidays configured for {calMonth.year}. Add holidays so they appear in the booking calendar.</p>
+              <p>{t('manageSchedule.noHolidaysConfigured', { year: calMonth.year })}</p>
             </div>
           ) : (
             <div style={{ display: 'grid', gap: 8 }}>
@@ -581,30 +581,30 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         <div className="modal-overlay" onClick={() => setShowSchedForm(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editingSchedId ? 'Edit Schedule' : 'Add Weekly Schedule'}</h2>
+              <h2>{editingSchedId ? t('manageSchedule.editSchedule') : t('manageSchedule.addWeeklySchedule')}</h2>
               <button className="modal-close" onClick={() => setShowSchedForm(false)}>✕</button>
             </div>
             <div className="modal-body">
               {schedFormError && <div className="modal-alert error" style={{ marginBottom: 16 }}>{schedFormError}</div>}
               <form onSubmit={handleSchedSubmit}>
                 <div className="form-group">
-                  <label className="form-label">Day of Week</label>
+                  <label className="form-label">{t('manageSchedule.dayOfWeek')}</label>
                   <select className="form-input" value={schedForm.dayOfWeek} onChange={e => setSchedForm({ ...schedForm, dayOfWeek: e.target.value })}>
                     {DAYS.map(d => <option key={d} value={d}>{DAY_LABELS[d]}</option>)}
                   </select>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   <div className="form-group">
-                    <label className="form-label">Start Time</label>
+                    <label className="form-label">{t('manageSchedule.startTime')}</label>
                     <input className="form-input" type="time" value={schedForm.startTime} onChange={e => setSchedForm({ ...schedForm, startTime: e.target.value })} />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">End Time</label>
+                    <label className="form-label">{t('manageSchedule.endTime')}</label>
                     <input className="form-input" type="time" value={schedForm.endTime} onChange={e => setSchedForm({ ...schedForm, endTime: e.target.value })} />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Slot Duration</label>
+                  <label className="form-label">{t('manageSchedule.slotDuration')}</label>
                   <select className="form-input" value={schedForm.slotDurationMinutes} onChange={e => setSchedForm({ ...schedForm, slotDurationMinutes: Number(e.target.value) })}>
                     {[15, 20, 30, 45, 60].map(m => <option key={m} value={m}>{m} minutes</option>)}
                   </select>
@@ -612,12 +612,12 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 <div className="form-group">
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                     <input type="checkbox" checked={schedForm.isAvailable} onChange={e => setSchedForm({ ...schedForm, isAvailable: e.target.checked })} style={{ width: 18, height: 18 }} />
-                    <span>Available for bookings</span>
+                    <span>{t('manageSchedule.availableForBookings')}</span>
                   </label>
                 </div>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowSchedForm(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Saving...' : editingSchedId ? 'Update' : 'Create'}</button>
+                  <button type="button" className="btn btn-outline" onClick={() => setShowSchedForm(false)}>{t('manageSchedule.cancel')}</button>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.saving') : editingSchedId ? t('manageSchedule.update') : t('manageSchedule.create')}</button>
                 </div>
               </form>
             </div>
@@ -630,18 +630,18 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         <div className="modal-overlay" onClick={() => setShowOverrideForm(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>📅 Date Override</h2>
+              <h2>📅 {t('manageSchedule.dateOverrideTitle')}</h2>
               <button className="modal-close" onClick={() => setShowOverrideForm(false)}>✕</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleOverrideSubmit}>
                 <div className="form-group">
-                  <label className="form-label">Date</label>
+                  <label className="form-label">{t('manageSchedule.date')}</label>
                   <input className="form-input" type="date" value={overrideForm.overrideDate} min={todayStr}
                     onChange={e => setOverrideForm({ ...overrideForm, overrideDate: e.target.value })} required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Override Type</label>
+                  <label className="form-label">{t('manageSchedule.overrideType')}</label>
                   <div style={{ display: 'flex', gap: 12 }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: '8px 14px', borderRadius: 8,
                       background: overrideForm.overrideType === 'unavailable' ? '#fef2f2' : '#f9fafb', border: `2px solid ${overrideForm.overrideType === 'unavailable' ? '#fca5a5' : '#e5e7eb'}` }}>
@@ -661,16 +661,16 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   <>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                       <div className="form-group">
-                        <label className="form-label">Start Time</label>
+                        <label className="form-label">{t('manageSchedule.startTime')}</label>
                         <input className="form-input" type="time" value={overrideForm.startTime} onChange={e => setOverrideForm({ ...overrideForm, startTime: e.target.value })} />
                       </div>
                       <div className="form-group">
-                        <label className="form-label">End Time</label>
+                        <label className="form-label">{t('manageSchedule.endTime')}</label>
                         <input className="form-input" type="time" value={overrideForm.endTime} onChange={e => setOverrideForm({ ...overrideForm, endTime: e.target.value })} />
                       </div>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Slot Duration</label>
+                      <label className="form-label">{t('manageSchedule.slotDuration')}</label>
                       <select className="form-input" value={overrideForm.slotDuration} onChange={e => setOverrideForm({ ...overrideForm, slotDuration: Number(e.target.value) })}>
                         {[15, 20, 30, 45, 60].map(m => <option key={m} value={m}>{m} minutes</option>)}
                       </select>
@@ -678,13 +678,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   </>
                 )}
                 <div className="form-group">
-                  <label className="form-label">Reason (optional)</label>
+                  <label className="form-label">{t('manageSchedule.reason')}</label>
                   <input className="form-input" value={overrideForm.reason} onChange={e => setOverrideForm({ ...overrideForm, reason: e.target.value })}
-                    placeholder="e.g., Conference, Personal leave, Half day..." />
+                    placeholder={t('manageSchedule.reasonPlaceholder')} />
                 </div>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowOverrideForm(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Saving...' : 'Save Override'}</button>
+                  <button type="button" className="btn btn-outline" onClick={() => setShowOverrideForm(false)}>{t('manageSchedule.cancel')}</button>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.saving') : t('manageSchedule.saveOverride')}</button>
                 </div>
               </form>
             </div>
@@ -697,7 +697,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         <div className="modal-overlay" onClick={() => setShowVacationForm(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🏖️ Set Vacation / Leave</h2>
+              <h2>🏖️ {t('manageSchedule.vacationLeave')}</h2>
               <button className="modal-close" onClick={() => setShowVacationForm(false)}>✕</button>
             </div>
             <div className="modal-body">
@@ -709,20 +709,20 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
               <form onSubmit={handleVacationSubmit}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   <div className="form-group">
-                    <label className="form-label">Start Date</label>
+                    <label className="form-label">{t('manageSchedule.startDate')}</label>
                     <input className="form-input" type="date" value={vacationForm.startDate} min={todayStr}
                       onChange={e => setVacationForm({ ...vacationForm, startDate: e.target.value })} required />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">End Date</label>
+                    <label className="form-label">{t('manageSchedule.endDate')}</label>
                     <input className="form-input" type="date" value={vacationForm.endDate} min={vacationForm.startDate || todayStr}
                       onChange={e => setVacationForm({ ...vacationForm, endDate: e.target.value })} required />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Reason (optional)</label>
+                  <label className="form-label">{t('manageSchedule.reason')}</label>
                   <input className="form-input" value={vacationForm.reason} onChange={e => setVacationForm({ ...vacationForm, reason: e.target.value })}
-                    placeholder="e.g., Annual leave, Conference, Personal..." />
+                    placeholder={t('manageSchedule.vacationReasonPlaceholder')} />
                 </div>
                 {vacationForm.startDate && vacationForm.endDate && (
                   <div style={{ padding: 12, borderRadius: 8, background: '#f0fdf4', border: '1px solid #bbf7d0', marginBottom: 12, fontSize: 13 }}>
@@ -730,8 +730,8 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowVacationForm(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Setting...' : 'Set Vacation'}</button>
+                  <button type="button" className="btn btn-outline" onClick={() => setShowVacationForm(false)}>{t('manageSchedule.cancel')}</button>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.setting') : t('manageSchedule.setVacationBtn')}</button>
                 </div>
               </form>
             </div>
@@ -744,13 +744,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         <div className="modal-overlay" onClick={() => setShowBlockForm(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>⏰ Block Time Slot</h2>
+              <h2>⏰ {t('manageSchedule.blockTimeSlot')}</h2>
               <button className="modal-close" onClick={() => setShowBlockForm(false)}>✕</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleBlockSubmit}>
                 <div className="form-group">
-                  <label className="form-label">Block Type</label>
+                  <label className="form-label">{t('manageSchedule.blockType')}</label>
                   <div style={{ display: 'flex', gap: 12 }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: '8px 14px', borderRadius: 8,
                       background: !blockForm.isRecurring ? '#eff6ff' : '#f9fafb', border: `2px solid ${!blockForm.isRecurring ? '#93c5fd' : '#e5e7eb'}` }}>
@@ -768,36 +768,36 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 </div>
                 {blockForm.isRecurring ? (
                   <div className="form-group">
-                    <label className="form-label">Day of Week</label>
+                    <label className="form-label">{t('manageSchedule.dayOfWeek')}</label>
                     <select className="form-input" value={blockForm.recurringDay} onChange={e => setBlockForm({ ...blockForm, recurringDay: e.target.value })}>
                       {DAYS.map(d => <option key={d} value={d}>{DAY_LABELS[d]}</option>)}
                     </select>
                   </div>
                 ) : (
                   <div className="form-group">
-                    <label className="form-label">Date</label>
+                    <label className="form-label">{t('manageSchedule.date')}</label>
                     <input className="form-input" type="date" value={blockForm.blockDate} min={todayStr}
                       onChange={e => setBlockForm({ ...blockForm, blockDate: e.target.value })} required />
                   </div>
                 )}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   <div className="form-group">
-                    <label className="form-label">Block Start</label>
+                    <label className="form-label">{t('manageSchedule.blockStart')}</label>
                     <input className="form-input" type="time" value={blockForm.startTime} onChange={e => setBlockForm({ ...blockForm, startTime: e.target.value })} />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Block End</label>
+                    <label className="form-label">{t('manageSchedule.blockEnd')}</label>
                     <input className="form-input" type="time" value={blockForm.endTime} onChange={e => setBlockForm({ ...blockForm, endTime: e.target.value })} />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Reason (optional)</label>
+                  <label className="form-label">{t('manageSchedule.reason')}</label>
                   <input className="form-input" value={blockForm.reason} onChange={e => setBlockForm({ ...blockForm, reason: e.target.value })}
-                    placeholder="e.g., Lunch break, Surgery time, Team meeting..." />
+                    placeholder={t('manageSchedule.blockReasonPlaceholder')} />
                 </div>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowBlockForm(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Saving...' : 'Create Block'}</button>
+                  <button type="button" className="btn btn-outline" onClick={() => setShowBlockForm(false)}>{t('manageSchedule.cancel')}</button>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.saving') : t('manageSchedule.createBlock')}</button>
                 </div>
               </form>
             </div>
@@ -810,23 +810,23 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         <div className="modal-overlay" onClick={() => setShowHolidayForm(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🎉 Add Holiday</h2>
+              <h2>🎉 {t('manageSchedule.addHolidayTitle')}</h2>
               <button className="modal-close" onClick={() => setShowHolidayForm(false)}>✕</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleHolidaySubmit}>
                 <div className="form-group">
-                  <label className="form-label">Holiday Name</label>
+                  <label className="form-label">{t('manageSchedule.holidayName')}</label>
                   <input className="form-input" value={holidayForm.name} onChange={e => setHolidayForm({ ...holidayForm, name: e.target.value })}
-                    placeholder="e.g., Christmas Day, Independence Day..." required />
+                    placeholder={t('manageSchedule.holidayNamePlaceholder')} required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Date</label>
+                  <label className="form-label">{t('manageSchedule.date')}</label>
                   <input className="form-input" type="date" value={holidayForm.holidayDate}
                     onChange={e => setHolidayForm({ ...holidayForm, holidayDate: e.target.value })} required />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Type</label>
+                  <label className="form-label">{t('manageSchedule.type')}</label>
                   <select className="form-input" value={holidayForm.holidayType} onChange={e => setHolidayForm({ ...holidayForm, holidayType: e.target.value })}>
                     <option value="general">General Holiday</option>
                     <option value="hospital_specific">Hospital Specific</option>
@@ -836,24 +836,24 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 <div className="form-group">
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                     <input type="checkbox" checked={holidayForm.isFullDay} onChange={e => setHolidayForm({ ...holidayForm, isFullDay: e.target.checked })} style={{ width: 18, height: 18 }} />
-                    <span>Full day closure</span>
+                    <span>{t('manageSchedule.fullDayClosure')}</span>
                   </label>
                 </div>
                 {!holidayForm.isFullDay && (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     <div className="form-group">
-                      <label className="form-label">Closure Start</label>
+                      <label className="form-label">{t('manageSchedule.closureStart')}</label>
                       <input className="form-input" type="time" value={holidayForm.startTime} onChange={e => setHolidayForm({ ...holidayForm, startTime: e.target.value })} />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Closure End</label>
+                      <label className="form-label">{t('manageSchedule.closureEnd')}</label>
                       <input className="form-input" type="time" value={holidayForm.endTime} onChange={e => setHolidayForm({ ...holidayForm, endTime: e.target.value })} />
                     </div>
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowHolidayForm(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Saving...' : 'Add Holiday'}</button>
+                  <button type="button" className="btn btn-outline" onClick={() => setShowHolidayForm(false)}>{t('manageSchedule.cancel')}</button>
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.saving') : t('manageSchedule.addHolidayBtn')}</button>
                 </div>
               </form>
             </div>

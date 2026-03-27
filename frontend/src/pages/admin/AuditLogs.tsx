@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { AuditLog } from '../../types'
@@ -9,6 +10,7 @@ interface AuditLogsProps {
 }
 
 const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { formatDateTime } = useSettings()
   const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
@@ -52,24 +54,24 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>Audit Logs</h1>
-          <p className="page-subtitle">System activity trail • {logs.length} entries</p>
+          <h1>{t('auditLogs.title')}</h1>
+          <p className="page-subtitle">{t('auditLogs.subtitle')} • {logs.length} {t('auditLogs.entries')}</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-outline" onClick={loadLogs}>🔄 Refresh</button>
-          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← Dashboard</button>
+          <button className="btn btn-outline" onClick={loadLogs}>🔄 {t('auditLogs.refresh')}</button>
+          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('auditLogs.dashboard')}</button>
         </div>
       </div>
 
       {/* Filters */}
       <div className="search-filter-bar" style={{ marginBottom: 24 }}>
         <select className="form-input" value={actionFilter} onChange={e => setActionFilter(e.target.value)} style={{ width: 200 }}>
-          <option value="">All Actions</option>
-          <option value="user.status_change">User Status Change</option>
-          <option value="user.role_change">User Role Change</option>
-          <option value="review.moderate">Review Moderation</option>
-          <option value="payment.refund">Payment Refund</option>
-          <option value="setting.update">Setting Update</option>
+          <option value="">{t('auditLogs.allActions')}</option>
+          <option value="user.status_change">{t('auditLogs.userStatusChange')}</option>
+          <option value="user.role_change">{t('auditLogs.userRoleChange')}</option>
+          <option value="review.moderate">{t('auditLogs.reviewModeration')}</option>
+          <option value="payment.refund">{t('auditLogs.paymentRefund')}</option>
+          <option value="setting.update">{t('auditLogs.settingUpdate')}</option>
         </select>
       </div>
 
@@ -78,8 +80,8 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
       ) : logs.length === 0 ? (
         <div className="empty-state">
           <div style={{ fontSize: 48 }}>📋</div>
-          <h3>No audit logs found</h3>
-          <p>Activity will be recorded as you use the admin panel</p>
+          <h3>{t('auditLogs.noLogsFound')}</h3>
+          <p>{t('auditLogs.noLogsDescription')}</p>
         </div>
       ) : (
         <div className="card">
@@ -119,7 +121,7 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
                       </code>
                       {log.resourceType && (
                         <span style={{ fontSize: 12, color: '#6b7280' }}>
-                          on {log.resourceType}
+                          {t('auditLogs.on')} {log.resourceType}
                         </span>
                       )}
                     </div>
@@ -145,15 +147,15 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
                 {expandedId === log.id && (
                   <div style={{ marginTop: 12, padding: 12, background: '#f3f4f6', borderRadius: 8, fontSize: 13 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      <div><strong>Log ID:</strong> {log.id}</div>
-                      <div><strong>User ID:</strong> {log.userId || '—'}</div>
-                      <div><strong>Resource ID:</strong> {log.resourceId || '—'}</div>
-                      <div><strong>Resource Type:</strong> {log.resourceType || '—'}</div>
-                      {log.ipAddress && <div><strong>IP:</strong> {log.ipAddress}</div>}
+                      <div><strong>{t('auditLogs.logId')}:</strong> {log.id}</div>
+                      <div><strong>{t('auditLogs.userId')}:</strong> {log.userId || '—'}</div>
+                      <div><strong>{t('auditLogs.resourceId')}:</strong> {log.resourceId || '—'}</div>
+                      <div><strong>{t('auditLogs.resourceType')}:</strong> {log.resourceType || '—'}</div>
+                      {log.ipAddress && <div><strong>{t('auditLogs.ip')}:</strong> {log.ipAddress}</div>}
                     </div>
                     {log.details && (
                       <div style={{ marginTop: 8 }}>
-                        <strong>Details:</strong>
+                        <strong>{t('auditLogs.details')}:</strong>
                         <pre style={{ margin: '4px 0 0', padding: 8, background: '#fff', borderRadius: 4, fontSize: 12, overflow: 'auto' }}>
                           {typeof log.details === 'string' ? log.details : JSON.stringify(log.details, null, 2)}
                         </pre>

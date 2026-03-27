@@ -910,9 +910,10 @@
 .footer-links .link-button:hover { color: white; }
 
 /* ── Responsive ── */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .stats-container { grid-template-columns: repeat(3, 1fr); }
   .enterprise-types-grid { grid-template-columns: repeat(4, 1fr); }
+  .advanced-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
@@ -947,6 +948,16 @@
   .cta-content h2 { font-size: 1.6rem; }
   .cta-buttons { flex-direction: column; align-items: center; }
   .cta-buttons .btn { width: 100%; max-width: 340px; text-align: center; }
+}
+
+@media (max-width: 640px) {
+  .stats-container { grid-template-columns: repeat(2, 1fr); }
+  .enterprise-types-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-visual { height: 220px; }
+  .hero-icon-large { font-size: 80px; }
+  .benefit-card { padding: 1.25rem; }
+  .advanced-card { padding: 1.1rem; }
+  .cta-content h2 { font-size: 1.4rem; }
 }
 
 @media (max-width: 480px) {

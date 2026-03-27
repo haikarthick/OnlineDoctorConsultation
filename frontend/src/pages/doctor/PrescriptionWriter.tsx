@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import apiService from '../../services/api'
 import { Medication } from '../../types'
@@ -10,6 +11,7 @@ interface PrescriptionWriterProps {
 }
 
 const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId, onNavigate }) => {
+  const { t } = useTranslation()
   void useAuth() // ensure auth context
   const params = new URLSearchParams(window.location.search)
   const conId = consultationId || params.get('consultationId') || ''
@@ -38,7 +40,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
 
   const addMedication = () => {
     if (!newMed.name || !newMed.dosage || !newMed.frequency) {
-      setError('Please fill in medication name, dosage, and frequency')
+      setError(t('prescriptionWriter.errorNameDosageFrequency'))
       return
     }
     setMedications([...medications, { ...newMed }])
@@ -54,8 +56,8 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
     e.preventDefault()
     setError('')
 
-    if (!diagnosis.trim()) { setError('Diagnosis is required'); return }
-    if (medications.length === 0) { setError('At least one medication is required'); return }
+    if (!diagnosis.trim()) { setError(t('prescriptionWriter.errorDiagnosisRequired')); return }
+    if (medications.length === 0) { setError(t('prescriptionWriter.errorMedicationRequired')); return }
 
     try {
       setSubmitting(true)
@@ -91,34 +93,34 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       <div className="module-page">
         <div style={{ textAlign: 'center', padding: '80px 20px' }}>
           <div style={{ fontSize: 64, marginBottom: 20 }}>💊</div>
-          <h1 style={{ marginBottom: 8 }}>Prescription Created</h1>
+          <h1 style={{ marginBottom: 8 }}>{t('prescriptionWriter.prescriptionCreated')}</h1>
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 24 }}>
-            {medications.length} medication{medications.length > 1 ? 's' : ''} prescribed
+            {t('prescriptionWriter.medicationsPrescribed', { count: medications.length })}
           </p>
           {conId ? (
             <>
               <p style={{ color: '#667eea', fontSize: 14, marginBottom: 20 }}>
-                Returning to consultation in {redirectCountdown}s...
+                {t('prescriptionWriter.returningToConsultation', { seconds: redirectCountdown })}
               </p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
                 <button className="btn btn-primary" onClick={() => onNavigate(`/doctor/consultation-room/${conId}`)}>
-                  ← Back to Consultation Now
+                  ← {t('prescriptionWriter.backToConsultationNow')}
                 </button>
                 <button className="btn btn-outline" onClick={() => {
                   setRedirectCountdown(999)
                   setSubmitted(false); setMedications([]); setDiagnosis('')
                 }}>
-                  Write Another Prescription
+                  {t('prescriptionWriter.writeAnotherPrescription')}
                 </button>
               </div>
             </>
           ) : (
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
               <button className="btn btn-primary" onClick={() => onNavigate('/dashboard')}>
-                Dashboard
+                {t('prescriptionWriter.dashboard')}
               </button>
               <button className="btn btn-outline" onClick={() => { setSubmitted(false); setMedications([]); setDiagnosis(''); }}>
-                Write Another
+                {t('prescriptionWriter.writeAnother')}
               </button>
             </div>
           )}
@@ -131,12 +133,12 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>Prescription Writer</h1>
-          <p className="page-subtitle">Create a new prescription for your patient</p>
+          <h1>{t('prescriptionWriter.title')}</h1>
+          <p className="page-subtitle">{t('prescriptionWriter.subtitle')}</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-outline" onClick={() => onNavigate(conId ? `/doctor/consultation-room/${conId}` : '/dashboard')}>
-            ← Back
+            ← {t('prescriptionWriter.back')}
           </button>
         </div>
       </div>
@@ -152,31 +154,31 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
           {/* Left: Diagnosis & Instructions */}
           <div>
             <div className="card">
-              <div className="card-header"><h2>🩺 Diagnosis & Notes</h2></div>
+              <div className="card-header"><h2>🩺 {t('prescriptionWriter.diagnosisAndNotes')}</h2></div>
               <div className="card-body">
                 <div className="form-group">
-                  <label className="form-label">Diagnosis *</label>
+                  <label className="form-label">{t('prescriptionWriter.diagnosis')} *</label>
                   <textarea
                     className="form-input"
                     rows={3}
-                    placeholder="Enter diagnosis..."
+                    placeholder={t('prescriptionWriter.enterDiagnosis')}
                     value={diagnosis}
                     onChange={e => setDiagnosis(e.target.value)}
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">General Instructions</label>
+                  <label className="form-label">{t('prescriptionWriter.generalInstructions')}</label>
                   <textarea
                     className="form-input"
                     rows={3}
-                    placeholder="Dietary restrictions, activity level, warnings..."
+                    placeholder={t('prescriptionWriter.instructionsPlaceholder')}
                     value={instructions}
                     onChange={e => setInstructions(e.target.value)}
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Follow-up Date</label>
+                  <label className="form-label">{t('prescriptionWriter.followUpDate')}</label>
                   <input
                     className="form-input"
                     type="date"
@@ -193,7 +195,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
           <div>
             <div className="card">
               <div className="card-header">
-                <h2>💊 Medications ({medications.length})</h2>
+                <h2>💊 {t('prescriptionWriter.medications')} ({medications.length})</h2>
               </div>
               <div className="card-body">
                 {/* Current Medications */}
@@ -224,31 +226,31 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
 
                 {/* Add Medication Form */}
                 <div style={{ padding: 12, background: '#f9fafb', borderRadius: 8, border: '1px dashed #d1d5db' }}>
-                  <h4 style={{ margin: '0 0 10px', fontSize: 14 }}>+ Add Medication</h4>
+                  <h4 style={{ margin: '0 0 10px', fontSize: 14 }}>+ {t('prescriptionWriter.addMedication')}</h4>
                   <div className="form-group">
-                    <input className="form-input" placeholder="Medication name *" value={newMed.name}
+                    <input className="form-input" placeholder={t('prescriptionWriter.medicationName')} value={newMed.name}
                       onChange={e => setNewMed({ ...newMed, name: e.target.value })} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    <input className="form-input" placeholder="Dosage *" value={newMed.dosage}
+                    <input className="form-input" placeholder={t('prescriptionWriter.dosage')} value={newMed.dosage}
                       onChange={e => setNewMed({ ...newMed, dosage: e.target.value })} />
-                    <input className="form-input" placeholder="Frequency *" value={newMed.frequency}
+                    <input className="form-input" placeholder={t('prescriptionWriter.frequency')} value={newMed.frequency}
                       onChange={e => setNewMed({ ...newMed, frequency: e.target.value })} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
-                    <input className="form-input" placeholder="Duration" value={newMed.duration}
+                    <input className="form-input" placeholder={t('prescriptionWriter.duration')} value={newMed.duration}
                       onChange={e => setNewMed({ ...newMed, duration: e.target.value })} />
-                    <input className="form-input" placeholder="Instructions" value={newMed.instructions}
+                    <input className="form-input" placeholder={t('prescriptionWriter.instructions')} value={newMed.instructions}
                       onChange={e => setNewMed({ ...newMed, instructions: e.target.value })} />
                   </div>
                   <button type="button" className="btn btn-outline" style={{ marginTop: 10, width: '100%' }} onClick={addMedication}>
-                    + Add Medication
+                    + {t('prescriptionWriter.addMedication')}
                   </button>
                 </div>
 
                 {/* Quick Add Templates */}
                 <div style={{ marginTop: 12 }}>
-                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>Quick add:</p>
+                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>{t('prescriptionWriter.quickAdd')}</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {[
                       { name: 'Amoxicillin', dosage: '250mg', frequency: 'Twice daily', duration: '7 days' },
@@ -274,9 +276,9 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
 
         {/* Submit */}
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
-          <button type="button" className="btn btn-outline" onClick={() => onNavigate(conId ? `/doctor/consultation-room/${conId}` : '/dashboard')}>Cancel</button>
+          <button type="button" className="btn btn-outline" onClick={() => onNavigate(conId ? `/doctor/consultation-room/${conId}` : '/dashboard')}>{t('prescriptionWriter.cancel')}</button>
           <button type="submit" className="btn btn-primary btn-lg" disabled={submitting}>
-            {submitting ? 'Creating...' : '💊 Create Prescription'}
+            {submitting ? t('prescriptionWriter.creating') : `💊 ${t('prescriptionWriter.createPrescription')}`}
           </button>
         </div>
       </form>

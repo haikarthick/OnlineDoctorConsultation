@@ -21,6 +21,34 @@
 - Global classes in `frontend/src/styles/modules.css`
 - Never add `display: none` in CSS for React-conditionally-rendered elements
 
+## i18n — Multi-Language Support (MANDATORY FOR ALL FEATURES)
+
+Every UI string **MUST** use `t()` from `react-i18next`. **Never hardcode English text** in JSX.
+
+- Use `import { useTranslation } from 'react-i18next'` and `const { t } = useTranslation()` in every page component
+- Sub-components outside the main component that need translated strings must accept a `t` prop
+- **All 5 locale files** must be updated together when adding new strings:
+  - `frontend/src/locales/en/translation.json`
+  - `frontend/src/locales/hi/translation.json`
+  - `frontend/src/locales/ta/translation.json`
+  - `frontend/src/locales/te/translation.json`
+  - `frontend/src/locales/kn/translation.json`
+- Translation key convention: `{module}.{section}.{key}` (e.g. `marketplace.sell.title`)
+
+## Responsive CSS (MANDATORY FOR ALL FEATURES)
+
+Every page/component CSS **MUST** include 4-tier responsive breakpoints:
+
+| Breakpoint | Purpose |
+|------------|---------|
+| `1200px` | Grid auto-fit adjustments, sidebar width reduction |
+| `768px` | Single-column layouts, stacked forms, table `overflow-x: auto`, sticky panels unstick |
+| `640px` | Hide step labels (icons only), 2-col stats grids, chip bar horizontal scroll |
+| `480px` | Single-column everything, reduced font/image sizes |
+
+- Reference patterns: `Dashboard.css`, `Marketplace.css`
+- Tables: always add `overflow-x: auto` wrapper at `768px`
+
 ## Permission System (4-FILE SYNC REQUIRED)
 
 When adding/removing pages, menus, or changing role access, you MUST update ALL 4 files together:

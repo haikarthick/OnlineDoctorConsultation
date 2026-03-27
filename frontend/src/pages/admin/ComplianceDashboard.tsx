@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
@@ -8,6 +9,7 @@ interface ComplianceDashboardProps {
 }
 
 const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { formatDateTime } = useSettings()
   const [tab, setTab] = useState<'overview' | 'phi' | 'policies'>('overview')
   const [dashboard, setDashboard] = useState<any>(null)
@@ -87,22 +89,22 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>🛡️ HIPAA Compliance & Data Privacy</h1>
-          <p className="page-subtitle">Compliance dashboard • audit monitoring • PHI access tracking</p>
+          <h1>🛡️ {t('complianceDashboard.title')}</h1>
+          <p className="page-subtitle">{t('complianceDashboard.subtitle')}</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-outline" onClick={loadDashboard}>🔄 Refresh</button>
-          <button className="btn btn-outline" onClick={() => onNavigate('/admin/audit-logs')}>📜 Full Audit Logs</button>
-          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← Dashboard</button>
+          <button className="btn btn-outline" onClick={loadDashboard}>🔄 {t('complianceDashboard.refresh')}</button>
+          <button className="btn btn-outline" onClick={() => onNavigate('/admin/audit-logs')}>📜 {t('complianceDashboard.fullAuditLogs')}</button>
+          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('complianceDashboard.dashboard')}</button>
         </div>
       </div>
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         {[
-          { key: 'overview', label: '📊 Compliance Overview' },
-          { key: 'phi', label: '🔐 PHI Access Log' },
-          { key: 'policies', label: '📋 Policies & Checklist' },
+          { key: 'overview', label: '📊 ' + t('complianceDashboard.complianceOverview') },
+          { key: 'phi', label: '🔐 ' + t('complianceDashboard.phiAccessLog') },
+          { key: 'policies', label: '📋 ' + t('complianceDashboard.policiesAndChecklist') },
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key as any)}
             style={{
@@ -122,8 +124,8 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
           <div className="module-card" style={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)', color: 'white', marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: 28 }}>HIPAA Compliance Score</h2>
-                <p style={{ margin: '4px 0 0', opacity: 0.9 }}>Based on {complianceChecklist.length} compliance controls assessed</p>
+                <h2 style={{ margin: 0, fontSize: 28 }}>{t('complianceDashboard.hipaaComplianceScore')}</h2>
+                <p style={{ margin: '4px 0 0', opacity: 0.9 }}>{t('complianceDashboard.basedOnControls', { count: complianceChecklist.length })}</p>
               </div>
               <div style={{ fontSize: 56, fontWeight: 800 }}>{complianceScore}%</div>
             </div>
@@ -135,11 +137,11 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
           {/* KPI Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
             {[
-              { label: 'Audit Events (30d)', value: d.totalAuditEvents || 0, icon: '📊', color: '#3b82f6' },
-              { label: 'PHI Access Events', value: d.phiAccessEvents || 0, icon: '🔐', color: '#8b5cf6' },
-              { label: 'Failed Logins (30d)', value: d.failedLoginAttempts || 0, icon: '⚠️', color: d.failedLoginAttempts > 10 ? '#dc2626' : '#f59e0b' },
-              { label: 'Active Sessions', value: d.activeSessions || 0, icon: '🟢', color: '#059669' },
-              { label: 'Confidential Records', value: d.confidentialRecords || 0, icon: '🔒', color: '#6366f1' },
+              { label: t('complianceDashboard.auditEvents30d'), value: d.totalAuditEvents || 0, icon: '📊', color: '#3b82f6' },
+              { label: t('complianceDashboard.phiAccessEvents'), value: d.phiAccessEvents || 0, icon: '🔐', color: '#8b5cf6' },
+              { label: t('complianceDashboard.failedLogins30d'), value: d.failedLoginAttempts || 0, icon: '⚠️', color: d.failedLoginAttempts > 10 ? '#dc2626' : '#f59e0b' },
+              { label: t('complianceDashboard.activeSessions'), value: d.activeSessions || 0, icon: '🟢', color: '#059669' },
+              { label: t('complianceDashboard.confidentialRecords'), value: d.confidentialRecords || 0, icon: '🔒', color: '#6366f1' },
             ].map((kpi, i) => (
               <div key={i} className="module-card" style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 28 }}>{kpi.icon}</div>
@@ -152,7 +154,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
           {/* Users by Role + Events by Severity */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
             <div className="module-card">
-              <h3 style={{ marginTop: 0 }}>👥 Users by Role</h3>
+              <h3 style={{ marginTop: 0 }}>👥 {t('complianceDashboard.usersByRole')}</h3>
               {(d.usersByRole || []).map((r: any, i: number) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
                   <span style={{ textTransform: 'capitalize' }}>{r.role?.replace('_', ' ')}</span>
@@ -161,7 +163,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
               ))}
             </div>
             <div className="module-card">
-              <h3 style={{ marginTop: 0 }}>📊 Events by Severity (30d)</h3>
+              <h3 style={{ marginTop: 0 }}>📊 {t('complianceDashboard.eventsBySeverity')}</h3>
               {(d.eventsBySeverity || []).map((s: any, i: number) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -176,7 +178,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
 
           {/* Events by Category */}
           <div className="module-card" style={{ marginBottom: 24 }}>
-            <h3 style={{ marginTop: 0 }}>📂 Events by HIPAA Category (30d)</h3>
+            <h3 style={{ marginTop: 0 }}>📂 {t('complianceDashboard.eventsByCategory')}</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
               {(d.eventsByCategory || []).map((c: any, i: number) => (
                 <div key={i} style={{ padding: '12px 16px', borderRadius: 8, background: '#f9fafb', border: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -189,7 +191,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
 
           {/* Daily Trend */}
           <div className="module-card" style={{ marginBottom: 24 }}>
-            <h3 style={{ marginTop: 0 }}>📈 Daily Audit Activity (14d)</h3>
+            <h3 style={{ marginTop: 0 }}>📈 {t('complianceDashboard.dailyAuditActivity')}</h3>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 120 }}>
               {(d.dailyTrend || []).map((day: any, i: number) => {
                 const max = Math.max(...(d.dailyTrend || []).map((x: any) => parseInt(x.count) || 1))
@@ -207,19 +209,19 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
 
           {/* Recent High-Severity Events */}
           <div className="module-card">
-            <h3 style={{ marginTop: 0 }}>🚨 Recent High-Severity Events (7d)</h3>
+            <h3 style={{ marginTop: 0 }}>🚨 {t('complianceDashboard.recentHighSeverity')}</h3>
             {(d.highSeverityEvents || []).length === 0 ? (
-              <p style={{ color: '#059669', fontWeight: 600 }}>✅ No high-severity events in the last 7 days</p>
+              <p style={{ color: '#059669', fontWeight: 600 }}>✅ {t('complianceDashboard.noHighSeverity')}</p>
             ) : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
-                      <th style={{ textAlign: 'left', padding: 8 }}>When</th>
-                      <th style={{ textAlign: 'left', padding: 8 }}>User</th>
-                      <th style={{ textAlign: 'left', padding: 8 }}>Action</th>
-                      <th style={{ textAlign: 'left', padding: 8 }}>Category</th>
-                      <th style={{ textAlign: 'left', padding: 8 }}>IP</th>
+                      <th style={{ textAlign: 'left', padding: 8 }}>{t('complianceDashboard.when')}</th>
+                      <th style={{ textAlign: 'left', padding: 8 }}>{t('complianceDashboard.user')}</th>
+                      <th style={{ textAlign: 'left', padding: 8 }}>{t('complianceDashboard.action')}</th>
+                      <th style={{ textAlign: 'left', padding: 8 }}>{t('complianceDashboard.category')}</th>
+                      <th style={{ textAlign: 'left', padding: 8 }}>{t('complianceDashboard.ipHeader')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -244,38 +246,38 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
       {tab === 'phi' && (
         <div className="module-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-            <h3 style={{ margin: 0 }}>🔐 Protected Health Information Access Log</h3>
+            <h3 style={{ margin: 0 }}>🔐 {t('complianceDashboard.phiAccessLogTitle')}</h3>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <select value={phiEntityFilter} onChange={e => setPhiEntityFilter(e.target.value)}
                 style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 13 }}>
-                <option value="">All PHI Types</option>
-                <option value="medical_record">Medical Records</option>
-                <option value="prescription">Prescriptions</option>
-                <option value="consultation">Consultations</option>
-                <option value="vaccination">Vaccinations</option>
-                <option value="lab_result">Lab Results</option>
-                <option value="scan_analysis">Scan Analysis</option>
+                <option value="">{t('complianceDashboard.allPhiTypes')}</option>
+                <option value="medical_record">{t('complianceDashboard.medicalRecords')}</option>
+                <option value="prescription">{t('complianceDashboard.prescriptions')}</option>
+                <option value="consultation">{t('complianceDashboard.consultations')}</option>
+                <option value="vaccination">{t('complianceDashboard.vaccinations')}</option>
+                <option value="lab_result">{t('complianceDashboard.labResults')}</option>
+                <option value="scan_analysis">{t('complianceDashboard.scanAnalysis')}</option>
               </select>
-              <span style={{ fontSize: 13, color: '#6b7280' }}>{phiTotal} total events</span>
+              <span style={{ fontSize: 13, color: '#6b7280' }}>{phiTotal} {t('complianceDashboard.totalEvents')}</span>
             </div>
           </div>
 
           {phiLoading ? (
-            <p style={{ textAlign: 'center', color: '#6b7280' }}>Loading...</p>
+            <p style={{ textAlign: 'center', color: '#6b7280' }}>{t('complianceDashboard.loadingPhi')}</p>
           ) : phiLogs.length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#059669' }}>✅ No PHI access events found for selected filters</p>
+            <p style={{ textAlign: 'center', color: '#059669' }}>✅ {t('complianceDashboard.noPhiEvents')}</p>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #e5e7eb', background: '#f9fafb' }}>
-                    <th style={{ textAlign: 'left', padding: 10 }}>Timestamp</th>
-                    <th style={{ textAlign: 'left', padding: 10 }}>User</th>
-                    <th style={{ textAlign: 'left', padding: 10 }}>Role</th>
-                    <th style={{ textAlign: 'left', padding: 10 }}>Action</th>
-                    <th style={{ textAlign: 'left', padding: 10 }}>Entity</th>
-                    <th style={{ textAlign: 'left', padding: 10 }}>Category</th>
-                    <th style={{ textAlign: 'left', padding: 10 }}>IP</th>
+                    <th style={{ textAlign: 'left', padding: 10 }}>{t('complianceDashboard.timestamp')}</th>
+                    <th style={{ textAlign: 'left', padding: 10 }}>{t('complianceDashboard.user')}</th>
+                    <th style={{ textAlign: 'left', padding: 10 }}>{t('complianceDashboard.role')}</th>
+                    <th style={{ textAlign: 'left', padding: 10 }}>{t('complianceDashboard.action')}</th>
+                    <th style={{ textAlign: 'left', padding: 10 }}>{t('complianceDashboard.entity')}</th>
+                    <th style={{ textAlign: 'left', padding: 10 }}>{t('complianceDashboard.category')}</th>
+                    <th style={{ textAlign: 'left', padding: 10 }}>{t('complianceDashboard.ipHeader')}</th>
                     <th style={{ textAlign: 'left', padding: 10 }}></th>
                   </tr>
                 </thead>
@@ -302,10 +304,10 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
                         <tr>
                           <td colSpan={8} style={{ padding: '12px 24px', background: '#f9fafb', fontSize: 12 }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                              <div><strong>Entity ID:</strong> <code style={{ fontSize: 11 }}>{log.entityId || '—'}</code></div>
-                              <div><strong>User Agent:</strong> <span style={{ fontSize: 11, wordBreak: 'break-all' }}>{log.userAgent || '—'}</span></div>
-                              <div><strong>Severity:</strong> <span style={{ color: severityColor(log.details?.severity) }}>{log.details?.severity?.toUpperCase()}</span></div>
-                              <div><strong>User ID:</strong> <code style={{ fontSize: 11 }}>{log.userId || '—'}</code></div>
+                              <div><strong>{t('complianceDashboard.entityId')}:</strong> <code style={{ fontSize: 11 }}>{log.entityId || '—'}</code></div>
+                              <div><strong>{t('complianceDashboard.user')} Agent:</strong> <span style={{ fontSize: 11, wordBreak: 'break-all' }}>{log.userAgent || '—'}</span></div>
+                              <div><strong>{t('complianceDashboard.severity')}:</strong> <span style={{ color: severityColor(log.details?.severity) }}>{log.details?.severity?.toUpperCase()}</span></div>
+                              <div><strong>{t('complianceDashboard.user')} ID:</strong> <code style={{ fontSize: 11 }}>{log.userId || '—'}</code></div>
                             </div>
                           </td>
                         </tr>
@@ -323,16 +325,16 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
       {tab === 'policies' && (
         <>
           <div className="module-card" style={{ marginBottom: 24 }}>
-            <h3 style={{ marginTop: 0 }}>📋 HIPAA Compliance Checklist</h3>
+            <h3 style={{ marginTop: 0 }}>📋 {t('complianceDashboard.hipaaChecklist')}</h3>
             <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 16 }}>
-              Status of HIPAA technical safeguards, administrative controls, and data privacy measures implemented in VetCare
+              {t('complianceDashboard.hipaaChecklistDesc')}
             </p>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
-                  <th style={{ textAlign: 'left', padding: 10 }}>Control</th>
-                  <th style={{ textAlign: 'center', padding: 10, width: 80 }}>Status</th>
-                  <th style={{ textAlign: 'left', padding: 10 }}>Details</th>
+                  <th style={{ textAlign: 'left', padding: 10 }}>{t('complianceDashboard.control')}</th>
+                  <th style={{ textAlign: 'center', padding: 10, width: 80 }}>{t('complianceDashboard.status')}</th>
+                  <th style={{ textAlign: 'left', padding: 10 }}>{t('complianceDashboard.detailsHeader')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -351,7 +353,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
 
           {/* Privacy Policies */}
           <div className="module-card" style={{ marginBottom: 24 }}>
-            <h3 style={{ marginTop: 0 }}>📜 Data Privacy Policies</h3>
+            <h3 style={{ marginTop: 0 }}>📜 {t('complianceDashboard.dataPrivacyPolicies')}</h3>
             <div style={{ display: 'grid', gap: 16 }}>
               {[
                 { title: 'Data Collection & Purpose', icon: '📝',
@@ -381,7 +383,7 @@ const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({ onNavigate })
 
           {/* Compliance Standards */}
           <div className="module-card">
-            <h3 style={{ marginTop: 0 }}>🏛️ Regulatory Framework</h3>
+            <h3 style={{ marginTop: 0 }}>🏛️ {t('complianceDashboard.regulatoryFramework')}</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
               {[
                 { title: 'HIPAA', status: 'Aligned', color: '#059669', icon: '🏥',

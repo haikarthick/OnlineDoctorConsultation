@@ -134,7 +134,7 @@ const Dashboard: React.FC = () => {
       return [
         ...base,
         { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐄', color: '#10b981', path: '/animals' },
-        { label: 'Enterprises', value: stats.enterprises || 0, icon: '🏢', color: '#f59e0b', path: '/enterprises' },
+        { label: t('dashboard.stats.enterprises'), value: stats.enterprises || 0, icon: '🏢', color: '#f59e0b', path: '/enterprises' },
         { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
       ]
     }
@@ -169,53 +169,53 @@ const Dashboard: React.FC = () => {
   const quickActions: QuickAction[] = useMemo(() => {
     if (isFarmer) {
       return [
-        { icon: '📝', label: t('dashboard.quickActions.bookConsultation'), path: '/book-consultation', color: '#667eea', description: 'Schedule a vet visit' },
-        { icon: '🐄', label: t('dashboard.quickActions.myAnimals'), path: '/animals', color: '#10b981', description: 'Manage your livestock' },
-        { icon: '🏢', label: 'Farm / Enterprise', path: '/enterprises', color: '#f59e0b', description: 'Manage your farm' },
-        { icon: '🐾', label: t('dashboard.quickActions.herdManagement'), path: '/animal-groups', color: '#8b5cf6', description: 'Organize animal groups' },
-        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: 'Health history' },
-        { icon: '💊', label: 'Herd Medical', path: '/herd-medical', color: '#ec4899', description: 'Herd health management' },
-        { icon: '💉', label: 'Campaigns', path: '/campaigns', color: '#14b8a6', description: 'Treatment campaigns' },
-        { icon: '📈', label: 'Health Analytics', path: '/health-analytics', color: '#6366f1', description: 'Insights & trends' },
-        { icon: '🏥', label: 'Find Hospital', path: '/vet-hospitals', color: '#0ea5e9', description: 'Browse vet hospitals' },
+        { icon: '📝', label: t('dashboard.quickActions.bookConsultation'), path: '/book-consultation', color: '#667eea', description: t('dashboard.quickActions.desc.scheduleVetVisit') },
+        { icon: '🐄', label: t('dashboard.quickActions.myAnimals'), path: '/animals', color: '#10b981', description: t('dashboard.quickActions.desc.manageYourLivestock') },
+        { icon: '🏢', label: t('dashboard.quickActions.farmEnterprise'), path: '/enterprises', color: '#f59e0b', description: t('dashboard.quickActions.desc.manageYourFarm') },
+        { icon: '🐾', label: t('dashboard.quickActions.herdManagement'), path: '/animal-groups', color: '#8b5cf6', description: t('dashboard.quickActions.desc.organizeAnimalGroups') },
+        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: t('dashboard.quickActions.desc.healthHistory') },
+        { icon: '💊', label: t('dashboard.quickActions.herdMedical'), path: '/herd-medical', color: '#ec4899', description: t('dashboard.quickActions.desc.herdHealthMgmt') },
+        { icon: '💉', label: t('dashboard.quickActions.campaigns'), path: '/campaigns', color: '#14b8a6', description: t('dashboard.quickActions.desc.treatmentCampaigns') },
+        { icon: '📈', label: t('dashboard.quickActions.healthAnalytics'), path: '/health-analytics', color: '#6366f1', description: t('dashboard.quickActions.desc.insightsAndTrends') },
+        { icon: '🏥', label: t('dashboard.quickActions.findHospital'), path: '/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.browseVetHospitals') },
       ]
     }
 
     if (isPetOwner) {
       return [
-        { icon: '📝', label: t('dashboard.quickActions.bookConsultation'), path: '/book-consultation', color: '#667eea', description: 'Schedule a vet visit' },
-        { icon: '🔍', label: 'Find Doctor', path: '/find-doctor', color: '#8b5cf6', description: 'Search veterinarians' },
-        { icon: '🐾', label: t('dashboard.quickActions.myAnimals'), path: '/animals', color: '#10b981', description: 'Manage your pets' },
-        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: 'Pet health history' },
-        { icon: '💚', label: 'Wellness Portal', path: '/wellness', color: '#14b8a6', description: 'Pet wellness tips' },
-        { icon: '✍️', label: 'Write Review', path: '/write-review', color: '#f59e0b', description: 'Rate your vet' },
-        { icon: '🏥', label: 'Find Hospital', path: '/vet-hospitals', color: '#0ea5e9', description: 'Browse vet hospitals' },
+        { icon: '📝', label: t('dashboard.quickActions.bookConsultation'), path: '/book-consultation', color: '#667eea', description: t('dashboard.quickActions.desc.scheduleVetVisit') },
+        { icon: '🔍', label: t('dashboard.quickActions.findDoctor'), path: '/find-doctor', color: '#8b5cf6', description: t('dashboard.quickActions.desc.searchVeterinarians') },
+        { icon: '🐾', label: t('dashboard.quickActions.myAnimals'), path: '/animals', color: '#10b981', description: t('dashboard.quickActions.desc.manageYourPets') },
+        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: t('dashboard.quickActions.desc.petHealthHistory') },
+        { icon: '💚', label: t('dashboard.quickActions.wellnessPortal'), path: '/wellness', color: '#14b8a6', description: t('dashboard.quickActions.desc.petWellnessTips') },
+        { icon: '✍️', label: t('dashboard.quickActions.writeReview'), path: '/write-review', color: '#f59e0b', description: t('dashboard.quickActions.desc.rateYourVet') },
+        { icon: '🏥', label: t('dashboard.quickActions.findHospital'), path: '/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.browseVetHospitals') },
       ]
     }
 
     if (isVeterinarian) {
       return [
-        { icon: '🏥', label: t('dashboard.quickActions.viewConsultations'), path: '/consultations', color: '#667eea', description: 'View all consultations' },
-        { icon: '🗓️', label: t('dashboard.quickActions.manageSchedule'), path: '/doctor/manage-schedule', color: '#8b5cf6', description: 'Manage availability' },
-        { icon: '💊', label: t('dashboard.quickActions.prescriptions'), path: '/doctor/prescriptions', color: '#10b981', description: 'Write prescriptions' },
-        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: 'Patient records' },
-        { icon: '📈', label: 'Health Analytics', path: '/health-analytics', color: '#f59e0b', description: 'Health insights' },
-        { icon: '🧠', label: 'Disease AI', path: '/disease-prediction', color: '#ec4899', description: 'AI diagnosis assist' },
-        { icon: '⭐', label: t('dashboard.quickActions.myReviews'), path: '/doctor/reviews', color: '#14b8a6', description: 'Patient feedback' },
-        { icon: '🔔', label: 'Smart Alerts', path: '/alerts', color: '#ef4444', description: 'Health notifications' },
-        { icon: '🏨', label: 'My Hospital', path: '/vet-hospitals/manage', color: '#0ea5e9', description: 'Hospital dashboard' },
+        { icon: '🏥', label: t('dashboard.quickActions.viewConsultations'), path: '/consultations', color: '#667eea', description: t('dashboard.quickActions.desc.viewAllConsultations') },
+        { icon: '🗓️', label: t('dashboard.quickActions.manageSchedule'), path: '/doctor/manage-schedule', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageAvailability') },
+        { icon: '💊', label: t('dashboard.quickActions.prescriptions'), path: '/doctor/prescriptions', color: '#10b981', description: t('dashboard.quickActions.desc.writePrescriptions') },
+        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: t('dashboard.quickActions.desc.patientRecords') },
+        { icon: '📈', label: t('dashboard.quickActions.healthAnalytics'), path: '/health-analytics', color: '#f59e0b', description: t('dashboard.quickActions.desc.healthInsights') },
+        { icon: '🧠', label: t('dashboard.quickActions.diseaseAI'), path: '/disease-prediction', color: '#ec4899', description: t('dashboard.quickActions.desc.aiDiagnosisAssist') },
+        { icon: '⭐', label: t('dashboard.quickActions.myReviews'), path: '/doctor/reviews', color: '#14b8a6', description: t('dashboard.quickActions.desc.patientFeedback') },
+        { icon: '🔔', label: t('dashboard.quickActions.smartAlerts'), path: '/alerts', color: '#ef4444', description: t('dashboard.quickActions.desc.healthNotifications') },
+        { icon: '🏨', label: t('dashboard.quickActions.myHospital'), path: '/vet-hospitals/manage', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalDashboard') },
       ]
     }
 
     // Admin
     return [
-      { icon: '🛡️', label: 'Admin Panel', path: '/admin/dashboard', color: '#667eea', description: 'System overview' },
-      { icon: '👥', label: 'Users', path: '/admin/users', color: '#8b5cf6', description: 'User management' },
-      { icon: '🩺', label: t('dashboard.quickActions.viewConsultations'), path: '/admin/consultations', color: '#10b981', description: 'All consultations' },
-      { icon: '💳', label: 'Payments', path: '/admin/payments', color: '#f59e0b', description: 'Payment management' },
-      { icon: '⚖️', label: 'Reviews', path: '/admin/reviews', color: '#06b6d4', description: 'Review moderation' },
-      { icon: '📜', label: 'Audit Logs', path: '/admin/audit-logs', color: '#ef4444', description: 'System activity' },
-      { icon: '🏥', label: 'Hospital Mgmt', path: '/admin/vet-hospitals', color: '#0ea5e9', description: 'Hospital oversight' },
+      { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
+      { icon: '👥', label: t('dashboard.quickActions.users'), path: '/admin/users', color: '#8b5cf6', description: t('dashboard.quickActions.desc.userManagement') },
+      { icon: '🩺', label: t('dashboard.quickActions.viewConsultations'), path: '/admin/consultations', color: '#10b981', description: t('dashboard.quickActions.desc.allConsultations') },
+      { icon: '💳', label: t('dashboard.quickActions.payments'), path: '/admin/payments', color: '#f59e0b', description: t('dashboard.quickActions.desc.paymentManagement') },
+      { icon: '⚖️', label: t('dashboard.quickActions.reviews'), path: '/admin/reviews', color: '#06b6d4', description: t('dashboard.quickActions.desc.reviewModeration') },
+      { icon: '📜', label: t('dashboard.quickActions.auditLogs'), path: '/admin/audit-logs', color: '#ef4444', description: t('dashboard.quickActions.desc.systemActivity') },
+      { icon: '🏥', label: t('dashboard.quickActions.hospitalMgmt'), path: '/admin/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalOversight') },
     ]
   }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, t])
 
@@ -244,7 +244,7 @@ const Dashboard: React.FC = () => {
       {error && (
         <div className="dashboard-error">
           <span>⚠️ {error}</span>
-          <button onClick={loadDashboardData}>Retry</button>
+          <button onClick={loadDashboardData}>{t('common.retry')}</button>
         </div>
       )}
 
@@ -287,21 +287,21 @@ const Dashboard: React.FC = () => {
                 return (
                 <div key={booking.id} className="alert-item">
                   <div className="alert-item-info">
-                    <strong>{booking.petOwnerName || 'Patient'}</strong>
+                    <strong>{booking.petOwnerName || t('dashboard.pending.patient')}</strong>
                     <span className="alert-item-meta">
                       {formatDate(booking.scheduledDate, { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.timeSlotStart}
-                      {' · '}{booking.bookingType === 'video_call' ? '📹 Video' : '💬 Chat'}
+                      {' · '}{booking.bookingType === 'video_call' ? t('dashboard.pending.video') : t('dashboard.pending.chat')}
                     </span>
                     <span className="alert-item-reason">
-                      {booking.reasonForVisit || booking.reason || 'General consultation'}
+                      {booking.reasonForVisit || booking.reason || t('dashboard.pending.generalConsultation')}
                       {(booking.priority === 'urgent' || booking.priority === 'emergency') && (
                         <span className="priority-tag"> ⚠️ {booking.priority?.toUpperCase()}</span>
                       )}
                     </span>
                   </div>
                   <div className="alert-item-actions">
-                    <button className="btn-confirm" onClick={() => handleConfirm(booking.id)}>✓ Confirm</button>
-                    <button className="btn-decline" onClick={() => handleCancel(booking.id)}>✕ Decline</button>
+                    <button className="btn-confirm" onClick={() => handleConfirm(booking.id)}>{t('dashboard.pending.confirm')}</button>
+                    <button className="btn-decline" onClick={() => handleCancel(booking.id)}>{t('dashboard.pending.decline')}</button>
                   </div>
                 </div>
                 )
@@ -390,7 +390,7 @@ const Dashboard: React.FC = () => {
                   {upcomingBookings.map(booking => (
                     <div key={booking.id} className="booking-item">
                       <div className="booking-item-info">
-                        <strong>{booking.petOwnerName || 'Patient'}</strong>
+                        <strong>{booking.petOwnerName || t('dashboard.pending.patient')}</strong>
                         <span className="booking-item-meta">
                           {formatDate(booking.scheduledDate)} at {booking.timeSlotStart}
                         </span>
@@ -421,7 +421,7 @@ const Dashboard: React.FC = () => {
                   {recentConsultations.map(consultation => (
                     <div key={consultation.id} className="booking-item">
                       <div className="booking-item-info">
-                        <strong>{consultation.title || 'Consultation'}</strong>
+                        <strong>{consultation.title || t('dashboard.pending.consultation')}</strong>
                         <span className="booking-item-meta">
                           {formatDate(consultation.createdAt || '')}
                         </span>
@@ -442,24 +442,24 @@ const Dashboard: React.FC = () => {
           <div className="feature-card" onClick={() => navigate('/herd-medical')}>
             <div className="feature-card-icon" style={{ background: '#ec489915', color: '#ec4899' }}>💊</div>
             <div className="feature-card-body">
-              <h3>Herd Medical Management</h3>
-              <p>Track treatments, vaccinations, and health records for your entire herd</p>
+              <h3>{t('dashboard.features.herdMedicalTitle')}</h3>
+              <p>{t('dashboard.features.herdMedicalDesc')}</p>
             </div>
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/breeding')}>
             <div className="feature-card-icon" style={{ background: '#8b5cf615', color: '#8b5cf6' }}>🧬</div>
             <div className="feature-card-body">
-              <h3>Breeding & Genetics</h3>
-              <p>Manage breeding cycles, lineage tracking, and genetic data</p>
+              <h3>{t('dashboard.features.breedingTitle')}</h3>
+              <p>{t('dashboard.features.breedingDesc')}</p>
             </div>
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/feed-inventory')}>
             <div className="feature-card-icon" style={{ background: '#f59e0b15', color: '#f59e0b' }}>🌾</div>
             <div className="feature-card-body">
-              <h3>Feed & Inventory</h3>
-              <p>Monitor feed stock, nutrition plans, and supply management</p>
+              <h3>{t('dashboard.features.feedTitle')}</h3>
+              <p>{t('dashboard.features.feedDesc')}</p>
             </div>
             <span className="feature-arrow">→</span>
           </div>
@@ -471,24 +471,24 @@ const Dashboard: React.FC = () => {
           <div className="feature-card" onClick={() => navigate('/wellness')}>
             <div className="feature-card-icon" style={{ background: '#14b8a615', color: '#14b8a6' }}>💚</div>
             <div className="feature-card-body">
-              <h3>Wellness Portal</h3>
-              <p>Health tips, nutrition guides, and wellness tracking for your pet</p>
+              <h3>{t('dashboard.features.wellnessTitle')}</h3>
+              <p>{t('dashboard.features.wellnessDesc')}</p>
             </div>
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/marketplace')}>
             <div className="feature-card-icon" style={{ background: '#6366f115', color: '#6366f1' }}>🏪</div>
             <div className="feature-card-body">
-              <h3>Marketplace</h3>
-              <p>Browse pet products, medications, and health supplies</p>
+              <h3>{t('dashboard.features.marketplaceTitle')}</h3>
+              <p>{t('dashboard.features.marketplaceDesc')}</p>
             </div>
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/ai-copilot')}>
             <div className="feature-card-icon" style={{ background: '#667eea15', color: '#667eea' }}>🤖</div>
             <div className="feature-card-body">
-              <h3>AI Health Assistant</h3>
-              <p>Get instant AI-powered health advice for your pet</p>
+              <h3>{t('dashboard.features.aiHealthTitle')}</h3>
+              <p>{t('dashboard.features.aiHealthDesc')}</p>
             </div>
             <span className="feature-arrow">→</span>
           </div>
@@ -500,24 +500,24 @@ const Dashboard: React.FC = () => {
           <div className="feature-card" onClick={() => navigate('/disease-prediction')}>
             <div className="feature-card-icon" style={{ background: '#ec489915', color: '#ec4899' }}>🧠</div>
             <div className="feature-card-body">
-              <h3>Disease AI Prediction</h3>
-              <p>AI-assisted diagnosis and disease prediction tools</p>
+              <h3>{t('dashboard.features.diseaseAITitle')}</h3>
+              <p>{t('dashboard.features.diseaseAIDesc')}</p>
             </div>
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/report-builder')}>
             <div className="feature-card-icon" style={{ background: '#6366f115', color: '#6366f1' }}>📊</div>
             <div className="feature-card-body">
-              <h3>Report Builder</h3>
-              <p>Create custom medical and analytics reports</p>
+              <h3>{t('dashboard.features.reportBuilderTitle')}</h3>
+              <p>{t('dashboard.features.reportBuilderDesc')}</p>
             </div>
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/ai-copilot')}>
             <div className="feature-card-icon" style={{ background: '#667eea15', color: '#667eea' }}>🤖</div>
             <div className="feature-card-body">
-              <h3>AI Copilot</h3>
-              <p>Get AI-powered clinical decision support</p>
+              <h3>{t('dashboard.features.aiCopilotTitle')}</h3>
+              <p>{t('dashboard.features.aiCopilotDesc')}</p>
             </div>
             <span className="feature-arrow">→</span>
           </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
@@ -12,6 +13,7 @@ interface VideoConsultationProps {
 }
 
 const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, onNavigate }) => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { formatTime, formatDate } = useSettings()
   const [session, setSession] = useState<VideoSession | null>(null)
@@ -536,7 +538,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
       <div className="module-page">
         <div className="loading-container">
           <div className="loading-spinner" />
-          <p>Connecting to consultation room...</p>
+          <p>{t('videoConsultation.connecting')}</p>
         </div>
       </div>
     )
@@ -548,14 +550,14 @@ setError('Failed to start recording — your browser may not support MediaRecord
       <div className="module-page">
         <div style={{ textAlign: 'center', padding: '80px 20px' }}>
           <div style={{ fontSize: 64, marginBottom: 20 }}>📹</div>
-          <h1 style={{ marginBottom: 8 }}>Consultation Ended</h1>
+          <h1 style={{ marginBottom: 8 }}>{t('videoConsultation.ended')}</h1>
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 8 }}>
             Duration: {formatDuration(session.duration || callDuration)}
           </p>
           {(session.recordingUrl || recordingUrl) && (
             <div style={{ marginTop: 20, marginBottom: 16 }}>
               <p style={{ color: '#059669', fontSize: 14, marginBottom: 12 }}>
-                🎬 Recording available
+                🎬 {t('videoConsultation.recordingAvailable')}
               </p>
               {recordingUrl && (
                 <>
@@ -571,27 +573,27 @@ setError('Failed to start recording — your browser may not support MediaRecord
                     className="btn btn-outline"
                     style={{ display: 'inline-block', textDecoration: 'none' }}
                   >
-                    ⬇️ Download Recording
+                    ⬇️ {t('videoConsultation.downloadRecording')}
                   </a>
                 </>
               )}
               {!recordingUrl && session.recordingUrl && (
-                <p style={{ color: '#6b7280', fontSize: 13 }}>Recording saved on server</p>
+                <p style={{ color: '#6b7280', fontSize: 13 }}>{t('videoConsultation.recordingSaved')}</p>
               )}
             </div>
           )}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
             <button className="btn btn-primary" onClick={() => onNavigate('/consultations')}>
-              View Consultations
+              {t('videoConsultation.viewConsultations')}
             </button>
             <button className="btn btn-outline" onClick={() => onNavigate('/dashboard')}>
-              Dashboard
+              {t('videoConsultation.dashboard')}
             </button>
           </div>
           {/* Chat transcript */}
           {messages.length > 0 && (
             <div style={{ maxWidth: 500, margin: '32px auto 0', textAlign: 'left' }}>
-              <h3 style={{ marginBottom: 12 }}>💬 Chat Transcript ({messages.length} messages)</h3>
+              <h3 style={{ marginBottom: 12 }}>💬 {t('videoConsultation.chatTranscript')} ({messages.length} {t('videoConsultation.messages')})</h3>
               <div style={{ background: '#f9fafb', borderRadius: 8, padding: 16, maxHeight: 300, overflow: 'auto' }}>
                 {messages.map(msg => (
                   <div key={msg.id} style={{ marginBottom: 8, fontSize: 13 }}>
@@ -607,7 +609,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
           {/* Prescriptions */}
           {prescriptions.length > 0 && (
             <div style={{ maxWidth: 500, margin: '24px auto 0', textAlign: 'left' }}>
-              <h3 style={{ marginBottom: 12 }}>💊 Prescriptions ({prescriptions.length})</h3>
+              <h3 style={{ marginBottom: 12 }}>💊 {t('videoConsultation.prescriptions')} ({prescriptions.length})</h3>
               {prescriptions.map((rx: any) => (
                 <div key={rx.id} style={{ background: '#f0fdf4', borderRadius: 8, padding: 16, marginBottom: 12, border: '1px solid #bbf7d0' }}>
                   {Array.isArray(rx.medications) && rx.medications.map((med: any, mi: number) => (
@@ -633,16 +635,16 @@ setError('Failed to start recording — your browser may not support MediaRecord
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>Video Consultation</h1>
+          <h1>{t('videoConsultation.title')}</h1>
           <p className="page-subtitle">
             {session?.status === 'active' ? (
               <span style={{ color: '#059669', fontWeight: 600 }}>
-                🔴 Live — {formatDuration(callDuration)}
+                🔴 {t('videoConsultation.live')} — {formatDuration(callDuration)}
               </span>
             ) : session?.status === 'waiting' ? (
-              'Waiting for Doctor...'
+              t('videoConsultation.waitingForDoctor')
             ) : (
-              'Ready to start'
+              t('videoConsultation.readyToStart')
             )}
           </p>
         </div>
@@ -665,9 +667,9 @@ setError('Failed to start recording — your browser may not support MediaRecord
       {!session ? (
         <div style={{ textAlign: 'center', padding: '60px 20px' }}>
           <div style={{ fontSize: 64, marginBottom: 20 }}>📹</div>
-          <h2 style={{ marginBottom: 8 }}>Setting up...</h2>
+          <h2 style={{ marginBottom: 8 }}>{t('videoConsultation.settingUp')}</h2>
           <p style={{ color: '#6b7280', marginBottom: 24 }}>
-            Connecting to your consultation room
+            {t('videoConsultation.connectingRoom')}
           </p>
           <div className="loading-spinner" />
         </div>
@@ -693,7 +695,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
                 {!remoteStream && (
                   <div className="video-placeholder">
                     <div className="video-avatar">{user?.role === 'veterinarian' ? '🧑' : '👨‍⚕️'}</div>
-                    <p>{connectionState === 'connecting' ? 'Connecting to doctor...' : 'Waiting for doctor video...'}</p>
+                    <p>{connectionState === 'connecting' ? t('videoConsultation.connectingDoctor') : t('videoConsultation.waitingDoctorVideo')}</p>
                     {mediaMode === 'audio-only' && (
                       <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 Audio-only mode — camera unavailable</p>
                     )}
@@ -712,7 +714,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
             ) : (
               <div className="video-placeholder">
                 <div className="video-avatar">👨‍⚕️</div>
-                <p>Waiting for Doctor...</p>
+                <p>{t('videoConsultation.waitingForDoctor')}</p>
               </div>
             )}
 
@@ -732,7 +734,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
             <div className="video-self" style={isCameraOff || mediaMode !== 'video' ? {} : { padding: 0, overflow: 'hidden' }}>
               {isCameraOff || mediaMode !== 'video' ? (
                 <span style={{ textAlign: 'center', fontSize: 13 }}>
-                  {mediaMode === 'audio-only' ? '🎤 Audio Only' : mediaMode === 'none' ? '💬 Chat Only' : '📷 Camera Off'}
+                  {mediaMode === 'audio-only' ? t('videoConsultation.audioOnly') : mediaMode === 'none' ? t('videoConsultation.chatOnly') : t('videoConsultation.cameraOff')}
                 </span>
               ) : (
                 <video
@@ -796,7 +798,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
             {session.status === 'waiting' && (
               <div className="video-controls" style={{ gap: 12 }}>
                 <button className="btn btn-success btn-lg" onClick={handleStartSession}>
-                  ▶ Join Call
+                  ▶ {t('videoConsultation.joinCall')}
                 </button>
               </div>
             )}
@@ -813,15 +815,15 @@ setError('Failed to start recording — your browser may not support MediaRecord
           {showChat && (
             <div className="chat-panel">
               <div className="card-header">
-                <h3>💬 Chat</h3>
+                <h3>💬 {t('videoConsultation.chat')}</h3>
                 <button className="btn btn-sm btn-outline" onClick={() => setShowChat(false)}>✕</button>
               </div>
 
               <div className="chat-messages">
                 {messages.length === 0 && (
                   <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
-                    <p>No messages yet</p>
-                    <p style={{ fontSize: 13 }}>Start the conversation</p>
+                    <p>{t('videoConsultation.noMessages')}</p>
+                    <p style={{ fontSize: 13 }}>{t('videoConsultation.startConversation')}</p>
                   </div>
                 )}
                 {messages.map(msg => (
@@ -843,7 +845,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
                 <input
                   className="chat-input"
                   type="text"
-                  placeholder="Type a message..."
+                  placeholder={t('videoConsultation.typeMessage')}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -861,7 +863,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
               style={{ position: 'fixed', bottom: 20, right: 20 }}
               onClick={() => setShowChat(true)}
             >
-              💬 Chat
+              💬 {t('videoConsultation.chat')}
             </button>
           )}
         </div>

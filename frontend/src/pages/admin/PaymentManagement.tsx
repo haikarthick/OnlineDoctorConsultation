@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { Payment } from '../../types'
@@ -10,6 +11,7 @@ interface PaymentManagementProps {
 
 const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => {
   const { formatDate, formatCurrency } = useSettings()
+  const { t } = useTranslation()
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
@@ -62,11 +64,11 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>Payment Management</h1>
-          <p className="page-subtitle">{payments.length} payments</p>
+          <h1>{t('paymentManagement.title')}</h1>
+          <p className="page-subtitle">{payments.length} {t('paymentManagement.payments')}</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← Dashboard</button>
+          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('paymentManagement.dashboard')}</button>
         </div>
       </div>
 
@@ -75,17 +77,17 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
         <div className="stat-card">
           <div className="stat-icon">💰</div>
           <div className="stat-value">{formatCurrency(totalRevenue / 100)}</div>
-          <div className="stat-label">Total Revenue</div>
+          <div className="stat-label">{t('paymentManagement.totalRevenue')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">↩️</div>
           <div className="stat-value">{formatCurrency(totalRefunded / 100)}</div>
-          <div className="stat-label">Total Refunded</div>
+          <div className="stat-label">{t('paymentManagement.totalRefunded')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">⏳</div>
           <div className="stat-value">{payments.filter(p => p.status === 'pending').length}</div>
-          <div className="stat-label">Pending Payments</div>
+          <div className="stat-label">{t('paymentManagement.pendingPayments')}</div>
         </div>
       </div>
 
@@ -94,22 +96,22 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
         <div className="modal-overlay" onClick={() => setRefundingId(null)}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
             <div className="modal-header">
-              <h2>Process Refund</h2>
+              <h2>{t('paymentManagement.processRefund')}</h2>
               <button className="modal-close" onClick={() => setRefundingId(null)}>✕</button>
             </div>
             <div className="modal-body">
               <div className="form-group">
-                <label className="form-label">Refund Amount (cents)</label>
-                <input className="form-input" type="number" value={refundAmount} onChange={e => setRefundAmount(e.target.value)} placeholder="e.g. 5000 for $50" />
+                <label className="form-label">{t('paymentManagement.refundAmountLabel')}</label>
+                <input className="form-input" type="number" value={refundAmount} onChange={e => setRefundAmount(e.target.value)} placeholder={t('paymentManagement.refundAmountPlaceholder')} />
               </div>
               <div className="form-group">
-                <label className="form-label">Reason</label>
-                <textarea className="form-input" rows={3} value={refundReason} onChange={e => setRefundReason(e.target.value)} placeholder="Reason for refund..." />
+                <label className="form-label">{t('paymentManagement.reason')}</label>
+                <textarea className="form-input" rows={3} value={refundReason} onChange={e => setRefundReason(e.target.value)} placeholder={t('paymentManagement.reasonPlaceholder')} />
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
-                <button className="btn btn-outline" onClick={() => setRefundingId(null)}>Cancel</button>
+                <button className="btn btn-outline" onClick={() => setRefundingId(null)}>{t('paymentManagement.cancel')}</button>
                 <button className="btn btn-warning" disabled={processing || !refundAmount} onClick={handleRefund}>
-                  {processing ? 'Processing...' : 'Process Refund'}
+                  {processing ? t('paymentManagement.processing') : t('paymentManagement.processRefund')}
                 </button>
               </div>
             </div>
@@ -120,11 +122,11 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       {/* Filters */}
       <div className="search-filter-bar" style={{ marginBottom: 16 }}>
         <select className="form-input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: 180 }}>
-          <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="completed">Completed</option>
-          <option value="failed">Failed</option>
-          <option value="refunded">Refunded</option>
+          <option value="">{t('paymentManagement.allStatuses')}</option>
+          <option value="pending">{t('paymentManagement.pending')}</option>
+          <option value="completed">{t('paymentManagement.completed')}</option>
+          <option value="failed">{t('paymentManagement.failed')}</option>
+          <option value="refunded">{t('paymentManagement.refunded')}</option>
         </select>
         <button className="btn btn-outline" onClick={loadPayments}>🔄</button>
       </div>
@@ -133,19 +135,19 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /></div>
       ) : payments.length === 0 ? (
-        <div className="empty-state"><div style={{ fontSize: 48 }}>💳</div><h3>No payments found</h3></div>
+        <div className="empty-state"><div style={{ fontSize: 48 }}>💳</div><h3>{t('paymentManagement.noPaymentsFound')}</h3></div>
       ) : (
         <div className="data-table-container">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Invoice</th>
-                <th>Amount</th>
-                <th>Tax</th>
-                <th>Method</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th>{t('paymentManagement.invoice')}</th>
+                <th>{t('paymentManagement.amount')}</th>
+                <th>{t('paymentManagement.tax')}</th>
+                <th>{t('paymentManagement.method')}</th>
+                <th>{t('paymentManagement.status')}</th>
+                <th>{t('paymentManagement.date')}</th>
+                <th>{t('paymentManagement.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -160,7 +162,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
                   <td>
                     {p.status === 'completed' && (
                       <button className="btn btn-sm btn-warning" onClick={() => { setRefundingId(p.id); setRefundAmount(String(p.amount)) }}>
-                        ↩️ Refund
+                        ↩️ {t('paymentManagement.refund')}
                       </button>
                     )}
                   </td>

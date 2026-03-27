@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
 
@@ -15,6 +16,7 @@ interface PermissionMetadata {
 }
 
 const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate: _onNavigate }) => {
+  const { t } = useTranslation()
   const [matrix, setMatrix] = useState<Record<string, Record<string, boolean>>>({})
   const [metadata, setMetadata] = useState<PermissionMetadata | null>(null)
   const [loading, setLoading] = useState(true)
@@ -35,7 +37,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       setMatrix(result.data?.matrix || {})
       setMetadata(result.data?.metadata || null)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load permissions')
+      setError(err?.response?.data?.error?.message || err?.message || t('permissionManagement.failedToLoad'))
     } finally {
       setLoading(false)
     }
@@ -62,14 +64,14 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
         ...prev,
         [role]: { ...prev[role], [permission]: currentValue }
       }))
-      setError(err?.response?.data?.error?.message || 'Failed to update permission')
+      setError(err?.response?.data?.error?.message || t('permissionManagement.failedToUpdate'))
     } finally {
       setSaving(null)
     }
   }
 
   const handleResetDefaults = async () => {
-    if (!window.confirm(`Reset all permissions for "${metadata?.roleLabels[selectedRole] || selectedRole}" to defaults? This cannot be undone.`)) return
+    if (!window.confirm(t('permissionManagement.resetConfirm', { role: metadata?.roleLabels[selectedRole] || selectedRole }))) return
     try {
       setResetting(true)
       setError('')
@@ -78,7 +80,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       setSuccess(`Permissions reset to defaults for ${metadata?.roleLabels[selectedRole] || selectedRole}`)
       setTimeout(() => setSuccess(''), 3000)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to reset permissions')
+      setError(err?.response?.data?.error?.message || t('permissionManagement.failedToReset'))
     } finally {
       setResetting(false)
     }
@@ -102,7 +104,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       setTimeout(() => setSuccess(''), 3000)
     } catch (err: any) {
       loadPermissions() // reload on error
-      setError(err?.response?.data?.error?.message || 'Failed to update')
+      setError(err?.response?.data?.error?.message || t('permissionManagement.failedToUpdate'))
     } finally {
       setSaving(null)
     }
@@ -136,7 +138,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       <div className="module-page">
         <div className="loading-container">
           <div className="loading-spinner" />
-          <p>Loading permissions...</p>
+          <p>{t('permissionManagement.loading')}</p>
         </div>
       </div>
     )
@@ -146,8 +148,8 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
     return (
       <div className="module-page">
         <div style={{ textAlign: 'center', padding: 40 }}>
-          <p>No permission data available.</p>
-          <button className="btn btn-primary" onClick={loadPermissions}>Retry</button>
+          <p>{t('permissionManagement.noData')}</p>
+          <button className="btn btn-primary" onClick={loadPermissions}>{t('permissionManagement.retry')}</button>
         </div>
       </div>
     )
@@ -161,8 +163,8 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>🔐 Permission Management</h1>
-          <p className="page-subtitle">Configure role-based access control — what each role can see and do</p>
+          <h1>🔐 {t('permissionManagement.title')}</h1>
+          <p className="page-subtitle">{t('permissionManagement.subtitle')}</p>
         </div>
       </div>
 
@@ -203,7 +205,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
           <input
             type="text"
-            placeholder="Search permissions..."
+            placeholder={t('permissionManagement.searchPlaceholder')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             style={{ padding: '8px 14px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: 14, width: 200 }}
@@ -213,7 +215,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
             disabled={resetting}
             style={{ padding: '8px 16px', border: '1px solid #dc2626', borderRadius: 6, background: 'white', color: '#dc2626', cursor: 'pointer', fontSize: 13 }}
           >
-            {resetting ? 'Resetting...' : '↻ Reset to Defaults'}
+            {resetting ? t('permissionManagement.resetting') : t('permissionManagement.resetToDefaults')}
           </button>
         </div>
       </div>
@@ -222,15 +224,15 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
         <div style={{ background: 'white', borderRadius: 12, padding: '16px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', flex: 1 }}>
           <div style={{ fontSize: 24, fontWeight: 700, color: '#667eea' }}>{enabledCount}</div>
-          <div style={{ fontSize: 13, color: '#6b7280' }}>Enabled Permissions</div>
+          <div style={{ fontSize: 13, color: '#6b7280' }}>{t('permissionManagement.enabledPermissions')}</div>
         </div>
         <div style={{ background: 'white', borderRadius: 12, padding: '16px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', flex: 1 }}>
           <div style={{ fontSize: 24, fontWeight: 700, color: '#9ca3af' }}>{totalCount - enabledCount}</div>
-          <div style={{ fontSize: 13, color: '#6b7280' }}>Disabled Permissions</div>
+          <div style={{ fontSize: 13, color: '#6b7280' }}>{t('permissionManagement.disabledPermissions')}</div>
         </div>
         <div style={{ background: 'white', borderRadius: 12, padding: '16px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', flex: 1 }}>
           <div style={{ fontSize: 24, fontWeight: 700, color: '#16a34a' }}>{totalCount}</div>
-          <div style={{ fontSize: 13, color: '#6b7280' }}>Total Permissions</div>
+          <div style={{ fontSize: 13, color: '#6b7280' }}>{t('permissionManagement.totalPermissions')}</div>
         </div>
       </div>
 
@@ -260,14 +262,14 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
                   disabled={saving === catKey}
                   style={{ padding: '4px 12px', fontSize: 12, border: '1px solid #16a34a', borderRadius: 4, background: 'white', color: '#16a34a', cursor: 'pointer' }}
                 >
-                  Enable All
+                  {t('permissionManagement.enableAll')}
                 </button>
                 <button
                   onClick={() => handleDisableAll(catKey)}
                   disabled={saving === catKey}
                   style={{ padding: '4px 12px', fontSize: 12, border: '1px solid #dc2626', borderRadius: 4, background: 'white', color: '#dc2626', cursor: 'pointer' }}
                 >
-                  Disable All
+                  {t('permissionManagement.disableAll')}
                 </button>
               </div>
             </div>
@@ -339,12 +341,12 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
 
       {/* Permission Matrix View */}
       <div style={{ background: 'white', borderRadius: 12, marginTop: 24, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <h3 style={{ margin: '0 0 16px 0' }}>📊 Role Comparison Matrix</h3>
+        <h3 style={{ margin: '0 0 16px 0' }}>📊 {t('permissionManagement.roleComparisonMatrix')}</h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr>
-                <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '2px solid #e5e7eb', background: '#f9fafb', position: 'sticky', left: 0 }}>Permission</th>
+                <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '2px solid #e5e7eb', background: '#f9fafb', position: 'sticky', left: 0 }}>{t('permissionManagement.permission')}</th>
                 {metadata.roles.map(role => (
                   <th key={role} style={{ padding: '10px 12px', textAlign: 'center', borderBottom: '2px solid #e5e7eb', background: '#f9fafb', minWidth: 100 }}>
                     {metadata.roleLabels[role]}

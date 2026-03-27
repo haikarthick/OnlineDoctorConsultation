@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
@@ -10,6 +11,7 @@ interface DoctorDashboardProps {
 }
 
 const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([])
@@ -73,7 +75,7 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
       <div className="module-page">
         <div className="loading-container">
           <div className="loading-spinner" />
-          <p>Loading dashboard...</p>
+          <p>{t('doctorDashboard.loadingDashboard')}</p>
         </div>
       </div>
     )
@@ -83,15 +85,15 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>Doctor Dashboard</h1>
-          <p className="page-subtitle">Welcome back, Dr. {user?.lastName || user?.firstName}</p>
+          <h1>{t('doctorDashboard.title')}</h1>
+          <p className="page-subtitle">{t('doctorDashboard.welcomeBack', { name: user?.lastName || user?.firstName })}</p>
         </div>
       </div>
 
       {error && (
         <div style={{ padding: '14px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
           ⚠️ {error}
-          <button className="btn btn-outline" style={{ marginLeft: 12 }} onClick={loadDashboard}>Retry</button>
+          <button className="btn btn-outline" style={{ marginLeft: 12 }} onClick={loadDashboard}>{t('doctorDashboard.retry')}</button>
         </div>
       )}
 
@@ -100,22 +102,22 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
         <div className="stat-card">
           <div className="stat-icon">👥</div>
           <div className="stat-value">{stats.totalPatients}</div>
-          <div className="stat-label">Total Patients</div>
+          <div className="stat-label">{t('doctorDashboard.totalPatients')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">📅</div>
           <div className="stat-value">{stats.todayBookings}</div>
-          <div className="stat-label">Today's Bookings</div>
+          <div className="stat-label">{t('doctorDashboard.todaysBookings')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">✅</div>
           <div className="stat-value">{stats.completedToday}</div>
-          <div className="stat-label">Completed Today</div>
+          <div className="stat-label">{t('doctorDashboard.completedToday')}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">⏳</div>
           <div className="stat-value">{stats.pendingCount}</div>
-          <div className="stat-label">Pending Approvals</div>
+          <div className="stat-label">{t('doctorDashboard.pendingApprovals')}</div>
         </div>
       </div>
 
@@ -123,7 +125,7 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
       {pendingBookings.length > 0 && (
         <div className="card" style={{ marginBottom: 24, border: '2px solid #fbbf24' }}>
           <div className="card-header" style={{ background: '#fffbeb' }}>
-            <h2>🔔 Pending Booking Confirmations ({pendingBookings.length})</h2>
+            <h2>🔔 {t('doctorDashboard.pendingBookingConfirmations')} ({pendingBookings.length})</h2>
           </div>
           <div className="card-body">
             {pendingBookings.map(booking => (
@@ -135,15 +137,15 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
                     {' • '}{booking.bookingType === 'video_call' ? '📹 Video' : '💬 Chat'}
                   </p>
                   <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
-                    Reason: {booking.reasonForVisit || booking.reason || 'General consultation'}
+                    {t('doctorDashboard.reason')}: {booking.reasonForVisit || booking.reason || t('doctorDashboard.generalConsultation')}
                     {booking.priority === 'urgent' || booking.priority === 'emergency'
                       ? <span style={{ color: '#dc2626', fontWeight: 600 }}> — ⚠️ {booking.priority?.toUpperCase()}</span>
                       : null}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button className="btn btn-primary" style={{ padding: '6px 16px', fontSize: 13 }} onClick={() => handleConfirm(booking.id)}>✓ Confirm</button>
-                  <button className="btn btn-outline" style={{ padding: '6px 16px', fontSize: 13, color: '#dc2626', borderColor: '#dc2626' }} onClick={() => handleCancel(booking.id)}>✕ Decline</button>
+                  <button className="btn btn-primary" style={{ padding: '6px 16px', fontSize: 13 }} onClick={() => handleConfirm(booking.id)}>✓ {t('doctorDashboard.confirm')}</button>
+                  <button className="btn btn-outline" style={{ padding: '6px 16px', fontSize: 13, color: '#dc2626', borderColor: '#dc2626' }} onClick={() => handleCancel(booking.id)}>✕ {t('doctorDashboard.decline')}</button>
                 </div>
               </div>
             ))}
@@ -153,20 +155,20 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
 
       {/* Quick Actions */}
       <div className="card" style={{ marginBottom: 24 }}>
-        <div className="card-header"><h2>⚡ Quick Actions</h2></div>
+        <div className="card-header"><h2>⚡ {t('doctorDashboard.quickActions')}</h2></div>
         <div className="card-body">
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <button className="btn btn-primary" onClick={() => onNavigate('/consultations')}>
-              👥 Consultations
+              👥 {t('doctorDashboard.consultations')}
             </button>
             <button className="btn btn-outline" onClick={() => onNavigate('/doctor/manage-schedule')}>
-              📅 Manage Schedule
+              📅 {t('doctorDashboard.manageSchedule')}
             </button>
             <button className="btn btn-outline" onClick={() => onNavigate('/doctor/prescriptions')}>
-              💊 Write Prescription
+              💊 {t('doctorDashboard.writePrescription')}
             </button>
             <button className="btn btn-outline" onClick={() => onNavigate('/doctor/reviews')}>
-              ⭐ My Reviews
+              ⭐ {t('doctorDashboard.myReviews')}
             </button>
           </div>
         </div>
@@ -176,22 +178,22 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
         {/* Upcoming Bookings */}
         <div className="card">
           <div className="card-header">
-            <h2>📅 Upcoming Bookings</h2>
+            <h2>📅 {t('doctorDashboard.upcomingBookings')}</h2>
             <button className="btn btn-sm btn-outline" onClick={() => onNavigate('/consultations')}>
-              View All
+              {t('doctorDashboard.viewAll')}
             </button>
           </div>
           <div className="card-body">
             {upcomingBookings.length === 0 ? (
               <div className="empty-state">
-                <p>No upcoming bookings</p>
+                <p>{t('doctorDashboard.noUpcomingBookings')}</p>
               </div>
             ) : (
               upcomingBookings.map(booking => (
                 <div key={booking.id} className="booking-card" style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <strong>{booking.petOwnerName || 'Patient'}</strong>
+                      <strong>{booking.petOwnerName || t('doctorDashboard.patient')}</strong>
                       <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
                         {formatDate(booking.scheduledDate)} at {booking.timeSlotStart}
                       </p>
@@ -215,19 +217,19 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
         {/* Recent Consultations */}
         <div className="card">
           <div className="card-header">
-            <h2>🩺 Recent Consultations</h2>
+            <h2>🩺 {t('doctorDashboard.recentConsultations')}</h2>
           </div>
           <div className="card-body">
             {recentConsultations.length === 0 ? (
               <div className="empty-state">
-                <p>No recent consultations</p>
+                <p>{t('doctorDashboard.noRecentConsultations')}</p>
               </div>
             ) : (
               recentConsultations.map(consultation => (
                 <div key={consultation.id} className="booking-card" style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <strong>{consultation.title || 'Consultation'}</strong>
+                      <strong>{consultation.title || t('doctorDashboard.consultation')}</strong>
                       <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
                         {formatDate(consultation.createdAt || '')}
                       </p>

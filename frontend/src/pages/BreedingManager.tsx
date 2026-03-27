@@ -9,7 +9,8 @@ const STATUS_COLORS: Record<string, string> = {
   delivered: '#8b5cf6', aborted: '#ef4444', reabsorbed: '#f97316'
 }
 
-const BreedingManager: React.FC = () => {  const { t } = useTranslation()
+const BreedingManager: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -75,16 +76,16 @@ const BreedingManager: React.FC = () => {  const { t } = useTranslation()
     try {
       if (editingId) {
         await apiService.updateBreedingRecord(editingId, payload)
-        setSuccessMsg('Breeding record updated!')
+        setSuccessMsg(t('breedingManager.toasts.updated'))
       } else {
         await apiService.createBreedingRecord(selectedEnterpriseId, payload)
-        setSuccessMsg('Breeding record created!')
+        setSuccessMsg(t('breedingManager.toasts.created'))
       }
       setShowForm(false); setEditingId(null)
       setFormData({ damId: '', sireId: '', breedingDate: '', breedingMethod: 'natural', notes: '', status: 'bred', offspringCount: '', liveOffspring: '', stillborn: '' })
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to save breeding record')
+      setError(err.response?.data?.error?.message || t('breedingManager.toasts.failed'))
     }
   }
 
@@ -103,16 +104,16 @@ const BreedingManager: React.FC = () => {  const { t } = useTranslation()
     <div className="module-page">
       <div className="module-header">
         <h1>{t('breedingManager.pageTitle')}</h1>
-        <p>Track breeding records, monitor pregnancies, and analyze reproductive performance</p>
+        <p>{t('breedingManager.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('breedingManager.selectEnterprise')}</label>
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
-          <option value="">-- Select --</option>
+          <option value="">{t('breedingManager.selectDefault')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
@@ -120,81 +121,81 @@ const BreedingManager: React.FC = () => {  const { t } = useTranslation()
       {selectedEnterpriseId && (
         <>
           <div className="tab-bar">
-            <button className={`tab-btn ${tab === 'records' ? 'active' : ''}`} onClick={() => setTab('records')}>📋 Records</button>
-            <button className={`tab-btn ${tab === 'upcoming' ? 'active' : ''}`} onClick={() => setTab('upcoming')}>🍼 Upcoming Due ({upcomingDue.length})</button>
-            <button className={`tab-btn ${tab === 'stats' ? 'active' : ''}`} onClick={() => setTab('stats')}>📊 Statistics</button>
-            <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null) }}>+ New Record</button>
+            <button className={`tab-btn ${tab === 'records' ? 'active' : ''}`} onClick={() => setTab('records')}>{t('breedingManager.tabs.records')}</button>
+            <button className={`tab-btn ${tab === 'upcoming' ? 'active' : ''}`} onClick={() => setTab('upcoming')}>{t('breedingManager.tabs.upcomingDue')} ({upcomingDue.length})</button>
+            <button className={`tab-btn ${tab === 'stats' ? 'active' : ''}`} onClick={() => setTab('stats')}>{t('breedingManager.tabs.statistics')}</button>
+            <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null) }}>{t('breedingManager.newRecord')}</button>
           </div>
 
           {showForm && (
             <form className="module-form" onSubmit={handleSubmit}>
-              <h3>{editingId ? 'Edit Breeding Record' : 'New Breeding Record'}</h3>
+              <h3>{editingId ? t('breedingManager.modal.editTitle') : t('breedingManager.modal.createTitle')}</h3>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Dam (Mother) ID *</label>
-                  <input required value={formData.damId} onChange={e => setFormData({ ...formData, damId: e.target.value })} placeholder="UUID of dam" />
+                  <label>{t('breedingManager.modal.dam')}</label>
+                  <input required value={formData.damId} onChange={e => setFormData({ ...formData, damId: e.target.value })} placeholder={t('breedingManager.modal.damPlaceholder')} />
                 </div>
                 <div className="form-group">
-                  <label>Sire (Father) ID</label>
-                  <input value={formData.sireId} onChange={e => setFormData({ ...formData, sireId: e.target.value })} placeholder="UUID of sire" />
+                  <label>{t('breedingManager.modal.sire')}</label>
+                  <input value={formData.sireId} onChange={e => setFormData({ ...formData, sireId: e.target.value })} placeholder={t('breedingManager.modal.sirePlaceholder')} />
                 </div>
                 <div className="form-group">
-                  <label>Breeding Date *</label>
+                  <label>{t('breedingManager.modal.breedingDate')}</label>
                   <input type="date" required value={formData.breedingDate} onChange={e => setFormData({ ...formData, breedingDate: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Method</label>
+                  <label>{t('breedingManager.modal.method')}</label>
                   <select value={formData.breedingMethod} onChange={e => setFormData({ ...formData, breedingMethod: e.target.value })}>
-                    {['natural', 'artificial_insemination', 'embryo_transfer', 'ivf'].map(m => <option key={m} value={m}>{m.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>)}
+                    {['natural', 'artificial_insemination', 'embryo_transfer', 'ivf'].map(m => <option key={m} value={m}>{t('breedingManager.methods.' + m)}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Status</label>
+                  <label>{t('breedingManager.modal.status')}</label>
                   <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })}>
-                    {['bred', 'confirmed_pregnant', 'not_pregnant', 'delivered', 'aborted', 'reabsorbed'].map(s => <option key={s} value={s}>{s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>)}
+                    {['bred', 'confirmed_pregnant', 'not_pregnant', 'delivered', 'aborted', 'reabsorbed'].map(s => <option key={s} value={s}>{t('breedingManager.statuses.' + s)}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Offspring Count</label>
+                  <label>{t('breedingManager.modal.offspringCount')}</label>
                   <input type="number" value={formData.offspringCount} onChange={e => setFormData({ ...formData, offspringCount: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Live Offspring</label>
+                  <label>{t('breedingManager.modal.liveOffspring')}</label>
                   <input type="number" value={formData.liveOffspring} onChange={e => setFormData({ ...formData, liveOffspring: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Stillborn</label>
+                  <label>{t('breedingManager.modal.stillborn')}</label>
                   <input type="number" value={formData.stillborn} onChange={e => setFormData({ ...formData, stillborn: e.target.value })} />
                 </div>
               </div>
               <div className="form-group">
-                <label>Notes</label>
+                <label>{t('breedingManager.modal.notes')}</label>
                 <textarea rows={2} value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} />
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">{editingId ? 'Update' : 'Create'}</button>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editingId ? t('breedingManager.modal.updateBtn') : t('breedingManager.modal.createBtn')}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>{t('breedingManager.modal.cancel')}</button>
               </div>
             </form>
           )}
 
-          {loading ? <p className="loading-text">Loading...</p> : tab === 'records' ? (
+          {loading ? <p className="loading-text">{t('breedingManager.loading')}</p> : tab === 'records' ? (
             <div className="card full-width">
-              <h3>Breeding Records</h3>
-              {records.length === 0 ? <p className="empty-text">No breeding records yet.</p> : (
+              <h3>{t('breedingManager.recordsTable.title')}</h3>
+              {records.length === 0 ? <p className="empty-text">{t('breedingManager.recordsTable.empty')}</p> : (
                 <table className="data-table">
-                  <thead><tr><th>Dam</th><th>Sire</th><th>Date</th><th>Method</th><th>Status</th><th>Due Date</th><th>Offspring</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>{t('breedingManager.recordsTable.headers.dam')}</th><th>{t('breedingManager.recordsTable.headers.sire')}</th><th>{t('breedingManager.recordsTable.headers.date')}</th><th>{t('breedingManager.recordsTable.headers.method')}</th><th>{t('breedingManager.recordsTable.headers.status')}</th><th>{t('breedingManager.recordsTable.headers.dueDate')}</th><th>{t('breedingManager.recordsTable.headers.offspring')}</th><th>{t('breedingManager.recordsTable.headers.actions')}</th></tr></thead>
                   <tbody>
                     {records.map(r => (
                       <tr key={r.id}>
                         <td>{r.damName || r.damId?.slice(0, 8)}</td>
                         <td>{r.sireName || r.sireId?.slice(0, 8) || '–'}</td>
                         <td>{r.breedingDate ? new Date(r.breedingDate).toLocaleDateString() : '–'}</td>
-                        <td>{r.breedingMethod?.replace(/_/g, ' ')}</td>
-                        <td><span className="badge" style={{ background: STATUS_COLORS[r.status] || '#888' }}>{r.status?.replace(/_/g, ' ')}</span></td>
+                        <td>{r.breedingMethod ? t('breedingManager.methods.' + r.breedingMethod) : '–'}</td>
+                        <td><span className="badge" style={{ background: STATUS_COLORS[r.status] || '#888' }}>{r.status ? t('breedingManager.statuses.' + r.status) : '–'}</span></td>
                         <td>{r.expectedDueDate ? new Date(r.expectedDueDate).toLocaleDateString() : '–'}</td>
                         <td>{r.liveOffspring ?? '–'} / {r.offspringCount ?? '–'}</td>
-                        <td><button className="btn btn-sm" onClick={() => startEdit(r)}>Edit</button></td>
+                        <td><button className="btn btn-sm" onClick={() => startEdit(r)}>{t('breedingManager.editBtn')}</button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -203,10 +204,10 @@ const BreedingManager: React.FC = () => {  const { t } = useTranslation()
             </div>
           ) : tab === 'upcoming' ? (
             <div className="card full-width">
-              <h3>🍼 Upcoming Due Dates (next 60 days)</h3>
-              {upcomingDue.length === 0 ? <p className="empty-text">No upcoming births expected.</p> : (
+              <h3>{t('breedingManager.upcomingDue.title')}</h3>
+              {upcomingDue.length === 0 ? <p className="empty-text">{t('breedingManager.upcomingDue.empty')}</p> : (
                 <table className="data-table">
-                  <thead><tr><th>Dam</th><th>Expected Due</th><th>Days Left</th><th>Status</th><th>Method</th></tr></thead>
+                  <thead><tr><th>{t('breedingManager.upcomingDue.headers.dam')}</th><th>{t('breedingManager.upcomingDue.headers.expectedDue')}</th><th>{t('breedingManager.upcomingDue.daysLeft')}</th><th>{t('breedingManager.upcomingDue.headers.status')}</th><th>{t('breedingManager.upcomingDue.headers.method')}</th></tr></thead>
                   <tbody>
                     {upcomingDue.map(r => {
                       const daysLeft = r.expectedDueDate ? Math.ceil((new Date(r.expectedDueDate).getTime() - Date.now()) / 86400000) : null
@@ -214,9 +215,9 @@ const BreedingManager: React.FC = () => {  const { t } = useTranslation()
                         <tr key={r.id}>
                           <td>{r.damName || r.damId?.slice(0, 8)}</td>
                           <td>{r.expectedDueDate ? new Date(r.expectedDueDate).toLocaleDateString() : '–'}</td>
-                          <td><span className={`badge ${daysLeft && daysLeft <= 7 ? 'badge-danger' : daysLeft && daysLeft <= 14 ? 'badge-warning' : ''}`}>{daysLeft ?? '?'} days</span></td>
-                          <td>{r.status?.replace(/_/g, ' ')}</td>
-                          <td>{r.breedingMethod?.replace(/_/g, ' ')}</td>
+                          <td><span className={`badge ${daysLeft && daysLeft <= 7 ? 'badge-danger' : daysLeft && daysLeft <= 14 ? 'badge-warning' : ''}`}>{daysLeft ?? '?'} {t('breedingManager.upcomingDue.dayUnit')}</span></td>
+                          <td>{r.status ? t('breedingManager.statuses.' + r.status) : '–'}</td>
+                          <td>{r.breedingMethod ? t('breedingManager.methods.' + r.breedingMethod) : '–'}</td>
                         </tr>
                       )
                     })}
@@ -226,13 +227,13 @@ const BreedingManager: React.FC = () => {  const { t } = useTranslation()
             </div>
           ) : tab === 'stats' && stats ? (
             <div className="dashboard-grid">
-              <div className="card"><h3>Total Records</h3><div className="big-stat">{stats.total}</div></div>
-              <div className="card"><h3>Currently Bred</h3><div className="big-stat">{stats.bred}</div></div>
-              <div className="card"><h3>Confirmed Pregnant</h3><div className="big-stat">{stats.confirmed}</div></div>
-              <div className="card"><h3>Delivered</h3><div className="big-stat">{stats.delivered}</div></div>
-              <div className="card"><h3>Live Births</h3><div className="big-stat success">{stats.live_births}</div></div>
-              <div className="card"><h3>Stillbirths</h3><div className="big-stat danger">{stats.stillbirths}</div></div>
-              <div className="card"><h3>Avg Gestation (days)</h3><div className="big-stat">{stats.avgGestation ? Number(stats.avgGestation).toFixed(0) : '–'}</div></div>
+              <div className="card"><h3>{t('breedingManager.statistics.totalRecords')}</h3><div className="big-stat">{stats.total}</div></div>
+              <div className="card"><h3>{t('breedingManager.statistics.currentlyBred')}</h3><div className="big-stat">{stats.bred}</div></div>
+              <div className="card"><h3>{t('breedingManager.statistics.confirmedPregnant')}</h3><div className="big-stat">{stats.confirmed}</div></div>
+              <div className="card"><h3>{t('breedingManager.statistics.delivered')}</h3><div className="big-stat">{stats.delivered}</div></div>
+              <div className="card"><h3>{t('breedingManager.statistics.liveBirths')}</h3><div className="big-stat success">{stats.live_births}</div></div>
+              <div className="card"><h3>{t('breedingManager.statistics.stillbirths')}</h3><div className="big-stat danger">{stats.stillbirths}</div></div>
+              <div className="card"><h3>{t('breedingManager.statistics.avgGestation')}</h3><div className="big-stat">{stats.avgGestation ? Number(stats.avgGestation).toFixed(0) : '–'}</div></div>
             </div>
           ) : null}
         </>

@@ -102,7 +102,7 @@ const Settings: React.FC = () => {
       })
       showSaved('basic')
     } catch {
-      alert('Failed to update profile')
+      alert(t('settings.alerts.failedUpdateProfile'))
     } finally {
       setSaving(false)
     }
@@ -131,7 +131,7 @@ const Settings: React.FC = () => {
       await apiService.updateVetProfile(payload)
       showSaved('vet')
     } catch {
-      alert('Failed to update vet profile')
+      alert(t('settings.alerts.failedUpdateVetProfile'))
     } finally {
       setSaving(false)
     }
@@ -151,7 +151,7 @@ const Settings: React.FC = () => {
       const url = result.url || result.key
       setVetForm(prev => ({ ...prev, profileImage: url }))
     } catch {
-      alert('Failed to upload photo')
+      alert(t('settings.alerts.failedUploadPhoto'))
     } finally {
       setUploading(false)
     }
@@ -188,9 +188,9 @@ const Settings: React.FC = () => {
                 <input type="tel" name="phone" value={formData.phone} onChange={handleChange} />
               </div>
               <button className="btn-primary" onClick={handleSaveBasic} disabled={saving}>
-                {saving ? 'Saving...' : t('settings.profile.saveChanges')}
+                {saving ? t('settings.saving') : t('settings.profile.saveChanges')}
               </button>
-              {saved === 'basic' && <span style={{ color: '#16a34a', marginLeft: 12, fontSize: 13 }}>✓ Saved</span>}
+              {saved === 'basic' && <span style={{ color: '#16a34a', marginLeft: 12, fontSize: 13 }}>{t('settings.saved')}</span>}
             </div>
           </div>
 
@@ -198,7 +198,7 @@ const Settings: React.FC = () => {
           {isVet && (
             <>
               <div className="settings-section">
-                <h2>🩺 Professional Profile</h2>
+                <h2>{t('settings.professional.title')}</h2>
 
                 {/* Photo Upload */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
@@ -208,7 +208,7 @@ const Settings: React.FC = () => {
                     overflow: 'hidden', border: '3px solid #667eea', flexShrink: 0
                   }}>
                     {profileImageUrl ? (
-                      <img src={profileImageUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={profileImageUrl} alt={t('settings.professional.profileAlt')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
                       <span style={{ fontSize: 32, color: '#667eea' }}>
                         {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
@@ -218,57 +218,57 @@ const Settings: React.FC = () => {
                   <div>
                     <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
                     <button className="btn-small" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                      {uploading ? 'Uploading...' : '📷 Change Photo'}
+                      {uploading ? t('settings.professional.uploading') : t('settings.professional.changePhoto')}
                     </button>
-                    <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>Max 10MB, JPG/PNG</p>
+                    <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>{t('settings.professional.maxFileSize')}</p>
                   </div>
                 </div>
 
                 <div className="settings-form">
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     <div className="form-group">
-                      <label>License Number</label>
-                      <input type="text" name="licenseNumber" value={vetForm.licenseNumber} onChange={handleVetChange} placeholder="VET-12345" />
+                      <label>{t('settings.professional.licenseNumber')}</label>
+                      <input type="text" name="licenseNumber" value={vetForm.licenseNumber} onChange={handleVetChange} placeholder={t('settings.professional.licensePlaceholder')} />
                     </div>
                     <div className="form-group">
-                      <label>Years of Experience</label>
+                      <label>{t('settings.professional.yearsOfExperience')}</label>
                       <input type="number" name="yearsOfExperience" value={vetForm.yearsOfExperience} onChange={handleVetChange} min="0" max="80" />
                     </div>
                   </div>
 
                   <div className="form-group">
-                    <label>Bio / About</label>
+                    <label>{t('settings.professional.bio')}</label>
                     <textarea name="bio" value={vetForm.bio} onChange={handleVetChange} rows={3}
-                      placeholder="Tell pet owners about yourself, your experience, and approach..." 
+                      placeholder={t('settings.professional.bioPlaceholder')} 
                       style={{ padding: '10px 12px', border: '1px solid #e0e0e0', borderRadius: 6, fontSize: 14, resize: 'vertical' }} />
                   </div>
 
                   <div className="form-group">
-                    <label>Specializations (comma-separated)</label>
+                    <label>{t('settings.professional.specializations')}</label>
                     <input type="text" name="specializations" value={vetForm.specializations} onChange={handleVetChange}
-                      placeholder="e.g., Dermatology, Orthopedics, Dental" />
+                      placeholder={t('settings.professional.specializationsPlaceholder')} />
                   </div>
 
                   <div className="form-group">
-                    <label>Qualifications (comma-separated)</label>
+                    <label>{t('settings.professional.qualifications')}</label>
                     <input type="text" name="qualifications" value={vetForm.qualifications} onChange={handleVetChange}
-                      placeholder="e.g., BVSc, MVSc, PhD" />
+                      placeholder={t('settings.professional.qualificationsPlaceholder')} />
                   </div>
 
                   <div className="form-group">
-                    <label>Languages (comma-separated)</label>
+                    <label>{t('settings.professional.languages')}</label>
                     <input type="text" name="languages" value={vetForm.languages} onChange={handleVetChange}
-                      placeholder="e.g., English, Hindi, Tamil" />
+                      placeholder={t('settings.professional.languagesPlaceholder')} />
                   </div>
                 </div>
               </div>
 
               {/* Consultation & Rates */}
               <div className="settings-section">
-                <h2>💰 Consultation Rate</h2>
+                <h2>{t('settings.consultation.title')}</h2>
                 <div className="settings-form">
                   <div className="form-group">
-                    <label>Consultation Fee</label>
+                    <label>{t('settings.consultation.fee')}</label>
                     <div style={{ position: 'relative' }}>
                       <input type="number" name="consultationFee" value={vetForm.consultationFee} onChange={handleVetChange}
                         min="0" step="0.01" placeholder="500" style={{ paddingLeft: 12 }} />
@@ -277,7 +277,7 @@ const Settings: React.FC = () => {
                       </span>
                     </div>
                     <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>
-                      Preview: {formatCurrency(parseFloat(vetForm.consultationFee) || 0)}
+                      {t('settings.consultation.preview')} {formatCurrency(parseFloat(vetForm.consultationFee) || 0)}
                     </p>
                   </div>
                 </div>
@@ -285,47 +285,47 @@ const Settings: React.FC = () => {
 
               {/* Clinic & Availability */}
               <div className="settings-section">
-                <h2>🏥 Clinic & Availability</h2>
+                <h2>{t('settings.clinic.title')}</h2>
                 <div className="settings-form">
                   <div className="form-group">
-                    <label>Clinic Name</label>
+                    <label>{t('settings.clinic.name')}</label>
                     <input type="text" name="clinicName" value={vetForm.clinicName} onChange={handleVetChange}
-                      placeholder="e.g., Happy Paws Veterinary Clinic" />
+                      placeholder={t('settings.clinic.namePlaceholder')} />
                   </div>
                   <div className="form-group">
-                    <label>Clinic Address</label>
+                    <label>{t('settings.clinic.address')}</label>
                     <input type="text" name="clinicAddress" value={vetForm.clinicAddress} onChange={handleVetChange}
-                      placeholder="Full address" />
+                      placeholder={t('settings.clinic.addressPlaceholder')} />
                   </div>
                   <div className="form-group">
-                    <label>Available Days</label>
+                    <label>{t('settings.clinic.availableDays')}</label>
                     <input type="text" name="availableDays" value={vetForm.availableDays} onChange={handleVetChange}
-                      placeholder="e.g., Mon-Fri or Mon,Tue,Wed,Thu,Fri" />
+                      placeholder={t('settings.clinic.availableDaysPlaceholder')} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     <div className="form-group">
-                      <label>Hours Start</label>
+                      <label>{t('settings.clinic.hoursStart')}</label>
                       <input type="time" name="availableHoursStart" value={vetForm.availableHoursStart} onChange={handleVetChange} />
                     </div>
                     <div className="form-group">
-                      <label>Hours End</label>
+                      <label>{t('settings.clinic.hoursEnd')}</label>
                       <input type="time" name="availableHoursEnd" value={vetForm.availableHoursEnd} onChange={handleVetChange} />
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 24, padding: '8px 0' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                       <input type="checkbox" name="isAvailable" checked={vetForm.isAvailable} onChange={handleVetChange} />
-                      <span>Available for Consultations</span>
+                      <span>{t('settings.clinic.availableForConsultations')}</span>
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                       <input type="checkbox" name="acceptsEmergency" checked={vetForm.acceptsEmergency} onChange={handleVetChange} />
-                      <span>Accept Emergency Cases</span>
+                      <span>{t('settings.clinic.acceptEmergency')}</span>
                     </label>
                   </div>
                   <button className="btn-primary" onClick={handleSaveVet} disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Professional Profile'}
+                    {saving ? t('settings.saving') : t('settings.professional.saveProfile')}
                   </button>
-                  {saved === 'vet' && <span style={{ color: '#16a34a', marginLeft: 12, fontSize: 13 }}>✓ Profile Saved</span>}
+                  {saved === 'vet' && <span style={{ color: '#16a34a', marginLeft: 12, fontSize: 13 }}>{t('settings.professional.profileSaved')}</span>}
                 </div>
               </div>
             </>
@@ -356,9 +356,9 @@ const Settings: React.FC = () => {
 
           {/* Privacy & Data section */}
           <div className="settings-section">
-            <h2>🔐 Privacy & Data</h2>
+            <h2>{t('settings.privacy.title')}</h2>
             <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
-              Review your data footprint and manage privacy settings. VetCare follows HIPAA-aligned data protection practices.
+              {t('settings.privacy.description')}
             </p>
 
             {!dataSummary ? (
@@ -369,18 +369,18 @@ const Settings: React.FC = () => {
                   setDataSummary(result.data || {})
                 } catch { /* */ } finally { setDataLoading(false) }
               }} disabled={dataLoading}>
-                {dataLoading ? '⏳ Loading...' : '📊 View My Data Summary'}
+                {dataLoading ? t('settings.privacy.loading') : t('settings.privacy.viewDataSummary')}
               </button>
             ) : (
               <div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
                   {[
-                    { label: 'Medical Records', value: dataSummary.medicalRecords, icon: '📋' },
-                    { label: 'Consultations', value: dataSummary.consultations, icon: '🏥' },
-                    { label: 'Prescriptions', value: dataSummary.prescriptions, icon: '💊' },
-                    { label: 'Animals', value: dataSummary.animals, icon: '🐾' },
-                    { label: 'Audit Trail', value: dataSummary.auditEntries, icon: '📜' },
-                    { label: 'Active Sessions', value: dataSummary.activeSessions, icon: '🟢' },
+                    { label: t('settings.privacy.medicalRecords'), value: dataSummary.medicalRecords, icon: '📋' },
+                    { label: t('settings.privacy.consultations'), value: dataSummary.consultations, icon: '🏥' },
+                    { label: t('settings.privacy.prescriptions'), value: dataSummary.prescriptions, icon: '💊' },
+                    { label: t('settings.privacy.animals'), value: dataSummary.animals, icon: '🐾' },
+                    { label: t('settings.privacy.auditTrail'), value: dataSummary.auditEntries, icon: '📜' },
+                    { label: t('settings.privacy.activeSessions'), value: dataSummary.activeSessions, icon: '🟢' },
                   ].map((item, i) => (
                     <div key={i} style={{ padding: '12px 16px', borderRadius: 8, background: '#f9fafb', border: '1px solid #e5e7eb', textAlign: 'center' }}>
                       <div style={{ fontSize: 20 }}>{item.icon}</div>
@@ -390,24 +390,24 @@ const Settings: React.FC = () => {
                   ))}
                 </div>
                 {dataSummary.lastLogin && (
-                  <p style={{ fontSize: 12, color: '#6b7280' }}>Last login: {formatDateTime(dataSummary.lastLogin)}</p>
+                  <p style={{ fontSize: 12, color: '#6b7280' }}>{t('settings.privacy.lastLogin')} {formatDateTime(dataSummary.lastLogin)}</p>
                 )}
               </div>
             )}
 
             <div style={{ marginTop: 16, padding: 16, borderRadius: 8, background: '#f0fdf4', border: '1px solid #86efac' }}>
-              <h4 style={{ margin: '0 0 8px', fontSize: 14 }}>🛡️ Your Data Rights</h4>
+              <h4 style={{ margin: '0 0 8px', fontSize: 14 }}>{t('settings.privacy.dataRightsTitle')}</h4>
               <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#166534', lineHeight: 1.8 }}>
-                <li><strong>Right to Access:</strong> View all your data through the dashboard above</li>
-                <li><strong>Right to Rectification:</strong> Update your profile information anytime</li>
-                <li><strong>Right to Data Portability:</strong> Contact admin for data export</li>
-                <li><strong>Right to Erasure:</strong> Contact admin for account deletion request</li>
-                <li><strong>Right to Restrict Processing:</strong> Toggle data sharing preferences above</li>
+                <li><strong>{t('settings.privacy.rightToAccess')}</strong> {t('settings.privacy.rightToAccessDesc')}</li>
+                <li><strong>{t('settings.privacy.rightToRectification')}</strong> {t('settings.privacy.rightToRectificationDesc')}</li>
+                <li><strong>{t('settings.privacy.rightToPortability')}</strong> {t('settings.privacy.rightToPortabilityDesc')}</li>
+                <li><strong>{t('settings.privacy.rightToErasure')}</strong> {t('settings.privacy.rightToErasureDesc')}</li>
+                <li><strong>{t('settings.privacy.rightToRestrict')}</strong> {t('settings.privacy.rightToRestrictDesc')}</li>
               </ul>
             </div>
 
             <div style={{ marginTop: 16, padding: 12, borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a', fontSize: 12, color: '#92400e' }}>
-              ⚠️ Medical records may be retained as required by veterinary regulatory standards even after account deletion requests. All data access is logged for HIPAA compliance.
+              {t('settings.privacy.retentionWarning')}
             </div>
           </div>
         </div>

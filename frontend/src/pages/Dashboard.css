@@ -480,18 +480,14 @@
 
 /* ═══════════ Responsive ═══════════ */
 
-/* Tablets and smaller desktops */
-@media (max-width: 1100px) {
+/* Smaller desktops */
+@media (max-width: 1200px) {
   .dashboard-main-grid { grid-template-columns: 1fr; }
   .dashboard-two-col { grid-template-columns: 1fr; }
+  .quick-actions-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-@media (max-width: 900px) {
-  .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
-  .dashboard-feature-grid { grid-template-columns: 1fr; }
-}
-
-/* Mobile landscape + tablets */
+/* Tablets */
 @media (max-width: 768px) {
   .dashboard-container { padding: 16px; }
   .dashboard-header { flex-direction: column; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; }
@@ -502,23 +498,29 @@
   .stat-value { font-size: 20px; }
   .stat-icon { width: 40px; height: 40px; font-size: 18px; }
   .dashboard-section { padding: 14px; }
-  /* Stack activity items vertically on mobile */
+  .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-feature-grid { grid-template-columns: 1fr; }
   .activity-item { flex-wrap: wrap; gap: 6px; }
   .activity-meta { flex-direction: row; align-items: center; gap: 6px; min-width: 0; max-width: 100%; width: 100%; justify-content: flex-start; }
   .activity-content { width: calc(100% - 30px); }
-  /* Booking list items: allow status pill to wrap below */
   .booking-item { flex-wrap: wrap; gap: 4px; }
   .booking-item-info { min-width: 0; }
-  /* Alert items: stack on mobile */
   .alert-item { flex-direction: column; align-items: flex-start; gap: 8px; }
   .alert-item-actions { width: 100%; justify-content: flex-start; }
+}
+
+/* Small tablets / large phones */
+@media (max-width: 640px) {
+  .dashboard-stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .quick-actions-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .tips-grid { grid-template-columns: 1fr; }
 }
 
 /* Mobile portrait */
 @media (max-width: 480px) {
   .dashboard-container { padding: 12px; }
   .dashboard-title { font-size: 20px; }
-  .dashboard-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .dashboard-stats-grid { grid-template-columns: 1fr; gap: 8px; }
   .stat-card { padding: 12px; gap: 10px; }
   .stat-value { font-size: 18px; }
   .stat-label { font-size: 10px; }

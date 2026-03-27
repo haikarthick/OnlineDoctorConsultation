@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { vetHospitalApi } from '../../services/api/vetHospitalApi'
 import type { VetHospital, HospitalAdminStats } from '../../types'
@@ -12,6 +13,7 @@ const HOSPITAL_TYPE_LABELS: Record<string, string> = {
 }
 
 const VetHospitalAdmin: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [hospitals, setHospitals] = useState<VetHospital[]>([])
   const [stats, setStats] = useState<HospitalAdminStats | null>(null)
@@ -77,22 +79,22 @@ const VetHospitalAdmin: React.FC = () => {
     <div className="admin-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.6rem' }}>🏥 Hospital Management</h1>
-          <p style={{ margin: '.3rem 0 0', color: 'var(--text-muted,#666)' }}>Verify and manage all vet hospitals on the platform</p>
+          <h1 style={{ margin: 0, fontSize: '1.6rem' }}>🏥 {t('vetHospitalAdmin.title')}</h1>
+          <p style={{ margin: '.3rem 0 0', color: 'var(--text-muted,#666)' }}>{t('vetHospitalAdmin.subtitle')}</p>
         </div>
-        <button className="btn-secondary" onClick={() => navigate('/vet-hospitals')}>Browse as User</button>
+        <button className="btn-secondary" onClick={() => navigate('/vet-hospitals')}>{t('vetHospitalAdmin.browseAsUser')}</button>
       </div>
 
       {/* Stats Row */}
       {stats && (
         <div className="vh-manage-stats" style={{ marginBottom: '1.5rem' }}>
           {[
-            { label: 'Total Hospitals', value: Number(stats.total) || 0, icon: '🏥' },
-            { label: 'Verified', value: Number(stats.verified) || 0, icon: '✓', accent: '#059669' },
-            { label: 'Pending', value: (Number(stats.total) - Number(stats.verified)) || 0, icon: '⏳', accent: '#d97706' },
-            { label: 'New This Month', value: Number(stats.new_this_month) || 0, icon: '📈' },
-            { label: 'Avg Rating', value: parseFloat(stats.avg_rating || '0').toFixed(1), icon: '⭐' },
-            { label: 'Multi-Specialty', value: Number(stats.multi_specialty) || 0, icon: '🏨' },
+            { label: t('vetHospitalAdmin.totalHospitals'), value: Number(stats.total) || 0, icon: '🏥' },
+            { label: t('vetHospitalAdmin.verified'), value: Number(stats.verified) || 0, icon: '✓', accent: '#059669' },
+            { label: t('vetHospitalAdmin.pending'), value: (Number(stats.total) - Number(stats.verified)) || 0, icon: '⏳', accent: '#d97706' },
+            { label: t('vetHospitalAdmin.newThisMonth'), value: Number(stats.new_this_month) || 0, icon: '📈' },
+            { label: t('vetHospitalAdmin.avgRating'), value: parseFloat(stats.avg_rating || '0').toFixed(1), icon: '⭐' },
+            { label: t('vetHospitalAdmin.multiSpecialty'), value: Number(stats.multi_specialty) || 0, icon: '🏨' },
           ].map(s => (
             <div key={s.label} className="vh-stat-card">
               <div style={{ fontSize: '1.3rem' }}>{s.icon}</div>
@@ -106,10 +108,10 @@ const VetHospitalAdmin: React.FC = () => {
       {/* Admin Tabs */}
       <div className="vh-profile-tabs" style={{ marginBottom: '1.25rem' }}>
         <button className={`vh-tab${adminTab === 'hospitals' ? ' active' : ''}`} onClick={() => setAdminTab('hospitals')}>
-          🏥 Hospitals ({hospitals.length})
+          🏥 {t('vetHospitalAdmin.hospitals')} ({hospitals.length})
         </button>
         <button className={`vh-tab${adminTab === 'documents' ? ' active' : ''}`} onClick={() => setAdminTab('documents')}>
-          📄 Document Review {pendingHospitals.length > 0 ? `(${pendingHospitals.length})` : ''}
+          📄 {t('vetHospitalAdmin.documentReview')} {pendingHospitals.length > 0 ? `(${pendingHospitals.length})` : ''}
         </button>
       </div>
 
@@ -117,15 +119,15 @@ const VetHospitalAdmin: React.FC = () => {
       {/* Filters */}
       <div className="vh-filters" style={{ marginBottom: '1.25rem' }}>
         <div className="vh-search-row">
-          <input className="vh-search-input" placeholder="Search by name, city…" value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="vh-search-input" placeholder={t('vetHospitalAdmin.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
           <select className="vh-select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
-            <option value="">All Types</option>
+            <option value="">{t('vetHospitalAdmin.allTypes')}</option>
             {Object.entries(HOSPITAL_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
           <select className="vh-select" value={verifiedFilter} onChange={e => setVerifiedFilter(e.target.value as any)}>
-            <option value="">All Status</option>
-            <option value="true">Verified</option>
-            <option value="false">Pending</option>
+            <option value="">{t('vetHospitalAdmin.allStatus')}</option>
+            <option value="true">{t('vetHospitalAdmin.verified')}</option>
+            <option value="false">{t('vetHospitalAdmin.pendingStatus')}</option>
           </select>
         </div>
       </div>
@@ -137,20 +139,20 @@ const VetHospitalAdmin: React.FC = () => {
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /></div>
       ) : hospitals.length === 0 ? (
-        <div className="empty-state"><div className="empty-state-icon">🏥</div><p>No hospitals found</p></div>
+        <div className="empty-state"><div className="empty-state-icon">🏥</div><p>{t('vetHospitalAdmin.noHospitals')}</p></div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="vh-admin-table">
             <thead>
               <tr>
-                <th>Hospital</th>
-                <th>Type</th>
-                <th>City</th>
-                <th>Doctors</th>
-                <th>Rating</th>
-                <th>Flags</th>
-                <th>Verified</th>
-                <th>Actions</th>
+                <th>{t('vetHospitalAdmin.hospital')}</th>
+                <th>{t('vetHospitalAdmin.type')}</th>
+                <th>{t('vetHospitalAdmin.city')}</th>
+                <th>{t('vetHospitalAdmin.doctors')}</th>
+                <th>{t('vetHospitalAdmin.rating')}</th>
+                <th>{t('vetHospitalAdmin.flags')}</th>
+                <th>{t('vetHospitalAdmin.verifiedCol')}</th>
+                <th>{t('vetHospitalAdmin.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -172,28 +174,28 @@ const VetHospitalAdmin: React.FC = () => {
                     <div style={{ display: 'flex', gap: '.3rem', flexWrap: 'wrap' }}>
                       {h.hasEmergency && <span className="badge badge-emergency">⚡</span>}
                       {h.is24Hours && <span className="badge badge-24h">24h</span>}
-                      {!h.isActive && <span className="badge" style={{ background: '#fee2e2', color: '#b91c1c' }}>Inactive</span>}
+                      {!h.isActive && <span className="badge" style={{ background: '#fee2e2', color: '#b91c1c' }}>{t('vetHospitalAdmin.inactive')}</span>}
                     </div>
                   </td>
                   <td>
                     {h.isVerified
-                      ? <span className="badge badge-verified">✓ Verified</span>
-                      : <span className="badge" style={{ background: '#fef9c3', color: '#92400e' }}>⏳ Pending</span>}
+                      ? <span className="badge badge-verified">✓ {t('vetHospitalAdmin.verified')}</span>
+                      : <span className="badge" style={{ background: '#fef9c3', color: '#92400e' }}>⏳ {t('vetHospitalAdmin.pendingStatus')}</span>}
                   </td>
                   <td>
                     <div className="action-btns">
                       <button className="btn-secondary" style={{ fontSize: '.76rem', padding: '.25rem .55rem' }}
-                        onClick={() => navigate(`/vet-hospitals/${h.id}`)}>View</button>
+                        onClick={() => navigate(`/vet-hospitals/${h.id}`)}>{t('vetHospitalAdmin.view')}</button>
                       {!h.isVerified
                         ? <button className="btn-primary" style={{ fontSize: '.76rem', padding: '.25rem .55rem' }}
                             disabled={actionLoading === h.id}
                             onClick={() => setVerifyTarget(h)}>
-                            {actionLoading === h.id ? '…' : 'Verify'}
+                            {actionLoading === h.id ? '…' : t('vetHospitalAdmin.verify')}
                           </button>
                         : <button className="btn-danger" style={{ fontSize: '.76rem', padding: '.25rem .55rem' }}
                             disabled={actionLoading === h.id}
                             onClick={() => handleVerify(h, false)}>
-                            {actionLoading === h.id ? '…' : 'Unverify'}
+                            {actionLoading === h.id ? '…' : t('vetHospitalAdmin.unverify')}
                           </button>}
                     </div>
                   </td>
@@ -208,13 +210,13 @@ const VetHospitalAdmin: React.FC = () => {
       {/* ── Document Review Tab ── */}
       {adminTab === 'documents' && (
         <div>
-          <h3 style={{ margin: '0 0 1rem' }}>Hospitals with Pending Document Reviews</h3>
+          <h3 style={{ margin: '0 0 1rem' }}>{t('vetHospitalAdmin.pendingDocReviews')}</h3>
           {pendingLoading ? (
             <div className="loading-container"><div className="loading-spinner" /></div>
           ) : pendingHospitals.length === 0 ? (
             <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '.5rem' }}>✅</div>
-              <p>No pending document reviews! All hospitals are up to date.</p>
+              <p>{t('vetHospitalAdmin.noDocReviews')}</p>
             </div>
           ) : (
             <div className="doc-cards-grid">
@@ -235,7 +237,7 @@ const VetHospitalAdmin: React.FC = () => {
                     <span className="dac-item missing">{h.missing_docs || h.missingDocs || 0} Missing</span>
                   </div>
                   <div style={{ marginTop: '.5rem', textAlign: 'right' }}>
-                    <span style={{ fontSize: '.82rem', color: '#2563eb', fontWeight: 600 }}>Review Documents →</span>
+                    <span style={{ fontSize: '.82rem', color: '#2563eb', fontWeight: 600 }}>{t('vetHospitalAdmin.reviewDocuments')} →</span>
                   </div>
                 </div>
               ))}
@@ -249,15 +251,15 @@ const VetHospitalAdmin: React.FC = () => {
         <div className="modal-overlay" onClick={() => setVerifyTarget(null)}>
           <div className="modal-content" style={{ maxWidth: 420 }} onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setVerifyTarget(null)}>✕</button>
-            <h2>Verify Hospital</h2>
-            <p>Are you sure you want to verify <strong>{verifyTarget.name}</strong>?</p>
+            <h2>{t('vetHospitalAdmin.verifyHospital')}</h2>
+            <p>{t('vetHospitalAdmin.verifyConfirm')} <strong>{verifyTarget.name}</strong>?</p>
             <p style={{ fontSize: '.88rem', color: 'var(--text-muted,#666)' }}>
-              This will mark it as a verified hospital and it will appear with a verification badge to all users.
+              {t('vetHospitalAdmin.verifyMsg')}
             </p>
             <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button className="btn-secondary" onClick={() => setVerifyTarget(null)}>Cancel</button>
+              <button className="btn-secondary" onClick={() => setVerifyTarget(null)}>{t('vetHospitalAdmin.cancel')}</button>
               <button className="btn-primary" disabled={!!actionLoading} onClick={() => handleVerify(verifyTarget, true)}>
-                {actionLoading ? 'Verifying…' : 'Confirm Verify'}
+                {actionLoading ? t('vetHospitalAdmin.verifying') : t('vetHospitalAdmin.confirmVerify')}
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { Consultation } from '../../types'
@@ -9,6 +10,7 @@ interface ConsultationManagementProps {
 }
 
 const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavigate }) => {
+  const { t } = useTranslation()
   const { formatDate } = useSettings()
   const [consultations, setConsultations] = useState<Consultation[]>([])
   const [loading, setLoading] = useState(true)
@@ -55,11 +57,11 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavig
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>Consultation Management</h1>
-          <p className="page-subtitle">{consultations.length} consultations</p>
+          <h1>{t('consultationManagement.title')}</h1>
+          <p className="page-subtitle">{consultations.length} {t('consultationManagement.consultations')}</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← Dashboard</button>
+          <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('consultationManagement.dashboard')}</button>
         </div>
       </div>
 
@@ -67,18 +69,18 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavig
       <div className="search-filter-bar" style={{ marginBottom: 24 }}>
         <input
           className="form-input"
-          placeholder="Search consultations..."
+          placeholder={t('consultationManagement.searchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{ flex: 1 }}
         />
         <select className="form-input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: 170 }}>
-          <option value="">All Statuses</option>
-          <option value="scheduled">Scheduled</option>
-          <option value="in_progress">In Progress</option>
-          <option value="completed">Completed</option>
-          <option value="ended">Ended</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="">{t('consultationManagement.allStatuses')}</option>
+          <option value="scheduled">{t('consultationManagement.scheduled')}</option>
+          <option value="in_progress">{t('consultationManagement.inProgress')}</option>
+          <option value="completed">{t('consultationManagement.completed')}</option>
+          <option value="ended">{t('consultationManagement.ended')}</option>
+          <option value="cancelled">{t('consultationManagement.cancelled')}</option>
         </select>
         <button className="btn btn-outline" onClick={loadConsultations}>🔄</button>
       </div>
@@ -89,27 +91,27 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavig
       ) : filteredConsultations.length === 0 ? (
         <div className="empty-state">
           <div style={{ fontSize: 48 }}>🩺</div>
-          <h3>No consultations found</h3>
+          <h3>{t('consultationManagement.noConsultationsFound')}</h3>
         </div>
       ) : (
         <div className="data-table-container">
           <table className="data-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Pet Owner</th>
-                <th>Vet</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Created</th>
+                <th>{t('consultationManagement.id')}</th>
+                <th>{t('consultationManagement.titleHeader')}</th>
+                <th>{t('consultationManagement.petOwner')}</th>
+                <th>{t('consultationManagement.vet')}</th>
+                <th>{t('consultationManagement.priority')}</th>
+                <th>{t('consultationManagement.status')}</th>
+                <th>{t('consultationManagement.created')}</th>
               </tr>
             </thead>
             <tbody>
               {filteredConsultations.map(c => (
                 <tr key={c.id}>
                   <td><code style={{ fontSize: 12 }}>{c.id.slice(0, 8)}</code></td>
-                  <td>{c.title || 'Untitled'}</td>
+                  <td>{c.title || t('consultationManagement.untitled')}</td>
                   <td>{c.petOwnerName || '—'}</td>
                   <td>{c.vetName || '—'}</td>
                   <td>

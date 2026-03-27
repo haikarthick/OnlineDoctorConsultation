@@ -336,6 +336,12 @@
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+  .holiday-page .holiday-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .holiday-page .holiday-toolbar {
     flex-direction: column;
@@ -353,6 +359,9 @@
 
   .holiday-page .holiday-table {
     font-size: 12px;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .holiday-page .holiday-table thead th,
@@ -366,5 +375,23 @@
 
   .holiday-page .holiday-stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .holiday-page .holiday-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .holiday-page .month-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .holiday-page .holiday-stats {
+    grid-template-columns: 1fr;
+  }
+  .holiday-page .holiday-table {
+    font-size: 11px;
   }
 }
