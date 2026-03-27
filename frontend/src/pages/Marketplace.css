@@ -208,8 +208,14 @@
 .mp-bid-winning { color: #22c55e; font-weight: 700; font-size: 12px; }
 
 /* ─── Responsive ─── */
+@media (max-width: 1200px) {
+  .mp-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .mp-species-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .mp-detail-sidebar { width: 280px; }
+}
+
 @media (max-width: 768px) {
-  .mp-grid { grid-template-columns: 1fr; }
+  .mp-grid { grid-template-columns: 1fr 1fr; }
   .mp-detail-layout { flex-direction: column; }
   .mp-detail-sidebar { width: 100%; }
   .mp-steps { flex-direction: column; }
@@ -218,10 +224,29 @@
   .mp-review-grid { grid-template-columns: 1fr; }
   .mp-detail-grid { grid-template-columns: 1fr; }
   .mp-species-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .mp-buy-panel, .mp-bid-panel { position: static; }
+  .mp-chip-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  .mp-chip { flex-shrink: 0; }
+  .module-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .mp-sell-container { max-width: 100%; }
+  .mp-sell-card { padding: 16px; }
+}
+
+@media (max-width: 640px) {
+  .mp-grid { grid-template-columns: 1fr; }
+  .mp-step-label { display: none; }
+  .mp-steps { flex-direction: row; }
+  .mp-step { justify-content: center; padding: 8px; }
+  .mp-seller-row { flex-direction: column; gap: 4px; text-align: center; }
+  .mp-detail-price { font-size: 24px; }
+  .mp-buy-price { font-size: 22px; }
+  .module-stats { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 @media (max-width: 480px) {
   .mp-card-img { height: 120px; }
   .mp-card-price { font-size: 18px; }
-  .mp-detail-price { font-size: 24px; }
+  .mp-detail-price { font-size: 20px; }
+  .mp-species-grid { grid-template-columns: 1fr 1fr; }
+  .module-stats { grid-template-columns: 1fr !important; }
 }
