@@ -57,6 +57,7 @@ const Marketplace: React.FC = () => {
     species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
     pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
     listingTier: 'standard', isHotDeal: false, auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
+    images: [], linkedAnimalId: '',
   })
 
   // Bid
@@ -75,8 +76,25 @@ const Marketplace: React.FC = () => {
   // Order role
   const [orderRole, setOrderRole] = useState<'buyer' | 'seller'>('buyer')
 
+  // Animal list for auto-populate
+  const [userAnimals, setUserAnimals] = useState<any[]>([])
+  const [selectedAnimalId, setSelectedAnimalId] = useState('')
+  const [uploadingImages, setUploadingImages] = useState(false)
+
   const fetchDashboard = useCallback(async () => {
     try { const res = await apiService.getMarketplaceDashboard(); setDashboard(res.data) } catch {}
+  }, [])
+
+  // Load user's animals for auto-populate
+  useEffect(() => {
+    const loadAnimals = async () => {
+      try {
+        const res = await apiService.listAnimals({ limit: 200 })
+        const list = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
+        setUserAnimals(list)
+      } catch { setUserAnimals([]) }
+    }
+    loadAnimals()
   }, [])
 
   const fetchListings = useCallback(async () => {
@@ -125,9 +143,55 @@ const Marketplace: React.FC = () => {
       setSellForm({ title: '', description: '', category: 'animal', listingType: 'sale', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
         species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
         pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
-        listingTier: 'standard', isHotDeal: false, auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '' })
+        listingTier: 'standard', isHotDeal: false, auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
+        images: [], linkedAnimalId: '' })
       setSellStep(0); setTab('browse'); fetchListings(); fetchDashboard()
     } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  // Auto-populate sell form from selected animal
+  const handleAnimalSelect = (animalId: string) => {
+    setSelectedAnimalId(animalId)
+    if (!animalId) return
+    const animal = userAnimals.find((a: any) => a.id === animalId)
+    if (!animal) return
+    const updates: Record<string, any> = { linkedAnimalId: animalId }
+    if (animal.species) updates.species = animal.species
+    if (animal.breed) updates.breed = animal.breed
+    if (animal.gender) updates.gender = animal.gender
+    if (animal.weight || animal.current_weight || animal.currentWeight) {
+      updates.animalWeightKg = String(animal.weight || animal.current_weight || animal.currentWeight || '')
+    }
+    if (animal.dateOfBirth || animal.date_of_birth) {
+      const dob = new Date(animal.dateOfBirth || animal.date_of_birth)
+      const months = Math.floor((Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 30.44))
+      if (months > 0) updates.animalAgeMonths = String(months)
+    }
+    if (!sellForm.title && animal.name) {
+      updates.title = `${animal.name} - ${animal.species || ''} ${animal.breed || ''}`.trim()
+    }
+    setSellForm((prev: Record<string, any>) => ({ ...prev, ...updates }))
+    setSuccessMsg(t('marketplace.sell.autoPopulated', 'Animal details auto-filled!'))
+  }
+
+  // Handle image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setUploadingImages(true)
+    try {
+      const urls: string[] = [...(sellForm.images || [])]
+      for (let i = 0; i < Math.min(files.length, 5 - urls.length); i++) {
+        const res = await apiService.uploadFile(files[i], 'marketplace')
+        if (res.data?.url) urls.push(res.data.url)
+        else if (res.data?.fileUrl) urls.push(res.data.fileUrl)
+      }
+      setSellForm((prev: Record<string, any>) => ({ ...prev, images: urls }))
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message || t('marketplace.sell.uploadFailed', 'Image upload failed'))
+    }
+    setUploadingImages(false)
+    e.target.value = ''
   }
 
   const placeBid = async () => {
@@ -413,6 +477,19 @@ const Marketplace: React.FC = () => {
                 <h3>{t('marketplace.sell.animalDetailsTitle')}</h3>
                 <p className="mp-sell-step-desc">{t('marketplace.sell.animalDetailsDesc')}</p>
                 <div className="module-form">
+                  {/* Auto-populate from existing animal */}
+                  {userAnimals.length > 0 && (
+                    <div className="mp-form-section">
+                      <div className="mp-form-section-title">🐾 {t('marketplace.sell.autoPopulateTitle', 'Auto-Fill from Your Animal')}</div>
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.sell.selectAnimal', 'Select an animal to auto-fill details')}</label>
+                        <select className="module-input" value={selectedAnimalId} onChange={e => handleAnimalSelect(e.target.value)}>
+                          <option value="">{t('marketplace.sell.manualEntry', '— Manual Entry —')}</option>
+                          {userAnimals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({a.species}{a.breed ? ` - ${a.breed}` : ''})</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  )}
                   <div className="mp-form-section">
                     <div className="mp-form-section-title">{t('marketplace.sell.identificationSection')}</div>
                     <div className="module-form-row">
@@ -526,6 +603,34 @@ const Marketplace: React.FC = () => {
                   <div className="module-form-group">
                     <label className="module-label">{t('marketplace.livestock.contact')}</label>
                     <input className="module-input" value={sellForm.contactPhone} onChange={e => sf('contactPhone', e.target.value)} placeholder={t('marketplace.sell.contactPlaceholder')} />
+                  </div>
+                  {/* Image Upload */}
+                  <div className="mp-form-section">
+                    <div className="mp-form-section-title">📸 {t('marketplace.sell.imagesTitle', 'Listing Images')}</div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.sell.imagesLabel', 'Upload up to 5 images')}</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="module-input"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImages || (sellForm.images?.length || 0) >= 5}
+                      />
+                      {uploadingImages && <div className="input-error-msg" style={{ color: '#3b82f6' }}>{t('marketplace.sell.uploading', 'Uploading...')}</div>}
+                    </div>
+                    {sellForm.images?.length > 0 && (
+                      <div className="mp-image-preview-row">
+                        {sellForm.images.map((url: string, i: number) => (
+                          <div key={i} className="mp-image-preview">
+                            <img src={url} alt={`Listing ${i + 1}`} />
+                            <button className="mp-image-remove" onClick={() => {
+                              setSellForm((prev: Record<string, any>) => ({ ...prev, images: prev.images.filter((_: string, idx: number) => idx !== i) }))
+                            }}>×</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="mp-step-actions">

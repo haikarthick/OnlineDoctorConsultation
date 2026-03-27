@@ -1907,7 +1907,15 @@
       "back": "← पीछे",
       "review": "समीक्षा →",
       "publish": "🚀 लिस्टिंग प्रकाशित करें",
-      "titleRequired": "शीर्षक आवश्यक है"
+      "titleRequired": "शीर्षक आवश्यक है",
+      "autoPopulateTitle": "अपने पशु से स्वतः भरें",
+      "selectAnimal": "विवरण स्वतः भरने के लिए पशु चुनें",
+      "manualEntry": "— मैन्युअल प्रविष्टि —",
+      "autoPopulated": "पशु विवरण स्वतः भर दिया गया!",
+      "imagesTitle": "लिस्टिंग छवियाँ",
+      "imagesLabel": "5 तक छवियाँ अपलोड करें",
+      "uploading": "अपलोड हो रहा है...",
+      "uploadFailed": "छवि अपलोड विफल"
     },
     "detail": {
       "backToListings": "← लिस्टिंग पर वापस",

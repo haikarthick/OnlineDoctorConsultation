@@ -1907,7 +1907,15 @@
       "back": "← Back",
       "review": "Review →",
       "publish": "🚀 Publish Listing",
-      "titleRequired": "Title is required"
+      "titleRequired": "Title is required",
+      "autoPopulateTitle": "Auto-Fill from Your Animal",
+      "selectAnimal": "Select an animal to auto-fill details",
+      "manualEntry": "— Manual Entry —",
+      "autoPopulated": "Animal details auto-filled!",
+      "imagesTitle": "Listing Images",
+      "imagesLabel": "Upload up to 5 images",
+      "uploading": "Uploading...",
+      "uploadFailed": "Image upload failed"
     },
     "detail": {
       "backToListings": "← Back to listings",
