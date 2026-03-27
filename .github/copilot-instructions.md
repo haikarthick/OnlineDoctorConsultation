@@ -72,6 +72,51 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 2. Verify Joi validation schemas match frontend form requirements
 3. Check error response format consistency (backend → frontend)
 4. Test that `.env` secrets are not committed (gitignored)
+5. Always `git push origin develop` after committing — raw `git commit` does NOT push
+
+## Feature Coverage Rule (MANDATORY)
+
+**ANY feature added MUST be accessible to ALL relevant user roles.**
+- Never add a page/menu to only one role without considering all 4 roles
+- Timeline, medical records, analytics etc. must work across pet_owner, farmer, veterinarian, admin
+- When adding a nav item: always review ALL 4 roles and add to every role that should see it
+
+## Past Bugs — LEARN FROM THESE (do not repeat)
+
+| Bug | Root Cause | Lesson |
+|-----|-----------|--------|
+| Scrollbar overflow | `.module-page { min-height: 100vh }` inside flex child | Use `calc(100vh - 64px)`, `box-sizing: border-box` |
+| Mobile nav hidden | CSS `display: none` overriding React conditional render | Never put `display: none` on React-rendered elements |
+| Pet owner seeing farm menus | `pet_owner` had `enterprise_manage` permission | Permission changes need 4-file sync |
+| Prescription "Failed to create" | Joi required `instructions`/`duration` but UI made them optional | Joi schemas must match frontend forms |
+| Error display mismatch | Backend `{ errors: [...] }` vs frontend expecting `error.message` | Always check error format between BE/FE |
+| AI chat messages invisible | PostgreSQL snake_case vs frontend camelCase | Use `AS "camelCase"` aliases in SELECT queries |
+| Missing CSS classes | Components used `.module-tabs` etc. that were never defined | Always verify CSS class exists when using className |
+
+## Database Migration Pattern
+
+- `init.sql` uses `CREATE TABLE IF NOT EXISTS` — **skips if table exists**
+- New columns added to `init.sql` won't apply to existing production tables
+- **Fix**: `database.ts` → `seedDefaultSettings()` runs `ALTER TABLE ADD COLUMN IF NOT EXISTS` for all new columns on every startup
+- When adding new columns: ALSO add `ALTER TABLE ADD COLUMN IF NOT EXISTS` in `database.ts`
+- `render-start.sh` swallows migration errors — never rely solely on migrations
+
+## Demo Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@vetcare.com | Admin@123 |
+| Veterinarian | sarah.johnson@example.com | Demo@123 |
+| Pet Owner | emily.davis@example.com | Demo@123 |
+| Farmer | tom.wilson@example.com | Demo@123 |
+
+`fixDemoPasswords.ts` runs on every server start — auto-corrects emails + passwords by UUID.
+
+## AI Copilot
+
+- `AiCopilotService.ts`: Groq (GROQ_API_KEY, free) → OpenAI (OPENAI_API_KEY) → local fallback
+- Uses OpenAI SDK with Groq baseURL for Groq provider
+- Models: `llama-3.3-70b-versatile` (Groq), `gpt-4o` (OpenAI)
 
 ## Deployment & CI/CD
 - **Branch model**: `develop` (DEV) → `main` (PROD)
