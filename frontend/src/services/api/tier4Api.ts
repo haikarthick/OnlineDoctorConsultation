@@ -143,6 +143,42 @@ export async function updateOrderStatus(id: string, status: string) {
   return response.data
 }
 
+export async function getMarketPrices(filters: any = {}) {
+  const response = await client.get('/marketplace/prices', { params: filters })
+  return response.data
+}
+
+// Admin marketplace endpoints
+export async function adminListMarketplaceListings(filters: any = {}) {
+  const response = await client.get('/marketplace/admin/listings', { params: filters })
+  return response.data
+}
+
+export async function adminGetMarketplaceStats() {
+  const response = await client.get('/marketplace/admin/stats')
+  return response.data
+}
+
+export async function adminApproveMarketplaceListing(id: string, notes?: string) {
+  const response = await client.patch(`/marketplace/admin/listings/${id}/approve`, { notes })
+  return response.data
+}
+
+export async function adminRejectMarketplaceListing(id: string, reason: string) {
+  const response = await client.patch(`/marketplace/admin/listings/${id}/reject`, { reason })
+  return response.data
+}
+
+export async function adminToggleHotDeal(id: string, isHotDeal: boolean) {
+  const response = await client.patch(`/marketplace/admin/listings/${id}/hot-deal`, { isHotDeal })
+  return response.data
+}
+
+export async function adminToggleFeatured(id: string, featured: boolean) {
+  const response = await client.patch(`/marketplace/admin/listings/${id}/featured`, { featured })
+  return response.data
+}
+
 // ─── Sustainability & Carbon ──────────────────────────────────
 export async function getSustainabilityDashboard(enterpriseId: string) {
   const response = await client.get(`/enterprises/${enterpriseId}/sustainability/dashboard`)

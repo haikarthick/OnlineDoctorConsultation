@@ -955,6 +955,28 @@ export const runSimulationSchema = Joi.object({
 });
 
 // ─── Tier 4: Marketplace ─────────────────────────────────────
+const livestockFields = {
+  species: Joi.string().max(50).optional().allow('', null),
+  breed: Joi.string().max(100).optional().allow('', null),
+  animalAgeMonths: Joi.number().integer().min(0).max(600).optional().allow(null),
+  animalWeightKg: Joi.number().min(0).max(5000).optional().allow(null),
+  gender: Joi.string().valid('male', 'female', 'unknown').optional().allow('', null),
+  lactationNumber: Joi.number().integer().min(0).max(20).optional().allow(null),
+  dailyMilkYield: Joi.number().min(0).max(100).optional().allow(null),
+  pregnancyStatus: Joi.string().valid('not_pregnant', 'pregnant', 'unknown').optional().allow('', null),
+  pregnancyMonth: Joi.number().integer().min(0).max(12).optional().allow(null),
+  vaccinationStatus: Joi.string().valid('fully_vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown').optional(),
+  healthCertificate: Joi.boolean().optional(),
+  listingTier: Joi.string().valid('standard', 'premium', 'spotlight').optional(),
+  isHotDeal: Joi.boolean().optional(),
+  linkedAnimalId: Joi.string().uuid().optional().allow('', null),
+  auctionEndTime: Joi.string().optional().allow('', null),
+  reservePrice: Joi.number().min(0).optional().allow(null),
+  contactPhone: Joi.string().max(20).optional().allow('', null),
+  latitude: Joi.number().min(-90).max(90).optional().allow(null),
+  longitude: Joi.number().min(-180).max(180).optional().allow(null),
+};
+
 export const createMarketplaceListingSchema = Joi.object({
   enterpriseId: uuid.optional(),
   title: shortText().required(),
@@ -972,6 +994,7 @@ export const createMarketplaceListingSchema = Joi.object({
   tags: Joi.array().items(Joi.string().max(50)).optional(),
   featured: Joi.boolean().optional(),
   expiresAt: Joi.string().optional().allow('', null),
+  ...livestockFields,
 });
 
 export const updateMarketplaceListingSchema = Joi.object({
@@ -985,6 +1008,9 @@ export const updateMarketplaceListingSchema = Joi.object({
   location: shortText(500).optional().allow('', null),
   images: Joi.array().items(Joi.string().uri().max(2000)).optional(),
   tags: Joi.array().items(Joi.string().max(50)).optional(),
+  listingType: Joi.string().valid('sale', 'auction', 'wanted').optional(),
+  featured: Joi.boolean().optional(),
+  ...livestockFields,
 }).min(1);
 
 export const placeBidSchema = Joi.object({

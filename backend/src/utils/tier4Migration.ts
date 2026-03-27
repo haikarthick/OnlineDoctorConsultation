@@ -353,6 +353,45 @@ async function runTier4Migration() {
     }
     console.log(`  ✓ ${indexes.length} indexes created`);
 
+    // ═══════════════════════════════════════════════════════════
+    // Livestock Marketplace — extend marketplace_listings
+    // ═══════════════════════════════════════════════════════════
+    const livestockColumns = [
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS species VARCHAR(60)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS breed VARCHAR(100)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_age_months INT`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_weight_kg NUMERIC(8,2)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS gender VARCHAR(20)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS lactation_number INT`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS daily_milk_yield NUMERIC(6,2)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS pregnancy_status VARCHAR(30)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS pregnancy_month INT`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS vaccination_status VARCHAR(30) DEFAULT 'unknown'`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS health_certificate BOOLEAN DEFAULT false`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS listing_tier VARCHAR(20) DEFAULT 'standard'`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS is_hot_deal BOOLEAN DEFAULT false`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS linked_animal_id UUID`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS auction_end_time TIMESTAMPTZ`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS reserve_price NUMERIC(12,2)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS contact_phone VARCHAR(20)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS latitude NUMERIC(10,7)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS longitude NUMERIC(10,7)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS admin_approved BOOLEAN DEFAULT true`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS admin_notes TEXT`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS rejection_reason TEXT`,
+    ];
+    for (const col of livestockColumns) {
+      try { await client.query(col); } catch {}
+    }
+    console.log('  ✓ marketplace_listings livestock columns added');
+
+    // Indexes for livestock fields
+    await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_species ON marketplace_listings(species)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_breed ON marketplace_listings(breed)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_tier ON marketplace_listings(listing_tier)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_admin ON marketplace_listings(admin_approved)').catch(() => {});
+    console.log('  ✓ livestock indexes created');
+
     await client.query('COMMIT');
     console.log('\n✅ migration completed successfully!');
   } catch (err) {

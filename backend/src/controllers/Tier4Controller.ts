@@ -266,6 +266,57 @@ class Tier4Controller {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
+  // ── Admin Marketplace Controls ──
+
+  async adminListMarketplaceListings(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.adminListAllListings(req.query);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async adminApproveMarketplaceListing(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.adminApproveListing(req.params.id, req.body.notes);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async adminRejectMarketplaceListing(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.adminRejectListing(req.params.id, req.body.reason);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async adminToggleHotDeal(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.adminToggleHotDeal(req.params.id, req.body.isHotDeal);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async adminToggleFeatured(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.adminToggleFeatured(req.params.id, req.body.featured);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getMarketplaceStats(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.getMarketplaceStats();
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getMarketPrices(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.getMarketPrices(req.query);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
   // ═══════════════════ Sustainability & Carbon ═══════════════════
 
   async listSustainabilityMetrics(req: Request, res: Response) {

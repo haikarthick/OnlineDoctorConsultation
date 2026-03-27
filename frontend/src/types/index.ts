@@ -1319,7 +1319,7 @@ export interface MarketplaceListing {
   location?: string
   shippingOptions: any[]
   tags: string[]
-  status: 'draft' | 'active' | 'sold' | 'expired' | 'deleted'
+  status: 'draft' | 'active' | 'sold' | 'expired' | 'deleted' | 'rejected' | 'pending'
   featured: boolean
   viewsCount: number
   sellerName?: string
@@ -1328,6 +1328,55 @@ export interface MarketplaceListing {
   highestBid?: number
   expiresAt?: string
   createdAt: string
+  // Livestock-specific fields
+  species?: string
+  breed?: string
+  animalAgeMonths?: number
+  animal_age_months?: number
+  animalWeightKg?: number
+  animal_weight_kg?: number
+  gender?: 'male' | 'female' | 'unknown'
+  lactationNumber?: number
+  lactation_number?: number
+  dailyMilkYield?: number
+  daily_milk_yield?: number
+  pregnancyStatus?: 'not_pregnant' | 'pregnant' | 'unknown'
+  pregnancy_status?: string
+  pregnancyMonth?: number
+  pregnancy_month?: number
+  vaccinationStatus?: 'fully_vaccinated' | 'partially_vaccinated' | 'not_vaccinated' | 'unknown'
+  vaccination_status?: string
+  healthCertificate?: boolean
+  health_certificate?: boolean
+  listingTier?: 'standard' | 'premium' | 'spotlight'
+  listing_tier?: string
+  isHotDeal?: boolean
+  is_hot_deal?: boolean
+  linkedAnimalId?: string
+  linked_animal_id?: string
+  auctionEndTime?: string
+  auction_end_time?: string
+  reservePrice?: number
+  reserve_price?: number
+  contactPhone?: string
+  contact_phone?: string
+  latitude?: number
+  longitude?: number
+  adminApproved?: boolean
+  admin_approved?: boolean
+  adminNotes?: string
+  admin_notes?: string
+  rejectionReason?: string
+  rejection_reason?: string
+  views_count?: number
+  listing_type?: string
+  seller_name?: string
+  enterprise_name?: string
+  bid_count?: number | string
+  highest_bid?: number | string
+  seller_id?: string
+  created_at?: string
+  updated_at?: string
 }
 
 export interface MarketplaceBid {
@@ -1339,7 +1388,10 @@ export interface MarketplaceBid {
   isWinning: boolean
   status: 'active' | 'outbid' | 'won' | 'cancelled'
   bidderName?: string
+  bidder_name?: string
+  is_winning?: boolean
   createdAt: string
+  created_at?: string
 }
 
 export interface MarketplaceOrder {
@@ -1355,11 +1407,51 @@ export interface MarketplaceOrder {
   trackingNumber?: string
   notes?: string
   listingTitle?: string
+  listing_title?: string
   category?: string
+  species?: string
+  breed?: string
   buyerName?: string
+  buyer_name?: string
   sellerName?: string
+  seller_name?: string
   completedAt?: string
+  completed_at?: string
   createdAt: string
+  created_at?: string
+  unit_price?: number
+  total_price?: number
+  images?: string[]
+}
+
+export interface MarketplaceStats {
+  overview: {
+    total_listings: number
+    active_listings: number
+    sold_listings: number
+    rejected_listings: number
+    pending_review: number
+    hot_deals: number
+    auctions: number
+    avg_price: number
+    max_price: number
+    total_views: number
+  }
+  bySpecies: Array<{ species: string; count: number; avg_price: number; avg_milk_yield: number; avg_weight: number }>
+  priceDistribution: { under_10k: number; range_10k_50k: number; range_50k_100k: number; above_100k: number }
+  auctions: { total_bids: number; listings_with_bids: number; avg_bid: number }
+  orders: Array<{ status: string; count: number; total_value: number }>
+}
+
+export interface MarketPriceData {
+  species: string
+  breed: string
+  total_listings: number
+  avg_price: number
+  min_price: number
+  max_price: number
+  avg_milk_yield: number
+  avg_weight: number
 }
 
 // ─── Sustainability & Carbon ─────────────────────────────────

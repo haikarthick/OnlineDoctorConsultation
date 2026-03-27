@@ -1675,6 +1675,41 @@ class ApiService {
     return response.data
   }
 
+  async getMarketPrices(filters: any = {}) {
+    const response = await this.client.get('/marketplace/prices', { params: filters })
+    return response.data
+  }
+
+  async adminListMarketplaceListings(filters: any = {}) {
+    const response = await this.client.get('/marketplace/admin/listings', { params: filters })
+    return response.data
+  }
+
+  async adminGetMarketplaceStats() {
+    const response = await this.client.get('/marketplace/admin/stats')
+    return response.data
+  }
+
+  async adminApproveMarketplaceListing(id: string, notes?: string) {
+    const response = await this.client.patch(`/marketplace/admin/listings/${id}/approve`, { notes })
+    return response.data
+  }
+
+  async adminRejectMarketplaceListing(id: string, reason: string) {
+    const response = await this.client.patch(`/marketplace/admin/listings/${id}/reject`, { reason })
+    return response.data
+  }
+
+  async adminToggleHotDeal(id: string, isHotDeal: boolean) {
+    const response = await this.client.patch(`/marketplace/admin/listings/${id}/hot-deal`, { isHotDeal })
+    return response.data
+  }
+
+  async adminToggleFeatured(id: string, featured: boolean) {
+    const response = await this.client.patch(`/marketplace/admin/listings/${id}/featured`, { featured })
+    return response.data
+  }
+
   // ─── Sustainability & Carbon ────────────────────────────────
   async getSustainabilityDashboard(enterpriseId: string) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/sustainability/dashboard`)

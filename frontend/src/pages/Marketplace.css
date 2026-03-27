@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════ */
+/* Livestock Marketplace Styles                       */
+/* ═══════════════════════════════════════════════════ */
+
+/* ─── Grid & Layout ─── */
+.mp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.mp-section { margin-top: 28px; }
+.mp-section-title { font-size: 18px; font-weight: 700; margin: 0 0 16px; color: #1e293b; }
+.mp-empty { color: #888; text-align: center; padding: 40px 20px; grid-column: 1 / -1; }
+.mp-loading { color: #888; text-align: center; padding: 40px; }
+
+/* ─── Listing Cards ─── */
+.mp-listing-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.mp-listing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+.mp-listing-card.premium { border-color: #f59e0b; border-width: 2px; }
+.mp-listing-card.spotlight { border-color: #ef4444; border-width: 2px; box-shadow: 0 0 12px rgba(239, 68, 68, 0.15); }
+
+.mp-hot-ribbon {
+  position: absolute; top: 12px; right: -8px; z-index: 2;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff; font-size: 11px; font-weight: 700; padding: 4px 12px;
+  border-radius: 4px 0 0 4px;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
+  letter-spacing: 0.5px;
+}
+.mp-hot-ribbon.spotlight-ribbon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+.mp-card-img {
+  height: 160px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.mp-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.mp-card-img-placeholder { font-size: 48px; opacity: 0.6; }
+
+.mp-card-body { padding: 16px; }
+.mp-card-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.mp-card-title { margin: 0 0 8px; font-size: 16px; font-weight: 600; color: #1e293b; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.mp-card-livestock { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.mp-card-metrics { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+
+.mp-metric {
+  font-size: 12px; color: #475569; background: #f8fafc;
+  padding: 2px 8px; border-radius: 12px; border: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+.mp-metric.pregnant { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+.mp-metric.vax { background: #dcfce7; border-color: #22c55e; color: #166534; }
+.mp-metric.cert { background: #dbeafe; border-color: #3b82f6; color: #1e40af; }
+
+.mp-card-price {
+  font-size: 22px; font-weight: 700; color: #667eea;
+  margin-bottom: 8px; display: flex; align-items: baseline; gap: 8px;
+}
+.mp-bid-count { font-size: 12px; color: #888; font-weight: 400; }
+
+.mp-card-footer {
+  display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8;
+  padding-top: 8px; border-top: 1px solid #f1f5f9;
+}
+
+.mp-card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+
+/* ─── Badges & Tags ─── */
+.mp-badge {
+  display: inline-flex; align-items: center; padding: 2px 10px;
+  border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.mp-badge.category { background: #f1f5f9; color: #475569; }
+.mp-badge.sale { background: #dcfce7; color: #166534; }
+.mp-badge.auction { background: #fef3c7; color: #92400e; }
+.mp-badge.premium { background: #fef9c3; color: #854d0e; }
+.mp-badge.hot { background: #fee2e2; color: #991b1b; }
+.mp-badge.featured { background: #e0e7ff; color: #3730a3; }
+
+.mp-tag {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  border-radius: 10px; font-size: 11px; background: #f1f5f9; color: #475569;
+}
+.mp-tag.species { background: #dbeafe; color: #1e40af; font-weight: 600; }
+.mp-tag.breed { background: #fce7f3; color: #9d174d; font-weight: 600; }
+.mp-tag.gender { background: #f3e8ff; color: #7c3aed; font-weight: 700; font-size: 13px; }
+
+/* ─── Filter Bar ─── */
+.mp-filter-bar {
+  display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;
+}
+
+.mp-chip-bar {
+  display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.mp-chip {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0;
+  background: #fff; font-size: 13px; cursor: pointer; transition: all 0.2s;
+  color: #475569;
+}
+.mp-chip:hover { border-color: #667eea; color: #667eea; }
+.mp-chip.active { background: #667eea; color: #fff; border-color: #667eea; }
+.mp-chip.clear { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+.mp-chip.clear:hover { background: #fca5a5; }
+
+/* ─── Species Cards ─── */
+.mp-species-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;
+}
+.mp-species-card {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+  padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.mp-species-card:hover { border-color: #667eea; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.mp-species-name { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.mp-species-count { font-size: 13px; color: #667eea; font-weight: 600; }
+.mp-species-price { font-size: 12px; color: #64748b; margin-top: 4px; }
+.mp-species-milk { font-size: 12px; color: #059669; margin-top: 2px; }
+
+/* ─── Top Sellers ─── */
+.mp-sellers-list { display: flex; flex-direction: column; gap: 8px; }
+.mp-seller-row {
+  display: flex; align-items: center; gap: 16px; padding: 12px 16px;
+  background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+}
+.mp-seller-rank { font-weight: 700; color: #667eea; font-size: 16px; min-width: 32px; }
+.mp-seller-name { font-weight: 600; color: #1e293b; flex: 1; }
+.mp-seller-stat { font-size: 13px; color: #64748b; }
+
+/* ─── Multi-Step Sell Flow ─── */
+.mp-sell-container { max-width: 800px; margin: 0 auto; }
+.mp-steps {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  background: #f8fafc; border-radius: 12px; padding: 8px; border: 1px solid #e2e8f0;
+}
+.mp-step {
+  flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  border-radius: 8px; cursor: pointer; transition: all 0.2s;
+}
+.mp-step.active { background: #667eea; color: #fff; }
+.mp-step.done { background: #dcfce7; color: #166534; }
+.mp-step-num {
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; border: 2px solid currentColor; flex-shrink: 0;
+}
+.mp-step.active .mp-step-num { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
+.mp-step-label { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.mp-sell-card { padding: 28px; }
+.mp-sell-step h3 { margin: 0 0 20px; font-size: 18px; color: #1e293b; }
+.mp-step-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+
+/* ─── Review Grid ─── */
+.mp-review-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;
+}
+.mp-review-item { display: flex; flex-direction: column; gap: 2px; }
+.mp-review-label { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.mp-review-value { font-size: 14px; color: #1e293b; font-weight: 500; }
+
+/* ─── Listing Detail ─── */
+.mp-detail-layout { display: flex; gap: 28px; }
+.mp-detail-main { flex: 1; min-width: 0; }
+.mp-detail-sidebar { width: 320px; flex-shrink: 0; }
+
+.mp-detail-price { font-size: 32px; font-weight: 700; color: #667eea; margin-bottom: 20px; }
+
+.mp-detail-section {
+  margin-top: 24px; padding: 20px; background: #f8fafc;
+  border-radius: 12px; border: 1px solid #e2e8f0;
+}
+.mp-detail-section h3 { margin: 0 0 16px; font-size: 16px; color: #1e293b; }
+.mp-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mp-detail-item { display: flex; flex-direction: column; gap: 2px; }
+.mp-detail-label { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+.mp-detail-value { font-size: 14px; color: #1e293b; font-weight: 500; }
+.mp-detail-value.highlight { color: #667eea; font-weight: 700; font-size: 16px; }
+
+/* Buy / Bid Panel */
+.mp-buy-panel, .mp-bid-panel {
+  background: #fff; border: 2px solid #e2e8f0; border-radius: 12px;
+  padding: 20px; position: sticky; top: 80px;
+}
+.mp-buy-panel h4, .mp-bid-panel h4 { margin: 0 0 12px; font-size: 16px; color: #1e293b; }
+.mp-buy-price { font-size: 28px; font-weight: 700; color: #667eea; margin-bottom: 8px; }
+.mp-bid-current { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; color: #64748b; }
+.mp-bid-amount { font-weight: 700; color: #667eea; font-size: 18px; }
+.mp-auction-end { font-size: 13px; color: #ef4444; font-weight: 600; margin-bottom: 12px; padding: 8px; background: #fef2f2; border-radius: 8px; }
+
+.mp-bid-history { margin-top: 20px; }
+.mp-bid-history h5 { margin: 0 0 8px; font-size: 14px; color: #475569; }
+.mp-bid-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+.mp-bid-row-amount { font-weight: 700; color: #1e293b; }
+.mp-bid-winning { color: #22c55e; font-weight: 700; font-size: 12px; }
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .mp-grid { grid-template-columns: 1fr; }
+  .mp-detail-layout { flex-direction: column; }
+  .mp-detail-sidebar { width: 100%; }
+  .mp-steps { flex-direction: column; }
+  .mp-filter-bar { flex-direction: column; }
+  .mp-filter-bar > * { width: 100% !important; min-width: 0 !important; }
+  .mp-review-grid { grid-template-columns: 1fr; }
+  .mp-detail-grid { grid-template-columns: 1fr; }
+  .mp-species-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .mp-card-img { height: 120px; }
+  .mp-card-price { font-size: 18px; }
+  .mp-detail-price { font-size: 24px; }
+}
