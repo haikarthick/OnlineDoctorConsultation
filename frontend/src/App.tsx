@@ -6,6 +6,7 @@ import { PermissionProvider, usePermission, ROUTE_PERMISSION_MAP } from './conte
 import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
 import FloatingChatWidget from './components/FloatingChatWidget'
+import FloatingLanguageSelector from './components/FloatingLanguageSelector'
 import { PWAPrompt } from './components/PWAPrompt'
 import ErrorAutoScroll from './components/ErrorAutoScroll'
 // Eagerly loaded public pages (needed at first paint)
@@ -291,6 +292,7 @@ function App() {
             <SocketProvider>
               <AppRoutes />
               <FloatingChatWidget />
+              <FloatingLanguageSelector />
               <PWAPrompt />
             </SocketProvider>
           </PermissionProvider>
