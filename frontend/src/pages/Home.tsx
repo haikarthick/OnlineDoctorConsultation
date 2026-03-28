@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import './Home.css'
 import { useTranslation } from 'react-i18next'
+import { supportedLanguages } from '../i18n'
+import './Home.css'
 
 interface HomeProps {
   onGetStarted: () => void
@@ -29,7 +30,10 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
   const [scrollProgress, setScrollProgress] = useState(0)
   const [showBackToTop, setShowBackToTop] = useState(false)
   const [navScrolled, setNavScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const observerRef = useRef<IntersectionObserver | null>(null)
+  const { i18n } = useTranslation()
+  const currentLang = supportedLanguages.find(l => l.code === i18n.language) || supportedLanguages[0]
 
   // Scroll progress + back-to-top + nav shadow
   const handleScroll = useCallback(() => {
@@ -257,17 +261,64 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
               🏪 {t('publicMarketplace.homeCta.browseNow')}
             </button>
             <button className="home-nav-signin" onClick={onLogin || (() => {})}>
-              Sign In
+              {t('home.signIn')}
             </button>
             <button className="home-nav-cta" onClick={onGetStarted}>
-              Get Started Free
+              {t('home.ctaPrimary')}
+            </button>
+            <button className="home-nav-lang" onClick={() => {
+              const codes = supportedLanguages.map(l => l.code)
+              const idx = codes.indexOf(i18n.language as typeof codes[number])
+              const next = codes[(idx + 1) % codes.length]
+              i18n.changeLanguage(next)
+            }} title={`${currentLang.nativeLabel} — Click to change`}>
+              {currentLang.flag} {currentLang.code.toUpperCase()}
             </button>
           </div>
-          <button className="home-nav-mobile-toggle" onClick={onLogin || (() => {})}>
-            <span className="nav-hamburger" />
+          <button className="home-nav-mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Menu">
+            <span className={`nav-hamburger${mobileMenuOpen ? ' nav-hamburger--open' : ''}`} />
           </button>
         </div>
       </nav>
+
+      {/* Mobile Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="home-mobile-menu">
+          <div className="home-mobile-menu-sections">
+            {SECTIONS.filter(s => s.id !== 'hero').map(s => (
+              <button
+                key={s.id}
+                className={`home-mobile-menu-link${activeSection === s.id ? ' home-mobile-menu-link--active' : ''}`}
+                onClick={() => { scrollToSection(s.id); setMobileMenuOpen(false) }}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <div className="home-mobile-menu-actions">
+            <button className="home-mobile-menu-browse" onClick={() => { navigate('/browse-marketplace'); setMobileMenuOpen(false) }}>
+              🏪 {t('publicMarketplace.homeCta.browseNow')}
+            </button>
+            <button className="home-mobile-menu-signin" onClick={() => { if (onLogin) onLogin(); setMobileMenuOpen(false) }}>
+              {t('home.signIn')}
+            </button>
+            <button className="home-mobile-menu-cta" onClick={() => { onGetStarted(); setMobileMenuOpen(false) }}>
+              {t('home.ctaPrimary')}
+            </button>
+          </div>
+          <div className="home-mobile-menu-lang">
+            {supportedLanguages.map(lang => (
+              <button
+                key={lang.code}
+                className={`home-mobile-lang-btn${lang.code === i18n.language ? ' home-mobile-lang-btn--active' : ''}`}
+                onClick={() => i18n.changeLanguage(lang.code)}
+              >
+                {lang.flag} {lang.nativeLabel}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Section Quick-Nav Dots */}
       <div className={`section-dots${showBackToTop ? ' section-dots--visible' : ''}`}>

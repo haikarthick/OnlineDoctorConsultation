@@ -847,6 +847,8 @@
 
   .register-form-topbar {
     padding: 0.6rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
 
   .register-form-panel > .register-form-header,
@@ -1139,6 +1141,13 @@
 @media (max-width: 520px) {
   .login-topbar {
     padding: 0.6rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .browse-marketplace-link {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.6rem;
   }
 
   .login-form-center {

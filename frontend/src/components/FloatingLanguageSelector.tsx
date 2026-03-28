@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { supportedLanguages } from '../i18n'
@@ -7,6 +8,7 @@ import './FloatingLanguageSelector.css'
 const FloatingLanguageSelector: React.FC = () => {
   const { i18n } = useTranslation()
   const { user } = useAuth()
+  const location = useLocation()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -27,6 +29,8 @@ const FloatingLanguageSelector: React.FC = () => {
 
   // Authenticated users have the language switcher in the sidebar
   if (user) return null
+  // Home page has its own embedded language switcher in the nav bar
+  if (location.pathname === '/') return null
 
   return (
     <div className="floating-lang" ref={ref}>
