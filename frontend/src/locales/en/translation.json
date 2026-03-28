@@ -208,51 +208,234 @@
     "ctaVet": "Join as Veterinarian",
     "guarantees": "✓ Free for pet owners • ✓ 30-day enterprise trial • ✓ No credit card required",
     "signinLink": "Already have an account? Sign in here →",
-    "benefitOwner": {
-      "access": "24/7 Expert Access",
-      "records": "Complete Health Records",
-      "reminders": "Smart Reminders",
-      "dashboard": "Multi-Pet Dashboard",
-      "chat": "Instant Chat",
-      "savings": "Cost Savings"
+    "pageTitle": "Every Enterprise Type, One Platform",
+    "nav": {
+      "home": "Home",
+      "enterprises": "Enterprises",
+      "hospitals": "Hospitals",
+      "features": "Features",
+      "workflow": "Workflow",
+      "compliance": "Compliance",
+      "howItWorks": "How It Works",
+      "testimonials": "Testimonials"
     },
-    "benefitEnterprise": {
-      "herdAI": "Herd Health AI",
-      "iot": "IoT Integration",
-      "supplyChain": "Supply Chain Tracking",
-      "financial": "Financial Analytics",
-      "workforce": "Workforce Management",
-      "compliance": "Compliance Automation"
+    "registerHospital": "Register Hospital",
+    "browseHospitals": "Browse Hospitals",
+    "enterpriseTrial": "Enterprise Trial",
+    "heroBadge1": "HIPAA-Aligned",
+    "heroBadge2": "End-to-End Encrypted",
+    "heroBadge3": "Full Audit Trail",
+    "heroCard1Title": "2,400 cattle",
+    "heroCard1Sub": "3 locations tracked",
+    "heroCard2Title": "Campaign: 94% done",
+    "heroCard2Sub": "FMD Vaccination drive",
+    "heroCard3Title": "Live Consult",
+    "heroCard3Sub": "Dr. Wilson — now",
+    "heroBadge": "Enterprise Animal Care",
+    "stats": {
+      "petOwners": "Pet Owners",
+      "enterprises": "Enterprises",
+      "hospitals": "Hospitals",
+      "verifiedVets": "Verified Vets",
+      "animalsManaged": "Animals Managed",
+      "avgRating": "Average Rating"
     },
-    "benefitVet": {
-      "schedule": "Flexible Schedule",
-      "prescriptions": "Digital Prescriptions",
-      "history": "Patient History",
-      "revenue": "Revenue Growth",
-      "copilot": "AI Copilot",
-      "network": "Professional Network"
+    "enterpriseSubtitle": "One platform. Every species. Every scale.",
+    "enterpriseTypesGrid": {
+      "dairyFarms": "Dairy Farms",
+      "poultry": "Poultry",
+      "equestrian": "Equestrian",
+      "aquaculture": "Aquaculture",
+      "zoosWildlife": "Zoos & Wildlife",
+      "kennels": "Kennels",
+      "catteries": "Catteries",
+      "breeding": "Breeding",
+      "aviaries": "Aviaries",
+      "ranches": "Ranches",
+      "vetClinics": "Vet Clinics",
+      "sanctuaries": "Sanctuaries"
     },
-    "enterpriseTypes": {
-      "dairy": "🐄 Dairy Farms",
-      "poultry": "🐓 Poultry Operations",
-      "swine": "🐖 Swine Production",
-      "sheep": "🐑 Sheep & Goat",
-      "aqua": "🐟 Aquaculture",
-      "equine": "🏇 Equine Centers",
-      "petClinics": "🐕 Pet Clinics",
-      "apiaries": "🐝 Apiaries",
-      "multiSpecies": "🏢 Multi-Species",
-      "research": "🔬 Research Labs",
-      "wildlife": "🌿 Wildlife",
-      "government": "📋 Government"
+    "hospitalTitle": "Vet Hospital Network",
+    "hospitalSubtitle": "Create, manage and grow your veterinary hospital — all in one platform",
+    "hospitalStats": {
+      "hospitals": "Hospitals",
+      "doctorsNetworked": "Doctors Networked",
+      "specialties": "Specialties",
+      "avgRating": "Avg Hospital Rating"
+    },
+    "hospitalFeatures": {
+      "profileTitle": "Public Hospital Profile",
+      "profileDesc": "A verified listing that patients can find, browse services, read reviews and book appointments directly.",
+      "multiDoctorTitle": "Multi-Doctor Management",
+      "multiDoctorDesc": "Invite veterinarians to join your hospital, assign departments, set specialties and manage schedules.",
+      "departmentsTitle": "Departments & Services",
+      "departmentsDesc": "Organise by Surgery, Dermatology, Emergency, Oncology and any custom specialty your hospital offers.",
+      "emergencyTitle": "Emergency Ready",
+      "emergencyDesc": "Flag 24/7 emergency availability, ICU capacity and critical care services so patients can reach you fast.",
+      "bookingTitle": "Online Booking",
+      "bookingDesc": "Patients book with your hospital in seconds. Appointments are routed to the right doctor automatically.",
+      "reviewsTitle": "Reviews & Trust",
+      "reviewsDesc": "Build a reputation with verified patient reviews, star ratings and transparent service quality scores."
+    },
+    "hospitalCta": {
+      "title": "Ready to put your hospital online?",
+      "desc": "Register as a Veterinarian — then create your hospital profile from your dashboard in minutes. Add your team, set services and start accepting bookings today.",
+      "step1": "Register as Vet",
+      "step2": "Create Hospital",
+      "step3": "Add Doctors",
+      "step4": "Go Live"
+    },
+    "featuresTitle": "Why Choose VetCare?",
+    "tabs": {
+      "petOwners": "Pet Owners",
+      "enterprises": "Enterprises",
+      "hospitals": "Hospitals",
+      "vets": "Veterinarians"
+    },
+    "ownerBenefits": {
+      "0": { "title": "Available 24/7", "desc": "Get expert advice for your pets anytime, day or night" },
+      "1": { "title": "Licensed Vets", "desc": "Connect with board-certified veterinary professionals" },
+      "2": { "title": "Live Video & Chat", "desc": "Real-time consultations with screen-sharing support" },
+      "3": { "title": "Digital Records", "desc": "Complete medical history, prescriptions & lab results" },
+      "4": { "title": "40% More Affordable", "desc": "Save compared to in-clinic visits with same quality" },
+      "5": { "title": "Under 5 Min Wait", "desc": "Average response time to connect with a vet" }
+    },
+    "enterpriseBenefits": {
+      "0": { "title": "Multi-Site Management", "desc": "Manage farms, ranches, zoos & facilities from one dashboard" },
+      "1": { "title": "Herd & Flock Tracking", "desc": "Groups, lineage, movements & production data at scale" },
+      "2": { "title": "Treatment Campaigns", "desc": "Batch vaccinations, deworming & health testing programs" },
+      "3": { "title": "Analytics & Reporting", "desc": "Real-time dashboards, mortality rates & productivity KPIs" },
+      "4": { "title": "Smart Alerts", "desc": "Automated health alerts, breeding reminders & compliance" },
+      "5": { "title": "Multi-Enterprise", "desc": "Dairy, poultry, equestrian, aquaculture, sanctuaries & more" }
+    },
+    "vetBenefits": {
+      "0": { "title": "Expand Practice", "desc": "Serve individual pets and enterprise-scale operations" },
+      "1": { "title": "Case Management", "desc": "Organized patient queue with priority triage system" },
+      "2": { "title": "Enterprise Contracts", "desc": "Steady income from farm & facility retainer agreements" },
+      "3": { "title": "Regulatory Compliant", "desc": "Built-in compliance for veterinary standards & audits" },
+      "4": { "title": "Mobile Ready", "desc": "Field-ready mobile interface for on-site visits" },
+      "5": { "title": "Global Network", "desc": "Connect with animal businesses worldwide" }
+    },
+    "hospitalBenefits": {
+      "0": { "title": "Hospital Profile", "desc": "Create a verified public profile for your clinic or multi-doctor hospital" },
+      "1": { "title": "Multi-Doctor Teams", "desc": "Add doctors, assign departments and manage staff roles in one place" },
+      "2": { "title": "Department Management", "desc": "Organise by Surgery, Dermatology, Oncology and custom specialties" },
+      "3": { "title": "Centralised Booking", "desc": "Patients book directly with your hospital; auto-route to the right vet" },
+      "4": { "title": "Emergency Services", "desc": "Flag 24/7 emergency availability and highlight critical care capacity" },
+      "5": { "title": "Reviews & Ratings", "desc": "Build trust with verified patient reviews and public ratings" }
+    },
+    "advancedTitle": "Advanced Enterprise Capabilities",
+    "advancedSubtitle": "Built for operations that demand more",
+    "advancedFeatures": {
+      "0": { "title": "Health Analytics", "desc": "AI-powered dashboards with mortality trends, growth curves, and predictive health scoring across your entire operation" },
+      "1": { "title": "Breeding & Genetics", "desc": "Lineage trees, inbreeding coefficients, breeding cycle tracking, and genetic trait analysis for optimal pairing" },
+      "2": { "title": "Feed & Inventory", "desc": "Feed consumption tracking, cost-per-animal analytics, automated reorder alerts and supplier management" },
+      "3": { "title": "IoT & Sensor Ready", "desc": "Integration-ready for temperature sensors, GPS trackers, weight scales, and automated feeding systems" },
+      "4": { "title": "Regulatory & Compliance", "desc": "Export certificates, movement permits, vaccination records and audit trails for government inspections" },
+      "5": { "title": "Financial Management", "desc": "Revenue per animal, treatment cost analytics, insurance claims tracking, and enterprise billing" }
+    },
+    "innovationTitle": "Next-Generation Innovation",
+    "innovationSubtitle": "Cutting-edge AI, IoT, and blockchain-style features that redefine animal management",
+    "innovationFeatures": {
+      "0": { "title": "AI Disease Prediction", "desc": "Predict disease outbreaks before they happen using risk scoring, geographic outbreak mapping, and automated preventive action plans" },
+      "1": { "title": "Genomic Lineage Tracker", "desc": "Deep ancestry trees with recursive lineage tracing, inbreeding coefficient analysis, and AI-powered breeding pair recommendations" },
+      "2": { "title": "IoT Sensor Dashboard", "desc": "Real-time environmental monitoring with automated anomaly detection, low-battery alerts, and telemetry analytics across all facilities" },
+      "3": { "title": "Farm-to-Fork Traceability", "desc": "Blockchain-style supply chain audit trail with SHA-256 verification, QR code generation, and complete batch traceability" },
+      "4": { "title": "Workforce Ops Center", "desc": "Task boards with priority scheduling, shift management with check-in/out, and worker performance analytics" },
+      "5": { "title": "Report Builder", "desc": "Generate 7 types of cross-module reports on demand — from animal census to sensor analytics — with export capabilities" }
+    },
+    "intelligenceTitle": "Futuristic Intelligence",
+    "intelligenceSubtitle": "AI copilots, digital twins, marketplace ecosystems, and geospatial intelligence",
+    "intelligenceFeatures": {
+      "0": { "title": "AI Vet Copilot", "desc": "Intelligent veterinary AI assistant with drug interaction checking, symptom analysis, and chat-based clinical decision support" },
+      "1": { "title": "Digital Twin & Simulator", "desc": "Create digital replicas of your operations and run simulations for disease spread, resource optimization, and financial forecasting" },
+      "2": { "title": "Marketplace & Auctions", "desc": "Buy, sell, and auction livestock, equipment, and supplies with real-time bidding, order management, and seller dashboards" },
+      "3": { "title": "Sustainability & Carbon", "desc": "Track ESG metrics, set sustainability goals, and estimate carbon footprints using IPCC emission factors per species" },
+      "4": { "title": "Wellness Portal", "desc": "Comprehensive pet health scorecards with nutrition, activity, vaccination & dental tracking plus smart recurring reminders" },
+      "5": { "title": "Geospatial Analytics", "desc": "Geofencing zones, real-time location tracking, heatmap clustering, movement trails, and automatic zone breach detection" }
+    },
+    "workflowTitle": "Hospital Workflow & Staff Management",
+    "workflowSubtitle": "Enterprise-grade clinical workflow: triage → examination → treatment → discharge, with 12+ staff categories",
+    "workflowChips": {
+      "0": "Queue & Triage",
+      "1": "Clinical Pipeline",
+      "2": "Referral Workflows",
+      "3": "Inpatient/ICU",
+      "4": "12 Staff Roles"
+    },
+    "workflowFeatures": {
+      "0": { "title": "Smart Queue & Triage", "desc": "Priority-based waiting room with emergency escalation, triage levels, and real-time average wait time tracking" },
+      "1": { "title": "Clinical Workflow Pipeline", "desc": "Full triage → examination → treatment → observation → discharge pipeline with stage transitions and audit trails" },
+      "2": { "title": "Specialist Referrals", "desc": "Multi-doctor consultation workflow with referral requests, specialty routing, clinical notes sharing, and acceptance tracking" },
+      "3": { "title": "Inpatient & Boarding", "desc": "ICU, surgery recovery, boarding management with vitals logging, medication tracking, and daily rate billing" },
+      "4": { "title": "12+ Staff Positions", "desc": "Vet technicians, nurses, surgeons, lab techs, pharmacists, anesthesiologists — all mapped to departments with role-based access" },
+      "5": { "title": "Workflow Analytics", "desc": "Real-time dashboard showing active cases by stage, average case duration, queue stats, and staff utilization metrics" }
+    },
+    "complianceTitle": "HIPAA Compliance & Data Privacy",
+    "complianceSubtitle": "Enterprise-grade security and HIPAA-aligned data protection for every animal, every record, every user",
+    "complianceBadges": {
+      "0": "HIPAA-Aligned",
+      "1": "RBAC Enforced",
+      "2": "Audit Logged",
+      "3": "Encrypted"
+    },
+    "complianceFeatures": {
+      "0": { "title": "HIPAA-Aligned Protection", "desc": "Technical safeguards including role-based access controls, encrypted data transmission, and confidential record flagging for all medical data" },
+      "1": { "title": "HIPAA-Grade Audit Trail", "desc": "Every data access, modification, and export is logged with user identity, IP address, timestamp, and HIPAA event categorization" },
+      "2": { "title": "Role-Based Access Control", "desc": "4-tier RBAC system (Pet Owner, Farmer, Veterinarian, Admin) with granular permission management and admin override auditing" },
+      "3": { "title": "Data Encryption & Security", "desc": "TLS encryption in transit, bcrypt password hashing, JWT session management with configurable expiration and revocation" },
+      "4": { "title": "PHI Access Monitoring", "desc": "Real-time dashboard tracking who accessed Protected Health Information — medical records, prescriptions, lab results, and scans" },
+      "5": { "title": "Compliance Dashboard", "desc": "Live compliance scoring, policy management, breach detection, failed login monitoring, and regulatory framework tracking" }
+    },
+    "dataPrivacyTitle": "Data Privacy Commitment:",
+    "dataPrivacyText": "VetCare does not sell, share, or monetize your health data. All medical records are protected with the same standards used in human healthcare. Every access is audited. Every user has full visibility into their data footprint.",
+    "howItWorksTitle": "How It Works",
+    "steps": {
+      "owner": {
+        "0": { "title": "Sign Up Free", "desc": "Create your account in seconds" },
+        "1": { "title": "Add Your Pet", "desc": "Register species, breed & history" },
+        "2": { "title": "Book a Vet", "desc": "Chat, video or schedule a visit" },
+        "3": { "title": "Get Treatment", "desc": "Prescriptions & records saved" }
+      },
+      "enterprise": {
+        "0": { "title": "Register Enterprise", "desc": "Farm, ranch, zoo, clinic or more" },
+        "1": { "title": "Set Up Operations", "desc": "Locations, groups & team members" },
+        "2": { "title": "Onboard Animals", "desc": "Import herds, assign to locations" },
+        "3": { "title": "Run & Scale", "desc": "Campaigns, analytics & vet care" }
+      },
+      "hospital": {
+        "0": { "title": "Register as Vet", "desc": "Create a veterinarian account" },
+        "1": { "title": "Create Hospital", "desc": "Set up your clinic profile & departments" },
+        "2": { "title": "Add Doctors & Staff", "desc": "Invite vets, assign roles & specialties" },
+        "3": { "title": "Accept Bookings", "desc": "Patients find & book your hospital online" }
+      },
+      "vet": {
+        "0": { "title": "Register & Verify", "desc": "Submit your veterinary credentials" },
+        "1": { "title": "Set Availability", "desc": "Choose your consultation hours" },
+        "2": { "title": "Serve Clients", "desc": "Pet owners & enterprise operations" },
+        "3": { "title": "Grow Practice", "desc": "Reviews, analytics & retainer deals" }
+      }
+    },
+    "testimonialsTitle": "Trusted by Professionals",
+    "testimonials": {
+      "0": { "name": "Sarah Mitchell", "role": "Pet Owner", "text": "VetCare saved my cat's life! Quick diagnosis at 2 AM when every clinic was closed. The video consultation was seamless." },
+      "1": { "name": "Robert Hargrove", "role": "Dairy Farm Owner — 2,400 head", "text": "Managing treatment campaigns across 3 farms used to take a week of paperwork. Now it's done in minutes with full traceability." },
+      "2": { "name": "Dr. James Wilson", "role": "Veterinarian", "text": "I serve 12 enterprise clients and dozens of pet owners through VetCare. The platform handles scheduling, records, and billing beautifully." },
+      "3": { "name": "Maria Chen", "role": "Zoo Operations Director", "text": "Location tracking, species grouping and campaign management for our 800+ animals across 40 enclosures — all in one place." },
+      "4": { "name": "Dr. Priya Nair", "role": "Director — City Paws Veterinary Hospital", "text": "We set up our hospital profile, added 8 doctors across 4 departments and went live in one afternoon. Bookings started the same day. VetCare is the best thing to happen to our clinic." },
+      "5": { "name": "Thomas Eriksen", "role": "Compliance Officer — Nordic Farms Group", "text": "The HIPAA-grade audit logging and PHI access monitoring gave our compliance team full confidence. Every record access is tracked, and the real-time dashboard makes audit preparation effortless." }
     },
     "ctaTitle": "Ready to Transform Your Animal Care?",
     "ctaSubtitle": "Join thousands of pet owners, enterprises, and veterinarians on VetCare",
     "footer": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
+      "compliance": "Compliance",
       "contact": "Contact Us",
-      "signIn": "Sign In"
+      "signIn": "Sign In",
+      "brand": "VetCare Enterprise",
+      "hipaa": "HIPAA-Aligned",
+      "copyright": "© 2026 VetCare. All rights reserved."
     },
     "howItWorks": {
       "petOwners": "For Pet Owners",
