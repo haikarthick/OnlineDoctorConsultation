@@ -3309,5 +3309,48 @@
     "recentPrescriptions": "Recent Prescriptions",
     "vaccinations": "Vaccinations",
     "noMedicalHistory": "No medical history found for this patient"
+  },
+  "publicMarketplace": {
+    "heroTitle": "Browse Livestock & Farm Supplies",
+    "heroSubtitle": "Discover cattle, buffalo, goats, feed, equipment and more — no login required. Sign in to contact sellers, place bids or list your own.",
+    "stats": {
+      "activeListings": "Active Listings",
+      "species": "Species",
+      "categories": "Categories",
+      "sellers": "Sellers"
+    },
+    "registerToSell": "Register to Sell",
+    "signInToBid": "Sign In to Bid",
+    "goToFullMarketplace": "Go to Full Marketplace",
+    "showingResults": "Showing {{count}} of {{total}} listings",
+    "prev": "← Previous",
+    "next": "Next →",
+    "pageOf": "Page {{current}} of {{total}}",
+    "ctaBanner": {
+      "title": "Ready to Buy, Sell or Bid?",
+      "subtitle": "Create a free account to contact sellers, place bids, list your animals and access your full marketplace dashboard.",
+      "register": "Create Free Account",
+      "signIn": "Sign In"
+    },
+    "loginGate": {
+      "buyText": "Sign in to purchase this listing or contact the seller.",
+      "signInToBuy": "Sign In to Buy",
+      "bidText": "Sign in to place a bid on this listing.",
+      "signInToBid": "Sign In to Bid",
+      "placeBidFull": "Place Bid in Marketplace",
+      "createAccount": "Don't have an account? Register free →"
+    },
+    "homeCta": {
+      "title": "Livestock Marketplace",
+      "subtitle": "Browse thousands of livestock, farm equipment, feed and veterinary supplies — completely free, no login needed.",
+      "livestock": "Livestock",
+      "feed": "Feed & Nutrition",
+      "equipment": "Equipment",
+      "medicine": "Medicine",
+      "genetics": "Genetics",
+      "services": "Vet Services",
+      "browseNow": "Browse Marketplace",
+      "sellYours": "Sell Your Animals"
+    }
   }
 }

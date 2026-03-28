@@ -181,6 +181,30 @@ class Tier4Controller {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
+  // ═══════════════════ Public Marketplace (no auth) ═══════════════════
+
+  async publicListMarketplaceListings(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.listPublicListings(req.query);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async publicGetMarketplaceListing(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.getPublicListing(req.params.id);
+      if (!data) return res.status(404).json({ error: { message: 'Listing not found' } });
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async publicGetMarketplaceStats(req: Request, res: Response) {
+    try {
+      const data = await marketplaceService.getPublicStats();
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
   // ═══════════════════ Marketplace & Auctions ═══════════════════
 
   async listMarketplaceListings(req: Request, res: Response) {

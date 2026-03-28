@@ -361,6 +361,99 @@ class MarketplaceService {
     };
   }
 
+  // ── Public Browse (no auth) ──
+  async listPublicListings(filters: any = {}) {
+    const {
+      category, listingType, minPrice, maxPrice, search,
+      limit = 24, offset = 0,
+      species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender,
+      vaccinationStatus, healthCertificate, sortBy,
+    } = filters;
+    // Only select safe public columns — no seller email/phone/id
+    let query = `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
+                 l.quantity, l.unit, l.condition, l.images, l.location, l.tags, l.featured,
+                 l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender,
+                 l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
+                 l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
+                 l.auction_end_time, l.views_count, l.created_at, l.status,
+                 u.first_name as seller_name, l.location as seller_location,
+                 (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count,
+                 (SELECT MAX(amount) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as highest_bid
+                 FROM marketplace_listings l
+                 LEFT JOIN users u ON l.seller_id = u.id
+                 WHERE l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`;
+    const params: any[] = []; let idx = 1;
+
+    if (category) { query += ` AND l.category = $${idx++}`; params.push(category); }
+    if (listingType) { query += ` AND l.listing_type = $${idx++}`; params.push(listingType); }
+    if (minPrice) { query += ` AND l.price >= $${idx++}`; params.push(minPrice); }
+    if (maxPrice) { query += ` AND l.price <= $${idx++}`; params.push(maxPrice); }
+    if (search) { query += ` AND (l.title ILIKE $${idx} OR l.description ILIKE $${idx} OR l.breed ILIKE $${idx})`; params.push(`%${search}%`); idx++; }
+    if (species) { query += ` AND l.species = $${idx++}`; params.push(species); }
+    if (breed) { query += ` AND l.breed ILIKE $${idx++}`; params.push(`%${breed}%`); }
+    if (minMilkYield) { query += ` AND l.daily_milk_yield >= $${idx++}`; params.push(minMilkYield); }
+    if (maxMilkYield) { query += ` AND l.daily_milk_yield <= $${idx++}`; params.push(maxMilkYield); }
+    if (pregnancyStatus) { query += ` AND l.pregnancy_status = $${idx++}`; params.push(pregnancyStatus); }
+    if (gender) { query += ` AND l.gender = $${idx++}`; params.push(gender); }
+    if (vaccinationStatus) { query += ` AND l.vaccination_status = $${idx++}`; params.push(vaccinationStatus); }
+    if (healthCertificate === 'true' || healthCertificate === true) { query += ` AND l.health_certificate = true`; }
+
+    let orderBy = 'l.is_hot_deal DESC NULLS LAST, l.listing_tier DESC NULLS LAST, l.featured DESC, l.created_at DESC';
+    if (sortBy === 'price_asc') orderBy = 'l.price ASC NULLS LAST';
+    else if (sortBy === 'price_desc') orderBy = 'l.price DESC NULLS LAST';
+    else if (sortBy === 'newest') orderBy = 'l.created_at DESC';
+    else if (sortBy === 'milk_yield') orderBy = 'l.daily_milk_yield DESC NULLS LAST';
+
+    query += ` ORDER BY ${orderBy} LIMIT $${idx++} OFFSET $${idx}`;
+    params.push(Math.min(+limit, 50), offset);
+    const result = await pool.query(query, params);
+
+    // Count
+    let countQuery = `SELECT COUNT(*) FROM marketplace_listings l WHERE l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`;
+    const countParams: any[] = []; let cIdx = 1;
+    if (category) { countQuery += ` AND l.category = $${cIdx++}`; countParams.push(category); }
+    if (species) { countQuery += ` AND l.species = $${cIdx++}`; countParams.push(species); }
+    if (search) { countQuery += ` AND (l.title ILIKE $${cIdx} OR l.description ILIKE $${cIdx} OR l.breed ILIKE $${cIdx})`; countParams.push(`%${search}%`); cIdx++; }
+    const countResult = await pool.query(countQuery, countParams);
+
+    return { items: result.rows, total: +(countResult.rows[0]?.count || 0) };
+  }
+
+  async getPublicListing(id: string) {
+    // Increment views
+    await pool.query('UPDATE marketplace_listings SET views_count = views_count + 1 WHERE id = $1', [id]);
+    // Return listing without sensitive seller info (no email, phone, seller_id)
+    const result = await pool.query(
+      `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
+              l.quantity, l.unit, l.condition, l.images, l.location, l.tags, l.featured,
+              l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender,
+              l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
+              l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
+              l.auction_end_time, l.reserve_price, l.views_count, l.created_at, l.status,
+              u.first_name as seller_name, l.location as seller_location,
+              e.name as enterprise_name,
+              (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count,
+              (SELECT MAX(amount) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as highest_bid
+       FROM marketplace_listings l
+       LEFT JOIN users u ON l.seller_id = u.id
+       LEFT JOIN enterprises e ON l.enterprise_id = e.id
+       WHERE l.id = $1 AND l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`, [id]
+    );
+    return result.rows[0] || null;
+  }
+
+  async getPublicStats() {
+    const result = await pool.query(
+      `SELECT
+        COUNT(*) FILTER (WHERE status = 'active') as active_listings,
+        COUNT(DISTINCT species) FILTER (WHERE status = 'active' AND species IS NOT NULL) as species_count,
+        COUNT(DISTINCT category) FILTER (WHERE status = 'active') as category_count,
+        COUNT(DISTINCT seller_id) FILTER (WHERE status = 'active') as seller_count
+       FROM marketplace_listings WHERE (admin_approved = true OR admin_approved IS NULL)`
+    );
+    return result.rows[0] || {};
+  }
+
   // ── Market Intelligence ──
   async getMarketPrices(filters: any = {}) {
     const { species, breed } = filters;

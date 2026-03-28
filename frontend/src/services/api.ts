@@ -1619,6 +1619,22 @@ class ApiService {
     return response.data
   }
 
+  // ─── Public Marketplace (no auth required) ──────────────────
+  async listPublicMarketplaceListings(filters: any = {}) {
+    const response = await axios.get(`${API_BASE_URL}/public/marketplace/listings`, { params: filters })
+    return response.data
+  }
+
+  async getPublicMarketplaceListing(id: string) {
+    const response = await axios.get(`${API_BASE_URL}/public/marketplace/listings/${id}`)
+    return response.data
+  }
+
+  async getPublicMarketplaceStats() {
+    const response = await axios.get(`${API_BASE_URL}/public/marketplace/stats`)
+    return response.data
+  }
+
   // ─── Marketplace & Auctions ─────────────────────────────────
   async getMarketplaceDashboard(filters: any = {}) {
     const response = await this.client.get('/marketplace/dashboard', { params: filters })

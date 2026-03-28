@@ -600,6 +600,11 @@ router.get('/settings/public', asyncHandler(async (_req: Request, res: Response)
   res.json({ success: true, data: settings });
 }));
 
+// ─── Public Marketplace (no auth required) ───────────────────
+router.get('/public/marketplace/listings', asyncHandler((req: Request, res: Response) => Tier4Controller.publicListMarketplaceListings(req, res)));
+router.get('/public/marketplace/listings/:id', asyncHandler((req: Request, res: Response) => Tier4Controller.publicGetMarketplaceListing(req, res)));
+router.get('/public/marketplace/stats', asyncHandler((req: Request, res: Response) => Tier4Controller.publicGetMarketplaceStats(req, res)));
+
 // ─── Health check & feature flags ────────────────────────────
 router.get('/health', async (_req, res) => {
   const checks: Record<string, string> = { api: 'ok' };

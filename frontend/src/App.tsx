@@ -70,6 +70,7 @@ const ReportBuilder = lazy(() => import('./pages/ReportBuilder'))
 const AICopilot = lazy(() => import('./pages/AICopilot'))
 const DigitalTwin = lazy(() => import('./pages/DigitalTwin'))
 const Marketplace = lazy(() => import('./pages/Marketplace'))
+const PublicMarketplace = lazy(() => import('./pages/PublicMarketplace'))
 const Sustainability = lazy(() => import('./pages/Sustainability'))
 const WellnessPortal = lazy(() => import('./pages/WellnessPortal'))
 const GeospatialAnalytics = lazy(() => import('./pages/GeospatialAnalytics'))
@@ -185,6 +186,7 @@ function AppRoutes() {
         </PublicOnlyRoute>
       } />
       <Route path="/accept-invite" element={<AcceptInvite />} />
+      <Route path="/browse-marketplace" element={<PublicMarketplace />} />
 
       {/* Protected pages (inside AppLayout) */}
       <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
