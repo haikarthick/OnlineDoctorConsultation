@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import './Auth.css'
@@ -11,6 +12,7 @@ interface RegisterProps {
 export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const { register } = useAuth()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -105,6 +107,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
         <div className="register-form-panel">
           <div className="register-form-topbar">
             {onGoHome && <button className="back-home-btn" onClick={onGoHome} title={t('login.backHome')}>{t('login.backHome')}</button>}
+            <button className="browse-marketplace-link" onClick={() => navigate('/browse-marketplace')}>🏪 {t('publicMarketplace.homeCta.browseNow')}</button>
             <span className="register-topbar-login">{t('register.alreadyMember')} <button className="link-btn" onClick={onSwitchToLogin}>{t('register.signIn')}</button></span>
           </div>
           <div className="register-form-header">

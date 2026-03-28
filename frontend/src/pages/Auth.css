@@ -988,6 +988,25 @@
   flex-shrink: 0;
 }
 
+.browse-marketplace-link {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #fff;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.38rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.browse-marketplace-link:hover {
+  background: linear-gradient(135deg, #047857, #059669);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+}
+
 .login-topbar-register {
   font-size: 0.84rem;
   color: #6b7280;

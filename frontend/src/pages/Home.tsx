@@ -253,6 +253,9 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
             ))}
           </div>
           <div className="home-nav-actions">
+            <button className="home-nav-browse" onClick={() => navigate('/browse-marketplace')}>
+              🏪 {t('publicMarketplace.homeCta.browseNow')}
+            </button>
             <button className="home-nav-signin" onClick={onLogin || (() => {})}>
               Sign In
             </button>
