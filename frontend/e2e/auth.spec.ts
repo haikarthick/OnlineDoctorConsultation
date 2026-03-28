@@ -144,6 +144,15 @@ test.describe('Authentication — Public Routes', () => {
     await expect(page).toHaveURL(/^\/$|\/$/  )
   })
 
+  test('public marketplace browse loads without login', async ({ page }) => {
+    await page.goto('/browse-marketplace')
+    await page.waitForLoadState('domcontentloaded')
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    // Should NOT redirect to login
+    await expect(page).toHaveURL(/\/browse-marketplace/)
+  })
+
   test('unauthenticated user is redirected from protected routes', async ({ page }) => {
     await page.goto('/dashboard')
     await expect(page).toHaveURL(/\/login/)
