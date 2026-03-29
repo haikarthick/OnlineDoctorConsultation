@@ -339,6 +339,31 @@ const AnimalTimeline: React.FC = () => {
   }, [fullRangeMs, minMs, maxMs, daysVisible])
 
   // ── Navigation ──
+  const buildRecordPath = (event: TimelineEvent) => {
+    const config = getEventConfig(event.type)
+    const basePath = config.navPath || '/medical-records'
+    const animalId = selectedAnimalId
+    // Map event types to MedicalRecords tab
+    const tabMap: Record<string, string> = {
+      vaccination: 'vaccinations', record_vaccination: 'vaccinations',
+      lab_result: 'lab_results', record_lab_report: 'lab_results',
+      allergy: 'allergies', weight: 'weight',
+    }
+    const tab = tabMap[event.type] || ''
+    if (basePath === '/medical-records') {
+      const params = new URLSearchParams()
+      if (animalId) params.set('animalId', animalId)
+      if (tab) params.set('tab', tab)
+      params.set('recordId', event.id)
+      return `${basePath}?${params.toString()}`
+    }
+    // For consultations/prescriptions, pass recordId as query param
+    const params = new URLSearchParams()
+    if (animalId) params.set('animalId', animalId)
+    params.set('recordId', event.id)
+    return `${basePath}?${params.toString()}`
+  }
+
   const navigate = (path: string) => {
     routerNavigate(path)
   }
@@ -703,7 +728,7 @@ const AnimalTimeline: React.FC = () => {
           <div className="tl-tt-actions">
             <button className="tl-tt-action" onClick={() => { setDrawerEvent(hoverEvent); setHoverEvent(null) }}>📋 Details</button>
             {getEventConfig(hoverEvent.type).navPath && (
-              <button className="tl-tt-action" onClick={() => { navigate(getEventConfig(hoverEvent.type).navPath!); setHoverEvent(null) }}>🔗 Open Record</button>
+              <button className="tl-tt-action" onClick={() => { navigate(buildRecordPath(hoverEvent)); setHoverEvent(null) }}>🔗 Open Record</button>
             )}
             {(hoverEvent.type === 'booking' || hoverEvent.type === 'consultation') && (
               <button className="tl-tt-action tl-tt-action-primary" onClick={() => { navigate('/consultations'); setHoverEvent(null) }}>🏥 Consultation</button>
@@ -747,7 +772,7 @@ const AnimalTimeline: React.FC = () => {
             </div>
             <div className="tl-drawer-actions">
               {getEventConfig(drawerEvent.type).navPath && (
-                <button className="tl-drawer-action-primary" onClick={() => navigate(getEventConfig(drawerEvent.type).navPath!)}>🔗 Open Full Record</button>
+                <button className="tl-drawer-action-primary" onClick={() => navigate(buildRecordPath(drawerEvent))}>🔗 Open Full Record</button>
               )}
               {(drawerEvent.type === 'booking' || drawerEvent.type === 'consultation') && (
                 <button className="tl-drawer-action-primary" onClick={() => navigate('/consultations')}>🏥 View Consultation</button>

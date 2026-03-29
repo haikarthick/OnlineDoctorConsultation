@@ -673,6 +673,18 @@ textarea.module-input {
   transition: all 0.3s ease;
   border: 1px solid rgba(0, 0, 0, 0.02);
 }
+
+.record-item.record-highlight {
+  animation: record-pulse 2s ease-in-out;
+  border-color: #667eea;
+  box-shadow: 0 0 12px rgba(102, 126, 234, 0.35);
+}
+
+@keyframes record-pulse {
+  0% { box-shadow: 0 0 0 rgba(102, 126, 234, 0); border-color: rgba(0,0,0,0.02); }
+  20% { box-shadow: 0 0 16px rgba(102, 126, 234, 0.5); border-color: #667eea; }
+  100% { box-shadow: 0 0 12px rgba(102, 126, 234, 0.35); border-color: #667eea; }
+}
   transition: all 0.3s ease;
   align-items: center;
 }

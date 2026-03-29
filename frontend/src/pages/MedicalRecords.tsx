@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
 import apiService from '../services/api'
@@ -30,12 +31,21 @@ const MedicalRecords: React.FC = () => {
 
   const { formatDate } = useSettings()
   const { user } = useAuth()
+  const location = useLocation()
   const isVet = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
 
-  const [activeTab, setActiveTab] = useState<Tab>('overview')
+  // Parse deep-link query params
+  const queryParams = new URLSearchParams(location.search)
+  const deepLinkAnimalId = queryParams.get('animalId') || ''
+  const deepLinkTab = queryParams.get('tab') as Tab | ''
+  const deepLinkRecordId = queryParams.get('recordId') || ''
+
+  const [activeTab, setActiveTab] = useState<Tab>(deepLinkTab || 'overview')
   const [animals, setAnimals] = useState<any[]>([])
-  const [selectedAnimal, setSelectedAnimal] = useState<string>('')
+  const [selectedAnimal, setSelectedAnimal] = useState<string>(deepLinkAnimalId)
+  const [highlightRecordId] = useState<string>(deepLinkRecordId)
+  const highlightedRef = useRef<HTMLDivElement | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -69,10 +79,12 @@ const MedicalRecords: React.FC = () => {
       const list = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
       setAnimals(list)
       if (list.length > 0 && !selectedAnimal) {
-        setSelectedAnimal(list[0].id)
+        // Use deep-linked animal if provided and exists in the list
+        const target = deepLinkAnimalId && list.find((a: any) => a.id === deepLinkAnimalId)
+        setSelectedAnimal(target ? target.id : list[0].id)
       }
     } catch { /* ignore */ }
-  }, [selectedAnimal])
+  }, [selectedAnimal, deepLinkAnimalId])
 
   const loadStats = useCallback(async () => {
     try {
@@ -176,6 +188,25 @@ const MedicalRecords: React.FC = () => {
       loadStats()
     }
   }, [selectedAnimal, activeTab])
+
+  // Scroll to highlighted record after data loads
+  useEffect(() => {
+    if (highlightRecordId && highlightedRef.current) {
+      setTimeout(() => {
+        highlightedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 300)
+    }
+  }, [highlightRecordId, vaccinations, labResults, allergies, consultations, prescriptions, weightHistory, timeline, loading])
+
+  // ═══ RECORD HIGHLIGHT HELPER ═══════════════════════════════
+
+  const recordItemProps = (id: string) => {
+    const isMatch = highlightRecordId && id === highlightRecordId
+    return {
+      className: `record-item${isMatch ? ' record-highlight' : ''}`,
+      ref: isMatch ? highlightedRef : undefined,
+    }
+  }
 
   // ═══ CRUD HANDLERS ════════════════════════════════════════
 
@@ -388,7 +419,7 @@ const MedicalRecords: React.FC = () => {
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>Recent Prescriptions</h3>
                 <div className="records-list">
                   {prescriptions.slice(0, 5).map((rx: any) => (
-                    <div key={rx.id} className="record-item" style={{ borderLeft: '4px solid #059669' }}>
+                    <div key={rx.id} {...recordItemProps(rx.id)} style={{ borderLeft: '4px solid #059669' }}>
                       <div className="record-icon">💊</div>
                       <div className="record-details">
                         <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : 'Medication'}</h4>
@@ -427,7 +458,7 @@ const MedicalRecords: React.FC = () => {
                 {consultations.map((c: any) => {
                   const statusColors: Record<string, string> = { completed: '#059669', in_progress: '#667eea', scheduled: '#d97706', cancelled: '#dc2626', missed: '#9ca3af' }
                   return (
-                    <div key={c.id} className="record-item" style={{ borderLeft: `4px solid ${statusColors[c.status] || '#6b7280'}` }}>
+                    <div key={c.id} {...recordItemProps(c.id)} style={{ borderLeft: `4px solid ${statusColors[c.status] || '#6b7280'}` }}>
                       <div className="record-icon">🩺</div>
                       <div className="record-details">
                         <h4>
@@ -461,7 +492,7 @@ const MedicalRecords: React.FC = () => {
             ) : (
               <div className="records-list">
                 {prescriptions.map((rx: any) => (
-                  <div key={rx.id} className="record-item" style={{ borderLeft: '4px solid #059669' }}>
+                  <div key={rx.id} {...recordItemProps(rx.id)} style={{ borderLeft: '4px solid #059669' }}>
                     <div className="record-icon">💊</div>
                     <div className="record-details">
                       <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : 'Medication'}</h4>
@@ -507,7 +538,7 @@ const MedicalRecords: React.FC = () => {
                     {vaccinations.map((v: any) => {
                       const isOverdue = v.nextDueDate && new Date(v.nextDueDate) < new Date()
                       return (
-                        <div key={v.id} className="record-item" style={{ borderLeft: `4px solid ${isOverdue ? '#dc2626' : '#7c3aed'}` }}>
+                        <div key={v.id} {...recordItemProps(v.id)} style={{ borderLeft: `4px solid ${isOverdue ? '#dc2626' : '#7c3aed'}` }}>
                           <div className="record-icon">💉</div>
                           <div className="record-details">
                             <h4>{v.vaccineName} {v.vaccineType ? `(${v.vaccineType})` : ''}</h4>
@@ -551,7 +582,7 @@ const MedicalRecords: React.FC = () => {
                 ) : (
                   <div className="records-list">
                     {labResults.map((lr: any) => (
-                      <div key={lr.id} className="record-item" style={{ borderLeft: `4px solid ${lr.isAbnormal ? '#dc2626' : '#d97706'}` }}>
+                      <div key={lr.id} {...recordItemProps(lr.id)} style={{ borderLeft: `4px solid ${lr.isAbnormal ? '#dc2626' : '#d97706'}` }}>
                         <div className="record-icon">🔬</div>
                         <div className="record-details">
                           <h4>{lr.testName} {lr.testCategory ? `(${lr.testCategory})` : ''}</h4>
@@ -595,7 +626,7 @@ const MedicalRecords: React.FC = () => {
                     {allergies.map((al: any) => {
                       const sevColor = al.severity === 'severe' ? '#dc2626' : al.severity === 'moderate' ? '#d97706' : '#059669'
                       return (
-                        <div key={al.id} className="record-item" style={{ borderLeft: `4px solid ${sevColor}` }}>
+                        <div key={al.id} {...recordItemProps(al.id)} style={{ borderLeft: `4px solid ${sevColor}` }}>
                           <div className="record-icon">⚠️</div>
                           <div className="record-details">
                             <h4>{al.allergen}</h4>
@@ -663,7 +694,7 @@ const MedicalRecords: React.FC = () => {
                     </div>
                     <div className="records-list">
                       {weightHistory.map((w: any) => (
-                        <div key={w.id} className="record-item" style={{ borderLeft: '4px solid #667eea' }}>
+                        <div key={w.id} {...recordItemProps(w.id)} style={{ borderLeft: '4px solid #667eea' }}>
                           <div className="record-icon">⚖️</div>
                           <div className="record-details">
                             <h4>{w.weight} {w.unit}</h4>
