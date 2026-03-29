@@ -65,9 +65,9 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer'], section: 'Consultations' },
 
     // ── Animals & Health ──
-    { id: 'animals', label: t(isPetOwner ? 'nav.myPets' : 'nav.myAnimals'),
-      icon: isPetOwner ? '🐾' : '🐄', path: '/animals',
-      roles: ['pet_owner', 'farmer'], section: 'Animals & Health' },
+    { id: 'animals', label: t(isPetOwner ? 'nav.myPets' : (user?.role === 'veterinarian' ? 'nav.myPets' : 'nav.myAnimals')),
+      icon: (isPetOwner || user?.role === 'veterinarian') ? '🐾' : '🐄', path: '/animals',
+      roles: ['pet_owner', 'farmer', 'veterinarian'], section: 'Animals & Health' },
     { id: 'medical', label: t('nav.medicalRecords'), icon: '📋', path: '/medical-records',
       roles: ['veterinarian', 'pet_owner', 'farmer'], section: 'Animals & Health' },
     { id: 'animal-timeline', label: t('nav.animalTimeline'), icon: '📅', path: '/animal-timeline',

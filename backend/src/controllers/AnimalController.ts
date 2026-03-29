@@ -66,6 +66,7 @@ export class AnimalController {
     if (animal.ownerId !== req.userId && req.userRole !== 'admin') {
       throw new ForbiddenError('You do not have permission to update this animal');
     }
+    // Veterinarians can only update their own animals (ownerId check above covers this)
     const updated = await AnimalService.updateAnimal(req.params.id, req.body);
     res.json({ success: true, data: updated });
   }
@@ -75,6 +76,7 @@ export class AnimalController {
     if (animal.ownerId !== req.userId && req.userRole !== 'admin') {
       throw new ForbiddenError('You do not have permission to delete this animal');
     }
+    // Veterinarians can only delete their own animals (ownerId check above covers this)
     await AnimalService.deleteAnimal(req.params.id);
     res.json({ success: true, message: 'Animal removed' });
   }

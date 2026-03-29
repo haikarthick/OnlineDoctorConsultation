@@ -143,7 +143,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Pages
     'dashboard', 'consultations', 'medical_records', 'schedule',
     'prescriptions', 'reviews', 'video_consultation', 'settings',
-    'animal_timeline',
+    'animals', 'animal_timeline',
     // Hospital
     'hospital_browse', 'hospital_create', 'hospital_manage',
     'hospital_departments', 'hospital_services', 'hospital_staff',
