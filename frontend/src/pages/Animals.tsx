@@ -267,14 +267,15 @@ const Animals: React.FC = () => {
         </div>
       )}
 
-      {/* ─── Registration / Edit Form ──────────────────────── */}
-      {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
+      {/* ─── Registration / Edit Form Modal ──────────────── */}
       {showForm && (
-        <div ref={formRef} className="edit-form-panel">
-          {editingAnimal && <div className="edit-form-badge">✏️ Editing Mode</div>}
-          <h2>
-            {editingAnimal ? `✏️ ${t('animals.registerModal.titleEdit', { name: editingAnimal.name })}` : t('animals.registerModal.titleNew')}
-          </h2>
+        <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }}>
+          <div ref={formRef} className="edit-form-panel edit-form-modal" onClick={e => e.stopPropagation()}>
+            <button className="edit-form-close" onClick={() => { setShowForm(false); resetForm() }} aria-label="Close">✕</button>
+            {editingAnimal && <div className="edit-form-badge">✏️ Editing Mode</div>}
+            <h2>
+              {editingAnimal ? `✏️ ${t('animals.registerModal.titleEdit', { name: editingAnimal.name })}` : t('animals.registerModal.titleNew')}
+            </h2>
           <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 16px' }}>{t('animals.registerModal.requiredNote')}</p>
 
           <form onSubmit={handleSubmit}>
@@ -422,6 +423,7 @@ const Animals: React.FC = () => {
               </button>
             </div>
           </form>
+          </div>
         </div>
       )}
 

@@ -258,9 +258,14 @@
 .edit-form-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.25);
-  z-index: 40;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9998;
   animation: overlayFadeIn 0.25s ease;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+  overflow-y: auto;
 }
 
 @keyframes overlayFadeIn {
@@ -270,7 +275,7 @@
 
 .edit-form-panel {
   position: relative;
-  z-index: 41;
+  z-index: 9999;
   background: white;
   border: 2px solid #6366f1;
   border-radius: 16px;
@@ -278,6 +283,38 @@
   margin-bottom: 24px;
   box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
   animation: formSlideIn 0.3s ease;
+}
+
+.edit-form-modal {
+  width: 95%;
+  max-width: 720px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  margin: 0 auto;
+}
+
+.edit-form-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.edit-form-close:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
 }
 
 @keyframes formSlideIn {
@@ -308,13 +345,22 @@
   .edit-form-panel {
     padding: 16px;
     border-radius: 12px;
-    margin: 0 -8px 16px;
+  }
+  .edit-form-modal {
+    width: 100%;
+    max-height: calc(100vh - 40px);
+  }
+  .edit-form-overlay {
+    padding: 20px 8px;
   }
 }
 
 @media (max-width: 480px) {
   .edit-form-panel {
     padding: 12px;
+  }
+  .edit-form-overlay {
+    padding: 10px 4px;
   }
 }
 
