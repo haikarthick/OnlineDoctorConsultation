@@ -53,11 +53,12 @@ const Marketplace: React.FC = () => {
   // Multi-step sell form
   const [sellStep, setSellStep] = useState(0)
   const [sellForm, setSellForm] = useState<Record<string, any>>({
-    title: '', description: '', category: 'animal', listingType: 'sale', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
+    title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
     species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
     pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
     listingTier: 'standard', isHotDeal: false, auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
     images: [], linkedAnimalId: '',
+    sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false,
   })
 
   // Bid
@@ -140,11 +141,12 @@ const Marketplace: React.FC = () => {
       payload.tags = typeof payload.tags === 'string' ? payload.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : payload.tags
       await apiService.createMarketplaceListing(payload)
       setSuccessMsg(t('marketplace.listingCreated'))
-      setSellForm({ title: '', description: '', category: 'animal', listingType: 'sale', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
+      setSellForm({ title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
         species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
         pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
         listingTier: 'standard', isHotDeal: false, auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
-        images: [], linkedAnimalId: '' })
+        images: [], linkedAnimalId: '',
+        sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false })
       setSellStep(0); setTab('browse'); fetchListings(); fetchDashboard()
     } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
   }
@@ -446,7 +448,7 @@ const Marketplace: React.FC = () => {
                     <div className="module-form-group">
                       <label className="module-label">{t('marketplace.sell.listingType')}</label>
                       <select className="module-input" value={sellForm.listingType} onChange={e => sf('listingType', e.target.value)}>
-                        <option value="sale">{t('marketplace.listingType.fixedPrice')}</option>
+                        <option value="fixed_price">{t('marketplace.listingType.fixedPrice')}</option>
                         <option value="auction">{t('marketplace.listingType.auctionType')}</option>
                         <option value="wanted">{t('marketplace.listingType.wanted')}</option>
                       </select>
@@ -455,6 +457,27 @@ const Marketplace: React.FC = () => {
                   <div className="module-form-group">
                     <label className="module-label">{t('marketplace.sell.tags')}</label>
                     <input className="module-input" value={sellForm.tags} onChange={e => sf('tags', e.target.value)} placeholder={t('marketplace.sell.tagsPlaceholder')} />
+                  </div>
+                  {/* Seller Type (Compliance: PCA Rules 2017/2018) */}
+                  <div className="mp-form-section">
+                    <div className="mp-form-section-title">📋 {t('marketplace.compliance.sellerTypeTitle')}</div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.compliance.sellerType')}</label>
+                      <select className="module-input" value={sellForm.sellerType} onChange={e => sf('sellerType', e.target.value)}>
+                        <option value="individual">{t('marketplace.compliance.individualOwner')}</option>
+                        <option value="registered_breeder">{t('marketplace.compliance.registeredBreeder')}</option>
+                      </select>
+                    </div>
+                    {sellForm.sellerType === 'registered_breeder' && (
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.compliance.registrationNumber')}</label>
+                        <input className="module-input" value={sellForm.registrationNumber} onChange={e => sf('registrationNumber', e.target.value)} placeholder={t('marketplace.compliance.registrationPlaceholder')} />
+                        <div className="mp-compliance-hint">{t('marketplace.compliance.registrationHint')}</div>
+                      </div>
+                    )}
+                    {sellForm.sellerType === 'individual' && (
+                      <div className="mp-compliance-info">{t('marketplace.compliance.individualInfo')}</div>
+                    )}
                   </div>
                 </div>
                 <div className="mp-step-actions">
@@ -601,6 +624,13 @@ const Marketplace: React.FC = () => {
                     </label>
                   </div>
                   <div className="module-form-group">
+                    <label className="mp-checkbox-label">
+                      <input type="checkbox" checked={sellForm.welfareAttestation} onChange={e => sf('welfareAttestation', e.target.checked)} />
+                      {t('marketplace.compliance.welfareAttestation')}
+                    </label>
+                    <div className="mp-compliance-hint">{t('marketplace.compliance.welfareHint')}</div>
+                  </div>
+                  <div className="module-form-group">
                     <label className="module-label">{t('marketplace.livestock.contact')}</label>
                     <input className="module-input" value={sellForm.contactPhone} onChange={e => sf('contactPhone', e.target.value)} placeholder={t('marketplace.sell.contactPlaceholder')} />
                   </div>
@@ -706,6 +736,8 @@ const Marketplace: React.FC = () => {
                   <ReviewItem label={t('marketplace.sell.location')} value={sellForm.location || '—'} />
                   <ReviewItem label={t('marketplace.reviewLabels.tier')} value={TIER_LABELS[sellForm.listingTier] || t('marketplace.tier.standard')} />
                   <ReviewItem label={t('marketplace.livestock.contact')} value={sellForm.contactPhone || '—'} />
+                  <ReviewItem label={t('marketplace.compliance.sellerType')} value={sellForm.sellerType === 'registered_breeder' ? t('marketplace.compliance.registeredBreeder') : t('marketplace.compliance.individualOwner')} />
+                  {sellForm.sellerType === 'registered_breeder' && <ReviewItem label={t('marketplace.compliance.registrationNumber')} value={sellForm.registrationNumber || '—'} />}
                 </div>
                 {sellForm.description && (
                   <div className="mp-review-desc">
@@ -713,9 +745,27 @@ const Marketplace: React.FC = () => {
                     <p>{sellForm.description}</p>
                   </div>
                 )}
+                {/* Legal Compliance & T&C */}
+                <div className="mp-compliance-section">
+                  <h4 className="mp-compliance-title">⚖️ {t('marketplace.compliance.legalTitle')}</h4>
+                  <div className="mp-compliance-disclaimer">{t('marketplace.compliance.legalDisclaimer')}</div>
+                  <div className="mp-compliance-checkboxes">
+                    <label className="mp-checkbox-label">
+                      <input type="checkbox" checked={sellForm.welfareAttestation} onChange={e => sf('welfareAttestation', e.target.checked)} />
+                      {t('marketplace.compliance.welfareAttestation')}
+                    </label>
+                    <label className="mp-checkbox-label">
+                      <input type="checkbox" checked={sellForm.termsAccepted} onChange={e => sf('termsAccepted', e.target.checked)} />
+                      {t('marketplace.compliance.termsAccept')}
+                    </label>
+                  </div>
+                  {sellForm.sellerType === 'registered_breeder' && (
+                    <div className="mp-compliance-breeder-note">{t('marketplace.compliance.breederNote')}</div>
+                  )}
+                </div>
                 <div className="mp-step-actions">
                   <button className="module-btn" onClick={() => setSellStep(3)}>{t('marketplace.sell.back')}</button>
-                  <button className="module-btn primary" onClick={createListing}>{t('marketplace.sell.publish')}</button>
+                  <button className="module-btn primary" disabled={!sellForm.termsAccepted || !sellForm.welfareAttestation} onClick={createListing}>{t('marketplace.sell.publish')}</button>
                 </div>
               </div>
             )}
@@ -906,6 +956,9 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
   const sellerName = g(l, 'sellerName', 'seller_name')
   const viewsCount = g(l, 'viewsCount', 'views_count')
   const weight = g(l, 'animalWeightKg', 'animal_weight_kg')
+  const sellerType = g(l, 'sellerType', 'seller_type')
+  const breederVerified = g(l, 'breederVerified', 'breeder_verified')
+  const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
 
@@ -923,7 +976,7 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
         {/* Category + Type badges */}
         <div className="mp-card-badges">
           <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-          <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
+          <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
           {tier === 'premium' && <span className="mp-badge premium">⭐</span>}
         </div>
 
@@ -945,6 +998,8 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
           {pregnancy === 'pregnant' && <span className="mp-metric pregnant">🤰 {t('marketplace.card.pregnant')}</span>}
           {vax === 'fully_vaccinated' && <span className="mp-metric vax">{t('marketplace.card.vaccinated')}</span>}
           {hasCert && <span className="mp-metric cert">{t('marketplace.card.certified')}</span>}
+          {welfareAtt && <span className="mp-metric welfare">🛡️ {t('marketplace.card.welfareAttested')}</span>}
+          {sellerType === 'registered_breeder' && <span className={`mp-metric breeder ${breederVerified ? 'verified' : ''}`}>{breederVerified ? '✅' : '📋'} {t('marketplace.card.registeredBreeder')}</span>}
         </div>
 
         {/* Price */}
@@ -998,6 +1053,9 @@ const ListingDetail: React.FC<{
   const sellerName = g(l, 'sellerName', 'seller_name')
   const viewsCount = g(l, 'viewsCount', 'views_count')
   const auctionEnd = g(l, 'auctionEndTime', 'auction_end_time')
+  const sellerType = g(l, 'sellerType', 'seller_type')
+  const breederVerified = g(l, 'breederVerified', 'breeder_verified')
+  const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
 
   return (
@@ -1009,7 +1067,7 @@ const ListingDetail: React.FC<{
           {/* Header badges */}
           <div className="mp-card-badges">
             <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-            <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
+            <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
             {tier && <span className="mp-badge premium">{{ standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }[tier as 'standard' | 'premium' | 'spotlight'] || tier}</span>}
             {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
@@ -1056,7 +1114,23 @@ const ListingDetail: React.FC<{
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.location')}</span><span className="mp-detail-value">{l.location || t('marketplace.detail.notSpecified')}</span></div>
               {contact && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.contact')}</span><span className="mp-detail-value">{contact}</span></div>}
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.views')}</span><span className="mp-detail-value">{viewsCount || 0}</span></div>
+              {sellerType === 'registered_breeder' && (
+                <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.sellerType')}</span><span className="mp-detail-value">{breederVerified ? '✅ ' : '📋 '}{t('marketplace.compliance.registeredBreeder')}{breederVerified ? ` (${t('marketplace.compliance.verified')})` : ''}</span></div>
+              )}
+              {sellerType === 'individual' && (
+                <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.sellerType')}</span><span className="mp-detail-value">{t('marketplace.compliance.individualOwner')}</span></div>
+              )}
             </div>
+          </div>
+
+          {/* Compliance & Welfare */}
+          <div className="mp-detail-section mp-compliance-detail">
+            <h3>⚖️ {t('marketplace.compliance.complianceTitle')}</h3>
+            <div className="mp-detail-grid">
+              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.welfareStatus')}</span><span className="mp-detail-value">{welfareAtt ? '✅ ' + t('marketplace.compliance.attested') : '—'}</span></div>
+              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.termsStatus')}</span><span className="mp-detail-value">✅ {t('marketplace.compliance.accepted')}</span></div>
+            </div>
+            <div className="mp-compliance-info">{t('marketplace.compliance.detailDisclaimer')}</div>
           </div>
 
           {tags.length > 0 && (

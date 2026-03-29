@@ -250,6 +250,9 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
   const sellerName = g(l, 'sellerName', 'seller_name')
   const viewsCount = g(l, 'viewsCount', 'views_count')
   const weight = g(l, 'animalWeightKg', 'animal_weight_kg')
+  const sellerType = g(l, 'sellerType', 'seller_type')
+  const breederVerified = g(l, 'breederVerified', 'breeder_verified')
+  const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
 
@@ -265,7 +268,7 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
       <div className="mp-card-body">
         <div className="mp-card-badges">
           <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-          <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
+          <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
           {tier === 'premium' && <span className="mp-badge premium">⭐</span>}
         </div>
 
@@ -285,6 +288,8 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
           {pregnancy === 'pregnant' && <span className="mp-metric pregnant">🤰 {t('marketplace.card.pregnant')}</span>}
           {vax === 'fully_vaccinated' && <span className="mp-metric vax">{t('marketplace.card.vaccinated')}</span>}
           {hasCert && <span className="mp-metric cert">{t('marketplace.card.certified')}</span>}
+          {welfareAtt && <span className="mp-metric welfare">🛡️ {t('marketplace.card.welfareAttested')}</span>}
+          {sellerType === 'registered_breeder' && <span className={`mp-metric breeder ${breederVerified ? 'verified' : ''}`}>{breederVerified ? '✅' : '📋'} {t('marketplace.card.registeredBreeder')}</span>}
         </div>
 
         <div className="mp-card-price">
@@ -333,6 +338,9 @@ const PublicListingDetail: React.FC<{
   const sellerName = g(l, 'sellerName', 'seller_name')
   const viewsCount = g(l, 'viewsCount', 'views_count')
   const auctionEnd = g(l, 'auctionEndTime', 'auction_end_time')
+  const sellerType = g(l, 'sellerType', 'seller_type')
+  const breederVerified = g(l, 'breederVerified', 'breeder_verified')
+  const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
 
   return (
@@ -343,7 +351,7 @@ const PublicListingDetail: React.FC<{
         <div className="mp-detail-main">
           <div className="mp-card-badges">
             <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-            <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
+            <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
             {tier && <span className="mp-badge premium">{{ standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }[tier as 'standard' | 'premium' | 'spotlight'] || tier}</span>}
             {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
@@ -387,7 +395,22 @@ const PublicListingDetail: React.FC<{
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.seller')}</span><span className="mp-detail-value">{sellerName || t('marketplace.genderLabel.unknown')}</span></div>
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.location')}</span><span className="mp-detail-value">{l.location || t('marketplace.detail.notSpecified')}</span></div>
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.views')}</span><span className="mp-detail-value">{viewsCount || 0}</span></div>
+              {sellerType === 'registered_breeder' && (
+                <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.sellerType')}</span><span className="mp-detail-value">{breederVerified ? '✅ ' : '📋 '}{t('marketplace.compliance.registeredBreeder')}{breederVerified ? ` (${t('marketplace.compliance.verified')})` : ''}</span></div>
+              )}
+              {sellerType === 'individual' && (
+                <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.sellerType')}</span><span className="mp-detail-value">{t('marketplace.compliance.individualOwner')}</span></div>
+              )}
             </div>
+          </div>
+
+          {/* Compliance & Welfare */}
+          <div className="mp-detail-section mp-compliance-detail">
+            <h3>⚖️ {t('marketplace.compliance.complianceTitle')}</h3>
+            <div className="mp-detail-grid">
+              <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.welfareStatus')}</span><span className="mp-detail-value">{welfareAtt ? '✅ ' + t('marketplace.compliance.attested') : '—'}</span></div>
+            </div>
+            <div className="mp-compliance-info">{t('marketplace.compliance.detailDisclaimer')}</div>
           </div>
 
           {tags.length > 0 && (

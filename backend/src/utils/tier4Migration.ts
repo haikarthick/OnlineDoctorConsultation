@@ -379,17 +379,25 @@ async function runTier4Migration() {
       `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS admin_approved BOOLEAN DEFAULT true`,
       `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS admin_notes TEXT`,
       `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS rejection_reason TEXT`,
+      // ── Compliance & Legal (PCA Act 1960, Dog Breeding Rules 2017, Pet Shop Rules 2018) ──
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS seller_type VARCHAR(30) DEFAULT 'individual'`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS registration_number VARCHAR(100)`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS breeder_verified BOOLEAN DEFAULT false`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS welfare_attestation BOOLEAN DEFAULT false`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted BOOLEAN DEFAULT false`,
+      `ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ`,
     ];
     for (const col of livestockColumns) {
       try { await client.query(col); } catch {}
     }
-    console.log('  ✓ marketplace_listings livestock columns added');
+    console.log('  ✓ marketplace_listings livestock + compliance columns added');
 
     // Indexes for livestock fields
     await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_species ON marketplace_listings(species)').catch(() => {});
     await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_breed ON marketplace_listings(breed)').catch(() => {});
     await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_tier ON marketplace_listings(listing_tier)').catch(() => {});
     await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_admin ON marketplace_listings(admin_approved)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_seller_type ON marketplace_listings(seller_type)').catch(() => {});
     console.log('  ✓ livestock indexes created');
 
     await client.query('COMMIT');

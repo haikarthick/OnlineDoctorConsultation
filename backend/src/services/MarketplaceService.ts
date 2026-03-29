@@ -1,7 +1,8 @@
 /**
- * Marketplace & Auction Service
- * Buy/sell animals, equipment, and supplies with fixed-price listings,
+ * Marketplace & Auction Service — Pet Rehoming & Adoption Board
+ * Rehome and adopt animals, equipment, and supplies with fixed-price listings,
  * live auction bidding, order processing, and search.
+ * Compliant with PCA Act 1960, Dog Breeding Rules 2017, Pet Shop Rules 2018.
  * Enhanced with livestock-specific fields, admin controls, and market intelligence.
  */
 import pool from '../utils/database';
@@ -91,12 +92,13 @@ class MarketplaceService {
         lactation_number, daily_milk_yield, pregnancy_status, pregnancy_month,
         vaccination_status, health_certificate, listing_tier, is_hot_deal,
         linked_animal_id, auction_end_time, reserve_price, contact_phone,
-        latitude, longitude, admin_approved
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38)`,
+        latitude, longitude, admin_approved,
+        seller_type, registration_number, welfare_attestation, terms_accepted, terms_accepted_at
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43)`,
       [
         id, data.enterpriseId || null, data.sellerId, data.title, data.description || null,
         data.category || 'animal', data.listingType || 'fixed_price', data.price || null,
-        data.currency || 'USD', data.quantity || 1, data.unit || null, data.condition || 'new',
+        data.currency || 'INR', data.quantity || 1, data.unit || null, data.condition || 'new',
         JSON.stringify(data.images || []), data.location || null, JSON.stringify(data.shippingOptions || []),
         JSON.stringify(data.tags || []), data.featured || false, data.expiresAt || null,
         data.species || null, data.breed || null, data.animalAgeMonths || null,
@@ -108,6 +110,9 @@ class MarketplaceService {
         data.linkedAnimalId || null, data.auctionEndTime || null, data.reservePrice || null,
         data.contactPhone || null, data.latitude || null, data.longitude || null,
         data.adminApproved !== undefined ? data.adminApproved : true,
+        data.sellerType || 'individual', data.registrationNumber || null,
+        data.welfareAttestation || false, data.termsAccepted || false,
+        data.termsAccepted ? new Date().toISOString() : null,
       ]
     );
     const result = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [id]);
@@ -118,7 +123,7 @@ class MarketplaceService {
     const allowedFields = [
       'title', 'description', 'price', 'quantity', 'status', 'category', 'condition', 'location',
       'species', 'breed', 'gender', 'listing_type',
-      'vaccination_status', 'contact_phone',
+      'vaccination_status', 'contact_phone', 'seller_type', 'registration_number',
     ];
     const sets: string[] = []; const vals: any[] = []; let idx = 1;
     for (const [key, val] of Object.entries(data)) {
@@ -150,6 +155,8 @@ class MarketplaceService {
     if (data.isHotDeal !== undefined) { sets.push(`is_hot_deal = $${idx++}`); vals.push(data.isHotDeal); }
     if (data.healthCertificate !== undefined) { sets.push(`health_certificate = $${idx++}`); vals.push(data.healthCertificate); }
     if (data.featured !== undefined) { sets.push(`featured = $${idx++}`); vals.push(data.featured); }
+    if (data.welfareAttestation !== undefined) { sets.push(`welfare_attestation = $${idx++}`); vals.push(data.welfareAttestation); }
+    if (data.breederVerified !== undefined) { sets.push(`breeder_verified = $${idx++}`); vals.push(data.breederVerified); }
     if (data.images) { sets.push(`images = $${idx++}`); vals.push(JSON.stringify(data.images)); }
     if (data.tags) { sets.push(`tags = $${idx++}`); vals.push(JSON.stringify(data.tags)); }
     if (sets.length === 0) return null;
@@ -231,7 +238,7 @@ class MarketplaceService {
     );
 
     if (listing.rows[0].listing_type === 'fixed_price') {
-      await pool.query('UPDATE marketplace_listings SET status = $1 WHERE id = $2', ['sold', data.listingId]);
+      await pool.query('UPDATE marketplace_listings SET status = $1 WHERE id = $2', ['rehomed', data.listingId]);
     }
 
     const result = await pool.query('SELECT * FROM marketplace_orders WHERE id = $1', [id]);
@@ -257,7 +264,7 @@ class MarketplaceService {
                   WHERE l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)
                   ORDER BY l.is_hot_deal DESC NULLS LAST, l.created_at DESC LIMIT 8`),
       pool.query(`SELECT u.first_name || ' ' || u.last_name as name, COUNT(*) as listings, SUM(l.views_count) as total_views
-                  FROM marketplace_listings l JOIN users u ON l.seller_id = u.id WHERE l.status IN ('active','sold') GROUP BY u.id, u.first_name, u.last_name ORDER BY listings DESC LIMIT 5`),
+                  FROM marketplace_listings l JOIN users u ON l.seller_id = u.id WHERE l.status IN ('active','sold','rehomed') GROUP BY u.id, u.first_name, u.last_name ORDER BY listings DESC LIMIT 5`),
       pool.query(`SELECT species, COUNT(*) as count, AVG(price) as avg_price, AVG(daily_milk_yield) as avg_milk_yield
                   FROM marketplace_listings WHERE status = 'active' AND species IS NOT NULL AND (admin_approved = true OR admin_approved IS NULL) GROUP BY species ORDER BY count DESC`),
       pool.query(`SELECT l.id, l.title, l.price, l.species, l.breed, l.daily_milk_yield, l.images, l.listing_tier,
@@ -269,7 +276,7 @@ class MarketplaceService {
     return {
       summary: {
         activeListings: +(listingStats.rows.find((r: any) => r.status === 'active')?.count || 0),
-        soldListings: +(listingStats.rows.find((r: any) => r.status === 'sold')?.count || 0),
+        soldListings: +(listingStats.rows.find((r: any) => r.status === 'sold')?.count || 0) + +(listingStats.rows.find((r: any) => r.status === 'rehomed')?.count || 0),
         totalListings: listingStats.rows.reduce((s: number, r: any) => s + +r.count, 0),
         pendingApproval: +(listingStats.rows.find((r: any) => r.status === 'pending')?.count || 0),
       },
@@ -332,7 +339,7 @@ class MarketplaceService {
       pool.query(`SELECT
         COUNT(*) as total_listings,
         COUNT(CASE WHEN status = 'active' THEN 1 END) as active_listings,
-        COUNT(CASE WHEN status = 'sold' THEN 1 END) as sold_listings,
+        COUNT(CASE WHEN status IN ('sold','rehomed') THEN 1 END) as sold_listings,
         COUNT(CASE WHEN admin_approved = false THEN 1 END) as rejected_listings,
         COUNT(CASE WHEN admin_approved IS NULL OR admin_approved = false THEN 1 END) as pending_review,
         COUNT(CASE WHEN is_hot_deal = true THEN 1 END) as hot_deals,
@@ -376,6 +383,7 @@ class MarketplaceService {
                  l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
                  l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
                  l.auction_end_time, l.views_count, l.created_at, l.status,
+                 l.seller_type, l.breeder_verified, l.welfare_attestation,
                  u.first_name as seller_name, l.location as seller_location,
                  (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count,
                  (SELECT MAX(amount) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as highest_bid
@@ -430,6 +438,7 @@ class MarketplaceService {
               l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
               l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
               l.auction_end_time, l.reserve_price, l.views_count, l.created_at, l.status,
+              l.seller_type, l.breeder_verified, l.welfare_attestation,
               u.first_name as seller_name, l.location as seller_location,
               e.name as enterprise_name,
               (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count,
@@ -460,7 +469,7 @@ class MarketplaceService {
     let query = `SELECT species, breed, 
       COUNT(*) as total_listings, AVG(price) as avg_price, MIN(price) as min_price, MAX(price) as max_price,
       AVG(daily_milk_yield) as avg_milk_yield, AVG(animal_weight_kg) as avg_weight
-      FROM marketplace_listings WHERE status IN ('active', 'sold') AND species IS NOT NULL`;
+      FROM marketplace_listings WHERE status IN ('active', 'sold', 'rehomed') AND species IS NOT NULL`;
     const params: any[] = []; let idx = 1;
     if (species) { query += ` AND species = $${idx++}`; params.push(species); }
     if (breed) { query += ` AND breed ILIKE $${idx++}`; params.push(`%${breed}%`); }
