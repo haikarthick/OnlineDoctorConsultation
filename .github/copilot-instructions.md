@@ -139,6 +139,14 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 - When adding new columns: ALSO add `ALTER TABLE ADD COLUMN IF NOT EXISTS` in `database.ts`
 - `render-start.sh` swallows migration errors — never rely solely on migrations
 
+## Database Schema Rule (MANDATORY)
+
+- **ALL tables MUST be defined in `docker/init.sql`** — NEVER create tables only at runtime
+- Runtime `CREATE TABLE IF NOT EXISTS` in services is allowed as a **safety net only**, but the canonical schema MUST exist in `init.sql`
+- **ALL seed/demo data for new features MUST be in `docker/seed-demo-data.sql`**
+- When adding new tables: add to `init.sql` + appropriate tier migration file + `database.ts seedDefaultSettings()` safety net
+- The repo must be fully self-contained — running `init.sql` + tier migrations must produce a complete schema without needing the app server to boot
+
 ## Demo Credentials
 
 | Role | Email | Password |

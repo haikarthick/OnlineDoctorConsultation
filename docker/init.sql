@@ -1019,3 +1019,142 @@ CREATE TRIGGER update_vet_blocked_slots_updated_at BEFORE UPDATE ON vet_blocked_
 DROP TRIGGER IF EXISTS update_hospital_holidays_updated_at ON hospital_holidays;
 CREATE TRIGGER update_hospital_holidays_updated_at BEFORE UPDATE ON hospital_holidays
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ═══════════════════════════════════════════════════════════════════
+-- Auth & Permission Tables
+-- ═══════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS role_permissions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  role VARCHAR(50) NOT NULL,
+  permission VARCHAR(100) NOT NULL,
+  is_enabled BOOLEAN DEFAULT true,
+  updated_by UUID,
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(role, permission)
+);
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash VARCHAR(128) NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  revoked_at TIMESTAMPTZ,
+  replaced_by_token_id UUID,
+  user_agent TEXT,
+  ip_address VARCHAR(45)
+);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON refresh_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_hash ON refresh_tokens(token_hash);
+
+-- ═══════════════════════════════════════════════════════════════════
+-- Hospital Sub-Tables (departments, doctors, services, invites, documents)
+-- ═══════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS hospital_departments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  code VARCHAR(20),
+  description TEXT,
+  specializations TEXT[] DEFAULT '{}',
+  floor_number VARCHAR(20),
+  room_numbers VARCHAR(100),
+  head_doctor_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(hospital_id, name)
+);
+CREATE INDEX IF NOT EXISTS idx_hospital_departments_hospital ON hospital_departments(hospital_id);
+
+CREATE TABLE IF NOT EXISTS hospital_doctors (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
+  doctor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  department_id UUID REFERENCES hospital_departments(id) ON DELETE SET NULL,
+  hospital_role VARCHAR(50) NOT NULL DEFAULT 'doctor'
+    CHECK (hospital_role IN (
+      'owner','medical_director','department_head',
+      'consultant','resident','intern','staff','visiting'
+    )),
+  title VARCHAR(100),
+  employment_type VARCHAR(30) DEFAULT 'full_time'
+    CHECK (employment_type IN ('full_time','part_time','contract','visiting','honorary')),
+  is_primary_hospital BOOLEAN DEFAULT false,
+  consultation_fee DECIMAL(10,2),
+  is_accepting_patients BOOLEAN DEFAULT true,
+  joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ends_at TIMESTAMP,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(hospital_id, doctor_id)
+);
+CREATE INDEX IF NOT EXISTS idx_hospital_doctors_hospital ON hospital_doctors(hospital_id);
+CREATE INDEX IF NOT EXISTS idx_hospital_doctors_doctor ON hospital_doctors(doctor_id);
+
+CREATE TABLE IF NOT EXISTS hospital_services (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
+  service_name VARCHAR(255) NOT NULL,
+  category VARCHAR(100) NOT NULL DEFAULT 'consultation'
+    CHECK (category IN (
+      'consultation','diagnostics','surgery','vaccination',
+      'dental','grooming','boarding','emergency',
+      'rehabilitation','nutrition','reproduction','other'
+    )),
+  description TEXT,
+  price_min DECIMAL(10,2),
+  price_max DECIMAL(10,2),
+  currency VARCHAR(10) DEFAULT 'USD',
+  duration_minutes INTEGER,
+  requires_appointment BOOLEAN DEFAULT true,
+  is_available BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS hospital_invites (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
+  email VARCHAR(255) NOT NULL,
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  phone VARCHAR(20),
+  invite_token VARCHAR(128) NOT NULL UNIQUE,
+  hospital_role VARCHAR(50) DEFAULT 'staff',
+  department_id UUID REFERENCES hospital_departments(id) ON DELETE SET NULL,
+  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending','accepted','expired','revoked')),
+  invited_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_hospital_invites_token ON hospital_invites(invite_token);
+CREATE INDEX IF NOT EXISTS idx_hospital_invites_hospital ON hospital_invites(hospital_id);
+
+CREATE TABLE IF NOT EXISTS hospital_documents (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
+  doc_type VARCHAR(30) NOT NULL
+    CHECK (doc_type IN (
+      'pan','gst','aadhaar','bank_account',
+      'vet_council','trade_license','drug_license'
+    )),
+  file_name VARCHAR(500) NOT NULL,
+  file_url TEXT NOT NULL,
+  expiry_date DATE,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending_review'
+    CHECK (status IN ('pending_review','approved','rejected')),
+  rejection_reason TEXT,
+  reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (hospital_id, doc_type)
+);
+CREATE INDEX IF NOT EXISTS idx_hospital_docs_hospital ON hospital_documents(hospital_id);
+CREATE INDEX IF NOT EXISTS idx_hospital_docs_status ON hospital_documents(status);
+CREATE INDEX IF NOT EXISTS idx_hospital_docs_expiry ON hospital_documents(expiry_date)
+  WHERE expiry_date IS NOT NULL;
