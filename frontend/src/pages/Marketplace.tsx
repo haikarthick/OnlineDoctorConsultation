@@ -166,22 +166,43 @@ const Marketplace: React.FC = () => {
     const animal = userAnimals.find((a: any) => a.id === animalId)
     if (!animal) return
     const updates: Record<string, any> = { linkedAnimalId: animalId }
+    // Basic info
     if (animal.species) updates.species = animal.species
     if (animal.breed) updates.breed = animal.breed
     if (animal.gender) updates.gender = animal.gender
-    if (animal.weight || animal.current_weight || animal.currentWeight) {
-      updates.animalWeightKg = String(animal.weight || animal.current_weight || animal.currentWeight || '')
-    }
+    // Weight: prefer current_weight over weight
+    const w = animal.currentWeight || animal.current_weight || animal.weight
+    if (w) updates.animalWeightKg = String(w)
+    // Age from date of birth
     if (animal.dateOfBirth || animal.date_of_birth) {
       const dob = new Date(animal.dateOfBirth || animal.date_of_birth)
       const months = Math.floor((Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 30.44))
       if (months > 0) updates.animalAgeMonths = String(months)
     }
-    if (!sellForm.title && animal.name) {
-      updates.title = `${animal.name} - ${animal.species || ''} ${animal.breed || ''}`.trim()
+    // Breeding / pregnancy status
+    const bs = animal.breedingStatus || animal.breeding_status
+    if (bs) {
+      const statusMap: Record<string, string> = { pregnant: 'pregnant', lactating: 'lactating', open: 'open', bred: 'bred' }
+      if (statusMap[bs]) updates.pregnancyStatus = statusMap[bs]
     }
+    // Registration number for breeder compliance
+    const regNum = animal.registrationNumber || animal.registration_number
+    if (regNum) updates.registrationNumber = regNum
+    // Auto-generate title
+    const ageStr = updates.animalAgeMonths ? `${updates.animalAgeMonths}m` : ''
+    const genderStr = animal.gender ? ` ${animal.gender}` : ''
+    updates.title = `${animal.name} — ${animal.species || ''}${animal.breed ? ' ' + animal.breed : ''}${genderStr}${ageStr ? ', ' + ageStr : ''}`.trim()
+    // Auto-generate description from medical notes and profile
+    const descParts: string[] = []
+    if (animal.name) descParts.push(`Name: ${animal.name}`)
+    if (animal.breed) descParts.push(`Breed: ${animal.breed}`)
+    if (animal.color) descParts.push(`Color: ${animal.color}`)
+    if (animal.isNeutered || animal.is_neutered) descParts.push('Neutered/Spayed: Yes')
+    const medNotes = animal.medicalNotes || animal.medical_notes
+    if (medNotes) descParts.push(`Health Notes: ${medNotes}`)
+    if (descParts.length > 0) updates.description = descParts.join('\n')
     setSellForm((prev: Record<string, any>) => ({ ...prev, ...updates }))
-    setSuccessMsg(t('marketplace.sell.autoPopulated', 'Animal details auto-filled!'))
+    setSuccessMsg(t('marketplace.sell.autoPopulated'))
   }
 
   // Handle image upload
@@ -494,6 +515,21 @@ const Marketplace: React.FC = () => {
                 <h3>{t('marketplace.sell.basicInfoTitle')}</h3>
                 <p className="mp-sell-step-desc">{t('marketplace.sell.basicInfoDesc')}</p>
                 <div className="module-form">
+                  {/* Auto-populate from existing animal — top of form for visibility */}
+                  {userAnimals.length > 0 && (
+                    <div className="mp-auto-populate-section">
+                      <div className="mp-form-section-title">🐾 {t('marketplace.sell.autoPopulateTitle')}</div>
+                      <p className="mp-auto-populate-hint">{t('marketplace.sell.autoPopulateHint')}</p>
+                      <div className="module-form-group">
+                        <label className="module-label">{t('marketplace.sell.selectAnimal')}</label>
+                        <select className="module-input mp-animal-select" value={selectedAnimalId} onChange={e => handleAnimalSelect(e.target.value)}>
+                          <option value="">{t('marketplace.sell.manualEntry')}</option>
+                          {userAnimals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({a.species}{a.breed ? ` - ${a.breed}` : ''})</option>)}
+                        </select>
+                      </div>
+                      {selectedAnimalId && <div className="mp-auto-populated-badge">✅ {t('marketplace.sell.autoPopulated')}</div>}
+                    </div>
+                  )}
                   <div className="module-form-group">
                     <label className="module-label">{t('marketplace.sell.title')}</label>
                     <input className={`module-input${fieldErrors.title ? ' input-error' : ''}`} value={sellForm.title} onChange={e => { sf('title', e.target.value); if (fieldErrors.title) setFieldErrors(prev => { const n = { ...prev }; delete n.title; return n }) }} placeholder={t('marketplace.sell.titlePlaceholder')} />
@@ -565,18 +601,8 @@ const Marketplace: React.FC = () => {
                 <h3>{t('marketplace.sell.animalDetailsTitle')}</h3>
                 <p className="mp-sell-step-desc">{t('marketplace.sell.animalDetailsDesc')}</p>
                 <div className="module-form">
-                  {/* Auto-populate from existing animal */}
-                  {userAnimals.length > 0 && (
-                    <div className="mp-form-section">
-                      <div className="mp-form-section-title">🐾 {t('marketplace.sell.autoPopulateTitle', 'Auto-Fill from Your Animal')}</div>
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.sell.selectAnimal', 'Select an animal to auto-fill details')}</label>
-                        <select className="module-input" value={selectedAnimalId} onChange={e => handleAnimalSelect(e.target.value)}>
-                          <option value="">{t('marketplace.sell.manualEntry', '— Manual Entry —')}</option>
-                          {userAnimals.map((a: any) => <option key={a.id} value={a.id}>{a.name} ({a.species}{a.breed ? ` - ${a.breed}` : ''})</option>)}
-                        </select>
-                      </div>
-                    </div>
+                  {selectedAnimalId && (
+                    <div className="mp-auto-populated-badge">✅ {t('marketplace.sell.fieldsAutoFilled')}</div>
                   )}
                   <div className="mp-form-section">
                     <div className="mp-form-section-title">{t('marketplace.sell.identificationSection')}</div>

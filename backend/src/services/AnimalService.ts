@@ -109,6 +109,9 @@ export class AnimalService {
                registration_number as "registrationNumber", is_neutered as "isNeutered",
                insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
                insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
+               breeding_status as "breedingStatus", current_weight as "currentWeight",
+               weight_unit as "weightUnit", last_breeding_date as "lastBreedingDate",
+               expected_due_date as "expectedDueDate",
                is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
         FROM animals WHERE id = $1
       `;
@@ -131,6 +134,9 @@ export class AnimalService {
                registration_number as "registrationNumber", is_neutered as "isNeutered",
                insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
                insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
+               breeding_status as "breedingStatus", current_weight as "currentWeight",
+               weight_unit as "weightUnit", last_breeding_date as "lastBreedingDate",
+               expected_due_date as "expectedDueDate",
                is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
         FROM animals WHERE owner_id = $1 AND is_active = true
         ORDER BY name ASC LIMIT $2 OFFSET $3
@@ -159,6 +165,9 @@ export class AnimalService {
                a.registration_number as "registrationNumber", a.is_neutered as "isNeutered",
                a.insurance_provider as "insuranceProvider", a.insurance_policy_number as "insurancePolicyNumber",
                a.insurance_expiry as "insuranceExpiry", a.medical_notes as "medicalNotes",
+               a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
+               a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
+               a.expected_due_date as "expectedDueDate",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
         FROM animals a
@@ -198,6 +207,9 @@ export class AnimalService {
                a.registration_number as "registrationNumber", a.is_neutered as "isNeutered",
                a.insurance_provider as "insuranceProvider", a.insurance_policy_number as "insurancePolicyNumber",
                a.insurance_expiry as "insuranceExpiry", a.medical_notes as "medicalNotes",
+               a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
+               a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
+               a.expected_due_date as "expectedDueDate",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
         FROM animals a LEFT JOIN users u ON u.id = a.owner_id

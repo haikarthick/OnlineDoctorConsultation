@@ -249,6 +249,35 @@
   border-bottom: 1px dashed #e2e8f0;
 }
 
+/* Auto-populate from animal profile */
+.mp-auto-populate-section {
+  background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+  border: 2px dashed #93c5fd;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.mp-auto-populate-hint {
+  font-size: 13px;
+  color: #4b5563;
+  margin: 4px 0 12px;
+  line-height: 1.4;
+}
+.mp-animal-select {
+  border: 2px solid #93c5fd !important;
+  font-weight: 500;
+}
+.mp-auto-populated-badge {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #a7f3d0;
+  margin-bottom: 12px;
+}
+
 /* Checkbox row for sell form */
 .mp-checkbox-label {
   display: inline-flex;
