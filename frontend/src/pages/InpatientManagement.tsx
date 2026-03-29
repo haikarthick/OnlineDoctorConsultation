@@ -222,7 +222,7 @@ export default function InpatientManagement() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {/* Animal Search */}
-              <AnimalSearchPicker selectedAnimal={admitAnimal} onSelect={setAdmitAnimal} label="🔍 Search Patient to Admit" />
+              <AnimalSearchPicker selectedAnimal={admitAnimal} onSelect={setAdmitAnimal} label={t('inpatientManagement.searchPatient')} />
 
               {/* Admission Type */}
               <div>
@@ -341,51 +341,55 @@ export default function InpatientManagement() {
                 )}
 
                 {/* Recent Medical Records */}
-                {medicalHistory.records?.length > 0 && (
+                {medicalHistory.recentRecords?.length > 0 && (
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>🏥 {t('inpatientManagement.recentMedicalRecords')}</div>
-                    {medicalHistory.records.slice(0, 5).map((r: any, i: number) => (
+                    {medicalHistory.recentRecords.slice(0, 5).map((r: any, i: number) => (
                       <div key={i} style={{ background: '#f8fafc', borderRadius: 8, padding: '8px 12px', marginBottom: 6, fontSize: 13 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ fontWeight: 600 }}>{r.record_type?.replace(/_/g, ' ')}</span>
-                          <span style={{ color: '#94a3b8', fontSize: 11 }}>{r.visit_date ? formatDateTime(r.visit_date) : ''}</span>
+                          <span style={{ fontWeight: 600 }}>{r.title || r.record_type?.replace(/_/g, ' ')}</span>
+                          <span style={{ color: '#94a3b8', fontSize: 11 }}>{r.created_at ? formatDateTime(r.created_at) : ''}</span>
                         </div>
-                        {r.diagnosis && <div style={{ color: '#475569', marginTop: 2 }}>Dx: {r.diagnosis}</div>}
-                        {r.treatment && <div style={{ color: '#059669', marginTop: 1 }}>Tx: {r.treatment}</div>}
+                        {r.severity && r.severity !== 'normal' && <div style={{ color: '#475569', marginTop: 2 }}>Severity: {r.severity}</div>}
+                        {r.content && <div style={{ color: '#059669', marginTop: 1, whiteSpace: 'pre-line' }}>{r.content.substring(0, 120)}{r.content.length > 120 ? '...' : ''}</div>}
                       </div>
                     ))}
                   </div>
                 )}
 
                 {/* Prescriptions */}
-                {medicalHistory.prescriptions?.length > 0 && (
+                {medicalHistory.recentPrescriptions?.length > 0 && (
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>💊 {t('inpatientManagement.recentPrescriptions')}</div>
-                    {medicalHistory.prescriptions.slice(0, 5).map((rx: any, i: number) => (
-                      <div key={i} style={{ background: '#faf5ff', borderRadius: 8, padding: '8px 12px', marginBottom: 6, fontSize: 13 }}>
-                        <span style={{ fontWeight: 600, color: '#7c3aed' }}>{rx.medication_name}</span>
-                        {rx.dosage && <span style={{ color: '#64748b' }}> — {rx.dosage}</span>}
-                        {rx.status && <span style={{ marginLeft: 8, fontSize: 11, padding: '2px 6px', borderRadius: 8, background: rx.status === 'active' ? '#dcfce7' : '#f1f5f9', color: rx.status === 'active' ? '#166534' : '#64748b' }}>{rx.status}</span>}
-                      </div>
-                    ))}
+                    {medicalHistory.recentPrescriptions.slice(0, 5).map((rx: any, i: number) => {
+                      const meds = (() => { try { return typeof rx.medications === 'string' ? JSON.parse(rx.medications) : rx.medications || [] } catch { return [] } })()
+                      return (
+                        <div key={i} style={{ background: '#faf5ff', borderRadius: 8, padding: '8px 12px', marginBottom: 6, fontSize: 13 }}>
+                          {meds.length > 0 ? meds.map((m: any, j: number) => (
+                            <div key={j}><span style={{ fontWeight: 600, color: '#7c3aed' }}>{m.name || m.medication}</span>{m.dosage && <span style={{ color: '#64748b' }}> — {m.dosage}</span>}</div>
+                          )) : <span style={{ fontWeight: 600, color: '#7c3aed' }}>{rx.instructions || 'Prescription'}</span>}
+                          {rx.valid_until && <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>Valid until: {new Date(rx.valid_until).toLocaleDateString()}</div>}
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
 
                 {/* Vaccinations */}
-                {medicalHistory.vaccinations?.length > 0 && (
+                {medicalHistory.recentVaccinations?.length > 0 && (
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>💉 {t('inpatientManagement.vaccinations')}</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                      {medicalHistory.vaccinations.map((v: any, i: number) => (
+                      {medicalHistory.recentVaccinations.map((v: any, i: number) => (
                         <span key={i} style={{ background: '#ecfdf5', color: '#059669', padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600, border: '1px solid #a7f3d0' }}>
-                          {v.vaccine_name} {v.vaccination_date ? `(${new Date(v.vaccination_date).toLocaleDateString()})` : ''}
+                          {v.vaccine_name} {v.date_administered ? `(${new Date(v.date_administered).toLocaleDateString()})` : ''}
                         </span>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {!medicalHistory.records?.length && !medicalHistory.prescriptions?.length && !medicalHistory.vaccinations?.length && !medicalHistory.allergies?.length && (
+                {!medicalHistory.recentRecords?.length && !medicalHistory.recentPrescriptions?.length && !medicalHistory.recentVaccinations?.length && !medicalHistory.allergies?.length && (
                   <p style={{ textAlign: 'center', color: '#94a3b8', padding: 20 }}>{t('inpatientManagement.noMedicalHistory')}</p>
                 )}
               </div>

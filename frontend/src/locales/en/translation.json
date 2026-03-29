@@ -3531,6 +3531,7 @@
   "inpatientManagement": {
     "title": "Inpatient & Boarding",
     "subtitle": "Manage admitted patients, ICU, surgery recovery, and boarding",
+    "searchPatient": "🔍 Search Patient to Admit",
     "admitPatient": "Admit Patient",
     "totalOccupied": "Total Occupied",
     "admitted": "Admitted",

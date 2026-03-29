@@ -11,13 +11,13 @@ class StaffWorkflowService {
   async searchAnimals(query: string, limit = 15) {
     const result = await database.query(`
       SELECT a.id, a.name, a.species, a.breed, a.weight, a.date_of_birth,
-        a.gender, a.microchip_number, a.avatar_url,
+        a.gender, a.microchip_id, a.color,
         u.id AS owner_id, u.first_name AS owner_first_name, u.last_name AS owner_last_name,
         u.phone AS owner_phone, u.email AS owner_email
       FROM animals a
       JOIN users u ON u.id = a.owner_id
       WHERE (a.name ILIKE $1 OR u.first_name ILIKE $1 OR u.last_name ILIKE $1
-        OR a.microchip_number ILIKE $1 OR a.species ILIKE $1)
+        OR a.microchip_id ILIKE $1 OR a.species ILIKE $1)
       ORDER BY a.name ASC
       LIMIT $2
     `, [`%${query}%`, limit]);
@@ -32,14 +32,14 @@ class StaffWorkflowService {
         FROM animals a JOIN users u ON u.id = a.owner_id WHERE a.id = $1
       `, [animalId]),
       database.query(`
-        SELECT mr.id, mr.record_type, mr.title, mr.diagnosis, mr.treatment,
-          mr.notes, mr.created_at, u.first_name AS vet_first_name, u.last_name AS vet_last_name
+        SELECT mr.id, mr.record_type, mr.title, mr.severity,
+          mr.content, mr.created_at, u.first_name AS vet_first_name, u.last_name AS vet_last_name
         FROM medical_records mr
         LEFT JOIN users u ON u.id = mr.veterinarian_id
         WHERE mr.animal_id = $1 ORDER BY mr.created_at DESC LIMIT 10
       `, [animalId]),
       database.query(`
-        SELECT p.id, p.diagnosis, p.instructions, p.created_at, p.valid_until,
+        SELECT p.id, p.instructions, p.medications, p.created_at, p.valid_until,
           u.first_name AS vet_first_name, u.last_name AS vet_last_name
         FROM prescriptions p
         LEFT JOIN users u ON u.id = p.veterinarian_id
@@ -50,8 +50,8 @@ class StaffWorkflowService {
         FROM vaccination_records WHERE animal_id = $1 ORDER BY date_administered DESC LIMIT 5
       `, [animalId]),
       database.query(`
-        SELECT id, allergen, severity, reaction, diagnosed_date
-        FROM allergy_records WHERE animal_id = $1 ORDER BY diagnosed_date DESC
+        SELECT id, allergen, severity, reaction, identified_date
+        FROM allergy_records WHERE animal_id = $1 ORDER BY identified_date DESC
       `, [animalId]),
     ]);
     return {

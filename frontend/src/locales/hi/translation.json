@@ -3501,6 +3501,7 @@
   "inpatientManagement": {
     "title": "इनपेशेंट और बोर्डिंग",
     "subtitle": "भर्ती रोगियों, आईसीयू, सर्जरी रिकवरी और बोर्डिंग का प्रबंधन करें",
+    "searchPatient": "🔍 भर्ती के लिए रोगी खोजें",
     "admitPatient": "रोगी भर्ती करें",
     "totalOccupied": "कुल भरे हुए",
     "admitted": "भर्ती",
