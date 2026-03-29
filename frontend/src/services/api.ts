@@ -394,7 +394,7 @@ class ApiService {
     return response.data
   }
 
-  async listAnimals(params?: { limit?: number; offset?: number }) {
+  async listAnimals(params?: { limit?: number; offset?: number; view?: string }) {
     const response = await this.client.get('/animals', { params })
     return response.data
   }

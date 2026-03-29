@@ -46,10 +46,16 @@ export class AnimalController {
 
     let result;
     if (req.userRole === 'veterinarian') {
-      // Vets see animals they've consulted with; fall back to all animals if none found
-      result = await AnimalService.listAnimalsByVeterinarian(req.userId!, limit, offset);
-      if (result.total === 0) {
-        result = await AnimalService.listAllAnimals(limit, offset);
+      const view = req.query.view as string;
+      if (view === 'patients') {
+        // Vets see animals they've consulted with
+        result = await AnimalService.listAnimalsByVeterinarian(req.userId!, limit, offset);
+        if (result.total === 0) {
+          result = await AnimalService.listAllAnimals(limit, offset);
+        }
+      } else {
+        // Default: vet's own personal pets
+        result = await AnimalService.listAnimalsByOwner(req.userId!, limit, offset);
       }
     } else if (req.userRole === 'admin') {
       // Admins see all animals

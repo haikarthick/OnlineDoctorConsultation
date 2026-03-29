@@ -62,6 +62,7 @@ const Animals: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [speciesFilter, setSpeciesFilter] = useState('')
+  const [vetView, setVetView] = useState<'my-pets' | 'patients'>('my-pets')
 
   // Enterprise / group options for farmer role
   const [enterpriseOptions, setEnterpriseOptions] = useState<EnterpriseOption[]>([])
@@ -71,6 +72,7 @@ const Animals: React.FC = () => {
   const isAdmin = user?.role === 'admin'
   const isFarmer = user?.role === 'farmer'
   const isPetOwner = user?.role === 'pet_owner' || user?.role === 'farmer'
+  const canManageAnimals = isPetOwner || (isVet && vetView === 'my-pets')
 
   const breeds = useMemo(() => BREED_DATABASE[formData.species] || [], [formData.species])
   const showEarTag = EAR_TAG_SPECIES.includes(formData.species)
@@ -94,7 +96,9 @@ const Animals: React.FC = () => {
   const fetchAnimals = async () => {
     try {
       setLoading(true)
-      const res = await apiService.listAnimals()
+      const params: Record<string, string> = {}
+      if (isVet && vetView === 'patients') params.view = 'patients'
+      const res = await apiService.listAnimals(params)
       setAnimals(res.data?.animals || [])
     } catch {
       setAnimals([])
@@ -103,7 +107,7 @@ const Animals: React.FC = () => {
     }
   }
 
-  useEffect(() => { fetchAnimals() }, [])
+  useEffect(() => { fetchAnimals() }, [vetView])
 
   const resetForm = () => {
     setFormData({
@@ -218,13 +222,13 @@ const Animals: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🐾 {isVet ? t('animals.pageTitles.vet') : isAdmin ? t('animals.pageTitles.admin') : t('animals.pageTitles.petOwner')}</h1>
+          <h1>🐾 {isVet ? (vetView === 'my-pets' ? t('animals.pageTitles.petOwner') : t('animals.pageTitles.vet')) : isAdmin ? t('animals.pageTitles.admin') : t('animals.pageTitles.petOwner')}</h1>
           <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>
-            {isVet ? t('animals.subtitles.vet') : isAdmin ? t('animals.subtitles.admin') : t('animals.subtitles.petOwner')}
+            {isVet ? (vetView === 'my-pets' ? t('animals.subtitles.vetMyPets') : t('animals.subtitles.vet')) : isAdmin ? t('animals.subtitles.admin') : t('animals.subtitles.petOwner')}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          {isPetOwner && (
+          {canManageAnimals && (
             <button className="btn-primary" onClick={() => { resetForm(); setShowForm(!showForm) }}>
               {showForm ? t('animals.actions.cancel') : t('animals.registerAnimal')}
             </button>
@@ -234,6 +238,18 @@ const Animals: React.FC = () => {
 
       {successMsg && <div style={{ padding: '12px 16px', background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', borderRadius: 8, marginBottom: 16, fontWeight: 500 }}>{successMsg}</div>}
       {error && <div style={{ padding: '12px 16px', background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', borderRadius: 8, marginBottom: 16, fontWeight: 500 }}>{error}</div>}
+
+      {/* ─── Vet View Tabs ─────────────────────────────── */}
+      {isVet && (
+        <div className="module-tabs" style={{ marginBottom: 20 }}>
+          <button className={`module-tab ${vetView === 'my-pets' ? 'active' : ''}`} onClick={() => setVetView('my-pets')}>
+            🐾 {t('animals.vetTabs.myPets')}
+          </button>
+          <button className={`module-tab ${vetView === 'patients' ? 'active' : ''}`} onClick={() => setVetView('patients')}>
+            🩺 {t('animals.vetTabs.patientAnimals')}
+          </button>
+        </div>
+      )}
 
       {/* ─── Search & Filter Bar ───────────────────────────── */}
       {!showForm && animals.length > 0 && (
@@ -420,8 +436,8 @@ const Animals: React.FC = () => {
           <div style={{ textAlign: 'center', padding: 60 }}>
             <div style={{ fontSize: 64, marginBottom: 16 }}>🐾</div>
             <h3 style={{ fontSize: 20, color: '#333', marginBottom: 8 }}>{searchTerm || speciesFilter ? t('animals.emptySearch') : t('animals.emptyAnimals')}</h3>
-            <p style={{ color: '#666' }}>{isPetOwner ? t('animals.petOwnerCTA') : t('animals.adminCTA')}</p>
-            {isPetOwner && !showForm && (
+            <p style={{ color: '#666' }}>{canManageAnimals ? t('animals.petOwnerCTA') : t('animals.adminCTA')}</p>
+            {canManageAnimals && !showForm && (
               <button className="btn-primary" style={{ marginTop: 16 }} onClick={() => { resetForm(); setShowForm(true) }}>{t('animals.registerAnimal')}</button>
             )}
           </div>
@@ -491,7 +507,7 @@ const Animals: React.FC = () => {
                     <button className="btn-small" style={{ background: '#f0fdf4', color: '#059669', border: '1px solid #bbf7d0' }}
                       onClick={() => setDetailAnimal(animal)}>{t('animals.cardLabels.details')}</button>
                     <button className="btn-small" onClick={() => navigate('/medical-records')}>{t('animals.cardActions.records')}</button>
-                    {isPetOwner && (
+                    {canManageAnimals && (
                       <>
                         <button className="btn-small" style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }}
                           onClick={() => openEditForm(animal)}>{t('animals.cardActions.edit')}</button>
@@ -572,7 +588,7 @@ const Animals: React.FC = () => {
             </div>
             <div style={{ padding: '16px 28px', borderTop: '1px solid #e5e7eb', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button className="btn-small" onClick={() => navigate('/medical-records')}>{t('animals.detailModal.medicalRecords')}</button>
-              {isPetOwner && <button className="btn-small" style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }} onClick={() => { setDetailAnimal(null); openEditForm(detailAnimal) }}>{t('animals.detailModal.editBtn')}</button>}
+              {canManageAnimals && <button className="btn-small" style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }} onClick={() => { setDetailAnimal(null); openEditForm(detailAnimal) }}>{t('animals.detailModal.editBtn')}</button>}
               <button className="btn-small" onClick={() => setDetailAnimal(null)} style={{ padding: '6px 20px' }}>{t('animals.detailModal.closeBtn')}</button>
             </div>
           </div>

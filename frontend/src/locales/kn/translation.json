@@ -662,7 +662,12 @@
     "subtitles": {
       "petOwner": "Manage your pets and farm animals",
       "vet": "Animals from your consultations",
+      "vetMyPets": "ನಿಮ್ಮ ಸ್ವಂತ ಸಾಕುಪ್ರಾಣಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
       "admin": "All registered animals in the system"
+    },
+    "vetTabs": {
+      "myPets": "ನನ್ನ ಸಾಕುಪ್ರಾಣಿಗಳು",
+      "patientAnimals": "ರೋಗಿ ಪ್ರಾಣಿಗಳು"
     },
     "registerAnimal": "+ Register Animal",
     "searchPlaceholder": "Search by name, ID, ear tag, microchip...",

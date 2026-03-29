@@ -662,7 +662,12 @@
     "subtitles": {
       "petOwner": "Manage your pets and farm animals",
       "vet": "Animals from your consultations",
+      "vetMyPets": "Manage your personal pets and animals",
       "admin": "All registered animals in the system"
+    },
+    "vetTabs": {
+      "myPets": "My Pets",
+      "patientAnimals": "Patient Animals"
     },
     "registerAnimal": "+ Register Animal",
     "searchPlaceholder": "Search by name, ID, ear tag, microchip...",
