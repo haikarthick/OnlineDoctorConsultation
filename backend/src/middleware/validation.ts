@@ -1030,6 +1030,57 @@ export const updateOrderStatusSchema = Joi.object({
   status: Joi.string().valid('pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded').required(),
 });
 
+// ─── Tier 4: Marketplace Monetization ────────────────────────
+export const updateMonetizationSettingSchema = Joi.object({
+  settingValue: Joi.object().optional(),
+  isEnabled: Joi.boolean().optional(),
+}).min(1);
+
+export const createMarketplacePlanSchema = Joi.object({
+  name: shortText(100).required(),
+  description: longText(1000).optional().allow('', null),
+  price: Joi.number().min(0).required(),
+  currency: shortText(10).optional(),
+  durationDays: Joi.number().integer().min(0).optional(),
+  features: Joi.object().optional(),
+  maxListings: Joi.number().integer().allow(null).optional(),
+  maxBoostsPerMonth: Joi.number().integer().min(0).optional(),
+  prioritySupport: Joi.boolean().optional(),
+  analyticsAccess: Joi.boolean().optional(),
+  isActive: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().min(0).optional(),
+});
+
+export const updateMarketplacePlanSchema = Joi.object({
+  name: shortText(100).optional(),
+  description: longText(1000).optional().allow('', null),
+  price: Joi.number().min(0).optional(),
+  durationDays: Joi.number().integer().min(0).optional(),
+  features: Joi.object().optional(),
+  maxListings: Joi.number().integer().allow(null).optional(),
+  maxBoostsPerMonth: Joi.number().integer().min(0).optional(),
+  prioritySupport: Joi.boolean().optional(),
+  analyticsAccess: Joi.boolean().optional(),
+  isActive: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().min(0).optional(),
+}).min(1);
+
+export const boostListingSchema = Joi.object({
+  boostType: Joi.string().valid('standard', 'premium', 'spotlight').optional(),
+});
+
+export const createInquirySchema = Joi.object({
+  message: longText(2000).optional().allow('', null),
+});
+
+export const respondInquirySchema = Joi.object({
+  revealContact: Joi.boolean().optional(),
+});
+
+export const createSubscriptionSchema = Joi.object({
+  planId: requiredUuid,
+});
+
 // ─── Tier 4: Sustainability ──────────────────────────────────
 export const createSustainabilityMetricSchema = Joi.object({
   metricType: shortText(100).required(),

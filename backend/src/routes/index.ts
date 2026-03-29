@@ -53,6 +53,8 @@ import {
   createChatSessionSchema, sendChatMessageSchema, checkDrugInteractionsSchema, analyzeSymptomsSchema,
   createDigitalTwinSchema, updateDigitalTwinSchema, runSimulationSchema,
   createMarketplaceListingSchema, updateMarketplaceListingSchema, placeBidSchema, createMarketplaceOrderSchema, updateOrderStatusSchema,
+  updateMonetizationSettingSchema, createMarketplacePlanSchema as createMPlanSchema, updateMarketplacePlanSchema as updateMPlanSchema,
+  boostListingSchema, createInquirySchema, respondInquirySchema, createSubscriptionSchema,
   createSustainabilityMetricSchema, updateSustainabilityMetricSchema, createSustainabilityGoalSchema, updateSustainabilityGoalSchema,
   createWellnessScorecardSchema, updateWellnessScorecardSchema, createWellnessReminderSchema, snoozeReminderSchema,
   createGeofenceZoneSchema, updateGeofenceZoneSchema, createGeospatialEventSchema,
@@ -556,6 +558,23 @@ router.patch('/marketplace/admin/listings/:id/approve', authMiddleware, roleMidd
 router.patch('/marketplace/admin/listings/:id/reject', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.adminRejectMarketplaceListing(req, res)));
 router.patch('/marketplace/admin/listings/:id/hot-deal', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.adminToggleHotDeal(req, res)));
 router.patch('/marketplace/admin/listings/:id/featured', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.adminToggleFeatured(req, res)));
+// Marketplace Monetization — Admin
+router.get('/marketplace/admin/monetization/settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.getMonetizationSettings(req, res)));
+router.put('/marketplace/admin/monetization/settings/:key', authMiddleware, roleMiddleware(['admin']), validateBody(updateMonetizationSettingSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateMonetizationSetting(req, res)));
+router.get('/marketplace/admin/monetization/plans', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplacePlans(req, res)));
+router.post('/marketplace/admin/monetization/plans', authMiddleware, roleMiddleware(['admin']), validateBody(createMPlanSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createMarketplacePlan(req, res)));
+router.put('/marketplace/admin/monetization/plans/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMPlanSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateMarketplacePlan(req, res)));
+router.delete('/marketplace/admin/monetization/plans/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.deleteMarketplacePlan(req, res)));
+router.get('/marketplace/admin/monetization/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.getMonetizationDashboard(req, res)));
+// Marketplace Monetization — User
+router.get('/marketplace/subscription', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getUserSubscription(req, res)));
+router.post('/marketplace/subscription', authMiddleware, validateBody(createSubscriptionSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createUserSubscription(req, res)));
+router.delete('/marketplace/subscription', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.cancelUserSubscription(req, res)));
+router.post('/marketplace/listings/:id/boost', authMiddleware, validateBody(boostListingSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.boostMarketplaceListing(req, res)));
+router.post('/marketplace/listings/:listingId/inquiries', authMiddleware, validateBody(createInquirySchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createMarketplaceInquiry(req, res)));
+router.get('/marketplace/inquiries', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceInquiries(req, res)));
+router.patch('/marketplace/inquiries/:id/respond', authMiddleware, validateBody(respondInquirySchema), asyncHandler((req: Request, res: Response) => Tier4Controller.respondToMarketplaceInquiry(req, res)));
+router.get('/marketplace/monetization-status', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getUserMonetizationStatus(req, res)));
 
 // ─── Sustainability & Carbon Tracking ───────────────
 router.get('/enterprises/:enterpriseId/sustainability/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getSustainabilityDashboard(req, res)));

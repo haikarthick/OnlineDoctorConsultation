@@ -77,6 +77,14 @@ const Marketplace: React.FC = () => {
   // Order role
   const [orderRole, setOrderRole] = useState<'buyer' | 'seller'>('buyer')
 
+  // Monetization (admin)
+  const [monetizationSettings, setMonetizationSettings] = useState<any[]>([])
+  const [monetizationPlans, setMonetizationPlans] = useState<any[]>([])
+  const [monetizationDashboard, setMonetizationDashboard] = useState<any>(null)
+  const [adminSubTab, setAdminSubTab] = useState<'listings' | 'settings' | 'plans' | 'revenue'>('listings')
+  const [editingPlan, setEditingPlan] = useState<any>(null)
+  const [planForm, setPlanForm] = useState<Record<string, any>>({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
+
   // Animal list for auto-populate
   const [userAnimals, setUserAnimals] = useState<any[]>([])
   const [selectedAnimalId, setSelectedAnimalId] = useState('')
@@ -230,6 +238,63 @@ const Marketplace: React.FC = () => {
     } catch {}
   }
 
+  const fetchMonetizationSettings = async () => {
+    try {
+      const [settingsRes, plansRes, dashRes] = await Promise.all([
+        apiService.getMonetizationSettings(),
+        apiService.getMonetizationPlans(),
+        apiService.getMonetizationDashboard(),
+      ])
+      setMonetizationSettings(settingsRes.data || [])
+      setMonetizationPlans(plansRes.data || [])
+      setMonetizationDashboard(dashRes.data || null)
+    } catch {}
+  }
+
+  const handleToggleSetting = async (key: string, current: boolean) => {
+    try {
+      await apiService.updateMonetizationSetting(key, { isEnabled: !current })
+      setSuccessMsg(t('marketplace.monetization.settingUpdated'))
+      fetchMonetizationSettings()
+    } catch (e: any) { setError(e.message) }
+  }
+
+  const handleSavePlan = async () => {
+    try {
+      const data = {
+        name: planForm.name, description: planForm.description,
+        price: parseFloat(planForm.price) || 0, durationDays: parseInt(planForm.durationDays) || 30,
+        maxListings: planForm.maxListings ? parseInt(planForm.maxListings) : null,
+        maxBoostsPerMonth: parseInt(planForm.maxBoostsPerMonth) || 0,
+        isActive: planForm.isActive, sortOrder: parseInt(planForm.sortOrder) || 0,
+      }
+      if (editingPlan) {
+        await apiService.updateMonetizationPlan(editingPlan.id, data)
+      } else {
+        await apiService.createMonetizationPlan(data)
+      }
+      setSuccessMsg(editingPlan ? t('marketplace.monetization.planUpdated') : t('marketplace.monetization.planCreated'))
+      setEditingPlan(null)
+      setPlanForm({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
+      fetchMonetizationSettings()
+    } catch (e: any) { setError(e.message) }
+  }
+
+  const handleDeletePlan = async (id: string) => {
+    try {
+      await apiService.deleteMonetizationPlan(id)
+      setSuccessMsg(t('marketplace.monetization.planDeleted'))
+      fetchMonetizationSettings()
+    } catch (e: any) { setError(e.message) }
+  }
+
+  const handleTogglePlanActive = async (plan: any) => {
+    try {
+      await apiService.updateMonetizationPlan(plan.id, { isActive: !plan.is_active })
+      fetchMonetizationSettings()
+    } catch (e: any) { setError(e.message) }
+  }
+
   const handleAdminApprove = async (id: string) => {
     try { await apiService.adminApproveMarketplaceListing(id); setSuccessMsg(t('marketplace.admin.listingApproved')); fetchAdminData() } catch (e: any) { setError(e.message) }
   }
@@ -278,7 +343,7 @@ const Marketplace: React.FC = () => {
             setTab(key); setSelectedListing(null)
             if (key === 'orders') fetchOrders()
             if (key === 'prices') fetchMarketPrices()
-            if (key === 'admin') fetchAdminData()
+            if (key === 'admin') { fetchAdminData(); fetchMonetizationSettings() }
             if (key === 'auctions') { setFilters({ listingType: 'auction' }); fetchListings() }
           }}>{label}</button>
         ))}
@@ -834,106 +899,321 @@ const Marketplace: React.FC = () => {
       {/* ════════ ADMIN PANEL ════════ */}
       {tab === 'admin' && isAdmin && (
         <div>
-          {/* Admin Stats Overview */}
-          {adminStats && (
-            <div className="module-stats">
-              <div className="stat-card"><div className="stat-value">{adminStats.overview?.total_listings || 0}</div><div className="stat-label">{t('marketplace.stats.totalListings')}</div></div>
-              <div className="stat-card"><div className="stat-value">{adminStats.overview?.active_listings || 0}</div><div className="stat-label">{t('marketplace.stats.active')}</div></div>
-              <div className="stat-card"><div className="stat-value">{adminStats.overview?.sold_listings || 0}</div><div className="stat-label">{t('marketplace.stats.sold')}</div></div>
-              <div className="stat-card"><div className="stat-value">{adminStats.overview?.pending_review || 0}</div><div className="stat-label">{t('marketplace.stats.pendingReview')}</div></div>
-              <div className="stat-card"><div className="stat-value">{adminStats.overview?.hot_deals || 0}</div><div className="stat-label">{t('marketplace.stats.hotDeals')}</div></div>
-              <div className="stat-card"><div className="stat-value">{adminStats.overview?.auctions || 0}</div><div className="stat-label">{t('marketplace.stats.auctions')}</div></div>
-              <div className="stat-card"><div className="stat-value">{adminStats.overview?.total_views || 0}</div><div className="stat-label">{t('marketplace.stats.totalViews')}</div></div>
-            </div>
-          )}
+          {/* Admin Sub-tabs */}
+          <div className="mp-admin-subtabs">
+            {(['listings', 'settings', 'plans', 'revenue'] as const).map(st => (
+              <button key={st} className={`mp-admin-subtab ${adminSubTab === st ? 'active' : ''}`}
+                onClick={() => setAdminSubTab(st)}>
+                {st === 'listings' && '📋'} {st === 'settings' && '⚙️'} {st === 'plans' && '💎'} {st === 'revenue' && '📊'}
+                {' '}{t(`marketplace.monetization.subtabs.${st}`)}
+              </button>
+            ))}
+          </div>
 
-          {/* Species Breakdown */}
-          {adminStats?.bySpecies && adminStats.bySpecies.length > 0 && (
-            <div className="mp-section">
-              <h3 className="mp-section-title">{t('marketplace.sections.speciesAnalytics')}</h3>
-              <table className="module-table">
-                <thead><tr><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.admin.count')}</th><th>{t('marketplace.prices.avgPrice')}</th><th>{t('marketplace.admin.avgMilkYield')}</th><th>{t('marketplace.prices.avgWeight')}</th></tr></thead>
-                <tbody>{adminStats.bySpecies.map((s, i) => (
-                  <tr key={i}><td><strong>{s.species}</strong></td><td>{s.count}</td>
-                    <td>{formatCurrency(Math.round(s.avg_price || 0))}</td>
-                    <td>{s.avg_milk_yield ? `${Number(s.avg_milk_yield).toFixed(1)}L` : '—'}</td>
-                    <td>{s.avg_weight ? `${Number(s.avg_weight).toFixed(0)}${t('marketplace.units.kg')}` : '—'}</td></tr>
-                ))}</tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Price Distribution */}
-          {adminStats?.priceDistribution && (
-            <div className="mp-section">
-              <h3 className="mp-section-title">{t('marketplace.sections.priceDistribution')}</h3>
-              <div className="module-stats">
-                <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.under_10k}</div><div className="stat-label">{t('marketplace.admin.priceUnder10k')}</div></div>
-                <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.range_10k_50k}</div><div className="stat-label">{t('marketplace.admin.price10k50k')}</div></div>
-                <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.range_50k_100k}</div><div className="stat-label">{t('marketplace.admin.price50k1l')}</div></div>
-                <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.above_100k}</div><div className="stat-label">{t('marketplace.admin.priceAbove1l')}</div></div>
+          {/* ── Listings Sub-tab ── */}
+          {adminSubTab === 'listings' && (
+            <div>
+              {adminStats && (
+                <div className="module-stats">
+                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.total_listings || 0}</div><div className="stat-label">{t('marketplace.stats.totalListings')}</div></div>
+                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.active_listings || 0}</div><div className="stat-label">{t('marketplace.stats.active')}</div></div>
+                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.sold_listings || 0}</div><div className="stat-label">{t('marketplace.stats.sold')}</div></div>
+                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.pending_review || 0}</div><div className="stat-label">{t('marketplace.stats.pendingReview')}</div></div>
+                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.hot_deals || 0}</div><div className="stat-label">{t('marketplace.stats.hotDeals')}</div></div>
+                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.auctions || 0}</div><div className="stat-label">{t('marketplace.stats.auctions')}</div></div>
+                  <div className="stat-card"><div className="stat-value">{adminStats.overview?.total_views || 0}</div><div className="stat-label">{t('marketplace.stats.totalViews')}</div></div>
+                </div>
+              )}
+              {adminStats?.bySpecies && adminStats.bySpecies.length > 0 && (
+                <div className="mp-section">
+                  <h3 className="mp-section-title">{t('marketplace.sections.speciesAnalytics')}</h3>
+                  <table className="module-table">
+                    <thead><tr><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.admin.count')}</th><th>{t('marketplace.prices.avgPrice')}</th><th>{t('marketplace.admin.avgMilkYield')}</th><th>{t('marketplace.prices.avgWeight')}</th></tr></thead>
+                    <tbody>{adminStats.bySpecies.map((s, i) => (
+                      <tr key={i}><td><strong>{s.species}</strong></td><td>{s.count}</td>
+                        <td>{formatCurrency(Math.round(s.avg_price || 0))}</td>
+                        <td>{s.avg_milk_yield ? `${Number(s.avg_milk_yield).toFixed(1)}L` : '—'}</td>
+                        <td>{s.avg_weight ? `${Number(s.avg_weight).toFixed(0)}${t('marketplace.units.kg')}` : '—'}</td></tr>
+                    ))}</tbody>
+                  </table>
+                </div>
+              )}
+              {adminStats?.priceDistribution && (
+                <div className="mp-section">
+                  <h3 className="mp-section-title">{t('marketplace.sections.priceDistribution')}</h3>
+                  <div className="module-stats">
+                    <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.under_10k}</div><div className="stat-label">{t('marketplace.admin.priceUnder10k')}</div></div>
+                    <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.range_10k_50k}</div><div className="stat-label">{t('marketplace.admin.price10k50k')}</div></div>
+                    <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.range_50k_100k}</div><div className="stat-label">{t('marketplace.admin.price50k1l')}</div></div>
+                    <div className="stat-card"><div className="stat-value">{adminStats.priceDistribution.above_100k}</div><div className="stat-label">{t('marketplace.admin.priceAbove1l')}</div></div>
+                  </div>
+                </div>
+              )}
+              <div className="mp-section">
+                <div className="mp-admin-header">
+                  <h3 className="mp-section-title">{t('marketplace.sections.listingManagement')}</h3>
+                  <select className="module-input" value={adminFilter} onChange={e => { setAdminFilter(e.target.value); fetchAdminData() }}>
+                    <option value="">{t('marketplace.admin.allListings')}</option>
+                    <option value="true">{t('marketplace.admin.approved')}</option>
+                    <option value="false">{t('marketplace.admin.rejectedPending')}</option>
+                  </select>
+                </div>
+                <div className="data-table-container">
+                  <table className="module-table">
+                    <thead><tr><th>{t('marketplace.admin.titleCol')}</th><th>{t('marketplace.admin.sellerCol')}</th><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.admin.priceCol')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.admin.approvedCol')}</th><th>{t('marketplace.admin.actionsCol')}</th></tr></thead>
+                    <tbody>
+                      {adminListings.map(l => (
+                        <tr key={l.id}>
+                          <td>
+                            <div className="mp-title-cell">
+                              {g(l, 'isHotDeal', 'is_hot_deal') && <span title="Hot Deal">🔥</span>}
+                              {l.featured && <span title="Featured">⭐</span>}
+                              <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing(l) }}>{l.title}</span>
+                            </div>
+                          </td>
+                          <td>{g(l, 'sellerName', 'seller_name') || '—'}</td>
+                          <td>{l.species || '—'}</td>
+                          <td>{l.price ? formatCurrency(l.price) : '—'}</td>
+                          <td><span className={`module-badge ${l.status === 'active' ? 'success' : l.status === 'rejected' ? 'error' : ''}`}>{l.status}</span></td>
+                          <td>{g(l, 'adminApproved', 'admin_approved') === true ? '✅' : g(l, 'adminApproved', 'admin_approved') === false ? '❌' : '⏳'}</td>
+                          <td>
+                            <div className="mp-action-cluster">
+                              {g(l, 'adminApproved', 'admin_approved') !== true && <button className="module-btn small" onClick={() => handleAdminApprove(l.id)} title="Approve">✅</button>}
+                              <button className="module-btn small" onClick={() => handleToggleHotDeal(l.id, g(l, 'isHotDeal', 'is_hot_deal') || false)} title="Toggle Hot Deal">{g(l, 'isHotDeal', 'is_hot_deal') ? '🔥' : '💤'}</button>
+                              <button className="module-btn small" onClick={() => handleToggleFeatured(l.id, l.featured || false)} title="Toggle Featured">{l.featured ? '⭐' : '☆'}</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {adminListings.length === 0 && <p className="mp-empty">{t('marketplace.admin.noListings')}</p>}
+              </div>
+              <div className="mp-section">
+                <h3 className="mp-section-title">{t('marketplace.sections.rejectListing')}</h3>
+                <div className="mp-reject-row">
+                  <input className="module-input" value={adminRejectReason} onChange={e => setAdminRejectReason(e.target.value)} placeholder={t('marketplace.admin.rejectionReason')} />
+                  <select className="module-input" id="rejectListingSelect">
+                    <option value="">{t('marketplace.admin.selectToReject')}</option>
+                    {adminListings.filter(l => g(l, 'adminApproved', 'admin_approved') !== false).map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
+                  </select>
+                  <button className="module-btn primary" onClick={() => {
+                    const sel = (document.getElementById('rejectListingSelect') as HTMLSelectElement)?.value
+                    if (sel) handleAdminReject(sel)
+                  }}>{t('marketplace.admin.reject')}</button>
+                </div>
               </div>
             </div>
           )}
 
-          {/* All Listings Management */}
-          <div className="mp-section">
-            <div className="mp-admin-header">
-              <h3 className="mp-section-title">{t('marketplace.sections.listingManagement')}</h3>
-              <select className="module-input" value={adminFilter} onChange={e => { setAdminFilter(e.target.value); fetchAdminData() }}>
-                <option value="">{t('marketplace.admin.allListings')}</option>
-                <option value="true">{t('marketplace.admin.approved')}</option>
-                <option value="false">{t('marketplace.admin.rejectedPending')}</option>
-              </select>
-            </div>
-            <div className="data-table-container">
-              <table className="module-table">
-                <thead><tr><th>{t('marketplace.admin.titleCol')}</th><th>{t('marketplace.admin.sellerCol')}</th><th>{t('marketplace.livestock.species')}</th><th>{t('marketplace.admin.priceCol')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.admin.approvedCol')}</th><th>{t('marketplace.admin.actionsCol')}</th></tr></thead>
-                <tbody>
-                  {adminListings.map(l => (
-                    <tr key={l.id}>
-                      <td>
-                        <div className="mp-title-cell">
-                          {g(l, 'isHotDeal', 'is_hot_deal') && <span title="Hot Deal">🔥</span>}
-                          {l.featured && <span title="Featured">⭐</span>}
-                          <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing(l) }}>{l.title}</span>
+          {/* ── Monetization Settings Sub-tab ── */}
+          {adminSubTab === 'settings' && (
+            <div>
+              <div className="mp-section">
+                <h3 className="mp-section-title">{t('marketplace.monetization.featureToggles')}</h3>
+                <p className="mp-monetization-note">{t('marketplace.monetization.allFreeNote')}</p>
+                <div className="mp-settings-grid">
+                  {monetizationSettings.map(s => {
+                    const SETTING_ICONS: Record<string, string> = {
+                      listing_fee: '📝', listing_boost: '🚀', subscription_plans: '💎',
+                      inquiry_fee: '📩', featured_seller: '⭐', transaction_fee: '💰',
+                      premium_analytics: '📊', priority_placement: '📌',
+                    }
+                    return (
+                      <div key={s.settingKey} className={`mp-setting-card ${s.isEnabled ? 'enabled' : ''}`}>
+                        <div className="mp-setting-header">
+                          <span className="mp-setting-icon">{SETTING_ICONS[s.settingKey] || '⚙️'}</span>
+                          <div className="mp-setting-info">
+                            <h4>{t(`marketplace.monetization.settings.${s.settingKey}.title`)}</h4>
+                            <p>{t(`marketplace.monetization.settings.${s.settingKey}.desc`)}</p>
+                          </div>
+                          <label className="mp-toggle-switch">
+                            <input type="checkbox" checked={s.isEnabled} onChange={() => handleToggleSetting(s.settingKey, s.isEnabled)} />
+                            <span className="mp-toggle-slider"></span>
+                          </label>
                         </div>
-                      </td>
-                      <td>{g(l, 'sellerName', 'seller_name') || '—'}</td>
-                      <td>{l.species || '—'}</td>
-                      <td>{l.price ? formatCurrency(l.price) : '—'}</td>
-                      <td><span className={`module-badge ${l.status === 'active' ? 'success' : l.status === 'rejected' ? 'error' : ''}`}>{l.status}</span></td>
-                      <td>{g(l, 'adminApproved', 'admin_approved') === true ? '✅' : g(l, 'adminApproved', 'admin_approved') === false ? '❌' : '⏳'}</td>
-                      <td>
-                        <div className="mp-action-cluster">
-                          {g(l, 'adminApproved', 'admin_approved') !== true && <button className="module-btn small" onClick={() => handleAdminApprove(l.id)} title="Approve">✅</button>}
-                          <button className="module-btn small" onClick={() => handleToggleHotDeal(l.id, g(l, 'isHotDeal', 'is_hot_deal') || false)} title="Toggle Hot Deal">{g(l, 'isHotDeal', 'is_hot_deal') ? '🔥' : '💤'}</button>
-                          <button className="module-btn small" onClick={() => handleToggleFeatured(l.id, l.featured || false)} title="Toggle Featured">{l.featured ? '⭐' : '☆'}</button>
+                        <div className="mp-setting-status">
+                          <span className={`module-badge ${s.isEnabled ? 'success' : ''}`}>
+                            {s.isEnabled ? t('marketplace.monetization.active') : t('marketplace.monetization.inactive')}
+                          </span>
+                          <span className="mp-setting-category">{s.category}</span>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
-            {adminListings.length === 0 && <p className="mp-empty">{t('marketplace.admin.noListings')}</p>}
-          </div>
+          )}
 
-          {/* Reject with reason */}
-          <div className="mp-section">
-            <h3 className="mp-section-title">{t('marketplace.sections.rejectListing')}</h3>
-            <div className="mp-reject-row">
-              <input className="module-input" value={adminRejectReason} onChange={e => setAdminRejectReason(e.target.value)} placeholder={t('marketplace.admin.rejectionReason')} />
-              <select className="module-input" id="rejectListingSelect">
-                <option value="">{t('marketplace.admin.selectToReject')}</option>
-                {adminListings.filter(l => g(l, 'adminApproved', 'admin_approved') !== false).map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
-              </select>
-              <button className="module-btn primary" onClick={() => {
-                const sel = (document.getElementById('rejectListingSelect') as HTMLSelectElement)?.value
-                if (sel) handleAdminReject(sel)
-              }}>{t('marketplace.admin.reject')}</button>
+          {/* ── Plans Sub-tab ── */}
+          {adminSubTab === 'plans' && (
+            <div>
+              <div className="mp-section">
+                <h3 className="mp-section-title">{t('marketplace.monetization.managePlans')}</h3>
+                <div className="mp-plans-grid">
+                  {monetizationPlans.map(p => (
+                    <div key={p.id} className={`mp-plan-card ${p.is_active ? 'active' : 'inactive'}`}>
+                      <div className="mp-plan-header">
+                        <h4>{p.name}</h4>
+                        <span className={`module-badge ${p.is_active ? 'success' : ''}`}>
+                          {p.is_active ? t('marketplace.monetization.active') : t('marketplace.monetization.inactive')}
+                        </span>
+                      </div>
+                      <p className="mp-plan-desc">{p.description}</p>
+                      <div className="mp-plan-price">
+                        {p.price > 0 ? formatCurrency(p.price) : t('marketplace.monetization.free')}
+                        {p.duration_days > 0 && <span className="mp-plan-duration">/ {p.duration_days} {t('marketplace.monetization.days')}</span>}
+                      </div>
+                      <div className="mp-plan-features">
+                        <div className="mp-plan-feature">📋 {p.max_listings === -1 ? t('marketplace.monetization.unlimited') : p.max_listings || 0} {t('marketplace.monetization.listings')}</div>
+                        <div className="mp-plan-feature">🚀 {p.max_boosts_per_month || 0} {t('marketplace.monetization.boostsMonth')}</div>
+                        {p.priority_support && <div className="mp-plan-feature">🛡️ {t('marketplace.monetization.prioritySupport')}</div>}
+                        {p.analytics_access && <div className="mp-plan-feature">📊 {t('marketplace.monetization.analyticsAccess')}</div>}
+                      </div>
+                      <div className="mp-plan-actions">
+                        <button className="module-btn small" onClick={() => handleTogglePlanActive(p)}>
+                          {p.is_active ? '⏸️' : '▶️'}
+                        </button>
+                        <button className="module-btn small" onClick={() => {
+                          setEditingPlan(p)
+                          setPlanForm({
+                            name: p.name, description: p.description || '', price: String(p.price),
+                            durationDays: String(p.duration_days), maxListings: p.max_listings ? String(p.max_listings) : '',
+                            maxBoostsPerMonth: String(p.max_boosts_per_month || 0), isActive: p.is_active, sortOrder: String(p.sort_order || 0),
+                          })
+                        }}>✏️</button>
+                        <button className="module-btn small" onClick={() => handleDeletePlan(p.id)}>🗑️</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Plan Form */}
+              <div className="mp-section">
+                <h3 className="mp-section-title">{editingPlan ? t('marketplace.monetization.editPlan') : t('marketplace.monetization.createPlan')}</h3>
+                <div className="module-form">
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.monetization.planName')}</label>
+                      <input className="module-input" value={planForm.name} onChange={e => setPlanForm(f => ({ ...f, name: e.target.value }))} />
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.monetization.planPrice')}</label>
+                      <input className="module-input" type="number" value={planForm.price} onChange={e => setPlanForm(f => ({ ...f, price: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div className="module-form-row-3">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.monetization.durationDays')}</label>
+                      <input className="module-input" type="number" value={planForm.durationDays} onChange={e => setPlanForm(f => ({ ...f, durationDays: e.target.value }))} />
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.monetization.maxListings')}</label>
+                      <input className="module-input" type="number" value={planForm.maxListings} onChange={e => setPlanForm(f => ({ ...f, maxListings: e.target.value }))} placeholder="-1 = unlimited" />
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('marketplace.monetization.boostsMonth')}</label>
+                      <input className="module-input" type="number" value={planForm.maxBoostsPerMonth} onChange={e => setPlanForm(f => ({ ...f, maxBoostsPerMonth: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('marketplace.monetization.planDescription')}</label>
+                    <textarea className="module-input" rows={2} value={planForm.description} onChange={e => setPlanForm(f => ({ ...f, description: e.target.value }))} />
+                  </div>
+                  <div className="mp-plan-form-actions">
+                    <button className="module-btn primary" onClick={handleSavePlan}>{editingPlan ? t('marketplace.monetization.updatePlan') : t('marketplace.monetization.createPlan')}</button>
+                    {editingPlan && <button className="module-btn" onClick={() => {
+                      setEditingPlan(null)
+                      setPlanForm({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
+                    }}>{t('marketplace.monetization.cancel')}</button>}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* ── Revenue Dashboard Sub-tab ── */}
+          {adminSubTab === 'revenue' && (
+            <div>
+              <div className="module-stats">
+                <div className="stat-card"><div className="stat-value">{formatCurrency(monetizationDashboard?.totalRevenue?.total || 0)}</div><div className="stat-label">{t('marketplace.monetization.totalRevenue')}</div></div>
+                <div className="stat-card"><div className="stat-value">{monetizationDashboard?.totalRevenue?.count || 0}</div><div className="stat-label">{t('marketplace.monetization.totalTransactions')}</div></div>
+                <div className="stat-card"><div className="stat-value">{monetizationDashboard?.inquiryStats?.total || 0}</div><div className="stat-label">{t('marketplace.monetization.totalInquiries')}</div></div>
+                <div className="stat-card"><div className="stat-value">{formatCurrency(monetizationDashboard?.inquiryStats?.revenue || 0)}</div><div className="stat-label">{t('marketplace.monetization.inquiryRevenue')}</div></div>
+              </div>
+              {/* Revenue by Type */}
+              {monetizationDashboard?.revenueByType?.length > 0 && (
+                <div className="mp-section">
+                  <h3 className="mp-section-title">{t('marketplace.monetization.revenueByType')}</h3>
+                  <div className="module-stats">
+                    {monetizationDashboard.revenueByType.map((r: any, i: number) => (
+                      <div className="stat-card" key={i}>
+                        <div className="stat-value">{formatCurrency(r.total || 0)}</div>
+                        <div className="stat-label">{r.type} ({r.count})</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Subscription Stats */}
+              {monetizationDashboard?.subscriptionStats?.length > 0 && (
+                <div className="mp-section">
+                  <h3 className="mp-section-title">{t('marketplace.monetization.subscriptionStats')}</h3>
+                  <div className="module-stats">
+                    {monetizationDashboard.subscriptionStats.map((s: any, i: number) => (
+                      <div className="stat-card" key={i}>
+                        <div className="stat-value">{s.count}</div>
+                        <div className="stat-label">{s.status}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Boost Stats */}
+              {monetizationDashboard?.boostStats?.length > 0 && (
+                <div className="mp-section">
+                  <h3 className="mp-section-title">{t('marketplace.monetization.boostStats')}</h3>
+                  <div className="module-stats">
+                    {monetizationDashboard.boostStats.map((b: any, i: number) => (
+                      <div className="stat-card" key={i}>
+                        <div className="stat-value">{b.count}</div>
+                        <div className="stat-label">{b.boost_type} ({formatCurrency(b.revenue || 0)})</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Recent Transactions */}
+              {monetizationDashboard?.recentTransactions?.length > 0 && (
+                <div className="mp-section">
+                  <h3 className="mp-section-title">{t('marketplace.monetization.recentTransactions')}</h3>
+                  <div className="data-table-container">
+                    <table className="module-table">
+                      <thead><tr><th>{t('marketplace.monetization.user')}</th><th>{t('marketplace.monetization.type')}</th><th>{t('marketplace.monetization.amount')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.monetization.date')}</th></tr></thead>
+                      <tbody>
+                        {monetizationDashboard.recentTransactions.map((tx: any) => (
+                          <tr key={tx.id}>
+                            <td>{tx.userName || '—'}</td>
+                            <td><span className="module-badge">{tx.transaction_type}</span></td>
+                            <td>{formatCurrency(tx.amount)}</td>
+                            <td><span className={`module-badge ${tx.status === 'completed' ? 'success' : ''}`}>{tx.status}</span></td>
+                            <td>{new Date(tx.created_at).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+              {(!monetizationDashboard?.recentTransactions?.length && !monetizationDashboard?.revenueByType?.length) && (
+                <div className="mp-section">
+                  <p className="mp-empty">{t('marketplace.monetization.noRevenue')}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -400,6 +400,157 @@ async function runTier4Migration() {
     await client.query('CREATE INDEX IF NOT EXISTS idx_marketplace_listings_seller_type ON marketplace_listings(seller_type)').catch(() => {});
     console.log('  ✓ livestock indexes created');
 
+    // ═══════════════════════════════════════════════════════════
+    // 5. Marketplace Monetization Foundation
+    // ═══════════════════════════════════════════════════════════
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS marketplace_monetization_settings (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        setting_key VARCHAR(100) UNIQUE NOT NULL,
+        setting_value JSONB NOT NULL DEFAULT '{}',
+        is_enabled BOOLEAN DEFAULT false,
+        description TEXT,
+        category VARCHAR(50) DEFAULT 'general',
+        updated_by UUID REFERENCES users(id),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    console.log('  ✓ marketplace_monetization_settings table');
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS marketplace_plans (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        price NUMERIC(10,2) NOT NULL DEFAULT 0,
+        currency VARCHAR(10) DEFAULT 'INR',
+        duration_days INTEGER NOT NULL DEFAULT 30,
+        features JSONB NOT NULL DEFAULT '{}',
+        max_listings INTEGER,
+        max_boosts_per_month INTEGER DEFAULT 0,
+        priority_support BOOLEAN DEFAULT false,
+        analytics_access BOOLEAN DEFAULT false,
+        is_active BOOLEAN DEFAULT true,
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    console.log('  ✓ marketplace_plans table');
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS marketplace_subscriptions (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID NOT NULL REFERENCES users(id),
+        plan_id UUID NOT NULL REFERENCES marketplace_plans(id),
+        status VARCHAR(20) DEFAULT 'active',
+        starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        expires_at TIMESTAMPTZ NOT NULL,
+        auto_renew BOOLEAN DEFAULT false,
+        cancelled_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    console.log('  ✓ marketplace_subscriptions table');
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS listing_boosts (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users(id),
+        boost_type VARCHAR(30) DEFAULT 'standard',
+        price_paid NUMERIC(10,2) DEFAULT 0,
+        starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        expires_at TIMESTAMPTZ NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    console.log('  ✓ listing_boosts table');
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS marketplace_inquiries (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
+        buyer_id UUID NOT NULL REFERENCES users(id),
+        seller_id UUID NOT NULL REFERENCES users(id),
+        message TEXT,
+        contact_revealed BOOLEAN DEFAULT false,
+        fee_charged NUMERIC(10,2) DEFAULT 0,
+        status VARCHAR(20) DEFAULT 'pending',
+        responded_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    console.log('  ✓ marketplace_inquiries table');
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS marketplace_transactions (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID NOT NULL REFERENCES users(id),
+        transaction_type VARCHAR(30) NOT NULL,
+        amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+        currency VARCHAR(10) DEFAULT 'INR',
+        status VARCHAR(20) DEFAULT 'completed',
+        reference_id UUID,
+        reference_type VARCHAR(30),
+        metadata JSONB DEFAULT '{}',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    console.log('  ✓ marketplace_transactions table');
+
+    // Indexes for monetization tables
+    await client.query('CREATE INDEX IF NOT EXISTS idx_mp_subscriptions_user ON marketplace_subscriptions(user_id)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_mp_subscriptions_status ON marketplace_subscriptions(status)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_listing_boosts_listing ON listing_boosts(listing_id)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_listing_boosts_active ON listing_boosts(is_active)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_mp_inquiries_listing ON marketplace_inquiries(listing_id)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_mp_inquiries_buyer ON marketplace_inquiries(buyer_id)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_mp_transactions_user ON marketplace_transactions(user_id)').catch(() => {});
+    await client.query('CREATE INDEX IF NOT EXISTS idx_mp_transactions_type ON marketplace_transactions(transaction_type)').catch(() => {});
+    console.log('  ✓ monetization indexes created');
+
+    // Seed default monetization settings (all disabled)
+    const monetizationDefaults = [
+      { key: 'listing_fee', value: JSON.stringify({ price: 0, free_limit: 10 }), desc: 'Charge per listing after free limit', category: 'fees' },
+      { key: 'listing_boost', value: JSON.stringify({ standard: 99, premium: 199, spotlight: 499, duration_days: 7 }), desc: 'Boost listing visibility with paid promotion', category: 'boost' },
+      { key: 'subscription_plans', value: JSON.stringify({ enabled_plan_ids: [] }), desc: 'Premium subscription plans for sellers', category: 'subscription' },
+      { key: 'inquiry_fee', value: JSON.stringify({ per_inquiry: 0, free_daily_limit: 50 }), desc: 'Charge per inquiry/contact reveal', category: 'fees' },
+      { key: 'featured_seller', value: JSON.stringify({ monthly_price: 0 }), desc: 'Featured/verified seller badge', category: 'premium' },
+      { key: 'transaction_fee', value: JSON.stringify({ percentage: 0, flat_fee: 0 }), desc: 'Commission on successful transactions', category: 'fees' },
+      { key: 'premium_analytics', value: JSON.stringify({ price: 0 }), desc: 'Advanced marketplace analytics for sellers', category: 'premium' },
+      { key: 'priority_placement', value: JSON.stringify({ price: 0, duration_days: 30 }), desc: 'Priority placement in search results', category: 'boost' },
+    ];
+    for (const d of monetizationDefaults) {
+      await client.query(
+        `INSERT INTO marketplace_monetization_settings (id, setting_key, setting_value, is_enabled, description, category)
+         VALUES (uuid_generate_v4(), $1, $2::jsonb, false, $3, $4)
+         ON CONFLICT (setting_key) DO NOTHING`,
+        [d.key, d.value, d.desc, d.category]
+      ).catch(() => {});
+    }
+    console.log('  ✓ default monetization settings seeded (all disabled)');
+
+    // Seed default plans (inactive by default)
+    const defaultPlans = [
+      { name: 'Free', desc: 'Basic free plan for all users', price: 0, days: 0, features: JSON.stringify({ listings: 10, boosts: 0, analytics: false, support: 'community' }), maxListings: 10, boosts: 0, sort: 0 },
+      { name: 'Starter', desc: 'For small sellers getting started', price: 299, days: 30, features: JSON.stringify({ listings: 25, boosts: 2, analytics: false, support: 'email' }), maxListings: 25, boosts: 2, sort: 1 },
+      { name: 'Professional', desc: 'For active sellers and breeders', price: 799, days: 30, features: JSON.stringify({ listings: 100, boosts: 5, analytics: true, support: 'priority' }), maxListings: 100, boosts: 5, sort: 2 },
+      { name: 'Enterprise', desc: 'Unlimited access for large farms', price: 1999, days: 30, features: JSON.stringify({ listings: -1, boosts: 20, analytics: true, support: 'dedicated' }), maxListings: -1, boosts: 20, sort: 3 },
+    ];
+    for (const p of defaultPlans) {
+      await client.query(
+        `INSERT INTO marketplace_plans (id, name, description, price, duration_days, features, max_listings, max_boosts_per_month, is_active, sort_order)
+         VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5::jsonb, $6, $7, false, $8)
+         ON CONFLICT DO NOTHING`,
+        [p.name, p.desc, p.price, p.days, p.features, p.maxListings, p.boosts, p.sort]
+      ).catch(() => {});
+    }
+    console.log('  ✓ default marketplace plans seeded (inactive)');
+
     await client.query('COMMIT');
     console.log('\n✅ migration completed successfully!');
   } catch (err) {

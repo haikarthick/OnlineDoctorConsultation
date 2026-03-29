@@ -2231,6 +2231,32 @@
       "verified": "सत्यापित",
       "detailDisclaimer": "यह लिस्टिंग पुनर्वास क्लासीफाइड बोर्ड पर प्रकाशित है। VetCare सीधी बिक्री नहीं करता। सभी लेनदेन ऑफलाइन होते हैं। PCA अधिनियम 1960 और लागू राज्य नियमों का पालन करें।",
       "adoptDontShop": "🐾 गोद लें, खरीदें नहीं — आश्रयों और बचाव संगठनों से गोद लेने पर विचार करें"
+    },
+    "monetization": {
+      "subtabs": { "listings": "लिस्टिंग", "settings": "मुद्रीकरण", "plans": "प्लान", "revenue": "राजस्व" },
+      "featureToggles": "फीचर टॉगल",
+      "allFreeNote": "सभी सुविधाएं वर्तमान में सभी उपयोगकर्ताओं के लिए मुफ्त हैं। चार्ज शुरू करने के लिए तैयार होने पर सुविधाएं चालू करें।",
+      "settingUpdated": "सेटिंग सफलतापूर्वक अपडेट की गई",
+      "active": "सक्रिय", "inactive": "निष्क्रिय", "free": "मुफ्त", "days": "दिन", "unlimited": "असीमित",
+      "listings": "लिस्टिंग", "boostsMonth": "बूस्ट/माह", "prioritySupport": "प्राथमिकता सहायता", "analyticsAccess": "एनालिटिक्स एक्सेस",
+      "managePlans": "सदस्यता योजनाएं प्रबंधित करें", "editPlan": "प्लान संपादित करें", "createPlan": "प्लान बनाएं",
+      "planCreated": "प्लान सफलतापूर्वक बनाया गया", "planUpdated": "प्लान अपडेट किया गया", "planDeleted": "प्लान हटाया गया",
+      "updatePlan": "प्लान अपडेट करें", "cancel": "रद्द करें",
+      "planName": "प्लान का नाम", "planPrice": "कीमत (INR)", "planDescription": "विवरण", "durationDays": "अवधि (दिन)", "maxListings": "अधिकतम लिस्टिंग",
+      "totalRevenue": "कुल राजस्व", "totalTransactions": "कुल लेनदेन", "totalInquiries": "कुल पूछताछ", "inquiryRevenue": "पूछताछ राजस्व",
+      "revenueByType": "प्रकार अनुसार राजस्व", "subscriptionStats": "सदस्यता आँकड़े", "boostStats": "बूस्ट आँकड़े",
+      "recentTransactions": "हाल के लेनदेन", "user": "उपयोगकर्ता", "type": "प्रकार", "amount": "राशि", "date": "तिथि",
+      "noRevenue": "अभी तक कोई राजस्व डेटा नहीं। मुद्रीकरण सुविधाएं सक्षम होने पर राजस्व यहाँ दिखाई देगा।",
+      "settings": {
+        "listing_fee": { "title": "लिस्टिंग शुल्क", "desc": "मुफ्त सीमा के बाद प्रति लिस्टिंग शुल्क" },
+        "listing_boost": { "title": "लिस्टिंग बूस्ट", "desc": "दृश्यता बढ़ाने के लिए भुगतान प्रचार" },
+        "subscription_plans": { "title": "सदस्यता योजनाएं", "desc": "पावर सेलर्स के लिए प्रीमियम सदस्यता" },
+        "inquiry_fee": { "title": "पूछताछ शुल्क", "desc": "प्रति पूछताछ या संपर्क शुल्क" },
+        "featured_seller": { "title": "फीचर्ड सेलर", "desc": "प्रीमियम सत्यापित विक्रेता बैज" },
+        "transaction_fee": { "title": "लेनदेन शुल्क", "desc": "सफल लेनदेन पर कमीशन" },
+        "premium_analytics": { "title": "प्रीमियम एनालिटिक्स", "desc": "विक्रेताओं के लिए उन्नत अंतर्दृष्टि" },
+        "priority_placement": { "title": "प्राथमिकता प्लेसमेंट", "desc": "खोज परिणामों में प्राथमिकता" }
+      }
     }
   },
   "sustainability": {

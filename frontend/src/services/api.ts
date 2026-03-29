@@ -1726,6 +1726,83 @@ class ApiService {
     return response.data
   }
 
+  // ─── Marketplace Monetization — Admin ───────────────────────
+  async getMonetizationSettings() {
+    const response = await this.client.get('/marketplace/admin/monetization/settings')
+    return response.data
+  }
+
+  async updateMonetizationSetting(key: string, data: { settingValue?: any; isEnabled?: boolean }) {
+    const response = await this.client.put(`/marketplace/admin/monetization/settings/${key}`, data)
+    return response.data
+  }
+
+  async getMonetizationPlans() {
+    const response = await this.client.get('/marketplace/admin/monetization/plans')
+    return response.data
+  }
+
+  async createMonetizationPlan(data: any) {
+    const response = await this.client.post('/marketplace/admin/monetization/plans', data)
+    return response.data
+  }
+
+  async updateMonetizationPlan(id: string, data: any) {
+    const response = await this.client.put(`/marketplace/admin/monetization/plans/${id}`, data)
+    return response.data
+  }
+
+  async deleteMonetizationPlan(id: string) {
+    const response = await this.client.delete(`/marketplace/admin/monetization/plans/${id}`)
+    return response.data
+  }
+
+  async getMonetizationDashboard() {
+    const response = await this.client.get('/marketplace/admin/monetization/dashboard')
+    return response.data
+  }
+
+  // ─── Marketplace Monetization — User ────────────────────────
+  async getUserSubscription() {
+    const response = await this.client.get('/marketplace/subscription')
+    return response.data
+  }
+
+  async createUserSubscription(planId: string) {
+    const response = await this.client.post('/marketplace/subscription', { planId })
+    return response.data
+  }
+
+  async cancelUserSubscription() {
+    const response = await this.client.delete('/marketplace/subscription')
+    return response.data
+  }
+
+  async boostListing(id: string, boostType: string = 'standard') {
+    const response = await this.client.post(`/marketplace/listings/${id}/boost`, { boostType })
+    return response.data
+  }
+
+  async createInquiry(listingId: string, message: string) {
+    const response = await this.client.post(`/marketplace/listings/${listingId}/inquiries`, { message })
+    return response.data
+  }
+
+  async listInquiries(role: 'buyer' | 'seller' = 'buyer') {
+    const response = await this.client.get('/marketplace/inquiries', { params: { role } })
+    return response.data
+  }
+
+  async respondToInquiry(id: string, revealContact: boolean) {
+    const response = await this.client.patch(`/marketplace/inquiries/${id}/respond`, { revealContact })
+    return response.data
+  }
+
+  async getUserMonetizationStatus() {
+    const response = await this.client.get('/marketplace/monetization-status')
+    return response.data
+  }
+
   // ─── Sustainability & Carbon ────────────────────────────────
   async getSustainabilityDashboard(enterpriseId: string) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/sustainability/dashboard`)

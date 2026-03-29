@@ -6,6 +6,7 @@ import { Request, Response } from 'express';
 import aiCopilotService from '../services/AiCopilotService';
 import digitalTwinService from '../services/DigitalTwinService';
 import marketplaceService from '../services/MarketplaceService';
+import monetizationService from '../services/MarketplaceMonetizationService';
 import sustainabilityService from '../services/SustainabilityService';
 import wellnessService from '../services/WellnessService';
 import geospatialService from '../services/GeospatialService';
@@ -570,6 +571,124 @@ class Tier4Controller {
       const { enterpriseId } = req.params;
       if (!await ensureAccess(req, res, enterpriseId)) return;
       const data = await geospatialService.getDashboard(enterpriseId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  // ═══════════════════ Marketplace Monetization ═══════════════════
+
+  async getMonetizationSettings(req: Request, res: Response) {
+    try {
+      const data = await monetizationService.getAllSettings();
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async updateMonetizationSetting(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await monetizationService.updateSetting(req.params.key, req.body, userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async listMarketplacePlans(req: Request, res: Response) {
+    try {
+      const includeInactive = (req as any).userRole === 'admin';
+      const data = await monetizationService.listPlans(includeInactive);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async createMarketplacePlan(req: Request, res: Response) {
+    try {
+      const data = await monetizationService.createPlan(req.body);
+      res.status(201).json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async updateMarketplacePlan(req: Request, res: Response) {
+    try {
+      const data = await monetizationService.updatePlan(req.params.id, req.body);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async deleteMarketplacePlan(req: Request, res: Response) {
+    try {
+      const data = await monetizationService.deletePlan(req.params.id);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getUserSubscription(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await monetizationService.getUserSubscription(userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async createUserSubscription(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await monetizationService.createSubscription(userId, req.body.planId);
+      res.status(201).json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async cancelUserSubscription(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await monetizationService.cancelSubscription(userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async boostMarketplaceListing(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await monetizationService.boostListing(req.params.id, userId, req.body.boostType || 'standard');
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async createMarketplaceInquiry(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await monetizationService.createInquiry(req.params.listingId, userId, req.body.message || '');
+      res.status(201).json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async listMarketplaceInquiries(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const role = req.query.role === 'seller' ? 'seller' : 'buyer';
+      const data = await monetizationService.listInquiries(userId, role as 'buyer' | 'seller');
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async respondToMarketplaceInquiry(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await monetizationService.respondToInquiry(req.params.id, userId, req.body.revealContact ?? false);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getMonetizationDashboard(req: Request, res: Response) {
+    try {
+      const data = await monetizationService.getRevenueDashboard();
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getUserMonetizationStatus(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await monetizationService.getUserMonetizationStatus(userId);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
