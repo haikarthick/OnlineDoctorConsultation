@@ -272,7 +272,7 @@ const Animals: React.FC = () => {
         <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }}>
           <div ref={formRef} className="edit-form-panel edit-form-modal" onClick={e => e.stopPropagation()}>
             <button className="edit-form-close" onClick={() => { setShowForm(false); resetForm() }} aria-label="Close">✕</button>
-            {editingAnimal && <div className="edit-form-badge">✏️ Editing Mode</div>}
+            {editingAnimal && <div className="edit-form-badge">{t('animals.registerModal.editingMode')}</div>}
             <h2>
               {editingAnimal ? `✏️ ${t('animals.registerModal.titleEdit', { name: editingAnimal.name })}` : t('animals.registerModal.titleNew')}
             </h2>

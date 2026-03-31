@@ -59,7 +59,7 @@ const AlertCenter: React.FC = () => {
     e.preventDefault()
     setError(''); setSuccessMsg('')
     let conditions: any
-    try { conditions = JSON.parse(ruleFormData.conditions) } catch { setError('Invalid JSON in conditions'); return }
+    try { conditions = JSON.parse(ruleFormData.conditions) } catch { setError(t('alertCenter.toasts.invalidJson')); return }
     const payload = {
       enterpriseId: selectedEnterpriseId, name: ruleFormData.name,
       ruleType: ruleFormData.ruleType, severity: ruleFormData.severity,
@@ -68,34 +68,34 @@ const AlertCenter: React.FC = () => {
     try {
       if (editingRuleId) {
         await apiService.updateAlertRule(editingRuleId, payload)
-        setSuccessMsg('Rule updated!')
+        setSuccessMsg(t('alertCenter.toasts.ruleUpdated'))
       } else {
         await apiService.createAlertRule(selectedEnterpriseId, payload)
-        setSuccessMsg('Rule created!')
+        setSuccessMsg(t('alertCenter.toasts.ruleCreated'))
       }
       setShowRuleForm(false); setEditingRuleId(null)
       setRuleFormData({ name: '', ruleType: 'vaccination_due', severity: 'warning', conditions: '{}' })
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to save rule')
+      setError(err.response?.data?.error?.message || t('alertCenter.toasts.saveFailed'))
     }
   }
 
   const handleToggleRule = async (id: string, current: boolean) => {
     try {
       await apiService.toggleAlertRule(id, !current)
-      setSuccessMsg(`Rule ${!current ? 'enabled' : 'disabled'}`)
+      setSuccessMsg(t(!current ? 'alertCenter.toasts.ruleEnabled' : 'alertCenter.toasts.ruleDisabled'))
       fetchData()
-    } catch { setError('Failed to toggle rule') }
+    } catch { setError(t('alertCenter.toasts.toggleFailed')) }
   }
 
   const handleDeleteRule = async (id: string) => {
-    if (!window.confirm('Delete this alert rule?')) return
+    if (!window.confirm(t('alertCenter.toasts.deleteConfirm'))) return
     try {
       await apiService.deleteAlertRule(id)
-      setSuccessMsg('Rule deleted!')
+      setSuccessMsg(t('alertCenter.toasts.ruleDeleted'))
       fetchData()
-    } catch { setError('Failed to delete') }
+    } catch { setError(t('alertCenter.toasts.deleteFailed')) }
   }
 
   const handleMarkRead = async (id: string) => {
@@ -108,27 +108,27 @@ const AlertCenter: React.FC = () => {
   const handleMarkAllRead = async () => {
     try {
       await apiService.markAllAlertsRead(selectedEnterpriseId)
-      setSuccessMsg('All alerts marked as read')
+      setSuccessMsg(t('alertCenter.toasts.allRead'))
       fetchData()
-    } catch { setError('Failed to mark all read') }
+    } catch { setError(t('alertCenter.toasts.readFailed')) }
   }
 
   const handleAcknowledge = async (id: string) => {
     try {
       await apiService.acknowledgeAlert(id)
-      setSuccessMsg('Alert acknowledged')
+      setSuccessMsg(t('alertCenter.toasts.acknowledged'))
       fetchData()
-    } catch { setError('Failed to acknowledge') }
+    } catch { setError(t('alertCenter.toasts.acknowledgeFailed')) }
   }
 
   const handleRunChecks = async () => {
     try {
       const res = await apiService.runAlertChecks(selectedEnterpriseId)
       const count = res.data?.triggered || 0
-      setSuccessMsg(`Alert checks complete: ${count} alert(s) triggered`)
+      setSuccessMsg(t('alertCenter.toasts.checksComplete', { count }))
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to run checks')
+      setError(err.response?.data?.error?.message || t('alertCenter.toasts.checksFailed'))
     }
   }
 
@@ -147,16 +147,16 @@ const AlertCenter: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <h1>{t('alertCenter.pageTitle')}</h1>
-        <p>Configure alert rules, monitor events, and stay on top of critical issues</p>
+        <p>{t('alertCenter.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('alertCenter.selectEnterprise')}</label>
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
-          <option value="">-- Select --</option>
+          <option value="">{t('alertCenter.selectDefault')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
@@ -165,54 +165,54 @@ const AlertCenter: React.FC = () => {
         <>
           <div className="tab-bar">
             <button className={`tab-btn ${tab === 'events' ? 'active' : ''}`} onClick={() => setTab('events')}>
-              🔔 Events {unreadCount > 0 && <span className="badge badge-danger" style={{ marginLeft: 6 }}>{unreadCount}</span>}
+              {t('alertCenter.tabs.events')} {unreadCount > 0 && <span className="badge badge-danger" style={{ marginLeft: 6 }}>{unreadCount}</span>}
             </button>
-            <button className={`tab-btn ${tab === 'rules' ? 'active' : ''}`} onClick={() => setTab('rules')}>⚙️ Rules ({rules.length})</button>
-            <button className="btn btn-primary" onClick={handleRunChecks}>🔍 Run Alert Checks</button>
-            {tab === 'events' && events.length > 0 && <button className="btn btn-secondary" onClick={handleMarkAllRead}>✓ Mark All Read</button>}
-            {tab === 'rules' && <button className="btn btn-primary" onClick={() => { setShowRuleForm(!showRuleForm); setEditingRuleId(null) }}>+ New Rule</button>}
+            <button className={`tab-btn ${tab === 'rules' ? 'active' : ''}`} onClick={() => setTab('rules')}>{t('alertCenter.tabs.rules')} ({rules.length})</button>
+            <button className="btn btn-primary" onClick={handleRunChecks}>{t('alertCenter.runChecks')}</button>
+            {tab === 'events' && events.length > 0 && <button className="btn btn-secondary" onClick={handleMarkAllRead}>{t('alertCenter.markAllRead')}</button>}
+            {tab === 'rules' && <button className="btn btn-primary" onClick={() => { setShowRuleForm(!showRuleForm); setEditingRuleId(null) }}>{t('alertCenter.newRule')}</button>}
           </div>
 
           {showRuleForm && <div className="edit-form-overlay" onClick={() => { setShowRuleForm(false); setEditingRuleId(null) }} />}
           {showRuleForm && (
             <div ref={formRef} className="edit-form-panel">
             <form className="module-form" onSubmit={handleCreateRule}>
-              <h3>{editingRuleId ? 'Edit Alert Rule' : 'Create Alert Rule'}</h3>
+              <h3>{editingRuleId ? t('alertCenter.ruleModal.editTitle') : t('alertCenter.ruleModal.createTitle')}</h3>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Rule Name *</label>
+                  <label>{t('alertCenter.ruleModal.name')}</label>
                   <input required value={ruleFormData.name} onChange={e => setRuleFormData({ ...ruleFormData, name: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Rule Type</label>
+                  <label>{t('alertCenter.ruleModal.type')}</label>
                   <select value={ruleFormData.ruleType} onChange={e => setRuleFormData({ ...ruleFormData, ruleType: e.target.value })}>
                     {RULE_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Severity</label>
+                  <label>{t('alertCenter.ruleModal.severity')}</label>
                   <select value={ruleFormData.severity} onChange={e => setRuleFormData({ ...ruleFormData, severity: e.target.value })}>
                     {['info', 'warning', 'critical'].map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
                   </select>
                 </div>
               </div>
               <div className="form-group">
-                <label>Conditions (JSON)</label>
+                <label>{t('alertCenter.ruleModal.conditions')}</label>
                 <textarea rows={4} value={ruleFormData.conditions} onChange={e => setRuleFormData({ ...ruleFormData, conditions: e.target.value })} style={{ fontFamily: 'monospace' }} />
                 <small>Examples: {`{"daysAhead": 14}`} for vaccination_due, {`{"minScore": 50}`} for health_threshold</small>
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">{editingRuleId ? 'Update Rule' : 'Create Rule'}</button>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowRuleForm(false); setEditingRuleId(null) }}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editingRuleId ? t('alertCenter.ruleModal.updateBtn') : t('alertCenter.ruleModal.createBtn')}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowRuleForm(false); setEditingRuleId(null) }}>{t('common.cancel')}</button>
               </div>
             </form>
             </div>
           )}
 
-          {loading ? <p className="loading-text">Loading...</p> : tab === 'events' ? (
+          {loading ? <p className="loading-text">{t('common.loading')}</p> : tab === 'events' ? (
             <div className="card full-width">
-              <h3>Alert Events</h3>
-              {events.length === 0 ? <p className="empty-text">No alert events. Run alert checks to scan for issues.</p> : (
+              <h3>{t('alertCenter.events.title')}</h3>
+              {events.length === 0 ? <p className="empty-text">{t('alertCenter.events.empty')}</p> : (
                 <div className="alert-events-list">
                   {events.map(ev => (
                     <div key={ev.id} className={`alert-event-card ${!ev.isRead ? 'unread' : ''} severity-${ev.severity}`}>
@@ -223,13 +223,13 @@ const AlertCenter: React.FC = () => {
                       </div>
                       <p className="alert-event-message">{ev.message}</p>
                       <div className="alert-event-meta">
-                        {ev.ruleName && <span>Rule: {ev.ruleName}</span>}
-                        {ev.animalName && <span>Animal: {ev.animalName}</span>}
-                        {ev.acknowledgedByName && <span>Acknowledged by: {ev.acknowledgedByName}</span>}
+                        {ev.ruleName && <span>{t('alertCenter.events.rule')} {ev.ruleName}</span>}
+                        {ev.animalName && <span>{t('alertCenter.events.animal')} {ev.animalName}</span>}
+                        {ev.acknowledgedByName && <span>{t('alertCenter.events.acknowledgedBy')} {ev.acknowledgedByName}</span>}
                       </div>
                       <div className="alert-event-actions">
-                        {!ev.isRead && <button className="btn btn-sm" onClick={() => handleMarkRead(ev.id)}>Mark Read</button>}
-                        {!ev.acknowledgedBy && <button className="btn btn-sm btn-secondary" onClick={() => handleAcknowledge(ev.id)}>Acknowledge</button>}
+                        {!ev.isRead && <button className="btn btn-sm" onClick={() => handleMarkRead(ev.id)}>{t('alertCenter.events.markRead')}</button>}
+                        {!ev.acknowledgedBy && <button className="btn btn-sm btn-secondary" onClick={() => handleAcknowledge(ev.id)}>{t('alertCenter.events.acknowledge')}</button>}
                       </div>
                     </div>
                   ))}
@@ -238,10 +238,10 @@ const AlertCenter: React.FC = () => {
             </div>
           ) : (
             <div className="card full-width">
-              <h3>Alert Rules</h3>
-              {rules.length === 0 ? <p className="empty-text">No alert rules configured. Create one to start monitoring.</p> : (
+              <h3>{t('alertCenter.rules.title')}</h3>
+              {rules.length === 0 ? <p className="empty-text">{t('alertCenter.rules.empty')}</p> : (
                 <table className="data-table">
-                  <thead><tr><th>Name</th><th>Type</th><th>Severity</th><th>Status</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>{t('alertCenter.rules.headers.name')}</th><th>{t('alertCenter.rules.headers.type')}</th><th>{t('alertCenter.rules.headers.severity')}</th><th>{t('alertCenter.rules.headers.status')}</th><th>{t('alertCenter.rules.headers.actions')}</th></tr></thead>
                   <tbody>
                     {rules.map(r => (
                       <tr key={r.id}>
@@ -250,12 +250,12 @@ const AlertCenter: React.FC = () => {
                         <td><span className="badge" style={{ background: SEVERITY_COLORS[r.severity] }}>{r.severity}</span></td>
                         <td>
                           <button className={`btn btn-sm ${r.isEnabled ? 'btn-success' : 'btn-secondary'}`} onClick={() => handleToggleRule(r.id, r.isEnabled)}>
-                            {r.isEnabled ? '✅ Enabled' : '⏸ Disabled'}
+                            {r.isEnabled ? t('common.enabled') : t('common.disabled')}
                           </button>
                         </td>
                         <td>
-                          <button className="btn btn-sm" onClick={() => startEditRule(r)}>Edit</button>
-                          <button className="btn btn-sm btn-danger" onClick={() => handleDeleteRule(r.id)}>Del</button>
+                          <button className="btn btn-sm" onClick={() => startEditRule(r)}>{t('common.edit')}</button>
+                          <button className="btn btn-sm btn-danger" onClick={() => handleDeleteRule(r.id)}>{t('alertCenter.rules.del')}</button>
                         </td>
                       </tr>
                     ))}

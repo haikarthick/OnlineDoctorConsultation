@@ -74,11 +74,11 @@ const GenomicLineagePage: React.FC = () => {
         breedPurityPct: formData.breedPurityPct ? parseFloat(formData.breedPurityPct) : undefined,
         notes: formData.notes || undefined,
       })
-      setSuccessMsg('Genetic profile created!')
+      setSuccessMsg(t('genomicLineage.profileCreated'))
       setShowForm(false)
       setFormData({ animalId: '', sireId: '', damId: '', generation: '', inbreedingCoefficient: '', dnaTestDate: '', dnaLab: '', dnaSampleId: '', breedPurityPct: '', notes: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   const handleCreatePair = async (e: React.FormEvent) => {
@@ -91,11 +91,11 @@ const GenomicLineagePage: React.FC = () => {
         predictedInbreeding: parseFloat(pairForm.predictedInbreeding) || 0,
         recommendation: pairForm.recommendation, reason: pairForm.reason || undefined,
       })
-      setSuccessMsg('Breeding pair recommendation created!')
+      setSuccessMsg(t('genomicLineage.pairCreated'))
       setShowPairForm(false)
       setPairForm({ sireId: '', damId: '', compatibilityScore: '', predictedInbreeding: '', recommendation: 'neutral', reason: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   const recColor = (r: string) => {
@@ -107,56 +107,56 @@ const GenomicLineagePage: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <h1>{t('genomicLineage.pageTitle')}</h1>
-        <p>Track ancestry trees, inbreeding coefficients, and find optimal breeding pairs</p>
+        <p>{t('genomicLineage.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('common.selectEnterprise')}:</label>
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
-          <option value="">-- Select --</option>
+          <option value="">{t('common.selectOption')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
 
       {!selectedEnterpriseId ? (
-        <div className="empty-state">Select an enterprise to view genetic data</div>
+        <div className="empty-state">{t('genomicLineage.selectEnterprise')}</div>
       ) : loading ? (
-        <div className="loading-spinner">Loading genetic data…</div>
+        <div className="loading-spinner">{t('genomicLineage.loading')}</div>
       ) : (
         <>
           <div className="tab-bar">
-            <button className={tab === 'dashboard' ? 'tab-active' : ''} onClick={() => setTab('dashboard')}>Diversity Dashboard</button>
-            <button className={tab === 'profiles' ? 'tab-active' : ''} onClick={() => setTab('profiles')}>Genetic Profiles</button>
-            <button className={tab === 'pairs' ? 'tab-active' : ''} onClick={() => setTab('pairs')}>Pair Recommendations</button>
+            <button className={tab === 'dashboard' ? 'tab-active' : ''} onClick={() => setTab('dashboard')}>{t('genomicLineage.tabs.dashboard')}</button>
+            <button className={tab === 'profiles' ? 'tab-active' : ''} onClick={() => setTab('profiles')}>{t('genomicLineage.tabs.profiles')}</button>
+            <button className={tab === 'pairs' ? 'tab-active' : ''} onClick={() => setTab('pairs')}>{t('genomicLineage.tabs.pairs')}</button>
           </div>
 
           {tab === 'dashboard' && dashboard && (
             <div className="dashboard-grid">
               <div className="stat-card accent-green">
                 <div className="stat-value">{dashboard.summary?.total || 0}</div>
-                <div className="stat-label">Total Profiles</div>
+                <div className="stat-label">{t('genomicLineage.stats.totalProfiles')}</div>
               </div>
               <div className="stat-card accent-orange">
                 <div className="stat-value">{(+(dashboard.summary?.avg || 0)).toFixed(4)}</div>
-                <div className="stat-label">Avg Inbreeding Coeff.</div>
+                <div className="stat-label">{t('genomicLineage.stats.avgInbreeding')}</div>
               </div>
               <div className="stat-card accent-red">
                 <div className="stat-value">{dashboard.highRiskInbreeding?.length || 0}</div>
-                <div className="stat-label">High-Risk (&gt;0.0625)</div>
+                <div className="stat-label">{t('genomicLineage.stats.highRisk')}</div>
               </div>
               <div className="stat-card accent-blue">
                 <div className="stat-value">{dashboard.bySpecies?.length || 0}</div>
-                <div className="stat-label">Species Tracked</div>
+                <div className="stat-label">{t('genomicLineage.stats.speciesTracked')}</div>
               </div>
 
               {dashboard.bySpecies?.length > 0 && (
                 <div className="card full-width">
-                  <h3>📊 Genetic Diversity by Species</h3>
+                  <h3>📊 {t('genomicLineage.diversityBySpecies')}</h3>
                   <table className="data-table">
-                    <thead><tr><th>Species</th><th>Count</th><th>Avg Inbreeding</th></tr></thead>
+                    <thead><tr><th>{t('genomicLineage.species')}</th><th>{t('genomicLineage.count')}</th><th>{t('genomicLineage.avgInbreeding')}</th></tr></thead>
                     <tbody>{dashboard.bySpecies.map((s: any, i: number) => (
                       <tr key={i}><td>{s.species}</td><td>{s.count}</td><td>{(+s.avg_inbreeding).toFixed(4)}</td></tr>
                     ))}</tbody>
@@ -166,9 +166,9 @@ const GenomicLineagePage: React.FC = () => {
 
               {dashboard.highRiskInbreeding?.length > 0 && (
                 <div className="card full-width">
-                  <h3>⚠️ High Inbreeding Risk Animals</h3>
+                  <h3>⚠️ {t('genomicLineage.highRiskAnimals')}</h3>
                   <table className="data-table">
-                    <thead><tr><th>Animal</th><th>Species</th><th>Inbreeding Coeff.</th></tr></thead>
+                    <thead><tr><th>{t('genomicLineage.animal')}</th><th>{t('genomicLineage.species')}</th><th>{t('genomicLineage.inbreedingCoeff')}</th></tr></thead>
                     <tbody>{dashboard.highRiskInbreeding.map((a: any, i: number) => (
                       <tr key={i}><td>{a.name}</td><td>{a.species}</td><td style={{ color: '#ef4444', fontWeight: 'bold' }}>{(+a.inbreeding_coefficient).toFixed(4)}</td></tr>
                     ))}</tbody>
@@ -181,7 +181,7 @@ const GenomicLineagePage: React.FC = () => {
           {tab === 'profiles' && (
             <div>
               <div className="section-toolbar">
-                <button className="btn-primary" onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancel' : '+ Add Genetic Profile'}</button>
+                <button className="btn-primary" onClick={() => setShowForm(!showForm)}>{showForm ? t('common.cancel') : t('genomicLineage.addProfile')}</button>
               </div>
 
               {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false) }} />}
@@ -189,24 +189,24 @@ const GenomicLineagePage: React.FC = () => {
                 <div ref={formRef} className="edit-form-panel">
                 <form className="module-form" onSubmit={handleCreateProfile}>
                   <div className="form-grid">
-                    <div className="form-group"><label>Animal ID *</label><input required value={formData.animalId} onChange={e => setFormData({ ...formData, animalId: e.target.value })} /></div>
-                    <div className="form-group"><label>Sire ID</label><input value={formData.sireId} onChange={e => setFormData({ ...formData, sireId: e.target.value })} /></div>
-                    <div className="form-group"><label>Dam ID</label><input value={formData.damId} onChange={e => setFormData({ ...formData, damId: e.target.value })} /></div>
-                    <div className="form-group"><label>Generation</label><input type="number" value={formData.generation} onChange={e => setFormData({ ...formData, generation: e.target.value })} /></div>
-                    <div className="form-group"><label>Inbreeding Coefficient</label><input type="number" step="0.0001" min="0" max="1" value={formData.inbreedingCoefficient} onChange={e => setFormData({ ...formData, inbreedingCoefficient: e.target.value })} /></div>
-                    <div className="form-group"><label>DNA Test Date</label><input type="date" value={formData.dnaTestDate} onChange={e => setFormData({ ...formData, dnaTestDate: e.target.value })} /></div>
-                    <div className="form-group"><label>DNA Lab</label><input value={formData.dnaLab} onChange={e => setFormData({ ...formData, dnaLab: e.target.value })} /></div>
-                    <div className="form-group"><label>DNA Sample ID</label><input value={formData.dnaSampleId} onChange={e => setFormData({ ...formData, dnaSampleId: e.target.value })} /></div>
-                    <div className="form-group"><label>Breed Purity %</label><input type="number" min="0" max="100" value={formData.breedPurityPct} onChange={e => setFormData({ ...formData, breedPurityPct: e.target.value })} /></div>
-                    <div className="form-group full-width"><label>Notes</label><textarea value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.animalId')} *</label><input required value={formData.animalId} onChange={e => setFormData({ ...formData, animalId: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.sireId')}</label><input value={formData.sireId} onChange={e => setFormData({ ...formData, sireId: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.damId')}</label><input value={formData.damId} onChange={e => setFormData({ ...formData, damId: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.generation')}</label><input type="number" value={formData.generation} onChange={e => setFormData({ ...formData, generation: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.inbreedingCoeff')}</label><input type="number" step="0.0001" min="0" max="1" value={formData.inbreedingCoefficient} onChange={e => setFormData({ ...formData, inbreedingCoefficient: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.dnaTestDate')}</label><input type="date" value={formData.dnaTestDate} onChange={e => setFormData({ ...formData, dnaTestDate: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.dnaLab')}</label><input value={formData.dnaLab} onChange={e => setFormData({ ...formData, dnaLab: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.dnaSampleId')}</label><input value={formData.dnaSampleId} onChange={e => setFormData({ ...formData, dnaSampleId: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.breedPurity')}</label><input type="number" min="0" max="100" value={formData.breedPurityPct} onChange={e => setFormData({ ...formData, breedPurityPct: e.target.value })} /></div>
+                    <div className="form-group full-width"><label>{t('common.notes')}</label><textarea value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} /></div>
                   </div>
-                  <button type="submit" className="btn-primary">Create Profile</button>
+                  <button type="submit" className="btn-primary">{t('genomicLineage.createProfile')}</button>
                 </form>
                 </div>
               )}
 
               <table className="data-table">
-                <thead><tr><th>Animal</th><th>Species</th><th>Sire</th><th>Dam</th><th>Gen</th><th>Inbreeding</th><th>Purity</th></tr></thead>
+                <thead><tr><th>{t('genomicLineage.animal')}</th><th>{t('genomicLineage.species')}</th><th>{t('genomicLineage.sire')}</th><th>{t('genomicLineage.dam')}</th><th>{t('genomicLineage.gen')}</th><th>{t('genomicLineage.inbreeding')}</th><th>{t('genomicLineage.purity')}</th></tr></thead>
                 <tbody>
                   {profiles.map(p => (
                     <tr key={p.id}>
@@ -221,7 +221,7 @@ const GenomicLineagePage: React.FC = () => {
                       <td>{(p.breedPurityPct || (p as any).breed_purity_pct) ? `${p.breedPurityPct || (p as any).breed_purity_pct}%` : '—'}</td>
                     </tr>
                   ))}
-                  {!profiles.length && <tr><td colSpan={7} className="empty-cell">No genetic profiles</td></tr>}
+                  {!profiles.length && <tr><td colSpan={7} className="empty-cell">{t('genomicLineage.noProfiles')}</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -230,17 +230,17 @@ const GenomicLineagePage: React.FC = () => {
           {tab === 'pairs' && (
             <div>
               <div className="section-toolbar">
-                <button className="btn-primary" onClick={() => setShowPairForm(!showPairForm)}>{showPairForm ? 'Cancel' : '+ Add Pair Recommendation'}</button>
+                <button className="btn-primary" onClick={() => setShowPairForm(!showPairForm)}>{showPairForm ? t('common.cancel') : t('genomicLineage.addPair')}</button>
               </div>
 
               {showPairForm && (
                 <form className="module-form" onSubmit={handleCreatePair}>
                   <div className="form-grid">
-                    <div className="form-group"><label>Sire ID *</label><input required value={pairForm.sireId} onChange={e => setPairForm({ ...pairForm, sireId: e.target.value })} /></div>
-                    <div className="form-group"><label>Dam ID *</label><input required value={pairForm.damId} onChange={e => setPairForm({ ...pairForm, damId: e.target.value })} /></div>
-                    <div className="form-group"><label>Compatibility Score (0-100)</label><input type="number" min="0" max="100" value={pairForm.compatibilityScore} onChange={e => setPairForm({ ...pairForm, compatibilityScore: e.target.value })} /></div>
-                    <div className="form-group"><label>Predicted Inbreeding</label><input type="number" step="0.0001" min="0" max="1" value={pairForm.predictedInbreeding} onChange={e => setPairForm({ ...pairForm, predictedInbreeding: e.target.value })} /></div>
-                    <div className="form-group"><label>Recommendation</label>
+                    <div className="form-group"><label>{t('genomicLineage.sireId')} *</label><input required value={pairForm.sireId} onChange={e => setPairForm({ ...pairForm, sireId: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.damId')} *</label><input required value={pairForm.damId} onChange={e => setPairForm({ ...pairForm, damId: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.compatibilityScore')}</label><input type="number" min="0" max="100" value={pairForm.compatibilityScore} onChange={e => setPairForm({ ...pairForm, compatibilityScore: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.predictedInbreeding')}</label><input type="number" step="0.0001" min="0" max="1" value={pairForm.predictedInbreeding} onChange={e => setPairForm({ ...pairForm, predictedInbreeding: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('genomicLineage.recommendation')}</label>
                       <select value={pairForm.recommendation} onChange={e => setPairForm({ ...pairForm, recommendation: e.target.value })}>
                         <option value="highly_recommended">Highly Recommended</option>
                         <option value="recommended">Recommended</option>
@@ -249,9 +249,9 @@ const GenomicLineagePage: React.FC = () => {
                         <option value="avoid">Avoid</option>
                       </select>
                     </div>
-                    <div className="form-group full-width"><label>Reason</label><textarea value={pairForm.reason} onChange={e => setPairForm({ ...pairForm, reason: e.target.value })} /></div>
+                    <div className="form-group full-width"><label>{t('genomicLineage.reason')}</label><textarea value={pairForm.reason} onChange={e => setPairForm({ ...pairForm, reason: e.target.value })} /></div>
                   </div>
-                  <button type="submit" className="btn-primary">Create Pair Recommendation</button>
+                  <button type="submit" className="btn-primary">{t('genomicLineage.createPair')}</button>
                 </form>
               )}
 
@@ -263,13 +263,13 @@ const GenomicLineagePage: React.FC = () => {
                       <span className="badge" style={{ backgroundColor: recColor(p.recommendation || (p as any).recommendation) }}>{(p.recommendation || (p as any).recommendation).replace(/_/g, ' ')}</span>
                     </div>
                     <div className="card-stats">
-                      <div><strong>{+(p.compatibilityScore || (p as any).compatibility_score)}</strong> compatibility</div>
-                      <div><strong>{(+(p.predictedInbreeding || (p as any).predicted_inbreeding || 0)).toFixed(4)}</strong> pred. inbreeding</div>
+                      <div><strong>{+(p.compatibilityScore || (p as any).compatibility_score)}</strong> {t('genomicLineage.compatibility')}</div>
+                      <div><strong>{(+(p.predictedInbreeding || (p as any).predicted_inbreeding || 0)).toFixed(4)}</strong> {t('genomicLineage.predInbreeding')}</div>
                     </div>
                     {(p.reason) && <p className="card-note">{p.reason}</p>}
                   </div>
                 ))}
-                {!pairs.length && <div className="empty-state">No pair recommendations yet</div>}
+                {!pairs.length && <div className="empty-state">{t('genomicLineage.noPairs')}</div>}
               </div>
             </div>
           )}

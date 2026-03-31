@@ -66,8 +66,8 @@ const MovementLog: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setError('')
-    if (!formData.movementType) { setError('Movement type required'); return }
-    if (!formData.animalId && !formData.groupId) { setError('Select animal or group'); return }
+    if (!formData.movementType) { setError(t('movementLog.validation.typeRequired')); return }
+    if (!formData.animalId && !formData.groupId) { setError(t('movementLog.validation.selectAnimal')); return }
     try {
       await apiService.createMovement({
         enterpriseId: selectedEnterpriseId,
@@ -77,12 +77,12 @@ const MovementLog: React.FC = () => {
         fromLocationId: formData.fromLocationId || undefined,
         toLocationId: formData.toLocationId || undefined
       } as any)
-      setSuccessMsg('Movement recorded')
+      setSuccessMsg(t('movementLog.toasts.recorded'))
       setShowForm(false)
       setFormData({ movementType: 'transfer', animalId: '', groupId: '', fromLocationId: '', toLocationId: '', reason: '', notes: '' })
       fetchMovements()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('movementLog.toasts.failed')) }
   }
 
   const formatDate = (d: string) => d ? new Date(d).toLocaleString() : '–'
@@ -92,11 +92,11 @@ const MovementLog: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('movementLog.pageTitle')}</h1>
-          <p className="subtitle">Track animal transfers, births, sales, and more</p>
+          <p className="subtitle">{t('movementLog.subtitle')}</p>
         </div>
         <div className="header-actions">
           {selectedEnterpriseId && (
-            <button className="btn btn-primary" onClick={() => setShowForm(true)}>+ Record Movement</button>
+            <button className="btn btn-primary" onClick={() => setShowForm(true)}>{t('movementLog.recordMovement')}</button>
           )}
         </div>
       </div>
@@ -106,7 +106,7 @@ const MovementLog: React.FC = () => {
 
       <div className="filters-bar">
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input" style={{ maxWidth: '350px' }}>
-          <option value="">Select Enterprise...</option>
+          <option value="">{t('movementLog.selectEnterprise')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
@@ -114,29 +114,29 @@ const MovementLog: React.FC = () => {
       {!selectedEnterpriseId ? (
         <div className="empty-state">
           <div className="empty-icon">🔄</div>
-          <h3>Select an Enterprise</h3>
-          <p>Choose an enterprise to view movement history.</p>
+          <h3>{t('movementLog.emptyEnterprise')}</h3>
+          <p>{t('movementLog.emptyEnterpriseSubtitle')}</p>
         </div>
       ) : loading ? (
-        <div className="loading-spinner">Loading...</div>
+        <div className="loading-spinner">{t('common.loading')}</div>
       ) : movements.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔄</div>
-          <h3>No Movements Recorded</h3>
-          <p>Movement records track animal transfers, births, sales, and other events.</p>
-          <button className="btn btn-primary" onClick={() => setShowForm(true)}>+ Record Movement</button>
+          <h3>{t('movementLog.emptyTitle')}</h3>
+          <p>{t('movementLog.emptySubtitle')}</p>
+          <button className="btn btn-primary" onClick={() => setShowForm(true)}>{t('movementLog.recordMovement')}</button>
         </div>
       ) : (
         <div style={{ background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden' }}>
           <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Type</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Animal/Group</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>From</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>To</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Reason</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Date</th>
+                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.type')}</th>
+                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.animalGroup')}</th>
+                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.from')}</th>
+                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.to')}</th>
+                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.reason')}</th>
+                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.date')}</th>
               </tr>
             </thead>
             <tbody>
@@ -163,53 +163,53 @@ const MovementLog: React.FC = () => {
       {showForm && <div className="edit-form-overlay" onClick={() => setShowForm(false)} />}
       {showForm && (
         <div ref={formRef} className="edit-form-panel">
-            <h2>Record Movement</h2>
+            <h2>{t('movementLog.form.title')}</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
               <div className="form-group">
-                <label>Movement Type *</label>
+                <label>{t('movementLog.form.type')}</label>
                 <select value={formData.movementType} onChange={e => setFormData(f => ({ ...f, movementType: e.target.value }))} required>
                   {Object.entries(MOVEMENT_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
-                  <label>Animal ID</label>
-                  <input type="text" placeholder="Enter animal ID" value={formData.animalId} onChange={e => setFormData(f => ({ ...f, animalId: e.target.value }))} />
+                  <label>{t('movementLog.form.animalId')}</label>
+                  <input type="text" placeholder={t('movementLog.form.animalId')} value={formData.animalId} onChange={e => setFormData(f => ({ ...f, animalId: e.target.value }))} />
                 </div>
                 <div className="form-group">
-                  <label>Or Group</label>
+                  <label>{t('movementLog.form.group')}</label>
                   <select value={formData.groupId} onChange={e => setFormData(f => ({ ...f, groupId: e.target.value }))}>
-                    <option value="">None</option>
+                    <option value="">{t('movementLog.form.groupDefault')}</option>
                     {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>From Location</label>
+                  <label>{t('movementLog.form.fromLocation')}</label>
                   <select value={formData.fromLocationId} onChange={e => setFormData(f => ({ ...f, fromLocationId: e.target.value }))}>
-                    <option value="">—</option>
+                    <option value="">{t('movementLog.form.locationDefault')}</option>
                     {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>To Location</label>
+                  <label>{t('movementLog.form.toLocation')}</label>
                   <select value={formData.toLocationId} onChange={e => setFormData(f => ({ ...f, toLocationId: e.target.value }))}>
-                    <option value="">—</option>
+                    <option value="">{t('movementLog.form.locationDefault')}</option>
                     {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
                 </div>
               </div>
               <div className="form-group">
-                <label>Reason</label>
+                <label>{t('movementLog.form.reason')}</label>
                 <input type="text" value={formData.reason} onChange={e => setFormData(f => ({ ...f, reason: e.target.value }))} />
               </div>
               <div className="form-group">
-                <label>Notes</label>
+                <label>{t('movementLog.form.notes')}</label>
                 <textarea rows={2} value={formData.notes} onChange={e => setFormData(f => ({ ...f, notes: e.target.value }))} />
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Record Movement</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>{t('common.cancel')}</button>
+                <button type="submit" className="btn btn-primary">{t('movementLog.form.recordBtn')}</button>
               </div>
             </form>
         </div>

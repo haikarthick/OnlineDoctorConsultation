@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
@@ -19,6 +20,7 @@ const DEFAULT_PROMPTS = [
 ]
 
 const FloatingChatWidget: React.FC = () => {
+  const { t } = useTranslation()
   const { isAuthenticated, user } = useAuth()
   const [open, setOpen] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -108,7 +110,7 @@ const FloatingChatWidget: React.FC = () => {
       return id
     } catch (createErr) {
       console.error('[AI Chat] createSession failed:', getApiError(createErr))
-      setError('Could not start chat session. Tap 🔄 to retry.')
+      setError(t('chat.couldNotStartSession'))
       setInitializing(false)
       return null
     }
@@ -156,7 +158,7 @@ const FloatingChatWidget: React.FC = () => {
       ])
     } catch (sendErr) {
       console.error('[AI Chat] sendMessage failed:', getApiError(sendErr))
-      setError('Failed to send message')
+      setError(t('chat.failedToSendMessage'))
       setMessages(prev => prev.filter(m => m.id !== tempMsg.id))
     }
     setSending(false)
@@ -170,7 +172,7 @@ const FloatingChatWidget: React.FC = () => {
       await createNewSession()
     } catch (err) {
       console.error('[AI Chat] new session failed:', getApiError(err))
-      setError('Could not create new session. Tap 🔄 to retry.')
+      setError(t('chat.couldNotCreateSession'))
     }
   }
 
@@ -179,7 +181,7 @@ const FloatingChatWidget: React.FC = () => {
   // Floating bubble
   if (!open) {
     return (
-      <button className="chat-widget-bubble" onClick={handleOpen} title="AI Buddy Helper">
+      <button className="chat-widget-bubble" onClick={handleOpen} title={t('chat.aiBuddyHelper')}>
         <span className="chat-widget-bubble-icon">🐕</span>
         <span className="chat-widget-badge" />
       </button>
@@ -193,13 +195,13 @@ const FloatingChatWidget: React.FC = () => {
       <div className="chat-widget-header">
         <div className="chat-widget-header-avatar">🐕</div>
         <div className="chat-widget-header-info">
-          <div className="chat-widget-header-title">AI Buddy Helper</div>
+          <div className="chat-widget-header-title">{t('chat.aiBuddyHelper')}</div>
           <div className="chat-widget-header-status">
-            {sending ? 'Thinking...' : user ? `${user.firstName}'s veterinary assistant` : 'Your veterinary assistant'}
+            {sending ? t('chat.thinking') : user ? t('chat.userAssistant', { name: user.firstName }) : t('chat.yourAssistant')}
           </div>
         </div>
-        <button className="chat-widget-close" onClick={handleNewSession} title="New chat">🔄</button>
-        <button className="chat-widget-close" onClick={() => setOpen(false)} title="Close">✕</button>
+        <button className="chat-widget-close" onClick={handleNewSession} title={t('chat.newChat')}>🔄</button>
+        <button className="chat-widget-close" onClick={() => setOpen(false)} title={t('common.close')}>✕</button>
       </div>
 
       {/* Error */}
@@ -216,16 +218,16 @@ const FloatingChatWidget: React.FC = () => {
         {initializing ? (
           <div className="chat-widget-welcome">
             <div style={{ fontSize: 36 }}>⏳</div>
-            <p>Starting up...</p>
+            <p>{t('chat.startingUp')}</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="chat-widget-welcome">
             <div style={{ fontSize: 48 }}>🐕</div>
-            <h3>Hi{user ? ` ${user.firstName}` : ''}! I'm AI Buddy 🐾</h3>
+            <h3>{user ? t('chat.hiUser', { name: user.firstName }) : t('chat.hiGuest')}</h3>
             <p>
               {pets.length > 0
-                ? <>I know about <strong>{pets.map(p => p.name).join(', ')}</strong> and their health history. Ask me anything!</>
-                : 'Ask me anything about pet health, symptoms, or veterinary care!'
+                ? <>{t('chat.iKnowAbout')} <strong>{pets.map(p => p.name).join(', ')}</strong> {t('chat.askMeAnything')}</>
+                : t('chat.askMeAnythingGeneral')
               }
             </p>
             <div className="chat-widget-prompts">
@@ -282,7 +284,7 @@ const FloatingChatWidget: React.FC = () => {
       <div className="chat-widget-input-area">
         <input
           className="chat-widget-input"
-          placeholder="Ask AI Buddy..."
+          placeholder={t('chat.askAiBuddy')}
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}

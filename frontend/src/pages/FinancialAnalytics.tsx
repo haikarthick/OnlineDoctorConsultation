@@ -73,28 +73,28 @@ const FinancialAnalytics: React.FC = () => {
     try {
       if (editingId) {
         await apiService.updateFinancialRecord(editingId, payload)
-        setSuccessMsg('Record updated!')
+        setSuccessMsg(t('financialAnalytics.toasts.recordUpdated'))
       } else {
         await apiService.createFinancialRecord(selectedEnterpriseId, payload)
-        setSuccessMsg('Record created!')
+        setSuccessMsg(t('financialAnalytics.toasts.recordCreated'))
       }
       setShowForm(false); setEditingId(null)
       resetForm()
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to save record')
+      setError(err.response?.data?.error?.message || t('financialAnalytics.toasts.saveFailed'))
     }
   }
 
   const resetForm = () => setFormData({ recordType: 'expense', category: 'feed', amount: '', description: '', referenceNumber: '', transactionDate: new Date().toISOString().split('T')[0], notes: '' })
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this financial record?')) return
+    if (!window.confirm(t('financialAnalytics.deleteConfirm'))) return
     try {
       await apiService.deleteFinancialRecord(id)
-      setSuccessMsg('Record deleted!')
+      setSuccessMsg(t('financialAnalytics.toasts.recordDeleted'))
       fetchData()
-    } catch { setError('Failed to delete') }
+    } catch { setError(t('financialAnalytics.toasts.deleteFailed')) }
   }
 
   const startEdit = (rec: FinancialRecord) => {
@@ -112,16 +112,16 @@ const FinancialAnalytics: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <h1>{t('financialAnalytics.pageTitle')}</h1>
-        <p>Track income, expenses, and analyze financial performance</p>
+        <p>{t('financialAnalytics.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('financialAnalytics.selectEnterprise')}</label>
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
-          <option value="">-- Select --</option>
+          <option value="">{t('financialAnalytics.selectDefault')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
@@ -129,72 +129,72 @@ const FinancialAnalytics: React.FC = () => {
       {selectedEnterpriseId && (
         <>
           <div className="tab-bar">
-            <button className={`tab-btn ${tab === 'dashboard' ? 'active' : ''}`} onClick={() => setTab('dashboard')}>📊 Dashboard</button>
-            <button className={`tab-btn ${tab === 'records' ? 'active' : ''}`} onClick={() => setTab('records')}>📋 Records</button>
-            <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); resetForm() }}>+ Add Record</button>
+            <button className={`tab-btn ${tab === 'dashboard' ? 'active' : ''}`} onClick={() => setTab('dashboard')}>{t('financialAnalytics.tabs.dashboard')}</button>
+            <button className={`tab-btn ${tab === 'records' ? 'active' : ''}`} onClick={() => setTab('records')}>{t('financialAnalytics.tabs.records')}</button>
+            <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); resetForm() }}>{t('financialAnalytics.addRecord')}</button>
           </div>
 
           {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); setEditingId(null) }} />}
           {showForm && (
             <div ref={formRef} className="edit-form-panel">
             <form className="module-form" onSubmit={handleSubmit}>
-              <h3>{editingId ? 'Edit Financial Record' : 'Add Financial Record'}</h3>
+              <h3>{editingId ? t('financialAnalytics.form.editTitle') : t('financialAnalytics.form.createTitle')}</h3>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Type *</label>
+                  <label>{t('financialAnalytics.form.type')}</label>
                   <select value={formData.recordType} onChange={e => setFormData({ ...formData, recordType: e.target.value as 'income' | 'expense', category: CATEGORIES[e.target.value as 'income' | 'expense'][0] })}>
-                    <option value="income">💚 Income</option>
-                    <option value="expense">🔴 Expense</option>
+                    <option value="income">{t('financialAnalytics.form.income')}</option>
+                    <option value="expense">{t('financialAnalytics.form.expense')}</option>
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Category *</label>
+                  <label>{t('financialAnalytics.form.category')}</label>
                   <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
                     {CATEGORIES[formData.recordType].map(c => <option key={c} value={c}>{c.replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase())}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Amount *</label>
+                  <label>{t('financialAnalytics.form.amount')}</label>
                   <input type="number" step="0.01" required value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Transaction Date *</label>
+                  <label>{t('financialAnalytics.form.date')}</label>
                   <input type="date" required value={formData.transactionDate} onChange={e => setFormData({ ...formData, transactionDate: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Description</label>
+                  <label>{t('financialAnalytics.form.description')}</label>
                   <input value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Reference #</label>
+                  <label>{t('financialAnalytics.form.reference')}</label>
                   <input value={formData.referenceNumber} onChange={e => setFormData({ ...formData, referenceNumber: e.target.value })} />
                 </div>
               </div>
               <div className="form-group">
-                <label>Notes</label>
+                <label>{t('financialAnalytics.form.notes')}</label>
                 <textarea rows={2} value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} />
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">{editingId ? 'Update' : 'Add'}</button>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editingId ? t('common.update') : t('financialAnalytics.addRecord')}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>{t('common.cancel')}</button>
               </div>
             </form>
             </div>
           )}
 
-          {loading ? <p className="loading-text">Loading...</p> : tab === 'dashboard' && dashboard ? (
+          {loading ? <p className="loading-text">{t('common.loading')}</p> : tab === 'dashboard' && dashboard ? (
             <div className="dashboard-grid">
               {/* Summary cards */}
               <div className="card">
-                <h3>Total Income</h3>
+                <h3>{t('financialAnalytics.dashboard.totalIncome')}</h3>
                 <div className="big-stat success">{formatCurrency(dashboard.totalIncome || 0)}</div>
               </div>
               <div className="card">
-                <h3>Total Expenses</h3>
+                <h3>{t('financialAnalytics.dashboard.totalExpenses')}</h3>
                 <div className="big-stat danger">{formatCurrency(dashboard.totalExpenses || 0)}</div>
               </div>
               <div className="card">
-                <h3>Net Profit</h3>
+                <h3>{t('financialAnalytics.dashboard.netProfit')}</h3>
                 <div className={`big-stat ${Number(dashboard.netProfit) >= 0 ? 'success' : 'danger'}`}>
                   {formatCurrency(dashboard.netProfit || 0)}
                 </div>
@@ -202,10 +202,10 @@ const FinancialAnalytics: React.FC = () => {
 
               {/* Monthly Breakdown */}
               <div className="card full-width">
-                <h3>Monthly Breakdown</h3>
-                {(dashboard.monthlyBreakdown || []).length === 0 ? <p className="empty-text">No data yet.</p> : (
+                <h3>{t('financialAnalytics.dashboard.monthlyBreakdown')}</h3>
+                {(dashboard.monthlyBreakdown || []).length === 0 ? <p className="empty-text">{t('financialAnalytics.dashboard.noData')}</p> : (
                   <table className="data-table compact">
-                    <thead><tr><th>Month</th><th>Income</th><th>Expenses</th><th>Profit</th></tr></thead>
+                    <thead><tr><th>{t('financialAnalytics.dashboard.headers.month')}</th><th>{t('financialAnalytics.dashboard.headers.income')}</th><th>{t('financialAnalytics.dashboard.headers.expenses')}</th><th>{t('financialAnalytics.dashboard.headers.profit')}</th></tr></thead>
                     <tbody>
                       {(dashboard.monthlyBreakdown || []).map(m => (
                         <tr key={m.month}>
@@ -222,9 +222,9 @@ const FinancialAnalytics: React.FC = () => {
 
               {/* Top Expenses */}
               <div className="card">
-                <h3>Top Expense Categories</h3>
+                <h3>{t('financialAnalytics.dashboard.topExpenses')}</h3>
                 <table className="data-table compact">
-                  <thead><tr><th>Category</th><th>Total</th></tr></thead>
+                  <thead><tr><th>{t('financialAnalytics.dashboard.headers.category')}</th><th>{t('financialAnalytics.dashboard.headers.total')}</th></tr></thead>
                   <tbody>
                     {(dashboard.topExpenseCategories || []).map(c => (
                       <tr key={c.category}><td>{c.category.replace(/_/g, ' ')}</td><td className="text-danger">{formatCurrency(c.total)}</td></tr>
@@ -235,9 +235,9 @@ const FinancialAnalytics: React.FC = () => {
 
               {/* Revenue by Category */}
               <div className="card">
-                <h3>Revenue by Category</h3>
+                <h3>{t('financialAnalytics.dashboard.revenueByCategory')}</h3>
                 <table className="data-table compact">
-                  <thead><tr><th>Category</th><th>Total</th></tr></thead>
+                  <thead><tr><th>{t('financialAnalytics.dashboard.headers.category')}</th><th>{t('financialAnalytics.dashboard.headers.total')}</th></tr></thead>
                   <tbody>
                     {(dashboard.revenueByCategory || []).map(c => (
                       <tr key={c.category}><td>{c.category.replace(/_/g, ' ')}</td><td className="text-success">{formatCurrency(c.total)}</td></tr>
@@ -248,10 +248,10 @@ const FinancialAnalytics: React.FC = () => {
             </div>
           ) : tab === 'records' ? (
             <div className="card full-width">
-              <h3>Financial Records</h3>
-              {records.length === 0 ? <p className="empty-text">No records yet.</p> : (
+              <h3>{t('financialAnalytics.tabs.records')}</h3>
+              {records.length === 0 ? <p className="empty-text">{t('financialAnalytics.emptyRecords')}</p> : (
                 <table className="data-table">
-                  <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Description</th><th>Ref #</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>{t('common.date')}</th><th>{t('common.type')}</th><th>{t('financialAnalytics.dashboard.headers.category')}</th><th>{t('financialAnalytics.form.amount')}</th><th>{t('common.description')}</th><th>{t('financialAnalytics.form.reference')}</th><th>{t('common.actions')}</th></tr></thead>
                   <tbody>
                     {records.map(r => (
                       <tr key={r.id}>
@@ -262,8 +262,8 @@ const FinancialAnalytics: React.FC = () => {
                         <td>{r.description || '–'}</td>
                         <td>{r.referenceNumber || '–'}</td>
                         <td>
-                          <button className="btn btn-sm" onClick={() => startEdit(r)}>Edit</button>
-                          <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r.id)}>Del</button>
+                          <button className="btn btn-sm" onClick={() => startEdit(r)}>{t('common.edit')}</button>
+                          <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r.id)}>{t('common.delete')}</button>
                         </td>
                       </tr>
                     ))}

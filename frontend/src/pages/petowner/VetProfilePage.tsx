@@ -38,7 +38,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
       const res = await apiService.getVetProfile(vetUserId)
       setVet(res.data || res)
     } catch {
-      setError('Failed to load veterinarian profile')
+      setError(t('vetProfile.failedToLoad'))
     } finally {
       setLoading(false)
     }

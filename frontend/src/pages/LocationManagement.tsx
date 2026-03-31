@@ -90,7 +90,7 @@ const LocationManagement: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (!formData.name || !formData.locationType) { setError('Name and type are required'); return }
+    if (!formData.name || !formData.locationType) { setError(t('locationManagement.modal.validation')); return }
     try {
       const payload: any = {
         ...formData, enterpriseId: selectedEnterpriseId,
@@ -102,24 +102,24 @@ const LocationManagement: React.FC = () => {
       }
       if (editingLocation) {
         await apiService.updateLocation(editingLocation.id, payload)
-        setSuccessMsg('Location updated')
+        setSuccessMsg(t('locationManagement.toasts.updated'))
       } else {
         await apiService.createLocation(payload)
-        setSuccessMsg('Location created')
+        setSuccessMsg(t('locationManagement.toasts.created'))
       }
       resetForm(); setShowForm(false); fetchLocations()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to save') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this location?')) return
+    if (!confirm(t('locationManagement.toasts.deleteConfirm'))) return
     try {
       await apiService.deleteLocation(id)
-      setSuccessMsg('Location deleted')
+      setSuccessMsg(t('locationManagement.toasts.deleted'))
       fetchLocations()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToDelete')) }
   }
 
   const renderTreeNode = (loc: FarmLocation, depth = 0) => (
@@ -129,9 +129,9 @@ const LocationManagement: React.FC = () => {
         <strong>{loc.name}</strong>
         <span className="badge" style={{ fontSize: '0.7rem' }}>{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span>
         <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          {loc.currentOccupancy}/{loc.capacity} capacity
+          {loc.currentOccupancy}/{loc.capacity} {t('locationManagement.occupancy').toLowerCase()}
         </span>
-        <button className="btn btn-sm btn-secondary" style={{ marginLeft: 'auto', padding: '0.15rem 0.5rem' }} onClick={() => openEdit(loc)}>Edit</button>
+        <button className="btn btn-sm btn-secondary" style={{ marginLeft: 'auto', padding: '0.15rem 0.5rem' }} onClick={() => openEdit(loc)}>{t('common.edit')}</button>
         <button className="btn btn-sm btn-danger" style={{ padding: '0.15rem 0.5rem' }} onClick={() => handleDelete(loc.id)}>×</button>
       </div>
       {loc.children?.map(child => renderTreeNode(child, depth + 1))}
@@ -143,15 +143,15 @@ const LocationManagement: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('locationManagement.pageTitle')}</h1>
-          <p className="subtitle">Manage barns, pens, paddocks, and facility locations</p>
+          <p className="subtitle">{t('locationManagement.subtitle')}</p>
         </div>
         <div className="header-actions">
           {selectedEnterpriseId && (
             <>
-              <button className={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('grid')}>Grid</button>
-              <button className={`btn btn-sm ${viewMode === 'tree' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('tree')}>Tree</button>
-              <button className={`btn btn-sm ${viewMode === 'map' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('map')}>🗺️ Map</button>
-              <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>+ New Location</button>
+              <button className={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('grid')}>{t('locationManagement.viewGrid')}</button>
+              <button className={`btn btn-sm ${viewMode === 'tree' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('tree')}>{t('locationManagement.viewTree')}</button>
+              <button className={`btn btn-sm ${viewMode === 'map' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('map')}>{t('locationManagement.viewMap')}</button>
+              <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>{t('locationManagement.newLocation')}</button>
             </>
           )}
         </div>
@@ -162,7 +162,7 @@ const LocationManagement: React.FC = () => {
 
       <div className="filters-bar">
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input" style={{ maxWidth: '350px' }}>
-          <option value="">Select Enterprise...</option>
+          <option value="">{t('locationManagement.selectEnterprise')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
@@ -170,17 +170,17 @@ const LocationManagement: React.FC = () => {
       {!selectedEnterpriseId ? (
         <div className="empty-state">
           <div className="empty-icon">📍</div>
-          <h3>Select an Enterprise</h3>
-          <p>Choose an enterprise to manage locations.</p>
+          <h3>{t('locationManagement.emptyEnterprise')}</h3>
+          <p>{t('locationManagement.emptyEnterpriseSubtitle')}</p>
         </div>
       ) : loading ? (
-        <div className="loading-spinner">Loading locations...</div>
+        <div className="loading-spinner">{t('locationManagement.loading')}</div>
       ) : locations.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">📍</div>
-          <h3>No Locations Yet</h3>
-          <p>Add your first location to track where animals are housed.</p>
-          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>+ Create Location</button>
+          <h3>{t('locationManagement.emptyTitle')}</h3>
+          <p>{t('locationManagement.emptySubtitle')}</p>
+          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>{t('locationManagement.createBtn')}</button>
         </div>
       ) : viewMode === 'tree' ? (
         <div style={{ background: 'var(--surface)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
@@ -191,7 +191,7 @@ const LocationManagement: React.FC = () => {
           {/* Interactive Location Map */}
           <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 20 }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-              <h3 style={{ margin: 0 }}>🗺️ Farm Locations Map</h3>
+              <h3 style={{ margin: 0 }}>{t('locationManagement.mapTitle')}</h3>
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
                 {locations.filter(l => l.gpsLatitude && l.gpsLongitude).length} of {locations.length} locations have GPS coordinates
               </p>
@@ -210,7 +210,7 @@ const LocationManagement: React.FC = () => {
                   <div>
                     <strong>{LOCATION_TYPE_ICONS[loc.locationType] || '📍'} {loc.name}</strong><br />
                     <span style={{ fontSize: 12 }}>{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span><br />
-                    <span style={{ fontSize: 12 }}>Occupancy: {loc.currentOccupancy} / {loc.capacity}</span>
+                    <span style={{ fontSize: 12 }}>{t('locationManagement.occupancy')}: {loc.currentOccupancy} / {loc.capacity}</span>
                     {loc.area && <><br /><span style={{ fontSize: 12 }}>Area: {loc.area} {loc.areaUnit}</span></>}
                     {loc.description && <><br /><span style={{ fontSize: 11, color: '#888' }}>{loc.description}</span></>}
                   </div>
@@ -241,10 +241,10 @@ const LocationManagement: React.FC = () => {
                   <span className="badge" style={{ fontSize: '0.75rem' }}>{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span>
                 </div>
               </div>
-              {loc.parentLocationName && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Inside: {loc.parentLocationName}</p>}
+              {loc.parentLocationName && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t('locationManagement.inside')} {loc.parentLocationName}</p>}
               <div style={{ marginTop: '0.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                  <span>Occupancy</span>
+                  <span>{t('locationManagement.occupancy')}</span>
                   <span style={{ fontWeight: 600 }}>{loc.currentOccupancy} / {loc.capacity}</span>
                 </div>
                 {loc.capacity > 0 && (
@@ -253,11 +253,11 @@ const LocationManagement: React.FC = () => {
                   </div>
                 )}
               </div>
-              {loc.area && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Area: {loc.area} {loc.areaUnit}</p>}
+              {loc.area && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>{t('locationManagement.area')} {loc.area} {loc.areaUnit}</p>}
               {loc.description && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{loc.description}</p>}
               <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                <button className="btn btn-sm btn-secondary" onClick={() => openEdit(loc)}>Edit</button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(loc.id)}>Delete</button>
+                <button className="btn btn-sm btn-secondary" onClick={() => openEdit(loc)}>{t('common.edit')}</button>
+                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(loc.id)}>{t('common.delete')}</button>
               </div>
             </div>
           ))}
@@ -268,34 +268,34 @@ const LocationManagement: React.FC = () => {
       {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
         <div ref={formRef} className="edit-form-panel">
-            <h2>{editingLocation ? 'Edit Location' : 'Create Location'}</h2>
+            <h2>{editingLocation ? t('locationManagement.modal.editTitle') : t('locationManagement.modal.createTitle')}</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
               <div className="form-group">
-                <label>Location Name *</label>
+                <label>{t('locationManagement.form.name')}</label>
                 <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
-                  <label>Location Type *</label>
+                  <label>{t('locationManagement.form.type')}</label>
                   <select value={formData.locationType} onChange={e => setFormData(f => ({ ...f, locationType: e.target.value as LocationType }))} required>
                     <option value="">Select...</option>
                     {Object.entries(LOCATION_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Parent Location</label>
+                  <label>{t('locationManagement.form.parentLocation')}</label>
                   <select value={formData.parentLocationId} onChange={e => setFormData(f => ({ ...f, parentLocationId: e.target.value }))}>
-                    <option value="">None (Top Level)</option>
+                    <option value="">{t('locationManagement.modal.parentDefault')}</option>
                     {locations.filter(l => l.id !== editingLocation?.id).map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Capacity</label>
+                  <label>{t('locationManagement.form.capacity')}</label>
                   <input type="number" value={formData.capacity} onChange={e => setFormData(f => ({ ...f, capacity: e.target.value }))} />
                 </div>
                 <div className="form-group">
-                  <label>Area</label>
+                  <label>{t('locationManagement.form.area')}</label>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <input type="number" step="0.01" value={formData.area} onChange={e => setFormData(f => ({ ...f, area: e.target.value }))} style={{ flex: 1 }} />
                     <select value={formData.areaUnit} onChange={e => setFormData(f => ({ ...f, areaUnit: e.target.value }))} style={{ width: '80px' }}>
@@ -306,16 +306,16 @@ const LocationManagement: React.FC = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label>Description</label>
+                <label>{t('common.description')}</label>
                 <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
-                  <label>GPS Latitude</label>
+                  <label>{t('locationManagement.form.gpsLatitude')}</label>
                   <input type="number" step="0.000001" placeholder="Click map or type" value={formData.gpsLatitude} onChange={e => setFormData(f => ({ ...f, gpsLatitude: e.target.value }))} />
                 </div>
                 <div className="form-group">
-                  <label>GPS Longitude</label>
+                  <label>{t('locationManagement.form.gpsLongitude')}</label>
                   <input type="number" step="0.000001" placeholder="Click map or type" value={formData.gpsLongitude} onChange={e => setFormData(f => ({ ...f, gpsLongitude: e.target.value }))} />
                 </div>
               </div>
@@ -341,8 +341,8 @@ const LocationManagement: React.FC = () => {
                 </div>
               )}
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>Cancel</button>
-                <button type="submit" className="btn btn-primary">{editingLocation ? 'Update' : 'Create'} Location</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
+                <button type="submit" className="btn btn-primary">{editingLocation ? t('locationManagement.modal.updateBtn') : t('locationManagement.modal.createBtn')}</button>
               </div>
             </form>
         </div>

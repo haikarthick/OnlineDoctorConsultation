@@ -52,7 +52,7 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
       })
       setSubmitted(true)
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to submit review')
+      setError(err.response?.data?.error?.message || t('writeReview.failedToSubmit'))
     } finally {
       setSubmitting(false)
     }

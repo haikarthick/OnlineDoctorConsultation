@@ -167,7 +167,7 @@ const MedicalRecords: React.FC = () => {
     try {
       await Promise.all([loadAnimals(), loadStats(), loadPrescriptions(), loadConsultations()])
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load data')
+      setError(err?.response?.data?.error?.message || err?.message || t('medicalRecords.failedToLoad'))
     } finally { setLoading(false) }
   }, [loadAnimals, loadStats, loadPrescriptions, loadConsultations])
 
@@ -222,7 +222,7 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadStats()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save record')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveRecord'))
     } finally { setSaving(false) }
   }
 
@@ -234,7 +234,7 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadVaccinations()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save vaccination')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveVaccination'))
     } finally { setSaving(false) }
   }
 
@@ -246,7 +246,7 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadWeightHistory()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save weight')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveWeight'))
     } finally { setSaving(false) }
   }
 
@@ -258,7 +258,7 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadAllergies()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save allergy')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveAllergy'))
     } finally { setSaving(false) }
   }
 
@@ -270,7 +270,7 @@ const MedicalRecords: React.FC = () => {
       setShowModal(null); setModalData({})
       loadLabResults()
     } catch (err: any) {
-      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save lab result')
+      setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveLabResult'))
     } finally { setSaving(false) }
   }
 
@@ -282,14 +282,14 @@ const MedicalRecords: React.FC = () => {
   const selectedAnimalData = animals.find((a: any) => a.id === selectedAnimal)
 
   const TAB_ITEMS: { key: Tab; icon: string; label: string; count?: number }[] = [
-    { key: 'overview', icon: '📊', label: 'Overview' },
-    { key: 'consultations', icon: '🩺', label: 'Consultations', count: stats?.consultations?.total ?? consultationsTotal },
-    { key: 'prescriptions', icon: '💊', label: 'Prescriptions', count: stats?.prescriptions?.total ?? prescriptionsTotal },
-    { key: 'vaccinations', icon: '💉', label: 'Vaccinations', count: stats?.vaccinations?.total ?? vaccinations.length },
-    { key: 'lab_results', icon: '🔬', label: 'Lab Results', count: stats?.labResults?.total ?? labResults.length },
-    { key: 'allergies', icon: '⚠️', label: 'Allergies', count: stats?.allergies?.total ?? allergies.length },
-    { key: 'weight', icon: '⚖️', label: 'Weight', count: weightHistory.length },
-    { key: 'timeline', icon: '📅', label: 'Timeline' },
+    { key: 'overview', icon: '📊', label: t('medicalRecords.tabs.overview') },
+    { key: 'consultations', icon: '🩺', label: t('medicalRecords.tabs.consultations'), count: stats?.consultations?.total ?? consultationsTotal },
+    { key: 'prescriptions', icon: '💊', label: t('medicalRecords.tabs.prescriptions'), count: stats?.prescriptions?.total ?? prescriptionsTotal },
+    { key: 'vaccinations', icon: '💉', label: t('medicalRecords.tabs.vaccinations'), count: stats?.vaccinations?.total ?? vaccinations.length },
+    { key: 'lab_results', icon: '🔬', label: t('medicalRecords.tabs.labResults'), count: stats?.labResults?.total ?? labResults.length },
+    { key: 'allergies', icon: '⚠️', label: t('medicalRecords.tabs.allergies'), count: stats?.allergies?.total ?? allergies.length },
+    { key: 'weight', icon: '⚖️', label: t('medicalRecords.tabs.weight'), count: weightHistory.length },
+    { key: 'timeline', icon: '📅', label: t('medicalRecords.tabs.timeline') },
   ]
 
   // ═══ RENDER ═══════════════════════════════════════════════
@@ -300,7 +300,7 @@ const MedicalRecords: React.FC = () => {
         <div className="module-header"><h1>{t('medicalRecords.pageTitle')}</h1></div>
         <div className="module-content" style={{ textAlign: 'center', padding: 60 }}>
           <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
-          <p>Loading medical records...</p>
+          <p>{t('medicalRecords.loading')}</p>
         </div>
       </div>
     )
@@ -309,7 +309,7 @@ const MedicalRecords: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-        <h1>📋 Medical Records</h1>
+        <h1>{t('medicalRecords.pageTitle')}</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Animal selector */}
           <select
@@ -317,7 +317,7 @@ const MedicalRecords: React.FC = () => {
             onChange={(e) => setSelectedAnimal(e.target.value)}
             style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, minWidth: 180 }}
           >
-            <option value="">All Animals</option>
+            <option value="">{t('medicalRecords.allAnimals')}</option>
             {animals.map((a: any) => (
               <option key={a.id} value={a.id}>
                 {a.uniqueId || a.unique_id || ''} {a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}
@@ -327,7 +327,7 @@ const MedicalRecords: React.FC = () => {
           {(isVet || isAdmin) && (
             <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
               onClick={() => { setShowModal('record'); setModalData({ recordType: 'diagnosis', severity: 'normal' }) }}>
-              + New Record
+              {t('medicalRecords.newRecord')}
             </button>
           )}
         </div>
@@ -346,17 +346,17 @@ const MedicalRecords: React.FC = () => {
           <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 700, color: '#667eea' }}>🐾 {selectedAnimalData.uniqueId || selectedAnimalData.unique_id || 'N/A'}</span>
             <span><strong>{selectedAnimalData.name}</strong> ({selectedAnimalData.species}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''})</span>
-            {selectedAnimalData.ownerName && <span>Owner: {selectedAnimalData.ownerName}</span>}
-            {selectedAnimalData.gender && <span>Gender: {selectedAnimalData.gender === 'male' ? '♂ Male' : '♀ Female'}</span>}
-            {selectedAnimalData.weight && <span>Weight: {selectedAnimalData.weight} kg</span>}
-            {selectedAnimalData.dateOfBirth && <span>DOB: {fmtDate(selectedAnimalData.dateOfBirth || selectedAnimalData.date_of_birth)}</span>}
-            {selectedAnimalData.isNeutered && <span style={{ color: '#059669' }}>Neutered ✓</span>}
+            {selectedAnimalData.ownerName && <span>{t('medicalRecords.animalInfo.owner')} {selectedAnimalData.ownerName}</span>}
+            {selectedAnimalData.gender && <span>{t('medicalRecords.animalInfo.gender')} {selectedAnimalData.gender === 'male' ? t('medicalRecords.animalInfo.maleSymbol') : t('medicalRecords.animalInfo.femaleSymbol')}</span>}
+            {selectedAnimalData.weight && <span>{t('medicalRecords.animalInfo.weight')} {selectedAnimalData.weight} kg</span>}
+            {selectedAnimalData.dateOfBirth && <span>{t('medicalRecords.animalInfo.dob')} {fmtDate(selectedAnimalData.dateOfBirth || selectedAnimalData.date_of_birth)}</span>}
+            {selectedAnimalData.isNeutered && <span style={{ color: '#059669' }}>{t('medicalRecords.animalInfo.neutered')}</span>}
           </div>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 6 }}>
-            {selectedAnimalData.microchipId && <span>🏷️ Microchip: <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.microchipId}</strong></span>}
-            {selectedAnimalData.earTagId && <span>🏷️ Ear Tag: <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.earTagId}</strong></span>}
-            {selectedAnimalData.registrationNumber && <span>📋 Reg#: <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.registrationNumber}</strong></span>}
-            {selectedAnimalData.insuranceProvider && <span>🛡️ Insurance: <strong>{selectedAnimalData.insuranceProvider}</strong>{selectedAnimalData.insurancePolicyNumber ? ` (${selectedAnimalData.insurancePolicyNumber})` : ''}</span>}
+            {selectedAnimalData.microchipId && <span>🏷️ {t('medicalRecords.animalInfo.microchip')} <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.microchipId}</strong></span>}
+            {selectedAnimalData.earTagId && <span>🏷️ {t('medicalRecords.animalInfo.earTag')} <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.earTagId}</strong></span>}
+            {selectedAnimalData.registrationNumber && <span>📋 {t('medicalRecords.animalInfo.regNumber')} <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.registrationNumber}</strong></span>}
+            {selectedAnimalData.insuranceProvider && <span>🛡️ {t('medicalRecords.animalInfo.insurance')} <strong>{selectedAnimalData.insuranceProvider}</strong>{selectedAnimalData.insurancePolicyNumber ? ` (${selectedAnimalData.insurancePolicyNumber})` : ''}</span>}
           </div>
         </div>
       )}
@@ -386,29 +386,29 @@ const MedicalRecords: React.FC = () => {
             {/* Stats Cards */}
             {stats && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
-                <StatCard icon="🩺" label="Consultations" value={stats.consultations?.total || 0}
-                  sub={stats.consultations?.completed ? `${stats.consultations.completed} completed` : ''} color="#667eea" />
-                <StatCard icon="💊" label="Prescriptions" value={stats.prescriptions?.total || 0}
-                  sub={stats.prescriptions?.active ? `${stats.prescriptions.active} active` : ''} color="#059669" />
-                <StatCard icon="💉" label="Vaccinations" value={stats.vaccinations?.total || 0}
-                  sub={stats.vaccinations?.upcomingDue ? `${stats.vaccinations.upcomingDue} due soon` : ''} color="#7c3aed" />
-                <StatCard icon="🔬" label="Lab Results" value={stats.labResults?.total || 0}
-                  sub={stats.labResults?.pending ? `${stats.labResults.pending} pending` : ''} color="#d97706" />
-                <StatCard icon="⚠️" label="Active Allergies" value={stats.allergies?.active || 0} color="#dc2626" />
-                <StatCard icon="📋" label="Medical Records" value={stats.totalRecords || 0} color="#6b7280" />
-                <StatCard icon="📅" label="Follow-ups (7d)" value={stats.upcomingFollowUps || 0} color="#ea580c" />
+                <StatCard icon="🩺" label={t('medicalRecords.overview.stats.consultations')} value={stats.consultations?.total || 0}
+                  sub={stats.consultations?.completed ? `${stats.consultations.completed} ${t('medicalRecords.overview.completed')}` : ''} color="#667eea" />
+                <StatCard icon="💊" label={t('medicalRecords.overview.stats.prescriptions')} value={stats.prescriptions?.total || 0}
+                  sub={stats.prescriptions?.active ? `${stats.prescriptions.active} ${t('medicalRecords.overview.active')}` : ''} color="#059669" />
+                <StatCard icon="💉" label={t('medicalRecords.overview.stats.vaccinations')} value={stats.vaccinations?.total || 0}
+                  sub={stats.vaccinations?.upcomingDue ? `${stats.vaccinations.upcomingDue} ${t('medicalRecords.overview.dueSoon')}` : ''} color="#7c3aed" />
+                <StatCard icon="🔬" label={t('medicalRecords.overview.stats.labResults')} value={stats.labResults?.total || 0}
+                  sub={stats.labResults?.pending ? `${stats.labResults.pending} ${t('medicalRecords.overview.pending')}` : ''} color="#d97706" />
+                <StatCard icon="⚠️" label={t('medicalRecords.overview.stats.activeAllergies')} value={stats.allergies?.active || 0} color="#dc2626" />
+                <StatCard icon="📋" label={t('medicalRecords.overview.stats.medicalRecords')} value={stats.totalRecords || 0} color="#6b7280" />
+                <StatCard icon="📅" label={t('medicalRecords.overview.stats.followUps')} value={stats.upcomingFollowUps || 0} color="#ea580c" />
               </div>
             )}
 
             {/* Quick Actions */}
             {(isVet || isAdmin) && selectedAnimal && (
               <div style={{ marginBottom: 24 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>Quick Actions</h3>
+                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>{t('medicalRecords.overview.quickActions')}</h3>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <QuickBtn label="+ Vaccination" onClick={() => { setShowModal('vaccination'); setModalData({}) }} />
-                  <QuickBtn label="+ Weight" onClick={() => { setShowModal('weight'); setModalData({ unit: 'kg' }) }} />
-                  <QuickBtn label="+ Allergy" onClick={() => { setShowModal('allergy'); setModalData({ severity: 'mild' }) }} />
-                  <QuickBtn label="+ Lab Result" onClick={() => { setShowModal('lab_result'); setModalData({ status: 'pending' }) }} />
+                  <QuickBtn label={t('medicalRecords.overview.addVaccination')} onClick={() => { setShowModal('vaccination'); setModalData({}) }} />
+                  <QuickBtn label={t('medicalRecords.overview.addWeight')} onClick={() => { setShowModal('weight'); setModalData({ unit: 'kg' }) }} />
+                  <QuickBtn label={t('medicalRecords.overview.addAllergy')} onClick={() => { setShowModal('allergy'); setModalData({ severity: 'mild' }) }} />
+                  <QuickBtn label={t('medicalRecords.overview.addLabResult')} onClick={() => { setShowModal('lab_result'); setModalData({ status: 'pending' }) }} />
                 </div>
               </div>
             )}
@@ -416,28 +416,28 @@ const MedicalRecords: React.FC = () => {
             {/* Recent Activity preview */}
             {prescriptions.length > 0 && (
               <div style={{ marginBottom: 24 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>Recent Prescriptions</h3>
+                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>{t('medicalRecords.overview.recentPrescriptions')}</h3>
                 <div className="records-list">
                   {prescriptions.slice(0, 5).map((rx: any) => (
                     <div key={rx.id} {...recordItemProps(rx.id)} style={{ borderLeft: '4px solid #059669' }}>
                       <div className="record-icon">💊</div>
                       <div className="record-details">
-                        <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : 'Medication'}</h4>
-                        {rx.diagnosis && <p style={{ color: '#667eea', fontSize: 12 }}><strong>Diagnosis:</strong> {rx.diagnosis}</p>}
+                        <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : t('medicalRecords.overview.medication')}</h4>
+                        {rx.diagnosis && <p style={{ color: '#667eea', fontSize: 12 }}><strong>{t('medicalRecords.overview.diagnosis')}</strong> {rx.diagnosis}</p>}
                         <p className="text-muted" style={{ fontSize: 11 }}>
                           {rx.veterinarianName && `👨‍⚕️ Dr. ${rx.veterinarianName} • `}
                           {fmtDate(rx.createdAt || rx.created_at || '')}
                         </p>
                       </div>
                       <div className="record-actions">
-                        <span className="badge badge-completed">{rx.isActive || rx.is_active ? 'active' : 'expired'}</span>
+                        <span className="badge badge-completed">{rx.isActive || rx.is_active ? t('medicalRecords.prescriptionsTab.active') : t('medicalRecords.prescriptionsTab.expired')}</span>
                       </div>
                     </div>
                   ))}
                 </div>
                 {prescriptions.length > 5 && (
                   <button onClick={() => setActiveTab('prescriptions')} style={{ marginTop: 8, color: '#059669', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
-                    View all {prescriptionsTotal} prescriptions →
+                    {t('medicalRecords.overview.viewAllPrescriptions', { count: prescriptionsTotal })}
                   </button>
                 )}
               </div>
@@ -450,9 +450,9 @@ const MedicalRecords: React.FC = () => {
         {activeTab === 'consultations' && (
           <div>
             {!selectedAnimal ? (
-              <EmptyState icon="🩺" title="Select a pet" subtitle="Choose a pet from the dropdown above to view consultation history" />
+              <EmptyState icon="🩺" title={t('medicalRecords.consultationsTab.selectPet')} subtitle={t('medicalRecords.consultationsTab.selectPetSubtitle')} />
             ) : consultations.length === 0 ? (
-              <EmptyState icon="🩺" title="No consultations found" subtitle="Consultation history for this pet will appear here" />
+              <EmptyState icon="🩺" title={t('medicalRecords.consultationsTab.emptyTitle')} subtitle={t('medicalRecords.consultationsTab.emptySubtitle')} />
             ) : (
               <div className="records-list">
                 {consultations.map((c: any) => {
@@ -462,19 +462,19 @@ const MedicalRecords: React.FC = () => {
                       <div className="record-icon">🩺</div>
                       <div className="record-details">
                         <h4>
-                          Consultation with Dr. {c.veterinarianName || 'Unknown'}
-                          {c.prescriptionCount > 0 && <span style={{ fontSize: 11, color: '#059669', marginLeft: 8 }}>💊 {c.prescriptionCount} prescription{c.prescriptionCount > 1 ? 's' : ''}</span>}
+                          {t('medicalRecords.consultationsTab.consultWith', { name: c.veterinarianName || t('medicalRecords.consultationsTab.unknown') })}
+                          {c.prescriptionCount > 0 && <span style={{ fontSize: 11, color: '#059669', marginLeft: 8 }}>💊 {t('medicalRecords.consultationsTab.prescriptionCount', { count: c.prescriptionCount })}</span>}
                         </h4>
-                        {c.diagnosis && <p><strong>Diagnosis:</strong> {c.diagnosis}</p>}
+                        {c.diagnosis && <p><strong>{t('medicalRecords.consultationsTab.diagnosis')}</strong> {c.diagnosis}</p>}
                         {c.notes && <p className="text-muted">📝 {(c.notes || '').substring(0, 150)}{(c.notes || '').length > 150 ? '...' : ''}</p>}
                         <p className="text-muted">
-                          Date: {fmtDate(c.startTime || c.createdAt)}
-                          {c.ownerName && ` • Owner: ${c.ownerName}`}
-                          {c.followUpDate && ` • Follow-up: ${fmtDate(c.followUpDate)}`}
+                          {t('medicalRecords.consultationsTab.date')} {fmtDate(c.startTime || c.createdAt)}
+                          {c.ownerName && ` • ${t('medicalRecords.consultationsTab.owner')} ${c.ownerName}`}
+                          {c.followUpDate && ` • ${t('medicalRecords.consultationsTab.followUp')} ${fmtDate(c.followUpDate)}`}
                         </p>
                       </div>
                       <div className="record-actions">
-                        <span className={`badge badge-${c.status === 'completed' ? 'completed' : c.status === 'cancelled' ? 'cancelled' : 'pending'}`}>{c.status}</span>
+                        <span className={`badge badge-${c.status === 'completed' ? 'completed' : c.status === 'cancelled' ? 'cancelled' : 'pending'}`}>{t(c.status === 'in_progress' ? 'common.inProgress' : `common.${c.status}`)}</span>
                       </div>
                     </div>
                   )
@@ -488,26 +488,26 @@ const MedicalRecords: React.FC = () => {
         {activeTab === 'prescriptions' && (
           <div>
             {prescriptions.length === 0 ? (
-              <EmptyState icon="💊" title="No prescriptions yet" subtitle={selectedAnimal ? 'No prescriptions found for this pet' : 'Select a pet to view prescriptions or showing all your prescriptions'} />
+              <EmptyState icon="💊" title={t('medicalRecords.prescriptionsTab.emptyTitle')} subtitle={selectedAnimal ? t('medicalRecords.prescriptionsTab.emptySubtitle') : t('medicalRecords.prescriptionsTab.emptySubtitle')} />
             ) : (
               <div className="records-list">
                 {prescriptions.map((rx: any) => (
                   <div key={rx.id} {...recordItemProps(rx.id)} style={{ borderLeft: '4px solid #059669' }}>
                     <div className="record-icon">💊</div>
                     <div className="record-details">
-                      <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : 'Medication'}</h4>
+                      <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : t('medicalRecords.prescriptionsTab.medication')}</h4>
                       {Array.isArray(rx.medications) && rx.medications.map((med: any, mi: number) => (
                         <p key={mi}><strong>{med.name}</strong>{med.dosage ? ` — ${med.dosage}` : ''}{med.frequency ? `, ${med.frequency}` : ''}{med.duration ? ` for ${med.duration}` : ''}</p>
                       ))}
-                      {rx.diagnosis && <p style={{ color: '#667eea' }}><strong>Diagnosis:</strong> {rx.diagnosis}</p>}
+                      {rx.diagnosis && <p style={{ color: '#667eea' }}><strong>{t('medicalRecords.prescriptionsTab.diagnosis')}</strong> {rx.diagnosis}</p>}
                       {rx.instructions && <p className="text-muted">📝 {rx.instructions}</p>}
                       <p className="text-muted">
                         {rx.veterinarianName && `👨‍⚕️ Dr. ${rx.veterinarianName} • `}
-                        Prescribed: {fmtDate(rx.createdAt || rx.created_at || '')} • Valid until: {fmtDate(rx.validUntil || rx.valid_until || '')}
+                        {t('medicalRecords.prescriptionsTab.prescribed')} {fmtDate(rx.createdAt || rx.created_at || '')} • {t('medicalRecords.prescriptionsTab.validUntil')} {fmtDate(rx.validUntil || rx.valid_until || '')}
                       </p>
                     </div>
                     <div className="record-actions">
-                      <span className="badge badge-completed">{rx.isActive || rx.is_active ? 'active' : 'expired'}</span>
+                      <span className="badge badge-completed">{rx.isActive || rx.is_active ? t('medicalRecords.prescriptionsTab.active') : t('medicalRecords.prescriptionsTab.expired')}</span>
                     </div>
                   </div>
                 ))}
@@ -520,19 +520,19 @@ const MedicalRecords: React.FC = () => {
         {activeTab === 'vaccinations' && (
           <div>
             {!selectedAnimal ? (
-              <EmptyState icon="💉" title="Select a pet" subtitle="Choose a pet from the dropdown above to view vaccination records" />
+              <EmptyState icon="💉" title={t('medicalRecords.vaccinationsTab.selectPet')} subtitle={t('medicalRecords.selectPetGenericSub')} />
             ) : (
               <>
                 {(isVet || isAdmin) && (
                   <div style={{ marginBottom: 12 }}>
                     <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
                       onClick={() => { setShowModal('vaccination'); setModalData({}) }}>
-                      + Add Vaccination
+                      {t('medicalRecords.vaccinationsTab.addButton')}
                     </button>
                   </div>
                 )}
                 {vaccinations.length === 0 ? (
-                  <EmptyState icon="💉" title="No vaccination records" subtitle="Vaccination records will appear here once added" />
+                  <EmptyState icon="💉" title={t('medicalRecords.vaccinationsTab.emptyTitle')} subtitle={t('medicalRecords.vaccinationsTab.emptySubtitle')} />
                 ) : (
                   <div className="records-list">
                     {vaccinations.map((v: any) => {
@@ -542,15 +542,15 @@ const MedicalRecords: React.FC = () => {
                           <div className="record-icon">💉</div>
                           <div className="record-details">
                             <h4>{v.vaccineName} {v.vaccineType ? `(${v.vaccineType})` : ''}</h4>
-                            <p>Administered: {fmtDate(v.dateAdministered)} {v.administeredByName ? `by ${v.administeredByName}` : ''}</p>
-                            {v.dosage && <p className="text-muted">Dosage: {v.dosage}</p>}
-                            {v.batchNumber && <p className="text-muted">Batch: {v.batchNumber} {v.manufacturer ? `| ${v.manufacturer}` : ''}</p>}
-                            {v.nextDueDate && <p className="text-muted">Next due: <strong style={{ color: isOverdue ? '#dc2626' : '#059669' }}>{fmtDate(v.nextDueDate)}{isOverdue ? ' (OVERDUE)' : ''}</strong></p>}
-                            {v.certificateNumber && <p className="text-muted">Certificate: {v.certificateNumber}</p>}
-                            {v.reactionNotes && <p className="text-muted">⚠️ Reaction: {v.reactionNotes}</p>}
+                            <p>{t('medicalRecords.vaccinationsTab.administered')} {fmtDate(v.dateAdministered)} {v.administeredByName ? `by ${v.administeredByName}` : ''}</p>
+                            {v.dosage && <p className="text-muted">{t('medicalRecords.vaccinationsTab.dosage')} {v.dosage}</p>}
+                            {v.batchNumber && <p className="text-muted">{t('medicalRecords.vaccinationsTab.batch')} {v.batchNumber} {v.manufacturer ? `| ${v.manufacturer}` : ''}</p>}
+                            {v.nextDueDate && <p className="text-muted">{t('medicalRecords.vaccinationsTab.nextDue')} <strong style={{ color: isOverdue ? '#dc2626' : '#059669' }}>{fmtDate(v.nextDueDate)}{isOverdue ? ` ${t('medicalRecords.vaccinationsTab.overdue')}` : ''}</strong></p>}
+                            {v.certificateNumber && <p className="text-muted">{t('medicalRecords.vaccinationsTab.certificate')} {v.certificateNumber}</p>}
+                            {v.reactionNotes && <p className="text-muted">{t('medicalRecords.vaccinationsTab.reaction')} {v.reactionNotes}</p>}
                           </div>
                           <div className="record-actions">
-                            <span className={`badge ${v.isValid ? 'badge-completed' : 'badge-cancelled'}`}>{v.isValid ? 'Valid' : 'Invalid'}</span>
+                            <span className={`badge ${v.isValid ? 'badge-completed' : 'badge-cancelled'}`}>{v.isValid ? t('medicalRecords.vaccinationsTab.valid') : t('medicalRecords.vaccinationsTab.invalid')}</span>
                           </div>
                         </div>
                       )
@@ -566,19 +566,19 @@ const MedicalRecords: React.FC = () => {
         {activeTab === 'lab_results' && (
           <div>
             {!selectedAnimal ? (
-              <EmptyState icon="🔬" title="Select a pet" subtitle="Choose a pet from the dropdown above to view lab results" />
+              <EmptyState icon="🔬" title={t('medicalRecords.labResultsTab.selectPet')} subtitle={t('medicalRecords.selectPetGenericSub')} />
             ) : (
               <>
                 {(isVet || isAdmin) && (
                   <div style={{ marginBottom: 12 }}>
                     <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
                       onClick={() => { setShowModal('lab_result'); setModalData({ status: 'pending' }) }}>
-                      + Add Lab Result
+                      {t('medicalRecords.labResultsTab.addButton')}
                     </button>
                   </div>
                 )}
                 {labResults.length === 0 ? (
-                  <EmptyState icon="🔬" title="No lab results" subtitle="Lab test results will appear here once added" />
+                  <EmptyState icon="🔬" title={t('medicalRecords.labResultsTab.emptyTitle')} subtitle={t('medicalRecords.labResultsTab.emptySubtitle')} />
                 ) : (
                   <div className="records-list">
                     {labResults.map((lr: any) => (
@@ -586,16 +586,16 @@ const MedicalRecords: React.FC = () => {
                         <div className="record-icon">🔬</div>
                         <div className="record-details">
                           <h4>{lr.testName} {lr.testCategory ? `(${lr.testCategory})` : ''}</h4>
-                          <p>Test Date: {fmtDate(lr.testDate)} {lr.orderedByName ? `| Ordered by: ${lr.orderedByName}` : ''}</p>
+                          <p>{t('medicalRecords.labResultsTab.testDate')} {fmtDate(lr.testDate)} {lr.orderedByName ? `| ${t('medicalRecords.labResultsTab.orderedBy')} ${lr.orderedByName}` : ''}</p>
                           {lr.resultValue && (
-                            <p><strong>Result:</strong> {lr.resultValue} {lr.unit || ''} {lr.normalRange ? <span className="text-muted">(Normal: {lr.normalRange})</span> : ''}</p>
+                            <p><strong>{t('medicalRecords.labResultsTab.result')}</strong> {lr.resultValue} {lr.unit || ''} {lr.normalRange ? <span className="text-muted">({t('medicalRecords.labResultsTab.normal')} {lr.normalRange})</span> : ''}</p>
                           )}
                           {lr.interpretation && <p className="text-muted">📝 {lr.interpretation}</p>}
-                          {lr.labName && <p className="text-muted">Lab: {lr.labName}</p>}
+                          {lr.labName && <p className="text-muted">{t('medicalRecords.labResultsTab.lab')} {lr.labName}</p>}
                         </div>
                         <div className="record-actions" style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
-                          <span className={`badge ${lr.status === 'completed' ? 'badge-completed' : lr.status === 'pending' ? 'badge-pending' : 'badge-info'}`}>{lr.status}</span>
-                          {lr.isAbnormal && <span className="badge" style={{ background: '#fef2f2', color: '#dc2626', fontWeight: 700 }}>⚠️ Abnormal</span>}
+                          <span className={`badge ${lr.status === 'completed' ? 'badge-completed' : lr.status === 'pending' ? 'badge-pending' : 'badge-info'}`}>{t(lr.status === 'in_progress' ? 'common.inProgress' : `common.${lr.status}`)}</span>
+                          {lr.isAbnormal && <span className="badge" style={{ background: '#fef2f2', color: '#dc2626', fontWeight: 700 }}>{t('medicalRecords.labResultsTab.abnormal')}</span>}
                         </div>
                       </div>
                     ))}
@@ -610,17 +610,17 @@ const MedicalRecords: React.FC = () => {
         {activeTab === 'allergies' && (
           <div>
             {!selectedAnimal ? (
-              <EmptyState icon="⚠️" title="Select a pet" subtitle="Choose a pet from the dropdown above to view allergies" />
+              <EmptyState icon="⚠️" title={t('medicalRecords.allergiesTab.selectPet')} subtitle={t('medicalRecords.selectPetGenericSub')} />
             ) : (
               <>
                 <div style={{ marginBottom: 12 }}>
                   <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
                     onClick={() => { setShowModal('allergy'); setModalData({ severity: 'mild' }) }}>
-                    + Report Allergy
+                    {t('medicalRecords.allergiesTab.addButton')}
                   </button>
                 </div>
                 {allergies.length === 0 ? (
-                  <EmptyState icon="✅" title="No known allergies" subtitle="No allergies have been recorded for this pet" />
+                  <EmptyState icon="✅" title={t('medicalRecords.allergiesTab.emptyTitle')} subtitle={t('medicalRecords.allergiesTab.emptySubtitle')} />
                 ) : (
                   <div className="records-list">
                     {allergies.map((al: any) => {
@@ -630,16 +630,16 @@ const MedicalRecords: React.FC = () => {
                           <div className="record-icon">⚠️</div>
                           <div className="record-details">
                             <h4>{al.allergen}</h4>
-                            {al.reaction && <p>Reaction: {al.reaction}</p>}
+                            {al.reaction && <p>{t('medicalRecords.allergiesTab.reaction')} {al.reaction}</p>}
                             <p className="text-muted">
-                              Severity: <strong style={{ color: sevColor }}>{al.severity}</strong>
-                              {al.identifiedDate ? ` | Identified: ${fmtDate(al.identifiedDate)}` : ''}
-                              {al.reportedByName ? ` | Reported by: ${al.reportedByName}` : ''}
+                              {t('medicalRecords.allergiesTab.severity')} <strong style={{ color: sevColor }}>{al.severity}</strong>
+                              {al.identifiedDate ? ` | ${t('medicalRecords.allergiesTab.identified')} ${fmtDate(al.identifiedDate)}` : ''}
+                              {al.reportedByName ? ` | ${t('medicalRecords.allergiesTab.reportedBy')} ${al.reportedByName}` : ''}
                             </p>
                             {al.notes && <p className="text-muted">📝 {al.notes}</p>}
                           </div>
                           <div className="record-actions">
-                            <span className={`badge ${al.isActive ? 'badge-cancelled' : 'badge-completed'}`}>{al.isActive ? '⚠️ Active' : 'Resolved'}</span>
+                            <span className={`badge ${al.isActive ? 'badge-cancelled' : 'badge-completed'}`}>{al.isActive ? t('medicalRecords.allergiesTab.active') : t('medicalRecords.allergiesTab.resolved')}</span>
                           </div>
                         </div>
                       )
@@ -655,22 +655,22 @@ const MedicalRecords: React.FC = () => {
         {activeTab === 'weight' && (
           <div>
             {!selectedAnimal ? (
-              <EmptyState icon="⚖️" title="Select a pet" subtitle="Choose a pet from the dropdown above to view weight history" />
+              <EmptyState icon="⚖️" title={t('medicalRecords.weightTab.selectPet')} subtitle={t('medicalRecords.selectPetGenericSub')} />
             ) : (
               <>
                 <div style={{ marginBottom: 12 }}>
                   <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
                     onClick={() => { setShowModal('weight'); setModalData({ unit: 'kg' }) }}>
-                    + Record Weight
+                    {t('medicalRecords.weightTab.addButton')}
                   </button>
                 </div>
                 {weightHistory.length === 0 ? (
-                  <EmptyState icon="⚖️" title="No weight records" subtitle="Weight measurements will appear here once added" />
+                  <EmptyState icon="⚖️" title={t('medicalRecords.weightTab.emptyTitle')} subtitle={t('medicalRecords.weightTab.emptySubtitle')} />
                 ) : (
                   <>
                     {/* Weight Chart (simple text-based) */}
                     <div style={{ marginBottom: 20, padding: 16, background: '#f9fafb', borderRadius: 8 }}>
-                      <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Weight Trend</h4>
+                      <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>{t('medicalRecords.weightTab.weightTrend')}</h4>
                       <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 100 }}>
                         {weightHistory.slice().reverse().slice(-20).map((w: any, i: number) => {
                           const max = Math.max(...weightHistory.map((x: any) => parseFloat(x.weight)))
@@ -684,11 +684,11 @@ const MedicalRecords: React.FC = () => {
                         })}
                       </div>
                       <p className="text-muted" style={{ fontSize: 11, marginTop: 8 }}>
-                        Latest: <strong>{weightHistory[0]?.weight} {weightHistory[0]?.unit}</strong>
+                        {t('medicalRecords.weightTab.latest')} <strong>{weightHistory[0]?.weight} {weightHistory[0]?.unit}</strong>
                         {weightHistory.length > 1 && (() => {
                           const diff = (parseFloat(weightHistory[0].weight) - parseFloat(weightHistory[1].weight)).toFixed(2)
                           const num = parseFloat(diff)
-                          return ` (${num > 0 ? '+' : ''}${diff} ${weightHistory[0].unit} from last)`
+                          return ` (${num > 0 ? '+' : ''}${diff} ${weightHistory[0].unit} ${t('medicalRecords.weightTab.fromLast')})`
                         })()}
                       </p>
                     </div>
@@ -698,7 +698,7 @@ const MedicalRecords: React.FC = () => {
                           <div className="record-icon">⚖️</div>
                           <div className="record-details">
                             <h4>{w.weight} {w.unit}</h4>
-                            <p className="text-muted">Recorded: {fmtDate(w.recordedAt)} {w.recordedByName ? `by ${w.recordedByName}` : ''}</p>
+                            <p className="text-muted">{t('medicalRecords.weightTab.recorded')} {fmtDate(w.recordedAt)} {w.recordedByName ? `by ${w.recordedByName}` : ''}</p>
                             {w.notes && <p className="text-muted">📝 {w.notes}</p>}
                           </div>
                         </div>
@@ -715,9 +715,9 @@ const MedicalRecords: React.FC = () => {
         {activeTab === 'timeline' && (
           <div>
             {!selectedAnimal ? (
-              <EmptyState icon="📅" title="Select a pet" subtitle="Choose a pet from the dropdown above to view its complete medical timeline" />
+              <EmptyState icon="📅" title={t('medicalRecords.timelineTab.selectPet')} subtitle={t('medicalRecords.timelineTab.selectSubtitle')} />
             ) : timeline.length === 0 ? (
-              <EmptyState icon="📅" title="No medical history" subtitle="Medical events will appear here as records are created" />
+              <EmptyState icon="📅" title={t('medicalRecords.timelineTab.emptyTitle')} subtitle={t('medicalRecords.timelineTab.emptySubtitle')} />
             ) : (
               <div style={{ position: 'relative', paddingLeft: 32 }}>
                 <div style={{ position: 'absolute', left: 12, top: 0, bottom: 0, width: 2, background: '#e5e7eb' }} />
@@ -740,10 +740,10 @@ const MedicalRecords: React.FC = () => {
                           <span className="text-muted" style={{ fontSize: 11 }}>{fmtDate(item.date)}</span>
                         </div>
                         {item.description && <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>{item.description}</p>}
-                        {item.createdByName && <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>By: {item.createdByName}</p>}
+                        {item.createdByName && <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>{t('medicalRecords.timelineTab.by')} {item.createdByName}</p>}
                         <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
-                          {item.status && <span className={`badge badge-${item.status === 'active' || item.status === 'valid' ? 'completed' : item.status === 'pending' ? 'pending' : 'info'}`} style={{ fontSize: 10 }}>{item.status}</span>}
-                          {item.severity && item.severity !== 'normal' && <span className="badge" style={{ fontSize: 10, background: getSeverityInfo(item.severity).color, color: '#fff' }}>{item.severity}</span>}
+                          {item.status && <span className={`badge badge-${item.status === 'active' || item.status === 'valid' ? 'completed' : item.status === 'pending' ? 'pending' : 'info'}`} style={{ fontSize: 10 }}>{t(item.status === 'in_progress' ? 'common.inProgress' : `common.${item.status}`)}</span>}
+                          {item.severity && item.severity !== 'normal' && <span className="badge" style={{ fontSize: 10, background: getSeverityInfo(item.severity).color, color: '#fff' }}>{t(`medicalRecords.severityLevels.${item.severity}`)}</span>}
                         </div>
                       </div>
                     </div>
@@ -771,20 +771,20 @@ const MedicalRecords: React.FC = () => {
             {/* Medical Record Modal */}
             {showModal === 'record' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>📄 New Medical Record</h2>
-                <ModalField label="Record Type">
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.newRecord')}</h2>
+                <ModalField label={t('medicalRecords.modals.recordType')}>
                   <select value={modalData.recordType || ''} onChange={(e) => setModalData({ ...modalData, recordType: e.target.value })} style={inputStyle}>
-                    {RECORD_TYPES.map(t => <option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
+                    {RECORD_TYPES.map(rt => <option key={rt.value} value={rt.value}>{rt.icon} {t(`medicalRecords.recordTypes.${rt.value === 'lab_report' ? 'labReport' : rt.value === 'follow_up' ? 'followUp' : rt.value}`)}</option>)}
                   </select>
                 </ModalField>
-                <ModalField label="Title"><input value={modalData.title || ''} onChange={(e) => setModalData({ ...modalData, title: e.target.value })} style={inputStyle} placeholder="Record title..." /></ModalField>
-                <ModalField label="Content"><textarea value={modalData.content || ''} onChange={(e) => setModalData({ ...modalData, content: e.target.value })} style={{ ...inputStyle, height: 100 }} placeholder="Detailed description..." /></ModalField>
-                <ModalField label="Severity">
+                <ModalField label={t('medicalRecords.modals.title')}><input value={modalData.title || ''} onChange={(e) => setModalData({ ...modalData, title: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.recordTitlePlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.content')}><textarea value={modalData.content || ''} onChange={(e) => setModalData({ ...modalData, content: e.target.value })} style={{ ...inputStyle, height: 100 }} placeholder={t('medicalRecords.modals.contentPlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.severity')}>
                   <select value={modalData.severity || 'normal'} onChange={(e) => setModalData({ ...modalData, severity: e.target.value })} style={inputStyle}>
-                    {SEVERITY_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    {SEVERITY_OPTIONS.map(s => <option key={s.value} value={s.value}>{t(`medicalRecords.severityLevels.${s.value}`)}</option>)}
                   </select>
                 </ModalField>
-                <ModalField label="Follow-up Date (optional)">
+                <ModalField label={t('medicalRecords.modals.followUpDate')}>
                   <input type="date" value={modalData.followUpDate || ''} onChange={(e) => setModalData({ ...modalData, followUpDate: e.target.value })} style={inputStyle} />
                 </ModalField>
                 <ModalActions onCancel={closeModal} onSave={handleSaveRecord} saving={saving}
@@ -795,16 +795,16 @@ const MedicalRecords: React.FC = () => {
             {/* Vaccination Modal */}
             {showModal === 'vaccination' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>💉 Add Vaccination</h2>
-                <ModalField label="Vaccine Name *"><input value={modalData.vaccineName || ''} onChange={(e) => setModalData({ ...modalData, vaccineName: e.target.value })} style={inputStyle} placeholder="e.g., Rabies, DHPP..." /></ModalField>
-                <ModalField label="Vaccine Type"><input value={modalData.vaccineType || ''} onChange={(e) => setModalData({ ...modalData, vaccineType: e.target.value })} style={inputStyle} placeholder="e.g., Core, Non-core..." /></ModalField>
-                <ModalField label="Date Administered *"><input type="date" value={modalData.dateAdministered || ''} onChange={(e) => setModalData({ ...modalData, dateAdministered: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label="Next Due Date"><input type="date" value={modalData.nextDueDate || ''} onChange={(e) => setModalData({ ...modalData, nextDueDate: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label="Dosage"><input value={modalData.dosage || ''} onChange={(e) => setModalData({ ...modalData, dosage: e.target.value })} style={inputStyle} placeholder="e.g., 1ml" /></ModalField>
-                <ModalField label="Batch Number"><input value={modalData.batchNumber || ''} onChange={(e) => setModalData({ ...modalData, batchNumber: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label="Manufacturer"><input value={modalData.manufacturer || ''} onChange={(e) => setModalData({ ...modalData, manufacturer: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label="Certificate Number"><input value={modalData.certificateNumber || ''} onChange={(e) => setModalData({ ...modalData, certificateNumber: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label="Reaction Notes"><textarea value={modalData.reactionNotes || ''} onChange={(e) => setModalData({ ...modalData, reactionNotes: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder="Any adverse reactions..." /></ModalField>
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.addVaccination')}</h2>
+                <ModalField label={t('medicalRecords.modals.vaccineName')}><input value={modalData.vaccineName || ''} onChange={(e) => setModalData({ ...modalData, vaccineName: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.vaccineNamePlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.vaccineType')}><input value={modalData.vaccineType || ''} onChange={(e) => setModalData({ ...modalData, vaccineType: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.vaccineTypePlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.dateAdministered')}><input type="date" value={modalData.dateAdministered || ''} onChange={(e) => setModalData({ ...modalData, dateAdministered: e.target.value })} style={inputStyle} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.nextDueDate')}><input type="date" value={modalData.nextDueDate || ''} onChange={(e) => setModalData({ ...modalData, nextDueDate: e.target.value })} style={inputStyle} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.dosage')}><input value={modalData.dosage || ''} onChange={(e) => setModalData({ ...modalData, dosage: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.dosagePlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.batchNumber')}><input value={modalData.batchNumber || ''} onChange={(e) => setModalData({ ...modalData, batchNumber: e.target.value })} style={inputStyle} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.manufacturer')}><input value={modalData.manufacturer || ''} onChange={(e) => setModalData({ ...modalData, manufacturer: e.target.value })} style={inputStyle} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.certificateNumber')}><input value={modalData.certificateNumber || ''} onChange={(e) => setModalData({ ...modalData, certificateNumber: e.target.value })} style={inputStyle} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.reactionNotes')}><textarea value={modalData.reactionNotes || ''} onChange={(e) => setModalData({ ...modalData, reactionNotes: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder={t('medicalRecords.modals.reactionPlaceholder')} /></ModalField>
                 <ModalActions onCancel={closeModal} onSave={handleSaveVaccination} saving={saving}
                   disabled={!modalData.vaccineName || !modalData.dateAdministered} />
               </>
@@ -813,14 +813,14 @@ const MedicalRecords: React.FC = () => {
             {/* Weight Modal */}
             {showModal === 'weight' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>⚖️ Record Weight</h2>
-                <ModalField label="Weight *"><input type="number" step="0.01" value={modalData.weight || ''} onChange={(e) => setModalData({ ...modalData, weight: e.target.value })} style={inputStyle} placeholder="Enter weight..." /></ModalField>
-                <ModalField label="Unit">
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.recordWeight')}</h2>
+                <ModalField label={t('medicalRecords.modals.weightValue')}><input type="number" step="0.01" value={modalData.weight || ''} onChange={(e) => setModalData({ ...modalData, weight: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.weightPlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.unit')}>
                   <select value={modalData.unit || 'kg'} onChange={(e) => setModalData({ ...modalData, unit: e.target.value })} style={inputStyle}>
                     <option value="kg">kg</option><option value="lbs">lbs</option><option value="g">g</option>
                   </select>
                 </ModalField>
-                <ModalField label="Notes"><textarea value={modalData.notes || ''} onChange={(e) => setModalData({ ...modalData, notes: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder="Any notes..." /></ModalField>
+                <ModalField label={t('medicalRecords.modals.notes')}><textarea value={modalData.notes || ''} onChange={(e) => setModalData({ ...modalData, notes: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder={t('medicalRecords.modals.notesPlaceholder')} /></ModalField>
                 <ModalActions onCancel={closeModal} onSave={handleSaveWeight} saving={saving}
                   disabled={!modalData.weight} />
               </>
@@ -829,16 +829,16 @@ const MedicalRecords: React.FC = () => {
             {/* Allergy Modal */}
             {showModal === 'allergy' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>⚠️ Report Allergy</h2>
-                <ModalField label="Allergen *"><input value={modalData.allergen || ''} onChange={(e) => setModalData({ ...modalData, allergen: e.target.value })} style={inputStyle} placeholder="e.g., Chicken, Penicillin..." /></ModalField>
-                <ModalField label="Reaction"><textarea value={modalData.reaction || ''} onChange={(e) => setModalData({ ...modalData, reaction: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder="Describe the reaction..." /></ModalField>
-                <ModalField label="Severity">
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.reportAllergy')}</h2>
+                <ModalField label={t('medicalRecords.modals.allergen')}><input value={modalData.allergen || ''} onChange={(e) => setModalData({ ...modalData, allergen: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.allergenPlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.reaction')}><textarea value={modalData.reaction || ''} onChange={(e) => setModalData({ ...modalData, reaction: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder={t('medicalRecords.modals.reactionDescPlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.severity')}>
                   <select value={modalData.severity || 'mild'} onChange={(e) => setModalData({ ...modalData, severity: e.target.value })} style={inputStyle}>
-                    <option value="mild">Mild</option><option value="moderate">Moderate</option><option value="severe">Severe</option>
+                    <option value="mild">{t('medicalRecords.modals.allergyMild')}</option><option value="moderate">{t('medicalRecords.modals.allergyModerate')}</option><option value="severe">{t('medicalRecords.modals.allergySevere')}</option>
                   </select>
                 </ModalField>
-                <ModalField label="Date Identified"><input type="date" value={modalData.identifiedDate || ''} onChange={(e) => setModalData({ ...modalData, identifiedDate: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label="Notes"><textarea value={modalData.notes || ''} onChange={(e) => setModalData({ ...modalData, notes: e.target.value })} style={{ ...inputStyle, height: 60 }} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.dateIdentified')}><input type="date" value={modalData.identifiedDate || ''} onChange={(e) => setModalData({ ...modalData, identifiedDate: e.target.value })} style={inputStyle} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.notes')}><textarea value={modalData.notes || ''} onChange={(e) => setModalData({ ...modalData, notes: e.target.value })} style={{ ...inputStyle, height: 60 }} /></ModalField>
                 <ModalActions onCancel={closeModal} onSave={handleSaveAllergy} saving={saving}
                   disabled={!modalData.allergen} />
               </>
@@ -847,27 +847,27 @@ const MedicalRecords: React.FC = () => {
             {/* Lab Result Modal */}
             {showModal === 'lab_result' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>🔬 Add Lab Result</h2>
-                <ModalField label="Test Name *"><input value={modalData.testName || ''} onChange={(e) => setModalData({ ...modalData, testName: e.target.value })} style={inputStyle} placeholder="e.g., Complete Blood Count..." /></ModalField>
-                <ModalField label="Test Category"><input value={modalData.testCategory || ''} onChange={(e) => setModalData({ ...modalData, testCategory: e.target.value })} style={inputStyle} placeholder="e.g., Hematology, Biochemistry..." /></ModalField>
-                <ModalField label="Test Date *"><input type="date" value={modalData.testDate || ''} onChange={(e) => setModalData({ ...modalData, testDate: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label="Result Value"><input value={modalData.resultValue || ''} onChange={(e) => setModalData({ ...modalData, resultValue: e.target.value })} style={inputStyle} placeholder="Test result..." /></ModalField>
-                <ModalField label="Normal Range"><input value={modalData.normalRange || ''} onChange={(e) => setModalData({ ...modalData, normalRange: e.target.value })} style={inputStyle} placeholder="e.g., 5.5-8.5" /></ModalField>
-                <ModalField label="Unit"><input value={modalData.unit || ''} onChange={(e) => setModalData({ ...modalData, unit: e.target.value })} style={inputStyle} placeholder="e.g., mg/dL, mmol/L..." /></ModalField>
-                <ModalField label="Status">
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.addLabResult')}</h2>
+                <ModalField label={t('medicalRecords.modals.testName')}><input value={modalData.testName || ''} onChange={(e) => setModalData({ ...modalData, testName: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.testNamePlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.testCategory')}><input value={modalData.testCategory || ''} onChange={(e) => setModalData({ ...modalData, testCategory: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.testCategoryPlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.testDate')}><input type="date" value={modalData.testDate || ''} onChange={(e) => setModalData({ ...modalData, testDate: e.target.value })} style={inputStyle} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.resultValue')}><input value={modalData.resultValue || ''} onChange={(e) => setModalData({ ...modalData, resultValue: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.resultPlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.normalRange')}><input value={modalData.normalRange || ''} onChange={(e) => setModalData({ ...modalData, normalRange: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.normalRangePlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.unit')}><input value={modalData.unit || ''} onChange={(e) => setModalData({ ...modalData, unit: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.unitPlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.status')}>
                   <select value={modalData.status || 'pending'} onChange={(e) => setModalData({ ...modalData, status: e.target.value })} style={inputStyle}>
-                    <option value="pending">Pending</option><option value="in_progress">In Progress</option><option value="completed">Completed</option>
+                    <option value="pending">{t('medicalRecords.modals.statusPending')}</option><option value="in_progress">{t('medicalRecords.modals.statusInProgress')}</option><option value="completed">{t('medicalRecords.modals.statusCompleted')}</option>
                   </select>
                 </ModalField>
-                <ModalField label="Lab Name"><input value={modalData.labName || ''} onChange={(e) => setModalData({ ...modalData, labName: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label="Abnormal?">
+                <ModalField label={t('medicalRecords.modals.labName')}><input value={modalData.labName || ''} onChange={(e) => setModalData({ ...modalData, labName: e.target.value })} style={inputStyle} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.abnormalLabel')}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <input type="checkbox" checked={modalData.isAbnormal || false} onChange={(e) => setModalData({ ...modalData, isAbnormal: e.target.checked })} />
-                    Result is abnormal
+                    {t('medicalRecords.modals.abnormalLabel')}
                   </label>
                 </ModalField>
-                <ModalField label="Interpretation"><textarea value={modalData.interpretation || ''} onChange={(e) => setModalData({ ...modalData, interpretation: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder="Clinical interpretation..." /></ModalField>
-                <ModalField label="Notes"><textarea value={modalData.notes || ''} onChange={(e) => setModalData({ ...modalData, notes: e.target.value })} style={{ ...inputStyle, height: 60 }} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.interpretation')}><textarea value={modalData.interpretation || ''} onChange={(e) => setModalData({ ...modalData, interpretation: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder={t('medicalRecords.modals.interpretationPlaceholder')} /></ModalField>
+                <ModalField label={t('medicalRecords.modals.notes')}><textarea value={modalData.notes || ''} onChange={(e) => setModalData({ ...modalData, notes: e.target.value })} style={{ ...inputStyle, height: 60 }} /></ModalField>
                 <ModalActions onCancel={closeModal} onSave={handleSaveLabResult} saving={saving}
                   disabled={!modalData.testName || !modalData.testDate} />
               </>
@@ -914,13 +914,16 @@ const ModalField: React.FC<{ label: string; children: React.ReactNode }> = ({ la
   </div>
 )
 
-const ModalActions: React.FC<{ onCancel: () => void; onSave: () => void; saving: boolean; disabled: boolean }> = ({ onCancel, onSave, saving, disabled }) => (
+const ModalActions: React.FC<{ onCancel: () => void; onSave: () => void; saving: boolean; disabled: boolean }> = ({ onCancel, onSave, saving, disabled }) => {
+  const { t } = useTranslation()
+  return (
   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-    <button onClick={onCancel} style={{ padding: '8px 20px', borderRadius: 6, border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontSize: 13, color: '#374151' }}>Cancel</button>
+    <button onClick={onCancel} style={{ padding: '8px 20px', borderRadius: 6, border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontSize: 13, color: '#374151' }}>{t('medicalRecords.modals.cancel')}</button>
     <button onClick={onSave} disabled={disabled || saving} className="btn-primary" style={{ padding: '8px 20px', fontSize: 13, opacity: (disabled || saving) ? 0.5 : 1 }}>
-      {saving ? 'Saving...' : 'Save'}
+      {saving ? t('medicalRecords.modals.saving') : t('medicalRecords.modals.save')}
     </button>
   </div>
-)
+  )
+}
 
 export default MedicalRecords

@@ -9,7 +9,8 @@ const ZONE_TYPES = ['pasture', 'barn', 'medical', 'quarantine', 'feeding', 'wate
 const ZONE_COLORS: Record<string, string> = { pasture: '#22c55e', barn: '#a78bfa', medical: '#ef4444', quarantine: '#f97316', feeding: '#eab308', water: '#3b82f6', boundary: '#64748b', custom: '#ec4899' }
 const EVENT_TYPES = ['location_update', 'zone_entry', 'zone_exit', 'zone_breach', 'sos_alert']
 
-const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
+const GeospatialAnalytics: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<any[]>([])
   const [enterpriseId, setEnterpriseId] = useState('')
@@ -62,7 +63,7 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
         ...zoneForm, centerLat: +zoneForm.centerLat, centerLng: +zoneForm.centerLng, radiusMeters: +zoneForm.radiusMeters,
       })
       setShowZoneForm(false)
-      setSuccessMsg('Zone created!')
+      setSuccessMsg(t('geospatialAnalytics.zoneCreated'))
       fetchAll()
     } catch (e: any) { setError(e.message) }
   }
@@ -75,7 +76,7 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
         metadata: eventForm.metadata ? JSON.parse(eventForm.metadata) : undefined,
       })
       setShowEventForm(false)
-      setSuccessMsg('Event recorded!')
+      setSuccessMsg(t('geospatialAnalytics.eventRecorded'))
       fetchAll()
     } catch (e: any) { setError(e.message) }
   }
@@ -93,9 +94,9 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
       <div className="module-page">
         <div className="module-header"><h1>{t('geospatialAnalytics.pageTitle')}</h1></div>
         <div className="module-card">
-          <h3>Select Enterprise</h3>
+          <h3>{t('common.selectEnterprise')}</h3>
           <select className="module-input" value="" onChange={e => setEnterpriseId(e.target.value)}>
-            <option value="">Choose enterprise...</option>
+            <option value="">{t('geospatialAnalytics.chooseEnterprise')}</option>
             {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
           </select>
         </div>
@@ -107,8 +108,8 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🗺️ Geospatial Analytics</h1>
-          <p style={{ color: '#666', margin: '8px 0 0' }}>Geofencing, location tracking, heatmaps, and movement trails</p>
+          <h1>{t('geospatialAnalytics.pageTitle')}</h1>
+          <p style={{ color: '#666', margin: '8px 0 0' }}>{t('geospatialAnalytics.subtitle')}</p>
         </div>
         <select className="module-input" style={{ width: 220 }} value={enterpriseId} onChange={e => setEnterpriseId(e.target.value)}>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
@@ -119,29 +120,29 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
       {successMsg && <div className="module-alert success">{successMsg} <button onClick={() => setSuccessMsg('')}>✕</button></div>}
 
       <div className="module-tabs">
-        {(['dashboard', 'zones', 'events', 'heatmap'] as const).map(t => (
-          <button key={t} className={`module-tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
-            {t === 'dashboard' ? '📊 Dashboard' : t === 'zones' ? '📍 Zones' : t === 'events' ? '📡 Events' : '🔥 Heatmap & Trails'}
+        {(['dashboard', 'zones', 'events', 'heatmap'] as const).map(tb => (
+          <button key={tb} className={`module-tab ${tab === tb ? 'active' : ''}`} onClick={() => setTab(tb)}>
+            {tb === 'dashboard' ? t('geospatialAnalytics.tabs.dashboard') : tb === 'zones' ? t('geospatialAnalytics.tabs.zones') : tb === 'events' ? t('geospatialAnalytics.tabs.events') : t('geospatialAnalytics.tabs.heatmap')}
           </button>
         ))}
       </div>
 
-      {loading && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>Loading...</div>}
+      {loading && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>{t('common.loading')}</div>}
 
       {!loading && tab === 'dashboard' && dashboard && (
         <div>
           <div className="module-stats">
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.totalZones || 0}</div><div className="stat-label">Total Zones</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.activeZones || 0}</div><div className="stat-label">Active Zones</div></div>
-            <div className="stat-card"><div className="stat-value" style={{ color: '#ef4444' }}>{dashboard.summary?.restrictedZones || 0}</div><div className="stat-label">Restricted</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.events24h || 0}</div><div className="stat-label">Events (24h)</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.trackedAnimals || 0}</div><div className="stat-label">Tracked Animals</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.totalZones || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.totalZones')}</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.activeZones || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.activeZones')}</div></div>
+            <div className="stat-card"><div className="stat-value" style={{ color: '#ef4444' }}>{dashboard.summary?.restrictedZones || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.restricted')}</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.events24h || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.events24h')}</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.trackedAnimals || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.trackedAnimals')}</div></div>
           </div>
 
           {/* Interactive Overview Map */}
           <div className="module-card" style={{ marginTop: 20, padding: 0, overflow: 'hidden', borderRadius: 12 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ margin: 0 }}>📍 Live Zone & Event Map</h3>
+              <h3 style={{ margin: 0 }}>📍 {t('geospatialAnalytics.liveZoneEventMap')}</h3>
               <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>Zones shown as circles, recent events as markers</p>
             </div>
             <MapView
@@ -182,8 +183,8 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
 
           {dashboard.recentEvents?.length > 0 && (
             <div className="module-card" style={{ marginTop: 20 }}>
-              <h3>Recent Events</h3>
-              <table className="module-table"><thead><tr><th>Time</th><th>Animal</th><th>Type</th><th>Zone</th><th>Location</th></tr></thead>
+              <h3>{t('geospatialAnalytics.recentEvents')}</h3>
+              <table className="module-table"><thead><tr><th>{t('iotSensors.time')}</th><th>{t('genomicLineage.animal')}</th><th>{t('common.type')}</th><th>{t('geospatialAnalytics.zone')}</th><th>{t('geospatialAnalytics.location')}</th></tr></thead>
                 <tbody>{dashboard.recentEvents.map((ev: any) => (
                   <tr key={ev.id}><td>{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString() : '–'}</td><td>{ev.animal_name}</td>
                     <td><span className={`module-badge ${ev.event_type === 'zone_breach' ? 'error' : ''}`}>{ev.event_type}</span></td>
@@ -197,34 +198,34 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
       {!loading && tab === 'zones' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-            <button className="module-btn primary" onClick={() => setShowZoneForm(true)}>+ New Zone</button>
+            <button className="module-btn primary" onClick={() => setShowZoneForm(true)}>{t('geospatialAnalytics.newZone')}</button>
           </div>
           {showZoneForm && (
             <div className="module-card" style={{ marginBottom: 20 }}>
-              <h3>Create Geofence Zone</h3>
+              <h3>{t('geospatialAnalytics.createZone')}</h3>
               <p style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>💡 Click on the map below to set the zone center coordinates</p>
               <div className="module-form">
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 2 }}><label className="module-label">Zone Name</label><input className="module-input" value={zoneForm.name} onChange={e => setZoneForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. North Pasture" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Type</label>
+                  <div style={{ flex: 2 }}><label className="module-label">{t('geospatialAnalytics.zoneName')}</label><input className="module-input" value={zoneForm.name} onChange={e => setZoneForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. North Pasture" /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('common.type')}</label>
                     <select className="module-input" value={zoneForm.zoneType} onChange={e => setZoneForm(f => ({ ...f, zoneType: e.target.value, color: ZONE_COLORS[e.target.value] || '#3b82f6' }))}>
-                      {ZONE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select></div>
+                      {ZONE_TYPES.map(zt => <option key={zt} value={zt}>{zt}</option>)}</select></div>
                 </div>
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">Center Latitude</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLat} onChange={e => setZoneForm(f => ({ ...f, centerLat: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Center Longitude</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLng} onChange={e => setZoneForm(f => ({ ...f, centerLng: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Radius (meters)</label><input className="module-input" type="number" value={zoneForm.radiusMeters} onChange={e => setZoneForm(f => ({ ...f, radiusMeters: e.target.value }))} /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.centerLatitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLat} onChange={e => setZoneForm(f => ({ ...f, centerLat: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.centerLongitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLng} onChange={e => setZoneForm(f => ({ ...f, centerLng: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.radiusMeters')}</label><input className="module-input" type="number" value={zoneForm.radiusMeters} onChange={e => setZoneForm(f => ({ ...f, radiusMeters: e.target.value }))} /></div>
                 </div>
                 <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                  <div><label className="module-label">Color</label><input type="color" value={zoneForm.color} onChange={e => setZoneForm(f => ({ ...f, color: e.target.value }))} /></div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={zoneForm.alertOnEntry} onChange={e => setZoneForm(f => ({ ...f, alertOnEntry: e.target.checked }))} />Alert on Entry</label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={zoneForm.alertOnExit} onChange={e => setZoneForm(f => ({ ...f, alertOnExit: e.target.checked }))} />Alert on Exit</label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={zoneForm.isRestricted} onChange={e => setZoneForm(f => ({ ...f, isRestricted: e.target.checked }))} />Restricted Zone</label>
+                  <div><label className="module-label">{t('geospatialAnalytics.color')}</label><input type="color" value={zoneForm.color} onChange={e => setZoneForm(f => ({ ...f, color: e.target.value }))} /></div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={zoneForm.alertOnEntry} onChange={e => setZoneForm(f => ({ ...f, alertOnEntry: e.target.checked }))} />{t('geospatialAnalytics.alertOnEntry')}</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={zoneForm.alertOnExit} onChange={e => setZoneForm(f => ({ ...f, alertOnExit: e.target.checked }))} />{t('geospatialAnalytics.alertOnExit')}</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={zoneForm.isRestricted} onChange={e => setZoneForm(f => ({ ...f, isRestricted: e.target.checked }))} />{t('geospatialAnalytics.restrictedZone')}</label>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                <button className="module-btn primary" onClick={createZone}>Create Zone</button>
-                <button className="module-btn" onClick={() => setShowZoneForm(false)}>Cancel</button>
+                <button className="module-btn primary" onClick={createZone}>{t('geospatialAnalytics.createZone')}</button>
+                <button className="module-btn" onClick={() => setShowZoneForm(false)}>{t('common.cancel')}</button>
               </div>
             </div>
           )}
@@ -232,7 +233,7 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
           {/* Interactive Zone Map */}
           <div className="module-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 12, marginBottom: 20 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ margin: 0 }}>📍 Geofence Zones Map</h3>
+              <h3 style={{ margin: 0 }}>📍 {t('geospatialAnalytics.geofenceZonesMap')}</h3>
               <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
                 {zones.length} zone{zones.length !== 1 ? 's' : ''} · Click map to set new zone center
               </p>
@@ -292,7 +293,7 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
                 </div>
               </div>
             ))}
-            {zones.length === 0 && <p style={{ color: '#888' }}>No zones created yet. Click the map to place your first zone.</p>}
+            {zones.length === 0 && <p style={{ color: '#888' }}>{t('geospatialAnalytics.noZones')}</p>}
           </div>
         </div>
       )}
@@ -300,28 +301,28 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
       {!loading && tab === 'events' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-            <button className="module-btn primary" onClick={() => setShowEventForm(true)}>+ Record Event</button>
+            <button className="module-btn primary" onClick={() => setShowEventForm(true)}>{t('geospatialAnalytics.recordEvent')}</button>
           </div>
           {showEventForm && (
             <div className="module-card" style={{ marginBottom: 20 }}>
-              <h3>Record Geospatial Event</h3>
+              <h3>{t('geospatialAnalytics.recordGeospatialEvent')}</h3>
               <p style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>💡 Click on the map below to set the event coordinates</p>
               <div className="module-form">
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">Animal ID</label><input className="module-input" value={eventForm.animalId} onChange={e => setEventForm(f => ({ ...f, animalId: e.target.value }))} placeholder="Enter animal UUID" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Event Type</label>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.animalId')}</label><input className="module-input" value={eventForm.animalId} onChange={e => setEventForm(f => ({ ...f, animalId: e.target.value }))} placeholder="Enter animal UUID" /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.eventType')}</label>
                     <select className="module-input" value={eventForm.eventType} onChange={e => setEventForm(f => ({ ...f, eventType: e.target.value }))}>
-                      {EVENT_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}</select></div>
+                      {EVENT_TYPES.map(et => <option key={et} value={et}>{et.replace(/_/g, ' ')}</option>)}</select></div>
                 </div>
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">Latitude</label><input className="module-input" type="number" step="0.0001" value={eventForm.latitude} onChange={e => setEventForm(f => ({ ...f, latitude: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Longitude</label><input className="module-input" type="number" step="0.0001" value={eventForm.longitude} onChange={e => setEventForm(f => ({ ...f, longitude: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.latitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.latitude} onChange={e => setEventForm(f => ({ ...f, latitude: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.longitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.longitude} onChange={e => setEventForm(f => ({ ...f, longitude: e.target.value }))} placeholder="Click map or type" /></div>
                 </div>
-                <div><label className="module-label">Metadata (JSON, optional)</label><input className="module-input" value={eventForm.metadata} onChange={e => setEventForm(f => ({ ...f, metadata: e.target.value }))} placeholder='{"speed": 5.2, "heading": 270}' /></div>
+                <div><label className="module-label">{t('geospatialAnalytics.metadata')}</label><input className="module-input" value={eventForm.metadata} onChange={e => setEventForm(f => ({ ...f, metadata: e.target.value }))} placeholder='{"speed": 5.2, "heading": 270}' /></div>
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                <button className="module-btn primary" onClick={createEvent}>Record Event</button>
-                <button className="module-btn" onClick={() => setShowEventForm(false)}>Cancel</button>
+                <button className="module-btn primary" onClick={createEvent}>{t('geospatialAnalytics.recordEvent')}</button>
+                <button className="module-btn" onClick={() => setShowEventForm(false)}>{t('common.cancel')}</button>
               </div>
             </div>
           )}
@@ -329,7 +330,7 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
           {/* Interactive Events Map */}
           <div className="module-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 12, marginBottom: 20 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ margin: 0 }}>📡 Event Locations Map</h3>
+              <h3 style={{ margin: 0 }}>📡 {t('geospatialAnalytics.eventLocationsMap')}</h3>
               <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
                 {events.length} event{events.length !== 1 ? 's' : ''} · Click map to set event coordinates
               </p>
@@ -389,16 +390,16 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
 
           {/* Legend */}
           <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap', fontSize: 12 }}>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#22c55e', marginRight: 4 }}></span>Location Update</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#8b5cf6', marginRight: 4 }}></span>Zone Entry/Exit</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#ef4444', marginRight: 4 }}></span>Breach</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#f97316', marginRight: 4 }}></span>SOS / Speed Alert</span>
+            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#22c55e', marginRight: 4 }}></span>{t('geospatialAnalytics.legend.locationUpdate')}</span>
+            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#8b5cf6', marginRight: 4 }}></span>{t('geospatialAnalytics.legend.zoneEntryExit')}</span>
+            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#ef4444', marginRight: 4 }}></span>{t('geospatialAnalytics.legend.breach')}</span>
+            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#f97316', marginRight: 4 }}></span>{t('geospatialAnalytics.legend.sosAlert')}</span>
           </div>
 
           <div className="module-card">
-            <h3>Event Log</h3>
+              <h3>{t('geospatialAnalytics.eventLog')}</h3>
             <table className="module-table">
-              <thead><tr><th>Time</th><th>Animal</th><th>Type</th><th>Zone</th><th>Location</th><th>Details</th></tr></thead>
+              <thead><tr><th>{t('iotSensors.time')}</th><th>{t('genomicLineage.animal')}</th><th>{t('common.type')}</th><th>{t('geospatialAnalytics.zone')}</th><th>{t('geospatialAnalytics.location')}</th><th>{t('geospatialAnalytics.details')}</th></tr></thead>
               <tbody>
                 {events.map(ev => (
                   <tr key={ev.id}>
@@ -412,7 +413,7 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
                 ))}
               </tbody>
             </table>
-            {events.length === 0 && <p style={{ textAlign: 'center', color: '#888' }}>No events recorded yet. Click the map to place your first event.</p>}
+            {events.length === 0 && <p style={{ textAlign: 'center', color: '#888' }}>{t('geospatialAnalytics.noEvents')}</p>}
           </div>
         </div>
       )}
@@ -422,7 +423,7 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
           {/* Interactive Heatmap */}
           <div className="module-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 12, marginBottom: 24 }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ margin: 0 }}>🔥 Location Density Heatmap</h3>
+              <h3 style={{ margin: 0 }}>🔥 {t('geospatialAnalytics.locationDensityHeatmap')}</h3>
               <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
                 {heatmapData.length} data point{heatmapData.length !== 1 ? 's' : ''} · Warmer colors indicate higher activity
               </p>
@@ -447,26 +448,26 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
             />
             {heatmapData.length === 0 && (
               <div style={{ padding: '24px', textAlign: 'center', color: '#888', borderTop: '1px solid #e5e7eb' }}>
-                No location data available yet. Record geospatial events to build the heatmap.
+                {t('geospatialAnalytics.noLocationData')}
               </div>
             )}
           </div>
 
           {/* Movement Trail */}
           <div className="module-card">
-            <h3>🐾 Movement Trail</h3>
-            <p style={{ fontSize: 13, color: '#888' }}>Track an animal's movement path over time on an interactive map</p>
+            <h3>🐾 {t('geospatialAnalytics.movementTrail')}</h3>
+            <p style={{ fontSize: 13, color: '#888' }}>{t('geospatialAnalytics.trackAnimalMovement')}</p>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <input className="module-input" placeholder="Enter Animal ID" value={trailAnimalId}
                 onChange={e => setTrailAnimalId(e.target.value)} style={{ flex: 1 }} />
-              <button className="module-btn primary" onClick={loadTrail}>Load Trail</button>
+              <button className="module-btn primary" onClick={loadTrail}>{t('geospatialAnalytics.loadTrail')}</button>
             </div>
 
             {trailData && (
               <div style={{ marginTop: 16 }}>
                 <div className="module-stats">
-                  <div className="stat-card"><div className="stat-value">{trailData.pointCount || 0}</div><div className="stat-label">Points</div></div>
-                  <div className="stat-card"><div className="stat-value">{(+(trailData.totalDistanceKm ?? 0)).toFixed(2)}</div><div className="stat-label">Distance (km)</div></div>
+                  <div className="stat-card"><div className="stat-value">{trailData.pointCount || 0}</div><div className="stat-label">{t('geospatialAnalytics.points')}</div></div>
+                  <div className="stat-card"><div className="stat-value">{(+(trailData.totalDistanceKm ?? 0)).toFixed(2)}</div><div className="stat-label">{t('geospatialAnalytics.distanceKm')}</div></div>
                 </div>
 
                 {/* Trail Map */}
@@ -518,7 +519,7 @@ const GeospatialAnalytics: React.FC = () => {  const { t } = useTranslation()
                     <details>
                       <summary style={{ cursor: 'pointer', fontSize: 13, color: '#666' }}>📋 Trail Points Table ({trailData.trail.length} points)</summary>
                       <table className="module-table" style={{ marginTop: 8 }}>
-                        <thead><tr><th>#</th><th>Time</th><th>Lat</th><th>Lng</th><th>Type</th></tr></thead>
+                        <thead><tr><th>#</th><th>{t('iotSensors.time')}</th><th>{t('geospatialAnalytics.lat')}</th><th>{t('geospatialAnalytics.lng')}</th><th>{t('common.type')}</th></tr></thead>
                         <tbody>
                           {trailData.trail.slice(0, 50).map((p: any, i: number) => (
                             <tr key={i}><td>{i + 1}</td><td>{p.recorded_at ? new Date(p.recorded_at).toLocaleString() : '–'}</td>

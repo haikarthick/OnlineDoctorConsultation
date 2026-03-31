@@ -98,7 +98,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
       setMediaMode('audio-only')
       setIsCameraOff(true)
       setIsMuted(false)
-      setCameraError('Camera is unavailable (may be in use by another tab). Audio-only mode enabled.')
+      setCameraError(t('videoConsultation.cameraUnavailableAudioOnly'))
       return
     } catch (err: any) {
 }
@@ -108,7 +108,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
     setStreamToSend(null)
     setIsCameraOff(true)
     setIsMuted(true)
-    setCameraError('Camera & microphone unavailable. You can still use chat.')
+    setCameraError(t('videoConsultation.cameraAndMicUnavailable'))
   }, [])
 
   // Stop all local media tracks
@@ -223,7 +223,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
           })
           if (created.data) sessionData = created.data
         } catch (err: any) {
-          setError('Failed to create video room: ' + (err?.response?.data?.error?.message || err?.message || ''))
+          setError(t('videoConsultation.failedToCreateVideoRoom') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
         }
       }
 
@@ -246,7 +246,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
         }
       }
     } catch (err: any) {
-      setError('Failed to initialize: ' + (err?.message || ''))
+      setError(t('videoConsultation.failedToInitialize') + ': ' + (err?.message || ''))
     } finally { setLoading(false) }
   }
 
@@ -311,13 +311,13 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
         await startLocalStream()
       }
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Failed to start session')
+      setError(err?.response?.data?.error?.message || t('videoConsultation.failedToStartSession'))
     }
   }
 
   const handleEndSession = async () => {
     if (!session) return
-    if (!window.confirm('Are you sure you want to end this consultation?')) return
+    if (!window.confirm(t('videoConsultation.confirmEndConsultation'))) return
     try {
       // Stop recording first so blob is ready
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -336,7 +336,7 @@ const VideoConsultation: React.FC<VideoConsultationProps> = ({ consultationId, o
 const msg = err?.response?.data?.error?.message
         || err?.response?.data?.message
         || err?.message
-        || 'Failed to end session'
+        || t('videoConsultation.failedToEndSession')
       setError(msg)
       // Even if API fails, clean up local resources
       stopLocalStream()
@@ -396,7 +396,7 @@ setNewMessage(messageText) // restore message on failure
       const msg = err?.response?.data?.error?.message
         || err?.response?.data?.message
         || err?.message
-        || 'Failed to send message'
+        || t('videoConsultation.failedToSendMessage')
       setError(msg)
     }
   }
@@ -406,7 +406,7 @@ setNewMessage(messageText) // restore message on failure
       // Start recording
       const stream = screenStreamRef.current || localStreamRef.current
       if (!stream) {
-        setError('No media stream available to record')
+        setError(t('videoConsultation.noMediaStream'))
         return
       }
       try {
@@ -437,7 +437,7 @@ setNewMessage(messageText) // restore message on failure
           apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => {})
         }
       } catch (err) {
-setError('Failed to start recording — your browser may not support MediaRecorder')
+setError(t('videoConsultation.failedToStartRecording'))
       }
     } else {
       // Stop recording
@@ -459,7 +459,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
       })
       setIsMuted(!isMuted)
     } else if (mediaMode === 'none') {
-      setError('Microphone is unavailable')
+      setError(t('videoConsultation.micUnavailable'))
     }
   }
 
@@ -488,7 +488,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
         setIsCameraOff(false)
         setCameraError('')
       } catch {
-        setError('Camera is still unavailable')
+        setError(t('videoConsultation.cameraStillUnavailable'))
       }
       return
     }
@@ -552,7 +552,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
           <div style={{ fontSize: 64, marginBottom: 20 }}>📹</div>
           <h1 style={{ marginBottom: 8 }}>{t('videoConsultation.ended')}</h1>
           <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 8 }}>
-            Duration: {formatDuration(session.duration || callDuration)}
+            {t('videoConsultation.duration')}: {formatDuration(session.duration || callDuration)}
           </p>
           {(session.recordingUrl || recordingUrl) && (
             <div style={{ marginTop: 20, marginBottom: 16 }}>
@@ -614,14 +614,14 @@ setError('Failed to start recording — your browser may not support MediaRecord
                 <div key={rx.id} style={{ background: '#f0fdf4', borderRadius: 8, padding: 16, marginBottom: 12, border: '1px solid #bbf7d0' }}>
                   {Array.isArray(rx.medications) && rx.medications.map((med: any, mi: number) => (
                     <div key={mi} style={{ marginBottom: mi < rx.medications.length - 1 ? 8 : 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>💊 {med.name || 'Medication'}</div>
-                      {med.dosage && <p style={{ fontSize: 13, margin: '4px 0' }}><strong>Dosage:</strong> {med.dosage}</p>}
-                      {med.frequency && <p style={{ fontSize: 13, margin: '4px 0' }}><strong>Frequency:</strong> {med.frequency}</p>}
-                      {med.duration && <p style={{ fontSize: 13, margin: '4px 0' }}><strong>Duration:</strong> {med.duration}</p>}
+                      <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>💊 {med.name || t('videoConsultation.medication')}</div>
+                      {med.dosage && <p style={{ fontSize: 13, margin: '4px 0' }}><strong>{t('videoConsultation.dosage')}:</strong> {med.dosage}</p>}
+                      {med.frequency && <p style={{ fontSize: 13, margin: '4px 0' }}><strong>{t('videoConsultation.frequency')}:</strong> {med.frequency}</p>}
+                      {med.duration && <p style={{ fontSize: 13, margin: '4px 0' }}><strong>{t('videoConsultation.durationLabel')}:</strong> {med.duration}</p>}
                     </div>
                   ))}
-                  {rx.instructions && <p style={{ fontSize: 13, margin: '8px 0 0' }}><strong>Instructions:</strong> {rx.instructions}</p>}
-                  <p style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>Valid until: {rx.validUntil ? formatDate(rx.validUntil) : 'N/A'}</p>
+                  {rx.instructions && <p style={{ fontSize: 13, margin: '8px 0 0' }}><strong>{t('videoConsultation.instructions')}:</strong> {rx.instructions}</p>}
+                  <p style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>{t('videoConsultation.validUntil')}: {rx.validUntil ? formatDate(rx.validUntil) : 'N/A'}</p>
                 </div>
               ))}
             </div>
@@ -651,7 +651,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
         {session && (session.status as string) !== 'ended' && (
           <div className="page-header-actions">
             <span className="badge badge-active" style={{ fontSize: 14, padding: '6px 14px' }}>
-              Room: {session.roomId}
+              {t('videoConsultation.room')}: {session.roomId}
             </span>
           </div>
         )}
@@ -660,7 +660,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
       {error && (
         <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
           ⚠️ {error}
-          <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }} onClick={() => setError('')}>Dismiss</button>
+          <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }} onClick={() => setError('')}>{t('videoConsultation.dismiss')}</button>
         </div>
       )}
 
@@ -697,17 +697,17 @@ setError('Failed to start recording — your browser may not support MediaRecord
                     <div className="video-avatar">{user?.role === 'veterinarian' ? '🧑' : '👨‍⚕️'}</div>
                     <p>{connectionState === 'connecting' ? t('videoConsultation.connectingDoctor') : t('videoConsultation.waitingDoctorVideo')}</p>
                     {mediaMode === 'audio-only' && (
-                      <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 Audio-only mode — camera unavailable</p>
+                      <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 {t('videoConsultation.audioOnlyMode')}</p>
                     )}
                     {mediaMode === 'none' && (
-                      <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 Chat-only mode</p>
+                      <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 {t('videoConsultation.chatOnlyMode')}</p>
                     )}
                   </div>
                 )}
                 {isScreenSharing && (
                   <div style={{ position: 'absolute', bottom: 70, left: 16, background: 'rgba(0,0,0,.75)',
                     color: '#fff', padding: '4px 12px', borderRadius: 8, fontSize: 13, zIndex: 10 }}>
-                    🖥️ Screen sharing active
+                    🖥️ {t('videoConsultation.screenSharingActive')}
                   </div>
                 )}
               </>
@@ -759,28 +759,28 @@ setError('Failed to start recording — your browser may not support MediaRecord
                 <button
                   className={`video-control-btn ${!isMuted ? 'active' : ''}`}
                   onClick={toggleMute}
-                  title={isMuted ? 'Unmute' : 'Mute'}
+                  title={isMuted ? t('videoConsultation.unmute') : t('videoConsultation.mute')}
                 >
                   {isMuted ? '🔇' : '🎤'}
                 </button>
                 <button
                   className={`video-control-btn ${!isCameraOff ? 'active' : ''}`}
                   onClick={toggleCamera}
-                  title={isCameraOff ? 'Turn on camera' : 'Turn off camera'}
+                  title={isCameraOff ? t('videoConsultation.turnOnCamera') : t('videoConsultation.turnOffCamera')}
                 >
                   {isCameraOff ? '📷' : '📹'}
                 </button>
                 <button
                   className={`video-control-btn ${isScreenSharing ? 'active' : ''}`}
                   onClick={toggleScreenShare}
-                  title="Share screen"
+                  title={t('videoConsultation.shareScreen')}
                 >
                   🖥️
                 </button>
                 <button
                   className={`video-control-btn ${isRecording ? 'recording' : ''}`}
                   onClick={toggleRecording}
-                  title={isRecording ? 'Stop Recording' : 'Start Recording'}
+                  title={isRecording ? t('videoConsultation.stopRecording') : t('videoConsultation.startRecording')}
                   style={isRecording ? { background: '#dc2626', color: 'white', animation: 'pulse 1.5s infinite' } : {}}
                 >
                   {isRecording ? '⏹️' : '⏺️'}
@@ -788,7 +788,7 @@ setError('Failed to start recording — your browser may not support MediaRecord
                 <button
                   className="video-control-btn end-call"
                   onClick={handleEndSession}
-                  title="End call"
+                  title={t('videoConsultation.endCallTitle')}
                 >
                   📞
                 </button>

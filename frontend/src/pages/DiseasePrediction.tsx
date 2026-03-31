@@ -80,11 +80,11 @@ const DiseasePredictionPage: React.FC = () => {
         recommendedActions: formData.recommendedActions ? formData.recommendedActions.split(',').map(s => s.trim()) : [],
         animalId: formData.animalId || undefined,
       })
-      setSuccessMsg('Prediction created!')
+      setSuccessMsg(t('diseasePrediction.predictionCreated'))
       setShowForm(false)
       setFormData({ diseaseName: '', riskScore: '', confidence: '', predictedOnset: '', riskFactors: '', recommendedActions: '', animalId: '', enterpriseId: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   const handleCreateOutbreak = async (e: React.FormEvent) => {
@@ -101,75 +101,75 @@ const DiseasePredictionPage: React.FC = () => {
         centerLat: parseFloat(outbreakForm.centerLat) || undefined,
         centerLng: parseFloat(outbreakForm.centerLng) || undefined,
       })
-      setSuccessMsg('Outbreak zone created!')
+      setSuccessMsg(t('diseasePrediction.outbreakCreated'))
       setShowOutbreakForm(false)
       setOutbreakForm({ diseaseName: '', severity: 'low', affectedCount: '', totalAtRisk: '', radiusKm: '', centerLat: '', centerLng: '', enterpriseId: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   const handleResolve = async (id: string) => {
-    try { await apiService.resolvePrediction(id, 'resolved'); setSuccessMsg('Resolved!'); fetchData() }
-    catch { setError('Failed to resolve') }
+    try { await apiService.resolvePrediction(id, 'resolved'); setSuccessMsg(t('diseasePrediction.resolved')); fetchData() }
+    catch { setError(t('diseasePrediction.failedResolve')) }
   }
 
   const handleResolveOutbreak = async (id: string) => {
-    try { await apiService.resolveOutbreakZone(id); setSuccessMsg('Outbreak resolved!'); fetchData() }
-    catch { setError('Failed to resolve') }
+    try { await apiService.resolveOutbreakZone(id); setSuccessMsg(t('diseasePrediction.outbreakResolved')); fetchData() }
+    catch { setError(t('diseasePrediction.failedResolve')) }
   }
 
   return (
     <div className="module-page">
       <div className="module-header">
         <h1>{t('diseasePrediction.pageTitle')}</h1>
-        <p>Predictive risk scoring, geographic outbreak heatmaps, and recommended preventive actions</p>
+        <p>{t('diseasePrediction.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('common.selectEnterprise')}:</label>
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
-          <option value="">-- Select --</option>
+          <option value="">{t('common.selectOption')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
 
       {!selectedEnterpriseId ? (
-        <div className="empty-state">Select an enterprise to view AI disease predictions</div>
+        <div className="empty-state">{t('diseasePrediction.selectEnterprise')}</div>
       ) : loading ? (
-        <div className="loading-spinner">Analyzing risk data…</div>
+        <div className="loading-spinner">{t('diseasePrediction.loading')}</div>
       ) : (
         <>
           <div className="tab-bar">
-            <button className={tab === 'dashboard' ? 'tab-active' : ''} onClick={() => setTab('dashboard')}>Risk Dashboard</button>
-            <button className={tab === 'predictions' ? 'tab-active' : ''} onClick={() => setTab('predictions')}>Predictions</button>
-            <button className={tab === 'outbreaks' ? 'tab-active' : ''} onClick={() => setTab('outbreaks')}>Outbreak Zones</button>
+            <button className={tab === 'dashboard' ? 'tab-active' : ''} onClick={() => setTab('dashboard')}>{t('diseasePrediction.tabs.dashboard')}</button>
+            <button className={tab === 'predictions' ? 'tab-active' : ''} onClick={() => setTab('predictions')}>{t('diseasePrediction.tabs.predictions')}</button>
+            <button className={tab === 'outbreaks' ? 'tab-active' : ''} onClick={() => setTab('outbreaks')}>{t('diseasePrediction.tabs.outbreaks')}</button>
           </div>
 
           {tab === 'dashboard' && dashboard && (
             <div className="dashboard-grid">
               <div className="stat-card accent-purple">
                 <div className="stat-value">{dashboard.summary?.totalActive ?? 0}</div>
-                <div className="stat-label">Active Predictions</div>
+                <div className="stat-label">{t('diseasePrediction.stats.activePredictions')}</div>
               </div>
               <div className="stat-card accent-orange">
                 <div className="stat-value">{dashboard.summary?.avgRisk ?? 0}%</div>
-                <div className="stat-label">Avg Risk Score</div>
+                <div className="stat-label">{t('diseasePrediction.stats.avgRiskScore')}</div>
               </div>
               <div className="stat-card accent-red">
                 <div className="stat-value">{dashboard.summary?.diseases ?? 0}</div>
-                <div className="stat-label">Diseases Tracked</div>
+                <div className="stat-label">{t('diseasePrediction.stats.diseasesTracked')}</div>
               </div>
               <div className="stat-card accent-blue">
                 <div className="stat-value">{outbreakZones.filter(z => z.containmentStatus !== 'resolved').length}</div>
-                <div className="stat-label">Active Outbreaks</div>
+                <div className="stat-label">{t('diseasePrediction.stats.activeOutbreaks')}</div>
               </div>
 
               {(dashboard.activePredictions || []).length > 0 && (
                 <div className="card full-width">
-                  <h3>🔬 Disease Risk Distribution</h3>
+                  <h3>🔬 {t('diseasePrediction.riskDistribution')}</h3>
                   <div className="mini-chart-bar">
                     {(dashboard.activePredictions || []).map((d, i) => (
                       <div key={i} className="bar-row">
@@ -186,9 +186,9 @@ const DiseasePredictionPage: React.FC = () => {
 
               {(dashboard.topRiskAnimals || []).length > 0 && (
                 <div className="card full-width">
-                  <h3>⚠️ Highest Risk Animals</h3>
+                  <h3>⚠️ {t('diseasePrediction.highRiskAnimals')}</h3>
                   <table className="data-table">
-                    <thead><tr><th>Animal</th><th>Species</th><th>Breed</th><th>Risk Score</th><th>Predictions</th></tr></thead>
+                    <thead><tr><th>{t('diseasePrediction.animal')}</th><th>{t('diseasePrediction.species')}</th><th>{t('diseasePrediction.breed')}</th><th>{t('diseasePrediction.riskScore')}</th><th>{t('diseasePrediction.tabs.predictions')}</th></tr></thead>
                     <tbody>
                       {(dashboard.topRiskAnimals || []).map((a, i) => (
                         <tr key={i}>
@@ -208,7 +208,7 @@ const DiseasePredictionPage: React.FC = () => {
             <div>
               <div className="section-toolbar">
                 <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
-                  {showForm ? 'Cancel' : '+ New Prediction'}
+                  {showForm ? t('common.cancel') : t('diseasePrediction.newPrediction')}
                 </button>
               </div>
 
@@ -217,20 +217,20 @@ const DiseasePredictionPage: React.FC = () => {
                 <div ref={formRef} className="edit-form-panel">
                 <form className="module-form" onSubmit={handleCreatePrediction}>
                   <div className="form-grid">
-                    <div className="form-group"><label>Disease Name *</label><input required value={formData.diseaseName} onChange={e => setFormData({ ...formData, diseaseName: e.target.value })} /></div>
-                    <div className="form-group"><label>Risk Score (0-100)</label><input type="number" min="0" max="100" step="0.1" value={formData.riskScore} onChange={e => setFormData({ ...formData, riskScore: e.target.value })} /></div>
-                    <div className="form-group"><label>Confidence (0-100)</label><input type="number" min="0" max="100" step="0.1" value={formData.confidence} onChange={e => setFormData({ ...formData, confidence: e.target.value })} /></div>
-                    <div className="form-group"><label>Predicted Onset</label><input type="date" value={formData.predictedOnset} onChange={e => setFormData({ ...formData, predictedOnset: e.target.value })} /></div>
-                    <div className="form-group full-width"><label>Risk Factors (comma-separated)</label><input value={formData.riskFactors} onChange={e => setFormData({ ...formData, riskFactors: e.target.value })} placeholder="e.g., Overcrowding, Poor ventilation" /></div>
-                    <div className="form-group full-width"><label>Recommended Actions (comma-separated)</label><input value={formData.recommendedActions} onChange={e => setFormData({ ...formData, recommendedActions: e.target.value })} placeholder="e.g., Isolate affected animals, Increase ventilation" /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.diseaseName')} *</label><input required value={formData.diseaseName} onChange={e => setFormData({ ...formData, diseaseName: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.riskScore')} (0-100)</label><input type="number" min="0" max="100" step="0.1" value={formData.riskScore} onChange={e => setFormData({ ...formData, riskScore: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.confidence')} (0-100)</label><input type="number" min="0" max="100" step="0.1" value={formData.confidence} onChange={e => setFormData({ ...formData, confidence: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.predictedOnset')}</label><input type="date" value={formData.predictedOnset} onChange={e => setFormData({ ...formData, predictedOnset: e.target.value })} /></div>
+                    <div className="form-group full-width"><label>{t('diseasePrediction.riskFactors')}</label><input value={formData.riskFactors} onChange={e => setFormData({ ...formData, riskFactors: e.target.value })} placeholder="e.g., Overcrowding, Poor ventilation" /></div>
+                    <div className="form-group full-width"><label>{t('diseasePrediction.recommendedActions')}</label><input value={formData.recommendedActions} onChange={e => setFormData({ ...formData, recommendedActions: e.target.value })} placeholder="e.g., Isolate affected animals, Increase ventilation" /></div>
                   </div>
-                  <button type="submit" className="btn-primary">Submit Prediction</button>
+                  <button type="submit" className="btn-primary">{t('diseasePrediction.submitPrediction')}</button>
                 </form>
                 </div>
               )}
 
               <table className="data-table">
-                <thead><tr><th>Disease</th><th>Risk</th><th>Confidence</th><th>Onset</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>{t('diseasePrediction.disease')}</th><th>{t('diseasePrediction.risk')}</th><th>{t('diseasePrediction.confidence')}</th><th>{t('diseasePrediction.onset')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr></thead>
                 <tbody>
                   {predictions.map(p => (
                     <tr key={p.id}>
@@ -239,10 +239,10 @@ const DiseasePredictionPage: React.FC = () => {
                       <td>{+(p.confidence || 0)}%</td>
                       <td>{(p.predictedOnset || (p as any).predicted_onset) ? new Date(p.predictedOnset || (p as any).predicted_onset).toLocaleDateString() : '—'}</td>
                       <td><span className={`badge badge-${p.status}`}>{p.status}</span></td>
-                      <td>{p.status === 'active' && <button className="btn-sm" onClick={() => handleResolve(p.id)}>Resolve</button>}</td>
+                      <td>{p.status === 'active' && <button className="btn-sm" onClick={() => handleResolve(p.id)}>{t('diseasePrediction.resolve')}</button>}</td>
                     </tr>
                   ))}
-                  {!predictions.length && <tr><td colSpan={6} className="empty-cell">No predictions yet</td></tr>}
+                  {!predictions.length && <tr><td colSpan={6} className="empty-cell">{t('diseasePrediction.noPredictions')}</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -252,7 +252,7 @@ const DiseasePredictionPage: React.FC = () => {
             <div>
               <div className="section-toolbar">
                 <button className="btn-primary" onClick={() => setShowOutbreakForm(!showOutbreakForm)}>
-                  {showOutbreakForm ? 'Cancel' : '+ Report Outbreak Zone'}
+                  {showOutbreakForm ? t('common.cancel') : t('diseasePrediction.reportOutbreak')}
                 </button>
               </div>
 
@@ -260,27 +260,27 @@ const DiseasePredictionPage: React.FC = () => {
                 <form className="module-form" onSubmit={handleCreateOutbreak}>
                   <p style={{ fontSize: 13, color: '#888', margin: '0 0 12px' }}>💡 Click on the map below to set the outbreak center location</p>
                   <div className="form-grid">
-                    <div className="form-group"><label>Disease *</label><input required value={outbreakForm.diseaseName} onChange={e => setOutbreakForm({ ...outbreakForm, diseaseName: e.target.value })} /></div>
-                    <div className="form-group"><label>Severity</label>
+                    <div className="form-group"><label>{t('diseasePrediction.disease')} *</label><input required value={outbreakForm.diseaseName} onChange={e => setOutbreakForm({ ...outbreakForm, diseaseName: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.severity')}</label>
                       <select value={outbreakForm.severity} onChange={e => setOutbreakForm({ ...outbreakForm, severity: e.target.value })}>
                         <option value="low">Low</option><option value="medium">Medium</option>
                         <option value="high">High</option><option value="critical">Critical</option>
                       </select>
                     </div>
-                    <div className="form-group"><label>Affected Count</label><input type="number" value={outbreakForm.affectedCount} onChange={e => setOutbreakForm({ ...outbreakForm, affectedCount: e.target.value })} /></div>
-                    <div className="form-group"><label>Total at Risk</label><input type="number" value={outbreakForm.totalAtRisk} onChange={e => setOutbreakForm({ ...outbreakForm, totalAtRisk: e.target.value })} /></div>
-                    <div className="form-group"><label>Radius (km)</label><input type="number" step="0.1" value={outbreakForm.radiusKm} onChange={e => setOutbreakForm({ ...outbreakForm, radiusKm: e.target.value })} /></div>
-                    <div className="form-group"><label>Center Lat</label><input type="number" step="0.0001" value={outbreakForm.centerLat} onChange={e => setOutbreakForm({ ...outbreakForm, centerLat: e.target.value })} placeholder="Click map or type" /></div>
-                    <div className="form-group"><label>Center Lng</label><input type="number" step="0.0001" value={outbreakForm.centerLng} onChange={e => setOutbreakForm({ ...outbreakForm, centerLng: e.target.value })} placeholder="Click map or type" /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.affectedCount')}</label><input type="number" value={outbreakForm.affectedCount} onChange={e => setOutbreakForm({ ...outbreakForm, affectedCount: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.totalAtRisk')}</label><input type="number" value={outbreakForm.totalAtRisk} onChange={e => setOutbreakForm({ ...outbreakForm, totalAtRisk: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.radiusKm')}</label><input type="number" step="0.1" value={outbreakForm.radiusKm} onChange={e => setOutbreakForm({ ...outbreakForm, radiusKm: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.centerLat')}</label><input type="number" step="0.0001" value={outbreakForm.centerLat} onChange={e => setOutbreakForm({ ...outbreakForm, centerLat: e.target.value })} placeholder="Click map or type" /></div>
+                    <div className="form-group"><label>{t('diseasePrediction.centerLng')}</label><input type="number" step="0.0001" value={outbreakForm.centerLng} onChange={e => setOutbreakForm({ ...outbreakForm, centerLng: e.target.value })} placeholder="Click map or type" /></div>
                   </div>
-                  <button type="submit" className="btn-primary">Create Outbreak Zone</button>
+                  <button type="submit" className="btn-primary">{t('diseasePrediction.createOutbreakZone')}</button>
                 </form>
               )}
 
               {/* Interactive Outbreak Map */}
               <div style={{ marginBottom: 20, borderRadius: 12, overflow: 'hidden', border: '1px solid #e5e7eb' }}>
                 <div style={{ padding: '14px 20px', borderBottom: '1px solid #e5e7eb', background: '#fafafa' }}>
-                  <h3 style={{ margin: 0 }}>🗺️ Outbreak Zone Map</h3>
+                  <h3 style={{ margin: 0 }}>🗺️ {t('diseasePrediction.outbreakZoneMap')}</h3>
                   <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
                     {outbreakZones.length} outbreak zone{outbreakZones.length !== 1 ? 's' : ''} · Circle size represents radius · Color represents severity
                   </p>
@@ -348,22 +348,22 @@ const DiseasePredictionPage: React.FC = () => {
                       <span className={`badge badge-${z.containmentStatus || (z as any).containment_status}`}>{z.containmentStatus || (z as any).containment_status}</span>
                     </div>
                     <div className="card-stats">
-                      <div><strong>{z.affectedCount || (z as any).affected_count}</strong> affected</div>
-                      <div><strong>{z.totalAtRisk || (z as any).total_at_risk}</strong> at risk</div>
+                      <div><strong>{z.affectedCount || (z as any).affected_count}</strong> {t('diseasePrediction.affected')}</div>
+                      <div><strong>{z.totalAtRisk || (z as any).total_at_risk}</strong> {t('diseasePrediction.atRisk')}</div>
                       {(z.radiusKm || (z as any).radius_km) && <div><strong>{z.radiusKm || (z as any).radius_km} km</strong> radius</div>}
                     </div>
                     {(z.centerLat || (z as any).center_lat) && (
                       <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>📍 {(+(z.centerLat || (z as any).center_lat)).toFixed(4)}, {(+(z.centerLng || (z as any).center_lng)).toFixed(4)}</div>
                     )}
                     <div className="card-footer">
-                      <small>Started {(z.startedAt || (z as any).started_at) ? new Date(z.startedAt || (z as any).started_at).toLocaleDateString() : '–'}</small>
+                      <small>{t('diseasePrediction.started')} {(z.startedAt || (z as any).started_at) ? new Date(z.startedAt || (z as any).started_at).toLocaleDateString() : '–'}</small>
                       {(z.containmentStatus || (z as any).containment_status) !== 'resolved' && (
-                        <button className="btn-sm" onClick={() => handleResolveOutbreak(z.id)}>Resolve</button>
+                        <button className="btn-sm" onClick={() => handleResolveOutbreak(z.id)}>{t('diseasePrediction.resolve')}</button>
                       )}
                     </div>
                   </div>
                 ))}
-                {!outbreakZones.length && <div className="empty-state">No outbreak zones reported. Click the map to place an outbreak zone.</div>}
+                {!outbreakZones.length && <div className="empty-state">{t('diseasePrediction.noOutbreaks')}</div>}
               </div>
             </div>
           )}

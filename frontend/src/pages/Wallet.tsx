@@ -102,38 +102,38 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
     <div className="module-page">
       <div className="page-header">
         <div>
-          <h1>{t('common.pageTitle')}</h1>
-          <p className="page-subtitle">Manage your balance, refunds, and bonus credits</p>
+          <h1>{t('wallet.pageTitle')}</h1>
+          <p className="page-subtitle">{t('wallet.subtitle')}</p>
         </div>
         <div className="page-header-actions">
-          <button className="btn btn-outline" onClick={() => onNavigate('/consultations')}>← My Consultations</button>
+          <button className="btn btn-outline" onClick={() => onNavigate('/consultations')}>{t('wallet.myConsultations')}</button>
         </div>
       </div>
 
       {/* Balance Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>Total Balance</div>
+          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('wallet.totalBalance')}</div>
           <div style={{ fontSize: 32, fontWeight: 700, color: '#059669' }}>{formatCurrency(total)}</div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>Refund Balance</div>
+          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('wallet.refundBalance')}</div>
           <div style={{ fontSize: 28, fontWeight: 600, color: '#2563eb' }}>{formatCurrency(balance)}</div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>Bonus Credits</div>
+          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('wallet.bonusCredits')}</div>
           <div style={{ fontSize: 28, fontWeight: 600, color: '#d97706' }}>{formatCurrency(bonus)}</div>
-          <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>From doctor cancellation goodwill</div>
+          <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>{t('wallet.bonusTip')}</div>
         </div>
         <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>Payment Mode</div>
+          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('wallet.paymentMode')}</div>
           <div style={{ fontSize: 18, fontWeight: 600 }}>
             {gatewayMode === 'demo' && <span style={{ color: '#d97706' }}>🧪 Demo</span>}
             {gatewayMode === 'test' && <span style={{ color: '#2563eb' }}>🔧 Test</span>}
             {gatewayMode === 'live' && <span style={{ color: '#059669' }}>🟢 Live</span>}
           </div>
           <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>
-            {gatewayMode === 'demo' ? 'Simulated payments' : gatewayMode === 'test' ? 'Sandbox mode' : 'Real payments'}
+            {gatewayMode === 'demo' ? t('wallet.simulated') : gatewayMode === 'test' ? t('wallet.sandbox') : t('wallet.realPayments')}
           </div>
         </div>
       </div>
@@ -141,14 +141,14 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
       {/* Transaction History */}
       <div className="card">
         <div className="card-header">
-          <h2>📋 Transaction History</h2>
+          <h2>{t('wallet.transactionHistory')}</h2>
         </div>
         <div className="card-body" style={{ padding: 0 }}>
           {transactions.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6b7280' }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>💳</div>
-              <h3>No transactions yet</h3>
-              <p>Your refunds and bonus credits will appear here.</p>
+              <h3>{t('wallet.noTransactions')}</h3>
+              <p>{t('wallet.refundsAppearHere')}</p>
             </div>
           ) : (
             <>
@@ -182,7 +182,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
               {hasMore && (
                 <div style={{ textAlign: 'center', padding: 16 }}>
                   <button className="btn btn-outline" disabled={txLoading} onClick={() => loadTransactions(offset + limit)}>
-                    {txLoading ? 'Loading...' : 'Load More'}
+                    {txLoading ? t('common.loading') : t('wallet.loadMore')}
                   </button>
                 </div>
               )}

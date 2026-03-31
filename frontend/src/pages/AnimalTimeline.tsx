@@ -459,7 +459,7 @@ const AnimalTimeline: React.FC = () => {
   if (animalsLoading) {
     return (
       <div className="tl-page">
-        <div className="tl-loading"><div className="tl-spinner" /><p>Loading animals...</p></div>
+        <div className="tl-loading"><div className="tl-spinner" /><p>{t('timeline.loadingAnimals')}</p></div>
       </div>
     )
   }
@@ -510,15 +510,15 @@ const AnimalTimeline: React.FC = () => {
             )}
           </div>
           <div className="tl-zoom-group">
-            <button className="tl-zoom-btn" onClick={() => setZoomIndex(z => Math.max(0, z - 1))} disabled={zoomIndex === 0} title="Zoom in">+</button>
+            <button className="tl-zoom-btn" onClick={() => setZoomIndex(z => Math.max(0, z - 1))} disabled={zoomIndex === 0} title={t('timeline.zoomIn')}>+</button>
             <span className="tl-zoom-label">{ZOOM_LEVELS[zoomIndex]}d</span>
-            <button className="tl-zoom-btn" onClick={() => setZoomIndex(z => Math.min(ZOOM_LEVELS.length - 1, z + 1))} disabled={zoomIndex === ZOOM_LEVELS.length - 1} title="Zoom out">−</button>
+            <button className="tl-zoom-btn" onClick={() => setZoomIndex(z => Math.min(ZOOM_LEVELS.length - 1, z + 1))} disabled={zoomIndex === ZOOM_LEVELS.length - 1} title={t('timeline.zoomOut')}>−</button>
           </div>
-          <button className="tl-sort-btn" onClick={() => setSortAsc(s => !s)}>{sortAsc ? '↑ Oldest' : '↓ Newest'}</button>
+          <button className="tl-sort-btn" onClick={() => setSortAsc(s => !s)}>{sortAsc ? `↑ ${t('timeline.oldest')}` : `↓ ${t('timeline.newest')}`}</button>
           <button className={`tl-filter-btn ${filterPanelOpen ? 'active' : ''}`} onClick={() => setFilterPanelOpen(o => !o)}>
             ▼ Filters {activeFilterCount > 0 && <span className="tl-filter-badge">{activeFilterCount}</span>}
           </button>
-          <button className="tl-icon-btn" onClick={loadTimeline} title="Refresh">↻</button>
+          <button className="tl-icon-btn" onClick={loadTimeline} title={t('timeline.refresh')}>↻</button>
         </div>
       </div>
 
@@ -526,10 +526,10 @@ const AnimalTimeline: React.FC = () => {
       {events.length > 0 && (
         <div className="tl-stats">
           {[
-            { icon: '📊', value: stats.total,   label: 'Total Events'  },
-            { icon: '📋', value: stats.types,   label: 'Event Types'   },
-            { icon: '✅', value: stats.active,  label: 'Active Items'  },
-            ...(stats.highSev > 0 ? [{ icon: '🔴', value: stats.highSev, label: 'High Severity' }] : []),
+            { icon: '📊', value: stats.total,   label: t('timeline.stats.totalEvents')  },
+            { icon: '📋', value: stats.types,   label: t('timeline.stats.eventTypes')   },
+            { icon: '✅', value: stats.active,  label: t('timeline.stats.activeItems')  },
+            ...(stats.highSev > 0 ? [{ icon: '🔴', value: stats.highSev, label: t('timeline.stats.highSeverity') }] : []),
           ].map(s => (
             <div className="tl-stat" key={s.label}>
               <span className="tl-stat-icon">{s.icon}</span>
@@ -545,11 +545,11 @@ const AnimalTimeline: React.FC = () => {
         {/* Filter panel */}
         <div className={`tl-filter-panel ${filterPanelOpen ? 'open' : ''}`}>
           <div className="tl-fp-header">
-            <span>Filters</span>
+            <span>{t('timeline.filters.title')}</span>
             <button className="tl-fp-close" onClick={() => setFilterPanelOpen(false)}>×</button>
           </div>
           <div className="tl-fp-section">
-            <div className="tl-fp-label">TYPES TO SHOW</div>
+            <div className="tl-fp-label">{t('timeline.filters.typesToShow')}</div>
             {FILTER_CATEGORIES.map(cat => {
               const count   = categoryCounts[cat.key] || 0
               const isActive = activeFilters.has(cat.key)
@@ -566,29 +566,29 @@ const AnimalTimeline: React.FC = () => {
             })}
           </div>
           <div className="tl-fp-section">
-            <div className="tl-fp-label">DATE RANGE</div>
-            <label className="tl-fp-date-label">From</label>
+            <div className="tl-fp-label">{t('timeline.filters.dateRange')}</div>
+            <label className="tl-fp-date-label">{t('timeline.filters.from')}</label>
             <input type="date" className="tl-fp-date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
-            <label className="tl-fp-date-label">To</label>
+            <label className="tl-fp-date-label">{t('timeline.filters.to')}</label>
             <input type="date" className="tl-fp-date" value={dateTo} onChange={e => setDateTo(e.target.value)} />
             {(dateFrom || dateTo) && (
               <div className="tl-fp-date-range-badge">{dateFrom || '...'} to {dateTo || '...'}</div>
             )}
           </div>
-          {activeFilterCount > 0 && <button className="tl-fp-clear" onClick={clearAll}>✕ Clear All</button>}
-          <button className="tl-fp-apply" onClick={() => setFilterPanelOpen(false)}>Apply</button>
+          {activeFilterCount > 0 && <button className="tl-fp-clear" onClick={clearAll}>✕ {t('timeline.filters.clearAll')}</button>}
+          <button className="tl-fp-apply" onClick={() => setFilterPanelOpen(false)}>{t('timeline.filters.apply')}</button>
         </div>
 
         {/* Canvas */}
         <div className="tl-canvas-wrap">
           {loading ? (
-            <div className="tl-loading"><div className="tl-spinner" /><p>Loading timeline...</p></div>
+            <div className="tl-loading"><div className="tl-spinner" /><p>{t('timeline.loadingTimeline')}</p></div>
           ) : filteredEvents.length === 0 ? (
             <div className="tl-empty">
               <div className="tl-empty-icon">📅</div>
-              <h3>{searchQuery || activeFilters.size > 0 ? 'No matching events' : 'No events yet'}</h3>
-              <p>{activeFilterCount > 0 ? 'Try clearing filters.' : selectedAnimalId ? 'No timeline events found.' : 'Select an animal above.'}</p>
-              {activeFilterCount > 0 && <button className="tl-btn-outline" onClick={clearAll}>Clear Filters</button>}
+              <h3>{searchQuery || activeFilters.size > 0 ? t('timeline.noMatching') : t('timeline.noEventsYet')}</h3>
+              <p>{activeFilterCount > 0 ? t('timeline.tryClearingFilters') : selectedAnimalId ? t('timeline.noEventsFound') : t('timeline.selectAnimal')}</p>
+              {activeFilterCount > 0 && <button className="tl-btn-outline" onClick={clearAll}>{t('timeline.filters.clearFilters')}</button>}
             </div>
           ) : (
             <>
@@ -712,13 +712,13 @@ const AnimalTimeline: React.FC = () => {
           </div>
           {hoverEvent.status && (
             <div className="tl-tt-row">
-              <span className="tl-tt-key">Status</span>
+              <span className="tl-tt-key">{t('common.status')}</span>
               <span className="tl-tt-val" style={{ color: hoverEvent.status === 'active' || hoverEvent.status === 'valid' ? '#2e7d32' : '#757575' }}>{hoverEvent.status}</span>
             </div>
           )}
           {hoverEvent.severity && (
             <div className="tl-tt-row">
-              <span className="tl-tt-key">Severity</span>
+              <span className="tl-tt-key">{t('timeline.severity')}</span>
               <span className="tl-tt-val" style={{ color: severityColor(hoverEvent.severity) || undefined }}>{hoverEvent.severity}</span>
             </div>
           )}
@@ -726,12 +726,12 @@ const AnimalTimeline: React.FC = () => {
             <div className="tl-tt-desc">{hoverEvent.description.slice(0, 90)}{hoverEvent.description.length > 90 ? '...' : ''}</div>
           )}
           <div className="tl-tt-actions">
-            <button className="tl-tt-action" onClick={() => { setDrawerEvent(hoverEvent); setHoverEvent(null) }}>📋 Details</button>
+            <button className="tl-tt-action" onClick={() => { setDrawerEvent(hoverEvent); setHoverEvent(null) }}>📋 {t('timeline.details')}</button>
             {getEventConfig(hoverEvent.type).navPath && (
-              <button className="tl-tt-action" onClick={() => { navigate(buildRecordPath(hoverEvent)); setHoverEvent(null) }}>🔗 Open Record</button>
+              <button className="tl-tt-action" onClick={() => { navigate(buildRecordPath(hoverEvent)); setHoverEvent(null) }}>🔗 {t('timeline.openRecord')}</button>
             )}
             {(hoverEvent.type === 'booking' || hoverEvent.type === 'consultation') && (
-              <button className="tl-tt-action tl-tt-action-primary" onClick={() => { navigate('/consultations'); setHoverEvent(null) }}>🏥 Consultation</button>
+              <button className="tl-tt-action tl-tt-action-primary" onClick={() => { navigate('/consultations'); setHoverEvent(null) }}>🏥 {t('timeline.consultation')}</button>
             )}
           </div>
         </div>
@@ -751,12 +751,12 @@ const AnimalTimeline: React.FC = () => {
             </div>
             <div className="tl-drawer-body">
               {[
-                { k: 'Date',        v: formatEventDate(drawerEvent.date) },
-                { k: 'Animal',      v: selectedAnimal ? `${selectedAnimal.name} (${selectedAnimal.species})` : undefined },
-                { k: 'Status',      v: drawerEvent.status,       col: drawerEvent.status === 'active' || drawerEvent.status === 'valid' ? '#2e7d32' : undefined },
-                { k: 'Severity',    v: drawerEvent.severity,     col: severityColor(drawerEvent.severity) || undefined },
-                { k: 'Recorded by', v: drawerEvent.createdByName },
-                { k: 'Description', v: drawerEvent.description },
+                { k: t('common.date'),        v: formatEventDate(drawerEvent.date) },
+                { k: t('common.animal'),      v: selectedAnimal ? `${selectedAnimal.name} (${selectedAnimal.species})` : undefined },
+                { k: t('common.status'),      v: drawerEvent.status,       col: drawerEvent.status === 'active' || drawerEvent.status === 'valid' ? '#2e7d32' : undefined },
+                { k: t('timeline.severity'),    v: drawerEvent.severity,     col: severityColor(drawerEvent.severity) || undefined },
+                { k: t('timeline.recordedBy'), v: drawerEvent.createdByName },
+                { k: t('common.description'), v: drawerEvent.description },
               ].filter(r => r.v).map(row => (
                 <div className="tl-drawer-row" key={row.k}>
                   <span className="tl-drawer-key">{row.k}</span>
@@ -772,19 +772,19 @@ const AnimalTimeline: React.FC = () => {
             </div>
             <div className="tl-drawer-actions">
               {getEventConfig(drawerEvent.type).navPath && (
-                <button className="tl-drawer-action-primary" onClick={() => navigate(buildRecordPath(drawerEvent))}>🔗 Open Full Record</button>
+                <button className="tl-drawer-action-primary" onClick={() => navigate(buildRecordPath(drawerEvent))}>🔗 {t('timeline.openFullRecord')}</button>
               )}
               {(drawerEvent.type === 'booking' || drawerEvent.type === 'consultation') && (
-                <button className="tl-drawer-action-primary" onClick={() => navigate('/consultations')}>🏥 View Consultation</button>
+                <button className="tl-drawer-action-primary" onClick={() => navigate('/consultations')}>🏥 {t('timeline.viewConsultation')}</button>
               )}
               {(drawerEvent.type === 'prescription' || drawerEvent.type === 'record_prescription') && (
-                <button className="tl-drawer-action" onClick={() => navigate('/prescriptions')}>💊 View Prescriptions</button>
+                <button className="tl-drawer-action" onClick={() => navigate('/prescriptions')}>💊 {t('timeline.viewPrescriptions')}</button>
               )}
               <div className="tl-drawer-nav">
                 <button className="tl-drawer-action"
                   disabled={filteredEvents.findIndex(e => e.id === drawerEvent.id) === 0}
                   onClick={() => { const i = filteredEvents.findIndex(e => e.id === drawerEvent.id); if (i > 0) setDrawerEvent(filteredEvents[i - 1]) }}>
-                  ← Prev
+                  ← {t('vetHospitals.prev')}
                 </button>
                 <span className="tl-drawer-nav-pos">
                   {filteredEvents.findIndex(e => e.id === drawerEvent.id) + 1} / {filteredEvents.length}
@@ -792,7 +792,7 @@ const AnimalTimeline: React.FC = () => {
                 <button className="tl-drawer-action"
                   disabled={filteredEvents.findIndex(e => e.id === drawerEvent.id) === filteredEvents.length - 1}
                   onClick={() => { const i = filteredEvents.findIndex(e => e.id === drawerEvent.id); if (i < filteredEvents.length - 1) setDrawerEvent(filteredEvents[i + 1]) }}>
-                  Next →
+                  {t('vetHospitals.next')} →
                 </button>
               </div>
             </div>

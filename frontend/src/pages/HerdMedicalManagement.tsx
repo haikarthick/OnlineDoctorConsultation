@@ -197,7 +197,7 @@ const HerdMedicalManagement: React.FC = () => {
   // Form handlers
   const handleCreateRecord = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!recordForm.animalId || !recordForm.title || !recordForm.content) { setError('Animal, title, and content are required'); return }
+    if (!recordForm.animalId || !recordForm.title || !recordForm.content) { setError(t('herdMedical.validation.recordRequired')); return }
     setModalSaving(true); clearMessages()
     try {
       const medsArray = recordForm.medications ? recordForm.medications.split(',').map(m => ({ name: m.trim() })) : undefined
@@ -207,16 +207,16 @@ const HerdMedicalManagement: React.FC = () => {
         followUpDate: recordForm.followUpDate || undefined, medications: medsArray,
         veterinarianId: isVet ? user?.id : undefined,
       })
-      setSuccess('Medical record created successfully'); setModal(null)
+      setSuccess(t('herdMedical.success.recordCreated')); setModal(null)
       setRecordForm({ animalId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '' })
       loadRecords(); loadStats()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to create record') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToCreateRecord')) }
     finally { setModalSaving(false) }
   }
 
   const handleCreateVaccination = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!vaccForm.animalId || !vaccForm.vaccineName || !vaccForm.dateAdministered) { setError('Animal, vaccine name, and date are required'); return }
+    if (!vaccForm.animalId || !vaccForm.vaccineName || !vaccForm.dateAdministered) { setError(t('herdMedical.validation.vaccinationRequired')); return }
     setModalSaving(true); clearMessages()
     try {
       await apiService.createVaccination({
@@ -226,16 +226,16 @@ const HerdMedicalManagement: React.FC = () => {
         manufacturer: vaccForm.manufacturer || undefined, dosage: vaccForm.dosage || undefined,
         certificateNumber: vaccForm.certificateNumber || undefined,
       })
-      setSuccess('Vaccination recorded successfully'); setModal(null)
+      setSuccess(t('herdMedical.success.vaccinationRecorded')); setModal(null)
       setVaccForm({ animalId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '' })
       loadVaccinations(); loadStats()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to record vaccination') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToRecordVaccination')) }
     finally { setModalSaving(false) }
   }
 
   const handleCreateAllergy = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!allergyForm.animalId || !allergyForm.allergen) { setError('Animal and allergen are required'); return }
+    if (!allergyForm.animalId || !allergyForm.allergen) { setError(t('herdMedical.validation.allergyRequired')); return }
     setModalSaving(true); clearMessages()
     try {
       await apiService.createAllergy({
@@ -243,16 +243,16 @@ const HerdMedicalManagement: React.FC = () => {
         reaction: allergyForm.reaction || undefined, severity: allergyForm.severity || undefined,
         notes: allergyForm.notes || undefined,
       })
-      setSuccess('Allergy recorded successfully'); setModal(null)
+      setSuccess(t('herdMedical.success.allergyRecorded')); setModal(null)
       setAllergyForm({ animalId: '', allergen: '', reaction: '', severity: 'normal', notes: '' })
       loadAllergies(); loadStats()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to record allergy') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToRecordAllergy')) }
     finally { setModalSaving(false) }
   }
 
   const handleCreateLabResult = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!labForm.animalId || !labForm.testName || !labForm.testDate) { setError('Animal, test name, and date are required'); return }
+    if (!labForm.animalId || !labForm.testName || !labForm.testDate) { setError(t('herdMedical.validation.labRequired')); return }
     setModalSaving(true); clearMessages()
     try {
       await apiService.createLabResult({
@@ -262,35 +262,35 @@ const HerdMedicalManagement: React.FC = () => {
         status: labForm.status as any || 'pending', interpretation: labForm.interpretation || undefined,
         labName: labForm.labName || undefined, notes: labForm.notes || undefined,
       })
-      setSuccess('Lab result recorded successfully'); setModal(null)
+      setSuccess(t('herdMedical.success.labRecorded')); setModal(null)
       setLabForm({ animalId: '', testName: '', testDate: new Date().toISOString().slice(0, 10), testCategory: '', resultValue: '', normalRange: '', unit: '', status: 'pending', interpretation: '', labName: '', notes: '' })
       loadLabResults(); loadStats()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to record lab result') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToRecordLabResult')) }
     finally { setModalSaving(false) }
   }
 
   const handleDeleteRecord = async (id: string) => {
-    if (!window.confirm('Archive this medical record?')) return
+    if (!window.confirm(t('herdMedical.confirm.archiveRecord'))) return
     clearMessages()
-    try { await apiService.deleteMedicalRecord(id); setSuccess('Record archived'); loadRecords(); loadStats() }
-    catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to archive') }
+    try { await apiService.deleteMedicalRecord(id); setSuccess(t('herdMedical.success.recordArchived')); loadRecords(); loadStats() }
+    catch (err: any) { setError(err.response?.data?.error?.message || t('herdMedical.error.failedToArchive')) }
   }
 
   const handleViewRecord = async (id: string) => {
     try { const res = await apiService.getMedicalRecord(id); setViewRecord(res.data || null); setModal('view-record') }
-    catch { setError('Failed to load record details') }
+    catch { setError(t('herdMedical.error.failedToLoadDetails')) }
   }
 
   const handleUpdateLabStatus = async (id: string, status: string) => {
     clearMessages()
-    try { await apiService.updateLabResult(id, { status }); setSuccess('Lab result updated'); loadLabResults() }
-    catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to update') }
+    try { await apiService.updateLabResult(id, { status }); setSuccess(t('herdMedical.success.labUpdated')); loadLabResults() }
+    catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToUpdate')) }
   }
 
   // Animal Select component
   const AnimalSelect = ({ value, onChange, required }: { value: string; onChange: (v: string) => void; required?: boolean }) => (
     <select value={value} onChange={e => onChange(e.target.value)} className="search-input" required={required} style={{ width: '100%' }}>
-      <option value="">-- Select Animal --</option>
+      <option value="">{t('herdMedical.selectAnimal')}</option>
       {animals.map(a => (
         <option key={a.id} value={a.id}>
           {a.name} ({a.species}{a.breed ? ' - ' + a.breed : ''}{a.groupName ? ' | ' + a.groupName : ''})
@@ -301,46 +301,46 @@ const HerdMedicalManagement: React.FC = () => {
 
   const GroupFilterSelect = () => (
     <select value={groupFilter} onChange={e => { setGroupFilter(e.target.value); setPage(0) }} className="search-input" style={{ maxWidth: '220px' }}>
-      <option value="">All Groups</option>
+      <option value="">{t('herdMedical.allGroups')}</option>
       {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
     </select>
   )
 
   // OVERVIEW TAB
   const renderOverview = () => {
-    if (!stats) return <div className="empty-state">No statistics available yet. Add animals and records to see health data.</div>
+    if (!stats) return <div className="empty-state">{t('herdMedical.overview.noStats')}</div>
     return (
       <div>
         <div className="dashboard-grid">
-          <div className="stat-card"><div className="stat-icon">&#x1F404;</div><div className="stat-value">{stats.activeAnimals || 0}</div><div className="stat-label">Active Animals</div></div>
-          <div className="stat-card"><div className="stat-icon">&#x1F4CB;</div><div className="stat-value">{stats.totalRecords || 0}</div><div className="stat-label">Medical Records</div></div>
-          <div className="stat-card"><div className="stat-icon">&#x1F489;</div><div className="stat-value">{stats.vaccinations?.total || 0}</div><div className="stat-label">Vaccinations</div></div>
+          <div className="stat-card"><div className="stat-icon">&#x1F404;</div><div className="stat-value">{stats.activeAnimals || 0}</div><div className="stat-label">{t('herdMedical.overview.activeAnimals')}</div></div>
+          <div className="stat-card"><div className="stat-icon">&#x1F4CB;</div><div className="stat-value">{stats.totalRecords || 0}</div><div className="stat-label">{t('herdMedical.overview.medicalRecords')}</div></div>
+          <div className="stat-card"><div className="stat-icon">&#x1F489;</div><div className="stat-value">{stats.vaccinations?.total || 0}</div><div className="stat-label">{t('herdMedical.overview.vaccinations')}</div></div>
           <div className="stat-card" style={{ borderColor: (stats.vaccinations?.overdue || 0) > 0 ? '#dc2626' : undefined }}>
             <div className="stat-icon">&#x26A0;&#xFE0F;</div>
             <div className="stat-value" style={{ color: (stats.vaccinations?.overdue || 0) > 0 ? '#dc2626' : undefined }}>{stats.vaccinations?.overdue || 0}</div>
-            <div className="stat-label">Overdue Vaccinations</div>
+            <div className="stat-label">{t('herdMedical.overview.overdueVaccinations')}</div>
           </div>
-          <div className="stat-card"><div className="stat-icon">&#x1F52C;</div><div className="stat-value">{stats.labResults?.pending || 0}</div><div className="stat-label">Pending Lab Results</div></div>
-          <div className="stat-card"><div className="stat-icon">&#x1F927;</div><div className="stat-value">{stats.allergies?.active || 0}</div><div className="stat-label">Active Allergies</div></div>
-          <div className="stat-card"><div className="stat-icon">&#x1F4C5;</div><div className="stat-value">{stats.upcomingFollowUps || 0}</div><div className="stat-label">Follow-ups (7 days)</div></div>
-          <div className="stat-card"><div className="stat-icon">&#x1F4CA;</div><div className="stat-value">{stats.vaccinations?.upcomingDue || 0}</div><div className="stat-label">Vaccinations Due (30d)</div></div>
+          <div className="stat-card"><div className="stat-icon">&#x1F52C;</div><div className="stat-value">{stats.labResults?.pending || 0}</div><div className="stat-label">{t('herdMedical.overview.pendingLabResults')}</div></div>
+          <div className="stat-card"><div className="stat-icon">&#x1F927;</div><div className="stat-value">{stats.allergies?.active || 0}</div><div className="stat-label">{t('herdMedical.overview.activeAllergies')}</div></div>
+          <div className="stat-card"><div className="stat-icon">&#x1F4C5;</div><div className="stat-value">{stats.upcomingFollowUps || 0}</div><div className="stat-label">{t('herdMedical.overview.followUps')}</div></div>
+          <div className="stat-card"><div className="stat-icon">&#x1F4CA;</div><div className="stat-value">{stats.vaccinations?.upcomingDue || 0}</div><div className="stat-label">{t('herdMedical.overview.vaccinationsDue')}</div></div>
         </div>
 
         {canCreate && (
           <div style={{ marginTop: '24px' }}>
-            <h3 style={{ marginBottom: '12px' }}>Quick Actions</h3>
+            <h3 style={{ marginBottom: '12px' }}>{t('herdMedical.overview.quickActions')}</h3>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button className="btn btn-primary" onClick={() => { setRecordForm(f => ({ ...f, animalId: '' })); setModal('add-record') }}>+ Add Medical Record</button>
-              <button className="btn btn-primary" onClick={() => { setVaccForm(f => ({ ...f, animalId: '' })); setModal('add-vaccination') }}>+ Record Vaccination</button>
-              <button className="btn btn-primary" onClick={() => { setAllergyForm(f => ({ ...f, animalId: '' })); setModal('add-allergy') }}>+ Record Allergy</button>
-              <button className="btn btn-primary" onClick={() => { setLabForm(f => ({ ...f, animalId: '' })); setModal('add-lab') }}>+ Add Lab Result</button>
+              <button className="btn btn-primary" onClick={() => { setRecordForm(f => ({ ...f, animalId: '' })); setModal('add-record') }}>{t('herdMedical.overview.addRecord')}</button>
+              <button className="btn btn-primary" onClick={() => { setVaccForm(f => ({ ...f, animalId: '' })); setModal('add-vaccination') }}>{t('herdMedical.overview.addVaccination')}</button>
+              <button className="btn btn-primary" onClick={() => { setAllergyForm(f => ({ ...f, animalId: '' })); setModal('add-allergy') }}>{t('herdMedical.overview.addAllergy')}</button>
+              <button className="btn btn-primary" onClick={() => { setLabForm(f => ({ ...f, animalId: '' })); setModal('add-lab') }}>{t('herdMedical.overview.addLabResult')}</button>
             </div>
           </div>
         )}
 
         {stats.recordsByType && Object.keys(stats.recordsByType).length > 0 && (
           <div style={{ marginTop: '24px' }}>
-            <h3 style={{ marginBottom: '12px' }}>Records by Type</h3>
+            <h3 style={{ marginBottom: '12px' }}>{t('herdMedical.overview.recordsByType')}</h3>
             <div className="dashboard-grid">
               {Object.entries(stats.recordsByType).map(([type, count]: any) => (
                 <div key={type} className="stat-card" style={{ cursor: 'pointer' }} onClick={() => { setRecordTypeFilter(type); setTab('records') }}>
@@ -355,10 +355,10 @@ const HerdMedicalManagement: React.FC = () => {
 
         {stats.groupHealth && stats.groupHealth.length > 0 && (
           <div style={{ marginTop: '24px' }}>
-            <h3 style={{ marginBottom: '12px' }}>Herd / Group Health</h3>
+            <h3 style={{ marginBottom: '12px' }}>{t('herdMedical.overview.groupHealth')}</h3>
             <div className="table-container">
               <table className="data-table">
-                <thead><tr><th>Group</th><th>Type</th><th>Animals</th><th>Records</th><th>Overdue Vaccinations</th></tr></thead>
+                <thead><tr><th>{t('herdMedical.table.group')}</th><th>{t('common.type')}</th><th>{t('herdMedical.table.animals')}</th><th>{t('herdMedical.table.records')}</th><th>{t('herdMedical.table.overdueVaccinations')}</th></tr></thead>
                 <tbody>
                   {stats.groupHealth.map((g: any) => (
                     <tr key={g.id}>
@@ -374,10 +374,10 @@ const HerdMedicalManagement: React.FC = () => {
 
         {stats.recentRecords && stats.recentRecords.length > 0 && (
           <div style={{ marginTop: '24px' }}>
-            <h3 style={{ marginBottom: '12px' }}>Recent Medical Records</h3>
+            <h3 style={{ marginBottom: '12px' }}>{t('herdMedical.overview.recentRecords')}</h3>
             <div className="table-container">
               <table className="data-table">
-                <thead><tr><th>Date</th><th>Animal</th><th>Type</th><th>Title</th><th>Severity</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>{t('common.date')}</th><th>{t('herdMedical.table.animal')}</th><th>{t('common.type')}</th><th>{t('herdMedical.table.title')}</th><th>{t('herdMedical.table.severity')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr></thead>
                 <tbody>
                   {stats.recentRecords.map((r: any) => (
                     <tr key={r.id}>
@@ -387,7 +387,7 @@ const HerdMedicalManagement: React.FC = () => {
                       <td>{r.title}</td>
                       <td><span style={{ backgroundColor: SEVERITY_COLORS[r.severity] || '#6b7280', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8em' }}>{r.severity}</span></td>
                       <td>{r.status}</td>
-                      <td><button className="btn btn-secondary" style={{ fontSize: '0.8em', padding: '2px 8px' }} onClick={() => handleViewRecord(r.id)}>View</button></td>
+                      <td><button className="btn btn-secondary" style={{ fontSize: '0.8em', padding: '2px 8px' }} onClick={() => handleViewRecord(r.id)}>{t('common.view')}</button></td>
                     </tr>
                   ))}
                 </tbody>
@@ -404,28 +404,28 @@ const HerdMedicalManagement: React.FC = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
-          <input type="text" placeholder="Search records..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setPage(0) }} className="search-input" style={{ flex: 1, minWidth: '200px' }} />
+          <input type="text" placeholder={t('herdMedical.records.searchPlaceholder')} value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setPage(0) }} className="search-input" style={{ flex: 1, minWidth: '200px' }} />
           <select value={recordTypeFilter} onChange={e => { setRecordTypeFilter(e.target.value); setPage(0) }} className="search-input" style={{ maxWidth: '170px' }}>
-            <option value="">All Types</option>{RECORD_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            <option value="">{t('herdMedical.records.allTypes')}</option>{RECORD_TYPES.map(rt => <option key={rt.value} value={rt.value}>{t(`herdMedical.recordTypes.${rt.value}`)}</option>)}
           </select>
           <select value={severityFilter} onChange={e => { setSeverityFilter(e.target.value); setPage(0) }} className="search-input" style={{ maxWidth: '150px' }}>
-            <option value="">All Severities</option><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="critical">Critical</option>
+            <option value="">{t('herdMedical.records.allSeverities')}</option><option value="low">{t('herdMedical.severity.low')}</option><option value="normal">{t('herdMedical.severity.normal')}</option><option value="high">{t('herdMedical.severity.high')}</option><option value="critical">{t('herdMedical.severity.critical')}</option>
           </select>
           <GroupFilterSelect />
         </div>
         {canCreate && (
           <button className="btn btn-primary" onClick={() => { setRecordForm({ animalId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '' }); setModal('add-record') }}>
-            + Add Record
+            {t('herdMedical.records.addRecord')}
           </button>
         )}
       </div>
       {records.length === 0 ? (
-        <div className="empty-state">{animals.length === 0 ? 'No animals registered in this enterprise yet.' : 'No medical records found matching your filters.'}</div>
+        <div className="empty-state">{animals.length === 0 ? t('herdMedical.records.noAnimalsYet') : t('herdMedical.records.noRecords')}</div>
       ) : (
         <>
           <div className="table-container">
             <table className="data-table">
-              <thead><tr><th>Date</th><th>Animal</th><th>Group</th><th>Type</th><th>Title</th><th>Severity</th><th>Status</th><th>Vet</th><th>Actions</th></tr></thead>
+              <thead><tr><th>{t('common.date')}</th><th>{t('herdMedical.table.animal')}</th><th>{t('herdMedical.table.group')}</th><th>{t('common.type')}</th><th>{t('herdMedical.table.title')}</th><th>{t('herdMedical.table.severity')}</th><th>{t('common.status')}</th><th>{t('herdMedical.table.vet')}</th><th>{t('common.actions')}</th></tr></thead>
               <tbody>
                 {records.map((r: any) => (
                   <tr key={r.id}>
@@ -438,8 +438,8 @@ const HerdMedicalManagement: React.FC = () => {
                     <td>{r.status}</td>
                     <td>{r.veterinarianName || '-'}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>
-                      <button className="btn btn-secondary" style={{ fontSize: '0.8em', padding: '2px 8px', marginRight: '4px' }} onClick={() => handleViewRecord(r.id)}>View</button>
-                      {canManage && <button className="btn btn-secondary" style={{ fontSize: '0.8em', padding: '2px 8px', color: '#dc2626' }} onClick={() => handleDeleteRecord(r.id)}>Archive</button>}
+                      <button className="btn btn-secondary" style={{ fontSize: '0.8em', padding: '2px 8px', marginRight: '4px' }} onClick={() => handleViewRecord(r.id)}>{t('common.view')}</button>
+                      {canManage && <button className="btn btn-secondary" style={{ fontSize: '0.8em', padding: '2px 8px', color: '#dc2626' }} onClick={() => handleDeleteRecord(r.id)}>{t('herdMedical.records.archive')}</button>}
                     </td>
                   </tr>
                 ))}
@@ -447,10 +447,10 @@ const HerdMedicalManagement: React.FC = () => {
             </table>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-            <span style={{ color: '#666', fontSize: '0.9em' }}>Showing {page * 20 + 1} - {Math.min((page + 1) * 20, recordsTotal)} of {recordsTotal}</span>
+            <span style={{ color: '#666', fontSize: '0.9em' }}>{t('herdMedical.records.showing', { from: page * 20 + 1, to: Math.min((page + 1) * 20, recordsTotal), total: recordsTotal })}</span>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn btn-secondary" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
-              <button className="btn btn-secondary" disabled={(page + 1) * 20 >= recordsTotal} onClick={() => setPage(p => p + 1)}>Next</button>
+              <button className="btn btn-secondary" disabled={page === 0} onClick={() => setPage(p => p - 1)}>{t('herdMedical.records.prev')}</button>
+              <button className="btn btn-secondary" disabled={(page + 1) * 20 >= recordsTotal} onClick={() => setPage(p => p + 1)}>{t('herdMedical.records.next')}</button>
             </div>
           </div>
         </>
@@ -464,23 +464,23 @@ const HerdMedicalManagement: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <select value={vaccFilter} onChange={e => setVaccFilter(e.target.value as any)} className="search-input" style={{ maxWidth: '200px' }}>
-            <option value="all">All Vaccinations</option><option value="overdue">Overdue Only</option><option value="upcoming">Upcoming (30 days)</option>
+            <option value="all">{t('herdMedical.vaccinations.all')}</option><option value="overdue">{t('herdMedical.vaccinations.overdueOnly')}</option><option value="upcoming">{t('herdMedical.vaccinations.upcoming')}</option>
           </select>
           <GroupFilterSelect />
-          <span style={{ color: '#666', fontSize: '0.9em' }}>{vaccinationsTotal} total</span>
+          <span style={{ color: '#666', fontSize: '0.9em' }}>{t('herdMedical.vaccinations.totalCount', { count: vaccinationsTotal })}</span>
         </div>
         {canCreate && (
           <button className="btn btn-primary" onClick={() => { setVaccForm({ animalId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '' }); setModal('add-vaccination') }}>
-            + Record Vaccination
+            {t('herdMedical.vaccinations.addButton')}
           </button>
         )}
       </div>
       {vaccinations.length === 0 ? (
-        <div className="empty-state">{animals.length === 0 ? 'No animals registered yet.' : 'No vaccination records found.'}</div>
+        <div className="empty-state">{animals.length === 0 ? t('herdMedical.records.noAnimalsYet') : t('herdMedical.vaccinations.noRecords')}</div>
       ) : (
         <div className="table-container">
           <table className="data-table">
-            <thead><tr><th>Animal</th><th>Group</th><th>Vaccine</th><th>Type</th><th>Dosage</th><th>Administered</th><th>Next Due</th><th>Status</th></tr></thead>
+            <thead><tr><th>{t('herdMedical.table.animal')}</th><th>{t('herdMedical.table.group')}</th><th>{t('herdMedical.table.vaccine')}</th><th>{t('common.type')}</th><th>{t('herdMedical.table.dosage')}</th><th>{t('herdMedical.table.administered')}</th><th>{t('herdMedical.table.nextDue')}</th><th>{t('common.status')}</th></tr></thead>
             <tbody>
               {vaccinations.map((v: any) => (
                 <tr key={v.id}>
@@ -497,7 +497,7 @@ const HerdMedicalManagement: React.FC = () => {
                       backgroundColor: v.dueStatus === 'overdue' ? '#fef2f2' : v.dueStatus === 'upcoming' ? '#fffbeb' : '#f0fdf4',
                       color: v.dueStatus === 'overdue' ? '#dc2626' : v.dueStatus === 'upcoming' ? '#d97706' : '#059669',
                     }}>
-                      {v.dueStatus === 'overdue' ? 'Overdue' : v.dueStatus === 'upcoming' ? 'Due Soon' : 'Current'}
+                      {v.dueStatus === 'overdue' ? t('herdMedical.vaccinations.overdue') : v.dueStatus === 'upcoming' ? t('herdMedical.vaccinations.dueSoon') : t('herdMedical.vaccinations.current')}
                     </span>
                   </td>
                 </tr>
@@ -513,19 +513,19 @@ const HerdMedicalManagement: React.FC = () => {
   const renderAllergies = () => (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <span style={{ color: '#666' }}>{allergies.length} allergy record(s) across enterprise animals</span>
+        <span style={{ color: '#666' }}>{t('herdMedical.allergies.countText', { count: allergies.length })}</span>
         {canCreate && (
           <button className="btn btn-primary" onClick={() => { setAllergyForm({ animalId: '', allergen: '', reaction: '', severity: 'normal', notes: '' }); setModal('add-allergy') }}>
-            + Record Allergy
+            {t('herdMedical.allergies.addButton')}
           </button>
         )}
       </div>
       {allergies.length === 0 ? (
-        <div className="empty-state">{animals.length === 0 ? 'No animals registered yet.' : 'No allergy records found.'}</div>
+        <div className="empty-state">{animals.length === 0 ? t('herdMedical.records.noAnimalsYet') : t('herdMedical.allergies.noRecords')}</div>
       ) : (
         <div className="table-container">
           <table className="data-table">
-            <thead><tr><th>Animal</th><th>Allergen</th><th>Reaction</th><th>Severity</th><th>Active</th><th>Identified</th></tr></thead>
+            <thead><tr><th>{t('herdMedical.table.animal')}</th><th>{t('herdMedical.table.allergen')}</th><th>{t('herdMedical.table.reaction')}</th><th>{t('herdMedical.table.severity')}</th><th>{t('herdMedical.table.active')}</th><th>{t('herdMedical.table.identified')}</th></tr></thead>
             <tbody>
               {allergies.map((a: any, i: number) => (
                 <tr key={a.id || i}>
@@ -533,7 +533,7 @@ const HerdMedicalManagement: React.FC = () => {
                   <td><strong>{a.allergen}</strong></td>
                   <td>{a.reaction || '-'}</td>
                   <td><span style={{ backgroundColor: SEVERITY_COLORS[a.severity] || '#6b7280', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8em' }}>{a.severity || 'normal'}</span></td>
-                  <td>{a.isActive === false ? 'Inactive' : 'Active'}</td>
+                  <td>{a.isActive === false ? t('herdMedical.allergies.inactive') : t('herdMedical.allergies.active')}</td>
                   <td>{a.identifiedDate ? fmtDate(a.identifiedDate) : fmtDate(a.createdAt)}</td>
                 </tr>
               ))}
@@ -548,19 +548,19 @@ const HerdMedicalManagement: React.FC = () => {
   const renderLabResults = () => (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <span style={{ color: '#666' }}>{labResults.length} lab result(s) across enterprise animals</span>
+        <span style={{ color: '#666' }}>{t('herdMedical.labResults.countText', { count: labResults.length })}</span>
         {canCreate && (
           <button className="btn btn-primary" onClick={() => { setLabForm({ animalId: '', testName: '', testDate: new Date().toISOString().slice(0, 10), testCategory: '', resultValue: '', normalRange: '', unit: '', status: 'pending', interpretation: '', labName: '', notes: '' }); setModal('add-lab') }}>
-            + Add Lab Result
+            {t('herdMedical.labResults.addButton')}
           </button>
         )}
       </div>
       {labResults.length === 0 ? (
-        <div className="empty-state">{animals.length === 0 ? 'No animals registered yet.' : 'No lab results found.'}</div>
+        <div className="empty-state">{animals.length === 0 ? t('herdMedical.records.noAnimalsYet') : t('herdMedical.labResults.noRecords')}</div>
       ) : (
         <div className="table-container">
           <table className="data-table">
-            <thead><tr><th>Date</th><th>Animal</th><th>Test</th><th>Category</th><th>Result</th><th>Normal Range</th><th>Status</th>{canManage && <th>Actions</th>}</tr></thead>
+            <thead><tr><th>{t('common.date')}</th><th>{t('herdMedical.table.animal')}</th><th>{t('herdMedical.table.test')}</th><th>{t('herdMedical.table.category')}</th><th>{t('herdMedical.table.result')}</th><th>{t('herdMedical.table.normalRange')}</th><th>{t('common.status')}</th>{canManage && <th>{t('common.actions')}</th>}</tr></thead>
             <tbody>
               {labResults.map((l: any, i: number) => (
                 <tr key={l.id || i}>
@@ -568,7 +568,7 @@ const HerdMedicalManagement: React.FC = () => {
                   <td><strong>{l.animalName}</strong> ({l.animalSpecies})</td>
                   <td><strong>{l.testName}</strong></td>
                   <td>{l.testCategory || '-'}</td>
-                  <td style={{ color: l.isAbnormal ? '#dc2626' : undefined, fontWeight: l.isAbnormal ? 600 : undefined }}>{l.resultValue || 'Pending'} {l.unit || ''}</td>
+                  <td style={{ color: l.isAbnormal ? '#dc2626' : undefined, fontWeight: l.isAbnormal ? 600 : undefined }}>{l.resultValue || t('common.pending')} {l.unit || ''}</td>
                   <td>{l.normalRange || '-'}</td>
                   <td>
                     <span style={{
@@ -579,7 +579,7 @@ const HerdMedicalManagement: React.FC = () => {
                   </td>
                   {canManage && (
                     <td style={{ whiteSpace: 'nowrap' }}>
-                      {l.status === 'pending' && <button className="btn btn-secondary" style={{ fontSize: '0.8em', padding: '2px 8px' }} onClick={() => handleUpdateLabStatus(l.id, 'completed')}>Complete</button>}
+                      {l.status === 'pending' && <button className="btn btn-secondary" style={{ fontSize: '0.8em', padding: '2px 8px' }} onClick={() => handleUpdateLabStatus(l.id, 'completed')}>{t('herdMedical.labResults.complete')}</button>}
                     </td>
                   )}
                 </tr>
@@ -611,31 +611,31 @@ const HerdMedicalManagement: React.FC = () => {
           <div style={modalStyle} onClick={e => e.stopPropagation()}>
             <h2 style={{ marginBottom: '16px' }}>{t('medicalRecords.pageTitle')}</h2>
             <p style={{ color: '#666', fontSize: '0.9em', marginBottom: '16px' }}>
-              {isVet ? 'Creating record as veterinarian - you will be recorded as the attending vet.' : isAdmin ? 'Creating record as admin.' : 'Creating record for your enterprise animal.'}
+              {isVet ? t('herdMedical.modal.roleVet') : isAdmin ? t('herdMedical.modal.roleAdmin') : t('herdMedical.modal.roleFarmer')}
             </p>
             <form onSubmit={handleCreateRecord}>
-              <div style={fieldStyle}><label style={labelStyle}>Animal *</label><AnimalSelect value={recordForm.animalId} onChange={v => setRecordForm(f => ({ ...f, animalId: v }))} required /></div>
+              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.animal')} *</label><AnimalSelect value={recordForm.animalId} onChange={v => setRecordForm(f => ({ ...f, animalId: v }))} required /></div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Record Type *</label>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.recordType')} *</label>
                   <select value={recordForm.recordType} onChange={e => setRecordForm(f => ({ ...f, recordType: e.target.value }))} className="search-input" style={{ width: '100%' }}>
-                    {RECORD_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                    {RECORD_TYPES.map(rt => <option key={rt.value} value={rt.value}>{t(`herdMedical.recordTypes.${rt.value}`)}</option>)}
                   </select>
                 </div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Severity</label>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.table.severity')}</label>
                   <select value={recordForm.severity} onChange={e => setRecordForm(f => ({ ...f, severity: e.target.value }))} className="search-input" style={{ width: '100%' }}>
-                    <option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="critical">Critical</option>
+                    <option value="low">{t('herdMedical.severity.low')}</option><option value="normal">{t('herdMedical.severity.normal')}</option><option value="high">{t('herdMedical.severity.high')}</option><option value="critical">{t('herdMedical.severity.critical')}</option>
                   </select>
                 </div>
               </div>
-              <div style={fieldStyle}><label style={labelStyle}>Title *</label><input type="text" className="search-input" style={{ width: '100%' }} value={recordForm.title} onChange={e => setRecordForm(f => ({ ...f, title: e.target.value }))} required placeholder="Brief description of the condition" /></div>
-              <div style={fieldStyle}><label style={labelStyle}>Content / Notes *</label><textarea className="search-input" style={{ width: '100%', minHeight: '100px', fontFamily: 'inherit' }} value={recordForm.content} onChange={e => setRecordForm(f => ({ ...f, content: e.target.value }))} required placeholder="Detailed notes, observations, diagnosis..." /></div>
+              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.table.title')} *</label><input type="text" className="search-input" style={{ width: '100%' }} value={recordForm.title} onChange={e => setRecordForm(f => ({ ...f, title: e.target.value }))} required placeholder={t('herdMedical.modal.titlePlaceholder')} /></div>
+              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.contentNotes')} *</label><textarea className="search-input" style={{ width: '100%', minHeight: '100px', fontFamily: 'inherit' }} value={recordForm.content} onChange={e => setRecordForm(f => ({ ...f, content: e.target.value }))} required placeholder={t('herdMedical.modal.contentPlaceholder')} /></div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Medications (comma-separated)</label><input type="text" className="search-input" style={{ width: '100%' }} value={recordForm.medications} onChange={e => setRecordForm(f => ({ ...f, medications: e.target.value }))} placeholder="e.g. Amoxicillin, Ibuprofen" /></div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Follow-up Date</label><input type="date" className="search-input" style={{ width: '100%' }} value={recordForm.followUpDate} onChange={e => setRecordForm(f => ({ ...f, followUpDate: e.target.value }))} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.medications')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={recordForm.medications} onChange={e => setRecordForm(f => ({ ...f, medications: e.target.value }))} placeholder={t('herdMedical.modal.medicationsPlaceholder')} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.followUpDate')}</label><input type="date" className="search-input" style={{ width: '100%' }} value={recordForm.followUpDate} onChange={e => setRecordForm(f => ({ ...f, followUpDate: e.target.value }))} /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={modalSaving}>{modalSaving ? 'Saving...' : 'Create Record'}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>{t('common.cancel')}</button>
+                <button type="submit" className="btn btn-primary" disabled={modalSaving}>{modalSaving ? t('herdMedical.modal.saving') : t('herdMedical.modal.createRecord')}</button>
               </div>
             </form>
           </div>
@@ -645,29 +645,29 @@ const HerdMedicalManagement: React.FC = () => {
       {modal === 'add-vaccination' && (
         <div style={modalOverlayStyle} onClick={() => setModal(null)}>
           <div style={modalStyle} onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginBottom: '16px' }}>Record Vaccination</h2>
-            <p style={{ color: '#666', fontSize: '0.9em', marginBottom: '16px' }}>Administering or recording a vaccine for an enterprise animal.</p>
+            <h2 style={{ marginBottom: '16px' }}>{t('herdMedical.modal.recordVaccination')}</h2>
+            <p style={{ color: '#666', fontSize: '0.9em', marginBottom: '16px' }}>{t('herdMedical.modal.vaccDescription')}</p>
             <form onSubmit={handleCreateVaccination}>
-              <div style={fieldStyle}><label style={labelStyle}>Animal *</label><AnimalSelect value={vaccForm.animalId} onChange={v => setVaccForm(f => ({ ...f, animalId: v }))} required /></div>
+              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.animal')} *</label><AnimalSelect value={vaccForm.animalId} onChange={v => setVaccForm(f => ({ ...f, animalId: v }))} required /></div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Vaccine Name *</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.vaccineName} onChange={e => setVaccForm(f => ({ ...f, vaccineName: e.target.value }))} required placeholder="e.g. Rabies, FMD, BVD" /></div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Vaccine Type</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.vaccineType} onChange={e => setVaccForm(f => ({ ...f, vaccineType: e.target.value }))} placeholder="e.g. Live, Inactivated" /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.vaccineName')} *</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.vaccineName} onChange={e => setVaccForm(f => ({ ...f, vaccineName: e.target.value }))} required placeholder={t('herdMedical.modal.vaccineNamePlaceholder')} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.vaccineType')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.vaccineType} onChange={e => setVaccForm(f => ({ ...f, vaccineType: e.target.value }))} placeholder={t('herdMedical.modal.vaccineTypePlaceholder')} /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Date Administered *</label><input type="date" className="search-input" style={{ width: '100%' }} value={vaccForm.dateAdministered} onChange={e => setVaccForm(f => ({ ...f, dateAdministered: e.target.value }))} required /></div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Next Due Date</label><input type="date" className="search-input" style={{ width: '100%' }} value={vaccForm.nextDueDate} onChange={e => setVaccForm(f => ({ ...f, nextDueDate: e.target.value }))} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.dateAdministered')} *</label><input type="date" className="search-input" style={{ width: '100%' }} value={vaccForm.dateAdministered} onChange={e => setVaccForm(f => ({ ...f, dateAdministered: e.target.value }))} required /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.nextDueDate')}</label><input type="date" className="search-input" style={{ width: '100%' }} value={vaccForm.nextDueDate} onChange={e => setVaccForm(f => ({ ...f, nextDueDate: e.target.value }))} /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Batch Number</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.batchNumber} onChange={e => setVaccForm(f => ({ ...f, batchNumber: e.target.value }))} /></div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Manufacturer</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.manufacturer} onChange={e => setVaccForm(f => ({ ...f, manufacturer: e.target.value }))} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.batchNumber')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.batchNumber} onChange={e => setVaccForm(f => ({ ...f, batchNumber: e.target.value }))} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.manufacturer')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.manufacturer} onChange={e => setVaccForm(f => ({ ...f, manufacturer: e.target.value }))} /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Dosage</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.dosage} onChange={e => setVaccForm(f => ({ ...f, dosage: e.target.value }))} placeholder="e.g. 2ml" /></div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Certificate Number</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.certificateNumber} onChange={e => setVaccForm(f => ({ ...f, certificateNumber: e.target.value }))} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.dosage')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.dosage} onChange={e => setVaccForm(f => ({ ...f, dosage: e.target.value }))} placeholder={t('herdMedical.modal.dosagePlaceholder')} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.certificateNumber')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.certificateNumber} onChange={e => setVaccForm(f => ({ ...f, certificateNumber: e.target.value }))} /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={modalSaving}>{modalSaving ? 'Saving...' : 'Record Vaccination'}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>{t('common.cancel')}</button>
+                <button type="submit" className="btn btn-primary" disabled={modalSaving}>{modalSaving ? t('herdMedical.modal.saving') : t('herdMedical.modal.recordVaccination')}</button>
               </div>
             </form>
           </div>
@@ -677,22 +677,22 @@ const HerdMedicalManagement: React.FC = () => {
       {modal === 'add-allergy' && (
         <div style={modalOverlayStyle} onClick={() => setModal(null)}>
           <div style={modalStyle} onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginBottom: '16px' }}>Record Allergy</h2>
+            <h2 style={{ marginBottom: '16px' }}>{t('herdMedical.modal.recordAllergy')}</h2>
             <form onSubmit={handleCreateAllergy}>
-              <div style={fieldStyle}><label style={labelStyle}>Animal *</label><AnimalSelect value={allergyForm.animalId} onChange={v => setAllergyForm(f => ({ ...f, animalId: v }))} required /></div>
+              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.animal')} *</label><AnimalSelect value={allergyForm.animalId} onChange={v => setAllergyForm(f => ({ ...f, animalId: v }))} required /></div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Allergen *</label><input type="text" className="search-input" style={{ width: '100%' }} value={allergyForm.allergen} onChange={e => setAllergyForm(f => ({ ...f, allergen: e.target.value }))} required placeholder="e.g. Penicillin, Dust, Pollen" /></div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Severity</label>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.table.allergen')} *</label><input type="text" className="search-input" style={{ width: '100%' }} value={allergyForm.allergen} onChange={e => setAllergyForm(f => ({ ...f, allergen: e.target.value }))} required placeholder={t('herdMedical.modal.allergenPlaceholder')} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.table.severity')}</label>
                   <select value={allergyForm.severity} onChange={e => setAllergyForm(f => ({ ...f, severity: e.target.value }))} className="search-input" style={{ width: '100%' }}>
-                    <option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="critical">Critical</option>
+                    <option value="low">{t('herdMedical.severity.low')}</option><option value="normal">{t('herdMedical.severity.normal')}</option><option value="high">{t('herdMedical.severity.high')}</option><option value="critical">{t('herdMedical.severity.critical')}</option>
                   </select>
                 </div>
               </div>
-              <div style={fieldStyle}><label style={labelStyle}>Reaction</label><input type="text" className="search-input" style={{ width: '100%' }} value={allergyForm.reaction} onChange={e => setAllergyForm(f => ({ ...f, reaction: e.target.value }))} placeholder="e.g. Skin rash, Swelling, Anaphylaxis" /></div>
-              <div style={fieldStyle}><label style={labelStyle}>Notes</label><textarea className="search-input" style={{ width: '100%', minHeight: '60px', fontFamily: 'inherit' }} value={allergyForm.notes} onChange={e => setAllergyForm(f => ({ ...f, notes: e.target.value }))} placeholder="Additional notes..." /></div>
+              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.table.reaction')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={allergyForm.reaction} onChange={e => setAllergyForm(f => ({ ...f, reaction: e.target.value }))} placeholder={t('herdMedical.modal.reactionPlaceholder')} /></div>
+              <div style={fieldStyle}><label style={labelStyle}>{t('common.notes')}</label><textarea className="search-input" style={{ width: '100%', minHeight: '60px', fontFamily: 'inherit' }} value={allergyForm.notes} onChange={e => setAllergyForm(f => ({ ...f, notes: e.target.value }))} placeholder={t('herdMedical.modal.notesPlaceholder')} /></div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={modalSaving}>{modalSaving ? 'Saving...' : 'Record Allergy'}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>{t('common.cancel')}</button>
+                <button type="submit" className="btn btn-primary" disabled={modalSaving}>{modalSaving ? t('herdMedical.modal.saving') : t('herdMedical.modal.recordAllergy')}</button>
               </div>
             </form>
           </div>
@@ -702,33 +702,33 @@ const HerdMedicalManagement: React.FC = () => {
       {modal === 'add-lab' && (
         <div style={modalOverlayStyle} onClick={() => setModal(null)}>
           <div style={modalStyle} onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginBottom: '16px' }}>Add Lab Result</h2>
+            <h2 style={{ marginBottom: '16px' }}>{t('herdMedical.modal.addLabResult')}</h2>
             <form onSubmit={handleCreateLabResult}>
-              <div style={fieldStyle}><label style={labelStyle}>Animal *</label><AnimalSelect value={labForm.animalId} onChange={v => setLabForm(f => ({ ...f, animalId: v }))} required /></div>
+              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.animal')} *</label><AnimalSelect value={labForm.animalId} onChange={v => setLabForm(f => ({ ...f, animalId: v }))} required /></div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Test Name *</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.testName} onChange={e => setLabForm(f => ({ ...f, testName: e.target.value }))} required placeholder="e.g. CBC, Blood Chemistry" /></div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Test Category</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.testCategory} onChange={e => setLabForm(f => ({ ...f, testCategory: e.target.value }))} placeholder="e.g. Hematology, Biochemistry" /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.testName')} *</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.testName} onChange={e => setLabForm(f => ({ ...f, testName: e.target.value }))} required placeholder={t('herdMedical.modal.testNamePlaceholder')} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.testCategory')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.testCategory} onChange={e => setLabForm(f => ({ ...f, testCategory: e.target.value }))} placeholder={t('herdMedical.modal.testCategoryPlaceholder')} /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Test Date *</label><input type="date" className="search-input" style={{ width: '100%' }} value={labForm.testDate} onChange={e => setLabForm(f => ({ ...f, testDate: e.target.value }))} required /></div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Lab Name</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.labName} onChange={e => setLabForm(f => ({ ...f, labName: e.target.value }))} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.testDate')} *</label><input type="date" className="search-input" style={{ width: '100%' }} value={labForm.testDate} onChange={e => setLabForm(f => ({ ...f, testDate: e.target.value }))} required /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.labName')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.labName} onChange={e => setLabForm(f => ({ ...f, labName: e.target.value }))} /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Result Value</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.resultValue} onChange={e => setLabForm(f => ({ ...f, resultValue: e.target.value }))} placeholder="Leave empty if pending" /></div>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Normal Range</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.normalRange} onChange={e => setLabForm(f => ({ ...f, normalRange: e.target.value }))} placeholder="e.g. 5.0 - 10.0" /></div>
-                <div style={{ maxWidth: '80px' }}><label style={labelStyle}>Unit</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.unit} onChange={e => setLabForm(f => ({ ...f, unit: e.target.value }))} placeholder="mg/dL" /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.resultValue')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.resultValue} onChange={e => setLabForm(f => ({ ...f, resultValue: e.target.value }))} placeholder={t('herdMedical.modal.resultPlaceholder')} /></div>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.normalRange')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.normalRange} onChange={e => setLabForm(f => ({ ...f, normalRange: e.target.value }))} placeholder={t('herdMedical.modal.normalRangePlaceholder')} /></div>
+                <div style={{ maxWidth: '80px' }}><label style={labelStyle}>{t('herdMedical.modal.unit')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.unit} onChange={e => setLabForm(f => ({ ...f, unit: e.target.value }))} placeholder="mg/dL" /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>Status</label>
+                <div style={{ flex: 1 }}><label style={labelStyle}>{t('common.status')}</label>
                   <select value={labForm.status} onChange={e => setLabForm(f => ({ ...f, status: e.target.value }))} className="search-input" style={{ width: '100%' }}>
-                    <option value="pending">Pending</option><option value="in_progress">In Progress</option><option value="completed">Completed</option>
+                    <option value="pending">{t('common.pending')}</option><option value="in_progress">{t('common.inProgress')}</option><option value="completed">{t('common.completed')}</option>
                   </select>
                 </div>
-                <div style={{ flex: 2 }}><label style={labelStyle}>Interpretation</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.interpretation} onChange={e => setLabForm(f => ({ ...f, interpretation: e.target.value }))} placeholder="Vet interpretation of results" /></div>
+                <div style={{ flex: 2 }}><label style={labelStyle}>{t('herdMedical.modal.interpretation')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={labForm.interpretation} onChange={e => setLabForm(f => ({ ...f, interpretation: e.target.value }))} placeholder={t('herdMedical.modal.interpretationPlaceholder')} /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={modalSaving}>{modalSaving ? 'Saving...' : 'Save Lab Result'}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>{t('common.cancel')}</button>
+                <button type="submit" className="btn btn-primary" disabled={modalSaving}>{modalSaving ? t('herdMedical.modal.saving') : t('herdMedical.modal.saveLabResult')}</button>
               </div>
             </form>
           </div>
@@ -739,15 +739,15 @@ const HerdMedicalManagement: React.FC = () => {
         <div style={modalOverlayStyle} onClick={() => setModal(null)}>
           <div style={modalStyle} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <h2 style={{ marginBottom: '16px' }}>{RECORD_TYPE_ICONS[viewRecord.recordType] || ''} Medical Record</h2>
+              <h2 style={{ marginBottom: '16px' }}>{RECORD_TYPE_ICONS[viewRecord.recordType] || ''} {t('herdMedical.modal.medicalRecord')}</h2>
               <span style={{ backgroundColor: SEVERITY_COLORS[viewRecord.severity] || '#6b7280', color: '#fff', padding: '4px 12px', borderRadius: '6px', fontSize: '0.85em', fontWeight: 600 }}>{viewRecord.severity}</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-              <div><strong style={{ color: '#666', fontSize: '0.85em' }}>Record #</strong><br />{viewRecord.recordNumber || 'N/A'}</div>
-              <div><strong style={{ color: '#666', fontSize: '0.85em' }}>Status</strong><br />{viewRecord.status || 'active'}</div>
-              <div><strong style={{ color: '#666', fontSize: '0.85em' }}>Type</strong><br />{viewRecord.recordType?.replace(/_/g, ' ')}</div>
-              <div><strong style={{ color: '#666', fontSize: '0.85em' }}>Created</strong><br />{fmtDate(viewRecord.createdAt)}</div>
-              {viewRecord.followUpDate && <div><strong style={{ color: '#666', fontSize: '0.85em' }}>Follow-up</strong><br />{fmtDate(viewRecord.followUpDate)}</div>}
+              <div><strong style={{ color: '#666', fontSize: '0.85em' }}>{t('herdMedical.modal.recordNumber')}</strong><br />{viewRecord.recordNumber || 'N/A'}</div>
+              <div><strong style={{ color: '#666', fontSize: '0.85em' }}>{t('common.status')}</strong><br />{viewRecord.status || 'active'}</div>
+              <div><strong style={{ color: '#666', fontSize: '0.85em' }}>{t('common.type')}</strong><br />{viewRecord.recordType?.replace(/_/g, ' ')}</div>
+              <div><strong style={{ color: '#666', fontSize: '0.85em' }}>{t('herdMedical.modal.created')}</strong><br />{fmtDate(viewRecord.createdAt)}</div>
+              {viewRecord.followUpDate && <div><strong style={{ color: '#666', fontSize: '0.85em' }}>{t('herdMedical.modal.followUp')}</strong><br />{fmtDate(viewRecord.followUpDate)}</div>}
             </div>
             <div style={{ marginBottom: '16px' }}>
               <strong style={{ fontSize: '1.1em' }}>{viewRecord.title}</strong>
@@ -755,7 +755,7 @@ const HerdMedicalManagement: React.FC = () => {
             </div>
             {viewRecord.medications && viewRecord.medications.length > 0 && (
               <div style={{ marginBottom: '16px' }}>
-                <strong style={{ color: '#666', fontSize: '0.85em' }}>Medications</strong>
+                <strong style={{ color: '#666', fontSize: '0.85em' }}>{t('herdMedical.modal.medications')}</strong>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
                   {viewRecord.medications.map((m: any, i: number) => (
                     <span key={i} style={{ background: '#ede9fe', color: '#5b21b6', padding: '2px 10px', borderRadius: '12px', fontSize: '0.85em' }}>{m.name || m}</span>
@@ -765,17 +765,17 @@ const HerdMedicalManagement: React.FC = () => {
             )}
             {viewRecord.tags && viewRecord.tags.length > 0 && (
               <div style={{ marginBottom: '16px' }}>
-                <strong style={{ color: '#666', fontSize: '0.85em' }}>Tags</strong>
+                <strong style={{ color: '#666', fontSize: '0.85em' }}>{t('herdMedical.modal.tags')}</strong>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
-                  {viewRecord.tags.map((t: string, i: number) => (
-                    <span key={i} style={{ background: '#dbeafe', color: '#1e40af', padding: '2px 10px', borderRadius: '12px', fontSize: '0.85em' }}>{t}</span>
+                  {viewRecord.tags.map((tag: string, i: number) => (
+                    <span key={i} style={{ background: '#dbeafe', color: '#1e40af', padding: '2px 10px', borderRadius: '12px', fontSize: '0.85em' }}>{tag}</span>
                   ))}
                 </div>
               </div>
             )}
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
-              {canManage && <button className="btn btn-secondary" style={{ color: '#dc2626' }} onClick={() => { handleDeleteRecord(viewRecord.id); setModal(null) }}>Archive</button>}
-              <button className="btn btn-primary" onClick={() => setModal(null)}>Close</button>
+              {canManage && <button className="btn btn-secondary" style={{ color: '#dc2626' }} onClick={() => { handleDeleteRecord(viewRecord.id); setModal(null) }}>{t('herdMedical.records.archive')}</button>}
+              <button className="btn btn-primary" onClick={() => setModal(null)}>{t('common.close')}</button>
             </div>
           </div>
         </div>
@@ -786,10 +786,10 @@ const HerdMedicalManagement: React.FC = () => {
   // Role info banner
   const renderRoleInfo = () => {
     const roleInfo: Record<string, { icon: string; label: string; perms: string }> = {
-      admin: { icon: 'Admin', label: 'Administrator', perms: 'Full access: view, create, update, and archive all medical records, vaccinations, allergies, and lab results.' },
-      veterinarian: { icon: 'Vet', label: 'Veterinarian', perms: 'Clinical access: create diagnoses, prescriptions, and records. Manage vaccinations and lab results. Records auto-tag you as attending vet.' },
-      farmer: { icon: 'Farmer', label: 'Farmer / Owner', perms: 'Owner access: view all herd health data. Create records, log vaccinations, and report allergies for your enterprise animals.' },
-      pet_owner: { icon: 'Owner', label: 'Pet Owner', perms: 'View-only access for enterprise records. Create records for your own animals.' },
+      admin: { icon: 'Admin', label: t('herdMedical.role.admin'), perms: t('herdMedical.role.adminPerms') },
+      veterinarian: { icon: 'Vet', label: t('herdMedical.role.vet'), perms: t('herdMedical.role.vetPerms') },
+      farmer: { icon: 'Farmer', label: t('herdMedical.role.farmer'), perms: t('herdMedical.role.farmerPerms') },
+      pet_owner: { icon: 'Owner', label: t('herdMedical.role.petOwner'), perms: t('herdMedical.role.petOwnerPerms') },
     }
     const info = roleInfo[role] || roleInfo['pet_owner']
     return (
@@ -804,8 +804,8 @@ const HerdMedicalManagement: React.FC = () => {
   return (
     <div className="module-page">
       <div className="module-header">
-        <h1>Herd Medical Management</h1>
-        <p>Enterprise-wide medical records, vaccination tracking, allergy management, and lab results across all herds and animal groups</p>
+        <h1>{t('herdMedical.pageTitle')}</h1>
+        <p>{t('herdMedical.pageDescription')}</p>
       </div>
 
       {renderRoleInfo()}
@@ -814,26 +814,26 @@ const HerdMedicalManagement: React.FC = () => {
       {success && <div className="alert alert-success" style={{ marginBottom: '12px' }}>{success} <button onClick={() => setSuccess('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', color: '#166534' }}>X</button></div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('herdMedical.selectEnterprise')}:</label>
         <select value={selectedEnterpriseId} onChange={e => { setSelectedEnterpriseId(e.target.value); setPage(0); setTab('overview') }}>
-          <option value="">-- Select Enterprise --</option>
+          <option value="">{t('herdMedical.selectEnterpriseOption')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
-        {selectedEnterpriseId && <span style={{ marginLeft: '16px', color: '#666', fontSize: '0.9em' }}>{animals.length} animals | {groups.length} groups</span>}
+        {selectedEnterpriseId && <span style={{ marginLeft: '16px', color: '#666', fontSize: '0.9em' }}>{t('herdMedical.enterpriseContext', { animals: animals.length, groups: groups.length })}</span>}
       </div>
 
       {!selectedEnterpriseId ? (
-        <div className="empty-state">Select an enterprise to manage herd medical records</div>
+        <div className="empty-state">{t('herdMedical.selectEnterprisePrompt')}</div>
       ) : loading ? (
-        <div className="loading-spinner">Loading medical data...</div>
+        <div className="loading-spinner">{t('herdMedical.loading')}</div>
       ) : (
         <>
           <div className="tab-bar">
-            <button className={tab === 'overview' ? 'tab-active' : ''} onClick={() => setTab('overview')}>Overview</button>
-            <button className={tab === 'records' ? 'tab-active' : ''} onClick={() => setTab('records')}>Records ({recordsTotal})</button>
-            <button className={tab === 'vaccinations' ? 'tab-active' : ''} onClick={() => setTab('vaccinations')}>Vaccinations ({vaccinationsTotal})</button>
-            <button className={tab === 'allergies' ? 'tab-active' : ''} onClick={() => setTab('allergies')}>Allergies ({allergies.length})</button>
-            <button className={tab === 'lab_results' ? 'tab-active' : ''} onClick={() => setTab('lab_results')}>Lab Results ({labResults.length})</button>
+            <button className={tab === 'overview' ? 'tab-active' : ''} onClick={() => setTab('overview')}>{t('herdMedical.tabs.overview')}</button>
+            <button className={tab === 'records' ? 'tab-active' : ''} onClick={() => setTab('records')}>{t('herdMedical.tabs.records')} ({recordsTotal})</button>
+            <button className={tab === 'vaccinations' ? 'tab-active' : ''} onClick={() => setTab('vaccinations')}>{t('herdMedical.tabs.vaccinations')} ({vaccinationsTotal})</button>
+            <button className={tab === 'allergies' ? 'tab-active' : ''} onClick={() => setTab('allergies')}>{t('herdMedical.tabs.allergies')} ({allergies.length})</button>
+            <button className={tab === 'lab_results' ? 'tab-active' : ''} onClick={() => setTab('lab_results')}>{t('herdMedical.tabs.labResults')} ({labResults.length})</button>
           </div>
 
           {tab === 'overview' && renderOverview()}

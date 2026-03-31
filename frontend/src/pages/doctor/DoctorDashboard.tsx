@@ -21,6 +21,11 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  const statusText = (s: string) => {
+    const map: Record<string, string> = { in_progress: 'inProgress' }
+    return t(`common.${map[s] || s}`)
+  }
+
   useEffect(() => {
     loadDashboard()
   }, [])
@@ -54,7 +59,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ onNavigate }) => {
         pendingCount: pending.length
       })
     } catch (err: any) {
-setError(err?.response?.data?.error?.message || err?.message || 'Failed to load dashboard')
+setError(err?.response?.data?.error?.message || err?.message || t('doctorDashboard.failedToLoad'))
     } finally {
       setLoading(false)
     }
@@ -62,12 +67,12 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
 
   const handleConfirm = async (id: string) => {
     try { await apiService.confirmBooking(id); loadDashboard() }
-    catch (err: any) { setError(err?.response?.data?.error?.message || 'Failed to confirm') }
+    catch (err: any) { setError(err?.response?.data?.error?.message || t('doctorDashboard.failedToConfirm')) }
   }
   const handleCancel = async (id: string) => {
-    if (!window.confirm('Cancel this booking?')) return
-    try { await apiService.cancelBooking(id, 'Declined by doctor'); loadDashboard() }
-    catch (err: any) { setError(err?.response?.data?.error?.message || 'Failed to cancel') }
+    if (!window.confirm(t('doctorDashboard.cancelConfirm'))) return
+    try { await apiService.cancelBooking(id, t('doctorDashboard.declinedByDoctor')); loadDashboard() }
+    catch (err: any) { setError(err?.response?.data?.error?.message || t('doctorDashboard.failedToCancel')) }
   }
 
   if (loading) {
@@ -131,10 +136,10 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
             {pendingBookings.map(booking => (
               <div key={booking.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f3f4f6' }}>
                 <div>
-                  <strong>{booking.petOwnerName || 'Patient'}</strong>
+                  <strong>{booking.petOwnerName || t('common.patient')}</strong>
                   <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
                     {formatDate(booking.scheduledDate, { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.timeSlotStart}
-                    {' • '}{booking.bookingType === 'video_call' ? '📹 Video' : '💬 Chat'}
+                    {' • '}{booking.bookingType === 'video_call' ? t('doctorDashboard.videoType') : t('doctorDashboard.chatType')}
                   </p>
                   <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
                     {t('doctorDashboard.reason')}: {booking.reasonForVisit || booking.reason || t('doctorDashboard.generalConsultation')}
@@ -198,14 +203,14 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
                         {formatDate(booking.scheduledDate)} at {booking.timeSlotStart}
                       </p>
                       <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
-                        {booking.consultationType === 'video' ? '📹 Video' : '💬 Chat'} •{' '}
+                        {booking.consultationType === 'video' ? t('doctorDashboard.videoType') : t('doctorDashboard.chatType')} •{' '}
                         <span className={`priority-${booking.priority || 'normal'}`}>
-                          {booking.priority || 'normal'}
+                          {t(`common.${booking.priority || 'normal'}`)}
                         </span>
                       </p>
                     </div>
                     <span className={`badge badge-${booking.status === 'confirmed' ? 'active' : 'pending'}`}>
-                      {booking.status}
+                      {statusText(booking.status)}
                     </span>
                   </div>
                 </div>
@@ -235,7 +240,7 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
                       </p>
                     </div>
                     <span className={`badge badge-${consultation.status === 'completed' ? 'active' : consultation.status === 'in_progress' ? 'pending' : 'inactive'}`}>
-                      {consultation.status}
+                      {statusText(consultation.status)}
                     </span>
                   </div>
                 </div>

@@ -144,10 +144,10 @@ const Consultations: React.FC = () => {
 
   const actionLabel = (action: string): string => {
     const map: Record<string, string> = {
-      BOOKING_CREATED: '📅 Booking Created',
-      BOOKING_CONFIRMED: '✅ Confirmed by Doctor',
-      BOOKING_CANCELLED: '❌ Booking Cancelled',
-      BOOKING_RESCHEDULED: '🔄 Rescheduled',
+      BOOKING_CREATED: t('consultations.actionLabels.created'),
+      BOOKING_CONFIRMED: t('consultations.actionLabels.confirmed'),
+      BOOKING_CANCELLED: t('consultations.actionLabels.cancelled'),
+      BOOKING_RESCHEDULED: t('consultations.actionLabels.rescheduled'),
     }
     return map[action] || action
   }
@@ -174,13 +174,13 @@ const Consultations: React.FC = () => {
       setBookings(bRes.data?.items || (Array.isArray(bRes.data) ? bRes.data : []))
       setConsultations(cRes.data?.items || (Array.isArray(cRes.data) ? cRes.data : []))
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load data')
+      setError(err?.response?.data?.error?.message || err?.message || t('consultations.failedToLoad'))
     } finally { setLoading(false) }
   }
 
   const handleConfirmBooking = async (id: string) => {
     try { await apiService.confirmBooking(id); loadData() }
-    catch (err: any) { setError(err?.response?.data?.error?.message || 'Failed to confirm booking') }
+    catch (err: any) { setError(err?.response?.data?.error?.message || t('consultations.failedToConfirm')) }
   }
 
   const handleCancelBooking = async (id?: string) => {
@@ -197,7 +197,7 @@ const Consultations: React.FC = () => {
       setCancelError('')
       loadData()
     } catch (err: any) {
-      setCancelError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to cancel booking')
+      setCancelError(err?.response?.data?.message || err?.response?.data?.error?.message || t('consultations.failedToCancel'))
     }
   }
 
@@ -260,7 +260,7 @@ const Consultations: React.FC = () => {
     // Validate: cannot reschedule to a past time
     const slotDateTime = new Date(`${rescheduleDate}T${rescheduleSelectedSlot.startTime}:00`)
     if (slotDateTime <= new Date()) {
-      setRescheduleError('Cannot reschedule to a past time. Please select a future slot.')
+      setRescheduleError(t('consultations.pastTimeError'))
       return
     }
     try {
@@ -279,7 +279,7 @@ const Consultations: React.FC = () => {
       setRescheduleError('')
       loadData()
     } catch (err: any) {
-      setRescheduleError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to reschedule booking')
+      setRescheduleError(err?.response?.data?.message || err?.response?.data?.error?.message || t('consultations.failedToReschedule'))
     } finally {
       setRescheduleSubmitting(false)
     }
@@ -322,7 +322,7 @@ const Consultations: React.FC = () => {
           navigate(`/video-consultation/${res.data.id}`)
         }
       }
-    } catch (err: any) { setError(err?.response?.data?.error?.message || 'Failed to start consultation') }
+    } catch (err: any) { setError(err?.response?.data?.error?.message || t('consultations.failedToStart')) }
   }
 
   const fmt = (d: string) => {
@@ -340,15 +340,15 @@ const Consultations: React.FC = () => {
       active: { bg: '#c3f7c8', fg: '#0d5415' }, ended: { bg: '#e2e2e2', fg: '#555' },
     }
     const s = m[status] || { bg: '#f0f0f0', fg: '#333' }
-    return <span style={{ background: s.bg, color: s.fg, padding: '4px 12px', borderRadius: 12, fontSize: 12, fontWeight: 600, textTransform: 'capitalize' as const }}>{status.replace(/_/g, ' ')}</span>
+    return <span style={{ background: s.bg, color: s.fg, padding: '4px 12px', borderRadius: 12, fontSize: 12, fontWeight: 600, textTransform: 'capitalize' as const }}>{t(`consultations.statuses.${status}`, status.replace(/_/g, ' '))}</span>
   }
 
   const missedBadge = (missedBy?: 'doctor' | 'patient' | 'both') => {
     if (!missedBy) return null
     const config = {
-      doctor:  { bg: '#fef3c7', fg: '#92400e', icon: '🩺', label: 'Doctor No-Show' },
-      patient: { bg: '#ede9fe', fg: '#6d28d9', icon: '🙋', label: 'Patient No-Show' },
-      both:    { bg: '#f1f5f9', fg: '#475569', icon: '❌', label: 'Both No-Show' },
+      doctor:  { bg: '#fef3c7', fg: '#92400e', icon: '🩺', label: t('consultations.missedLabels.doctorNoShow') },
+      patient: { bg: '#ede9fe', fg: '#6d28d9', icon: '🙋', label: t('consultations.missedLabels.patientNoShow') },
+      both:    { bg: '#f1f5f9', fg: '#475569', icon: '❌', label: t('consultations.missedLabels.bothNoShow') },
     }
     const c = config[missedBy]
     return (
@@ -362,7 +362,7 @@ const Consultations: React.FC = () => {
     <div className="module-page">
       <div style={{ textAlign: 'center', padding: 60 }}>
         <div className="loading-spinner" />
-        <p style={{ color: '#6b7280', marginTop: 16 }}>Loading consultations...</p>
+        <p style={{ color: '#6b7280', marginTop: 16 }}>{t('consultations.loading')}</p>
       </div>
     </div>
   )
@@ -373,25 +373,25 @@ const Consultations: React.FC = () => {
         <div>
           <h1>{t('consultations.pageTitle')}</h1>
           <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>
-            {isAdmin ? 'All system appointments & consultations' : isVet ? 'Your scheduled appointments & consultations' : 'Your booked appointments & consultation history'}
+            {isAdmin ? t('consultations.subtitles.admin') : isVet ? t('consultations.subtitles.vet') : t('consultations.subtitles.petOwner')}
           </p>
         </div>
         {isPetOwner && (
-          <button className="btn-primary" onClick={() => navigate('/book-consultation')}>+ Book Consultation</button>
+          <button className="btn-primary" onClick={() => navigate('/book-consultation')}>{t('consultations.bookConsultation')}</button>
         )}
       </div>
 
       {error && (
         <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
           ⚠️ {error}
-          <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }} onClick={() => setError('')}>Dismiss</button>
+          <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }} onClick={() => setError('')}>{t('consultations.dismiss')}</button>
         </div>
       )}
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: 20 }}>
-        {[{ key: 'bookings' as const, label: '📅 Appointments', count: activeBookings.length },
-          { key: 'consultations' as const, label: '🩺 Consultation History', count: historyBookings.length }
+        {[{ key: 'bookings' as const, label: t('consultations.tabs.appointments'), count: activeBookings.length },
+          { key: 'consultations' as const, label: t('consultations.tabs.history'), count: historyBookings.length }
         ].map(t => (
           <button key={t.key} onClick={() => handleTabSwitch(t.key)}
             style={{ padding: '12px 24px', fontWeight: 600, fontSize: 14, cursor: 'pointer', border: 'none', background: 'none',
@@ -405,17 +405,17 @@ const Consultations: React.FC = () => {
 
       {/* Filters */}
       <div style={{ marginBottom: 16, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 13, color: '#6b7280' }}>Filter:</span>
+        <span style={{ fontSize: 13, color: '#6b7280' }}>{t('consultations.filterLabel')}:</span>
         {['', ...currentFilterStatuses].map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
             style={{ padding: '5px 14px', borderRadius: 16, fontSize: 12, fontWeight: 500, cursor: 'pointer',
               border: statusFilter === s ? '2px solid #667eea' : '1px solid #d1d5db',
               background: statusFilter === s ? '#eef2ff' : 'white', color: statusFilter === s ? '#667eea' : '#6b7280'
             }}>
-            {s ? s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'All'}
+            {s ? t(`consultations.statuses.${s}`, s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())) : t('consultations.filterAll')}
           </button>
         ))}
-        <button onClick={loadData} style={{ marginLeft: 'auto', padding: '5px 14px', borderRadius: 6, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#374151' }}>&#x21bb; Refresh</button>
+        <button onClick={loadData} style={{ marginLeft: 'auto', padding: '5px 14px', borderRadius: 6, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#374151' }}>{t('common.refresh')}</button>
       </div>
 
       {/* Appointments Tab — items needing attention or upcoming */}
@@ -424,9 +424,9 @@ const Consultations: React.FC = () => {
           {filteredActive.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>📅</div>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>{statusFilter ? 'No appointments match this filter' : 'No upcoming appointments'}</p>
-              <p style={{ fontSize: 13, margin: '4px 0 12px' }}>Appointments requiring your attention will appear here</p>
-              {isPetOwner && !statusFilter && <button className="btn-primary" style={{ marginTop: 4 }} onClick={() => navigate('/book-consultation')}>Book a Consultation</button>}
+              <p style={{ fontSize: 16, fontWeight: 500 }}>{statusFilter ? t('consultations.noMatchAppointments') : t('consultations.emptyAppointments')}</p>
+              <p style={{ fontSize: 13, margin: '4px 0 12px' }}>{t('consultations.appointmentHint')}</p>
+              {isPetOwner && !statusFilter && <button className="btn-primary" style={{ marginTop: 4 }} onClick={() => navigate('/book-consultation')}>{t('consultations.bookButton')}</button>}
             </div>
           ) : (
             <div className="appt-card-grid">
@@ -435,15 +435,15 @@ const Consultations: React.FC = () => {
                   {/* Card Header */}
                   <div className="appt-card-header">
                     <div className="appt-card-who">
-                      {isVet && <strong>{b.petOwnerName || 'Patient'}</strong>}
-                      {isPetOwner && <strong>{b.vetName || 'Doctor'}</strong>}
+                      {isVet && <strong>{b.petOwnerName || t('common.patient')}</strong>}
+                      {isPetOwner && <strong>{b.vetName || t('common.doctor')}</strong>}
                       {isAdmin && <span>{b.petOwnerName || '—'} / {b.vetName || '—'}</span>}
                     </div>
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
                       <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: 11, fontWeight: 600,
                         background: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#fef2f2' : '#f0f0f0',
                         color: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#dc2626' : '#555'
-                      }}>{b.priority || 'normal'}</span>
+                      }}>{b.priority ? t(`consultations.priorities.${b.priority}`, b.priority) : t('common.normal')}</span>
                       {badge(b.status)}
                     </div>
                   </div>
@@ -457,7 +457,7 @@ const Consultations: React.FC = () => {
                           <span style={{ fontWeight: 600, color: '#059669' }}>🏢 {b.enterpriseName}</span>
                           {b.groupName && <span style={{ color: '#6b7280' }}> · 📋 {b.groupName}</span>}
                           {b.animalName ? <span> · 🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</span>
-                            : <span style={{ color: '#9ca3af', fontStyle: 'italic' }}> · Herd-level</span>}
+                            : <span style={{ color: '#9ca3af', fontStyle: 'italic' }}> · {t('consultations.herdLevel')}</span>}
                         </>
                       ) : b.animalName ? (
                         <span>🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}{b.animalBreed ? ` / ${b.animalBreed}` : ''}</span>
@@ -470,7 +470,7 @@ const Consultations: React.FC = () => {
                     <div className="appt-card-meta">
                       <span>📅 {fmt(b.scheduledDate)}</span>
                       <span>⏰ {b.timeSlotStart} - {b.timeSlotEnd}</span>
-                      <span>{b.bookingType === 'video_call' ? '📹 Video' : b.bookingType === 'phone' ? '📞 Phone' : b.bookingType === 'in_person' ? '🏥 In-person' : '💬 Chat'}</span>
+                      <span>{b.bookingType === 'video_call' ? t('consultations.types.video') : b.bookingType === 'phone' ? t('consultations.types.phone') : b.bookingType === 'in_person' ? t('consultations.types.inPerson') : t('consultations.types.chat')}</span>
                     </div>
 
                     {/* Reason */}
@@ -483,25 +483,25 @@ const Consultations: React.FC = () => {
                     {/* PENDING — awaiting vet confirmation */}
                     {b.status === 'pending' && !isExpiredPending(b) && (
                       <div style={{ padding: '8px 12px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#92400e', marginTop: 6 }}>
-                        {isPetOwner && '⏳ Awaiting doctor confirmation. You\u2019ll be notified once confirmed.'}
-                        {isVet && '📋 This booking needs your confirmation. Please confirm or decline.'}
-                        {isAdmin && '⏳ Pending — awaiting veterinarian confirmation.'}
+                        {isPetOwner && t('consultations.pendingMessages.petOwner')}
+                        {isVet && t('consultations.pendingMessages.vet')}
+                        {isAdmin && t('consultations.pendingMessages.admin')}
                       </div>
                     )}
 
                     {/* PENDING but expired (safety fallback — backend normally auto-expires these) */}
                     {isExpiredPending(b) && (
                       <div style={{ padding: '8px 12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, fontSize: 12, color: '#991b1b', marginTop: 6 }}>
-                        ⚠️ Scheduled time has passed without doctor confirmation. Please reschedule{isPetOwner ? ' with any available doctor' : ''}.
+                        {isPetOwner ? t('consultations.expiredPendingMessages.petOwner') : t('consultations.expiredPendingMessages.general')}
                       </div>
                     )}
 
                     {/* CONFIRMED — appointment is set */}
                     {b.status === 'confirmed' && (
                       <div style={{ padding: '8px 12px', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 6, fontSize: 12, color: '#065f46', marginTop: 6 }}>
-                        {isPetOwner && '✅ Your appointment is confirmed! Join at the scheduled time.'}
-                        {isVet && '✅ Confirmed. Start the consultation at the scheduled time.'}
-                        {isAdmin && '✅ Appointment confirmed by the veterinarian.'}
+                        {isPetOwner && t('consultations.confirmedMessages.petOwner')}
+                        {isVet && t('consultations.confirmedMessages.vet')}
+                        {isAdmin && t('consultations.confirmedMessages.admin')}
                       </div>
                     )}
 
@@ -515,17 +515,17 @@ const Consultations: React.FC = () => {
                           <>
                             {isPetOwner && (
                               <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
-                                🩺 The doctor did not respond to your booking request in time. You may reschedule with any available doctor — <strong>no limit</strong> on reschedules.
+                                {t('consultations.doctorMissedPending.petOwner')}
                               </div>
                             )}
                             {isVet && (
                               <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
-                                🩺 You did not confirm this booking before the scheduled time. The patient may reschedule.
+                                {t('consultations.doctorMissedPending.vet')}
                               </div>
                             )}
                             {isAdmin && (
                               <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
-                                🩺 Doctor did not confirm this booking. Pending → Missed.
+                                {t('consultations.doctorMissedPending.admin')}
                               </div>
                             )}
                           </>
@@ -536,17 +536,17 @@ const Consultations: React.FC = () => {
                           <>
                             {isPetOwner && (
                               <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
-                                🩺 The doctor confirmed but did not join the appointment. You may reschedule with any available doctor — <strong>no limit</strong> on reschedules.
+                                {t('consultations.doctorMissedConfirmed.petOwner')}
                               </div>
                             )}
                             {isVet && (
                               <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
-                                🩺 You confirmed but did not join this session. The patient may reschedule.
+                                {t('consultations.doctorMissedConfirmed.vet')}
                               </div>
                             )}
                             {isAdmin && (
                               <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
-                                🩺 Doctor confirmed but did not attend. Confirmed → Missed.
+                                {t('consultations.doctorMissedConfirmed.admin')}
                               </div>
                             )}
                           </>
@@ -559,28 +559,28 @@ const Consultations: React.FC = () => {
                           const remaining = limit === 0 ? null : Math.max(0, limit - used)
                           return (
                             <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
-                              ⚠️ You {b.missedBy === 'both' ? 'and the doctor both' : ''} missed this appointment.{' '}
+                              {b.missedBy === 'both' ? t('consultations.missedMessages.bothMissed') : t('consultations.missedMessages.youMissed')}{' '}
                               {limit === 0
-                                ? 'You may reschedule at any time.'
+                                ? t('consultations.missedMessages.rescheduleAnytime')
                                 : remaining !== null && remaining > 0
-                                  ? `You have ${remaining} reschedule${remaining !== 1 ? 's' : ''} remaining.`
-                                  : 'You have used your reschedule allowance for this booking.'}
+                                  ? t('consultations.missedMessages.rescheduleRemaining', { count: remaining })
+                                  : t('consultations.missedMessages.rescheduleUsed')}
                             </div>
                           )
                         })()}
                         {isVet && b.missedBy === 'patient' && (
                           <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
-                            🙋 The patient did not join the session. They may reschedule.
+                            {t('consultations.missedMessages.patientNoJoin')}
                           </div>
                         )}
                         {isVet && b.missedBy === 'both' && (
                           <div style={{ padding: '8px 12px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, color: '#475569', marginTop: 6 }}>
-                            ❌ Neither party joined this session. The patient may reschedule.
+                            {t('consultations.missedMessages.neitherJoined')}
                           </div>
                         )}
                         {isAdmin && (b.missedBy === 'patient' || b.missedBy === 'both') && (
                           <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
-                            {b.missedBy === 'patient' ? '🙋 Patient no-show.' : '❌ Both parties missed.'} Confirmed → Missed.
+                            {b.missedBy === 'patient' ? t('consultations.adminMissed.patientNoShow') : t('consultations.adminMissed.bothMissed')}
                           </div>
                         )}
                       </div>
@@ -590,17 +590,17 @@ const Consultations: React.FC = () => {
                   {/* Card Actions */}
                   <div className="appt-card-actions">
                     {isVet && b.status === 'pending' && !isExpiredPending(b) && (
-                      <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>✓ Confirm</button>
+                      <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>{t('consultations.actions.confirm')}</button>
                     )}
                     {(isVet || isAdmin) && b.status === 'confirmed' && b.bookingType === 'video_call' && (
                       isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
-                        ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>▶ Start</button>
-                        : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}>🔒 Not Yet</button>
+                        ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>{t('consultations.actions.start')}</button>
+                        : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={t('consultations.joinWindowTooltip', { minutes: appSettings.joinWindowMinutes })}>{t('consultations.actions.notYet')}</button>
                     )}
                     {isPetOwner && b.status === 'confirmed' && b.bookingType === 'video_call' && (
                       isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
-                        ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>📹 Join</button>
-                        : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={`Available ${appSettings.joinWindowMinutes} min before scheduled time`}>🔒 Not Yet</button>
+                        ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>{t('consultations.actions.join')}</button>
+                        : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={t('consultations.joinWindowTooltip', { minutes: appSettings.joinWindowMinutes })}>{t('consultations.actions.notYet')}</button>
                     )}
                     {/* Reschedule button — conditional on who missed and reschedule limits */}
                     {(b.status === 'confirmed' || (b.status === 'pending' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit)) || (b.status === 'missed' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit))) && (
@@ -608,16 +608,16 @@ const Consultations: React.FC = () => {
                         background: isExpiredPending(b) ? '#dc2626' : '#f59e0b',
                         color: 'white', border: 'none'
                       }} onClick={() => openRescheduleModal(b)}>
-                        {isExpiredPending(b) ? '⚠️ Reschedule' : '🔄 Reschedule'}
+                        {isExpiredPending(b) ? `⚠️ ${t('consultations.actions.reschedule')}` : `🔄 ${t('consultations.actions.reschedule')}`}
                       </button>
                     )}
                     {(b.status === 'pending' || b.status === 'confirmed') && (
-                      <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #dc2626', background: 'white' }} onClick={() => handleCancelBooking(b.id)}>✕ Cancel</button>
+                      <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #dc2626', background: 'white' }} onClick={() => handleCancelBooking(b.id)}>{t('consultations.actions.cancelBooking')}</button>
                     )}
                     {isAdmin && b.status === 'pending' && !isExpiredPending(b) && (
-                      <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>✓ Confirm</button>
+                      <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>{t('consultations.actions.confirm')}</button>
                     )}
-                    <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View Action History">📋 Log</button>
+                    <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title={t('consultations.viewActionHistory')}>{t('consultations.actions.log')}</button>
                   </div>
                 </div>
               ))}
@@ -632,8 +632,8 @@ const Consultations: React.FC = () => {
           {filteredHistory.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🩺</div>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>{statusFilter ? 'No consultations match this filter' : 'No consultation history yet'}</p>
-              <p style={{ fontSize: 13 }}>Completed and cancelled consultations will appear here for reference</p>
+              <p style={{ fontSize: 16, fontWeight: 500 }}>{statusFilter ? t('consultations.noMatchFilter') : t('consultations.noHistory')}</p>
+              <p style={{ fontSize: 13 }}>{t('consultations.historyHint')}</p>
             </div>
           ) : (
             <div className="appt-card-grid">
@@ -644,8 +644,8 @@ const Consultations: React.FC = () => {
                     {/* Card Header */}
                     <div className="appt-card-header">
                       <div className="appt-card-who">
-                        {isVet && <strong>{b.petOwnerName || 'Patient'}</strong>}
-                        {isPetOwner && <strong>{b.vetName || 'Doctor'}</strong>}
+                        {isVet && <strong>{b.petOwnerName || t('common.patient')}</strong>}
+                        {isPetOwner && <strong>{b.vetName || t('common.doctor')}</strong>}
                         {isAdmin && <span>{b.petOwnerName || '—'} / {b.vetName || '—'}</span>}
                       </div>
                       {badge(b.status)}
@@ -685,7 +685,7 @@ const Consultations: React.FC = () => {
                         <div style={{ fontSize: 12, marginTop: 6, padding: '4px 10px', borderRadius: 6,
                           background: b.cancelledBy === user?.id ? '#fef3c7' : '#fef2f2',
                           color: b.cancelledBy === user?.id ? '#92400e' : '#991b1b' }}>
-                          {b.cancelledBy === user?.id ? '🙋 Cancelled by you' : '🔔 Cancelled by the other party'}
+                          {b.cancelledBy === user?.id ? t('consultations.cancelledByYou') : t('consultations.cancelledByOther')}
                           {b.cancelledAt && <span style={{ marginLeft: 8, fontSize: 11, color: '#9ca3af' }}>
                             {formatDate(b.cancelledAt)}
                           </span>}
@@ -696,7 +696,7 @@ const Consultations: React.FC = () => {
                       {b.status === 'rescheduled' && (
                         <div style={{ fontSize: 12, marginTop: 6, padding: '8px 12px', borderRadius: 6,
                           background: '#fef3c7', border: '1px solid #fcd34d', color: '#92400e' }}>
-                          🔄 This booking was rescheduled. A new appointment was created to replace it.
+                          {t('consultations.rescheduledNotice')}
                         </div>
                       )}
                     </div>
@@ -708,13 +708,13 @@ const Consultations: React.FC = () => {
                           onClick={() => {
                             if (isVet) navigate(`/doctor/consultation-room/${b.consultationId}`)
                             else navigate(`/video-consultation/${b.consultationId}`)
-                          }}>📋 View</button>
+                          }}>{t('consultations.actions.view')}</button>
                       )}
                       {b.status === 'completed' && isPetOwner && b.consultationId && (
-                        <button className="btn-small" onClick={() => navigate(`/write-review?consultationId=${b.consultationId}&veterinarianId=${b.veterinarianId}`)}>⭐ Review</button>
+                        <button className="btn-small" onClick={() => navigate(`/write-review?consultationId=${b.consultationId}&veterinarianId=${b.veterinarianId}`)}>{t('consultations.actions.review')}</button>
                       )}
                       {b.status === 'cancelled' && (
-                        <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title="View cancellation details">📋 Details</button>
+                        <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title={t('consultations.viewCancellationDetails')}>{t('consultations.actions.details')}</button>
                       )}
                     </div>
                   </div>
@@ -736,23 +736,23 @@ const Consultations: React.FC = () => {
             maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ margin: 0 }}>🔄 Reschedule Appointment</h2>
+              <h2 style={{ margin: 0 }}>{t('consultations.reschedule.title')}</h2>
               <button onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
                 style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
             {/* Current booking info */}
             <div style={{ background: '#fef3c7', borderRadius: 8, padding: 14, marginBottom: 20, border: '1px solid #fcd34d' }}>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#92400e' }}>⚠️ Original Appointment</p>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#92400e' }}>{t('consultations.reschedule.originalLabel')}</p>
               <p style={{ margin: '6px 0 0', fontSize: 13, color: '#92400e' }}>
-                {rescheduleBooking.vetName || 'Doctor'} — {fmt(rescheduleBooking.scheduledDate)} at {rescheduleBooking.timeSlotStart} - {rescheduleBooking.timeSlotEnd}
+                {rescheduleBooking.vetName || t('common.doctor')} — {fmt(rescheduleBooking.scheduledDate)} {t('common.at')} {rescheduleBooking.timeSlotStart} - {rescheduleBooking.timeSlotEnd}
               </p>
             </div>
 
             {/* Reschedule count info */}
             {rescheduleBooking.status === 'pending' && !isExpiredPending(rescheduleBooking) && appSettings.maxReschedules > 0 && (
               <div style={{ padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#1e40af' }}>
-                📊 Reschedule {(rescheduleBooking.rescheduleCount || 0) + 1} of {appSettings.maxReschedules} allowed
+                {t('consultations.reschedule.rescheduleCount', { current: (rescheduleBooking.rescheduleCount || 0) + 1, max: appSettings.maxReschedules })}
               </div>
             )}
 
@@ -765,14 +765,14 @@ const Consultations: React.FC = () => {
               }}>
                 {!rescheduleBooking.missedBy || rescheduleBooking.missedBy === 'doctor'
                   ? (rescheduleBooking.confirmedAt
-                    ? '🩺 Doctor confirmed but did not attend — you may reschedule with any available doctor. No reschedule limit applies.'
-                    : '🩺 Doctor did not confirm in time — you may reschedule with any available doctor. No reschedule limit applies.')
+                    ? t('consultations.reschedule.doctorConfirmedNoShow')
+                    : t('consultations.reschedule.doctorNoConfirm'))
                   : (() => {
                       const used = rescheduleBooking.rescheduleCount || 0
                       const limit = patientNoShowRescheduleLimit
                       return limit === 0
-                        ? '🙋 Patient no-show — you may reschedule (no limit configured).'
-                        : `🙋 Patient no-show — reschedule ${used + 1} of ${limit} allowed.`
+                        ? t('consultations.reschedule.patientNoShowNoLimit')
+                        : t('consultations.reschedule.patientNoShowLimit', { current: used + 1, max: limit })
                     })()
                 }
               </div>
@@ -781,27 +781,27 @@ const Consultations: React.FC = () => {
             {/* Expired pending notice */}
             {isExpiredPending(rescheduleBooking) && (
               <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#991b1b' }}>
-                ⚠️ The original appointment time has passed without doctor confirmation. You may select a <strong>different doctor</strong> for faster availability.
+                {t('consultations.reschedule.expiredPendingNotice')}
               </div>
             )}
 
             {/* Doctor selection */}
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>
-                Select Doctor {isExpiredPending(rescheduleBooking) ? '*' : '(optional)'}
+                {isExpiredPending(rescheduleBooking) ? t('consultations.reschedule.selectDoctor') : t('consultations.reschedule.selectDoctorOptional')}
               </label>
               {vetListLoading ? (
-                <div style={{ padding: 10, textAlign: 'center', color: '#6b7280', fontSize: 13 }}>Loading doctors...</div>
+                <div style={{ padding: 10, textAlign: 'center', color: '#6b7280', fontSize: 13 }}>{t('consultations.reschedule.loadingDoctors')}</div>
               ) : (
                 <select
                   value={rescheduleVetId}
                   onChange={(e) => handleVetChange(e.target.value)}
                   style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '2px solid #d1d5db', fontSize: 14, boxSizing: 'border-box', background: 'white', color: '#1a1a1a' }}
                 >
-                  <option value="">— Keep current doctor —</option>
+                  <option value="">{t('consultations.reschedule.keepCurrentDoctor')}</option>
                   {vetList.map(v => (
                     <option key={v.id} value={v.id}>
-                      {v.name}{v.specialization ? ` — ${v.specialization}` : ''}{v.id === rescheduleBooking.veterinarianId ? ' (current)' : ''}
+                      {v.name}{v.specialization ? ` — ${v.specialization}` : ''}{v.id === rescheduleBooking.veterinarianId ? ` ${t('consultations.reschedule.currentDoctor')}` : ''}
                     </option>
                   ))}
                 </select>
@@ -810,7 +810,7 @@ const Consultations: React.FC = () => {
 
             {/* New date picker */}
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Select New Date *</label>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>{t('consultations.reschedule.dateLabel')}</label>
               <input
                 type="date"
                 style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }}
@@ -825,18 +825,18 @@ const Consultations: React.FC = () => {
               const futureSlots = filterFutureSlots(rescheduleSlots, rescheduleDate)
               return (
               <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>Available Time Slots</label>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>{t('consultations.reschedule.slotsTitle')}</label>
                 {rescheduleSlotsLoading ? (
                   <div style={{ textAlign: 'center', padding: 20 }}>
                     <div className="loading-spinner" style={{ margin: '0 auto' }} />
                   </div>
                 ) : rescheduleDateMsg ? (
                   <div style={{ padding: '12px 16px', borderRadius: 8, background: '#fefce8', border: '1px solid #fde047', fontSize: 13, color: '#854d0e', textAlign: 'center' }}>
-                    {rescheduleDateMsg} — Please select another date.
+                    {rescheduleDateMsg} — {t('consultations.reschedule.selectAnotherDate')}
                   </div>
                 ) : futureSlots.length === 0 ? (
                   <p style={{ color: '#9ca3af', fontSize: 13, textAlign: 'center', padding: 16 }}>
-                    No available slots for this date. Please select another date.
+                    {t('consultations.reschedule.noSlots')}
                   </p>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
@@ -863,7 +863,7 @@ const Consultations: React.FC = () => {
             {/* Doctor approval note for pet owners */}
             {isPetOwner && rescheduleSelectedSlot && (
               <div style={{ padding: '10px 14px', background: '#dbeafe', color: '#1e40af', borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
-                ℹ️ Your rescheduled appointment will need <strong>doctor approval</strong> before you can join.
+                {t('consultations.reschedule.approvalNote')}
               </div>
             )}
 
@@ -879,7 +879,7 @@ const Consultations: React.FC = () => {
               <button
                 onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
                 style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 500 }}
-              >Cancel</button>
+              >{t('common.cancel')}</button>
               <button
                 onClick={handleRescheduleSubmit}
                 disabled={!rescheduleDate || !rescheduleSelectedSlot || rescheduleSubmitting}
@@ -889,7 +889,7 @@ const Consultations: React.FC = () => {
                   color: (!rescheduleDate || !rescheduleSelectedSlot) ? '#6b7280' : 'white'
                 }}
               >
-                {rescheduleSubmitting ? 'Rescheduling...' : '✓ Confirm Reschedule'}
+                {rescheduleSubmitting ? t('consultations.reschedule.confirming') : t('consultations.reschedule.confirmBtn')}
               </button>
             </div>
           </div>
@@ -908,14 +908,14 @@ const Consultations: React.FC = () => {
             maxWidth: 520, maxHeight: '80vh', overflowY: 'auto'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ margin: 0, fontSize: 18 }}>📋 Action Log</h2>
+              <h2 style={{ margin: 0, fontSize: 18 }}>{t('consultations.actionLog.title')}</h2>
               <button onClick={() => setActionLogBookingId(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
-            {actionLogsLoading && <p style={{ color: '#6b7280' }}>Loading action history...</p>}
+            {actionLogsLoading && <p style={{ color: '#6b7280' }}>{t('consultations.actionLog.loading')}</p>}
 
             {!actionLogsLoading && actionLogs.length === 0 && (
-              <p style={{ color: '#9ca3af', textAlign: 'center', padding: 20 }}>No action history found for this booking.</p>
+              <p style={{ color: '#9ca3af', textAlign: 'center', padding: 20 }}>{t('consultations.actionLog.empty')}</p>
             )}
 
             {!actionLogsLoading && actionLogs.length > 0 && (
@@ -937,27 +937,27 @@ const Consultations: React.FC = () => {
                         {actionLabel(log.action)}
                       </div>
                       <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
-                        by <strong>{log.userName || 'System'}</strong>
+                        {t('consultations.actionLog.by')} <strong>{log.userName || t('consultations.actionLog.system')}</strong>
                         {log.details?.role && <span> ({log.details.role})</span>}
                         {' · '}
                         {log.createdAt ? new Date(log.createdAt).toLocaleString() : '–'}
                       </div>
                       {log.action === 'BOOKING_RESCHEDULED' && log.details && (
                         <div style={{ fontSize: 12, color: '#4b5563', marginTop: 4, padding: '4px 8px', background: '#fef3c7', borderRadius: 4 }}>
-                          New slot: {log.details.newDate} {log.details.newTimeSlotStart}–{log.details.newTimeSlotEnd}
+                          {t('consultations.actionLog.newSlot')} {log.details.newDate} {log.details.newTimeSlotStart}–{log.details.newTimeSlotEnd}
                           {log.details.newStatus === 'pending' && (
                             // Check if a subsequent confirmation exists in the log
                             actionLogs.some((l, j) => j > idx && l.action === 'BOOKING_CONFIRMED')
-                              ? <span style={{ color: '#059669' }}> (approved ✓)</span>
-                              : <span style={{ color: '#d97706' }}> (awaiting doctor approval)</span>
+                              ? <span style={{ color: '#059669' }}> {t('consultations.actionLog.approved')}</span>
+                              : <span style={{ color: '#d97706' }}> {t('consultations.actionLog.awaitingApproval')}</span>
                           )}
-                          {log.details.newStatus === 'confirmed' && <span style={{ color: '#059669' }}> (auto-confirmed)</span>}
+                          {log.details.newStatus === 'confirmed' && <span style={{ color: '#059669' }}> {t('consultations.actionLog.autoConfirmed')}</span>}
                         </div>
                       )}
                       {log.action === 'BOOKING_CANCELLED' && (
                         <div style={{ fontSize: 12, color: '#dc2626', marginTop: 4 }}>
-                          {log.details?.cancelledByRole && <span>Cancelled by {log.details.cancelledByRole}. </span>}
-                          {log.details?.reason && <span>Reason: {log.details.reason}</span>}
+                          {log.details?.cancelledByRole && <span>{t('consultations.actionLog.cancelledBy', { role: log.details.cancelledByRole })} </span>}
+                          {log.details?.reason && <span>{t('consultations.actionLog.reason', { reason: log.details.reason })}</span>}
                         </div>
                       )}
                     </div>
@@ -967,7 +967,7 @@ const Consultations: React.FC = () => {
             )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-              <button className="btn-small" style={{ padding: '8px 20px' }} onClick={() => setActionLogBookingId(null)}>Close</button>
+              <button className="btn-small" style={{ padding: '8px 20px' }} onClick={() => setActionLogBookingId(null)}>{t('consultations.actionLog.close')}</button>
             </div>
           </div>
         </div>
@@ -978,8 +978,8 @@ const Consultations: React.FC = () => {
         const cancelBooking = bookings.find(b => b.id === cancelModal.bookingId)
         const refundEstimate = cancelBooking ? estimateRefund(cancelBooking.scheduledDate, cancelBooking.timeSlotStart, 500) : null
         const reasonPresets = isVet
-          ? ['Schedule conflict', 'Emergency', 'Patient request', 'Unable to attend']
-          : ['Found another doctor', 'Schedule conflict', 'No longer needed', 'Financial reasons']
+          ? (t('consultations.cancelModal.reasonPresetsVet', { returnObjects: true }) as string[])
+          : (t('consultations.cancelModal.reasonPresetsPatient', { returnObjects: true }) as string[])
         return (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -990,12 +990,12 @@ const Consultations: React.FC = () => {
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)', maxHeight: '90vh', overflowY: 'auto'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ margin: 0, fontSize: 18 }}>❌ Cancel Booking</h2>
+              <h2 style={{ margin: 0, fontSize: 18 }}>{t('consultations.cancelModal.title')}</h2>
               <button onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
                 style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
             <div style={{ background: '#fef2f2', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13, color: '#991b1b' }}>
-              ⚠️ This action cannot be undone. The appointment will be cancelled.
+              {t('consultations.cancelModal.warning')}
             </div>
 
             {/* Refund Policy Preview (for patients) */}
@@ -1005,14 +1005,14 @@ const Consultations: React.FC = () => {
                 border: `1px solid ${refundEstimate.percent === 100 ? '#6ee7b7' : refundEstimate.percent > 0 ? '#fcd34d' : '#fca5a5'}`,
                 borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13
               }}>
-                <strong>{refundEstimate.percent === 100 ? '✅' : refundEstimate.percent > 0 ? '⚠️' : '❌'} Refund Policy:</strong>
+                <strong>{refundEstimate.percent === 100 ? '✅' : refundEstimate.percent > 0 ? '⚠️' : '❌'} {t('consultations.cancelModal.refundPolicy')}:</strong>
                 <div style={{ marginTop: 4 }}>{refundEstimate.reason}</div>
               </div>
             )}
 
             {/* Quick reason presets */}
             <div style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Quick reasons:</label>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>{t('consultations.cancelModal.quickReasons')}</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {reasonPresets.map(r => (
                   <button key={r}
@@ -1025,9 +1025,9 @@ const Consultations: React.FC = () => {
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>Reason for cancellation</label>
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>{t('consultations.cancelModal.reasonLabel')}</label>
               <textarea
-                placeholder="Please provide a reason for cancellation..."
+                placeholder={t('consultations.cancelModal.reasonPlaceholder')}
                 value={cancelModal.reason}
                 onChange={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
                 style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, minHeight: 80, resize: 'vertical', boxSizing: 'border-box' }}
@@ -1042,12 +1042,12 @@ const Consultations: React.FC = () => {
               <button
                 onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
                 style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 500 }}
-              >Keep Booking</button>
+              >{t('consultations.cancelModal.keepBooking')}</button>
               <button
                 onClick={() => handleCancelBooking()}
                 disabled={!cancelModal.reason.trim()}
                 style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: cancelModal.reason.trim() ? '#dc2626' : '#e5e7eb', color: cancelModal.reason.trim() ? 'white' : '#9ca3af', cursor: cancelModal.reason.trim() ? 'pointer' : 'not-allowed', fontWeight: 600 }}
-              >Confirm Cancellation</button>
+              >{t('consultations.cancelModal.confirmCancel')}</button>
             </div>
           </div>
         </div>

@@ -88,11 +88,11 @@ const MyBookings: React.FC<MyBookingsProps> = ({ onNavigate }) => {
   const handleCancelBooking = async () => {
     try {
       setCancelError('')
-      await apiService.cancelBooking(cancelModal.bookingId, cancelModal.reason || 'Cancelled by user')
+      await apiService.cancelBooking(cancelModal.bookingId, cancelModal.reason || t('myBookings.cancelledByUser'))
       setCancelModal({ show: false, bookingId: '', reason: '' })
       loadBookings()
     } catch (err: any) {
-setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to cancel booking')
+setCancelError(err?.response?.data?.error?.message || err?.message || t('myBookings.failedToCancel'))
     }
   }
 
@@ -121,7 +121,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
     // Validate: cannot reschedule to a past time
     const slotDateTime = new Date(`${rescheduleDate}T${rescheduleSelectedSlot.startTime}:00`)
     if (slotDateTime <= new Date()) {
-      setRescheduleError('Cannot reschedule to a past time. Please select a future slot.')
+      setRescheduleError(t('myBookings.pastTimeError'))
       return
     }
     setRescheduleError('')
@@ -136,13 +136,14 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
       setRescheduleTarget(null)
       loadBookings()
     } catch (err: any) {
-      setRescheduleError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to reschedule')
+      setRescheduleError(err?.response?.data?.message || err?.response?.data?.error?.message || t('myBookings.failedToReschedule'))
     } finally { setRescheduleSubmitting(false) }
   }
 
-  const getStatusBadge = (status: string) => (
-    <span className={`badge badge-${status}`}>{status.replace('_', ' ')}</span>
-  )
+  const getStatusBadge = (status: string) => {
+    const map: Record<string, string> = { in_progress: 'inProgress' }
+    return <span className={`badge badge-${status}`}>{t(`common.${map[status] || status}`)}</span>
+  }
 
   const getBookingTypeIcon = (type: string) => {
     const icons: Record<string, string> = {
@@ -152,6 +153,16 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
       chat: '💬'
     }
     return icons[type] || '📋'
+  }
+
+  const bookingTypeLabel = (type: string) => {
+    const map: Record<string, string> = {
+      video_call: t('myBookings.typeVideoCall'),
+      phone: t('myBookings.typePhone'),
+      in_person: t('myBookings.typeInPerson'),
+      chat: t('myBookings.typeChat')
+    }
+    return map[type] || type
   }
 
   return (
@@ -175,7 +186,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             className={`tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {t(`myBookings.tabs.${tab}`)}
           </button>
         ))}
       </div>
@@ -201,7 +212,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
               <div className="booking-card-header">
                 <div>
                   <span style={{ fontSize: 14, fontWeight: 600, color: '#1f2937' }}>
-                    {getBookingTypeIcon(booking.bookingType)} {(booking.bookingType || '').replace('_', ' ')}
+                    {getBookingTypeIcon(booking.bookingType)} {bookingTypeLabel(booking.bookingType)}
                   </span>
                 </div>
                 {getStatusBadge(booking.status)}
@@ -241,7 +252,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
                       }
                       // Otherwise create a new consultation for this booking
                       try {
-                        const reason = booking.reasonForVisit || 'General consultation'
+                        const reason = booking.reasonForVisit || t('myBookings.generalConsultation')
                         let description = booking.symptoms || reason
                         if (description.length < 10) description = `Consultation: ${description} — scheduled appointment`
                         const res = await apiService.createConsultation({
@@ -370,8 +381,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
             )}
 
             <div style={{ padding: '10px 14px', background: '#fef3c7', color: '#92400e', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
-              ⚠️ Your appointment on <strong>{rescheduleTarget.scheduledDate}</strong> at{' '}
-              <strong>{rescheduleTarget.timeSlotStart}–{rescheduleTarget.timeSlotEnd}</strong> was missed. Please select a new slot.
+              {t('myBookings.missedNotice', { date: rescheduleTarget.scheduledDate, time: `${rescheduleTarget.timeSlotStart}\u2013${rescheduleTarget.timeSlotEnd}` })}
             </div>
 
             <div className="form-group" style={{ marginBottom: 16 }}>
@@ -425,7 +435,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
 
             {rescheduleSelectedSlot && (
               <div style={{ padding: '10px 14px', background: '#dbeafe', color: '#1e40af', borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
-                ℹ️ Your rescheduled appointment will need <strong>doctor approval</strong> before you can join.
+                {t('myBookings.rescheduleApprovalNote')}
               </div>
             )}
 
@@ -484,25 +494,25 @@ setCancelError(err?.response?.data?.error?.message || err?.message || 'Failed to
                         {actionLabel(log.action)}
                       </div>
                       <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
-                        by <strong>{log.userName || 'System'}</strong>
+                        {t('myBookings.actionLogBy')} <strong>{log.userName || t('myBookings.actionLogSystem')}</strong>
                         {log.details?.role && <span> ({log.details.role})</span>}
                         {' · '}
                         {log.createdAt ? new Date(log.createdAt).toLocaleString() : '–'}
                       </div>
                       {log.action === 'BOOKING_RESCHEDULED' && log.details && (
                         <div style={{ fontSize: 12, color: '#4b5563', marginTop: 4, padding: '4px 8px', background: '#fef3c7', borderRadius: 4 }}>
-                          New slot: {log.details.newDate} {log.details.newTimeSlotStart}–{log.details.newTimeSlotEnd}
+                          {t('myBookings.actionLogNewSlot')} {log.details.newDate} {log.details.newTimeSlotStart}–{log.details.newTimeSlotEnd}
                           {log.details.newStatus === 'pending' && (
                             actionLogs.some((l, j) => j > idx && l.action === 'BOOKING_CONFIRMED')
-                              ? <span style={{ color: '#059669' }}> (approved ✓)</span>
-                              : <span style={{ color: '#d97706' }}> (awaiting doctor approval)</span>
+                              ? <span style={{ color: '#059669' }}> {t('myBookings.actionLogApproved')}</span>
+                              : <span style={{ color: '#d97706' }}> {t('myBookings.actionLogAwaiting')}</span>
                           )}
-                          {log.details.newStatus === 'confirmed' && <span style={{ color: '#059669' }}> (auto-confirmed)</span>}
+                          {log.details.newStatus === 'confirmed' && <span style={{ color: '#059669' }}> {t('myBookings.actionLogAutoConfirmed')}</span>}
                         </div>
                       )}
                       {log.action === 'BOOKING_CANCELLED' && log.details?.reason && (
                         <div style={{ fontSize: 12, color: '#dc2626', marginTop: 4 }}>
-                          Reason: {log.details.reason}
+                          {t('myBookings.actionLogReason', { reason: log.details.reason })}
                         </div>
                       )}
                     </div>

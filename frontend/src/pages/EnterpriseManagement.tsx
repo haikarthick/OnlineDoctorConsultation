@@ -102,20 +102,20 @@ const EnterpriseManagement: React.FC = () => {
       fetchEnterprises()
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to save enterprise')
+      setError(err.response?.data?.error?.message || t('common.failedToSave'))
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to deactivate this enterprise?')) return
+    if (!confirm(t('enterpriseManagement.deactivateConfirm'))) return
     try {
       await apiService.deleteEnterprise(id)
-      setSuccessMsg('Enterprise deactivated')
+      setSuccessMsg(t('enterpriseManagement.deactivated'))
       fetchEnterprises()
       if (selectedEnterprise?.id === id) setSelectedEnterprise(null)
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to deactivate')
+      setError(err.response?.data?.error?.message || t('common.failedToDelete'))
     }
   }
 
@@ -144,7 +144,7 @@ const EnterpriseManagement: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('enterpriseManagement.pageTitle')}</h1>
-          <p className="subtitle">Manage your farms, clinics, and animal enterprises</p>
+          <p className="subtitle">{t('enterpriseManagement.subtitle')}</p>
         </div>
         <div className="header-actions">
           <button className={`btn ${showMapOverview ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setShowMapOverview(!showMapOverview)}>
@@ -162,7 +162,7 @@ const EnterpriseManagement: React.FC = () => {
       {/* Search */}
       <div className="filters-bar">
         <input
-          type="text" placeholder="Search enterprises..." className="search-input"
+          type="text" placeholder={t('enterpriseManagement.searchPlaceholder')} className="search-input"
           value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
@@ -204,12 +204,12 @@ const EnterpriseManagement: React.FC = () => {
         {/* Enterprise List */}
         <div style={{ flex: '1', minWidth: '300px' }}>
           {loading ? (
-            <div className="loading-spinner">Loading enterprises...</div>
+            <div className="loading-spinner">{t('enterpriseManagement.loading')}</div>
           ) : filtered.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🏢</div>
-              <h3>No Enterprises Yet</h3>
-              <p>Create your first enterprise to start managing animals at scale.</p>
+              <h3>{t('enterpriseManagement.emptyTitle')}</h3>
+              <p>{t('enterpriseManagement.emptySubtitle')}</p>
               <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>
                 + Create Enterprise
               </button>
@@ -235,9 +235,9 @@ const EnterpriseManagement: React.FC = () => {
                     <span>🐾 {ent.animalCount || 0} animals</span>
                   </div>
                   <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-sm btn-secondary" onClick={e => { e.stopPropagation(); openEdit(ent) }}>Edit</button>
+                    <button className="btn btn-sm btn-secondary" onClick={e => { e.stopPropagation(); openEdit(ent) }}>{t('common.edit')}</button>
                     {(isAdmin || ent.ownerId === user?.id) && (
-                      <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); handleDelete(ent.id) }}>Delete</button>
+                      <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); handleDelete(ent.id) }}>{t('common.delete')}</button>
                     )}
                   </div>
                 </div>
@@ -313,7 +313,7 @@ const EnterpriseManagement: React.FC = () => {
       {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
         <div ref={formRef} className="edit-form-panel">
-            <h2>{editingEnterprise ? 'Edit Enterprise' : 'Create New Enterprise'}</h2>
+            <h2>{editingEnterprise ? t('enterpriseManagement.modal.editTitle') : t('enterpriseManagement.modal.createTitle')}</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
 
@@ -437,7 +437,7 @@ const EnterpriseManagement: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
                 <button type="submit" className="btn btn-primary">{editingEnterprise ? 'Update' : 'Create'} Enterprise</button>
               </div>
             </form>

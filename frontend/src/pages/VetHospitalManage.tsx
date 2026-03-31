@@ -151,11 +151,11 @@ const VetHospitalManage: React.FC = () => {
       })
       const url = result?.inviteUrl || ''
       setInviteLink(url)
-      setModalMsg({ text: 'Invitation created! Share the link below with the doctor.', isError: false })
+      setModalMsg({ text: t('vetHospitalManage.inviteCreated'), isError: false })
       setInviteForm({ email: '', firstName: '', lastName: '', phone: '', hospitalRole: 'staff', departmentId: '' })
       setInvitesLoaded(false)
     } catch (err: any) {
-      setModalMsg({ text: err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to send invite', isError: true })
+      setModalMsg({ text: err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.inviteFailed'), isError: true })
     }
   }
 
@@ -181,7 +181,7 @@ const VetHospitalManage: React.FC = () => {
           if (hs.length === 0) { navigate('/vet-hospitals'); return }
           await loadHospital(hs[0])
         }
-      } catch { setError('Failed to load hospital data') }
+      } catch { setError(t('vetHospitalManage.errors.loadFailed')) }
       finally { setLoading(false) }
     }
     init()
@@ -210,7 +210,7 @@ const VetHospitalManage: React.FC = () => {
       // Refresh hospital to get updated verificationStatus
       const updated = await vetHospitalApi.getHospital(hospital.id)
       setHospital(updated)
-      flash('Document uploaded successfully')
+      flash(t('vetHospitalManage.toasts.docUploaded'))
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.response?.data?.error?.message || 'Upload failed'
       setDocError(p => ({ ...p, [docType]: msg }))
@@ -276,7 +276,7 @@ const VetHospitalManage: React.FC = () => {
   const handleDoctorSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!hospital) return
-    if (!editDoctor && !doctorForm.doctorId) { mFlash('Please select a veterinarian from the search results', true); return }
+    if (!editDoctor && !doctorForm.doctorId) { mFlash(t('vetHospitalManage.errors.selectVet'), true); return }
     try {
       if (editDoctor) {
         await vetHospitalApi.updateDoctor(hospital.id, editDoctor.doctorId, {
@@ -287,7 +287,7 @@ const VetHospitalManage: React.FC = () => {
           consultationFee: doctorForm.consultationFee ? parseFloat(doctorForm.consultationFee) : undefined,
           isPrimaryHospital: doctorForm.isPrimaryHospital,
         })
-        flash('Doctor updated ✓')
+        flash(t('vetHospitalManage.toasts.doctorUpdated'))
         closeDocModal()
       } else {
         await vetHospitalApi.addDoctor(hospital.id, {
@@ -299,20 +299,20 @@ const VetHospitalManage: React.FC = () => {
           consultationFee: doctorForm.consultationFee ? parseFloat(doctorForm.consultationFee) : undefined,
           isPrimaryHospital: doctorForm.isPrimaryHospital,
         })
-        flash('Doctor added to hospital ✓')
+        flash(t('vetHospitalManage.toasts.doctorAdded'))
         closeDocModal()
       }
       const docs = await vetHospitalApi.listDoctors(hospital.id); setDoctors(docs)
-    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || 'Operation failed', true) }
+    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.operationFailed'), true) }
   }
 
   const handleRemoveDoctor = async (doc: HospitalDoctor) => {
-    if (!hospital || !window.confirm(`Remove ${doc.doctorName || doc.doctorId}?`)) return
+    if (!hospital || !window.confirm(t('vetHospitalManage.confirmRemoveDoctor', { name: doc.doctorName || doc.doctorId }))) return
     try {
       await vetHospitalApi.removeDoctor(hospital.id, doc.doctorId)
-      flash('Doctor removed')
+      flash(t('vetHospitalManage.toasts.doctorRemoved'))
       setDoctors(prev => prev.filter(d => d.doctorId !== doc.doctorId))
-    } catch { flash('Failed to remove doctor', true) }
+    } catch { flash(t('vetHospitalManage.errors.removeFailed'), true) }
   }
 
   // ── Dept ops ─────────────────────────────────────────────────────────────
@@ -328,7 +328,7 @@ const VetHospitalManage: React.FC = () => {
           floorNumber: deptForm.floorNumber || undefined,
           headDoctorId: deptForm.headDoctorId || undefined,
         })
-        flash('Department updated ✓')
+        flash(t('vetHospitalManage.toasts.deptUpdated'))
         closeDeptModal()
       } else {
         await vetHospitalApi.createDepartment(hospital.id, {
@@ -338,20 +338,20 @@ const VetHospitalManage: React.FC = () => {
           floorNumber: deptForm.floorNumber || undefined,
           headDoctorId: deptForm.headDoctorId || undefined,
         })
-        flash('Department created ✓')
+        flash(t('vetHospitalManage.toasts.deptCreated'))
         closeDeptModal()
       }
       const depts = await vetHospitalApi.listDepartments(hospital.id); setDepartments(depts)
-    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || 'Operation failed', true) }
+    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.operationFailed'), true) }
   }
 
   const handleDeleteDept = async (dept: HospitalDepartment) => {
-    if (!hospital || !window.confirm(`Delete department "${dept.name}"?`)) return
+    if (!hospital || !window.confirm(t('vetHospitalManage.confirmDeleteDept', { name: dept.name }))) return
     try {
       await vetHospitalApi.deleteDepartment(hospital.id, dept.id)
-      flash('Department deleted')
+      flash(t('vetHospitalManage.toasts.deptDeleted'))
       setDepartments(prev => prev.filter(d => d.id !== dept.id))
-    } catch { flash('Failed to delete department', true) }
+    } catch { flash(t('vetHospitalManage.errors.deleteDeptFailed'), true) }
   }
 
   // ── Service ops ──────────────────────────────────────────────────────────
@@ -368,7 +368,7 @@ const VetHospitalManage: React.FC = () => {
           durationMinutes: serviceForm.durationMinutes ? parseInt(serviceForm.durationMinutes) : undefined,
           requiresAppointment: serviceForm.requiresAppointment,
         })
-        flash('Service updated ✓')
+        flash(t('vetHospitalManage.toasts.serviceUpdated'))
         closeServiceModal()
       } else {
         await vetHospitalApi.addService(hospital.id, {
@@ -379,20 +379,20 @@ const VetHospitalManage: React.FC = () => {
           durationMinutes: serviceForm.durationMinutes ? parseInt(serviceForm.durationMinutes) : undefined,
           requiresAppointment: serviceForm.requiresAppointment,
         })
-        flash('Service added ✓')
+        flash(t('vetHospitalManage.toasts.serviceAdded'))
         closeServiceModal()
       }
       const svcs = await vetHospitalApi.listServices(hospital.id); setServices(svcs)
-    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || 'Operation failed', true) }
+    } catch (err: any) { mFlash(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.operationFailed'), true) }
   }
 
   const handleDeleteService = async (svc: HospitalService) => {
-    if (!hospital || !window.confirm(`Delete service "${svc.serviceName}"?`)) return
+    if (!hospital || !window.confirm(t('vetHospitalManage.confirmDeleteService', { name: svc.serviceName }))) return
     try {
       await vetHospitalApi.deleteService(hospital.id, svc.id)
-      flash('Service deleted')
+      flash(t('vetHospitalManage.toasts.serviceDeleted'))
       setServices(prev => prev.filter(s => s.id !== svc.id))
-    } catch { flash('Failed to delete service', true) }
+    } catch { flash(t('vetHospitalManage.errors.deleteServiceFailed'), true) }
   }
 
   // ── Settings save ────────────────────────────────────────────────────────
@@ -401,8 +401,8 @@ const VetHospitalManage: React.FC = () => {
     if (!hospital) return
     try {
       const updated = await vetHospitalApi.updateHospital(hospital.id, settingsForm as any)
-      setHospital(updated); flash('Hospital profile updated')
-    } catch (err: any) { flash(err?.response?.data?.message || err?.response?.data?.error?.message || 'Update failed', true) }
+      setHospital(updated); flash(t('vetHospitalManage.toasts.profileUpdated'))
+    } catch (err: any) { flash(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitalManage.errors.updateFailed'), true) }
   }
 
   const openEditDoctor = (doc: HospitalDoctor) => {
@@ -473,7 +473,7 @@ const VetHospitalManage: React.FC = () => {
   }
 
   if (loading) return <div className="loading-container"><div className="loading-spinner" /></div>
-  if (!hospital) return <div className="empty-state"><h3>No hospital found</h3><button className="btn-primary" onClick={() => navigate('/vet-hospitals')}>Browse Hospitals</button></div>
+  if (!hospital) return <div className="empty-state"><h3>{t('vetHospitalManage.noHospitalFound')}</h3><button className="btn-primary" onClick={() => navigate('/vet-hospitals')}>{t('vetHospitalManage.browseHospitals')}</button></div>
 
   return (
     <div className="module-page">
@@ -496,7 +496,7 @@ const VetHospitalManage: React.FC = () => {
               {hospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
             </select>
           )}
-          <button className="btn-secondary" onClick={() => navigate(`/vet-hospitals/${hospital.id}`)}>View Public Profile</button>
+          <button className="btn-secondary" onClick={() => navigate(`/vet-hospitals/${hospital.id}`)}>{t('vetHospitalManage.viewPublicProfile')}</button>
         </div>
       </div>
 
@@ -510,7 +510,7 @@ const VetHospitalManage: React.FC = () => {
             <span className="vstatus-badge">{info.label}</span>
             <span className="vstatus-msg">{info.msg}</span>
             {(vs === 'pending_documents' || vs === 'rejected' || vs === 'suspended') && (
-              <button className="vstatus-action-btn" onClick={() => setActiveTab('documents')}>Manage Documents</button>
+              <button className="vstatus-action-btn" onClick={() => setActiveTab('documents')}>{t('vetHospitalManage.manageDocuments')}</button>
             )}
           </div>
         )
@@ -521,14 +521,14 @@ const VetHospitalManage: React.FC = () => {
 
       {/* Tabs */}
       <div className="vh-profile-tabs">
-        {(['overview','doctors','departments','services','appointments','documents','settings'] as Tab[]).map(t => (
-          <button key={t} className={`vh-tab${activeTab === t ? ' active' : ''}`} onClick={() => setActiveTab(t)}>
-            {t === 'overview' ? '📊 Overview' : t === 'doctors' ? `👨‍⚕️ Doctors (${doctors.length})` :
-              t === 'departments' ? `🏢 Depts (${departments.length})` :
-              t === 'services' ? `💊 Services (${services.length})` :
-              t === 'appointments' ? '📅 Appointments' :
-              t === 'documents' ? `📄 Documents (${documents.length}/${REQUIRED_DOC_TYPES.length})` :
-              '⚙ Settings'}
+        {(['overview','doctors','departments','services','appointments','documents','settings'] as Tab[]).map(tab => (
+          <button key={tab} className={`vh-tab${activeTab === tab ? ' active' : ''}`} onClick={() => setActiveTab(tab)}>
+            {tab === 'overview' ? `📊 ${t('vetHospitalManage.tabs.overview')}` : tab === 'doctors' ? `👨‍⚕️ ${t('vetHospitalManage.tabs.doctors')} (${doctors.length})` :
+              tab === 'departments' ? `🏢 ${t('vetHospitalManage.tabs.depts')} (${departments.length})` :
+              tab === 'services' ? `💊 ${t('vetHospitalManage.tabs.services')} (${services.length})` :
+              tab === 'appointments' ? `📅 ${t('vetHospitalManage.tabs.appointments')}` :
+              tab === 'documents' ? `📄 ${t('vetHospitalManage.tabs.documents')} (${documents.length}/${REQUIRED_DOC_TYPES.length})` :
+              `⚙ ${t('vetHospitalManage.tabs.settings')}`}
           </button>
         ))}
       </div>
@@ -538,12 +538,12 @@ const VetHospitalManage: React.FC = () => {
         <div>
           <div className="vh-manage-stats">
             {[
-              { label: 'Doctors', value: doctors.length, icon: '👨‍⚕️' },
-              { label: 'Departments', value: departments.length, icon: '🏢' },
-              { label: 'Services', value: services.length, icon: '💊' },
-              { label: 'Avg Rating', value: hospital.rating > 0 ? Number(hospital.rating).toFixed(1) : '—', icon: '⭐' },
-              { label: 'Total Reviews', value: hospital.totalReviews, icon: '💬' },
-              { label: 'Status', value: hospital.isActive ? 'Active' : 'Inactive', icon: '🔘' },
+              { label: t('vetHospitalManage.overview.doctors'), value: doctors.length, icon: '👨‍⚕️' },
+              { label: t('vetHospitalManage.overview.departments'), value: departments.length, icon: '🏢' },
+              { label: t('vetHospitalManage.overview.services'), value: services.length, icon: '💊' },
+              { label: t('vetHospitalManage.overview.avgRating'), value: hospital.rating > 0 ? Number(hospital.rating).toFixed(1) : '—', icon: '⭐' },
+              { label: t('vetHospitalManage.overview.totalReviews'), value: hospital.totalReviews, icon: '💬' },
+              { label: t('common.status'), value: hospital.isActive ? t('common.active') : t('vetHospitalManage.overview.inactive'), icon: '🔘' },
             ].map(s => (
               <div key={s.label} className="vh-stat-card">
                 <div style={{ fontSize: '1.3rem' }}>{s.icon}</div>
@@ -554,17 +554,17 @@ const VetHospitalManage: React.FC = () => {
           </div>
           {stats && (
             <div className="card">
-              <h3 style={{ marginTop: 0 }}>Accepting Patients</h3>
+              <h3 style={{ marginTop: 0 }}>{t('vetHospitalManage.overview.acceptingPatients')}</h3>
               <p>{doctors.filter(d => d.isAcceptingPatients).length} of {doctors.length} doctors are accepting new patients</p>
             </div>
           )}
           <div className="card" style={{ marginTop: '1rem' }}>
-            <h3 style={{ marginTop: 0 }}>Quick Actions</h3>
+            <h3 style={{ marginTop: 0 }}>{t('vetHospitalManage.overview.quickActions')}</h3>
             <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
-              <button className="btn-secondary" onClick={() => { setActiveTab('doctors'); setShowAddDoctor(true) }}>+ Add Doctor</button>
-              <button className="btn-secondary" onClick={() => { setActiveTab('departments'); setShowAddDept(true) }}>+ Add Department</button>
-              <button className="btn-secondary" onClick={() => { setActiveTab('services'); setShowAddService(true) }}>+ Add Service</button>
-              <button className="btn-secondary" onClick={() => setActiveTab('settings')}>Edit Profile</button>
+              <button className="btn-secondary" onClick={() => { setActiveTab('doctors'); setShowAddDoctor(true) }}>+ {t('vetHospitalManage.modal.addDoctor')}</button>
+              <button className="btn-secondary" onClick={() => { setActiveTab('departments'); setShowAddDept(true) }}>+ {t('vetHospitalManage.modal.addDept')}</button>
+              <button className="btn-secondary" onClick={() => { setActiveTab('services'); setShowAddService(true) }}>+ {t('vetHospitalManage.modal.addService')}</button>
+              <button className="btn-secondary" onClick={() => setActiveTab('settings')}>{t('vetHospitalManage.editProfile')}</button>
             </div>
           </div>
         </div>
@@ -574,10 +574,10 @@ const VetHospitalManage: React.FC = () => {
       {activeTab === 'doctors' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '.5rem' }}>
-            <h3 style={{ margin: 0 }}>Staff ({doctors.length})</h3>
+            <h3 style={{ margin: 0 }}>{t('vetHospitalManage.doctors.staff')} ({doctors.length})</h3>
             <div style={{ display: 'flex', gap: '.5rem' }}>
-              <button className="btn-secondary" onClick={() => { setModalMsg(null); setInviteLink(''); setLinkCopied(''); setInviteForm({ email: '', firstName: '', lastName: '', phone: '', hospitalRole: 'staff', departmentId: '' }); setShowInviteDoctor(true) }}>✉ Invite New Doctor</button>
-              <button className="btn-primary" onClick={() => { setEditDoctor(null); setDoctorForm({ doctorId: '', hospitalRole: 'staff', employmentType: 'full_time', departmentId: '', title: '', consultationFee: '', isPrimaryHospital: false }); setShowAddDoctor(true) }}>+ Add Existing</button>
+              <button className="btn-secondary" onClick={() => { setModalMsg(null); setInviteLink(''); setLinkCopied(''); setInviteForm({ email: '', firstName: '', lastName: '', phone: '', hospitalRole: 'staff', departmentId: '' }); setShowInviteDoctor(true) }}>✉ {t('vetHospitalManage.doctors.inviteNew')}</button>
+              <button className="btn-primary" onClick={() => { setEditDoctor(null); setDoctorForm({ doctorId: '', hospitalRole: 'staff', employmentType: 'full_time', departmentId: '', title: '', consultationFee: '', isPrimaryHospital: false }); setShowAddDoctor(true) }}>+ {t('vetHospitalManage.doctors.addExisting')}</button>
             </div>
           </div>
 
@@ -592,13 +592,13 @@ const VetHospitalManage: React.FC = () => {
                   </span>
                   <span style={{ fontSize: '.78rem', color: '#92400e' }}>Expires {new Date(inv.expires_at).toLocaleDateString()}</span>
                   {inv.inviteUrl && <button type="button" className="btn-secondary" style={{ fontSize: '.72rem', padding: '.15rem .45rem' }} onClick={() => { navigator.clipboard.writeText(inv.inviteUrl); setLinkCopied(inv.id); setTimeout(() => setLinkCopied(''), 2000) }}>{linkCopied === inv.id ? '✓ Copied' : '📋 Copy Link'}</button>}
-                  <button className="btn-danger" style={{ fontSize: '.75rem', padding: '.2rem .5rem' }} onClick={() => handleRevokeInvite(inv.id)}>Revoke</button>
+                  <button className="btn-danger" style={{ fontSize: '.75rem', padding: '.2rem .5rem' }} onClick={() => handleRevokeInvite(inv.id)}>{t('vetHospitalManage.invite.revoke')}</button>
                 </div>
               ))}
             </div>
           )}
           {doctors.length === 0
-            ? <div className="empty-state"><div className="empty-state-icon">👨‍⚕️</div><p>No staff added yet</p></div>
+            ? <div className="empty-state"><div className="empty-state-icon">👨‍⚕️</div><p>{t('vetHospitalManage.doctors.emptyState')}</p></div>
             : <div className="vh-doctor-grid">
                 {doctors.map(doc => (
                   <div key={doc.id} className="vh-doctor-card">
@@ -608,12 +608,12 @@ const VetHospitalManage: React.FC = () => {
                     {doc.departmentId && <div className="vh-doctor-dept">{departments.find(d => d.id === doc.departmentId)?.name || 'Dept'}</div>}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem', marginTop: '.3rem' }}>
                       <span style={{ fontSize: '.75rem', color: doc.isAcceptingPatients ? '#059669' : '#dc2626' }}>
-                        {doc.isAcceptingPatients ? '● Accepting' : '● Not Accepting'}
+                        {doc.isAcceptingPatients ? `● ${t('vetHospitalManage.doctors.accepting')}` : `● ${t('vetHospitalManage.doctors.notAccepting')}`}
                       </span>
                     </div>
                     <div className="vh-doctor-actions">
-                      <button className="btn-secondary" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => openEditDoctor(doc)}>Edit</button>
-                      <button className="btn-danger" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => handleRemoveDoctor(doc)}>Remove</button>
+                      <button className="btn-secondary" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => openEditDoctor(doc)}>{t('common.edit')}</button>
+                      <button className="btn-danger" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => handleRemoveDoctor(doc)}>{t('common.remove')}</button>
                     </div>
                   </div>
                 ))}
@@ -625,11 +625,11 @@ const VetHospitalManage: React.FC = () => {
       {activeTab === 'departments' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>Departments ({departments.length})</h3>
-            <button className="btn-primary" onClick={() => { setEditDept(null); setDeptForm({ name: '', code: '', description: '', specializations: '', floorNumber: '', headDoctorId: '' }); setShowAddDept(true) }}>+ Add Department</button>
+            <h3 style={{ margin: 0 }}>{t('vetHospitalManage.departments.title')} ({departments.length})</h3>
+            <button className="btn-primary" onClick={() => { setEditDept(null); setDeptForm({ name: '', code: '', description: '', specializations: '', floorNumber: '', headDoctorId: '' }); setShowAddDept(true) }}>+ {t('vetHospitalManage.modal.addDept')}</button>
           </div>
           {departments.length === 0
-            ? <div className="empty-state"><div className="empty-state-icon">🏢</div><p>No departments yet</p></div>
+            ? <div className="empty-state"><div className="empty-state-icon">🏢</div><p>{t('vetHospitalManage.departments.emptyState')}</p></div>
             : <div className="vh-dept-grid">
                 {departments.map(dept => (
                   <div key={dept.id} className="vh-dept-card">
@@ -642,11 +642,11 @@ const VetHospitalManage: React.FC = () => {
                       </div>
                     )}
                     <div style={{ fontSize: '.8rem', color: 'var(--text-muted,#888)', marginBottom: '.5rem' }}>
-                      {doctors.filter(d => d.departmentId === dept.id).length} doctors
+                      {doctors.filter(d => d.departmentId === dept.id).length} {t('vetHospitalManage.departments.doctors')}
                     </div>
                     <div style={{ display: 'flex', gap: '.4rem' }}>
-                      <button className="btn-secondary" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => openEditDept(dept)}>Edit</button>
-                      <button className="btn-danger" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => handleDeleteDept(dept)}>Delete</button>
+                      <button className="btn-secondary" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => openEditDept(dept)}>{t('common.edit')}</button>
+                      <button className="btn-danger" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => handleDeleteDept(dept)}>{t('common.delete')}</button>
                     </div>
                   </div>
                 ))}
@@ -658,11 +658,11 @@ const VetHospitalManage: React.FC = () => {
       {activeTab === 'services' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>Services ({services.length})</h3>
-            <button className="btn-primary" onClick={() => { setEditService(null); setServiceForm({ serviceName: '', category: 'consultation', description: '', priceMin: '', priceMax: '', durationMinutes: '', requiresAppointment: false }); setShowAddService(true) }}>+ Add Service</button>
+            <h3 style={{ margin: 0 }}>{t('vetHospitalManage.services.title')} ({services.length})</h3>
+            <button className="btn-primary" onClick={() => { setEditService(null); setServiceForm({ serviceName: '', category: 'consultation', description: '', priceMin: '', priceMax: '', durationMinutes: '', requiresAppointment: false }); setShowAddService(true) }}>+ {t('vetHospitalManage.modal.addService')}</button>
           </div>
           {services.length === 0
-            ? <div className="empty-state"><div className="empty-state-icon">💊</div><p>No services yet</p></div>
+            ? <div className="empty-state"><div className="empty-state-icon">💊</div><p>{t('vetHospitalManage.services.emptyState')}</p></div>
             : <div className="vh-services-grid">
                 {services.map(svc => (
                   <div key={svc.id} className="vh-service-card">
@@ -677,8 +677,8 @@ const VetHospitalManage: React.FC = () => {
                     )}
                     {svc.durationMinutes && <div className="vh-service-duration">⏱ {svc.durationMinutes} min</div>}
                     <div style={{ display: 'flex', gap: '.4rem', marginTop: '.5rem' }}>
-                      <button className="btn-secondary" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => openEditService(svc)}>Edit</button>
-                      <button className="btn-danger" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => handleDeleteService(svc)}>Delete</button>
+                      <button className="btn-secondary" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => openEditService(svc)}>{t('common.edit')}</button>
+                      <button className="btn-danger" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => handleDeleteService(svc)}>{t('common.delete')}</button>
                     </div>
                   </div>
                 ))}
@@ -842,37 +842,37 @@ const VetHospitalManage: React.FC = () => {
       {activeTab === 'appointments' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '.75rem', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>Hospital Appointments</h3>
+            <h3 style={{ margin: 0 }}>{t('vetHospitalManage.appointments.title')}</h3>
             <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
               <select className="vh-select" value={bookingsStatusFilter} onChange={e => { setBookingsStatusFilter(e.target.value); setBookingsPage(0) }}>
-                <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="">{t('vetHospitalManage.appointments.allStatuses')}</option>
+                <option value="pending">{t('common.pending')}</option>
+                <option value="confirmed">{t('common.confirmed')}</option>
+                <option value="completed">{t('common.completed')}</option>
+                <option value="cancelled">{t('common.cancelled')}</option>
               </select>
               <button className="btn-secondary" onClick={() => hospital && loadBookings(hospital.id, bookingsPage, bookingsStatusFilter)}>↻ Refresh</button>
             </div>
           </div>
           {bookingsLoading ? (
-            <p style={{ textAlign: 'center', color: '#888', padding: '2rem 0' }}>Loading appointments...</p>
+            <p style={{ textAlign: 'center', color: '#888', padding: '2rem 0' }}>{t('vetHospitalManage.appointments.loading')}</p>
           ) : bookings.length === 0 ? (
             <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '.5rem' }}>📅</div>
-              <p>No appointments found{bookingsStatusFilter ? ` with status "${bookingsStatusFilter}"` : ''}</p>
+              <p>{t('vetHospitalManage.appointments.noAppointments')}{bookingsStatusFilter ? ` ${t('vetHospitalManage.appointments.withStatus', { status: bookingsStatusFilter })}` : ''}</p>
             </div>
           ) : (
             <>
               <table className="vh-admin-table">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Patient</th>
-                    <th>Doctor</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Reason</th>
+                    <th>{t('common.date')}</th>
+                    <th>{t('vetHospitalManage.appointments.time')}</th>
+                    <th>{t('vetHospitalManage.appointments.patient')}</th>
+                    <th>{t('vetHospitalManage.appointments.doctor')}</th>
+                    <th>{t('common.type')}</th>
+                    <th>{t('common.status')}</th>
+                    <th>{t('vetHospitalManage.appointments.reason')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -911,69 +911,69 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Settings ── */}
       {activeTab === 'settings' && (
         <form onSubmit={handleSettingsSave} className="vh-form">
-          <h3 style={{ marginTop: 0 }}>Hospital Profile</h3>
+          <h3 style={{ marginTop: 0 }}>{t('vetHospitalManage.settings.title')}</h3>
           <div className="form-row">
             <div className="form-group">
-              <label>Hospital Name *</label>
+              <label>{t('vetHospitals.form.hospitalName')}</label>
               <input required value={settingsForm.name || ''} onChange={e => setSettingsForm(f => ({ ...f, name: e.target.value }))} />
             </div>
             <div className="form-group">
-              <label>Type</label>
+              <label>{t('common.type')}</label>
               <select value={settingsForm.hospitalType || 'clinic'} onChange={e => setSettingsForm(f => ({ ...f, hospitalType: e.target.value as any }))}>
                 {Object.entries(HOSPITAL_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>
           </div>
           <div className="form-group">
-            <label>Tagline</label>
+            <label>{t('vetHospitals.form.tagline')}</label>
             <input value={settingsForm.tagline || ''} onChange={e => setSettingsForm(f => ({ ...f, tagline: e.target.value }))} />
           </div>
           <div className="form-group">
-            <label>Description</label>
+            <label>{t('common.description')}</label>
             <textarea rows={3} value={settingsForm.description || ''} onChange={e => setSettingsForm(f => ({ ...f, description: e.target.value }))} />
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>City</label>
+              <label>{t('vetHospitals.form.city')}</label>
               <input value={settingsForm.city || ''} onChange={e => setSettingsForm(f => ({ ...f, city: e.target.value }))} />
             </div>
             <div className="form-group">
-              <label>State</label>
+              <label>{t('vetHospitals.form.state')}</label>
               <input value={settingsForm.state || ''} onChange={e => setSettingsForm(f => ({ ...f, state: e.target.value }))} />
             </div>
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>Phone</label>
+              <label>{t('vetHospitals.form.phone')}</label>
               <input value={settingsForm.phone || ''} onChange={e => setSettingsForm(f => ({ ...f, phone: e.target.value }))} />
             </div>
             <div className="form-group">
-              <label>Email</label>
+              <label>{t('vetHospitals.form.email')}</label>
               <input type="email" value={settingsForm.email || ''} onChange={e => setSettingsForm(f => ({ ...f, email: e.target.value }))} />
             </div>
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>Website</label>
+              <label>{t('vetHospitals.form.website')}</label>
               <input value={settingsForm.website || ''} onChange={e => setSettingsForm(f => ({ ...f, website: e.target.value }))} />
             </div>
             <div className="form-group">
-              <label>Full Address</label>
+              <label>{t('vetHospitalManage.settings.fullAddress')}</label>
               <input value={settingsForm.address || ''} onChange={e => setSettingsForm(f => ({ ...f, address: e.target.value }))} />
             </div>
           </div>
           <div style={{ display: 'flex', gap: '1.5rem', margin: '.6rem 0 1rem' }}>
             <label className="vh-toggle" style={{ marginBottom: '.75rem' }}>
               <input type="checkbox" checked={!!settingsForm.hasEmergency} onChange={e => setSettingsForm(f => ({ ...f, hasEmergency: e.target.checked }))} />
-              Has Emergency Services
+              {t('vetHospitalManage.settings.hasEmergency')}
             </label>
             <label className="vh-toggle">
               <input type="checkbox" checked={!!settingsForm.is24Hours} onChange={e => setSettingsForm(f => ({ ...f, is24Hours: e.target.checked }))} />
-              Open 24 Hours
+              {t('vetHospitalManage.settings.open24h')}
             </label>
           </div>
           <div className="form-actions">
-            <button type="submit" className="btn-primary">Save Changes</button>
+            <button type="submit" className="btn-primary">{t('vetHospitalManage.settings.saveBtn')}</button>
           </div>
         </form>
       )}
@@ -1002,8 +1002,8 @@ const VetHospitalManage: React.FC = () => {
                   ⚠️ This link expires in 7 days. The doctor will use it to create their account and join the hospital automatically.
                 </p>
                 <div className="form-actions" style={{ marginTop: '1rem' }}>
-                  <button type="button" className="btn-secondary" onClick={() => setShowInviteDoctor(false)}>Close</button>
-                  <button type="button" className="btn-primary" onClick={() => { setInviteLink(''); setModalMsg(null); setLinkCopied('') }}>Invite Another</button>
+                  <button type="button" className="btn-secondary" onClick={() => setShowInviteDoctor(false)}>{t('common.close')}</button>
+                  <button type="button" className="btn-primary" onClick={() => { setInviteLink(''); setModalMsg(null); setLinkCopied('') }}>{t('vetHospitalManage.invite.inviteAnother')}</button>
                 </div>
               </div>
             ) : (
@@ -1011,26 +1011,26 @@ const VetHospitalManage: React.FC = () => {
               <form onSubmit={handleInviteSubmit} className="vh-form">
                 {modalMsg && <div className={`modal-alert ${modalMsg.isError ? 'error' : 'success'}`}>{modalMsg.text}</div>}
                 <div className="form-group">
-                  <label>Email Address *</label>
+                  <label>{t('vetHospitalManage.invite.emailAddress')}</label>
                   <input type="email" required value={inviteForm.email} onChange={e => setInviteForm(f => ({ ...f, email: e.target.value }))} placeholder="doctor@example.com" />
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>First Name</label>
+                    <label>{t('vetHospitalManage.invite.firstName')}</label>
                     <input value={inviteForm.firstName} onChange={e => setInviteForm(f => ({ ...f, firstName: e.target.value }))} placeholder="(optional)" />
                   </div>
                   <div className="form-group">
-                    <label>Last Name</label>
+                    <label>{t('vetHospitalManage.invite.lastName')}</label>
                     <input value={inviteForm.lastName} onChange={e => setInviteForm(f => ({ ...f, lastName: e.target.value }))} placeholder="(optional)" />
                   </div>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Phone</label>
+                    <label>{t('vetHospitals.form.phone')}</label>
                     <input value={inviteForm.phone} onChange={e => setInviteForm(f => ({ ...f, phone: e.target.value }))} placeholder="(optional)" />
                   </div>
                   <div className="form-group">
-                    <label>Hospital Role</label>
+                    <label>{t('vetHospitalManage.modal.hospitalRole')}</label>
                     <select value={inviteForm.hospitalRole} onChange={e => setInviteForm(f => ({ ...f, hospitalRole: e.target.value }))}>
                       {HOSPITAL_ROLES.map(r => <option key={r} value={r}>{r.replace(/_/g,' ')}</option>)}
                     </select>
@@ -1038,7 +1038,7 @@ const VetHospitalManage: React.FC = () => {
                 </div>
                 {departments.length > 0 && (
                   <div className="form-group">
-                    <label>Department</label>
+                    <label>{t('vetHospitalManage.invite.department')}</label>
                     <select value={inviteForm.departmentId} onChange={e => setInviteForm(f => ({ ...f, departmentId: e.target.value }))}>
                       <option value="">— None —</option>
                       {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -1046,8 +1046,8 @@ const VetHospitalManage: React.FC = () => {
                   </div>
                 )}
                 <div className="form-actions">
-                  <button type="button" className="btn-secondary" onClick={() => setShowInviteDoctor(false)}>Cancel</button>
-                  <button type="submit" className="btn-primary">Create Invitation</button>
+                  <button type="button" className="btn-secondary" onClick={() => setShowInviteDoctor(false)}>{t('common.cancel')}</button>
+                  <button type="submit" className="btn-primary">{t('vetHospitalManage.invite.createInvitation')}</button>
                 </div>
               </form>
             )}
@@ -1060,12 +1060,12 @@ const VetHospitalManage: React.FC = () => {
         <div className="modal-overlay" onClick={closeDocModal}>
           <div className="modal-content" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={closeDocModal}>✕</button>
-            <h2>{editDoctor ? 'Edit Staff Member' : 'Add Doctor'}</h2>
+            <h2>{editDoctor ? t('vetHospitalManage.modal.editDoctor') : t('vetHospitalManage.modal.addDoctor')}</h2>
             <form onSubmit={handleDoctorSubmit} className="vh-form">
               {modalMsg && <div className={`modal-alert ${modalMsg.isError ? 'error' : 'success'}`}>{modalMsg.text}</div>}
               {!editDoctor && (
                 <div className="form-group">
-                  <label>Select Veterinarian *</label>
+                  <label>{t('vetHospitalManage.modal.selectVet')}</label>
                   {selectedVetName ? (
                     <div className="vet-selected-chip">
                       <span>👨‍⚕️ {selectedVetName}</span>
@@ -1138,13 +1138,13 @@ const VetHospitalManage: React.FC = () => {
               )}
               <div className="form-row">
                 <div className="form-group">
-                  <label>Hospital Role</label>
+                  <label>{t('vetHospitalManage.modal.hospitalRole')}</label>
                   <select value={doctorForm.hospitalRole} onChange={e => setDoctorForm(f => ({ ...f, hospitalRole: e.target.value }))}>
                     {HOSPITAL_ROLES.map(r => <option key={r} value={r}>{r.replace(/_/g,' ')}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Employment Type</label>
+                  <label>{t('vetHospitalManage.modal.employmentType')}</label>
                   <select value={doctorForm.employmentType} onChange={e => setDoctorForm(f => ({ ...f, employmentType: e.target.value }))}>
                     {EMPLOYMENT_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g,' ')}</option>)}
                   </select>
@@ -1152,11 +1152,11 @@ const VetHospitalManage: React.FC = () => {
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Title / Designation</label>
+                  <label>{t('vetHospitalManage.modal.titleDesignation')}</label>
                   <input value={doctorForm.title} onChange={e => setDoctorForm(f => ({ ...f, title: e.target.value }))} placeholder="Dr., Prof., etc." />
                 </div>
                 <div className="form-group">
-                  <label>Department</label>
+                  <label>{t('vetHospitalManage.invite.department')}</label>
                   <select value={doctorForm.departmentId} onChange={e => setDoctorForm(f => ({ ...f, departmentId: e.target.value }))}>
                     <option value="">— None —</option>
                     {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -1164,16 +1164,16 @@ const VetHospitalManage: React.FC = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label>Consultation Fee ({settings.currency})</label>
+                <label>{t('vetHospitalManage.modal.consultationFee', { currency: settings.currency })}</label>
                 <input type="number" value={doctorForm.consultationFee} onChange={e => setDoctorForm(f => ({ ...f, consultationFee: e.target.value }))} placeholder="e.g. 500" min="0" />
               </div>
               <label className="vh-toggle" style={{ marginBottom: '.75rem' }}>
                 <input type="checkbox" checked={doctorForm.isPrimaryHospital} onChange={e => setDoctorForm(f => ({ ...f, isPrimaryHospital: e.target.checked }))} />
-                Primary hospital for this doctor
+                {t('vetHospitalManage.modal.primaryHospital')}
               </label>
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={closeDocModal}>Cancel</button>
-                <button type="submit" className="btn-primary">{editDoctor ? 'Save Changes' : 'Add Doctor'}</button>
+                <button type="button" className="btn-secondary" onClick={closeDocModal}>{t('common.cancel')}</button>
+                <button type="submit" className="btn-primary">{editDoctor ? t('vetHospitalManage.settings.saveBtn') : t('vetHospitalManage.modal.addDoctor')}</button>
               </div>
             </form>
           </div>
@@ -1185,16 +1185,16 @@ const VetHospitalManage: React.FC = () => {
         <div className="modal-overlay" onClick={closeDeptModal}>
           <div className="modal-content" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={closeDeptModal}>✕</button>
-            <h2>{editDept ? 'Edit Department' : 'Add Department'}</h2>
+            <h2>{editDept ? t('vetHospitalManage.modal.editDept') : t('vetHospitalManage.modal.addDept')}</h2>
             <form onSubmit={handleDeptSubmit} className="vh-form">
               {modalMsg && <div className={`modal-alert ${modalMsg.isError ? 'error' : 'success'}`}>{modalMsg.text}</div>}
               <div className="form-row">
                 <div className="form-group">
-                  <label>Department Name *</label>
+                  <label>{t('vetHospitalManage.modal.deptName')}</label>
                   <input required value={deptForm.name} onChange={e => setDeptForm(f => ({ ...f, name: e.target.value }))} />
                 </div>
                 <div className="form-group">
-                  <label>Code</label>
+                  <label>{t('vetHospitalManage.modal.code')}</label>
                   <input value={deptForm.code} onChange={e => setDeptForm(f => ({ ...f, code: e.target.value }))} placeholder="e.g. CARDIO" />
                 </div>
               </div>
@@ -1203,16 +1203,16 @@ const VetHospitalManage: React.FC = () => {
                 <textarea rows={2} value={deptForm.description} onChange={e => setDeptForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div className="form-group">
-                <label>Specializations (comma-separated)</label>
+                <label>{t('vetHospitalManage.modal.specializations')}</label>
                 <input value={deptForm.specializations} onChange={e => setDeptForm(f => ({ ...f, specializations: e.target.value }))} placeholder="Cardiology, Neurology" />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Floor / Location</label>
+                  <label>{t('vetHospitalManage.modal.floorLocation')}</label>
                   <input value={deptForm.floorNumber} onChange={e => setDeptForm(f => ({ ...f, floorNumber: e.target.value }))} placeholder="Floor 2, Block A" />
                 </div>
                 <div className="form-group">
-                  <label>Head Doctor</label>
+                  <label>{t('vetHospitalManage.modal.headDoctor')}</label>
                   <select value={deptForm.headDoctorId} onChange={e => setDeptForm(f => ({ ...f, headDoctorId: e.target.value }))}>
                     <option value="">— None —</option>
                     {doctors.map(d => <option key={d.doctorId} value={d.doctorId}>{d.doctorName || d.doctorId}</option>)}
@@ -1220,8 +1220,8 @@ const VetHospitalManage: React.FC = () => {
                 </div>
               </div>
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={closeDeptModal}>Cancel</button>
-                <button type="submit" className="btn-primary">{editDept ? 'Save Changes' : 'Create Department'}</button>
+                <button type="button" className="btn-secondary" onClick={closeDeptModal}>{t('common.cancel')}</button>
+                <button type="submit" className="btn-primary">{editDept ? t('vetHospitalManage.settings.saveBtn') : t('vetHospitalManage.modal.createDept')}</button>
               </div>
             </form>
           </div>
@@ -1233,16 +1233,16 @@ const VetHospitalManage: React.FC = () => {
         <div className="modal-overlay" onClick={closeServiceModal}>
           <div className="modal-content" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={closeServiceModal}>✕</button>
-            <h2>{editService ? 'Edit Service' : 'Add Service'}</h2>
+            <h2>{editService ? t('vetHospitalManage.modal.editService') : t('vetHospitalManage.modal.addService')}</h2>
             <form onSubmit={handleServiceSubmit} className="vh-form">
               {modalMsg && <div className={`modal-alert ${modalMsg.isError ? 'error' : 'success'}`}>{modalMsg.text}</div>}
               <div className="form-row">
                 <div className="form-group">
-                  <label>Service Name *</label>
+                  <label>{t('vetHospitalManage.modal.serviceName')}</label>
                   <input required value={serviceForm.serviceName} onChange={e => setServiceForm(f => ({ ...f, serviceName: e.target.value }))} placeholder="e.g. Abdominal Ultrasound" />
                 </div>
                 <div className="form-group">
-                  <label>Category</label>
+                  <label>{t('vetHospitalManage.modal.category')}</label>
                   <select value={serviceForm.category} onChange={e => setServiceForm(f => ({ ...f, category: e.target.value }))}>
                     {SERVICE_CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
                   </select>
@@ -1254,25 +1254,25 @@ const VetHospitalManage: React.FC = () => {
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Min Price ({settings.currency})</label>
+                  <label>{t('vetHospitalManage.modal.minPrice', { currency: settings.currency })}</label>
                   <input type="number" value={serviceForm.priceMin} onChange={e => setServiceForm(f => ({ ...f, priceMin: e.target.value }))} min="0" />
                 </div>
                 <div className="form-group">
-                  <label>Max Price ({settings.currency})</label>
+                  <label>{t('vetHospitalManage.modal.maxPrice', { currency: settings.currency })}</label>
                   <input type="number" value={serviceForm.priceMax} onChange={e => setServiceForm(f => ({ ...f, priceMax: e.target.value }))} min="0" />
                 </div>
               </div>
               <div className="form-group">
-                <label>Duration (minutes)</label>
+                <label>{t('vetHospitalManage.modal.duration')}</label>
                 <input type="number" value={serviceForm.durationMinutes} onChange={e => setServiceForm(f => ({ ...f, durationMinutes: e.target.value }))} min="5" step="5" />
               </div>
               <label className="vh-toggle" style={{ marginBottom: '.75rem' }}>
                 <input type="checkbox" checked={serviceForm.requiresAppointment} onChange={e => setServiceForm(f => ({ ...f, requiresAppointment: e.target.checked }))} />
-                Requires appointment
+                {t('vetHospitalManage.modal.requiresAppointment')}
               </label>
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={closeServiceModal}>Cancel</button>
-                <button type="submit" className="btn-primary">{editService ? 'Save Changes' : 'Add Service'}</button>
+                <button type="button" className="btn-secondary" onClick={closeServiceModal}>{t('common.cancel')}</button>
+                <button type="submit" className="btn-primary">{editService ? t('vetHospitalManage.settings.saveBtn') : t('vetHospitalManage.modal.createService')}</button>
               </div>
             </form>
           </div>
@@ -1306,7 +1306,7 @@ const VetHospitalManage: React.FC = () => {
               </div>
             )}
             <div className="form-actions">
-              <button type="button" className="btn-secondary" onClick={() => { setReviewForm(null); setModalMsg(null) }}>Cancel</button>
+              <button type="button" className="btn-secondary" onClick={() => { setReviewForm(null); setModalMsg(null) }}>{t('common.cancel')}</button>
               <button
                 type="button"
                 className={reviewForm.status === 'approved' ? 'btn-primary' : 'btn-danger'}

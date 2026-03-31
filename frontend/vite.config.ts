@@ -29,6 +29,11 @@ export default defineConfig({
         changeOrigin: true,
         configure: silenceProxyErrors,
       },
+      '/uploads': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        configure: silenceProxyErrors,
+      },
       '/ws': {
         target: 'http://localhost:3000',
         changeOrigin: true,

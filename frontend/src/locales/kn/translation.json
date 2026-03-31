@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
     "cancel": "ರದ್ದುಮಾಡಿ",
@@ -622,35 +622,78 @@
     "noMatchFilter": "No consultations match this filter",
     "noHistory": "No consultation history yet",
     "historyHint": "Completed and cancelled consultations will appear here for reference",
-    "reschedule": {
-      "title": "🔄 Reschedule Appointment",
-      "originalLabel": "⚠️ Original Appointment",
-      "dateLabel": "Select New Date *",
-      "slotsTitle": "Available Time Slots",
-      "noSlots": "No available slots for this date. Please select another date.",
-      "confirming": "Rescheduling...",
-      "confirmBtn": "✓ Confirm Reschedule"
-    },
-    "actionLog": {
-      "title": "📋 Action Log",
-      "loading": "Loading action history...",
-      "empty": "No action history found for this booking.",
-      "by": "by",
-      "system": "System",
-      "newSlot": "New slot:",
-      "approved": "(approved ✓)",
-      "awaitingApproval": "(awaiting doctor approval)",
-      "autoConfirmed": "(auto-confirmed)",
-      "cancelledBy": "Cancelled by",
-      "reason": "Reason:"
-    },
     "cancelModal": {
       "title": "❌ Cancel Booking",
       "warning": "⚠️ This action cannot be undone. The appointment will be cancelled.",
       "reasonLabel": "Reason for cancellation",
       "reasonPlaceholder": "Please provide a reason for cancellation...",
       "keepBooking": "Keep Booking",
-      "confirmCancel": "Confirm Cancellation"
+      "confirmCancel": "Confirm Cancellation",
+      "quickReasons": "Quick reasons:",
+      "refundPolicy": "Refund Policy:",
+      "reasonPresetsVet": ["Schedule conflict", "Emergency", "Patient request", "Unable to attend"],
+      "reasonPresetsPatient": ["Found another doctor", "Schedule conflict", "No longer needed", "Financial reasons"]
+    },
+    "loading": "Loading consultations...",
+    "failedToLoad": "Failed to load data",
+    "failedToConfirm": "Failed to confirm booking",
+    "failedToCancel": "Failed to cancel booking",
+    "failedToReschedule": "Failed to reschedule booking",
+    "failedToStart": "Failed to start consultation",
+    "pastTimeError": "Cannot reschedule to a past time. Please select a future slot.",
+    "actionLabels": {
+      "created": "📅 Booking Created",
+      "confirmed": "✅ Confirmed by Doctor",
+      "cancelled": "❌ Booking Cancelled",
+      "rescheduled": "🔄 Rescheduled"
+    },
+    "missedLabels": {
+      "doctorNoShow": "Doctor No-Show",
+      "patientNoShow": "Patient No-Show",
+      "bothNoShow": "Both No-Show"
+    },
+    "reschedule": {
+      "title": "🔄 Reschedule Appointment",
+      "originalLabel": "⚠️ Original Appointment",
+      "selectDoctor": "Select Doctor",
+      "selectDoctorOptional": "Select Doctor (optional)",
+      "keepCurrentDoctor": "— Keep current doctor —",
+      "currentDoctor": "(current)",
+      "loadingDoctors": "Loading doctors...",
+      "dateLabel": "Select New Date *",
+      "slotsTitle": "Available Time Slots",
+      "noSlots": "No available slots for this date. Please select another date.",
+      "selectAnotherDate": "Please select another date.",
+      "approvalNote": "ℹ️ Your rescheduled appointment will need doctor approval before you can join.",
+      "confirming": "Rescheduling...",
+      "confirmBtn": "✓ Confirm Reschedule",
+      "rescheduleCount": "📊 Reschedule {{current}} of {{max}} allowed"
+    },
+    "noMatchAppointments": "No appointments match this filter",
+    "cancelledByYou": "🙋 Cancelled by you",
+    "cancelledByOther": "🔔 Cancelled by the other party",
+    "rescheduledNotice": "🔄 This booking was rescheduled. A new appointment was created to replace it.",
+    "actionLog": {
+      "title": "📋 Action Log",
+      "loading": "Loading action history...",
+      "empty": "No action history found for this booking.",
+      "close": "Close",
+      "newSlot": "New slot:",
+      "approved": "(approved ✓)",
+      "awaitingApproval": "(awaiting doctor approval)",
+      "autoConfirmed": "(auto-confirmed)",
+      "cancelledBy": "Cancelled by {{role}}.",
+      "reason": "Reason: {{reason}}"
+    },
+    "herdLevel": "Herd-level",
+    "missedMessages": {
+      "youMissed": "⚠️ You missed this appointment.",
+      "bothMissed": "⚠️ You and the doctor both missed this appointment.",
+      "rescheduleAnytime": "You may reschedule at any time.",
+      "rescheduleRemaining": "You have {{count}} reschedule(s) remaining.",
+      "rescheduleUsed": "You have used your reschedule allowance for this booking.",
+      "patientNoJoin": "🙋 The patient did not join the session. They may reschedule.",
+      "neitherJoined": "❌ Neither party joined this session. The patient may reschedule."
     }
   },
   "animals": {
@@ -850,6 +893,41 @@
     "noEventsDesc": "ಪ್ರಸ್ತುತ ಫಿಲ್ಟರ್‌ಗಳೊಂದಿಗೆ ಈ ಪ್ರಾಣಿಗೆ ಈವೆಂಟ್‌ಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
     "selectAnimalFirst": "ಅವರ ಜೀವನ ಟೈಮ್‌ಲೈನ್ ವೀಕ್ಷಿಸಲು ಒಂದು ಪ್ರಾಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
     "distribution": "ಈವೆಂಟ್ ವಿತರಣೆ",
+    "loadingAnimals": "Loading animals...",
+    "loadingTimeline": "Loading timeline...",
+    "noMatching": "No matching events",
+    "noEventsYet": "No events yet",
+    "tryClearingFilters": "Try clearing filters.",
+    "noEventsFound": "No timeline events found.",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "oldest": "Oldest",
+    "newest": "Newest",
+    "refresh": "Refresh",
+    "severity": "Severity",
+    "recordedBy": "Recorded by",
+    "details": "Details",
+    "openRecord": "Open Record",
+    "consultation": "Consultation",
+    "openFullRecord": "Open Full Record",
+    "viewConsultation": "View Consultation",
+    "viewPrescriptions": "View Prescriptions",
+    "stats": {
+      "totalEvents": "Total Events",
+      "eventTypes": "Event Types",
+      "activeItems": "Active Items",
+      "highSeverity": "High Severity"
+    },
+    "filters": {
+      "title": "Filters",
+      "typesToShow": "TYPES TO SHOW",
+      "dateRange": "DATE RANGE",
+      "from": "From",
+      "to": "To",
+      "clearAll": "Clear All",
+      "apply": "Apply",
+      "clearFilters": "Clear Filters"
+    },
     "detail": {
       "type": "ಪ್ರಕಾರ",
       "date": "ದಿನಾಂಕ",
@@ -1032,7 +1110,34 @@
       "normalRange": "Normal Range",
       "labName": "Lab Name",
       "abnormalLabel": "Result is abnormal",
-      "interpretation": "Interpretation"
+      "interpretation": "Interpretation",
+      "notes": "Notes",
+      "status": "Status",
+      "statusPending": "Pending",
+      "statusInProgress": "In Progress",
+      "statusCompleted": "Completed",
+      "allergyMild": "Mild",
+      "allergyModerate": "Moderate",
+      "allergySevere": "Severe",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "recordTitlePlaceholder": "Record title...",
+      "contentPlaceholder": "Detailed description...",
+      "vaccineNamePlaceholder": "e.g., Rabies, DHPP...",
+      "vaccineTypePlaceholder": "e.g., Core, Non-core...",
+      "dosagePlaceholder": "e.g., 1ml",
+      "reactionPlaceholder": "Any adverse reactions...",
+      "weightPlaceholder": "Enter weight...",
+      "notesPlaceholder": "Any notes...",
+      "allergenPlaceholder": "e.g., Chicken, Penicillin...",
+      "reactionDescPlaceholder": "Describe the reaction...",
+      "testNamePlaceholder": "e.g., Complete Blood Count...",
+      "testCategoryPlaceholder": "e.g., Hematology, Biochemistry...",
+      "resultPlaceholder": "Test result...",
+      "normalRangePlaceholder": "e.g., 5.5-8.5",
+      "unitPlaceholder": "e.g., mg/dL, mmol/L...",
+      "interpretationPlaceholder": "Clinical interpretation..."
     },
     "recordTypes": {
       "diagnosis": "ರೋಗನಿರ್ಣಯ",
@@ -1049,7 +1154,16 @@
       "normal": "ಸಾಮಾನ್ಯ",
       "high": "ಹೆಚ್ಚು",
       "critical": "ಗಂಭೀರ"
-    }
+    },
+    "loading": "Loading medical records...",
+    "failedToLoad": "Failed to load data",
+    "failedToSaveRecord": "Failed to save record",
+    "failedToSaveVaccination": "Failed to save vaccination",
+    "failedToSaveWeight": "Failed to save weight",
+    "failedToSaveAllergy": "Failed to save allergy",
+    "failedToSaveLabResult": "Failed to save lab result",
+    "selectPetGeneric": "Select a pet",
+    "selectPetGenericSub": "Choose a pet from the dropdown above"
   },
   "settings": {
     "pageTitle": "⚙️ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
@@ -1239,6 +1353,34 @@
       "created": "Group created",
       "deleted": "Group deleted",
       "deleteConfirm": "Delete this group? Animals will be unlinked."
+    },
+    "manageAnimals": "🐄 ಪ್ರಾಣಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+    "bookConsultation": "📋 ಸಂಪರ್ಕ ಬುಕ್ ಮಾಡಿ",
+    "manage": {
+      "title": "{{name}} - ಪ್ರಾಣಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+      "inGroup": "ಗುಂಪಿನಲ್ಲಿ {{count}} ಪ್ರಾಣಿ(ಗಳು)",
+      "emptyGroup": "ಈ ಗುಂಪಿನಲ್ಲಿ ಇನ್ನೂ ಪ್ರಾಣಿಗಳಿಲ್ಲ.",
+      "registerAnimal": "ಪ್ರಾಣಿಯನ್ನು ನೋಂದಿಸಿ",
+      "first": "ಮೊದಲು ",
+      "available": "ನಿಯೋಜಿಸಬಹುದಾದ ಪ್ರಾಣಿಗಳು",
+      "searchPlaceholder": "ಪ್ರಾಣಿಗಳನ್ನು ಹುಡುಕಿ...",
+      "noAnimals": "ಲಭ್ಯವಿರುವ ಪ್ರಾಣಿಗಳಿಲ್ಲ.",
+      "registerFirst": "ಮೊದಲು ಪ್ರಾಣಿಗಳನ್ನು ನೋಂದಿಸಿ",
+      "toGetStarted": " ಪ್ರಾರಂಭಿಸಲು.",
+      "noMatch": "ಹುಡುಕಾಟಕ್ಕೆ ಹೊಂದಿಕೆಯಾಗುವ ಪ್ರಾಣಿಗಳಿಲ್ಲ.",
+      "allAssigned": "ಎಲ್ಲಾ ಪ್ರಾಣಿಗಳು ಗುಂಪುಗಳಿಗೆ ನಿಯೋಜಿಸಲಾಗಿದೆ.",
+      "assign": "ನಿಯೋಜಿಸಿ",
+      "assignSuccess": "ಪ್ರಾಣಿ ಗುಂಪಿಗೆ ನಿಯೋಜಿಸಲಾಗಿದೆ",
+      "assignFailed": "ಪ್ರಾಣಿಯನ್ನು ನಿಯೋಜಿಸಲು ವಿಫಲವಾಯಿತು",
+      "removeSuccess": "ಪ್ರಾಣಿ ಗುಂಪಿನಿಂದ ತೆಗೆದುಹಾಕಲಾಗಿದೆ",
+      "removeFailed": "ಪ್ರಾಣಿಯನ್ನು ತೆಗೆದುಹಾಕಲು ವಿಫಲವಾಯಿತು",
+      "loadFailed": "ಗುಂಪು ಪ್ರಾಣಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಯಿತು"
+    },
+    "reassign": {
+      "title": "ಪ್ರಾಣಿಯನ್ನು ಮರುನಿಯೋಜನೆ ಮಾಡಿ",
+      "currentGroup": "ಪ್ರಸ್ತುತ ಗುಂಪು: {{group}}",
+      "moveMessage": "ಈ ಪ್ರಾಣಿಯನ್ನು {{targetGroup}} ಗುಂಪಿಗೆ ಸ್ಥಳಾಂತರಿಸಬೇಕೇ?",
+      "confirmBtn": "ಹೌದು, ಪ್ರಾಣಿಯನ್ನು ಸ್ಥಳಾಂತರಿಸಿ"
     }
   },
   "locationManagement": {
@@ -1246,6 +1388,8 @@
     "subtitle": "Manage barns, pens, paddocks, and facility locations",
     "viewGrid": "ಗ್ರಿಡ್",
     "viewTree": "ಟ್ರೀ",
+    "viewMap": "ನಕ್ಶೆ",
+    "mapTitle": "ಸ್ಥಳ ನಕ್ಶೆ",
     "newLocation": "+ New Location",
     "selectEnterprise": "Select Enterprise...",
     "emptyEnterprise": "Select an Enterprise",
@@ -1261,7 +1405,24 @@
       "editTitle": "Edit Location",
       "createTitle": "Create Location",
       "parentDefault": "None (Top Level)",
-      "validation": "Name and type are required"
+      "validation": "Name and type are required",
+      "updateBtn": "ಸ್ಥಳ ನವೀಕರಿಸಿ",
+      "createBtn": "ಸ್ಥಳ ರಚಿಸಿ"
+    },
+    "form": {
+      "name": "ಸ್ಥಳದ ಹೆಸರು *",
+      "type": "ಸ್ಥಳ ಪ್ರಕಾರ *",
+      "parentLocation": "ಮೂಲ ಸ್ಥಳ",
+      "capacity": "ಸಾಮರ್ಥ್ಯ",
+      "area": "ಪ್ರದೇಶ (ಚ.ಮೀ)",
+      "gpsLatitude": "GPS ಅಕ್ಷಾಂಶ",
+      "gpsLongitude": "GPS ರೇಖಾಂಶ"
+    },
+    "toasts": {
+      "updated": "ಸ್ಥಳ ನವೀಕರಿಸಲಾಗಿದೆ!",
+      "created": "ಸ್ಥಳ ರಚಿಸಲಾಗಿದೆ!",
+      "deleted": "ಸ್ಥಳ ಅಳಿಸಲಾಗಿದೆ!",
+      "deleteConfirm": "ಈ ಸ್ಥಳವನ್ನು ಅಳಿಸಬೇಕೇ?"
     }
   },
   "movementLog": {
@@ -1406,7 +1567,11 @@
       "open": "⏳ Open"
     },
     "resolve": "Resolve",
-    "emptyObservations": "No observations recorded yet."
+    "emptyObservations": "No observations recorded yet.",
+    "allObservations": "📋 All Observations",
+    "errors": {
+      "failedToResolve": "Failed to resolve observation"
+    }
   },
   "breedingManager": {
     "pageTitle": "🧬 Breeding & Genetics Manager",
@@ -1512,7 +1677,54 @@
     "lowStockAlerts": "⚠️ Low Stock Alerts",
     "allOk": "All stock levels OK!",
     "consumptionByType": "Consumption by Type (30 days)",
-    "dailyTrend": "Daily Consumption Trend"
+    "dailyTrend": "Daily Consumption Trend",
+    "selectEnterprise": "Select Enterprise...",
+    "selectDefault": "-- Select --",
+    "form": {
+      "editTitle": "ಮೇವನು ಸಂಪಾದಿಸಿ",
+      "createTitle": "ಮೇವನು ಸೇರಿಸಿ",
+      "name": "ಹೆಸರು *",
+      "feedType": "ಮೇವನ ಪ್ರಕಾರ *",
+      "brand": "ಬ್ರಾಂಡ್",
+      "batchNumber": "ಬ್ಯಾಚ್ ಸಂಖ್ಯೆ",
+      "quantityInStock": "ದಾಸ್ತಾನಿನಲ್ಲಿರುವ ಪ್ರಮಾಣ *",
+      "unit": "ಘಟಕ *",
+      "minimumStockLevel": "ಕನಿಷ್ಠ ದಾಸ್ತಾನು ಮಟ್ಟ",
+      "costPerUnit": "ಪ್ರತಿ ಘಟಕ ವೆಚ್ಚ",
+      "expiryDate": "ಅವಧಿ ದಿನಾಂಕ",
+      "storageLocation": "ಸಂಗ್ರಹಣೆ ಸ್ಥಳ",
+      "supplier": "ಪೂರೈಕೆದಾರ"
+    },
+    "consumptionForm": {
+      "title": "ಬಳಕೆ ದಾಖಲಿಸಿ",
+      "feed": "ಮೇವನು",
+      "selectFeed": "ಮೇವನು ಆಯ್ಕೆಮಾಡಿ",
+      "quantityUsed": "ಬಳಸಿದ ಪ್ರಮಾಣ *",
+      "submitBtn": "ಬಳಕೆ ದಾಖಲಿಸಿ"
+    },
+    "headers": {
+      "stock": "ದಾಸ್ತಾನು",
+      "minLevel": "ಕನಿಷ್ಠ ಮಟ್ಟ",
+      "costPerUnit": "ಘಟಕಕ್ಕೆ ವೆಚ್ಚ",
+      "expiry": "ಅವಧಿ",
+      "location": "ಸ್ಥಳ"
+    },
+    "analytics": {
+      "used": "ಬಳಸಿದ್ದು",
+      "cost": "ವೆಚ್ಚ"
+    },
+    "toasts": {
+      "feedUpdated": "ಮೇವನು ನವೀಕರಿಸಲಾಗಿದೆ!",
+      "feedAdded": "ಮೇವನು ಸೇರಿಸಲಾಗಿದೆ!",
+      "saveFailed": "ಮೇವನು ಉಳಿಸಲು ವಿಫಲವಾಯಿತು",
+      "restocked": "ಮರುದಾಸ್ತಾನು ಯಶಸ್ವಿ!",
+      "restockFailed": "ಮರುದಾಸ್ತಾನು ವಿಫಲವಾಯಿತು",
+      "consumptionLogged": "ಬಳಕೆ ದಾಖಲಾಗಿದೆ!",
+      "consumptionFailed": "ಬಳಕೆ ದಾಖಲಿಸಲು ವಿಫಲವಾಯಿತು",
+      "deleteConfirm": "ಈ ಮೇವನ ವಸ್ತುವನ್ನು ಅಳಿಸಬೇಕೇ?",
+      "feedDeleted": "ಮೇವನು ಅಳಿಸಲಾಗಿದೆ!",
+      "deleteFailed": "ಅಳಿಸಲು ವಿಫಲವಾಯಿತು"
+    }
   },
   "complianceDocs": {
     "pageTitle": "📜 ಅನುಸರಣೆ & ನಿಯಂತ್ರಣ ದಾಖಲೆಗಳು",
@@ -1609,7 +1821,37 @@
       "revenueByCategory": "Revenue by Category"
     },
     "emptyRecords": "No records yet.",
-    "deleteConfirm": "Delete this financial record?"
+    "deleteConfirm": "Delete this financial record?",
+    "selectEnterprise": "Select Enterprise...",
+    "selectDefault": "-- Select --",
+    "form": {
+      "editTitle": "ದಾಖಲೆ ಸಂಪಾದಿಸಿ",
+      "createTitle": "ದಾಖಲೆ ಸೇರಿಸಿ"
+    },
+    "dashboard": {
+      "totalIncome": "Total Income",
+      "totalExpenses": "Total Expenses",
+      "netProfit": "Net Profit",
+      "monthlyBreakdown": "Monthly Breakdown",
+      "topExpenses": "Top Expense Categories",
+      "revenueByCategory": "Revenue by Category",
+      "noData": "ಡೇಟಾ ಇಲ್ಲ",
+      "headers": {
+        "month": "ತಿಂಗಳು",
+        "income": "ಆದಾಯ",
+        "expenses": "ವೆಚ್ಚಗಳು",
+        "profit": "ಲಾಭ",
+        "category": "ವರ್ಗ",
+        "total": "ಒಟ್ಟು"
+      }
+    },
+    "toasts": {
+      "recordUpdated": "ದಾಖಲೆ ನವೀಕರಿಸಲಾಗಿದೆ!",
+      "recordCreated": "ದಾಖಲೆ ರಚಿಸಲಾಗಿದೆ!",
+      "saveFailed": "ದಾಖಲೆ ಉಳಿಸಲು ವಿಫಲವಾಯಿತು",
+      "recordDeleted": "ದಾಖಲೆ ಅಳಿಸಲಾಗಿದೆ!",
+      "deleteFailed": "ಅಳಿಸಲು ವಿಫಲವಾಯಿತು"
+    }
   },
   "alertCenter": {
     "pageTitle": "🔔 Smart Alert Center",
@@ -1666,7 +1908,12 @@
       "acknowledged": "Alert acknowledged",
       "checksComplete": "Alert checks complete: {{count}} alert(s) triggered",
       "deleteConfirm": "Delete this alert rule?",
-      "invalidJson": "Invalid JSON in conditions"
+      "invalidJson": "Invalid JSON in conditions",
+      "ruleEnabled": "ನಿಯಮ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
+      "ruleDisabled": "ನಿಯಮ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
+      "readFailed": "ಓದಿದೆ ಎಂದು ಗುರುತು ಹಾಕಲು ವಿಫಲವಾಯಿತು",
+      "acknowledgeFailed": "ಅಂಗೀಕರಿಸಲು ವಿಫಲವಾಯಿತು",
+      "checksFailed": "ಅಲರ್ಟ್ ತಪಾಸಣೆಗಳು ವಿಫಲವಾಯಿತು"
     }
   },
   "diseasePrediction": {
@@ -1861,7 +2108,21 @@
       "inputPlaceholder": "Type your question...",
       "emptyTitle": "AI Veterinary Copilot",
       "emptySubtitle": "Select a session or start a new chat",
-      "startNew": "Start New Chat"
+      "startNew": "Start New Chat",
+      "aiBuddyHelper": "AI Buddy Helper",
+      "failedToSendMessage": "Failed to send message",
+      "startingUp": "Starting up...",
+      "hiUser": "Hi {{name}}! 👋 I'm AI Buddy",
+      "hiGuest": "Hi there! 👋 I'm AI Buddy",
+      "iKnowAbout": "I know about",
+      "askMeAnything": "— ask me anything!",
+      "askMeAnythingGeneral": "Ask me anything about pet health, symptoms, nutrition, or veterinary care!",
+      "askAiBuddy": "Ask AI Buddy...",
+      "thinking": "Thinking...",
+      "userAssistant": "{{name}}'s veterinary assistant",
+      "yourAssistant": "Your veterinary assistant",
+      "couldNotStartSession": "Could not start chat session",
+      "couldNotCreateSession": "Could not create chat session"
     },
     "suggestedPrompts": {
       "respiratory": "What are common signs of respiratory infection in cattle?",
@@ -2495,7 +2756,8 @@
     "booking": "ಬುಕಿಂಗ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
     "confirmBooking": "✓ ಬುಕಿಂಗ್ ದೃಢೀಕರಿಸಿ",
     "fillRequired": "ಎಲ್ಲಾ ಅಗತ್ಯ ಕ್ಷೇತ್ರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ",
-    "cannotBookPast": "ಹಿಂದಿನ ಸಮಯಕ್ಕೆ ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಭವಿಷ್ಯದ ದಿನಾಂಕ ಮತ್ತು ಸಮಯವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ."
+    "cannotBookPast": "ಹಿಂದಿನ ಸಮಯಕ್ಕೆ ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಭವಿಷ್ಯದ ದಿನಾಂಕ ಮತ್ತು ಸಮಯವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.",
+    "failedToCreate": "Failed to create booking"
   },
   "findDoctor": {
     "title": "ಪಶುವೈದ್ಯರನ್ನು ಹುಡುಕಿ",
@@ -2557,7 +2819,19 @@
     "actionCreated": "📅 ಬುಕಿಂಗ್ ರಚಿಸಲಾಗಿದೆ",
     "actionConfirmed": "✅ ವೈದ್ಯರು ದೃಢೀಕರಿಸಿದ್ದಾರೆ",
     "actionCancelled": "❌ ಬುಕಿಂಗ್ ರದ್ದಾಗಿದೆ",
-    "actionRescheduled": "🔄 ಮರುನಿಗದಿಪಡಿಸಲಾಗಿದೆ"
+    "actionRescheduled": "🔄 ಮರುನಿಗದಿಪಡಿಸಲಾಗಿದೆ",
+    "failedToCancel": "Failed to cancel booking",
+    "failedToReschedule": "Failed to reschedule",
+    "pastTimeError": "Cannot reschedule to a past time. Please select a future slot.",
+    "missedNotice": "⚠️ Your appointment on {{date}} at {{time}} was missed. Please select a new slot.",
+    "rescheduleApprovalNote": "ℹ️ ನಿಮ್ಮ ಮರುನಿಗದಿ ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗೆ ವೈದ್ಯರ ಅನುಮೋದನೆ ಬೇಕು.",
+    "cancelledByUser": "ಬಳಕೆದಾರರು ರದ್ದು ಮಾಡಿದ್ದಾರೆ",
+    "generalConsultation": "ಸಾಮಾನ್ಯ ಸಮಾಲೋಚನೆ",
+    "typeVideoCall": "ವೀಡಿಯೋ ಕಾಲ್",
+    "typePhone": "ಫೋನ್",
+    "typeInPerson": "ನೇರವಾಗಿ",
+    "typeChat": "ಚಾಟ್",
+    "failedToLoad": "Failed to load veterinarians"
   },
   "vetProfile": {
     "notSpecified": "ನಿರ್ದಿಷ್ಟಪಡಿಸಲಾಗಿಲ್ಲ",
@@ -2586,7 +2860,8 @@
     "patientReviews": "ರೋಗಿ ವಿಮರ್ಶೆಗಳು",
     "noReviews": "ಇನ್ನೂ ವಿಮರ್ಶೆಗಳಿಲ್ಲ. ಸಮಾಲೋಚನೆಯ ನಂತರ ಮೊದಲ ವಿಮರ್ಶೆ ನೀಡಿ!",
     "doctorResponse": "ವೈದ್ಯರ ಪ್ರತಿಕ್ರಿಯೆ",
-    "loadMoreReviews": "ಹೆಚ್ಚಿನ ವಿಮರ್ಶೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಿ"
+    "loadMoreReviews": "ಹೆಚ್ಚಿನ ವಿಮರ್ಶೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಿ",
+    "failedToLoad": "Failed to load veterinarian profile"
   },
   "videoConsultation": {
     "title": "ವೀಡಿಯೋ ಸಮಾಲೋಚನೆ",
@@ -2614,7 +2889,39 @@
     "chat": "ಚಾಟ್",
     "noMessages": "ಇನ್ನೂ ಸಂದೇಶಗಳಿಲ್ಲ",
     "startConversation": "ಸಂಭಾಷಣೆ ಪ್ರಾರಂಭಿಸಿ",
-    "typeMessage": "ಸಂದೇಶ ಟೈಪ್ ಮಾಡಿ..."
+    "typeMessage": "ಸಂದೇಶ ಟೈಪ್ ಮಾಡಿ...",
+    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "failedToCreateVideoRoom": "Failed to create video room",
+    "failedToInitialize": "Failed to initialize video consultation",
+    "failedToStartSession": "Failed to start video session",
+    "confirmEndConsultation": "End this video consultation?",
+    "failedToEndSession": "Failed to end session",
+    "failedToSendMessage": "Failed to send message",
+    "noMediaStream": "No media stream available",
+    "failedToStartRecording": "Failed to start recording",
+    "micUnavailable": "Microphone unavailable",
+    "cameraStillUnavailable": "Camera still unavailable",
+    "duration": "Duration",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "durationLabel": "Duration",
+    "instructions": "Instructions",
+    "validUntil": "Valid until",
+    "dismiss": "Dismiss",
+    "audioOnlyMode": "Audio-only mode",
+    "chatOnlyMode": "Chat-only mode",
+    "screenSharingActive": "Screen sharing active",
+    "medication": "Medication",
+    "room": "Room",
+    "unmute": "Unmute",
+    "mute": "Mute",
+    "turnOnCamera": "Turn on camera",
+    "turnOffCamera": "Turn off camera",
+    "shareScreen": "Share screen",
+    "startRecording": "Start recording",
+    "stopRecording": "Stop recording",
+    "endCallTitle": "End call"
   },
   "writeReview": {
     "title": "ವಿಮರ್ಶೆ ಬರೆಯಿರಿ",
@@ -2641,7 +2948,8 @@
     "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
     "errorSelectRating": "ದಯವಿಟ್ಟು ರೇಟಿಂಗ್ ಆಯ್ಕೆ ಮಾಡಿ",
     "errorWriteComment": "ದಯವಿಟ್ಟು ಕಾಮೆಂಟ್ ಬರೆಯಿರಿ",
-    "errorMinChars": "ಕಾಮೆಂಟ್ ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು"
+    "errorMinChars": "ಕಾಮೆಂಟ್ ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು",
+    "failedToSubmit": "Failed to submit review"
   },
   "doctorDashboard": {
     "title": "ವೈದ್ಯರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
@@ -2668,7 +2976,14 @@
     "recentConsultations": "ಇತ್ತೀಚಿನ ಸಮಾಲೋಚನೆಗಳು",
     "noRecentConsultations": "ಇತ್ತೀಚಿನ ಸಮಾಲೋಚನೆಗಳಿಲ್ಲ",
     "consultation": "ಸಮಾಲೋಚನೆ",
-    "loadingDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ..."
+    "loadingDashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "failedToLoad": "Failed to load dashboard",
+    "failedToConfirm": "Failed to confirm",
+    "cancelConfirm": "Cancel this booking?",
+    "failedToCancel": "ರದ್ದು ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
+    "declinedByDoctor": "ವೈದ್ಯರು ನಿರಾಕರಿಸಿದ್ದಾರೆ",
+    "videoType": "📹 ವೀಡಿಯೋ",
+    "chatType": "💬 ಚಾಟ್"
   },
   "doctorReviews": {
     "title": "ನನ್ನ ವಿಮರ್ಶೆಗಳು",
@@ -2699,7 +3014,8 @@
     "validUntil": "ವರೆಗೆ ಮಾನ್ಯ",
     "active": "ಸಕ್ರಿಯ",
     "inactive": "ನಿಷ್ಕ್ರಿಯ",
-    "viewConsultation": "ಸಮಾಲೋಚನೆ ವೀಕ್ಷಿಸಿ"
+    "viewConsultation": "ಸಮಾಲೋಚನೆ ವೀಕ್ಷಿಸಿ",
+    "failedToLoad": "Failed to load prescriptions"
   },
   "prescriptionWriter": {
     "title": "ಔಷಧಿ ಚೀಟಿ ಬರೆಯುವವರು",
@@ -2732,7 +3048,8 @@
     "createPrescription": "ಔಷಧಿ ಚೀಟಿ ರಚಿಸಿ",
     "errorNameDosageFrequency": "ದಯವಿಟ್ಟು ಔಷಧಿ ಹೆಸರು, ಡೋಸ್ ಮತ್ತು ಆವರ್ತನ ಭರ್ತಿ ಮಾಡಿ",
     "errorDiagnosisRequired": "ರೋಗನಿರ್ಣಯ ಅಗತ್ಯ",
-    "errorMedicationRequired": "ಕನಿಷ್ಠ ಒಂದು ಔಷಧಿ ಅಗತ್ಯ"
+    "errorMedicationRequired": "ಕನಿಷ್ಠ ಒಂದು ಔಷಧಿ ಅಗತ್ಯ",
+    "failedToCreate": "Failed to create prescription"
   },
   "patientQueue": {
     "title": "ರೋಗಿ ಸರತಿ",
@@ -2834,7 +3151,30 @@
     "chat": "ಚಾಟ್",
     "historyTab": "ಇತಿಹಾಸ",
     "notesTab": "ಟಿಪ್ಪಣಿಗಳು",
-    "rx": "Rx"
+    "rx": "Rx",
+    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "failedToCreateVideoSession": "Failed to create video session",
+    "failedToInitializeRoom": "Failed to initialize consultation room",
+    "failedToStartCall": "Failed to start call",
+    "confirmEndCall": "End this video consultation?",
+    "failedToEndCall": "Failed to end call",
+    "micUnavailable": "Microphone unavailable",
+    "cameraUnavailable": "Camera unavailable",
+    "noMediaStream": "No media stream available",
+    "failedToStartRecording": "Failed to start recording",
+    "failedToSaveNotes": "Failed to save notes",
+    "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
+    "failedToComplete": "Failed to complete consultation",
+    "markedAsCompleted": "Marked as completed",
+    "unmute": "Unmute",
+    "mute": "Mute",
+    "turnOnCamera": "Turn on camera",
+    "turnOffCamera": "Turn off camera",
+    "shareScreen": "Share screen",
+    "startRecording": "Start recording",
+    "stopRecording": "Stop recording",
+    "endCallTitle": "End call"
   },
   "manageSchedule": {
     "title": "ಲಭ್ಯತೆ ನಿರ್ವಾಹಕ",
@@ -2925,7 +3265,33 @@
     "closureStart": "ಮುಚ್ಚುವಿಕೆ ಪ್ರಾರಂಭ",
     "closureEnd": "ಮುಚ್ಚುವಿಕೆ ಅಂತ್ಯ",
     "addHolidayBtn": "ರಜೆ ಸೇರಿಸಿ",
-    "loadingSchedule": "ವೇಳಾಪಟ್ಟಿ ಲೋಡ್ ಆಗುತ್ತಿದೆ..."
+    "loadingSchedule": "ವೇಳಾಪಟ್ಟಿ ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "scheduleUpdated": "Schedule updated successfully",
+    "scheduleCreated": "Schedule created successfully",
+    "scheduleDeleted": "Schedule deleted",
+    "confirmDeleteSchedule": "Delete this schedule?",
+    "allDaysHaveSchedules": "All days already have schedules",
+    "copiedToDays": "Copied to {{count}} days",
+    "failedToCopy": "Failed to copy schedule",
+    "overrideSaved": "Override saved",
+    "failedToSaveOverride": "Failed to save override",
+    "select1to90days": "Please select between 1 and 90 days",
+    "daysMarkedAsLeave": "{{count}} days marked as leave",
+    "failedToSetVacation": "Failed to set vacation",
+    "overrideRemoved": "Override removed",
+    "failedToRemove": "Failed to remove",
+    "timeBlockCreated": "Time block created",
+    "failedToCreateBlock": "Failed to create block",
+    "blockRemoved": "Block removed",
+    "holidayAdded": "Holiday added",
+    "failedToAddHoliday": "Failed to add holiday",
+    "holidayRemoved": "Holiday removed",
+    "inactive": "Inactive",
+    "copyToAllEmpty": "Copy to all empty days",
+    "minSlots": "min slots",
+    "custom": "Custom",
+    "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
+    "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
   },
   "adminDashboard": {
     "title": "ಅಡ್ಮಿನ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
@@ -3595,5 +3961,90 @@
       "browseNow": "ಮಾರುಕಟ್ಟೆ ಬ್ರೌಸ್ ಮಾಡಿ",
       "sellYours": "ನಿಮ್ಮ ಪ್ರಾಣಿಗಳನ್ನು ಪುನರ್ವಸತಿಸಿ"
     }
+  },
+  "wallet": {
+    "pageTitle": "💰 My Wallet",
+    "subtitle": "Manage your balance, refunds, and bonus credits",
+    "myConsultations": "← My Consultations",
+    "totalBalance": "Total Balance",
+    "refundBalance": "Refund Balance",
+    "bonusCredits": "Bonus Credits",
+    "bonusTip": "From doctor cancellation goodwill",
+    "paymentMode": "Payment Mode",
+    "simulated": "Simulated payments",
+    "sandbox": "Sandbox mode",
+    "realPayments": "Real payments",
+    "transactionHistory": "📋 Transaction History",
+    "noTransactions": "No transactions yet",
+    "refundsAppearHere": "Your refunds and bonus credits will appear here.",
+    "loadMore": "Load More"
+  },
+  "acceptInvite": {
+    "noToken": "Invalid invitation link — no token provided",
+    "invalidInvite": "Invalid or expired invitation",
+    "failedToAccept": "Failed to accept invitation",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordsMismatch": "Passwords do not match",
+    "successTitle": "Welcome to VetCare!",
+    "successMsg": "Your account has been created and linked to the hospital.",
+    "goToLogin": "Go to Login",
+    "inviteProblem": "Invitation Problem",
+    "joinTitle": "Join {{name}}",
+    "setUpAccount": "Set Up Your Account",
+    "createPassword": "Create Password *",
+    "confirmPassword": "Confirm Password *",
+    "minChars": "Minimum 8 characters",
+    "reEnterPassword": "Re-enter password",
+    "creatingAccount": "Creating Account...",
+    "acceptAndCreate": "✓ Accept & Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "logIn": "Log in",
+    "instead": "instead"
+  },
+  "vetHospitals": {
+    "subtitle": "Find verified veterinary hospitals and specialist centres near you",
+    "registerHospital": "Register Hospital",
+    "adminPanel": "Admin Panel",
+    "searchPlaceholder": "Search hospitals, specializations…",
+    "cityPlaceholder": "City",
+    "allTypes": "All Types",
+    "emergency": "Emergency",
+    "open247": "24/7 Open",
+    "verifiedOnly": "Verified Only",
+    "gridView": "Grid",
+    "listView": "List",
+    "showingResults": "Showing {{shown}} of {{total}} hospital(s)",
+    "noHospitals": "No hospitals found",
+    "adjustFilters": "Try adjusting your search or filters",
+    "registerYours": "Register your hospital",
+    "prev": "‹ Prev",
+    "next": "Next ›",
+    "badges": { "verified": "✓ Verified", "underReview": "⏳ Under Review", "pendingDocs": "📋 Pending Docs", "suspended": "⚠ Suspended", "emergency": "⚡ Emergency" },
+    "stats": { "doctors": "Doctors", "depts": "Depts", "reviews": "Reviews" },
+    "form": { "hospitalName": "Hospital Name *", "type": "Type *", "tagline": "Tagline", "taglinePlaceholder": "Brief motto or focus area", "descriptionPlaceholder": "About your hospital…", "city": "City", "state": "State / Province", "phone": "Phone", "email": "Email", "website": "Website", "establishedYear": "Established Year" },
+    "createModal": { "title": "Register a Vet Hospital", "subtitle": "Create your hospital profile to connect with patients and other vets", "creating": "Creating…", "createBtn": "Create Hospital" },
+    "errors": { "nameTypeRequired": "Name and type are required", "createFailed": "Failed to create hospital" }
+  },
+  "vetHospitalManage": {
+    "noHospitalFound": "No hospital found",
+    "browseHospitals": "Browse Hospitals",
+    "viewPublicProfile": "View Public Profile",
+    "editProfile": "Edit Profile",
+    "manageDocuments": "Manage Documents",
+    "inviteCreated": "Invitation created! Share the link below with the doctor.",
+    "tabs": { "overview": "Overview", "doctors": "Doctors", "depts": "Depts", "services": "Services", "appointments": "Appointments", "documents": "Documents", "settings": "Settings" },
+    "overview": { "doctors": "Doctors", "departments": "Departments", "services": "Services", "avgRating": "Avg Rating", "totalReviews": "Total Reviews", "inactive": "Inactive", "acceptingPatients": "Accepting Patients", "quickActions": "Quick Actions" },
+    "doctors": { "staff": "Staff", "inviteNew": "Invite New Doctor", "addExisting": "Add Existing", "emptyState": "No staff added yet", "accepting": "Accepting", "notAccepting": "Not Accepting" },
+    "departments": { "title": "Departments", "emptyState": "No departments yet", "doctors": "doctors" },
+    "services": { "title": "Services", "emptyState": "No services yet" },
+    "appointments": { "title": "Hospital Appointments", "allStatuses": "All Statuses", "loading": "Loading appointments...", "noAppointments": "No appointments found", "withStatus": "with status \"{{status}}\"", "time": "Time", "patient": "Patient", "doctor": "Doctor", "reason": "Reason" },
+    "settings": { "title": "Hospital Profile", "fullAddress": "Full Address", "hasEmergency": "Has Emergency Services", "open24h": "Open 24 Hours", "saveBtn": "Save Changes" },
+    "invite": { "emailAddress": "Email Address *", "firstName": "First Name", "lastName": "Last Name", "department": "Department", "revoke": "Revoke", "inviteAnother": "Invite Another", "createInvitation": "Create Invitation" },
+    "modal": { "addDoctor": "Add Doctor", "editDoctor": "Edit Staff Member", "addDept": "Add Department", "editDept": "Edit Department", "createDept": "Create Department", "addService": "Add Service", "editService": "Edit Service", "createService": "Add Service", "selectVet": "Select Veterinarian *", "hospitalRole": "Hospital Role", "employmentType": "Employment Type", "titleDesignation": "Title / Designation", "consultationFee": "Consultation Fee ({{currency}})", "primaryHospital": "Primary hospital for this doctor", "deptName": "Department Name *", "specializations": "Specializations (comma-separated)", "floorLocation": "Floor / Location", "headDoctor": "Head Doctor", "serviceName": "Service Name *", "category": "Category", "minPrice": "Min Price ({{currency}})", "maxPrice": "Max Price ({{currency}})", "duration": "Duration (minutes)", "requiresAppointment": "Requires appointment", "code": "Code" },
+    "toasts": { "doctorUpdated": "Doctor updated ✓", "doctorAdded": "Doctor added to hospital ✓", "doctorRemoved": "Doctor removed", "deptUpdated": "Department updated ✓", "deptCreated": "Department created ✓", "deptDeleted": "Department deleted", "serviceUpdated": "Service updated ✓", "serviceAdded": "Service added ✓", "serviceDeleted": "Service deleted", "profileUpdated": "Hospital profile updated", "docUploaded": "Document uploaded successfully" },
+    "errors": { "loadFailed": "Failed to load hospital data", "selectVet": "Please select a veterinarian from the search results", "operationFailed": "Operation failed", "removeFailed": "Failed to remove doctor", "deleteDeptFailed": "Failed to delete department", "deleteServiceFailed": "Failed to delete service", "updateFailed": "Update failed", "inviteFailed": "Failed to send invite" },
+    "confirmRemoveDoctor": "Remove {{name}}?",
+    "confirmDeleteDept": "Delete department \"{{name}}\"?",
+    "confirmDeleteService": "Delete service \"{{name}}\"?"
   }
 }

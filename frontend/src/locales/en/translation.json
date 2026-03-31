@@ -40,13 +40,40 @@
     "resolved": "Resolved",
     "pending": "Pending",
     "completed": "Completed",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled",
+    "missed": "Missed",
+    "scheduled": "Scheduled",
+    "rescheduled": "Rescheduled",
+    "inProgress": "In Progress",
     "newborn": "Newborn",
     "male": "Male",
     "female": "Female",
     "loadingPage": "Loading…",
     "brand": "VetCare",
     "enterprise": "ENTERPRISE",
-    "trustBadge": "Trusted by 3,000+ enterprises worldwide"
+    "trustBadge": "Trusted by 3,000+ enterprises worldwide",
+    "booking": "Booking",
+    "consultation": "Consultation",
+    "video": "Video",
+    "inPerson": "In-person",
+    "chat": "Chat",
+    "with": "with",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "animal": "Animal",
+    "generalConsultation": "General consultation",
+    "normal": "Normal",
+    "urgent": "Urgent",
+    "emergency": "Emergency",
+    "at": "at",
+    "view": "View",
+    "remove": "Remove",
+    "apply": "Apply",
+    "failedToLoad": "Failed to load data",
+    "failedToSave": "Failed to save",
+    "failedToDelete": "Failed to delete",
+    "failedToUpdate": "Failed to update"
   },
   "nav": {
     "brand": "VetCare",
@@ -622,35 +649,83 @@
     "noMatchFilter": "No consultations match this filter",
     "noHistory": "No consultation history yet",
     "historyHint": "Completed and cancelled consultations will appear here for reference",
-    "reschedule": {
-      "title": "🔄 Reschedule Appointment",
-      "originalLabel": "⚠️ Original Appointment",
-      "dateLabel": "Select New Date *",
-      "slotsTitle": "Available Time Slots",
-      "noSlots": "No available slots for this date. Please select another date.",
-      "confirming": "Rescheduling...",
-      "confirmBtn": "✓ Confirm Reschedule"
-    },
-    "actionLog": {
-      "title": "📋 Action Log",
-      "loading": "Loading action history...",
-      "empty": "No action history found for this booking.",
-      "by": "by",
-      "system": "System",
-      "newSlot": "New slot:",
-      "approved": "(approved ✓)",
-      "awaitingApproval": "(awaiting doctor approval)",
-      "autoConfirmed": "(auto-confirmed)",
-      "cancelledBy": "Cancelled by",
-      "reason": "Reason:"
-    },
     "cancelModal": {
       "title": "❌ Cancel Booking",
       "warning": "⚠️ This action cannot be undone. The appointment will be cancelled.",
       "reasonLabel": "Reason for cancellation",
       "reasonPlaceholder": "Please provide a reason for cancellation...",
       "keepBooking": "Keep Booking",
-      "confirmCancel": "Confirm Cancellation"
+      "confirmCancel": "Confirm Cancellation",
+      "quickReasons": "Quick reasons:",
+      "refundPolicy": "Refund Policy:",
+      "reasonPresetsVet": ["Schedule conflict", "Emergency", "Patient request", "Unable to attend"],
+      "reasonPresetsPatient": ["Found another doctor", "Schedule conflict", "No longer needed", "Financial reasons"]
+    },
+    "loading": "Loading consultations...",
+    "failedToLoad": "Failed to load data",
+    "failedToConfirm": "Failed to confirm booking",
+    "failedToCancel": "Failed to cancel booking",
+    "failedToReschedule": "Failed to reschedule booking",
+    "failedToStart": "Failed to start consultation",
+    "pastTimeError": "Cannot reschedule to a past time. Please select a future slot.",
+    "actionLabels": {
+      "created": "📅 Booking Created",
+      "confirmed": "✅ Confirmed by Doctor",
+      "cancelled": "❌ Booking Cancelled",
+      "rescheduled": "🔄 Rescheduled"
+    },
+    "missedLabels": {
+      "doctorNoShow": "Doctor No-Show",
+      "patientNoShow": "Patient No-Show",
+      "bothNoShow": "Both No-Show"
+    },
+    "reschedule": {
+      "title": "🔄 Reschedule Appointment",
+      "originalLabel": "⚠️ Original Appointment",
+      "selectDoctor": "Select Doctor",
+      "selectDoctorOptional": "Select Doctor (optional)",
+      "keepCurrentDoctor": "— Keep current doctor —",
+      "currentDoctor": "(current)",
+      "loadingDoctors": "Loading doctors...",
+      "dateLabel": "Select New Date *",
+      "slotsTitle": "Available Time Slots",
+      "noSlots": "No available slots for this date. Please select another date.",
+      "selectAnotherDate": "Please select another date.",
+      "approvalNote": "ℹ️ Your rescheduled appointment will need doctor approval before you can join.",
+      "confirming": "Rescheduling...",
+      "confirmBtn": "✓ Confirm Reschedule",
+      "rescheduleCount": "📊 Reschedule {{current}} of {{max}} allowed",
+      "doctorConfirmedNoShow": "🩺 Doctor confirmed but did not attend — you may reschedule with any available doctor. No reschedule limit applies.",
+      "doctorNoConfirm": "🩺 Doctor did not confirm in time — you may reschedule with any available doctor. No reschedule limit applies.",
+      "patientNoShowNoLimit": "🙋 Patient no-show — you may reschedule (no limit configured).",
+      "patientNoShowLimit": "🙋 Patient no-show — reschedule {{current}} of {{max}} allowed.",
+      "expiredPendingNotice": "⚠️ The original appointment time has passed without doctor confirmation. You may select a different doctor for faster availability."
+    },
+    "noMatchAppointments": "No appointments match this filter",
+    "cancelledByYou": "🙋 Cancelled by you",
+    "cancelledByOther": "🔔 Cancelled by the other party",
+    "rescheduledNotice": "🔄 This booking was rescheduled. A new appointment was created to replace it.",
+    "actionLog": {
+      "title": "📋 Action Log",
+      "loading": "Loading action history...",
+      "empty": "No action history found for this booking.",
+      "close": "Close",
+      "newSlot": "New slot:",
+      "approved": "(approved ✓)",
+      "awaitingApproval": "(awaiting doctor approval)",
+      "autoConfirmed": "(auto-confirmed)",
+      "cancelledBy": "Cancelled by {{role}}.",
+      "reason": "Reason: {{reason}}"
+    },
+    "herdLevel": "Herd-level",
+    "missedMessages": {
+      "youMissed": "⚠️ You missed this appointment.",
+      "bothMissed": "⚠️ You and the doctor both missed this appointment.",
+      "rescheduleAnytime": "You may reschedule at any time.",
+      "rescheduleRemaining": "You have {{count}} reschedule(s) remaining.",
+      "rescheduleUsed": "You have used your reschedule allowance for this booking.",
+      "patientNoJoin": "🙋 The patient did not join the session. They may reschedule.",
+      "neitherJoined": "❌ Neither party joined this session. The patient may reschedule."
     }
   },
   "animals": {
@@ -677,6 +752,7 @@
     "registerModal": {
       "titleNew": "📋 Register New Animal",
       "titleEdit": "Edit {{name}}",
+      "editingMode": "✏️ Editing Mode",
       "requiredNote": "Fields marked with * are required",
       "sections": {
         "basic": "📝 Basic Information",
@@ -850,6 +926,41 @@
     "noEventsDesc": "No events found for this animal with the current filters.",
     "selectAnimalFirst": "Select an animal to view their life timeline.",
     "distribution": "Event Distribution",
+    "loadingAnimals": "Loading animals...",
+    "loadingTimeline": "Loading timeline...",
+    "noMatching": "No matching events",
+    "noEventsYet": "No events yet",
+    "tryClearingFilters": "Try clearing filters.",
+    "noEventsFound": "No timeline events found.",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "oldest": "Oldest",
+    "newest": "Newest",
+    "refresh": "Refresh",
+    "severity": "Severity",
+    "recordedBy": "Recorded by",
+    "details": "Details",
+    "openRecord": "Open Record",
+    "consultation": "Consultation",
+    "openFullRecord": "Open Full Record",
+    "viewConsultation": "View Consultation",
+    "viewPrescriptions": "View Prescriptions",
+    "stats": {
+      "totalEvents": "Total Events",
+      "eventTypes": "Event Types",
+      "activeItems": "Active Items",
+      "highSeverity": "High Severity"
+    },
+    "filters": {
+      "title": "Filters",
+      "typesToShow": "TYPES TO SHOW",
+      "dateRange": "DATE RANGE",
+      "from": "From",
+      "to": "To",
+      "clearAll": "Clear All",
+      "apply": "Apply",
+      "clearFilters": "Clear Filters"
+    },
     "detail": {
       "type": "Type",
       "date": "Date",
@@ -1032,7 +1143,34 @@
       "normalRange": "Normal Range",
       "labName": "Lab Name",
       "abnormalLabel": "Result is abnormal",
-      "interpretation": "Interpretation"
+      "interpretation": "Interpretation",
+      "notes": "Notes",
+      "status": "Status",
+      "statusPending": "Pending",
+      "statusInProgress": "In Progress",
+      "statusCompleted": "Completed",
+      "allergyMild": "Mild",
+      "allergyModerate": "Moderate",
+      "allergySevere": "Severe",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "recordTitlePlaceholder": "Record title...",
+      "contentPlaceholder": "Detailed description...",
+      "vaccineNamePlaceholder": "e.g., Rabies, DHPP...",
+      "vaccineTypePlaceholder": "e.g., Core, Non-core...",
+      "dosagePlaceholder": "e.g., 1ml",
+      "reactionPlaceholder": "Any adverse reactions...",
+      "weightPlaceholder": "Enter weight...",
+      "notesPlaceholder": "Any notes...",
+      "allergenPlaceholder": "e.g., Chicken, Penicillin...",
+      "reactionDescPlaceholder": "Describe the reaction...",
+      "testNamePlaceholder": "e.g., Complete Blood Count...",
+      "testCategoryPlaceholder": "e.g., Hematology, Biochemistry...",
+      "resultPlaceholder": "Test result...",
+      "normalRangePlaceholder": "e.g., 5.5-8.5",
+      "unitPlaceholder": "e.g., mg/dL, mmol/L...",
+      "interpretationPlaceholder": "Clinical interpretation..."
     },
     "recordTypes": {
       "diagnosis": "Diagnosis",
@@ -1049,7 +1187,16 @@
       "normal": "Normal",
       "high": "High",
       "critical": "Critical"
-    }
+    },
+    "loading": "Loading medical records...",
+    "failedToLoad": "Failed to load data",
+    "failedToSaveRecord": "Failed to save record",
+    "failedToSaveVaccination": "Failed to save vaccination",
+    "failedToSaveWeight": "Failed to save weight",
+    "failedToSaveAllergy": "Failed to save allergy",
+    "failedToSaveLabResult": "Failed to save lab result",
+    "selectPetGeneric": "Select a pet",
+    "selectPetGenericSub": "Choose a pet from the dropdown above"
   },
   "settings": {
     "pageTitle": "⚙️ Settings",
@@ -1239,6 +1386,34 @@
       "created": "Group created",
       "deleted": "Group deleted",
       "deleteConfirm": "Delete this group? Animals will be unlinked."
+    },
+    "manageAnimals": "🐾 Manage Animals",
+    "bookConsultation": "📅 Book Consultation",
+    "manage": {
+      "title": "🐾 Manage Animals — {{name}}",
+      "inGroup": "✅ Animals in this group ({{count}})",
+      "emptyGroup": "No animals in this group yet. Assign animals from your registered list below, or",
+      "registerAnimal": "register a new animal",
+      "first": "first.",
+      "available": "📋 Available Animals to Assign ({{count}})",
+      "searchPlaceholder": "Search animals by name, ID, or species...",
+      "noAnimals": "No animals registered yet.",
+      "registerFirst": "Register your first animal",
+      "toGetStarted": "to get started.",
+      "noMatch": "No matching animals found.",
+      "allAssigned": "All your animals are already assigned to this group.",
+      "assign": "+ Assign",
+      "assignSuccess": "Animal assigned to group",
+      "assignFailed": "Failed to assign animal",
+      "removeSuccess": "Animal removed from group",
+      "removeFailed": "Failed to remove animal",
+      "loadFailed": "Failed to load animals"
+    },
+    "reassign": {
+      "title": "Move Animal to Another Group?",
+      "currentGroup": "another group",
+      "moveMessage": "Moving it to {{targetGroup}} will automatically remove it from the previous group.",
+      "confirmBtn": "Yes, Move Animal"
     }
   },
   "locationManagement": {
@@ -1261,7 +1436,26 @@
       "editTitle": "Edit Location",
       "createTitle": "Create Location",
       "parentDefault": "None (Top Level)",
-      "validation": "Name and type are required"
+      "validation": "Name and type are required",
+      "updateBtn": "Update Location",
+      "createBtn": "Create Location"
+    },
+    "viewMap": "🗺️ Map",
+    "mapTitle": "🗺️ Farm Locations Map",
+    "form": {
+      "name": "Location Name *",
+      "type": "Location Type *",
+      "parentLocation": "Parent Location",
+      "capacity": "Capacity",
+      "area": "Area",
+      "gpsLatitude": "GPS Latitude",
+      "gpsLongitude": "GPS Longitude"
+    },
+    "toasts": {
+      "updated": "Location updated",
+      "created": "Location created",
+      "deleted": "Location deleted",
+      "deleteConfirm": "Delete this location?"
     }
   },
   "movementLog": {
@@ -1406,7 +1600,11 @@
       "open": "⏳ Open"
     },
     "resolve": "Resolve",
-    "emptyObservations": "No observations recorded yet."
+    "emptyObservations": "No observations recorded yet.",
+    "allObservations": "📋 All Observations",
+    "errors": {
+      "failedToResolve": "Failed to resolve observation"
+    }
   },
   "breedingManager": {
     "pageTitle": "🧬 Breeding & Genetics Manager",
@@ -1512,7 +1710,54 @@
     "lowStockAlerts": "⚠️ Low Stock Alerts",
     "allOk": "All stock levels OK!",
     "consumptionByType": "Consumption by Type (30 days)",
-    "dailyTrend": "Daily Consumption Trend"
+    "dailyTrend": "Daily Consumption Trend",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "form": {
+      "editTitle": "Edit Feed Item",
+      "createTitle": "Add New Feed",
+      "name": "Name *",
+      "feedType": "Feed Type",
+      "brand": "Brand",
+      "batchNumber": "Batch Number",
+      "quantityInStock": "Quantity in Stock *",
+      "unit": "Unit",
+      "minimumStockLevel": "Minimum Stock Level",
+      "costPerUnit": "Cost per Unit *",
+      "expiryDate": "Expiry Date",
+      "storageLocation": "Storage Location",
+      "supplier": "Supplier"
+    },
+    "consumptionForm": {
+      "title": "Log Feed Consumption",
+      "feed": "Feed *",
+      "selectFeed": "-- Select Feed --",
+      "quantityUsed": "Quantity Used *",
+      "submitBtn": "Log Consumption"
+    },
+    "headers": {
+      "stock": "Stock",
+      "minLevel": "Min Level",
+      "costPerUnit": "Cost/Unit",
+      "expiry": "Expiry",
+      "location": "Location"
+    },
+    "analytics": {
+      "used": "Used",
+      "cost": "Cost"
+    },
+    "toasts": {
+      "feedUpdated": "Feed updated!",
+      "feedAdded": "Feed added!",
+      "saveFailed": "Failed to save feed",
+      "restocked": "Feed restocked!",
+      "restockFailed": "Failed to restock",
+      "consumptionLogged": "Consumption logged!",
+      "consumptionFailed": "Failed to log consumption",
+      "deleteConfirm": "Delete this feed item?",
+      "feedDeleted": "Feed deleted!",
+      "deleteFailed": "Failed to delete"
+    }
   },
   "complianceDocs": {
     "pageTitle": "📜 Compliance & Regulatory Documents",
@@ -1598,7 +1843,9 @@
       "date": "Transaction Date *",
       "description": "Description",
       "reference": "Reference #",
-      "notes": "Notes"
+      "notes": "Notes",
+      "editTitle": "Edit Financial Record",
+      "createTitle": "Add Financial Record"
     },
     "dashboard": {
       "totalIncome": "Total Income",
@@ -1606,10 +1853,28 @@
       "netProfit": "Net Profit",
       "monthlyBreakdown": "Monthly Breakdown",
       "topExpenses": "Top Expense Categories",
-      "revenueByCategory": "Revenue by Category"
+      "revenueByCategory": "Revenue by Category",
+      "noData": "No data yet.",
+      "headers": {
+        "month": "Month",
+        "income": "Income",
+        "expenses": "Expenses",
+        "profit": "Profit",
+        "category": "Category",
+        "total": "Total"
+      }
     },
     "emptyRecords": "No records yet.",
-    "deleteConfirm": "Delete this financial record?"
+    "deleteConfirm": "Delete this financial record?",
+    "selectEnterprise": "Select Enterprise:",
+    "selectDefault": "-- Select --",
+    "toasts": {
+      "recordUpdated": "Record updated!",
+      "recordCreated": "Record created!",
+      "saveFailed": "Failed to save record",
+      "recordDeleted": "Record deleted!",
+      "deleteFailed": "Failed to delete"
+    }
   },
   "alertCenter": {
     "pageTitle": "🔔 Smart Alert Center",
@@ -1666,7 +1931,12 @@
       "acknowledged": "Alert acknowledged",
       "checksComplete": "Alert checks complete: {{count}} alert(s) triggered",
       "deleteConfirm": "Delete this alert rule?",
-      "invalidJson": "Invalid JSON in conditions"
+      "invalidJson": "Invalid JSON in conditions",
+      "ruleEnabled": "Rule enabled",
+      "ruleDisabled": "Rule disabled",
+      "readFailed": "Failed to mark all read",
+      "acknowledgeFailed": "Failed to acknowledge",
+      "checksFailed": "Failed to run checks"
     }
   },
   "diseasePrediction": {
@@ -1861,7 +2131,21 @@
       "inputPlaceholder": "Type your question...",
       "emptyTitle": "AI Veterinary Copilot",
       "emptySubtitle": "Select a session or start a new chat",
-      "startNew": "Start New Chat"
+      "startNew": "Start New Chat",
+      "aiBuddyHelper": "AI Buddy Helper",
+      "failedToSendMessage": "Failed to send message",
+      "startingUp": "Starting up...",
+      "hiUser": "Hi {{name}}! \ud83d\udc4b I'm AI Buddy",
+      "hiGuest": "Hi there! \ud83d\udc4b I'm AI Buddy",
+      "iKnowAbout": "I know about",
+      "askMeAnything": "— ask me anything!",
+      "askMeAnythingGeneral": "Ask me anything about pet health, symptoms, nutrition, or veterinary care!",
+      "askAiBuddy": "Ask AI Buddy...",
+      "thinking": "Thinking...",
+      "userAssistant": "{{name}}'s veterinary assistant",
+      "yourAssistant": "Your veterinary assistant",
+      "couldNotStartSession": "Could not start chat session",
+      "couldNotCreateSession": "Could not create chat session"
     },
     "suggestedPrompts": {
       "respiratory": "What are common signs of respiratory infection in cattle?",
@@ -2525,7 +2809,8 @@
     "booking": "Booking...",
     "confirmBooking": "✓ Confirm Booking",
     "fillRequired": "Please fill in all required fields",
-    "cannotBookPast": "Cannot book a consultation in the past. Please select a future date and time."
+    "cannotBookPast": "Cannot book a consultation in the past. Please select a future date and time.",
+    "failedToCreate": "Failed to create booking"
   },
   "findDoctor": {
     "title": "Find a Veterinarian",
@@ -2587,7 +2872,35 @@
     "actionCreated": "📅 Booking Created",
     "actionConfirmed": "✅ Confirmed by Doctor",
     "actionCancelled": "❌ Booking Cancelled",
-    "actionRescheduled": "🔄 Rescheduled"
+    "actionRescheduled": "🔄 Rescheduled",
+    "failedToCancel": "Failed to cancel booking",
+    "failedToReschedule": "Failed to reschedule",
+    "pastTimeError": "Cannot reschedule to a past time. Please select a future slot.",
+    "missedNotice": "⚠️ Your appointment on {{date}} at {{time}} was missed. Please select a new slot.",
+    "rescheduleApprovalNote": "ℹ️ Your rescheduled appointment will need doctor approval before you can join.",
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "missed": "Missed",
+      "rescheduled": "Rescheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "actionLogNewSlot": "New slot:",
+    "actionLogApproved": "(approved ✓)",
+    "actionLogAwaiting": "(awaiting doctor approval)",
+    "actionLogAutoConfirmed": "(auto-confirmed)",
+    "actionLogReason": "Reason: {{reason}}",
+    "actionLogBy": "by",
+    "actionLogSystem": "System",
+    "cancelledByUser": "Cancelled by user",
+    "generalConsultation": "General consultation",
+    "typeVideoCall": "Video Call",
+    "typePhone": "Phone",
+    "typeInPerson": "In Person",
+    "typeChat": "Chat",
+    "failedToLoad": "Failed to load veterinarians"
   },
   "vetProfile": {
     "notSpecified": "Not specified",
@@ -2616,7 +2929,8 @@
     "patientReviews": "Patient Reviews",
     "noReviews": "No reviews yet. Be the first to review after a consultation!",
     "doctorResponse": "Doctor's Response",
-    "loadMoreReviews": "Load More Reviews"
+    "loadMoreReviews": "Load More Reviews",
+    "failedToLoad": "Failed to load veterinarian profile"
   },
   "videoConsultation": {
     "title": "Video Consultation",
@@ -2644,7 +2958,39 @@
     "chat": "Chat",
     "noMessages": "No messages yet",
     "startConversation": "Start the conversation",
-    "typeMessage": "Type a message..."
+    "typeMessage": "Type a message...",
+    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "failedToCreateVideoRoom": "Failed to create video room",
+    "failedToInitialize": "Failed to initialize video consultation",
+    "failedToStartSession": "Failed to start video session",
+    "confirmEndConsultation": "End this video consultation?",
+    "failedToEndSession": "Failed to end session",
+    "failedToSendMessage": "Failed to send message",
+    "noMediaStream": "No media stream available",
+    "failedToStartRecording": "Failed to start recording",
+    "micUnavailable": "Microphone unavailable",
+    "cameraStillUnavailable": "Camera still unavailable",
+    "duration": "Duration",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "durationLabel": "Duration",
+    "instructions": "Instructions",
+    "validUntil": "Valid until",
+    "dismiss": "Dismiss",
+    "audioOnlyMode": "Audio-only mode",
+    "chatOnlyMode": "Chat-only mode",
+    "screenSharingActive": "Screen sharing active",
+    "medication": "Medication",
+    "room": "Room",
+    "unmute": "Unmute",
+    "mute": "Mute",
+    "turnOnCamera": "Turn on camera",
+    "turnOffCamera": "Turn off camera",
+    "shareScreen": "Share screen",
+    "startRecording": "Start recording",
+    "stopRecording": "Stop recording",
+    "endCallTitle": "End call"
   },
   "writeReview": {
     "title": "Write a Review",
@@ -2671,7 +3017,8 @@
     "dashboard": "Dashboard",
     "errorSelectRating": "Please select a rating",
     "errorWriteComment": "Please write a comment",
-    "errorMinChars": "Comment must be at least 10 characters"
+    "errorMinChars": "Comment must be at least 10 characters",
+    "failedToSubmit": "Failed to submit review"
   },
   "doctorDashboard": {
     "title": "Doctor Dashboard",
@@ -2698,7 +3045,14 @@
     "recentConsultations": "Recent Consultations",
     "noRecentConsultations": "No recent consultations",
     "consultation": "Consultation",
-    "loadingDashboard": "Loading dashboard..."
+    "loadingDashboard": "Loading dashboard...",
+    "failedToLoad": "Failed to load dashboard",
+    "failedToConfirm": "Failed to confirm",
+    "cancelConfirm": "Cancel this booking?",
+    "failedToCancel": "Failed to cancel",
+    "declinedByDoctor": "Declined by doctor",
+    "videoType": "📹 Video",
+    "chatType": "💬 Chat"
   },
   "doctorReviews": {
     "title": "My Reviews",
@@ -2729,7 +3083,8 @@
     "validUntil": "Valid until",
     "active": "Active",
     "inactive": "Inactive",
-    "viewConsultation": "View Consultation"
+    "viewConsultation": "View Consultation",
+    "failedToLoad": "Failed to load prescriptions"
   },
   "prescriptionWriter": {
     "title": "Prescription Writer",
@@ -2762,7 +3117,8 @@
     "createPrescription": "Create Prescription",
     "errorNameDosageFrequency": "Please fill in medication name, dosage, and frequency",
     "errorDiagnosisRequired": "Diagnosis is required",
-    "errorMedicationRequired": "At least one medication is required"
+    "errorMedicationRequired": "At least one medication is required",
+    "failedToCreate": "Failed to create prescription"
   },
   "patientQueue": {
     "title": "Patient Queue",
@@ -2864,7 +3220,30 @@
     "chat": "Chat",
     "historyTab": "History",
     "notesTab": "Notes",
-    "rx": "Rx"
+    "rx": "Rx",
+    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "failedToCreateVideoSession": "Failed to create video session",
+    "failedToInitializeRoom": "Failed to initialize consultation room",
+    "failedToStartCall": "Failed to start call",
+    "confirmEndCall": "End this video consultation?",
+    "failedToEndCall": "Failed to end call",
+    "micUnavailable": "Microphone unavailable",
+    "cameraUnavailable": "Camera unavailable",
+    "noMediaStream": "No media stream available",
+    "failedToStartRecording": "Failed to start recording",
+    "failedToSaveNotes": "Failed to save notes",
+    "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
+    "failedToComplete": "Failed to complete consultation",
+    "markedAsCompleted": "Marked as completed",
+    "unmute": "Unmute",
+    "mute": "Mute",
+    "turnOnCamera": "Turn on camera",
+    "turnOffCamera": "Turn off camera",
+    "shareScreen": "Share screen",
+    "startRecording": "Start recording",
+    "stopRecording": "Stop recording",
+    "endCallTitle": "End call"
   },
   "manageSchedule": {
     "title": "Availability Manager",
@@ -2955,7 +3334,33 @@
     "closureStart": "Closure Start",
     "closureEnd": "Closure End",
     "addHolidayBtn": "Add Holiday",
-    "loadingSchedule": "Loading schedule..."
+    "loadingSchedule": "Loading schedule...",
+    "scheduleUpdated": "Schedule updated successfully",
+    "scheduleCreated": "Schedule created successfully",
+    "scheduleDeleted": "Schedule deleted",
+    "confirmDeleteSchedule": "Delete this schedule?",
+    "allDaysHaveSchedules": "All days already have schedules",
+    "copiedToDays": "Copied to {{count}} days",
+    "failedToCopy": "Failed to copy schedule",
+    "overrideSaved": "Override saved",
+    "failedToSaveOverride": "Failed to save override",
+    "select1to90days": "Please select between 1 and 90 days",
+    "daysMarkedAsLeave": "{{count}} days marked as leave",
+    "failedToSetVacation": "Failed to set vacation",
+    "overrideRemoved": "Override removed",
+    "failedToRemove": "Failed to remove",
+    "timeBlockCreated": "Time block created",
+    "failedToCreateBlock": "Failed to create block",
+    "blockRemoved": "Block removed",
+    "holidayAdded": "Holiday added",
+    "failedToAddHoliday": "Failed to add holiday",
+    "holidayRemoved": "Holiday removed",
+    "inactive": "Inactive",
+    "copyToAllEmpty": "Copy to all empty days",
+    "minSlots": "min slots",
+    "custom": "Custom",
+    "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
+    "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
   },
   "adminDashboard": {
     "title": "Admin Dashboard",
@@ -3625,5 +4030,222 @@
       "browseNow": "Browse Marketplace",
       "sellYours": "Rehome Your Animals"
     }
+  },
+  "wallet": {
+    "pageTitle": "💰 My Wallet",
+    "subtitle": "Manage your balance, refunds, and bonus credits",
+    "myConsultations": "← My Consultations",
+    "totalBalance": "Total Balance",
+    "refundBalance": "Refund Balance",
+    "bonusCredits": "Bonus Credits",
+    "bonusTip": "From doctor cancellation goodwill",
+    "paymentMode": "Payment Mode",
+    "simulated": "Simulated payments",
+    "sandbox": "Sandbox mode",
+    "realPayments": "Real payments",
+    "transactionHistory": "📋 Transaction History",
+    "noTransactions": "No transactions yet",
+    "refundsAppearHere": "Your refunds and bonus credits will appear here.",
+    "loadMore": "Load More"
+  },
+  "acceptInvite": {
+    "noToken": "Invalid invitation link — no token provided",
+    "invalidInvite": "Invalid or expired invitation",
+    "failedToAccept": "Failed to accept invitation",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordsMismatch": "Passwords do not match",
+    "successTitle": "Welcome to VetCare!",
+    "successMsg": "Your account has been created and linked to the hospital. You can now log in to start managing patients and appointments.",
+    "goToLogin": "Go to Login",
+    "inviteProblem": "Invitation Problem",
+    "joinTitle": "Join {{name}}",
+    "setUpAccount": "Set Up Your Account",
+    "createPassword": "Create Password *",
+    "confirmPassword": "Confirm Password *",
+    "minChars": "Minimum 8 characters",
+    "reEnterPassword": "Re-enter password",
+    "creatingAccount": "Creating Account...",
+    "acceptAndCreate": "✓ Accept & Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "logIn": "Log in",
+    "instead": "instead"
+  },
+  "vetHospitals": {
+    "subtitle": "Find verified veterinary hospitals and specialist centres near you",
+    "registerHospital": "Register Hospital",
+    "adminPanel": "Admin Panel",
+    "searchPlaceholder": "Search hospitals, specializations…",
+    "cityPlaceholder": "City",
+    "allTypes": "All Types",
+    "emergency": "Emergency",
+    "open247": "24/7 Open",
+    "verifiedOnly": "Verified Only",
+    "gridView": "Grid",
+    "listView": "List",
+    "showingResults": "Showing {{shown}} of {{total}} hospital(s)",
+    "noHospitals": "No hospitals found",
+    "adjustFilters": "Try adjusting your search or filters",
+    "registerYours": "Register your hospital",
+    "prev": "‹ Prev",
+    "next": "Next ›",
+    "badges": {
+      "verified": "✓ Verified",
+      "underReview": "⏳ Under Review",
+      "pendingDocs": "📋 Pending Docs",
+      "suspended": "⚠ Suspended",
+      "emergency": "⚡ Emergency"
+    },
+    "stats": {
+      "doctors": "Doctors",
+      "depts": "Depts",
+      "reviews": "Reviews"
+    },
+    "form": {
+      "hospitalName": "Hospital Name *",
+      "type": "Type *",
+      "tagline": "Tagline",
+      "taglinePlaceholder": "Brief motto or focus area",
+      "descriptionPlaceholder": "About your hospital…",
+      "city": "City",
+      "state": "State / Province",
+      "phone": "Phone",
+      "email": "Email",
+      "website": "Website",
+      "establishedYear": "Established Year"
+    },
+    "createModal": {
+      "title": "Register a Vet Hospital",
+      "subtitle": "Create your hospital profile to connect with patients and other vets",
+      "creating": "Creating…",
+      "createBtn": "Create Hospital"
+    },
+    "errors": {
+      "nameTypeRequired": "Name and type are required",
+      "createFailed": "Failed to create hospital"
+    }
+  },
+  "vetHospitalManage": {
+    "noHospitalFound": "No hospital found",
+    "browseHospitals": "Browse Hospitals",
+    "viewPublicProfile": "View Public Profile",
+    "editProfile": "Edit Profile",
+    "manageDocuments": "Manage Documents",
+    "inviteCreated": "Invitation created! Share the link below with the doctor.",
+    "tabs": {
+      "overview": "Overview",
+      "doctors": "Doctors",
+      "depts": "Depts",
+      "services": "Services",
+      "appointments": "Appointments",
+      "documents": "Documents",
+      "settings": "Settings"
+    },
+    "overview": {
+      "doctors": "Doctors",
+      "departments": "Departments",
+      "services": "Services",
+      "avgRating": "Avg Rating",
+      "totalReviews": "Total Reviews",
+      "inactive": "Inactive",
+      "acceptingPatients": "Accepting Patients",
+      "quickActions": "Quick Actions"
+    },
+    "doctors": {
+      "staff": "Staff",
+      "inviteNew": "Invite New Doctor",
+      "addExisting": "Add Existing",
+      "emptyState": "No staff added yet",
+      "accepting": "Accepting",
+      "notAccepting": "Not Accepting"
+    },
+    "departments": {
+      "title": "Departments",
+      "emptyState": "No departments yet",
+      "doctors": "doctors"
+    },
+    "services": {
+      "title": "Services",
+      "emptyState": "No services yet"
+    },
+    "appointments": {
+      "title": "Hospital Appointments",
+      "allStatuses": "All Statuses",
+      "loading": "Loading appointments...",
+      "noAppointments": "No appointments found",
+      "withStatus": "with status \"{{status}}\"",
+      "time": "Time",
+      "patient": "Patient",
+      "doctor": "Doctor",
+      "reason": "Reason"
+    },
+    "settings": {
+      "title": "Hospital Profile",
+      "fullAddress": "Full Address",
+      "hasEmergency": "Has Emergency Services",
+      "open24h": "Open 24 Hours",
+      "saveBtn": "Save Changes"
+    },
+    "invite": {
+      "emailAddress": "Email Address *",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "department": "Department",
+      "revoke": "Revoke",
+      "inviteAnother": "Invite Another",
+      "createInvitation": "Create Invitation"
+    },
+    "modal": {
+      "addDoctor": "Add Doctor",
+      "editDoctor": "Edit Staff Member",
+      "addDept": "Add Department",
+      "editDept": "Edit Department",
+      "createDept": "Create Department",
+      "addService": "Add Service",
+      "editService": "Edit Service",
+      "createService": "Add Service",
+      "selectVet": "Select Veterinarian *",
+      "hospitalRole": "Hospital Role",
+      "employmentType": "Employment Type",
+      "titleDesignation": "Title / Designation",
+      "consultationFee": "Consultation Fee ({{currency}})",
+      "primaryHospital": "Primary hospital for this doctor",
+      "deptName": "Department Name *",
+      "specializations": "Specializations (comma-separated)",
+      "floorLocation": "Floor / Location",
+      "headDoctor": "Head Doctor",
+      "serviceName": "Service Name *",
+      "category": "Category",
+      "minPrice": "Min Price ({{currency}})",
+      "maxPrice": "Max Price ({{currency}})",
+      "duration": "Duration (minutes)",
+      "requiresAppointment": "Requires appointment",
+      "code": "Code"
+    },
+    "toasts": {
+      "doctorUpdated": "Doctor updated ✓",
+      "doctorAdded": "Doctor added to hospital ✓",
+      "doctorRemoved": "Doctor removed",
+      "deptUpdated": "Department updated ✓",
+      "deptCreated": "Department created ✓",
+      "deptDeleted": "Department deleted",
+      "serviceUpdated": "Service updated ✓",
+      "serviceAdded": "Service added ✓",
+      "serviceDeleted": "Service deleted",
+      "profileUpdated": "Hospital profile updated",
+      "docUploaded": "Document uploaded successfully"
+    },
+    "errors": {
+      "loadFailed": "Failed to load hospital data",
+      "selectVet": "Please select a veterinarian from the search results",
+      "operationFailed": "Operation failed",
+      "removeFailed": "Failed to remove doctor",
+      "deleteDeptFailed": "Failed to delete department",
+      "deleteServiceFailed": "Failed to delete service",
+      "updateFailed": "Update failed",
+      "inviteFailed": "Failed to send invite"
+    },
+    "confirmRemoveDoctor": "Remove {{name}}?",
+    "confirmDeleteDept": "Delete department \"{{name}}\"?",
+    "confirmDeleteService": "Delete service \"{{name}}\"?"
   }
 }

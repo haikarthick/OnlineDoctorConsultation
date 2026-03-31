@@ -14,7 +14,8 @@ const REPORT_TYPES = [
   { value: 'sensor_analytics', label: '📡 Sensor Analytics', desc: 'IoT sensor readings, anomalies, averages across devices' }
 ]
 
-const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
+const ReportBuilderPage: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -74,11 +75,11 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
         format: genForm.format,
         parameters: { days: parseInt(genForm.days) || 90, months: parseInt(genForm.months) || 12 }
       })
-      setSuccessMsg('Report generated!')
+      setSuccessMsg(t('reportBuilder.reportGenerated'))
       const report = result.data
       if (report) { setSelectedReport(report); setTab('view') }
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to generate report') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('reportBuilder.failedGenerate')) }
     finally { setGenerating(false) }
   }
 
@@ -87,7 +88,7 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
       const res = await apiService.getReport(id)
       setSelectedReport(res.data || null)
       setTab('view')
-    } catch { setError('Failed to load report') }
+    } catch { setError(t('common.failedToLoad')) }
   }
 
   const handleCreateTemplate = async (e: React.FormEvent) => {
@@ -98,16 +99,16 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
         enterpriseId: selectedEnterpriseId, name: templateForm.name,
         description: templateForm.description || undefined, reportType: templateForm.reportType
       })
-      setSuccessMsg('Template created!')
+      setSuccessMsg(t('reportBuilder.templateCreated'))
       setShowTemplateForm(false)
       setTemplateForm({ name: '', description: '', reportType: 'animal_census' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   const handleDeleteReport = async (id: string) => {
-    try { await apiService.deleteReport(id); setSuccessMsg('Report deleted!'); fetchData() }
-    catch { setError('Failed to delete') }
+    try { await apiService.deleteReport(id); setSuccessMsg(t('reportBuilder.reportDeleted')); fetchData() }
+    catch { setError(t('common.failedToDelete')) }
   }
 
   const renderReportData = (report: GeneratedReport) => {
@@ -115,7 +116,7 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
     if (!data || data.error) return <div className="alert alert-error">{data?.error || 'No data'}</div>
 
     const rows = data.rows || []
-    if (!rows.length) return <div className="empty-state">Report has no data rows</div>
+    if (!rows.length) return <div className="empty-state">{t('reportBuilder.noDataRows')}</div>
 
     const columns = Object.keys(rows[0])
     return (
@@ -145,36 +146,36 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
     <div className="module-page">
       <div className="module-header">
         <h1>{t('reportBuilder.pageTitle')}</h1>
-        <p>Custom reports, scheduled exports, and cross-module analytical dashboards</p>
+        <p>{t('reportBuilder.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('common.selectEnterprise')}:</label>
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
-          <option value="">-- Select --</option>
+          <option value="">{t('common.selectOption')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
 
       {!selectedEnterpriseId ? (
-        <div className="empty-state">Select an enterprise to generate reports</div>
+        <div className="empty-state">{t('reportBuilder.selectEnterprise')}</div>
       ) : loading ? (
-        <div className="loading-spinner">Loading report center…</div>
+        <div className="loading-spinner">{t('reportBuilder.loading')}</div>
       ) : (
         <>
           <div className="tab-bar">
-            <button className={tab === 'generate' ? 'tab-active' : ''} onClick={() => setTab('generate')}>Generate Report</button>
-            <button className={tab === 'history' ? 'tab-active' : ''} onClick={() => setTab('history')}>Report History</button>
-            <button className={tab === 'view' ? 'tab-active' : ''} onClick={() => setTab('view')}>View Report</button>
-            <button className={tab === 'templates' ? 'tab-active' : ''} onClick={() => setTab('templates')}>Templates</button>
+            <button className={tab === 'generate' ? 'tab-active' : ''} onClick={() => setTab('generate')}>{t('reportBuilder.tabs.generate')}</button>
+            <button className={tab === 'history' ? 'tab-active' : ''} onClick={() => setTab('history')}>{t('reportBuilder.tabs.history')}</button>
+            <button className={tab === 'view' ? 'tab-active' : ''} onClick={() => setTab('view')}>{t('reportBuilder.tabs.view')}</button>
+            <button className={tab === 'templates' ? 'tab-active' : ''} onClick={() => setTab('templates')}>{t('reportBuilder.tabs.templates')}</button>
           </div>
 
           {tab === 'generate' && (
             <div>
-              <h2 style={{ marginBottom: '1.5rem' }}>Select Report Type</h2>
+              <h2 style={{ marginBottom: '1.5rem' }}>{t('reportBuilder.selectReportType')}</h2>
               <div className="cards-grid">
                 {REPORT_TYPES.map(rt => (
                   <div key={rt.value} className={`card ${genForm.reportType === rt.value ? 'card-selected' : ''}`}
@@ -188,17 +189,17 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
 
               <form className="module-form" onSubmit={handleGenerate} style={{ marginTop: '1.5rem' }}>
                 <div className="form-grid">
-                  <div className="form-group"><label>Report Name</label><input value={genForm.name} onChange={e => setGenForm({ ...genForm, name: e.target.value })} placeholder="Auto-generated if empty" /></div>
-                  <div className="form-group"><label>Format</label>
+                  <div className="form-group"><label>{t('reportBuilder.reportName')}</label><input value={genForm.name} onChange={e => setGenForm({ ...genForm, name: e.target.value })} placeholder="Auto-generated if empty" /></div>
+                  <div className="form-group"><label>{t('reportBuilder.format')}</label>
                     <select value={genForm.format} onChange={e => setGenForm({ ...genForm, format: e.target.value })}>
                       <option value="json">JSON</option><option value="csv">CSV</option><option value="pdf">PDF</option>
                     </select>
                   </div>
-                  <div className="form-group"><label>Days (for health/event reports)</label><input type="number" value={genForm.days} onChange={e => setGenForm({ ...genForm, days: e.target.value })} /></div>
-                  <div className="form-group"><label>Months (for financial reports)</label><input type="number" value={genForm.months} onChange={e => setGenForm({ ...genForm, months: e.target.value })} /></div>
+                  <div className="form-group"><label>{t('reportBuilder.days')}</label><input type="number" value={genForm.days} onChange={e => setGenForm({ ...genForm, days: e.target.value })} /></div>
+                  <div className="form-group"><label>{t('reportBuilder.months')}</label><input type="number" value={genForm.months} onChange={e => setGenForm({ ...genForm, months: e.target.value })} /></div>
                 </div>
                 <button type="submit" className="btn-primary" disabled={generating}>
-                  {generating ? '⏳ Generating Report…' : '🚀 Generate Report'}
+                  {generating ? `⏳ ${t('reportBuilder.generating')}` : `🚀 ${t('reportBuilder.tabs.generate')}`}
                 </button>
               </form>
             </div>
@@ -207,7 +208,7 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
           {tab === 'history' && (
             <div>
               <table className="data-table">
-                <thead><tr><th>Name</th><th>Type</th><th>Format</th><th>Rows</th><th>Generated</th><th>Actions</th></tr></thead>
+                <thead><tr><th>{t('common.name')}</th><th>{t('common.type')}</th><th>{t('reportBuilder.format')}</th><th>{t('reportBuilder.rows')}</th><th>{t('reportBuilder.generated')}</th><th>{t('common.actions')}</th></tr></thead>
                 <tbody>
                   {reports.map(r => (
                     <tr key={r.id}>
@@ -217,12 +218,12 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
                       <td>{r.rowCount || (r as any).row_count || 0}</td>
                       <td>{(r.generatedAt || (r as any).generated_at) ? new Date(r.generatedAt || (r as any).generated_at).toLocaleString() : '–'}</td>
                       <td>
-                        <button className="btn-sm" onClick={() => handleViewReport(r.id)}>View</button>
-                        <button className="btn-sm btn-danger" onClick={() => handleDeleteReport(r.id)} style={{ marginLeft: '4px' }}>Delete</button>
+                        <button className="btn-sm" onClick={() => handleViewReport(r.id)}>{t('common.view')}</button>
+                        <button className="btn-sm btn-danger" onClick={() => handleDeleteReport(r.id)} style={{ marginLeft: '4px' }}>{t('common.delete')}</button>
                       </td>
                     </tr>
                   ))}
-                  {!reports.length && <tr><td colSpan={6} className="empty-cell">No reports generated yet</td></tr>}
+                  {!reports.length && <tr><td colSpan={6} className="empty-cell">{t('reportBuilder.noReports')}</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -243,7 +244,7 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
                   {renderReportData(selectedReport)}
                 </div>
               ) : (
-                <div className="empty-state">Select a report from History or Generate a new one</div>
+                <div className="empty-state">{t('reportBuilder.selectReport')}</div>
               )}
             </div>
           )}
@@ -252,37 +253,37 @@ const ReportBuilderPage: React.FC = () => {  const { t } = useTranslation()
             <div>
               <div className="section-toolbar">
                 <button className="btn-primary" onClick={() => setShowTemplateForm(!showTemplateForm)}>
-                  {showTemplateForm ? 'Cancel' : '+ Create Template'}
+                  {showTemplateForm ? t('common.cancel') : t('reportBuilder.createTemplate')}
                 </button>
               </div>
 
               {showTemplateForm && (
                 <form className="module-form" onSubmit={handleCreateTemplate}>
                   <div className="form-grid">
-                    <div className="form-group"><label>Name *</label><input required value={templateForm.name} onChange={e => setTemplateForm({ ...templateForm, name: e.target.value })} /></div>
-                    <div className="form-group"><label>Report Type</label>
+                    <div className="form-group"><label>{t('common.name')} *</label><input required value={templateForm.name} onChange={e => setTemplateForm({ ...templateForm, name: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('reportBuilder.reportType')}</label>
                       <select value={templateForm.reportType} onChange={e => setTemplateForm({ ...templateForm, reportType: e.target.value })}>
                         {REPORT_TYPES.map(rt => <option key={rt.value} value={rt.value}>{rt.label}</option>)}
                       </select>
                     </div>
-                    <div className="form-group full-width"><label>Description</label><textarea value={templateForm.description} onChange={e => setTemplateForm({ ...templateForm, description: e.target.value })} /></div>
+                    <div className="form-group full-width"><label>{t('common.description')}</label><textarea value={templateForm.description} onChange={e => setTemplateForm({ ...templateForm, description: e.target.value })} /></div>
                   </div>
-                  <button type="submit" className="btn-primary">Create Template</button>
+                  <button type="submit" className="btn-primary">{t('reportBuilder.createTemplate')}</button>
                 </form>
               )}
 
               <div className="cards-grid">
-                {templates.map(t => (
-                  <div key={t.id} className="card">
-                    <h3>{t.name}</h3>
+                {templates.map(tpl => (
+                  <div key={tpl.id} className="card">
+                    <h3>{tpl.name}</h3>
                     <div className="card-meta">
-                      <span className="badge">{typeInfo(t.reportType || (t as any).report_type)?.label || t.reportType || (t as any).report_type}</span>
-                      {(t.isSystem || (t as any).is_system) && <span className="badge badge-system">System</span>}
+                      <span className="badge">{typeInfo(tpl.reportType || (tpl as any).report_type)?.label || tpl.reportType || (tpl as any).report_type}</span>
+                      {(tpl.isSystem || (tpl as any).is_system) && <span className="badge badge-system">System</span>}
                     </div>
-                    {t.description && <p className="card-note">{t.description}</p>}
+                    {tpl.description && <p className="card-note">{tpl.description}</p>}
                   </div>
                 ))}
-                {!templates.length && <div className="empty-state">No templates yet</div>}
+                {!templates.length && <div className="empty-state">{t('reportBuilder.noTemplates')}</div>}
               </div>
             </div>
           )}

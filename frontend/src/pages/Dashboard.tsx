@@ -84,25 +84,26 @@ const Dashboard: React.FC = () => {
       // Build recent activity
       const acts: ActivityItem[] = []
       bookings.slice(0, 3).forEach((b: any) => {
-        const who = isVeterinarian ? (b.petOwnerName || 'Patient') : (b.vetName || 'Doctor')
+        const who = isVeterinarian ? (b.petOwnerName || t('common.patient')) : (b.vetName || t('common.doctor'))
+        const mode = b.bookingType === 'video_call' ? t('common.video') : t('common.inPerson')
         acts.push({
-          type: 'Booking',
-          description: `${b.bookingType === 'video_call' ? 'Video' : 'In-person'} with ${who} — ${b.reasonForVisit || 'Consultation'}`,
+          type: t('common.booking'),
+          description: `${mode} ${t('common.with')} ${who} — ${b.reasonForVisit || t('common.consultation')}`,
           time: b.scheduledDate ? formatDate(b.scheduledDate, { month: 'short', day: 'numeric' }) : '',
           status: b.status
         })
       })
       consults.slice(0, 2).forEach((c: any) => {
         acts.push({
-          type: 'Consultation',
-          description: `${c.animalType || 'Animal'} — ${c.symptomDescription || 'General consultation'}`,
+          type: t('common.consultation'),
+          description: `${c.animalType || t('common.animal')} — ${c.symptomDescription || t('common.generalConsultation')}`,
           time: c.scheduledAt ? formatDate(c.scheduledAt, { month: 'short', day: 'numeric' }) : '',
           status: c.status
         })
       })
       setActivities(acts)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load dashboard')
+      setError(err?.response?.data?.error?.message || err?.message || t('common.failedToLoad'))
     } finally {
       setLoading(false)
     }
@@ -111,12 +112,12 @@ const Dashboard: React.FC = () => {
   // ── Doctor actions ──
   const handleConfirm = async (id: string) => {
     try { await apiService.confirmBooking(id); loadDashboardData() }
-    catch (err: any) { setError(err?.response?.data?.error?.message || 'Failed to confirm') }
+    catch (err: any) { setError(err?.response?.data?.error?.message || t('common.failedToSave')) }
   }
   const handleCancel = async (id: string) => {
-    if (!window.confirm('Cancel this booking?')) return
-    try { await apiService.cancelBooking(id, 'Declined by doctor'); loadDashboardData() }
-    catch (err: any) { setError(err?.response?.data?.error?.message || 'Failed to cancel') }
+    if (!window.confirm(t('dashboard.cancelBooking'))) return
+    try { await apiService.cancelBooking(id, t('dashboard.declinedByDoctor')); loadDashboardData() }
+    catch (err: any) { setError(err?.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   /* ════════════════════════════════════════════════════════
@@ -252,7 +253,7 @@ const Dashboard: React.FC = () => {
       {hasPermission('dashboard_stats') && (
         <div className="dashboard-stats-grid">
           {statCards.map((stat, index) => (
-            <div key={index} className="stat-card" onClick={() => navigate(stat.path)} title={`View ${stat.label}`}>
+            <div key={index} className="stat-card" onClick={() => navigate(stat.path)} title={`${t('common.view')} ${stat.label}`}>
               <div className="stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
                 <span>{stat.icon}</span>
               </div>
@@ -271,7 +272,7 @@ const Dashboard: React.FC = () => {
           <div className="alert-card alert-warning">
             <div className="alert-header">
               <span className="alert-header-icon">🔔</span>
-              <h3>Pending Booking Confirmations ({pendingBookings.filter(booking => {
+              <h3>{t('dashboard.pendingBookings')} ({pendingBookings.filter(booking => {
                 const d = new Date(booking.scheduledDate + 'T' + (booking.timeSlotEnd || '23:59') + ':00')
                 return d >= new Date()
               }).length})</h3>
@@ -289,13 +290,13 @@ const Dashboard: React.FC = () => {
                   <div className="alert-item-info">
                     <strong>{booking.petOwnerName || t('dashboard.pending.patient')}</strong>
                     <span className="alert-item-meta">
-                      {formatDate(booking.scheduledDate, { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.timeSlotStart}
+                      {formatDate(booking.scheduledDate, { weekday: 'short', month: 'short', day: 'numeric' })} {t('common.at')} {booking.timeSlotStart}
                       {' · '}{booking.bookingType === 'video_call' ? t('dashboard.pending.video') : t('dashboard.pending.chat')}
                     </span>
                     <span className="alert-item-reason">
                       {booking.reasonForVisit || booking.reason || t('dashboard.pending.generalConsultation')}
                       {(booking.priority === 'urgent' || booking.priority === 'emergency') && (
-                        <span className="priority-tag"> ⚠️ {booking.priority?.toUpperCase()}</span>
+                        <span className="priority-tag"> ⚠️ {t(`common.${booking.priority}`)?.toUpperCase()}</span>
                       )}
                     </span>
                   </div>
@@ -364,7 +365,7 @@ const Dashboard: React.FC = () => {
                     <div className="activity-description">{activity.description}</div>
                   </div>
                   <div className="activity-meta">
-                    <span className={`activity-status status-${activity.status}`}>{activity.status}</span>
+                    <span className={`activity-status status-${activity.status}`}>{t(`common.${activity.status}`) || activity.status}</span>
                     <span className="activity-time">{activity.time}</span>
                   </div>
                 </div>
@@ -392,16 +393,16 @@ const Dashboard: React.FC = () => {
                       <div className="booking-item-info">
                         <strong>{booking.petOwnerName || t('dashboard.pending.patient')}</strong>
                         <span className="booking-item-meta">
-                          {formatDate(booking.scheduledDate)} at {booking.timeSlotStart}
+                          {formatDate(booking.scheduledDate)} {t('common.at')} {booking.timeSlotStart}
                         </span>
                         <span className="booking-item-meta">
-                          {booking.bookingType === 'video_call' ? '📹 Video' : '💬 Chat'} ·{' '}
+                          {booking.bookingType === 'video_call' ? t('dashboard.pending.video') : t('dashboard.pending.chat')} ·{' '}
                           <span style={{ color: booking.priority === 'urgent' || booking.priority === 'emergency' ? '#dc2626' : undefined }}>
-                            {booking.priority || 'normal'}
+                            {t(`common.${booking.priority || 'normal'}`) || booking.priority}
                           </span>
                         </span>
                       </div>
-                      <span className={`status-pill status-${booking.status}`}>{booking.status}</span>
+                      <span className={`status-pill status-${booking.status}`}>{t(`common.${booking.status}`) || booking.status}</span>
                     </div>
                   ))}
                 </div>
@@ -426,7 +427,7 @@ const Dashboard: React.FC = () => {
                           {formatDate(consultation.createdAt || '')}
                         </span>
                       </div>
-                      <span className={`status-pill status-${consultation.status}`}>{consultation.status}</span>
+                      <span className={`status-pill status-${consultation.status}`}>{t(`common.${consultation.status}`) || consultation.status}</span>
                     </div>
                   ))}
                 </div>

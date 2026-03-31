@@ -125,7 +125,7 @@ const AICopilot: React.FC = () => {
       const { userMessage, aiMessage } = res.data
       setMessages(prev => [...prev.filter(m => m.id !== 'temp'), userMessage, aiMessage])
     } catch (e: any) {
-      setError('Failed to send message')
+      setError(t('aiCopilot.errors.sendFailed'))
       setMessages(prev => prev.filter(m => m.id !== 'temp'))
     }
     setSending(false)
@@ -188,8 +188,8 @@ const AICopilot: React.FC = () => {
       await apiService.deleteChatSession(id)
       setSessions(prev => prev.filter(s => s.id !== id))
       if (selectedSession?.id === id) { setSelectedSession(null); setMessages([]) }
-      setSuccessMsg('Session deleted')
-    } catch { setError('Failed to delete') }
+      setSuccessMsg(t('aiCopilot.errors.deleted'))
+    } catch { setError(t('aiCopilot.errors.deleteFailed')) }
   }
 
   const SUGGESTED_PROMPTS = [
@@ -206,7 +206,7 @@ const AICopilot: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('aiCopilot.pageTitle')}</h1>
-          <p style={{ color: '#666', margin: '8px 0 0' }}>Intelligent assistant for symptom analysis, drug checks, scan analysis & treatment guidance</p>
+          <p style={{ color: '#666', margin: '8px 0 0' }}>{t('aiCopilot.subtitle')}</p>
         </div>
       </div>
 
@@ -234,10 +234,10 @@ const AICopilot: React.FC = () => {
                 <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{s.title}</div>
                 <div style={{ fontSize: 12, color: '#888' }}>{s.messageCount || 0} messages · {s.contextType}</div>
                 <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id) }}
-                  style={{ fontSize: 11, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', marginTop: 4 }}>Delete</button>
+                  style={{ fontSize: 11, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', marginTop: 4 }}>{t('common.delete')}</button>
               </div>
             ))}
-            {sessions.length === 0 && <p style={{ color: '#999', textAlign: 'center', fontSize: 14 }}>No sessions yet. Start a new chat!</p>}
+            {sessions.length === 0 && <p style={{ color: '#999', textAlign: 'center', fontSize: 14 }}>{t('aiCopilot.chat.emptySessions')}</p>}
           </div>
 
           {/* Chat area */}
@@ -283,8 +283,8 @@ const AICopilot: React.FC = () => {
                   {messages.length === 0 && (
                     <div style={{ textAlign: 'center', padding: 40 }}>
                       <div style={{ fontSize: 48, marginBottom: 16 }}>🐾</div>
-                      <h3 style={{ color: '#333' }}>How can I help today?</h3>
-                      <p style={{ color: '#888', marginBottom: 20 }}>Ask about symptoms, treatments, nutrition, or any veterinary topic</p>
+                      <h3 style={{ color: '#333' }}>{t('aiCopilot.chat.greeting')}</h3>
+                      <p style={{ color: '#888', marginBottom: 20 }}>{t('aiCopilot.chat.placeholder')}</p>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
                         {SUGGESTED_PROMPTS.map(p => (
                           <button key={p} onClick={() => { setMessageInput(p) }}
@@ -300,12 +300,12 @@ const AICopilot: React.FC = () => {
                 <div style={{ padding: '12px 20px', borderTop: '1px solid #eee', display: 'flex', gap: 12, alignItems: 'center' }}>
                   <input value={messageInput} onChange={e => setMessageInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                    placeholder="Type your question..." disabled={sending}
+                    placeholder={t('aiCopilot.chat.inputPlaceholder')} disabled={sending}
                     style={{ flex: 1, padding: '12px 18px', borderRadius: 24, border: '1px solid #ddd', fontSize: 14, outline: 'none',
                       background: sending ? '#f9f9f9' : 'white' }} />
                   <button className="module-btn primary" onClick={sendMessage} disabled={sending || !messageInput.trim()}
                     style={{ borderRadius: 24, padding: '12px 24px', opacity: (sending || !messageInput.trim()) ? 0.6 : 1 }}>
-                    {sending ? 'Sending…' : '▹ Send'}
+                    {sending ? t('common.loading') : t('aiCopilot.chat.send')}
                   </button>
                 </div>
               </>
@@ -313,9 +313,9 @@ const AICopilot: React.FC = () => {
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 64, marginBottom: 16 }}>🤖</div>
-                  <h2 style={{ color: '#333' }}>AI Veterinary Copilot</h2>
-                  <p>Select a session or start a new chat</p>
-                  <button className="module-btn primary" style={{ marginTop: 16 }} onClick={() => createSession()}>Start New Chat</button>
+                  <h2 style={{ color: '#333' }}>{t('aiCopilot.chat.emptyTitle')}</h2>
+                  <p>{t('aiCopilot.chat.emptySubtitle')}</p>
+                  <button className="module-btn primary" style={{ marginTop: 16 }} onClick={() => createSession()}>{t('aiCopilot.chat.startNew')}</button>
                 </div>
               </div>
             )}

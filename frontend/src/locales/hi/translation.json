@@ -622,35 +622,78 @@
     "noMatchFilter": "कोई परामर्श इस फ़िल्टर से मेल नहीं खाता",
     "noHistory": "अभी कोई परामर्श इतिहास नहीं",
     "historyHint": "पूर्ण और रद्द परामर्श यहाँ संदर्भ के लिए दिखाई देंगे",
-    "reschedule": {
-      "title": "🔄 अपॉइंटमेंट पुनर्निर्धारित करें",
-      "originalLabel": "⚠️ मूल अपॉइंटमेंट",
-      "dateLabel": "नई तिथि चुनें *",
-      "slotsTitle": "उपलब्ध समय स्लॉट",
-      "noSlots": "इस तिथि के लिए कोई स्लॉट उपलब्ध नहीं। कृपया अन्य तिथि चुनें।",
-      "confirming": "पुनर्निर्धारित हो रहा है...",
-      "confirmBtn": "✓ पुनर्निर्धारण की पुष्टि करें"
-    },
-    "actionLog": {
-      "title": "📋 कार्रवाई लॉग",
-      "loading": "कार्रवाई इतिहास लोड हो रहा है...",
-      "empty": "इस बुकिंग के लिए कोई कार्रवाई इतिहास नहीं मिला।",
-      "by": "द्वारा",
-      "system": "सिस्टम",
-      "newSlot": "नया स्लॉट:",
-      "approved": "(स्वीकृत ✓)",
-      "awaitingApproval": "(डॉक्टर की स्वीकृति की प्रतीक्षा)",
-      "autoConfirmed": "(स्वतः पुष्टि)",
-      "cancelledBy": "द्वारा रद्द",
-      "reason": "कारण:"
-    },
     "cancelModal": {
       "title": "❌ बुकिंग रद्द करें",
       "warning": "⚠️ यह क्रिया पूर्ववत नहीं की जा सकती। अपॉइंटमेंट रद्द हो जाएगी।",
       "reasonLabel": "रद्दीकरण का कारण",
       "reasonPlaceholder": "कृपया रद्दीकरण का कारण बताएं...",
       "keepBooking": "बुकिंग रखें",
-      "confirmCancel": "रद्दीकरण की पुष्टि करें"
+      "confirmCancel": "रद्दीकरण की पुष्टि करें",
+      "quickReasons": "त्वरित कारण:",
+      "refundPolicy": "रिफंड नीति:",
+      "reasonPresetsVet": ["शेड्यूल संघर्ष", "आपातकाल", "मरीज़ की अनुरोध", "उपस्थित नहीं हो सकता"],
+      "reasonPresetsPatient": ["दूसरा डॉक्टर मिला", "शेड्यूल संघर्ष", "अब ज़रूरत नहीं", "आर्थिक कारण"]
+    },
+    "loading": "परामर्श लोड हो रहे हैं...",
+    "failedToLoad": "डेटा लोड करने में विफल",
+    "failedToConfirm": "बुकिंग की पुष्टि करने में विफल",
+    "failedToCancel": "बुकिंग रद्द करने में विफल",
+    "failedToReschedule": "पुनर्निर्धारित करने में विफल",
+    "failedToStart": "परामर्श शुरू करने में विफल",
+    "pastTimeError": "बीते हुए समय में पुनर्निर्धारित नहीं कर सकते। कृपया भविष्य का स्लॉट चुनें।",
+    "actionLabels": {
+      "created": "📅 बुकिंग बनाई गई",
+      "confirmed": "✅ डॉक्टर द्वारा पुष्टि",
+      "cancelled": "❌ बुकिंग रद्द",
+      "rescheduled": "🔄 पुनर्निर्धारित"
+    },
+    "missedLabels": {
+      "doctorNoShow": "डॉक्टर नहीं आए",
+      "patientNoShow": "मरीज़ नहीं आए",
+      "bothNoShow": "दोनों नहीं आए"
+    },
+    "reschedule": {
+      "title": "🔄 अपॉइंटमेंट पुनर्निर्धारित करें",
+      "originalLabel": "⚠️ मूल अपॉइंटमेंट",
+      "selectDoctor": "डॉक्टर चुनें",
+      "selectDoctorOptional": "डॉक्टर चुनें (वैकल्पिक)",
+      "keepCurrentDoctor": "— वर्तमान डॉक्टर रखें —",
+      "currentDoctor": "(वर्तमान)",
+      "loadingDoctors": "डॉक्टर लोड हो रहे हैं...",
+      "dateLabel": "नई तारीख चुनें *",
+      "slotsTitle": "उपलब्ध समय स्लॉट",
+      "noSlots": "इस तारीख के लिए कोई उपलब्ध स्लॉट नहीं। कृपया अन्य तारीख चुनें।",
+      "selectAnotherDate": "कृपया अन्य तारीख चुनें।",
+      "approvalNote": "ℹ️ आपकी पुनर्निर्धारित अपॉइंटमेंट को डॉक्टर की मंजूरी की आवश्यकता होगी।",
+      "confirming": "पुनर्निर्धारित हो रहा है...",
+      "confirmBtn": "✓ पुनर्निर्धारण की पुष्टि करें",
+      "rescheduleCount": "📊 पुनर्निर्धारण {{current}} में से {{max}} अनुमत"
+    },
+    "noMatchAppointments": "इस फ़िल्टर से कोई अपॉइंटमेंट मेल नहीं खाती",
+    "cancelledByYou": "🙋 आपके द्वारा रद्द",
+    "cancelledByOther": "🔔 दूसरे पक्ष द्वारा रद्द",
+    "rescheduledNotice": "🔄 यह बुकिंग पुनर्निर्धारित की गई। इसकी जगह नई अपॉइंटमेंट बनाई गई।",
+    "actionLog": {
+      "title": "📋 कार्रवाई लॉग",
+      "loading": "कार्रवाई इतिहास लोड हो रहा है...",
+      "empty": "इस बुकिंग के लिए कोई कार्रवाई इतिहास नहीं मिला।",
+      "close": "बंद करें",
+      "newSlot": "नया स्लॉट:",
+      "approved": "(स्वीकृत ✓)",
+      "awaitingApproval": "(डॉक्टर की स्वीकृति की प्रतीक्षा)",
+      "autoConfirmed": "(स्वतः पुष्टि)",
+      "cancelledBy": "द्वारा रद्द {{role}}।",
+      "reason": "कारण: {{reason}}"
+    },
+    "herdLevel": "झुंड-स्तर",
+    "missedMessages": {
+      "youMissed": "⚠️ आपने यह अपॉइंटमेंट चूक दी।",
+      "bothMissed": "⚠️ आपने और डॉक्टर दोनों ने यह अपॉइंटमेंट चूक दी।",
+      "rescheduleAnytime": "आप कभी भी पुनर्निर्धारित कर सकते हैं।",
+      "rescheduleRemaining": "आपके पास {{count}} पुनर्निर्धारण शेष हैं।",
+      "rescheduleUsed": "आपने इस बुकिंग के लिए अपनी पुनर्निर्धारण सीमा का उपयोग कर लिया है।",
+      "patientNoJoin": "🙋 मरीज़ सत्र में शामिल नहीं हुआ। वे पुनर्निर्धारित कर सकते हैं।",
+      "neitherJoined": "❌ कोई भी पक्ष सत्र में शामिल नहीं हुआ। मरीज़ पुनर्निर्धारित कर सकता है।"
     }
   },
   "animals": {
@@ -850,6 +893,41 @@
     "noEventsDesc": "वर्तमान फ़िल्टर के साथ इस पशु के लिए कोई इवेंट नहीं मिला।",
     "selectAnimalFirst": "उनकी जीवन टाइमलाइन देखने के लिए एक पशु चुनें।",
     "distribution": "इवेंट वितरण",
+    "loadingAnimals": "पशु लोड हो रहे हैं...",
+    "loadingTimeline": "टाइमलाइन लोड हो रही है...",
+    "noMatching": "कोई मिलान इवेंट नहीं",
+    "noEventsYet": "अभी कोई इवेंट नहीं",
+    "tryClearingFilters": "फ़िल्टर साफ़ करने का प्रयास करें।",
+    "noEventsFound": "कोई टाइमलाइन इवेंट नहीं मिला।",
+    "zoomIn": "ज़ूम इन",
+    "zoomOut": "ज़ूम आउट",
+    "oldest": "सबसे पुराना",
+    "newest": "सबसे नया",
+    "refresh": "रीफ़्रेश",
+    "severity": "गंभीरता",
+    "recordedBy": "द्वारा दर्ज",
+    "details": "विवरण",
+    "openRecord": "रिकॉर्ड खोलें",
+    "consultation": "परामर्श",
+    "openFullRecord": "पूरा रिकॉर्ड खोलें",
+    "viewConsultation": "परामर्श देखें",
+    "viewPrescriptions": "नुस्खे देखें",
+    "stats": {
+      "totalEvents": "कुल इवेंट",
+      "eventTypes": "इवेंट प्रकार",
+      "activeItems": "सक्रिय आइटम",
+      "highSeverity": "उच्च गंभीरता"
+    },
+    "filters": {
+      "title": "फ़िल्टर",
+      "typesToShow": "दिखाने के प्रकार",
+      "dateRange": "तिथि सीमा",
+      "from": "से",
+      "to": "तक",
+      "clearAll": "सभी साफ़ करें",
+      "apply": "लागू करें",
+      "clearFilters": "फ़िल्टर साफ़ करें"
+    },
     "detail": {
       "type": "प्रकार",
       "date": "तारीख",
@@ -1032,7 +1110,34 @@
       "normalRange": "सामान्य सीमा",
       "labName": "लैब नाम",
       "abnormalLabel": "परिणाम असामान्य है",
-      "interpretation": "व्याख्या"
+      "interpretation": "व्याख्या",
+      "notes": "नोट्स",
+      "status": "स्थिति",
+      "statusPending": "लंबित",
+      "statusInProgress": "प्रगति में",
+      "statusCompleted": "पूर्ण",
+      "allergyMild": "हल्का",
+      "allergyModerate": "मध्यम",
+      "allergySevere": "गंभीर",
+      "cancel": "रद्द करें",
+      "save": "सहेजें",
+      "saving": "सहेजा जा रहा है...",
+      "recordTitlePlaceholder": "रिकॉर्ड शीर्षक...",
+      "contentPlaceholder": "विस्तृत विवरण...",
+      "vaccineNamePlaceholder": "जैसे, रेबीज, DHPP...",
+      "vaccineTypePlaceholder": "जैसे, कोर, नॉन-कोर...",
+      "dosagePlaceholder": "जैसे, 1ml",
+      "reactionPlaceholder": "कोई प्रतिकूल प्रतिक्रिया...",
+      "weightPlaceholder": "वजन दर्ज करें...",
+      "notesPlaceholder": "कोई नोट्स...",
+      "allergenPlaceholder": "जैसे, चिकन, पेनिसिलिन...",
+      "reactionDescPlaceholder": "प्रतिक्रिया का वर्णन करें...",
+      "testNamePlaceholder": "जैसे, पूर्ण रक्त गणना...",
+      "testCategoryPlaceholder": "जैसे, हेमेटोलॉजी, बायोकेमिस्ट्री...",
+      "resultPlaceholder": "परीक्षण परिणाम...",
+      "normalRangePlaceholder": "जैसे, 5.5-8.5",
+      "unitPlaceholder": "जैसे, mg/dL, mmol/L...",
+      "interpretationPlaceholder": "नैदानिक व्याख्या..."
     },
     "recordTypes": {
       "diagnosis": "निदान",
@@ -1049,7 +1154,16 @@
       "normal": "सामान्य",
       "high": "उच्च",
       "critical": "गंभीर"
-    }
+    },
+    "loading": "मेडिकल रिकॉर्ड्स लोड हो रहे हैं...",
+    "failedToLoad": "डेटा लोड करने में विफल",
+    "failedToSaveRecord": "रिकॉर्ड सहेजने में विफल",
+    "failedToSaveVaccination": "टीकाकरण सहेजने में विफल",
+    "failedToSaveWeight": "वजन सहेजने में विफल",
+    "failedToSaveAllergy": "एलर्जी सहेजने में विफल",
+    "failedToSaveLabResult": "लैब परिणाम सहेजने में विफल",
+    "selectPetGeneric": "पशु चुनें",
+    "selectPetGenericSub": "ऊपर ड्रॉपडाउन से पशु चुनें"
   },
   "settings": {
     "pageTitle": "⚙️ सेटिंग्स",
@@ -1239,6 +1353,34 @@
       "created": "समूह बनाया गया",
       "deleted": "समूह हटाया गया",
       "deleteConfirm": "इस समूह को हटाएं? पशु अनलिंक हो जाएंगे।"
+    },
+    "manageAnimals": "🐾 पशु प्रबंधन",
+    "bookConsultation": "📅 परामर्श बुक करें",
+    "manage": {
+      "title": "🐾 पशु प्रबंधन — {{name}}",
+      "inGroup": "✅ इस समूह में पशु ({{count}})",
+      "emptyGroup": "इस समूह में अभी कोई पशु नहीं। नीचे अपनी सूची से पशु जोड़ें, या",
+      "registerAnimal": "नया पशु पंजीकृत करें",
+      "first": "पहले।",
+      "available": "📋 जोड़ने योग्य पशु ({{count}})",
+      "searchPlaceholder": "नाम, ID, या प्रजाति से खोजें...",
+      "noAnimals": "अभी कोई पशु पंजीकृत नहीं।",
+      "registerFirst": "पहला पशु पंजीकृत करें",
+      "toGetStarted": "शुरू करने के लिए।",
+      "noMatch": "कोई मेल खाने वाला पशु नहीं मिला।",
+      "allAssigned": "आपके सभी पशु पहले से इस समूह में हैं।",
+      "assign": "+ जोड़ें",
+      "assignSuccess": "पशु समूह में जोड़ा गया",
+      "assignFailed": "पशु जोड़ने में विफल",
+      "removeSuccess": "पशु समूह से हटाया गया",
+      "removeFailed": "पशु हटाने में विफल",
+      "loadFailed": "पशु लोड करने में विफल"
+    },
+    "reassign": {
+      "title": "पशु को दूसरे समूह में ले जाएं?",
+      "currentGroup": "दूसरा समूह",
+      "moveMessage": "{{targetGroup}} में ले जाने से यह स्वचालित रूप से पिछले समूह से हट जाएगा।",
+      "confirmBtn": "हाँ, पशु ले जाएं"
     }
   },
   "locationManagement": {
@@ -1261,7 +1403,26 @@
       "editTitle": "स्थान संपादित करें",
       "createTitle": "स्थान बनाएं",
       "parentDefault": "कोई नहीं (शीर्ष स्तर)",
-      "validation": "नाम और प्रकार आवश्यक हैं"
+      "validation": "नाम और प्रकार आवश्यक हैं",
+      "updateBtn": "स्थान अपडेट करें",
+      "createBtn": "स्थान बनाएं"
+    },
+    "viewMap": "🗺️ मानचित्र",
+    "mapTitle": "🗺️ फार्म स्थान मानचित्र",
+    "form": {
+      "name": "स्थान नाम *",
+      "type": "स्थान प्रकार *",
+      "parentLocation": "मूल स्थान",
+      "capacity": "क्षमता",
+      "area": "क्षेत्र",
+      "gpsLatitude": "GPS अक्षांश",
+      "gpsLongitude": "GPS देशांतर"
+    },
+    "toasts": {
+      "updated": "स्थान अपडेट किया गया",
+      "created": "स्थान बनाया गया",
+      "deleted": "स्थान हटाया गया",
+      "deleteConfirm": "इस स्थान को हटाएं?"
     }
   },
   "movementLog": {
@@ -1406,7 +1567,11 @@
       "open": "⏳ खुला"
     },
     "resolve": "हल करें",
-    "emptyObservations": "अभी कोई अवलोकन दर्ज नहीं।"
+    "emptyObservations": "अभी कोई अवलोकन दर्ज नहीं।",
+    "allObservations": "📋 सभी अवलोकन",
+    "errors": {
+      "failedToResolve": "अवलोकन हल करने में विफल"
+    }
   },
   "breedingManager": {
     "pageTitle": "🧬 प्रजनन और आनुवंशिकी प्रबंधक",
@@ -1512,7 +1677,54 @@
     "lowStockAlerts": "⚠️ कम स्टॉक अलर्ट",
     "allOk": "सभी स्टॉक स्तर ठीक हैं!",
     "consumptionByType": "प्रकार अनुसार खपत (30 दिन)",
-    "dailyTrend": "दैनिक खपत प्रवृत्ति"
+    "dailyTrend": "दैनिक खपत प्रवृत्ति",
+    "selectEnterprise": "उद्यम चुनें:",
+    "selectDefault": "-- चुनें --",
+    "form": {
+      "editTitle": "चारा संपादित करें",
+      "createTitle": "नया चारा जोड़ें",
+      "name": "नाम *",
+      "feedType": "चारा प्रकार",
+      "brand": "ब्रांड",
+      "batchNumber": "बैच नंबर",
+      "quantityInStock": "स्टॉक में मात्रा *",
+      "unit": "इकाई",
+      "minimumStockLevel": "न्यूनतम स्टॉक स्तर",
+      "costPerUnit": "प्रति इकाई लागत *",
+      "expiryDate": "समाप्ति तिथि",
+      "storageLocation": "भंडारण स्थान",
+      "supplier": "आपूर्तिकर्ता"
+    },
+    "consumptionForm": {
+      "title": "चारा खपत लॉग करें",
+      "feed": "चारा *",
+      "selectFeed": "-- चारा चुनें --",
+      "quantityUsed": "उपयोग मात्रा *",
+      "submitBtn": "खपत लॉग करें"
+    },
+    "headers": {
+      "stock": "स्टॉक",
+      "minLevel": "न्यूनतम स्तर",
+      "costPerUnit": "लागत/इकाई",
+      "expiry": "समाप्ति",
+      "location": "स्थान"
+    },
+    "analytics": {
+      "used": "उपयोग",
+      "cost": "लागत"
+    },
+    "toasts": {
+      "feedUpdated": "चारा अपडेट किया गया!",
+      "feedAdded": "चारा जोड़ा गया!",
+      "saveFailed": "चारा सहेजने में विफल",
+      "restocked": "चारा पुनःस्टॉक किया गया!",
+      "restockFailed": "पुनःस्टॉक में विफल",
+      "consumptionLogged": "खपत लॉग की गई!",
+      "consumptionFailed": "खपत लॉग करने में विफल",
+      "deleteConfirm": "इस चारे को हटाएं?",
+      "feedDeleted": "चारा हटाया गया!",
+      "deleteFailed": "हटाने में विफल"
+    }
   },
   "complianceDocs": {
     "pageTitle": "📜 अनुपालन और नियामक दस्तावेज़",
@@ -1598,7 +1810,9 @@
       "date": "लेनदेन तिथि *",
       "description": "विवरण",
       "reference": "संदर्भ #",
-      "notes": "नोट्स"
+      "notes": "नोट्स",
+      "editTitle": "वित्तीय रिकॉर्ड संपादित करें",
+      "createTitle": "वित्तीय रिकॉर्ड जोड़ें"
     },
     "dashboard": {
       "totalIncome": "कुल आय",
@@ -1606,10 +1820,28 @@
       "netProfit": "शुद्ध लाभ",
       "monthlyBreakdown": "मासिक विभाजन",
       "topExpenses": "शीर्ष व्यय श्रेणियाँ",
-      "revenueByCategory": "श्रेणी अनुसार राजस्व"
+      "revenueByCategory": "श्रेणी अनुसार राजस्व",
+      "noData": "अभी कोई डेटा नहीं।",
+      "headers": {
+        "month": "महीना",
+        "income": "आय",
+        "expenses": "व्यय",
+        "profit": "लाभ",
+        "category": "श्रेणी",
+        "total": "कुल"
+      }
     },
     "emptyRecords": "अभी कोई रिकॉर्ड नहीं।",
-    "deleteConfirm": "इस वित्तीय रिकॉर्ड को हटाएं?"
+    "deleteConfirm": "इस वित्तीय रिकॉर्ड को हटाएं?",
+    "selectEnterprise": "उद्यम चुनें:",
+    "selectDefault": "-- चुनें --",
+    "toasts": {
+      "recordUpdated": "रिकॉर्ड अपडेट किया गया!",
+      "recordCreated": "रिकॉर्ड बनाया गया!",
+      "saveFailed": "रिकॉर्ड सहेजने में विफल",
+      "recordDeleted": "रिकॉर्ड हटाया गया!",
+      "deleteFailed": "हटाने में विफल"
+    }
   },
   "alertCenter": {
     "pageTitle": "🔔 स्मार्ट अलर्ट केंद्र",
@@ -1666,7 +1898,12 @@
       "acknowledged": "अलर्ट स्वीकार किया गया",
       "checksComplete": "अलर्ट जाँच पूर्ण: {{count}} अलर्ट ट्रिगर हुए",
       "deleteConfirm": "इस अलर्ट नियम को हटाएं?",
-      "invalidJson": "शर्तों में अमान्य JSON"
+      "invalidJson": "शर्तों में अमान्य JSON",
+      "ruleEnabled": "नियम सक्षम",
+      "ruleDisabled": "नियम अक्षम",
+      "readFailed": "सभी पढ़ा चिन्हित करने में विफल",
+      "acknowledgeFailed": "स्वीकार करने में विफल",
+      "checksFailed": "जाँच चलाने में विफल"
     }
   },
   "diseasePrediction": {
@@ -1861,7 +2098,21 @@
       "inputPlaceholder": "अपना प्रश्न लिखें...",
       "emptyTitle": "AI पशु चिकित्सा कोपायलट",
       "emptySubtitle": "एक सत्र चुनें या नई चैट शुरू करें",
-      "startNew": "नई चैट शुरू करें"
+      "startNew": "नई चैट शुरू करें",
+      "aiBuddyHelper": "AI Buddy Helper",
+      "failedToSendMessage": "संदेश भेजने में विफल",
+      "startingUp": "शुरू हो रहा है...",
+      "hiUser": "नमस्ते {{name}}! 👋 मैं AI Buddy हूँ",
+      "hiGuest": "नमस्ते! 👋 मैं AI Buddy हूँ",
+      "iKnowAbout": "मुझे पता है",
+      "askMeAnything": "के बारे में — कुछ भी पूछें!",
+      "askMeAnythingGeneral": "पालतू स्वास्थ्य, लक्षण, पोषण, या पशु चिकित्सा के बारे में कुछ भी पूछें!",
+      "askAiBuddy": "AI Buddy से पूछें...",
+      "thinking": "सोच रहा है...",
+      "userAssistant": "{{name}} का पशु चिकित्सा सहायक",
+      "yourAssistant": "आपका पशु चिकित्सा सहायक",
+      "couldNotStartSession": "चैट सत्र शुरू नहीं हो सका",
+      "couldNotCreateSession": "चैट सत्र बना नहीं सका"
     },
     "suggestedPrompts": {
       "respiratory": "गाय में श्वसन संक्रमण के सामान्य लक्षण क्या हैं?",
@@ -2495,7 +2746,8 @@
     "booking": "बुकिंग हो रही है...",
     "confirmBooking": "✓ बुकिंग की पुष्टि करें",
     "fillRequired": "कृपया सभी आवश्यक फ़ील्ड भरें",
-    "cannotBookPast": "पिछली तारीख में परामर्श बुक नहीं किया जा सकता। कृपया भविष्य की तारीख और समय चुनें।"
+    "cannotBookPast": "पिछली तारीख में परामर्श बुक नहीं किया जा सकता। कृपया भविष्य की तारीख और समय चुनें।",
+    "failedToCreate": "बुकिंग बनाने में विफल"
   },
   "findDoctor": {
     "title": "पशु चिकित्सक खोजें",
@@ -2557,7 +2809,19 @@
     "actionCreated": "📅 बुकिंग बनाई गई",
     "actionConfirmed": "✅ डॉक्टर द्वारा पुष्टि",
     "actionCancelled": "❌ बुकिंग रद्द की गई",
-    "actionRescheduled": "🔄 पुनर्निर्धारित"
+    "actionRescheduled": "🔄 पुनर्निर्धारित",
+    "failedToCancel": "बुकिंग रद्द करने में विफल",
+    "failedToReschedule": "पुनर्निर्धारित करने में विफल",
+    "pastTimeError": "बीते हुए समय में पुनर्निर्धारित नहीं कर सकते। कृपया भविष्य का स्लॉट चुनें।",
+    "missedNotice": "⚠️ {{date}} को {{time}} की आपकी अपॉइंटमेंट छूट गई। कृपया नया स्लॉट चुनें।",
+    "rescheduleApprovalNote": "ℹ️ आपकी पुनर्निर्धारित अपॉइंटमेंट को डॉक्टर की मंजूरी चाहिए।",
+    "cancelledByUser": "उपयोगकर्ता द्वारा रद्द",
+    "generalConsultation": "सामान्य परामर्श",
+    "typeVideoCall": "वीडियो कॉल",
+    "typePhone": "फ़ोन",
+    "typeInPerson": "व्यक्तिगत रूप से",
+    "typeChat": "चैट",
+    "failedToLoad": "पशु चिकित्सकों को लोड करने में विफल"
   },
   "vetProfile": {
     "notSpecified": "निर्दिष्ट नहीं",
@@ -2586,7 +2850,8 @@
     "patientReviews": "रोगी समीक्षाएं",
     "noReviews": "अभी तक कोई समीक्षा नहीं। परामर्श के बाद पहले समीक्षा करने वाले बनें!",
     "doctorResponse": "डॉक्टर का जवाब",
-    "loadMoreReviews": "और समीक्षाएं लोड करें"
+    "loadMoreReviews": "और समीक्षाएं लोड करें",
+    "failedToLoad": "पशु चिकित्सक प्रोफ़ाइल लोड करने में विफल"
   },
   "videoConsultation": {
     "title": "वीडियो परामर्श",
@@ -2614,7 +2879,39 @@
     "chat": "चैट",
     "noMessages": "अभी तक कोई संदेश नहीं",
     "startConversation": "बातचीत शुरू करें",
-    "typeMessage": "संदेश टाइप करें..."
+    "typeMessage": "संदेश टाइप करें...",
+    "cameraUnavailableAudioOnly": "कैमरा उपलब्ध नहीं — केवल ऑडियो मोड पर स्विच कर रहा है",
+    "cameraAndMicUnavailable": "कैमरा और माइक्रोफोन उपलब्ध नहीं — केवल चैट मोड पर स्विच कर रहा है",
+    "failedToCreateVideoRoom": "वीडियो रूम बनाने में विफल",
+    "failedToInitialize": "वीडियो परामर्श आरंभ करने में विफल",
+    "failedToStartSession": "वीडियो सत्र शुरू करने में विफल",
+    "confirmEndConsultation": "क्या यह वीडियो परामर्श समाप्त करना है?",
+    "failedToEndSession": "सत्र समाप्त करने में विफल",
+    "failedToSendMessage": "संदेश भेजने में विफल",
+    "noMediaStream": "कोई मीडिया स्ट्रीम उपलब्ध नहीं",
+    "failedToStartRecording": "रिकॉर्डिंग शुरू करने में विफल",
+    "micUnavailable": "माइक्रोफोन उपलब्ध नहीं",
+    "cameraStillUnavailable": "कैमरा अभी भी उपलब्ध नहीं",
+    "duration": "अवधि",
+    "dosage": "खुराक",
+    "frequency": "आवृत्ति",
+    "durationLabel": "अवधि",
+    "instructions": "निर्देश",
+    "validUntil": "तक मान्य",
+    "dismiss": "खारिज करें",
+    "audioOnlyMode": "केवल ऑडियो मोड",
+    "chatOnlyMode": "केवल चैट मोड",
+    "screenSharingActive": "स्क्रीन शेयरिंग सक्रिय",
+    "medication": "दवा",
+    "room": "कक्ष",
+    "unmute": "अनम्यूट करें",
+    "mute": "म्यूट करें",
+    "turnOnCamera": "कैमरा चालू करें",
+    "turnOffCamera": "कैमरा बंद करें",
+    "shareScreen": "स्क्रीन शेयर करें",
+    "startRecording": "रिकॉर्डिंग शुरू करें",
+    "stopRecording": "रिकॉर्डिंग बंद करें",
+    "endCallTitle": "कॉल समाप्त करें"
   },
   "writeReview": {
     "title": "समीक्षा लिखें",
@@ -2641,7 +2938,8 @@
     "dashboard": "डैशबोर्ड",
     "errorSelectRating": "कृपया एक रेटिंग चुनें",
     "errorWriteComment": "कृपया एक टिप्पणी लिखें",
-    "errorMinChars": "टिप्पणी कम से कम 10 अक्षरों की होनी चाहिए"
+    "errorMinChars": "टिप्पणी कम से कम 10 अक्षरों की होनी चाहिए",
+    "failedToSubmit": "समीक्षा सबमिट करने में विफल"
   },
   "doctorDashboard": {
     "title": "डॉक्टर डैशबोर्ड",
@@ -2668,7 +2966,14 @@
     "recentConsultations": "हालिया परामर्श",
     "noRecentConsultations": "कोई हालिया परामर्श नहीं",
     "consultation": "परामर्श",
-    "loadingDashboard": "डैशबोर्ड लोड हो रहा है..."
+    "loadingDashboard": "डैशबोर्ड लोड हो रहा है...",
+    "failedToLoad": "डैशबोर्ड लोड करने में विफल",
+    "failedToConfirm": "पुष्टि करने में विफल",
+    "cancelConfirm": "क्या आप यह बुकिंग रद्द करना चाहते हैं?",
+    "failedToCancel": "रद्द करने में विफल",
+    "declinedByDoctor": "डॉक्टर द्वारा अस्वीकृत",
+    "videoType": "📹 वीडियो",
+    "chatType": "💬 चैट"
   },
   "doctorReviews": {
     "title": "मेरी समीक्षाएँ",
@@ -2699,7 +3004,8 @@
     "validUntil": "तक मान्य",
     "active": "सक्रिय",
     "inactive": "निष्क्रिय",
-    "viewConsultation": "परामर्श देखें"
+    "viewConsultation": "परामर्श देखें",
+    "failedToLoad": "नुस्खे लोड करने में विफल"
   },
   "prescriptionWriter": {
     "title": "नुस्खा लेखक",
@@ -2732,7 +3038,8 @@
     "createPrescription": "नुस्खा बनाएं",
     "errorNameDosageFrequency": "कृपया दवा का नाम, खुराक और आवृत्ति भरें",
     "errorDiagnosisRequired": "निदान आवश्यक है",
-    "errorMedicationRequired": "कम से कम एक दवा आवश्यक है"
+    "errorMedicationRequired": "कम से कम एक दवा आवश्यक है",
+    "failedToCreate": "नुस्खा बनाने में विफल"
   },
   "patientQueue": {
     "title": "मरीज़ कतार",
@@ -2834,7 +3141,30 @@
     "chat": "चैट",
     "historyTab": "इतिहास",
     "notesTab": "नोट्स",
-    "rx": "Rx"
+    "rx": "Rx",
+    "cameraUnavailableAudioOnly": "कैमरा उपलब्ध नहीं — केवल ऑडियो मोड पर स्विच कर रहा है",
+    "cameraAndMicUnavailable": "कैमरा और माइक्रोफोन उपलब्ध नहीं — केवल चैट मोड पर स्विच कर रहा है",
+    "failedToCreateVideoSession": "वीडियो सत्र बनाने में विफल",
+    "failedToInitializeRoom": "परामर्श कक्ष आरंभ करने में विफल",
+    "failedToStartCall": "कॉल शुरू करने में विफल",
+    "confirmEndCall": "क्या यह वीडियो परामर्श समाप्त करना है?",
+    "failedToEndCall": "कॉल समाप्त करने में विफल",
+    "micUnavailable": "माइक्रोफोन उपलब्ध नहीं",
+    "cameraUnavailable": "कैमरा उपलब्ध नहीं",
+    "noMediaStream": "कोई मीडिया स्ट्रीम उपलब्ध नहीं",
+    "failedToStartRecording": "रिकॉर्डिंग शुरू करने में विफल",
+    "failedToSaveNotes": "नोट्स सेव करने में विफल",
+    "confirmComplete": "क्या यह परामर्श पूरा करना है? यह सत्र समाप्त करेगा और मरीज़ को सूचित करेगा।",
+    "failedToComplete": "परामर्श पूरा करने में विफल",
+    "markedAsCompleted": "पूर्ण के रूप में चिह्नित",
+    "unmute": "अनम्यूट करें",
+    "mute": "म्यूट करें",
+    "turnOnCamera": "कैमरा चालू करें",
+    "turnOffCamera": "कैमरा बंद करें",
+    "shareScreen": "स्क्रीन शेयर करें",
+    "startRecording": "रिकॉर्डिंग शुरू करें",
+    "stopRecording": "रिकॉर्डिंग बंद करें",
+    "endCallTitle": "कॉल समाप्त करें"
   },
   "manageSchedule": {
     "title": "उपलब्धता प्रबंधक",
@@ -2925,7 +3255,33 @@
     "closureStart": "बंद होने का समय",
     "closureEnd": "खुलने का समय",
     "addHolidayBtn": "छुट्टी जोड़ें",
-    "loadingSchedule": "शेड्यूल लोड हो रहा है..."
+    "loadingSchedule": "शेड्यूल लोड हो रहा है...",
+    "scheduleUpdated": "शेड्यूल सफलतापूर्वक अपडेट किया",
+    "scheduleCreated": "शेड्यूल सफलतापूर्वक बनाया",
+    "scheduleDeleted": "शेड्यूल हटाया",
+    "confirmDeleteSchedule": "क्या यह शेड्यूल हटाना है?",
+    "allDaysHaveSchedules": "सभी दिनों में पहले से शेड्यूल है",
+    "copiedToDays": "{{count}} दिनों में कॉपी किया",
+    "failedToCopy": "शेड्यूल कॉपी करने में विफल",
+    "overrideSaved": "ओवरराइड सेव किया",
+    "failedToSaveOverride": "ओवरराइड सेव करने में विफल",
+    "select1to90days": "कृपया 1 से 90 दिन चुनें",
+    "daysMarkedAsLeave": "{{count}} दिन छुट्टी के रूप में चिह्नित",
+    "failedToSetVacation": "छुट्टी सेट करने में विफल",
+    "overrideRemoved": "ओवरराइड हटाया",
+    "failedToRemove": "हटाने में विफल",
+    "timeBlockCreated": "समय ब्लॉक बनाया",
+    "failedToCreateBlock": "ब्लॉक बनाने में विफल",
+    "blockRemoved": "ब्लॉक हटाया",
+    "holidayAdded": "छुट्टी जोड़ी",
+    "failedToAddHoliday": "छुट्टी जोड़ने में विफल",
+    "holidayRemoved": "छुट्टी हटाई",
+    "inactive": "निष्क्रिय",
+    "copyToAllEmpty": "सभी खाली दिनों में कॉपी करें",
+    "minSlots": "मिनट स्लॉट",
+    "custom": "कस्टम",
+    "vacationInfoText": "उन सभी दिनों को अनुपलब्ध चिह्नित करने के लिए तिथि सीमा चुनें। उन तिथियों पर मौजूदा बुकिंग स्वचालित रूप से रद्द नहीं होंगी।",
+    "daysWillBeMarked": "{{count}} दिन अनुपलब्ध चिह्नित किए जाएंगे"
   },
   "adminDashboard": {
     "title": "एडमिन डैशबोर्ड",
@@ -3595,5 +3951,222 @@
       "browseNow": "मार्केटप्लेस ब्राउज़ करें",
       "sellYours": "अपने पशु पुनर्वासित करें"
     }
+  },
+  "wallet": {
+    "pageTitle": "💰 My Wallet",
+    "subtitle": "Manage your balance, refunds, and bonus credits",
+    "myConsultations": "← My Consultations",
+    "totalBalance": "Total Balance",
+    "refundBalance": "Refund Balance",
+    "bonusCredits": "Bonus Credits",
+    "bonusTip": "From doctor cancellation goodwill",
+    "paymentMode": "Payment Mode",
+    "simulated": "Simulated payments",
+    "sandbox": "Sandbox mode",
+    "realPayments": "Real payments",
+    "transactionHistory": "📋 Transaction History",
+    "noTransactions": "No transactions yet",
+    "refundsAppearHere": "Your refunds and bonus credits will appear here.",
+    "loadMore": "Load More"
+  },
+  "acceptInvite": {
+    "noToken": "Invalid invitation link — no token provided",
+    "invalidInvite": "Invalid or expired invitation",
+    "failedToAccept": "Failed to accept invitation",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordsMismatch": "Passwords do not match",
+    "successTitle": "Welcome to VetCare!",
+    "successMsg": "Your account has been created and linked to the hospital. You can now log in to start managing patients and appointments.",
+    "goToLogin": "Go to Login",
+    "inviteProblem": "Invitation Problem",
+    "joinTitle": "Join {{name}}",
+    "setUpAccount": "Set Up Your Account",
+    "createPassword": "Create Password *",
+    "confirmPassword": "Confirm Password *",
+    "minChars": "Minimum 8 characters",
+    "reEnterPassword": "Re-enter password",
+    "creatingAccount": "Creating Account...",
+    "acceptAndCreate": "✓ Accept & Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "logIn": "Log in",
+    "instead": "instead"
+  },
+  "vetHospitals": {
+    "subtitle": "Find verified veterinary hospitals and specialist centres near you",
+    "registerHospital": "Register Hospital",
+    "adminPanel": "Admin Panel",
+    "searchPlaceholder": "Search hospitals, specializations…",
+    "cityPlaceholder": "City",
+    "allTypes": "All Types",
+    "emergency": "Emergency",
+    "open247": "24/7 Open",
+    "verifiedOnly": "Verified Only",
+    "gridView": "Grid",
+    "listView": "List",
+    "showingResults": "Showing {{shown}} of {{total}} hospital(s)",
+    "noHospitals": "No hospitals found",
+    "adjustFilters": "Try adjusting your search or filters",
+    "registerYours": "Register your hospital",
+    "prev": "‹ Prev",
+    "next": "Next ›",
+    "badges": {
+      "verified": "✓ Verified",
+      "underReview": "⏳ Under Review",
+      "pendingDocs": "📋 Pending Docs",
+      "suspended": "⚠ Suspended",
+      "emergency": "⚡ Emergency"
+    },
+    "stats": {
+      "doctors": "Doctors",
+      "depts": "Depts",
+      "reviews": "Reviews"
+    },
+    "form": {
+      "hospitalName": "Hospital Name *",
+      "type": "Type *",
+      "tagline": "Tagline",
+      "taglinePlaceholder": "Brief motto or focus area",
+      "descriptionPlaceholder": "About your hospital…",
+      "city": "City",
+      "state": "State / Province",
+      "phone": "Phone",
+      "email": "Email",
+      "website": "Website",
+      "establishedYear": "Established Year"
+    },
+    "createModal": {
+      "title": "Register a Vet Hospital",
+      "subtitle": "Create your hospital profile to connect with patients and other vets",
+      "creating": "Creating…",
+      "createBtn": "Create Hospital"
+    },
+    "errors": {
+      "nameTypeRequired": "Name and type are required",
+      "createFailed": "Failed to create hospital"
+    }
+  },
+  "vetHospitalManage": {
+    "noHospitalFound": "No hospital found",
+    "browseHospitals": "Browse Hospitals",
+    "viewPublicProfile": "View Public Profile",
+    "editProfile": "Edit Profile",
+    "manageDocuments": "Manage Documents",
+    "inviteCreated": "Invitation created! Share the link below with the doctor.",
+    "tabs": {
+      "overview": "Overview",
+      "doctors": "Doctors",
+      "depts": "Depts",
+      "services": "Services",
+      "appointments": "Appointments",
+      "documents": "Documents",
+      "settings": "Settings"
+    },
+    "overview": {
+      "doctors": "Doctors",
+      "departments": "Departments",
+      "services": "Services",
+      "avgRating": "Avg Rating",
+      "totalReviews": "Total Reviews",
+      "inactive": "Inactive",
+      "acceptingPatients": "Accepting Patients",
+      "quickActions": "Quick Actions"
+    },
+    "doctors": {
+      "staff": "Staff",
+      "inviteNew": "Invite New Doctor",
+      "addExisting": "Add Existing",
+      "emptyState": "No staff added yet",
+      "accepting": "Accepting",
+      "notAccepting": "Not Accepting"
+    },
+    "departments": {
+      "title": "Departments",
+      "emptyState": "No departments yet",
+      "doctors": "doctors"
+    },
+    "services": {
+      "title": "Services",
+      "emptyState": "No services yet"
+    },
+    "appointments": {
+      "title": "Hospital Appointments",
+      "allStatuses": "All Statuses",
+      "loading": "Loading appointments...",
+      "noAppointments": "No appointments found",
+      "withStatus": "with status \"{{status}}\"",
+      "time": "Time",
+      "patient": "Patient",
+      "doctor": "Doctor",
+      "reason": "Reason"
+    },
+    "settings": {
+      "title": "Hospital Profile",
+      "fullAddress": "Full Address",
+      "hasEmergency": "Has Emergency Services",
+      "open24h": "Open 24 Hours",
+      "saveBtn": "Save Changes"
+    },
+    "invite": {
+      "emailAddress": "Email Address *",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "department": "Department",
+      "revoke": "Revoke",
+      "inviteAnother": "Invite Another",
+      "createInvitation": "Create Invitation"
+    },
+    "modal": {
+      "addDoctor": "Add Doctor",
+      "editDoctor": "Edit Staff Member",
+      "addDept": "Add Department",
+      "editDept": "Edit Department",
+      "createDept": "Create Department",
+      "addService": "Add Service",
+      "editService": "Edit Service",
+      "createService": "Add Service",
+      "selectVet": "Select Veterinarian *",
+      "hospitalRole": "Hospital Role",
+      "employmentType": "Employment Type",
+      "titleDesignation": "Title / Designation",
+      "consultationFee": "Consultation Fee ({{currency}})",
+      "primaryHospital": "Primary hospital for this doctor",
+      "deptName": "Department Name *",
+      "specializations": "Specializations (comma-separated)",
+      "floorLocation": "Floor / Location",
+      "headDoctor": "Head Doctor",
+      "serviceName": "Service Name *",
+      "category": "Category",
+      "minPrice": "Min Price ({{currency}})",
+      "maxPrice": "Max Price ({{currency}})",
+      "duration": "Duration (minutes)",
+      "requiresAppointment": "Requires appointment",
+      "code": "Code"
+    },
+    "toasts": {
+      "doctorUpdated": "Doctor updated ✓",
+      "doctorAdded": "Doctor added to hospital ✓",
+      "doctorRemoved": "Doctor removed",
+      "deptUpdated": "Department updated ✓",
+      "deptCreated": "Department created ✓",
+      "deptDeleted": "Department deleted",
+      "serviceUpdated": "Service updated ✓",
+      "serviceAdded": "Service added ✓",
+      "serviceDeleted": "Service deleted",
+      "profileUpdated": "Hospital profile updated",
+      "docUploaded": "Document uploaded successfully"
+    },
+    "errors": {
+      "loadFailed": "Failed to load hospital data",
+      "selectVet": "Please select a veterinarian from the search results",
+      "operationFailed": "Operation failed",
+      "removeFailed": "Failed to remove doctor",
+      "deleteDeptFailed": "Failed to delete department",
+      "deleteServiceFailed": "Failed to delete service",
+      "updateFailed": "Update failed",
+      "inviteFailed": "Failed to send invite"
+    },
+    "confirmRemoveDoctor": "Remove {{name}}?",
+    "confirmDeleteDept": "Delete department \"{{name}}\"?",
+    "confirmDeleteService": "Delete service \"{{name}}\"?"
   }
 }

@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "loading": "ஏற்றுகிறது...",
     "cancel": "ரத்துசெய்",
@@ -622,35 +622,78 @@
     "noMatchFilter": "இந்த வடிகட்டிக்கு ஆலோசனைகள் பொருந்தவில்லை",
     "noHistory": "இன்னும் ஆலோசனை வரலாறு இல்லை",
     "historyHint": "நிறைவடைந்த மற்றும் ரத்து செய்யப்பட்ட ஆலோசனைகள் குறிப்புக்காக இங்கே தோன்றும்",
-    "reschedule": {
-      "title": "🔄 சந்திப்பை மறுதிட்டமிடு",
-      "originalLabel": "⚠️ அசல் சந்திப்பு",
-      "dateLabel": "புதிய தேதியைத் தேர்வுசெய்யுங்கள் *",
-      "slotsTitle": "கிடைக்கும் நேர இடங்கள்",
-      "noSlots": "இந்த தேதிக்கு கிடைக்கும் இடங்கள் இல்லை. வேறு தேதியைத் தேர்வுசெய்யுங்கள்.",
-      "confirming": "மறுதிட்டமிடுகிறது...",
-      "confirmBtn": "✓ மறுதிட்டமிடலை உறுதிசெய்"
-    },
-    "actionLog": {
-      "title": "📋 செயல் பதிவு",
-      "loading": "செயல் வரலாற்றை ஏற்றுகிறது...",
-      "empty": "இந்த முன்பதிவுக்கு செயல் வரலாறு இல்லை.",
-      "by": "மூலம்",
-      "system": "கணினி",
-      "newSlot": "புதிய இடம்:",
-      "approved": "(அங்கீகரிக்கப்பட்டது ✓)",
-      "awaitingApproval": "(மருத்துவர் அங்கீகாரத்திற்காகக் காத்திருக்கிறது)",
-      "autoConfirmed": "(தானாக உறுதிசெய்யப்பட்டது)",
-      "cancelledBy": "ரத்துசெய்தவர்",
-      "reason": "காரணம்:"
-    },
     "cancelModal": {
       "title": "❌ முன்பதிவை ரத்துசெய்",
       "warning": "⚠️ இந்தச் செயலை மாற்ற முடியாது. சந்திப்பு ரத்துசெய்யப்படும்.",
       "reasonLabel": "ரத்துசெய்வதற்கான காரணம்",
       "reasonPlaceholder": "ரத்துசெய்வதற்கான காரணத்தைக் கூறுங்கள்...",
       "keepBooking": "முன்பதிவை வைத்திரு",
-      "confirmCancel": "ரத்துசெய்தலை உறுதிசெய்"
+      "confirmCancel": "ரத்துசெய்தலை உறுதிசெய்",
+      "quickReasons": "விரைவான காரணங்கள்:",
+      "refundPolicy": "பணத்திரும்ப நிதி கொள்கை:",
+      "reasonPresetsVet": ["நேர மோதல்", "அவசரநிலை", "நோயாளி கோரிக்கை", "கலந்துகொள்ள இயலாது"],
+      "reasonPresetsPatient": ["வேறு மருத்துவர் கிடைத்தது", "நேர மோதல்", "இனி தேவையில்லை", "நிதிக் காரணங்கள்"]
+    },
+    "loading": "ஆலோசனைகள் ஏற்றப்படுகின்றன...",
+    "failedToLoad": "தரவை ஏற்றுவதில் தோல்வி",
+    "failedToConfirm": "முன்பதிவை உறுதிசெய்வதில் தோல்வி",
+    "failedToCancel": "முன்பதிவை ரத்துசெய்வதில் தோல்வி",
+    "failedToReschedule": "மீள்திட்டமிடுவதில் தோல்வி",
+    "failedToStart": "ஆலோசனையைத் தொடங்குவதில் தோல்வி",
+    "pastTimeError": "கடந்த நேரத்திற்கு மீள்திட்டமிட முடியாது. எதிர்கால நேரத்தைத் தேர்ந்தெடுக்கவும்.",
+    "actionLabels": {
+      "created": "📅 முன்பதிவு உருவாக்கப்பட்டது",
+      "confirmed": "✅ மருத்துவரால் உறுதிசெய்யப்பட்டது",
+      "cancelled": "❌ முன்பதிவு ரத்துசெய்யப்பட்டது",
+      "rescheduled": "🔄 மீள்திட்டமிடப்பட்டது"
+    },
+    "missedLabels": {
+      "doctorNoShow": "மருத்துவர் வரவில்லை",
+      "patientNoShow": "நோயாளி வரவில்லை",
+      "bothNoShow": "இருவரும் வரவில்லை"
+    },
+    "reschedule": {
+      "title": "🔄 சந்திப்பை மீள்திட்டமிடு",
+      "originalLabel": "⚠️ அசல் சந்திப்பு",
+      "selectDoctor": "மருத்துவரைத் தேர்ந்தெடு",
+      "selectDoctorOptional": "மருத்துவரைத் தேர்ந்தெடு (விருப்பமான)",
+      "keepCurrentDoctor": "— தற்போதைய மருத்துவரை வைத்திரு —",
+      "currentDoctor": "(தற்போதைய)",
+      "loadingDoctors": "மருத்துவர்கள் ஏற்றப்படுகிறார்கள்...",
+      "dateLabel": "புதிய தேதியைத் தேர்ந்தெடு *",
+      "slotsTitle": "கிடைக்கும் நேர இடைவெளிகள்",
+      "noSlots": "இந்த தேதிக்கு நேர இடைவெளிகள் இல்லை. வேறு தேதியைத் தேர்ந்தெடுக்கவும்.",
+      "selectAnotherDate": "வேறு தேதியைத் தேர்ந்தெடுக்கவும்.",
+      "approvalNote": "ℹ️ உங்கள் மீள்திட்டமிடப்பட்ட சந்திப்புக்கு மருத்துவர் ஒப்புதல் தேவை.",
+      "confirming": "மீள்திட்டமிடப்படுகிறது...",
+      "confirmBtn": "✓ மீள்திட்டமிடலை உறுதிசெய்",
+      "rescheduleCount": "📊 மீள்திட்டமிடல் {{current}} / {{max}} அனுமதிக்கப்பட்டவை"
+    },
+    "noMatchAppointments": "இந்த வடிப்பிற்கு சந்திப்புகள் பொருந்தவில்லை",
+    "cancelledByYou": "🙋 நீங்கள் ரத்துசெய்தீர்கள்",
+    "cancelledByOther": "🔔 மற்ற தரப்பினரால் ரத்துசெய்யப்பட்டது",
+    "rescheduledNotice": "🔄 இந்த முன்பதிவு மீள்திட்டமிடப்பட்டது. புதிய சந்திப்பு உருவாக்கப்பட்டது.",
+    "actionLog": {
+      "title": "📋 செயல் பதிவு",
+      "loading": "செயல் வரலாறு ஏற்றப்படுகிறது...",
+      "empty": "இந்த முன்பதிவுக்கு செயல் வரலாறு இல்லை.",
+      "close": "மூடு",
+      "newSlot": "புதிய இடம்:",
+      "approved": "(அங்கீகரிக்கப்பட்டது ✓)",
+      "awaitingApproval": "(மருத்துவர் அங்கீகாரத்திற்காகக் காத்திருக்கிறது)",
+      "autoConfirmed": "(தானாக உறுதிசெய்யப்பட்டது)",
+      "cancelledBy": "ரத்துசெய்தவர் {{role}}.",
+      "reason": "காரணம்: {{reason}}"
+    },
+    "herdLevel": "மந்தை-நிலை",
+    "missedMessages": {
+      "youMissed": "⚠️ நீங்கள் இந்த சந்திப்பை தவறவிட்டீர்கள்.",
+      "bothMissed": "⚠️ நீங்களும் மருத்துவரும் இந்த சந்திப்பை தவறவிட்டீர்கள்.",
+      "rescheduleAnytime": "நீங்கள் எப்போது வேண்டுமானாலும் மீள்திட்டமிடலாம்.",
+      "rescheduleRemaining": "உங்களிடம் {{count}} மீள்திட்டமிடல்(கள்) உள்ளன.",
+      "rescheduleUsed": "இந்த முன்பதிவுக்கான மீள்திட்டமிடல் வரம்பை நீங்கள் பயன்படுத்திவிட்டீர்கள்.",
+      "patientNoJoin": "🙋 நோயாளி அமர்வில் சேரவில்லை. அவர்கள் மீள்திட்டமிடலாம்.",
+      "neitherJoined": "❌ எந்த தரப்பும் அமர்வில் சேரவில்லை. நோயாளி மீள்திட்டமிடலாம்."
     }
   },
   "animals": {
@@ -850,6 +893,41 @@
     "noEventsDesc": "தற்போதைய வடிகட்டிகளுடன் இந்த விலங்குக்கு நிகழ்வுகள் காணப்படவில்லை.",
     "selectAnimalFirst": "அவற்றின் வாழ்க்கை காலவரிசையைக் காண ஒரு விலங்கைத் தேர்ந்தெடுங்கள்.",
     "distribution": "நிகழ்வு விநியோகம்",
+    "loadingAnimals": "Loading animals...",
+    "loadingTimeline": "Loading timeline...",
+    "noMatching": "No matching events",
+    "noEventsYet": "No events yet",
+    "tryClearingFilters": "Try clearing filters.",
+    "noEventsFound": "No timeline events found.",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "oldest": "Oldest",
+    "newest": "Newest",
+    "refresh": "Refresh",
+    "severity": "Severity",
+    "recordedBy": "Recorded by",
+    "details": "Details",
+    "openRecord": "Open Record",
+    "consultation": "Consultation",
+    "openFullRecord": "Open Full Record",
+    "viewConsultation": "View Consultation",
+    "viewPrescriptions": "View Prescriptions",
+    "stats": {
+      "totalEvents": "Total Events",
+      "eventTypes": "Event Types",
+      "activeItems": "Active Items",
+      "highSeverity": "High Severity"
+    },
+    "filters": {
+      "title": "Filters",
+      "typesToShow": "TYPES TO SHOW",
+      "dateRange": "DATE RANGE",
+      "from": "From",
+      "to": "To",
+      "clearAll": "Clear All",
+      "apply": "Apply",
+      "clearFilters": "Clear Filters"
+    },
     "detail": {
       "type": "வகை",
       "date": "தேதி",
@@ -1032,7 +1110,34 @@
       "normalRange": "இயல்பான வரம்பு",
       "labName": "ஆய்வகப் பெயர்",
       "abnormalLabel": "முடிவு அசாதாரணமானது",
-      "interpretation": "விளக்கம்"
+      "interpretation": "விளக்கம்",
+      "notes": "குறிப்புகள்",
+      "status": "நிலை",
+      "statusPending": "நிலுவையில்",
+      "statusInProgress": "செயல்பாட்டில்",
+      "statusCompleted": "நிறைவு",
+      "allergyMild": "லேசான",
+      "allergyModerate": "மிதமான",
+      "allergySevere": "கடுமையான",
+      "cancel": "ரத்து",
+      "save": "சேமி",
+      "saving": "சேமிக்கிறது...",
+      "recordTitlePlaceholder": "பதிவு தலைப்பு...",
+      "contentPlaceholder": "விரிவான விளக்கம்...",
+      "vaccineNamePlaceholder": "எ.கா., ரேபிஸ், DHPP...",
+      "vaccineTypePlaceholder": "எ.கா., கோர், நான்-கோர்...",
+      "dosagePlaceholder": "எ.கா., 1ml",
+      "reactionPlaceholder": "ஏதேனும் எதிர்வினைகள்...",
+      "weightPlaceholder": "எடையை உள்ளிடவும்...",
+      "notesPlaceholder": "ஏதேனும் குறிப்புகள்...",
+      "allergenPlaceholder": "எ.கா., சிக்கன், பெனிசிலின்...",
+      "reactionDescPlaceholder": "எதிர்வினையை விவரிக்கவும்...",
+      "testNamePlaceholder": "எ.கா., முழு இரத்த எண்ணிக்கை...",
+      "testCategoryPlaceholder": "எ.கா., ஹீமடாலஜி, பயோகெமிஸ்ட்ரி...",
+      "resultPlaceholder": "சோதனை முடிவு...",
+      "normalRangePlaceholder": "எ.கா., 5.5-8.5",
+      "unitPlaceholder": "எ.கா., mg/dL, mmol/L...",
+      "interpretationPlaceholder": "மருத்துவ விளக்கம்..."
     },
     "recordTypes": {
       "diagnosis": "நோயறிதல்",
@@ -1049,7 +1154,16 @@
       "normal": "இயல்பானது",
       "high": "உயர்ந்தது",
       "critical": "அபாயகரமானது"
-    }
+    },
+    "loading": "மருத்துவ பதிவுகள் ஏற்றப்படுகின்றன...",
+    "failedToLoad": "தரவை ஏற்றுவதில் தோல்வி",
+    "failedToSaveRecord": "பதிவைச் சேமிக்க முடியவில்லை",
+    "failedToSaveVaccination": "தடுப்பூசி சேமிக்க முடியவில்லை",
+    "failedToSaveWeight": "எடையைச் சேமிக்க முடியவில்லை",
+    "failedToSaveAllergy": "அலர்ஜியைச் சேமிக்க முடியவில்லை",
+    "failedToSaveLabResult": "ஆய்வக முடிவை சேமிக்க முடியவில்லை",
+    "selectPetGeneric": "செல்லப்பிராணியைத் தேர்ந்தெடுக்கவும்",
+    "selectPetGenericSub": "மேலே உள்ள டிராப்டௌனிலிருந்து தேர்ந்தெடுக்கவும்"
   },
   "settings": {
     "pageTitle": "⚙️ அமைப்புகள்",
@@ -1239,6 +1353,34 @@
       "created": "குழு உருவாக்கப்பட்டது",
       "deleted": "குழு நீக்கப்பட்டது",
       "deleteConfirm": "இந்த குழுவை நீக்கவா? விலங்குகள் இணைப்பு நீக்கப்படும்."
+    },
+    "manageAnimals": "🐄 விலங்குகளை நிர்வகி",
+    "bookConsultation": "📋 ஆலோசனை முன்பதிவு",
+    "manage": {
+      "title": "{{name}} - விலங்குகளை நிர்வகி",
+      "inGroup": "குழுவில் {{count}} விலங்கு(கள்)",
+      "emptyGroup": "இந்தக் குழுவில் இன்னும் விலங்குகள் இல்லை.",
+      "registerAnimal": "விலங்கைப் பதிவுசெய்",
+      "first": "முதலில் ",
+      "available": "ஒதுக்கக்கூடிய விலங்குகள்",
+      "searchPlaceholder": "விலங்குகளைத் தேடுங்கள்...",
+      "noAnimals": "கிடைக்கும் விலங்குகள் இல்லை.",
+      "registerFirst": "முதலில் விலங்குகளைப் பதிவுசெய்யுங்கள்",
+      "toGetStarted": " தொடங்க.",
+      "noMatch": "தேடலுக்குப் பொருந்தும் விலங்குகள் இல்லை.",
+      "allAssigned": "அனைத்து விலங்குகளும் குழுக்களுக்கு ஒதுக்கப்பட்டுள்ளன.",
+      "assign": "ஒதுக்கு",
+      "assignSuccess": "விலங்கு குழுவுக்கு ஒதுக்கப்பட்டது",
+      "assignFailed": "விலங்கை ஒதுக்க முடியவில்லை",
+      "removeSuccess": "விலங்கு குழுவிலிருந்து நீக்கப்பட்டது",
+      "removeFailed": "விலங்கை நீக்க முடியவில்லை",
+      "loadFailed": "குழு விலங்குகளை ஏற்ற முடியவில்லை"
+    },
+    "reassign": {
+      "title": "விலங்கை மீள்ஒதுக்கீடு செய்",
+      "currentGroup": "தற்போதைய குழு: {{group}}",
+      "moveMessage": "இந்த விலங்கை {{targetGroup}} குழுவுக்கு நகர்த்தவா?",
+      "confirmBtn": "ஆம், விலங்கை நகர்த்து"
     }
   },
   "locationManagement": {
@@ -1246,6 +1388,8 @@
     "subtitle": "கொட்டிலங்கள், கூடுகள், மேய்ச்சல் நிலங்கள் மற்றும் வசதி இடங்களை நிர்வகியுங்கள்",
     "viewGrid": "கட்டம்",
     "viewTree": "மரம்",
+    "viewMap": "வரைபடம்",
+    "mapTitle": "இட வரைபடம்",
     "newLocation": "+ புதிய இடம்",
     "selectEnterprise": "நிறுவனத்தைத் தேர்வுசெய்...",
     "emptyEnterprise": "நிறுவனத்தைத் தேர்வுசெய்",
@@ -1261,7 +1405,24 @@
       "editTitle": "இடத்தைத் திருத்து",
       "createTitle": "இடத்தை உருவாக்கு",
       "parentDefault": "எதுவும் இல்லை (மேல் நிலை)",
-      "validation": "பெயர் மற்றும் வகை தேவை"
+      "validation": "பெயர் மற்றும் வகை தேவை",
+      "updateBtn": "இடத்தைப் புதுப்பி",
+      "createBtn": "இடத்தை உருவாக்கு"
+    },
+    "form": {
+      "name": "இடப் பெயர் *",
+      "type": "இட வகை *",
+      "parentLocation": "முதன்மை இடம்",
+      "capacity": "கொள்திறன்",
+      "area": "பரப்பளவு (ச.மீ)",
+      "gpsLatitude": "GPS அட்சரேகை",
+      "gpsLongitude": "GPS தீர்க்கரேகை"
+    },
+    "toasts": {
+      "updated": "இடம் புதுப்பிக்கப்பட்டது!",
+      "created": "இடம் உருவாக்கப்பட்டது!",
+      "deleted": "இடம் நீக்கப்பட்டது!",
+      "deleteConfirm": "இந்த இடத்தை நீக்கவா?"
     }
   },
   "movementLog": {
@@ -1406,7 +1567,11 @@
       "open": "⏳ திறந்தது"
     },
     "resolve": "தீர்",
-    "emptyObservations": "இன்னும் கவனிப்புகள் பதிவுசெய்யப்படவில்லை."
+    "emptyObservations": "இன்னும் கவனிப்புகள் பதிவுசெய்யப்படவில்லை.",
+    "allObservations": "📋 All Observations",
+    "errors": {
+      "failedToResolve": "Failed to resolve observation"
+    }
   },
   "breedingManager": {
     "pageTitle": "🧬 இனப்பெருக்கம் & மரபியல் மேலாளர்",
@@ -1512,7 +1677,54 @@
     "lowStockAlerts": "⚠️ குறைந்த இருப்பு எச்சரிக்கைகள்",
     "allOk": "அனைத்து இருப்பு நிலைகளும் சரி!",
     "consumptionByType": "வகை வாரியான நுகர்வு (30 நாட்கள்)",
-    "dailyTrend": "தினசரி நுகர்வு போக்கு"
+    "dailyTrend": "தினசரி நுகர்வு போக்கு",
+    "selectEnterprise": "நிறுவனத்தைத் தேர்வுசெய்...",
+    "selectDefault": "-- தேர்வுசெய் --",
+    "form": {
+      "editTitle": "தீவனத்தைத் திருத்து",
+      "createTitle": "தீவனம் சேர்",
+      "name": "பெயர் *",
+      "feedType": "தீவன வகை *",
+      "brand": "பிராண்டு",
+      "batchNumber": "தொகுதி எண்",
+      "quantityInStock": "இருப்பிலுள்ள அளவு *",
+      "unit": "அலகு *",
+      "minimumStockLevel": "குறைந்தபட்ச இருப்பு நிலை",
+      "costPerUnit": "ஒரு அலகுக்கான விலை",
+      "expiryDate": "காலாவதி தேதி",
+      "storageLocation": "சேமிப்பு இடம்",
+      "supplier": "சப்ளையர்"
+    },
+    "consumptionForm": {
+      "title": "நுகர்வைப் பதிவுசெய்",
+      "feed": "தீவனம்",
+      "selectFeed": "தீவனத்தைத் தேர்வுசெய்",
+      "quantityUsed": "பயன்படுத்திய அளவு *",
+      "submitBtn": "நுகர்வைப் பதிவுசெய்"
+    },
+    "headers": {
+      "stock": "இருப்பு",
+      "minLevel": "குறைந்தபட்ச நிலை",
+      "costPerUnit": "ஒரு அலகுக்கான விலை",
+      "expiry": "காலாவதி",
+      "location": "இடம்"
+    },
+    "analytics": {
+      "used": "பயன்படுத்தியது",
+      "cost": "விலை"
+    },
+    "toasts": {
+      "feedUpdated": "தீவனம் புதுப்பிக்கப்பட்டது!",
+      "feedAdded": "தீவனம் சேர்க்கப்பட்டது!",
+      "saveFailed": "தீவனத்தைச் சேமிக்க முடியவில்லை",
+      "restocked": "மறுநிரப்பு வெற்றி!",
+      "restockFailed": "மறுநிரப்பு தோல்வியடைந்தது",
+      "consumptionLogged": "நுகர்வு பதிவுசெய்யப்பட்டது!",
+      "consumptionFailed": "நுகர்வைப் பதிவுசெய்ய முடியவில்லை",
+      "deleteConfirm": "இந்த தீவனப் பொருளை நீக்கவா?",
+      "feedDeleted": "தீவனம் நீக்கப்பட்டது!",
+      "deleteFailed": "நீக்க முடியவில்லை"
+    }
   },
   "complianceDocs": {
     "pageTitle": "📜 இணக்கம் & ஒழுங்குமுறை ஆவணங்கள்",
@@ -1609,7 +1821,37 @@
       "revenueByCategory": "பிரிவு வாரியான வருவாய்"
     },
     "emptyRecords": "இன்னும் பதிவுகள் இல்லை.",
-    "deleteConfirm": "இந்த நிதிப் பதிவை நீக்கவா?"
+    "deleteConfirm": "இந்த நிதிப் பதிவை நீக்கவா?",
+    "selectEnterprise": "நிறுவனத்தைத் தேர்வுசெய்...",
+    "selectDefault": "-- தேர்வுசெய் --",
+    "form": {
+      "editTitle": "பதிவைத் திருத்து",
+      "createTitle": "பதிவு சேர்"
+    },
+    "dashboard": {
+      "totalIncome": "மொத்த வருமானம்",
+      "totalExpenses": "மொத்த செலவுகள்",
+      "netProfit": "நிகர் லாபம்",
+      "monthlyBreakdown": "மாதாந்திர விரிவாக்கம்",
+      "topExpenses": "முக்கிய செலவு பிரிவுகள்",
+      "revenueByCategory": "பிரிவு வாரியான வருவாய்",
+      "noData": "தரவு இல்லை",
+      "headers": {
+        "month": "மாதம்",
+        "income": "வருமானம்",
+        "expenses": "செலவுகள்",
+        "profit": "லாபம்",
+        "category": "பிரிவு",
+        "total": "மொத்தம்"
+      }
+    },
+    "toasts": {
+      "recordUpdated": "பதிவு புதுப்பிக்கப்பட்டது!",
+      "recordCreated": "பதிவு உருவாக்கப்பட்டது!",
+      "saveFailed": "பதிவைச் சேமிக்க முடியவில்லை",
+      "recordDeleted": "பதிவு நீக்கப்பட்டது!",
+      "deleteFailed": "நீக்க முடியவில்லை"
+    }
   },
   "alertCenter": {
     "pageTitle": "🔔 ஸ்மார்ட் எச்சரிக்கை மையம்",
@@ -1666,7 +1908,12 @@
       "acknowledged": "எச்சரிக்கை ஏற்றுக்கொள்ளப்பட்டது",
       "checksComplete": "எச்சரிக்கை சோதனைகள் நிறைவடைந்தன: {{count}} எச்சரிக்கை(கள்) தூண்டப்பட்டன",
       "deleteConfirm": "இந்த எச்சரிக்கை விதியை நீக்கவா?",
-      "invalidJson": "நிபந்தனைகளில் தவறான JSON"
+      "invalidJson": "நிபந்தனைகளில் தவறான JSON",
+      "ruleEnabled": "விதி செயல்படுத்தப்பட்டது",
+      "ruleDisabled": "விதி முடக்கப்பட்டது",
+      "readFailed": "படித்ததாகக் குறிக்க முடியவில்லை",
+      "acknowledgeFailed": "ஏற்றுக்கொள்ள முடியவில்லை",
+      "checksFailed": "எச்சரிக்கை சோதனைகள் தோல்வியடைந்தன"
     }
   },
   "diseasePrediction": {
@@ -1861,7 +2108,21 @@
       "inputPlaceholder": "உங்கள் கேள்வியை தட்டச்சு செய்யுங்கள்...",
       "emptyTitle": "AI கால்நடை மருத்துவ உதவியாளர்",
       "emptySubtitle": "ஒரு அமர்வைத் தேர்வுசெய்யுங்கள் அல்லது புதிய அரட்டையைத் தொடங்குங்கள்",
-      "startNew": "புதிய அரட்டையைத் தொடங்கு"
+      "startNew": "புதிய அரட்டையைத் தொடங்கு",
+      "aiBuddyHelper": "AI Buddy Helper",
+      "failedToSendMessage": "Failed to send message",
+      "startingUp": "Starting up...",
+      "hiUser": "Hi {{name}}! 👋 I'm AI Buddy",
+      "hiGuest": "Hi there! 👋 I'm AI Buddy",
+      "iKnowAbout": "I know about",
+      "askMeAnything": "— ask me anything!",
+      "askMeAnythingGeneral": "Ask me anything about pet health, symptoms, nutrition, or veterinary care!",
+      "askAiBuddy": "Ask AI Buddy...",
+      "thinking": "Thinking...",
+      "userAssistant": "{{name}}'s veterinary assistant",
+      "yourAssistant": "Your veterinary assistant",
+      "couldNotStartSession": "Could not start chat session",
+      "couldNotCreateSession": "Could not create chat session"
     },
     "suggestedPrompts": {
       "respiratory": "கால்நடைகளில் சுவாச நோய்த்தொற்றின் பொதுவான அறிகுறிகள் என்ன?",
@@ -2495,7 +2756,8 @@
     "booking": "முன்பதிவு செய்கிறது...",
     "confirmBooking": "✓ முன்பதிவை உறுதிப்படுத்தவும்",
     "fillRequired": "அனைத்து தேவையான புலங்களையும் நிரப்பவும்",
-    "cannotBookPast": "கடந்த காலத்தில் ஆலோசனையை முன்பதிவு செய்ய முடியாது. எதிர்கால தேதி மற்றும் நேரத்தைத் தேர்ந்தெடுக்கவும்."
+    "cannotBookPast": "கடந்த காலத்தில் ஆலோசனையை முன்பதிவு செய்ய முடியாது. எதிர்கால தேதி மற்றும் நேரத்தைத் தேர்ந்தெடுக்கவும்.",
+    "failedToCreate": "Failed to create booking"
   },
   "findDoctor": {
     "title": "கால்நடை மருத்துவரைக் கண்டறியுங்கள்",
@@ -2557,7 +2819,19 @@
     "actionCreated": "📅 முன்பதிவு உருவாக்கப்பட்டது",
     "actionConfirmed": "✅ மருத்துவர் உறுதிப்படுத்தினார்",
     "actionCancelled": "❌ முன்பதிவு ரத்து செய்யப்பட்டது",
-    "actionRescheduled": "🔄 மறுதிட்டமிடப்பட்டது"
+    "actionRescheduled": "🔄 மறுதிட்டமிடப்பட்டது",
+    "failedToCancel": "முன்பதிவு ரத்து செய்வதில் தோல்வி",
+    "failedToReschedule": "மீள்திட்டமிடுவதில் தோல்வி",
+    "pastTimeError": "கடந்த நேரத்திற்கு மீள்திட்டமிட முடியாது. எதிர்கால நேரத்தைத் தேர்ந்தெடுக்கவும்.",
+    "missedNotice": "⚠️ {{date}} அன்று {{time}} உங்கள் சந்திப்பு தவறவிட்டது. புதிய இடத்தைத் தேர்ந்தெடுக்கவும்.",
+    "rescheduleApprovalNote": "ℹ️ உங்கள் மீள்திட்டமிட்ட சந்திப்புக்கு மருத்துவர் ஒப்புதல் தேவை.",
+    "cancelledByUser": "பயனரால் ரத்து செய்யப்பட்டது",
+    "generalConsultation": "பொது ஆலோசனை",
+    "typeVideoCall": "வீடியோ அழைப்பு",
+    "typePhone": "தொலைபேசி",
+    "typeInPerson": "நேரில்",
+    "typeChat": "சாட்",
+    "failedToLoad": "Failed to load veterinarians"
   },
   "vetProfile": {
     "notSpecified": "குறிப்பிடப்படவில்லை",
@@ -2586,7 +2860,8 @@
     "patientReviews": "நோயாளி மதிப்பாய்வுகள்",
     "noReviews": "இன்னும் மதிப்பாய்வுகள் இல்லை. ஆலோசனைக்குப் பிறகு முதலில் மதிப்பாய்வு செய்யுங்கள்!",
     "doctorResponse": "மருத்துவரின் பதில்",
-    "loadMoreReviews": "மேலும் மதிப்பாய்வுகளை ஏற்றவும்"
+    "loadMoreReviews": "மேலும் மதிப்பாய்வுகளை ஏற்றவும்",
+    "failedToLoad": "Failed to load veterinarian profile"
   },
   "videoConsultation": {
     "title": "வீடியோ ஆலோசனை",
@@ -2614,7 +2889,39 @@
     "chat": "அரட்டை",
     "noMessages": "இன்னும் செய்திகள் இல்லை",
     "startConversation": "உரையாடலைத் தொடங்குங்கள்",
-    "typeMessage": "செய்தி தட்டச்சு செய்யவும்..."
+    "typeMessage": "செய்தி தட்டச்சு செய்யவும்...",
+    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "failedToCreateVideoRoom": "Failed to create video room",
+    "failedToInitialize": "Failed to initialize video consultation",
+    "failedToStartSession": "Failed to start video session",
+    "confirmEndConsultation": "End this video consultation?",
+    "failedToEndSession": "Failed to end session",
+    "failedToSendMessage": "Failed to send message",
+    "noMediaStream": "No media stream available",
+    "failedToStartRecording": "Failed to start recording",
+    "micUnavailable": "Microphone unavailable",
+    "cameraStillUnavailable": "Camera still unavailable",
+    "duration": "Duration",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "durationLabel": "Duration",
+    "instructions": "Instructions",
+    "validUntil": "Valid until",
+    "dismiss": "Dismiss",
+    "audioOnlyMode": "Audio-only mode",
+    "chatOnlyMode": "Chat-only mode",
+    "screenSharingActive": "Screen sharing active",
+    "medication": "Medication",
+    "room": "Room",
+    "unmute": "Unmute",
+    "mute": "Mute",
+    "turnOnCamera": "Turn on camera",
+    "turnOffCamera": "Turn off camera",
+    "shareScreen": "Share screen",
+    "startRecording": "Start recording",
+    "stopRecording": "Stop recording",
+    "endCallTitle": "End call"
   },
   "writeReview": {
     "title": "மதிப்பாய்வு எழுதுங்கள்",
@@ -2641,7 +2948,8 @@
     "dashboard": "டாஷ்போர்டு",
     "errorSelectRating": "மதிப்பீட்டைத் தேர்ந்தெடுக்கவும்",
     "errorWriteComment": "ஒரு கருத்தை எழுதவும்",
-    "errorMinChars": "கருத்து குறைந்தது 10 எழுத்துக்களாக இருக்க வேண்டும்"
+    "errorMinChars": "கருத்து குறைந்தது 10 எழுத்துக்களாக இருக்க வேண்டும்",
+    "failedToSubmit": "Failed to submit review"
   },
   "doctorDashboard": {
     "title": "மருத்துவர் டாஷ்போர்டு",
@@ -2668,7 +2976,14 @@
     "recentConsultations": "சமீபத்திய ஆலோசனைகள்",
     "noRecentConsultations": "சமீபத்திய ஆலோசனைகள் இல்லை",
     "consultation": "ஆலோசனை",
-    "loadingDashboard": "டாஷ்போர்டு ஏற்றப்படுகிறது..."
+    "loadingDashboard": "டாஷ்போர்டு ஏற்றப்படுகிறது...",
+    "failedToLoad": "டாஷ்போர்டை ஏற்றுவதில் தோல்வி",
+    "failedToConfirm": "உறுதிசெய்வதில் தோல்வி",
+    "cancelConfirm": "இந்த முன்பதிவை ரத்து செய்ய விரும்புகிறீர்களா?",
+    "failedToCancel": "ரத்து செய்வதில் தோல்வி",
+    "declinedByDoctor": "மருத்துவரால் நிராகரிக்கப்பட்டது",
+    "videoType": "📹 வீடியோ",
+    "chatType": "💬 சாட்"
   },
   "doctorReviews": {
     "title": "எனது மதிப்புரைகள்",
@@ -2699,7 +3014,8 @@
     "validUntil": "வரை செல்லும்",
     "active": "செயலில்",
     "inactive": "செயலற்றது",
-    "viewConsultation": "ஆலோசனை காண்க"
+    "viewConsultation": "ஆலோசனை காண்க",
+    "failedToLoad": "Failed to load prescriptions"
   },
   "prescriptionWriter": {
     "title": "மருந்து சீட்டு எழுதுபவர்",
@@ -2732,7 +3048,8 @@
     "createPrescription": "மருந்து சீட்டு உருவாக்கவும்",
     "errorNameDosageFrequency": "மருந்து பெயர், அளவு மற்றும் அதிர்வெண் நிரப்பவும்",
     "errorDiagnosisRequired": "நோய் கண்டறிதல் தேவை",
-    "errorMedicationRequired": "குறைந்தது ஒரு மருந்து தேவை"
+    "errorMedicationRequired": "குறைந்தது ஒரு மருந்து தேவை",
+    "failedToCreate": "Failed to create prescription"
   },
   "patientQueue": {
     "title": "நோயாளி வரிசை",
@@ -2834,7 +3151,30 @@
     "chat": "அரட்டை",
     "historyTab": "வரலாறு",
     "notesTab": "குறிப்புகள்",
-    "rx": "Rx"
+    "rx": "Rx",
+    "cameraUnavailableAudioOnly": "Camera unavailable — switching to audio-only mode",
+    "cameraAndMicUnavailable": "Camera and microphone unavailable — switching to chat-only mode",
+    "failedToCreateVideoSession": "Failed to create video session",
+    "failedToInitializeRoom": "Failed to initialize consultation room",
+    "failedToStartCall": "Failed to start call",
+    "confirmEndCall": "End this video consultation?",
+    "failedToEndCall": "Failed to end call",
+    "micUnavailable": "Microphone unavailable",
+    "cameraUnavailable": "Camera unavailable",
+    "noMediaStream": "No media stream available",
+    "failedToStartRecording": "Failed to start recording",
+    "failedToSaveNotes": "Failed to save notes",
+    "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
+    "failedToComplete": "Failed to complete consultation",
+    "markedAsCompleted": "Marked as completed",
+    "unmute": "Unmute",
+    "mute": "Mute",
+    "turnOnCamera": "Turn on camera",
+    "turnOffCamera": "Turn off camera",
+    "shareScreen": "Share screen",
+    "startRecording": "Start recording",
+    "stopRecording": "Stop recording",
+    "endCallTitle": "End call"
   },
   "manageSchedule": {
     "title": "கிடைக்கும் நேர மேலாளர்",
@@ -2925,7 +3265,33 @@
     "closureStart": "மூடல் தொடக்கம்",
     "closureEnd": "மூடல் முடிவு",
     "addHolidayBtn": "விடுமுறை சேர்க்கவும்",
-    "loadingSchedule": "அட்டவணை ஏற்றப்படுகிறது..."
+    "loadingSchedule": "அட்டவணை ஏற்றப்படுகிறது...",
+    "scheduleUpdated": "Schedule updated successfully",
+    "scheduleCreated": "Schedule created successfully",
+    "scheduleDeleted": "Schedule deleted",
+    "confirmDeleteSchedule": "Delete this schedule?",
+    "allDaysHaveSchedules": "All days already have schedules",
+    "copiedToDays": "Copied to {{count}} days",
+    "failedToCopy": "Failed to copy schedule",
+    "overrideSaved": "Override saved",
+    "failedToSaveOverride": "Failed to save override",
+    "select1to90days": "Please select between 1 and 90 days",
+    "daysMarkedAsLeave": "{{count}} days marked as leave",
+    "failedToSetVacation": "Failed to set vacation",
+    "overrideRemoved": "Override removed",
+    "failedToRemove": "Failed to remove",
+    "timeBlockCreated": "Time block created",
+    "failedToCreateBlock": "Failed to create block",
+    "blockRemoved": "Block removed",
+    "holidayAdded": "Holiday added",
+    "failedToAddHoliday": "Failed to add holiday",
+    "holidayRemoved": "Holiday removed",
+    "inactive": "Inactive",
+    "copyToAllEmpty": "Copy to all empty days",
+    "minSlots": "min slots",
+    "custom": "Custom",
+    "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
+    "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
   },
   "adminDashboard": {
     "title": "நிர்வாகி டாஷ்போர்டு",
@@ -3595,5 +3961,90 @@
       "browseNow": "சந்தையை உலாவுங்கள்",
       "sellYours": "உங்கள் விலங்குகளை புனர்வாசம் செய்யுங்கள்"
     }
+  },
+  "wallet": {
+    "pageTitle": "💰 My Wallet",
+    "subtitle": "Manage your balance, refunds, and bonus credits",
+    "myConsultations": "← My Consultations",
+    "totalBalance": "Total Balance",
+    "refundBalance": "Refund Balance",
+    "bonusCredits": "Bonus Credits",
+    "bonusTip": "From doctor cancellation goodwill",
+    "paymentMode": "Payment Mode",
+    "simulated": "Simulated payments",
+    "sandbox": "Sandbox mode",
+    "realPayments": "Real payments",
+    "transactionHistory": "📋 Transaction History",
+    "noTransactions": "No transactions yet",
+    "refundsAppearHere": "Your refunds and bonus credits will appear here.",
+    "loadMore": "Load More"
+  },
+  "acceptInvite": {
+    "noToken": "Invalid invitation link — no token provided",
+    "invalidInvite": "Invalid or expired invitation",
+    "failedToAccept": "Failed to accept invitation",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordsMismatch": "Passwords do not match",
+    "successTitle": "Welcome to VetCare!",
+    "successMsg": "Your account has been created and linked to the hospital.",
+    "goToLogin": "Go to Login",
+    "inviteProblem": "Invitation Problem",
+    "joinTitle": "Join {{name}}",
+    "setUpAccount": "Set Up Your Account",
+    "createPassword": "Create Password *",
+    "confirmPassword": "Confirm Password *",
+    "minChars": "Minimum 8 characters",
+    "reEnterPassword": "Re-enter password",
+    "creatingAccount": "Creating Account...",
+    "acceptAndCreate": "✓ Accept & Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "logIn": "Log in",
+    "instead": "instead"
+  },
+  "vetHospitals": {
+    "subtitle": "Find verified veterinary hospitals and specialist centres near you",
+    "registerHospital": "Register Hospital",
+    "adminPanel": "Admin Panel",
+    "searchPlaceholder": "Search hospitals, specializations…",
+    "cityPlaceholder": "City",
+    "allTypes": "All Types",
+    "emergency": "Emergency",
+    "open247": "24/7 Open",
+    "verifiedOnly": "Verified Only",
+    "gridView": "Grid",
+    "listView": "List",
+    "showingResults": "Showing {{shown}} of {{total}} hospital(s)",
+    "noHospitals": "No hospitals found",
+    "adjustFilters": "Try adjusting your search or filters",
+    "registerYours": "Register your hospital",
+    "prev": "‹ Prev",
+    "next": "Next ›",
+    "badges": { "verified": "✓ Verified", "underReview": "⏳ Under Review", "pendingDocs": "📋 Pending Docs", "suspended": "⚠ Suspended", "emergency": "⚡ Emergency" },
+    "stats": { "doctors": "Doctors", "depts": "Depts", "reviews": "Reviews" },
+    "form": { "hospitalName": "Hospital Name *", "type": "Type *", "tagline": "Tagline", "taglinePlaceholder": "Brief motto or focus area", "descriptionPlaceholder": "About your hospital…", "city": "City", "state": "State / Province", "phone": "Phone", "email": "Email", "website": "Website", "establishedYear": "Established Year" },
+    "createModal": { "title": "Register a Vet Hospital", "subtitle": "Create your hospital profile to connect with patients and other vets", "creating": "Creating…", "createBtn": "Create Hospital" },
+    "errors": { "nameTypeRequired": "Name and type are required", "createFailed": "Failed to create hospital" }
+  },
+  "vetHospitalManage": {
+    "noHospitalFound": "No hospital found",
+    "browseHospitals": "Browse Hospitals",
+    "viewPublicProfile": "View Public Profile",
+    "editProfile": "Edit Profile",
+    "manageDocuments": "Manage Documents",
+    "inviteCreated": "Invitation created! Share the link below with the doctor.",
+    "tabs": { "overview": "Overview", "doctors": "Doctors", "depts": "Depts", "services": "Services", "appointments": "Appointments", "documents": "Documents", "settings": "Settings" },
+    "overview": { "doctors": "Doctors", "departments": "Departments", "services": "Services", "avgRating": "Avg Rating", "totalReviews": "Total Reviews", "inactive": "Inactive", "acceptingPatients": "Accepting Patients", "quickActions": "Quick Actions" },
+    "doctors": { "staff": "Staff", "inviteNew": "Invite New Doctor", "addExisting": "Add Existing", "emptyState": "No staff added yet", "accepting": "Accepting", "notAccepting": "Not Accepting" },
+    "departments": { "title": "Departments", "emptyState": "No departments yet", "doctors": "doctors" },
+    "services": { "title": "Services", "emptyState": "No services yet" },
+    "appointments": { "title": "Hospital Appointments", "allStatuses": "All Statuses", "loading": "Loading appointments...", "noAppointments": "No appointments found", "withStatus": "with status \"{{status}}\"", "time": "Time", "patient": "Patient", "doctor": "Doctor", "reason": "Reason" },
+    "settings": { "title": "Hospital Profile", "fullAddress": "Full Address", "hasEmergency": "Has Emergency Services", "open24h": "Open 24 Hours", "saveBtn": "Save Changes" },
+    "invite": { "emailAddress": "Email Address *", "firstName": "First Name", "lastName": "Last Name", "department": "Department", "revoke": "Revoke", "inviteAnother": "Invite Another", "createInvitation": "Create Invitation" },
+    "modal": { "addDoctor": "Add Doctor", "editDoctor": "Edit Staff Member", "addDept": "Add Department", "editDept": "Edit Department", "createDept": "Create Department", "addService": "Add Service", "editService": "Edit Service", "createService": "Add Service", "selectVet": "Select Veterinarian *", "hospitalRole": "Hospital Role", "employmentType": "Employment Type", "titleDesignation": "Title / Designation", "consultationFee": "Consultation Fee ({{currency}})", "primaryHospital": "Primary hospital for this doctor", "deptName": "Department Name *", "specializations": "Specializations (comma-separated)", "floorLocation": "Floor / Location", "headDoctor": "Head Doctor", "serviceName": "Service Name *", "category": "Category", "minPrice": "Min Price ({{currency}})", "maxPrice": "Max Price ({{currency}})", "duration": "Duration (minutes)", "requiresAppointment": "Requires appointment", "code": "Code" },
+    "toasts": { "doctorUpdated": "Doctor updated ✓", "doctorAdded": "Doctor added to hospital ✓", "doctorRemoved": "Doctor removed", "deptUpdated": "Department updated ✓", "deptCreated": "Department created ✓", "deptDeleted": "Department deleted", "serviceUpdated": "Service updated ✓", "serviceAdded": "Service added ✓", "serviceDeleted": "Service deleted", "profileUpdated": "Hospital profile updated", "docUploaded": "Document uploaded successfully" },
+    "errors": { "loadFailed": "Failed to load hospital data", "selectVet": "Please select a veterinarian from the search results", "operationFailed": "Operation failed", "removeFailed": "Failed to remove doctor", "deleteDeptFailed": "Failed to delete department", "deleteServiceFailed": "Failed to delete service", "updateFailed": "Update failed", "inviteFailed": "Failed to send invite" },
+    "confirmRemoveDoctor": "Remove {{name}}?",
+    "confirmDeleteDept": "Delete department \"{{name}}\"?",
+    "confirmDeleteService": "Delete service \"{{name}}\"?"
   }
 }

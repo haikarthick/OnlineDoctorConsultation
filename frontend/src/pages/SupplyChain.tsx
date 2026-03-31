@@ -79,11 +79,11 @@ const SupplyChainPage: React.FC = () => {
         productionDate: formData.productionDate || undefined, expiryDate: formData.expiryDate || undefined,
         qualityGrade: formData.qualityGrade || undefined, currentHolder: formData.currentHolder || undefined,
       })
-      setSuccessMsg('Batch created!')
+      setSuccessMsg(t('supplyChain.batchCreated'))
       setShowForm(false)
       setFormData({ batchNumber: '', productType: '', description: '', quantity: '', unit: 'kg', productionDate: '', expiryDate: '', qualityGrade: '', currentHolder: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   const handleCreateEvent = async (e: React.FormEvent) => {
@@ -97,16 +97,16 @@ const SupplyChainPage: React.FC = () => {
         gpsLat: eventForm.gpsLat ? parseFloat(eventForm.gpsLat) : undefined,
         gpsLng: eventForm.gpsLng ? parseFloat(eventForm.gpsLng) : undefined,
       })
-      setSuccessMsg('Traceability event logged!')
+      setSuccessMsg(t('supplyChain.eventLogged'))
       setShowEventForm(false)
       setEventForm({ batchId: '', eventType: 'production', title: '', description: '', location: '', gpsLat: '', gpsLng: '' })
       fetchData()
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   const handleVerifyEvent = async (id: string) => {
-    try { await apiService.verifyTraceabilityEvent(id); setSuccessMsg('Event verified!'); fetchData() }
-    catch { setError('Failed to verify') }
+    try { await apiService.verifyTraceabilityEvent(id); setSuccessMsg(t('supplyChain.eventVerified')); fetchData() }
+    catch { setError(t('supplyChain.failedVerify')) }
   }
 
   const handleGenerateQR = async (batchId: string) => {
@@ -114,64 +114,64 @@ const SupplyChainPage: React.FC = () => {
       await apiService.generateQRCode(selectedEnterpriseId, {
         enterpriseId: selectedEnterpriseId, entityType: 'batch', entityId: batchId
       })
-      setSuccessMsg('QR code generated!')
+      setSuccessMsg(t('supplyChain.qrGenerated'))
       fetchData()
-    } catch { setError('Failed to generate QR') }
+    } catch { setError(t('supplyChain.failedQR')) }
   }
 
   return (
     <div className="module-page">
       <div className="module-header">
         <h1>{t('supplyChain.pageTitle')}</h1>
-        <p>Full birth-to-sale traceability, QR code generation, and blockchain-style audit trail</p>
+        <p>{t('supplyChain.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('common.selectEnterprise')}:</label>
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
-          <option value="">-- Select --</option>
+          <option value="">{t('common.selectOption')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
 
       {!selectedEnterpriseId ? (
-        <div className="empty-state">Select an enterprise to view supply chain data</div>
+        <div className="empty-state">{t('supplyChain.selectEnterprise')}</div>
       ) : loading ? (
-        <div className="loading-spinner">Loading traceability data…</div>
+        <div className="loading-spinner">{t('supplyChain.loading')}</div>
       ) : (
         <>
           <div className="tab-bar">
-            <button className={tab === 'dashboard' ? 'tab-active' : ''} onClick={() => setTab('dashboard')}>Dashboard</button>
-            <button className={tab === 'batches' ? 'tab-active' : ''} onClick={() => setTab('batches')}>Product Batches</button>
-            <button className={tab === 'events' ? 'tab-active' : ''} onClick={() => setTab('events')}>Traceability Events</button>
-            <button className={tab === 'qrcodes' ? 'tab-active' : ''} onClick={() => setTab('qrcodes')}>QR Codes</button>
+            <button className={tab === 'dashboard' ? 'tab-active' : ''} onClick={() => setTab('dashboard')}>{t('supplyChain.tabs.dashboard')}</button>
+            <button className={tab === 'batches' ? 'tab-active' : ''} onClick={() => setTab('batches')}>{t('supplyChain.tabs.batches')}</button>
+            <button className={tab === 'events' ? 'tab-active' : ''} onClick={() => setTab('events')}>{t('supplyChain.tabs.events')}</button>
+            <button className={tab === 'qrcodes' ? 'tab-active' : ''} onClick={() => setTab('qrcodes')}>{t('supplyChain.tabs.qrCodes')}</button>
           </div>
 
           {tab === 'dashboard' && dashboard && (
             <div className="dashboard-grid">
               <div className="stat-card accent-blue">
                 <div className="stat-value">{dashboard.summary?.totalBatches || 0}</div>
-                <div className="stat-label">Total Batches</div>
+                <div className="stat-label">{t('supplyChain.stats.totalBatches')}</div>
               </div>
               <div className="stat-card accent-green">
                 <div className="stat-value">{dashboard.summary?.activeBatches || 0}</div>
-                <div className="stat-label">In Production</div>
+                <div className="stat-label">{t('supplyChain.stats.inProduction')}</div>
               </div>
               <div className="stat-card accent-orange">
                 <div className="stat-value">{dashboard.summary?.expiringBatches || 0}</div>
-                <div className="stat-label">Expiring (30d)</div>
+                <div className="stat-label">{t('supplyChain.stats.expiring30d')}</div>
               </div>
               <div className="stat-card accent-purple">
                 <div className="stat-value">{qrCodes.length}</div>
-                <div className="stat-label">QR Codes</div>
+                <div className="stat-label">{t('supplyChain.tabs.qrCodes')}</div>
               </div>
 
               {dashboard.batchStatusDistribution?.length > 0 && (
                 <div className="card">
-                  <h3>📦 Batch Status Distribution</h3>
+                  <h3>📦 {t('supplyChain.batchStatusDist')}</h3>
                   <div className="mini-chart-bar">
                     {dashboard.batchStatusDistribution.map((s: any, i: number) => (
                       <div key={i} className="bar-row">
@@ -186,13 +186,13 @@ const SupplyChainPage: React.FC = () => {
 
               {dashboard.eventTypeCounts?.length > 0 && (
                 <div className="card">
-                  <h3>📋 Event Types (90d)</h3>
+                  <h3>📋 {t('supplyChain.eventTypes90d')}</h3>
                   <div className="mini-chart-bar">
-                    {dashboard.eventTypeCounts.map((t: any, i: number) => (
+                    {dashboard.eventTypeCounts.map((et: any, i: number) => (
                       <div key={i} className="bar-row">
-                        <span className="bar-label">{t.event_type}</span>
-                        <div className="bar-track"><div className="bar-fill" style={{ width: `${(+t.count / Math.max(1, ...dashboard.eventTypeCounts.map((x: any) => +x.count))) * 100}%` }} /></div>
-                        <span className="bar-value">{t.count}</span>
+                        <span className="bar-label">{et.event_type}</span>
+                        <div className="bar-track"><div className="bar-fill" style={{ width: `${(+et.count / Math.max(1, ...dashboard.eventTypeCounts.map((x: any) => +x.count))) * 100}%` }} /></div>
+                        <span className="bar-value">{et.count}</span>
                       </div>
                     ))}
                   </div>
@@ -201,9 +201,9 @@ const SupplyChainPage: React.FC = () => {
 
               {dashboard.expiringBatches?.length > 0 && (
                 <div className="card full-width">
-                  <h3>⏰ Expiring Soon</h3>
+                  <h3>⏰ {t('supplyChain.expiringSoon')}</h3>
                   <table className="data-table">
-                    <thead><tr><th>Batch #</th><th>Product</th><th>Expiry</th><th>Qty</th></tr></thead>
+                    <thead><tr><th>{t('supplyChain.batchNum')}</th><th>{t('supplyChain.product')}</th><th>{t('supplyChain.expiry')}</th><th>{t('supplyChain.qty')}</th></tr></thead>
                     <tbody>{dashboard.expiringBatches.map((b: any, i: number) => (
                       <tr key={i}><td>{b.batch_number}</td><td>{b.product_type}</td>
                         <td style={{ color: '#f97316' }}>{b.expiry_date ? new Date(b.expiry_date).toLocaleDateString() : '–'}</td><td>{b.quantity} {b.unit}</td></tr>
@@ -217,7 +217,7 @@ const SupplyChainPage: React.FC = () => {
           {tab === 'batches' && (
             <div>
               <div className="section-toolbar">
-                <button className="btn-primary" onClick={() => setShowForm(!showForm)}>{showForm ? 'Cancel' : '+ Create Batch'}</button>
+                <button className="btn-primary" onClick={() => setShowForm(!showForm)}>{showForm ? t('common.cancel') : t('supplyChain.createBatch')}</button>
               </div>
 
               {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false) }} />}
@@ -225,30 +225,30 @@ const SupplyChainPage: React.FC = () => {
                 <div ref={formRef} className="edit-form-panel">
                 <form className="module-form" onSubmit={handleCreateBatch}>
                   <div className="form-grid">
-                    <div className="form-group"><label>Batch Number *</label><input required value={formData.batchNumber} onChange={e => setFormData({ ...formData, batchNumber: e.target.value })} /></div>
-                    <div className="form-group"><label>Product Type *</label>
+                    <div className="form-group"><label>{t('supplyChain.batchNumber')} *</label><input required value={formData.batchNumber} onChange={e => setFormData({ ...formData, batchNumber: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.productType')} *</label>
                       <select value={formData.productType} onChange={e => setFormData({ ...formData, productType: e.target.value })}>
-                        <option value="">-- Select --</option>
-                        {['milk', 'meat', 'eggs', 'wool', 'honey', 'feed', 'medicine', 'semen', 'embryo', 'other'].map(t => (
-                          <option key={t} value={t}>{t}</option>
+                        <option value="">{t('common.selectOption')}</option>
+                        {['milk', 'meat', 'eggs', 'wool', 'honey', 'feed', 'medicine', 'semen', 'embryo', 'other'].map(tt => (
+                          <option key={tt} value={tt}>{tt}</option>
                         ))}
                       </select>
                     </div>
-                    <div className="form-group"><label>Quantity</label><input type="number" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} /></div>
-                    <div className="form-group"><label>Unit</label><input value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} /></div>
-                    <div className="form-group"><label>Production Date</label><input type="date" value={formData.productionDate} onChange={e => setFormData({ ...formData, productionDate: e.target.value })} /></div>
-                    <div className="form-group"><label>Expiry Date</label><input type="date" value={formData.expiryDate} onChange={e => setFormData({ ...formData, expiryDate: e.target.value })} /></div>
-                    <div className="form-group"><label>Quality Grade</label><input value={formData.qualityGrade} onChange={e => setFormData({ ...formData, qualityGrade: e.target.value })} /></div>
-                    <div className="form-group"><label>Current Holder</label><input value={formData.currentHolder} onChange={e => setFormData({ ...formData, currentHolder: e.target.value })} /></div>
-                    <div className="form-group full-width"><label>Description</label><textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.quantity')}</label><input type="number" step="0.01" value={formData.quantity} onChange={e => setFormData({ ...formData, quantity: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('sustainability.unit')}</label><input value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.productionDate')}</label><input type="date" value={formData.productionDate} onChange={e => setFormData({ ...formData, productionDate: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.expiryDate')}</label><input type="date" value={formData.expiryDate} onChange={e => setFormData({ ...formData, expiryDate: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.qualityGrade')}</label><input value={formData.qualityGrade} onChange={e => setFormData({ ...formData, qualityGrade: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.currentHolder')}</label><input value={formData.currentHolder} onChange={e => setFormData({ ...formData, currentHolder: e.target.value })} /></div>
+                    <div className="form-group full-width"><label>{t('common.description')}</label><textarea onChange={e => setFormData({ ...formData, description: e.target.value })} /></div>
                   </div>
-                  <button type="submit" className="btn-primary">Create Batch</button>
+                  <button type="submit" className="btn-primary">{t('supplyChain.createBatch')}</button>
                 </form>
                 </div>
               )}
 
               <table className="data-table">
-                <thead><tr><th>Batch #</th><th>Product</th><th>Qty</th><th>Grade</th><th>Status</th><th>Expiry</th><th>Actions</th></tr></thead>
+                <thead><tr><th>{t('supplyChain.batchNum')}</th><th>{t('supplyChain.product')}</th><th>{t('supplyChain.qty')}</th><th>{t('supplyChain.grade')}</th><th>{t('common.status')}</th><th>{t('supplyChain.expiry')}</th><th>{t('common.actions')}</th></tr></thead>
                 <tbody>
                   {batches.map(b => (
                     <tr key={b.id}>
@@ -261,7 +261,7 @@ const SupplyChainPage: React.FC = () => {
                       <td><button className="btn-sm" onClick={() => handleGenerateQR(b.id)}>🔲 QR</button></td>
                     </tr>
                   ))}
-                  {!batches.length && <tr><td colSpan={7} className="empty-cell">No batches</td></tr>}
+                  {!batches.length && <tr><td colSpan={7} className="empty-cell">{t('supplyChain.noBatches')}</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -270,33 +270,33 @@ const SupplyChainPage: React.FC = () => {
           {tab === 'events' && (
             <div>
               <div className="section-toolbar">
-                <button className="btn-primary" onClick={() => setShowEventForm(!showEventForm)}>{showEventForm ? 'Cancel' : '+ Log Event'}</button>
+                <button className="btn-primary" onClick={() => setShowEventForm(!showEventForm)}>{showEventForm ? t('common.cancel') : t('supplyChain.logEvent')}</button>
               </div>
 
               {showEventForm && (
                 <form className="module-form" onSubmit={handleCreateEvent}>
                   <p style={{ fontSize: 13, color: '#888', margin: '0 0 12px' }}>💡 Click on the map below to set GPS location for this event</p>
                   <div className="form-grid">
-                    <div className="form-group"><label>Batch</label>
+                    <div className="form-group"><label>{t('supplyChain.batch')}</label>
                       <select value={eventForm.batchId} onChange={e => setEventForm({ ...eventForm, batchId: e.target.value })}>
-                        <option value="">-- None --</option>
+                        <option value="">{t('common.selectOption')}</option>
                         {batches.map(b => <option key={b.id} value={b.id}>{b.batchNumber || (b as any).batch_number}</option>)}
                       </select>
                     </div>
-                    <div className="form-group"><label>Event Type *</label>
+                    <div className="form-group"><label>{t('supplyChain.eventType')} *</label>
                       <select value={eventForm.eventType} onChange={e => setEventForm({ ...eventForm, eventType: e.target.value })}>
-                        {['birth', 'vaccination', 'treatment', 'inspection', 'transfer', 'production', 'quality_check', 'packaging', 'shipment', 'delivery', 'recall', 'disposal'].map(t => (
-                          <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>
+                        {['birth', 'vaccination', 'treatment', 'inspection', 'transfer', 'production', 'quality_check', 'packaging', 'shipment', 'delivery', 'recall', 'disposal'].map(tt => (
+                          <option key={tt} value={tt}>{tt.replace(/_/g, ' ')}</option>
                         ))}
                       </select>
                     </div>
-                    <div className="form-group"><label>Title *</label><input required value={eventForm.title} onChange={e => setEventForm({ ...eventForm, title: e.target.value })} /></div>
-                    <div className="form-group"><label>Location (text)</label><input value={eventForm.location} onChange={e => setEventForm({ ...eventForm, location: e.target.value })} /></div>
-                    <div className="form-group"><label>GPS Latitude</label><input type="number" step="0.000001" placeholder="Click map" value={eventForm.gpsLat} onChange={e => setEventForm({ ...eventForm, gpsLat: e.target.value })} /></div>
-                    <div className="form-group"><label>GPS Longitude</label><input type="number" step="0.000001" placeholder="Click map" value={eventForm.gpsLng} onChange={e => setEventForm({ ...eventForm, gpsLng: e.target.value })} /></div>
-                    <div className="form-group full-width"><label>Description</label><textarea value={eventForm.description} onChange={e => setEventForm({ ...eventForm, description: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('workforce.form.title')} *</label><input required value={eventForm.title} onChange={e => setEventForm({ ...eventForm, title: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.location')}</label><input value={eventForm.location} onChange={e => setEventForm({ ...eventForm, location: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.gpsLat')}</label><input type="number" step="0.000001" placeholder="Click map" value={eventForm.gpsLat} onChange={e => setEventForm({ ...eventForm, gpsLat: e.target.value })} /></div>
+                    <div className="form-group"><label>{t('supplyChain.gpsLng')}</label><input type="number" step="0.000001" placeholder="Click map" value={eventForm.gpsLng} onChange={e => setEventForm({ ...eventForm, gpsLng: e.target.value })} /></div>
+                    <div className="form-group full-width"><label>{t('common.description')}</label><textarea value={eventForm.description} onChange={e => setEventForm({ ...eventForm, description: e.target.value })} /></div>
                   </div>
-                  <button type="submit" className="btn-primary">Log Event</button>
+                  <button type="submit" className="btn-primary">{t('supplyChain.logEvent')}</button>
                 </form>
               )}
 
@@ -360,7 +360,7 @@ const SupplyChainPage: React.FC = () => {
               })()}
 
               <table className="data-table">
-                <thead><tr><th>Title</th><th>Type</th><th>Batch</th><th>Location</th><th>Verified</th><th>Date</th><th>Actions</th></tr></thead>
+                <thead><tr><th>{t('workforce.form.title')}</th><th>{t('common.type')}</th><th>{t('supplyChain.batch')}</th><th>{t('supplyChain.location')}</th><th>{t('supplyChain.verified')}</th><th>{t('common.date')}</th><th>{t('common.actions')}</th></tr></thead>
                 <tbody>
                   {events.map(ev => (
                     <tr key={ev.id}>
@@ -370,10 +370,10 @@ const SupplyChainPage: React.FC = () => {
                       <td>{ev.location || '—'}</td>
                       <td>{(ev.verifiedBy || (ev as any).verified_by) ? <span className="badge badge-verified">✓ Verified</span> : <span className="badge badge-pending">Unverified</span>}</td>
                       <td>{(ev.eventDate || (ev as any).event_date) ? new Date(ev.eventDate || (ev as any).event_date).toLocaleDateString() : '–'}</td>
-                      <td>{!(ev.verifiedBy || (ev as any).verified_by) && <button className="btn-sm" onClick={() => handleVerifyEvent(ev.id)}>Verify</button>}</td>
+                      <td>{!(ev.verifiedBy || (ev as any).verified_by) && <button className="btn-sm" onClick={() => handleVerifyEvent(ev.id)}>{t('supplyChain.verify')}</button>}</td>
                     </tr>
                   ))}
-                  {!events.length && <tr><td colSpan={7} className="empty-cell">No traceability events</td></tr>}
+                  {!events.length && <tr><td colSpan={7} className="empty-cell">{t('supplyChain.noEvents')}</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -397,7 +397,7 @@ const SupplyChainPage: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                {!qrCodes.length && <div className="empty-state">No QR codes generated yet — create one from a batch</div>}
+                {!qrCodes.length && <div className="empty-state">{t('supplyChain.noQRCodes')}</div>}
               </div>
             </div>
           )}

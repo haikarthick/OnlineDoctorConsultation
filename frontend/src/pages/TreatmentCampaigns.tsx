@@ -120,7 +120,7 @@ const TreatmentCampaigns: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('treatmentCampaigns.pageTitle')}</h1>
-          <p className="subtitle">Manage vaccination, deworming, testing, and other campaigns</p>
+          <p className="subtitle">{t('treatmentCampaigns.subtitle')}</p>
         </div>
         <div className="header-actions">
           {selectedEnterpriseId && (
@@ -146,12 +146,12 @@ const TreatmentCampaigns: React.FC = () => {
           <p>Choose an enterprise to manage treatment campaigns.</p>
         </div>
       ) : loading ? (
-        <div className="loading-spinner">Loading...</div>
+        <div className="loading-spinner">{t('common.loading')}</div>
       ) : campaigns.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">💉</div>
-          <h3>No Campaigns Yet</h3>
-          <p>Create campaigns for vaccinations, deworming, testing, and more.</p>
+          <h3>{t('treatmentCampaigns.emptyTitle')}</h3>
+          <p>{t('treatmentCampaigns.emptySubtitle')}</p>
           <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>+ Create Campaign</button>
         </div>
       ) : (
@@ -184,8 +184,8 @@ const TreatmentCampaigns: React.FC = () => {
                 </div>
               )}
               <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-                <button className="btn btn-sm btn-secondary" onClick={() => openEdit(camp)}>Edit</button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(camp.id)}>Delete</button>
+                <button className="btn btn-sm btn-secondary" onClick={() => openEdit(camp)}>{t('common.edit')}</button>
+                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(camp.id)}>{t('common.delete')}</button>
               </div>
             </div>
           ))}
@@ -195,7 +195,7 @@ const TreatmentCampaigns: React.FC = () => {
       {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
         <div ref={formRef} className="edit-form-panel">
-            <h2>{editingCampaign ? 'Edit Campaign' : 'Create Campaign'}</h2>
+            <h2>{editingCampaign ? t('treatmentCampaigns.modal.editTitle') : t('treatmentCampaigns.modal.createTitle')}</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
               <div className="form-group">
@@ -210,12 +210,12 @@ const TreatmentCampaigns: React.FC = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Status</label>
+                  <label>{t('treatmentCampaigns.modal.status')}</label>
                   <select value={formData.status} onChange={e => setFormData(f => ({ ...f, status: e.target.value }))}>
-                    <option value="planned">Planned</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="planned">{t('treatmentCampaigns.modal.statusOptions.planned')}</option>
+                    <option value="in_progress">{t('treatmentCampaigns.modal.statusOptions.inProgress')}</option>
+                    <option value="completed">{t('common.completed')}</option>
+                    <option value="cancelled">{t('common.cancelled')}</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -236,15 +236,15 @@ const TreatmentCampaigns: React.FC = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label>Description</label>
+                <label>{t('common.description')}</label>
                 <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div className="form-group">
-                <label>Notes</label>
+                <label>{t('common.notes')}</label>
                 <textarea rows={2} value={formData.notes} onChange={e => setFormData(f => ({ ...f, notes: e.target.value }))} />
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
                 <button type="submit" className="btn btn-primary">{editingCampaign ? 'Update' : 'Create'} Campaign</button>
               </div>
             </form>

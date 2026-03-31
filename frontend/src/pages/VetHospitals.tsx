@@ -29,7 +29,7 @@ const StarRating: React.FC<{ value: number; max?: number }> = ({ value, max = 5 
   </span>
 )
 
-const HospitalCard: React.FC<{ hospital: VetHospital; onView: (h: VetHospital) => void }> = ({ hospital, onView }) => (
+const HospitalCard: React.FC<{ hospital: VetHospital; onView: (h: VetHospital) => void; t: any }> = ({ hospital, onView, t }) => (
   <div className="hospital-card" onClick={() => onView(hospital)} role="button" tabIndex={0}
     onKeyDown={e => e.key === 'Enter' && onView(hospital)}>
     <div className="hcard-banner">
@@ -38,17 +38,17 @@ const HospitalCard: React.FC<{ hospital: VetHospital; onView: (h: VetHospital) =
         : <div className="hcard-cover hcard-cover-placeholder" />}
       {hospital.logoUrl && <img src={hospital.logoUrl} alt={hospital.name} className="hcard-logo" />}
       <div className="hcard-badges">
-        {hospital.isVerified && <span className="badge badge-verified">✓ Verified</span>}
+        {hospital.isVerified && <span className="badge badge-verified">{t('vetHospitals.badges.verified')}</span>}
         {!hospital.isVerified && hospital.verificationStatus === 'under_review' && (
-          <span className="badge badge-review">⏳ Under Review</span>
+          <span className="badge badge-review">{t('vetHospitals.badges.underReview')}</span>
         )}
         {!hospital.isVerified && hospital.verificationStatus === 'pending_documents' && (
-          <span className="badge badge-pending-docs">📋 Pending Docs</span>
+          <span className="badge badge-pending-docs">{t('vetHospitals.badges.pendingDocs')}</span>
         )}
         {hospital.verificationStatus === 'suspended' && (
-          <span className="badge badge-suspended">⚠ Suspended</span>
+          <span className="badge badge-suspended">{t('vetHospitals.badges.suspended')}</span>
         )}
-        {hospital.hasEmergency && <span className="badge badge-emergency">⚡ Emergency</span>}
+        {hospital.hasEmergency && <span className="badge badge-emergency">{t('vetHospitals.badges.emergency')}</span>}
         {hospital.is24Hours && <span className="badge badge-24h">24h</span>}
       </div>
     </div>
@@ -61,9 +61,9 @@ const HospitalCard: React.FC<{ hospital: VetHospital; onView: (h: VetHospital) =
       {hospital.city && <p className="hcard-location">📍 {hospital.city}{hospital.state ? `, ${hospital.state}` : ''}</p>}
       {(hospital as any).tagline && <p className="hcard-tagline">{(hospital as any).tagline}</p>}
       <div className="hcard-stats">
-        <span className="hcard-stat">🏥 {(hospital as any).totalDoctors ?? 0} Doctors</span>
-        <span className="hcard-stat">🏢 {(hospital as any).totalDepartments ?? 0} Depts</span>
-        {hospital.totalReviews > 0 && <span className="hcard-stat">💬 {hospital.totalReviews} Reviews</span>}
+        <span className="hcard-stat">🏥 {(hospital as any).totalDoctors ?? 0} {t('vetHospitals.stats.doctors')}</span>
+        <span className="hcard-stat">🏢 {(hospital as any).totalDepartments ?? 0} {t('vetHospitals.stats.depts')}</span>
+        {hospital.totalReviews > 0 && <span className="hcard-stat">💬 {hospital.totalReviews} {t('vetHospitals.stats.reviews')}</span>}
       </div>
       {hospital.specializations && hospital.specializations.length > 0 && (
         <div className="hcard-chips">
@@ -75,7 +75,8 @@ const HospitalCard: React.FC<{ hospital: VetHospital; onView: (h: VetHospital) =
   </div>
 )
 
-const VetHospitals: React.FC = () => {  const { t } = useTranslation()
+const VetHospitals: React.FC = () => {
+  const { t } = useTranslation()
 
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -125,7 +126,7 @@ const VetHospitals: React.FC = () => {  const { t } = useTranslation()
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name || !formData.hospitalType) { setCreateError('Name and type are required'); return }
+    if (!formData.name || !formData.hospitalType) { setCreateError(t('vetHospitals.errors.nameTypeRequired')); return }
     setCreateLoading(true); setCreateError('')
     try {
       const hospital = await vetHospitalApi.createHospital({
@@ -135,7 +136,7 @@ const VetHospitals: React.FC = () => {  const { t } = useTranslation()
       setShowCreateModal(false)
       navigate(`/vet-hospitals/${hospital.id}/manage`)
     } catch (err: any) {
-      setCreateError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to create hospital')
+      setCreateError(err?.response?.data?.message || err?.response?.data?.error?.message || t('vetHospitals.errors.createFailed'))
     } finally { setCreateLoading(false) }
   }
 
@@ -149,16 +150,16 @@ const VetHospitals: React.FC = () => {  const { t } = useTranslation()
       <div className="module-header vh-header">
         <div className="vh-header-left">
           <h1 className="module-title">{t('consultations.pageTitle')}</h1>
-          <p className="module-subtitle">Find verified veterinary hospitals and specialist centres near you</p>
+          <p className="module-subtitle">{t('vetHospitals.subtitle')}</p>
         </div>
         {isVet && (
           <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
-            + Register Hospital
+            + {t('vetHospitals.registerHospital')}
           </button>
         )}
         {isAdmin && (
           <button className="btn-secondary" onClick={() => navigate('/admin/vet-hospitals')}>
-            Admin Panel
+            {t('vetHospitals.adminPanel')}
           </button>
         )}
       </div>
@@ -166,25 +167,25 @@ const VetHospitals: React.FC = () => {  const { t } = useTranslation()
       {/* ── Filters ── */}
       <div className="vh-filters">
         <form onSubmit={handleSearch} className="vh-search-row">
-          <input className="vh-search-input" placeholder="Search hospitals, specializations…"
+          <input className="vh-search-input" placeholder={t('vetHospitals.searchPlaceholder')}
             value={search} onChange={e => setSearch(e.target.value)} />
-          <input className="vh-city-input" placeholder="City" value={city} onChange={e => setCity(e.target.value)} />
-          <button type="submit" className="btn-primary vh-search-btn">Search</button>
+          <input className="vh-city-input" placeholder={t('vetHospitals.cityPlaceholder')} value={city} onChange={e => setCity(e.target.value)} />
+          <button type="submit" className="btn-primary vh-search-btn">{t('common.search')}</button>
         </form>
         <div className="vh-filter-row">
           <select className="vh-select" value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(0) }}>
-            <option value="">All Types</option>
+            <option value="">{t('vetHospitals.allTypes')}</option>
             {FILTER_TYPES.slice(1).map(t => <option key={t} value={t}>{HOSPITAL_TYPE_LABELS[t]}</option>)}
           </select>
           <label className="vh-toggle"><input type="checkbox" checked={onlyEmergency}
-            onChange={e => { setOnlyEmergency(e.target.checked); setPage(0) }} /> Emergency</label>
+            onChange={e => { setOnlyEmergency(e.target.checked); setPage(0) }} /> {t('vetHospitals.emergency')}</label>
           <label className="vh-toggle"><input type="checkbox" checked={only24h}
-            onChange={e => { setOnly24h(e.target.checked); setPage(0) }} /> 24/7 Open</label>
+            onChange={e => { setOnly24h(e.target.checked); setPage(0) }} /> {t('vetHospitals.open247')}</label>
           <label className="vh-toggle"><input type="checkbox" checked={onlyVerified}
-            onChange={e => { setOnlyVerified(e.target.checked); setPage(0) }} /> Verified Only</label>
+            onChange={e => { setOnlyVerified(e.target.checked); setPage(0) }} /> {t('vetHospitals.verifiedOnly')}</label>
           <div className="vh-view-toggle">
-            <button className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')} title="Grid">⊞</button>
-            <button className={viewMode === 'list' ? 'active' : ''} onClick={() => setViewMode('list')} title="List">☰</button>
+            <button className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')} title={t('vetHospitals.gridView')}>⊞</button>
+            <button className={viewMode === 'list' ? 'active' : ''} onClick={() => setViewMode('list')} title={t('vetHospitals.listView')}>☰</button>
           </div>
         </div>
       </div>
@@ -192,7 +193,7 @@ const VetHospitals: React.FC = () => {  const { t } = useTranslation()
       {/* ── Results count ── */}
       {!loading && (
         <div className="vh-results-meta">
-          Showing {hospitals.length} of {total} hospital{total !== 1 ? 's' : ''}
+          {t('vetHospitals.showingResults', { shown: hospitals.length, total })}
         </div>
       )}
 
@@ -202,24 +203,24 @@ const VetHospitals: React.FC = () => {  const { t } = useTranslation()
       ) : hospitals.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">🏥</div>
-          <h3>No hospitals found</h3>
-          <p>Try adjusting your search or filters</p>
-          {isVet && <button className="btn-primary" onClick={() => setShowCreateModal(true)}>Register your hospital</button>}
+          <h3>{t('vetHospitals.noHospitals')}</h3>
+          <p>{t('vetHospitals.adjustFilters')}</p>
+          {isVet && <button className="btn-primary" onClick={() => setShowCreateModal(true)}>{t('vetHospitals.registerYours')}</button>}
         </div>
       ) : (
         <div className={viewMode === 'grid' ? 'vh-grid' : 'vh-list'}>
-          {hospitals.map(h => <HospitalCard key={h.id} hospital={h} onView={h => navigate(`/vet-hospitals/${h.id}`)} />)}
+          {hospitals.map(h => <HospitalCard key={h.id} hospital={h} onView={h => navigate(`/vet-hospitals/${h.id}`)} t={t} />)}
         </div>
       )}
 
       {/* ── Pagination ── */}
       {totalPages > 1 && (
         <div className="pagination">
-          <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>‹ Prev</button>
+          <button disabled={page === 0} onClick={() => setPage(p => p - 1)}>{t('vetHospitals.prev')}</button>
           {Array.from({ length: totalPages }, (_, i) => (
             <button key={i} className={i === page ? 'active' : ''} onClick={() => setPage(i)}>{i + 1}</button>
           ))}
-          <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next ›</button>
+          <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>{t('vetHospitals.next')}</button>
         </div>
       )}
 
@@ -228,64 +229,64 @@ const VetHospitals: React.FC = () => {  const { t } = useTranslation()
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
           <div className="modal-content vh-create-modal" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowCreateModal(false)}>✕</button>
-            <h2>Register a Vet Hospital</h2>
-            <p className="modal-subtitle">Create your hospital profile to connect with patients and other vets</p>
+            <h2>{t('vetHospitals.createModal.title')}</h2>
+            <p className="modal-subtitle">{t('vetHospitals.createModal.subtitle')}</p>
             {createError && <div className="error-message">{createError}</div>}
             <form onSubmit={handleCreate} className="vh-form">
               <div className="form-row">
                 <div className="form-group">
-                  <label>Hospital Name *</label>
+                  <label>{t('vetHospitals.form.hospitalName')}</label>
                   <input required value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Sunrise Animal Hospital" />
                 </div>
                 <div className="form-group">
-                  <label>Type *</label>
+                  <label>{t('vetHospitals.form.type')}</label>
                   <select required value={formData.hospitalType} onChange={e => setFormData(f => ({ ...f, hospitalType: e.target.value }))}>
                     {FILTER_TYPES.slice(1).map(t => <option key={t} value={t}>{HOSPITAL_TYPE_LABELS[t]}</option>)}
                   </select>
                 </div>
               </div>
               <div className="form-group">
-                <label>Tagline</label>
-                <input value={formData.tagline} onChange={e => setFormData(f => ({ ...f, tagline: e.target.value }))} placeholder="Brief motto or focus area" />
+                <label>{t('vetHospitals.form.tagline')}</label>
+                <input value={formData.tagline} onChange={e => setFormData(f => ({ ...f, tagline: e.target.value }))} placeholder={t('vetHospitals.form.taglinePlaceholder')} />
               </div>
               <div className="form-group">
-                <label>Description</label>
-                <textarea value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} rows={3} placeholder="About your hospital…" />
+                <label>{t('common.description')}</label>
+                <textarea value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} rows={3} placeholder={t('vetHospitals.form.descriptionPlaceholder')} />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>City</label>
+                  <label>{t('vetHospitals.form.city')}</label>
                   <input value={formData.city} onChange={e => setFormData(f => ({ ...f, city: e.target.value }))} />
                 </div>
                 <div className="form-group">
-                  <label>State / Province</label>
+                  <label>{t('vetHospitals.form.state')}</label>
                   <input value={formData.state} onChange={e => setFormData(f => ({ ...f, state: e.target.value }))} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Phone</label>
+                  <label>{t('vetHospitals.form.phone')}</label>
                   <input value={formData.phone} onChange={e => setFormData(f => ({ ...f, phone: e.target.value }))} />
                 </div>
                 <div className="form-group">
-                  <label>Email</label>
+                  <label>{t('vetHospitals.form.email')}</label>
                   <input type="email" value={formData.email} onChange={e => setFormData(f => ({ ...f, email: e.target.value }))} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Website</label>
+                  <label>{t('vetHospitals.form.website')}</label>
                   <input value={formData.website} onChange={e => setFormData(f => ({ ...f, website: e.target.value }))} placeholder="https://" />
                 </div>
                 <div className="form-group">
-                  <label>Established Year</label>
+                  <label>{t('vetHospitals.form.establishedYear')}</label>
                   <input type="number" value={formData.establishedYear} onChange={e => setFormData(f => ({ ...f, establishedYear: e.target.value }))} placeholder="2010" min="1900" max={new Date().getFullYear()} />
                 </div>
               </div>
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowCreateModal(false)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={() => setShowCreateModal(false)}>{t('common.cancel')}</button>
                 <button type="submit" className="btn-primary" disabled={createLoading}>
-                  {createLoading ? 'Creating…' : 'Create Hospital'}
+                  {createLoading ? t('vetHospitals.createModal.creating') : t('vetHospitals.createModal.createBtn')}
                 </button>
               </div>
             </form>

@@ -152,7 +152,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
         setTotal(totalCount)
       }
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load veterinarians')
+      setError(err?.response?.data?.error?.message || err?.message || t('findDoctor.failedToLoad'))
     } finally {
       setLoading(false)
     }

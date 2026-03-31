@@ -90,29 +90,29 @@ const AnimalGroups: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (!formData.name || !formData.groupType) { setError('Name and group type are required'); return }
+    if (!formData.name || !formData.groupType) { setError(t('animalGroups.toasts.nameRequired')); return }
     try {
       const payload: any = { ...formData, enterpriseId: selectedEnterpriseId, targetCount: formData.targetCount ? parseInt(formData.targetCount) : 0 }
       if (editingGroup) {
         await apiService.updateAnimalGroup(editingGroup.id, payload)
-        setSuccessMsg('Group updated')
+        setSuccessMsg(t('animalGroups.toasts.updated'))
       } else {
         await apiService.createAnimalGroup(payload)
-        setSuccessMsg('Group created')
+        setSuccessMsg(t('animalGroups.toasts.created'))
       }
       resetForm(); setShowForm(false); fetchGroups()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to save group') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToSave')) }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this group? Animals will be unlinked.')) return
+    if (!confirm(t('animalGroups.toasts.deleteConfirm'))) return
     try {
       await apiService.deleteAnimalGroup(id)
-      setSuccessMsg('Group deleted')
+      setSuccessMsg(t('animalGroups.toasts.deleted'))
       fetchGroups()
       setTimeout(() => setSuccessMsg(''), 3000)
-    } catch (err: any) { setError(err.response?.data?.error?.message || 'Failed to delete') }
+    } catch (err: any) { setError(err.response?.data?.error?.message || t('common.failedToDelete')) }
   }
 
   const groupIcon = (t: AnimalGroupType) => {
@@ -148,7 +148,7 @@ const AnimalGroups: React.FC = () => {
       }))
       setGroupAnimals(inGroup)
       setAllMyAnimals(mine)
-    } catch { setAnimalError('Failed to load animals') }
+    } catch { setAnimalError(t('animalGroups.manage.loadFailed')) }
     finally { setLoadingAnimals(false) }
   }
 
@@ -169,13 +169,13 @@ const AnimalGroups: React.FC = () => {
     setConfirmReassign(null)
     try {
       await apiService.assignAnimalToGroup(manageGroup.id, animalId)
-      setAnimalSuccess('Animal assigned to group')
+      setAnimalSuccess(t('animalGroups.manage.assignSuccess'))
       setTimeout(() => setAnimalSuccess(''), 2500)
       // Refresh both lists
       await openManageAnimals(manageGroup)
       fetchGroups()
     } catch (err: any) {
-      setAnimalError(err.response?.data?.error?.message || 'Failed to assign animal')
+      setAnimalError(err.response?.data?.error?.message || t('animalGroups.manage.assignFailed'))
     }
   }
 
@@ -184,12 +184,12 @@ const AnimalGroups: React.FC = () => {
     setAnimalError('')
     try {
       await apiService.removeAnimalFromGroup(manageGroup.id, animalId)
-      setAnimalSuccess('Animal removed from group')
+      setAnimalSuccess(t('animalGroups.manage.removeSuccess'))
       setTimeout(() => setAnimalSuccess(''), 2500)
       await openManageAnimals(manageGroup)
       fetchGroups()
     } catch (err: any) {
-      setAnimalError(err.response?.data?.error?.message || 'Failed to remove animal')
+      setAnimalError(err.response?.data?.error?.message || t('animalGroups.manage.removeFailed'))
     }
   }
 
@@ -207,13 +207,13 @@ const AnimalGroups: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('animalGroups.pageTitle')}</h1>
-          <p className="subtitle">Manage herds, flocks, pens, and animal groups</p>
+          <p className="subtitle">{t('animalGroups.subtitle')}</p>
         </div>
         <div className="header-actions" style={{ display: 'flex', gap: '0.5rem' }}>
           {selectedEnterpriseId && (
             <>
-              <button className="btn btn-secondary" onClick={() => navigate('/animals')}>🐾 My Animals</button>
-              <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>+ New Group</button>
+              <button className="btn btn-secondary" onClick={() => navigate('/animals')}>{t('common.myAnimals')}</button>
+              <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>{t('animalGroups.newGroup')}</button>
             </>
           )}
         </div>
@@ -225,7 +225,7 @@ const AnimalGroups: React.FC = () => {
       {/* Enterprise Selector */}
       <div className="filters-bar">
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input" style={{ maxWidth: '350px' }}>
-          <option value="">Select Enterprise...</option>
+          <option value="">{t('animalGroups.selectEnterprise')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
@@ -233,17 +233,17 @@ const AnimalGroups: React.FC = () => {
       {!selectedEnterpriseId ? (
         <div className="empty-state">
           <div className="empty-icon">🐾</div>
-          <h3>Select an Enterprise</h3>
-          <p>Choose an enterprise above to manage its animal groups.</p>
+          <h3>{t('animalGroups.emptyEnterprise')}</h3>
+          <p>{t('animalGroups.emptyEnterpriseSubtitle')}</p>
         </div>
       ) : loading ? (
-        <div className="loading-spinner">Loading groups...</div>
+        <div className="loading-spinner">{t('animalGroups.loading')}</div>
       ) : groups.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🐾</div>
-          <h3>No Groups Yet</h3>
-          <p>Create your first animal group for this enterprise.</p>
-          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>+ Create Group</button>
+          <h3>{t('animalGroups.emptyTitle')}</h3>
+          <p>{t('animalGroups.emptySubtitle')}</p>
+          <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>{t('animalGroups.createBtn')}</button>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
@@ -256,24 +256,24 @@ const AnimalGroups: React.FC = () => {
                   <span className="badge" style={{ fontSize: '0.75rem' }}>{GROUP_TYPE_LABELS[g.groupType as AnimalGroupType] || g.groupType}</span>
                 </div>
               </div>
-              {g.species && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>Species: {g.species} {g.breed ? `(${g.breed})` : ''}</p>}
-              {g.purpose && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>Purpose: {g.purpose}</p>}
+              {g.species && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>{t('animalGroups.species')} {g.species} {g.breed ? `(${g.breed})` : ''}</p>}
+              {g.purpose && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>{t('animalGroups.purpose')} {g.purpose}</p>}
               <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>
-                <span>🐾 {g.currentCount} animals</span>
-                {g.targetCount > 0 && <span style={{ color: 'var(--text-secondary)' }}>/ {g.targetCount} target</span>}
+                <span>🐾 {g.currentCount} {t('animalGroups.animals')}</span>
+                {g.targetCount > 0 && <span style={{ color: 'var(--text-secondary)' }}>/ {g.targetCount} {t('animalGroups.target')}</span>}
               </div>
               {g.description && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>{g.description}</p>}
               <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button className="btn btn-sm btn-primary" onClick={() => openManageAnimals(g)} title="Add or remove animals from this group">
-                  🐾 Manage Animals
+                <button className="btn btn-sm btn-primary" onClick={() => openManageAnimals(g)} title={t('animalGroups.manageAnimals')}>
+                  {t('animalGroups.manageAnimals')}
                 </button>
                 <button className="btn btn-sm btn-secondary"
                   onClick={() => navigate(`/book-consultation?enterpriseId=${selectedEnterpriseId}&groupId=${g.id}`)}
-                  title="Book a consultation for this group">
-                  📅 Book Consultation
+                  title={t('animalGroups.bookConsultation')}>
+                  {t('animalGroups.bookConsultation')}
                 </button>
-                <button className="btn btn-sm btn-secondary" onClick={() => openEdit(g)}>Edit</button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(g.id)}>Delete</button>
+                <button className="btn btn-sm btn-secondary" onClick={() => openEdit(g)}>{t('common.edit')}</button>
+                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(g.id)}>{t('common.delete')}</button>
               </div>
             </div>
           ))}
@@ -288,7 +288,7 @@ const AnimalGroups: React.FC = () => {
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '720px', maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
               <div>
-                <h2 style={{ margin: 0 }}>🐾 Manage Animals — {manageGroup.name}</h2>
+                <h2 style={{ margin: 0 }}>{t('animalGroups.manage.title', { name: manageGroup.name })}</h2>
                 <p style={{ color: '#6b7280', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
                   {GROUP_TYPE_LABELS[manageGroup.groupType as AnimalGroupType] || manageGroup.groupType}
                   {manageGroup.species ? ` • ${manageGroup.species}` : ''}
@@ -301,21 +301,21 @@ const AnimalGroups: React.FC = () => {
             {animalError && <div className="alert alert-error" style={{ padding: '8px 12px', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{animalError}</div>}
 
             {loadingAnimals ? (
-              <div style={{ padding: '2rem', textAlign: 'center' }}>Loading animals...</div>
+              <div style={{ padding: '2rem', textAlign: 'center' }}>{t('common.loading')}</div>
             ) : (
               <div style={{ flex: 1, overflow: 'auto' }}>
                 {/* ── Animals Currently in Group ── */}
                 <div style={{ marginBottom: '1.5rem' }}>
                   <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.5rem' }}>
-                    ✅ Animals in this group ({groupAnimals.length})
+                    {t('animalGroups.manage.inGroup', { count: groupAnimals.length })}
                   </h3>
                   {groupAnimals.length === 0 ? (
                     <div style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px', color: '#6b7280', fontSize: '0.85rem', textAlign: 'center' }}>
-                      No animals in this group yet. Assign animals from your registered list below, or{' '}
+                      {t('animalGroups.manage.emptyGroup')}{' '}
                       <button onClick={() => { setManageGroup(null); navigate('/animals') }}
                         style={{ background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.85rem', padding: 0 }}>
-                        register a new animal
-                      </button> first.
+                        {t('animalGroups.manage.registerAnimal')}
+                      </button> {t('animalGroups.manage.first')}
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -327,7 +327,7 @@ const AnimalGroups: React.FC = () => {
                             {a.uniqueId && <span style={{ color: '#9ca3af', fontSize: '0.75rem', marginLeft: '0.5rem', fontFamily: 'monospace' }}>{a.uniqueId}</span>}
                           </div>
                           <button className="btn btn-sm btn-danger" onClick={() => handleRemoveAnimal(a.id)}
-                            style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Remove</button>
+                            style={{ padding: '4px 10px', fontSize: '0.75rem' }}>{t('common.remove')}</button>
                         </div>
                       ))}
                     </div>
@@ -337,24 +337,24 @@ const AnimalGroups: React.FC = () => {
                 {/* ── Available Animals to Assign ── */}
                 <div>
                   <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.5rem' }}>
-                    📋 Available Animals to Assign ({availableAnimals.length})
+                    {t('animalGroups.manage.available', { count: availableAnimals.length })}
                   </h3>
                   <input
-                    type="text" placeholder="Search animals by name, ID, or species..."
+                    type="text" placeholder={t('animalGroups.manage.searchPlaceholder')}
                     value={animalSearch} onChange={e => setAnimalSearch(e.target.value)}
                     style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '0.5rem' }}
                   />
                   {availableAnimals.length === 0 ? (
                     <div style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px', color: '#6b7280', fontSize: '0.85rem', textAlign: 'center' }}>
                       {allMyAnimals.length === 0
-                        ? <>No animals registered yet.{' '}
+                        ? <>{t('animalGroups.manage.noAnimals')}{' '}
                             <button onClick={() => { setManageGroup(null); navigate('/animals') }}
                               style={{ background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.85rem', padding: 0 }}>
-                              Register your first animal
-                            </button> to get started.</>
+                              {t('animalGroups.manage.registerFirst')}
+                            </button> {t('animalGroups.manage.toGetStarted')}</>
                         : animalSearch
-                          ? 'No matching animals found.'
-                          : 'All your animals are already assigned to this group.'}
+                          ? t('animalGroups.manage.noMatch')
+                          : t('animalGroups.manage.allAssigned')}
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '250px', overflowY: 'auto' }}>
@@ -372,7 +372,7 @@ const AnimalGroups: React.FC = () => {
                           </div>
                           <button className="btn btn-sm btn-primary" onClick={() => handleAssignAnimal(a.id)}
                             style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
-                            + Assign
+                            {t('animalGroups.manage.assign')}
                           </button>
                         </div>
                       ))}
@@ -383,7 +383,7 @@ const AnimalGroups: React.FC = () => {
             )}
 
             <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '0.75rem', marginTop: '0.75rem', display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="btn btn-secondary" onClick={() => setManageGroup(null)}>Close</button>
+              <button className="btn btn-secondary" onClick={() => setManageGroup(null)}>{t('common.close')}</button>
             </div>
           </div>
         </div>
@@ -396,20 +396,20 @@ const AnimalGroups: React.FC = () => {
             <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
               <span style={{ fontSize: '2.5rem' }}>⚠️</span>
             </div>
-            <h3 style={{ margin: '0 0 0.5rem', textAlign: 'center', color: '#1f2937' }}>Move Animal to Another Group?</h3>
+            <h3 style={{ margin: '0 0 0.5rem', textAlign: 'center', color: '#1f2937' }}>{t('animalGroups.reassign.title')}</h3>
             <p style={{ color: '#4b5563', fontSize: '0.9rem', textAlign: 'center', lineHeight: 1.6, margin: '0 0 1rem' }}>
               <strong style={{ color: '#1f2937' }}>{confirmReassign.name}</strong> ({confirmReassign.species}{confirmReassign.breed ? ` • ${confirmReassign.breed}` : ''})
-              is currently in <strong style={{ color: '#dc2626' }}>{confirmReassign.groupName || 'another group'}</strong>.
+              is currently in <strong style={{ color: '#dc2626' }}>{confirmReassign.groupName || t('animalGroups.reassign.currentGroup')}</strong>.
             </p>
             <p style={{ color: '#4b5563', fontSize: '0.9rem', textAlign: 'center', lineHeight: 1.6, margin: '0 0 1.25rem' }}>
-              Moving it to <strong style={{ color: '#059669' }}>{manageGroup.name}</strong> will automatically remove it from the previous group.
+              {t('animalGroups.reassign.moveMessage', { targetGroup: manageGroup.name })}
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               <button className="btn btn-secondary" onClick={() => setConfirmReassign(null)}
-                style={{ padding: '8px 20px', fontSize: '0.9rem' }}>Cancel</button>
+                style={{ padding: '8px 20px', fontSize: '0.9rem' }}>{t('common.cancel')}</button>
               <button className="btn btn-primary" onClick={() => doAssignAnimal(confirmReassign.id)}
                 style={{ padding: '8px 20px', fontSize: '0.9rem', background: '#dc2626', borderColor: '#dc2626' }}>
-                Yes, Move Animal
+                {t('animalGroups.reassign.confirmBtn')}
               </button>
             </div>
           </div>
@@ -420,42 +420,42 @@ const AnimalGroups: React.FC = () => {
       {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
       {showForm && (
         <div ref={formRef} className="edit-form-panel">
-            <h2>{editingGroup ? 'Edit Group' : 'Create Animal Group'}</h2>
+            <h2>{editingGroup ? t('animalGroups.modal.editTitle') : t('animalGroups.modal.createTitle')}</h2>
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
               <div className="form-group">
-                <label>Group Name *</label>
+                <label>{t('animalGroups.modal.name')}</label>
                 <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
-                  <label>Group Type *</label>
+                  <label>{t('animalGroups.modal.type')}</label>
                   <select value={formData.groupType} onChange={e => setFormData(f => ({ ...f, groupType: e.target.value as AnimalGroupType }))} required>
-                    <option value="">Select...</option>
+                    <option value="">{t('common.filter')}</option>
                     {Object.entries(GROUP_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Purpose</label>
+                  <label>{t('animalGroups.modal.purpose')}</label>
                   <select value={formData.purpose} onChange={e => setFormData(f => ({ ...f, purpose: e.target.value }))}>
-                    <option value="">Select...</option>
+                    <option value="">{t('common.filter')}</option>
                     {PURPOSE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Species</label>
+                  <label>{t('animalGroups.modal.species')}</label>
                   <input type="text" value={formData.species} onChange={e => setFormData(f => ({ ...f, species: e.target.value }))} placeholder="e.g. Cattle" />
                 </div>
                 <div className="form-group">
-                  <label>Breed</label>
+                  <label>{t('animalGroups.modal.breed')}</label>
                   <input type="text" value={formData.breed} onChange={e => setFormData(f => ({ ...f, breed: e.target.value }))} />
                 </div>
                 <div className="form-group">
-                  <label>Target Count</label>
+                  <label>{t('animalGroups.modal.targetCount')}</label>
                   <input type="number" value={formData.targetCount} onChange={e => setFormData(f => ({ ...f, targetCount: e.target.value }))} />
                 </div>
                 <div className="form-group">
-                  <label>Color Code</label>
+                  <label>{t('animalGroups.modal.colorCode')}</label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div style={{ width: 36, height: 36, borderRadius: 6, border: '2px solid #d1d5db', background: formData.colorCode, flexShrink: 0 }} />
                     <input type="color" value={formData.colorCode} onChange={e => setFormData(f => ({ ...f, colorCode: e.target.value }))} style={{ width: 40, height: 36, padding: 0, border: 'none', cursor: 'pointer' }} title="Pick a color" />
@@ -464,12 +464,12 @@ const AnimalGroups: React.FC = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label>Description</label>
+                <label>{t('animalGroups.modal.description')}</label>
                 <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>Cancel</button>
-                <button type="submit" className="btn btn-primary">{editingGroup ? 'Update' : 'Create'} Group</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
+                <button type="submit" className="btn btn-primary">{editingGroup ? t('animalGroups.modal.updateBtn') : t('animalGroups.modal.createBtn')}</button>
               </div>
             </form>
         </div>

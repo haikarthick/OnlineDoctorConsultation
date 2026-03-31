@@ -73,16 +73,16 @@ const FeedInventory: React.FC = () => {
     try {
       if (editingId) {
         await apiService.updateFeed(editingId, payload)
-        setSuccessMsg('Feed updated!')
+        setSuccessMsg(t('feedInventory.toasts.feedUpdated'))
       } else {
         await apiService.createFeed(selectedEnterpriseId, payload)
-        setSuccessMsg('Feed added!')
+        setSuccessMsg(t('feedInventory.toasts.feedAdded'))
       }
       setShowForm(false); setEditingId(null)
       resetForm()
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to save feed')
+      setError(err.response?.data?.error?.message || t('feedInventory.toasts.saveFailed'))
     }
   }
 
@@ -92,11 +92,11 @@ const FeedInventory: React.FC = () => {
     if (!restockId || !restockQty) return
     try {
       await apiService.restockFeed(restockId, parseFloat(restockQty))
-      setSuccessMsg('Feed restocked!')
+      setSuccessMsg(t('feedInventory.toasts.restocked'))
       setRestockId(null); setRestockQty('')
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to restock')
+      setError(err.response?.data?.error?.message || t('feedInventory.toasts.restockFailed'))
     }
   }
 
@@ -110,22 +110,22 @@ const FeedInventory: React.FC = () => {
         quantityUsed: parseFloat(consumptionData.quantityUsed),
         notes: consumptionData.notes || undefined,
       })
-      setSuccessMsg('Consumption logged!')
+      setSuccessMsg(t('feedInventory.toasts.consumptionLogged'))
       setShowConsumptionForm(false)
       setConsumptionData({ feedId: '', quantityUsed: '', notes: '' })
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to log consumption')
+      setError(err.response?.data?.error?.message || t('feedInventory.toasts.consumptionFailed'))
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this feed item?')) return
+    if (!window.confirm(t('feedInventory.toasts.deleteConfirm'))) return
     try {
       await apiService.deleteFeed(id)
-      setSuccessMsg('Feed deleted!')
+      setSuccessMsg(t('feedInventory.toasts.feedDeleted'))
       fetchData()
-    } catch { setError('Failed to delete') }
+    } catch { setError(t('feedInventory.toasts.deleteFailed')) }
   }
 
   const startEdit = (feed: FeedItem) => {
@@ -144,16 +144,16 @@ const FeedInventory: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <h1>{t('feedInventory.pageTitle')}</h1>
-        <p>Track feed stock levels, log consumption, and get low-stock alerts</p>
+        <p>{t('feedInventory.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
       {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
       <div className="enterprise-selector">
-        <label>Select Enterprise:</label>
+        <label>{t('feedInventory.selectEnterprise')}</label>
         <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
-          <option value="">-- Select --</option>
+          <option value="">{t('feedInventory.selectDefault')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
@@ -161,70 +161,70 @@ const FeedInventory: React.FC = () => {
       {selectedEnterpriseId && (
         <>
           <div className="tab-bar">
-            <button className={`tab-btn ${tab === 'inventory' ? 'active' : ''}`} onClick={() => setTab('inventory')}>📦 Inventory</button>
-            <button className={`tab-btn ${tab === 'analytics' ? 'active' : ''}`} onClick={() => setTab('analytics')}>📊 Analytics</button>
-            <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); resetForm() }}>+ Add Feed</button>
-            <button className="btn btn-secondary" onClick={() => setShowConsumptionForm(!showConsumptionForm)}>📝 Log Consumption</button>
+            <button className={`tab-btn ${tab === 'inventory' ? 'active' : ''}`} onClick={() => setTab('inventory')}>{t('feedInventory.tabs.inventory')}</button>
+            <button className={`tab-btn ${tab === 'analytics' ? 'active' : ''}`} onClick={() => setTab('analytics')}>{t('feedInventory.tabs.analytics')}</button>
+            <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); resetForm() }}>{t('feedInventory.addFeed')}</button>
+            <button className="btn btn-secondary" onClick={() => setShowConsumptionForm(!showConsumptionForm)}>{t('feedInventory.logConsumption')}</button>
           </div>
 
           {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); setEditingId(null) }} />}
           {showForm && (
             <div ref={formRef} className="edit-form-panel">
             <form className="module-form" onSubmit={handleSubmit}>
-              <h3>{editingId ? 'Edit Feed Item' : 'Add New Feed'}</h3>
+              <h3>{editingId ? t('feedInventory.form.editTitle') : t('feedInventory.form.createTitle')}</h3>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Name *</label>
+                  <label>{t('feedInventory.form.name')}</label>
                   <input required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Feed Type</label>
+                  <label>{t('feedInventory.form.feedType')}</label>
                   <select value={formData.feedType} onChange={e => setFormData({ ...formData, feedType: e.target.value })}>
                     {['hay', 'grain', 'pellet', 'silage', 'mineral', 'supplement', 'concentrate', 'forage', 'medicated', 'other'].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Brand</label>
+                  <label>{t('feedInventory.form.brand')}</label>
                   <input value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Batch Number</label>
+                  <label>{t('feedInventory.form.batchNumber')}</label>
                   <input value={formData.batchNumber} onChange={e => setFormData({ ...formData, batchNumber: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Quantity in Stock *</label>
+                  <label>{t('feedInventory.form.quantityInStock')}</label>
                   <input type="number" step="0.01" required value={formData.quantityInStock} onChange={e => setFormData({ ...formData, quantityInStock: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Unit</label>
+                  <label>{t('feedInventory.form.unit')}</label>
                   <select value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })}>
                     {['kg', 'lb', 'ton', 'bag', 'bale', 'liter', 'gallon'].map(u => <option key={u} value={u}>{u}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Minimum Stock Level</label>
+                  <label>{t('feedInventory.form.minimumStockLevel')}</label>
                   <input type="number" step="0.01" value={formData.minimumStockLevel} onChange={e => setFormData({ ...formData, minimumStockLevel: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Cost per Unit *</label>
+                  <label>{t('feedInventory.form.costPerUnit')}</label>
                   <input type="number" step="0.01" required value={formData.costPerUnit} onChange={e => setFormData({ ...formData, costPerUnit: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Expiry Date</label>
+                  <label>{t('feedInventory.form.expiryDate')}</label>
                   <input type="date" value={formData.expiryDate} onChange={e => setFormData({ ...formData, expiryDate: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Storage Location</label>
+                  <label>{t('feedInventory.form.storageLocation')}</label>
                   <input value={formData.storageLocation} onChange={e => setFormData({ ...formData, storageLocation: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Supplier</label>
+                  <label>{t('feedInventory.form.supplier')}</label>
                   <input value={formData.supplier} onChange={e => setFormData({ ...formData, supplier: e.target.value })} />
                 </div>
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">{editingId ? 'Update' : 'Add Feed'}</button>
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editingId ? t('common.update') : t('feedInventory.addFeed')}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>{t('common.cancel')}</button>
               </div>
             </form>
             </div>
@@ -232,37 +232,37 @@ const FeedInventory: React.FC = () => {
 
           {showConsumptionForm && (
             <form className="module-form" onSubmit={handleLogConsumption}>
-              <h3>Log Feed Consumption</h3>
+              <h3>{t('feedInventory.consumptionForm.title')}</h3>
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Feed *</label>
+                  <label>{t('feedInventory.consumptionForm.feed')}</label>
                   <select required value={consumptionData.feedId} onChange={e => setConsumptionData({ ...consumptionData, feedId: e.target.value })}>
-                    <option value="">-- Select Feed --</option>
+                    <option value="">{t('feedInventory.consumptionForm.selectFeed')}</option>
                     {feeds.map(f => <option key={f.id} value={f.id}>{f.name} ({f.quantityInStock} {f.unit})</option>)}
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Quantity Used *</label>
+                  <label>{t('feedInventory.consumptionForm.quantityUsed')}</label>
                   <input type="number" step="0.01" required value={consumptionData.quantityUsed} onChange={e => setConsumptionData({ ...consumptionData, quantityUsed: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Notes</label>
+                  <label>{t('common.notes')}</label>
                   <input value={consumptionData.notes} onChange={e => setConsumptionData({ ...consumptionData, notes: e.target.value })} />
                 </div>
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">Log Consumption</button>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowConsumptionForm(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{t('feedInventory.consumptionForm.submitBtn')}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowConsumptionForm(false)}>{t('common.cancel')}</button>
               </div>
             </form>
           )}
 
-          {loading ? <p className="loading-text">Loading...</p> : tab === 'inventory' ? (
+          {loading ? <p className="loading-text">{t('common.loading')}</p> : tab === 'inventory' ? (
             <div className="card full-width">
-              <h3>Feed Inventory</h3>
-              {feeds.length === 0 ? <p className="empty-text">No feed items in inventory.</p> : (
+              <h3>{t('feedInventory.inventoryTitle')}</h3>
+              {feeds.length === 0 ? <p className="empty-text">{t('feedInventory.emptyInventory')}</p> : (
                 <table className="data-table">
-                  <thead><tr><th>Name</th><th>Type</th><th>Stock</th><th>Min Level</th><th>Cost/Unit</th><th>Expiry</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>{t('common.name')}</th><th>{t('common.type')}</th><th>{t('feedInventory.headers.stock')}</th><th>{t('feedInventory.headers.minLevel')}</th><th>{t('feedInventory.headers.costPerUnit')}</th><th>{t('feedInventory.headers.expiry')}</th><th>{t('feedInventory.headers.location')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr></thead>
                   <tbody>
                     {feeds.map(f => {
                       const isLow = f.quantityInStock <= f.minimumStockLevel
@@ -275,9 +275,9 @@ const FeedInventory: React.FC = () => {
                           <td>${Number(f.costPerUnit).toFixed(2)}</td>
                           <td>{f.expiryDate ? new Date(f.expiryDate).toLocaleDateString() : '–'}</td>
                           <td>{f.storageLocation || '–'}</td>
-                          <td>{isLow ? <span className="badge badge-danger">Low Stock</span> : <span className="badge badge-success">OK</span>}</td>
+                          <td>{isLow ? <span className="badge badge-danger">{t('feedInventory.lowStock')}</span> : <span className="badge badge-success">{t('feedInventory.ok')}</span>}</td>
                           <td>
-                            <button className="btn btn-sm" onClick={() => startEdit(f)}>Edit</button>
+                            <button className="btn btn-sm" onClick={() => startEdit(f)}>{t('common.edit')}</button>
                             {restockId === f.id ? (
                               <span className="inline-form">
                                 <input type="number" step="0.01" placeholder="Qty" value={restockQty} onChange={e => setRestockQty(e.target.value)} style={{ width: 80 }} />
@@ -285,9 +285,9 @@ const FeedInventory: React.FC = () => {
                                 <button className="btn btn-sm" onClick={() => setRestockId(null)}>✗</button>
                               </span>
                             ) : (
-                              <button className="btn btn-sm btn-secondary" onClick={() => setRestockId(f.id)}>Restock</button>
+                              <button className="btn btn-sm btn-secondary" onClick={() => setRestockId(f.id)}>{t('feedInventory.restock')}</button>
                             )}
-                            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(f.id)}>Del</button>
+                            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(f.id)}>{t('common.delete')}</button>
                           </td>
                         </tr>
                       )
@@ -299,14 +299,14 @@ const FeedInventory: React.FC = () => {
           ) : analytics ? (
             <div className="dashboard-grid">
               <div className="card">
-                <h3>Total Inventory Value</h3>
+                <h3>{t('feedInventory.totalValue')}</h3>
                 <div className="big-stat">${Number(analytics.totalInventoryValue || 0).toFixed(2)}</div>
               </div>
 
               <div className="card">
-                <h3>⚠️ Low Stock Alerts</h3>
+                <h3>{t('feedInventory.lowStockAlerts')}</h3>
                 {(analytics.lowStockAlerts || []).length === 0 ? (
-                  <p className="empty-text">All stock levels OK!</p>
+                  <p className="empty-text">{t('feedInventory.allOk')}</p>
                 ) : (
                   <ul className="alert-list">
                     {analytics.lowStockAlerts.map(f => (
@@ -319,9 +319,9 @@ const FeedInventory: React.FC = () => {
               </div>
 
               <div className="card">
-                <h3>Consumption by Type (30 days)</h3>
+                <h3>{t('feedInventory.consumptionByType')}</h3>
                 <table className="data-table compact">
-                  <thead><tr><th>Type</th><th>Used</th><th>Cost</th></tr></thead>
+                  <thead><tr><th>{t('common.type')}</th><th>{t('feedInventory.analytics.used')}</th><th>{t('feedInventory.analytics.cost')}</th></tr></thead>
                   <tbody>
                     {(analytics.consumptionByType || []).map(c => (
                       <tr key={c.feed_type}>
@@ -335,7 +335,7 @@ const FeedInventory: React.FC = () => {
               </div>
 
               <div className="card">
-                <h3>Daily Consumption Trend</h3>
+                <h3>{t('feedInventory.dailyTrend')}</h3>
                 <div className="mini-chart">
                   {(analytics.dailyConsumptionTrend || []).slice(-14).map((d, i) => (
                     <div key={i} className="chart-bar-wrapper">

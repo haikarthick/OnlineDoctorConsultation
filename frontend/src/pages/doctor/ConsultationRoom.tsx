@@ -113,7 +113,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       setMediaMode('audio-only')
       setIsCameraOff(true)
       setIsMuted(false)
-      setCameraError('Camera unavailable — audio-only mode.')
+      setCameraError(t('consultationRoom.cameraUnavailableAudioOnly'))
       return
     } catch (err: any) {
 }
@@ -122,7 +122,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
     setStreamToSend(null)
     setIsCameraOff(true)
     setIsMuted(true)
-    setCameraError('Camera & microphone unavailable. Chat still works.')
+    setCameraError(t('consultationRoom.cameraAndMicUnavailable'))
   }, [])
 
   const stopLocalStream = useCallback(() => {
@@ -251,14 +251,14 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
             startMessagePolling(created.data.id)
           }
         } catch (err: any) {
-          setError('Failed to create video session: ' + (err?.response?.data?.error?.message || err?.message || ''))
+          setError(t('consultationRoom.failedToCreateVideoSession') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
         }
       }
 
       // Load consultation data for notes
       loadConsultationData()
     } catch (err: any) {
-      setError('Failed to initialize room: ' + (err?.message || ''))
+      setError(t('consultationRoom.failedToInitializeRoom') + ': ' + (err?.message || ''))
     } finally {
       setLoading(false)
     }
@@ -357,13 +357,13 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         await startLocalStream()
       }
     } catch (err: any) {
-      setError('Failed to start call: ' + (err?.response?.data?.error?.message || err?.message || ''))
+      setError(t('consultationRoom.failedToStartCall') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
     }
   }
 
   const handleEndCall = async () => {
     if (!session) return
-    if (!window.confirm('End this video consultation?')) return
+    if (!window.confirm(t('consultationRoom.confirmEndCall'))) return
     try {
       // Stop recording if active
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -381,7 +381,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       if (result.data) setSession(result.data)
       stopLocalStream()
     } catch (err: any) {
-      setError('Failed to end call: ' + (err?.response?.data?.error?.message || err?.message || ''))
+      setError(t('consultationRoom.failedToEndCall') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
       stopLocalStream()
     }
   }
@@ -392,7 +392,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       localStreamRef.current.getAudioTracks().forEach(t => { t.enabled = isMuted })
       setIsMuted(!isMuted)
     } else if (mediaMode === 'none') {
-      setError('Microphone is unavailable')
+      setError(t('consultationRoom.micUnavailable'))
     }
   }
 
@@ -415,7 +415,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         setIsCameraOff(false)
         setCameraError('')
       } catch {
-        setError('Camera is unavailable')
+        setError(t('consultationRoom.cameraUnavailable'))
       }
       return
     }
@@ -452,7 +452,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const toggleRecording = () => {
     if (!isRecording) {
       const stream = screenStreamRef.current || localStreamRef.current
-      if (!stream) { setError('No media stream available to record'); return }
+      if (!stream) { setError(t('consultationRoom.noMediaStream')); return }
       try {
         recordedChunksRef.current = []
         let mimeType = 'video/webm;codecs=vp9'
@@ -471,7 +471,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         setIsRecording(true)
         if (session) apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => {})
       } catch {
-        setError('Failed to start recording')
+        setError(t('consultationRoom.failedToStartRecording'))
       }
     } else {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -539,14 +539,14 @@ setNewMessage(text)
       setNotesSaved(true)
       setTimeout(() => setNotesSaved(false), 3000)
     } catch (err: any) {
-setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?.message || 'Unknown error'))
+setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
     } finally {
       setSavingNotes(false)
     }
   }
 
   const handleCompleteConsultation = async () => {
-    if (!window.confirm('Complete this consultation? Status will be set to completed.')) return
+    if (!window.confirm(t('consultationRoom.confirmComplete'))) return
     try {
       // Save notes first
       if (diagnosis.trim() || notes.trim()) {
@@ -566,7 +566,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
       stopLocalStream()
       onNavigate('/dashboard')
     } catch (err: any) {
-      setError('Failed to complete: ' + (err?.response?.data?.error?.message || err?.message || ''))
+      setError(t('consultationRoom.failedToComplete') + ': ' + (err?.response?.data?.error?.message || err?.message || ''))
     }
   }
 
@@ -601,7 +601,7 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
           </p>
           {isCompleted && (
             <p style={{ color: '#059669', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-              ? This consultation has been marked as completed
+              {t('consultationRoom.markedAsCompleted')}
             </p>
           )}
 
@@ -726,9 +726,9 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
               {!remoteStream && (
                 <div className="video-placeholder">
                   <div className="video-avatar">🧑</div>
-                  <p>{connectionState === 'connecting' ? 'Connecting to patient...' : 'Waiting for patient video...'}</p>
-                  {mediaMode === 'audio-only' && <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 Audio-only mode</p>}
-                  {mediaMode === 'none' && <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 Chat-only mode</p>}
+                  <p>{connectionState === 'connecting' ? t('consultationRoom.connectingToPatient') : t('consultationRoom.waitingForPatientVideo')}</p>
+                  {mediaMode === 'audio-only' && <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 {t('consultationRoom.audioOnlyMode')}</p>}
+                  {mediaMode === 'none' && <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 {t('consultationRoom.chatOnlyMode')}</p>}
                 </div>
               )}
               {isScreenSharing && (
@@ -781,23 +781,23 @@ setError('Failed to save notes: ' + (err?.response?.data?.error?.message || err?
             {session?.status === 'active' && (
               <>
                 <button className={`video-control-btn ${!isMuted ? 'active' : ''}`}
-                  onClick={toggleMute} title={isMuted ? 'Unmute' : 'Mute'}>
+                  onClick={toggleMute} title={isMuted ? t('consultationRoom.unmute') : t('consultationRoom.mute')}>
                   {isMuted ? '🔇' : '🎤'}
                 </button>
                 <button className={`video-control-btn ${!isCameraOff ? 'active' : ''}`}
-                  onClick={toggleCamera} title={isCameraOff ? 'Turn on camera' : 'Turn off camera'}>
+                  onClick={toggleCamera} title={isCameraOff ? t('consultationRoom.turnOnCamera') : t('consultationRoom.turnOffCamera')}>
                   {isCameraOff ? '📷' : '📹'}
                 </button>
                 <button className={`video-control-btn ${isScreenSharing ? 'active' : ''}`}
-                  onClick={toggleScreenShare} title="Share screen">
+                  onClick={toggleScreenShare} title={t('consultationRoom.shareScreen')}>
                   🖥️
                 </button>
                 <button className={`video-control-btn ${isRecording ? 'recording' : ''}`}
-                  onClick={toggleRecording} title={isRecording ? 'Stop Recording' : 'Start Recording'}
+                  onClick={toggleRecording} title={isRecording ? t('consultationRoom.stopRecording') : t('consultationRoom.startRecording')}
                   style={isRecording ? { background: '#dc2626', color: 'white', animation: 'pulse 1.5s infinite' } : {}}>
                   {isRecording ? '⏹️' : '⏺️'}
                 </button>
-                <button className="video-control-btn end-call" onClick={handleEndCall} title="End call">
+                <button className="video-control-btn end-call" onClick={handleEndCall} title={t('consultationRoom.endCallTitle')}>
                   📞
                 </button>
               </>

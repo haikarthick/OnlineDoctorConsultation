@@ -8,7 +8,8 @@ const SCORE_COLORS = (score: number) => score >= 80 ? '#22c55e' : score >= 60 ? 
 const PRIORITY_COLORS: Record<string, string> = { low: '#94a3b8', medium: '#3b82f6', high: '#f97316', urgent: '#ef4444' }
 const REMINDER_TYPES = ['vaccination', 'checkup', 'dental', 'grooming', 'medication', 'nutrition', 'exercise', 'lab_test']
 
-const WellnessPortal: React.FC = () => {  const { t } = useTranslation()
+const WellnessPortal: React.FC = () => {
+  const { t } = useTranslation()
 
   const [dashboard, setDashboard] = useState<any>(null)
   const [scorecards, setScorecards] = useState<WellnessScorecard[]>([])
@@ -110,7 +111,7 @@ const WellnessPortal: React.FC = () => {  const { t } = useTranslation()
       <div className="module-header">
         <div>
           <h1>{t('wellnessPortal.pageTitle')}</h1>
-          <p style={{ color: '#666', margin: '8px 0 0' }}>Pet health scorecards, vaccination reminders, and wellness tracking</p>
+          <p style={{ color: '#666', margin: '8px 0 0' }}>{t('wellnessPortal.subtitle')}</p>
         </div>
       </div>
 
@@ -125,7 +126,7 @@ const WellnessPortal: React.FC = () => {  const { t } = useTranslation()
         ))}
       </div>
 
-      {loading && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>Loading...</div>}
+      {loading && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>{t('common.loading')}</div>}
 
       {!loading && tab === 'dashboard' && dashboard && (
         <div>
@@ -217,7 +218,7 @@ const WellnessPortal: React.FC = () => {  const { t } = useTranslation()
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                 <button className="module-btn primary" onClick={createScorecard}>Create Scorecard</button>
-                <button className="module-btn" onClick={() => setShowScorecardForm(false)}>Cancel</button>
+                <button className="module-btn" onClick={() => setShowScorecardForm(false)}>{t('common.cancel')}</button>
               </div>
             </div>
           )}
@@ -247,7 +248,7 @@ const WellnessPortal: React.FC = () => {  const { t } = useTranslation()
                 {sc.nextCheckup && <div style={{ fontSize: 12, color: '#888', marginTop: 8 }}>Next checkup: {sc.nextCheckup.slice(0, 10)}</div>}
               </div>
             ))}
-            {scorecards.length === 0 && <p style={{ color: '#888' }}>No scorecards yet. Create one for your pet!</p>}
+            {scorecards.length === 0 && <p style={{ color: '#888' }}>{t('wellnessPortal.emptyScorecards')}</p>}
           </div>
         </div>
       )}
@@ -286,7 +287,7 @@ const WellnessPortal: React.FC = () => {  const { t } = useTranslation()
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                 <button className="module-btn primary" onClick={createReminder}>Create Reminder</button>
-                <button className="module-btn" onClick={() => setShowReminderForm(false)}>Cancel</button>
+                <button className="module-btn" onClick={() => setShowReminderForm(false)}>{t('common.cancel')}</button>
               </div>
             </div>
           )}
@@ -311,7 +312,7 @@ const WellnessPortal: React.FC = () => {  const { t } = useTranslation()
               )}
             </div>
           ))}
-          {reminders.length === 0 && <p style={{ color: '#888', textAlign: 'center', marginTop: 20 }}>No reminders yet</p>}
+          {reminders.length === 0 && <p style={{ color: '#888', textAlign: 'center', marginTop: 20 }}>{t('wellnessPortal.emptyReminders')}</p>}
         </div>
       )}
     </div>

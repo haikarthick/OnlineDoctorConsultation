@@ -125,7 +125,7 @@ class ApiService {
     const formData = new FormData()
     formData.append('file', file)
     if (folder) formData.append('folder', folder)
-    const response = await this.client.post('/files/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+    const response = await this.client.post('/files/upload', formData, { headers: { 'Content-Type': undefined } })
     return response.data
   }
 
@@ -1569,7 +1569,7 @@ class ApiService {
     if (context?.scanType) formData.append('scanType', context.scanType)
     if (context?.bodyPart) formData.append('bodyPart', context.bodyPart)
     if (context?.notes) formData.append('notes', context.notes)
-    const response = await this.client.post('/ai-copilot/analyze-scan', formData, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 60000 })
+    const response = await this.client.post('/ai-copilot/analyze-scan', formData, { headers: { 'Content-Type': undefined }, timeout: 60000 })
     return response.data
   }
 

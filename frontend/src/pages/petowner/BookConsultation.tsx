@@ -267,7 +267,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
 
       setSuccess(true)
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || err.response?.data?.message || 'Failed to create booking')
+      setError(err.response?.data?.error?.message || err.response?.data?.message || t('bookConsultation.failedToCreate'))
     } finally {
       setLoading(false)
     }

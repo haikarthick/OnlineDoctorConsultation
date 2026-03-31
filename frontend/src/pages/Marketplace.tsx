@@ -214,8 +214,8 @@ const Marketplace: React.FC = () => {
       const urls: string[] = [...(sellForm.images || [])]
       for (let i = 0; i < Math.min(files.length, 5 - urls.length); i++) {
         const res = await apiService.uploadFile(files[i], 'marketplace')
-        if (res.data?.url) urls.push(res.data.url)
-        else if (res.data?.fileUrl) urls.push(res.data.fileUrl)
+        if (res.url) urls.push(res.url)
+        else if (res.fileUrl) urls.push(res.fileUrl)
       }
       setSellForm((prev: Record<string, any>) => ({ ...prev, images: urls }))
     } catch (err: any) {

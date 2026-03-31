@@ -17,7 +17,8 @@ const METRIC_TYPES = [
 
 const SCOPE_LABELS: Record<string, string> = { scope_1: 'Direct Emissions', scope_2: 'Energy Indirect', scope_3: 'Value Chain' }
 
-const Sustainability: React.FC = () => {  const { t } = useTranslation()
+const Sustainability: React.FC = () => {
+  const { t } = useTranslation()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -83,7 +84,7 @@ const Sustainability: React.FC = () => {  const { t } = useTranslation()
     try {
       await apiService.createSustainabilityMetric(selectedEnterpriseId, { ...metricForm, value: +metricForm.value })
       setShowMetricForm(false)
-      setSuccessMsg('Metric recorded!')
+      setSuccessMsg(t('sustainability.metricRecorded'))
       fetchData()
     } catch (e: any) { setError(e.message) }
   }
@@ -96,7 +97,7 @@ const Sustainability: React.FC = () => {  const { t } = useTranslation()
         baselineValue: +goalForm.baselineValue || null,
       })
       setShowGoalForm(false)
-      setSuccessMsg('Goal created!')
+      setSuccessMsg(t('sustainability.goalCreated'))
       fetchData()
     } catch (e: any) { setError(e.message) }
   }
@@ -108,10 +109,10 @@ const Sustainability: React.FC = () => {  const { t } = useTranslation()
       <div className="module-header">
         <div>
           <h1>{t('sustainability.pageTitle')}</h1>
-          <p style={{ color: '#666', margin: '8px 0 0' }}>ESG scoring, carbon footprint tracking, and sustainability goal management</p>
+          <p style={{ color: '#666', margin: '8px 0 0' }}>{t('sustainability.subtitle')}</p>
         </div>
         <select className="module-input" value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} style={{ width: 260 }}>
-          <option value="">Select Enterprise</option>
+          <option value="">{t('common.selectEnterprise')}</option>
           {enterprises.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
         </select>
       </div>
@@ -120,29 +121,29 @@ const Sustainability: React.FC = () => {  const { t } = useTranslation()
       {successMsg && <div className="module-alert success">{successMsg} <button onClick={() => setSuccessMsg('')}>✕</button></div>}
 
       <div className="module-tabs">
-        {(['dashboard', 'metrics', 'goals', 'carbon'] as const).map(t => (
-          <button key={t} className={`module-tab ${tab === t ? 'active' : ''}`}
-            onClick={() => { setTab(t); if (t === 'carbon') fetchCarbon() }}>
-            {t === 'dashboard' ? '📊 Dashboard' : t === 'metrics' ? '📈 Metrics' : t === 'goals' ? '🎯 Goals' : '🌍 Carbon Footprint'}
+        {(['dashboard', 'metrics', 'goals', 'carbon'] as const).map(tb => (
+          <button key={tb} className={`module-tab ${tab === tb ? 'active' : ''}`}
+            onClick={() => { setTab(tb); if (tb === 'carbon') fetchCarbon() }}>
+            {tb === 'dashboard' ? `📊 ${t('sustainability.tabs.dashboard')}` : tb === 'metrics' ? `📈 ${t('sustainability.tabs.metrics')}` : tb === 'goals' ? `🎯 ${t('sustainability.tabs.goals')}` : `🌍 ${t('sustainability.tabs.carbon')}`}
           </button>
         ))}
       </div>
 
-      {loading && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>Loading...</div>}
+      {loading && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>{t('common.loading')}</div>}
 
       {!loading && tab === 'dashboard' && dashboard && (
         <div>
           <div className="module-stats">
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.totalMetricEntries || 0}</div><div className="stat-label">Metric Entries</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.metricTypes || 0}</div><div className="stat-label">Metric Types</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.activeGoals || 0}</div><div className="stat-label">Active Goals</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.avgGoalProgress || 0}%</div><div className="stat-label">Avg Goal Progress</div></div>
-            <div className="stat-card"><div className="stat-value">{dashboard.summary?.estimatedCO2tons || '—'}</div><div className="stat-label">Est. CO₂ (tons/yr)</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.totalMetricEntries || 0}</div><div className="stat-label">{t('sustainability.stats.metricEntries')}</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.metricTypes || 0}</div><div className="stat-label">{t('sustainability.stats.metricTypes')}</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.activeGoals || 0}</div><div className="stat-label">{t('sustainability.stats.activeGoals')}</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.avgGoalProgress || 0}%</div><div className="stat-label">{t('sustainability.stats.avgGoalProgress')}</div></div>
+            <div className="stat-card"><div className="stat-value">{dashboard.summary?.estimatedCO2tons || '—'}</div><div className="stat-label">{t('sustainability.stats.estCO2')}</div></div>
           </div>
 
           {dashboard.goals?.length > 0 && (
             <div className="module-card" style={{ marginTop: 24 }}>
-              <h3>🎯 Goal Progress</h3>
+              <h3>🎯 {t('sustainability.goalProgress')}</h3>
               {dashboard.goals.map((g: any) => (
                 <div key={g.id} style={{ padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -160,9 +161,9 @@ const Sustainability: React.FC = () => {  const { t } = useTranslation()
 
           {dashboard.byMetricType?.length > 0 && (
             <div className="module-card" style={{ marginTop: 24 }}>
-              <h3>📊 Metrics Summary</h3>
+              <h3>📊 {t('sustainability.metricsSummary')}</h3>
               <table className="module-table">
-                <thead><tr><th>Metric Type</th><th>Entries</th><th>Total</th><th>Average</th><th>Unit</th></tr></thead>
+                <thead><tr><th>{t('sustainability.metricType')}</th><th>{t('sustainability.entries')}</th><th>{t('sustainability.total')}</th><th>{t('sustainability.average')}</th><th>{t('sustainability.unit')}</th></tr></thead>
                 <tbody>{dashboard.byMetricType.map((m: any) => (
                   <tr key={m.metric_type}><td>{m.metric_type}</td><td>{m.entries}</td><td>{(+m.total_value).toFixed(1)}</td><td>{(+m.avg_value).toFixed(2)}</td><td>{m.unit || '—'}</td></tr>
                 ))}</tbody>
@@ -175,78 +176,78 @@ const Sustainability: React.FC = () => {  const { t } = useTranslation()
       {!loading && tab === 'metrics' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-            <button className="module-btn primary" onClick={() => setShowMetricForm(true)} disabled={!selectedEnterpriseId}>+ Record Metric</button>
+            <button className="module-btn primary" onClick={() => setShowMetricForm(true)} disabled={!selectedEnterpriseId}>{t('sustainability.recordMetric')}</button>
           </div>
           {showMetricForm && (
             <div className="module-card" style={{ marginBottom: 20 }}>
-              <h3>Record Sustainability Metric</h3>
+              <h3>{t('sustainability.recordSustainabilityMetric')}</h3>
               <div className="module-form">
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">Metric Type</label>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.metricType')}</label>
                     <select className="module-input" value={metricForm.metricType}
                       onChange={e => { const mt = METRIC_TYPES.find(m => m.value === e.target.value); setMetricForm(f => ({ ...f, metricType: e.target.value, unit: mt?.unit || f.unit })) }}>
                       {METRIC_TYPES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                     </select>
                   </div>
-                  <div style={{ flex: 1 }}><label className="module-label">Name</label><input className="module-input" value={metricForm.metricName} onChange={e => setMetricForm(f => ({ ...f, metricName: e.target.value }))} placeholder="e.g. Monthly CO2 from livestock" /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('common.name')}</label><input className="module-input" value={metricForm.metricName} onChange={e => setMetricForm(f => ({ ...f, metricName: e.target.value }))} placeholder="e.g. Monthly CO2 from livestock" /></div>
                 </div>
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">Value</label><input className="module-input" type="number" value={metricForm.value} onChange={e => setMetricForm(f => ({ ...f, value: e.target.value }))} /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Unit</label><input className="module-input" value={metricForm.unit} onChange={e => setMetricForm(f => ({ ...f, unit: e.target.value }))} /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Scope</label><select className="module-input" value={metricForm.scope} onChange={e => setMetricForm(f => ({ ...f, scope: e.target.value }))}>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.value')}</label><input className="module-input" type="number" value={metricForm.value} onChange={e => setMetricForm(f => ({ ...f, value: e.target.value }))} /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.unit')}</label><input className="module-input" value={metricForm.unit} onChange={e => setMetricForm(f => ({ ...f, unit: e.target.value }))} /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.scope')}</label><select className="module-input" value={metricForm.scope} onChange={e => setMetricForm(f => ({ ...f, scope: e.target.value }))}>
                     {Object.entries(SCOPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select></div>
                 </div>
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">Period Start</label><input className="module-input" type="date" value={metricForm.periodStart} onChange={e => setMetricForm(f => ({ ...f, periodStart: e.target.value }))} /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Period End</label><input className="module-input" type="date" value={metricForm.periodEnd} onChange={e => setMetricForm(f => ({ ...f, periodEnd: e.target.value }))} /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.periodStart')}</label><input className="module-input" type="date" value={metricForm.periodStart} onChange={e => setMetricForm(f => ({ ...f, periodStart: e.target.value }))} /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.periodEnd')}</label><input className="module-input" type="date" value={metricForm.periodEnd} onChange={e => setMetricForm(f => ({ ...f, periodEnd: e.target.value }))} /></div>
                 </div>
-                <div><label className="module-label">Notes</label><textarea className="module-input" value={metricForm.notes} onChange={e => setMetricForm(f => ({ ...f, notes: e.target.value }))} /></div>
+                <div><label className="module-label">{t('common.notes')}</label><textarea className="module-input" value={metricForm.notes} onChange={e => setMetricForm(f => ({ ...f, notes: e.target.value }))} /></div>
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                <button className="module-btn primary" onClick={createMetric}>Save Metric</button>
-                <button className="module-btn" onClick={() => setShowMetricForm(false)}>Cancel</button>
+                <button className="module-btn primary" onClick={createMetric}>{t('sustainability.saveMetric')}</button>
+                <button className="module-btn" onClick={() => setShowMetricForm(false)}>{t('common.cancel')}</button>
               </div>
             </div>
           )}
           <table className="module-table">
-            <thead><tr><th>Name</th><th>Type</th><th>Value</th><th>Unit</th><th>Scope</th><th>Period</th><th>Notes</th></tr></thead>
+            <thead><tr><th>{t('common.name')}</th><th>{t('common.type')}</th><th>{t('sustainability.value')}</th><th>{t('sustainability.unit')}</th><th>{t('sustainability.scope')}</th><th>{t('sustainability.period')}</th><th>{t('common.notes')}</th></tr></thead>
             <tbody>{metrics.map(m => (
               <tr key={m.id}><td>{m.metricName}</td><td><span className="module-badge">{m.metricType}</span></td>
               <td style={{ fontWeight: 600 }}>{m.value}</td><td>{m.unit}</td><td>{SCOPE_LABELS[m.scope] || m.scope}</td>
               <td>{m.periodStart?.slice(0, 10)} → {m.periodEnd?.slice(0, 10)}</td><td>{m.notes || '—'}</td></tr>
             ))}</tbody>
           </table>
-          {metrics.length === 0 && <p style={{ color: '#888', textAlign: 'center', marginTop: 20 }}>No metrics recorded yet</p>}
+          {metrics.length === 0 && <p style={{ color: '#888', textAlign: 'center', marginTop: 20 }}>{t('sustainability.noMetrics')}</p>}
         </div>
       )}
 
       {!loading && tab === 'goals' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-            <button className="module-btn primary" onClick={() => setShowGoalForm(true)} disabled={!selectedEnterpriseId}>+ Add Goal</button>
+            <button className="module-btn primary" onClick={() => setShowGoalForm(true)} disabled={!selectedEnterpriseId}>{t('sustainability.addGoal')}</button>
           </div>
           {showGoalForm && (
             <div className="module-card" style={{ marginBottom: 20 }}>
-              <h3>Create Sustainability Goal</h3>
+              <h3>{t('sustainability.createGoal')}</h3>
               <div className="module-form">
-                <div><label className="module-label">Goal Name</label><input className="module-input" value={goalForm.goalName} onChange={e => setGoalForm(f => ({ ...f, goalName: e.target.value }))} placeholder="e.g. Reduce carbon emissions 30% by 2025" /></div>
-                <div><label className="module-label">Description</label><textarea className="module-input" value={goalForm.description} onChange={e => setGoalForm(f => ({ ...f, description: e.target.value }))} /></div>
+                <div><label className="module-label">{t('sustainability.goalName')}</label><input className="module-input" value={goalForm.goalName} onChange={e => setGoalForm(f => ({ ...f, goalName: e.target.value }))} placeholder="e.g. Reduce carbon emissions 30% by 2025" /></div>
+                <div><label className="module-label">{t('common.description')}</label><textarea className="module-input" value={goalForm.description} onChange={e => setGoalForm(f => ({ ...f, description: e.target.value }))} /></div>
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">Metric Type</label><select className="module-input" value={goalForm.metricType} onChange={e => setGoalForm(f => ({ ...f, metricType: e.target.value }))}>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.metricType')}</label><select className="module-input" value={goalForm.metricType} onChange={e => setGoalForm(f => ({ ...f, metricType: e.target.value }))}>
                     {METRIC_TYPES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                   </select></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Target Date</label><input className="module-input" type="date" value={goalForm.targetDate} onChange={e => setGoalForm(f => ({ ...f, targetDate: e.target.value }))} /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.targetDate')}</label><input className="module-input" type="date" value={goalForm.targetDate} onChange={e => setGoalForm(f => ({ ...f, targetDate: e.target.value }))} /></div>
                 </div>
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">Target Value</label><input className="module-input" type="number" value={goalForm.targetValue} onChange={e => setGoalForm(f => ({ ...f, targetValue: e.target.value }))} /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Baseline Value</label><input className="module-input" type="number" value={goalForm.baselineValue} onChange={e => setGoalForm(f => ({ ...f, baselineValue: e.target.value }))} /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">Current Value</label><input className="module-input" type="number" value={goalForm.currentValue} onChange={e => setGoalForm(f => ({ ...f, currentValue: e.target.value }))} /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.targetValue')}</label><input className="module-input" type="number" value={goalForm.targetValue} onChange={e => setGoalForm(f => ({ ...f, targetValue: e.target.value }))} /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.baselineValue')}</label><input className="module-input" type="number" value={goalForm.baselineValue} onChange={e => setGoalForm(f => ({ ...f, baselineValue: e.target.value }))} /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('sustainability.currentValue')}</label><input className="module-input" type="number" value={goalForm.currentValue} onChange={e => setGoalForm(f => ({ ...f, currentValue: e.target.value }))} /></div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                <button className="module-btn primary" onClick={createGoal}>Create Goal</button>
-                <button className="module-btn" onClick={() => setShowGoalForm(false)}>Cancel</button>
+                <button className="module-btn primary" onClick={createGoal}>{t('sustainability.createGoal')}</button>
+                <button className="module-btn" onClick={() => setShowGoalForm(false)}>{t('common.cancel')}</button>
               </div>
             </div>
           )}
@@ -272,7 +273,7 @@ const Sustainability: React.FC = () => {  const { t } = useTranslation()
                 </div>
               </div>
             ))}
-            {goals.length === 0 && <p style={{ color: '#888' }}>No goals set yet</p>}
+            {goals.length === 0 && <p style={{ color: '#888' }}>{t('sustainability.noGoals')}</p>}
           </div>
         </div>
       )}
@@ -282,13 +283,13 @@ const Sustainability: React.FC = () => {  const { t } = useTranslation()
           {carbonEst ? (
             <div>
               <div className="module-stats">
-                <div className="stat-card"><div className="stat-value">{carbonEst.totalEstimatedCO2tons}</div><div className="stat-label">Total CO₂ (tons/yr)</div></div>
-                <div className="stat-card"><div className="stat-value">{carbonEst.estimates?.length || 0}</div><div className="stat-label">Species Groups</div></div>
+                <div className="stat-card"><div className="stat-value">{carbonEst.totalEstimatedCO2tons}</div><div className="stat-label">{t('sustainability.stats.totalCO2')}</div></div>
+                <div className="stat-card"><div className="stat-value">{carbonEst.estimates?.length || 0}</div><div className="stat-label">{t('sustainability.stats.speciesGroups')}</div></div>
               </div>
               <div className="module-card" style={{ marginTop: 24 }}>
-                <h3>Carbon Emissions by Species</h3>
+                <h3>{t('sustainability.carbonBySpecies')}</h3>
                 <table className="module-table">
-                  <thead><tr><th>Species</th><th>Head Count</th><th>Emission Factor</th><th>Annual CO₂ (kg)</th><th>Annual CO₂ (tons)</th></tr></thead>
+                  <thead><tr><th>{t('sustainability.species')}</th><th>{t('sustainability.headCount')}</th><th>{t('sustainability.emissionFactor')}</th><th>{t('sustainability.annualCO2kg')}</th><th>{t('sustainability.annualCO2tons')}</th></tr></thead>
                   <tbody>{carbonEst.estimates?.map((e: any) => (
                     <tr key={e.species}><td style={{ fontWeight: 600 }}>{e.species}</td><td>{e.count}</td><td>{e.emissionFactor} kg CO₂e/head/yr</td>
                     <td>{Number(e.annualCO2kg ?? 0).toLocaleString()}</td><td>{(Number(e.annualCO2kg ?? 0) / 1000).toFixed(2)}</td></tr>
@@ -301,7 +302,7 @@ const Sustainability: React.FC = () => {  const { t } = useTranslation()
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: 40 }}>
-              <p style={{ color: '#888' }}>{selectedEnterpriseId ? 'Calculating carbon footprint...' : 'Select an enterprise to view carbon footprint'}</p>
+              <p style={{ color: '#888' }}>{selectedEnterpriseId ? t('sustainability.calculatingCarbon') : t('sustainability.selectForCarbon')}</p>
             </div>
           )}
         </div>

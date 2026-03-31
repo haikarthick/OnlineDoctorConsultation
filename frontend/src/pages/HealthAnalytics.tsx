@@ -73,23 +73,23 @@ const HealthAnalytics: React.FC = () => {
       setFormData({ animalId: '', observationType: 'general', severity: 'low', title: '', description: '', bodyTemperature: '', heartRate: '', respiratoryRate: '', weightAtObservation: '' })
       fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to create observation')
+      setError(err.response?.data?.error?.message || t('common.failedToSave'))
     }
   }
 
   const handleResolve = async (id: string) => {
     try {
       await apiService.resolveHealthObservation(id)
-      setSuccessMsg('Observation resolved!')
+      setSuccessMsg(t('common.resolved') + '!')
       fetchData()
-    } catch { setError('Failed to resolve') }
+    } catch { setError(t('healthAnalytics.errors.failedToResolve')) }
   }
 
   return (
     <div className="module-page">
       <div className="module-header">
         <h1>{t('healthAnalytics.pageTitle')}</h1>
-        <p>Monitor herd health, track observations, and analyze health trends</p>
+        <p>{t('healthAnalytics.subtitle')}</p>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
@@ -159,14 +159,14 @@ const HealthAnalytics: React.FC = () => {
                 <textarea rows={3} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">Save Observation</button>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{t('healthAnalytics.form.saveBtn')}</button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>{t('common.cancel')}</button>
               </div>
             </form>
             </div>
           )}
 
-          {loading ? <p className="loading-text">Loading...</p> : tab === 'dashboard' && dashboard ? (
+          {loading ? <p className="loading-text">{t('common.loading')}</p> : tab === 'dashboard' && dashboard ? (
             <div className="dashboard-grid">
               {/* Severity Distribution */}
               <div className="card">
@@ -209,10 +209,10 @@ const HealthAnalytics: React.FC = () => {
 
               {/* Critical Observations */}
               <div className="card full-width">
-                <h3>🚨 Critical / Unresolved Observations</h3>
-                {(dashboard.criticalObservations || []).length === 0 ? <p className="empty-text">No critical observations!</p> : (
+                <h3>{t('healthAnalytics.critical')}</h3>
+                {(dashboard.criticalObservations || []).length === 0 ? <p className="empty-text">{t('healthAnalytics.noCritical')}</p> : (
                   <table className="data-table">
-                    <thead><tr><th>Title</th><th>Type</th><th>Severity</th><th>Animal</th><th>Date</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>{t('common.name')}</th><th>{t('common.type')}</th><th>{t('healthAnalytics.form.severity')}</th><th>{t('common.animal')}</th><th>{t('common.date')}</th><th>{t('common.actions')}</th></tr></thead>
                     <tbody>
                       {dashboard.criticalObservations.map(o => (
                         <tr key={o.id}>
@@ -221,7 +221,7 @@ const HealthAnalytics: React.FC = () => {
                           <td><span className="badge" style={{ background: SEVERITY_COLORS[o.severity] }}>{o.severity}</span></td>
                           <td>{o.animalName || '–'}</td>
                           <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '–'}</td>
-                          <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>Resolve</button>}</td>
+                          <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>{t('healthAnalytics.resolve')}</button>}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -231,7 +231,7 @@ const HealthAnalytics: React.FC = () => {
 
               {/* Mortality Trend */}
               <div className="card">
-                <h3>Mortality Trend (12 months)</h3>
+                <h3>{t('healthAnalytics.charts.mortalityTrend')}</h3>
                 <div className="mini-chart">
                   {(dashboard.mortalityTrend || []).map((m, i) => (
                     <div key={i} className="chart-bar-wrapper">
@@ -244,7 +244,7 @@ const HealthAnalytics: React.FC = () => {
 
               {/* Unresolved by Type */}
               <div className="card">
-                <h3>Unresolved by Type</h3>
+                <h3>{t('healthAnalytics.charts.unresolvedByType')}</h3>
                 <div className="stats-row wrap">
                   {(dashboard.unresolvedByType || []).map(t => (
                     <div key={t.observation_type} className="stat-item">
@@ -257,10 +257,10 @@ const HealthAnalytics: React.FC = () => {
             </div>
           ) : tab === 'observations' ? (
             <div className="card full-width">
-              <h3>All Observations</h3>
-              {observations.length === 0 ? <p className="empty-text">No observations recorded yet.</p> : (
+              <h3>{t('healthAnalytics.allObservations')}</h3>
+              {observations.length === 0 ? <p className="empty-text">{t('healthAnalytics.emptyObservations')}</p> : (
                 <table className="data-table">
-                  <thead><tr><th>Title</th><th>Type</th><th>Severity</th><th>Animal</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>{t('common.name')}</th><th>{t('common.type')}</th><th>{t('healthAnalytics.form.severity')}</th><th>{t('common.animal')}</th><th>{t('common.status')}</th><th>{t('common.date')}</th><th>{t('common.actions')}</th></tr></thead>
                   <tbody>
                     {observations.map(o => (
                       <tr key={o.id}>
@@ -268,9 +268,9 @@ const HealthAnalytics: React.FC = () => {
                         <td>{o.observationType}</td>
                         <td><span className="badge" style={{ background: SEVERITY_COLORS[o.severity] }}>{o.severity}</span></td>
                         <td>{o.animalName || '–'}</td>
-                        <td>{o.isResolved ? '✅ Resolved' : '⏳ Open'}</td>
+                        <td>{o.isResolved ? t('healthAnalytics.headers.resolved') : t('healthAnalytics.headers.open')}</td>
                         <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '–'}</td>
-                        <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>Resolve</button>}</td>
+                        <td>{!o.isResolved && <button className="btn btn-sm btn-success" onClick={() => handleResolve(o.id)}>{t('healthAnalytics.resolve')}</button>}</td>
                       </tr>
                     ))}
                   </tbody>

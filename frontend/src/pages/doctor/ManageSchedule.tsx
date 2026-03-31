@@ -111,8 +111,8 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       if (editingSchedId) await apiService.updateSchedule(editingSchedId, schedForm)
       else await apiService.createSchedule(schedForm)
       setShowSchedForm(false); setEditingSchedId(null); resetSchedForm()
-      loadAll(); msg(editingSchedId ? 'Schedule updated ✓' : 'Schedule created ✓')
-    } catch (err: any) { setSchedFormError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to save') }
+      loadAll(); msg(editingSchedId ? t('manageSchedule.scheduleUpdated') : t('manageSchedule.scheduleCreated'))
+    } catch (err: any) { setSchedFormError(err?.response?.data?.message || err?.response?.data?.error?.message || t('common.failedToSave')) }
     finally { setSubmitting(false) }
   }
 
@@ -122,21 +122,21 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
   }
 
   const handleDeleteSched = async (id: string) => {
-    if (!confirm('Delete this schedule?')) return
-    try { await apiService.deleteSchedule(id); loadAll(); msg('Schedule deleted') } catch { msg('Failed to delete', true) }
+    if (!confirm(t('manageSchedule.confirmDeleteSchedule'))) return
+    try { await apiService.deleteSchedule(id); loadAll(); msg(t('manageSchedule.scheduleDeleted')) } catch { msg(t('common.failedToDelete'), true) }
   }
 
   const handleCopyDay = async (fromDay: string) => {
     const source = schedules.find(s => s.dayOfWeek === fromDay)
     if (!source) return
     const available = DAYS.filter(d => d !== fromDay && !schedules.find(s => s.dayOfWeek === d))
-    if (available.length === 0) { msg('All days already have schedules', true); return }
+    if (available.length === 0) { msg(t('manageSchedule.allDaysHaveSchedules'), true); return }
     try {
       for (const day of available) {
         await apiService.createSchedule({ dayOfWeek: day, startTime: source.startTime, endTime: source.endTime, slotDuration: source.slotDuration || 30 })
       }
-      loadAll(); msg(`Copied to ${available.length} day(s) ✓`)
-    } catch { msg('Failed to copy', true) }
+      loadAll(); msg(t('manageSchedule.copiedToDays', { count: available.length }))
+    } catch { msg(t('manageSchedule.failedToCopy'), true) }
   }
 
   // ── Override handlers ─────────────────────────────────────
@@ -150,8 +150,8 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         ...(overrideForm.overrideType === 'custom_hours' ? { startTime: overrideForm.startTime, endTime: overrideForm.endTime, slotDuration: overrideForm.slotDuration } : {}),
         reason: overrideForm.reason || undefined
       })
-      setShowOverrideForm(false); loadAll(); loadCalendar(); msg('Override saved ✓')
-    } catch (err: any) { msg(err?.response?.data?.message || 'Failed to save override', true) }
+      setShowOverrideForm(false); loadAll(); loadCalendar(); msg(t('manageSchedule.overrideSaved'))
+    } catch (err: any) { msg(err?.response?.data?.message || t('manageSchedule.failedToSaveOverride'), true) }
     finally { setSubmitting(false) }
   }
 
@@ -167,15 +167,15 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         dates.push(current.toISOString().split('T')[0])
         current.setDate(current.getDate() + 1)
       }
-      if (dates.length === 0 || dates.length > 90) { msg('Select 1-90 days', true); return }
+      if (dates.length === 0 || dates.length > 90) { msg(t('manageSchedule.select1to90days'), true); return }
       await apiService.bulkCreateDateOverrides({ dates, overrideType: 'unavailable', reason: vacationForm.reason || 'Vacation / Leave' })
-      setShowVacationForm(false); loadAll(); loadCalendar(); msg(`${dates.length} day(s) marked as leave ✓`)
-    } catch (err: any) { msg(err?.response?.data?.message || 'Failed to set vacation', true) }
+      setShowVacationForm(false); loadAll(); loadCalendar(); msg(t('manageSchedule.daysMarkedAsLeave', { count: dates.length }))
+    } catch (err: any) { msg(err?.response?.data?.message || t('manageSchedule.failedToSetVacation'), true) }
     finally { setSubmitting(false) }
   }
 
   const handleDeleteOverride = async (id: string) => {
-    try { await apiService.deleteDateOverride(id); loadAll(); loadCalendar(); msg('Override removed ✓') } catch { msg('Failed to remove', true) }
+    try { await apiService.deleteDateOverride(id); loadAll(); loadCalendar(); msg(t('manageSchedule.overrideRemoved')) } catch { msg(t('manageSchedule.failedToRemove'), true) }
   }
 
   // ── Block handlers ────────────────────────────────────────
@@ -187,13 +187,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         ...(blockForm.isRecurring ? { recurringDay: blockForm.recurringDay, isRecurring: true } : { blockDate: blockForm.blockDate, isRecurring: false }),
         startTime: blockForm.startTime, endTime: blockForm.endTime, reason: blockForm.reason || undefined
       })
-      setShowBlockForm(false); loadAll(); msg('Time block created ✓')
-    } catch (err: any) { msg(err?.response?.data?.message || 'Failed to create block', true) }
+      setShowBlockForm(false); loadAll(); msg(t('manageSchedule.timeBlockCreated'))
+    } catch (err: any) { msg(err?.response?.data?.message || t('manageSchedule.failedToCreateBlock'), true) }
     finally { setSubmitting(false) }
   }
 
   const handleDeleteBlock = async (id: string) => {
-    try { await apiService.deleteBlockedSlot(id); loadAll(); msg('Block removed ✓') } catch { msg('Failed to remove', true) }
+    try { await apiService.deleteBlockedSlot(id); loadAll(); msg(t('manageSchedule.blockRemoved')) } catch { msg(t('manageSchedule.failedToRemove'), true) }
   }
 
   // ── Holiday handlers ──────────────────────────────────────
@@ -206,13 +206,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         holidayType: holidayForm.holidayType, isFullDay: holidayForm.isFullDay,
         ...(holidayForm.isFullDay ? {} : { startTime: holidayForm.startTime, endTime: holidayForm.endTime })
       })
-      setShowHolidayForm(false); loadAll(); loadCalendar(); msg('Holiday added ✓')
-    } catch (err: any) { msg(err?.response?.data?.message || 'Failed to add holiday', true) }
+      setShowHolidayForm(false); loadAll(); loadCalendar(); msg(t('manageSchedule.holidayAdded'))
+    } catch (err: any) { msg(err?.response?.data?.message || t('manageSchedule.failedToAddHoliday'), true) }
     finally { setSubmitting(false) }
   }
 
   const handleDeleteHoliday = async (id: string) => {
-    try { await apiService.deleteHoliday(id); loadAll(); loadCalendar(); msg('Holiday removed ✓') } catch { msg('Failed to remove', true) }
+    try { await apiService.deleteHoliday(id); loadAll(); loadCalendar(); msg(t('manageSchedule.holidayRemoved')) } catch { msg(t('manageSchedule.failedToRemove'), true) }
   }
 
   // ── Calendar helpers ──────────────────────────────────────
@@ -350,18 +350,18 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <h3 style={{ margin: 0, fontSize: 15 }}>{DAY_LABELS[day]}</h3>
                     <span className={`badge ${(daySched[0].isActive ?? daySched[0].isAvailable) ? 'badge-active' : 'badge-inactive'}`}>
-                      {(daySched[0].isActive ?? daySched[0].isAvailable) ? 'Active' : 'Inactive'}
+                      {(daySched[0].isActive ?? daySched[0].isAvailable) ? t('common.active') : t('manageSchedule.inactive')}
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <button className="btn btn-sm btn-outline" title="Copy to all empty days" onClick={() => handleCopyDay(day)}>📋 {t('manageSchedule.copyToAll')}</button>
+                    <button className="btn btn-sm btn-outline" title={t('manageSchedule.copyToAllEmpty')} onClick={() => handleCopyDay(day)}>📋 {t('manageSchedule.copyToAll')}</button>
                     <button className="btn btn-sm btn-outline" onClick={() => handleEditSched(daySched[0])}>✏️ {t('manageSchedule.edit')}</button>
                     <button className="btn btn-sm btn-danger" onClick={() => handleDeleteSched(daySched[0].id)}>🗑️</button>
                   </div>
                 </div>
                 <div style={{ padding: '4px 16px 10px', display: 'flex', gap: 16, fontSize: 13, color: '#374151' }}>
                   <span>🕐 {daySched[0].startTime} – {daySched[0].endTime}</span>
-                  <span>⏱️ {daySched[0].slotDuration || daySched[0].slotDurationMinutes}min slots</span>
+                  <span>⏱️ {daySched[0].slotDuration || daySched[0].slotDurationMinutes}{t('manageSchedule.minSlots')}</span>
                 </div>
               </div>
             )
@@ -457,7 +457,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   <div>
                     <strong>{new Date(o.overrideDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</strong>
                     <span style={{ marginLeft: 10, fontSize: 13 }}>
-                      {o.overrideType === 'unavailable' ? '🚫 Day Off' : `⚙️ Custom: ${o.startTime}–${o.endTime}`}
+                      {o.overrideType === 'unavailable' ? `🚫 ${t('manageSchedule.dayOff')}` : `⚙️ ${t('manageSchedule.custom')}: ${o.startTime}–${o.endTime}`}
                     </span>
                     {o.reason && <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>({o.reason})</span>}
                   </div>
@@ -492,7 +492,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
               {blockedSlots.filter(b => b.isRecurring).map(b => (
                 <div key={b.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid #3b82f6' }}>
                   <div>
-                    <strong>Every {DAY_LABELS[b.recurringDay || '']}</strong>
+                    <strong>{t('manageSchedule.every')} {DAY_LABELS[b.recurringDay || '']}</strong>
                     <span style={{ marginLeft: 10, fontSize: 13 }}>🕐 {b.startTime} – {b.endTime}</span>
                     {b.reason && <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>({b.reason})</span>}
                   </div>
@@ -606,7 +606,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 <div className="form-group">
                   <label className="form-label">{t('manageSchedule.slotDuration')}</label>
                   <select className="form-input" value={schedForm.slotDurationMinutes} onChange={e => setSchedForm({ ...schedForm, slotDurationMinutes: Number(e.target.value) })}>
-                    {[15, 20, 30, 45, 60].map(m => <option key={m} value={m}>{m} minutes</option>)}
+                    {[15, 20, 30, 45, 60].map(m => <option key={m} value={m}>{m} {t('manageSchedule.minutes')}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
@@ -647,13 +647,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                       background: overrideForm.overrideType === 'unavailable' ? '#fef2f2' : '#f9fafb', border: `2px solid ${overrideForm.overrideType === 'unavailable' ? '#fca5a5' : '#e5e7eb'}` }}>
                       <input type="radio" name="overrideType" value="unavailable" checked={overrideForm.overrideType === 'unavailable'}
                         onChange={() => setOverrideForm({ ...overrideForm, overrideType: 'unavailable' })} />
-                      <span>🚫 Day Off</span>
+                      <span>🚫 {t('manageSchedule.dayOff')}</span>
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: '8px 14px', borderRadius: 8,
                       background: overrideForm.overrideType === 'custom_hours' ? '#eff6ff' : '#f9fafb', border: `2px solid ${overrideForm.overrideType === 'custom_hours' ? '#93c5fd' : '#e5e7eb'}` }}>
                       <input type="radio" name="overrideType" value="custom_hours" checked={overrideForm.overrideType === 'custom_hours'}
                         onChange={() => setOverrideForm({ ...overrideForm, overrideType: 'custom_hours' })} />
-                      <span>⚙️ Custom Hours</span>
+                      <span>⚙️ {t('manageSchedule.customHours')}</span>
                     </label>
                   </div>
                 </div>
@@ -672,7 +672,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                     <div className="form-group">
                       <label className="form-label">{t('manageSchedule.slotDuration')}</label>
                       <select className="form-input" value={overrideForm.slotDuration} onChange={e => setOverrideForm({ ...overrideForm, slotDuration: Number(e.target.value) })}>
-                        {[15, 20, 30, 45, 60].map(m => <option key={m} value={m}>{m} minutes</option>)}
+                        {[15, 20, 30, 45, 60].map(m => <option key={m} value={m}>{m} {t('manageSchedule.minutes')}</option>)}
                       </select>
                     </div>
                   </>
@@ -703,7 +703,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
             <div className="modal-body">
               <div className="card" style={{ padding: 12, marginBottom: 16, background: '#eff6ff', border: '1px solid #bfdbfe' }}>
                 <p style={{ margin: 0, fontSize: 13, color: '#1e40af' }}>
-                  Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.
+                  {t('manageSchedule.vacationInfoText')}
                 </p>
               </div>
               <form onSubmit={handleVacationSubmit}>
@@ -726,7 +726,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 </div>
                 {vacationForm.startDate && vacationForm.endDate && (
                   <div style={{ padding: 12, borderRadius: 8, background: '#f0fdf4', border: '1px solid #bbf7d0', marginBottom: 12, fontSize: 13 }}>
-                    📅 {Math.max(1, Math.ceil((new Date(vacationForm.endDate).getTime() - new Date(vacationForm.startDate).getTime()) / 86400000) + 1)} day(s) will be marked unavailable
+                    📅 {t('manageSchedule.daysWillBeMarked', { count: Math.max(1, Math.ceil((new Date(vacationForm.endDate).getTime() - new Date(vacationForm.startDate).getTime()) / 86400000) + 1) })}
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
@@ -756,13 +756,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                       background: !blockForm.isRecurring ? '#eff6ff' : '#f9fafb', border: `2px solid ${!blockForm.isRecurring ? '#93c5fd' : '#e5e7eb'}` }}>
                       <input type="radio" name="blockType" checked={!blockForm.isRecurring}
                         onChange={() => setBlockForm({ ...blockForm, isRecurring: false })} />
-                      <span>📌 One-time</span>
+                      <span>📌 {t('manageSchedule.oneTime')}</span>
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: '8px 14px', borderRadius: 8,
                       background: blockForm.isRecurring ? '#f0fdf4' : '#f9fafb', border: `2px solid ${blockForm.isRecurring ? '#86efac' : '#e5e7eb'}` }}>
                       <input type="radio" name="blockType" checked={blockForm.isRecurring}
                         onChange={() => setBlockForm({ ...blockForm, isRecurring: true })} />
-                      <span>🔄 Every Week</span>
+                      <span>🔄 {t('manageSchedule.everyWeek')}</span>
                     </label>
                   </div>
                 </div>
@@ -828,9 +828,9 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 <div className="form-group">
                   <label className="form-label">{t('manageSchedule.type')}</label>
                   <select className="form-input" value={holidayForm.holidayType} onChange={e => setHolidayForm({ ...holidayForm, holidayType: e.target.value })}>
-                    <option value="general">General Holiday</option>
-                    <option value="hospital_specific">Hospital Specific</option>
-                    <option value="emergency_closure">Emergency Closure</option>
+                    <option value="general">{t('manageSchedule.generalHoliday')}</option>
+                    <option value="hospital_specific">{t('manageSchedule.hospitalSpecific')}</option>
+                    <option value="emergency_closure">{t('manageSchedule.emergencyClosure')}</option>
                   </select>
                 </div>
                 <div className="form-group">

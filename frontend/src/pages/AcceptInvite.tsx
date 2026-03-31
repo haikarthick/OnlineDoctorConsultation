@@ -5,7 +5,8 @@ import './ModulePage.css'
 import './VetHospitals.css'
 import { useTranslation } from 'react-i18next'
 
-const AcceptInvite: React.FC = () => {  const { t } = useTranslation()
+const AcceptInvite: React.FC = () => {
+  const { t } = useTranslation()
 
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -20,13 +21,13 @@ const AcceptInvite: React.FC = () => {  const { t } = useTranslation()
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    if (!token) { setError('Invalid invitation link — no token provided'); setLoading(false); return }
+    if (!token) { setError(t('acceptInvite.noToken')); setLoading(false); return }
     const load = async () => {
       try {
         const data = await vetHospitalApi.getInviteByToken(token)
         setInvite(data)
       } catch (err: any) {
-        setError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Invalid or expired invitation')
+        setError(err?.response?.data?.message || err?.response?.data?.error?.message || t('acceptInvite.invalidInvite'))
       } finally { setLoading(false) }
     }
     load()
@@ -34,14 +35,14 @@ const AcceptInvite: React.FC = () => {  const { t } = useTranslation()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password.length < 8) { setError('Password must be at least 8 characters'); return }
-    if (password !== confirmPassword) { setError('Passwords do not match'); return }
+    if (password.length < 8) { setError(t('acceptInvite.passwordMinLength')); return }
+    if (password !== confirmPassword) { setError(t('acceptInvite.passwordsMismatch')); return }
     setSubmitting(true); setError('')
     try {
       await vetHospitalApi.acceptInvite(token, password)
       setSuccess(true)
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.response?.data?.error?.message || 'Failed to accept invitation')
+      setError(err?.response?.data?.message || err?.response?.data?.error?.message || t('acceptInvite.failedToAccept'))
     } finally { setSubmitting(false) }
   }
 
@@ -52,10 +53,10 @@ const AcceptInvite: React.FC = () => {  const { t } = useTranslation()
       <div className="module-page" style={{ display: 'flex', justifyContent: 'center', paddingTop: '3rem' }}>
         <div className="hb-success-card">
           <div className="hb-success-icon">✓</div>
-          <h2>{t('common.pageTitle')}</h2>
-          <p>Your account has been created and linked to the hospital. You can now log in to start managing patients and appointments.</p>
+          <h2>{t('acceptInvite.successTitle')}</h2>
+          <p>{t('acceptInvite.successMsg')}</p>
           <button className="btn-primary" onClick={() => navigate('/login')} style={{ marginTop: '1rem' }}>
-            Go to Login
+            {t('acceptInvite.goToLogin')}
           </button>
         </div>
       </div>
@@ -67,10 +68,10 @@ const AcceptInvite: React.FC = () => {  const { t } = useTranslation()
       <div className="module-page" style={{ display: 'flex', justifyContent: 'center', paddingTop: '3rem' }}>
         <div className="hb-success-card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
-          <h2>Invitation Problem</h2>
+          <h2>{t('acceptInvite.inviteProblem')}</h2>
           <p style={{ color: '#666' }}>{error}</p>
           <Link to="/login" className="btn-secondary" style={{ display: 'inline-block', marginTop: '1rem', textDecoration: 'none' }}>
-            Go to Login
+            {t('acceptInvite.goToLogin')}
           </Link>
         </div>
       </div>
@@ -84,7 +85,7 @@ const AcceptInvite: React.FC = () => {  const { t } = useTranslation()
           {invite?.hospital_logo_url
             ? <img src={invite.hospital_logo_url} alt="" style={{ width: 64, height: 64, borderRadius: 14, margin: '0 auto .75rem', display: 'block', objectFit: 'cover' }} />
             : <div style={{ width: 64, height: 64, borderRadius: 14, background: 'linear-gradient(135deg,#1e3a5f,#2563eb)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: '#fff', margin: '0 auto .75rem' }}>🏥</div>}
-          <h2 style={{ margin: '0 0 .3rem' }}>Join {invite?.hospital_name}</h2>
+          <h2 style={{ margin: '0 0 .3rem' }}>{t('acceptInvite.joinTitle', { name: invite?.hospital_name })}</h2>
           <p style={{ color: '#666', margin: 0, fontSize: '.9rem' }}>
             You've been invited to join as <strong style={{ textTransform: 'capitalize' }}>{(invite?.hospital_role || 'staff').replace(/_/g, ' ')}</strong>
           </p>
@@ -92,7 +93,7 @@ const AcceptInvite: React.FC = () => {  const { t } = useTranslation()
         </div>
 
         <div className="hb-step-content" style={{ marginTop: '1.25rem' }}>
-          <h3 style={{ margin: '0 0 .75rem' }}>Set Up Your Account</h3>
+          <h3 style={{ margin: '0 0 .75rem' }}>{t('acceptInvite.setUpAccount')}</h3>
           <p style={{ fontSize: '.88rem', color: '#666', margin: '0 0 1rem' }}>
             Your email: <strong>{invite?.email}</strong>
           </p>
@@ -101,35 +102,35 @@ const AcceptInvite: React.FC = () => {  const { t } = useTranslation()
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '.85rem' }}>
             <div className="hb-form-group">
-              <label className="form-label">Create Password *</label>
+              <label className="form-label">{t('acceptInvite.createPassword')}</label>
               <input
                 type="password"
                 className="form-input"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Minimum 8 characters"
+                placeholder={t('acceptInvite.minChars')}
                 minLength={8}
                 required
               />
             </div>
             <div className="hb-form-group">
-              <label className="form-label">Confirm Password *</label>
+              <label className="form-label">{t('acceptInvite.confirmPassword')}</label>
               <input
                 type="password"
                 className="form-input"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter password"
+                placeholder={t('acceptInvite.reEnterPassword')}
                 required
               />
             </div>
             <button type="submit" className="btn-primary" disabled={submitting} style={{ marginTop: '.5rem', width: '100%', padding: '.65rem' }}>
-              {submitting ? 'Creating Account...' : '✓ Accept & Create Account'}
+              {submitting ? t('acceptInvite.creatingAccount') : t('acceptInvite.acceptAndCreate')}
             </button>
           </form>
 
           <p style={{ fontSize: '.82rem', color: '#999', textAlign: 'center', marginTop: '1rem' }}>
-            Already have an account? <Link to="/login" style={{ color: '#2563eb' }}>Log in</Link> instead
+            {t('acceptInvite.alreadyHaveAccount')} <Link to="/login" style={{ color: '#2563eb' }}>{t('acceptInvite.logIn')}</Link> {t('acceptInvite.instead')}
           </p>
         </div>
       </div>
