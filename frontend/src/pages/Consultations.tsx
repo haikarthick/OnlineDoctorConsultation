@@ -71,7 +71,7 @@ const canReschedule = (b: BookingRow, maxReschedules: number, patientNoShowLimit
 const Consultations: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { formatDate, isJoinable, settings: appSettings, estimateRefund } = useSettings()
+  const { formatDate, isJoinable, formatSlotTime, settings: appSettings, estimateRefund } = useSettings()
   const { maxReschedules, patientNoShowRescheduleLimit } = appSettings
   const navigate = useNavigate()
   const [bookings, setBookings] = useState<BookingRow[]>([])
@@ -469,7 +469,7 @@ const Consultations: React.FC = () => {
                     {/* Date, Time, Type row */}
                     <div className="appt-card-meta">
                       <span>📅 {fmt(b.scheduledDate)}</span>
-                      <span>⏰ {b.timeSlotStart} - {b.timeSlotEnd}</span>
+                      <span>⏰ {formatSlotTime(b.timeSlotStart)} - {formatSlotTime(b.timeSlotEnd)}</span>
                       <span>{b.bookingType === 'video_call' ? t('consultations.types.video') : b.bookingType === 'phone' ? t('consultations.types.phone') : b.bookingType === 'in_person' ? t('consultations.types.inPerson') : t('consultations.types.chat')}</span>
                     </div>
 
@@ -669,7 +669,7 @@ const Consultations: React.FC = () => {
 
                       <div className="appt-card-meta">
                         <span>📅 {fmt(b.scheduledDate)}</span>
-                        <span>⏰ {b.timeSlotStart} - {b.timeSlotEnd}</span>
+                        <span>⏰ {formatSlotTime(b.timeSlotStart)} - {formatSlotTime(b.timeSlotEnd)}</span>
                       </div>
 
                       {(b.reasonForVisit || b.reason) && (
@@ -745,7 +745,7 @@ const Consultations: React.FC = () => {
             <div style={{ background: '#fef3c7', borderRadius: 8, padding: 14, marginBottom: 20, border: '1px solid #fcd34d' }}>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#92400e' }}>{t('consultations.reschedule.originalLabel')}</p>
               <p style={{ margin: '6px 0 0', fontSize: 13, color: '#92400e' }}>
-                {rescheduleBooking.vetName || t('common.doctor')} — {fmt(rescheduleBooking.scheduledDate)} {t('common.at')} {rescheduleBooking.timeSlotStart} - {rescheduleBooking.timeSlotEnd}
+                {rescheduleBooking.vetName || t('common.doctor')} — {fmt(rescheduleBooking.scheduledDate)} {t('common.at')} {formatSlotTime(rescheduleBooking.timeSlotStart)} - {formatSlotTime(rescheduleBooking.timeSlotEnd)}
               </p>
             </div>
 
@@ -851,7 +851,7 @@ const Consultations: React.FC = () => {
                           color: rescheduleSelectedSlot?.startTime === slot.startTime ? '#667eea' : '#374151'
                         }}
                       >
-                        {slot.startTime} - {slot.endTime}
+                        {slot.startTime ? formatSlotTime(slot.startTime) : ''} - {slot.endTime ? formatSlotTime(slot.endTime) : ''}
                       </button>
                     ))}
                   </div>
@@ -944,7 +944,7 @@ const Consultations: React.FC = () => {
                       </div>
                       {log.action === 'BOOKING_RESCHEDULED' && log.details && (
                         <div style={{ fontSize: 12, color: '#4b5563', marginTop: 4, padding: '4px 8px', background: '#fef3c7', borderRadius: 4 }}>
-                          {t('consultations.actionLog.newSlot')} {log.details.newDate} {log.details.newTimeSlotStart}–{log.details.newTimeSlotEnd}
+                          {t('consultations.actionLog.newSlot')} {log.details.newDate} {formatSlotTime(log.details.newTimeSlotStart)}–{formatSlotTime(log.details.newTimeSlotEnd)}
                           {log.details.newStatus === 'pending' && (
                             // Check if a subsequent confirmation exists in the log
                             actionLogs.some((l, j) => j > idx && l.action === 'BOOKING_CONFIRMED')

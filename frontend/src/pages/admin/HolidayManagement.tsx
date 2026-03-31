@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import { useSettings } from '../../context/SettingsContext'
 import './HolidayManagement.css'
 
 interface Holiday {
@@ -27,6 +28,7 @@ function formatDisplayDate(raw: string, opts?: Intl.DateTimeFormatOptions): stri
 
 export default function HolidayManagement() {
   const { t } = useTranslation()
+  const { formatSlotTime } = useSettings()
   const [holidays, setHolidays] = useState<Holiday[]>([])
   const [loading, setLoading] = useState(true)
   const [year, setYear] = useState(new Date().getFullYear())
@@ -178,7 +180,7 @@ export default function HolidayManagement() {
                   <td>
                     {h.isFullDay
                       ? <span className="time-info">{t('holidayManagement.fullDay')}</span>
-                      : <span className="time-info partial">{h.startTime} – {h.endTime}</span>
+                      : <span className="time-info partial">{formatSlotTime(h.startTime || '')} – {formatSlotTime(h.endTime || '')}</span>
                     }
                   </td>
                   <td className="td-actions">

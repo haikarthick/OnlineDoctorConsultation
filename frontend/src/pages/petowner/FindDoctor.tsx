@@ -48,11 +48,16 @@ function getDateChips() {
   })
 }
 
-function formatTime12h(time24: string): string {
-  const [h, m] = time24.split(':').map(Number)
-  const period = h >= 12 ? 'PM' : 'AM'
-  const hour = h % 12 || 12
-  return `${hour}${m > 0 ? ':' + String(m).padStart(2, '0') : ''} ${period}`
+/** Filter out past time slots for today using browser local time + 15min buffer */
+function filterPastSlots(slots: TimeSlot[], forDate: string): TimeSlot[] {
+  const now = new Date()
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  if (forDate !== todayStr) return slots
+  const nowMinutes = now.getHours() * 60 + now.getMinutes() + 15
+  return slots.filter(s => {
+    const [h, m] = s.startTime.split(':').map(Number)
+    return h * 60 + m > nowMinutes
+  })
 }
 
 function formatDateLabel(dateStr: string): string {
@@ -68,7 +73,7 @@ function formatDateLabel(dateStr: string): string {
 
 const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
   const { t } = useTranslation()
-  const { formatCurrency } = useSettings()
+  const { formatCurrency, formatSlotTime } = useSettings()
   const [vets, setVets] = useState<VetWithAvailability[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -220,8 +225,10 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
 
   // ── Slot chips displayed on each card in availability mode ──
   const renderSlotChips = (vet: VetWithAvailability) => {
-    const slots = vet.availableSlots || []
-    if (!selectedDate || slots.length === 0) return null
+    const allSlots = vet.availableSlots || []
+    if (!selectedDate || allSlots.length === 0) return null
+    const slots = filterPastSlots(allSlots, selectedDate)
+    if (slots.length === 0) return null
     const shown     = slots.slice(0, 8)
     const remainder = slots.length - 8
 
@@ -245,7 +252,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
             <button
               key={slot.startTime}
               onClick={e => { e.stopPropagation(); handleSlotBook(vet, slot.startTime) }}
-              title={`Book ${formatTime12h(slot.startTime)} — pre-fills date & time`}
+              title={`Book ${formatSlotTime(slot.startTime)} — pre-fills date & time`}
               style={{
                 padding: '4px 10px', borderRadius: 20, cursor: 'pointer',
                 border: '1.5px solid #16a34a', background: 'white', color: '#16a34a',
@@ -260,7 +267,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
                 ;(e.currentTarget as HTMLElement).style.color = '#16a34a'
               }}
             >
-              {formatTime12h(slot.startTime)}
+              {formatSlotTime(slot.startTime)}
             </button>
           ))}
           {remainder > 0 && (

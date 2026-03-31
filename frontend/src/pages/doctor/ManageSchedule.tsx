@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import { useSettings } from '../../context/SettingsContext'
 import { VetSchedule } from '../../types'
 import '../../styles/modules.css'
 
@@ -37,6 +38,7 @@ interface CalendarDay {
 
 const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
   const { t } = useTranslation()
+  const { formatSlotTime } = useSettings()
   const [activeTab, setActiveTab] = useState<'weekly' | 'calendar' | 'blocks' | 'holidays'>('weekly')
   const [schedules, setSchedules] = useState<VetSchedule[]>([])
   const [overrides, setOverrides] = useState<DateOverride[]>([])
@@ -331,7 +333,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                     <div style={{ color: '#9ca3af', fontSize: 11, marginTop: 12 }}>{t('manageSchedule.off')}</div>
                   ) : daySched.map(s => (
                     <div key={s.id} style={{ fontSize: 12, marginTop: 4 }}>
-                      <div style={{ fontWeight: 600 }}>{s.startTime}–{s.endTime}</div>
+                      <div style={{ fontWeight: 600 }}>{formatSlotTime(s.startTime)}–{formatSlotTime(s.endTime)}</div>
                       <div style={{ color: '#6b7280', fontSize: 11 }}>{s.slotDuration || s.slotDurationMinutes}min</div>
                     </div>
                   ))}
@@ -360,7 +362,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   </div>
                 </div>
                 <div style={{ padding: '4px 16px 10px', display: 'flex', gap: 16, fontSize: 13, color: '#374151' }}>
-                  <span>🕐 {daySched[0].startTime} – {daySched[0].endTime}</span>
+                  <span>🕐 {formatSlotTime(daySched[0].startTime)} – {formatSlotTime(daySched[0].endTime)}</span>
                   <span>⏱️ {daySched[0].slotDuration || daySched[0].slotDurationMinutes}{t('manageSchedule.minSlots')}</span>
                 </div>
               </div>
@@ -457,7 +459,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   <div>
                     <strong>{new Date(o.overrideDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</strong>
                     <span style={{ marginLeft: 10, fontSize: 13 }}>
-                      {o.overrideType === 'unavailable' ? `🚫 ${t('manageSchedule.dayOff')}` : `⚙️ ${t('manageSchedule.custom')}: ${o.startTime}–${o.endTime}`}
+                      {o.overrideType === 'unavailable' ? `🚫 ${t('manageSchedule.dayOff')}` : `⚙️ ${t('manageSchedule.custom')}: ${formatSlotTime(o.startTime || '')}\u2013${formatSlotTime(o.endTime || '')}`}
                     </span>
                     {o.reason && <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>({o.reason})</span>}
                   </div>
@@ -493,7 +495,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 <div key={b.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid #3b82f6' }}>
                   <div>
                     <strong>{t('manageSchedule.every')} {DAY_LABELS[b.recurringDay || '']}</strong>
-                    <span style={{ marginLeft: 10, fontSize: 13 }}>🕐 {b.startTime} – {b.endTime}</span>
+                    <span style={{ marginLeft: 10, fontSize: 13 }}>🕐 {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</span>
                     {b.reason && <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>({b.reason})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteBlock(b.id)}>✕</button>
@@ -512,7 +514,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 <div key={b.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid #f97316' }}>
                   <div>
                     <strong>{b.blockDate ? new Date(b.blockDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '—'}</strong>
-                    <span style={{ marginLeft: 10, fontSize: 13 }}>🕐 {b.startTime} – {b.endTime}</span>
+                    <span style={{ marginLeft: 10, fontSize: 13 }}>🕐 {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</span>
                     {b.reason && <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>({b.reason})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteBlock(b.id)}>✕</button>
@@ -564,7 +566,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                     <span style={{ marginLeft: 8 }} className={`badge ${h.holidayType === 'general' ? 'badge-active' : h.holidayType === 'emergency_closure' ? 'badge-danger' : 'badge-warning'}`}>
                       {h.holidayType.replace('_', ' ')}
                     </span>
-                    {!h.isFullDay && <span style={{ marginLeft: 8, fontSize: 12, color: '#6b7280' }}>({h.startTime}–{h.endTime})</span>}
+                    {!h.isFullDay && <span style={{ marginLeft: 8, fontSize: 12, color: '#6b7280' }}>({formatSlotTime(h.startTime || '')}–{formatSlotTime(h.endTime || '')})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteHoliday(h.id)}>✕</button>
                 </div>

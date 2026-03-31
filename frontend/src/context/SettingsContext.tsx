@@ -42,6 +42,8 @@ interface SettingsContextType {
   formatDateTime: (d: string | Date) => string
   /** Check if a booking is within the join window (joinWindowMinutes before start through end) */
   isJoinable: (scheduledDate: string, timeSlotStart: string, timeSlotEnd: string) => boolean
+  /** Format a HH:MM time slot string respecting admin time format (e.g. "16:00" → "4 PM" or "16:00") */
+  formatSlotTime: (time24: string) => string
   /** Reload settings from server */
   reloadSettings: () => Promise<void>
   /** Calculate estimated refund for a booking based on timing */
@@ -193,6 +195,19 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, [settings.cancellationPolicy])
 
+  // ─── Slot time formatting (HH:MM strings) ───────────────
+  const formatSlotTime = useCallback((time24: string): string => {
+    try {
+      const [h, m] = time24.split(':').map(Number)
+      if (settings.timeFormat === '24h') {
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+      }
+      const period = h >= 12 ? 'PM' : 'AM'
+      const hour = h % 12 || 12
+      return `${hour}${m > 0 ? ':' + String(m).padStart(2, '0') : ''} ${period}`
+    } catch { return time24 }
+  }, [settings.timeFormat])
+
   // ─── Currency formatting ─────────────────────────────────
   const formatCurrency = useCallback((amount: number | string): string => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -201,7 +216,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, [settings.currency])
 
   return (
-    <SettingsContext.Provider value={{ settings, formatTime, formatDate, formatDateTime, isJoinable, reloadSettings: loadSettings, estimateRefund, formatCurrency }}>
+    <SettingsContext.Provider value={{ settings, formatTime, formatDate, formatDateTime, isJoinable, formatSlotTime, reloadSettings: loadSettings, estimateRefund, formatCurrency }}>
       {children}
     </SettingsContext.Provider>
   )

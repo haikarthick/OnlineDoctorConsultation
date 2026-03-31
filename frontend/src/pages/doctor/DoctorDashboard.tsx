@@ -13,7 +13,7 @@ interface DoctorDashboardProps {
 const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ onNavigate }) => {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { formatDate } = useSettings()
+  const { formatDate, formatSlotTime } = useSettings()
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([])
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([])
   const [recentConsultations, setRecentConsultations] = useState<Consultation[]>([])
@@ -138,7 +138,7 @@ setError(err?.response?.data?.error?.message || err?.message || t('doctorDashboa
                 <div>
                   <strong>{booking.petOwnerName || t('common.patient')}</strong>
                   <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
-                    {formatDate(booking.scheduledDate, { weekday: 'short', month: 'short', day: 'numeric' })} at {booking.timeSlotStart}
+                    {formatDate(booking.scheduledDate, { weekday: 'short', month: 'short', day: 'numeric' })} at {formatSlotTime(booking.timeSlotStart)}
                     {' • '}{booking.bookingType === 'video_call' ? t('doctorDashboard.videoType') : t('doctorDashboard.chatType')}
                   </p>
                   <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
@@ -200,7 +200,7 @@ setError(err?.response?.data?.error?.message || err?.message || t('doctorDashboa
                     <div>
                       <strong>{booking.petOwnerName || t('doctorDashboard.patient')}</strong>
                       <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
-                        {formatDate(booking.scheduledDate)} at {booking.timeSlotStart}
+                        {formatDate(booking.scheduledDate)} at {formatSlotTime(booking.timeSlotStart)}
                       </p>
                       <p style={{ color: '#6b7280', fontSize: 13, margin: 0 }}>
                         {booking.consultationType === 'video' ? t('doctorDashboard.videoType') : t('doctorDashboard.chatType')} •{' '}

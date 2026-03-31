@@ -19,7 +19,7 @@ const Dashboard: React.FC = () => {
   const { t } = useTranslation()
 
   const { user } = useAuth()
-  const { formatDate } = useSettings()
+  const { formatDate, formatSlotTime } = useSettings()
   const { hasPermission } = usePermission()
   const navigate = useNavigate()
   const [stats, setStats] = useState<DashStats>({ bookings: 0, consultations: 0, animals: 0, pending: 0, enterprises: 0 })
@@ -290,7 +290,7 @@ const Dashboard: React.FC = () => {
                   <div className="alert-item-info">
                     <strong>{booking.petOwnerName || t('dashboard.pending.patient')}</strong>
                     <span className="alert-item-meta">
-                      {formatDate(booking.scheduledDate, { weekday: 'short', month: 'short', day: 'numeric' })} {t('common.at')} {booking.timeSlotStart}
+                      {formatDate(booking.scheduledDate, { weekday: 'short', month: 'short', day: 'numeric' })} {t('common.at')} {formatSlotTime(booking.timeSlotStart)}
                       {' · '}{booking.bookingType === 'video_call' ? t('dashboard.pending.video') : t('dashboard.pending.chat')}
                     </span>
                     <span className="alert-item-reason">

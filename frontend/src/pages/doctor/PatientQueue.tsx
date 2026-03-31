@@ -31,7 +31,7 @@ interface PatientQueueProps {
 const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
   const { t } = useTranslation()
   void useAuth() // ensure auth context
-  const { formatDate, isJoinable, settings: appSettings } = useSettings()
+  const { formatDate, isJoinable, formatSlotTime, settings: appSettings } = useSettings()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<string>('pending')
@@ -281,7 +281,7 @@ setRescheduleSlots([])
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 14, color: '#4b5563' }}>
                       <div>📅 <strong>{t('patientQueue.date')}:</strong> {formatDate(booking.scheduledDate)}</div>
-                      <div>⏰ <strong>{t('patientQueue.time')}:</strong> {booking.timeSlotStart} - {booking.timeSlotEnd}</div>
+                      <div>⏰ <strong>{t('patientQueue.time')}:</strong> {formatSlotTime(booking.timeSlotStart)} - {formatSlotTime(booking.timeSlotEnd)}</div>
                       {booking.reason && <div style={{ gridColumn: '1/3' }}>📝 <strong>{t('patientQueue.reason')}:</strong> {booking.reason}</div>}
                       {booking.symptoms && <div style={{ gridColumn: '1/3' }}>🤒 <strong>{t('patientQueue.symptoms')}:</strong> {booking.symptoms}</div>}
                     </div>
@@ -369,7 +369,7 @@ setRescheduleSlots([])
 
             <div style={{ padding: '10px 14px', background: '#fef3c7', color: '#92400e', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
               ⚠️ The appointment on <strong>{rescheduleTarget.scheduledDate}</strong> at{' '}
-              <strong>{rescheduleTarget.timeSlotStart}–{rescheduleTarget.timeSlotEnd}</strong> was missed. Please select a new slot.
+              <strong>{formatSlotTime(rescheduleTarget.timeSlotStart)}–{formatSlotTime(rescheduleTarget.timeSlotEnd)}</strong> was missed. Please select a new slot.
             </div>
 
             <div className="form-group" style={{ marginBottom: 16 }}>
@@ -408,7 +408,7 @@ setRescheduleSlots([])
                         cursor: 'pointer', fontSize: 13
                       }}
                     >
-                      {slot.startTime}–{slot.endTime}
+                      {formatSlotTime(slot.startTime)}–{formatSlotTime(slot.endTime)}
                     </button>
                   ))}
                 </div>
@@ -483,7 +483,7 @@ setRescheduleSlots([])
                       </div>
                       {log.action === 'BOOKING_RESCHEDULED' && log.details && (
                         <div style={{ fontSize: 12, color: '#4b5563', marginTop: 4, padding: '4px 8px', background: '#fef3c7', borderRadius: 4 }}>
-                          New slot: {log.details.newDate} {log.details.newTimeSlotStart}–{log.details.newTimeSlotEnd}
+                          New slot: {log.details.newDate} {formatSlotTime(log.details.newTimeSlotStart)}–{formatSlotTime(log.details.newTimeSlotEnd)}
                           {log.details.newStatus === 'pending' && (
                             actionLogs.some((l, j) => j > idx && l.action === 'BOOKING_CONFIRMED')
                               ? <span style={{ color: '#059669' }}> (approved ✓)</span>

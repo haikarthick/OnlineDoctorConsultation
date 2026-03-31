@@ -30,7 +30,7 @@ const HOSPITAL_TYPE_LABELS: Record<string, string> = {
 
 const VetHospitalManage: React.FC = () => {
   const { t } = useTranslation()
-  const { formatCurrency, settings } = useSettings()
+  const { formatCurrency, formatSlotTime, settings } = useSettings()
 
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -879,7 +879,7 @@ const VetHospitalManage: React.FC = () => {
                   {bookings.map((b: any) => (
                     <tr key={b.id}>
                       <td>{b.scheduledDate ? new Date(b.scheduledDate).toLocaleDateString() : '—'}</td>
-                      <td>{b.timeSlotStart || '—'}{b.timeSlotEnd ? ` – ${b.timeSlotEnd}` : ''}</td>
+                      <td>{b.timeSlotStart ? formatSlotTime(b.timeSlotStart) : '—'}{b.timeSlotEnd ? ` – ${formatSlotTime(b.timeSlotEnd)}` : ''}</td>
                       <td>{b.patientName || b.ownerName || '—'}</td>
                       <td>{b.vetName || b.veterinarianName || '—'}</td>
                       <td><span className="chip">{(b.bookingType || 'in_person').replace(/_/g, ' ')}</span></td>

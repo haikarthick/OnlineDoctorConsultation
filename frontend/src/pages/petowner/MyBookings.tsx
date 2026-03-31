@@ -25,7 +25,7 @@ interface MyBookingsProps {
 
 const MyBookings: React.FC<MyBookingsProps> = ({ onNavigate }) => {
   const { t } = useTranslation()
-  const { formatDate, isJoinable, settings: appSettings } = useSettings()
+  const { formatDate, isJoinable, formatSlotTime, settings: appSettings } = useSettings()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<string>('all')
@@ -225,7 +225,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || t('myBooki
                 </div>
                 <div className="detail-row">
                   <span className="detail-icon">🕐</span>
-                  <span>{booking.timeSlotStart} - {booking.timeSlotEnd}</span>
+                  <span>{formatSlotTime(booking.timeSlotStart)} - {formatSlotTime(booking.timeSlotEnd)}</span>
                 </div>
                 <div className="detail-row">
                   <span className="detail-icon">📋</span>
@@ -381,7 +381,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || t('myBooki
             )}
 
             <div style={{ padding: '10px 14px', background: '#fef3c7', color: '#92400e', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
-              {t('myBookings.missedNotice', { date: rescheduleTarget.scheduledDate, time: `${rescheduleTarget.timeSlotStart}\u2013${rescheduleTarget.timeSlotEnd}` })}
+              {t('myBookings.missedNotice', { date: rescheduleTarget.scheduledDate, time: `${formatSlotTime(rescheduleTarget.timeSlotStart)}–${formatSlotTime(rescheduleTarget.timeSlotEnd)}` })}
             </div>
 
             <div className="form-group" style={{ marginBottom: 16 }}>
@@ -420,7 +420,7 @@ setCancelError(err?.response?.data?.error?.message || err?.message || t('myBooki
                         cursor: 'pointer', fontSize: 13
                       }}
                     >
-                      {slot.startTime}–{slot.endTime}
+                      {formatSlotTime(slot.startTime)}–{formatSlotTime(slot.endTime)}
                     </button>
                   ))}
                 </div>

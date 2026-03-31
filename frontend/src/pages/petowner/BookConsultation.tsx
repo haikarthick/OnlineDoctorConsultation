@@ -28,7 +28,7 @@ interface BookConsultationProps {
 const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { formatCurrency } = useSettings()
+  const { formatCurrency, formatSlotTime } = useSettings()
   const [step, setStep] = useState(1)
   const [vets, setVets] = useState<VetProfile[]>([])
   const [animals, setAnimals] = useState<Animal[]>([])
@@ -457,7 +457,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                           className={`time-slot ${selectedSlot?.startTime === slot.startTime ? 'selected' : ''}`}
                           onClick={() => setSelectedSlot(slot)}
                         >
-                          {slot.startTime} - {slot.endTime}
+                          {formatSlotTime(slot.startTime)} - {formatSlotTime(slot.endTime)}
                         </div>
                       ))}
                     </div>
