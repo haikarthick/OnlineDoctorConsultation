@@ -975,6 +975,10 @@ const livestockFields = {
   contactPhone: Joi.string().max(20).optional().allow('', null),
   latitude: Joi.number().min(-90).max(90).optional().allow(null),
   longitude: Joi.number().min(-180).max(180).optional().allow(null),
+  sellerType: Joi.string().valid('individual', 'registered_breeder', 'shelter', 'rescue').optional(),
+  registrationNumber: Joi.string().max(100).optional().allow('', null),
+  welfareAttestation: Joi.boolean().optional(),
+  termsAccepted: Joi.boolean().optional(),
 };
 
 export const createMarketplaceListingSchema = Joi.object({
