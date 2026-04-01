@@ -75,7 +75,9 @@ const MedicalRecords: React.FC = () => {
 
   const loadAnimals = useCallback(async () => {
     try {
-      const res = await apiService.listAnimals({ limit: 100 })
+      const params: any = { limit: 100 }
+      if (isVet) params.view = 'patients'
+      const res = await apiService.listAnimals(params)
       const list = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
       setAnimals(list)
       if (list.length > 0 && !selectedAnimal) {

@@ -49,6 +49,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     // ── Dashboard (always first, ungrouped) ──
     { id: 'dashboard', label: t('nav.dashboard'), icon: '📊', path: '/dashboard',
       roles: ['veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Main' },
+    { id: 'marketplace', label: t('nav.marketplace'), icon: '🏪', path: '/marketplace',
+      roles: ['farmer', 'admin', 'pet_owner', 'veterinarian'], section: 'Main' },
 
     // ── Consultation & Booking ──
     { id: 'consultations', label: t('nav.myConsultations'), icon: '🏥', path: '/consultations',
@@ -124,8 +126,6 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['veterinarian', 'farmer', 'admin', 'pet_owner'], section: 'Intelligence' },
     { id: 'digital-twin', label: t('nav.digitalTwin'), icon: '🔮', path: '/digital-twin',
       roles: ['farmer', 'admin'], section: 'Intelligence' },
-    { id: 'marketplace', label: t('nav.marketplace'), icon: '🏪', path: '/marketplace',
-      roles: ['farmer', 'admin', 'pet_owner', 'veterinarian'], section: 'Intelligence' },
     { id: 'sustainability', label: t('nav.sustainability'), icon: '🌱', path: '/sustainability',
       roles: ['farmer', 'admin'], section: 'Intelligence' },
     { id: 'wellness', label: t('nav.wellnessPortal'), icon: '💚', path: '/wellness',
