@@ -102,11 +102,12 @@ export async function fixDemoPasswords(): Promise<void> {
           const vpMatch = vpHeaderRegex.exec(fullSql);
           if (vpMatch) {
             const vpSectionStart = vpHeaderRegex.lastIndex;
-            // Find STEP 94 (whatever comes next) or end of file
-            const nextStepRegex = /-- ={10,}\n-- STEP (?!9[23])\d+/g;
-            nextStepRegex.lastIndex = vpSectionStart;
-            const nextMatch = nextStepRegex.exec(fullSql);
-            const vpSectionSql = fullSql.substring(vpSectionStart, nextMatch ? nextMatch.index : fullSql.length).trim();
+            // Stop STEP 92 extraction at STEP 93 header to avoid pulling in subsequent inserts
+            // that may fail with FK violations and roll back the whole batch.
+            const step93BoundaryRegex = /-- ={10,}\n-- STEP 93:/g;
+            step93BoundaryRegex.lastIndex = vpSectionStart;
+            const step93BoundaryMatch = step93BoundaryRegex.exec(fullSql);
+            const vpSectionSql = fullSql.substring(vpSectionStart, step93BoundaryMatch ? step93BoundaryMatch.index : fullSql.length).trim();
             try { await database.query(vpSectionSql); logger.info('Seed: ✓ VACCINE PROTOCOLS (STEP 92)'); }
             catch (e: any) { logger.warn('Seed: ⚠ VACCINE PROTOCOLS: ' + e.message.substring(0, 200)); }
           }
@@ -115,10 +116,14 @@ export async function fixDemoPasswords(): Promise<void> {
           const ch3Match = ch3HeaderRegex.exec(fullSql);
           if (ch3Match) {
             const ch3SectionStart = ch3HeaderRegex.lastIndex;
-            const nextStepRegex2 = /-- ={10,}\n-- STEP (?!93)\d+/g;
-            nextStepRegex2.lastIndex = ch3SectionStart;
-            const nextMatch2 = nextStepRegex2.exec(fullSql);
-            const ch3Sql = fullSql.substring(ch3SectionStart, nextMatch2 ? nextMatch2.index : fullSql.length).trim();
+            // Extract ONLY the vaccine_protocol_changes INSERT (stop after its ON CONFLICT clause).
+            // The STEP 93 section may contain additional inserts (weight history, medical records)
+            // that could fail with FK violations and roll back the vaccine_protocol_changes rows.
+            const ch3Raw = fullSql.substring(ch3SectionStart).trim();
+            const onConflictMatch = /ON CONFLICT \(id\) DO NOTHING;/.exec(ch3Raw);
+            const ch3Sql = onConflictMatch
+              ? ch3Raw.substring(0, onConflictMatch.index + onConflictMatch[0].length).trim()
+              : ch3Raw;
             try { await database.query(ch3Sql); logger.info('Seed: ✓ VACCINE PROTOCOL CHANGES (STEP 93)'); }
             catch (e: any) { logger.warn('Seed: ⚠ VACCINE PROTOCOL CHANGES: ' + e.message.substring(0, 200)); }
           }
