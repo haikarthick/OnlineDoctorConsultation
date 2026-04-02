@@ -1,5 +1,15 @@
 # VetCare Platform — Copilot Instructions
 
+## START OF EVERY SESSION (READ BEFORE DOING ANYTHING)
+
+Before implementing ANY feature or fix, the agent MUST:
+1. Read `/memories/repo/feature-tracker.md` — check for pending planned features and previously completed work
+2. Read `/memories/repo/past-bugs.md` — refresh all known bugs to avoid repetition
+3. Read any session memory files that exist in `/memories/session/` — check for in-progress plans
+4. Re-read this file — all rules below are MANDATORY for every change
+
+**This project has 5 locale files, a pre-push hook with 4 checks, and a 4-file permission sync. ALL must pass before every commit.**
+
 ## Architecture (DO NOT VIOLATE)
 
 ### Backend
@@ -130,6 +140,79 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 | Error display mismatch | Backend `{ errors: [...] }` vs frontend expecting `error.message` | Always check error format between BE/FE |
 | AI chat messages invisible | PostgreSQL snake_case vs frontend camelCase | Use `AS "camelCase"` aliases in SELECT queries |
 | Missing CSS classes | Components used `.module-tabs` etc. that were never defined | Always verify CSS class exists when using className |
+| i18n namespace missing (HerdMedical) | `t('herdMedical.*')` used throughout but `"herdMedical": {}` top-level object never added to any locale file. react-i18next silently renders raw key paths (e.g. `herdMedical.pageTitle`) — NO runtime error, NO console warning | When a new page uses a new `t('namespace.*')` prefix, the `"namespace": { }` top-level object MUST exist in all 5 locale files BEFORE using any t() calls from it |
+| Missing auto-populate listing | Marketplace listing pre-fill from animal profile was in original plan but not implemented; caught by user after delivery | Before closing any feature, cross-check ALL planned sub-features in feature-tracker.md |
+| Inpatient search silent SQL error | Service used `a.microchip_number` and `a.avatar_url` — neither exists. PostgreSQL threw error, catch block swallowed it, frontend showed "No animals found" silently | Always cross-reference SQL column names against `docker/init.sql`. Silent try/catch masking SQL errors is a major trap |
+| "Open Full Record" → generic page | Navigation passed no record ID; target page didn't parse URL params; clicking a specific record opened the generic overview | EVERY navigation to a specific record MUST pass the record's ID via query/route param. Target page MUST auto-select and highlight the record |
+| Vet "My Pets" shows other people's animals | `listAnimalsByVeterinarian()` used booking/consultation tables (patients), not `owner_id = userId` | "My X" for ANY role always means the user's OWN records. Query must align with page purpose, not professional role |
+| Time slots ignoring admin time format | FindDoctor used hardcoded `formatTime12h()` helper ignoring admin `display.timeFormat`. Past slots for today also shown | ALL time/date/currency displays MUST use `useSettings()` formatters (`formatSlotTime`, `formatDate`, `formatCurrency`). NEVER create local format helpers. Filter past slots for today's date with 15-min buffer |
+| Nav bar items overflow at intermediate widths | Home nav total width exceeded container at 1024–1200px; no intermediate breakpoints | Count total width of ALL nav items at 1200px, 1024px before adding buttons. Always add intermediate breakpoints, not just 768px mobile |
+| E2E pre-push generator overwrites manual stubs | Generator script REWROTE `auto-discovered.spec.ts` on every run, stripping manually added stubs from prior commits | For frontend-only routes (accept-invite, animal-timeline etc.) manually append stubs to `auto-discovered.spec.ts`. Verify pre-push hook assertion count matches expected total |
+| Hindi locale JSON broken by double-comma | Two separate edits each added trailing comma on same key → `,,` invalid JSON. No explicit JSON validation in pre-push hook | After editing ANY locale JSON: validate with `node -e "require('./frontend/src/locales/hi/translation.json')"` before pushing |
+| Floating element overlapping fixed nav | Fixed-position floating element (`z-index: 9998`) overlapped fixed nav bar (`z-index: 1000`) | Fixed/floating elements must account for ALL fixed/sticky elements on every page they render on |
+
+## Admin Settings Rule (MANDATORY — GLOBAL ENFORCEMENT)
+
+**ALL admin settings MUST be respected across ALL pages — no exceptions.**
+- **Time format**: Use `formatSlotTime()` from `useSettings()` for all HH:MM time slot displays. NEVER use hardcoded `formatTime12h()` helpers.
+- **Currency**: Use `formatCurrency()` from `useSettings()` for all monetary values
+- **Date format**: Use `formatDate()` from `useSettings()` for all date displays
+- **Join window**: Use `isJoinable()` from `useSettings()` for Join button visibility
+- When adding ANY new page showing times, dates, or currencies: ALWAYS import and use `useSettings()`
+
+## Deep Navigation Rule (MANDATORY)
+
+**ALL navigation links that reference a specific record MUST navigate to that exact record — NEVER to a generic overview page.**
+- When navigating from any context (timeline, dashboard, notifications, search): pass the record ID via query/route param
+- Target page MUST auto-select the correct item, tab, and scroll to/highlight the record
+- Pattern: `/medical-records?animalId=X&recordId=Y&tab=diagnoses`
+- This applies to: medical records, consultations, prescriptions, bookings, lab results, vaccinations, allergies, and ALL future entities
+
+## Functional Integrity Rule (MANDATORY — ZERO TOLERANCE)
+
+**Never break existing logic while adding new features.**
+- Before modifying ANY existing logic, understand what it currently does and WHY
+- If ANY existing logic needs to change to implement something new:
+  1. **STOP** — do NOT proceed
+  2. **ASK the user**: explain what the previous logic was + what the proposed change is
+  3. Only proceed AFTER receiving explicit approval
+- **Additive changes** (new endpoints, new pages, new fields) are OK without approval
+- **Modifications to existing behavior** ALWAYS require approval
+
+## Usability Standards Rule (MANDATORY — ALL SCREENS)
+
+**ALL screens, modals, forms, and UI interactions MUST follow best usability standards:**
+- Edit/Create forms MUST open as centered modals with dark overlay backdrop — user must never wonder if a form opened
+- Every modal MUST have a visible close button (✕) in the top-right corner PLUS overlay-click-to-close
+- Error messages must be visible without scrolling (auto-scroll + highlight specific field)
+- All interactive elements must have clear hover/focus states
+- On mobile: modals full-width, forms stack vertically
+
+## Plan Adherence Rule (MANDATORY)
+
+**NEVER deviate from the originally discussed plan without explicit documentation.**
+- Read `/memories/repo/feature-tracker.md` at the START of every task — check for pending planned items
+- If a feature was previously planned, it MUST be included
+- When skipping a planned item, add documented reason in commit message
+- UPDATE feature-tracker.md BEFORE committing — mark completed items, verify no planned items left as "⚠️ Planned"
+
+## i18n Namespace Rule (MANDATORY — ZERO TOLERANCE)
+
+**Before committing any new page component with `t('namespace.key')` calls:**
+1. Extract the namespace prefix (part before the first `.`)
+2. Verify `"namespace": { ... }` top-level object EXISTS in ALL 5 locale files
+3. Run: `node -e "require('./frontend/src/locales/en/translation.json')"` — must not throw
+4. Run: `node -e "require('./frontend/src/locales/hi/translation.json')"` — must not throw
+- Missing an entire namespace causes the ENTIRE page to show raw key paths silently — no error, no warning
+- Missing individual keys show the key path for just that string — also silent
+
+## SQL Column Name Rule (MANDATORY)
+
+**Before writing ANY SQL query**, cross-reference column names against `docker/init.sql`:
+- NEVER assume column names from memory
+- Mismatched column names cause PostgreSQL errors that get silently swallowed by catch blocks, showing "No data found" to user
+- Run `grep -n "column_name" docker/init.sql` to verify before using in a query
+- All SELECT queries must use `AS "camelCase"` aliases to match frontend TypeScript types
 
 ## Database Migration Pattern
 
