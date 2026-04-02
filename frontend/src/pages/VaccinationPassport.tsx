@@ -140,9 +140,13 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
     setLoading(true)
     setError('')
     try {
-      // For pet_owner / farmer — load their animals first, then passport for each
-      const animalsResp = await (apiService as any).client.get('/animals')
-      const animals: { id: string }[] = animalsResp.data?.data || animalsResp.data || []
+      // For all roles: load animals first, then fetch passport for each
+      const animalsResp = await (apiService as any).client.get('/animals', { params: { limit: 100 } })
+      const rawData = animalsResp.data?.data
+      // Backend returns { items: [...], total: n } — always extract .items array
+      const animals: { id: string }[] = Array.isArray(rawData?.items)
+        ? rawData.items
+        : Array.isArray(rawData) ? rawData : []
       if (animals.length === 0) {
         setPassports([])
         setLoading(false)

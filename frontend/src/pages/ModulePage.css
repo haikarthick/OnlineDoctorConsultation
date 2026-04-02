@@ -798,6 +798,7 @@ textarea.module-input {
 .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  -webkit-text-fill-color: white;
   border: none;
   padding: 10px 22px;
   border-radius: 10px;
@@ -864,7 +865,7 @@ textarea.module-input {
 .tab-btn:hover { border-color: #667eea; color: #667eea; }
 .tab-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
 
-/* Tab bar buttons (bare button pattern) */
+/* Tab bar buttons (bare button pattern — used by pages without .tab-btn class) */
 .tab-bar button {
   padding: 10px 20px; border: 2px solid #e2e8f0; background: white;
   border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;
@@ -872,6 +873,22 @@ textarea.module-input {
 }
 .tab-bar button:hover { border-color: #667eea; color: #667eea; }
 .tab-bar button.tab-active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
+
+/* Action buttons (btn-primary, btn-success, btn-danger) inside tab-bar MUST NOT inherit
+   the .tab-bar button white-background/grey-text override. The .tab-bar button selector
+   has specificity 0,1,1 which beats .btn-primary at 0,1,0 — causing white text on white
+   background (invisible). This override (0,2,0) restores correct appearance. */
+.tab-bar .btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  -webkit-text-fill-color: white;
+  border-color: transparent;
+}
+.tab-bar .btn-primary:hover { background: linear-gradient(135deg, #5a6fd8 0%, #6a4090 100%); color: white; -webkit-text-fill-color: white; border-color: transparent; }
+.tab-bar .btn-success { background: #22c55e; color: white; -webkit-text-fill-color: white; border-color: transparent; }
+.tab-bar .btn-success:hover { background: #16a34a; color: white; -webkit-text-fill-color: white; }
+.tab-bar .btn-danger { background: #ef4444; color: white; -webkit-text-fill-color: white; border-color: transparent; }
+.tab-bar .btn-danger:hover { background: #dc2626; color: white; -webkit-text-fill-color: white; }
 
 /* ═══ Module Form ═══ */
 .module-form {
