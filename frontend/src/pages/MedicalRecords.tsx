@@ -322,7 +322,7 @@ const MedicalRecords: React.FC = () => {
             <option value="">{t('medicalRecords.allAnimals')}</option>
             {animals.map((a: any) => (
               <option key={a.id} value={a.id}>
-                {a.uniqueId || a.unique_id || ''} {a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}
+                {a.uniqueId || a.unique_id || ''} {a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{(isAdmin || isVet) && a.ownerName ? ` · ${a.ownerName}` : ''}
               </option>
             ))}
           </select>

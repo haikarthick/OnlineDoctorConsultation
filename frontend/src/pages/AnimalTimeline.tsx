@@ -24,6 +24,7 @@ interface AnimalOption {
   id: string
   name: string
   species: string
+  ownerName?: string
 }
 
 // ─── Event type config ──────────────────────────────────────
@@ -134,6 +135,7 @@ const AnimalTimeline: React.FC = () => {
         const rawList = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
         const list: AnimalOption[] = rawList.map((a: any) => ({
           id: a.id, name: a.name, species: a.species,
+          ownerName: a.ownerName || a.owner_name || undefined,
         }))
         setAnimals(list)
         if (list.length > 0) setSelectedAnimalId(list[0].id)
@@ -483,7 +485,11 @@ const AnimalTimeline: React.FC = () => {
         <div className="tl-toolbar">
           <select className="tl-select" value={selectedAnimalId} onChange={e => setSelectedAnimalId(e.target.value)}>
             {animals.length === 0 && <option value="">No animals</option>}
-            {animals.map(a => <option key={a.id} value={a.id}>{a.name} ({a.species})</option>)}
+            {animals.map(a => (
+              <option key={a.id} value={a.id}>
+                {a.name} ({a.species}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
+              </option>
+            ))}
           </select>
           <div className="tl-search-wrap" ref={searchWrapRef}>
             <span className="tl-search-icon">🔍</span>

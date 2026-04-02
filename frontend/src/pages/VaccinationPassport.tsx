@@ -46,6 +46,7 @@ interface PassportAnimal {
   breed: string | null
   gender: string | null
   dateOfBirth: string | null
+  ownerName?: string | null
   overallCompliancePercent: number
   protocols: PassportProtocol[]
 }
@@ -317,6 +318,9 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                 {animal.dateOfBirth
                   ? ` · ${t('vaccinationPassport.dob')}: ${formatDate(animal.dateOfBirth)}`
                   : ''}
+                {(isAdmin || isVet) && animal.ownerName
+                  ? ` · ${t('vaccinationPassport.owner')}: ${animal.ownerName}`
+                  : ''}
               </div>
             </div>
           </div>
@@ -483,7 +487,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
           <option value="">{t('vaccinationPassport.selectAnimal')}</option>
           {passports.map((a) => (
             <option key={a.animalId} value={a.animalId}>
-              {SPECIES_ICONS[a.species] || '🐾'} {a.animalName}
+              {SPECIES_ICONS[a.species] || '🐾'} {a.animalName} ({a.species}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
             </option>
           ))}
         </select>
