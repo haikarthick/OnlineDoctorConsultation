@@ -150,19 +150,20 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
                 key={id}
                 className={`home-nav-link${activeSection === id ? ' home-nav-link--active' : ''}`}
                 onClick={() => scrollToSection(id)}
+                title={sectionLabel(id)}
               >
                 {sectionLabel(id)}
               </button>
             ))}
           </div>
           <div className="home-nav-actions">
-            <button className="home-nav-browse" onClick={() => navigate('/browse-marketplace')}>
+            <button className="home-nav-browse" onClick={() => navigate('/browse-marketplace')} title={t('publicMarketplace.homeCta.browseNow')}>
               🏪 {t('publicMarketplace.homeCta.browseNow')}
             </button>
             <button className="home-nav-signin" onClick={onLogin || (() => {})}>
               {t('home.signIn')}
             </button>
-            <button className="home-nav-cta" onClick={onGetStarted}>
+            <button className="home-nav-cta" onClick={onGetStarted} title={t('home.ctaPrimary')}>
               {t('home.ctaPrimary')}
             </button>
             <div className="home-nav-lang-wrapper" ref={langDropRef}>
