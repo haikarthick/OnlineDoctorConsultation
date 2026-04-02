@@ -83,6 +83,19 @@ const PublicMarketplace: React.FC = () => {
 
   return (
     <div className="pub-mp-page">
+      {/* Top Nav Bar */}
+      <nav className="pub-mp-topnav">
+        <button className="pub-mp-topnav-back" onClick={() => navigate(-1)}>
+          ← {t('common.back')}
+        </button>
+        <span className="pub-mp-topnav-logo">🐾 VetCare</span>
+        {isAuthenticated && (
+          <button className="pub-mp-topnav-cta" onClick={() => navigate('/marketplace')}>
+            {t('publicMarketplace.goToFullMarketplace')}
+          </button>
+        )}
+      </nav>
+
       {/* Hero Banner */}
       <div className="pub-mp-hero">
         <div className="pub-mp-hero-content">

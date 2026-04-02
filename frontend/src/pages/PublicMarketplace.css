@@ -2,6 +2,58 @@
 /* Public Marketplace — Guest Browse Styles           */
 /* ═══════════════════════════════════════════════════ */
 
+/* ─── Top Nav Bar ─── */
+.pub-mp-topnav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  padding: 10px 24px;
+  gap: 16px;
+}
+.pub-mp-topnav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 14px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pub-mp-topnav-back:hover { background: #f3f4f6; border-color: #9ca3af; }
+.pub-mp-topnav-logo {
+  flex: 1;
+  font-weight: 700;
+  font-size: 18px;
+  color: #1f2937;
+}
+.pub-mp-topnav-cta {
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: #2563eb;
+  color: white;
+  transition: background 0.15s;
+}
+.pub-mp-topnav-cta:hover { background: #1d4ed8; }
+@media (max-width: 480px) {
+  .pub-mp-topnav { padding: 8px 12px; }
+  .pub-mp-topnav-logo { font-size: 15px; }
+  .pub-mp-topnav-cta { padding: 5px 10px; font-size: 12px; }
+}
+
 .pub-mp-page {
   min-height: 100vh;
   background: #f8fafc;

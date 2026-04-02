@@ -313,6 +313,11 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
           <h1>{t('bookConsultation.title')}</h1>
           <p className="page-subtitle">{t('bookConsultation.subtitle')}</p>
         </div>
+        <div className="page-header-actions">
+          <button className="page-back-btn" onClick={() => onNavigate('/find-doctor')}>
+            ← {t('common.back')}
+          </button>
+        </div>
       </div>
 
       {/* Progress Steps */}

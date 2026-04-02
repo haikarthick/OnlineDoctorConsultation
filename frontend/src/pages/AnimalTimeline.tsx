@@ -466,6 +466,11 @@ const AnimalTimeline: React.FC = () => {
 
   return (
     <div className="tl-page">
+      {/* Back navigation */}
+      <button className="page-back-btn" onClick={() => routerNavigate(-1)}>
+        ← {t('common.back')}
+      </button>
+
       {/* Header */}
       <div className="tl-header">
         <div className="tl-header-left">

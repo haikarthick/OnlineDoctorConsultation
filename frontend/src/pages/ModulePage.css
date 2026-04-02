@@ -171,6 +171,23 @@
   border-radius: 8px;
 }
 
+/* ═══ Page Back Button (global design-system class) ═══ */
+.page-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 0;
+  margin-bottom: 12px;
+  transition: color 0.15s;
+}
+.page-back-btn:hover { color: #2563eb; }
+
 /* ═══ Module Table ═══ */
 .module-table {
   width: 100%;
