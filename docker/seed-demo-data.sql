@@ -2819,7 +2819,217 @@ INSERT INTO weight_history (id, animal_id, weight, unit, notes, recorded_by, rec
   ('f2000000-0000-0000-0000-000000000475','aa000000-0000-0000-0000-000000000010',22.48,'kg',NULL,'b0000000-0000-0000-0000-000000000001','2026-01-15 09:00:00','2026-01-15 09:00:00'),
   ('f2000000-0000-0000-0000-000000000476','aa000000-0000-0000-0000-000000000003',6.63,'kg',NULL,'b0000000-0000-0000-0000-000000000001','2023-04-15 09:00:00','2023-04-15 09:00:00'),
   ('f2000000-0000-0000-0000-000000000477','aa000000-0000-0000-0000-000000000003',6.96,'kg',NULL,'b0000000-0000-0000-0000-000000000001','2023-07-15 09:00:00','2023-07-15 09:00:00'),
-  ('f2000000-0000-0000-0000-000000000478','aa000000-0000-0000-0000-000000000003',7.52,'kg',NULL,'b0000000-0000-0000-0000-000000000001','2023-10-15 09:00:00','2023-10-15 09:00:00'),
+  ('f2000000-0000-0000-0000-000000000478','aa000000-0000-0000-0000-000000000003',7.52,'kg',NULL,'b0000000-0000-0000-0000-000000000001','2023-10-15 09:00:00','2023-10-15 09:00:00');
+
+-- ============================================================
+-- VACCINE PROTOCOL MASTER SEED DATA
+-- India livestock + companion animal + equine protocols
+-- ============================================================
+
+INSERT INTO vaccine_protocols (
+  id, name, disease, species, applicable_gender, min_age_weeks, max_age_weeks,
+  vaccine_category, is_zoonotic, initial_dose_age_weeks, booster_interval_days,
+  series_dose_count, series_interval_days, route, dosage_ml, site,
+  regulatory_body, regulatory_standard, seasonal_window, country, notes
+) VALUES
+
+-- ── INDIA LIVESTOCK ──────────────────────────────────────────────
+
+-- FMD (Foot and Mouth Disease) — cattle/buffalo/sheep/goat — mandatory biannual
+('vp000000-0000-0000-0000-000000000001',
+ 'FMD Vaccine (O+A+Asia1)', 'Foot and Mouth Disease (FMD)',
+ ARRAY['cattle','buffalo','sheep','goat','pig'], 'all', 12, NULL,
+ 'mandatory_govt', false, 12, 182, 1, 0,
+ 'intramuscular', '2 ml', 'Neck muscle',
+ 'DAHD (India)', 'DAHD Policy 2019, Animal Husbandry Commissioner Circular',
+ 'May–June and November–December', 'IN',
+ 'Mandatory biannual vaccination drive under GoI FMD-CP. Trivalent O+A+Asia1 strains. Cold chain required.'),
+
+-- Black Quarter (BQ / Blackleg) — cattle/buffalo — annual pre-monsoon
+('vp000000-0000-0000-0000-000000000002',
+ 'BQ Vaccine (Black Quarter)', 'Black Quarter (Blackleg)',
+ ARRAY['cattle','buffalo'], 'all', 6, NULL,
+ 'mandatory_govt', false, 6, 365, 1, 0,
+ 'subcutaneous', '2 ml', 'Shoulder',
+ 'DAHD (India)', 'DAHD Annual Vaccination Schedule',
+ 'Pre-monsoon (April–May)', 'IN',
+ 'Annual pre-monsoon vaccination. Particularly important for calves 6 months–3 years. Combined HS+BQ vaccines available.'),
+
+-- Haemorrhagic Septicaemia (HS) — cattle/buffalo — annual pre-monsoon
+('vp000000-0000-0000-0000-000000000003',
+ 'HS Vaccine (Haemorrhagic Septicaemia)', 'Haemorrhagic Septicaemia (HS)',
+ ARRAY['cattle','buffalo'], 'all', 6, NULL,
+ 'mandatory_govt', false, 6, 365, 1, 0,
+ 'subcutaneous', '2 ml', 'Shoulder',
+ 'DAHD (India)', 'DAHD Annual Vaccination Schedule',
+ 'Pre-monsoon (April–May)', 'IN',
+ 'Annual pre-monsoon. High endemicity in India. Pasteurella multocida types B:2 and E:2. Often combined with BQ.'),
+
+-- PPR (Peste des Petits Ruminants) — sheep/goat — once every 3 years
+('vp000000-0000-0000-0000-000000000004',
+ 'PPR Vaccine', 'Peste des Petits Ruminants (PPR)',
+ ARRAY['sheep','goat'], 'all', 4, NULL,
+ 'mandatory_govt', false, 4, 1095, 1, 0,
+ 'subcutaneous', '1 ml', 'Neck or shoulder',
+ 'DAHD (India)', 'DAHD PPR Eradication Programme 2021',
+ 'Any season', 'IN',
+ 'Single dose provides immunity for 3 years. National eradication programme target: 2030. OIE-listed disease.'),
+
+-- Brucellosis S19 — heifers only (female cattle 4–8 months)
+('vp000000-0000-0000-0000-000000000005',
+ 'Brucellosis S19 (Conjunctival)', 'Brucellosis (Contagious Abortion)',
+ ARRAY['cattle'], 'female', 16, 32,
+ 'mandatory_govt', true, 16, 0, 1, 0,
+ 'intranasal', '2 ml', 'Conjunctival sac',
+ 'DAHD (India)', 'DAHD Brucellosis Control Programme',
+ 'Any season', 'IN',
+ 'One-time vaccination for female calves 4–8 months only. Zoonotic — precautions required. Do NOT vaccinate pregnant animals.'),
+
+-- Anthrax — endemic areas, various species
+('vp000000-0000-0000-0000-000000000006',
+ 'Anthrax Spore Vaccine', 'Anthrax',
+ ARRAY['cattle','buffalo','sheep','goat','horse'], 'all', 8, NULL,
+ 'mandatory_govt', true, 8, 365, 1, 0,
+ 'subcutaneous', '1 ml', 'Shoulder or neck',
+ 'DAHD (India)', 'DAHD Regional Outbreak Protocol',
+ 'Pre-monsoon (April–May)', 'IN',
+ 'Annual vaccination in endemically affected districts. Sterne strain spore vaccine. Zoonotic — high risk.'),
+
+-- Rabies — all species, zoonotic, legally mandated
+('vp000000-0000-0000-0000-000000000007',
+ 'Rabies Vaccine (Annual)', 'Rabies',
+ ARRAY['dog','cat','cattle','buffalo','sheep','goat','horse','rabbit'], 'all', 12, NULL,
+ 'legally_mandated', true, 12, 365, 1, 0,
+ 'intramuscular', '1 ml', 'Neck muscle',
+ 'DAHD / AHL (India)', 'Prevention of Cruelty to Animals Act 1960, NHM Rabies Control',
+ 'Any season', 'IN',
+ 'Annual booster mandatory for dogs and cats. Zoonotic — 100% fatal without prophylaxis. PrEP for high-risk exposure.'),
+
+-- Etec/Rota Calf Scours — dairy calves
+('vp000000-0000-0000-0000-000000000008',
+ 'Calf Scours Vaccine (Rotavirus/Coronavirus/E.coli)', 'Calf Scours (Neonatal Diarrhea)',
+ ARRAY['cattle','buffalo'], 'female', 28, NULL,
+ 'non_core', false, 28, 365, 1, 0,
+ 'intramuscular', '2 ml', 'Neck muscle',
+ 'Manufacturer / IVRI', 'IVRI Recommendations',
+ 'Any season — vaccinate dry cows 3–6 weeks before calving', 'IN',
+ 'Vaccinate dry cows. Colostral antibodies protect newborn calves. Recommended for intensive dairy farms.'),
+
+-- ── COMPANION ANIMALS ────────────────────────────────────────────
+
+-- DA2PP (Core dogs) — distemper, adenovirus type 2, parvovirus, parainfluenza
+('vp000000-0000-0000-0000-000000000009',
+ 'DA2PP (Core Dog Vaccine)', 'Canine Distemper / Parvovirus / Adenovirus-2 / Parainfluenza',
+ ARRAY['dog'], 'all', 6, NULL,
+ 'core', false, 6, 365, 4, 28,
+ 'subcutaneous', '1 ml', 'Scruff of neck',
+ 'WSAVA', 'WSAVA Vaccination Guidelines 2022',
+ 'Any season', 'ALL',
+ 'Puppy series: doses at 6–8wk, 10–12wk, 14–16wk, 18–20wk. First adult booster at 1 year, then every 3 years (triennial). Killed or MLV.'),
+
+-- FVRCP (Core cats) — feline viral rhinotracheitis, calicivirus, panleukopenia
+('vp000000-0000-0000-0000-000000000010',
+ 'FVRCP (Core Cat Vaccine)', 'Feline Viral Rhinotracheitis / Calicivirus / Panleukopenia',
+ ARRAY['cat'], 'all', 6, NULL,
+ 'core', false, 6, 365, 3, 28,
+ 'subcutaneous', '1 ml', 'Scruff of neck',
+ 'WSAVA', 'WSAVA Vaccination Guidelines 2022',
+ 'Any season', 'ALL',
+ 'Kitten series: doses at 6–8wk, 10–12wk, 14–16wk. Adult booster at 1 year, then triennial. Panleukopenia immunity may last 7+ years.'),
+
+-- Bordetella (dogs) — kennel cough, non-core but recommended for social dogs
+('vp000000-0000-0000-0000-000000000011',
+ 'Bordetella (Kennel Cough)', 'Canine Infectious Respiratory Disease (Bordetella bronchiseptica)',
+ ARRAY['dog'], 'all', 8, NULL,
+ 'non_core', false, 8, 365, 1, 0,
+ 'intranasal', '1 ml', 'Nasal instillation',
+ 'WSAVA', 'WSAVA Non-Core Vaccination Recommendations 2022',
+ 'Any season — ideally 1–2 weeks before boarding/kennels', 'ALL',
+ 'Annual. Recommended for dogs attending kennels, dog shows, doggy daycare. Intranasal preferred over injectable.'),
+
+-- Leptospirosis (dogs) — non-core but recommended in India
+('vp000000-0000-0000-0000-000000000012',
+ 'Leptospirosis (Lepto4)', 'Leptospirosis',
+ ARRAY['dog'], 'all', 8, NULL,
+ 'non_core', true, 8, 365, 2, 21,
+ 'subcutaneous', '1 ml', 'Scruff of neck',
+ 'WSAVA', 'WSAVA Non-Core + DAHD Zoonotic Risk Assessment India',
+ 'Any season — pre-monsoon ideal', 'ALL',
+ 'Annual. Zoonotic. High risk in India monsoon flooding areas. 2-dose primary series 3 weeks apart.'),
+
+-- Feline Leukemia (FeLV) — non-core cats
+('vp000000-0000-0000-0000-000000000013',
+ 'FeLV (Feline Leukemia Virus)', 'Feline Leukemia',
+ ARRAY['cat'], 'all', 8, NULL,
+ 'non_core', false, 8, 365, 2, 21,
+ 'subcutaneous', '1 ml', 'Left hind limb',
+ 'WSAVA', 'WSAVA Non-Core Vaccination Recommendations 2022',
+ 'Any season', 'ALL',
+ 'For cats with outdoor access or in multi-cat households. 2-dose primary series then annual. Test before vaccinating.'),
+
+-- ── EQUINE ───────────────────────────────────────────────────────
+
+-- Equine Tetanus — annual
+('vp000000-0000-0000-0000-000000000014',
+ 'Equine Tetanus Toxoid', 'Tetanus (Clostridium tetani)',
+ ARRAY['horse'], 'all', 12, NULL,
+ 'core', false, 12, 365, 1, 0,
+ 'intramuscular', '1 ml', 'Neck muscle',
+ 'BEVA / AAEP', 'BEVA Vaccination Guidelines 2023',
+ 'Any season', 'ALL',
+ 'Annual core vaccination for all horses. Primary series: 2 doses 4 weeks apart. Foals: start at 3 months.'),
+
+-- EHV-1/4 (Equine Herpesvirus) — biannual
+('vp000000-0000-0000-0000-000000000015',
+ 'EHV-1/4 (Equine Herpesvirus)', 'Equine Herpesvirus Rhinopneumonitis',
+ ARRAY['horse'], 'all', 12, NULL,
+ 'core', false, 12, 182, 1, 0,
+ 'intramuscular', '1 ml', 'Neck muscle',
+ 'BEVA / AAEP', 'BEVA Vaccination Guidelines 2023',
+ 'Any season — booster every 6 months', 'ALL',
+ 'Biannual. Particularly important for pregnant mares (booster at 5, 7, and 9 months gestation).'),
+
+-- Equine Influenza — biannual
+('vp000000-0000-0000-0000-000000000016',
+ 'Equine Influenza', 'Equine Influenza',
+ ARRAY['horse'], 'all', 24, NULL,
+ 'core', false, 24, 182, 2, 21,
+ 'intramuscular', '1 ml', 'Neck muscle',
+ 'BEVA / OIE', 'OIE Terrestrial Animal Health Code, BEVA Guidelines 2023',
+ 'Any season', 'ALL',
+ 'Biannual. Primary series: 2 doses 3–6 weeks apart. Required for most competition events.')
+
+ON CONFLICT (id) DO NOTHING;
+
+-- ── REGULATORY CHANGE HISTORY SAMPLES ────────────────────────────
+
+INSERT INTO vaccine_protocol_changes (
+  id, protocol_id, changed_field, old_value, new_value,
+  change_reason, regulatory_standard, effective_date
+) VALUES
+
+-- FMD booster interval changed from annual to biannual per India policy update
+('vpc00000-0000-0000-0000-000000000001',
+ 'vp000000-0000-0000-0000-000000000001',
+ 'booster_interval_days', '365', '182',
+ 'GoI FMD-CP revised schedule — biannual vaccination proven more effective in high-endemic zones',
+ 'DAHD Policy Notification 2019', '2019-04-01'),
+
+-- PPR change from biannual to triennial following DAHD efficacy data
+('vpc00000-0000-0000-0000-000000000002',
+ 'vp000000-0000-0000-0000-000000000004',
+ 'booster_interval_days', '730', '1095',
+ 'DAHD eradication programme data shows single dose provides 3-year immunity',
+ 'DAHD PPR Eradication Programme 2021', '2021-06-01'),
+
+-- DA2PP triennial booster extended life per WSAVA 2022
+('vpc00000-0000-0000-0000-000000000003',
+ 'vp000000-0000-0000-0000-000000000009',
+ 'booster_interval_days', '365', '1095',
+ 'WSAVA 2022 guideline update — adult dog triennial CDV/CPV-2 revaccination after 1-year booster',
+ 'WSAVA Vaccination Guidelines 2022', '2022-03-01')
+
+ON CONFLICT (id) DO NOTHING;,
   ('f2000000-0000-0000-0000-000000000479','aa000000-0000-0000-0000-000000000003',8.02,'kg',NULL,'b0000000-0000-0000-0000-000000000001','2024-01-15 09:00:00','2024-01-15 09:00:00'),
   ('f2000000-0000-0000-0000-000000000480','aa000000-0000-0000-0000-000000000003',8.27,'kg',NULL,'b0000000-0000-0000-0000-000000000001','2024-04-15 09:00:00','2024-04-15 09:00:00'),
   ('f2000000-0000-0000-0000-000000000481','aa000000-0000-0000-0000-000000000003',8.93,'kg',NULL,'b0000000-0000-0000-0000-000000000001','2024-07-15 09:00:00','2024-07-15 09:00:00'),

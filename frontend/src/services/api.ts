@@ -1950,6 +1950,92 @@ class ApiService {
     const response = await this.client.get(`/geospatial/animals/${animalId}/trail`, { params: filters })
     return response.data
   }
+
+  // ─── Vaccine Protocols ────────────────────────────────────────
+  async adminListVaccineProtocols(filters: { species?: string; category?: string; country?: string; activeOnly?: boolean } = {}) {
+    const response = await this.client.get('/admin/vaccine-protocols', { params: filters })
+    return response.data
+  }
+
+  async adminCreateVaccineProtocol(data: any) {
+    const response = await this.client.post('/admin/vaccine-protocols', data)
+    return response.data
+  }
+
+  async adminUpdateVaccineProtocol(id: string, data: any) {
+    const response = await this.client.put(`/admin/vaccine-protocols/${id}`, data)
+    return response.data
+  }
+
+  async adminArchiveVaccineProtocol(id: string) {
+    const response = await this.client.patch(`/admin/vaccine-protocols/${id}/archive`, {})
+    return response.data
+  }
+
+  async adminRestoreVaccineProtocol(id: string) {
+    const response = await this.client.patch(`/admin/vaccine-protocols/${id}/restore`, {})
+    return response.data
+  }
+
+  async getVaccineProtocolChanges(id: string) {
+    const response = await this.client.get(`/admin/vaccine-protocols/${id}/changes`)
+    return response.data
+  }
+
+  async addVaccineProtocolChange(id: string, data: any) {
+    const response = await this.client.post(`/admin/vaccine-protocols/${id}/changes`, data)
+    return response.data
+  }
+
+  async listVaccineProtocols(filters: { species?: string; category?: string } = {}) {
+    const response = await this.client.get('/vaccine-protocols', { params: filters })
+    return response.data
+  }
+
+  async getAnimalVaccineAssignments(animalId: string) {
+    const response = await this.client.get(`/animals/${animalId}/vaccine-assignments`)
+    return response.data
+  }
+
+  async assignVaccineProtocol(animalId: string, data: { protocolId: string; notes?: string }) {
+    const response = await this.client.post(`/animals/${animalId}/vaccine-assignments`, data)
+    return response.data
+  }
+
+  async waiveVaccineProtocol(animalId: string, protocolId: string, reason: string) {
+    const response = await this.client.patch(`/animals/${animalId}/vaccine-assignments/${protocolId}/waive`, { reason })
+    return response.data
+  }
+
+  async getAnimalVaccineSchedule(animalId: string) {
+    const response = await this.client.get(`/vaccine-schedule/animal/${animalId}`)
+    return response.data
+  }
+
+  async markVaccineDoseAdministered(scheduleId: string, data: { vaccinationRecordId: string; administeredAt?: string }) {
+    const response = await this.client.patch(`/vaccine-schedule/${scheduleId}/administer`, data)
+    return response.data
+  }
+
+  async getVaccinationPassport(animalId: string) {
+    const response = await this.client.get(`/vaccination-passport/animal/${animalId}`)
+    return response.data
+  }
+
+  async getVaccinationComplianceSummary(filters: { enterpriseId?: string; species?: string } = {}) {
+    const response = await this.client.get('/vaccination-passport/compliance-summary', { params: filters })
+    return response.data
+  }
+
+  async logVaccineCertificateDownload(data: { animalId: string; vaccinationRecordId?: string; certificateType?: string; fileName?: string }) {
+    const response = await this.client.post('/vaccine-certificate-log', data)
+    return response.data
+  }
+
+  async getAnimalCertificateLogs(animalId: string) {
+    const response = await this.client.get(`/vaccine-certificate-log/animal/${animalId}`)
+    return response.data
+  }
 }
 
 export const apiService = new ApiService()

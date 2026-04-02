@@ -93,6 +93,8 @@ import AdminService from '../services/AdminService';
 import PermissionService from '../services/PermissionService';
 import VetProfileService from '../services/VetProfileService';
 import UserService from '../services/UserService';
+import VaccineProtocolService from '../services/VaccineProtocolService';
+import VaccineScheduleService from '../services/VaccineScheduleService';
 import { asyncHandler } from '../utils/errorHandler';
 import { AuthRequest } from '../middleware/auth';
 
@@ -706,5 +708,159 @@ router.get('/vet-hospitals/admin/pending', authMiddleware, asyncHandler((req: Re
 router.get('/vet-hospitals/:id/documents', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalDocumentController.listDocuments(req, res)));
 router.post('/vet-hospitals/:id/documents', authMiddleware, uploadAny.any(), asyncHandler((req: Request, res: Response) => HospitalDocumentController.uploadDocument(req, res)));
 router.put('/vet-hospitals/:id/documents/:docId/review', authMiddleware, validateBody(reviewHospitalDocSchema), asyncHandler((req: Request, res: Response) => HospitalDocumentController.reviewDocument(req, res)));
+
+// ─── Vaccine Protocol routes (admin CRUD) ────────────────────
+router.get('/admin/vaccine-protocols', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const { species, category, country, activeOnly } = req.query as Record<string, string>;
+  const protocols = await VaccineProtocolService.listProtocols({
+    species, category, country, activeOnly: activeOnly !== 'false',
+  });
+  const stats = await VaccineProtocolService.getProtocolStats();
+  res.json({ success: true, data: { protocols, stats } });
+}));
+
+router.post('/admin/vaccine-protocols', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const protocol = await VaccineProtocolService.createProtocol({
+    ...req.body, createdBy: authReq.userId,
+  });
+  res.status(201).json({ success: true, data: protocol });
+}));
+
+router.get('/admin/vaccine-protocols/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const protocol = await VaccineProtocolService.getProtocol(req.params.id);
+  if (!protocol) return res.status(404).json({ success: false, message: 'Protocol not found' });
+  res.json({ success: true, data: protocol });
+}));
+
+router.put('/admin/vaccine-protocols/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const protocol = await VaccineProtocolService.updateProtocol(req.params.id, req.body, authReq.userId);
+  res.json({ success: true, data: protocol });
+}));
+
+router.patch('/admin/vaccine-protocols/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await VaccineProtocolService.archiveProtocol(req.params.id);
+  res.json({ success: true, message: 'Protocol archived' });
+}));
+
+router.patch('/admin/vaccine-protocols/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await VaccineProtocolService.restoreProtocol(req.params.id);
+  res.json({ success: true, message: 'Protocol restored' });
+}));
+
+// Regulatory change tracking
+router.get('/admin/vaccine-protocols/:id/changes', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const changes = await VaccineProtocolService.getProtocolChangeHistory(req.params.id);
+  res.json({ success: true, data: changes });
+}));
+
+router.post('/admin/vaccine-protocols/:id/changes', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const change = await VaccineProtocolService.addProtocolChange({
+    protocolId: req.params.id,
+    ...req.body,
+    changedBy: authReq.userId,
+  });
+  res.status(201).json({ success: true, data: change });
+}));
+
+// ─── Vaccine protocols — public read (authenticated) ─────────
+router.get('/vaccine-protocols', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { species, category, country } = req.query as Record<string, string>;
+  const protocols = await VaccineProtocolService.listProtocols({ species, category, country, activeOnly: true });
+  res.json({ success: true, data: protocols });
+}));
+
+router.get('/vaccine-protocols/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const protocol = await VaccineProtocolService.getProtocol(req.params.id);
+  if (!protocol) return res.status(404).json({ success: false, message: 'Not found' });
+  res.json({ success: true, data: protocol });
+}));
+
+// ─── Animal vaccine assignment routes ────────────────────────
+router.get('/animals/:animalId/vaccine-assignments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const assignments = await VaccineProtocolService.getAnimalAssignments(req.params.animalId);
+  res.json({ success: true, data: assignments });
+}));
+
+router.post('/animals/:animalId/vaccine-assignments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { protocolId, notes } = req.body;
+  if (!protocolId) return res.status(400).json({ success: false, message: 'protocolId required' });
+  const assignment = await VaccineProtocolService.assignProtocolToAnimal(
+    req.params.animalId, protocolId, authReq.userId!, notes
+  );
+  // Auto-generate schedule rows
+  const animalRes = await database.query(
+    `SELECT date_of_birth FROM animals WHERE id = $1`, [req.params.animalId]
+  );
+  await VaccineScheduleService.generateScheduleForAnimal(
+    req.params.animalId, protocolId, animalRes.rows[0]?.date_of_birth ?? null
+  );
+  res.status(201).json({ success: true, data: assignment });
+}));
+
+router.patch('/animals/:animalId/vaccine-assignments/:protocolId/waive', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { reason } = req.body;
+  await VaccineProtocolService.waiverProtocol(req.params.animalId, req.params.protocolId, reason || 'Owner waiver');
+  res.json({ success: true, message: 'Protocol waived' });
+}));
+
+// ─── Vaccine schedule routes ─────────────────────────────────
+router.get('/vaccine-schedule/animal/:animalId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const rows = await VaccineScheduleService.getAnimalSchedule(req.params.animalId);
+  res.json({ success: true, data: rows });
+}));
+
+router.patch('/vaccine-schedule/:scheduleId/administer', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { vaccinationRecordId, administeredAt } = req.body;
+  if (!vaccinationRecordId) return res.status(400).json({ success: false, message: 'vaccinationRecordId required' });
+  await VaccineScheduleService.markDoseAdministered(
+    req.params.scheduleId, vaccinationRecordId, administeredAt || new Date().toISOString().split('T')[0]
+  );
+  res.json({ success: true, message: 'Dose marked administered' });
+}));
+
+// ─── Vaccination Passport routes ─────────────────────────────
+router.get('/vaccination-passport/animal/:animalId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const passport = await VaccineScheduleService.getAnimalPassport(req.params.animalId);
+  if (!passport) return res.status(404).json({ success: false, message: 'Animal not found' });
+  res.json({ success: true, data: passport });
+}));
+
+router.get('/vaccination-passport/compliance-summary', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { enterpriseId, species } = req.query as Record<string, string>;
+  const isAdmin = authReq.userRole === 'admin';
+  const isVet = authReq.userRole === 'veterinarian';
+  const ownerId = (isAdmin || isVet) ? undefined : authReq.userId;
+  const data = await VaccineScheduleService.getComplianceSummary({
+    enterpriseId: enterpriseId || undefined,
+    ownerId,
+    species: species || undefined,
+  });
+  res.json({ success: true, data });
+}));
+
+// ─── Certificate log routes ───────────────────────────────────
+router.post('/vaccine-certificate-log', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { animalId, vaccinationRecordId, certificateType, fileName } = req.body;
+  if (!animalId) return res.status(400).json({ success: false, message: 'animalId required' });
+  const entry = await VaccineProtocolService.logCertificateDownload({
+    animalId,
+    vaccinationRecordId: vaccinationRecordId ?? null,
+    generatedBy: authReq.userId!,
+    certificateType: certificateType ?? 'single',
+    fileName: fileName ?? null,
+  });
+  res.status(201).json({ success: true, data: entry });
+}));
+
+router.get('/vaccine-certificate-log/animal/:animalId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const logs = await VaccineProtocolService.getCertificateLogs(req.params.animalId);
+  res.json({ success: true, data: logs });
+}));
 
 export default router;

@@ -1158,3 +1158,132 @@ CREATE INDEX IF NOT EXISTS idx_hospital_docs_hospital ON hospital_documents(hosp
 CREATE INDEX IF NOT EXISTS idx_hospital_docs_status ON hospital_documents(status);
 CREATE INDEX IF NOT EXISTS idx_hospital_docs_expiry ON hospital_documents(expiry_date)
   WHERE expiry_date IS NOT NULL;
+
+-- ============================================================
+-- VACCINATION PROTOCOL MASTER LIBRARY
+-- ============================================================
+
+-- ── 30. VACCINE PROTOCOLS ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS vaccine_protocols (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL,
+  disease VARCHAR(255) NOT NULL,
+  species TEXT[] NOT NULL DEFAULT '{}',
+  -- Applicable gender: 'all', 'male', 'female'
+  applicable_gender VARCHAR(10) NOT NULL DEFAULT 'all'
+    CHECK (applicable_gender IN ('all','male','female')),
+  -- Age range in weeks. NULL = no restriction
+  min_age_weeks INTEGER,
+  max_age_weeks INTEGER,
+  -- Core vs non-core vs government-mandated
+  vaccine_category VARCHAR(30) NOT NULL DEFAULT 'core'
+    CHECK (vaccine_category IN ('core','non_core','mandatory_govt','legally_mandated')),
+  is_zoonotic BOOLEAN DEFAULT false,
+  -- Dosing schedule
+  initial_dose_age_weeks INTEGER,          -- age (weeks) for first dose
+  booster_interval_days INTEGER NOT NULL DEFAULT 365, -- days between boosters
+  -- For puppy/kitten series: number of initial doses before annual boosters
+  series_dose_count INTEGER DEFAULT 1,
+  series_interval_days INTEGER DEFAULT 21, -- days between series doses
+  -- Administration info
+  route VARCHAR(30) DEFAULT 'intramuscular'
+    CHECK (route IN ('intramuscular','subcutaneous','intranasal','oral','intravenous','topical')),
+  dosage_ml VARCHAR(50),
+  site VARCHAR(100),
+  -- Regulatory & labelling
+  regulatory_body VARCHAR(255),
+  regulatory_standard VARCHAR(500),
+  seasonal_window VARCHAR(100),            -- e.g. "Pre-monsoon (May–June)"
+  country VARCHAR(50) DEFAULT 'ALL',
+  -- Status
+  is_active BOOLEAN DEFAULT true,
+  notes TEXT,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ── 31. VACCINE PROTOCOL CHANGES (regulatory change history) ─
+CREATE TABLE IF NOT EXISTS vaccine_protocol_changes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
+  changed_field VARCHAR(100) NOT NULL,
+  old_value TEXT,
+  new_value TEXT,
+  change_reason TEXT,
+  regulatory_standard VARCHAR(500),       -- e.g. "WSAVA 2022", "DAHD India 2023"
+  effective_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  changed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ── 32. ANIMAL VACCINE ASSIGNMENTS (protocols assigned to an animal) ─
+CREATE TABLE IF NOT EXISTS animal_vaccine_assignments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
+  assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  waived BOOLEAN DEFAULT false,
+  waiver_reason TEXT,
+  notes TEXT,
+  UNIQUE (animal_id, protocol_id)
+);
+
+-- ── 33. VACCINE SCHEDULE (generated per-dose rows) ──────────
+CREATE TABLE IF NOT EXISTS vaccine_schedule (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
+  assignment_id UUID REFERENCES animal_vaccine_assignments(id) ON DELETE SET NULL,
+  dose_number INTEGER NOT NULL DEFAULT 1,
+  due_date DATE NOT NULL,
+  -- Populated when the dose is administered
+  administered_at DATE,
+  vaccination_record_id UUID REFERENCES vaccination_records(id) ON DELETE SET NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending','administered','overdue','skipped','waived')),
+  reminder_sent BOOLEAN DEFAULT false,
+  reminder_sent_at TIMESTAMP,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ── 34. VACCINE CERTIFICATE LOG (track PDF certificate downloads) ─
+CREATE TABLE IF NOT EXISTS vaccine_certificate_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  vaccination_record_id UUID REFERENCES vaccination_records(id) ON DELETE SET NULL,
+  generated_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  certificate_type VARCHAR(30) NOT NULL DEFAULT 'single'
+    CHECK (certificate_type IN ('single','passport','batch')),
+  file_name VARCHAR(255),
+  generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- vaccination_records — add protocol / schedule FKs
+ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS protocol_id UUID REFERENCES vaccine_protocols(id) ON DELETE SET NULL;
+ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS schedule_id UUID REFERENCES vaccine_schedule(id) ON DELETE SET NULL;
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_vaccine_protocols_species ON vaccine_protocols USING GIN(species);
+CREATE INDEX IF NOT EXISTS idx_vaccine_protocols_active ON vaccine_protocols(is_active);
+CREATE INDEX IF NOT EXISTS idx_vaccine_protocol_changes_protocol ON vaccine_protocol_changes(protocol_id);
+CREATE INDEX IF NOT EXISTS idx_animal_vaccine_assignments_animal ON animal_vaccine_assignments(animal_id);
+CREATE INDEX IF NOT EXISTS idx_animal_vaccine_assignments_protocol ON animal_vaccine_assignments(protocol_id);
+CREATE INDEX IF NOT EXISTS idx_vaccine_schedule_animal ON vaccine_schedule(animal_id);
+CREATE INDEX IF NOT EXISTS idx_vaccine_schedule_due ON vaccine_schedule(due_date);
+CREATE INDEX IF NOT EXISTS idx_vaccine_schedule_status ON vaccine_schedule(status);
+CREATE INDEX IF NOT EXISTS idx_vaccine_cert_log_animal ON vaccine_certificate_log(animal_id);
+CREATE INDEX IF NOT EXISTS idx_vaccine_cert_log_generated_by ON vaccine_certificate_log(generated_by);
+CREATE INDEX IF NOT EXISTS idx_vaccination_records_protocol ON vaccination_records(protocol_id);
+
+-- Triggers
+DROP TRIGGER IF EXISTS update_vaccine_protocols_updated_at ON vaccine_protocols;
+CREATE TRIGGER update_vaccine_protocols_updated_at BEFORE UPDATE ON vaccine_protocols
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_vaccine_schedule_updated_at ON vaccine_schedule;
+CREATE TRIGGER update_vaccine_schedule_updated_at BEFORE UPDATE ON vaccine_schedule
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

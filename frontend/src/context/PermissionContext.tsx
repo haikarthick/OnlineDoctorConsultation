@@ -78,6 +78,9 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   admin_holidays: ['/admin/holidays'],
   // Timeline
   animal_timeline: ['/animal-timeline'],
+  // Vaccination
+  vaccination_passport: ['/vaccination-passport'],
+  admin_vaccine_protocols: ['/admin/vaccine-protocols'],
 }
 
 // Reverse map: route path → required permission
@@ -153,6 +156,9 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'admin-holidays': 'admin_holidays',
   // Timeline
   'animal-timeline': 'animal_timeline',
+  // Vaccination
+  'vaccination-passport': 'vaccination_passport',
+  'admin-vaccine-protocols': 'admin_vaccine_protocols',
 }
 
 // ─── Context ────────────────────────────────────────────────

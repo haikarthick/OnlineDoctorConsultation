@@ -377,6 +377,102 @@ class PostgresDatabase {
       ).catch(() => {});
     }
 
+    // Ensure vaccination protocol tables exist (safety net for existing DBs)
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS vaccine_protocols (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        name VARCHAR(255) NOT NULL,
+        disease VARCHAR(255) NOT NULL,
+        species TEXT[] NOT NULL DEFAULT '{}',
+        applicable_gender VARCHAR(10) NOT NULL DEFAULT 'all',
+        min_age_weeks INTEGER,
+        max_age_weeks INTEGER,
+        vaccine_category VARCHAR(30) NOT NULL DEFAULT 'core',
+        is_zoonotic BOOLEAN DEFAULT false,
+        initial_dose_age_weeks INTEGER,
+        booster_interval_days INTEGER NOT NULL DEFAULT 365,
+        series_dose_count INTEGER DEFAULT 1,
+        series_interval_days INTEGER DEFAULT 21,
+        route VARCHAR(30) DEFAULT 'intramuscular',
+        dosage_ml VARCHAR(50),
+        site VARCHAR(100),
+        regulatory_body VARCHAR(255),
+        regulatory_standard VARCHAR(500),
+        seasonal_window VARCHAR(100),
+        country VARCHAR(50) DEFAULT 'ALL',
+        is_active BOOLEAN DEFAULT true,
+        notes TEXT,
+        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `).catch(() => {});
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS vaccine_protocol_changes (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
+        changed_field VARCHAR(100) NOT NULL,
+        old_value TEXT,
+        new_value TEXT,
+        change_reason TEXT,
+        regulatory_standard VARCHAR(500),
+        effective_date DATE NOT NULL DEFAULT CURRENT_DATE,
+        changed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `).catch(() => {});
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS animal_vaccine_assignments (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+        protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
+        assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        waived BOOLEAN DEFAULT false,
+        waiver_reason TEXT,
+        notes TEXT,
+        UNIQUE (animal_id, protocol_id)
+      )
+    `).catch(() => {});
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS vaccine_schedule (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+        protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
+        assignment_id UUID REFERENCES animal_vaccine_assignments(id) ON DELETE SET NULL,
+        dose_number INTEGER NOT NULL DEFAULT 1,
+        due_date DATE NOT NULL,
+        administered_at DATE,
+        vaccination_record_id UUID REFERENCES vaccination_records(id) ON DELETE SET NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        reminder_sent BOOLEAN DEFAULT false,
+        reminder_sent_at TIMESTAMP,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `).catch(() => {});
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS vaccine_certificate_log (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+        vaccination_record_id UUID REFERENCES vaccination_records(id) ON DELETE SET NULL,
+        generated_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        certificate_type VARCHAR(30) NOT NULL DEFAULT 'single',
+        file_name VARCHAR(255),
+        generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `).catch(() => {});
+
+    // Ensure vaccination_records has new FK columns
+    const vaccinationProtocolColumns = [
+      `ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS protocol_id UUID REFERENCES vaccine_protocols(id) ON DELETE SET NULL`,
+      `ALTER TABLE vaccination_records ADD COLUMN IF NOT EXISTS schedule_id UUID REFERENCES vaccine_schedule(id) ON DELETE SET NULL`,
+    ];
+    for (const ddl of vaccinationProtocolColumns) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
     logger.info('Default system settings seeded');
   }
 

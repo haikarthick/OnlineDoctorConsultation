@@ -1,0 +1,364 @@
+/* ══════════════════════════════════════════════════
+   VaccinationPassport.css
+   ══════════════════════════════════════════════════ */
+
+/* ── Compliance meter ──────────────────────────── */
+.vp-compliance-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+.vp-compliance-bar-track {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.vp-compliance-bar {
+  height: 8px;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  min-width: 4px;
+}
+.vp-compliance-label {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── Passport card ─────────────────────────────── */
+.vp-passport-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.vp-passport-card:hover {
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+}
+
+.vp-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f0ff 100%);
+  user-select: none;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.vp-card-header:hover {
+  background: linear-gradient(135deg, #eef2ff 0%, #e8e8ff 100%);
+}
+
+.vp-card-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.vp-species-icon {
+  font-size: 36px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.vp-animal-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: -0.3px;
+}
+.vp-animal-meta {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.vp-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.vp-expand-icon {
+  font-size: 12px;
+  color: #6b7280;
+  transition: transform 0.2s;
+}
+.vp-expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+/* ── Protocol list ─────────────────────────────── */
+.vp-protocol-list {
+  border-top: 1px solid #e5e7eb;
+  padding: 8px 0;
+}
+
+.vp-empty-protocols {
+  padding: 24px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.vp-protocol-row {
+  border-bottom: 1px solid #f3f4f6;
+}
+.vp-protocol-row:last-child {
+  border-bottom: none;
+}
+.vp-protocol-row.vp-waived {
+  opacity: 0.65;
+  background: #fafafa;
+}
+
+/* ── Protocol summary ──────────────────────────── */
+.vp-protocol-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  cursor: pointer;
+  flex-wrap: wrap;
+}
+.vp-protocol-summary:hover {
+  background: #f9fafb;
+}
+
+.vp-proto-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 200px;
+  flex: 1;
+}
+.vp-proto-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a1a2e;
+}
+
+.vp-zoonotic-chip {
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 8px;
+  border: 1px solid #fde68a;
+}
+
+.vp-proto-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #6b7280;
+  flex-wrap: wrap;
+  flex: 2;
+}
+.vp-proto-stats strong {
+  color: #374151;
+}
+
+.vp-overdue-warning {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.vp-proto-compliance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.vp-expand-icon-sm {
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+/* ── Dose table ────────────────────────────────── */
+.vp-dose-table-wrap {
+  padding: 0 20px 12px;
+}
+.vp-dose-table {
+  font-size: 13px;
+}
+
+/* ── Loading / empty states ────────────────────── */
+.vp-loading {
+  padding: 40px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 15px;
+}
+.vp-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 15px;
+}
+.vp-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+/* ── Compliance summary table ──────────────────── */
+.vp-table-icon {
+  margin-right: 6px;
+}
+
+/* ── Certificate history ───────────────────────── */
+.vp-cert-history {}
+
+.vp-cert-filter {
+  padding: 16px 0 4px;
+  max-width: 320px;
+}
+
+.vp-cert-timeline {
+  position: relative;
+  padding: 16px 0;
+}
+.vp-cert-timeline::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.vp-cert-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 8px 0 8px 8px;
+  position: relative;
+}
+
+.vp-cert-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #c7d2fe;
+  flex-shrink: 0;
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.vp-cert-info {
+  flex: 1;
+}
+.vp-cert-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.vp-cert-type {
+  background: #ede9fe;
+  color: #5b21b6;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.vp-cert-filename {
+  font-size: 13px;
+  color: #374151;
+  font-family: monospace;
+}
+.vp-cert-meta {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* ── Passport tab ─────────────────────────────── */
+.vp-passport-tab {
+  padding: 8px 0;
+}
+
+/* ══════════════════════════════════════════════════
+   Responsive breakpoints
+   ══════════════════════════════════════════════════ */
+
+/* 1200px ──────────────────────────────────────── */
+@media (max-width: 1200px) {
+  .vp-card-header {
+    gap: 12px;
+  }
+  .vp-proto-stats {
+    gap: 12px;
+  }
+}
+
+/* 768px ── single-column, stacked ────────────── */
+@media (max-width: 768px) {
+  .vp-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .vp-card-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .vp-protocol-summary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .vp-proto-name {
+    min-width: unset;
+  }
+  .vp-proto-stats {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .data-table-container {
+    overflow-x: auto;
+  }
+}
+
+/* 640px ──────────────────────────────────────── */
+@media (max-width: 640px) {
+  .vp-compliance-meter {
+    min-width: 80px;
+  }
+  .vp-animal-name {
+    font-size: 16px;
+  }
+  .vp-species-icon {
+    font-size: 28px;
+  }
+}
+
+/* 480px ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  .vp-cert-timeline::before {
+    left: 9px;
+  }
+  .vp-cert-entry {
+    gap: 12px;
+  }
+  .vp-card-identity {
+    gap: 8px;
+  }
+  .module-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}

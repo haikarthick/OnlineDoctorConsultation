@@ -7,6 +7,7 @@ import cacheManager from './utils/cacheManager';
 import { initSocketIO } from './utils/socketIO';
 import { startScheduler } from './utils/scheduler';
 import { fixDemoPasswords } from './utils/fixDemoPasswords';
+import VaccineScheduleService from './services/VaccineScheduleService';
 
 const startServer = async () => {
   try {
@@ -25,6 +26,16 @@ const startServer = async () => {
 
     // Start background scheduler (document expiry checks, etc.)
     startScheduler();
+
+    // Start vaccine reminder daily job (runs once on startup, then every 24h)
+    VaccineScheduleService.runDailyReminderJob().catch((err: any) =>
+      logger.warn('[VaccineSchedule] Initial reminder job failed', { error: err.message })
+    );
+    setInterval(() => {
+      VaccineScheduleService.runDailyReminderJob().catch((err: any) =>
+        logger.warn('[VaccineSchedule] Scheduled reminder job failed', { error: err.message })
+      );
+    }, 24 * 60 * 60 * 1000);
 
     // Start server
     const httpServer = http.createServer(app);

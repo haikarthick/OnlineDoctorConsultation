@@ -23,6 +23,7 @@ export const PERMISSION_CATEGORIES = {
       'hospital_manage',
       'animal_timeline',
       'wallet',
+      'vaccination_passport',
     ]
   },
   admin_pages: {
@@ -41,6 +42,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_compliance',
       'admin_holidays',
       'admin_cancellation_dashboard',
+      'admin_vaccine_protocols',
     ]
   },
   actions: {
@@ -144,6 +146,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard', 'consultations', 'medical_records', 'schedule',
     'prescriptions', 'reviews', 'video_consultation', 'settings',
     'animals', 'animal_timeline',
+    // Pages
+    'vaccination_passport',
     // Hospital
     'hospital_browse', 'hospital_create', 'hospital_manage',
     'hospital_departments', 'hospital_services', 'hospital_staff',
@@ -179,6 +183,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'hospital_browse',
     // (user-scoped)
     'ai_copilot', 'marketplace_access', 'wellness_portal',
+    'vaccination_passport',
     // Wallet
     'wallet',
     // Actions
@@ -207,6 +212,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Futuristic Modules
     'ai_copilot', 'digital_twin', 'marketplace_access',
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
+    'vaccination_passport',
     // Wallet
     'wallet',
     // Actions
@@ -241,6 +247,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Futuristic Modules
     'ai_copilot', 'digital_twin', 'marketplace_access',
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
+    // Vaccine Protocols
+    'vaccination_passport', 'admin_vaccine_protocols',
     // Wallet & Cancellation
     'wallet', 'admin_cancellation_dashboard',
     // Holiday management

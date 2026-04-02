@@ -88,6 +88,8 @@ const HospitalWorkflow = lazy(() => import('./pages/HospitalWorkflow'))
 const InpatientManagement = lazy(() => import('./pages/InpatientManagement'))
 const StaffSettingsAdmin = lazy(() => import('./pages/admin/StaffSettings'))
 const AnimalTimeline = lazy(() => import('./pages/AnimalTimeline'))
+const VaccinationPassport = lazy(() => import('./pages/VaccinationPassport'))
+const VaccineProtocolAdmin = lazy(() => import('./pages/admin/VaccineProtocolAdmin'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -195,6 +197,7 @@ function AppRoutes() {
       <Route path="/medical-records" element={<RoleRoute path="/medical-records"><AppLayout><MedicalRecords /></AppLayout></RoleRoute>} />
       <Route path="/animals" element={<RoleRoute path="/animals"><AppLayout><Animals /></AppLayout></RoleRoute>} />
       <Route path="/animal-timeline" element={<RoleRoute path="/animal-timeline"><AppLayout><AnimalTimeline /></AppLayout></RoleRoute>} />
+      <Route path="/vaccination-passport" element={<RoleRoute path="/vaccination-passport"><AppLayout><RoutedPage Component={VaccinationPassport} /></AppLayout></RoleRoute>} />
       <Route path="/settings" element={<RoleRoute path="/settings"><AppLayout><Settings /></AppLayout></RoleRoute>} />
 
       {/* ── Pet Owner Module ── */}
@@ -271,6 +274,7 @@ function AppRoutes() {
       <Route path="/admin/cancellation-dashboard" element={<RoleRoute path="/admin/cancellation-dashboard"><AppLayout><RoutedPage Component={CancellationDashboard} /></AppLayout></RoleRoute>} />
       <Route path="/admin/staff-settings" element={<RoleRoute path="/admin/staff-settings"><AppLayout><RoutedPage Component={StaffSettingsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/holidays" element={<RoleRoute path="/admin/holidays"><AppLayout><RoutedPage Component={HolidayManagementAdmin} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/vaccine-protocols" element={<RoleRoute path="/admin/vaccine-protocols"><AppLayout><RoutedPage Component={VaccineProtocolAdmin} /></AppLayout></RoleRoute>} />
 
       {/* ── Hospital Workflow Module ── */}
       <Route path="/hospital-workflow" element={<RoleRoute path="/hospital-workflow"><AppLayout><HospitalWorkflow /></AppLayout></RoleRoute>} />

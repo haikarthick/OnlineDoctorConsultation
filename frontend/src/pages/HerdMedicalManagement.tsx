@@ -69,11 +69,43 @@ const HerdMedicalManagement: React.FC = () => {
   const [modalSaving, setModalSaving] = useState(false)
   const [viewRecord, setViewRecord] = useState<any>(null)
 
+  // Vaccine protocols (loaded when animal selected in vaccination modal)
+  const [vaccineProtocols, setVaccineProtocols] = useState<any[]>([])
+
   // Form states
   const [recordForm, setRecordForm] = useState({ animalId: '', recordType: 'diagnosis', title: '', content: '', severity: 'normal', followUpDate: '', medications: '' })
   const [vaccForm, setVaccForm] = useState({ animalId: '', vaccineName: '', vaccineType: '', dateAdministered: new Date().toISOString().slice(0, 10), nextDueDate: '', batchNumber: '', manufacturer: '', dosage: '', certificateNumber: '' })
   const [allergyForm, setAllergyForm] = useState({ animalId: '', allergen: '', reaction: '', severity: 'normal', notes: '' })
   const [labForm, setLabForm] = useState({ animalId: '', testName: '', testDate: new Date().toISOString().slice(0, 10), testCategory: '', resultValue: '', normalRange: '', unit: '', status: 'pending', interpretation: '', labName: '', notes: '' })
+
+  // Load protocols when vaccForm.animalId changes
+  useEffect(() => {
+    if (!vaccForm.animalId) { setVaccineProtocols([]); return }
+    const animal = animals.find(a => a.id === vaccForm.animalId)
+    if (!animal) return
+    ;(apiService as any).client.get('/vaccine-protocols', { params: { species: animal.species, activeOnly: true } })
+      .then((res: any) => setVaccineProtocols(res.data?.data || []))
+      .catch(() => setVaccineProtocols([]))
+  }, [vaccForm.animalId, animals])
+
+  const handleVaccineProtocolSelect = (name: string) => {
+    const proto = vaccineProtocols.find((p: any) => p.name === name)
+    if (!proto) { setVaccForm(f => ({ ...f, vaccineName: name })); return }
+    const adminDate = vaccForm.dateAdministered || new Date().toISOString().slice(0, 10)
+    let nextDue = ''
+    if (proto.boosterIntervalDays) {
+      const d = new Date(adminDate)
+      d.setDate(d.getDate() + proto.boosterIntervalDays)
+      nextDue = d.toISOString().slice(0, 10)
+    }
+    setVaccForm(f => ({
+      ...f,
+      vaccineName: proto.name,
+      vaccineType: proto.vaccineCategory || f.vaccineType,
+      dosage: proto.dosageMl ? `${proto.dosageMl} mL` : f.dosage,
+      nextDueDate: nextDue || f.nextDueDate,
+    }))
+  }
 
   const fmtDate = useCallback((d: string) => {
     if (!d) return 'N/A'
@@ -648,9 +680,31 @@ const HerdMedicalManagement: React.FC = () => {
             <h2 style={{ marginBottom: '16px' }}>{t('herdMedical.modal.recordVaccination')}</h2>
             <p style={{ color: '#666', fontSize: '0.9em', marginBottom: '16px' }}>{t('herdMedical.modal.vaccDescription')}</p>
             <form onSubmit={handleCreateVaccination}>
-              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.animal')} *</label><AnimalSelect value={vaccForm.animalId} onChange={v => setVaccForm(f => ({ ...f, animalId: v }))} required /></div>
+              <div style={fieldStyle}><label style={labelStyle}>{t('herdMedical.modal.animal')} *</label><AnimalSelect value={vaccForm.animalId} onChange={v => setVaccForm(f => ({ ...f, animalId: v, vaccineName: '', vaccineType: '', dosage: '', nextDueDate: '' }))} required /></div>
+              {vaccineProtocols.length > 0 && (
+                <div style={{ ...fieldStyle, padding: '8px 12px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', marginBottom: '8px', fontSize: '0.85em', color: '#166534' }}>
+                  💉 {t('herdMedical.modal.protocolsAvailable', { count: vaccineProtocols.length })}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
-                <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.vaccineName')} *</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.vaccineName} onChange={e => setVaccForm(f => ({ ...f, vaccineName: e.target.value }))} required placeholder={t('herdMedical.modal.vaccineNamePlaceholder')} /></div>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>{t('herdMedical.modal.vaccineName')} *</label>
+                  <input
+                    type="text"
+                    list="vaccine-protocol-datalist"
+                    className="search-input"
+                    style={{ width: '100%' }}
+                    value={vaccForm.vaccineName}
+                    onChange={e => handleVaccineProtocolSelect(e.target.value)}
+                    required
+                    placeholder={vaccineProtocols.length > 0 ? t('herdMedical.modal.vaccineNameSuggestPlaceholder') : t('herdMedical.modal.vaccineNamePlaceholder')}
+                  />
+                  <datalist id="vaccine-protocol-datalist">
+                    {vaccineProtocols.map((p: any) => (
+                      <option key={p.id} value={p.name}>{p.disease} ({p.vaccineCategory})</option>
+                    ))}
+                  </datalist>
+                </div>
                 <div style={{ flex: 1 }}><label style={labelStyle}>{t('herdMedical.modal.vaccineType')}</label><input type="text" className="search-input" style={{ width: '100%' }} value={vaccForm.vaccineType} onChange={e => setVaccForm(f => ({ ...f, vaccineType: e.target.value }))} placeholder={t('herdMedical.modal.vaccineTypePlaceholder')} /></div>
               </div>
               <div style={{ display: 'flex', gap: '12px', ...fieldStyle }}>
