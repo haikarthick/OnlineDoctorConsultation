@@ -81,6 +81,53 @@ export async function fixDemoPasswords(): Promise<void> {
     // 2. Seed demo data if missing (check multiple indicators — vet_profiles AND consultations must both exist)
     const { rows: vpRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM vet_profiles');
     const { rows: cRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM consultations');
+
+    // 2a. Always seed vaccine protocols independently (separate from main seed guard)
+    //     This runs even when full demo data already exists but protocols are missing.
+    try {
+      const { rows: protocolRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM vaccine_protocols');
+      if (protocolRows[0].cnt === 0) {
+        logger.info('Vaccine protocols table empty — running STEP 92 & 93 seed...');
+        const possibleSeedPaths = [
+          path.join(__dirname, '..', '..', '..', 'docker', 'seed-demo-data.sql'),
+          path.join(__dirname, '..', '..', 'docker', 'seed-demo-data.sql'),
+          path.join(process.cwd(), '..', 'docker', 'seed-demo-data.sql'),
+          path.join(process.cwd(), 'docker', 'seed-demo-data.sql'),
+        ];
+        let vpSqlPath: string | null = null;
+        for (const p of possibleSeedPaths) { if (fs.existsSync(p)) { vpSqlPath = p; break; } }
+        if (vpSqlPath) {
+          const fullSql = fs.readFileSync(vpSqlPath, 'utf-8').replace(/\r\n/g, '\n');
+          const vpHeaderRegex = /-- ={10,}\n-- STEP 92:\s*.+\n-- ={10,}/g;
+          const vpMatch = vpHeaderRegex.exec(fullSql);
+          if (vpMatch) {
+            const vpSectionStart = vpHeaderRegex.lastIndex;
+            // Find STEP 94 (whatever comes next) or end of file
+            const nextStepRegex = /-- ={10,}\n-- STEP (?!9[23])\d+/g;
+            nextStepRegex.lastIndex = vpSectionStart;
+            const nextMatch = nextStepRegex.exec(fullSql);
+            const vpSectionSql = fullSql.substring(vpSectionStart, nextMatch ? nextMatch.index : fullSql.length).trim();
+            try { await database.query(vpSectionSql); logger.info('Seed: ✓ VACCINE PROTOCOLS (STEP 92)'); }
+            catch (e: any) { logger.warn('Seed: ⚠ VACCINE PROTOCOLS: ' + e.message.substring(0, 200)); }
+          }
+          // Also run STEP 93 (regulatory change history)
+          const ch3HeaderRegex = /-- ={10,}\n-- STEP 93:\s*.+\n-- ={10,}/g;
+          const ch3Match = ch3HeaderRegex.exec(fullSql);
+          if (ch3Match) {
+            const ch3SectionStart = ch3HeaderRegex.lastIndex;
+            const nextStepRegex2 = /-- ={10,}\n-- STEP (?!93)\d+/g;
+            nextStepRegex2.lastIndex = ch3SectionStart;
+            const nextMatch2 = nextStepRegex2.exec(fullSql);
+            const ch3Sql = fullSql.substring(ch3SectionStart, nextMatch2 ? nextMatch2.index : fullSql.length).trim();
+            try { await database.query(ch3Sql); logger.info('Seed: ✓ VACCINE PROTOCOL CHANGES (STEP 93)'); }
+            catch (e: any) { logger.warn('Seed: ⚠ VACCINE PROTOCOL CHANGES: ' + e.message.substring(0, 200)); }
+          }
+        }
+      }
+    } catch (vpErr: any) {
+      logger.warn('Vaccine protocol seed check failed: ' + vpErr.message);
+    }
+
     if (vpRows[0].cnt >= 3 && cRows[0].cnt > 0) return; // Full seed data already exists
 
     logger.info('No demo data found — seeding via app database connection...');

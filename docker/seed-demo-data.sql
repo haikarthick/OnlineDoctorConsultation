@@ -2822,8 +2822,7 @@ INSERT INTO weight_history (id, animal_id, weight, unit, notes, recorded_by, rec
   ('f2000000-0000-0000-0000-000000000478','aa000000-0000-0000-0000-000000000003',7.52,'kg',NULL,'b0000000-0000-0000-0000-000000000001','2023-10-15 09:00:00','2023-10-15 09:00:00');
 
 -- ============================================================
--- VACCINE PROTOCOL MASTER SEED DATA
--- India livestock + companion animal + equine protocols
+-- STEP 92: VACCINE PROTOCOLS (India + Companion + Equine)
 -- ============================================================
 
 INSERT INTO vaccine_protocols (
@@ -3001,7 +3000,9 @@ INSERT INTO vaccine_protocols (
 
 ON CONFLICT (id) DO NOTHING;
 
--- ── REGULATORY CHANGE HISTORY SAMPLES ────────────────────────────
+-- ============================================================
+-- STEP 93: VACCINE PROTOCOL REGULATORY CHANGE HISTORY
+-- ============================================================
 
 INSERT INTO vaccine_protocol_changes (
   id, protocol_id, changed_field, old_value, new_value,
