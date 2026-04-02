@@ -244,7 +244,8 @@
       "workflow": "Workflow",
       "compliance": "Compliance",
       "howItWorks": "How It Works",
-      "testimonials": "Testimonials"
+      "testimonials": "Testimonials",
+      "sections": "Sections"
     },
     "registerHospital": "Register Hospital",
     "browseHospitals": "Browse Hospitals",

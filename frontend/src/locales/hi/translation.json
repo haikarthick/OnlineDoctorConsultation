@@ -217,7 +217,8 @@
       "workflow": "वर्कफ़्लो",
       "compliance": "अनुपालन",
       "howItWorks": "कैसे काम करता है",
-      "testimonials": "प्रशंसापत्र"
+      "testimonials": "प्रशंसापत्र",
+      "sections": "अनुभाग"
     },
     "registerHospital": "अस्पताल पंजीकरण",
     "browseHospitals": "अस्पताल ब्राउज़ करें",

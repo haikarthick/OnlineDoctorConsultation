@@ -205,17 +205,130 @@
   line-height: 1;
 }
 
-/* Center nav links */
+/* Center nav — sections dropdown trigger */
 .home-nav-center {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  flex: 1;
   justify-content: center;
+  flex: 1;
   min-width: 0;
+  position: relative;
+}
+
+/* Sections trigger button */
+.home-nav-sections-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  max-width: 260px;
   overflow: hidden;
 }
 
+.home-nav-sections-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.28);
+  color: #ffffff;
+}
+
+.home-nav-sections-btn--active {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(165, 180, 252, 0.35);
+  color: #ffffff;
+}
+
+.home-nav-sections-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.home-nav-sections-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.home-nav-sections-arrow {
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+.home-nav-sections-arrow--open {
+  transform: rotate(180deg);
+}
+
+/* Sections dropdown panel */
+.home-nav-sections-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a2744;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.4);
+  z-index: 1001;
+  min-width: 220px;
+  padding: 6px;
+  animation: sectionsDropAnim 0.15s ease;
+}
+
+@keyframes sectionsDropAnim {
+  from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.home-nav-sections-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.75);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.home-nav-sections-option:hover {
+  background: rgba(255,255,255,0.08);
+  color: #ffffff;
+}
+
+.home-nav-sections-option--active {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  font-weight: 600;
+}
+
+.home-nav-sections-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a5b4fc;
+  flex-shrink: 0;
+}
+
+/* Keep .home-nav-link for any legacy usage */
 .home-nav-link {
   color: rgba(255,255,255,0.65);
   text-decoration: none;
@@ -224,40 +337,12 @@
   padding: 0.4rem 0.55rem;
   border-radius: 6px;
   transition: all 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 130px;
-  letter-spacing: 0.01em;
   background: none;
   border: none;
   cursor: pointer;
-  position: relative;
-  flex-shrink: 1;
-  min-width: 0;
 }
 
-.home-nav-link:hover {
-  color: #ffffff;
-  background: rgba(255,255,255,0.08);
-}
-
-.home-nav-link--active {
-  color: #ffffff;
-  background: rgba(99, 102, 241, 0.2);
-}
-
-.home-nav-link--active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 16px;
-  height: 2px;
-  background: #a5b4fc;
-  border-radius: 1px;
-}
+.home-nav-link:hover { color: #ffffff; background: rgba(255,255,255,0.08); }
 
 /* Action buttons */
 .home-nav-actions {
@@ -1146,10 +1231,10 @@
   .home-nav-center {
     gap: 0.1rem;
   }
-  .home-nav-link {
-    font-size: 0.74rem;
-    padding: 0.3rem 0.4rem;
-    max-width: 110px;
+  .home-nav-sections-btn {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.85rem;
+    max-width: 220px;
   }
   .home-nav-actions {
     gap: 0.35rem;
@@ -1171,11 +1256,21 @@
   .advanced-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Nav: hide center links entirely, show only actions */
+/* Nav: compress action buttons at 1024px — sections btn stays visible */
 @media (max-width: 1024px) {
-  .home-nav-center { display: none; }
-  .home-nav-mobile-toggle { display: flex; }
-  .home-nav-inner { padding: 0 1.5rem; }
+  .home-nav-inner { padding: 0 1rem; gap: 0.4rem; }
+  .home-nav-title { display: none; }
+  .home-nav-badge { display: none; }
+  .home-nav-actions { gap: 0.4rem; }
+  .home-nav-browse,
+  .home-nav-signin,
+  .home-nav-cta {
+    font-size: 0.72rem;
+    padding: 0.32rem 0.65rem;
+  }
+  .home-nav-browse { max-width: 140px; }
+  .home-nav-cta { max-width: 180px; }
+  .home-nav-sections-btn { font-size: 0.8rem; padding: 0.38rem 0.75rem; max-width: 200px; }
 }
 
 @media (max-width: 768px) {

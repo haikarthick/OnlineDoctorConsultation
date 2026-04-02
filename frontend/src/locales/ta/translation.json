@@ -217,7 +217,8 @@
       "workflow": "பணிப்பாய்வு",
       "compliance": "இணக்கம்",
       "howItWorks": "எப்படி செயல்படுகிறது",
-      "testimonials": "சான்றுகள்"
+      "testimonials": "சான்றுகள்",
+      "sections": "பகுதிகள்"
     },
     "registerHospital": "மருத்துவமனை பதிவு",
     "browseHospitals": "மருத்துவமனைகள் பார்வையிடு",

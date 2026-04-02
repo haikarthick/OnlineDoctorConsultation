@@ -28,17 +28,22 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
   const [navScrolled, setNavScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [langDropdownOpen, setLangDropdownOpen] = useState(false)
+  const [sectionsDropdownOpen, setSectionsDropdownOpen] = useState(false)
   const observerRef = useRef<IntersectionObserver | null>(null)
   const langDropRef = useRef<HTMLDivElement>(null)
+  const sectionsDropRef = useRef<HTMLDivElement>(null)
   const currentLang = supportedLanguages.find(l => l.code === i18n.language) || supportedLanguages[0]
 
   const sectionLabel = (id: string) => t(`home.nav.${NAV_KEY_MAP[id] || id}`)
 
-  // Close lang dropdown on outside click
+  // Close lang + sections dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (langDropRef.current && !langDropRef.current.contains(e.target as Node)) {
         setLangDropdownOpen(false)
+      }
+      if (sectionsDropRef.current && !sectionsDropRef.current.contains(e.target as Node)) {
+        setSectionsDropdownOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -144,17 +149,34 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
             <span className="home-nav-title">{t('common.brand')}</span>
             <span className="home-nav-badge">{t('common.enterprise')}</span>
           </div>
-          <div className="home-nav-center">
-            {SECTION_IDS.filter(id => id !== 'hero').map(id => (
-              <button
-                key={id}
-                className={`home-nav-link${activeSection === id ? ' home-nav-link--active' : ''}`}
-                onClick={() => scrollToSection(id)}
-                title={sectionLabel(id)}
-              >
-                {sectionLabel(id)}
-              </button>
-            ))}
+          <div className="home-nav-center" ref={sectionsDropRef}>
+            <button
+              className={`home-nav-sections-btn${activeSection !== 'hero' ? ' home-nav-sections-btn--active' : ''}`}
+              onClick={() => setSectionsDropdownOpen(prev => !prev)}
+              aria-haspopup="true"
+              aria-expanded={sectionsDropdownOpen}
+            >
+              <span className="home-nav-sections-icon">☰</span>
+              <span className="home-nav-sections-label">
+                {activeSection !== 'hero' ? sectionLabel(activeSection) : t('home.nav.sections')}
+              </span>
+              <span className={`home-nav-sections-arrow${sectionsDropdownOpen ? ' home-nav-sections-arrow--open' : ''}`}>▾</span>
+            </button>
+            {sectionsDropdownOpen && (
+              <div className="home-nav-sections-dropdown" role="menu">
+                {SECTION_IDS.filter(id => id !== 'hero').map(id => (
+                  <button
+                    key={id}
+                    role="menuitem"
+                    className={`home-nav-sections-option${activeSection === id ? ' home-nav-sections-option--active' : ''}`}
+                    onClick={() => { scrollToSection(id); setSectionsDropdownOpen(false) }}
+                  >
+                    {activeSection === id && <span className="home-nav-sections-dot" />}
+                    {sectionLabel(id)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="home-nav-actions">
             <button className="home-nav-browse" onClick={() => navigate('/browse-marketplace')} title={t('publicMarketplace.homeCta.browseNow')}>
