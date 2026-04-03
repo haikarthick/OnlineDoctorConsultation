@@ -286,7 +286,8 @@ const MedicalRecords: React.FC = () => {
     setLoadingProtocols(true)
     try {
       const res = await apiService.listVaccineProtocols({ species })
-      setVaccineProtocols(res?.protocols || res?.data?.protocols || [])
+      const protocols = Array.isArray(res?.data) ? res.data : (res?.data?.protocols || res?.protocols || [])
+      setVaccineProtocols(protocols)
     } catch {
       setVaccineProtocols([])
     } finally {
