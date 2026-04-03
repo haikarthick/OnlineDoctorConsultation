@@ -149,7 +149,7 @@ class VaccineProtocolService {
       query += ` AND is_active = true`;
     }
     if (filters.species) {
-      query += ` AND $${idx} = ANY(species)`;
+      query += ` AND LOWER($${idx}) = ANY(SELECT LOWER(s) FROM unnest(species) s)`;
       params.push(filters.species);
       idx++;
     }

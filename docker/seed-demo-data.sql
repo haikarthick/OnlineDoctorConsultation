@@ -3042,7 +3042,91 @@ INSERT INTO vaccine_protocols (
  'intramuscular', '1 ml', 'Neck muscle',
  'BEVA / OIE', 'OIE Terrestrial Animal Health Code, BEVA Guidelines 2023',
  'Any season', 'ALL',
- 'Biannual. Primary series: 2 doses 3–6 weeks apart. Required for most competition events.')
+ 'Biannual. Primary series: 2 doses 3–6 weeks apart. Required for most competition events.'),
+
+-- ── DOGS ─────────────────────────────────────────────────────
+
+-- Rabies — dog — annual/triennial (required by law in most countries)
+('a9000000-0000-0000-0000-000000000020',
+ 'Rabies (Canine)', 'Rabies',
+ ARRAY['dog'], 'all', 12, NULL,
+ 'mandatory_govt', true, 12, 365, 1, 0,
+ 'subcutaneous', '1 ml', 'Right rear leg',
+ 'WSAVA / BVA', 'WSAVA Vaccination Guidelines 2022, Local Rabies Control Act',
+ 'Any season', 'ALL',
+ 'Core vaccine. Legally mandatory in most countries. First dose at 12 weeks, booster at 1 year, then annually or every 3 years depending on vaccine label and local law.'),
+
+-- DHPP (Distemper-Hepatitis-Parvovirus-Parainfluenza) — core puppy series
+('a9000000-0000-0000-0000-000000000021',
+ 'DHPP (Distemper, Hepatitis, Parvo, Para-Influenza)', 'Canine Distemper / Hepatitis / Parvovirus / Parainfluenza',
+ ARRAY['dog'], 'all', 6, NULL,
+ 'core', false, 6, 1095, 3, 21,
+ 'subcutaneous', '1 ml', 'Right shoulder',
+ 'WSAVA / AAHA', 'WSAVA Vaccination Guidelines 2022, AAHA Canine Vaccination Guidelines 2022',
+ 'Any season', 'ALL',
+ 'Core. Puppy series: 6, 9, 12 weeks then booster at 1 year, then every 3 years. Do not skip - parvovirus is highly fatal in unvaccinated puppies.'),
+
+-- Bordetella (Kennel Cough) — annual
+('a9000000-0000-0000-0000-000000000022',
+ 'Bordetella bronchiseptica (Kennel Cough)', 'Infectious Tracheobronchitis',
+ ARRAY['dog'], 'all', 8, NULL,
+ 'non_core', false, 8, 365, 1, 0,
+ 'intranasal', '1 ml', 'Intranasal',
+ 'WSAVA / AAHA', 'WSAVA Vaccination Guidelines 2022',
+ 'Any season — required before boarding/kenneling', 'ALL',
+ 'Non-core but recommended for all social dogs. Intranasal preferred. Required by most boarding facilities and dog parks.'),
+
+-- Leptospirosis — annual
+('a9000000-0000-0000-0000-000000000023',
+ 'Leptospirosis (L4)', 'Leptospirosis',
+ ARRAY['dog'], 'all', 8, NULL,
+ 'non_core', true, 8, 365, 2, 21,
+ 'subcutaneous', '1 ml', 'Left shoulder',
+ 'WSAVA / AAHA', 'WSAVA Vaccination Guidelines 2022',
+ 'Any season — higher risk in monsoon/wet season', 'ALL',
+ 'Zoonotic. Non-core but strongly recommended in endemic areas. Annual boosters required for maintained immunity. L4 covers 4 serovars.'),
+
+-- Canine Influenza (H3N2/H3N8) — biannual
+('a9000000-0000-0000-0000-000000000024',
+ 'Canine Influenza (H3N2/H3N8)', 'Canine Influenza',
+ ARRAY['dog'], 'all', 6, NULL,
+ 'non_core', false, 6, 182, 2, 21,
+ 'subcutaneous', '1 ml', 'Right shoulder',
+ 'AAHA', 'AAHA Canine Vaccination Guidelines 2022',
+ 'Any season', 'ALL',
+ 'Non-core. Recommended for dogs with frequent exposure (shows, boarding, shelters). Primary 2-dose series 3 weeks apart, then biannual boosters.'),
+
+-- ── CATS ─────────────────────────────────────────────────────
+
+-- Rabies (Feline) — annual
+('a9000000-0000-0000-0000-000000000025',
+ 'Rabies (Feline)', 'Rabies',
+ ARRAY['cat'], 'all', 12, NULL,
+ 'mandatory_govt', true, 12, 365, 1, 0,
+ 'subcutaneous', '1 ml', 'Right rear leg',
+ 'WSAVA / ABCD', 'WSAVA Vaccination Guidelines 2022, ABCD Guidelines 2023',
+ 'Any season', 'ALL',
+ 'Core. Legally mandatory in most jurisdictions. Annual or 3-year vaccine depending on product label.'),
+
+-- FVRCP (Feline Distemper+Calici+Herpes) — triennial
+('a9000000-0000-0000-0000-000000000026',
+ 'FVRCP (Feline Panleukopenia, Herpesvirus, Calicivirus)', 'Feline Panleukopenia / Herpesvirus / Calicivirus',
+ ARRAY['cat'], 'all', 6, NULL,
+ 'core', false, 6, 1095, 3, 21,
+ 'subcutaneous', '1 ml', 'Right shoulder',
+ 'WSAVA / ABCD', 'WSAVA Vaccination Guidelines 2022',
+ 'Any season', 'ALL',
+ 'Core. Kitten series at 6, 9, 12 weeks. Booster at 1 year then every 3 years. Highly effective. Panleukopenia (feline parvo) is often fatal without vaccination.'),
+
+-- FeLV (Feline Leukemia) — annual
+('a9000000-0000-0000-0000-000000000027',
+ 'FeLV (Feline Leukemia Virus)', 'Feline Leukemia',
+ ARRAY['cat'], 'all', 8, NULL,
+ 'non_core', false, 8, 365, 2, 21,
+ 'subcutaneous', '1 ml', 'Left rear leg',
+ 'WSAVA / ABCD', 'WSAVA Vaccination Guidelines 2022, ABCD Guidelines 2023',
+ 'Any season', 'ALL',
+ 'Non-core but recommended for outdoor or multi-cat household cats. Primary 2-dose series 3-4 weeks apart. Annual boosters for at-risk cats.')
 
 ON CONFLICT (id) DO NOTHING;
 
