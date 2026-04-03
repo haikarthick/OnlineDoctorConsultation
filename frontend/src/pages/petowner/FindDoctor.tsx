@@ -131,10 +131,17 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
           limit:     pageSize,
           offset:    pageNum * pageSize,
         })
-        const vetList    = result.data?.vets   || []
-        const totalCount = result.data?.total  ?? vetList.length
-        setVets(vetList)
-        setTotal(totalCount)
+        const vetList = result.data?.vets || []
+        // Post-process: for each vet, filter out past slots (client-side, using browser local time).
+        // This ensures the badge count and vet list are accurate even when selectedDate === today.
+        const processedVets: VetWithAvailability[] = vetList
+          .map((vet: VetWithAvailability) => {
+            const futureSlots = filterPastSlots(vet.availableSlots || [], selectedDate)
+            return { ...vet, availableSlots: futureSlots, totalAvailableSlots: futureSlots.length }
+          })
+          .filter((vet: VetWithAvailability) => (vet.totalAvailableSlots ?? 0) > 0)
+        setVets(processedVets)
+        setTotal(processedVets.length)
       } else {
         // ── Standard mode: list vets with regular filters ──
         const params: Record<string, any> = {

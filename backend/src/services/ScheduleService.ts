@@ -533,6 +533,15 @@ class ScheduleService {
             });
           }
 
+          // Filter out past slots when searching for today's date (IST = UTC+5:30)
+          const istOffsetMs = 5.5 * 60 * 60 * 1000;
+          const istNow = new Date(Date.now() + istOffsetMs);
+          const istTodayStr = istNow.toISOString().split('T')[0];
+          if (date === istTodayStr) {
+            const nowMinutes = istNow.getUTCHours() * 60 + istNow.getUTCMinutes() + 15;
+            slots = slots.filter(slot => this.parseTime(slot.startTime) > nowMinutes);
+          }
+
           if (slots.length === 0) return null;
 
           return {
