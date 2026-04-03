@@ -182,7 +182,8 @@ const Marketplace: React.FC = () => {
     // Breeding / pregnancy status
     const bs = animal.breedingStatus || animal.breeding_status
     if (bs) {
-      const statusMap: Record<string, string> = { pregnant: 'pregnant', lactating: 'lactating', open: 'open', bred: 'bred' }
+      // Map animal breeding_status -> Joi-valid pregnancyStatus ('pregnant'|'not_pregnant'|'unknown')
+      const statusMap: Record<string, string> = { pregnant: 'pregnant', bred: 'pregnant', lactating: 'not_pregnant', open: 'not_pregnant' }
       if (statusMap[bs]) updates.pregnancyStatus = statusMap[bs]
     }
     // Registration number for breeder compliance

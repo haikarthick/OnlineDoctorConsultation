@@ -986,7 +986,7 @@ export const createMarketplaceListingSchema = Joi.object({
   title: shortText().required(),
   description: longText(5000).optional().allow('', null),
   category: shortText(100).optional(),
-  listingType: Joi.string().valid('sale', 'auction', 'wanted').optional(),
+  listingType: Joi.string().valid('fixed_price', 'sale', 'auction', 'wanted').optional(),
   price: positiveNumber.optional().allow(null),
   currency: Joi.string().max(3).optional(),
   quantity: positiveInt.optional(),
