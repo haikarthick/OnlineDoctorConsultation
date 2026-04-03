@@ -36,16 +36,34 @@ export interface PassportAnimal {
   protocols: PassportProtocolStatus[];
 }
 
+export interface PassportDose {
+  scheduleId: string;
+  doseNumber: number;
+  dueDate: string;
+  administeredAt: string | null;
+  status: 'pending' | 'administered' | 'overdue' | 'skipped' | 'waived';
+  reminderSent: boolean;
+  vaccinationRecordId: string | null;
+}
+
 export interface PassportProtocolStatus {
   protocolId: string;
   protocolName: string;
   disease: string;
   vaccineCategory: string;
+  category: string;
   isZoonotic: boolean;
+  waived: boolean;
+  waiverReason: string | null;
+  assignedAt: string;
   status: 'current' | 'due_soon' | 'overdue' | 'not_started' | 'waived';
   nextDueDate: string | null;
   lastAdministeredDate: string | null;
+  lastAdministeredAt: string | null;
   lastVaccineName: string | null;
+  overdueCount: number;
+  compliancePercent: number;
+  doses: PassportDose[];
   upcomingSchedule: ScheduleRow[];
   history: any[];
 }
@@ -205,11 +223,19 @@ class VaccineScheduleService {
           protocolName: asgn.protocol_name,
           disease: asgn.disease,
           vaccineCategory: asgn.vaccine_category,
+          category: asgn.vaccine_category,
           isZoonotic: asgn.is_zoonotic,
+          waived: true,
+          waiverReason: asgn.waiver_reason ?? null,
+          assignedAt: asgn.assigned_at,
           status: 'waived',
           nextDueDate: null,
           lastAdministeredDate: null,
+          lastAdministeredAt: null,
           lastVaccineName: null,
+          overdueCount: 0,
+          compliancePercent: 100,
+          doses: [],
           upcomingSchedule: [],
           history: [],
         });
@@ -256,16 +282,44 @@ class VaccineScheduleService {
         status = 'current';
       }
 
+      // Compute per-protocol stats the frontend needs
+      const overdueCount = schedRows.filter(r => r.status === 'overdue').length;
+      const administered = schedRows.filter(r => r.status === 'administered').length;
+      const compliancePercent = schedRows.length === 0
+        ? 100
+        : Math.round((administered / schedRows.length) * 100);
+
+      // Map schedule rows to the PassportDose shape the frontend expects
+      const doses = schedRows.map(r => ({
+        scheduleId: r.id,
+        doseNumber: r.doseNumber,
+        dueDate: r.dueDate,
+        administeredAt: r.administeredAt,
+        status: r.status,
+        reminderSent: r.reminderSent,
+        vaccinationRecordId: r.vaccinationRecordId,
+      }));
+
       protocolStatuses.push({
         protocolId: asgn.protocol_id,
         protocolName: asgn.protocol_name,
         disease: asgn.disease,
         vaccineCategory: asgn.vaccine_category,
+        // Frontend uses both 'category' and 'vaccineCategory'
+        category: asgn.vaccine_category,
         isZoonotic: asgn.is_zoonotic,
+        waived: false,
+        waiverReason: null,
+        assignedAt: asgn.assigned_at,
         status,
         nextDueDate: upcoming[0]?.dueDate ?? null,
         lastAdministeredDate: lastAdministered?.date_administered ?? null,
+        // Frontend uses 'lastAdministeredAt'
+        lastAdministeredAt: lastAdministered?.date_administered ?? null,
         lastVaccineName: lastAdministered?.vaccine_name ?? null,
+        overdueCount,
+        compliancePercent,
+        doses,
         upcomingSchedule: upcoming,
         history: histRes.rows,
       });

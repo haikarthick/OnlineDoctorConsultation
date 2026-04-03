@@ -527,7 +527,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   // ── Passport stats (top) ─────────────────────────────────────
   const totalProtocols = passports.reduce((s, a) => s + a.protocols.length, 0)
   const overdueCount = passports.reduce(
-    (s, a) => s + a.protocols.reduce((ps, p) => ps + p.overdueCount, 0),
+    (s, a) => s + a.protocols.reduce((ps, p) => ps + (p.overdueCount ?? 0), 0),
     0
   )
   const avgCompliance =
@@ -540,7 +540,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
       a.protocols.reduce(
         (ps, p) =>
           ps +
-          p.doses.filter(
+          (p.doses ?? []).filter(
             (d) =>
               d.status === 'pending' &&
               d.dueDate &&
