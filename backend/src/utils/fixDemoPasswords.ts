@@ -78,6 +78,37 @@ export async function fixDemoPasswords(): Promise<void> {
       logger.info(`Demo users: ${created} created, ${fixed} passwords fixed`);
     }
 
+    // 1b. Remove any non-seeded test animals accidentally added to pet_owner demo accounts.
+    //     All seeded animals for pet owners start with 'aa000000-'. Anything else is a test artefact.
+    try {
+      const petOwnerIds = [
+        'c0000000-0000-0000-0000-000000000001', // Emily Davis
+        'c0000000-0000-0000-0000-000000000002', // Robert Chen
+      ];
+      for (const ownerId of petOwnerIds) {
+        const { rows: testAnimals } = await database.query(
+          `SELECT id, name FROM animals WHERE owner_id = $1 AND id NOT LIKE 'aa000000-%'`,
+          [ownerId]
+        );
+        if (testAnimals.length > 0) {
+          for (const animal of testAnimals) {
+            // Remove all dependent rows first to satisfy FK constraints
+            await database.query('DELETE FROM vaccine_schedule WHERE animal_id = $1', [animal.id]);
+            await database.query('DELETE FROM vaccination_records WHERE animal_id = $1', [animal.id]);
+            await database.query('DELETE FROM animal_vaccine_assignments WHERE animal_id = $1', [animal.id]);
+            await database.query('DELETE FROM vaccine_certificate_log WHERE animal_id = $1', [animal.id]);
+            await database.query('DELETE FROM medical_records WHERE animal_id = $1', [animal.id]);
+            await database.query('DELETE FROM bookings WHERE animal_id = $1', [animal.id]);
+            await database.query('DELETE FROM consultations WHERE animal_id = $1', [animal.id]);
+            await database.query('DELETE FROM animals WHERE id = $1', [animal.id]);
+          }
+          logger.info(`Demo cleanup: removed ${testAnimals.length} non-seeded animal(s) for owner ${ownerId}: ${testAnimals.map((a: any) => a.name).join(', ')}`);
+        }
+      }
+    } catch (cleanupErr: any) {
+      logger.warn('Demo animal cleanup skipped: ' + cleanupErr.message.substring(0, 200));
+    }
+
     // 2. Seed demo data if missing (check multiple indicators — vet_profiles AND consultations must both exist)
     const { rows: vpRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM vet_profiles');
     const { rows: cRows } = await database.query('SELECT COUNT(*)::int AS cnt FROM consultations');

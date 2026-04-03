@@ -824,6 +824,18 @@ router.patch('/vaccine-schedule/:scheduleId/administer', authMiddleware, asyncHa
 
 // ─── Vaccination Passport routes ─────────────────────────────
 router.get('/vaccination-passport/animal/:animalId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  // Pet owners and farmers may only access their own animal's passport
+  if (authReq.userRole !== 'admin' && authReq.userRole !== 'veterinarian') {
+    const { rows } = await database.query(
+      'SELECT owner_id FROM animals WHERE id = $1',
+      [req.params.animalId]
+    );
+    if (!rows[0]) return res.status(404).json({ success: false, message: 'Animal not found' });
+    if (rows[0].owner_id !== authReq.userId) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+  }
   const passport = await VaccineScheduleService.getAnimalPassport(req.params.animalId);
   if (!passport) return res.status(404).json({ success: false, message: 'Animal not found' });
   res.json({ success: true, data: passport });
@@ -859,6 +871,17 @@ router.post('/vaccine-certificate-log', authMiddleware, asyncHandler(async (req:
 }));
 
 router.get('/vaccine-certificate-log/animal/:animalId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  // Pet owners and farmers may only view certificate logs for their own animals
+  if (authReq.userRole !== 'admin' && authReq.userRole !== 'veterinarian') {
+    const { rows } = await database.query(
+      'SELECT owner_id FROM animals WHERE id = $1',
+      [req.params.animalId]
+    );
+    if (rows[0] && rows[0].owner_id !== authReq.userId) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+  }
   const logs = await VaccineProtocolService.getCertificateLogs(req.params.animalId);
   res.json({ success: true, data: logs });
 }));
