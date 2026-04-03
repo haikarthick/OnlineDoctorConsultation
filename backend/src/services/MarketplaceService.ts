@@ -225,8 +225,11 @@ class MarketplaceService {
     const listing = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [data.listingId]);
     if (!listing.rows[0]) throw new Error('Listing not found');
     if (listing.rows[0].status !== 'active') throw new Error('Listing is no longer active');
+    if (listing.rows[0].seller_id === data.buyerId) throw new Error('Cannot purchase your own listing');
+    if (listing.rows[0].price == null && data.unitPrice == null)
+      throw new Error('This is a contact-for-fee listing — please use Inquire to contact the seller');
 
-    const unitPrice = data.unitPrice || listing.rows[0].price;
+    const unitPrice = data.unitPrice != null ? +data.unitPrice : +listing.rows[0].price;
     const qty = data.quantity || 1;
     const total = unitPrice * qty;
 

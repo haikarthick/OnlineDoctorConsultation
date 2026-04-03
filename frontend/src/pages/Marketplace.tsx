@@ -76,6 +76,7 @@ const Marketplace: React.FC = () => {
 
   // Order role
   const [orderRole, setOrderRole] = useState<'buyer' | 'seller'>('buyer')
+  const [inquiries, setInquiries] = useState<any[]>([])
 
   // Monetization (admin)
   const [monetizationSettings, setMonetizationSettings] = useState<any[]>([])
@@ -235,6 +236,15 @@ const Marketplace: React.FC = () => {
   }
 
   const buyNow = async (listing: MarketplaceListing) => {
+    if (listing.price == null) {
+      // "Contact for fee" listing — send inquiry instead of purchase order
+      try {
+        await apiService.createInquiry(listing.id, '')
+        setSuccessMsg(t('marketplace.orderPlaced'))
+        setSelectedListing(null)
+      } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+      return
+    }
     try {
       await apiService.createMarketplaceOrder({ listingId: listing.id, quantity: 1 })
       setSuccessMsg(t('marketplace.orderPlaced')); fetchListings(); fetchDashboard(); setSelectedListing(null)
@@ -243,6 +253,10 @@ const Marketplace: React.FC = () => {
 
   const fetchOrders = async (role: 'buyer' | 'seller' = orderRole) => {
     try { const res = await apiService.listMarketplaceOrders(role); setOrders(res.data?.items || []) } catch { setOrders([]) }
+  }
+
+  const fetchInquiries = async (role: 'buyer' | 'seller' = orderRole) => {
+    try { const res = await apiService.listInquiries(role); setInquiries(Array.isArray(res.data) ? res.data : []) } catch { setInquiries([]) }
   }
 
   const fetchMarketPrices = async () => {
@@ -363,7 +377,7 @@ const Marketplace: React.FC = () => {
         {tabs.map(([key, label]) => (
           <button key={key} className={`module-tab ${tab === key ? 'active' : ''}`} onClick={() => {
             setTab(key); setSelectedListing(null)
-            if (key === 'orders') fetchOrders()
+            if (key === 'orders') { fetchOrders(); fetchInquiries() }
             if (key === 'prices') fetchMarketPrices()
             if (key === 'admin') { fetchAdminData(); fetchMonetizationSettings() }
             if (key === 'auctions') { setFilters({ listingType: 'auction' }); fetchListings() }
@@ -446,6 +460,7 @@ const Marketplace: React.FC = () => {
               bidAmount={bidAmount} bidMessage={bidMessage} onBidAmountChange={setBidAmount} onBidMessageChange={setBidMessage}
               onPlaceBid={placeBid} onBuyNow={() => buyNow(selectedListing)} onBack={() => setSelectedListing(null)}
               isAdmin={isAdmin} onToggleHotDeal={(id, v) => handleToggleHotDeal(id, v)} onToggleFeatured={(id, v) => handleToggleFeatured(id, v)}
+              userId={user?.id}
               t={t}
             />
           ) : (
@@ -869,9 +884,29 @@ const Marketplace: React.FC = () => {
       {tab === 'orders' && (
         <div>
           <div className="mp-order-toggle">
-            <button className={`module-btn ${orderRole === 'buyer' ? 'primary' : ''}`} onClick={() => { setOrderRole('buyer'); fetchOrders('buyer') }}>{t('marketplace.orders.asBuyer')}</button>
-            <button className={`module-btn ${orderRole === 'seller' ? 'primary' : ''}`} onClick={() => { setOrderRole('seller'); fetchOrders('seller') }}>{t('marketplace.orders.asSeller')}</button>
+            <button className={`module-btn ${orderRole === 'buyer' ? 'primary' : ''}`} onClick={() => { setOrderRole('buyer'); fetchOrders('buyer'); fetchInquiries('buyer') }}>{t('marketplace.orders.asBuyer')}</button>
+            <button className={`module-btn ${orderRole === 'seller' ? 'primary' : ''}`} onClick={() => { setOrderRole('seller'); fetchOrders('seller'); fetchInquiries('seller') }}>{t('marketplace.orders.asSeller')}</button>
           </div>
+          {inquiries.length > 0 && (
+            <div className="mp-section">
+              <h3 className="mp-section-title">💌 {t('marketplace.orders.inquiriesTitle')}</h3>
+              <div className="data-table-container">
+                <table className="module-table">
+                  <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.orders.message')}</th><th>{t('marketplace.orders.date')}</th><th>{t('marketplace.orders.status')}</th></tr></thead>
+                  <tbody>
+                    {inquiries.map((inq: any) => (
+                      <tr key={inq.id}>
+                        <td>{inq.listingTitle || inq.listing_title || '—'}</td>
+                        <td>{inq.message || '—'}</td>
+                        <td>{inq.created_at ? new Date(inq.created_at).toLocaleDateString() : '—'}</td>
+                        <td><span className={`module-badge ${inq.status === 'responded' ? 'success' : ''}`}>{inq.status || 'pending'}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
           <div className="data-table-container">
             <table className="module-table">
               <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.livestock.species')}</th><th>{orderRole === 'buyer' ? t('marketplace.detail.seller') : t('marketplace.orders.asBuyer').replace('🛒 ', '')}</th><th>{t('marketplace.orders.qty')}</th><th>{t('marketplace.orders.total')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.orders.date')}</th></tr></thead>
@@ -1339,8 +1374,9 @@ const ListingDetail: React.FC<{
   bidAmount: string; bidMessage: string; onBidAmountChange: (v: string) => void; onBidMessageChange: (v: string) => void;
   onPlaceBid: () => void; onBuyNow: () => void; onBack: () => void;
   isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
+  userId?: string;
   t: (key: string) => string;
-}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, t }) => {
+}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, t }) => {
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -1460,7 +1496,12 @@ const ListingDetail: React.FC<{
 
         {/* Right sidebar - Buy/Bid panel */}
         <div className="mp-detail-sidebar">
-          {listingType !== 'auction' ? (
+          {(l.seller_id && l.seller_id === userId) ? (
+            <div className="mp-buy-panel">
+              <h4>{t('marketplace.detail.yourListing')}</h4>
+              <p className="mp-sell-step-desc">{t('marketplace.detail.yourListingDesc')}</p>
+            </div>
+          ) : listingType !== 'auction' ? (
             <div className="mp-buy-panel">
               <h4>{t('marketplace.detail.buyNowTitle')}</h4>
               <div className="mp-buy-price">{l.price ? formatCurrency(l.price) : t('marketplace.detail.contactSeller')}</div>

@@ -3046,7 +3046,9 @@
       "makeHotDeal": "💤 Make Hot Deal",
       "unfeature": "⭐ Unfeature",
       "feature": "☆ Feature",
-      "leading": "★ Leading"
+      "leading": "★ Leading",
+      "yourListing": "📋 Your Listing",
+      "yourListingDesc": "This is your listing. Other users can inquire or contact you about this animal."
     },
     "card": {
       "hotDeal": "🔥 HOT DEAL",
@@ -3068,7 +3070,10 @@
       "total": "Total",
       "status": "Status",
       "date": "Date",
-      "noOrders": "No rehoming requests found"
+      "noOrders": "No rehoming requests found",
+      "inquiriesTitle": "💌 Inquiries",
+      "noInquiries": "No inquiries yet",
+      "message": "Message"
     },
     "prices": {
       "subtitle": "Average rehoming fees across all active and rehomed listings by species and breed",
