@@ -1,4 +1,4 @@
-import http from 'http';
+﻿import http from 'http';
 import app from './app';
 import config from './config';
 import logger from './utils/logger';
@@ -14,9 +14,6 @@ const startServer = async () => {
     // Connect to database
     await database.connect();
     logger.info('Database initialized');
-
-    // Fix demo user passwords (runtime bcrypt — runs on every start)
-    await fixDemoPasswords();
 
     // Initialize cache
     if (cacheManager.connect) {
@@ -43,6 +40,10 @@ const startServer = async () => {
 
     const server = httpServer.listen(config.app.port, () => {
       logger.info(`Server running on port ${config.app.port} in ${config.app.nodeEnv} mode`);
+      // Fix demo passwords AFTER port is open so Render's health check passes immediately
+      fixDemoPasswords().catch((err: any) =>
+        logger.error('fixDemoPasswords failed', { error: err.message || String(err) })
+      );
     });
 
     // Handle server errors

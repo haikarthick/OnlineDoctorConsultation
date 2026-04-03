@@ -112,7 +112,7 @@ async function run() {
       { email: 'thomas.green@greenmeadows.com', password: 'Demo@123' },
     ];
     for (const u of demoPasswords) {
-      const hash = bcrypt.hashSync(u.password, 10);
+      const hash = await bcrypt.hash(u.password, 10);
       const res = await client.query('UPDATE users SET password_hash = $1 WHERE email = $2', [hash, u.email]);
       console.log(`  ${res.rowCount ? '✓' : '⚠'} ${u.email} (${res.rowCount} row)`);
     }
