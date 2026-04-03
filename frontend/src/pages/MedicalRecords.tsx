@@ -34,6 +34,7 @@ const MedicalRecords: React.FC = () => {
   const location = useLocation()
   const isVet = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
+  const isFarmer = user?.role === 'farmer'
 
   // Parse deep-link query params
   const queryParams = new URLSearchParams(location.search)
@@ -367,7 +368,7 @@ const MedicalRecords: React.FC = () => {
               </option>
             ))}
           </select>
-          {(isVet || isAdmin) && (
+          {(isVet || isAdmin || isFarmer) && (
             <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
               onClick={() => { setShowModal('record'); setModalData({ recordType: 'diagnosis', severity: 'normal' }) }}>
               {t('medicalRecords.newRecord')}
@@ -444,7 +445,7 @@ const MedicalRecords: React.FC = () => {
             )}
 
             {/* Quick Actions */}
-            {(isVet || isAdmin) && selectedAnimal && (
+            {(isVet || isAdmin || isFarmer) && selectedAnimal && (
               <div style={{ marginBottom: 24 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>{t('medicalRecords.overview.quickActions')}</h3>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -566,7 +567,7 @@ const MedicalRecords: React.FC = () => {
               <EmptyState icon="💉" title={t('medicalRecords.vaccinationsTab.selectPet')} subtitle={t('medicalRecords.selectPetGenericSub')} />
             ) : (
               <>
-                {(isVet || isAdmin) && (
+                {(isVet || isAdmin || isFarmer) && (
                   <div style={{ marginBottom: 12 }}>
                     <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
                       onClick={openVaccinationModal}>
@@ -612,7 +613,7 @@ const MedicalRecords: React.FC = () => {
               <EmptyState icon="🔬" title={t('medicalRecords.labResultsTab.selectPet')} subtitle={t('medicalRecords.selectPetGenericSub')} />
             ) : (
               <>
-                {(isVet || isAdmin) && (
+                {(isVet || isAdmin || isFarmer) && (
                   <div style={{ marginBottom: 12 }}>
                     <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
                       onClick={() => { setShowModal('lab_result'); setModalData({ status: 'pending' }) }}>

@@ -983,11 +983,13 @@
   "animals": {
     "pageTitles": {
       "petOwner": "🐾 నా జంతువులు",
+      "farmer": "🐄 నా జంతువులు",
       "vet": "🐾 రోగి జంతువులు",
       "admin": "🐾 జంతు రిజిస్ట్రీ"
     },
     "subtitles": {
       "petOwner": "మీ పెంపుడు జంతువులు మరియు వ్యవసాయ జంతువులను నిర్వహించండి",
+      "farmer": "మీ పశువులు మరియు వ్యవసాయ జంతువులను నిర్వహించండి",
       "vet": "మీ సంప్రదింపుల నుండి జంతువులు",
       "vetMyPets": "మీ సొంత పెంపుడు జంతువులను నిర్వహించండి",
       "admin": "సిస్టమ్‌లో నమోదు చేయబడిన అన్ని జంతువులు"
@@ -3330,6 +3332,19 @@
     "doneBtn": "✓ పూర్తి",
     "snooze3d": "💤 స్నూజ్",
     "emptyReminders": "ఇంకా రిమైండర్లు లేవు",
+    "scoreInputSuffix": "స్కోర్ (0-100)",
+    "labelAnimal": "జంతువు",
+    "labelWeightStatus": "బరువు స్థితి",
+    "labelNextCheckup": "తదుపరి తనిఖీ",
+    "labelRecommendations": "సిఫారసులు (కామాతో)",
+    "labelRiskFlags": "ప్రమాద సూచికలు (కామాతో)",
+    "labelType": "రకం",
+    "labelTitle": "శీర్షిక",
+    "labelDescription": "వివరణ",
+    "labelDueDate": "గడువు తేదీ",
+    "labelPriority": "ప్రాధాన్యత",
+    "labelRecurrence": "పునరావృత్తి",
+    "recurrenceNone": "లేదు",
     "toasts": {
       "scorecardCreated": "స్కోర్‌కార్డ్ సృష్టించబడింది!",
       "reminderCreated": "రిమైండర్ సృష్టించబడింది!",

@@ -249,7 +249,7 @@ router.get('/enterprises/:enterpriseId/campaigns', authMiddleware, asyncHandler(
 // ─── Medical Record routes ───────────────────────────────────
 router.get('/medical-records/stats', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getStats(req, res)));
 router.get('/medical-records/audit', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getAuditLog(req, res)));
-router.post('/medical-records', authMiddleware, validateBody(createMedicalRecordSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createRecord(req, res)));
+router.post('/medical-records', authMiddleware, roleMiddleware(['veterinarian', 'farmer', 'admin']), validateBody(createMedicalRecordSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createRecord(req, res)));
 router.get('/medical-records', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listRecords(req, res)));
 router.get('/medical-records/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getRecord(req, res)));
 router.put('/medical-records/:id', authMiddleware, validateBody(updateMedicalRecordSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.updateRecord(req, res)));

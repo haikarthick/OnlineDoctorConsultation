@@ -134,6 +134,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   const isAdmin = user?.role === 'admin'
   const isVet = user?.role === 'veterinarian'
   const isFarmer = user?.role === 'farmer'
+  const isPetOwner = user?.role === 'pet_owner'
 
   // ── Load passports ──────────────────────────────────────────
   const loadPassports = useCallback(async () => {
@@ -207,10 +208,10 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   }, [loadPassports])
 
   useEffect(() => {
-    if (activeTab === 'compliance' && (isAdmin || isVet || isFarmer)) {
+    if (activeTab === 'compliance' && (isAdmin || isVet || isFarmer || isPetOwner)) {
       loadComplianceSummary()
     }
-  }, [activeTab, isAdmin, isVet, isFarmer, loadComplianceSummary])
+  }, [activeTab, isAdmin, isVet, isFarmer, isPetOwner, loadComplianceSummary])
 
   useEffect(() => {
     if (activeTab === 'history' && selectedAnimalForHistory) {
@@ -603,7 +604,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
         >
           {t('vaccinationPassport.tabs.passport')}
         </button>
-        {(isAdmin || isVet || isFarmer) && (
+        {(isAdmin || isVet || isFarmer || isPetOwner) && (
           <button
             className={`module-tab ${activeTab === 'compliance' ? 'active' : ''}`}
             onClick={() => setActiveTab('compliance')}

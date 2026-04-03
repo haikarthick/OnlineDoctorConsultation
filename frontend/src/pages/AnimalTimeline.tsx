@@ -96,6 +96,7 @@ const AnimalTimeline: React.FC = () => {
 
   const isVet   = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
+  const isFarmer = user?.role === 'farmer'
 
   const [animals, setAnimals]               = useState<AnimalOption[]>([])
   const [selectedAnimalId, setSelectedAnimalId] = useState('')
@@ -131,7 +132,7 @@ const AnimalTimeline: React.FC = () => {
     const load = async () => {
       try {
         setAnimalsLoading(true)
-        const res = await apiService.listAnimals({ limit: isVet || isAdmin ? 500 : 200 })
+        const res = await apiService.listAnimals({ limit: isVet || isAdmin || isFarmer ? 500 : 200 })
         const rawList = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
         const list: AnimalOption[] = rawList.map((a: any) => ({
           id: a.id, name: a.name, species: a.species,

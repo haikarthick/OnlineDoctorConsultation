@@ -18,7 +18,8 @@ const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
   { value: 'other', labelKey: 'marketplace.categories.other' },
 ]
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
-const SPECIES_LIST = ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Poultry', 'Dog', 'Cat', 'Other']
+const FARMER_SPECIES_LIST = ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Poultry', 'Dog', 'Cat', 'Other']
+const PET_OWNER_SPECIES_LIST = ['Dog', 'Cat', 'Horse', 'Rabbit', 'Cow', 'Buffalo', 'Goat', 'Sheep', 'Camel', 'Pig', 'Poultry', 'Other']
 
 type TabKey = 'dashboard' | 'browse' | 'sell' | 'auctions' | 'orders' | 'prices' | 'admin'
 
@@ -30,6 +31,8 @@ const Marketplace: React.FC = () => {
   const { user } = useAuth()
   const { t } = useTranslation()
   const isAdmin = user?.role === 'admin'
+  const isFarmer = user?.role === 'farmer'
+  const SPECIES_LIST = (isFarmer || isAdmin) ? FARMER_SPECIES_LIST : PET_OWNER_SPECIES_LIST
 
   const TIER_LABELS: Record<string, string> = { standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }
   const GENDER_LABELS: Record<string, string> = { male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') }

@@ -983,11 +983,13 @@
   "animals": {
     "pageTitles": {
       "petOwner": "🐾 ನನ್ನ ಪ್ರಾಣಿಗಳು",
+      "farmer": "🐄 ನನ್ನ ಪ್ರಾಣಿಗಳು",
       "vet": "🐾 Patient Animals",
       "admin": "🐾 Animal Registry"
     },
     "subtitles": {
       "petOwner": "Manage your pets and farm animals",
+      "farmer": "Manage your livestock and farm animals",
       "vet": "Animals from your consultations",
       "vetMyPets": "ನಿಮ್ಮ ಸ್ವಂತ ಸಾಕುಪ್ರಾಣಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
       "admin": "All registered animals in the system"
@@ -3330,6 +3332,19 @@
     "doneBtn": "✓ Done",
     "snooze3d": "💤 Snooze",
     "emptyReminders": "No reminders yet",
+    "scoreInputSuffix": "Score (0-100)",
+    "labelAnimal": "Animal",
+    "labelWeightStatus": "Weight Status",
+    "labelNextCheckup": "Next Checkup",
+    "labelRecommendations": "Recommendations (comma separated)",
+    "labelRiskFlags": "Risk Flags (comma separated)",
+    "labelType": "Type",
+    "labelTitle": "Title",
+    "labelDescription": "Description",
+    "labelDueDate": "Due Date",
+    "labelPriority": "Priority",
+    "labelRecurrence": "Recurrence",
+    "recurrenceNone": "None",
     "toasts": {
       "scorecardCreated": "Scorecard created!",
       "reminderCreated": "Reminder created!",

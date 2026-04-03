@@ -983,11 +983,13 @@
   "animals": {
     "pageTitles": {
       "petOwner": "🐾 मेरे पशु",
+      "farmer": "🐄 मेरे पशु",
       "vet": "🐾 मरीज़ पशु",
       "admin": "🐾 पशु रजिस्ट्री"
     },
     "subtitles": {
       "petOwner": "अपने पालतू जानवरों और कृषि पशुओं का प्रबंधन करें",
+      "farmer": "अपने पशुधन और कृषि पशुओं का प्रबंधन करें",
       "vet": "आपके परामर्श के पशु",
       "vetMyPets": "अपने निजी पालतू जानवरों का प्रबंधन करें",
       "admin": "सिस्टम में सभी पंजीकृत पशु"
@@ -3339,6 +3341,19 @@
     "doneBtn": "✓ पूर्ण",
     "snooze3d": "💤 स्नूज़",
     "emptyReminders": "अभी कोई रिमाइंडर नहीं",
+    "scoreInputSuffix": "स्कोर (0-100)",
+    "labelAnimal": "पशु",
+    "labelWeightStatus": "वजन स्थिति",
+    "labelNextCheckup": "अगली जांच",
+    "labelRecommendations": "सिफारिशें (अल्पविराम से)",
+    "labelRiskFlags": "जोखिम चिह्न (अल्पविराम से)",
+    "labelType": "प्रकार",
+    "labelTitle": "शीर्षक",
+    "labelDescription": "विवरण",
+    "labelDueDate": "नियत तारीख",
+    "labelPriority": "प्राथमिकता",
+    "labelRecurrence": "पुनरावृत्ति",
+    "recurrenceNone": "कोई नहीं",
     "toasts": {
       "scorecardCreated": "स्कोरकार्ड बनाया गया!",
       "reminderCreated": "रिमाइंडर बनाया गया!",

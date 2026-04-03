@@ -72,8 +72,8 @@ const Animals: React.FC = () => {
   const isVet = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
   const isFarmer = user?.role === 'farmer'
-  const isPetOwner = user?.role === 'pet_owner' || user?.role === 'farmer'
-  const canManageAnimals = isPetOwner || (isVet && vetView === 'my-pets')
+  const isPetOwner = user?.role === 'pet_owner'
+  const canManageAnimals = isPetOwner || isFarmer || (isVet && vetView === 'my-pets')
 
   const breeds = useMemo(() => BREED_DATABASE[formData.species] || [], [formData.species])
   const showEarTag = EAR_TAG_SPECIES.includes(formData.species)
@@ -223,9 +223,9 @@ const Animals: React.FC = () => {
     <div className="module-page">
       <div className="module-header">
         <div>
-          <h1>🐾 {isVet ? (vetView === 'my-pets' ? t('animals.pageTitles.petOwner') : t('animals.pageTitles.vet')) : isAdmin ? t('animals.pageTitles.admin') : t('animals.pageTitles.petOwner')}</h1>
+          <h1>{isFarmer ? '🐄' : '🐾'} {isVet ? (vetView === 'my-pets' ? t('animals.pageTitles.petOwner') : t('animals.pageTitles.vet')) : isAdmin ? t('animals.pageTitles.admin') : isFarmer ? t('animals.pageTitles.farmer') : t('animals.pageTitles.petOwner')}</h1>
           <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>
-            {isVet ? (vetView === 'my-pets' ? t('animals.subtitles.vetMyPets') : t('animals.subtitles.vet')) : isAdmin ? t('animals.subtitles.admin') : t('animals.subtitles.petOwner')}
+            {isVet ? (vetView === 'my-pets' ? t('animals.subtitles.vetMyPets') : t('animals.subtitles.vet')) : isAdmin ? t('animals.subtitles.admin') : isFarmer ? t('animals.subtitles.farmer') : t('animals.subtitles.petOwner')}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
