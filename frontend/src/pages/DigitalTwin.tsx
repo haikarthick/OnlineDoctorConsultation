@@ -171,7 +171,7 @@ const DigitalTwinPage: React.FC = () => {
       <div className="module-tabs">
         {(['dashboard', 'twins', 'simulate'] as const).map(tb => (
           <button key={tb} className={`module-tab ${tab === tb ? 'active' : ''}`} onClick={() => setTab(tb)}>
-            {tb === 'dashboard' ? `📊 ${t('digitalTwin.tabs.dashboard')}` : tb === 'twins' ? `🏗️ ${t('digitalTwin.tabs.twins')}` : `🧪 ${t('digitalTwin.tabs.simulate')}`}
+            {tb === 'dashboard' ? t('digitalTwin.tabs.dashboard') : tb === 'twins' ? t('digitalTwin.tabs.twins') : t('digitalTwin.tabs.simulate')}
           </button>
         ))}
       </div>

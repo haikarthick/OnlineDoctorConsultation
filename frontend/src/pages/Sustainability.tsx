@@ -124,7 +124,7 @@ const Sustainability: React.FC = () => {
         {(['dashboard', 'metrics', 'goals', 'carbon'] as const).map(tb => (
           <button key={tb} className={`module-tab ${tab === tb ? 'active' : ''}`}
             onClick={() => { setTab(tb); if (tb === 'carbon') fetchCarbon() }}>
-            {tb === 'dashboard' ? `📊 ${t('sustainability.tabs.dashboard')}` : tb === 'metrics' ? `📈 ${t('sustainability.tabs.metrics')}` : tb === 'goals' ? `🎯 ${t('sustainability.tabs.goals')}` : `🌍 ${t('sustainability.tabs.carbon')}`}
+            {tb === 'dashboard' ? t('sustainability.tabs.dashboard') : tb === 'metrics' ? t('sustainability.tabs.metrics') : tb === 'goals' ? t('sustainability.tabs.goals') : t('sustainability.tabs.carbon')}
           </button>
         ))}
       </div>

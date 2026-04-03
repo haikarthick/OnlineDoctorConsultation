@@ -65,6 +65,8 @@ const MedicalRecords: React.FC = () => {
   const [modalData, setModalData] = useState<any>({})
   const [saving, setSaving] = useState(false)
   const [modalError, setModalError] = useState('')
+  const [vaccineProtocols, setVaccineProtocols] = useState<any[]>([])
+  const [loadingProtocols, setLoadingProtocols] = useState(false)
 
   const fmtDate = useCallback((d: string) => {
     if (!d) return 'N/A'
@@ -279,6 +281,44 @@ const MedicalRecords: React.FC = () => {
   // ═══ UI HELPERS ═══════════════════════════════════════════
 
   const closeModal = () => { setShowModal(null); setModalData({}); setModalError('') }
+
+  const loadVaccineProtocolsForSpecies = useCallback(async (species: string) => {
+    setLoadingProtocols(true)
+    try {
+      const res = await apiService.listVaccineProtocols({ species })
+      setVaccineProtocols(res?.protocols || res?.data?.protocols || [])
+    } catch {
+      setVaccineProtocols([])
+    } finally {
+      setLoadingProtocols(false)
+    }
+  }, [])
+
+  const openVaccinationModal = useCallback(() => {
+    setShowModal('vaccination')
+    setModalData({ dateAdministered: new Date().toISOString().split('T')[0] })
+    setModalError('')
+    const animalData = animals.find((a: any) => a.id === selectedAnimal)
+    const species = animalData?.species
+    if (species) loadVaccineProtocolsForSpecies(species)
+  }, [animals, selectedAnimal, loadVaccineProtocolsForSpecies])
+
+  const handleProtocolSelect = (protocolId: string) => {
+    const proto = vaccineProtocols.find((p: any) => p.id === protocolId)
+    if (!proto) { setModalData((prev: any) => ({ ...prev, protocolId: '', vaccineName: '', vaccineType: '', dosage: '', nextDueDate: '' })); return }
+    const today = new Date()
+    const nextDue = proto.boosterIntervalDays > 0
+      ? new Date(today.getTime() + proto.boosterIntervalDays * 86400000).toISOString().split('T')[0]
+      : ''
+    setModalData((prev: any) => ({
+      ...prev,
+      protocolId: proto.id,
+      vaccineName: proto.name,
+      vaccineType: proto.vaccineCategory,
+      dosage: proto.dosageMl || '',
+      nextDueDate: nextDue,
+    }))
+  }
   const getRecordTypeInfo = (type: string) => RECORD_TYPES.find(r => r.value === type) || RECORD_TYPES[7]
   const getSeverityInfo = (sev: string) => SEVERITY_OPTIONS.find(s => s.value === sev) || SEVERITY_OPTIONS[1]
   const selectedAnimalData = animals.find((a: any) => a.id === selectedAnimal)
@@ -407,7 +447,7 @@ const MedicalRecords: React.FC = () => {
               <div style={{ marginBottom: 24 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>{t('medicalRecords.overview.quickActions')}</h3>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <QuickBtn label={t('medicalRecords.overview.addVaccination')} onClick={() => { setShowModal('vaccination'); setModalData({}) }} />
+                  <QuickBtn label={t('medicalRecords.overview.addVaccination')} onClick={openVaccinationModal} />
                   <QuickBtn label={t('medicalRecords.overview.addWeight')} onClick={() => { setShowModal('weight'); setModalData({ unit: 'kg' }) }} />
                   <QuickBtn label={t('medicalRecords.overview.addAllergy')} onClick={() => { setShowModal('allergy'); setModalData({ severity: 'mild' }) }} />
                   <QuickBtn label={t('medicalRecords.overview.addLabResult')} onClick={() => { setShowModal('lab_result'); setModalData({ status: 'pending' }) }} />
@@ -528,7 +568,7 @@ const MedicalRecords: React.FC = () => {
                 {(isVet || isAdmin) && (
                   <div style={{ marginBottom: 12 }}>
                     <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
-                      onClick={() => { setShowModal('vaccination'); setModalData({}) }}>
+                      onClick={openVaccinationModal}>
                       {t('medicalRecords.vaccinationsTab.addButton')}
                     </button>
                   </div>
@@ -797,16 +837,47 @@ const MedicalRecords: React.FC = () => {
             {/* Vaccination Modal */}
             {showModal === 'vaccination' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.addVaccination')}</h2>
-                <ModalField label={t('medicalRecords.modals.vaccineName')}><input value={modalData.vaccineName || ''} onChange={(e) => setModalData({ ...modalData, vaccineName: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.vaccineNamePlaceholder')} /></ModalField>
-                <ModalField label={t('medicalRecords.modals.vaccineType')}><input value={modalData.vaccineType || ''} onChange={(e) => setModalData({ ...modalData, vaccineType: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.vaccineTypePlaceholder')} /></ModalField>
-                <ModalField label={t('medicalRecords.modals.dateAdministered')}><input type="date" value={modalData.dateAdministered || ''} onChange={(e) => setModalData({ ...modalData, dateAdministered: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label={t('medicalRecords.modals.nextDueDate')}><input type="date" value={modalData.nextDueDate || ''} onChange={(e) => setModalData({ ...modalData, nextDueDate: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label={t('medicalRecords.modals.dosage')}><input value={modalData.dosage || ''} onChange={(e) => setModalData({ ...modalData, dosage: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.dosagePlaceholder')} /></ModalField>
-                <ModalField label={t('medicalRecords.modals.batchNumber')}><input value={modalData.batchNumber || ''} onChange={(e) => setModalData({ ...modalData, batchNumber: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label={t('medicalRecords.modals.manufacturer')}><input value={modalData.manufacturer || ''} onChange={(e) => setModalData({ ...modalData, manufacturer: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label={t('medicalRecords.modals.certificateNumber')}><input value={modalData.certificateNumber || ''} onChange={(e) => setModalData({ ...modalData, certificateNumber: e.target.value })} style={inputStyle} /></ModalField>
-                <ModalField label={t('medicalRecords.modals.reactionNotes')}><textarea value={modalData.reactionNotes || ''} onChange={(e) => setModalData({ ...modalData, reactionNotes: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder={t('medicalRecords.modals.reactionPlaceholder')} /></ModalField>
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>{t('medicalRecords.modals.addVaccination')}</h2>
+                {selectedAnimalData && (
+                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 16 }}>
+                    {selectedAnimalData.name} &bull; {selectedAnimalData.species}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''}
+                  </p>
+                )}
+
+                {/* Protocol Selector — primary integration point */}
+                <ModalField label={t('medicalRecords.modals.selectProtocol')}>
+                  {loadingProtocols ? (
+                    <div style={{ padding: '8px 0', fontSize: 13, color: '#6b7280' }}>{t('common.loading')}</div>
+                  ) : vaccineProtocols.length > 0 ? (
+                    <select
+                      value={modalData.protocolId || ''}
+                      onChange={(e) => handleProtocolSelect(e.target.value)}
+                      style={inputStyle}
+                    >
+                      <option value="">{t('medicalRecords.modals.selectProtocolPlaceholder')}</option>
+                      {vaccineProtocols.map((p: any) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} &mdash; {p.vaccineCategory?.replace('_', ' ')} ({p.disease})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p style={{ fontSize: 12, color: '#9ca3af', margin: '4px 0' }}>{t('medicalRecords.modals.noProtocolsForSpecies')}</p>
+                  )}
+                </ModalField>
+
+                <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 14, marginTop: 4 }}>
+                  <ModalField label={t('medicalRecords.modals.vaccineName')}><input value={modalData.vaccineName || ''} onChange={(e) => setModalData({ ...modalData, vaccineName: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.vaccineNamePlaceholder')} /></ModalField>
+                  <ModalField label={t('medicalRecords.modals.vaccineType')}><input value={modalData.vaccineType || ''} onChange={(e) => setModalData({ ...modalData, vaccineType: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.vaccineTypePlaceholder')} /></ModalField>
+                  <ModalField label={t('medicalRecords.modals.dateAdministered')}><input type="date" value={modalData.dateAdministered || ''} onChange={(e) => setModalData({ ...modalData, dateAdministered: e.target.value })} style={inputStyle} /></ModalField>
+                  <ModalField label={t('medicalRecords.modals.nextDueDate')}><input type="date" value={modalData.nextDueDate || ''} onChange={(e) => setModalData({ ...modalData, nextDueDate: e.target.value })} style={inputStyle} /></ModalField>
+                  <ModalField label={t('medicalRecords.modals.dosage')}><input value={modalData.dosage || ''} onChange={(e) => setModalData({ ...modalData, dosage: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.dosagePlaceholder')} /></ModalField>
+                  <ModalField label={t('medicalRecords.modals.batchNumber')}><input value={modalData.batchNumber || ''} onChange={(e) => setModalData({ ...modalData, batchNumber: e.target.value })} style={inputStyle} /></ModalField>
+                  <ModalField label={t('medicalRecords.modals.manufacturer')}><input value={modalData.manufacturer || ''} onChange={(e) => setModalData({ ...modalData, manufacturer: e.target.value })} style={inputStyle} /></ModalField>
+                  <ModalField label={t('medicalRecords.modals.certificateNumber')}><input value={modalData.certificateNumber || ''} onChange={(e) => setModalData({ ...modalData, certificateNumber: e.target.value })} style={inputStyle} /></ModalField>
+                  <ModalField label={t('medicalRecords.modals.reactionNotes')}><textarea value={modalData.reactionNotes || ''} onChange={(e) => setModalData({ ...modalData, reactionNotes: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder={t('medicalRecords.modals.reactionPlaceholder')} /></ModalField>
+                </div>
+
                 <ModalActions onCancel={closeModal} onSave={handleSaveVaccination} saving={saving}
                   disabled={!modalData.vaccineName || !modalData.dateAdministered} />
               </>

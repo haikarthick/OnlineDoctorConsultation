@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import AutocompleteInput from '../../components/AutocompleteInput'
 import '../../styles/modules.css'
 import './VaccineProtocolAdmin.css'
 
@@ -304,102 +305,113 @@ const VaccineProtocolAdmin: React.FC<VaccineProtocolAdminProps> = ({ onNavigate:
         </div>
       )}
 
-      {/* Controls */}
-      <div className="vpa-controls">
-        <input
-          className="module-input"
-          placeholder={t('vaccineProtocol.searchPlaceholder')}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <select className="module-input" value={filterSpecies} onChange={e => setFilterSpecies(e.target.value)}>
-          <option value="">{t('vaccineProtocol.allSpecies')}</option>
-          {SPECIES_OPTIONS.map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-        <select className="module-input" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
-          <option value="">{t('vaccineProtocol.allCategories')}</option>
-          <option value="core">{t('vaccineProtocol.category.core')}</option>
-          <option value="non_core">{t('vaccineProtocol.category.nonCore')}</option>
-          <option value="mandatory_govt">{t('vaccineProtocol.category.mandatoryGovt')}</option>
-          <option value="legally_mandated">{t('vaccineProtocol.category.legallyMandated')}</option>
-        </select>
-        <label className="vpa-checkbox-label">
-          <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} />
-          {t('vaccineProtocol.showArchived')}
-        </label>
-        <button className="module-btn primary" onClick={openAdd}>
-          + {t('vaccineProtocol.addProtocol')}
-        </button>
+      {/* Filter Bar */}
+      <div className="vpa-filter-bar">
+        <div className="vpa-filter-search">
+          <AutocompleteInput
+            value={search}
+            onChange={setSearch}
+            options={protocols.map(p => p.name)}
+            placeholder={t('vaccineProtocol.searchPlaceholder')}
+          />
+        </div>
+        <div className="vpa-filter-row">
+          <div className="vpa-filter-section">
+            <span className="vpa-filter-label">{t('vaccineProtocol.allSpecies')}:</span>
+            <div className="vpa-filter-chips">
+              <button
+                className={`vpa-filter-chip ${!filterSpecies ? 'active' : ''}`}
+                onClick={() => setFilterSpecies('')}
+              >{t('vaccineProtocol.allSpecies')}</button>
+              {SPECIES_OPTIONS.map(s => (
+                <button
+                  key={s}
+                  className={`vpa-filter-chip ${filterSpecies === s ? 'active' : ''}`}
+                  onClick={() => setFilterSpecies(filterSpecies === s ? '' : s)}
+                >{s}</button>
+              ))}
+            </div>
+          </div>
+          <div className="vpa-filter-section">
+            <span className="vpa-filter-label">{t('vaccineProtocol.allCategories')}:</span>
+            <div className="vpa-filter-chips">
+              <button className={`vpa-filter-chip cat-all ${!filterCategory ? 'active' : ''}`} onClick={() => setFilterCategory('')}>{t('vaccineProtocol.allCategories')}</button>
+              <button className={`vpa-filter-chip cat-core ${filterCategory === 'core' ? 'active' : ''}`} onClick={() => setFilterCategory(filterCategory === 'core' ? '' : 'core')}>{t('vaccineProtocol.category.core')}</button>
+              <button className={`vpa-filter-chip cat-noncore ${filterCategory === 'non_core' ? 'active' : ''}`} onClick={() => setFilterCategory(filterCategory === 'non_core' ? '' : 'non_core')}>{t('vaccineProtocol.category.nonCore')}</button>
+              <button className={`vpa-filter-chip cat-mandatory ${filterCategory === 'mandatory_govt' ? 'active' : ''}`} onClick={() => setFilterCategory(filterCategory === 'mandatory_govt' ? '' : 'mandatory_govt')}>{t('vaccineProtocol.category.mandatoryGovt')}</button>
+              <button className={`vpa-filter-chip cat-legal ${filterCategory === 'legally_mandated' ? 'active' : ''}`} onClick={() => setFilterCategory(filterCategory === 'legally_mandated' ? '' : 'legally_mandated')}>{t('vaccineProtocol.category.legallyMandated')}</button>
+            </div>
+          </div>
+        </div>
+        <div className="vpa-filter-actions">
+          <label className="vpa-checkbox-label">
+            <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} />
+            {t('vaccineProtocol.showArchived')}
+          </label>
+          <span className="vpa-results-count">{filtered.length} {t('vaccineProtocol.stats.total').toLowerCase()}</span>
+          <button className="module-btn primary" onClick={openAdd}>
+            + {t('vaccineProtocol.addProtocol')}
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
+      {/* Protocol Card Grid */}
       {loading ? (
         <div className="module-loading">{t('common.loading')}</div>
+      ) : filtered.length === 0 ? (
+        <div className="vpa-empty-state">
+          <div className="vpa-empty-icon">💉</div>
+          <p>{t('vaccineProtocol.noProtocols')}</p>
+        </div>
       ) : (
-        <div className="data-table-container">
-          <table className="module-table">
-            <thead>
-              <tr>
-                <th>{t('vaccineProtocol.table.name')}</th>
-                <th>{t('vaccineProtocol.table.disease')}</th>
-                <th>{t('vaccineProtocol.table.species')}</th>
-                <th>{t('vaccineProtocol.table.category')}</th>
-                <th>{t('vaccineProtocol.table.boosterInterval')}</th>
-                <th>{t('vaccineProtocol.table.route')}</th>
-                <th>{t('vaccineProtocol.table.zoonotic')}</th>
-                <th>{t('vaccineProtocol.table.status')}</th>
-                <th>{t('vaccineProtocol.table.actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="vpa-empty">{t('vaccineProtocol.noProtocols')}</td>
-                </tr>
-              ) : filtered.map(p => (
-                <tr key={p.id} className={p.isActive ? '' : 'vpa-archived-row'}>
-                  <td>
-                    <strong>{p.name}</strong>
-                    {p.isZoonotic && (
-                      <span className="vpa-zoonotic-badge">⚠ {t('vaccineProtocol.zoonotic')}</span>
-                    )}
-                  </td>
-                  <td>{p.disease}</td>
-                  <td>
-                    <div className="vpa-species-chips">
-                      {p.species.slice(0, 3).map(s => (
-                        <span key={s} className="vpa-species-chip">{s}</span>
-                      ))}
-                      {p.species.length > 3 && <span className="vpa-species-chip">+{p.species.length - 3}</span>}
-                    </div>
-                  </td>
-                  <td>{getCategoryDisplay(p.vaccineCategory, t)}</td>
-                  <td>{getIntervalLabel(p.boosterIntervalDays)}</td>
-                  <td>{p.route}</td>
-                  <td>{p.isZoonotic ? '✓' : '–'}</td>
-                  <td>{getStatusBadge(p.isActive, t)}</td>
-                  <td>
-                    <div className="vpa-actions">
-                      <button className="module-btn module-btn-small" onClick={() => openEdit(p)}>
-                        {t('common.edit')}
-                      </button>
-                      <button className="module-btn module-btn-small" onClick={() => openHistory(p)}>
-                        {t('vaccineProtocol.history')}
-                      </button>
-                      <button
-                        className={`module-btn module-btn-small ${p.isActive ? '' : 'primary'}`}
-                        onClick={() => toggleArchive(p)}
-                      >
-                        {p.isActive ? t('vaccineProtocol.archive') : t('vaccineProtocol.restore')}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="vpa-protocol-grid">
+          {filtered.map(p => (
+            <div key={p.id} className={`vpa-protocol-card ${!p.isActive ? 'vpa-card-archived' : ''}`}>
+              <div className="vpa-card-header">
+                <div className="vpa-card-title-row">
+                  <h3 className="vpa-card-title">{p.name}</h3>
+                  {p.isZoonotic && (
+                    <span className="vpa-zoonotic-badge">⚠ {t('vaccineProtocol.zoonotic')}</span>
+                  )}
+                </div>
+                <div className="vpa-card-badges">
+                  {getCategoryDisplay(p.vaccineCategory, t)}
+                  {getStatusBadge(p.isActive, t)}
+                </div>
+              </div>
+              <div className="vpa-card-disease">
+                🦠 <span>{p.disease}</span>
+              </div>
+              <div className="vpa-species-chips">
+                {p.species.slice(0, 4).map(s => (
+                  <span key={s} className="vpa-species-chip">{s}</span>
+                ))}
+                {p.species.length > 4 && (
+                  <span className="vpa-species-chip">+{p.species.length - 4}</span>
+                )}
+              </div>
+              <div className="vpa-card-meta">
+                <span className="vpa-meta-item">🔄 {getIntervalLabel(p.boosterIntervalDays)}</span>
+                <span className="vpa-meta-item">💉 {p.route}</span>
+                {p.country && <span className="vpa-meta-item">🌍 {p.country}</span>}
+                {p.regulatoryBody && <span className="vpa-meta-item">📋 {p.regulatoryBody}</span>}
+              </div>
+              <div className="vpa-card-actions">
+                <button className="module-btn module-btn-small" onClick={() => openEdit(p)}>
+                  ✏️ {t('common.edit')}
+                </button>
+                <button className="module-btn module-btn-small" onClick={() => openHistory(p)}>
+                  📋 {t('vaccineProtocol.history')}
+                </button>
+                <button
+                  className={`module-btn module-btn-small ${p.isActive ? '' : 'primary'}`}
+                  onClick={() => toggleArchive(p)}
+                >
+                  {p.isActive ? `🗃 ${t('vaccineProtocol.archive')}` : `♻️ ${t('vaccineProtocol.restore')}`}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

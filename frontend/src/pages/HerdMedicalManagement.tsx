@@ -2,6 +2,7 @@
 import apiService from '../services/api'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
+import AutocompleteInput from '../components/AutocompleteInput'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 
@@ -436,7 +437,13 @@ const HerdMedicalManagement: React.FC = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
-          <input type="text" placeholder={t('herdMedical.records.searchPlaceholder')} value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setPage(0) }} className="search-input" style={{ flex: 1, minWidth: '200px' }} />
+          <AutocompleteInput
+            value={searchQuery}
+            onChange={v => { setSearchQuery(v); setPage(0) }}
+            options={animals.map(a => a.name)}
+            placeholder={t('herdMedical.records.searchPlaceholder')}
+            className="herd-search"
+          />
           <select value={recordTypeFilter} onChange={e => { setRecordTypeFilter(e.target.value); setPage(0) }} className="search-input" style={{ maxWidth: '170px' }}>
             <option value="">{t('herdMedical.records.allTypes')}</option>{RECORD_TYPES.map(rt => <option key={rt.value} value={rt.value}>{t(`herdMedical.recordTypes.${rt.value}`)}</option>)}
           </select>

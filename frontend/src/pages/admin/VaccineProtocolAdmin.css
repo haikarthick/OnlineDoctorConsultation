@@ -1,18 +1,233 @@
-.vpa-controls {
+/* ─── Filter Bar ─────────────────────────────── */
+.vpa-filter-bar {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.vpa-filter-search {
+  display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.vpa-filter-search .autocomplete-container {
+  flex: 1;
+  max-width: 480px;
+}
+
+.vpa-filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vpa-filter-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vpa-filter-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  margin-top: 6px;
+  min-width: 60px;
+}
+
+.vpa-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vpa-filter-chip {
+  padding: 4px 12px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.vpa-filter-chip:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.vpa-filter-chip.active,
+.vpa-filter-chip.cat-all.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.vpa-filter-chip.cat-core.active {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+}
+
+.vpa-filter-chip.cat-noncore.active {
+  background: #d97706;
+  border-color: #d97706;
+  color: #fff;
+}
+
+.vpa-filter-chip.cat-mandatory.active,
+.vpa-filter-chip.cat-legal.active {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.vpa-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.vpa-results-count {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-left: auto;
+}
+
+/* ─── Protocol Card Grid ─────────────────────── */
+.vpa-protocol-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
   margin-bottom: 24px;
 }
 
-.vpa-controls .module-input {
-  flex: 1;
-  min-width: 150px;
+.vpa-protocol-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
-.vpa-controls .module-btn {
-  white-space: nowrap;
+.vpa-protocol-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.vpa-card-archived {
+  opacity: 0.6;
+  background: #fafafa;
+  border-style: dashed;
+}
+
+.vpa-card-archived:hover {
+  opacity: 0.8;
+}
+
+.vpa-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vpa-card-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vpa-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.vpa-card-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.vpa-card-disease {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.vpa-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vpa-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  color: #374151;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.vpa-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.vpa-empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  color: #9ca3af;
+}
+
+.vpa-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.vpa-empty-state p {
+  font-size: 1rem;
+  margin: 0;
 }
 
 .vpa-checkbox-label {
@@ -48,16 +263,6 @@
   padding: 1px 7px;
   font-size: 0.72rem;
   font-weight: 600;
-}
-
-.vpa-archived-row {
-  opacity: 0.55;
-}
-
-.vpa-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
 }
 
 .module-btn-small {
@@ -258,22 +463,36 @@
 }
 
 /* Responsive */
+/* ─── Responsive ─────────────────────────────── */
 @media (max-width: 1200px) {
+  .vpa-protocol-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
   .vpa-modal {
     max-width: 95vw;
   }
 }
 
 @media (max-width: 768px) {
-  .vpa-controls {
+  .vpa-filter-bar {
+    padding: 14px 16px;
+  }
+  .vpa-filter-search .autocomplete-container {
+    max-width: 100%;
+  }
+  .vpa-filter-actions {
     flex-direction: column;
     align-items: stretch;
   }
-  .vpa-controls .module-btn {
+  .vpa-filter-actions .module-btn {
     width: 100%;
+    text-align: center;
   }
-  .data-table-container {
-    overflow-x: auto;
+  .vpa-results-count {
+    margin-left: 0;
+  }
+  .vpa-protocol-grid {
+    grid-template-columns: 1fr;
   }
   .vpa-modal {
     max-height: 95vh;
@@ -289,11 +508,24 @@
 }
 
 @media (max-width: 640px) {
+  .vpa-filter-chips {
+    gap: 4px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
   .vpa-species-checkboxes {
     gap: 6px;
   }
   .module-form-row {
     grid-template-columns: 1fr;
+  }
+  .vpa-card-actions {
+    flex-direction: column;
+  }
+  .vpa-card-actions .module-btn {
+    width: 100%;
+    text-align: center;
   }
 }
 
@@ -303,5 +535,8 @@
   }
   .vpa-change-values {
     flex-wrap: wrap;
+  }
+  .vpa-protocol-card {
+    padding: 14px;
   }
 }

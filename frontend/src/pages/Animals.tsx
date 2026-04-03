@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
+import AutocompleteInput from '../components/AutocompleteInput'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
@@ -254,10 +255,12 @@ const Animals: React.FC = () => {
       {/* ─── Search & Filter Bar ───────────────────────────── */}
       {!showForm && animals.length > 0 && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input
-            type="text" placeholder={t('animals.searchPlaceholder')}
-            value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-            style={{ ...fieldStyle, maxWidth: 350 }}
+          <AutocompleteInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            options={animals.map(a => a.name)}
+            placeholder={t('animals.searchPlaceholder')}
+            className="animals-search"
           />
           <select value={speciesFilter} onChange={e => setSpeciesFilter(e.target.value)} style={{ ...fieldStyle, maxWidth: 160 }}>
             <option value="">{t('animals.allSpecies')}</option>
