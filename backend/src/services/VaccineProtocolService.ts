@@ -418,11 +418,18 @@ class VaccineProtocolService {
 
   async getCertificateLogs(animalId: string): Promise<any[]> {
     const result = await database.query(
-      `SELECT cl.*,
-         u.first_name || ' ' || u.last_name AS "generated_by_name",
-         vr.vaccine_name
+      `SELECT cl.id,
+         cl.animal_id AS "animalId",
+         cl.vaccination_record_id AS "vaccinationRecordId",
+         cl.certificate_type AS "certificateType",
+         cl.file_name AS "fileName",
+         cl.generated_at AS "generatedAt",
+         a.name AS "animalName",
+         u.first_name || ' ' || u.last_name AS "generatedByName",
+         vr.vaccine_name AS "vaccineName"
        FROM vaccine_certificate_log cl
        JOIN users u ON u.id = cl.generated_by
+       LEFT JOIN animals a ON a.id = cl.animal_id
        LEFT JOIN vaccination_records vr ON vr.id = cl.vaccination_record_id
        WHERE cl.animal_id = $1
        ORDER BY cl.generated_at DESC`,

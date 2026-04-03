@@ -4998,6 +4998,8 @@
     "selectAnimal": "Select an animal...",
     "downloadPassport": "Download Passport",
     "downloading": "Generating...",
+    "passportPreview": "Vaccination Passport Preview",
+    "printSavePdf": "Print / Save as PDF",
     "dob": "DOB",
     "disease": "Disease",
     "lastDose": "Last Dose",

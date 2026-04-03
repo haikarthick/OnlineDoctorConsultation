@@ -4948,6 +4948,8 @@
     "noCertLogs": "अभी तक कोई प्रमाण पत्र नहीं बनाया गया।",
     "selectAnimal": "पशु चुनें...",
     "downloadPassport": "पासपोर्ट डाउनलोड करें",
+    "passportPreview": "टीकाकरण पासपोर्ट पूर्वावलोकन",
+    "printSavePdf": "प्रिंट / PDF के रूप में सहेजें",
     "downloading": "तैयार हो रहा है...",
     "dob": "जन्म तिथि",
     "disease": "बीमारी",
