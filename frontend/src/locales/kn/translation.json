@@ -46,7 +46,10 @@
     "loadingPage": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
     "brand": "VetCare",
     "enterprise": "ಉದ್ಯಮ",
-    "trustBadge": "ವಿಶ್ವಾದ್ಯಂತ 3,000+ ಉದ್ಯಮಗಳ ವಿಶ್ವಾಸ"
+    "trustBadge": "ವಿಶ್ವಾದ್ಯಂತ 3,000+ ಉದ್ಯಮಗಳ ವಿಶ್ವಾಸ",
+    "myAnimals": "My Animals",
+    "selectOption": "Select an option",
+    "average": "Average"
   },
   "nav": {
     "brand": "VetCare",
@@ -296,66 +299,192 @@
       "vets": "ಪಶುವೈದ್ಯರು"
     },
     "ownerBenefits": {
-      "0": { "title": "24/7 ಲಭ್ಯ", "desc": "ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿಗಳಿಗೆ ತಜ್ಞ ಸಲಹೆ ಪಡೆಯಿರಿ" },
-      "1": { "title": "ಪರವಾನಗಿ ಪಡೆದ ಪಶುವೈದ್ಯರು", "desc": "ಬೋರ್ಡ್-ಪ್ರಮಾಣಿತ ಪಶುವೈದ್ಯ ತಜ್ಞರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ" },
-      "2": { "title": "ಲೈವ್ ವೀಡಿಯೊ ಮತ್ತು ಚಾಟ್", "desc": "ಸ್ಕ್ರೀನ್-ಹಂಚಿಕೆ ಬೆಂಬಲದೊಂದಿಗೆ ನೈಜ-ಸಮಯದ ಸಮಾಲೋಚನೆಗಳು" },
-      "3": { "title": "ಡಿಜಿಟಲ್ ದಾಖಲೆಗಳು", "desc": "ಸಂಪೂರ್ಣ ವೈದ್ಯಕೀಯ ಇತಿಹಾಸ, ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು ಮತ್ತು ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು" },
-      "4": { "title": "40% ಕಡಿಮೆ ವೆಚ್ಚ", "desc": "ಆಸ್ಪತ್ರೆ ಭೇಟಿಗಳಿಗೆ ಹೋಲಿಸಿದರೆ ಅದೇ ಗುಣಮಟ್ಟದಲ್ಲಿ ಉಳಿಸಿ" },
-      "5": { "title": "5 ನಿಮಿಷಕ್ಕಿಂತ ಕಡಿಮೆ ಕಾಯುವಿಕೆ", "desc": "ಪಶುವೈದ್ಯರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಲು ಸರಾಸರಿ ಪ್ರತಿಕ್ರಿಯೆ ಸಮಯ" }
+      "0": {
+        "title": "24/7 ಲಭ್ಯ",
+        "desc": "ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿಗಳಿಗೆ ತಜ್ಞ ಸಲಹೆ ಪಡೆಯಿರಿ"
+      },
+      "1": {
+        "title": "ಪರವಾನಗಿ ಪಡೆದ ಪಶುವೈದ್ಯರು",
+        "desc": "ಬೋರ್ಡ್-ಪ್ರಮಾಣಿತ ಪಶುವೈದ್ಯ ತಜ್ಞರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ"
+      },
+      "2": {
+        "title": "ಲೈವ್ ವೀಡಿಯೊ ಮತ್ತು ಚಾಟ್",
+        "desc": "ಸ್ಕ್ರೀನ್-ಹಂಚಿಕೆ ಬೆಂಬಲದೊಂದಿಗೆ ನೈಜ-ಸಮಯದ ಸಮಾಲೋಚನೆಗಳು"
+      },
+      "3": {
+        "title": "ಡಿಜಿಟಲ್ ದಾಖಲೆಗಳು",
+        "desc": "ಸಂಪೂರ್ಣ ವೈದ್ಯಕೀಯ ಇತಿಹಾಸ, ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು ಮತ್ತು ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು"
+      },
+      "4": {
+        "title": "40% ಕಡಿಮೆ ವೆಚ್ಚ",
+        "desc": "ಆಸ್ಪತ್ರೆ ಭೇಟಿಗಳಿಗೆ ಹೋಲಿಸಿದರೆ ಅದೇ ಗುಣಮಟ್ಟದಲ್ಲಿ ಉಳಿಸಿ"
+      },
+      "5": {
+        "title": "5 ನಿಮಿಷಕ್ಕಿಂತ ಕಡಿಮೆ ಕಾಯುವಿಕೆ",
+        "desc": "ಪಶುವೈದ್ಯರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಲು ಸರಾಸರಿ ಪ್ರತಿಕ್ರಿಯೆ ಸಮಯ"
+      }
     },
     "enterpriseBenefits": {
-      "0": { "title": "ಬಹು-ಸ್ಥಳ ನಿರ್ವಹಣೆ", "desc": "ಒಂದೇ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಿಂದ ಕೃಷಿ, ಮೃಗಾಲಯ ಮತ್ತು ಸೌಲಭ್ಯಗಳನ್ನು ನಿರ್ವಹಿಸಿ" },
-      "1": { "title": "ಹಿಂಡು ಮತ್ತು ಗುಂಪು ಟ್ರ್ಯಾಕಿಂಗ್", "desc": "ಗುಂಪುಗಳು, ವಂಶಾವಳಿ, ಚಲನೆಗಳು ಮತ್ತು ಉತ್ಪಾದನಾ ಡೇಟಾ ದೊಡ್ಡ ಪ್ರಮಾಣದಲ್ಲಿ" },
-      "2": { "title": "ಚಿಕಿತ್ಸಾ ಅಭಿಯಾನಗಳು", "desc": "ಸಾಮೂಹಿಕ ಲಸಿಕೆ, ಹುಳ ನಿವಾರಣೆ ಮತ್ತು ಆರೋಗ್ಯ ತಪಾಸಣೆ ಕಾರ್ಯಕ್ರಮಗಳು" },
-      "3": { "title": "ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ವರದಿ", "desc": "ನೈಜ-ಸಮಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗಳು, ಮರಣ ದರಗಳು ಮತ್ತು ಉತ್ಪಾದಕತೆ KPIಗಳು" },
-      "4": { "title": "ಸ್ಮಾರ್ಟ್ ಎಚ್ಚರಿಕೆಗಳು", "desc": "ಸ್ವಯಂಚಾಲಿತ ಆರೋಗ್ಯ ಎಚ್ಚರಿಕೆಗಳು, ತಳಿ ಸಂವರ್ಧನೆ ಜ್ಞಾಪನೆಗಳು ಮತ್ತು ಅನುಸರಣೆ" },
-      "5": { "title": "ಬಹು-ಉದ್ಯಮ", "desc": "ಹೈನು, ಕೋಳಿ, ಅಶ್ವಾರೋಹಣ, ಮೀನುಸಾಕಣೆ, ಅಭಯಾರಣ್ಯಗಳು ಮತ್ತು ಹೆಚ್ಚು" }
+      "0": {
+        "title": "ಬಹು-ಸ್ಥಳ ನಿರ್ವಹಣೆ",
+        "desc": "ಒಂದೇ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಿಂದ ಕೃಷಿ, ಮೃಗಾಲಯ ಮತ್ತು ಸೌಲಭ್ಯಗಳನ್ನು ನಿರ್ವಹಿಸಿ"
+      },
+      "1": {
+        "title": "ಹಿಂಡು ಮತ್ತು ಗುಂಪು ಟ್ರ್ಯಾಕಿಂಗ್",
+        "desc": "ಗುಂಪುಗಳು, ವಂಶಾವಳಿ, ಚಲನೆಗಳು ಮತ್ತು ಉತ್ಪಾದನಾ ಡೇಟಾ ದೊಡ್ಡ ಪ್ರಮಾಣದಲ್ಲಿ"
+      },
+      "2": {
+        "title": "ಚಿಕಿತ್ಸಾ ಅಭಿಯಾನಗಳು",
+        "desc": "ಸಾಮೂಹಿಕ ಲಸಿಕೆ, ಹುಳ ನಿವಾರಣೆ ಮತ್ತು ಆರೋಗ್ಯ ತಪಾಸಣೆ ಕಾರ್ಯಕ್ರಮಗಳು"
+      },
+      "3": {
+        "title": "ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ವರದಿ",
+        "desc": "ನೈಜ-ಸಮಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗಳು, ಮರಣ ದರಗಳು ಮತ್ತು ಉತ್ಪಾದಕತೆ KPIಗಳು"
+      },
+      "4": {
+        "title": "ಸ್ಮಾರ್ಟ್ ಎಚ್ಚರಿಕೆಗಳು",
+        "desc": "ಸ್ವಯಂಚಾಲಿತ ಆರೋಗ್ಯ ಎಚ್ಚರಿಕೆಗಳು, ತಳಿ ಸಂವರ್ಧನೆ ಜ್ಞಾಪನೆಗಳು ಮತ್ತು ಅನುಸರಣೆ"
+      },
+      "5": {
+        "title": "ಬಹು-ಉದ್ಯಮ",
+        "desc": "ಹೈನು, ಕೋಳಿ, ಅಶ್ವಾರೋಹಣ, ಮೀನುಸಾಕಣೆ, ಅಭಯಾರಣ್ಯಗಳು ಮತ್ತು ಹೆಚ್ಚು"
+      }
     },
     "vetBenefits": {
-      "0": { "title": "ಅಭ್ಯಾಸ ವಿಸ್ತರಣೆ", "desc": "ವೈಯಕ್ತಿಕ ಸಾಕುಪ್ರಾಣಿಗಳು ಮತ್ತು ಉದ್ಯಮ-ಮಟ್ಟದ ಕಾರ್ಯಾಚರಣೆಗಳಿಗೆ ಸೇವೆ ನೀಡಿ" },
-      "1": { "title": "ಕೇಸ್ ನಿರ್ವಹಣೆ", "desc": "ಆದ್ಯತೆ ಟ್ರಯೇಜ್ ವ್ಯವಸ್ಥೆಯೊಂದಿಗೆ ಸಂಘಟಿತ ರೋಗಿ ಸರದಿ" },
-      "2": { "title": "ಉದ್ಯಮ ಒಪ್ಪಂದಗಳು", "desc": "ಕೃಷಿ ಮತ್ತು ಸೌಲಭ್ಯ ರಿಟೇನರ್ ಒಪ್ಪಂದಗಳಿಂದ ಸ್ಥಿರ ಆದಾಯ" },
-      "3": { "title": "ನಿಯಂತ್ರಣ ಅನುಸರಣೆ", "desc": "ಪಶುವೈದ್ಯ ಮಾನದಂಡಗಳು ಮತ್ತು ಆಡಿಟ್‌ಗಳಿಗೆ ಅಂತರ್ನಿರ್ಮಿತ ಅನುಸರಣೆ" },
-      "4": { "title": "ಮೊಬೈಲ್ ಸಿದ್ಧ", "desc": "ಕ್ಷೇತ್ರ ಭೇಟಿಗಳಿಗೆ ಕ್ಷೇತ್ರ-ಸಿದ್ಧ ಮೊಬೈಲ್ ಇಂಟರ್‌ಫೇಸ್" },
-      "5": { "title": "ಜಾಗತಿಕ ನೆಟ್‌ವರ್ಕ್", "desc": "ಪ್ರಪಂಚದಾದ್ಯಂತ ಪ್ರಾಣಿ ವ್ಯವಹಾರಗಳೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ" }
+      "0": {
+        "title": "ಅಭ್ಯಾಸ ವಿಸ್ತರಣೆ",
+        "desc": "ವೈಯಕ್ತಿಕ ಸಾಕುಪ್ರಾಣಿಗಳು ಮತ್ತು ಉದ್ಯಮ-ಮಟ್ಟದ ಕಾರ್ಯಾಚರಣೆಗಳಿಗೆ ಸೇವೆ ನೀಡಿ"
+      },
+      "1": {
+        "title": "ಕೇಸ್ ನಿರ್ವಹಣೆ",
+        "desc": "ಆದ್ಯತೆ ಟ್ರಯೇಜ್ ವ್ಯವಸ್ಥೆಯೊಂದಿಗೆ ಸಂಘಟಿತ ರೋಗಿ ಸರದಿ"
+      },
+      "2": {
+        "title": "ಉದ್ಯಮ ಒಪ್ಪಂದಗಳು",
+        "desc": "ಕೃಷಿ ಮತ್ತು ಸೌಲಭ್ಯ ರಿಟೇನರ್ ಒಪ್ಪಂದಗಳಿಂದ ಸ್ಥಿರ ಆದಾಯ"
+      },
+      "3": {
+        "title": "ನಿಯಂತ್ರಣ ಅನುಸರಣೆ",
+        "desc": "ಪಶುವೈದ್ಯ ಮಾನದಂಡಗಳು ಮತ್ತು ಆಡಿಟ್‌ಗಳಿಗೆ ಅಂತರ್ನಿರ್ಮಿತ ಅನುಸರಣೆ"
+      },
+      "4": {
+        "title": "ಮೊಬೈಲ್ ಸಿದ್ಧ",
+        "desc": "ಕ್ಷೇತ್ರ ಭೇಟಿಗಳಿಗೆ ಕ್ಷೇತ್ರ-ಸಿದ್ಧ ಮೊಬೈಲ್ ಇಂಟರ್‌ಫೇಸ್"
+      },
+      "5": {
+        "title": "ಜಾಗತಿಕ ನೆಟ್‌ವರ್ಕ್",
+        "desc": "ಪ್ರಪಂಚದಾದ್ಯಂತ ಪ್ರಾಣಿ ವ್ಯವಹಾರಗಳೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ"
+      }
     },
     "hospitalBenefits": {
-      "0": { "title": "ಆಸ್ಪತ್ರೆ ಪ್ರೊಫೈಲ್", "desc": "ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ಅಥವಾ ಬಹು-ವೈದ್ಯ ಕ್ಲಿನಿಕ್‌ಗೆ ಪರಿಶೀಲಿತ ಸಾರ್ವಜನಿಕ ಪ್ರೊಫೈಲ್ ರಚಿಸಿ" },
-      "1": { "title": "ಬಹು-ವೈದ್ಯ ತಂಡಗಳು", "desc": "ವೈದ್ಯರನ್ನು ಸೇರಿಸಿ, ಇಲಾಖೆಗಳನ್ನು ನಿಯೋಜಿಸಿ, ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ ಸಿಬ್ಬಂದಿ ಪಾತ್ರಗಳನ್ನು ನಿರ್ವಹಿಸಿ" },
-      "2": { "title": "ಇಲಾಖೆ ನಿರ್ವಹಣೆ", "desc": "ಶಸ್ತ್ರಚಿಕಿತ್ಸೆ, ಚರ್ಮರೋಗ, ಆಂಕೊಲಜಿ ಮತ್ತು ಕಸ್ಟಮ್ ವಿಶೇಷತೆಗಳ ಮೂಲಕ ಸಂಘಟಿಸಿ" },
-      "3": { "title": "ಕೇಂದ್ರೀಕೃತ ಬುಕಿಂಗ್", "desc": "ರೋಗಿಗಳು ನೇರವಾಗಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆಯಲ್ಲಿ ಬುಕ್ ಮಾಡಿ; ಸರಿಯಾದ ಪಶುವೈದ್ಯರಿಗೆ ಆಟೋ-ರೂಟಿಂಗ್" },
-      "4": { "title": "ತುರ್ತು ಸೇವೆಗಳು", "desc": "24/7 ತುರ್ತು ಲಭ್ಯತೆ ಮತ್ತು ಕ್ರಿಟಿಕಲ್ ಕೇರ್ ಸಾಮರ್ಥ್ಯವನ್ನು ಹೈಲೈಟ್ ಮಾಡಿ" },
-      "5": { "title": "ವಿಮರ್ಶೆಗಳು ಮತ್ತು ರೇಟಿಂಗ್‌ಗಳು", "desc": "ಪರಿಶೀಲಿತ ರೋಗಿ ವಿಮರ್ಶೆಗಳು ಮತ್ತು ಸಾರ್ವಜನಿಕ ರೇಟಿಂಗ್‌ಗಳೊಂದಿಗೆ ನಂಬಿಕೆ ಕಟ್ಟಿಕೊಳ್ಳಿ" }
+      "0": {
+        "title": "ಆಸ್ಪತ್ರೆ ಪ್ರೊಫೈಲ್",
+        "desc": "ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ಅಥವಾ ಬಹು-ವೈದ್ಯ ಕ್ಲಿನಿಕ್‌ಗೆ ಪರಿಶೀಲಿತ ಸಾರ್ವಜನಿಕ ಪ್ರೊಫೈಲ್ ರಚಿಸಿ"
+      },
+      "1": {
+        "title": "ಬಹು-ವೈದ್ಯ ತಂಡಗಳು",
+        "desc": "ವೈದ್ಯರನ್ನು ಸೇರಿಸಿ, ಇಲಾಖೆಗಳನ್ನು ನಿಯೋಜಿಸಿ, ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ ಸಿಬ್ಬಂದಿ ಪಾತ್ರಗಳನ್ನು ನಿರ್ವಹಿಸಿ"
+      },
+      "2": {
+        "title": "ಇಲಾಖೆ ನಿರ್ವಹಣೆ",
+        "desc": "ಶಸ್ತ್ರಚಿಕಿತ್ಸೆ, ಚರ್ಮರೋಗ, ಆಂಕೊಲಜಿ ಮತ್ತು ಕಸ್ಟಮ್ ವಿಶೇಷತೆಗಳ ಮೂಲಕ ಸಂಘಟಿಸಿ"
+      },
+      "3": {
+        "title": "ಕೇಂದ್ರೀಕೃತ ಬುಕಿಂಗ್",
+        "desc": "ರೋಗಿಗಳು ನೇರವಾಗಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆಯಲ್ಲಿ ಬುಕ್ ಮಾಡಿ; ಸರಿಯಾದ ಪಶುವೈದ್ಯರಿಗೆ ಆಟೋ-ರೂಟಿಂಗ್"
+      },
+      "4": {
+        "title": "ತುರ್ತು ಸೇವೆಗಳು",
+        "desc": "24/7 ತುರ್ತು ಲಭ್ಯತೆ ಮತ್ತು ಕ್ರಿಟಿಕಲ್ ಕೇರ್ ಸಾಮರ್ಥ್ಯವನ್ನು ಹೈಲೈಟ್ ಮಾಡಿ"
+      },
+      "5": {
+        "title": "ವಿಮರ್ಶೆಗಳು ಮತ್ತು ರೇಟಿಂಗ್‌ಗಳು",
+        "desc": "ಪರಿಶೀಲಿತ ರೋಗಿ ವಿಮರ್ಶೆಗಳು ಮತ್ತು ಸಾರ್ವಜನಿಕ ರೇಟಿಂಗ್‌ಗಳೊಂದಿಗೆ ನಂಬಿಕೆ ಕಟ್ಟಿಕೊಳ್ಳಿ"
+      }
     },
     "advancedTitle": "ಮುಂದುವರಿದ ಉದ್ಯಮ ಸಾಮರ್ಥ್ಯಗಳು",
     "advancedSubtitle": "ಅತ್ಯಂತ ಬೇಡಿಕೆಯ ಕಾರ್ಯಾಚರಣೆಗಳಿಗಾಗಿ ನಿರ್ಮಿಸಲಾಗಿದೆ",
     "advancedFeatures": {
-      "0": { "title": "ಆರೋಗ್ಯ ವಿಶ್ಲೇಷಣೆ", "desc": "ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ಮರಣ ಪ್ರವೃತ್ತಿಗಳು, ಬೆಳವಣಿಗೆ ವಕ್ರರೇಖೆಗಳು ಮತ್ತು ಭವಿಷ್ಯ ಆರೋಗ್ಯ ಅಂಕಗಳೊಂದಿಗೆ AI-ಚಾಲಿತ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗಳು" },
-      "1": { "title": "ತಳಿ ಸಂವರ್ಧನೆ ಮತ್ತು ತಳಿಶಾಸ್ತ್ರ", "desc": "ವಂಶಾವಳಿ ಮರಗಳು, ಅಂತರ್ತಳಿ ಗುಣಾಂಕಗಳು, ತಳಿ ಚಕ್ರ ಟ್ರ್ಯಾಕಿಂಗ್ ಮತ್ತು ಅತ್ಯುತ್ತಮ ಜೋಡಿಗೆ ತಳಿ ಗುಣ ವಿಶ್ಲೇಷಣೆ" },
-      "2": { "title": "ಆಹಾರ ಮತ್ತು ಸರಕು", "desc": "ಆಹಾರ ಬಳಕೆ ಟ್ರ್ಯಾಕಿಂಗ್, ಪ್ರತಿ-ಪ್ರಾಣಿ ವೆಚ್ಚ ವಿಶ್ಲೇಷಣೆ, ಸ್ವಯಂಚಾಲಿತ ಮರು-ಆರ್ಡರ್ ಎಚ್ಚರಿಕೆಗಳು ಮತ್ತು ಪೂರೈಕೆದಾರ ನಿರ್ವಹಣೆ" },
-      "3": { "title": "IoT ಮತ್ತು ಸೆನ್ಸಾರ್ ಸಿದ್ಧ", "desc": "ತಾಪಮಾನ ಸೆನ್ಸಾರ್‌ಗಳು, GPS ಟ್ರ್ಯಾಕರ್‌ಗಳು, ತೂಕ ಮಾಪಕಗಳು ಮತ್ತು ಸ್ವಯಂಚಾಲಿತ ಆಹಾರ ವ್ಯವಸ್ಥೆಗಳಿಗೆ ಏಕೀಕರಣ-ಸಿದ್ಧ" },
-      "4": { "title": "ನಿಯಂತ್ರಣ ಮತ್ತು ಅನುಸರಣೆ", "desc": "ರಫ್ತು ಪ್ರಮಾಣೀಕರಣ, ಸಾರಿಗೆ ಅನುಮತಿಗಳು, ಲಸಿಕೆ ದಾಖಲೆಗಳು ಮತ್ತು ಸರ್ಕಾರಿ ತಪಾಸಣೆಗಳಿಗೆ ಆಡಿಟ್ ಟ್ರಯಲ್‌ಗಳು" },
-      "5": { "title": "ಹಣಕಾಸು ನಿರ್ವಹಣೆ", "desc": "ಪ್ರತಿ-ಪ್ರಾಣಿ ಆದಾಯ, ಚಿಕಿತ್ಸಾ ವೆಚ್ಚ ವಿಶ್ಲೇಷಣೆ, ವಿಮಾ ಕ್ಲೇಮ್ ಟ್ರ್ಯಾಕಿಂಗ್ ಮತ್ತು ಉದ್ಯಮ ಬಿಲ್ಲಿಂಗ್" }
+      "0": {
+        "title": "ಆರೋಗ್ಯ ವಿಶ್ಲೇಷಣೆ",
+        "desc": "ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ಮರಣ ಪ್ರವೃತ್ತಿಗಳು, ಬೆಳವಣಿಗೆ ವಕ್ರರೇಖೆಗಳು ಮತ್ತು ಭವಿಷ್ಯ ಆರೋಗ್ಯ ಅಂಕಗಳೊಂದಿಗೆ AI-ಚಾಲಿತ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗಳು"
+      },
+      "1": {
+        "title": "ತಳಿ ಸಂವರ್ಧನೆ ಮತ್ತು ತಳಿಶಾಸ್ತ್ರ",
+        "desc": "ವಂಶಾವಳಿ ಮರಗಳು, ಅಂತರ್ತಳಿ ಗುಣಾಂಕಗಳು, ತಳಿ ಚಕ್ರ ಟ್ರ್ಯಾಕಿಂಗ್ ಮತ್ತು ಅತ್ಯುತ್ತಮ ಜೋಡಿಗೆ ತಳಿ ಗುಣ ವಿಶ್ಲೇಷಣೆ"
+      },
+      "2": {
+        "title": "ಆಹಾರ ಮತ್ತು ಸರಕು",
+        "desc": "ಆಹಾರ ಬಳಕೆ ಟ್ರ್ಯಾಕಿಂಗ್, ಪ್ರತಿ-ಪ್ರಾಣಿ ವೆಚ್ಚ ವಿಶ್ಲೇಷಣೆ, ಸ್ವಯಂಚಾಲಿತ ಮರು-ಆರ್ಡರ್ ಎಚ್ಚರಿಕೆಗಳು ಮತ್ತು ಪೂರೈಕೆದಾರ ನಿರ್ವಹಣೆ"
+      },
+      "3": {
+        "title": "IoT ಮತ್ತು ಸೆನ್ಸಾರ್ ಸಿದ್ಧ",
+        "desc": "ತಾಪಮಾನ ಸೆನ್ಸಾರ್‌ಗಳು, GPS ಟ್ರ್ಯಾಕರ್‌ಗಳು, ತೂಕ ಮಾಪಕಗಳು ಮತ್ತು ಸ್ವಯಂಚಾಲಿತ ಆಹಾರ ವ್ಯವಸ್ಥೆಗಳಿಗೆ ಏಕೀಕರಣ-ಸಿದ್ಧ"
+      },
+      "4": {
+        "title": "ನಿಯಂತ್ರಣ ಮತ್ತು ಅನುಸರಣೆ",
+        "desc": "ರಫ್ತು ಪ್ರಮಾಣೀಕರಣ, ಸಾರಿಗೆ ಅನುಮತಿಗಳು, ಲಸಿಕೆ ದಾಖಲೆಗಳು ಮತ್ತು ಸರ್ಕಾರಿ ತಪಾಸಣೆಗಳಿಗೆ ಆಡಿಟ್ ಟ್ರಯಲ್‌ಗಳು"
+      },
+      "5": {
+        "title": "ಹಣಕಾಸು ನಿರ್ವಹಣೆ",
+        "desc": "ಪ್ರತಿ-ಪ್ರಾಣಿ ಆದಾಯ, ಚಿಕಿತ್ಸಾ ವೆಚ್ಚ ವಿಶ್ಲೇಷಣೆ, ವಿಮಾ ಕ್ಲೇಮ್ ಟ್ರ್ಯಾಕಿಂಗ್ ಮತ್ತು ಉದ್ಯಮ ಬಿಲ್ಲಿಂಗ್"
+      }
     },
     "innovationTitle": "ಮುಂದಿನ ತಲೆಮಾರಿನ ನಾವೀನ್ಯತೆ",
     "innovationSubtitle": "ಪ್ರಾಣಿ ನಿರ್ವಹಣೆಯನ್ನು ಮರು-ವ್ಯಾಖ್ಯಾನಿಸುವ AI, IoT ಮತ್ತು ಬ್ಲಾಕ್‌ಚೈನ್-ಶೈಲಿ ವೈಶಿಷ್ಟ್ಯಗಳು",
     "innovationFeatures": {
-      "0": { "title": "AI ರೋಗ ಭವಿಷ್ಯ", "desc": "ಅಪಾಯ ಅಂಕ, ಭೌಗೋಳಿಕ ಹರಡುವಿಕೆ ಮ್ಯಾಪಿಂಗ್ ಮತ್ತು ಸ್ವಯಂಚಾಲಿತ ತಡೆ ಕ್ರಿಯಾ ಯೋಜನೆಗಳೊಂದಿಗೆ ರೋಗ ಹರಡುವಿಕೆಯನ್ನು ಮುಂಚಿತವಾಗಿ ಊಹಿಸಿ" },
-      "1": { "title": "ತಳಿ ವಂಶಾವಳಿ ಟ್ರ್ಯಾಕರ್", "desc": "ಆಳವಾದ ವಂಶಾವಳಿ ಮರಗಳು, ಅಂತರ್ತಳಿ ಗುಣಾಂಕ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು AI-ಚಾಲಿತ ತಳಿ ಜೋಡಿ ಶಿಫಾರಸುಗಳು" },
-      "2": { "title": "IoT ಸೆನ್ಸಾರ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", "desc": "ಎಲ್ಲಾ ಸೌಲಭ್ಯಗಳಲ್ಲಿ ಸ್ವಯಂಚಾಲಿತ ಅಸಹಜತೆ ಪತ್ತೆ, ಕಡಿಮೆ-ಬ್ಯಾಟರಿ ಎಚ್ಚರಿಕೆಗಳು ಮತ್ತು ದೂರ ವಿಶ್ಲೇಷಣೆಯೊಂದಿಗೆ ನೈಜ-ಸಮಯ ಪರಿಸರ ಮೇಲ್ವಿಚಾರಣೆ" },
-      "3": { "title": "ಕೃಷಿ-ಆಹಾರ ಟ್ರೇಸಬಿಲಿಟಿ", "desc": "SHA-256 ಪರಿಶೀಲನೆ, QR ಕೋಡ್ ಉತ್ಪಾದನೆ ಮತ್ತು ಸಂಪೂರ್ಣ ಬ್ಯಾಚ್ ಟ್ರೇಸಬಿಲಿಟಿಯೊಂದಿಗೆ ಬ್ಲಾಕ್‌ಚೈನ್-ಶೈಲಿ ಸರಬರಾಜು ಸರಪಳಿ ಆಡಿಟ್ ಟ್ರಯಲ್" },
-      "4": { "title": "ಸಿಬ್ಬಂದಿ ಕಾರ್ಯಾಚರಣೆ ಹಬ್", "desc": "ಆದ್ಯತೆ ಶೆಡ್ಯೂಲಿಂಗ್, ಚೆಕ್-ಇನ್/ಔಟ್ ಮತ್ತು ಸಿಬ್ಬಂದಿ ಕಾರ್ಯಕ್ಷಮತೆ ವಿಶ್ಲೇಷಣೆಯೊಂದಿಗೆ ಶಿಫ್ಟ್ ನಿರ್ವಹಣೆ ಮತ್ತು ಕಾರ್ಯ ಬೋರ್ಡ್‌ಗಳು" },
-      "5": { "title": "ವರದಿ ಜನರೇಟರ್", "desc": "ಪ್ರಾಣಿ ಜನಗಣತಿಯಿಂದ ಸೆನ್ಸಾರ್ ವಿಶ್ಲೇಷಣೆಯವರೆಗೆ — ರಫ್ತು ಸಾಮರ್ಥ್ಯಗಳೊಂದಿಗೆ 7 ರೀತಿಯ ಕ್ರಾಸ್-ಮಾಡ್ಯೂಲ್ ವರದಿಗಳನ್ನು ಬೇಡಿಕೆ ಮೇಲೆ ಉತ್ಪಾದಿಸಿ" }
+      "0": {
+        "title": "AI ರೋಗ ಭವಿಷ್ಯ",
+        "desc": "ಅಪಾಯ ಅಂಕ, ಭೌಗೋಳಿಕ ಹರಡುವಿಕೆ ಮ್ಯಾಪಿಂಗ್ ಮತ್ತು ಸ್ವಯಂಚಾಲಿತ ತಡೆ ಕ್ರಿಯಾ ಯೋಜನೆಗಳೊಂದಿಗೆ ರೋಗ ಹರಡುವಿಕೆಯನ್ನು ಮುಂಚಿತವಾಗಿ ಊಹಿಸಿ"
+      },
+      "1": {
+        "title": "ತಳಿ ವಂಶಾವಳಿ ಟ್ರ್ಯಾಕರ್",
+        "desc": "ಆಳವಾದ ವಂಶಾವಳಿ ಮರಗಳು, ಅಂತರ್ತಳಿ ಗುಣಾಂಕ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು AI-ಚಾಲಿತ ತಳಿ ಜೋಡಿ ಶಿಫಾರಸುಗಳು"
+      },
+      "2": {
+        "title": "IoT ಸೆನ್ಸಾರ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+        "desc": "ಎಲ್ಲಾ ಸೌಲಭ್ಯಗಳಲ್ಲಿ ಸ್ವಯಂಚಾಲಿತ ಅಸಹಜತೆ ಪತ್ತೆ, ಕಡಿಮೆ-ಬ್ಯಾಟರಿ ಎಚ್ಚರಿಕೆಗಳು ಮತ್ತು ದೂರ ವಿಶ್ಲೇಷಣೆಯೊಂದಿಗೆ ನೈಜ-ಸಮಯ ಪರಿಸರ ಮೇಲ್ವಿಚಾರಣೆ"
+      },
+      "3": {
+        "title": "ಕೃಷಿ-ಆಹಾರ ಟ್ರೇಸಬಿಲಿಟಿ",
+        "desc": "SHA-256 ಪರಿಶೀಲನೆ, QR ಕೋಡ್ ಉತ್ಪಾದನೆ ಮತ್ತು ಸಂಪೂರ್ಣ ಬ್ಯಾಚ್ ಟ್ರೇಸಬಿಲಿಟಿಯೊಂದಿಗೆ ಬ್ಲಾಕ್‌ಚೈನ್-ಶೈಲಿ ಸರಬರಾಜು ಸರಪಳಿ ಆಡಿಟ್ ಟ್ರಯಲ್"
+      },
+      "4": {
+        "title": "ಸಿಬ್ಬಂದಿ ಕಾರ್ಯಾಚರಣೆ ಹಬ್",
+        "desc": "ಆದ್ಯತೆ ಶೆಡ್ಯೂಲಿಂಗ್, ಚೆಕ್-ಇನ್/ಔಟ್ ಮತ್ತು ಸಿಬ್ಬಂದಿ ಕಾರ್ಯಕ್ಷಮತೆ ವಿಶ್ಲೇಷಣೆಯೊಂದಿಗೆ ಶಿಫ್ಟ್ ನಿರ್ವಹಣೆ ಮತ್ತು ಕಾರ್ಯ ಬೋರ್ಡ್‌ಗಳು"
+      },
+      "5": {
+        "title": "ವರದಿ ಜನರೇಟರ್",
+        "desc": "ಪ್ರಾಣಿ ಜನಗಣತಿಯಿಂದ ಸೆನ್ಸಾರ್ ವಿಶ್ಲೇಷಣೆಯವರೆಗೆ — ರಫ್ತು ಸಾಮರ್ಥ್ಯಗಳೊಂದಿಗೆ 7 ರೀತಿಯ ಕ್ರಾಸ್-ಮಾಡ್ಯೂಲ್ ವರದಿಗಳನ್ನು ಬೇಡಿಕೆ ಮೇಲೆ ಉತ್ಪಾದಿಸಿ"
+      }
     },
     "intelligenceTitle": "ಭವಿಷ್ಯ ಬುದ್ಧಿಮತ್ತೆ",
     "intelligenceSubtitle": "AI ಸಹಾಯಕರು, ಡಿಜಿಟಲ್ ಟ್ವಿನ್‌ಗಳು, ಮಾರುಕಟ್ಟೆ ಪರಿಸರ ವ್ಯವಸ್ಥೆಗಳು ಮತ್ತು ಜಿಯೋ-ಲೊಕೇಶನ್ ಬುದ್ಧಿಮತ್ತೆ",
     "intelligenceFeatures": {
-      "0": { "title": "AI ಪಶುವೈದ್ಯ ಸಹಾಯಕ", "desc": "ಔಷಧ ಪರಸ್ಪರ ಕ್ರಿಯೆ ತಪಾಸಣೆ, ರೋಗಲಕ್ಷಣ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಚಾಟ್-ಆಧಾರಿತ ವೈದ್ಯಕೀಯ ನಿರ್ಧಾರ ಬೆಂಬಲದೊಂದಿಗೆ ಬುದ್ಧಿವಂತ ಪಶುವೈದ್ಯ AI ಸಹಾಯಕ" },
-      "1": { "title": "ಡಿಜಿಟಲ್ ಟ್ವಿನ್ ಮತ್ತು ಸಿಮ್ಯುಲೇಟರ್", "desc": "ನಿಮ್ಮ ಕಾರ್ಯಾಚರಣೆಗಳ ಡಿಜಿಟಲ್ ಪ್ರತಿಕೃತಿಗಳನ್ನು ರಚಿಸಿ ಮತ್ತು ರೋಗ ಹರಡುವಿಕೆ, ಸಂಪನ್ಮೂಲ ಉತ್ತಮೀಕರಣ ಮತ್ತು ಹಣಕಾಸು ಮುನ್ಸೂಚನೆಗಾಗಿ ಸಿಮ್ಯುಲೇಷನ್‌ಗಳನ್ನು ನಡೆಸಿ" },
-      "2": { "title": "ಮಾರುಕಟ್ಟೆ ಮತ್ತು ಹರಾಜು", "desc": "ನೈಜ-ಸಮಯ ಬಿಡ್ಡಿಂಗ್, ಆರ್ಡರ್ ನಿರ್ವಹಣೆ ಮತ್ತು ಮಾರಾಟಗಾರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗಳೊಂದಿಗೆ ಜಾನುವಾರು, ಸಲಕರಣೆ ಮತ್ತು ಸರಕುಗಳನ್ನು ಖರೀದಿಸಿ, ಮಾರಾಟ ಮಾಡಿ ಮತ್ತು ಹರಾಜು ಮಾಡಿ" },
-      "3": { "title": "ಸುಸ್ಥಿರತೆ ಮತ್ತು ಕಾರ್ಬನ್", "desc": "ESG ಮೆಟ್ರಿಕ್‌ಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ, ಸುಸ್ಥಿರತೆ ಗುರಿಗಳನ್ನು ಹೊಂದಿಸಿ ಮತ್ತು ತಳಿ ವಾರು IPCC ಹೊರಸೂಸುವಿಕೆ ಅಂಶಗಳನ್ನು ಬಳಸಿ ಕಾರ್ಬನ್ ಹೆಜ್ಜೆಗಳನ್ನು ಅಂದಾಜಿಸಿ" },
-      "4": { "title": "ಕ್ಷೇಮ ಪೋರ್ಟಲ್", "desc": "ಪೌಷ್ಟಿಕತೆ, ಚಟುವಟಿಕೆ, ಲಸಿಕೆ ಮತ್ತು ದಂತ ಟ್ರ್ಯಾಕಿಂಗ್‌ನೊಂದಿಗೆ ಸಮಗ್ರ ಸಾಕುಪ್ರಾಣಿ ಆರೋಗ್ಯ ಅಂಕಪಟ್ಟಿಗಳು ಮತ್ತು ಸ್ಮಾರ್ಟ್ ಮರುಕಳಿಸುವ ಜ್ಞಾಪನೆಗಳು" },
-      "5": { "title": "ಜಿಯೋ-ಲೊಕೇಶನ್ ವಿಶ್ಲೇಷಣೆ", "desc": "ಜಿಯೋ-ಬೇಲಿ ವಲಯಗಳು, ನೈಜ-ಸಮಯ ಸ್ಥಳ ಟ್ರ್ಯಾಕಿಂಗ್, ಹೀಟ್‌ಮ್ಯಾಪ್ ಕ್ಲಸ್ಟರಿಂಗ್, ಚಲನೆ ಹಾದಿಗಳು ಮತ್ತು ಸ್ವಯಂಚಾಲಿತ ವಲಯ ಉಲ್ಲಂಘನೆ ಪತ್ತೆ" }
+      "0": {
+        "title": "AI ಪಶುವೈದ್ಯ ಸಹಾಯಕ",
+        "desc": "ಔಷಧ ಪರಸ್ಪರ ಕ್ರಿಯೆ ತಪಾಸಣೆ, ರೋಗಲಕ್ಷಣ ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಚಾಟ್-ಆಧಾರಿತ ವೈದ್ಯಕೀಯ ನಿರ್ಧಾರ ಬೆಂಬಲದೊಂದಿಗೆ ಬುದ್ಧಿವಂತ ಪಶುವೈದ್ಯ AI ಸಹಾಯಕ"
+      },
+      "1": {
+        "title": "ಡಿಜಿಟಲ್ ಟ್ವಿನ್ ಮತ್ತು ಸಿಮ್ಯುಲೇಟರ್",
+        "desc": "ನಿಮ್ಮ ಕಾರ್ಯಾಚರಣೆಗಳ ಡಿಜಿಟಲ್ ಪ್ರತಿಕೃತಿಗಳನ್ನು ರಚಿಸಿ ಮತ್ತು ರೋಗ ಹರಡುವಿಕೆ, ಸಂಪನ್ಮೂಲ ಉತ್ತಮೀಕರಣ ಮತ್ತು ಹಣಕಾಸು ಮುನ್ಸೂಚನೆಗಾಗಿ ಸಿಮ್ಯುಲೇಷನ್‌ಗಳನ್ನು ನಡೆಸಿ"
+      },
+      "2": {
+        "title": "ಮಾರುಕಟ್ಟೆ ಮತ್ತು ಹರಾಜು",
+        "desc": "ನೈಜ-ಸಮಯ ಬಿಡ್ಡಿಂಗ್, ಆರ್ಡರ್ ನಿರ್ವಹಣೆ ಮತ್ತು ಮಾರಾಟಗಾರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗಳೊಂದಿಗೆ ಜಾನುವಾರು, ಸಲಕರಣೆ ಮತ್ತು ಸರಕುಗಳನ್ನು ಖರೀದಿಸಿ, ಮಾರಾಟ ಮಾಡಿ ಮತ್ತು ಹರಾಜು ಮಾಡಿ"
+      },
+      "3": {
+        "title": "ಸುಸ್ಥಿರತೆ ಮತ್ತು ಕಾರ್ಬನ್",
+        "desc": "ESG ಮೆಟ್ರಿಕ್‌ಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ, ಸುಸ್ಥಿರತೆ ಗುರಿಗಳನ್ನು ಹೊಂದಿಸಿ ಮತ್ತು ತಳಿ ವಾರು IPCC ಹೊರಸೂಸುವಿಕೆ ಅಂಶಗಳನ್ನು ಬಳಸಿ ಕಾರ್ಬನ್ ಹೆಜ್ಜೆಗಳನ್ನು ಅಂದಾಜಿಸಿ"
+      },
+      "4": {
+        "title": "ಕ್ಷೇಮ ಪೋರ್ಟಲ್",
+        "desc": "ಪೌಷ್ಟಿಕತೆ, ಚಟುವಟಿಕೆ, ಲಸಿಕೆ ಮತ್ತು ದಂತ ಟ್ರ್ಯಾಕಿಂಗ್‌ನೊಂದಿಗೆ ಸಮಗ್ರ ಸಾಕುಪ್ರಾಣಿ ಆರೋಗ್ಯ ಅಂಕಪಟ್ಟಿಗಳು ಮತ್ತು ಸ್ಮಾರ್ಟ್ ಮರುಕಳಿಸುವ ಜ್ಞಾಪನೆಗಳು"
+      },
+      "5": {
+        "title": "ಜಿಯೋ-ಲೊಕೇಶನ್ ವಿಶ್ಲೇಷಣೆ",
+        "desc": "ಜಿಯೋ-ಬೇಲಿ ವಲಯಗಳು, ನೈಜ-ಸಮಯ ಸ್ಥಳ ಟ್ರ್ಯಾಕಿಂಗ್, ಹೀಟ್‌ಮ್ಯಾಪ್ ಕ್ಲಸ್ಟರಿಂಗ್, ಚಲನೆ ಹಾದಿಗಳು ಮತ್ತು ಸ್ವಯಂಚಾಲಿತ ವಲಯ ಉಲ್ಲಂಘನೆ ಪತ್ತೆ"
+      }
     },
     "workflowTitle": "ಆಸ್ಪತ್ರೆ ಕಾರ್ಯಪ್ರವಾಹ ಮತ್ತು ಸಿಬ್ಬಂದಿ ನಿರ್ವಹಣೆ",
     "workflowSubtitle": "ಉದ್ಯಮ-ದರ್ಜೆಯ ವೈದ್ಯಕೀಯ ಕಾರ್ಯಪ್ರವಾಹ: ಟ್ರಯೇಜ್ → ಪರೀಕ್ಷೆ → ಚಿಕಿತ್ಸೆ → ಡಿಸ್ಚಾರ್ಜ್, 12+ ಸಿಬ್ಬಂದಿ ವಿಧಗಳೊಂದಿಗೆ",
@@ -367,12 +496,30 @@
       "4": "12 ಸಿಬ್ಬಂದಿ ಪಾತ್ರಗಳು"
     },
     "workflowFeatures": {
-      "0": { "title": "ಸ್ಮಾರ್ಟ್ ಸರದಿ ಮತ್ತು ಟ್ರಯೇಜ್", "desc": "ತುರ್ತು ಹೆಚ್ಚಳ, ಟ್ರಯೇಜ್ ಸ್ಥಿತಿಗಳು ಮತ್ತು ನೈಜ-ಸಮಯ ಸರಾಸರಿ ಕಾಯುವ ಸಮಯ ಟ್ರ್ಯಾಕಿಂಗ್‌ನೊಂದಿಗೆ ಆದ್ಯತೆ-ಆಧಾರಿತ ಕಾಯುವ ಕೊಠಡಿ" },
-      "1": { "title": "ವೈದ್ಯಕೀಯ ಕಾರ್ಯಪ್ರವಾಹ ಪೈಪ್‌ಲೈನ್", "desc": "ಸಂಪೂರ್ಣ ಟ್ರಯೇಜ್ → ಪರೀಕ್ಷೆ → ಚಿಕಿತ್ಸೆ → ವೀಕ್ಷಣೆ → ಡಿಸ್ಚಾರ್ಜ್ ಪೈಪ್‌ಲೈನ್, ಸ್ಥಿತಿ ಪರಿವರ್ತನೆಗಳು ಮತ್ತು ಆಡಿಟ್ ಟ್ರಯಲ್‌ಗಳೊಂದಿಗೆ" },
-      "2": { "title": "ತಜ್ಞ ರೆಫರಲ್‌ಗಳು", "desc": "ರೆಫರಲ್ ವಿನಂತಿಗಳು, ವಿಶೇಷತೆ ರೂಟಿಂಗ್, ವೈದ್ಯಕೀಯ ಟಿಪ್ಪಣಿ ಹಂಚಿಕೆ ಮತ್ತು ಸ್ವೀಕೃತಿ ಟ್ರ್ಯಾಕಿಂಗ್‌ನೊಂದಿಗೆ ಬಹು-ವೈದ್ಯ ಸಮಾಲೋಚನೆ ಕಾರ್ಯಪ್ರವಾಹ" },
-      "3": { "title": "ಒಳರೋಗಿ ಮತ್ತು ಬೋರ್ಡಿಂಗ್", "desc": "ಮಹತ್ವ ಲಾಗಿಂಗ್, ಔಷಧ ಟ್ರ್ಯಾಕಿಂಗ್ ಮತ್ತು ದೈನಂದಿನ ದರ ಬಿಲ್ಲಿಂಗ್‌ನೊಂದಿಗೆ ICU, ಶಸ್ತ್ರಚಿಕಿತ್ಸಾ ಚೇತರಿಕೆ, ಬೋರ್ಡಿಂಗ್ ನಿರ್ವಹಣೆ" },
-      "4": { "title": "12+ ಸಿಬ್ಬಂದಿ ಹುದ್ದೆಗಳು", "desc": "ಪಶುವೈದ್ಯ ತಂತ್ರಜ್ಞರು, ನರ್ಸ್‌ಗಳು, ಶಸ್ತ್ರಚಿಕಿತ್ಸಕರು, ಲ್ಯಾಬ್ ತಂತ್ರಜ್ಞರು — ಎಲ್ಲರೂ ಪಾತ್ರ-ಆಧಾರಿತ ಪ್ರವೇಶದೊಂದಿಗೆ ಇಲಾಖೆಗಳಿಗೆ ಮ್ಯಾಪ್ ಮಾಡಲಾಗಿದೆ" },
-      "5": { "title": "ಕಾರ್ಯಪ್ರವಾಹ ವಿಶ್ಲೇಷಣೆ", "desc": "ಹಂತ ವಾರು ಸಕ್ರಿಯ ಕೇಸ್‌ಗಳು, ಸರಾಸರಿ ಕೇಸ್ ಅವಧಿ, ಸರದಿ ಅಂಕಿಅಂಶಗಳು ಮತ್ತು ಸಿಬ್ಬಂದಿ ಬಳಕೆ ಮೆಟ್ರಿಕ್‌ಗಳನ್ನು ತೋರಿಸುವ ನೈಜ-ಸಮಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್" }
+      "0": {
+        "title": "ಸ್ಮಾರ್ಟ್ ಸರದಿ ಮತ್ತು ಟ್ರಯೇಜ್",
+        "desc": "ತುರ್ತು ಹೆಚ್ಚಳ, ಟ್ರಯೇಜ್ ಸ್ಥಿತಿಗಳು ಮತ್ತು ನೈಜ-ಸಮಯ ಸರಾಸರಿ ಕಾಯುವ ಸಮಯ ಟ್ರ್ಯಾಕಿಂಗ್‌ನೊಂದಿಗೆ ಆದ್ಯತೆ-ಆಧಾರಿತ ಕಾಯುವ ಕೊಠಡಿ"
+      },
+      "1": {
+        "title": "ವೈದ್ಯಕೀಯ ಕಾರ್ಯಪ್ರವಾಹ ಪೈಪ್‌ಲೈನ್",
+        "desc": "ಸಂಪೂರ್ಣ ಟ್ರಯೇಜ್ → ಪರೀಕ್ಷೆ → ಚಿಕಿತ್ಸೆ → ವೀಕ್ಷಣೆ → ಡಿಸ್ಚಾರ್ಜ್ ಪೈಪ್‌ಲೈನ್, ಸ್ಥಿತಿ ಪರಿವರ್ತನೆಗಳು ಮತ್ತು ಆಡಿಟ್ ಟ್ರಯಲ್‌ಗಳೊಂದಿಗೆ"
+      },
+      "2": {
+        "title": "ತಜ್ಞ ರೆಫರಲ್‌ಗಳು",
+        "desc": "ರೆಫರಲ್ ವಿನಂತಿಗಳು, ವಿಶೇಷತೆ ರೂಟಿಂಗ್, ವೈದ್ಯಕೀಯ ಟಿಪ್ಪಣಿ ಹಂಚಿಕೆ ಮತ್ತು ಸ್ವೀಕೃತಿ ಟ್ರ್ಯಾಕಿಂಗ್‌ನೊಂದಿಗೆ ಬಹು-ವೈದ್ಯ ಸಮಾಲೋಚನೆ ಕಾರ್ಯಪ್ರವಾಹ"
+      },
+      "3": {
+        "title": "ಒಳರೋಗಿ ಮತ್ತು ಬೋರ್ಡಿಂಗ್",
+        "desc": "ಮಹತ್ವ ಲಾಗಿಂಗ್, ಔಷಧ ಟ್ರ್ಯಾಕಿಂಗ್ ಮತ್ತು ದೈನಂದಿನ ದರ ಬಿಲ್ಲಿಂಗ್‌ನೊಂದಿಗೆ ICU, ಶಸ್ತ್ರಚಿಕಿತ್ಸಾ ಚೇತರಿಕೆ, ಬೋರ್ಡಿಂಗ್ ನಿರ್ವಹಣೆ"
+      },
+      "4": {
+        "title": "12+ ಸಿಬ್ಬಂದಿ ಹುದ್ದೆಗಳು",
+        "desc": "ಪಶುವೈದ್ಯ ತಂತ್ರಜ್ಞರು, ನರ್ಸ್‌ಗಳು, ಶಸ್ತ್ರಚಿಕಿತ್ಸಕರು, ಲ್ಯಾಬ್ ತಂತ್ರಜ್ಞರು — ಎಲ್ಲರೂ ಪಾತ್ರ-ಆಧಾರಿತ ಪ್ರವೇಶದೊಂದಿಗೆ ಇಲಾಖೆಗಳಿಗೆ ಮ್ಯಾಪ್ ಮಾಡಲಾಗಿದೆ"
+      },
+      "5": {
+        "title": "ಕಾರ್ಯಪ್ರವಾಹ ವಿಶ್ಲೇಷಣೆ",
+        "desc": "ಹಂತ ವಾರು ಸಕ್ರಿಯ ಕೇಸ್‌ಗಳು, ಸರಾಸರಿ ಕೇಸ್ ಅವಧಿ, ಸರದಿ ಅಂಕಿಅಂಶಗಳು ಮತ್ತು ಸಿಬ್ಬಂದಿ ಬಳಕೆ ಮೆಟ್ರಿಕ್‌ಗಳನ್ನು ತೋರಿಸುವ ನೈಜ-ಸಮಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್"
+      }
     },
     "complianceTitle": "HIPAA ಅನುಸರಣೆ ಮತ್ತು ಡೇಟಾ ಗೌಪ್ಯತೆ",
     "complianceSubtitle": "ಪ್ರತಿ ಪ್ರಾಣಿ, ಪ್ರತಿ ದಾಖಲೆ, ಪ್ರತಿ ಬಳಕೆದಾರರಿಗೆ ಉದ್ಯಮ-ದರ್ಜೆಯ ಭದ್ರತೆ ಮತ್ತು HIPAA-ಅನುಸರಣೆ ಡೇಟಾ ರಕ್ಷಣೆ",
@@ -383,50 +530,140 @@
       "3": "ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಲಾಗಿದೆ"
     },
     "complianceFeatures": {
-      "0": { "title": "HIPAA-ಅನುಸರಣೆ ಭದ್ರತೆ", "desc": "ಪಾತ್ರ-ಆಧಾರಿತ ಪ್ರವೇಶ ನಿಯಂತ್ರಣಗಳು, ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಡೇಟಾ ಪ್ರಸಾರ ಮತ್ತು ಎಲ್ಲಾ ವೈದ್ಯಕೀಯ ಡೇಟಾಗೆ ಗೌಪ್ಯ ದಾಖಲೆ ಟ್ಯಾಗಿಂಗ್‌ನೊಂದಿಗೆ ತಾಂತ್ರಿಕ ರಕ್ಷಣೆಗಳು" },
-      "1": { "title": "HIPAA-ದರ್ಜೆ ಆಡಿಟ್ ಟ್ರಯಲ್", "desc": "ಪ್ರತಿ ಡೇಟಾ ಪ್ರವೇಶ, ಬದಲಾವಣೆ ಮತ್ತು ರಫ್ತನ್ನು ಬಳಕೆದಾರರ ಗುರುತು, IP ವಿಳಾಸ, ಸಮಯ ಮುದ್ರೆ ಮತ್ತು HIPAA ಈವೆಂಟ್ ವರ್ಗೀಕರಣದೊಂದಿಗೆ ಲಾಗ್ ಮಾಡಲಾಗಿದೆ" },
-      "2": { "title": "ಪಾತ್ರ-ಆಧಾರಿತ ಪ್ರವೇಶ ನಿಯಂತ್ರಣ", "desc": "ಸೂಕ್ಷ್ಮ ಅನುಮತಿ ನಿರ್ವಹಣೆ ಮತ್ತು ನಿರ್ವಾಹಕ ಅವಗಣನೆ ಆಡಿಟಿಂಗ್‌ನೊಂದಿಗೆ 4-ಹಂತ RBAC ವ್ಯವಸ್ಥೆ" },
-      "3": { "title": "ಡೇಟಾ ಎನ್‌ಕ್ರಿಪ್ಷನ್ ಮತ್ತು ಭದ್ರತೆ", "desc": "ಸಾಗಾಣಿಕೆಯಲ್ಲಿ TLS ಎನ್‌ಕ್ರಿಪ್ಷನ್, bcrypt ಪಾಸ್‌ವರ್ಡ್ ಹ್ಯಾಶಿಂಗ್, ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ಅವಧಿ ಮುಕ್ತಾಯ ಮತ್ತು ಹಿಂಪಡೆಯುವಿಕೆಯೊಂದಿಗೆ JWT ಅಧಿವೇಶನ ನಿರ್ವಹಣೆ" },
-      "4": { "title": "PHI ಪ್ರವೇಶ ಮೇಲ್ವಿಚಾರಣೆ", "desc": "ರಕ್ಷಿತ ಆರೋಗ್ಯ ಮಾಹಿತಿಯನ್ನು ಯಾರು ಪ್ರವೇಶಿಸಿದರು ಎಂಬುದನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುವ ನೈಜ-ಸಮಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ — ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು, ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು, ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು ಮತ್ತು ಸ್ಕ್ಯಾನ್‌ಗಳು" },
-      "5": { "title": "ಅನುಸರಣೆ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", "desc": "ನೇರ ಅನುಸರಣೆ ಅಂಕ, ನೀತಿ ನಿರ್ವಹಣೆ, ಉಲ್ಲಂಘನೆ ಪತ್ತೆ, ವಿಫಲ ಲಾಗಿನ್ ಮೇಲ್ವಿಚಾರಣೆ ಮತ್ತು ನಿಯಂತ್ರಣ ಚೌಕಟ್ಟು ಟ್ರ್ಯಾಕಿಂಗ್" }
+      "0": {
+        "title": "HIPAA-ಅನುಸರಣೆ ಭದ್ರತೆ",
+        "desc": "ಪಾತ್ರ-ಆಧಾರಿತ ಪ್ರವೇಶ ನಿಯಂತ್ರಣಗಳು, ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಡೇಟಾ ಪ್ರಸಾರ ಮತ್ತು ಎಲ್ಲಾ ವೈದ್ಯಕೀಯ ಡೇಟಾಗೆ ಗೌಪ್ಯ ದಾಖಲೆ ಟ್ಯಾಗಿಂಗ್‌ನೊಂದಿಗೆ ತಾಂತ್ರಿಕ ರಕ್ಷಣೆಗಳು"
+      },
+      "1": {
+        "title": "HIPAA-ದರ್ಜೆ ಆಡಿಟ್ ಟ್ರಯಲ್",
+        "desc": "ಪ್ರತಿ ಡೇಟಾ ಪ್ರವೇಶ, ಬದಲಾವಣೆ ಮತ್ತು ರಫ್ತನ್ನು ಬಳಕೆದಾರರ ಗುರುತು, IP ವಿಳಾಸ, ಸಮಯ ಮುದ್ರೆ ಮತ್ತು HIPAA ಈವೆಂಟ್ ವರ್ಗೀಕರಣದೊಂದಿಗೆ ಲಾಗ್ ಮಾಡಲಾಗಿದೆ"
+      },
+      "2": {
+        "title": "ಪಾತ್ರ-ಆಧಾರಿತ ಪ್ರವೇಶ ನಿಯಂತ್ರಣ",
+        "desc": "ಸೂಕ್ಷ್ಮ ಅನುಮತಿ ನಿರ್ವಹಣೆ ಮತ್ತು ನಿರ್ವಾಹಕ ಅವಗಣನೆ ಆಡಿಟಿಂಗ್‌ನೊಂದಿಗೆ 4-ಹಂತ RBAC ವ್ಯವಸ್ಥೆ"
+      },
+      "3": {
+        "title": "ಡೇಟಾ ಎನ್‌ಕ್ರಿಪ್ಷನ್ ಮತ್ತು ಭದ್ರತೆ",
+        "desc": "ಸಾಗಾಣಿಕೆಯಲ್ಲಿ TLS ಎನ್‌ಕ್ರಿಪ್ಷನ್, bcrypt ಪಾಸ್‌ವರ್ಡ್ ಹ್ಯಾಶಿಂಗ್, ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದಾದ ಅವಧಿ ಮುಕ್ತಾಯ ಮತ್ತು ಹಿಂಪಡೆಯುವಿಕೆಯೊಂದಿಗೆ JWT ಅಧಿವೇಶನ ನಿರ್ವಹಣೆ"
+      },
+      "4": {
+        "title": "PHI ಪ್ರವೇಶ ಮೇಲ್ವಿಚಾರಣೆ",
+        "desc": "ರಕ್ಷಿತ ಆರೋಗ್ಯ ಮಾಹಿತಿಯನ್ನು ಯಾರು ಪ್ರವೇಶಿಸಿದರು ಎಂಬುದನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುವ ನೈಜ-ಸಮಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ — ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು, ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು, ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು ಮತ್ತು ಸ್ಕ್ಯಾನ್‌ಗಳು"
+      },
+      "5": {
+        "title": "ಅನುಸರಣೆ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+        "desc": "ನೇರ ಅನುಸರಣೆ ಅಂಕ, ನೀತಿ ನಿರ್ವಹಣೆ, ಉಲ್ಲಂಘನೆ ಪತ್ತೆ, ವಿಫಲ ಲಾಗಿನ್ ಮೇಲ್ವಿಚಾರಣೆ ಮತ್ತು ನಿಯಂತ್ರಣ ಚೌಕಟ್ಟು ಟ್ರ್ಯಾಕಿಂಗ್"
+      }
     },
     "dataPrivacyTitle": "ಡೇಟಾ ಗೌಪ್ಯತೆ ಪ್ರತಿಜ್ಞೆ:",
     "dataPrivacyText": "VetCare ನಿಮ್ಮ ಆರೋಗ್ಯ ಡೇಟಾವನ್ನು ಮಾರಾಟ ಮಾಡುವುದಿಲ್ಲ, ಹಂಚಿಕೊಳ್ಳುವುದಿಲ್ಲ ಅಥವಾ ಹಣಗಳಿಸುವುದಿಲ್ಲ. ಎಲ್ಲಾ ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳನ್ನು ಮಾನವ ಆರೋಗ್ಯ ರಕ್ಷಣೆಯಲ್ಲಿ ಬಳಸುವ ಅದೇ ಮಾನದಂಡಗಳೊಂದಿಗೆ ರಕ್ಷಿಸಲಾಗಿದೆ. ಪ್ರತಿ ಪ್ರವೇಶವನ್ನು ಆಡಿಟ್ ಮಾಡಲಾಗುತ್ತದೆ.",
     "howItWorksTitle": "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
     "steps": {
       "owner": {
-        "0": { "title": "ಉಚಿತವಾಗಿ ನೋಂದಾಯಿಸಿ", "desc": "ಸೆಕೆಂಡುಗಳಲ್ಲಿ ನಿಮ್ಮ ಖಾತೆ ರಚಿಸಿ" },
-        "1": { "title": "ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿ ಸೇರಿಸಿ", "desc": "ತಳಿ, ಪ್ರಕಾರ ಮತ್ತು ಇತಿಹಾಸ ನಮೂದಿಸಿ" },
-        "2": { "title": "ಪಶುವೈದ್ಯರನ್ನು ಬುಕ್ ಮಾಡಿ", "desc": "ಚಾಟ್, ವೀಡಿಯೊ ಅಥವಾ ಭೇಟಿ ಶೆಡ್ಯೂಲ್ ಮಾಡಿ" },
-        "3": { "title": "ಚಿಕಿತ್ಸೆ ಪಡೆಯಿರಿ", "desc": "ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು ಮತ್ತು ದಾಖಲೆಗಳು ಉಳಿಸಲಾಗಿದೆ" }
+        "0": {
+          "title": "ಉಚಿತವಾಗಿ ನೋಂದಾಯಿಸಿ",
+          "desc": "ಸೆಕೆಂಡುಗಳಲ್ಲಿ ನಿಮ್ಮ ಖಾತೆ ರಚಿಸಿ"
+        },
+        "1": {
+          "title": "ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿ ಸೇರಿಸಿ",
+          "desc": "ತಳಿ, ಪ್ರಕಾರ ಮತ್ತು ಇತಿಹಾಸ ನಮೂದಿಸಿ"
+        },
+        "2": {
+          "title": "ಪಶುವೈದ್ಯರನ್ನು ಬುಕ್ ಮಾಡಿ",
+          "desc": "ಚಾಟ್, ವೀಡಿಯೊ ಅಥವಾ ಭೇಟಿ ಶೆಡ್ಯೂಲ್ ಮಾಡಿ"
+        },
+        "3": {
+          "title": "ಚಿಕಿತ್ಸೆ ಪಡೆಯಿರಿ",
+          "desc": "ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು ಮತ್ತು ದಾಖಲೆಗಳು ಉಳಿಸಲಾಗಿದೆ"
+        }
       },
       "enterprise": {
-        "0": { "title": "ಉದ್ಯಮ ನೋಂದಣಿ", "desc": "ಕೃಷಿ, ಜಮೀನು, ಮೃಗಾಲಯ, ಆಸ್ಪತ್ರೆ ಅಥವಾ ಹೆಚ್ಚು" },
-        "1": { "title": "ಕಾರ್ಯಾಚರಣೆ ಹೊಂದಿಸಿ", "desc": "ಸ್ಥಳಗಳು, ಗುಂಪುಗಳು ಮತ್ತು ತಂಡ ಸದಸ್ಯರು" },
-        "2": { "title": "ಪ್ರಾಣಿಗಳನ್ನು ಸಂಪರ್ಕಿಸಿ", "desc": "ಹಿಂಡುಗಳನ್ನು ಆಮದು ಮಾಡಿ, ಸ್ಥಳಗಳಿಗೆ ನಿಯೋಜಿಸಿ" },
-        "3": { "title": "ನಡೆಸಿ ಮತ್ತು ವಿಸ್ತರಿಸಿ", "desc": "ಅಭಿಯಾನಗಳು, ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಪಶುವೈದ್ಯ ಆರೈಕೆ" }
+        "0": {
+          "title": "ಉದ್ಯಮ ನೋಂದಣಿ",
+          "desc": "ಕೃಷಿ, ಜಮೀನು, ಮೃಗಾಲಯ, ಆಸ್ಪತ್ರೆ ಅಥವಾ ಹೆಚ್ಚು"
+        },
+        "1": {
+          "title": "ಕಾರ್ಯಾಚರಣೆ ಹೊಂದಿಸಿ",
+          "desc": "ಸ್ಥಳಗಳು, ಗುಂಪುಗಳು ಮತ್ತು ತಂಡ ಸದಸ್ಯರು"
+        },
+        "2": {
+          "title": "ಪ್ರಾಣಿಗಳನ್ನು ಸಂಪರ್ಕಿಸಿ",
+          "desc": "ಹಿಂಡುಗಳನ್ನು ಆಮದು ಮಾಡಿ, ಸ್ಥಳಗಳಿಗೆ ನಿಯೋಜಿಸಿ"
+        },
+        "3": {
+          "title": "ನಡೆಸಿ ಮತ್ತು ವಿಸ್ತರಿಸಿ",
+          "desc": "ಅಭಿಯಾನಗಳು, ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ಪಶುವೈದ್ಯ ಆರೈಕೆ"
+        }
       },
       "hospital": {
-        "0": { "title": "ಪಶುವೈದ್ಯರಾಗಿ ನೋಂದಣಿ", "desc": "ಪಶುವೈದ್ಯ ಖಾತೆ ರಚಿಸಿ" },
-        "1": { "title": "ಆಸ್ಪತ್ರೆ ರಚಿಸಿ", "desc": "ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಇಲಾಖೆಗಳನ್ನು ಹೊಂದಿಸಿ" },
-        "2": { "title": "ವೈದ್ಯರು ಮತ್ತು ಸಿಬ್ಬಂದಿ ಸೇರಿಸಿ", "desc": "ಪಶುವೈದ್ಯರನ್ನು ಆಹ್ವಾನಿಸಿ, ಪಾತ್ರಗಳು ಮತ್ತು ವಿಶೇಷತೆಗಳನ್ನು ನಿಯೋಜಿಸಿ" },
-        "3": { "title": "ಬುಕಿಂಗ್ ಸ್ವೀಕರಿಸಿ", "desc": "ರೋಗಿಗಳು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆಯನ್ನು ಹುಡುಕಿ ಬುಕ್ ಮಾಡುತ್ತಾರೆ" }
+        "0": {
+          "title": "ಪಶುವೈದ್ಯರಾಗಿ ನೋಂದಣಿ",
+          "desc": "ಪಶುವೈದ್ಯ ಖಾತೆ ರಚಿಸಿ"
+        },
+        "1": {
+          "title": "ಆಸ್ಪತ್ರೆ ರಚಿಸಿ",
+          "desc": "ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ಪ್ರೊಫೈಲ್ ಮತ್ತು ಇಲಾಖೆಗಳನ್ನು ಹೊಂದಿಸಿ"
+        },
+        "2": {
+          "title": "ವೈದ್ಯರು ಮತ್ತು ಸಿಬ್ಬಂದಿ ಸೇರಿಸಿ",
+          "desc": "ಪಶುವೈದ್ಯರನ್ನು ಆಹ್ವಾನಿಸಿ, ಪಾತ್ರಗಳು ಮತ್ತು ವಿಶೇಷತೆಗಳನ್ನು ನಿಯೋಜಿಸಿ"
+        },
+        "3": {
+          "title": "ಬುಕಿಂಗ್ ಸ್ವೀಕರಿಸಿ",
+          "desc": "ರೋಗಿಗಳು ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆಯನ್ನು ಹುಡುಕಿ ಬುಕ್ ಮಾಡುತ್ತಾರೆ"
+        }
       },
       "vet": {
-        "0": { "title": "ನೋಂದಣಿ ಮತ್ತು ಪರಿಶೀಲನೆ", "desc": "ನಿಮ್ಮ ಪಶುವೈದ್ಯ ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ಸಲ್ಲಿಸಿ" },
-        "1": { "title": "ಲಭ್ಯತೆ ಹೊಂದಿಸಿ", "desc": "ನಿಮ್ಮ ಸಮಾಲೋಚನೆ ಸಮಯಗಳನ್ನು ಆರಿಸಿ" },
-        "2": { "title": "ಗ್ರಾಹಕರಿಗೆ ಸೇವೆ ನೀಡಿ", "desc": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರು ಮತ್ತು ಉದ್ಯಮ ಕಾರ್ಯಾಚರಣೆಗಳು" },
-        "3": { "title": "ಅಭ್ಯಾಸ ಬೆಳೆಸಿ", "desc": "ವಿಮರ್ಶೆಗಳು, ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ರಿಟೇನರ್ ಒಪ್ಪಂದಗಳು" }
+        "0": {
+          "title": "ನೋಂದಣಿ ಮತ್ತು ಪರಿಶೀಲನೆ",
+          "desc": "ನಿಮ್ಮ ಪಶುವೈದ್ಯ ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ಸಲ್ಲಿಸಿ"
+        },
+        "1": {
+          "title": "ಲಭ್ಯತೆ ಹೊಂದಿಸಿ",
+          "desc": "ನಿಮ್ಮ ಸಮಾಲೋಚನೆ ಸಮಯಗಳನ್ನು ಆರಿಸಿ"
+        },
+        "2": {
+          "title": "ಗ್ರಾಹಕರಿಗೆ ಸೇವೆ ನೀಡಿ",
+          "desc": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರು ಮತ್ತು ಉದ್ಯಮ ಕಾರ್ಯಾಚರಣೆಗಳು"
+        },
+        "3": {
+          "title": "ಅಭ್ಯಾಸ ಬೆಳೆಸಿ",
+          "desc": "ವಿಮರ್ಶೆಗಳು, ವಿಶ್ಲೇಷಣೆ ಮತ್ತು ರಿಟೇನರ್ ಒಪ್ಪಂದಗಳು"
+        }
       }
     },
     "testimonialsTitle": "ತಜ್ಞರಿಂದ ವಿಶ್ವಾಸಿತ",
     "testimonials": {
-      "0": { "name": "ಸಾರಾ ಮಿಚೆಲ್", "role": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ", "text": "VetCare ನನ್ನ ಬೆಕ್ಕಿನ ಜೀವವನ್ನು ಉಳಿಸಿತು! ಪ್ರತಿ ಆಸ್ಪತ್ರೆಯೂ ಮುಚ್ಚಿದ್ದಾಗ ಬೆಳಗ್ಗೆ 2 ಗಂಟೆಗೆ ತ್ವರಿತ ರೋಗ ನಿರ್ಣಯ. ವೀಡಿಯೊ ಸಮಾಲೋಚನೆ ತುಂಬಾ ಮೃದುವಾಗಿತ್ತು." },
-      "1": { "name": "ರಾಬರ್ಟ್ ಹಾರ್‌ಗ್ರೋವ್", "role": "ಹೈನು ಕೃಷಿ ಮಾಲೀಕ — 2,400 ತಲೆ", "text": "3 ಕೃಷಿಯಲ್ಲಿ ಚಿಕಿತ್ಸಾ ಅಭಿಯಾನಗಳನ್ನು ನಿರ್ವಹಿಸುವುದು ಒಂದು ವಾರದ ಕಾಗದ ಕೆಲಸ ತೆಗೆದುಕೊಳ್ಳುತ್ತಿತ್ತು. ಈಗ ಅದು ಸಂಪೂರ್ಣ ಟ್ರೇಸಬಿಲಿಟಿಯೊಂದಿಗೆ ನಿಮಿಷಗಳಲ್ಲಿ ಆಗುತ್ತದೆ." },
-      "2": { "name": "ಡಾ. ಜೇಮ್ಸ್ ವಿಲ್ಸನ್", "role": "ಪಶುವೈದ್ಯ", "text": "VetCare ಮೂಲಕ ನಾನು 12 ಉದ್ಯಮ ಗ್ರಾಹಕರು ಮತ್ತು ಹಲವಾರು ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರಿಗೆ ಸೇವೆ ನೀಡುತ್ತಿದ್ದೇನೆ. ಶೆಡ್ಯೂಲಿಂಗ್, ದಾಖಲೆಗಳು ಮತ್ತು ಬಿಲ್ಲಿಂಗ್ ಅನ್ನು ವೇದಿಕೆ ಸುಂದರವಾಗಿ ನಿರ್ವಹಿಸುತ್ತದೆ." },
-      "3": { "name": "ಮಾರಿಯಾ ಚೆಂಗ್", "role": "ಮೃಗಾಲಯ ಕಾರ್ಯಾಚರಣೆ ನಿರ್ದೇಶಕ", "text": "40 ಆವರಣಗಳಲ್ಲಿ ನಮ್ಮ 800+ ಪ್ರಾಣಿಗಳಿಗೆ ಸ್ಥಳ ಟ್ರ್ಯಾಕಿಂಗ್, ತಳಿ ಗುಂಪುಮಾಡುವಿಕೆ ಮತ್ತು ಅಭಿಯಾನ ನಿರ್ವಹಣೆ — ಎಲ್ಲವೂ ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ." },
-      "4": { "name": "ಡಾ. ಪ್ರಿಯಾ ನಾಯರ್", "role": "ನಿರ್ದೇಶಕ — ಸಿಟಿ ಪಾಸ್ ಪಶುವೈದ್ಯ ಆಸ್ಪತ್ರೆ", "text": "ನಾವು ನಮ್ಮ ಆಸ್ಪತ್ರೆ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಹೊಂದಿಸಿ, 4 ಇಲಾಖೆಗಳಲ್ಲಿ 8 ವೈದ್ಯರನ್ನು ಸೇರಿಸಿ, ಒಂದೇ ಮಧ್ಯಾಹ್ನ ಲೈವ್ ಆಗಿ. ಅದೇ ದಿನ ಬುಕಿಂಗ್‌ಗಳು ಪ್ರಾರಂಭವಾದವು." },
-      "5": { "name": "ಥಾಮಸ್ ಎರಿಕ್ಸನ್", "role": "ಅನುಸರಣೆ ಅಧಿಕಾರಿ — ನಾರ್ಡಿಕ್ ಫಾರ್ಮ್ಸ್ ಗ್ರೂಪ್", "text": "HIPAA-ದರ್ಜೆ ಆಡಿಟ್ ಲಾಗಿಂಗ್ ಮತ್ತು PHI ಪ್ರವೇಶ ಮೇಲ್ವಿಚಾರಣೆ ನಮ್ಮ ಅನುಸರಣೆ ತಂಡಕ್ಕೆ ಸಂಪೂರ್ಣ ವಿಶ್ವಾಸ ನೀಡಿತು. ಪ್ರತಿ ದಾಖಲೆ ಪ್ರವೇಶ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗುತ್ತದೆ." }
+      "0": {
+        "name": "ಸಾರಾ ಮಿಚೆಲ್",
+        "role": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ",
+        "text": "VetCare ನನ್ನ ಬೆಕ್ಕಿನ ಜೀವವನ್ನು ಉಳಿಸಿತು! ಪ್ರತಿ ಆಸ್ಪತ್ರೆಯೂ ಮುಚ್ಚಿದ್ದಾಗ ಬೆಳಗ್ಗೆ 2 ಗಂಟೆಗೆ ತ್ವರಿತ ರೋಗ ನಿರ್ಣಯ. ವೀಡಿಯೊ ಸಮಾಲೋಚನೆ ತುಂಬಾ ಮೃದುವಾಗಿತ್ತು."
+      },
+      "1": {
+        "name": "ರಾಬರ್ಟ್ ಹಾರ್‌ಗ್ರೋವ್",
+        "role": "ಹೈನು ಕೃಷಿ ಮಾಲೀಕ — 2,400 ತಲೆ",
+        "text": "3 ಕೃಷಿಯಲ್ಲಿ ಚಿಕಿತ್ಸಾ ಅಭಿಯಾನಗಳನ್ನು ನಿರ್ವಹಿಸುವುದು ಒಂದು ವಾರದ ಕಾಗದ ಕೆಲಸ ತೆಗೆದುಕೊಳ್ಳುತ್ತಿತ್ತು. ಈಗ ಅದು ಸಂಪೂರ್ಣ ಟ್ರೇಸಬಿಲಿಟಿಯೊಂದಿಗೆ ನಿಮಿಷಗಳಲ್ಲಿ ಆಗುತ್ತದೆ."
+      },
+      "2": {
+        "name": "ಡಾ. ಜೇಮ್ಸ್ ವಿಲ್ಸನ್",
+        "role": "ಪಶುವೈದ್ಯ",
+        "text": "VetCare ಮೂಲಕ ನಾನು 12 ಉದ್ಯಮ ಗ್ರಾಹಕರು ಮತ್ತು ಹಲವಾರು ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರಿಗೆ ಸೇವೆ ನೀಡುತ್ತಿದ್ದೇನೆ. ಶೆಡ್ಯೂಲಿಂಗ್, ದಾಖಲೆಗಳು ಮತ್ತು ಬಿಲ್ಲಿಂಗ್ ಅನ್ನು ವೇದಿಕೆ ಸುಂದರವಾಗಿ ನಿರ್ವಹಿಸುತ್ತದೆ."
+      },
+      "3": {
+        "name": "ಮಾರಿಯಾ ಚೆಂಗ್",
+        "role": "ಮೃಗಾಲಯ ಕಾರ್ಯಾಚರಣೆ ನಿರ್ದೇಶಕ",
+        "text": "40 ಆವರಣಗಳಲ್ಲಿ ನಮ್ಮ 800+ ಪ್ರಾಣಿಗಳಿಗೆ ಸ್ಥಳ ಟ್ರ್ಯಾಕಿಂಗ್, ತಳಿ ಗುಂಪುಮಾಡುವಿಕೆ ಮತ್ತು ಅಭಿಯಾನ ನಿರ್ವಹಣೆ — ಎಲ್ಲವೂ ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ."
+      },
+      "4": {
+        "name": "ಡಾ. ಪ್ರಿಯಾ ನಾಯರ್",
+        "role": "ನಿರ್ದೇಶಕ — ಸಿಟಿ ಪಾಸ್ ಪಶುವೈದ್ಯ ಆಸ್ಪತ್ರೆ",
+        "text": "ನಾವು ನಮ್ಮ ಆಸ್ಪತ್ರೆ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಹೊಂದಿಸಿ, 4 ಇಲಾಖೆಗಳಲ್ಲಿ 8 ವೈದ್ಯರನ್ನು ಸೇರಿಸಿ, ಒಂದೇ ಮಧ್ಯಾಹ್ನ ಲೈವ್ ಆಗಿ. ಅದೇ ದಿನ ಬುಕಿಂಗ್‌ಗಳು ಪ್ರಾರಂಭವಾದವು."
+      },
+      "5": {
+        "name": "ಥಾಮಸ್ ಎರಿಕ್ಸನ್",
+        "role": "ಅನುಸರಣೆ ಅಧಿಕಾರಿ — ನಾರ್ಡಿಕ್ ಫಾರ್ಮ್ಸ್ ಗ್ರೂಪ್",
+        "text": "HIPAA-ದರ್ಜೆ ಆಡಿಟ್ ಲಾಗಿಂಗ್ ಮತ್ತು PHI ಪ್ರವೇಶ ಮೇಲ್ವಿಚಾರಣೆ ನಮ್ಮ ಅನುಸರಣೆ ತಂಡಕ್ಕೆ ಸಂಪೂರ್ಣ ವಿಶ್ವಾಸ ನೀಡಿತು. ಪ್ರತಿ ದಾಖಲೆ ಪ್ರವೇಶ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗುತ್ತದೆ."
+      }
     },
     "ctaTitle": "ನಿಮ್ಮ ಪ್ರಾಣಿ ಆರೈಕೆಯನ್ನು ಪರಿವರ್ತಿಸಲು ಸಿದ್ಧರೇ?",
     "ctaSubtitle": "VetCare ನಲ್ಲಿ ಸಾವಿರಾರು ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕರು, ಉದ್ಯಮಗಳು ಮತ್ತು ಪಶುವೈದ್ಯರನ್ನು ಸೇರಿ",
@@ -634,8 +871,18 @@
       "confirmCancel": "Confirm Cancellation",
       "quickReasons": "Quick reasons:",
       "refundPolicy": "Refund Policy:",
-      "reasonPresetsVet": ["Schedule conflict", "Emergency", "Patient request", "Unable to attend"],
-      "reasonPresetsPatient": ["Found another doctor", "Schedule conflict", "No longer needed", "Financial reasons"]
+      "reasonPresetsVet": [
+        "Schedule conflict",
+        "Emergency",
+        "Patient request",
+        "Unable to attend"
+      ],
+      "reasonPresetsPatient": [
+        "Found another doctor",
+        "Schedule conflict",
+        "No longer needed",
+        "Financial reasons"
+      ]
     },
     "loading": "Loading consultations...",
     "failedToLoad": "Failed to load data",
@@ -686,7 +933,9 @@
       "awaitingApproval": "(awaiting doctor approval)",
       "autoConfirmed": "(auto-confirmed)",
       "cancelledBy": "Cancelled by {{role}}.",
-      "reason": "Reason: {{reason}}"
+      "reason": "Reason: {{reason}}",
+      "by": "by",
+      "system": "System"
     },
     "herdLevel": "Herd-level",
     "missedMessages": {
@@ -697,7 +946,39 @@
       "rescheduleUsed": "You have used your reschedule allowance for this booking.",
       "patientNoJoin": "🙋 The patient did not join the session. They may reschedule.",
       "neitherJoined": "❌ Neither party joined this session. The patient may reschedule."
-    }
+    },
+    "filterLabel": "Filter",
+    "pendingMessages": {
+      "petOwner": "Your appointment request is awaiting vet confirmation.",
+      "vet": "A patient has requested an appointment. Please confirm or suggest a new time.",
+      "admin": "Pending appointment awaiting veterinarian confirmation."
+    },
+    "expiredPendingMessages": {
+      "petOwner": "This appointment slot has passed without confirmation. Please reschedule.",
+      "general": "This booking expired without vet confirmation."
+    },
+    "confirmedMessages": {
+      "petOwner": "Your appointment is confirmed. Please join at the scheduled time.",
+      "vet": "Appointment confirmed. Please be ready at the scheduled time.",
+      "admin": "This appointment has been confirmed by the veterinarian."
+    },
+    "doctorMissedPending": {
+      "petOwner": "The vet did not respond in time. You can reschedule at no penalty.",
+      "vet": "You did not confirm this appointment request before it expired.",
+      "admin": "Veterinarian did not respond to this pending request."
+    },
+    "doctorMissedConfirmed": {
+      "petOwner": "Your vet did not join the confirmed appointment. You can reschedule for free.",
+      "vet": "You missed this confirmed appointment.",
+      "admin": "Veterinarian missed this confirmed appointment."
+    },
+    "adminMissed": {
+      "patientNoShow": "Patient did not join the appointment.",
+      "bothMissed": "Both the vet and patient missed this appointment."
+    },
+    "joinWindowTooltip": "Available {{minutes}} minutes before the appointment.",
+    "viewActionHistory": "View action history",
+    "viewCancellationDetails": "View cancellation details"
   },
   "animals": {
     "pageTitles": {
@@ -1551,7 +1832,11 @@
       "admin": "ನಿರ್ವಾಹಕ",
       "vet": "ಪಶುವೈದ್ಯ",
       "farmer": "ರೈತ",
-      "petOwner": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ"
+      "petOwner": "ಸಾಕುಪ್ರಾಣಿ ಮಾಲೀಕ",
+      "adminPerms": "Full access — view, create, manage, and archive all records",
+      "vetPerms": "Create and manage records; view all herd data",
+      "farmerPerms": "Create records; view your enterprise's medical data",
+      "petOwnerPerms": "View records for your own animals"
     },
     "tabs": {
       "overview": "ಅವಲೋಕನ",
@@ -1589,7 +1874,8 @@
       "archive": "ಆರ್ಕೈವ್ ಮಾಡಿ",
       "noAnimalsYet": "ದಾಖಲೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
       "searchPlaceholder": "ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಿ...",
-      "countText": "{{count}} ದಾಖಲೆಗಳು"
+      "countText": "{{count}} ದಾಖಲೆಗಳು",
+      "noRecords": "No medical records found"
     },
     "vaccinations": {
       "addButton": "ಲಸಿಕೆ ಸೇರಿಸಿ",
@@ -1599,18 +1885,21 @@
       "overdue": "ವಿಳಂಬ",
       "dueSoon": "ಶೀಘ್ರದಲ್ಲೇ ಬಾಕಿ",
       "current": "ಪ್ರಸ್ತುತ",
-      "totalCount": "{{count}} ಲಸಿಕೆಗಳು"
+      "totalCount": "{{count}} ಲಸಿಕೆಗಳು",
+      "noRecords": "No vaccination records found"
     },
     "labResults": {
       "addButton": "ಲ್ಯಾಬ್ ಫಲಿತಾಂಶ ಸೇರಿಸಿ",
       "complete": "ಪೂರ್ಣ ಎಂದು ಗುರುತಿಸಿ",
-      "countText": "{{count}} ಫಲಿತಾಂಶಗಳು"
+      "countText": "{{count}} ಫಲಿತಾಂಶಗಳು",
+      "noRecords": "No lab results found"
     },
     "allergies": {
       "addButton": "ಅಲರ್ಜಿ ದಾಖಲಿಸಿ",
       "active": "ಸಕ್ರಿಯ",
       "inactive": "ನಿಷ್ಕ್ರಿಯ",
-      "countText": "{{count}} ಅಲರ್ಜಿಗಳು"
+      "countText": "{{count}} ಅಲರ್ಜಿಗಳು",
+      "noRecords": "No allergy records found"
     },
     "severity": {
       "low": "ಕಡಿಮೆ",
@@ -1998,29 +2287,6 @@
     },
     "addRecord": "+ Add Record",
     "form": {
-      "type": "Type *",
-      "income": "💚 ಆದಾಯ",
-      "expense": "🔴 ವೆಚ್ಚ",
-      "category": "Category *",
-      "amount": "Amount *",
-      "date": "Transaction Date *",
-      "description": "ವಿವರಣೆ",
-      "reference": "Reference #",
-      "notes": "ಟಿಪ್ಪಣಿಗಳು"
-    },
-    "dashboard": {
-      "totalIncome": "Total Income",
-      "totalExpenses": "Total Expenses",
-      "netProfit": "Net Profit",
-      "monthlyBreakdown": "Monthly Breakdown",
-      "topExpenses": "Top Expense Categories",
-      "revenueByCategory": "Revenue by Category"
-    },
-    "emptyRecords": "No records yet.",
-    "deleteConfirm": "Delete this financial record?",
-    "selectEnterprise": "Select Enterprise...",
-    "selectDefault": "-- Select --",
-    "form": {
       "editTitle": "ದಾಖಲೆ ಸಂಪಾದಿಸಿ",
       "createTitle": "ದಾಖಲೆ ಸೇರಿಸಿ"
     },
@@ -2041,6 +2307,10 @@
         "total": "ಒಟ್ಟು"
       }
     },
+    "emptyRecords": "No records yet.",
+    "deleteConfirm": "Delete this financial record?",
+    "selectEnterprise": "Select Enterprise...",
+    "selectDefault": "-- Select --",
     "toasts": {
       "recordUpdated": "ದಾಖಲೆ ನವೀಕರಿಸಲಾಗಿದೆ!",
       "recordCreated": "ದಾಖಲೆ ರಚಿಸಲಾಗಿದೆ!",
@@ -2141,7 +2411,38 @@
     "affected": "affected",
     "atRisk": "at risk",
     "radius": "radius",
-    "outbreakResolved": "Outbreak resolved!"
+    "outbreakResolved": "Outbreak resolved!",
+    "predictionCreated": "Disease prediction created successfully",
+    "outbreakCreated": "Outbreak zone reported successfully",
+    "resolved": "Prediction resolved successfully",
+    "failedResolve": "Failed to resolve prediction",
+    "selectEnterprise": "Select an enterprise to view disease predictions",
+    "highRiskAnimals": "High Risk Animals",
+    "animal": "Animal",
+    "species": "Species",
+    "breed": "Breed",
+    "riskScore": "Risk Score",
+    "diseaseName": "Disease Name",
+    "confidence": "Confidence",
+    "predictedOnset": "Predicted Onset",
+    "riskFactors": "Risk Factors",
+    "recommendedActions": "Recommended Actions",
+    "disease": "Disease",
+    "risk": "Risk",
+    "onset": "Onset",
+    "resolve": "Resolve",
+    "noPredictions": "No predictions found",
+    "reportOutbreak": "Report Outbreak",
+    "severity": "Severity",
+    "affectedCount": "Affected Count",
+    "totalAtRisk": "Total At Risk",
+    "radiusKm": "Radius (km)",
+    "centerLat": "Center Latitude",
+    "centerLng": "Center Longitude",
+    "createOutbreakZone": "Create Outbreak Zone",
+    "outbreakZoneMap": "Outbreak Zone Map",
+    "started": "Started",
+    "noOutbreaks": "No outbreak zones reported"
   },
   "genomicLineage": {
     "pageTitle": "🧬 Genomic Lineage & Genetic Diversity",
@@ -2166,7 +2467,37 @@
     "createPair": "Create Pair Recommendation",
     "emptyPairs": "No pair recommendations yet",
     "emptyEnterprise": "Select an enterprise to view genetic data",
-    "loading": "Loading genetic data…"
+    "loading": "Loading genetic data…",
+    "profileCreated": "Genetic profile created successfully",
+    "pairCreated": "Breeding pair recorded successfully",
+    "selectEnterprise": "Select an enterprise to view genomic data",
+    "diversityBySpecies": "Genetic Diversity by Species",
+    "species": "Species",
+    "count": "Count",
+    "avgInbreeding": "Avg. Inbreeding Coefficient",
+    "animal": "Animal",
+    "inbreedingCoeff": "Inbreeding Coefficient",
+    "animalId": "Animal ID",
+    "sireId": "Sire ID",
+    "damId": "Dam ID",
+    "generation": "Generation",
+    "dnaTestDate": "DNA Test Date",
+    "dnaLab": "DNA Lab",
+    "dnaSampleId": "DNA Sample ID",
+    "breedPurity": "Breed Purity %",
+    "sire": "Sire",
+    "dam": "Dam",
+    "gen": "Gen",
+    "inbreeding": "Inbreeding",
+    "purity": "Purity",
+    "noProfiles": "No genetic profiles found",
+    "compatibilityScore": "Compatibility Score",
+    "predictedInbreeding": "Predicted Inbreeding",
+    "recommendation": "Recommendation",
+    "reason": "Reason",
+    "compatibility": "compatibility",
+    "predInbreeding": "predicted inbreeding",
+    "noPairs": "No breeding pairs recorded"
   },
   "iotSensors": {
     "pageTitle": "📡 IoT Sensor Integration Dashboard",
@@ -2178,7 +2509,38 @@
     },
     "registerSensor": "Register Sensor",
     "recordReading": "📊 Record Reading",
-    "loading": "Connecting to sensor network…"
+    "loading": "Connecting to sensor network…",
+    "sensorRegistered": "Sensor registered successfully",
+    "readingRecorded": "Sensor reading recorded successfully",
+    "stats": {
+      "totalSensors": "Total Sensors",
+      "anomalies24h": "Anomalies (24h)",
+      "lowBattery": "Low Battery"
+    },
+    "sensorsByType": "Sensors by Type",
+    "avgReadings24h": "Average Readings (24h)",
+    "avg": "Avg",
+    "min": "Min",
+    "max": "Max",
+    "recentAnomalies": "Recent Anomalies",
+    "sensor": "Sensor",
+    "value": "Value",
+    "anomaly": "Anomaly",
+    "time": "Time",
+    "lowBatterySensors": "Low Battery Sensors",
+    "sensorType": "Sensor Type",
+    "sensorName": "Sensor Name",
+    "serialNumber": "Serial Number",
+    "manufacturer": "Manufacturer",
+    "unit": "Unit",
+    "minThreshold": "Min Threshold",
+    "maxThreshold": "Max Threshold",
+    "readingInterval": "Reading Interval (seconds)",
+    "selectSensor": "Select a sensor",
+    "viewReadings": "View Readings",
+    "noSensors": "No sensors registered yet",
+    "recordedAt": "Recorded At",
+    "noReadings": "No readings recorded yet"
   },
   "supplyChain": {
     "pageTitle": "🔗 Supply Chain & Traceability (Farm-to-Fork)",
@@ -2197,7 +2559,8 @@
       "totalBatches": "Total Batches",
       "inProduction": "In Production",
       "expiring": "Expiring (30d)",
-      "qrCodes": "QR Codes"
+      "qrCodes": "QR Codes",
+      "expiring30d": "Expiring in 30 Days"
     },
     "batchStatus": "📦 Batch Status Distribution",
     "eventTypes": "📋 Event Types (90d)",
@@ -2210,7 +2573,33 @@
     "logEvent": "+ Log Event",
     "emptyBatches": "No batches",
     "emptyEvents": "No traceability events",
-    "emptyQR": "No QR codes generated yet — create one from a batch"
+    "emptyQR": "No QR codes generated yet — create one from a batch",
+    "failedVerify": "Failed to verify event",
+    "failedQR": "Failed to generate QR code",
+    "batchStatusDist": "Batch Status Distribution",
+    "eventTypes90d": "Event Types (Last 90 Days)",
+    "batchNum": "Batch #",
+    "product": "Product",
+    "expiry": "Expiry",
+    "qty": "Qty",
+    "batchNumber": "Batch Number",
+    "productType": "Product Type",
+    "quantity": "Quantity",
+    "productionDate": "Production Date",
+    "expiryDate": "Expiry Date",
+    "qualityGrade": "Quality Grade",
+    "currentHolder": "Current Holder",
+    "grade": "Grade",
+    "noBatches": "No batches found",
+    "batch": "Batch",
+    "eventType": "Event Type",
+    "location": "Location",
+    "gpsLat": "GPS Latitude",
+    "gpsLng": "GPS Longitude",
+    "verified": "Verified",
+    "verify": "Verify",
+    "noEvents": "No events recorded",
+    "noQRCodes": "No QR codes generated yet"
   },
   "workforce": {
     "pageTitle": "👷 Workforce & Task Management",
@@ -2244,7 +2633,10 @@
     "emptyTasks": "No tasks yet",
     "emptyShifts": "No shifts scheduled",
     "checkIn": "Check In",
-    "checkOut": "Check Out"
+    "checkOut": "Check Out",
+    "form": {
+      "title": "Title"
+    }
   },
   "reportBuilder": {
     "pageTitle": "📊 Report Builder & Export Center",
@@ -2285,7 +2677,19 @@
     "templateCreated": "Template created!",
     "emptyHistory": "No reports generated yet",
     "emptyView": "Select a report from History or Generate a new one",
-    "createTemplate": "+ Create Template"
+    "createTemplate": "+ Create Template",
+    "reportGenerated": "Report generated successfully",
+    "failedGenerate": "Failed to generate report",
+    "reportDeleted": "Report deleted",
+    "noDataRows": "No data rows in this report",
+    "selectReportType": "Select Report Type",
+    "days": "Days",
+    "months": "Months",
+    "rows": "Rows",
+    "noReports": "No reports generated yet",
+    "selectReport": "Select a report to view",
+    "reportType": "Report Type",
+    "noTemplates": "No templates created yet"
   },
   "aiCopilot": {
     "pageTitle": "🤖 AI Veterinary Copilot",
@@ -2384,7 +2788,17 @@
     "results": "Results:",
     "emptySimulations": "No simulations yet. Create a digital twin first, then run simulations.",
     "twinCreated": "Digital twin created!",
-    "simulationCompleted": "Simulation completed!"
+    "simulationCompleted": "Simulation completed!",
+    "selectForDashboard": "Select an enterprise to view the dashboard",
+    "recentSimulations": "Recent Simulations",
+    "twin": "Twin",
+    "scenario": "Scenario",
+    "duration": "Duration",
+    "createDigitalTwin": "Create Digital Twin",
+    "create": "Create",
+    "noTwins": "No digital twins created yet",
+    "parameters": "Parameters",
+    "noSimulations": "No simulations run yet"
   },
   "marketplace": {
     "pageTitle": "🏪 ಪ್ರಾಣಿ ಪುನರ್ವಸತಿ ಫಲಕ",
@@ -2697,29 +3111,83 @@
       "adoptDontShop": "🐾 ದತ್ತು ತೆಗೆದುಕೊಳ್ಳಿ, ಖರೀದಿಸಬೇಡಿ — ಆಶ್ರಯಗಳು ಮತ್ತು ರಕ್ಷಣಾ ಸಂಸ್ಥೆಗಳಿಂದ ದತ್ತು ತೆಗೆದುಕೊಳ್ಳುವುದನ್ನು ಪರಿಗಣಿಸಿ"
     },
     "monetization": {
-      "subtabs": { "listings": "ಪಟ್ಟಿಗಳು", "settings": "ನಗದೀಕರಣ", "plans": "ಯೋಜನೆಗಳು", "revenue": "ಆದಾಯ" },
+      "subtabs": {
+        "listings": "ಪಟ್ಟಿಗಳು",
+        "settings": "ನಗದೀಕರಣ",
+        "plans": "ಯೋಜನೆಗಳು",
+        "revenue": "ಆದಾಯ"
+      },
       "featureToggles": "ಫೀಚರ್ ಟಾಗಲ್‌ಗಳು",
       "allFreeNote": "ಎಲ್ಲಾ ಫೀಚರ್‌ಗಳು ಪ್ರಸ್ತುತ ಎಲ್ಲಾ ಬಳಕೆದಾರರಿಗೆ ಉಚಿತ. ಶುಲ್ಕ ವಿಧಿಸಲು ಸಿದ್ಧವಾದಾಗ ಫೀಚರ್‌ಗಳನ್ನು ಆನ್ ಮಾಡಿ.",
       "settingUpdated": "ಸೆಟ್ಟಿಂಗ್ ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ",
-      "active": "ಸಕ್ರಿಯ", "inactive": "ನಿಷ್ಕ್ರಿಯ", "free": "ಉಚಿತ", "days": "ದಿನಗಳು", "unlimited": "ಅಪರಿಮಿತ",
-      "listings": "ಪಟ್ಟಿಗಳು", "boostsMonth": "ಬೂಸ್ಟ್‌ಗಳು/ತಿಂಗಳು", "prioritySupport": "ಆದ್ಯತಾ ಬೆಂಬಲ", "analyticsAccess": "ವಿಶ್ಲೇಷಣಾ ಪ್ರವೇಶ",
-      "managePlans": "ಚಂದಾ ಯೋಜನೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ", "editPlan": "ಯೋಜನೆ ಸಂಪಾದಿಸಿ", "createPlan": "ಯೋಜನೆ ರಚಿಸಿ",
-      "planCreated": "ಯೋಜನೆ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ", "planUpdated": "ಯೋಜನೆ ನವೀಕರಿಸಲಾಗಿದೆ", "planDeleted": "ಯೋಜನೆ ಅಳಿಸಲಾಗಿದೆ",
-      "updatePlan": "ಯೋಜನೆ ನವೀಕರಿಸಿ", "cancel": "ರದ್ದುಮಾಡಿ",
-      "planName": "ಯೋಜನೆ ಹೆಸರು", "planPrice": "ಬೆಲೆ (INR)", "planDescription": "ವಿವರಣೆ", "durationDays": "ಅವಧಿ (ದಿನಗಳು)", "maxListings": "ಗರಿಷ್ಠ ಪಟ್ಟಿಗಳು",
-      "totalRevenue": "ಒಟ್ಟು ಆದಾಯ", "totalTransactions": "ಒಟ್ಟು ವಹಿವಾಟುಗಳು", "totalInquiries": "ಒಟ್ಟು ವಿಚಾರಣೆಗಳು", "inquiryRevenue": "ವಿಚಾರಣಾ ಆದಾಯ",
-      "revenueByType": "ಪ್ರಕಾರದ ಪ್ರಕಾರ ಆದಾಯ", "subscriptionStats": "ಚಂದಾ ಅಂಕಿಅಂಶಗಳು", "boostStats": "ಬೂಸ್ಟ್ ಅಂಕಿಅಂಶಗಳು",
-      "recentTransactions": "ಇತ್ತೀಚಿನ ವಹಿವಾಟುಗಳು", "user": "ಬಳಕೆದಾರ", "type": "ಪ್ರಕಾರ", "amount": "ಮೊತ್ತ", "date": "ದಿನಾಂಕ",
+      "active": "ಸಕ್ರಿಯ",
+      "inactive": "ನಿಷ್ಕ್ರಿಯ",
+      "free": "ಉಚಿತ",
+      "days": "ದಿನಗಳು",
+      "unlimited": "ಅಪರಿಮಿತ",
+      "listings": "ಪಟ್ಟಿಗಳು",
+      "boostsMonth": "ಬೂಸ್ಟ್‌ಗಳು/ತಿಂಗಳು",
+      "prioritySupport": "ಆದ್ಯತಾ ಬೆಂಬಲ",
+      "analyticsAccess": "ವಿಶ್ಲೇಷಣಾ ಪ್ರವೇಶ",
+      "managePlans": "ಚಂದಾ ಯೋಜನೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+      "editPlan": "ಯೋಜನೆ ಸಂಪಾದಿಸಿ",
+      "createPlan": "ಯೋಜನೆ ರಚಿಸಿ",
+      "planCreated": "ಯೋಜನೆ ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ",
+      "planUpdated": "ಯೋಜನೆ ನವೀಕರಿಸಲಾಗಿದೆ",
+      "planDeleted": "ಯೋಜನೆ ಅಳಿಸಲಾಗಿದೆ",
+      "updatePlan": "ಯೋಜನೆ ನವೀಕರಿಸಿ",
+      "cancel": "ರದ್ದುಮಾಡಿ",
+      "planName": "ಯೋಜನೆ ಹೆಸರು",
+      "planPrice": "ಬೆಲೆ (INR)",
+      "planDescription": "ವಿವರಣೆ",
+      "durationDays": "ಅವಧಿ (ದಿನಗಳು)",
+      "maxListings": "ಗರಿಷ್ಠ ಪಟ್ಟಿಗಳು",
+      "totalRevenue": "ಒಟ್ಟು ಆದಾಯ",
+      "totalTransactions": "ಒಟ್ಟು ವಹಿವಾಟುಗಳು",
+      "totalInquiries": "ಒಟ್ಟು ವಿಚಾರಣೆಗಳು",
+      "inquiryRevenue": "ವಿಚಾರಣಾ ಆದಾಯ",
+      "revenueByType": "ಪ್ರಕಾರದ ಪ್ರಕಾರ ಆದಾಯ",
+      "subscriptionStats": "ಚಂದಾ ಅಂಕಿಅಂಶಗಳು",
+      "boostStats": "ಬೂಸ್ಟ್ ಅಂಕಿಅಂಶಗಳು",
+      "recentTransactions": "ಇತ್ತೀಚಿನ ವಹಿವಾಟುಗಳು",
+      "user": "ಬಳಕೆದಾರ",
+      "type": "ಪ್ರಕಾರ",
+      "amount": "ಮೊತ್ತ",
+      "date": "ದಿನಾಂಕ",
       "noRevenue": "ಇನ್ನೂ ಆದಾಯ ಡೇಟಾ ಇಲ್ಲ. ನಗದೀಕರಣ ಫೀಚರ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ ನಂತರ ಆದಾಯ ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ.",
       "settings": {
-        "listing_fee": { "title": "ಪಟ್ಟಿ ಶುಲ್ಕ", "desc": "ಉಚಿತ ಮಿತಿಯ ನಂತರ ಪಟ್ಟಿ ಶುಲ್ಕ" },
-        "listing_boost": { "title": "ಪಟ್ಟಿ ಬೂಸ್ಟ್", "desc": "ಗೋಚರತೆ ಹೆಚ್ಚಿಸಲು ಪಾವತಿ ಪ್ರಚಾರ" },
-        "subscription_plans": { "title": "ಚಂದಾ ಯೋಜನೆಗಳು", "desc": "ಮಾರಾಟಗಾರರಿಗೆ ಪ್ರೀಮಿಯಂ ಚಂದಾ" },
-        "inquiry_fee": { "title": "ವಿಚಾರಣಾ ಶುಲ್ಕ", "desc": "ಪ್ರತಿ ವಿಚಾರಣೆಗೆ ಶುಲ್ಕ" },
-        "featured_seller": { "title": "ಫೀಚರ್ಡ್ ಸೆಲ್ಲರ್", "desc": "ಪ್ರೀಮಿಯಂ ಪರಿಶೀಲಿತ ಮಾರಾಟಗಾರ ಬ್ಯಾಡ್ಜ್" },
-        "transaction_fee": { "title": "ವಹಿವಾಟು ಶುಲ್ಕ", "desc": "ಯಶಸ್ವಿ ವಹಿವಾಟುಗಳ ಮೇಲೆ ಕಮಿಷನ್" },
-        "premium_analytics": { "title": "ಪ್ರೀಮಿಯಂ ವಿಶ್ಲೇಷಣೆ", "desc": "ಮಾರಾಟಗಾರರಿಗೆ ಸುಧಾರಿತ ಒಳನೋಟಗಳು" },
-        "priority_placement": { "title": "ಆದ್ಯತಾ ನಿಯೋಜನೆ", "desc": "ಹುಡುಕಾಟ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಆದ್ಯತೆ" }
+        "listing_fee": {
+          "title": "ಪಟ್ಟಿ ಶುಲ್ಕ",
+          "desc": "ಉಚಿತ ಮಿತಿಯ ನಂತರ ಪಟ್ಟಿ ಶುಲ್ಕ"
+        },
+        "listing_boost": {
+          "title": "ಪಟ್ಟಿ ಬೂಸ್ಟ್",
+          "desc": "ಗೋಚರತೆ ಹೆಚ್ಚಿಸಲು ಪಾವತಿ ಪ್ರಚಾರ"
+        },
+        "subscription_plans": {
+          "title": "ಚಂದಾ ಯೋಜನೆಗಳು",
+          "desc": "ಮಾರಾಟಗಾರರಿಗೆ ಪ್ರೀಮಿಯಂ ಚಂದಾ"
+        },
+        "inquiry_fee": {
+          "title": "ವಿಚಾರಣಾ ಶುಲ್ಕ",
+          "desc": "ಪ್ರತಿ ವಿಚಾರಣೆಗೆ ಶುಲ್ಕ"
+        },
+        "featured_seller": {
+          "title": "ಫೀಚರ್ಡ್ ಸೆಲ್ಲರ್",
+          "desc": "ಪ್ರೀಮಿಯಂ ಪರಿಶೀಲಿತ ಮಾರಾಟಗಾರ ಬ್ಯಾಡ್ಜ್"
+        },
+        "transaction_fee": {
+          "title": "ವಹಿವಾಟು ಶುಲ್ಕ",
+          "desc": "ಯಶಸ್ವಿ ವಹಿವಾಟುಗಳ ಮೇಲೆ ಕಮಿಷನ್"
+        },
+        "premium_analytics": {
+          "title": "ಪ್ರೀಮಿಯಂ ವಿಶ್ಲೇಷಣೆ",
+          "desc": "ಮಾರಾಟಗಾರರಿಗೆ ಸುಧಾರಿತ ಒಳನೋಟಗಳು"
+        },
+        "priority_placement": {
+          "title": "ಆದ್ಯತಾ ನಿಯೋಜನೆ",
+          "desc": "ಹುಡುಕಾಟ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಆದ್ಯತೆ"
+        }
       }
     }
   },
@@ -2738,7 +3206,11 @@
       "metricTypes": "Metric Types",
       "activeGoals": "Active Goals",
       "avgProgress": "Avg Goal Progress",
-      "co2Estimate": "Est. CO₂ (tons/yr)"
+      "co2Estimate": "Est. CO₂ (tons/yr)",
+      "avgGoalProgress": "Avg. Goal Progress",
+      "estCO2": "Est. CO₂ (tons)",
+      "totalCO2": "Total CO₂ (tons)",
+      "speciesGroups": "Species Groups"
     },
     "goalProgress": "🎯 Goal Progress",
     "target": "Target:",
@@ -2787,7 +3259,30 @@
     "toasts": {
       "metricRecorded": "Metric recorded!",
       "goalCreated": "Goal created!"
-    }
+    },
+    "metricRecorded": "Sustainability metric recorded successfully",
+    "goalCreated": "Goal created successfully",
+    "metricType": "Metric Type",
+    "entries": "Entries",
+    "total": "Total",
+    "average": "Average",
+    "unit": "Unit",
+    "recordSustainabilityMetric": "Record Sustainability Metric",
+    "value": "Value",
+    "scope": "Scope",
+    "periodStart": "Period Start",
+    "periodEnd": "Period End",
+    "period": "Period",
+    "noMetrics": "No metrics recorded yet",
+    "goalName": "Goal Name",
+    "targetDate": "Target Date",
+    "targetValue": "Target Value",
+    "baselineValue": "Baseline Value",
+    "currentValue": "Current Value",
+    "noGoals": "No sustainability goals created yet",
+    "carbonBySpecies": "Carbon Footprint by Species",
+    "species": "Species",
+    "headCount": "Head Count"
   },
   "wellnessPortal": {
     "pageTitle": "💚 ಆರೋಗ್ಯ ಪೋರ್ಟಲ್",
@@ -2859,7 +3354,48 @@
     "trailTitle": "🐾 Movement Trail",
     "trailSubtitle": "Track an animal's movement path over time",
     "animalIdPlaceholder": "Enter Animal ID",
-    "loadTrail": "Load Trail"
+    "loadTrail": "Load Trail",
+    "zoneCreated": "Geofence zone created successfully",
+    "eventRecorded": "Geospatial event recorded successfully",
+    "chooseEnterprise": "Choose an enterprise...",
+    "liveZoneEventMap": "Live Zone & Event Map",
+    "zone": "Zone",
+    "location": "Location",
+    "newZone": "New Zone",
+    "zoneName": "Zone Name",
+    "centerLatitude": "Center Latitude",
+    "centerLongitude": "Center Longitude",
+    "radiusMeters": "Radius (meters)",
+    "color": "Color",
+    "alertOnEntry": "Alert on Entry",
+    "alertOnExit": "Alert on Exit",
+    "restrictedZone": "Restricted Zone",
+    "geofenceZonesMap": "Geofence Zones Map",
+    "noZones": "No geofence zones created yet",
+    "recordGeospatialEvent": "Record Geospatial Event",
+    "animalId": "Animal ID",
+    "eventType": "Event Type",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "metadata": "Metadata (JSON)",
+    "eventLocationsMap": "Event Locations Map",
+    "legend": {
+      "locationUpdate": "Location Update",
+      "zoneEntryExit": "Zone Entry / Exit",
+      "breach": "Zone Breach",
+      "sosAlert": "SOS Alert"
+    },
+    "eventLog": "Event Log",
+    "details": "Details",
+    "noEvents": "No events recorded yet",
+    "locationDensityHeatmap": "Location Density Heatmap",
+    "noLocationData": "No location data available",
+    "movementTrail": "Movement Trail",
+    "trackAnimalMovement": "Track animal movement by entering an Animal ID below.",
+    "points": "Points",
+    "distanceKm": "Distance (km)",
+    "lat": "Lat",
+    "lng": "Lng"
   },
   "errorBoundary": {
     "heading": "ಏನೋ ತಪ್ಪಾಗಿದೆ",
@@ -4215,11 +4751,41 @@
     "registerYours": "Register your hospital",
     "prev": "‹ Prev",
     "next": "Next ›",
-    "badges": { "verified": "✓ Verified", "underReview": "⏳ Under Review", "pendingDocs": "📋 Pending Docs", "suspended": "⚠ Suspended", "emergency": "⚡ Emergency" },
-    "stats": { "doctors": "Doctors", "depts": "Depts", "reviews": "Reviews" },
-    "form": { "hospitalName": "Hospital Name *", "type": "Type *", "tagline": "Tagline", "taglinePlaceholder": "Brief motto or focus area", "descriptionPlaceholder": "About your hospital…", "city": "City", "state": "State / Province", "phone": "Phone", "email": "Email", "website": "Website", "establishedYear": "Established Year" },
-    "createModal": { "title": "Register a Vet Hospital", "subtitle": "Create your hospital profile to connect with patients and other vets", "creating": "Creating…", "createBtn": "Create Hospital" },
-    "errors": { "nameTypeRequired": "Name and type are required", "createFailed": "Failed to create hospital" }
+    "badges": {
+      "verified": "✓ Verified",
+      "underReview": "⏳ Under Review",
+      "pendingDocs": "📋 Pending Docs",
+      "suspended": "⚠ Suspended",
+      "emergency": "⚡ Emergency"
+    },
+    "stats": {
+      "doctors": "Doctors",
+      "depts": "Depts",
+      "reviews": "Reviews"
+    },
+    "form": {
+      "hospitalName": "Hospital Name *",
+      "type": "Type *",
+      "tagline": "Tagline",
+      "taglinePlaceholder": "Brief motto or focus area",
+      "descriptionPlaceholder": "About your hospital…",
+      "city": "City",
+      "state": "State / Province",
+      "phone": "Phone",
+      "email": "Email",
+      "website": "Website",
+      "establishedYear": "Established Year"
+    },
+    "createModal": {
+      "title": "Register a Vet Hospital",
+      "subtitle": "Create your hospital profile to connect with patients and other vets",
+      "creating": "Creating…",
+      "createBtn": "Create Hospital"
+    },
+    "errors": {
+      "nameTypeRequired": "Name and type are required",
+      "createFailed": "Failed to create hospital"
+    }
   },
   "vetHospitalManage": {
     "noHospitalFound": "No hospital found",
@@ -4228,17 +4794,119 @@
     "editProfile": "Edit Profile",
     "manageDocuments": "Manage Documents",
     "inviteCreated": "Invitation created! Share the link below with the doctor.",
-    "tabs": { "overview": "Overview", "doctors": "Doctors", "depts": "Depts", "services": "Services", "appointments": "Appointments", "documents": "Documents", "settings": "Settings" },
-    "overview": { "doctors": "Doctors", "departments": "Departments", "services": "Services", "avgRating": "Avg Rating", "totalReviews": "Total Reviews", "inactive": "Inactive", "acceptingPatients": "Accepting Patients", "quickActions": "Quick Actions" },
-    "doctors": { "staff": "Staff", "inviteNew": "Invite New Doctor", "addExisting": "Add Existing", "emptyState": "No staff added yet", "accepting": "Accepting", "notAccepting": "Not Accepting" },
-    "departments": { "title": "Departments", "emptyState": "No departments yet", "doctors": "doctors" },
-    "services": { "title": "Services", "emptyState": "No services yet" },
-    "appointments": { "title": "Hospital Appointments", "allStatuses": "All Statuses", "loading": "Loading appointments...", "noAppointments": "No appointments found", "withStatus": "with status \"{{status}}\"", "time": "Time", "patient": "Patient", "doctor": "Doctor", "reason": "Reason" },
-    "settings": { "title": "Hospital Profile", "fullAddress": "Full Address", "hasEmergency": "Has Emergency Services", "open24h": "Open 24 Hours", "saveBtn": "Save Changes" },
-    "invite": { "emailAddress": "Email Address *", "firstName": "First Name", "lastName": "Last Name", "department": "Department", "revoke": "Revoke", "inviteAnother": "Invite Another", "createInvitation": "Create Invitation" },
-    "modal": { "addDoctor": "Add Doctor", "editDoctor": "Edit Staff Member", "addDept": "Add Department", "editDept": "Edit Department", "createDept": "Create Department", "addService": "Add Service", "editService": "Edit Service", "createService": "Add Service", "selectVet": "Select Veterinarian *", "hospitalRole": "Hospital Role", "employmentType": "Employment Type", "titleDesignation": "Title / Designation", "consultationFee": "Consultation Fee ({{currency}})", "primaryHospital": "Primary hospital for this doctor", "deptName": "Department Name *", "specializations": "Specializations (comma-separated)", "floorLocation": "Floor / Location", "headDoctor": "Head Doctor", "serviceName": "Service Name *", "category": "Category", "minPrice": "Min Price ({{currency}})", "maxPrice": "Max Price ({{currency}})", "duration": "Duration (minutes)", "requiresAppointment": "Requires appointment", "code": "Code" },
-    "toasts": { "doctorUpdated": "Doctor updated ✓", "doctorAdded": "Doctor added to hospital ✓", "doctorRemoved": "Doctor removed", "deptUpdated": "Department updated ✓", "deptCreated": "Department created ✓", "deptDeleted": "Department deleted", "serviceUpdated": "Service updated ✓", "serviceAdded": "Service added ✓", "serviceDeleted": "Service deleted", "profileUpdated": "Hospital profile updated", "docUploaded": "Document uploaded successfully" },
-    "errors": { "loadFailed": "Failed to load hospital data", "selectVet": "Please select a veterinarian from the search results", "operationFailed": "Operation failed", "removeFailed": "Failed to remove doctor", "deleteDeptFailed": "Failed to delete department", "deleteServiceFailed": "Failed to delete service", "updateFailed": "Update failed", "inviteFailed": "Failed to send invite" },
+    "tabs": {
+      "overview": "Overview",
+      "doctors": "Doctors",
+      "depts": "Depts",
+      "services": "Services",
+      "appointments": "Appointments",
+      "documents": "Documents",
+      "settings": "Settings"
+    },
+    "overview": {
+      "doctors": "Doctors",
+      "departments": "Departments",
+      "services": "Services",
+      "avgRating": "Avg Rating",
+      "totalReviews": "Total Reviews",
+      "inactive": "Inactive",
+      "acceptingPatients": "Accepting Patients",
+      "quickActions": "Quick Actions"
+    },
+    "doctors": {
+      "staff": "Staff",
+      "inviteNew": "Invite New Doctor",
+      "addExisting": "Add Existing",
+      "emptyState": "No staff added yet",
+      "accepting": "Accepting",
+      "notAccepting": "Not Accepting"
+    },
+    "departments": {
+      "title": "Departments",
+      "emptyState": "No departments yet",
+      "doctors": "doctors"
+    },
+    "services": {
+      "title": "Services",
+      "emptyState": "No services yet"
+    },
+    "appointments": {
+      "title": "Hospital Appointments",
+      "allStatuses": "All Statuses",
+      "loading": "Loading appointments...",
+      "noAppointments": "No appointments found",
+      "withStatus": "with status \"{{status}}\"",
+      "time": "Time",
+      "patient": "Patient",
+      "doctor": "Doctor",
+      "reason": "Reason"
+    },
+    "settings": {
+      "title": "Hospital Profile",
+      "fullAddress": "Full Address",
+      "hasEmergency": "Has Emergency Services",
+      "open24h": "Open 24 Hours",
+      "saveBtn": "Save Changes"
+    },
+    "invite": {
+      "emailAddress": "Email Address *",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "department": "Department",
+      "revoke": "Revoke",
+      "inviteAnother": "Invite Another",
+      "createInvitation": "Create Invitation"
+    },
+    "modal": {
+      "addDoctor": "Add Doctor",
+      "editDoctor": "Edit Staff Member",
+      "addDept": "Add Department",
+      "editDept": "Edit Department",
+      "createDept": "Create Department",
+      "addService": "Add Service",
+      "editService": "Edit Service",
+      "createService": "Add Service",
+      "selectVet": "Select Veterinarian *",
+      "hospitalRole": "Hospital Role",
+      "employmentType": "Employment Type",
+      "titleDesignation": "Title / Designation",
+      "consultationFee": "Consultation Fee ({{currency}})",
+      "primaryHospital": "Primary hospital for this doctor",
+      "deptName": "Department Name *",
+      "specializations": "Specializations (comma-separated)",
+      "floorLocation": "Floor / Location",
+      "headDoctor": "Head Doctor",
+      "serviceName": "Service Name *",
+      "category": "Category",
+      "minPrice": "Min Price ({{currency}})",
+      "maxPrice": "Max Price ({{currency}})",
+      "duration": "Duration (minutes)",
+      "requiresAppointment": "Requires appointment",
+      "code": "Code"
+    },
+    "toasts": {
+      "doctorUpdated": "Doctor updated ✓",
+      "doctorAdded": "Doctor added to hospital ✓",
+      "doctorRemoved": "Doctor removed",
+      "deptUpdated": "Department updated ✓",
+      "deptCreated": "Department created ✓",
+      "deptDeleted": "Department deleted",
+      "serviceUpdated": "Service updated ✓",
+      "serviceAdded": "Service added ✓",
+      "serviceDeleted": "Service deleted",
+      "profileUpdated": "Hospital profile updated",
+      "docUploaded": "Document uploaded successfully"
+    },
+    "errors": {
+      "loadFailed": "Failed to load hospital data",
+      "selectVet": "Please select a veterinarian from the search results",
+      "operationFailed": "Operation failed",
+      "removeFailed": "Failed to remove doctor",
+      "deleteDeptFailed": "Failed to delete department",
+      "deleteServiceFailed": "Failed to delete service",
+      "updateFailed": "Update failed",
+      "inviteFailed": "Failed to send invite"
+    },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
     "confirmDeleteService": "Delete service \"{{name}}\"?"

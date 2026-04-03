@@ -143,9 +143,10 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
       // For all roles: load animals first, then fetch passport for each
       const animalsResp = await (apiService as any).client.get('/animals', { params: { limit: 100 } })
       const rawData = animalsResp.data?.data
-      // Backend returns { items: [...], total: n } — always extract .items array
-      const animals: { id: string }[] = Array.isArray(rawData?.items)
-        ? rawData.items
+      // Backend always returns { data: { animals: [], total: n } } — extract the animals array
+      const animals: { id: string }[] = Array.isArray(rawData?.animals)
+        ? rawData.animals
+        : Array.isArray(rawData?.items) ? rawData.items  // legacy fallback
         : Array.isArray(rawData) ? rawData : []
       if (animals.length === 0) {
         setPassports([])
