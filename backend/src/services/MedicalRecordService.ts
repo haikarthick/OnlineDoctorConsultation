@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import database from '../utils/database';
 import { DatabaseError, NotFoundError } from '../utils/errors';
 import logger from '../utils/logger';
+import VaccineProtocolService from './VaccineProtocolService';
 
 // ─── Interfaces ─────────────────────────────────────────────
 export interface MedicalRecord {
@@ -363,19 +364,34 @@ export class MedicalRecordService {
   async createVaccination(animalId: string, data: Partial<VaccinationRecord>, createdBy?: string, createdByName?: string): Promise<VaccinationRecord> {
     try {
       const id = uuidv4();
+      const protocolId: string | null = (data as any).protocolId || null;
       await database.query(`
         INSERT INTO vaccination_records (
           id, animal_id, vaccine_name, vaccine_type, batch_number, manufacturer,
           date_administered, next_due_date, administered_by, site_of_administration,
-          dosage, reaction_notes, is_valid, certificate_number, created_by, created_at, updated_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,NOW(),NOW())
+          dosage, reaction_notes, is_valid, certificate_number, protocol_id, created_by, created_at, updated_at
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,NOW(),NOW())
       `, [
         id, animalId, data.vaccineName, data.vaccineType || null, data.batchNumber || null,
         data.manufacturer || null, data.dateAdministered, data.nextDueDate || null,
         data.administeredBy || createdBy || null, data.siteOfAdministration || null,
         data.dosage || null, data.reactionNotes || null, true,
-        data.certificateNumber || null, createdBy || null
+        data.certificateNumber || null, protocolId, createdBy || null
       ]);
+      // If a protocol was selected from the master list, auto-assign it to the animal so
+      // the vaccination appears on the Vaccination Passport page. The assignProtocolToAnimal
+      // call uses ON CONFLICT DO UPDATE — fully idempotent.
+      if (protocolId) {
+        try {
+          await VaccineProtocolService.assignProtocolToAnimal(
+            animalId,
+            protocolId,
+            createdBy || animalId
+          );
+        } catch (assignErr: any) {
+          logger.warn(`Protocol auto-assign failed for animal ${animalId}: ${assignErr.message}`);
+        }
+      }
       await logMedicalAudit(id, 'vaccination', 'CREATE', createdBy, createdByName, null, { vaccineName: data.vaccineName, animalId });
       return this.getVaccination(id);
     } catch (error) {

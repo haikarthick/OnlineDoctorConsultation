@@ -259,6 +259,10 @@ export const createVaccinationSchema = Joi.object({
   dosage: shortText(100).optional().allow('', null),
   reactionNotes: longText(2000).optional().allow('', null),
   certificateNumber: shortText(100).optional().allow('', null),
+  // Protocol linkage — when vet selects a protocol from the master list,
+  // this ID triggers auto-assignment in animal_vaccine_assignments so the
+  // vaccination shows on the Vaccination Passport page.
+  protocolId: uuid.optional(),
 });
 
 export const updateVaccinationSchema = createVaccinationSchema.fork(
