@@ -3525,7 +3525,9 @@
     "failedToCreate": "बुकिंग बनाने में विफल",
     "bookingWith": "के साथ बुकिंग",
     "generalVeterinarian": "सामान्य पशु चिकित्सक",
-    "perSession": "प्रति सत्र"
+    "perSession": "प्रति सत्र",
+    "findingNextDate": "अगली उपलब्ध तारीख खोजी जा रही है...",
+    "nextAvailableAutoSelected": "अगली उपलब्ध तारीख स्वचालित रूप से चुनी गई — जरूरत पड़ने पर बदलें"
   },
   "findDoctor": {
     "title": "पशु चिकित्सक खोजें",

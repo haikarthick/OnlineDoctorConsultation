@@ -3516,7 +3516,9 @@
     "failedToCreate": "Failed to create booking",
     "bookingWith": "முன்பதிவு",
     "generalVeterinarian": "பொது கால்நடை மருத்துவர்",
-    "perSession": "ஒரு அமர்வுக்கு"
+    "perSession": "ஒரு அமர்வுக்கு",
+    "findingNextDate": "அடுத்த கிடைக்கும் தேதியை தேடுகிறது...",
+    "nextAvailableAutoSelected": "அடுத்த கிடைக்கும் தேதி தானாக தேர்வு செய்யப்பட்டது — தேவையெனில் மாற்றலாம்"
   },
   "findDoctor": {
     "title": "கால்நடை மருத்துவரைக் கண்டறியுங்கள்",

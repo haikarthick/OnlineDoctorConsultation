@@ -44,6 +44,8 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [slotsLoading, setSlotsLoading] = useState(false)
+  const [dateSearching, setDateSearching] = useState(false)
+  const [autoSelectedDate, setAutoSelectedDate] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
@@ -252,6 +254,41 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       loadAvailability(selectedDate)
     }
   }, [selectedDate, selectedVet])
+
+  // Auto-find the next available date when the user arrives at Step 2 without a pre-filled date
+  useEffect(() => {
+    if (step !== 2 || !selectedVet || selectedDate) return
+    autoFindNextDate(selectedVet.userId)
+  }, [step, selectedVet])
+
+  const autoFindNextDate = async (vetId: string) => {
+    const today = new Date()
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    setDateSearching(true)
+    setAutoSelectedDate(false)
+    // Try current month then next month
+    for (let offset = 0; offset <= 1; offset++) {
+      const d = new Date(today.getFullYear(), today.getMonth() + offset, 1)
+      const year = d.getFullYear()
+      const month = d.getMonth() + 1
+      try {
+        const res = await apiService.getMonthlyAvailability(vetId, year, month)
+        const days: { date: string; status: string }[] = res.data?.summary || res.data || []
+        const next = days.find(
+          day => day.date >= todayStr && (day.status === 'available' || day.status === 'custom')
+        )
+        if (next) {
+          setSelectedDate(next.date)
+          setAutoSelectedDate(true)
+          setDateSearching(false)
+          return
+        }
+      } catch {
+        // ignore — let user pick manually
+      }
+    }
+    setDateSearching(false)
+  }
 
   const handleSubmitBooking = async () => {
     if (!selectedVet || !selectedSlot || !reasonForVisit) {
@@ -465,16 +502,31 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">{t('bookConsultation.selectDate')}</label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={selectedDate}
-                    min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()}
-                    onChange={(e) => {
-                      setSelectedDate(e.target.value)
-                      setSelectedSlot(null)
-                    }}
-                  />
+                  {dateSearching ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8 }}>
+                      <div className="loading-spinner" style={{ width: 16, height: 16, flexShrink: 0 }} />
+                      <span style={{ fontSize: 13, color: '#0369a1' }}>{t('bookConsultation.findingNextDate')}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="date"
+                        className="form-input"
+                        value={selectedDate}
+                        min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()}
+                        onChange={(e) => {
+                          setSelectedDate(e.target.value)
+                          setSelectedSlot(null)
+                          setAutoSelectedDate(false)
+                        }}
+                      />
+                      {autoSelectedDate && selectedDate && (
+                        <p style={{ margin: '6px 0 0', fontSize: 12, color: '#059669' }}>
+                          ✓ {t('bookConsultation.nextAvailableAutoSelected')}
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
                 <div className="form-group">
                   <label className="form-label">{t('bookConsultation.consultationType')}</label>

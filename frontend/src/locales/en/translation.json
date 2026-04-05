@@ -3558,7 +3558,9 @@
     "failedToCreate": "Failed to create booking",
     "bookingWith": "Booking with",
     "generalVeterinarian": "General Veterinarian",
-    "perSession": "per session"
+    "perSession": "per session",
+    "findingNextDate": "Finding next available date...",
+    "nextAvailableAutoSelected": "Next available date auto-selected — change if needed"
   },
   "findDoctor": {
     "title": "Find a Veterinarian",

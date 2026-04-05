@@ -3516,7 +3516,9 @@
     "failedToCreate": "Failed to create booking",
     "bookingWith": "ಜೊತೆ ಬುಕಿಂಗ್",
     "generalVeterinarian": "ಸಾಮಾನ್ಯ ಪಶುವೈದ್ಯ",
-    "perSession": "ಪ್ರತಿ ಅಧಿವೇಶನಕ್ಕೆ"
+    "perSession": "ಪ್ರತಿ ಅಧಿವೇಶನಕ್ಕೆ",
+    "findingNextDate": "ಮುಂದಿನ ಲಭ್ಯ ದಿನಾಂಕವನ್ನು ಹುಡುಕುತ್ತಿದೆ...",
+    "nextAvailableAutoSelected": "ಮುಂದಿನ ಲಭ್ಯ ದಿನಾಂಕ ಸ್ವಯಂಚಾಲ್ ಆಯ್ಕೆಯಾಗಿದೆ — ಬೇಕಾದರೆ ಬದಲಾಯಿಸಕ್ಕು"
   },
   "findDoctor": {
     "title": "ಪಶುವೈದ್ಯರನ್ನು ಹುಡುಕಿ",

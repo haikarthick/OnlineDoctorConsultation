@@ -3516,7 +3516,9 @@
     "failedToCreate": "Failed to create booking",
     "bookingWith": "తో బుకింగ్",
     "generalVeterinarian": "సాధారణ పశువైద్యుడు",
-    "perSession": "సెషన్‌కు"
+    "perSession": "సెషన్‌కు",
+    "findingNextDate": "తదుపరి అందుబాటు తేదీని వెతుకుతోంది...",
+    "nextAvailableAutoSelected": "తదుపరి అందుబాటు తేదీ స్వయంచాలాగా ఎంపిక చేయబడింది — అవసరమైతే మార్చుకోవచ్చు"
   },
   "findDoctor": {
     "title": "వెటర్నరీ వైద్యుడిని కనుగొనండి",
