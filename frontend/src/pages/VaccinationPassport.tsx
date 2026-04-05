@@ -224,6 +224,8 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
 
   // ── Print passport (in-app modal) ──────────────────────────
   const handlePrintPassport = async (animal: PassportAnimal) => {
+    // Guard: never generate a passport when no protocols exist
+    if (animal.protocols.length === 0) return
     setDownloadingAnimal(animal.animalId)
     try {
       const stamp = new Date().toISOString().slice(0, 10)
@@ -330,16 +332,30 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
             </div>
           </div>
           <div className="vp-card-actions">
-            <ComplianceMeter percent={animal.overallCompliancePercent} />
-            <button
-              className="module-btn primary small"
-              onClick={(e) => { e.stopPropagation(); handlePrintPassport(animal) }}
-              disabled={downloadingAnimal === animal.animalId}
-            >
-              {downloadingAnimal === animal.animalId
-                ? t('vaccinationPassport.downloading')
-                : t('vaccinationPassport.downloadPassport')}
-            </button>
+            {animal.protocols.length === 0 ? (
+              <span className="vp-compliance-na">{t('vaccinationPassport.complianceNA')}</span>
+            ) : (
+              <ComplianceMeter percent={animal.overallCompliancePercent} />
+            )}
+            {animal.protocols.length === 0 ? (
+              <div className="vp-no-protocols-action">
+                {(isAdmin || isVet) ? (
+                  <span className="vp-no-protocols-note">{t('vaccinationPassport.assignProtocolsFirst')}</span>
+                ) : (
+                  <span className="vp-no-protocols-note">{t('vaccinationPassport.contactVetForProtocols')}</span>
+                )}
+              </div>
+            ) : (
+              <button
+                className="module-btn primary small"
+                onClick={(e) => { e.stopPropagation(); handlePrintPassport(animal) }}
+                disabled={downloadingAnimal === animal.animalId}
+              >
+                {downloadingAnimal === animal.animalId
+                  ? t('vaccinationPassport.downloading')
+                  : t('vaccinationPassport.downloadPassport')}
+              </button>
+            )}
             <span className={`vp-expand-icon ${isExpanded ? 'expanded' : ''}`}>▼</span>
           </div>
         </div>
@@ -452,7 +468,11 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                   <td>{row.ownerName || '—'}</td>
                   <td>{row.totalProtocols}</td>
                   <td>
-                    <ComplianceMeter percent={row.compliancePercent} />
+                    {row.totalProtocols === 0 ? (
+                      <span className="vp-compliance-na">{t('vaccinationPassport.complianceNA')}</span>
+                    ) : (
+                      <ComplianceMeter percent={row.compliancePercent} />
+                    )}
                   </td>
                   <td>
                     {row.overdueDoses > 0 ? (
@@ -530,10 +550,12 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
     (s, a) => s + a.protocols.reduce((ps, p) => ps + (p.overdueCount ?? 0), 0),
     0
   )
+  // Only average animals that actually have protocols — avoids misleading 100% when no protocols assigned
+  const animalsWithProtocols = passports.filter(a => a.protocols.length > 0)
   const avgCompliance =
-    passports.length > 0
-      ? Math.round(passports.reduce((s, a) => s + a.overallCompliancePercent, 0) / passports.length)
-      : 0
+    animalsWithProtocols.length > 0
+      ? Math.round(animalsWithProtocols.reduce((s, a) => s + a.overallCompliancePercent, 0) / animalsWithProtocols.length)
+      : null
   const dueSoonCount = passports.reduce(
     (s, a) =>
       s +
@@ -580,7 +602,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
           </div>
           <div className="stat-card">
             <div className="stat-icon">📊</div>
-            <div className="stat-value">{avgCompliance}%</div>
+            <div className="stat-value">{avgCompliance !== null ? `${avgCompliance}%` : t('vaccinationPassport.complianceNA')}</div>
             <div className="stat-label">{t('vaccinationPassport.avgCompliance')}</div>
           </div>
           <div className="stat-card">
