@@ -5200,6 +5200,8 @@
     "next": "Next",
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
+    "failedToCreate": "ಪ್ರಮಾಣಪತ್ರ ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ",
+    "noCertTypeSelected": "ದಯವಿಟ್ಟು ಪ್ರಮಾಣಪತ್ರ ಪ್ರಕಾರ ಆಯ್ಕೆಮಾಡಿ",
     "certificateIssued": "Certificate issued successfully",
     "draftSaved": "Draft saved",
     "vaccinationDetails": "Vaccination Details",

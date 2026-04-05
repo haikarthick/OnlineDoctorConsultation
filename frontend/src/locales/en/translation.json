@@ -5312,6 +5312,8 @@
     "next": "Next",
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
+    "failedToCreate": "Failed to create certificate",
+    "noCertTypeSelected": "Please select a certificate type",
     "certificateIssued": "Certificate issued successfully",
     "draftSaved": "Draft saved",
     "vaccinationDetails": "Vaccination Details",

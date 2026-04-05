@@ -5245,6 +5245,8 @@
     "next": "Next",
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
+    "failedToCreate": "சான்றிதழை உருவாக்க முடியவில்லை",
+    "noCertTypeSelected": "சான்றிதழ் வகையை தேர்ந்தெடுக்கவும்",
     "certificateIssued": "Certificate issued successfully",
     "draftSaved": "Draft saved",
     "vaccinationDetails": "Vaccination Details",

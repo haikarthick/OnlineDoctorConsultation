@@ -173,7 +173,17 @@ class PostgresDatabase {
       `ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS certificate_types TEXT[] DEFAULT '{}'`
     ).catch(() => {});
 
-    // Ensure vet_certificates table exists (safety net)
+    // Ensure enterprise-related tables exist FIRST (vet_certificates has a FK to enterprises)
+    await this.pool.query(
+      `CREATE TABLE IF NOT EXISTS enterprises (
+         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+         name VARCHAR(255) NOT NULL,
+         enterprise_type VARCHAR(50),
+         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+       )`
+    ).catch(() => { /* table may already exist */ });
+
+    // Ensure vet_certificates table exists (safety net — must run AFTER enterprises is guaranteed)
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS vet_certificates (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -202,17 +212,9 @@ class PostgresDatabase {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `).catch(() => {});
-
-    // Ensure enterprise-related tables exist (safety net if enterpriseMigration fails)
-    await this.pool.query(
-      `CREATE TABLE IF NOT EXISTS enterprises (
-         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-         name VARCHAR(255) NOT NULL,
-         enterprise_type VARCHAR(50),
-         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-       )`
-    ).catch(() => { /* table may already exist */ });
+    `).catch((e: any) => {
+      logger.error('Failed to create vet_certificates safety-net table', { error: e.message });
+    });
     await this.pool.query(
       `CREATE TABLE IF NOT EXISTS animal_groups (
          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

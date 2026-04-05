@@ -219,7 +219,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
 
   // ── Save draft ──
   const handleSaveDraft = async () => {
-    if (!certType) { setError('Please select a certificate type'); return }
+    if (!certType) { setError(t('certificateWriter.noCertTypeSelected')); return }
     try {
       setSubmitting(true)
       setError('')
@@ -230,11 +230,12 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
         const res = await apiService.createCertificate(payload)
         const created = res.data?.certificate || res.data
         if (created?.id) setSavedId(created.id)
+        else throw new Error(t('certificateWriter.failedToCreate'))
       }
       setDraftSaved(true)
       setTimeout(() => setDraftSaved(false), 3000)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.response?.data?.message || t('certificateWriter.failedToSave'))
+      setError(err?.response?.data?.error || err?.response?.data?.message || err?.message || t('certificateWriter.failedToSave'))
     } finally {
       setSubmitting(false)
     }
@@ -242,6 +243,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
 
   // ── Issue certificate ──
   const handleIssue = async () => {
+    if (!certType) { setError(t('certificateWriter.noCertTypeSelected')); return }
     try {
       setSubmitting(true)
       setError('')
@@ -253,14 +255,13 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
         const res = await apiService.createCertificate(payload)
         const created = res.data?.certificate || res.data
         id = created?.id || ''
+        if (!id) throw new Error(t('certificateWriter.failedToCreate'))
         setSavedId(id)
       }
-      if (id) {
-        await apiService.issueCertificate(id)
-      }
+      await apiService.issueCertificate(id)
       setIssued(true)
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || err?.response?.data?.message || t('certificateWriter.failedToIssue'))
+      setError(err?.response?.data?.error || err?.response?.data?.message || err?.message || t('certificateWriter.failedToIssue'))
     } finally {
       setSubmitting(false)
     }

@@ -5257,6 +5257,8 @@
     "next": "आगे",
     "failedToSave": "प्रमाणपत्र सहेजने में विफल",
     "failedToIssue": "प्रमाणपत्र जारी करने में विफल",
+    "failedToCreate": "प्रमाणपत्र बनाने में विफल",
+    "noCertTypeSelected": "कृपया प्रमाणपत्र प्रकार चुनें",
     "certificateIssued": "प्रमाणपत्र सफलतापूर्वक जारी किया गया",
     "draftSaved": "प्रारूप सहेजा गया",
     "vaccinationDetails": "टीकाकरण विवरण",

@@ -5189,6 +5189,8 @@
     "next": "Next",
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
+    "failedToCreate": "ధృవపత్రాన్ని సృష్టించడంలో విఫలమైంది",
+    "noCertTypeSelected": "దయచేసి ధృవపత్రం రకాన్ని ఎంచుకోండి",
     "certificateIssued": "Certificate issued successfully",
     "draftSaved": "Draft saved",
     "vaccinationDetails": "Vaccination Details",
