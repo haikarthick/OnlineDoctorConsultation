@@ -1339,7 +1339,8 @@
       "prescribed": "Prescribed:",
       "validUntil": "Valid until:",
       "active": "active",
-      "expired": "expired"
+      "expired": "expired",
+      "addButton": "Write Prescription"
     },
     "vaccinationsTab": {
       "addButton": "+ Add Vaccination",
@@ -3828,7 +3829,16 @@
     "active": "Active",
     "inactive": "Inactive",
     "viewConsultation": "View Consultation",
-    "failedToLoad": "Failed to load prescriptions"
+    "failedToLoad": "Failed to load prescriptions",
+    "searchPlaceholder": "Search by medication, animal, patient, or diagnosis...",
+    "filterAll": "All Prescriptions",
+    "filterActive": "Active Only",
+    "filterInactive": "Inactive Only",
+    "noMatchingPrescriptions": "No matching prescriptions",
+    "confirmDeactivate": "Are you sure you want to deactivate this prescription?",
+    "deactivate": "Deactivate",
+    "failedToDeactivate": "Failed to deactivate prescription",
+    "showing": "Showing {{count}} of {{total}} prescriptions"
   },
   "prescriptionWriter": {
     "title": "Prescription Writer",
@@ -3862,7 +3872,15 @@
     "errorNameDosageFrequency": "Please fill in medication name, dosage, and frequency",
     "errorDiagnosisRequired": "Diagnosis is required",
     "errorMedicationRequired": "At least one medication is required",
-    "failedToCreate": "Failed to create prescription"
+    "failedToCreate": "Failed to create prescription",
+    "patientSelection": "Patient Selection",
+    "selectPatient": "Select Patient",
+    "loadingPatients": "Loading patients...",
+    "choosePatient": "-- Choose a patient --",
+    "selectAnimal": "Select Animal (Optional)",
+    "loadingAnimals": "Loading animals...",
+    "chooseAnimal": "-- Choose an animal --",
+    "errorPatientRequired": "Please select a patient before creating a standalone prescription"
   },
   "patientQueue": {
     "title": "Patient Queue",

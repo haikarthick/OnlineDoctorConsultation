@@ -1306,7 +1306,8 @@
       "prescribed": "निर्धारित:",
       "validUntil": "तक मान्य:",
       "active": "सक्रिय",
-      "expired": "समाप्त"
+      "expired": "समाप्त",
+      "addButton": "नुस्खा लिखें"
     },
     "vaccinationsTab": {
       "addButton": "+ टीकाकरण जोड़ें",
@@ -3779,7 +3780,16 @@
     "active": "सक्रिय",
     "inactive": "निष्क्रिय",
     "viewConsultation": "परामर्श देखें",
-    "failedToLoad": "नुस्खे लोड करने में विफल"
+    "failedToLoad": "नुस्खे लोड करने में विफल",
+    "searchPlaceholder": "दवा, जानवर, मरीज़ या निदान से खोजें...",
+    "filterAll": "सभी नुस्खे",
+    "filterActive": "केवल सक्रिय",
+    "filterInactive": "केवल निष्क्रिय",
+    "noMatchingPrescriptions": "कोई मेल खाता नुस्खा नहीं",
+    "confirmDeactivate": "क्या आप इस नुस्खे को निष्क्रिय करना चाहते हैं?",
+    "deactivate": "निष्क्रिय करें",
+    "failedToDeactivate": "नुस्खा निष्क्रिय करने में विफल",
+    "showing": "{{total}} में से {{count}} नुस्खे दिखाए जा रहे हैं"
   },
   "prescriptionWriter": {
     "title": "नुस्खा लेखक",
@@ -3813,7 +3823,15 @@
     "errorNameDosageFrequency": "कृपया दवा का नाम, खुराक और आवृत्ति भरें",
     "errorDiagnosisRequired": "निदान आवश्यक है",
     "errorMedicationRequired": "कम से कम एक दवा आवश्यक है",
-    "failedToCreate": "नुस्खा बनाने में विफल"
+    "failedToCreate": "नुस्खा बनाने में विफल",
+    "patientSelection": "मरीज़ चयन",
+    "selectPatient": "मरीज़ चुनें",
+    "loadingPatients": "मरीज़ लोड हो रहे हैं...",
+    "choosePatient": "-- मरीज़ चुनें --",
+    "selectAnimal": "जानवर चुनें (वैकल्पिक)",
+    "loadingAnimals": "जानवर लोड हो रहे हैं...",
+    "chooseAnimal": "-- जानवर चुनें --",
+    "errorPatientRequired": "स्वतंत्र नुस्खा बनाने से पहले कृपया एक मरीज़ चुनें"
   },
   "patientQueue": {
     "title": "मरीज़ कतार",

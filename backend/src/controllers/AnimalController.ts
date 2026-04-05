@@ -43,6 +43,14 @@ export class AnimalController {
     const isAdminOrVet = req.userRole === 'admin' || req.userRole === 'veterinarian';
     const limit = Math.min(parseInt(req.query.limit as string) || 20, isAdminOrVet ? 500 : 200);
     const offset = parseInt(req.query.offset as string) || 0;
+    const ownerId = req.query.ownerId as string;
+
+    // Vets/admins can request animals for a specific owner (for standalone prescription)
+    if (ownerId && isAdminOrVet) {
+      const result = await AnimalService.listAnimalsByOwner(ownerId, limit, offset);
+      res.json({ success: true, data: result });
+      return;
+    }
 
     let result;
     if (req.userRole === 'veterinarian') {

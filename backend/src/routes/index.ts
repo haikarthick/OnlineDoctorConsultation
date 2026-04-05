@@ -180,6 +180,19 @@ router.delete('/holidays/:id', authMiddleware, asyncHandler((req: Request, res: 
 
 // ─── Prescription routes ─────────────────────────────────────
 router.post('/prescriptions', authMiddleware, validateBody(createPrescriptionSchema), asyncHandler((req: Request, res: Response) => PrescriptionController.createPrescription(req, res)));
+router.get('/prescriptions/patients', authMiddleware, roleMiddleware(['admin', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  // Return pet_owner and farmer users for standalone prescription patient selector
+  const limit = Math.min(parseInt(req.query.limit as string) || 200, 500);
+  const search = req.query.search as string || '';
+  const params: any[] = [];
+  const conditions: string[] = ["role IN ('pet_owner', 'farmer')", 'is_active = true'];
+  if (search) { params.push(`%${search}%`); conditions.push(`(first_name ILIKE $${params.length} OR last_name ILIKE $${params.length} OR email ILIKE $${params.length})`); }
+  const { rows } = await database.query(
+    `SELECT id, first_name as "firstName", last_name as "lastName", email, role FROM users WHERE ${conditions.join(' AND ')} ORDER BY first_name, last_name LIMIT $${params.length + 1}`,
+    [...params, limit]
+  );
+  res.json({ success: true, data: { users: rows } });
+}));
 router.get('/prescriptions/me', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listMyPrescriptions(req, res)));
 router.get('/prescriptions/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listByAnimal(req, res)));
 router.get('/prescriptions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.getPrescription(req, res)));

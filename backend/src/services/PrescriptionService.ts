@@ -27,8 +27,9 @@ class PrescriptionService {
       }
     }
 
-    if (!petOwnerId) {
-      throw new NotFoundError('Pet owner could not be determined from consultation', data.consultationId);
+    // For standalone prescriptions (no consultation), petOwnerId must be supplied directly
+    if (!petOwnerId && !data.petOwnerId) {
+      throw new NotFoundError('petOwnerId is required for prescriptions not linked to a consultation', data.consultationId || 'standalone');
     }
 
     // Default validUntil to 30 days from now if not provided
@@ -98,15 +99,17 @@ class PrescriptionService {
   async listByConsultation(consultationId: string): Promise<Prescription[]> {
     const result = await database.query(
       `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
-       p.pet_owner_id as "petOwnerId", p.medications, p.instructions,
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(v.first_name || ' ' || v.last_name, 'Unknown') as "vetName",
        COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
+       a.name as "animalName",
        c.diagnosis
        FROM prescriptions p
        LEFT JOIN users v ON v.id = p.veterinarian_id
        LEFT JOIN users o ON o.id = p.pet_owner_id
+       LEFT JOIN animals a ON a.id = p.animal_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
        WHERE p.consultation_id = $1 ORDER BY p.created_at DESC`,
       [consultationId]
@@ -123,13 +126,15 @@ class PrescriptionService {
 
     const result = await database.query(
       `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
-       p.pet_owner_id as "petOwnerId", p.medications, p.instructions,
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "vetName",
+       a.name as "animalName",
        c.diagnosis
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.veterinarian_id
+       LEFT JOIN animals a ON a.id = p.animal_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
        WHERE p.pet_owner_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
       [petOwnerId, limit, offset]
@@ -146,13 +151,15 @@ class PrescriptionService {
 
     const result = await database.query(
       `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
-       p.pet_owner_id as "petOwnerId", p.medications, p.instructions,
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "petOwnerName",
+       a.name as "animalName",
        c.diagnosis
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.pet_owner_id
+       LEFT JOIN animals a ON a.id = p.animal_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
        WHERE p.veterinarian_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
       [veterinarianId, limit, offset]

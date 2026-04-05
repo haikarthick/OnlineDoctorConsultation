@@ -157,7 +157,7 @@ const medicationSchema = Joi.object({
 });
 
 export const createPrescriptionSchema = Joi.object({
-  consultationId: requiredUuid,
+  consultationId: uuid.optional().allow('', null),
   petOwnerId: uuid.optional(),
   animalId: uuid.optional(),
   medications: Joi.array().items(medicationSchema).min(1).required(),

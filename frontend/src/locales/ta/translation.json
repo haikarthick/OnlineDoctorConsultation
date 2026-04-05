@@ -1306,7 +1306,8 @@
       "prescribed": "பரிந்துரைக்கப்பட்டது:",
       "validUntil": "செல்லுபடியாகும் வரை:",
       "active": "செயலில்",
-      "expired": "காலாவதியானது"
+      "expired": "காலாவதியானது",
+      "addButton": "மருந்து சீட்டு எழுது"
     },
     "vaccinationsTab": {
       "addButton": "+ தடுப்பூசி சேர்",
@@ -3770,7 +3771,16 @@
     "active": "செயலில்",
     "inactive": "செயலற்றது",
     "viewConsultation": "ஆலோசனை காண்க",
-    "failedToLoad": "Failed to load prescriptions"
+    "failedToLoad": "Failed to load prescriptions",
+    "searchPlaceholder": "மருந்து, மிருகம், நோயாளி அல்லது நோயறிதலின் தேடு...",
+    "filterAll": "அனைத்து மருந்து சீட்டுகள்",
+    "filterActive": "செயலில் மட்டும்",
+    "filterInactive": "செயலற்றது மட்டும்",
+    "noMatchingPrescriptions": "பேரிணைக்கும் மருந்து சீட்டுகள் இல்லை",
+    "confirmDeactivate": "இந்த மருந்து சீட்டை செயலற்றதாக்க விரும்புகிறீர்களா?",
+    "deactivate": "செயலற்றதாக்கு",
+    "failedToDeactivate": "மருந்து சீட்டை செயலற்றதாக்க தோல்வி",
+    "showing": "{{total}} இல் இருந்து {{count}} மருந்து சீட்டுகள் காட்டப்படுகின்றன"
   },
   "prescriptionWriter": {
     "title": "மருந்து சீட்டு எழுதுபவர்",
@@ -3804,7 +3814,15 @@
     "errorNameDosageFrequency": "மருந்து பெயர், அளவு மற்றும் அதிர்வெண் நிரப்பவும்",
     "errorDiagnosisRequired": "நோய் கண்டறிதல் தேவை",
     "errorMedicationRequired": "குறைந்தது ஒரு மருந்து தேவை",
-    "failedToCreate": "Failed to create prescription"
+    "failedToCreate": "Failed to create prescription",
+    "patientSelection": "நோயாளி தேர்வு",
+    "selectPatient": "நோயாளியை தேர்வுசெய்",
+    "loadingPatients": "நோயாளிகள் ஏற்றப்படுகின்றன...",
+    "choosePatient": "-- நோயாளியை தேர்வுசெய் --",
+    "selectAnimal": "மிருகத்தை தேர்வுசெய் (ஐம்பிયமானது)",
+    "loadingAnimals": "மிருகங்கள் ஏற்றப்படுகின்றன...",
+    "chooseAnimal": "-- மிருகத்தை தேர்வுசெய் --",
+    "errorPatientRequired": "தனி மருந்து சீட்டை உருவாக்கும் முன் நோயாளியை தேர்வுசெய்யவும்"
   },
   "patientQueue": {
     "title": "நோயாளி வரிசை",

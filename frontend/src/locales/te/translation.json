@@ -1306,7 +1306,8 @@
       "prescribed": "సూచించబడింది:",
       "validUntil": "గడువు:",
       "active": "ప్రస్తుతం",
-      "expired": "గడువు ముగిసింది"
+      "expired": "గడువు ముగిసింది",
+      "addButton": "ప్రిస్క్రిప్షన్ రాయండి"
     },
     "vaccinationsTab": {
       "addButton": "+ టీకా జోడించు",
@@ -3770,7 +3771,16 @@
     "active": "యాక్టివ్",
     "inactive": "ఇన్‌యాక్టివ్",
     "viewConsultation": "సంప్రదింపు చూడండి",
-    "failedToLoad": "Failed to load prescriptions"
+    "failedToLoad": "Failed to load prescriptions",
+    "searchPlaceholder": "మందు, జంతువు, రోగి లేదా నిర్ణయం వ్యాఖ్యానం ద్వారా వెతకండి...",
+    "filterAll": "అన్ని ప్రిస్క్రిప్షన్లు",
+    "filterActive": "చురుగుగా ఉన్నవి మాత్రమే",
+    "filterInactive": "నిష్క్రియనవి మాత్రమే",
+    "noMatchingPrescriptions": "సరిపోయే ప్రిస్క్రిప్షన్లు లేవు",
+    "confirmDeactivate": "ఈ ప్రిస్క్రిప్షన్ను నిష్క్రియం చేయాలంటున్నారా?",
+    "deactivate": "నిష్క్రియం చేయి",
+    "failedToDeactivate": "ప్రిస్క్రిప్షన్ నిష్క్రియం చేయడం విఫలమైంది",
+    "showing": "{{total}} లో నుండి {{count}} ప్రిస్క్రిప్షన్లు చూపిస్తున్నారు"
   },
   "prescriptionWriter": {
     "title": "ప్రిస్క్రిప్షన్ రైటర్",

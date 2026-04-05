@@ -1306,7 +1306,8 @@
       "prescribed": "Prescribed:",
       "validUntil": "Valid until:",
       "active": "active",
-      "expired": "expired"
+      "expired": "expired",
+      "addButton": "ಔಷಧಿ ಚೀಟಿ ಬರೆಯಿರಿ"
     },
     "vaccinationsTab": {
       "addButton": "+ Add Vaccination",
@@ -3770,7 +3771,16 @@
     "active": "ಸಕ್ರಿಯ",
     "inactive": "ನಿಷ್ಕ್ರಿಯ",
     "viewConsultation": "ಸಮಾಲೋಚನೆ ವೀಕ್ಷಿಸಿ",
-    "failedToLoad": "Failed to load prescriptions"
+    "failedToLoad": "Failed to load prescriptions",
+    "searchPlaceholder": "ಔಷಧಿ, ಪ್ರಾಣಿ, ರೋಗಿ ಅಥವಾ ರೋಗನಿರ್ಣಯದಿಂದ ಹುಡುಕಿ...",
+    "filterAll": "ಸರ್ವ ಔಷಧಿ ಚೀಟಿಗಳು",
+    "filterActive": "ಸಕ್ರಿಯವದು ಮಾತ್ರ",
+    "filterInactive": "ನಿಷ್ಕ್ರಿಯವದು ಮಾತ್ರ",
+    "noMatchingPrescriptions": "ಹೊಂದಿಕೆಯಾಗುವ ಔಷಧಿ ಚೀಟಿಗಳಿಲ್ಲ",
+    "confirmDeactivate": "ಈ ಔಷಧಿ ಚೀಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ನಿಜವಾಗಿಯೂ ವಿರಾ?",
+    "deactivate": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
+    "failedToDeactivate": "ಔಷಧಿ ಚೀಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ವಿಫಲವಾಯಿತು",
+    "showing": "{{total}} ರಲ್ಲಿ {{count}} ಔಷಧಿ ಚೀಟಿಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ"
   },
   "prescriptionWriter": {
     "title": "ಔಷಧಿ ಚೀಟಿ ಬರೆಯುವವರು",
@@ -3804,7 +3814,15 @@
     "errorNameDosageFrequency": "ದಯವಿಟ್ಟು ಔಷಧಿ ಹೆಸರು, ಡೋಸ್ ಮತ್ತು ಆವರ್ತನ ಭರ್ತಿ ಮಾಡಿ",
     "errorDiagnosisRequired": "ರೋಗನಿರ್ಣಯ ಅಗತ್ಯ",
     "errorMedicationRequired": "ಕನಿಷ್ಠ ಒಂದು ಔಷಧಿ ಅಗತ್ಯ",
-    "failedToCreate": "Failed to create prescription"
+    "failedToCreate": "Failed to create prescription",
+    "patientSelection": "ರೋಗಿ ಆಯ್ಕೆ",
+    "selectPatient": "ರೋಗಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "loadingPatients": "ರೋಗಿಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ...",
+    "choosePatient": "-- ರೋಗಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ --",
+    "selectAnimal": "ಪ್ರಾಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಐಚ್ಛಿಕ)",
+    "loadingAnimals": "ಪ್ರಾಣಿಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ...",
+    "chooseAnimal": "-- ಪ್ರಾಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ --",
+    "errorPatientRequired": "ಸ್ವತಂತ್ರ ಔಷಧಿ ಚೀಟಿ ರಚಿಸುವ ಮುನ್ನ ರೋಗಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"
   },
   "patientQueue": {
     "title": "ರೋಗಿ ಸರತಿ",

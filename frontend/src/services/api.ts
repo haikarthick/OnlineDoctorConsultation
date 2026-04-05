@@ -345,7 +345,7 @@ class ApiService {
 
   // ─── Prescriptions ────────────────────────────────────────
   async createPrescription(data: {
-    consultationId: string; petOwnerId?: string; animalId?: string;
+    consultationId?: string; petOwnerId?: string; animalId?: string;
     medications: { name: string; dosage: string; frequency: string; duration: string; instructions?: string }[];
     instructions: string; validUntil?: string; diagnosis?: string; followUpDate?: string
   }) {
@@ -383,6 +383,11 @@ class ApiService {
     return response.data
   }
 
+  async listPatients(params?: { limit?: number; search?: string }) {
+    const response = await this.client.get('/prescriptions/patients', { params })
+    return response.data
+  }
+
   // ─── Animals ──────────────────────────────────────────────
   async createAnimal(data: { name: string; species: string; breed?: string; gender?: string; weight?: number; color?: string; medicalNotes?: string; dateOfBirth?: string; microchipId?: string; earTagId?: string; registrationNumber?: string; isNeutered?: boolean; insuranceProvider?: string; insurancePolicyNumber?: string; insuranceExpiry?: string }) {
     const response = await this.client.post('/animals', data)
@@ -394,7 +399,7 @@ class ApiService {
     return response.data
   }
 
-  async listAnimals(params?: { limit?: number; offset?: number; view?: string }) {
+  async listAnimals(params?: { limit?: number; offset?: number; view?: string; ownerId?: string }) {
     const response = await this.client.get('/animals', { params })
     return response.data
   }

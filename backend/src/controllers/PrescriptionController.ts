@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import PrescriptionService from '../services/PrescriptionService';
 import { ForbiddenError, ValidationError } from '../utils/errors';
+import database from '../utils/database';
 
 class PrescriptionController {
   async createPrescription(req: Request, res: Response) {
@@ -50,11 +51,27 @@ class PrescriptionController {
   }
 
   async listByAnimal(req: Request, res: Response) {
+    const authReq = req as AuthRequest;
     const { animalId } = req.params;
     const params = {
       limit: parseInt(req.query.limit as string) || 50,
       offset: parseInt(req.query.offset as string) || 0
     };
+
+    // Ownership guard: pet_owner and farmer may only view prescriptions for their own animals
+    if (authReq.userRole === 'pet_owner' || authReq.userRole === 'farmer') {
+      const animalResult = await database.query(
+        `SELECT owner_id FROM animals WHERE id = $1`,
+        [animalId]
+      );
+      if (animalResult.rows.length === 0) {
+        throw new ForbiddenError('Animal not found');
+      }
+      if (animalResult.rows[0].owner_id !== authReq.userId) {
+        throw new ForbiddenError('Not authorized to view prescriptions for this animal');
+      }
+    }
+
     const result = await PrescriptionService.listByAnimal(animalId, params);
     res.json({ success: true, data: result });
   }

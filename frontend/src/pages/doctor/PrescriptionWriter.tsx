@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import apiService from '../../services/api'
@@ -12,9 +12,10 @@ interface PrescriptionWriterProps {
 
 const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId, onNavigate }) => {
   const { t } = useTranslation()
-  void useAuth() // ensure auth context
+  const { user } = useAuth()
   const params = new URLSearchParams(window.location.search)
   const conId = consultationId || params.get('consultationId') || ''
+  const urlAnimalId = params.get('animalId') || ''
 
   // Pre-populate medications from query param (Common Prescriptions templates)
   const getInitialMeds = (): Medication[] => {
@@ -32,6 +33,53 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+
+  // Standalone patient/animal selection (when no consultationId)
+  const [patients, setPatients] = useState<{ id: string; name: string; role: string }[]>([])
+  const [animals, setAnimals] = useState<{ id: string; name: string; species: string }[]>([])
+  const [selectedPetOwnerId, setSelectedPetOwnerId] = useState('')
+  const [selectedAnimalId, setSelectedAnimalId] = useState(urlAnimalId)
+  const [loadingPatients, setLoadingPatients] = useState(false)
+  const [loadingAnimals, setLoadingAnimals] = useState(false)
+
+  const isVet = user?.role === 'veterinarian'
+  const isAdmin = user?.role === 'admin'
+  const isStandalone = !conId
+
+  // Load all animals directly when animalId is pre-selected
+  useEffect(() => {
+    if (!isStandalone || (!isVet && !isAdmin)) return
+    const loadPatients = async () => {
+      try {
+        setLoadingPatients(true)
+        const res = await apiService.listPatients({ limit: 200 })
+        const users = res.data?.users || (Array.isArray(res.data) ? res.data : [])
+        setPatients(users.map((u: any) => ({ id: u.id, name: `${u.firstName || u.first_name} ${u.lastName || u.last_name}`, role: u.role })))
+      } catch { setPatients([]) }
+      finally { setLoadingPatients(false) }
+    }
+    loadPatients()
+  }, [isStandalone, isVet, isAdmin])
+
+  // Load animals when a pet owner is selected, or when animalId is pre-selected
+  useEffect(() => {
+    if (!isStandalone) return
+    if (!selectedPetOwnerId && !urlAnimalId) { setAnimals([]); return }
+    const loadAnimals = async () => {
+      try {
+        setLoadingAnimals(true)
+        const queryParams: any = { limit: 100 }
+        if (selectedPetOwnerId) queryParams.ownerId = selectedPetOwnerId
+        const res = await apiService.listAnimals(queryParams)
+        const list = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
+        setAnimals(list.map((a: any) => ({ id: a.id, name: a.name, species: a.species })))
+        // Auto-select if only one animal for the owner
+        if (list.length === 1 && !selectedAnimalId) setSelectedAnimalId(list[0].id)
+      } catch { setAnimals([]) }
+      finally { setLoadingAnimals(false) }
+    }
+    loadAnimals()
+  }, [selectedPetOwnerId, urlAnimalId, isStandalone])
 
   // New med form
   const [newMed, setNewMed] = useState<Medication>({
@@ -56,13 +104,19 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
     e.preventDefault()
     setError('')
 
+    if (isStandalone && (isVet || isAdmin) && !selectedPetOwnerId) {
+      setError(t('prescriptionWriter.errorPatientRequired'))
+      return
+    }
     if (!diagnosis.trim()) { setError(t('prescriptionWriter.errorDiagnosisRequired')); return }
     if (medications.length === 0) { setError(t('prescriptionWriter.errorMedicationRequired')); return }
 
     try {
       setSubmitting(true)
       await apiService.createPrescription({
-        consultationId: conId,
+        consultationId: conId || undefined,
+        petOwnerId: selectedPetOwnerId || undefined,
+        animalId: selectedAnimalId || undefined,
         diagnosis,
         medications,
         instructions: instructions || '',
@@ -150,6 +204,52 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       )}
 
       <form onSubmit={handleSubmit}>
+        {/* Standalone patient/animal selector */}
+        {isStandalone && (isVet || isAdmin) && (
+          <div className="card" style={{ marginBottom: 24 }}>
+            <div className="card-header"><h2>👤 {t('prescriptionWriter.patientSelection')}</h2></div>
+            <div className="card-body">
+              <div className="module-form-row">
+                <div className="module-form-group">
+                  <label className="module-label">{t('prescriptionWriter.selectPatient')} *</label>
+                  {loadingPatients ? (
+                    <p style={{ fontSize: 14, color: '#6b7280' }}>{t('prescriptionWriter.loadingPatients')}</p>
+                  ) : (
+                    <select
+                      className="module-input"
+                      value={selectedPetOwnerId}
+                      onChange={e => { setSelectedPetOwnerId(e.target.value); setSelectedAnimalId(''); setAnimals([]) }}
+                    >
+                      <option value="">{t('prescriptionWriter.choosePatient')}</option>
+                      {patients.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('prescriptionWriter.selectAnimal')}</label>
+                  {loadingAnimals ? (
+                    <p style={{ fontSize: 14, color: '#6b7280' }}>{t('prescriptionWriter.loadingAnimals')}</p>
+                  ) : (
+                    <select
+                      className="module-input"
+                      value={selectedAnimalId}
+                      onChange={e => setSelectedAnimalId(e.target.value)}
+                      disabled={!selectedPetOwnerId && !urlAnimalId}
+                    >
+                      <option value="">{t('prescriptionWriter.chooseAnimal')}</option>
+                      {animals.map(a => (
+                        <option key={a.id} value={a.id}>{a.name} ({a.species})</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
           {/* Left: Diagnosis & Instructions */}
           <div>

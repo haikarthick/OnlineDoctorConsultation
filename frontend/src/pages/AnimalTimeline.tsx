@@ -790,7 +790,7 @@ const AnimalTimeline: React.FC = () => {
                 <button className="tl-drawer-action-primary" onClick={() => navigate('/consultations')}>🏥 {t('timeline.viewConsultation')}</button>
               )}
               {(drawerEvent.type === 'prescription' || drawerEvent.type === 'record_prescription') && (
-                <button className="tl-drawer-action" onClick={() => navigate('/prescriptions')}>💊 {t('timeline.viewPrescriptions')}</button>
+                <button className="tl-drawer-action" onClick={() => navigate(`/medical-records?animalId=${selectedAnimalId}&tab=prescriptions&recordId=${drawerEvent.id}`)}>💊 {t('timeline.viewPrescriptions')}</button>
               )}
               <div className="tl-drawer-nav">
                 <button className="tl-drawer-action"

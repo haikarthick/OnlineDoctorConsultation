@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
 import apiService from '../services/api'
@@ -32,6 +32,7 @@ const MedicalRecords: React.FC = () => {
   const { formatDate } = useSettings()
   const { user } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const isVet = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
   const isFarmer = user?.role === 'farmer'
@@ -531,6 +532,14 @@ const MedicalRecords: React.FC = () => {
         {/* ═══ PRESCRIPTIONS TAB ═════════════════════════════ */}
         {activeTab === 'prescriptions' && (
           <div>
+            {(isVet || isAdmin) && selectedAnimal && (
+              <div style={{ marginBottom: 12 }}>
+                <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
+                  onClick={() => navigate(`/doctor/prescriptions/new?animalId=${selectedAnimal}`)}>
+                  💊 {t('medicalRecords.prescriptionsTab.addButton')}
+                </button>
+              </div>
+            )}
             {prescriptions.length === 0 ? (
               <EmptyState icon="💊" title={t('medicalRecords.prescriptionsTab.emptyTitle')} subtitle={selectedAnimal ? t('medicalRecords.prescriptionsTab.emptySubtitle') : t('medicalRecords.prescriptionsTab.emptySubtitle')} />
             ) : (
