@@ -87,7 +87,7 @@ class PrescriptionService {
        COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.date_of_birth as "animalDob", a.gender as "animalGender",
-       c.diagnosis, c.reason_for_visit as "chiefComplaints",
+       c.diagnosis, c.symptom_description as "chiefComplaints",
        vp.license_number as "vetLicense",
        vp.specializations as "vetSpecializations",
        vp.qualifications as "vetQualifications",
@@ -216,6 +216,34 @@ class PrescriptionService {
       }),
       total: parseInt(countResult.rows[0]?.count || '0', 10),
     };
+  }
+
+  async listAll(params?: { limit?: number; offset?: number }): Promise<Prescription[]> {
+    const limit = params?.limit || 50;
+    const offset = params?.offset || 0;
+
+    const result = await database.query(
+      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
+       p.valid_until as "validUntil", p.is_active as "isActive",
+       p.created_at as "createdAt", p.updated_at as "updatedAt",
+       COALESCE(v.first_name || ' ' || v.last_name, 'Unknown') as "vetName",
+       COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
+       a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+       a.gender as "animalGender",
+       c.diagnosis
+       FROM prescriptions p
+       LEFT JOIN users v ON v.id = p.veterinarian_id
+       LEFT JOIN users o ON o.id = p.pet_owner_id
+       LEFT JOIN animals a ON a.id = p.animal_id
+       LEFT JOIN consultations c ON c.id = p.consultation_id
+       ORDER BY p.created_at DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+    return result.rows.map((row: any) => {
+      if (typeof row.medications === 'string') row.medications = JSON.parse(row.medications);
+      return row;
+    });
   }
 
   async deactivatePrescription(id: string): Promise<Prescription> {

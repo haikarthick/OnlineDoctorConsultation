@@ -44,6 +44,8 @@ class PrescriptionController {
     let prescriptions;
     if (authReq.userRole === 'veterinarian') {
       prescriptions = await PrescriptionService.listByVeterinarian(authReq.userId!, params);
+    } else if (authReq.userRole === 'admin') {
+      prescriptions = await PrescriptionService.listAll(params);
     } else {
       prescriptions = await PrescriptionService.listByPetOwner(authReq.userId!, params);
     }
