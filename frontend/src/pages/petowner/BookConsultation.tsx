@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import apiService from '../../services/api'
@@ -63,6 +63,9 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   // Track pre-filled context from URL for the info banner
   const [prefilledContext, setPrefilledContext] = useState<{ animalName?: string; groupName?: string; enterpriseName?: string } | null>(null)
 
+  // Stores the time param from URL so loadAvailability can auto-select the slot (one-shot)
+  const prefilledTimeRef = useRef<string | null>(null)
+
   // Pre-fill from URL params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -70,6 +73,10 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
     const animalId = params.get('animalId')
     const enterpriseId = params.get('enterpriseId')
     const groupId = params.get('groupId')
+    const date = params.get('date')
+    const time = params.get('time')
+    if (date) setSelectedDate(date)
+    if (time) prefilledTimeRef.current = time
     loadInitialData(vetId, animalId, enterpriseId, groupId)
   }, [])
 
@@ -219,7 +226,20 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
     try {
       setSlotsLoading(true)
       const result = await apiService.getVetAvailability(selectedVet.userId, date)
-      setAvailableSlots(result.data?.slots || [])
+      const slots: TimeSlot[] = result.data?.slots || []
+      setAvailableSlots(slots)
+
+      // Auto-select the slot that was clicked in FindDoctor (one-shot, clears after use)
+      if (prefilledTimeRef.current) {
+        const autoTime = prefilledTimeRef.current
+        prefilledTimeRef.current = null // clear so subsequent date changes don't re-auto-select
+        const futureSlots = filterFutureSlots(slots, date)
+        const match = futureSlots.find(s => s.startTime === autoTime)
+        if (match) {
+          setSelectedSlot(match)
+          setStep(3) // skip the "Choose Time" step — user already chose in FindDoctor
+        }
+      }
     } catch (err: any) {
       setAvailableSlots([])
     } finally {
@@ -353,6 +373,43 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       {error && (
         <div className="toast toast-error" style={{ position: 'relative', marginBottom: 16 }}>
           {error}
+        </div>
+      )}
+
+      {/* Persistent Doctor Info Panel — visible on steps 2, 3, 4 */}
+      {selectedVet && step > 1 && (
+        <div className="card" style={{ marginBottom: 24, background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+          <div className="card-body" style={{ display: 'flex', gap: 16, alignItems: 'center', padding: '14px 20px' }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: '50%', background: '#2563eb',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'white', fontSize: 22, fontWeight: 700, flexShrink: 0
+            }}>
+              {selectedVet.firstName?.charAt(0) || '🐾'}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: 16, color: '#1e40af' }}>
+                {t('bookConsultation.bookingWith')} Dr. {selectedVet.firstName} {selectedVet.lastName}
+              </div>
+              <div style={{ fontSize: 13, color: '#3b82f6', marginTop: 2 }}>
+                {(selectedVet.specializations || []).join(', ') || t('bookConsultation.generalVeterinarian')}
+              </div>
+              {selectedVet.clinicName && (
+                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>🏥 {selectedVet.clinicName}</div>
+              )}
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: 18, color: '#2563eb' }}>
+                {formatCurrency(selectedVet.consultationFee || 0)}
+              </div>
+              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('bookConsultation.perSession')}</div>
+              {(selectedVet.rating ?? 0) > 0 && (
+                <div style={{ fontSize: 12, color: '#f59e0b', marginTop: 2 }}>
+                  ⭐ {(selectedVet.rating ?? 0).toFixed(1)}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

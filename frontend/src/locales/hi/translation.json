@@ -3522,7 +3522,10 @@
     "confirmBooking": "✓ बुकिंग की पुष्टि करें",
     "fillRequired": "कृपया सभी आवश्यक फ़ील्ड भरें",
     "cannotBookPast": "पिछली तारीख में परामर्श बुक नहीं किया जा सकता। कृपया भविष्य की तारीख और समय चुनें।",
-    "failedToCreate": "बुकिंग बनाने में विफल"
+    "failedToCreate": "बुकिंग बनाने में विफल",
+    "bookingWith": "के साथ बुकिंग",
+    "generalVeterinarian": "सामान्य पशु चिकित्सक",
+    "perSession": "प्रति सत्र"
   },
   "findDoctor": {
     "title": "पशु चिकित्सक खोजें",

@@ -3513,7 +3513,10 @@
     "confirmBooking": "✓ முன்பதிவை உறுதிப்படுத்தவும்",
     "fillRequired": "அனைத்து தேவையான புலங்களையும் நிரப்பவும்",
     "cannotBookPast": "கடந்த காலத்தில் ஆலோசனையை முன்பதிவு செய்ய முடியாது. எதிர்கால தேதி மற்றும் நேரத்தைத் தேர்ந்தெடுக்கவும்.",
-    "failedToCreate": "Failed to create booking"
+    "failedToCreate": "Failed to create booking",
+    "bookingWith": "முன்பதிவு",
+    "generalVeterinarian": "பொது கால்நடை மருத்துவர்",
+    "perSession": "ஒரு அமர்வுக்கு"
   },
   "findDoctor": {
     "title": "கால்நடை மருத்துவரைக் கண்டறியுங்கள்",

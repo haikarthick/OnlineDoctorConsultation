@@ -3513,7 +3513,10 @@
     "confirmBooking": "✓ బుకింగ్ ధృవీకరించండి",
     "fillRequired": "అన్ని అవసరమైన ఫీల్డ్‌లను నింపండి",
     "cannotBookPast": "గతంలో సంప్రదింపు బుక్ చేయలేరు. దయచేసి భవిష్యత్ తేదీ మరియు సమయాన్ని ఎంచుకోండి.",
-    "failedToCreate": "Failed to create booking"
+    "failedToCreate": "Failed to create booking",
+    "bookingWith": "తో బుకింగ్",
+    "generalVeterinarian": "సాధారణ పశువైద్యుడు",
+    "perSession": "సెషన్‌కు"
   },
   "findDoctor": {
     "title": "వెటర్నరీ వైద్యుడిని కనుగొనండి",

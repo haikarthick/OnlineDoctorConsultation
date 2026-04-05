@@ -3555,7 +3555,10 @@
     "confirmBooking": "✓ Confirm Booking",
     "fillRequired": "Please fill in all required fields",
     "cannotBookPast": "Cannot book a consultation in the past. Please select a future date and time.",
-    "failedToCreate": "Failed to create booking"
+    "failedToCreate": "Failed to create booking",
+    "bookingWith": "Booking with",
+    "generalVeterinarian": "General Veterinarian",
+    "perSession": "per session"
   },
   "findDoctor": {
     "title": "Find a Veterinarian",

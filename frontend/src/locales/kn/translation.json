@@ -3513,7 +3513,10 @@
     "confirmBooking": "✓ ಬುಕಿಂಗ್ ದೃಢೀಕರಿಸಿ",
     "fillRequired": "ಎಲ್ಲಾ ಅಗತ್ಯ ಕ್ಷೇತ್ರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ",
     "cannotBookPast": "ಹಿಂದಿನ ಸಮಯಕ್ಕೆ ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಭವಿಷ್ಯದ ದಿನಾಂಕ ಮತ್ತು ಸಮಯವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.",
-    "failedToCreate": "Failed to create booking"
+    "failedToCreate": "Failed to create booking",
+    "bookingWith": "ಜೊತೆ ಬುಕಿಂಗ್",
+    "generalVeterinarian": "ಸಾಮಾನ್ಯ ಪಶುವೈದ್ಯ",
+    "perSession": "ಪ್ರತಿ ಅಧಿವೇಶನಕ್ಕೆ"
   },
   "findDoctor": {
     "title": "ಪಶುವೈದ್ಯರನ್ನು ಹುಡುಕಿ",
