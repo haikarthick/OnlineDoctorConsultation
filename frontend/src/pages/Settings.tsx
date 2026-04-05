@@ -18,6 +18,9 @@ const Settings: React.FC = () => {
   const [uploading, setUploading] = useState(false)
   const [dataSummary, setDataSummary] = useState<any>(null)
   const [dataLoading, setDataLoading] = useState(false)
+  const [selectedCertTypes, setSelectedCertTypes] = useState<string[]>([])
+  const [savingCertTypes, setSavingCertTypes] = useState(false)
+  const [certTypesSaved, setCertTypesSaved] = useState(false)
 
   // Basic profile
   const [formData, setFormData] = useState({
@@ -73,6 +76,7 @@ const Settings: React.FC = () => {
         acceptsEmergency: p.acceptsEmergency ?? false,
         profileImage: p.profileImage || '',
       })
+      setSelectedCertTypes(p.certificateTypes || [])
     } catch {
       // No vet profile yet
     }
@@ -135,6 +139,25 @@ const Settings: React.FC = () => {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleSaveCertTypes = async () => {
+    try {
+      setSavingCertTypes(true)
+      await apiService.updateVetProfile({ certificateTypes: selectedCertTypes })
+      setCertTypesSaved(true)
+      setTimeout(() => setCertTypesSaved(false), 3000)
+    } catch {
+      alert(t('settings.alerts.failedUpdateVetProfile'))
+    } finally {
+      setSavingCertTypes(false)
+    }
+  }
+
+  const toggleCertType = (type: string) => {
+    setSelectedCertTypes(prev =>
+      prev.includes(type) ? prev.filter(t_ => t_ !== type) : [...prev, type]
+    )
   }
 
   const showSaved = (section: string) => {
@@ -264,6 +287,39 @@ const Settings: React.FC = () => {
               </div>
 
               {/* Consultation & Rates */}
+              <div className="settings-section">
+                <h2>📜 {t('settings.certificateServices')}</h2>
+                <div className="settings-form">
+                  <p style={{ fontSize: 13, color: '#6b7280', margin: '0 0 14px' }}>
+                    {t('settings.certificateServicesDesc')}
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '10px 20px' }}>
+                    {[
+                      'health_certificate', 'fitness_to_travel', 'rabies_vaccination', 'vaccination_record',
+                      'pre_travel', 'sterilization', 'treatment', 'animal_injury', 'post_mortem',
+                      'breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation',
+                      'fitness_for_sale', 'animal_valuation',
+                    ].map(ct => (
+                      <label key={ct} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, padding: '6px 0' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedCertTypes.includes(ct)}
+                          onChange={() => toggleCertType(ct)}
+                        />
+                        <span>{t(`vetCertificates.certTypes.${ct}` as any)}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
+                    <button className="btn-primary" onClick={handleSaveCertTypes} disabled={savingCertTypes}>
+                      {savingCertTypes ? t('settings.saving') : t('settings.saveCertificateTypes')}
+                    </button>
+                    {certTypesSaved && <span style={{ color: '#16a34a', fontSize: 13 }}>✓ {t('settings.certificateTypesSaved')}</span>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Consultation &amp; Rates */}
               <div className="settings-section">
                 <h2>{t('settings.consultation.title')}</h2>
                 <div className="settings-form">

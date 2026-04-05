@@ -81,6 +81,9 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   // Vaccination
   vaccination_passport: ['/vaccination-passport'],
   admin_vaccine_protocols: ['/admin/vaccine-protocols'],
+  // Veterinary Certificates
+  vet_certificates: ['/vet-certificates', '/doctor/certificates/new'],
+  admin_certificates: ['/admin/certificate-settings'],
 }
 
 // Reverse map: route path → required permission
@@ -160,6 +163,10 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   // Vaccination
   'vaccination-passport': 'vaccination_passport',
   'admin-vaccine-protocols': 'admin_vaccine_protocols',
+  // Veterinary Certificates
+  'vet-certificates': 'vet_certificates',
+  'certificate-writer': 'vet_certificates',
+  'admin-certificate-settings': 'admin_certificates',
 }
 
 // ─── Context ────────────────────────────────────────────────

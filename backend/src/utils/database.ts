@@ -131,6 +131,17 @@ class PostgresDatabase {
       { key: 'prescription.registrationNumber', value: 'VET-REG-2024-001', category: 'prescription', description: 'Platform/clinic registration or license number' },
       { key: 'prescription.clinicLogo', value: '', category: 'prescription', description: 'Logo URL or base64 for prescription letterhead (leave blank to use default icon)' },
       { key: 'prescription.footerText', value: 'This prescription is digitally generated and valid until the date specified. Contact the prescribing veterinarian for queries.', category: 'prescription', description: 'Disclaimer text in prescription footer' },
+      // Certificate template defaults
+      { key: 'cert.clinicName', value: 'VetCare Platform', category: 'cert', description: 'Clinic / platform name shown on certificate letterhead' },
+      { key: 'cert.clinicAddress', value: '123 Veterinary Avenue, Chennai, Tamil Nadu 600001, India', category: 'cert', description: 'Full clinic address for certificate letterhead' },
+      { key: 'cert.clinicPhone', value: '+91 44 1234 5678', category: 'cert', description: 'Phone number printed on certificates' },
+      { key: 'cert.clinicEmail', value: 'care@vetcareplatform.com', category: 'cert', description: 'Email address printed on certificates' },
+      { key: 'cert.clinicWebsite', value: 'www.vetcareplatform.com', category: 'cert', description: 'Website URL printed on certificates' },
+      { key: 'cert.registrationNumber', value: 'VET-REG-2024-001', category: 'cert', description: 'Official registration / license number for certificates' },
+      { key: 'cert.clinicLogo', value: '', category: 'cert', description: 'Logo URL or base64 for certificate letterhead (leave blank to use default icon)' },
+      { key: 'cert.footerText', value: 'This certificate is officially issued by a licensed veterinarian and is valid as stated. For queries, contact the issuing veterinarian.', category: 'cert', description: 'Disclaimer text at the bottom of every certificate' },
+      { key: 'cert.signatureRequired', value: 'false', category: 'cert', description: 'If true, vets must upload a signature before a certificate can be issued' },
+      { key: 'cert.autoNumberPrefix', value: 'VC', category: 'cert', description: 'Prefix for auto-generated certificate numbers (e.g. VC → VC-2026-00001)' },
     ];
     for (const d of defaults) {
       await this.pool.query(
@@ -156,6 +167,42 @@ class PostgresDatabase {
     for (const ddl of bookingColumns) {
       await this.pool.query(ddl).catch(() => {});
     }
+
+    // Ensure vet_profiles columns added after initial table creation
+    await this.pool.query(
+      `ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS certificate_types TEXT[] DEFAULT '{}'`
+    ).catch(() => {});
+
+    // Ensure vet_certificates table exists (safety net)
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS vet_certificates (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        certificate_number VARCHAR(100) NOT NULL UNIQUE,
+        certificate_type VARCHAR(50) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'draft',
+        veterinarian_id UUID NOT NULL REFERENCES users(id),
+        pet_owner_id UUID REFERENCES users(id),
+        animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
+        consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+        booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
+        enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL,
+        examination_date DATE,
+        clinical_findings TEXT,
+        diagnosis TEXT,
+        treatment_summary TEXT,
+        recommendations TEXT,
+        vaccination_details JSONB,
+        travel_details JSONB,
+        breeding_details JSONB,
+        valuation_details JSONB,
+        issued_at TIMESTAMP,
+        valid_until DATE,
+        notes TEXT,
+        revocation_reason TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `).catch(() => {});
 
     // Ensure enterprise-related tables exist (safety net if enterpriseMigration fails)
     await this.pool.query(

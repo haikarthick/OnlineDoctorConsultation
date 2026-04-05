@@ -344,6 +344,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
           >
             📄 {t('systemSettings.prescriptionTemplate')}
           </button>
+          <button
+            className="btn btn-outline"
+            onClick={() => onNavigate('/admin/certificate-settings')}
+            style={{ borderColor: '#2d3748', color: '#2d3748' }}
+          >
+            📋 {t('systemSettings.certificateTemplate')}
+          </button>
           <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('systemSettings.dashboard')}</button>
         </div>
       </div>

@@ -388,6 +388,61 @@ class ApiService {
     return response.data
   }
 
+  // ─── Veterinary Certificates ──────────────────────────────
+  async createCertificate(data: {
+    certificateType: string; animalId?: string; petOwnerId?: string;
+    consultationId?: string; bookingId?: string; enterpriseId?: string;
+    examinationDate?: string; clinicalFindings?: string; diagnosis?: string;
+    treatmentSummary?: string; recommendations?: string;
+    vaccinationDetails?: object; travelDetails?: object;
+    breedingDetails?: object; valuationDetails?: object;
+    validUntil?: string; notes?: string;
+  }) {
+    const response = await this.client.post('/certificates', data)
+    return response.data
+  }
+
+  async getMyCertificates(params?: { limit?: number; offset?: number; type?: string; status?: string; animalId?: string; search?: string }) {
+    const response = await this.client.get('/certificates/me', { params })
+    return response.data
+  }
+
+  async getCertificate(id: string) {
+    const response = await this.client.get(`/certificates/${id}`)
+    return response.data
+  }
+
+  async getCertificatesByAnimal(animalId: string) {
+    const response = await this.client.get(`/certificates/animal/${animalId}`)
+    return response.data
+  }
+
+  async updateCertificate(id: string, data: {
+    examinationDate?: string; clinicalFindings?: string; diagnosis?: string;
+    treatmentSummary?: string; recommendations?: string;
+    vaccinationDetails?: object; travelDetails?: object;
+    breedingDetails?: object; valuationDetails?: object;
+    validUntil?: string; notes?: string; animalId?: string; petOwnerId?: string; consultationId?: string;
+  }) {
+    const response = await this.client.put(`/certificates/${id}`, data)
+    return response.data
+  }
+
+  async issueCertificate(id: string) {
+    const response = await this.client.put(`/certificates/${id}/issue`)
+    return response.data
+  }
+
+  async revokeCertificate(id: string, reason: string) {
+    const response = await this.client.put(`/certificates/${id}/revoke`, { reason })
+    return response.data
+  }
+
+  async deleteCertificate(id: string) {
+    const response = await this.client.delete(`/certificates/${id}`)
+    return response.data
+  }
+
   // ─── Animals ──────────────────────────────────────────────
   async createAnimal(data: { name: string; species: string; breed?: string; gender?: string; weight?: number; color?: string; medicalNotes?: string; dateOfBirth?: string; microchipId?: string; earTagId?: string; registrationNumber?: string; isNeutered?: boolean; insuranceProvider?: string; insurancePolicyNumber?: string; insuranceExpiry?: string }) {
     const response = await this.client.post('/animals', data)
@@ -670,6 +725,20 @@ class ApiService {
     for (const item of list) {
       if (item.key.startsWith('prescription.')) {
         const shortKey = item.key.replace('prescription.', '')
+        template[shortKey] = item.value
+      }
+    }
+    return template
+  }
+
+  async getCertificateTemplate(): Promise<Record<string, string>> {
+    // Fetches cert.* settings from the public settings endpoint (accessible to all users)
+    const response = await this.client.get('/settings/public')
+    const list: { key: string; value: string }[] = response.data?.data || []
+    const template: Record<string, string> = {}
+    for (const item of list) {
+      if (item.key.startsWith('cert.')) {
+        const shortKey = item.key.replace('cert.', '')
         template[shortKey] = item.value
       }
     }

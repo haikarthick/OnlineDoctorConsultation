@@ -320,6 +320,7 @@ export interface VetProfile {
   lastName?: string
   email?: string
   phone?: string
+  certificateTypes?: string[]
 }
 
 export interface VetSchedule {

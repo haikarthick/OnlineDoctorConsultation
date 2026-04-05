@@ -39,6 +39,7 @@ export class VetProfileController {
     if (req.query.search) filters.search = req.query.search;
     if (req.query.sortBy) filters.sortBy = req.query.sortBy;
     if (req.query.sortOrder) filters.sortOrder = req.query.sortOrder;
+    if (req.query.certificateType) filters.certificateType = req.query.certificateType;
     const result = await VetProfileService.listVets(limit, offset, filters);
     res.json({ success: true, data: result });
   }

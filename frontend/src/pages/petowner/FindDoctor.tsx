@@ -97,6 +97,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
   const [sortBy, setSortBy] = useState<SortOption>('rating')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [showFilters, setShowFilters] = useState(false)
+  const [certTypeFilter, setCertTypeFilter] = useState('')
 
   // Debounce search
   useEffect(() => {
@@ -156,6 +157,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
         if (availableOnly)   params.availableOnly    = 'true'
         if (minRating > 0)   params.minRating        = minRating
         if (maxFee !== '' && maxFee > 0) params.maxFee = maxFee
+        if (certTypeFilter) params.certificateType = certTypeFilter
 
         const result     = await apiService.listVets(params)
         const vetList    = result.data?.vets || result.data?.items || (Array.isArray(result.data) ? result.data : [])
@@ -168,7 +170,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
     } finally {
       setLoading(false)
     }
-  }, [selectedDate, timeOfDay, debouncedSearch, specialtyFilter, languageFilter, emergencyOnly, availableOnly, minRating, maxFee, sortBy])
+  }, [selectedDate, timeOfDay, debouncedSearch, specialtyFilter, languageFilter, emergencyOnly, availableOnly, minRating, maxFee, sortBy, certTypeFilter])
 
   // Populate filter dropdown options on mount
   useEffect(() => {
@@ -203,7 +205,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
 
   const activeFilterCount = [
     specialtyFilter, languageFilter, emergencyOnly, availableOnly,
-    minRating > 0, maxFee !== '' && (maxFee as number) > 0
+    minRating > 0, maxFee !== '' && (maxFee as number) > 0, certTypeFilter
   ].filter(Boolean).length
 
   const renderStars = (rating: number) => (
@@ -532,6 +534,14 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
             style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 13, minWidth: 160, background: 'white' }}>
             <option value="">{t('findDoctor.allSpecializations')}</option>
             {allSpecializations.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+
+          <select value={certTypeFilter} onChange={e => { setCertTypeFilter(e.target.value); setPage(0) }}
+            style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 13, minWidth: 180, background: 'white' }}>
+            <option value="">{t('findDoctor.allCertificates')}</option>
+            {['health_certificate','fitness_to_travel','rabies_vaccination','vaccination_record','pre_travel','sterilization','treatment','animal_injury','post_mortem','breeding_soundness','pregnancy_diagnosis','infertility_evaluation','fitness_for_sale','animal_valuation'].map(ct => (
+              <option key={ct} value={ct}>{t(`vetCertificates.certTypes.${ct}` as any)}</option>
+            ))}
           </select>
 
           <select value={languageFilter} onChange={e => setLanguageFilter(e.target.value)}

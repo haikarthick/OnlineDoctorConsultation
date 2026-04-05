@@ -96,3 +96,45 @@ test.describe('Auto-Discovered — /admin/prescription-settings', () => {
     await context.close()
   })
 })
+
+test.describe('Auto-Discovered - /vet-certificates', () => {
+  test('should load /vet-certificates without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'veterinarian')
+    await page.goto('/vet-certificates')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})
+
+test.describe('Auto-Discovered - /doctor/certificates/new', () => {
+  test('should load /doctor/certificates/new without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'veterinarian')
+    await page.goto('/doctor/certificates/new')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})
+
+test.describe('Auto-Discovered - /admin/certificate-settings', () => {
+  test('should load /admin/certificate-settings without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'admin')
+    await page.goto('/admin/certificate-settings')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})

@@ -143,6 +143,7 @@ export class VetProfileService {
       availableOnly?: boolean;
       sortBy?: string;
       sortOrder?: string;
+      certificateType?: string;
     }
   ): Promise<{ vets: VetProfile[]; total: number }> {
     try {
@@ -159,6 +160,7 @@ export class VetProfileService {
                vp.available_hours_end as "availableHoursEnd",
                vp.languages, vp.rating, vp.total_reviews as "totalReviews",
                vp.total_consultations as "totalConsultations",
+               COALESCE(vp.certificate_types, '{}') as "certificateTypes",
                u.first_name as "firstName", u.last_name as "lastName", u.email,
                vp.created_at as "createdAt", vp.updated_at as "updatedAt"
         FROM vet_profiles vp JOIN users u ON u.id = vp.user_id
@@ -235,6 +237,14 @@ export class VetProfileService {
         countParams.push(like);
       }
 
+      if (filters?.certificateType) {
+        idx++; cIdx++;
+        query += ` AND $${idx} = ANY(COALESCE(vp.certificate_types, '{}'))`;
+        countWhere += ` AND $${cIdx} = ANY(COALESCE(vp.certificate_types, '{}'))`;
+        params.push(filters.certificateType);
+        countParams.push(filters.certificateType);
+      }
+
       // Sorting
       const sortMap: Record<string, string> = {
         rating: 'vp.rating', fee_asc: 'vp.consultation_fee', fee_desc: 'vp.consultation_fee',
@@ -276,7 +286,7 @@ export class VetProfileService {
         isAvailable: 'is_available', acceptsEmergency: 'accepts_emergency',
         availableDays: 'available_days', availableHoursStart: 'available_hours_start',
         availableHoursEnd: 'available_hours_end', languages: 'languages',
-        profileImage: 'profile_image',
+        profileImage: 'profile_image', certificateTypes: 'certificate_types',
       };
 
       const entries = Object.entries(updates).filter(([_, v]) => v !== undefined);
@@ -301,6 +311,7 @@ export class VetProfileService {
                   available_days as "availableDays",
                   available_hours_start as "availableHoursStart",
                   available_hours_end as "availableHoursEnd",
+                  COALESCE(certificate_types, '{}') as "certificateTypes",
                   created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [userId, ...values]);

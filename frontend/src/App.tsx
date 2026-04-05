@@ -91,6 +91,9 @@ const StaffSettingsAdmin = lazy(() => import('./pages/admin/StaffSettings'))
 const AnimalTimeline = lazy(() => import('./pages/AnimalTimeline'))
 const VaccinationPassport = lazy(() => import('./pages/VaccinationPassport'))
 const VaccineProtocolAdmin = lazy(() => import('./pages/admin/VaccineProtocolAdmin'))
+const VetCertificates = lazy(() => import('./pages/VetCertificates'))
+const CertificateWriter = lazy(() => import('./pages/doctor/CertificateWriter'))
+const CertificateSettings = lazy(() => import('./pages/admin/CertificateSettings'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -199,6 +202,8 @@ function AppRoutes() {
       <Route path="/animals" element={<RoleRoute path="/animals"><AppLayout><Animals /></AppLayout></RoleRoute>} />
       <Route path="/animal-timeline" element={<RoleRoute path="/animal-timeline"><AppLayout><AnimalTimeline /></AppLayout></RoleRoute>} />
       <Route path="/vaccination-passport" element={<RoleRoute path="/vaccination-passport"><AppLayout><RoutedPage Component={VaccinationPassport} /></AppLayout></RoleRoute>} />
+      <Route path="/vet-certificates" element={<RoleRoute path="/vet-certificates"><AppLayout><RoutedPage Component={VetCertificates} /></AppLayout></RoleRoute>} />
+      <Route path="/doctor/certificates/new" element={<RoleRoute path="/doctor/certificates/new"><AppLayout><RoutedPage Component={CertificateWriter} /></AppLayout></RoleRoute>} />
       <Route path="/settings" element={<RoleRoute path="/settings"><AppLayout><Settings /></AppLayout></RoleRoute>} />
 
       {/* ── Pet Owner Module ── */}
@@ -277,6 +282,7 @@ function AppRoutes() {
       <Route path="/admin/staff-settings" element={<RoleRoute path="/admin/staff-settings"><AppLayout><RoutedPage Component={StaffSettingsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/holidays" element={<RoleRoute path="/admin/holidays"><AppLayout><RoutedPage Component={HolidayManagementAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/vaccine-protocols" element={<RoleRoute path="/admin/vaccine-protocols"><AppLayout><RoutedPage Component={VaccineProtocolAdmin} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/certificate-settings" element={<RoleRoute path="/admin/certificate-settings"><AppLayout><RoutedPage Component={CertificateSettings} /></AppLayout></RoleRoute>} />
 
       {/* ── Hospital Workflow Module ── */}
       <Route path="/hospital-workflow" element={<RoleRoute path="/hospital-workflow"><AppLayout><HospitalWorkflow /></AppLayout></RoleRoute>} />

@@ -39,6 +39,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
   const [bookingType, setBookingType] = useState<string>('video_call')
   const [reasonForVisit, setReasonForVisit] = useState('')
+  const [certPurpose, setCertPurpose] = useState('')
   const [symptoms, setSymptoms] = useState('')
   const [priority, setPriority] = useState('normal')
   const [notes, setNotes] = useState('')
@@ -774,6 +775,29 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                   </select>
                 </div>
               )}
+
+              <div className="form-group">
+                <label className="form-label">Certificate Purpose (optional)</label>
+                <select
+                  className="form-input"
+                  value={certPurpose}
+                  onChange={e => {
+                    const ct = e.target.value
+                    setCertPurpose(ct)
+                    if (ct) {
+                      const label = ct.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+                      setReasonForVisit(`Certificate: ${label}`)
+                    } else {
+                      setReasonForVisit('')
+                    }
+                  }}
+                >
+                  <option value="">Regular Consultation</option>
+                  {['health_certificate','fitness_to_travel','rabies_vaccination','vaccination_record','pre_travel','sterilization','treatment','animal_injury','post_mortem','breeding_soundness','pregnancy_diagnosis','infertility_evaluation','fitness_for_sale','animal_valuation'].map(ct => (
+                    <option key={ct} value={ct}>{ct.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>
+                  ))}
+                </select>
+              </div>
 
               <div className="form-group">
                 <label className="form-label">{t('bookConsultation.reasonForVisit')}</label>

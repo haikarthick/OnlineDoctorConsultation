@@ -24,6 +24,7 @@ export const PERMISSION_CATEGORIES = {
       'animal_timeline',
       'wallet',
       'vaccination_passport',
+      'vet_certificates',
     ]
   },
   admin_pages: {
@@ -43,6 +44,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_holidays',
       'admin_cancellation_dashboard',
       'admin_vaccine_protocols',
+      'admin_certificates',
     ]
   },
   actions: {
@@ -147,7 +149,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'prescriptions', 'reviews', 'video_consultation', 'settings',
     'animals', 'animal_timeline',
     // Pages
-    'vaccination_passport',
+    'vaccination_passport', 'vet_certificates',
     // Hospital
     'hospital_browse', 'hospital_create', 'hospital_manage',
     'hospital_departments', 'hospital_services', 'hospital_staff',
@@ -183,7 +185,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'hospital_browse',
     // (user-scoped)
     'ai_copilot', 'marketplace_access', 'wellness_portal',
-    'vaccination_passport',
+    'vaccination_passport', 'vet_certificates',
     // Wallet
     'wallet',
     // Actions
@@ -200,6 +202,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'animal_timeline',
     // Hospital (browse to find vets)
     'hospital_browse',
+    // Vet Certificates
+    'vet_certificates',
     // Enterprise
     'enterprise_manage', 'enterprise_groups', 'enterprise_locations',
     'enterprise_movements', 'enterprise_campaigns', 'enterprise_members', 'herd_medical',
@@ -248,7 +252,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'ai_copilot', 'digital_twin', 'marketplace_access',
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
     // Vaccine Protocols
-    'vaccination_passport', 'admin_vaccine_protocols',
+    'vaccination_passport', 'admin_vaccine_protocols', 'vet_certificates',
+    // Certificates admin
+    'admin_certificates',
     // Wallet & Cancellation
     'wallet', 'admin_cancellation_dashboard',
     // Holiday management

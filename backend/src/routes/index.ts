@@ -78,6 +78,7 @@ import BookingController from '../controllers/BookingController';
 import VideoSessionController from '../controllers/VideoSessionController';
 import ScheduleController from '../controllers/ScheduleController';
 import PrescriptionController from '../controllers/PrescriptionController';
+import CertificateController from '../controllers/CertificateController';
 import AdminController from '../controllers/AdminController';
 import EnterpriseController from '../controllers/EnterpriseController';
 import Tier2Controller from '../controllers/Tier2Controller';
@@ -198,6 +199,16 @@ router.get('/prescriptions/animal/:animalId', authMiddleware, asyncHandler((req:
 router.get('/prescriptions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.getPrescription(req, res)));
 router.get('/prescriptions/consultation/:consultationId', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listByConsultation(req, res)));
 router.put('/prescriptions/:id/deactivate', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.deactivatePrescription(req, res)));
+
+// ─── Veterinary Certificate routes ───────────────────────────
+router.post('/certificates', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.createCertificate(req, res)));
+router.get('/certificates/me', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.getMyCertificates(req, res)));
+router.get('/certificates/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.getCertificatesByAnimal(req, res)));
+router.get('/certificates/:id', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.getCertificate(req, res)));
+router.put('/certificates/:id/issue', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.issueCertificate(req, res)));
+router.put('/certificates/:id/revoke', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.revokeCertificate(req, res)));
+router.put('/certificates/:id', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.updateCertificate(req, res)));
+router.delete('/certificates/:id', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.deleteCertificate(req, res)));
 
 // ─── Animal / Pet routes ─────────────────────────────────────
 router.post('/animals', authMiddleware, validateBody(createAnimalSchema), asyncHandler((req: Request, res: Response) => AnimalController.createAnimal(req, res)));

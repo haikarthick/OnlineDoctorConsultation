@@ -1,0 +1,389 @@
+/* ============================================================
+   CertificatePrintView.css
+   A4-ready veterinary certificate with letterhead format
+   ============================================================ */
+
+/* ── Overlay / Modal shell ── */
+.cert-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 9990;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.cert-modal {
+  background: #fff;
+  width: 210mm;
+  max-width: 100%;
+  border-radius: 6px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  position: relative;
+  margin: auto;
+}
+
+/* ── Action toolbar (hidden when printing) ── */
+.cert-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #2d3748;
+  border-radius: 6px 6px 0 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cert-toolbar-title {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.cert-toolbar-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.cert-btn-print {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+.cert-btn-print:hover { background: #059669; }
+
+.cert-btn-close {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cert-btn-close:hover { background: rgba(255,255,255,0.25); }
+
+/* ── Certificate document body ── */
+.cert-document {
+  padding: 14mm 14mm 10mm;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 11pt;
+  color: #1a1a1a;
+  line-height: 1.45;
+  min-height: 257mm;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* ── Status watermark ── */
+.cert-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 72pt;
+  font-weight: 900;
+  letter-spacing: 6px;
+  pointer-events: none;
+  z-index: 1;
+  user-select: none;
+  opacity: 0.06;
+}
+.cert-watermark-draft   { color: #d97706; }
+.cert-watermark-revoked { color: #e53e3e; }
+.cert-watermark-expired { color: #718096; }
+
+/* ── HEADER: letterhead ── */
+.cert-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 2;
+}
+
+.cert-logo-wrap { flex-shrink: 0; }
+
+.cert-logo-img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.cert-logo-placeholder {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #2d3748, #4a5568);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #fff;
+}
+
+.cert-clinic-info { flex: 1; }
+
+.cert-clinic-name {
+  font-size: 20pt;
+  font-weight: 700;
+  color: #2d3748;
+  letter-spacing: -0.3px;
+  margin: 0 0 2px;
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cert-status-badge {
+  font-size: 9pt;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+.cert-status-badge.active   { background: #c6f6d5; color: #276749; }
+.cert-status-badge.draft    { background: #fef3c7; color: #92400e; }
+.cert-status-badge.revoked  { background: #fed7d7; color: #9b1c1c; }
+.cert-status-badge.expired  { background: #e2e8f0; color: #4a5568; }
+
+.cert-contact-line {
+  font-size: 9pt;
+  color: #4a5568;
+  margin: 3px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+.cert-contact-line span { display: inline-flex; align-items: center; gap: 3px; }
+
+.cert-reg-badge { margin-top: 4px; font-size: 8pt; color: #718096; }
+
+/* ── Dividers ── */
+.cert-divider-thick {
+  border: none;
+  border-top: 3px solid #2d3748;
+  margin: 8px 0 4px;
+  position: relative; z-index: 2;
+}
+.cert-divider-thin {
+  border: none;
+  border-top: 1px solid #cbd5e0;
+  margin: 6px 0;
+  position: relative; z-index: 2;
+}
+
+/* ── Certificate type label bar ── */
+.cert-label-bar {
+  background: #2d3748;
+  color: #fff;
+  text-align: center;
+  font-size: 11pt;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  padding: 5px 0;
+  margin: 4px 0 10px;
+  border-radius: 2px;
+  position: relative; z-index: 2;
+}
+
+/* ── Certificate number banner ── */
+.cert-number-bar {
+  text-align: center;
+  font-size: 9pt;
+  color: #4a5568;
+  margin: -6px 0 10px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  position: relative; z-index: 2;
+}
+.cert-number-value {
+  font-weight: 700;
+  font-size: 11pt;
+  color: #2d3748;
+  letter-spacing: 2px;
+}
+
+/* ── Info rows (2-col grid) ── */
+.cert-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 20px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  position: relative; z-index: 2;
+}
+
+.cert-info-row {
+  display: flex;
+  gap: 6px;
+  font-size: 10pt;
+  align-items: flex-start;
+}
+.cert-info-label {
+  color: #718096;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 9pt;
+  min-width: 80px;
+}
+.cert-info-value { color: #1a1a1a; }
+
+/* ── Content sections ── */
+.cert-section {
+  margin-bottom: 12px;
+  position: relative; z-index: 2;
+}
+.cert-section-header {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #2d3748;
+  border-bottom: 1.5px solid #2d3748;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.3px;
+}
+.cert-section-body {
+  font-size: 10.5pt;
+  color: #2d3748;
+  white-space: pre-wrap;
+  line-height: 1.55;
+  padding: 0 2px;
+}
+
+/* ── Vaccination table ── */
+.cert-vacc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+  margin-top: 4px;
+}
+.cert-vacc-table th {
+  background: #2d3748;
+  color: #fff;
+  font-weight: 600;
+  padding: 5px 8px;
+  text-align: left;
+  font-size: 9pt;
+}
+.cert-vacc-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+.cert-vacc-table tr:nth-child(even) td { background: #f7fafc; }
+
+/* ── Key-value pairs for travel / breeding ── */
+.cert-kv-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 5px 12px;
+  font-size: 10pt;
+  padding: 0 2px;
+}
+.cert-kv-key { color: #718096; font-weight: 600; font-size: 9.5pt; }
+.cert-kv-val { color: #1a1a1a; }
+
+/* ── Footer row: validity + signature ── */
+.cert-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1.5px solid #2d3748;
+  gap: 20px;
+  position: relative; z-index: 2;
+}
+
+.cert-validity-block { flex: 1; }
+.cert-validity-label { font-size: 9pt; color: #718096; margin: 0; }
+.cert-validity-date  { font-size: 12pt; font-weight: 700; color: #2d3748; margin: 2px 0 0; }
+
+.cert-signature-block { text-align: right; }
+.cert-signature-line {
+  border-top: 1.5px solid #2d3748;
+  width: 160px;
+  margin: 0 0 4px auto;
+}
+.cert-signature-name { font-size: 10pt; font-weight: 700; margin: 0; }
+.cert-signature-sub  { font-size: 8.5pt; color: #718096; margin: 1px 0 0; }
+
+/* ── Document footer disclaimer ── */
+.cert-doc-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  position: relative; z-index: 2;
+}
+.cert-footer-disclaimer {
+  font-size: 8pt;
+  color: #718096;
+  margin: 0;
+  flex: 1;
+  font-style: italic;
+}
+.cert-footer-cert-id {
+  font-size: 7.5pt;
+  color: #a0aec0;
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* ── Print media ── */
+@media print {
+  .cert-toolbar { display: none !important; }
+  .cert-overlay {
+    position: static;
+    background: none;
+    padding: 0;
+    overflow: visible;
+  }
+  .cert-modal {
+    box-shadow: none;
+    border-radius: 0;
+    width: 100%;
+  }
+  .cert-document { padding: 10mm 14mm 10mm; min-height: auto; }
+  .cert-watermark { opacity: 0.1; }
+}
+
+/* ── Mobile adjustments ── */
+@media (max-width: 768px) {
+  .cert-modal { width: 100%; border-radius: 0; }
+  .cert-info-grid { grid-template-columns: 1fr; }
+  .cert-footer-row { flex-direction: column; align-items: flex-start; }
+  .cert-signature-block { text-align: left; }
+  .cert-signature-line { margin: 0 0 4px; }
+  .cert-doc-footer { flex-direction: column; }
+}
