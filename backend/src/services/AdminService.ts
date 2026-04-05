@@ -251,10 +251,10 @@ class AdminService {
 
   // System settings
   async getPublicSettings(): Promise<SystemSetting[]> {
-    // Return display.* and consultation.* settings — safe for unauthenticated access
+    // Return display.*, consultation.*, booking.*, cancellation.*, payment.*, prescription.* settings — safe for all authenticated users
     const result = await database.query(
       `SELECT key, value, description FROM system_settings
-       WHERE key LIKE 'display.%' OR key LIKE 'consultation.%' OR key LIKE 'booking.%' OR key LIKE 'cancellation.%' OR key LIKE 'payment.%' ORDER BY key`,
+       WHERE key LIKE 'display.%' OR key LIKE 'consultation.%' OR key LIKE 'booking.%' OR key LIKE 'cancellation.%' OR key LIKE 'payment.%' OR key LIKE 'prescription.%' ORDER BY key`,
       []
     );
     return result.rows;

@@ -662,6 +662,20 @@ class ApiService {
     return response.data
   }
 
+  async getPrescriptionTemplate(): Promise<Record<string, string>> {
+    // Fetches prescription.* settings from the public settings endpoint (accessible to all users)
+    const response = await this.client.get('/settings/public')
+    const list: { key: string; value: string }[] = response.data?.data || []
+    const template: Record<string, string> = {}
+    for (const item of list) {
+      if (item.key.startsWith('prescription.')) {
+        const shortKey = item.key.replace('prescription.', '')
+        template[shortKey] = item.value
+      }
+    }
+    return template
+  }
+
   async adminUpdateSetting(key: string, value: string) {
     const response = await this.client.put('/admin/settings', { key, value })
     return response.data

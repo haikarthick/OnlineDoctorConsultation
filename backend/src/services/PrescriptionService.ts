@@ -79,11 +79,27 @@ class PrescriptionService {
 
   async getPrescription(id: string): Promise<Prescription> {
     const result = await database.query(
-      `SELECT id, consultation_id as "consultationId", veterinarian_id as "veterinarianId",
-       pet_owner_id as "petOwnerId", animal_id as "animalId", medications, instructions,
-       valid_until as "validUntil", is_active as "isActive",
-       created_at as "createdAt", updated_at as "updatedAt"
-       FROM prescriptions WHERE id = $1`,
+      `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
+       p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
+       p.valid_until as "validUntil", p.is_active as "isActive",
+       p.created_at as "createdAt", p.updated_at as "updatedAt",
+       COALESCE(v.first_name || ' ' || v.last_name, 'Unknown') as "vetName",
+       COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
+       a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+       a.date_of_birth as "animalDob", a.gender as "animalGender",
+       c.diagnosis, c.reason_for_visit as "chiefComplaints",
+       vp.license_number as "vetLicense",
+       vp.specializations as "vetSpecializations",
+       vp.qualifications as "vetQualifications",
+       vp.clinic_name as "vetClinicName",
+       vp.clinic_address as "vetClinicAddress"
+       FROM prescriptions p
+       LEFT JOIN users v ON v.id = p.veterinarian_id
+       LEFT JOIN users o ON o.id = p.pet_owner_id
+       LEFT JOIN animals a ON a.id = p.animal_id
+       LEFT JOIN consultations c ON c.id = p.consultation_id
+       LEFT JOIN vet_profiles vp ON vp.user_id = p.veterinarian_id
+       WHERE p.id = $1`,
       [id]
     );
 
@@ -130,7 +146,8 @@ class PrescriptionService {
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "vetName",
-       a.name as "animalName",
+       a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+       a.gender as "animalGender",
        c.diagnosis
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.veterinarian_id
@@ -155,7 +172,8 @@ class PrescriptionService {
        p.valid_until as "validUntil", p.is_active as "isActive",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "petOwnerName",
-       a.name as "animalName",
+       a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+       a.gender as "animalGender",
        c.diagnosis
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.pet_owner_id

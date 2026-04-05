@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
+import PrescriptionPrintView, { PrescriptionPrintData, PrescriptionTemplate } from '../../components/PrescriptionPrintView'
 import '../../styles/modules.css'
 
 interface PrescriptionsProps {
@@ -15,7 +16,10 @@ interface PrescriptionItem {
   petOwnerId?: string
   animalId?: string
   animalName?: string
-  medications: { name: string; dosage: string; frequency: string; duration: string; instructions?: string }[]
+  animalSpecies?: string
+  animalBreed?: string
+  animalGender?: string
+  medications: { name: string; dosage: string; frequency: string; duration: string; route?: string; instructions?: string }[]
   instructions?: string
   validUntil?: string
   isActive: boolean
@@ -36,6 +40,10 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
   const [deactivating, setDeactivating] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
+  // Print view state
+  const [printData, setPrintData] = useState<PrescriptionPrintData | null>(null)
+  const [printTemplate, setPrintTemplate] = useState<PrescriptionTemplate | null>(null)
+  const [loadingPrint, setLoadingPrint] = useState<string | null>(null)
 
   const isVet = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
@@ -86,8 +94,84 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
     }
   }
 
+  const handlePrint = async (rx: PrescriptionItem) => {
+    try {
+      setLoadingPrint(rx.id)
+      // Fetch full prescription details (with vet profile) + template in parallel
+      const [fullRx, tpl] = await Promise.all([
+        apiService.getPrescription(rx.id),
+        apiService.getPrescriptionTemplate(),
+      ])
+      const rxData = fullRx?.data || fullRx
+      const animalDob: string | undefined = rxData?.animalDob
+      let animalAge: string | undefined
+      if (animalDob) {
+        const dob = new Date(animalDob)
+        const ageDays = Math.floor((Date.now() - dob.getTime()) / 86400000)
+        if (ageDays < 30) animalAge = `${ageDays}d`
+        else if (ageDays < 365) animalAge = `${Math.floor(ageDays / 30)}mo`
+        else animalAge = `${Math.floor(ageDays / 365)}yr`
+      }
+      const printPayload: PrescriptionPrintData = {
+        id: rxData?.id || rx.id,
+        consultationId: rxData?.consultationId || rx.consultationId,
+        isActive: rxData?.isActive ?? rx.isActive,
+        createdAt: rxData?.createdAt || rx.createdAt,
+        validUntil: rxData?.validUntil || rx.validUntil,
+        animalName: rxData?.animalName || rx.animalName,
+        animalSpecies: rxData?.animalSpecies || rx.animalSpecies,
+        animalBreed: rxData?.animalBreed || rx.animalBreed,
+        animalAge,
+        animalGender: rxData?.animalGender || rx.animalGender,
+        petOwnerName: rxData?.petOwnerName || rx.petOwnerName,
+        vetName: rxData?.vetName || rx.vetName,
+        vetLicense: rxData?.vetLicense,
+        vetSpecialization: Array.isArray(rxData?.vetSpecializations) ? rxData.vetSpecializations[0] : rxData?.vetSpecializations,
+        vetQualifications: Array.isArray(rxData?.vetQualifications) ? rxData.vetQualifications.join(', ') : rxData?.vetQualifications,
+        vetClinicName: rxData?.vetClinicName,
+        diagnosis: rxData?.diagnosis || rx.diagnosis,
+        chiefComplaints: rxData?.chiefComplaints,
+        instructions: rxData?.instructions || rx.instructions,
+        medications: (rxData?.medications || rx.medications).map((m: any) => ({
+          name: m.name,
+          dosage: m.dosage,
+          frequency: m.frequency,
+          duration: m.duration,
+          route: m.route,
+          instructions: m.instructions,
+        })),
+      }
+      const template: PrescriptionTemplate = {
+        clinicName: tpl.clinicName || 'VetCare Platform',
+        clinicTagline: tpl.clinicTagline || '',
+        clinicAddress: tpl.clinicAddress || '',
+        clinicPhone: tpl.clinicPhone || '',
+        clinicEmail: tpl.clinicEmail || '',
+        clinicWebsite: tpl.clinicWebsite || '',
+        registrationNumber: tpl.registrationNumber || '',
+        clinicLogo: tpl.clinicLogo || '',
+        footerText: tpl.footerText || '',
+      }
+      setPrintTemplate(template)
+      setPrintData(printPayload)
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message || t('prescriptions.failedToPrint'))
+    } finally {
+      setLoadingPrint(null)
+    }
+  }
+
   return (
     <div className="module-page">
+      {/* Print view modal */}
+      {printData && printTemplate && (
+        <PrescriptionPrintView
+          prescription={printData}
+          template={printTemplate}
+          onClose={() => { setPrintData(null); setPrintTemplate(null) }}
+        />
+      )}
+
       <div className="module-header">
         <div>
           <h1>💊 {t('prescriptions.title')}</h1>
@@ -157,7 +241,10 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                     </h3>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginTop: 4 }}>
                       {rx.animalName && (
-                        <span style={{ fontSize: 13, color: '#059669', fontWeight: 600 }}>🐾 {rx.animalName}</span>
+                        <span style={{ fontSize: 13, color: '#059669', fontWeight: 600 }}>
+                          🐾 {rx.animalName}
+                          {rx.animalSpecies && ` (${rx.animalSpecies}${rx.animalBreed ? ', ' + rx.animalBreed : ''})`}
+                        </span>
                       )}
                       {isVet || isAdmin ? (
                         rx.petOwnerName && <span style={{ fontSize: 13, color: '#6b7280' }}>👤 {rx.petOwnerName}</span>
@@ -181,6 +268,15 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                     }}>
                       {rx.isActive ? t('prescriptions.active') : t('prescriptions.inactive')}
                     </span>
+                    <button
+                      className="btn btn-outline"
+                      style={{ fontSize: 12, padding: '4px 10px', color: '#2b6cb0', borderColor: '#2b6cb0' }}
+                      disabled={loadingPrint === rx.id}
+                      onClick={() => handlePrint(rx)}
+                      title={t('prescriptions.printPrescription')}
+                    >
+                      {loadingPrint === rx.id ? '...' : `🖨 ${t('prescriptions.print')}`}
+                    </button>
                     {rx.consultationId && (
                       <button className="btn btn-outline" style={{ fontSize: 12, padding: '4px 10px' }}
                         onClick={() => onNavigate(isVet || isAdmin ? `/doctor/consultation-room/${rx.consultationId}` : `/video-consultation/${rx.consultationId}`)}>

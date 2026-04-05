@@ -121,6 +121,16 @@ class PostgresDatabase {
       { key: 'consultation.joinWindowMinutes', value: '5', category: 'consultation', description: 'Minutes before scheduled time when Join/Start button becomes available' },
       { key: 'booking.maxReschedules', value: '1', category: 'booking', description: 'Maximum times a user can reschedule before doctor acceptance (0 = unlimited)' },
       { key: 'payment.currency', value: 'INR', category: 'payment', description: 'Platform currency code (e.g. USD, INR, EUR, GBP)' },
+      // Prescription template defaults
+      { key: 'prescription.clinicName', value: 'VetCare Platform', category: 'prescription', description: 'Clinic / platform name shown on prescription letterhead' },
+      { key: 'prescription.clinicTagline', value: 'Compassionate Care for Your Animals', category: 'prescription', description: 'Tagline shown below clinic name on prescriptions' },
+      { key: 'prescription.clinicAddress', value: '123 Veterinary Avenue, Chennai, Tamil Nadu 600001, India', category: 'prescription', description: 'Full clinic address for prescription footer' },
+      { key: 'prescription.clinicPhone', value: '+91 44 1234 5678', category: 'prescription', description: 'Phone number printed on prescriptions' },
+      { key: 'prescription.clinicEmail', value: 'care@vetcareplatform.com', category: 'prescription', description: 'Email address printed on prescriptions' },
+      { key: 'prescription.clinicWebsite', value: 'www.vetcareplatform.com', category: 'prescription', description: 'Website URL printed on prescriptions' },
+      { key: 'prescription.registrationNumber', value: 'VET-REG-2024-001', category: 'prescription', description: 'Platform/clinic registration or license number' },
+      { key: 'prescription.clinicLogo', value: '', category: 'prescription', description: 'Logo URL or base64 for prescription letterhead (leave blank to use default icon)' },
+      { key: 'prescription.footerText', value: 'This prescription is digitally generated and valid until the date specified. Contact the prescribing veterinarian for queries.', category: 'prescription', description: 'Disclaimer text in prescription footer' },
     ];
     for (const d of defaults) {
       await this.pool.query(

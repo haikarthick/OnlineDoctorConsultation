@@ -337,6 +337,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
         </div>
         <div className="page-header-actions" style={{ flexWrap: 'wrap', gap: 8 }}>
           <button className="btn btn-primary" onClick={() => setShowAdd(true)}>+ {t('systemSettings.addSetting')}</button>
+          <button
+            className="btn btn-outline"
+            onClick={() => onNavigate('/admin/prescription-settings')}
+            style={{ borderColor: '#2b6cb0', color: '#2b6cb0' }}
+          >
+            📄 {t('systemSettings.prescriptionTemplate')}
+          </button>
           <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('systemSettings.dashboard')}</button>
         </div>
       </div>

@@ -41,6 +41,7 @@ const ConsultationManagement = lazy(() => import('./pages/admin/ConsultationMana
 const PaymentManagement = lazy(() => import('./pages/admin/PaymentManagement'))
 const ReviewModeration = lazy(() => import('./pages/admin/ReviewModeration'))
 const SystemSettings = lazy(() => import('./pages/admin/SystemSettings'))
+const PrescriptionSettings = lazy(() => import('./pages/admin/PrescriptionSettings'))
 const AuditLogs = lazy(() => import('./pages/admin/AuditLogs'))
 const PermissionManagement = lazy(() => import('./pages/admin/PermissionManagement'))
 const MedicalRecordManagement = lazy(() => import('./pages/admin/MedicalRecordManagement'))
@@ -267,6 +268,7 @@ function AppRoutes() {
       <Route path="/admin/payments" element={<RoleRoute path="/admin/payments"><AppLayout><RoutedPage Component={PaymentManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/reviews" element={<RoleRoute path="/admin/reviews"><AppLayout><RoutedPage Component={ReviewModeration} /></AppLayout></RoleRoute>} />
       <Route path="/admin/settings" element={<RoleRoute path="/admin/settings"><AppLayout><RoutedPage Component={SystemSettings} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/prescription-settings" element={<RoleRoute path="/admin/prescription-settings"><AppLayout><RoutedPage Component={PrescriptionSettings} /></AppLayout></RoleRoute>} />
       <Route path="/admin/audit-logs" element={<RoleRoute path="/admin/audit-logs"><AppLayout><RoutedPage Component={AuditLogs} /></AppLayout></RoleRoute>} />
       <Route path="/admin/permissions" element={<RoleRoute path="/admin/permissions"><AppLayout><RoutedPage Component={PermissionManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/medical-records" element={<RoleRoute path="/admin/medical-records"><AppLayout><RoutedPage Component={MedicalRecordManagement} /></AppLayout></RoleRoute>} />

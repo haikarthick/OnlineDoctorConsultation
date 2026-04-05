@@ -162,6 +162,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-settings', label: t('nav.systemSettings'), icon: '⚙️', path: '/admin/settings',
       roles: ['admin'], section: 'Administration' },
+    { id: 'admin-prescription-settings', label: t('nav.prescriptionSettings'), icon: '📄', path: '/admin/prescription-settings',
+      roles: ['admin'], section: 'Administration' },
     { id: 'admin-permissions', label: t('nav.permissions'), icon: '🔐', path: '/admin/permissions',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-medical-records', label: t('nav.medicalRecords'), icon: '📋', path: '/admin/medical-records',
