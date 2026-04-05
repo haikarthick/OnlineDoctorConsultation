@@ -3560,7 +3560,8 @@
     "generalVeterinarian": "General Veterinarian",
     "perSession": "per session",
     "findingNextDate": "Finding next available date...",
-    "nextAvailableAutoSelected": "Next available date auto-selected — change if needed"
+    "nextAvailableAutoSelected": "Next available date auto-selected — change if needed",
+    "reasonTooShort": "Reason for visit must be at least 3 characters"
   },
   "findDoctor": {
     "title": "Find a Veterinarian",

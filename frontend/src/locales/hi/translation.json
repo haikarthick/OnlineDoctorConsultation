@@ -3527,7 +3527,8 @@
     "generalVeterinarian": "सामान्य पशु चिकित्सक",
     "perSession": "प्रति सत्र",
     "findingNextDate": "अगली उपलब्ध तारीख खोजी जा रही है...",
-    "nextAvailableAutoSelected": "अगली उपलब्ध तारीख स्वचालित रूप से चुनी गई — जरूरत पड़ने पर बदलें"
+    "nextAvailableAutoSelected": "अगली उपलब्ध तारीख स्वचालित रूप से चुनी गई — जरूरत पड़ने पर बदलें",
+    "reasonTooShort": "यात्रा का कारण कम से कम 3 अक्षरों का होना चाहिए"
   },
   "findDoctor": {
     "title": "पशु चिकित्सक खोजें",

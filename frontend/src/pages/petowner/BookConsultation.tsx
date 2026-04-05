@@ -47,6 +47,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   const [dateSearching, setDateSearching] = useState(false)
   const [autoSelectedDate, setAutoSelectedDate] = useState(false)
   const [error, setError] = useState('')
+  const [step3Error, setStep3Error] = useState('')
   const [success, setSuccess] = useState(false)
 
   // Enterprise / Herd / Group state (farmers)
@@ -778,11 +779,19 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                 <label className="form-label">{t('bookConsultation.reasonForVisit')}</label>
                 <input
                   type="text"
-                  className="form-input"
+                  className={`form-input${step3Error && reasonForVisit.trim().length < 3 ? ' input-error' : ''}`}
                   placeholder={t('bookConsultation.reasonPlaceholder')}
                   value={reasonForVisit}
-                  onChange={(e) => setReasonForVisit(e.target.value)}
+                  onChange={(e) => {
+                    setReasonForVisit(e.target.value)
+                    if (step3Error) setStep3Error('')
+                  }}
                 />
+                {step3Error && (
+                  <p style={{ margin: '6px 0 0', fontSize: 13, color: '#dc2626' }}>
+                    ⚠ {step3Error}
+                  </p>
+                )}
               </div>
 
               <div className="form-group">
@@ -828,8 +837,15 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
             <button className="btn btn-outline" onClick={() => setStep(2)}>{t('bookConsultation.back')}</button>
             <button
               className="btn btn-primary btn-lg"
-              disabled={!reasonForVisit}
-              onClick={() => setStep(4)}
+              disabled={!reasonForVisit.trim()}
+              onClick={() => {
+                if (reasonForVisit.trim().length < 3) {
+                  setStep3Error(t('bookConsultation.reasonTooShort'))
+                  return
+                }
+                setStep3Error('')
+                setStep(4)
+              }}
             >
               {t('bookConsultation.reviewBooking')}
             </button>
