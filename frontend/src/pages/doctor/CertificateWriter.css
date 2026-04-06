@@ -1,0 +1,224 @@
+/* ============================================================
+   CertificateWriter.css
+   Follows the established design system (ModulePage.css / modules.css).
+   NO inline styles needed in the JSX — all layout here.
+   ============================================================ */
+
+/* ── Card padding (module-card has no padding by default) ── */
+.cw-card {
+  padding: 28px;
+}
+
+/* ── Step heading ── */
+.cw-step-title {
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+/* ── Alert spacing ── */
+.cw-alert-gap {
+  margin-bottom: 16px;
+}
+
+/* ── Tab bar spacing ── */
+.cw-tabs-gap {
+  margin-bottom: 24px;
+}
+
+/* ── Owner search — autocomplete wrapper ── */
+.cw-owner-search-wrap {
+  position: relative;
+}
+
+/* ── Autocomplete dropdown ── */
+.cw-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.cw-dropdown-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f7fafc;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.cw-dropdown-item:last-child { border-bottom: none; }
+.cw-dropdown-item:hover { background: #f7fafc; }
+.cw-dropdown-item-email { color: #718096; margin-left: 6px; }
+
+/* ── Loading / hint text ── */
+.cw-hint {
+  color: #718096;
+  font-size: 13px;
+  margin: 4px 0 16px;
+}
+.cw-loading-hint {
+  font-size: 12px;
+  color: #718096;
+  margin-top: 4px;
+}
+
+/* ── Step summary pill (shown at top of step 2 / 3) ── */
+.cw-step-summary {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #4a5568;
+}
+.cw-step-summary .cw-summary-name { color: #2d3748; }
+.cw-step-summary .cw-summary-owner { color: #718096; margin-left: 8px; }
+
+/* ── Vaccine row container ── */
+.cw-vaccine-row {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.cw-label-sm { font-size: 11px; }
+
+/* ── Remove/danger button modifier ── */
+.module-btn.danger {
+  color: #e53e3e;
+  border-color: #fed7d7;
+  background: #fff5f5;
+}
+.module-btn.danger:hover { background: #fed7d7; }
+
+/* ── Next button bar (right-aligned) ── */
+.cw-next-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* ── Step 3 review summary ── */
+.cw-review-summary {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 24px;
+}
+
+.cw-review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+
+.cw-review-label {
+  font-size: 12px;
+  color: #718096;
+  margin-bottom: 2px;
+}
+.cw-review-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* ── Preview button bar ── */
+.cw-preview-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* ── Warning / note box ── */
+.cw-warning-note {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  color: #78350f;
+  line-height: 1.5;
+}
+
+/* ── Action button bars ── */
+.cw-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  align-items: center;
+}
+.cw-actions-right {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Success screen ── */
+.cw-success-card {
+  max-width: 500px;
+  margin: 60px auto;
+  text-align: center;
+  padding: 40px 32px;
+}
+.cw-success-icon {
+  font-size: 52px;
+  margin: 0 0 16px;
+  line-height: 1;
+}
+.cw-success-type {
+  color: #718096;
+  margin: 4px 0 0;
+  font-size: 15px;
+}
+.cw-success-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS (4-tier mandatory)
+   ══════════════════════════════════════════ */
+
+@media (max-width: 1200px) {
+  .cw-review-grid { gap: 8px 16px; }
+}
+
+@media (max-width: 768px) {
+  .cw-card { padding: 16px; }
+  .cw-review-grid { grid-template-columns: 1fr; gap: 8px; }
+  .cw-actions { flex-direction: column; }
+  .cw-actions-right { width: 100%; justify-content: flex-end; }
+  .cw-next-bar { margin-top: 8px; }
+}
+
+@media (max-width: 640px) {
+  .cw-success-actions { flex-direction: column; align-items: stretch; }
+  .cw-review-grid { gap: 6px; }
+}
+
+@media (max-width: 480px) {
+  .cw-card { padding: 12px; }
+  .cw-success-card { padding: 24px 16px; margin: 32px auto; }
+  .cw-success-icon { font-size: 40px; }
+  .cw-preview-bar { flex-direction: column; align-items: stretch; }
+}

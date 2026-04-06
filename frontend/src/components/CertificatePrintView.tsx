@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../context/SettingsContext'
 import './CertificatePrintView.css'
@@ -165,6 +165,8 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
   const { formatDate } = useSettings()
   const tpl = { ...DEFAULT_TEMPLATE, ...template }
   const overlayRef = useRef<HTMLDivElement>(null)
+  const docRef = useRef<HTMLDivElement>(null)
+  const [printing, setPrinting] = useState(false)
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -177,7 +179,59 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  const handlePrint = () => window.print()
+  const handlePrint = () => {
+    const docEl = docRef.current
+    if (!docEl) return
+    setPrinting(true)
+
+    // Collect all currently-loaded CSS from this page's stylesheets
+    const cssTexts: string[] = []
+    Array.from(document.styleSheets).forEach(sheet => {
+      try {
+        Array.from(sheet.cssRules).forEach(rule => { cssTexts.push(rule.cssText) })
+      } catch {
+        // Cross-origin sheet — import by URL
+        if (sheet.href) cssTexts.push(`@import url("${sheet.href}");`)
+      }
+    })
+
+    // Create an isolated iframe containing ONLY the certificate document
+    const iframe = document.createElement('iframe')
+    iframe.setAttribute('style', 'position:fixed;top:-9999px;left:-9999px;width:210mm;height:297mm;border:0;visibility:hidden')
+    document.body.appendChild(iframe)
+
+    const win = iframe.contentWindow
+    if (!win) { document.body.removeChild(iframe); setPrinting(false); return }
+
+    win.document.open()
+    win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: white; }
+    ${cssTexts.join('\n')}
+    @media print {
+      .cert-watermark { opacity: 0.1; }
+    }
+  </style>
+</head>
+<body>${docEl.outerHTML}</body>
+</html>`)
+    win.document.close()
+
+    // Allow layout to settle then print
+    setTimeout(() => {
+      win.focus()
+      win.print()
+      setTimeout(() => {
+        if (document.body.contains(iframe)) document.body.removeChild(iframe)
+        setPrinting(false)
+      }, 1000)
+    }, 400)
+  }
+
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === overlayRef.current) onClose()
   }
@@ -199,15 +253,15 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
         <div className="cert-toolbar">
           <p className="cert-toolbar-title">🖨 {t('certificatePrint.previewTitle')}</p>
           <div className="cert-toolbar-actions">
-            <button className="cert-btn-print" onClick={handlePrint}>
-              🖨 {t('certificatePrint.print')}
+            <button className="cert-btn-print" onClick={handlePrint} disabled={printing}>
+              🖨 {printing ? '...' : t('certificatePrint.print')}
             </button>
             <button className="cert-btn-close" onClick={onClose}>✕ {t('common.close')}</button>
           </div>
         </div>
 
         {/* ── A4 Document ── */}
-        <div className="cert-document">
+        <div className="cert-document" ref={docRef}>
 
           {/* ── Status watermark ── */}
           {cert.status === 'draft' && (

@@ -361,21 +361,23 @@
 }
 
 /* ── Print media ── */
+/* When printing directly from browser (Ctrl+P on a page that happens to have
+   the modal open), hide everything except the certificate document. */
 @media print {
+  /* Hide the entire app shell */
+  body > * { visibility: hidden !important; display: none !important; }
+
+  /* The overlay is a fixed overlay — render it as the only visible element */
+  .cert-overlay { display: flex !important; visibility: visible !important;
+    position: fixed !important; inset: 0 !important;
+    background: none !important; padding: 0 !important; }
+  .cert-modal { visibility: visible !important; display: block !important;
+    box-shadow: none !important; border-radius: 0 !important; width: 210mm !important; margin: 0 !important; }
   .cert-toolbar { display: none !important; }
-  .cert-overlay {
-    position: static;
-    background: none;
-    padding: 0;
-    overflow: visible;
-  }
-  .cert-modal {
-    box-shadow: none;
-    border-radius: 0;
-    width: 100%;
-  }
-  .cert-document { padding: 10mm 14mm 10mm; min-height: auto; }
-  .cert-watermark { opacity: 0.1; }
+  .cert-document { visibility: visible !important; display: block !important;
+    padding: 10mm 14mm 10mm !important; min-height: auto !important; }
+  .cert-document * { visibility: visible !important; }
+  .cert-watermark { opacity: 0.1 !important; }
 }
 
 /* ── Mobile adjustments ── */

@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import CertificatePrintView, { CertificatePrintData, CertificateTemplate } from '../../components/CertificatePrintView'
 import '../../styles/modules.css'
+import './CertificateWriter.css'
 
 interface CertificateWriterProps {
   onNavigate: (path: string) => void
@@ -327,16 +328,16 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
   if (issued) {
     return (
       <div className="module-page">
-        <div className="module-card" style={{ maxWidth: 500, margin: '60px auto', textAlign: 'center', padding: '40px 32px' }}>
-          <p style={{ fontSize: 48 }}>✅</p>
+        <div className="module-card cw-success-card">
+          <p className="cw-success-icon">✅</p>
           <h2>{t('certificateWriter.certificateIssued')}</h2>
-          <p style={{ color: '#718096' }}>{certTypeLabel(certType)}</p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
+          <p className="cw-success-type">{certTypeLabel(certType)}</p>
+          <div className="cw-success-actions">
             <button className="module-btn" onClick={() => onNavigate('/vet-certificates')}>
-              View All Certificates
+              {t('certificateWriter.viewAllCertificates')}
             </button>
             <button className="module-btn primary" onClick={() => window.location.reload()}>
-              + Create Another
+              {t('certificateWriter.createAnother')}
             </button>
           </div>
         </div>
@@ -355,24 +356,24 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           </p>
         </div>
         <button className="module-btn" onClick={() => onNavigate('/vet-certificates')}>
-          ← Back
+          ← {t('certificateWriter.back')}
         </button>
       </div>
 
       {error && (
-        <div className="module-alert error" style={{ marginBottom: 16 }}>
+        <div className="module-alert error cw-alert-gap">
           {error}
-          <button className="module-alert-close" onClick={() => setError('')}>✕</button>
+          <button onClick={() => setError('')}>✕</button>
         </div>
       )}
       {draftSaved && (
-        <div className="module-alert success" style={{ marginBottom: 16 }}>
+        <div className="module-alert success cw-alert-gap">
           ✓ {t('certificateWriter.draftSaved')}
         </div>
       )}
 
       {/* ── Step indicator ── */}
-      <div className="module-tabs" style={{ marginBottom: 24 }}>
+      <div className="module-tabs cw-tabs-gap">
         {[1, 2, 3].map(s => (
           <button
             key={s}
@@ -390,8 +391,8 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           STEP 1: Animal & Type
       ══════════════════════════════ */}
       {step === 1 && (
-        <div className="module-card" style={{ padding: '24px 28px' }}>
-          <h3 style={{ margin: '0 0 20px' }}>1. {t('certificateWriter.step1')}</h3>
+        <div className="module-card cw-card">
+          <h3 className="cw-step-title">1. {t('certificateWriter.step1')}</h3>
 
           {/* Certificate type */}
           <div className="module-form-group">
@@ -409,7 +410,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           </div>
 
           {/* Owner search */}
-          <div className="module-form-group" style={{ position: 'relative' }}>
+          <div className="module-form-group cw-owner-search-wrap">
             <label className="module-label">{t('certificateWriter.searchOwner')} *</label>
             <input
               className="module-input"
@@ -418,18 +419,13 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
               value={ownerSearch}
               onChange={e => { setOwnerSearch(e.target.value); if (!e.target.value) { setSelectedOwnerId(''); setSelectedOwner(null) } }}
             />
-            {loadingOwners && <div style={{ fontSize: 12, color: '#718096', marginTop: 4 }}>{t('common.loading')}</div>}
+            {loadingOwners && <div className="cw-loading-hint">{t('common.loading')}</div>}
             {owners.length > 0 && (
-              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, boxShadow: '0 4px 16px rgba(0,0,0,0.12)', zIndex: 100, maxHeight: 200, overflowY: 'auto' }}>
+              <div className="cw-dropdown">
                 {owners.map(o => (
-                  <div
-                    key={o.id}
-                    onClick={() => selectOwner(o)}
-                    style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f7fafc', fontSize: 13 }}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#f7fafc')}
-                    onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
-                  >
-                    <strong>{o.name}</strong> <span style={{ color: '#718096' }}>· {o.email}</span>
+                  <div key={o.id} className="cw-dropdown-item" onClick={() => selectOwner(o)}>
+                    <strong>{o.name}</strong>
+                    <span className="cw-dropdown-item-email">· {o.email}</span>
                   </div>
                 ))}
               </div>
@@ -460,9 +456,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           )}
 
           {!selectedOwnerId && (
-            <p style={{ color: '#718096', fontSize: 13, margin: '4px 0 16px' }}>
-              ℹ {t('certificateWriter.selectOwnerFirst')}
-            </p>
+            <p className="cw-hint">ℹ {t('certificateWriter.selectOwnerFirst')}</p>
           )}
 
           {/* Optional consultation link */}
@@ -494,7 +488,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+          <div className="cw-next-bar">
             <button
               className="module-btn primary"
               disabled={!certType || !selectedOwnerId || !selectedAnimalId}
@@ -510,16 +504,16 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           STEP 2: Clinical Details
       ══════════════════════════════ */}
       {step === 2 && (
-        <div className="module-card" style={{ padding: '24px 28px' }}>
-          <h3 style={{ margin: '0 0 20px' }}>2. {t('certificateWriter.step2')}</h3>
+        <div className="module-card cw-card">
+          <h3 className="cw-step-title">2. {t('certificateWriter.step2')}</h3>
 
           {/* Summary of step 1 */}
-          <div style={{ background: '#f7fafc', border: '1px solid #e2e8f0', borderRadius: 6, padding: '10px 14px', marginBottom: 20, fontSize: 13 }}>
-            <strong>{certTypeLabel(certType)}</strong>
+          <div className="cw-step-summary">
+            <strong className="cw-summary-name">{certTypeLabel(certType)}</strong>
             {selectedAnimalId && animals.find(a => a.id === selectedAnimalId) && (
-              <span style={{ color: '#4a5568' }}> — {animals.find(a => a.id === selectedAnimalId)?.name}</span>
+              <span> — {animals.find(a => a.id === selectedAnimalId)?.name}</span>
             )}
-            <span style={{ marginLeft: 8, color: '#718096' }}>({selectedOwner?.name || 'Owner'})</span>
+            <span className="cw-summary-owner">({selectedOwner?.name || ''})</span>
           </div>
 
           {/* Vaccination-specific */}
@@ -527,31 +521,31 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
             <div className="module-form-group">
               <label className="module-label">💉 {t('certificateWriter.vaccinationDetails')}</label>
               {vaccineRows.map((row, i) => (
-                <div key={i} style={{ background: '#f7fafc', border: '1px solid #e2e8f0', borderRadius: 6, padding: '12px 14px', marginBottom: 10 }}>
+                <div key={i} className="cw-vaccine-row">
                   <div className="module-form-row-3">
                     <div className="module-form-group">
-                      <label className="module-label" style={{ fontSize: 11 }}>Vaccine Name</label>
+                      <label className="module-label cw-label-sm">Vaccine Name</label>
                       <input className="module-input" value={row.vaccine} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, vaccine: e.target.value } : x))} placeholder="e.g. Rabies" />
                     </div>
                     <div className="module-form-group">
-                      <label className="module-label" style={{ fontSize: 11 }}>Batch No.</label>
+                      <label className="module-label cw-label-sm">Batch No.</label>
                       <input className="module-input" value={row.batchNo} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, batchNo: e.target.value } : x))} placeholder="Batch number" />
                     </div>
                     <div className="module-form-group">
-                      <label className="module-label" style={{ fontSize: 11 }}>Manufacturer</label>
+                      <label className="module-label cw-label-sm">Manufacturer</label>
                       <input className="module-input" value={row.manufacturer} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, manufacturer: e.target.value } : x))} placeholder="Manufacturer" />
                     </div>
                     <div className="module-form-group">
-                      <label className="module-label" style={{ fontSize: 11 }}>Date Administered</label>
+                      <label className="module-label cw-label-sm">Date Administered</label>
                       <input className="module-input" type="date" value={row.dateAdministered} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, dateAdministered: e.target.value } : x))} />
                     </div>
                     <div className="module-form-group">
-                      <label className="module-label" style={{ fontSize: 11 }}>Next Due</label>
+                      <label className="module-label cw-label-sm">Next Due</label>
                       <input className="module-input" type="date" value={row.nextDue} onChange={e => setVaccineRows(r => r.map((x, j) => j === i ? { ...x, nextDue: e.target.value } : x))} />
                     </div>
-                    <div className="module-form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <div className="module-form-group">
                       {vaccineRows.length > 1 && (
-                        <button className="module-btn small" onClick={() => setVaccineRows(r => r.filter((_, j) => j !== i))} style={{ color: '#e53e3e' }}>
+                        <button className="module-btn small danger" onClick={() => setVaccineRows(r => r.filter((_, j) => j !== i))}>
                           Remove
                         </button>
                       )}
@@ -662,7 +656,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
             <textarea className="module-input" rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any additional notes..." style={{ resize: 'vertical' }} />
           </div>
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', marginTop: 8, flexWrap: 'wrap' }}>
+          <div className="cw-actions">
             <button className="module-btn" onClick={() => setStep(1)}>← {t('certificateWriter.back')}</button>
             <button className="module-btn primary" onClick={() => setStep(3)}>{t('certificateWriter.next')} →</button>
           </div>
@@ -673,39 +667,51 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           STEP 3: Review & Issue
       ══════════════════════════════ */}
       {step === 3 && (
-        <div className="module-card" style={{ padding: '24px 28px' }}>
-          <h3 style={{ margin: '0 0 20px' }}>3. {t('certificateWriter.step3')}</h3>
+        <div className="module-card cw-card">
+          <h3 className="cw-step-title">3. {t('certificateWriter.step3')}</h3>
 
           {/* Review summary */}
-          <div style={{ background: '#f7fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '16px 18px', marginBottom: 24 }}>
-            <div style={{ display: 'grid', gap: '8px 20px', gridTemplateColumns: '1fr 1fr', fontSize: 13 }}>
-              <div><span style={{ color: '#718096' }}>Certificate Type:</span> <strong>{certTypeLabel(certType)}</strong></div>
-              <div><span style={{ color: '#718096' }}>Animal:</span> <strong>{animals.find(a => a.id === selectedAnimalId)?.name || selectedAnimalId}</strong></div>
-              <div><span style={{ color: '#718096' }}>Owner:</span> <strong>{selectedOwner?.name || selectedOwnerId}</strong></div>
-              <div><span style={{ color: '#718096' }}>Exam Date:</span> <strong>{examinationDate ? formatDate(examinationDate) : '—'}</strong></div>
-              <div><span style={{ color: '#718096' }}>Valid Until:</span> <strong>{validUntil ? formatDate(validUntil) : 'No expiry'}</strong></div>
+          <div className="cw-review-summary">
+            <div className="cw-review-grid">
+              <div>
+                <div className="cw-review-label">{t('certificateWriter.reviewCertType')}</div>
+                <div className="cw-review-value">{certTypeLabel(certType)}</div>
+              </div>
+              <div>
+                <div className="cw-review-label">{t('certificateWriter.reviewAnimal')}</div>
+                <div className="cw-review-value">{animals.find(a => a.id === selectedAnimalId)?.name || '—'}</div>
+              </div>
+              <div>
+                <div className="cw-review-label">{t('certificateWriter.reviewOwner')}</div>
+                <div className="cw-review-value">{selectedOwner?.name || '—'}</div>
+              </div>
+              <div>
+                <div className="cw-review-label">{t('certificateWriter.reviewExamDate')}</div>
+                <div className="cw-review-value">{examinationDate ? formatDate(examinationDate) : '—'}</div>
+              </div>
+              <div>
+                <div className="cw-review-label">{t('certificateWriter.reviewValidUntil')}</div>
+                <div className="cw-review-value">{validUntil ? formatDate(validUntil) : t('certificateWriter.reviewNoExpiry')}</div>
+              </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 16 }}>
-            <button
-              className="module-btn"
-              onClick={handlePreview}
-            >
+          <div className="cw-preview-bar">
+            <button className="module-btn" onClick={handlePreview}>
               👁 {t('certificateWriter.preview')}
             </button>
           </div>
 
-          <div style={{ background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: 6, padding: '12px 14px', fontSize: 13, marginBottom: 20 }}>
-            <strong>⚠ Note:</strong>{' '}
-            Issuing will assign a permanent certificate number and cannot be undone. Save as draft to review first.
+          <div className="cw-warning-note">
+            <strong>⚠ {t('certificateWriter.issueNotePrefix')}:</strong>{' '}
+            {t('certificateWriter.issueNoteText')}
           </div>
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+          <div className="cw-actions">
             <button className="module-btn" onClick={() => setStep(2)} disabled={submitting}>
               ← {t('certificateWriter.back')}
             </button>
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div className="cw-actions-right">
               <button className="module-btn" onClick={handleSaveDraft} disabled={submitting}>
                 {submitting ? t('common.saving') : `💾 ${t('certificateWriter.saveDraft')}`}
               </button>
