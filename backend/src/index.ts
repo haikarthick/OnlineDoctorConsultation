@@ -9,10 +9,27 @@ import { startScheduler } from './utils/scheduler';
 import { fixDemoPasswords } from './utils/fixDemoPasswords';
 import VaccineScheduleService from './services/VaccineScheduleService';
 
+/** Retry database.connect() with exponential backoff.
+ *  Free-tier Render PostgreSQL can be slow to respond after restarts.
+ *  5 attempts at 10-second intervals = up to 50 seconds before giving up.
+ */
+const connectWithRetry = async (maxAttempts = 5): Promise<void> => {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await database.connect();
+      return;
+    } catch (err: any) {
+      if (attempt === maxAttempts) throw err;
+      logger.warn(`DB connect attempt ${attempt}/${maxAttempts} failed — retrying in 10s`, { error: err.message });
+      await new Promise(r => setTimeout(r, 10000));
+    }
+  }
+};
+
 const startServer = async () => {
   try {
-    // Connect to database
-    await database.connect();
+    // Connect to database (with retry for slow free-tier Render PostgreSQL)
+    await connectWithRetry();
     logger.info('Database initialized');
 
     // Initialize cache
