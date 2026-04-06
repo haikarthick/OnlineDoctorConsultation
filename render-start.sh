@@ -54,6 +54,12 @@ node dist/utils/enterpriseMigration.js  2>&1 || echo "  (enterprise migration wa
 node dist/utils/tier2Migration.js       2>&1 || echo "  (tier2 migration warning — continuing)"
 node dist/utils/tier3Migration.js       2>&1 || echo "  (tier3 migration warning — continuing)"
 node dist/utils/tier4Migration.js       2>&1 || echo "  (tier4 migration warning — continuing)"
+
+# Step 1b: Run formal SQL migrations from backend/migrations/*.sql
+# These apply new tables (e.g. vet_certificates) on existing databases that
+# pre-date the tables — init.sql is skipped for existing schemas.
+echo "━━━ Running formal SQL migrations ━━━"
+node dist/utils/migrate.js 2>&1 || echo "  (formal migration warning — continuing)"
 echo "✓ Migrations complete"
 
 # Step 2: Seed demo data if core data is missing (vet_profiles table empty)

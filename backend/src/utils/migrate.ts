@@ -36,9 +36,15 @@ function getPool(): Pool {
   );
 }
 
+// ── Schema ───────────────────────────────────────────────────
+
+const SCHEMA = process.env.DB_SCHEMA || 'public';
+
 // ── Helpers ───────────────────────────────────────────────────
 
 async function ensureTrackingTable(pool: Pool) {
+  // Set search_path so all DDL/DML goes to the correct schema (vetcare_dev / vetcare_prod)
+  await pool.query(`SET search_path TO ${SCHEMA}, public`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS ${TRACKING_TABLE} (
       id        SERIAL PRIMARY KEY,
@@ -85,6 +91,7 @@ async function runMigrations() {
       const sql = fs.readFileSync(migration.path, 'utf-8');
       const client = await pool.connect();
       try {
+        await client.query(`SET search_path TO ${SCHEMA}, public`);
         await client.query('BEGIN');
         await client.query(sql);
         await client.query(
