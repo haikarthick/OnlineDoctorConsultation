@@ -66,6 +66,10 @@ class PostgresDatabase {
       // Run schema if tables don't exist
       await this.ensureSchema();
 
+      // Apply any pending backend/migrations/*.sql files using the server's own pool
+      // (correct search_path, connection timeout, proper error handling)
+      await this.runSQLMigrations();
+
       // Ensure default system settings exist
       await this.seedDefaultSettings();
 
@@ -87,9 +91,65 @@ class PostgresDatabase {
     }
   }
 
+  /**
+   * Applies any pending SQL migration files from backend/migrations/*.sql.
+   * Uses the server's own pool (which has the correct search_path set via
+   * connection options), so this is far more reliable than running a separate
+   * node process. Errors are caught and logged — startup is never blocked.
+   */
+  private async runSQLMigrations(): Promise<void> {
+    try {
+      const migDir = path.join(__dirname, '..', '..', 'migrations');
+      if (!fs.existsSync(migDir)) {
+        logger.info('No migrations directory — skipping SQL migration runner');
+        return;
+      }
+
+      await this.pool.query(`
+        CREATE TABLE IF NOT EXISTS _migrations (
+          id         SERIAL PRIMARY KEY,
+          name       VARCHAR(255) NOT NULL UNIQUE,
+          applied_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+        )
+      `);
+
+      const { rows } = await this.pool.query(`SELECT name FROM _migrations ORDER BY id`);
+      const applied = new Set(rows.map((r: any) => r.name));
+
+      const pending = fs.readdirSync(migDir)
+        .filter(f => f.endsWith('.sql'))
+        .sort()
+        .filter(f => !applied.has(f));
+
+      if (pending.length === 0) {
+        logger.info('SQL migrations: all up to date');
+        return;
+      }
+
+      logger.info(`SQL migrations: applying ${pending.length} pending file(s)...`);
+      for (const file of pending) {
+        const sql = fs.readFileSync(path.join(migDir, file), 'utf-8');
+        const client = await this.pool.connect();
+        try {
+          await client.query('BEGIN');
+          await client.query(sql);
+          await client.query(`INSERT INTO _migrations (name) VALUES ($1)`, [file]);
+          await client.query('COMMIT');
+          logger.info(`  ✓ Migration applied: ${file}`);
+        } catch (err: any) {
+          await client.query('ROLLBACK');
+          logger.error(`  ✗ Migration failed (${file}): ${err.message}`);
+        } finally {
+          client.release();
+        }
+      }
+    } catch (error: any) {
+      logger.warn('SQL migration runner error', { error: error.message });
+    }
+  }
+
   private async ensureSchema(): Promise<void> {
     try {
-      // Check if the users table exists
       const schemaName = config.database.schema || 'public';
       const check = await this.pool.query(
         `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'users')`,
