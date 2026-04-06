@@ -64,27 +64,27 @@ class PostgresDatabase {
       });
 
       // Run schema if tables don't exist
-      await this.ensureSchema();
+      try { await this.ensureSchema(); } catch (e: any) { logger.warn('ensureSchema failed', { error: e.message }); }
 
       // Apply any pending backend/migrations/*.sql files using the server's own pool
       // (correct search_path, connection timeout, proper error handling)
       await this.runSQLMigrations();
 
       // Ensure default system settings exist
-      await this.seedDefaultSettings();
+      try { await this.seedDefaultSettings(); } catch (e: any) { logger.warn('seedDefaultSettings failed', { error: e.message }); }
 
       // Sync stale booking statuses with completed consultations
       await this.syncBookingStatuses();
 
       // Ensure RBAC permission table and seed defaults
-      await PermissionService.ensureTable();
-      await PermissionService.seedDefaults();
+      try { await PermissionService.ensureTable(); } catch (e: any) { logger.warn('PermissionService.ensureTable failed', { error: e.message }); }
+      try { await PermissionService.seedDefaults(); } catch (e: any) { logger.warn('PermissionService.seedDefaults failed', { error: e.message }); }
 
       // Ensure refresh tokens table
-      await RefreshTokenService.ensureTable();
+      try { await RefreshTokenService.ensureTable(); } catch (e: any) { logger.warn('RefreshTokenService.ensureTable failed', { error: e.message }); }
 
       // Ensure vet hospital tables
-      await VetHospitalService.ensureTables();
+      try { await VetHospitalService.ensureTables(); } catch (e: any) { logger.warn('VetHospitalService.ensureTables failed', { error: e.message }); }
     } catch (error: any) {
       logger.error('Failed to connect to PostgreSQL', { error: error.message });
       throw error;
