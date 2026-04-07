@@ -33,7 +33,35 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 
 ---
 
-### DEPLOY-005 — Free-Tier DB Cold Start → fixDemoPasswords Never Runs → Login Always Fails
+### DEPLOY-006 — uuid-ossp Extension Fails on Render → ALL Tables Never Created → Login/Register Always Fails
+- **Symptom:** Deployment succeeds, port binds, health check passes, but login AND registration both fail with "Error fetching user by email" — even after DB is fully warm
+- **Root Cause:** `docker/init.sql` started with `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`. Render's managed PostgreSQL runs as a restricted user — `CREATE EXTENSION` requires superuser. This line THREW an error, which aborted the entire `init.sql` execution. Zero tables were created.
+- **Chain:** `uuid-ossp` extension fail → init.sql aborts → `users` table never exists → `getUserByEmail` throws `DatabaseError` → login fails permanently → same for register
+- **Why silent:** The error was caught by catch blocks, and the catch re-threw as a generic `DatabaseError('Error fetching user by email')` — hiding the real PostgreSQL error
+- **Fix:** Replace ALL `uuid_generate_v4()` → `gen_random_uuid()` (built-in PostgreSQL 13+, no extension needed). Remove `CREATE EXTENSION uuid-ossp` line entirely.
+- **Files changed:** `docker/init.sql` (48), `docker/seed-demo-data.sql` (405), `docker/seed.sql` (20), `backend/src/utils/database.ts` (16), all migration .ts files (total 573 replacements)
+- **Rule: NEVER use `uuid_generate_v4()` — always use `gen_random_uuid()`**
+- **Rule: NEVER add `CREATE EXTENSION` to init.sql — Render managed PostgreSQL does not allow it**
+
+---
+
+### DEPLOY-007 — ensureSchemaPublic() Ran init.sql Before Creating Schema → Tables Created in Wrong Schema
+- **Symptom:** Server logs "Schema created successfully" but tables actually end up in `public` schema not `vetcare_prod`
+- **Root Cause:** `ensureSchemaPublic()` checked if `users` table exists in `vetcare_prod`, then ran `init.sql` without first creating the `vetcare_prod` schema. PostgreSQL defaulted to `public`.
+- **Fix:** `ensureSchemaPublic()` now does `CREATE SCHEMA IF NOT EXISTS "vetcare_prod"` BEFORE running init.sql
+- **Rule:** Always create the schema first, then create tables inside it
+
+---
+
+### AUTH-001 — Registration Shows "Error fetching user by email" Instead of Real Error
+- **Symptom:** User tries to register, gets "Error fetching user by email" — confusing because they're not logging in
+- **Root Cause:** `AuthController.register()` calls `getUserByEmail(email)` first to check if email is taken. If the DB is broken (table missing), this throws and bubbles up as the raw `DatabaseError` message
+- **Fix:** Added self-heal to `register()` same as `login()` — if `getUserByEmail` fails, run `ensureSchemaPublic()` + `fixDemoPasswords()` then retry. Shows "Database is not ready yet. Please retry." on heal failure.
+- **Rule:** ANY endpoint that calls `getUserByEmail` must handle DB errors gracefully with self-heal
+
+---
+
+
 - **Symptom:** Deployment "succeeds" (port binds, health check passes) but ALL logins fail with "Error fetching user by email" — permanently, not just briefly
 - **Root Cause:** Chain of failures:
   1. Free-tier DB sleeps and takes 30-90s to wake
@@ -179,6 +207,8 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 [ ] TypeScript passes: npx tsc --noEmit in both frontend/ and backend/
 [ ] All 5 locale JSON files valid: node -e "require('./frontend/src/locales/hi/translation.json')"
 [ ] All SQL column names cross-referenced against docker/init.sql
+[ ] NO uuid_generate_v4() anywhere — must be gen_random_uuid() (uuid-ossp breaks Render)
+[ ] NO CREATE EXTENSION in init.sql — Render managed PG doesn't allow it
 [ ] git push origin develop (NOT main — use GitHub Actions to promote to PROD)
 ```
 
