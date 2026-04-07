@@ -815,7 +815,9 @@
       "reportBuilderDesc": "ಕಸ್ಟಮ್ ವೈದ್ಯಕೀಯ ಮತ್ತು ವಿಶ್ಲೇಷಣೆ ವರದಿಗಳನ್ನು ರಚಿಸಿ",
       "aiCopilotTitle": "AI ಕೋಪೈಲಟ್",
       "aiCopilotDesc": "AI-ಚಾಲಿತ ಕ್ಲಿನಿಕಲ್ ನಿರ್ಧಾರ ಬೆಂಬಲ ಪಡೆಯಿರಿ"
-    }
+    },
+    "findDoctor": "ವೈದ್ಯರನ್ನು ಹುಡುಕಿ →",
+    "manageSchedule": "ವೇಳಾಪಟ್ಟಿ ನಿರ್ವಹಿಸಿ →"
   },
   "consultations": {
     "pageTitle": "🏥 Consultations & Appointments",
@@ -1459,7 +1461,10 @@
     "failedToSaveAllergy": "Failed to save allergy",
     "failedToSaveLabResult": "Failed to save lab result",
     "selectPetGeneric": "Select a pet",
-    "selectPetGenericSub": "Choose a pet from the dropdown above"
+    "selectPetGenericSub": "Choose a pet from the dropdown above",
+    "noAnimalsTitle": "ಯಾವ ಪ್ರಾಣಿಗಳನ್ನೂ ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ",
+    "registerAnimal": "ಪ್ರಾಣಿ ನೋಂದಾಯಿಸಿ",
+    "noAnimalsHint": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಮೊದಲು ನಿಮ್ಮ ಪ್ರಾಣಿಗಳನ್ನು ನೋಂದಾಯಿಸಿ."
   },
   "settings": {
     "pageTitle": "⚙️ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
@@ -3355,7 +3360,10 @@
       "reminderCreated": "Reminder created!",
       "completed": "Completed!",
       "snoozed": "Snoozed 3 days"
-    }
+    },
+    "addAnimal": "ಪ್ರಾಣಿ ನೋಂದಾಯಿಸಿ",
+    "noAnimalsTitle": "ಯಾವ ಪ್ರಾಣಿಗಳನ್ನೂ ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ",
+    "noAnimalsHint": "ಆರೋಗ್ಯವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು ನಿಮ್ಮ ಪ್ರಾಣಿಗಳನ್ನು ಸೇರಿಸಿ."
   },
   "geospatialAnalytics": {
     "pageTitle": "🗺️ Geospatial Analytics",
@@ -3523,7 +3531,10 @@
     "perSession": "ಪ್ರತಿ ಅಧಿವೇಶನಕ್ಕೆ",
     "findingNextDate": "ಮುಂದಿನ ಲಭ್ಯ ದಿನಾಂಕವನ್ನು ಹುಡುಕುತ್ತಿದೆ...",
     "nextAvailableAutoSelected": "ಮುಂದಿನ ಲಭ್ಯ ದಿನಾಂಕ ಸ್ವಯಂಚಾಲ್ ಆಯ್ಕೆಯಾಗಿದೆ — ಬೇಕಾದರೆ ಬದಲಾಯಿಸಕ್ಕು",
-    "reasonTooShort": "ಭೇಟಿಯ ಕಾರಣ ಕನಿಷ್ಠ 3 ಅಕ್ಷರಗಳು ಇರಬೇಕು"
+    "reasonTooShort": "ಭೇಟಿಯ ಕಾರಣ ಕನಿಷ್ಠ 3 ಅಕ್ಷರಗಳು ಇರಬೇಕು",
+    "noPetsRegistered": "ಇನ್ನೂ ಯಾವ ಸಾಕು ಪ್ರಾಣಿಗಳನ್ನೂ ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ",
+    "addPet": "ಸಾಕು ಪ್ರಾಣಿ ನೋಂದಾಯಿಸಿ",
+    "noPetsHint": "ಈ ಸಮಾಲೋಚನೆಗೆ ಲಿಂಕ್ ಮಾಡಲು ಮೊದಲು ನಿಮ್ಮ ಸಾಕು ಪ್ರಾಣಿಯನ್ನು ಸೇರಿಸಿ"
   },
   "findDoctor": {
     "title": "ಪಶುವೈದ್ಯರನ್ನು ಹುಡುಕಿ",

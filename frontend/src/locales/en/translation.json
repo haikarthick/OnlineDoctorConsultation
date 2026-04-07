@@ -841,7 +841,9 @@
       "reportBuilderDesc": "Create custom medical and analytics reports",
       "aiCopilotTitle": "AI Copilot",
       "aiCopilotDesc": "Get AI-powered clinical decision support"
-    }
+    },
+    "findDoctor": "Find a Doctor →",
+    "manageSchedule": "Manage Schedule →"
   },
   "consultations": {
     "pageTitle": "🏥 Consultations & Appointments",
@@ -1489,7 +1491,10 @@
     "failedToSaveAllergy": "Failed to save allergy",
     "failedToSaveLabResult": "Failed to save lab result",
     "selectPetGeneric": "Select a pet",
-    "selectPetGenericSub": "Choose a pet from the dropdown above"
+    "selectPetGenericSub": "Choose a pet from the dropdown above",
+    "noAnimalsTitle": "No Animals Registered",
+    "registerAnimal": "Register an Animal",
+    "noAnimalsHint": "Register your pets or animals first to view their medical records."
   },
   "settings": {
     "pageTitle": "⚙️ Settings",
@@ -3400,7 +3405,10 @@
       "reminderCreated": "Reminder created!",
       "completed": "Completed!",
       "snoozed": "Snoozed 3 days"
-    }
+    },
+    "addAnimal": "Register an Animal",
+    "noAnimalsTitle": "No Animals Registered",
+    "noAnimalsHint": "Add your pets or animals to track their wellness and set reminders."
   },
   "geospatialAnalytics": {
     "pageTitle": "🗺️ Geospatial Analytics",
@@ -3568,7 +3576,10 @@
     "perSession": "per session",
     "findingNextDate": "Finding next available date...",
     "nextAvailableAutoSelected": "Next available date auto-selected — change if needed",
-    "reasonTooShort": "Reason for visit must be at least 3 characters"
+    "reasonTooShort": "Reason for visit must be at least 3 characters",
+    "noPetsRegistered": "No pets registered yet",
+    "addPet": "Register a Pet",
+    "noPetsHint": "Add your pet first to link it to this consultation"
   },
   "findDoctor": {
     "title": "Find a Veterinarian",

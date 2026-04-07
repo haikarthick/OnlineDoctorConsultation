@@ -763,16 +763,33 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
               {selectionMode === 'individual' && (
                 <div className="form-group">
                   <label className="form-label">{t('bookConsultation.selectYourPet')}</label>
-                  <select
-                    className="form-select"
-                    value={selectedAnimal}
-                    onChange={(e) => setSelectedAnimal(e.target.value)}
-                  >
-                    <option value="">-- {t('bookConsultation.selectPetOptional')} --</option>
-                    {animals.map(a => (
-                      <option key={a.id} value={a.id}>{a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
-                    ))}
-                  </select>
+                  {animals.length === 0 ? (
+                    <div style={{ padding: '14px 16px', background: '#fefce8', border: '1px solid #fde68a', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                      <div>
+                        <strong style={{ color: '#92400e', fontSize: 13 }}>🐾 {t('bookConsultation.noPetsRegistered')}</strong>
+                        <p style={{ margin: '4px 0 0', fontSize: 12, color: '#78350f' }}>{t('bookConsultation.noPetsHint')}</p>
+                      </div>
+                      <button
+                        type="button"
+                        className="module-btn primary"
+                        style={{ whiteSpace: 'nowrap', fontSize: 13 }}
+                        onClick={() => onNavigate('/animals')}
+                      >
+                        + {t('bookConsultation.addPet')}
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      className="form-select"
+                      value={selectedAnimal}
+                      onChange={(e) => setSelectedAnimal(e.target.value)}
+                    >
+                      <option value="">-- {t('bookConsultation.selectPetOptional')} --</option>
+                      {animals.map(a => (
+                        <option key={a.id} value={a.id}>{a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               )}
 

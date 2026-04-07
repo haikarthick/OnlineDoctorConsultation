@@ -813,7 +813,9 @@
       "reportBuilderDesc": "தனிப்பயன் மருத்துவ மற்றும் பகுப்பாய்வு அறிக்கைகளை உருவாக்குக",
       "aiCopilotTitle": "AI கோபைலட்",
       "aiCopilotDesc": "AI-இயங்கும் மருத்துவ முடிவு ஆதரவைப் பெறுக"
-    }
+    },
+    "findDoctor": "மருத்துவர் கண்டுபிடி →",
+    "manageSchedule": "அட்டவணையை நிர்வகி →"
   },
   "consultations": {
     "pageTitle": "🏥 ஆலோசனைகள் & சந்திப்புகள்",
@@ -1455,7 +1457,10 @@
     "failedToSaveAllergy": "அலர்ஜியைச் சேமிக்க முடியவில்லை",
     "failedToSaveLabResult": "ஆய்வக முடிவை சேமிக்க முடியவில்லை",
     "selectPetGeneric": "செல்லப்பிராணியைத் தேர்ந்தெடுக்கவும்",
-    "selectPetGenericSub": "மேலே உள்ள டிராப்டௌனிலிருந்து தேர்ந்தெடுக்கவும்"
+    "selectPetGenericSub": "மேலே உள்ள டிராப்டௌனிலிருந்து தேர்ந்தெடுக்கவும்",
+    "noAnimalsTitle": "விலங்குகள் பதிவு செய்யப்படவில்லை",
+    "registerAnimal": "விலங்கை பதிவு செய்யுங்கள்",
+    "noAnimalsHint": "மருத்துவ பதிவுகளை பார்க்க முதலில் உங்கள் விலங்குகளை பதிவு செய்யுங்கள்."
   },
   "settings": {
     "pageTitle": "⚙️ அமைப்புகள்",
@@ -3353,7 +3358,10 @@
       "reminderCreated": "நினைவூட்டல் உருவாக்கப்பட்டது!",
       "completed": "நிறைவடைந்தது!",
       "snoozed": "3 நாட்கள் ஒத்திவைக்கப்பட்டது"
-    }
+    },
+    "addAnimal": "விலங்கை பதிவு செய்யுங்கள்",
+    "noAnimalsTitle": "விலங்குகள் பதிவு செய்யப்படவில்லை",
+    "noAnimalsHint": "ஆரோக்கியத்தை கண்காணிக்க உங்கள் விலங்குகளை சேர்க்கவும்."
   },
   "geospatialAnalytics": {
     "pageTitle": "🗺️ புவிசார் பகுப்பாய்வு",
@@ -3521,7 +3529,10 @@
     "perSession": "ஒரு அமர்வுக்கு",
     "findingNextDate": "அடுத்த கிடைக்கும் தேதியை தேடுகிறது...",
     "nextAvailableAutoSelected": "அடுத்த கிடைக்கும் தேதி தானாக தேர்வு செய்யப்பட்டது — தேவையெனில் மாற்றலாம்",
-    "reasonTooShort": "வருகைக்கான காரணம் குறைந்தது 3 எழுத்துக்கள் இருக்க வேண்டும்"
+    "reasonTooShort": "வருகைக்கான காரணம் குறைந்தது 3 எழுத்துக்கள் இருக்க வேண்டும்",
+    "noPetsRegistered": "இன்னும் எந்த செல்லப்பிராணியும் பதிவு செய்யப்படவில்லை",
+    "addPet": "செல்லப்பிராணியை பதிவு செய்யுங்கள்",
+    "noPetsHint": "இந்த ஆலோசனையில் இணைக்க முதலில் உங்கள் செல்லப்பிராணியை சேர்க்கவும்"
   },
   "findDoctor": {
     "title": "கால்நடை மருத்துவரைக் கண்டறியுங்கள்",
@@ -5171,7 +5182,8 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
-    "generated": "Generated"  },
+    "generated": "Generated"
+  },
   "vetCertificates": {
     "title": "Veterinary Certificates",
     "subtitle": "Official certificates issued for your animals",

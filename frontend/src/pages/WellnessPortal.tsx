@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { WellnessScorecard, WellnessReminder } from '../types'
@@ -16,6 +17,7 @@ const WellnessPortal: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
+  const navigate = useNavigate()
   const isFarmer = user?.role === 'farmer'
   const REMINDER_TYPES = isFarmer ? FARMER_REMINDER_TYPES : PET_REMINDER_TYPES
 
@@ -256,6 +258,14 @@ const WellnessPortal: React.FC = () => {
               </div>
             ))}
             {scorecards.length === 0 && <p style={{ color: '#888' }}>{t('wellnessPortal.emptyScorecards')}</p>}
+          {animals.length === 0 && scorecards.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px 24px', background: '#fefce8', borderRadius: 12, border: '1px solid #fde68a' }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🐾</div>
+              <h3 style={{ color: '#92400e', marginBottom: 8 }}>{t('wellnessPortal.noAnimalsTitle')}</h3>
+              <p style={{ color: '#78350f', marginBottom: 20, fontSize: 14 }}>{t('wellnessPortal.noAnimalsHint')}</p>
+              <button className="module-btn primary" onClick={() => navigate('/animals')}>+ {t('wellnessPortal.addAnimal')}</button>
+            </div>
+          )}
           </div>
         </div>
       )}
@@ -319,7 +329,15 @@ const WellnessPortal: React.FC = () => {
               )}
             </div>
           ))}
-          {reminders.length === 0 && <p style={{ color: '#888', textAlign: 'center', marginTop: 20 }}>{t('wellnessPortal.emptyReminders')}</p>}
+          {reminders.length === 0 && animals.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px 24px', background: '#fefce8', borderRadius: 12, border: '1px solid #fde68a' }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🐾</div>
+              <h3 style={{ color: '#92400e', marginBottom: 8 }}>{t('wellnessPortal.noAnimalsTitle')}</h3>
+              <p style={{ color: '#78350f', marginBottom: 20, fontSize: 14 }}>{t('wellnessPortal.noAnimalsHint')}</p>
+              <button className="module-btn primary" onClick={() => navigate('/animals')}>+ {t('wellnessPortal.addAnimal')}</button>
+            </div>
+          )}
+          {reminders.length === 0 && animals.length > 0 && <p style={{ color: '#888', textAlign: 'center', marginTop: 20 }}>{t('wellnessPortal.emptyReminders')}</p>}
         </div>
       )}
     </div>

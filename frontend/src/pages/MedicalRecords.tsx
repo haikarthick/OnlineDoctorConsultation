@@ -351,6 +351,23 @@ const MedicalRecords: React.FC = () => {
     )
   }
 
+  // Pet owners / farmers with no animals: show prominent shortcut
+  if (!isVet && !isAdmin && animals.length === 0) {
+    return (
+      <div className="module-page">
+        <div className="module-header"><h1>{t('medicalRecords.pageTitle')}</h1></div>
+        <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+          <div style={{ fontSize: 56, marginBottom: 16 }}>🐾</div>
+          <h2 style={{ color: '#374151', marginBottom: 8 }}>{t('medicalRecords.noAnimalsTitle')}</h2>
+          <p style={{ color: '#6b7280', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>{t('medicalRecords.noAnimalsHint')}</p>
+          <button className="module-btn primary" onClick={() => navigate('/animals')}>
+            + {t('medicalRecords.registerAnimal')}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="module-page">
       <div className="module-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>

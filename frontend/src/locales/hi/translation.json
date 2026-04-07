@@ -815,7 +815,9 @@
       "reportBuilderDesc": "कस्टम चिकित्सा और विश्लेषण रिपोर्ट बनाएं",
       "aiCopilotTitle": "AI कोपायलट",
       "aiCopilotDesc": "AI-संचालित नैदानिक निर्णय सहायता प्राप्त करें"
-    }
+    },
+    "findDoctor": "डॉक्टर खोजें →",
+    "manageSchedule": "शेड्यूल प्रबंधित करें →"
   },
   "consultations": {
     "pageTitle": "🏥 परामर्श और अपॉइंटमेंट",
@@ -1457,7 +1459,10 @@
     "failedToSaveAllergy": "एलर्जी सहेजने में विफल",
     "failedToSaveLabResult": "लैब परिणाम सहेजने में विफल",
     "selectPetGeneric": "पशु चुनें",
-    "selectPetGenericSub": "ऊपर ड्रॉपडाउन से पशु चुनें"
+    "selectPetGenericSub": "ऊपर ड्रॉपडाउन से पशु चुनें",
+    "noAnimalsTitle": "कोई जानवर पंजीकृत नहीं",
+    "registerAnimal": "जानवर पंजीकृत करें",
+    "noAnimalsHint": "चिकित्सा रिकॉर्ड देखने के लिए पहले अपने पालतू जानवर पंजीकृत करें।"
   },
   "settings": {
     "pageTitle": "⚙️ सेटिंग्स",
@@ -3364,7 +3369,10 @@
       "reminderCreated": "रिमाइंडर बनाया गया!",
       "completed": "पूर्ण!",
       "snoozed": "3 दिन स्नूज़"
-    }
+    },
+    "addAnimal": "जानवर पंजीकृत करें",
+    "noAnimalsTitle": "कोई जानवर पंजीकृत नहीं",
+    "noAnimalsHint": "वेलनेस ट्रैक करने के लिए अपने पालतू जानवर जोड़ें।"
   },
   "geospatialAnalytics": {
     "pageTitle": "🗺️ भू-स्थानिक विश्लेषण",
@@ -3532,7 +3540,10 @@
     "perSession": "प्रति सत्र",
     "findingNextDate": "अगली उपलब्ध तारीख खोजी जा रही है...",
     "nextAvailableAutoSelected": "अगली उपलब्ध तारीख स्वचालित रूप से चुनी गई — जरूरत पड़ने पर बदलें",
-    "reasonTooShort": "यात्रा का कारण कम से कम 3 अक्षरों का होना चाहिए"
+    "reasonTooShort": "यात्रा का कारण कम से कम 3 अक्षरों का होना चाहिए",
+    "noPetsRegistered": "अभी तक कोई पालतू जानवर पंजीकृत नहीं है",
+    "addPet": "पालतू जानवर पंजीकृत करें",
+    "noPetsHint": "इस परामर्श से जोड़ने के लिए पहले अपना पालतू जानवर जोड़ें"
   },
   "findDoctor": {
     "title": "पशु चिकित्सक खोजें",

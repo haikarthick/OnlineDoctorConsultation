@@ -385,7 +385,14 @@ const Dashboard: React.FC = () => {
                 <button className="section-link" onClick={() => navigate('/consultations?tab=bookings&status=confirmed')}>{t('dashboard.viewAll')}</button>
               </div>
               {upcomingBookings.length === 0 ? (
-                <div className="empty-state"><p>{t('dashboard.noUpcoming')}</p></div>
+                <div className="empty-state">
+                  <p>{t('dashboard.noUpcoming')}</p>
+                  {hasPermission('view_schedule') && (
+                    <button className="empty-action" onClick={() => navigate('/consultations?tab=schedule')}>
+                      {t('dashboard.manageSchedule')}
+                    </button>
+                  )}
+                </div>
               ) : (
                 <div className="booking-list">
                   {upcomingBookings.map(booking => (
@@ -416,7 +423,14 @@ const Dashboard: React.FC = () => {
                 <h2 className="section-title">{t('dashboard.recentConsultations')}</h2>
               </div>
               {recentConsultations.length === 0 ? (
-                <div className="empty-state"><p>{t('dashboard.noRecent')}</p></div>
+                <div className="empty-state">
+                  <p>{t('dashboard.noRecent')}</p>
+                  {hasPermission('book_consultation') && (
+                    <button className="empty-action" onClick={() => navigate('/find-doctor')}>
+                      {t('dashboard.findDoctor')}
+                    </button>
+                  )}
+                </div>
               ) : (
                 <div className="booking-list">
                   {recentConsultations.map(consultation => (

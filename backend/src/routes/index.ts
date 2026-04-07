@@ -652,7 +652,7 @@ router.get('/public/marketplace/stats', asyncHandler((req: Request, res: Respons
 
 // ─── Health check & feature flags ────────────────────────────
 router.get('/health', async (_req, res) => {
-  const checks: Record<string, string> = { api: 'ok' };
+  const checks: Record<string, any> = { api: 'ok' };
   let httpStatus = 200;
 
   // Database connectivity check
@@ -661,6 +661,28 @@ router.get('/health', async (_req, res) => {
     checks.database = dbResult.rows?.[0]?.ok === 1 ? 'ok' : 'degraded';
   } catch {
     checks.database = 'down';
+    httpStatus = 503;
+  }
+
+  // Schema + users table check (critical for login)
+  try {
+    const schema = process.env.DB_SCHEMA || 'public';
+    const tableCheck = await database.query(
+      `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'users') AS users_exists`, [schema]
+    );
+    const usersExists = tableCheck.rows[0]?.users_exists;
+    if (usersExists) {
+      const countCheck = await database.query('SELECT COUNT(*)::int AS cnt FROM users');
+      checks.schema = schema;
+      checks.usersTable = 'ok';
+      checks.userCount = countCheck.rows[0]?.cnt ?? 0;
+    } else {
+      checks.schema = schema;
+      checks.usersTable = 'missing';
+      httpStatus = 503;
+    }
+  } catch (e: any) {
+    checks.usersTable = 'error: ' + e.message;
     httpStatus = 503;
   }
 
