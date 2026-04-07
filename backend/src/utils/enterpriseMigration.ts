@@ -34,7 +34,7 @@ const migration = `
 -- E1. ENTERPRISES / FARMS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS enterprises (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   enterprise_type VARCHAR(50) NOT NULL
     CHECK (enterprise_type IN (
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS enterprises (
 -- E2. ENTERPRISE MEMBERS (multi-user access)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS enterprise_members (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   enterprise_id UUID NOT NULL REFERENCES enterprises(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   role VARCHAR(30) NOT NULL DEFAULT 'worker'
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS enterprise_members (
 -- E3. ANIMAL GROUPS (herds, flocks, pens, enclosures, tanks)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS animal_groups (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   enterprise_id UUID NOT NULL REFERENCES enterprises(id) ON DELETE CASCADE,
   name VARCHAR(200) NOT NULL,
   group_type VARCHAR(50) NOT NULL
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS animal_groups (
 -- E4. LOCATIONS (barns, pens, paddocks, tanks, enclosures)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS locations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   enterprise_id UUID NOT NULL REFERENCES enterprises(id) ON DELETE CASCADE,
   name VARCHAR(200) NOT NULL,
   location_type VARCHAR(50) NOT NULL
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS locations (
 -- E5. MOVEMENT RECORDS (animal/group transfers between locations)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS movement_records (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   enterprise_id UUID NOT NULL REFERENCES enterprises(id) ON DELETE CASCADE,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL,
@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS movement_records (
 -- E6. TREATMENT CAMPAIGNS (group-level treatments, vaccinations)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS treatment_campaigns (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   enterprise_id UUID NOT NULL REFERENCES enterprises(id) ON DELETE CASCADE,
   group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL,
   campaign_type VARCHAR(50) NOT NULL

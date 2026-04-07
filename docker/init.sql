@@ -4,7 +4,7 @@
 -- Covers ALL 22 tables used by the application services.
 -- ============================================================
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- gen_random_uuid() is built into PostgreSQL 13+ — no extension required
 
 -- Utility: auto-update updated_at on every UPDATE
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -19,7 +19,7 @@ $$ language 'plpgsql';
 -- 1. USERS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(255) UNIQUE NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- 2. VET PROFILES
 -- ============================================================
 CREATE TABLE IF NOT EXISTS vet_profiles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   license_number VARCHAR(100) NOT NULL,
   specializations TEXT[] DEFAULT '{}',
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS vet_profiles (
 -- 3. ANIMALS / PETS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS animals (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name VARCHAR(100) NOT NULL,
   species VARCHAR(50) NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS animals (
 -- 4. CONSULTATIONS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS consultations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS consultations (
 -- 4b. ENTERPRISES & ANIMAL GROUPS (required before bookings FK)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS enterprises (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   enterprise_type VARCHAR(50),
   description TEXT,
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS enterprises (
 );
 
 CREATE TABLE IF NOT EXISTS animal_groups (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   enterprise_id UUID REFERENCES enterprises(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
   group_type VARCHAR(50),
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS animal_groups (
 -- 5. BOOKINGS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS bookings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   pet_owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
@@ -214,7 +214,7 @@ CREATE TABLE IF NOT EXISTS bookings (
 -- 6. VET SCHEDULES
 -- ============================================================
 CREATE TABLE IF NOT EXISTS vet_schedules (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   day_of_week VARCHAR(10) NOT NULL
     CHECK (day_of_week IN ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')),
@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS vet_schedules (
 -- 7. VIDEO SESSIONS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS video_sessions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
   room_id VARCHAR(100) NOT NULL,
   host_user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS video_sessions (
 -- 8. CHAT MESSAGES
 -- ============================================================
 CREATE TABLE IF NOT EXISTS chat_messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id UUID NOT NULL REFERENCES video_sessions(id) ON DELETE CASCADE,
   sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   sender_name VARCHAR(200) NOT NULL,
@@ -267,7 +267,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 -- 9. PRESCRIPTIONS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS prescriptions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   pet_owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -284,7 +284,7 @@ CREATE TABLE IF NOT EXISTS prescriptions (
 -- 10. MEDICAL RECORDS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS medical_records (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
@@ -313,7 +313,7 @@ CREATE TABLE IF NOT EXISTS medical_records (
 -- 10b. VACCINATION RECORDS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS vaccination_records (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
   vaccine_name VARCHAR(255) NOT NULL,
   vaccine_type VARCHAR(100),
@@ -336,7 +336,7 @@ CREATE TABLE IF NOT EXISTS vaccination_records (
 -- 10c. WEIGHT HISTORY
 -- ============================================================
 CREATE TABLE IF NOT EXISTS weight_history (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
   weight DECIMAL(8,2) NOT NULL,
   unit VARCHAR(10) DEFAULT 'kg',
@@ -350,7 +350,7 @@ CREATE TABLE IF NOT EXISTS weight_history (
 -- 10d. ALLERGY RECORDS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS allergy_records (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
   allergen VARCHAR(255) NOT NULL,
   reaction TEXT,
@@ -368,7 +368,7 @@ CREATE TABLE IF NOT EXISTS allergy_records (
 -- 10e. MEDICAL RECORD AUDIT LOG
 -- ============================================================
 CREATE TABLE IF NOT EXISTS medical_record_audit_log (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   record_id UUID,
   record_type VARCHAR(50),
   action VARCHAR(50) NOT NULL,
@@ -387,7 +387,7 @@ CREATE TABLE IF NOT EXISTS medical_record_audit_log (
 -- 10f. LAB RESULTS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS lab_results (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
   medical_record_id UUID REFERENCES medical_records(id) ON DELETE SET NULL,
   test_name VARCHAR(255) NOT NULL,
@@ -414,7 +414,7 @@ CREATE TABLE IF NOT EXISTS lab_results (
 -- 11. SESSIONS (refresh tokens)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS sessions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   refresh_token VARCHAR(500) NOT NULL,
   user_agent VARCHAR(500),
@@ -427,7 +427,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 -- 12. PAYMENTS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS payments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
   booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
   user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -454,7 +454,7 @@ CREATE TABLE IF NOT EXISTS payments (
 -- 13. NOTIFICATIONS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS notifications (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type VARCHAR(50) NOT NULL,
   title VARCHAR(255) NOT NULL,
@@ -469,7 +469,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 -- 14. REVIEWS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS reviews (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
   reviewer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -489,7 +489,7 @@ CREATE TABLE IF NOT EXISTS reviews (
 -- 15. AUDIT LOGS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS audit_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   user_email VARCHAR(255),
   action VARCHAR(100) NOT NULL,
@@ -510,7 +510,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- 16. SYSTEM SETTINGS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS system_settings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   key VARCHAR(255) UNIQUE NOT NULL,
   value TEXT NOT NULL DEFAULT '',
   category VARCHAR(50) DEFAULT 'general',
@@ -523,7 +523,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
 -- 17. WALLETS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS wallets (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   balance DECIMAL(10,2) DEFAULT 0.00,
   bonus_credits DECIMAL(10,2) DEFAULT 0.00,
@@ -536,7 +536,7 @@ CREATE TABLE IF NOT EXISTS wallets (
 -- 18. WALLET TRANSACTIONS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS wallet_transactions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   wallet_id UUID NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
   type VARCHAR(30) NOT NULL CHECK (type IN ('credit', 'debit', 'refund', 'bonus', 'withdrawal')),
   amount DECIMAL(10,2) NOT NULL,
@@ -719,7 +719,7 @@ END $$;
 -- VET HOSPITALS (needed for booking LEFT JOIN)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS vet_hospitals (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   hospital_type VARCHAR(50) NOT NULL DEFAULT 'multi_specialty',
   tagline VARCHAR(500),
@@ -775,7 +775,7 @@ CREATE TABLE IF NOT EXISTS vet_hospitals (
 -- 19. STAFF POSITIONS (Hospital staff categories)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS staff_positions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   position VARCHAR(50) NOT NULL
@@ -792,7 +792,7 @@ CREATE TABLE IF NOT EXISTS staff_positions (
 -- 20. APPOINTMENT QUEUE (Waiting room & triage)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS appointment_queue (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
@@ -819,7 +819,7 @@ CREATE TABLE IF NOT EXISTS appointment_queue (
 -- 21. WORKFLOW CASES (Clinical pipeline tracking)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS workflow_cases (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   queue_entry_id UUID REFERENCES appointment_queue(id) ON DELETE SET NULL,
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
@@ -847,7 +847,7 @@ CREATE TABLE IF NOT EXISTS workflow_cases (
 -- 22. WORKFLOW TRANSITIONS (Stage change audit log)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS workflow_transitions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   case_id UUID NOT NULL REFERENCES workflow_cases(id) ON DELETE CASCADE,
   from_stage VARCHAR(30),
   to_stage VARCHAR(30) NOT NULL,
@@ -861,7 +861,7 @@ CREATE TABLE IF NOT EXISTS workflow_transitions (
 -- 23. REFERRALS (Multi-doctor consultation handoffs)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS referrals (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   case_id UUID REFERENCES workflow_cases(id) ON DELETE SET NULL,
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   from_vet_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -885,7 +885,7 @@ CREATE TABLE IF NOT EXISTS referrals (
 -- 24. INPATIENT ADMISSIONS (Boarding & overnight stays)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS inpatient_admissions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
   owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -951,7 +951,7 @@ CREATE TRIGGER update_inpatient_admissions_updated_at BEFORE UPDATE ON inpatient
 -- 25. VET DATE OVERRIDES (day off / custom hours for specific dates)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS vet_date_overrides (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   override_date DATE NOT NULL,
   override_type VARCHAR(20) NOT NULL CHECK (override_type IN ('unavailable', 'custom_hours')),
@@ -969,7 +969,7 @@ CREATE TABLE IF NOT EXISTS vet_date_overrides (
 -- 26. VET BLOCKED SLOTS (block specific time ranges, one-time or recurring)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS vet_blocked_slots (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   block_date DATE,
   start_time VARCHAR(10) NOT NULL,
@@ -985,7 +985,7 @@ CREATE TABLE IF NOT EXISTS vet_blocked_slots (
 -- 27. HOSPITAL HOLIDAYS (system-wide or hospital-specific)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS hospital_holidays (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   holiday_date DATE NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -1025,7 +1025,7 @@ CREATE TRIGGER update_hospital_holidays_updated_at BEFORE UPDATE ON hospital_hol
 -- ═══════════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS role_permissions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   role VARCHAR(50) NOT NULL,
   permission VARCHAR(100) NOT NULL,
   is_enabled BOOLEAN DEFAULT true,
@@ -1035,7 +1035,7 @@ CREATE TABLE IF NOT EXISTS role_permissions (
 );
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token_hash VARCHAR(128) NOT NULL,
   expires_at TIMESTAMPTZ NOT NULL,
@@ -1053,7 +1053,7 @@ CREATE INDEX IF NOT EXISTS idx_refresh_tokens_hash ON refresh_tokens(token_hash)
 -- ═══════════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS hospital_departments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
   code VARCHAR(20),
@@ -1070,7 +1070,7 @@ CREATE TABLE IF NOT EXISTS hospital_departments (
 CREATE INDEX IF NOT EXISTS idx_hospital_departments_hospital ON hospital_departments(hospital_id);
 
 CREATE TABLE IF NOT EXISTS hospital_doctors (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   doctor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   department_id UUID REFERENCES hospital_departments(id) ON DELETE SET NULL,
@@ -1096,7 +1096,7 @@ CREATE INDEX IF NOT EXISTS idx_hospital_doctors_hospital ON hospital_doctors(hos
 CREATE INDEX IF NOT EXISTS idx_hospital_doctors_doctor ON hospital_doctors(doctor_id);
 
 CREATE TABLE IF NOT EXISTS hospital_services (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   service_name VARCHAR(255) NOT NULL,
   category VARCHAR(100) NOT NULL DEFAULT 'consultation'
@@ -1116,7 +1116,7 @@ CREATE TABLE IF NOT EXISTS hospital_services (
 );
 
 CREATE TABLE IF NOT EXISTS hospital_invites (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   email VARCHAR(255) NOT NULL,
   first_name VARCHAR(100),
@@ -1135,7 +1135,7 @@ CREATE INDEX IF NOT EXISTS idx_hospital_invites_token ON hospital_invites(invite
 CREATE INDEX IF NOT EXISTS idx_hospital_invites_hospital ON hospital_invites(hospital_id);
 
 CREATE TABLE IF NOT EXISTS hospital_documents (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   doc_type VARCHAR(30) NOT NULL
     CHECK (doc_type IN (
@@ -1165,7 +1165,7 @@ CREATE INDEX IF NOT EXISTS idx_hospital_docs_expiry ON hospital_documents(expiry
 
 -- ── 30. VACCINE PROTOCOLS ────────────────────────────────────
 CREATE TABLE IF NOT EXISTS vaccine_protocols (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   disease VARCHAR(255) NOT NULL,
   species TEXT[] NOT NULL DEFAULT '{}',
@@ -1205,7 +1205,7 @@ CREATE TABLE IF NOT EXISTS vaccine_protocols (
 
 -- ── 31. VACCINE PROTOCOL CHANGES (regulatory change history) ─
 CREATE TABLE IF NOT EXISTS vaccine_protocol_changes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
   changed_field VARCHAR(100) NOT NULL,
   old_value TEXT,
@@ -1219,7 +1219,7 @@ CREATE TABLE IF NOT EXISTS vaccine_protocol_changes (
 
 -- ── 32. ANIMAL VACCINE ASSIGNMENTS (protocols assigned to an animal) ─
 CREATE TABLE IF NOT EXISTS animal_vaccine_assignments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
   protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
   assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -1232,7 +1232,7 @@ CREATE TABLE IF NOT EXISTS animal_vaccine_assignments (
 
 -- ── 33. VACCINE SCHEDULE (generated per-dose rows) ──────────
 CREATE TABLE IF NOT EXISTS vaccine_schedule (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
   protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
   assignment_id UUID REFERENCES animal_vaccine_assignments(id) ON DELETE SET NULL,
@@ -1252,7 +1252,7 @@ CREATE TABLE IF NOT EXISTS vaccine_schedule (
 
 -- ── 34. VACCINE CERTIFICATE LOG (track PDF certificate downloads) ─
 CREATE TABLE IF NOT EXISTS vaccine_certificate_log (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
   vaccination_record_id UUID REFERENCES vaccination_records(id) ON DELETE SET NULL,
   generated_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -1291,7 +1291,7 @@ CREATE TRIGGER update_vaccine_schedule_updated_at BEFORE UPDATE ON vaccine_sched
 -- 35. VETERINARY CERTIFICATES
 -- ============================================================
 CREATE TABLE IF NOT EXISTS vet_certificates (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   certificate_number VARCHAR(100) NOT NULL UNIQUE,
   certificate_type VARCHAR(50) NOT NULL CHECK (certificate_type IN (
     'health_certificate','fitness_to_travel','rabies_vaccination','vaccination_record',

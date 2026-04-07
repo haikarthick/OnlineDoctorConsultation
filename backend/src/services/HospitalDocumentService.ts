@@ -105,7 +105,7 @@ export class HospitalDocumentService {
       // hospital_documents table
       await database.query(`
         CREATE TABLE IF NOT EXISTS hospital_documents (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
           doc_type VARCHAR(30) NOT NULL
             CHECK (doc_type IN (

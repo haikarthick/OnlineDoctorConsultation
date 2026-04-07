@@ -66,29 +66,29 @@ ON CONFLICT (id) DO NOTHING;
 -- ─── Default Vet Schedules ──────────────────────────────────
 INSERT INTO vet_schedules (id, veterinarian_id, day_of_week, start_time, end_time, slot_duration, max_appointments, is_active)
 VALUES
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'monday', '09:00', '17:00', 30, 16, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'tuesday', '09:00', '17:00', 30, 16, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'wednesday', '09:00', '17:00', 30, 16, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'thursday', '09:00', '17:00', 30, 16, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000001', 'friday', '09:00', '15:00', 30, 12, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000002', 'monday', '10:00', '18:00', 30, 16, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000002', 'wednesday', '10:00', '18:00', 30, 16, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000002', 'friday', '10:00', '16:00', 30, 12, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000003', 'tuesday', '08:00', '16:00', 30, 16, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000003', 'thursday', '08:00', '16:00', 30, 16, true),
-  (uuid_generate_v4(), 'b0000000-0000-0000-0000-000000000003', 'saturday', '09:00', '13:00', 30, 8, true)
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000001', 'monday', '09:00', '17:00', 30, 16, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000001', 'tuesday', '09:00', '17:00', 30, 16, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000001', 'wednesday', '09:00', '17:00', 30, 16, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000001', 'thursday', '09:00', '17:00', 30, 16, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000001', 'friday', '09:00', '15:00', 30, 12, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000002', 'monday', '10:00', '18:00', 30, 16, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000002', 'wednesday', '10:00', '18:00', 30, 16, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000002', 'friday', '10:00', '16:00', 30, 12, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000003', 'tuesday', '08:00', '16:00', 30, 16, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000003', 'thursday', '08:00', '16:00', 30, 16, true),
+  (gen_random_uuid(), 'b0000000-0000-0000-0000-000000000003', 'saturday', '09:00', '13:00', 30, 8, true)
 ON CONFLICT (veterinarian_id, day_of_week) DO NOTHING;
 
 -- ─── Default System Settings ────────────────────────────────
 INSERT INTO system_settings (id, key, value, category, description)
 VALUES
-  (uuid_generate_v4(), 'site_name', 'VetCare Platform', 'general', 'Application name'),
-  (uuid_generate_v4(), 'max_booking_days_ahead', '30', 'booking', 'Maximum days in advance a booking can be made'),
-  (uuid_generate_v4(), 'default_slot_duration', '30', 'booking', 'Default consultation slot duration in minutes'),
-  (uuid_generate_v4(), 'booking.patientNoShowRescheduleLimit', '1', 'booking', 'Maximum times a patient can reschedule after a patient no-show (0 = unlimited)'),
-  (uuid_generate_v4(), 'payment_currency', 'USD', 'payment', 'Default payment currency'),
-  (uuid_generate_v4(), 'video_quality', 'high', 'video', 'Default video call quality'),
-  (uuid_generate_v4(), 'session_timeout', '86400', 'security', 'Session timeout in seconds'),
-  (uuid_generate_v4(), 'enable_notifications', 'true', 'notification', 'Enable in-app notifications'),
-  (uuid_generate_v4(), 'maintenance_mode', 'false', 'general', 'Enable maintenance mode')
+  (gen_random_uuid(), 'site_name', 'VetCare Platform', 'general', 'Application name'),
+  (gen_random_uuid(), 'max_booking_days_ahead', '30', 'booking', 'Maximum days in advance a booking can be made'),
+  (gen_random_uuid(), 'default_slot_duration', '30', 'booking', 'Default consultation slot duration in minutes'),
+  (gen_random_uuid(), 'booking.patientNoShowRescheduleLimit', '1', 'booking', 'Maximum times a patient can reschedule after a patient no-show (0 = unlimited)'),
+  (gen_random_uuid(), 'payment_currency', 'USD', 'payment', 'Default payment currency'),
+  (gen_random_uuid(), 'video_quality', 'high', 'video', 'Default video call quality'),
+  (gen_random_uuid(), 'session_timeout', '86400', 'security', 'Session timeout in seconds'),
+  (gen_random_uuid(), 'enable_notifications', 'true', 'notification', 'Enable in-app notifications'),
+  (gen_random_uuid(), 'maintenance_mode', 'false', 'general', 'Enable maintenance mode')
 ON CONFLICT (key) DO NOTHING;

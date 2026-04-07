@@ -364,7 +364,7 @@ class PermissionService {
   async ensureTable(): Promise<void> {
     await database.query(`
       CREATE TABLE IF NOT EXISTS role_permissions (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         role VARCHAR(50) NOT NULL,
         permission VARCHAR(100) NOT NULL,
         is_enabled BOOLEAN DEFAULT true,

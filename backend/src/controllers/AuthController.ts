@@ -17,7 +17,22 @@ export class AuthController {
         throw new ValidationError('Missing required fields');
       }
 
-      const existingUser = await UserService.getUserByEmail(email);
+      // Self-heal: if DB query fails (missing table), repair schema then retry
+      let existingUser;
+      try {
+        existingUser = await UserService.getUserByEmail(email);
+      } catch (dbErr: any) {
+        logger.error('Register: getUserByEmail failed — triggering self-heal', { error: dbErr.message });
+        try {
+          await database.ensureSchemaPublic();
+          await fixDemoPasswords();
+          existingUser = await UserService.getUserByEmail(email);
+        } catch (healErr: any) {
+          logger.error('Register: self-heal also failed', { error: healErr.message });
+          throw new DatabaseError('Database is not ready yet. Please retry in a few seconds.');
+        }
+      }
+
       if (existingUser) {
         throw new ValidationError('Email already registered');
       }

@@ -40,7 +40,7 @@ async function runTier3Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS disease_predictions (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         animal_id UUID REFERENCES animals(id),
         group_id UUID REFERENCES animal_groups(id),
@@ -62,7 +62,7 @@ async function runTier3Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS outbreak_zones (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         location_id UUID REFERENCES locations(id),
         disease_name VARCHAR(200) NOT NULL,
@@ -87,7 +87,7 @@ async function runTier3Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS genetic_profiles (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         sire_id UUID REFERENCES animals(id),
@@ -109,7 +109,7 @@ async function runTier3Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS lineage_pairs (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         sire_id UUID NOT NULL REFERENCES animals(id),
         dam_id UUID NOT NULL REFERENCES animals(id),
@@ -129,7 +129,7 @@ async function runTier3Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS iot_sensors (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         location_id UUID REFERENCES locations(id),
         animal_id UUID REFERENCES animals(id),
@@ -155,7 +155,7 @@ async function runTier3Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS sensor_readings (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         sensor_id UUID NOT NULL REFERENCES iot_sensors(id),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         value NUMERIC(12,4) NOT NULL,
@@ -173,7 +173,7 @@ async function runTier3Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS product_batches (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         batch_number VARCHAR(100) NOT NULL,
         product_type VARCHAR(60) NOT NULL,
@@ -196,7 +196,7 @@ async function runTier3Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS traceability_events (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         batch_id UUID REFERENCES product_batches(id),
         animal_id UUID REFERENCES animals(id),
@@ -218,7 +218,7 @@ async function runTier3Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS qr_codes (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         entity_type VARCHAR(30) NOT NULL,
         entity_id UUID NOT NULL,
@@ -236,7 +236,7 @@ async function runTier3Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS workforce_tasks (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         title VARCHAR(300) NOT NULL,
         description TEXT,
@@ -263,7 +263,7 @@ async function runTier3Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS shift_schedules (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         user_id UUID NOT NULL REFERENCES users(id),
         shift_date DATE NOT NULL,
@@ -286,7 +286,7 @@ async function runTier3Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS report_templates (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID REFERENCES enterprises(id),
         name VARCHAR(200) NOT NULL,
         description TEXT,
@@ -305,7 +305,7 @@ async function runTier3Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS generated_reports (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         template_id UUID REFERENCES report_templates(id),
         name VARCHAR(200) NOT NULL,

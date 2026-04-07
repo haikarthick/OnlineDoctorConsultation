@@ -34,7 +34,7 @@ async function runTier2Migration() {
     // ─── 1. Health Observations (granular health data) ───
     await client.query(`
       CREATE TABLE IF NOT EXISTS health_observations (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         animal_id UUID REFERENCES animals(id),
         group_id UUID REFERENCES animal_groups(id),
@@ -64,7 +64,7 @@ async function runTier2Migration() {
     // ─── 2. Breeding Records ───
     await client.query(`
       CREATE TABLE IF NOT EXISTS breeding_records (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         dam_id UUID REFERENCES animals(id),
         sire_id UUID REFERENCES animals(id),
@@ -92,7 +92,7 @@ async function runTier2Migration() {
     // ─── 3. Feed Inventory ───
     await client.query(`
       CREATE TABLE IF NOT EXISTS feed_inventory (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         location_id UUID REFERENCES locations(id),
         feed_name VARCHAR(200) NOT NULL,
@@ -118,7 +118,7 @@ async function runTier2Migration() {
     // ─── 4. Feed Consumption Logs ───
     await client.query(`
       CREATE TABLE IF NOT EXISTS feed_consumption_logs (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         feed_id UUID NOT NULL REFERENCES feed_inventory(id),
         group_id UUID REFERENCES animal_groups(id),
@@ -138,7 +138,7 @@ async function runTier2Migration() {
     // ─── 5. Compliance Documents ───
     await client.query(`
       CREATE TABLE IF NOT EXISTS compliance_documents (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         document_type VARCHAR(50) NOT NULL,
         title VARCHAR(300) NOT NULL,
@@ -167,7 +167,7 @@ async function runTier2Migration() {
     // ─── 6. Financial Records ───
     await client.query(`
       CREATE TABLE IF NOT EXISTS financial_records (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         record_type VARCHAR(30) NOT NULL,
         category VARCHAR(50) NOT NULL,
@@ -195,7 +195,7 @@ async function runTier2Migration() {
     // ─── 7. Alert Rules ───
     await client.query(`
       CREATE TABLE IF NOT EXISTS alert_rules (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         name VARCHAR(200) NOT NULL,
         description TEXT,
@@ -217,7 +217,7 @@ async function runTier2Migration() {
     // ─── 8. Alert Events ───
     await client.query(`
       CREATE TABLE IF NOT EXISTS alert_events (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         rule_id UUID REFERENCES alert_rules(id),
         alert_type VARCHAR(50) NOT NULL,

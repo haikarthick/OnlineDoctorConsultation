@@ -67,7 +67,7 @@ class CertificateService {
          recommendations, vaccination_details, travel_details, breeding_details,
          valuation_details, valid_until, notes
        ) VALUES (
-         uuid_generate_v4(), $1, $2, 'draft', $3,
+         gen_random_uuid(), $1, $2, 'draft', $3,
          $4, $5, $6, $7, $8,
          $9, $10, $11, $12,
          $13, $14, $15, $16,

@@ -170,7 +170,7 @@ export class VetHospitalService {
     try {
       await database.query(`
         CREATE TABLE IF NOT EXISTS vet_hospitals (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           name VARCHAR(255) NOT NULL,
           hospital_type VARCHAR(50) NOT NULL DEFAULT 'multi_specialty'
             CHECK (hospital_type IN (
@@ -223,7 +223,7 @@ export class VetHospitalService {
         );
 
         CREATE TABLE IF NOT EXISTS hospital_departments (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
           name VARCHAR(255) NOT NULL,
           code VARCHAR(20),
@@ -239,7 +239,7 @@ export class VetHospitalService {
         );
 
         CREATE TABLE IF NOT EXISTS hospital_doctors (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
           doctor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           department_id UUID REFERENCES hospital_departments(id) ON DELETE SET NULL,
@@ -263,7 +263,7 @@ export class VetHospitalService {
         );
 
         CREATE TABLE IF NOT EXISTS hospital_services (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
           service_name VARCHAR(255) NOT NULL,
           category VARCHAR(100) NOT NULL DEFAULT 'consultation'
@@ -302,7 +302,7 @@ export class VetHospitalService {
       // Hospital invites table
       await database.query(`
         CREATE TABLE IF NOT EXISTS hospital_invites (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
           email VARCHAR(255) NOT NULL,
           first_name VARCHAR(100),

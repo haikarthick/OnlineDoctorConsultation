@@ -151,11 +151,14 @@ class PostgresDatabase {
   private async ensureSchema(): Promise<void> {
     return this.ensureSchemaPublic();
   }
-
-  /** Public version — called by AuthController self-heal on first-login failure */
   async ensureSchemaPublic(): Promise<void> {
     try {
       const schemaName = config.database.schema || 'public';
+      // 1. Ensure the schema itself exists first
+      if (schemaName !== 'public') {
+        await this.pool.query(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
+      }
+      // 2. Check if users table exists
       const check = await this.pool.query(
         `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'users')`,
         [schemaName]
@@ -211,7 +214,7 @@ class PostgresDatabase {
     for (const d of defaults) {
       await this.pool.query(
         `INSERT INTO system_settings (id, key, value, category, description)
-         VALUES (uuid_generate_v4(), $1, $2, $3, $4)
+         VALUES (gen_random_uuid(), $1, $2, $3, $4)
          ON CONFLICT (key) DO NOTHING`,
         [d.key, d.value, d.category, d.description]
       );
@@ -241,7 +244,7 @@ class PostgresDatabase {
     // Ensure enterprise-related tables exist FIRST (vet_certificates has a FK to enterprises)
     await this.pool.query(
       `CREATE TABLE IF NOT EXISTS enterprises (
-         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
          name VARCHAR(255) NOT NULL,
          enterprise_type VARCHAR(50),
          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -251,7 +254,7 @@ class PostgresDatabase {
     // Ensure vet_certificates table exists (safety net — must run AFTER enterprises is guaranteed)
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS vet_certificates (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         certificate_number VARCHAR(100) NOT NULL UNIQUE,
         certificate_type VARCHAR(50) NOT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'draft',
@@ -282,7 +285,7 @@ class PostgresDatabase {
     });
     await this.pool.query(
       `CREATE TABLE IF NOT EXISTS animal_groups (
-         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
          name VARCHAR(255) NOT NULL,
          group_type VARCHAR(50),
          enterprise_id UUID,
@@ -395,7 +398,7 @@ class PostgresDatabase {
     // Ensure marketplace monetization tables exist (safety net)
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS marketplace_monetization_settings (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         setting_key VARCHAR(100) UNIQUE NOT NULL,
         setting_value JSONB NOT NULL DEFAULT '{}',
         is_enabled BOOLEAN DEFAULT false,
@@ -408,7 +411,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS marketplace_plans (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(100) NOT NULL,
         description TEXT,
         price NUMERIC(10,2) NOT NULL DEFAULT 0,
@@ -427,7 +430,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS marketplace_subscriptions (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id),
         plan_id UUID NOT NULL REFERENCES marketplace_plans(id),
         status VARCHAR(20) DEFAULT 'active',
@@ -440,7 +443,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS listing_boosts (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
         user_id UUID NOT NULL REFERENCES users(id),
         boost_type VARCHAR(30) DEFAULT 'standard',
@@ -453,7 +456,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS marketplace_inquiries (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
         buyer_id UUID NOT NULL REFERENCES users(id),
         seller_id UUID NOT NULL REFERENCES users(id),
@@ -468,7 +471,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS marketplace_transactions (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id),
         transaction_type VARCHAR(30) NOT NULL,
         amount NUMERIC(10,2) NOT NULL DEFAULT 0,
@@ -495,7 +498,7 @@ class PostgresDatabase {
     for (const d of monetizationDefaults) {
       await this.pool.query(
         `INSERT INTO marketplace_monetization_settings (id, setting_key, setting_value, is_enabled, description, category)
-         VALUES (uuid_generate_v4(), $1, $2::jsonb, false, $3, $4)
+         VALUES (gen_random_uuid(), $1, $2::jsonb, false, $3, $4)
          ON CONFLICT (setting_key) DO NOTHING`,
         [d.key, d.value, d.desc, d.category]
       ).catch(() => {});
@@ -504,7 +507,7 @@ class PostgresDatabase {
     // Ensure vaccination protocol tables exist (safety net for existing DBs)
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS vaccine_protocols (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(255) NOT NULL,
         disease VARCHAR(255) NOT NULL,
         species TEXT[] NOT NULL DEFAULT '{}',
@@ -533,7 +536,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS vaccine_protocol_changes (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
         changed_field VARCHAR(100) NOT NULL,
         old_value TEXT,
@@ -547,7 +550,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS animal_vaccine_assignments (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
         protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
         assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -560,7 +563,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS vaccine_schedule (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
         protocol_id UUID NOT NULL REFERENCES vaccine_protocols(id) ON DELETE CASCADE,
         assignment_id UUID REFERENCES animal_vaccine_assignments(id) ON DELETE SET NULL,
@@ -578,7 +581,7 @@ class PostgresDatabase {
     `).catch(() => {});
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS vaccine_certificate_log (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
         vaccination_record_id UUID REFERENCES vaccination_records(id) ON DELETE SET NULL,
         generated_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

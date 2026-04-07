@@ -41,7 +41,7 @@ async function runTier4Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS ai_chat_sessions (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID REFERENCES enterprises(id),
         user_id UUID NOT NULL REFERENCES users(id),
         animal_id UUID REFERENCES animals(id),
@@ -59,7 +59,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS ai_chat_messages (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         session_id UUID NOT NULL REFERENCES ai_chat_sessions(id) ON DELETE CASCADE,
         role VARCHAR(20) NOT NULL DEFAULT 'user',
         content TEXT NOT NULL,
@@ -78,7 +78,7 @@ async function runTier4Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS digital_twins (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         name VARCHAR(200) NOT NULL,
         twin_type VARCHAR(50) NOT NULL DEFAULT 'farm',
@@ -96,7 +96,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS simulation_runs (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         twin_id UUID NOT NULL REFERENCES digital_twins(id) ON DELETE CASCADE,
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         name VARCHAR(200) NOT NULL,
@@ -120,7 +120,7 @@ async function runTier4Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS marketplace_listings (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID REFERENCES enterprises(id),
         seller_id UUID NOT NULL REFERENCES users(id),
         title VARCHAR(300) NOT NULL,
@@ -148,7 +148,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS marketplace_bids (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
         bidder_id UUID NOT NULL REFERENCES users(id),
         amount NUMERIC(12,2) NOT NULL,
@@ -163,7 +163,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS marketplace_orders (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         listing_id UUID NOT NULL REFERENCES marketplace_listings(id),
         buyer_id UUID NOT NULL REFERENCES users(id),
         seller_id UUID NOT NULL REFERENCES users(id),
@@ -187,7 +187,7 @@ async function runTier4Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS sustainability_metrics (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         metric_type VARCHAR(60) NOT NULL,
         metric_name VARCHAR(200) NOT NULL,
@@ -208,7 +208,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS sustainability_goals (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         goal_name VARCHAR(200) NOT NULL,
         description TEXT,
@@ -233,7 +233,7 @@ async function runTier4Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS wellness_scorecards (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id),
         enterprise_id UUID REFERENCES enterprises(id),
         owner_id UUID NOT NULL REFERENCES users(id),
@@ -256,7 +256,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS wellness_reminders (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id),
         owner_id UUID NOT NULL REFERENCES users(id),
         reminder_type VARCHAR(60) NOT NULL,
@@ -280,7 +280,7 @@ async function runTier4Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS geofence_zones (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         name VARCHAR(200) NOT NULL,
         zone_type VARCHAR(50) DEFAULT 'boundary',
@@ -302,7 +302,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS geospatial_events (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         enterprise_id UUID NOT NULL REFERENCES enterprises(id),
         zone_id UUID REFERENCES geofence_zones(id),
         animal_id UUID REFERENCES animals(id),
@@ -405,7 +405,7 @@ async function runTier4Migration() {
     // ═══════════════════════════════════════════════════════════
     await client.query(`
       CREATE TABLE IF NOT EXISTS marketplace_monetization_settings (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         setting_key VARCHAR(100) UNIQUE NOT NULL,
         setting_value JSONB NOT NULL DEFAULT '{}',
         is_enabled BOOLEAN DEFAULT false,
@@ -420,7 +420,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS marketplace_plans (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name VARCHAR(100) NOT NULL,
         description TEXT,
         price NUMERIC(10,2) NOT NULL DEFAULT 0,
@@ -441,7 +441,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS marketplace_subscriptions (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id),
         plan_id UUID NOT NULL REFERENCES marketplace_plans(id),
         status VARCHAR(20) DEFAULT 'active',
@@ -456,7 +456,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS listing_boosts (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
         user_id UUID NOT NULL REFERENCES users(id),
         boost_type VARCHAR(30) DEFAULT 'standard',
@@ -471,7 +471,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS marketplace_inquiries (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
         buyer_id UUID NOT NULL REFERENCES users(id),
         seller_id UUID NOT NULL REFERENCES users(id),
@@ -488,7 +488,7 @@ async function runTier4Migration() {
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS marketplace_transactions (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id),
         transaction_type VARCHAR(30) NOT NULL,
         amount NUMERIC(10,2) NOT NULL DEFAULT 0,
@@ -527,7 +527,7 @@ async function runTier4Migration() {
     for (const d of monetizationDefaults) {
       await client.query(
         `INSERT INTO marketplace_monetization_settings (id, setting_key, setting_value, is_enabled, description, category)
-         VALUES (uuid_generate_v4(), $1, $2::jsonb, false, $3, $4)
+         VALUES (gen_random_uuid(), $1, $2::jsonb, false, $3, $4)
          ON CONFLICT (setting_key) DO NOTHING`,
         [d.key, d.value, d.desc, d.category]
       ).catch(() => {});
@@ -544,7 +544,7 @@ async function runTier4Migration() {
     for (const p of defaultPlans) {
       await client.query(
         `INSERT INTO marketplace_plans (id, name, description, price, duration_days, features, max_listings, max_boosts_per_month, is_active, sort_order)
-         VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5::jsonb, $6, $7, false, $8)
+         VALUES (gen_random_uuid(), $1, $2, $3, $4, $5::jsonb, $6, $7, false, $8)
          ON CONFLICT DO NOTHING`,
         [p.name, p.desc, p.price, p.days, p.features, p.maxListings, p.boosts, p.sort]
       ).catch(() => {});
