@@ -96,7 +96,23 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 
 ---
 
-## 🔴 CSS & Layout Bugs
+### AUTH-002 — CertificateController Wrong req.user Pattern — 403 for All Roles
+- **Symptom:** "Only veterinarians can create certificates" even when logged in as a Veterinarian role user
+- **Root Cause:** `CertificateController.ts` used `(req as any).user?.id` and `(req as any).user?.role` throughout all 7 methods. `authMiddleware` sets `req.userId` and `req.userRole` — NOT `req.user`. So `role` was always undefined, failing the role check for everyone.
+- **Why other controllers worked:** Tier2Controller, Tier3Controller etc all use `(req as any).userId` and `(req as any).userRole` correctly. Only CertificateController used the wrong pattern.
+- **Fix:** Replaced all `(req as any).user?.id` with `(req as any).userId` and `(req as any).user?.role` with `(req as any).userRole` in all 7 methods.
+- **Rule:** authMiddleware sets req.userId and req.userRole. NEVER use req.user?.id or req.user?.role.
+
+---
+
+### CSS-005 — module-tabs and module-btn Missing from modules.css — Broken Tabs on 3 Pages
+- **Symptom:** Step tabs and buttons appear unstyled (plain boxes) on CertificateWriter, VetCertificates, VaccinationPassport. User reports "CSS is breaking again" — recurring complaint.
+- **Root Cause:** `.module-tabs`, `.module-tab`, `.module-btn` were ONLY defined in `ModulePage.css`. But 3 pages import `modules.css` (not `ModulePage.css`), so they never received these styles.
+- **Pages affected:** CertificateWriter.tsx, VetCertificates.tsx, VaccinationPassport.tsx
+- **Fix:** Added `.module-tabs`, `.module-tab` (.hover + .active), `.module-btn` (.hover + .primary + .small + :disabled) to `modules.css` as canonical global location.
+- **Rule:** `modules.css` is the single source of truth for ALL shared design-system classes. If a class is used in ANY page component, it MUST be defined in `modules.css` — NOT only in `ModulePage.css`.
+
+---
 
 ### CSS-001 — Scrollbar Overflow on All Pages
 - **Root Cause:** `.module-page { min-height: 100vh }` inside a flex child that already has a 100vh parent
