@@ -1638,3 +1638,327 @@
   transform: none;
   box-shadow: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MODULE DESIGN SYSTEM — FULL CANONICAL SET
+   All classes below are authoritative. Pages that import ONLY
+   modules.css (not ModulePage.css) will get full design-system
+   styling. Add new design-system classes HERE, not in ModulePage.css.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page Layout ── */
+.module-page {
+  padding: 32px;
+  animation: fadeIn 0.3s ease;
+  background: linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%);
+  min-height: calc(100vh - 64px);
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+}
+.module-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+/* Prevent gradient text from cascading into interactive elements */
+.module-header button,
+.module-header select,
+.module-header input,
+.module-header textarea {
+  -webkit-text-fill-color: initial;
+}
+
+/* ── Card ── */
+.module-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+/* ── Content Block ── */
+.module-content {
+  background: white;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* ── Form Layout ── */
+.module-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.module-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.module-form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+.module-form-group {
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 768px) {
+  .module-form-row,
+  .module-form-row-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Form Elements ── */
+.module-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+  letter-spacing: 0.2px;
+}
+.module-input,
+.module-input[type="number"],
+.module-input[type="datetime-local"],
+select.module-input,
+textarea.module-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1a1a1a;
+  -webkit-text-fill-color: #1a1a1a;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.module-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+.module-input::placeholder { color: #94a3b8; }
+textarea.module-input {
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* ── Table ── */
+.module-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.module-table thead {
+  background: linear-gradient(135deg, #f0f4ff 0%, #f9f6ff 100%);
+}
+.module-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 12px;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+}
+.module-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  font-size: 13px;
+  color: #1a1a1a;
+}
+.module-table tbody tr { transition: background 0.2s; }
+.module-table tbody tr:hover { background: rgba(102, 126, 234, 0.04); }
+.module-table tbody tr:last-child td { border-bottom: none; }
+
+/* ── Alerts ── */
+.module-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.module-alert.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+.module-alert.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+/* Supports both <button className="module-alert-close"> and bare <button> inside alert */
+.module-alert button,
+.module-alert-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: inherit;
+  padding: 0 4px;
+}
+
+/* ── Badges (extended set) ── */
+.badge-success { background: #dcfce7; color: #166534; }
+.badge-error   { background: #fee2e2; color: #991b1b; }
+
+/* ── Module Badge (pill variant) ── */
+.module-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+  background: #f1f5f9;
+  color: #475569;
+}
+.module-badge.success {
+  background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+  color: #2e7d32;
+}
+.module-badge.error {
+  background: linear-gradient(135deg, #fecdd3 0%, #fda4af 100%);
+  color: #be123c;
+}
+
+/* ── Stats Grid ── */
+.module-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 768px) {
+  .module-stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .module-stats { grid-template-columns: 1fr; }
+}
+
+/* ── Error Utilities ── */
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  15%, 45%, 75% { transform: translateX(-6px); }
+  30%, 60%, 90% { transform: translateX(6px); }
+}
+.error-shake { animation: errorShake 0.5s ease-in-out; }
+.input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+.input-error-msg {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ── Modal / Edit Form Overlay ── */
+.edit-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9998;
+  animation: overlayFadeIn 0.25s ease;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+  overflow-y: auto;
+}
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.edit-form-panel {
+  position: relative;
+  z-index: 9999;
+  background: white;
+  border: 2px solid #6366f1;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
+  animation: formSlideIn 0.3s ease;
+}
+.edit-form-modal {
+  width: 95%;
+  max-width: 720px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  margin: 0 auto;
+}
+.edit-form-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.edit-form-close:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+@keyframes formSlideIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.edit-form-panel h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  color: #1f2937;
+}
+@media (max-width: 768px) {
+  .edit-form-panel    { padding: 16px; border-radius: 12px; }
+  .edit-form-modal    { width: 100%; max-height: calc(100vh - 40px); }
+  .edit-form-overlay  { padding: 20px 8px; }
+}
+@media (max-width: 480px) {
+  .edit-form-panel   { padding: 12px; }
+  .edit-form-overlay { padding: 10px 4px; }
+}

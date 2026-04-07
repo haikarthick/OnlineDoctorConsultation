@@ -112,6 +112,13 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 - **Fix:** Added `.module-tabs`, `.module-tab` (.hover + .active), `.module-btn` (.hover + .primary + .small + :disabled) to `modules.css` as canonical global location.
 - **Rule:** `modules.css` is the single source of truth for ALL shared design-system classes. If a class is used in ANY page component, it MUST be defined in `modules.css` — NOT only in `ModulePage.css`.
 
+### CSS-006 — ENTIRE Design System Missing from modules.css — ALL Pages Importing Only modules.css Were Broken
+- **Symptom:** Certificate module (VetCertificates.tsx etc.) had unstyled headers, cards, tables, inputs, alerts, forms. Error alerts rendered as plain text with no background/border.
+- **Root Cause:** `ModulePage.css` is the file where the design system grew organically, but `modules.css` was supposed to be the global file. Pages like VetCertificates only import `modules.css`, never `ModulePage.css`. Result: `module-header`, `module-card`, `module-table`, `module-input`, `module-label`, `module-alert`, `module-alert.error`, `module-alert.success`, `module-form`, `module-form-row`, `module-form-row-3`, `module-form-group`, `module-badge`, `module-stats`, `module-content`, `edit-form-overlay`, `edit-form-panel`, `edit-form-close` — ALL were missing.
+- **Root Cause 2:** `module-alert-close` used as explicit className in JSX but NO CSS class existed anywhere. Only `.module-alert button` existed in ModulePage.css.
+- **Fix:** Added ALL missing design-system classes to `modules.css` as the canonical global location. Also added `.module-alert-close` class alongside `.module-alert button`.
+- **Rule:** `modules.css` is the ONLY place design-system classes should be defined. When adding any new class to the design system, ALWAYS add it to `modules.css` first. Never define it only in `ModulePage.css`.
+
 ---
 
 ### CSS-001 — Scrollbar Overflow on All Pages
@@ -160,6 +167,12 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 
 - **Root Cause:** Query used `a.microchip_number` and `a.avatar_url` — neither column exists in the schema. PostgreSQL threw an error, catch block swallowed it, frontend silently showed "No animals found"
 - **Fix:** ALWAYS cross-reference every column name against `docker/init.sql` before writing SQL. Silent try/catch is a major trap — log errors even if you continue.
+
+### API-006 — CertificateService.getById() Used a.avatar_url → "Failed to load certificate for printing"
+- **Symptom:** Clicking the 🖨 print/view button on any certificate throws "Failed to load certificate for printing" for ALL users (doctor + patient)
+- **Root Cause:** `CertificateService.getById()` SQL query included `a.avatar_url as "animalAvatar"`. The `animals` table has NO `avatar_url` column (only `users` does, at line 30 of init.sql). PostgreSQL threw `column a.avatar_url does not exist`. The controller's catch block returned 500, frontend displayed the i18n error string.
+- **Fix:** Removed `a.avatar_url as "animalAvatar"` from the JOIN query and `animalAvatar: r.animalAvatar` from `mapRow()`.
+- **Rule:** ALWAYS grep `docker/init.sql` for a column name before using it in any SQL JOIN. Never assume columns from memory — especially from related tables. The animals table uses `name`, `species`, `breed`, `date_of_birth`, `gender` — NOT `avatar_url`.
 
 ---
 
