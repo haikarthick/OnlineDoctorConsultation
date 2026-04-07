@@ -467,7 +467,15 @@ const Animals: React.FC = () => {
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: 12, fontFamily: 'monospace' }}>
+                      <div
+                        style={{ fontSize: 11, fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: 12, fontFamily: 'monospace', cursor: 'copy' }}
+                        onClick={() => {
+                          if (animal.uniqueId) {
+                            navigator.clipboard?.writeText(animal.uniqueId).catch(() => {});
+                          }
+                        }}
+                        title={animal.uniqueId ? `Click to copy: ${animal.uniqueId}` : ''}
+                      >
                         {animal.uniqueId || `ID-${animal.id.substring(0, 8).toUpperCase()}`}
                       </div>
                       {age && <div style={{ fontSize: 11, marginTop: 4, opacity: 0.85 }}>{t('animals.cardLabels.age')} {age}</div>}

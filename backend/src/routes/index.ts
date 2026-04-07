@@ -212,6 +212,7 @@ router.delete('/certificates/:id', authMiddleware, asyncHandler((req: Request, r
 
 // ─── Animal / Pet routes ─────────────────────────────────────
 router.post('/animals', authMiddleware, validateBody(createAnimalSchema), asyncHandler((req: Request, res: Response) => AnimalController.createAnimal(req, res)));
+router.get('/animals/search/by-uid', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.searchByUniqueId(req, res)));
 router.get('/animals', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.listAnimals(req, res)));
 router.get('/animals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.getAnimal(req, res)));
 router.put('/animals/:id', authMiddleware, validateBody(updateAnimalSchema), asyncHandler((req: Request, res: Response) => AnimalController.updateAnimal(req, res)));

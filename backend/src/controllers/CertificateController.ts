@@ -29,6 +29,7 @@ class CertificateController {
         type: req.query.type as string | undefined,
         status: req.query.status as string | undefined,
         animalId: req.query.animalId as string | undefined,
+        enterpriseId: req.query.enterpriseId as string | undefined,
       };
 
       let result: any;
@@ -40,7 +41,7 @@ class CertificateController {
           search: req.query.search as string | undefined,
         });
       } else {
-        // pet_owner or farmer
+        // pet_owner or farmer — pass enterpriseId filter
         result = await CertificateService.listByOwner(userId, params);
       }
 

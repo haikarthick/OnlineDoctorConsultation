@@ -11,11 +11,14 @@ interface CertificateWriterProps {
   onNavigate: (path: string) => void
 }
 
-const CERT_TYPES = [
+const CERT_TYPES_PET = [
   'health_certificate', 'fitness_to_travel', 'rabies_vaccination', 'vaccination_record',
   'pre_travel', 'sterilization', 'treatment', 'animal_injury', 'post_mortem',
-  'breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation',
-  'fitness_for_sale', 'animal_valuation',
+  'fitness_for_sale',
+]
+
+const CERT_TYPES_FARM = [
+  'breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation', 'animal_valuation',
 ]
 
 interface VaccineRow {
@@ -51,13 +54,18 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
   const [owners, setOwners] = useState<{ id: string; name: string; email: string }[]>([])
   const [selectedOwnerId, setSelectedOwnerId] = useState(urlPetOwnerId)
   const [selectedOwner, setSelectedOwner] = useState<{ id: string; name: string; email: string } | null>(null)
-  const [animals, setAnimals] = useState<{ id: string; name: string; species: string; breed?: string }[]>([])
+  const [animals, setAnimals] = useState<{ id: string; name: string; species: string; breed?: string; uniqueId?: string }[]>([])
   const [selectedAnimalId, setSelectedAnimalId] = useState(urlAnimalId)
   const [consultations, setConsultations] = useState<{ id: string; label: string }[]>([])
   const [selectedConsultationId, setSelectedConsultationId] = useState(urlConsultationId)
   const [loadingOwners, setLoadingOwners] = useState(false)
   const [loadingAnimals, setLoadingAnimals] = useState(false)
   const [examinationDate, setExaminationDate] = useState(new Date().toISOString().slice(0, 10))
+
+  // Enterprise (farmer/admin)
+  const [enterpriseOptions, setEnterpriseOptions] = useState<{ id: string; name: string }[]>([])
+  const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
+  const isFarmerOrAdmin = user?.role === 'farmer' || user?.role === 'admin'
 
   // Step 2: Clinical fields
   const [clinicalFindings, setClinicalFindings] = useState('')
@@ -127,10 +135,20 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
         }
         // Load owner info
         if (cert.petOwnerId) setSelectedOwnerId(cert.petOwnerId)
+        if (cert.enterpriseId) setSelectedEnterpriseId(cert.enterpriseId)
       } catch { /* ignore */ }
     }
     loadEdit()
   }, [editId])
+
+  // ── Load enterprises for farmer/admin ──
+  useEffect(() => {
+    if (!isFarmerOrAdmin) return
+    apiService.listEnterprises({ limit: 100 }).then(res => {
+      const items = res.data?.items || res.data?.enterprises || (Array.isArray(res.data) ? res.data : [])
+      setEnterpriseOptions(items.map((e: any) => ({ id: e.id, name: e.name })))
+    }).catch(() => {})
+  }, [isFarmerOrAdmin])
 
   // ── Search owners ──
   const searchOwners = useCallback(async (q: string) => {
@@ -161,7 +179,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
         setLoadingAnimals(true)
         const res = await apiService.listAnimals({ ownerId: selectedOwnerId, limit: 100 })
         const list = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
-        setAnimals(list.map((a: any) => ({ id: a.id, name: a.name, species: a.species, breed: a.breed })))
+        setAnimals(list.map((a: any) => ({ id: a.id, name: a.name, species: a.species, breed: a.breed, uniqueId: a.uniqueId || a.unique_id })))
         if (list.length === 1 && !selectedAnimalId) setSelectedAnimalId(list[0].id)
       } catch { setAnimals([]) }
       finally { setLoadingAnimals(false) }
@@ -195,6 +213,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
       animalId: selectedAnimalId || undefined,
       petOwnerId: selectedOwnerId || undefined,
       consultationId: selectedConsultationId || undefined,
+      enterpriseId: selectedEnterpriseId || undefined,
       examinationDate: examinationDate || undefined,
       clinicalFindings: clinicalFindings || undefined,
       diagnosis: diagnosis || undefined,
@@ -394,7 +413,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
         <div className="module-card cw-card">
           <h3 className="cw-step-title">1. {t('certificateWriter.step1')}</h3>
 
-          {/* Certificate type */}
+          {/* Certificate type - grouped by context */}
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.selectType')} *</label>
             <select
@@ -403,11 +422,35 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
               onChange={e => setCertType(e.target.value)}
             >
               <option value="">{t('certificateWriter.selectType')}</option>
-              {CERT_TYPES.map(ct => (
-                <option key={ct} value={ct}>{certTypeLabel(ct)}</option>
-              ))}
+              <optgroup label="🐾 Pet / General">
+                {CERT_TYPES_PET.map(ct => (
+                  <option key={ct} value={ct}>{certTypeLabel(ct)}</option>
+                ))}
+              </optgroup>
+              <optgroup label="🐄 Farm / Enterprise">
+                {CERT_TYPES_FARM.map(ct => (
+                  <option key={ct} value={ct}>{certTypeLabel(ct)}</option>
+                ))}
+              </optgroup>
             </select>
           </div>
+
+          {/* Enterprise selector (farmer/admin only) */}
+          {isFarmerOrAdmin && enterpriseOptions.length > 0 && (
+            <div className="module-form-group">
+              <label className="module-label">🏢 {t('certificateWriter.enterprise')}</label>
+              <select
+                className="module-input"
+                value={selectedEnterpriseId}
+                onChange={e => setSelectedEnterpriseId(e.target.value)}
+              >
+                <option value="">— {t('certificateWriter.noEnterprise')} —</option>
+                {enterpriseOptions.map(e => (
+                  <option key={e.id} value={e.id}>{e.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Owner search */}
           <div className="module-form-group cw-owner-search-wrap">
@@ -448,7 +491,9 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                 >
                   <option value="">{t('certificateWriter.selectAnimal')}</option>
                   {animals.map(a => (
-                    <option key={a.id} value={a.id}>{a.name} ({a.species}{a.breed ? ', ' + a.breed : ''})</option>
+                    <option key={a.id} value={a.id}>
+                      {a.uniqueId ? `[${a.uniqueId}] ` : ''}{a.name} ({a.species}{a.breed ? ', ' + a.breed : ''})
+                    </option>
                   ))}
                 </select>
               )}

@@ -459,6 +459,11 @@ class ApiService {
     return response.data
   }
 
+  async searchAnimalByUniqueId(uid: string) {
+    const response = await this.client.get('/animals/search/by-uid', { params: { uid } })
+    return response.data
+  }
+
   async updateAnimal(id: string, data: Record<string, unknown>) {
     const response = await this.client.put(`/animals/${id}`, data)
     return response.data

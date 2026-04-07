@@ -293,6 +293,16 @@ class PostgresDatabase {
        )`
     ).catch(() => { /* table may already exist */ });
 
+    // Ensure animal_id_sequences table exists (race-safe VC-ID generation)
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS animal_id_sequences (
+        species  VARCHAR(20) NOT NULL,
+        year     INTEGER     NOT NULL,
+        last_seq INTEGER     NOT NULL DEFAULT 0,
+        PRIMARY KEY (species, year)
+      )
+    `).catch(() => {});
+
     // Ensure animals columns added after initial table creation
     const animalColumns = [
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS enterprise_id UUID`,

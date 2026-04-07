@@ -23,6 +23,9 @@ interface CertItem {
   animalId?: string
   animalName?: string
   animalSpecies?: string
+  animalUniqueId?: string
+  enterpriseId?: string
+  enterpriseName?: string
   vetFirstName?: string
   vetLastName?: string
   ownerFirstName?: string
@@ -47,9 +50,14 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
   const [error, setError] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [enterpriseFilter, setEnterpriseFilter] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 20
+
+  // Enterprise options for farmer/admin
+  const [enterpriseOptions, setEnterpriseOptions] = useState<{ id: string; name: string }[]>([])
+  const isFarmerOrAdmin = user?.role === 'farmer' || user?.role === 'admin'
 
   // Print
   const [printData, setPrintData] = useState<CertificatePrintData | null>(null)
@@ -68,6 +76,15 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
   const isVet = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
 
+  // Load enterprises for farmer/admin filter
+  useEffect(() => {
+    if (!isFarmerOrAdmin) return
+    apiService.listEnterprises({ limit: 100 }).then(res => {
+      const items = res.data?.items || res.data?.enterprises || (Array.isArray(res.data) ? res.data : [])
+      setEnterpriseOptions(items.map((e: any) => ({ id: e.id, name: e.name })))
+    }).catch(() => {})
+  }, [isFarmerOrAdmin])
+
   const loadCertificates = useCallback(async () => {
     try {
       setLoading(true)
@@ -78,7 +95,8 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
       }
       if (typeFilter) params.type = typeFilter
       if (statusFilter) params.status = statusFilter
-      if (isAdmin && searchTerm.trim()) params.search = searchTerm.trim()
+      if (enterpriseFilter) params.enterpriseId = enterpriseFilter
+      if ((isAdmin || isFarmerOrAdmin) && searchTerm.trim()) params.search = searchTerm.trim()
 
       const res = await apiService.getMyCertificates(params)
       const data = res.data || {}
@@ -89,7 +107,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
     } finally {
       setLoading(false)
     }
-  }, [t, typeFilter, statusFilter, searchTerm, page, isAdmin])
+  }, [t, typeFilter, statusFilter, enterpriseFilter, searchTerm, page, isAdmin, isFarmerOrAdmin])
 
   useEffect(() => { loadCertificates() }, [loadCertificates])
 
@@ -244,13 +262,28 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
               <option value="expired">{t('vetCertificates.expired')}</option>
             </select>
           </div>
-          {isAdmin && (
+          {isFarmerOrAdmin && enterpriseOptions.length > 0 && (
+            <div className="module-form-group">
+              <label className="module-label">🏢 Enterprise</label>
+              <select
+                className="module-input"
+                value={enterpriseFilter}
+                onChange={e => { setEnterpriseFilter(e.target.value); setPage(0) }}
+              >
+                <option value="">{t('vetCertificates.filterAll')}</option>
+                {enterpriseOptions.map(e => (
+                  <option key={e.id} value={e.id}>{e.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          {(isAdmin || isFarmerOrAdmin) && (
             <div className="module-form-group">
               <label className="module-label">{t('common.search')}</label>
               <input
                 className="module-input"
                 type="text"
-                placeholder="Search by vet, owner, animal, cert #..."
+                placeholder="Search by vet, owner, animal, cert #, Animal ID..."
                 value={searchTerm}
                 onChange={e => { setSearchTerm(e.target.value); setPage(0) }}
               />
@@ -280,6 +313,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
                   <th>{t('vetCertificates.certNumber')}</th>
                   <th>{t('vetCertificates.type')}</th>
                   <th>{t('vetCertificates.animal')}</th>
+                  {isFarmerOrAdmin && <th>Enterprise</th>}
                   {(isAdmin || !isVet) && <th>{t('vetCertificates.vet')}</th>}
                   {(isAdmin || isVet) && <th>{t('vetCertificates.owner')}</th>}
                   <th>{t('vetCertificates.issuedDate')}</th>
@@ -300,7 +334,13 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
                     <td>
                       {cert.animalName || '—'}
                       {cert.animalSpecies && <div style={{ fontSize: 11, color: '#718096' }}>{cert.animalSpecies}</div>}
+                      {cert.animalUniqueId && <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#4F46E5', background: '#EEF2FF', padding: '1px 5px', borderRadius: 4, display: 'inline-block', marginTop: 2 }}>{cert.animalUniqueId}</div>}
                     </td>
+                    {isFarmerOrAdmin && (
+                      <td style={{ fontSize: 12, color: cert.enterpriseName ? '#374151' : '#9ca3af' }}>
+                        {cert.enterpriseName || '—'}
+                      </td>
+                    )}
                     {(isAdmin || !isVet) && (
                       <td style={{ fontSize: 12 }}>
                         {cert.vetFirstName || cert.vetLastName

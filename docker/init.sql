@@ -100,6 +100,14 @@ CREATE TABLE IF NOT EXISTS animals (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Platform-wide animal ID sequences (race-safe VC-SPE-YY-NNNNN generation)
+CREATE TABLE IF NOT EXISTS animal_id_sequences (
+  species  VARCHAR(20) NOT NULL,
+  year     INTEGER     NOT NULL,
+  last_seq INTEGER     NOT NULL DEFAULT 0,
+  PRIMARY KEY (species, year)
+);
+
 -- ============================================================
 -- 4. CONSULTATIONS
 -- ============================================================

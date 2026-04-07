@@ -48,31 +48,48 @@ export interface AnimalCreateDTO {
 }
 
 export class AnimalService {
-  // Generate a unique tracking number like VET-00001
-  private async generateTrackingNumber(): Promise<string> {
+  // Map species name → 3-letter code for VC-SPE-YY-NNNNN format
+  private getSpeciesCode(species: string): string {
+    const s = species.toLowerCase().trim();
+    if (s === 'dog' || s === 'canine') return 'DOG';
+    if (s === 'cat' || s === 'feline') return 'CAT';
+    if (s === 'rabbit') return 'RAB';
+    if (s === 'bird') return 'BRD';
+    if (s === 'reptile') return 'REP';
+    if (s === 'cow' || s === 'cattle' || s === 'bovine') return 'COW';
+    if (s === 'sheep' || s === 'ovine') return 'SHP';
+    if (s === 'pig' || s === 'swine' || s === 'porcine') return 'PIG';
+    if (s === 'chicken' || s === 'poultry') return 'CHK';
+    if (s === 'horse' || s === 'equine') return 'HRS';
+    if (s === 'goat' || s === 'caprine') return 'GOT';
+    return 'OTH';
+  }
+
+  // Generate race-safe unique ID: VC-SPE-YY-NNNNN using atomic sequence table
+  private async generateUniqueId(species: string): Promise<string> {
+    const code = this.getSpeciesCode(species);
+    const year = new Date().getFullYear() % 100; // 2-digit year
     try {
-      const result = await database.query(`SELECT COUNT(*) as count FROM animals`);
-      const count = parseInt(result.rows[0]?.count || '0', 10) + 1;
-      return `VET-${count.toString().padStart(5, '0')}`;
+      const res = await database.query(
+        `INSERT INTO animal_id_sequences (species, year, last_seq)
+         VALUES ($1, $2, 1)
+         ON CONFLICT (species, year) DO UPDATE
+           SET last_seq = animal_id_sequences.last_seq + 1
+         RETURNING last_seq`,
+        [code, year]
+      );
+      const seq = res.rows[0].last_seq as number;
+      return `VC-${code}-${year.toString().padStart(2, '0')}-${seq.toString().padStart(5, '0')}`;
     } catch {
-      // fallback to timestamp-based
-      return `VET-${Date.now().toString(36).toUpperCase()}`;
+      // Fallback: timestamp-based (won't race but non-sequential)
+      return `VC-${code}-${year.toString().padStart(2, '0')}-${Date.now().toString(36).toUpperCase().slice(-5)}`;
     }
   }
 
   async createAnimal(ownerId: string, data: AnimalCreateDTO): Promise<Animal> {
     try {
       const id = uuidv4();
-      const trackingNumber = await this.generateTrackingNumber();
-      // Use microchip_id field to store tracking number if not provided
-      const microchipId = data.microchipId || trackingNumber;
-      // Generate unique pet ID
-      let uniqueId: string;
-      try {
-        const cnt = await database.query('SELECT COUNT(*) as count FROM animals');
-        const num = parseInt(cnt.rows[0]?.count || '0', 10) + 1;
-        uniqueId = `PET-${num.toString().padStart(5, '0')}`;
-      } catch { uniqueId = `PET-${Date.now().toString(36).toUpperCase()}`; }
+      const uniqueId = await this.generateUniqueId(data.species);
       const query = `
         INSERT INTO animals (id, owner_id, unique_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id,
                              ear_tag_id, registration_number, is_neutered, insurance_provider, insurance_policy_number, insurance_expiry,
@@ -89,15 +106,39 @@ export class AnimalService {
       const result = await database.query(query, [
         id, ownerId, uniqueId, data.name, data.species, data.breed || null,
         data.dateOfBirth || null, data.gender || null, data.weight || null,
-        data.color || null, microchipId, data.earTagId || null, data.registrationNumber || null,
+        data.color || null, data.microchipId || null, data.earTagId || null, data.registrationNumber || null,
         data.isNeutered || false, data.insuranceProvider || null, data.insurancePolicyNumber || null,
         data.insuranceExpiry || null, data.medicalNotes || null,
         data.enterpriseId || null, data.groupId || null
       ]);
-      logger.info('Animal created', { id, ownerId, uniqueId, trackingNumber });
+      logger.info('Animal created', { id, ownerId, uniqueId });
       return result.rows[0];
     } catch (error) {
       throw new DatabaseError('Error creating animal', { originalError: error });
+    }
+  }
+
+  // Search animal by VC unique ID — cross-module lookup
+  async searchByUniqueId(uid: string): Promise<Animal | null> {
+    try {
+      const res = await database.query(
+        `SELECT a.id, a.owner_id as "ownerId", a.unique_id as "uniqueId", a.name, a.species, a.breed,
+                a.date_of_birth as "dateOfBirth", a.gender, a.weight, a.color,
+                a.microchip_id as "microchipId", a.ear_tag_id as "earTagId",
+                a.registration_number as "registrationNumber", a.is_neutered as "isNeutered",
+                a.insurance_provider as "insuranceProvider", a.insurance_policy_number as "insurancePolicyNumber",
+                a.insurance_expiry as "insuranceExpiry", a.medical_notes as "medicalNotes",
+                a.enterprise_id as "enterpriseId", a.group_id as "groupId",
+                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
+                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName",
+                u.email as "ownerEmail"
+         FROM animals a LEFT JOIN users u ON u.id = a.owner_id
+         WHERE a.unique_id = $1 AND a.is_active = true`,
+        [uid.trim().toUpperCase()]
+      );
+      return res.rows[0] || null;
+    } catch (error) {
+      throw new DatabaseError('Error searching animal by unique ID', { originalError: error });
     }
   }
 

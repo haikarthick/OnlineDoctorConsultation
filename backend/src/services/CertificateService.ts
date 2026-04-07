@@ -124,6 +124,7 @@ class CertificateService {
     if (data.animalId !== undefined) setField('animal_id', data.animalId);
     if (data.petOwnerId !== undefined) setField('pet_owner_id', data.petOwnerId);
     if (data.consultationId !== undefined) setField('consultation_id', data.consultationId);
+    if (data.enterpriseId !== undefined) setField('enterprise_id', data.enterpriseId || null);
 
     if (fields.length === 0) return cert;
 
@@ -210,7 +211,7 @@ class CertificateService {
     return this.mapRow(result.rows[0]);
   }
 
-  async listByVet(vetId: string, params: { limit?: number; offset?: number; type?: string; status?: string; animalId?: string }): Promise<{ certificates: any[]; total: number }> {
+  async listByVet(vetId: string, params: { limit?: number; offset?: number; type?: string; status?: string; animalId?: string; enterpriseId?: string }): Promise<{ certificates: any[]; total: number }> {
     const limit = params.limit || 20;
     const offset = params.offset || 0;
     let where = `WHERE vc.veterinarian_id = $1`;
@@ -220,6 +221,7 @@ class CertificateService {
     if (params.type) { where += ` AND vc.certificate_type = $${p++}`; vals.push(params.type); }
     if (params.status) { where += ` AND vc.status = $${p++}`; vals.push(params.status); }
     if (params.animalId) { where += ` AND vc.animal_id = $${p++}`; vals.push(params.animalId); }
+    if (params.enterpriseId) { where += ` AND vc.enterprise_id = $${p++}`; vals.push(params.enterpriseId); }
 
     const countResult = await database.query(
       `SELECT COUNT(*) as count FROM vet_certificates vc ${where}`, vals
@@ -229,10 +231,12 @@ class CertificateService {
     const result = await database.query(
       `SELECT vc.*, 
          u_owner.first_name as "ownerFirstName", u_owner.last_name as "ownerLastName",
-         a.name as "animalName", a.species as "animalSpecies"
+         a.name as "animalName", a.species as "animalSpecies", a.unique_id as "animalUniqueId",
+         e.name as "enterpriseName"
        FROM vet_certificates vc
        LEFT JOIN users u_owner ON u_owner.id = vc.pet_owner_id
        LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN enterprises e ON e.id = vc.enterprise_id
        ${where}
        ORDER BY vc.created_at DESC LIMIT $${p} OFFSET $${p + 1}`,
       [...vals, limit, offset]
@@ -240,7 +244,7 @@ class CertificateService {
     return { certificates: result.rows.map((r: any) => this.mapListRow(r)), total };
   }
 
-  async listByOwner(ownerId: string, params: { limit?: number; offset?: number; type?: string; status?: string; animalId?: string }): Promise<{ certificates: any[]; total: number }> {
+  async listByOwner(ownerId: string, params: { limit?: number; offset?: number; type?: string; status?: string; animalId?: string; enterpriseId?: string }): Promise<{ certificates: any[]; total: number }> {
     const limit = params.limit || 20;
     const offset = params.offset || 0;
     let where = `WHERE vc.pet_owner_id = $1`;
@@ -250,6 +254,7 @@ class CertificateService {
     if (params.type) { where += ` AND vc.certificate_type = $${p++}`; vals.push(params.type); }
     if (params.status) { where += ` AND vc.status = $${p++}`; vals.push(params.status); }
     if (params.animalId) { where += ` AND vc.animal_id = $${p++}`; vals.push(params.animalId); }
+    if (params.enterpriseId) { where += ` AND vc.enterprise_id = $${p++}`; vals.push(params.enterpriseId); }
 
     const countResult = await database.query(
       `SELECT COUNT(*) as count FROM vet_certificates vc ${where}`, vals
@@ -259,10 +264,12 @@ class CertificateService {
     const result = await database.query(
       `SELECT vc.*,
          u_vet.first_name as "vetFirstName", u_vet.last_name as "vetLastName",
-         a.name as "animalName", a.species as "animalSpecies"
+         a.name as "animalName", a.species as "animalSpecies", a.unique_id as "animalUniqueId",
+         e.name as "enterpriseName"
        FROM vet_certificates vc
        LEFT JOIN users u_vet ON u_vet.id = vc.veterinarian_id
        LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN enterprises e ON e.id = vc.enterprise_id
        ${where}
        ORDER BY vc.created_at DESC LIMIT $${p} OFFSET $${p + 1}`,
       [...vals, limit, offset]
@@ -274,10 +281,13 @@ class CertificateService {
     const result = await database.query(
       `SELECT vc.*,
          u_vet.first_name as "vetFirstName", u_vet.last_name as "vetLastName",
-         u_owner.first_name as "ownerFirstName", u_owner.last_name as "ownerLastName"
+         u_owner.first_name as "ownerFirstName", u_owner.last_name as "ownerLastName",
+         a.unique_id as "animalUniqueId", e.name as "enterpriseName"
        FROM vet_certificates vc
        LEFT JOIN users u_vet ON u_vet.id = vc.veterinarian_id
        LEFT JOIN users u_owner ON u_owner.id = vc.pet_owner_id
+       LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN enterprises e ON e.id = vc.enterprise_id
        WHERE vc.animal_id = $1
        ORDER BY vc.created_at DESC`,
       [animalId]
@@ -285,7 +295,7 @@ class CertificateService {
     return { certificates: result.rows.map((r: any) => this.mapListRow(r)), total: result.rows.length };
   }
 
-  async listAll(params: { limit?: number; offset?: number; type?: string; status?: string; search?: string }): Promise<{ certificates: any[]; total: number }> {
+  async listAll(params: { limit?: number; offset?: number; type?: string; status?: string; search?: string; enterpriseId?: string }): Promise<{ certificates: any[]; total: number }> {
     const limit = params.limit || 20;
     const offset = params.offset || 0;
     let where = `WHERE 1=1`;
@@ -294,10 +304,11 @@ class CertificateService {
 
     if (params.type) { where += ` AND vc.certificate_type = $${p++}`; vals.push(params.type); }
     if (params.status) { where += ` AND vc.status = $${p++}`; vals.push(params.status); }
+    if (params.enterpriseId) { where += ` AND vc.enterprise_id = $${p++}`; vals.push(params.enterpriseId); }
     if (params.search) {
       where += ` AND (u_vet.first_name ILIKE $${p} OR u_vet.last_name ILIKE $${p}
                  OR u_owner.first_name ILIKE $${p} OR u_owner.last_name ILIKE $${p}
-                 OR a.name ILIKE $${p} OR vc.certificate_number ILIKE $${p})`;
+                 OR a.name ILIKE $${p} OR a.unique_id ILIKE $${p} OR vc.certificate_number ILIKE $${p})`;
       vals.push(`%${params.search}%`); p++;
     }
 
@@ -314,11 +325,13 @@ class CertificateService {
       `SELECT vc.*,
          u_vet.first_name as "vetFirstName", u_vet.last_name as "vetLastName",
          u_owner.first_name as "ownerFirstName", u_owner.last_name as "ownerLastName",
-         a.name as "animalName", a.species as "animalSpecies"
+         a.name as "animalName", a.species as "animalSpecies", a.unique_id as "animalUniqueId",
+         e.name as "enterpriseName"
        FROM vet_certificates vc
        LEFT JOIN users u_vet ON u_vet.id = vc.veterinarian_id
        LEFT JOIN users u_owner ON u_owner.id = vc.pet_owner_id
        LEFT JOIN animals a ON a.id = vc.animal_id
+       LEFT JOIN enterprises e ON e.id = vc.enterprise_id
        ${where}
        ORDER BY vc.created_at DESC LIMIT $${p} OFFSET $${p + 1}`,
       [...vals, limit, offset]
@@ -335,6 +348,7 @@ class CertificateService {
       veterinarianId: r.veterinarian_id,
       petOwnerId: r.pet_owner_id,
       animalId: r.animal_id,
+      enterpriseId: r.enterprise_id,
       examinationDate: r.examination_date,
       issuedAt: r.issued_at,
       validUntil: r.valid_until,
@@ -346,6 +360,8 @@ class CertificateService {
       ownerLastName: r.ownerLastName,
       animalName: r.animalName,
       animalSpecies: r.animalSpecies,
+      animalUniqueId: r.animalUniqueId,
+      enterpriseName: r.enterpriseName,
     };
   }
 

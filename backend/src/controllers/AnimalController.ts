@@ -75,6 +75,20 @@ export class AnimalController {
     res.json({ success: true, data: result });
   }
 
+  async searchByUniqueId(req: AuthRequest, res: Response): Promise<void> {
+    const uid = (req.query.uid as string || '').trim();
+    if (!uid) {
+      res.status(400).json({ success: false, error: 'uid query parameter is required' });
+      return;
+    }
+    const animal = await AnimalService.searchByUniqueId(uid);
+    if (!animal) {
+      res.status(404).json({ success: false, error: `No animal found with ID ${uid}` });
+      return;
+    }
+    res.json({ success: true, data: animal });
+  }
+
   async updateAnimal(req: AuthRequest, res: Response): Promise<void> {
     const animal = await AnimalService.getAnimal(req.params.id);
     if (animal.ownerId !== req.userId && req.userRole !== 'admin') {

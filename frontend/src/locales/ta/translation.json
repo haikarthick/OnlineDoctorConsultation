@@ -5287,7 +5287,9 @@
     "selectOwnerFirst": "Select owner first",
     "searchAnimals": "Search animals...",
     "noAnimals": "No animals found for this owner",
-    "searchOwner": "Search owner by name or email..."
+    "searchOwner": "Search owner by name or email...",
+    "enterprise": "Link to Enterprise (Farm)",
+    "noEnterprise": "No Enterprise / Standalone"
   },
   "certificatePrint": {
     "previewTitle": "Certificate Preview",
