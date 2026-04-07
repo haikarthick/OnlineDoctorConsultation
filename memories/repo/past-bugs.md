@@ -182,9 +182,16 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 - **Rule:** ALL `.replace()` / `.split()` / `.toUpperCase()` / `.toLowerCase()` calls on API response fields MUST use `(field || '')` fallback. TypeScript types are compile-time only — DB NULLs bypass them entirely.
 - **False positives (already safe):** Cases where the value is (a) already guarded by a ternary `field ? field.method() : default`, (b) wrapped in an `{field && ...}` JSX conditional, (c) initialized from controlled form state with a `''` default, or (d) protected by `|| []` on the containing map call.
 
----
+### API-008 — Marketplace Publish 400: DB Gender/Species Case Mismatch + Error Message Swallowed
+- **Symptom:** "Request failed with status code 400" when publishing an animal in Marketplace (Farmer role). The actual Joi validation error is never shown — user has no idea what to fix.
+- **Root Cause (1 — the 400):** `seed-demo-data.sql` inserts some animals with `gender = 'Male'`/`'Female'` (capitalized). The Joi schema for `createMarketplaceListing` validates `gender` against `['male', 'female', 'unknown']` (lowercase). The auto-fill function (`handleAnimalSelect`) copies `animal.gender` directly from the API without normalizing case → Joi rejects the payload with 400.
+- **Root Cause (2 — invisible error):** The `validateBody` middleware returns `{ message: "..." }` on 400. The frontend read `e?.response?.data?.error?.message` (wrong path) and fell back to the generic Axios `e.message` = "Request failed with status code 400". The real Joi error was completely hidden from the user.
+- **Fix (1):** In `createListing()` payload building, normalize: `payload.gender = payload.gender?.toLowerCase()` and `payload.species = payload.species?.toLowerCase()` before calling the API.
+- **Fix (2):** Error catch: `e?.response?.data?.message || e?.response?.data?.error?.message || e.message` — always check BOTH `data.message` and `data.error.message` paths.
+- **Rule:** ALWAYS normalize string enum fields (gender, species, status, role etc.) to the correct case at the point they leave the frontend — DB values can have inconsistent casing. NEVER trust that DB-sourced auto-fill values match Joi enum values.
+- **Rule:** When debugging a 400 error, ALWAYS log `e?.response?.data` in full — never just `e.message`. Frontend error display must check all possible error paths the backend uses.
 
-## 🔴 i18n Bugs
+---
 
 ### I18N-001 — Page Shows Raw Key Paths (herdMedical.pageTitle etc.)
 - **Root Cause:** `t('herdMedical.*')` used throughout a page but `"herdMedical": {}` top-level object was never added to any of the 5 locale files. react-i18next fails silently — no console error, no warning.

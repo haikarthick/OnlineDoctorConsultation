@@ -151,6 +151,9 @@ const Marketplace: React.FC = () => {
       payload.latitude = +payload.latitude || null
       payload.longitude = +payload.longitude || null
       payload.tags = typeof payload.tags === 'string' ? payload.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : payload.tags
+      // Normalize enum fields to lowercase to match Joi schema
+      if (payload.gender) payload.gender = (payload.gender as string).toLowerCase()
+      if (payload.species) payload.species = (payload.species as string).toLowerCase()
       await apiService.createMarketplaceListing(payload)
       setSuccessMsg(t('marketplace.listingCreated'))
       setSellForm({ title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
@@ -160,7 +163,7 @@ const Marketplace: React.FC = () => {
         images: [], linkedAnimalId: '',
         sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false })
       setSellStep(0); setTab('browse'); fetchListings(); fetchDashboard()
-    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+    } catch (e: any) { setError(e?.response?.data?.message || e?.response?.data?.error?.message || e.message) }
   }
 
   // Auto-populate sell form from selected animal
@@ -173,7 +176,7 @@ const Marketplace: React.FC = () => {
     // Basic info
     if (animal.species) updates.species = animal.species
     if (animal.breed) updates.breed = animal.breed
-    if (animal.gender) updates.gender = animal.gender
+    if (animal.gender) updates.gender = animal.gender.toLowerCase()
     // Weight: prefer current_weight over weight
     const w = animal.currentWeight || animal.current_weight || animal.weight
     if (w) updates.animalWeightKg = String(w)
