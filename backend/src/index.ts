@@ -11,17 +11,17 @@ import VaccineScheduleService from './services/VaccineScheduleService';
 
 /** Retry database.connect() with exponential backoff.
  *  Free-tier Render PostgreSQL can be slow to respond after restarts.
- *  5 attempts at 10-second intervals = up to 50 seconds before giving up.
+ *  10 attempts at 12-second intervals = up to 120 seconds before giving up.
  */
-const connectWithRetry = async (maxAttempts = 5): Promise<void> => {
+const connectWithRetry = async (maxAttempts = 10): Promise<void> => {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await database.connect();
       return;
     } catch (err: any) {
       if (attempt === maxAttempts) throw err;
-      logger.warn(`DB connect attempt ${attempt}/${maxAttempts} failed — retrying in 10s`, { error: err.message });
-      await new Promise(r => setTimeout(r, 10000));
+      logger.warn(`DB connect attempt ${attempt}/${maxAttempts} failed — retrying in 12s`, { error: err.message });
+      await new Promise(r => setTimeout(r, 12000));
     }
   }
 };
@@ -88,9 +88,14 @@ const startServer = async () => {
       );
     }, 24 * 60 * 60 * 1000);
 
-    fixDemoPasswords().catch((err: any) =>
-      logger.error('fixDemoPasswords failed', { error: err.message || String(err) })
-    );
+    fixDemoPasswords().catch((err: any) => {
+      logger.error('fixDemoPasswords failed on first attempt — will retry in 30s', { error: err.message || String(err) });
+      setTimeout(() => {
+        fixDemoPasswords().catch((err2: any) =>
+          logger.error('fixDemoPasswords retry also failed', { error: err2.message || String(err2) })
+        );
+      }, 30000);
+    });
   } catch (error: any) {
     logger.error('Failed to initialize services after server start', { error: error.message || String(error) });
     // Do NOT exit — server is already listening; DB may recover on its own

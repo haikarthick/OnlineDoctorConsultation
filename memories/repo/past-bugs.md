@@ -29,7 +29,23 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 - **Fix:** Every `node` subprocess in render-start.sh has BOTH:
   1. Outer `timeout N` shell wrapper
   2. `connectionTimeoutMillis` < N so node exits cleanly before shell kills it
-- **Current values:** schema=`timeout 45`/15000ms, VET_PROFILE_COUNT=`timeout 20`/15000ms, migrations=`timeout 40`, seed=`timeout 120`
+- **Current values:** schema=`timeout 90`/25000ms (with 4-attempt retry loop), VET_PROFILE_COUNT=`timeout 20`/15000ms, migrations=`timeout 40`, seed=`timeout 120`
+
+---
+
+### DEPLOY-005 — Free-Tier DB Cold Start → fixDemoPasswords Never Runs → Login Always Fails
+- **Symptom:** Deployment "succeeds" (port binds, health check passes) but ALL logins fail with "Error fetching user by email" — permanently, not just briefly
+- **Root Cause:** Chain of failures:
+  1. Free-tier DB sleeps and takes 30-90s to wake
+  2. render-start.sh Step 0 had only `connectionTimeoutMillis: 15000` → times out → schema/tables never created
+  3. `connectWithRetry()` in index.ts only tried 5×10s = 50s max → if DB took >50s, gave up → `fixDemoPasswords()` NEVER called
+  4. `fixDemoPasswords()` failure was silently swallowed — no retry
+  5. DB wakes eventually, pool auto-reconnects, but `users` table has zero rows → all logins fail
+- **Fix applied:**
+  1. `render-start.sh` Step 0: Added retry loop (4 attempts × 90s timeout + 25s sleep between = 6min budget) + connectionTimeoutMillis: 25000
+  2. `index.ts` `connectWithRetry`: Increased to 10 attempts × 12s = 120s max
+  3. `index.ts` `fixDemoPasswords`: Added 30s retry if first attempt fails
+- **Manual recovery:** If PROD is stuck: Render → vetcare-app → Environment → FORCE_RESEED=true → Manual Deploy → wait for "✓ Seed complete" in logs → set FORCE_RESEED=false
 
 ---
 
