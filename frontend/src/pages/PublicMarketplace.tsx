@@ -37,6 +37,30 @@ const PublicMarketplace: React.FC = () => {
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 24
 
+  const listingsRef = React.useRef<HTMLDivElement>(null)
+
+  const scrollToListings = () => {
+    listingsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const handleStatClick = (type: 'listings' | 'species' | 'categories' | 'sellers') => {
+    setPage(0)
+    if (type === 'listings') {
+      setFilters({})
+      setSortBy('')
+    } else if (type === 'species') {
+      setFilters({})
+      setSortBy('newest')
+    } else if (type === 'categories') {
+      setFilters({})
+      setSortBy('')
+    } else if (type === 'sellers') {
+      setFilters({})
+      setSortBy('newest')
+    }
+    setTimeout(scrollToListings, 100)
+  }
+
   const formatCurrency = (n: number) => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
   }
@@ -103,22 +127,22 @@ const PublicMarketplace: React.FC = () => {
           <p className="pub-mp-hero-subtitle">{t('publicMarketplace.heroSubtitle')}</p>
           {stats && (
             <div className="pub-mp-hero-stats">
-              <div className="pub-mp-stat">
+              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('listings')} title="Show all listings">
                 <span className="pub-mp-stat-value">{stats.active_listings || 0}</span>
                 <span className="pub-mp-stat-label">{t('publicMarketplace.stats.activeListings')}</span>
-              </div>
-              <div className="pub-mp-stat">
+              </button>
+              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('species')} title="Browse by species">
                 <span className="pub-mp-stat-value">{stats.species_count || 0}</span>
                 <span className="pub-mp-stat-label">{t('publicMarketplace.stats.species')}</span>
-              </div>
-              <div className="pub-mp-stat">
+              </button>
+              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('categories')} title="Browse by category">
                 <span className="pub-mp-stat-value">{stats.category_count || 0}</span>
                 <span className="pub-mp-stat-label">{t('publicMarketplace.stats.categories')}</span>
-              </div>
-              <div className="pub-mp-stat">
+              </button>
+              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('sellers')} title="Browse all rehomers">
                 <span className="pub-mp-stat-value">{stats.seller_count || 0}</span>
                 <span className="pub-mp-stat-label">{t('publicMarketplace.stats.sellers')}</span>
-              </div>
+              </button>
             </div>
           )}
           {!isAuthenticated && (
@@ -142,7 +166,7 @@ const PublicMarketplace: React.FC = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="pub-mp-container">
+      <div className="pub-mp-container" ref={listingsRef}>
         <div className="mp-filter-bar">
           <input className="module-input" value={filters.search || ''} onChange={e => updateFilter('search', e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') fetchListings() }} placeholder={t('marketplace.searchLivestock')} />

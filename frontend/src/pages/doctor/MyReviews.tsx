@@ -142,16 +142,19 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
 
                 {/* Respond Form */}
                 {!review.responseFromVet && respondingTo === review.id && (
-                  <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                    <input
-                      className="form-input"
+                  <div style={{ marginTop: 12 }}>
+                    <textarea
+                      className="module-input"
                       placeholder={t('doctorReviews.writeResponse')}
                       value={responseText}
                       onChange={e => setResponseText(e.target.value)}
-                      style={{ flex: 1 }}
+                      rows={3}
+                      style={{ width: '100%', resize: 'vertical', marginBottom: 8 }}
                     />
-                    <button className="btn btn-primary" onClick={() => handleRespond(review.id)}>{t('doctorReviews.send')}</button>
-                    <button className="btn btn-outline" onClick={() => { setRespondingTo(null); setResponseText('') }}>{t('doctorReviews.cancel')}</button>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="btn btn-primary" onClick={() => handleRespond(review.id)}>{t('doctorReviews.send')}</button>
+                      <button className="btn btn-outline" onClick={() => { setRespondingTo(null); setResponseText('') }}>{t('doctorReviews.cancel')}</button>
+                    </div>
                   </div>
                 )}
 
