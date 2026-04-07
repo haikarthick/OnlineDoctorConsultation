@@ -55,7 +55,7 @@ function filterPastSlots(slots: TimeSlot[], forDate: string): TimeSlot[] {
   if (forDate !== todayStr) return slots
   const nowMinutes = now.getHours() * 60 + now.getMinutes() + 15
   return slots.filter(s => {
-    const [h, m] = s.startTime.split(':').map(Number)
+    const [h, m] = (s.startTime || '00:00').split(':').map(Number)
     return h * 60 + m > nowMinutes
   })
 }

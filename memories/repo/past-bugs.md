@@ -177,9 +177,10 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 ### API-007 — Unsafe String Method Calls on API Fields → Runtime Crash
 - **Symptom:** Clicking into a page (e.g. AlertCenter, FinancialAnalytics) throws `Cannot read properties of undefined (reading 'replace')`. Crashes the entire React component tree for that page.
 - **Root Cause:** Code calls `.replace()`, `.split()`, `.toUpperCase()` etc. directly on API response fields (e.g. `r.ruleType.replace(/_/g,' ')`). TypeScript types declare these as `string` but DB rows can have NULL values at runtime — TypeScript never catches this.
-- **Pattern seen in:** AlertCenter (ruleType), FinancialAnalytics (category), ComplianceDocs (documentType, status), ManageSchedule (holidayType), StaffSettings (position), InpatientManagement (status, admission_type), HospitalWorkflow (status), SupplyChain (status)
-- **Fix:** Always guard: `(field || '').replace(...)` — never `field.replace(...)` on any API-sourced field
+- **Pattern seen in:** AlertCenter (ruleType), FinancialAnalytics (category), ComplianceDocs (documentType, status), ManageSchedule (holidayType), StaffSettings (position), InpatientManagement (status, admission_type), HospitalWorkflow (status), SupplyChain (status), DiseasePrediction (severity), Consultations/HospitalBooking/FindDoctor/BookConsultation/MyBookings/PatientQueue (startTime)
+- **Fix:** Always guard: `(field || '').replace(...)` and `(field || '00:00').split(':')` — never call string methods directly on any API-sourced field
 - **Rule:** ALL `.replace()` / `.split()` / `.toUpperCase()` / `.toLowerCase()` calls on API response fields MUST use `(field || '')` fallback. TypeScript types are compile-time only — DB NULLs bypass them entirely.
+- **False positives (already safe):** Cases where the value is (a) already guarded by a ternary `field ? field.method() : default`, (b) wrapped in an `{field && ...}` JSX conditional, (c) initialized from controlled form state with a `''` default, or (d) protected by `|| []` on the containing map call.
 
 ---
 

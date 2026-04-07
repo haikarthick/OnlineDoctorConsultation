@@ -298,7 +298,7 @@ const DiseasePredictionPage: React.FC = () => {
                       popup: (
                         <div>
                           <strong>{z.diseaseName || (z as any).disease_name}</strong><br />
-                          <span style={{ fontSize: 12, color: SEVERITY_COLORS[z.severity] }}>{z.severity.toUpperCase()}</span><br />
+                          <span style={{ fontSize: 12, color: SEVERITY_COLORS[z.severity] }}>{(z.severity || '').toUpperCase()}</span><br />
                           <span style={{ fontSize: 12 }}>Affected: {z.affectedCount || (z as any).affected_count} · At risk: {z.totalAtRisk || (z as any).total_at_risk}</span><br />
                           <span style={{ fontSize: 12 }}>Radius: {z.radiusKm || (z as any).radius_km}km</span><br />
                           <span style={{ fontSize: 11, color: '#888' }}>Status: {z.containmentStatus || (z as any).containment_status}</span>
