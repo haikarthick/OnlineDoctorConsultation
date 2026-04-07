@@ -149,6 +149,11 @@ class PostgresDatabase {
   }
 
   private async ensureSchema(): Promise<void> {
+    return this.ensureSchemaPublic();
+  }
+
+  /** Public version — called by AuthController self-heal on first-login failure */
+  async ensureSchemaPublic(): Promise<void> {
     try {
       const schemaName = config.database.schema || 'public';
       const check = await this.pool.query(

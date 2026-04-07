@@ -3,8 +3,10 @@ import { AuthRequest } from '../middleware/auth';
 import UserService from '../services/UserService';
 import RefreshTokenService from '../services/RefreshTokenService';
 import SecurityUtils from '../utils/security';
-import { ValidationError, UnauthorizedError } from '../utils/errors';
+import { ValidationError, UnauthorizedError, DatabaseError } from '../utils/errors';
 import logger from '../utils/logger';
+import database from '../utils/database';
+import { fixDemoPasswords } from '../utils/fixDemoPasswords';
 
 export class AuthController {
   async register(req: AuthRequest, res: Response): Promise<void> {
@@ -61,7 +63,22 @@ export class AuthController {
         throw new ValidationError('Email and password are required');
       }
 
-      const user = await UserService.getUserByEmail(email);
+      let user;
+      try {
+        user = await UserService.getUserByEmail(email);
+      } catch (dbErr: any) {
+        // If users table is missing, trigger schema + demo user repair then retry once
+        logger.error('Login: getUserByEmail failed — triggering self-heal', { error: dbErr.message });
+        try {
+          await database.ensureSchemaPublic();
+          await fixDemoPasswords();
+          user = await UserService.getUserByEmail(email);
+        } catch (healErr: any) {
+          logger.error('Login: self-heal also failed', { error: healErr.message });
+          throw new DatabaseError('Database is not ready yet. Please retry in a few seconds.');
+        }
+      }
+
       if (!user || !user.passwordHash) {
         throw new UnauthorizedError('Invalid email or password');
       }

@@ -68,8 +68,12 @@ export class UserService {
 
       const result = await database.query(query, [email]);
       return result.rows[0] || null;
-    } catch (error) {
-      throw new DatabaseError('Error fetching user by email', { originalError: error });
+    } catch (error: any) {
+      // Log the actual DB error so it appears in Render logs for diagnosis
+      const pgCode = error.code || 'unknown';
+      const pgMsg = error.message || String(error);
+      logger.error('getUserByEmail DB error', { email, pgCode, pgMsg });
+      throw new DatabaseError('Error fetching user by email', { originalError: pgMsg, pgCode });
     }
   }
 
