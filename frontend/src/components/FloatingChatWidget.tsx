@@ -42,7 +42,7 @@ const FloatingChatWidget: React.FC = () => {
     if (!isAuthenticated || petsLoaded.current) return
     petsLoaded.current = true
     apiService.listAnimals({ limit: 10 }).then(res => {
-      const items = res.data?.items || res.data || []
+      const items = res.data?.animals || res.data?.items || []
       setPets(items.map((a: any) => ({ id: a.id, name: a.name, species: a.species })))
     }).catch(() => { /* ignore */ })
   }, [isAuthenticated])

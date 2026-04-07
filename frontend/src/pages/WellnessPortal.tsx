@@ -53,7 +53,7 @@ const WellnessPortal: React.FC = () => {
       setDashboard(dashRes.data)
       setScorecards(scRes.data?.items || [])
       setReminders(remRes.data?.items || [])
-      setAnimals(animRes.data?.items || animRes.data || [])
+      setAnimals(animRes.data?.animals || animRes.data?.items || [])
     } catch (e: any) { setError(e.message) }
     setLoading(false)
   }

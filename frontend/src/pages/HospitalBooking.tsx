@@ -90,7 +90,7 @@ const HospitalBooking: React.FC = () => {
     const loadAnimals = async () => {
       try {
         const res = await apiService.listAnimals()
-        setAnimals(res?.data?.items || res?.data || [])
+        setAnimals(res?.data?.animals || res?.data?.items || [])
       } catch { /* non-blocking */ }
     }
     if (user) loadAnimals()

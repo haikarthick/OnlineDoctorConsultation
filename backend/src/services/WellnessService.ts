@@ -11,8 +11,14 @@ class WellnessService {
   // ── Scorecards ──
   async listScorecards(ownerId: string, filters: any = {}) {
     const { animalId, limit = 50, offset = 0 } = filters;
-    let query = `SELECT ws.*, a.name as animal_name, a.species, a.breed,
-                 u.first_name || ' ' || u.last_name as assessed_by_name
+    let query = `SELECT ws.id, ws.animal_id as "animalId", ws.owner_id as "ownerId",
+                 ws.overall_score as "overallScore", ws.nutrition_score as "nutritionScore",
+                 ws.activity_score as "activityScore", ws.vaccination_score as "vaccinationScore",
+                 ws.dental_score as "dentalScore", ws.weight_status as "weightStatus",
+                 ws.next_checkup as "nextCheckup", ws.recommendations, ws.risk_flags as "riskFlagsRaw",
+                 ws.assessed_at as "assessedAt",
+                 a.name as "animalName", a.species, a.breed,
+                 u.first_name || ' ' || u.last_name as "assessedByName"
                  FROM wellness_scorecards ws
                  JOIN animals a ON ws.animal_id = a.id
                  LEFT JOIN users u ON ws.assessed_by = u.id
@@ -22,7 +28,20 @@ class WellnessService {
     query += ` ORDER BY ws.assessed_at DESC LIMIT $${idx++} OFFSET $${idx}`;
     params.push(limit, offset);
     const result = await pool.query(query, params);
-    return { items: result.rows, total: result.rows.length };
+    // Parse JSON-string fields into actual arrays
+    const items = result.rows.map((row: any) => ({
+      ...row,
+      recommendations: this.parseJsonArray(row.recommendations),
+      riskFlags: this.parseJsonArray(row.riskFlagsRaw),
+    }));
+    return { items, total: items.length };
+  }
+
+  private parseJsonArray(val: any): any[] {
+    if (Array.isArray(val)) return val;
+    if (!val) return [];
+    try { const parsed = JSON.parse(val); return Array.isArray(parsed) ? parsed : []; }
+    catch { return []; }
   }
 
   async createScorecard(data: any) {
@@ -38,7 +57,12 @@ class WellnessService {
        JSON.stringify(data.recommendations || []), JSON.stringify(data.riskFlags || []),
        data.assessedBy || null]
     );
-    return (await pool.query(`SELECT ws.*, a.name as animal_name, a.species FROM wellness_scorecards ws JOIN animals a ON ws.animal_id = a.id WHERE ws.id = $1`, [id])).rows[0];
+    const row = (await pool.query(`SELECT ws.*, a.name as "animalName", a.species FROM wellness_scorecards ws JOIN animals a ON ws.animal_id = a.id WHERE ws.id = $1`, [id])).rows[0];
+    if (row) {
+      row.recommendations = this.parseJsonArray(row.recommendations);
+      row.riskFlags = this.parseJsonArray(row.risk_flags);
+    }
+    return row;
   }
 
   async updateScorecard(id: string, data: any) {
