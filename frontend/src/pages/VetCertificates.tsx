@@ -5,6 +5,7 @@ import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
 import CertificatePrintView, { CertificatePrintData, CertificateTemplate } from '../components/CertificatePrintView'
 import '../styles/modules.css'
+import './VetCertificates.css'
 
 interface VetCertificatesProps {
   onNavigate: (path: string) => void
@@ -320,49 +321,80 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
                     </td>
                     <td>{statusBadge(cert.status)}</td>
                     <td>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <div className="cert-actions">
+                        {/* View / Print */}
                         <button
-                          className="module-btn small"
+                          className="cert-action-btn view"
                           onClick={() => handlePrint(cert)}
                           disabled={loadingPrint === cert.id}
                           title={t('vetCertificates.printCertificate')}
                         >
-                          {loadingPrint === cert.id ? '...' : '🖨'}
+                          {loadingPrint === cert.id
+                            ? <span className="cert-action-spinner" />
+                            : <>
+                                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
+                                  <path d="M1 10s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6z"/>
+                                  <circle cx="10" cy="10" r="2.5"/>
+                                </svg>
+                                <span>{t('vetCertificates.printCertificate')}</span>
+                              </>
+                          }
                         </button>
+
+                        {/* Issue (vet + draft) */}
                         {isVet && cert.status === 'draft' && (
-                          <>
-                            <button
-                              className="module-btn small primary"
-                              onClick={() => setIssueTarget(cert)}
-                              title={t('vetCertificates.issue')}
-                            >
-                              ✓ {t('vetCertificates.issueCertificate')}
-                            </button>
-                            <button
-                              className="module-btn small"
-                              onClick={() => onNavigate(`/doctor/certificates/new?edit=${cert.id}`)}
-                              title={t('common.edit')}
-                            >
-                              ✏
-                            </button>
-                            <button
-                              className="module-btn small"
-                              onClick={() => handleDelete(cert)}
-                              style={{ color: '#e53e3e' }}
-                              title={t('common.delete')}
-                            >
-                              🗑
-                            </button>
-                          </>
+                          <button
+                            className="cert-action-btn issue"
+                            onClick={() => setIssueTarget(cert)}
+                            title={t('vetCertificates.issueCertificate')}
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M4 10l4.5 4.5L16 6"/>
+                            </svg>
+                            <span>{t('vetCertificates.issueCertificate')}</span>
+                          </button>
                         )}
+
+                        {/* Edit (vet + draft) */}
+                        {isVet && cert.status === 'draft' && (
+                          <button
+                            className="cert-action-btn edit"
+                            onClick={() => onNavigate(`/doctor/certificates/new?edit=${cert.id}`)}
+                            title={t('common.edit')}
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
+                              <path d="M13.5 3.5a2.12 2.12 0 013 3L6 17H3v-3L13.5 3.5z"/>
+                            </svg>
+                            <span>{t('common.edit')}</span>
+                          </button>
+                        )}
+
+                        {/* Delete (vet + draft) */}
+                        {isVet && cert.status === 'draft' && (
+                          <button
+                            className="cert-action-btn delete"
+                            onClick={() => handleDelete(cert)}
+                            title={t('common.delete')}
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
+                              <path d="M3 6h14M8 6V4h4v2M5 6l1 11h8l1-11"/>
+                            </svg>
+                            <span>{t('common.delete')}</span>
+                          </button>
+                        )}
+
+                        {/* Revoke (vet/admin + active) */}
                         {(isVet || isAdmin) && cert.status === 'active' && (
                           <button
-                            className="module-btn small"
+                            className="cert-action-btn revoke"
                             onClick={() => { setRevokeTarget(cert); setRevokeReason('') }}
-                            style={{ color: '#e53e3e' }}
                             title={t('vetCertificates.revoke')}
                           >
-                            🚫 {t('vetCertificates.revoke')}
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
+                              <circle cx="10" cy="10" r="8"/>
+                              <path d="M7 7l6 6M13 7l-6 6"/>
+                            </svg>
+                            <span>{t('vetCertificates.revoke')}</span>
                           </button>
                         )}
                       </div>

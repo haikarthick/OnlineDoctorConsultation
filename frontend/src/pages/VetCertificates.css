@@ -1,0 +1,175 @@
+/* ============================================================
+   VetCertificates.css
+   Industry-standard action button design for the certificates
+   table. Icon + label on wide screens, icon-only on mobile
+   with native tooltips.
+   ============================================================ */
+
+/* ── Action button container ── */
+.cert-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ── Base action button ── */
+.cert-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+  line-height: 1;
+  letter-spacing: 0.2px;
+}
+.cert-action-btn:active { transform: scale(0.96); }
+.cert-action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* SVG icon inside button */
+.cert-action-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ── View / Print ── teal */
+.cert-action-btn.view {
+  background: #ebf8ff;
+  color: #2b6cb0;
+  border-color: #bee3f8;
+}
+.cert-action-btn.view:hover:not(:disabled) {
+  background: #2b6cb0;
+  color: #fff;
+  border-color: #2b6cb0;
+  box-shadow: 0 2px 8px rgba(43, 108, 176, 0.3);
+}
+
+/* ── Issue ── green */
+.cert-action-btn.issue {
+  background: #f0fff4;
+  color: #276749;
+  border-color: #9ae6b4;
+}
+.cert-action-btn.issue:hover:not(:disabled) {
+  background: #276749;
+  color: #fff;
+  border-color: #276749;
+  box-shadow: 0 2px 8px rgba(39, 103, 73, 0.3);
+}
+
+/* ── Edit ── indigo */
+.cert-action-btn.edit {
+  background: #eef2ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
+}
+.cert-action-btn.edit:hover:not(:disabled) {
+  background: #4338ca;
+  color: #fff;
+  border-color: #4338ca;
+  box-shadow: 0 2px 8px rgba(67, 56, 202, 0.3);
+}
+
+/* ── Delete ── red (subtle by default, vivid on hover) */
+.cert-action-btn.delete {
+  background: #fff5f5;
+  color: #c53030;
+  border-color: #fed7d7;
+}
+.cert-action-btn.delete:hover:not(:disabled) {
+  background: #c53030;
+  color: #fff;
+  border-color: #c53030;
+  box-shadow: 0 2px 8px rgba(197, 48, 48, 0.3);
+}
+
+/* ── Revoke ── amber-red */
+.cert-action-btn.revoke {
+  background: #fffaf0;
+  color: #c05621;
+  border-color: #fbd38d;
+}
+.cert-action-btn.revoke:hover:not(:disabled) {
+  background: #c05621;
+  color: #fff;
+  border-color: #c05621;
+  box-shadow: 0 2px 8px rgba(192, 86, 33, 0.3);
+}
+
+/* ── Loading spinner inside button ── */
+.cert-action-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: certSpinAnim 0.7s linear infinite;
+}
+@keyframes certSpinAnim {
+  to { transform: rotate(360deg); }
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — 4-tier mandatory
+   ══════════════════════════════════════════ */
+
+/* 1200px — nothing changes, table is still wide */
+
+/* 768px — hide text labels, show icons only with tooltip */
+@media (max-width: 768px) {
+  .cert-action-btn span {
+    display: none;
+  }
+  .cert-action-btn {
+    padding: 6px 7px;
+    border-radius: 7px;
+  }
+  .cert-action-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+  .cert-actions {
+    gap: 4px;
+  }
+}
+
+/* 640px — buttons slightly smaller */
+@media (max-width: 640px) {
+  .cert-action-btn {
+    padding: 5px 6px;
+  }
+  .cert-action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* 480px — stack actions vertically if needed */
+@media (max-width: 480px) {
+  .cert-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .cert-action-btn span {
+    display: inline; /* restore labels on very small screens for clarity */
+  }
+  .cert-action-btn {
+    padding: 5px 10px;
+    width: 100%;
+    justify-content: center;
+  }
+}
