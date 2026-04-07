@@ -5,8 +5,8 @@ import logger from '../utils/logger';
 class CertificateController {
   async createCertificate(req: Request, res: Response): Promise<void> {
     try {
-      const vetId = (req as any).user?.id;
-      const role = (req as any).user?.role;
+      const vetId = (req as any).userId;
+      const role = (req as any).userRole;
       if (role !== 'veterinarian' && role !== 'admin') {
         res.status(403).json({ success: false, error: 'Only veterinarians can create certificates' });
         return;
@@ -21,8 +21,8 @@ class CertificateController {
 
   async getMyCertificates(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.id;
-      const role = (req as any).user?.role;
+      const userId = (req as any).userId;
+      const role = (req as any).userRole;
       const params = {
         limit: parseInt(req.query.limit as string) || 20,
         offset: parseInt(req.query.offset as string) || 0,
@@ -65,8 +65,8 @@ class CertificateController {
   async getCertificate(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const userId = (req as any).user?.id;
-      const role = (req as any).user?.role;
+      const userId = (req as any).userId;
+      const role = (req as any).userRole;
 
       const cert = await CertificateService.getById(id);
       if (!cert) {
@@ -93,8 +93,8 @@ class CertificateController {
   async updateCertificate(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const vetId = (req as any).user?.id;
-      const role = (req as any).user?.role;
+      const vetId = (req as any).userId;
+      const role = (req as any).userRole;
       if (role !== 'veterinarian' && role !== 'admin') {
         res.status(403).json({ success: false, error: 'Only veterinarians can update certificates' });
         return;
@@ -110,8 +110,8 @@ class CertificateController {
   async issueCertificate(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const vetId = (req as any).user?.id;
-      const role = (req as any).user?.role;
+      const vetId = (req as any).userId;
+      const role = (req as any).userRole;
       if (role !== 'veterinarian' && role !== 'admin') {
         res.status(403).json({ success: false, error: 'Only veterinarians can issue certificates' });
         return;
@@ -127,8 +127,8 @@ class CertificateController {
   async revokeCertificate(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const vetId = (req as any).user?.id;
-      const role = (req as any).user?.role;
+      const vetId = (req as any).userId;
+      const role = (req as any).userRole;
       if (role !== 'veterinarian' && role !== 'admin') {
         res.status(403).json({ success: false, error: 'Only veterinarians can revoke certificates' });
         return;
@@ -149,8 +149,8 @@ class CertificateController {
   async deleteCertificate(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const vetId = (req as any).user?.id;
-      const role = (req as any).user?.role;
+      const vetId = (req as any).userId;
+      const role = (req as any).userRole;
       if (role !== 'veterinarian' && role !== 'admin') {
         res.status(403).json({ success: false, error: 'Only veterinarians can delete certificates' });
         return;
@@ -165,3 +165,4 @@ class CertificateController {
 }
 
 export default new CertificateController();
+

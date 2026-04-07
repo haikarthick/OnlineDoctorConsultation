@@ -1567,3 +1567,74 @@
     font-size: 13px;
   }
 }
+
+/* ═══ Module Tabs (pill-style navigation) ═══
+   Canonical definition here so ALL pages get tabs regardless
+   of whether they import ModulePage.css or modules.css         */
+.module-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.module-tab {
+  padding: 10px 22px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #555;
+}
+.module-tab:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+.module-tab.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+}
+
+/* ═══ Module Buttons (pill-style action buttons) ═══
+   Canonical definition here so ALL pages get buttons regardless
+   of whether they import ModulePage.css or modules.css         */
+.module-btn {
+  padding: 10px 22px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #555;
+}
+.module-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+.module-btn.primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+.module-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+.module-btn.small {
+  padding: 6px 14px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+.module-btn:disabled,
+.module-btn.primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
