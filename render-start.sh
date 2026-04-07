@@ -17,12 +17,12 @@ echo "  Schema: $DB_SCHEMA"
 
 # Step 0: Create schema (if non-public) + base tables from init.sql
 echo "━━━ Setting up database schema ━━━"
-node -e "
+timeout 45 node -e "
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 async function main() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 30000, min: 0, max: 3 });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000, min: 0, max: 2 });
   const client = await pool.connect();
   try {
     const schema = process.env.DB_SCHEMA || 'public';
@@ -50,10 +50,10 @@ echo ""
 
 # Step 1: Run enterprise/tier migrations (idempotent — safe to re-run)
 echo "━━━ Running database migrations ━━━"
-timeout 60 node dist/utils/enterpriseMigration.js  2>&1 || echo "  (enterprise migration warning — continuing)"
-timeout 60 node dist/utils/tier2Migration.js       2>&1 || echo "  (tier2 migration warning — continuing)"
-timeout 60 node dist/utils/tier3Migration.js       2>&1 || echo "  (tier3 migration warning — continuing)"
-timeout 60 node dist/utils/tier4Migration.js       2>&1 || echo "  (tier4 migration warning — continuing)"
+timeout 40 node dist/utils/enterpriseMigration.js  2>&1 || echo "  (enterprise migration warning — continuing)"
+timeout 40 node dist/utils/tier2Migration.js       2>&1 || echo "  (tier2 migration warning — continuing)"
+timeout 40 node dist/utils/tier3Migration.js       2>&1 || echo "  (tier3 migration warning — continuing)"
+timeout 40 node dist/utils/tier4Migration.js       2>&1 || echo "  (tier4 migration warning — continuing)"
 # Note: backend/migrations/*.sql files are now applied by the server on startup
 # via database.ts runSQLMigrations() — no separate migrate.js process needed.
 echo "✓ Migrations complete"
@@ -62,10 +62,10 @@ echo "✓ Migrations complete"
 # Users are created by fixDemoPasswords at server start, but the rest
 # of the demo data (animals, vet profiles, consultations, etc.) only
 # comes from the seed SQL file.
-VET_PROFILE_COUNT=$(node -e "
+VET_PROFILE_COUNT=$(timeout 20 node -e "
 const { Pool } = require('pg');
 async function main() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 30000, min: 0, max: 3 });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000, min: 0, max: 2 });
   const schema = process.env.DB_SCHEMA || 'public';
   try {
     await pool.query('SET search_path TO ' + schema + ', public');
@@ -83,12 +83,12 @@ FORCE_RESEED_LOWER=$(echo "$FORCE_RESEED" | tr '[:upper:]' '[:lower:]')
 if [ "$FORCE_RESEED_LOWER" = "true" ] || [ "$FORCE_RESEED" = "1" ]; then
   echo ""
   echo "━━━ FORCE_RESEED=true — Re-seeding demo data ━━━"
-  timeout 300 node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings or timed out — continuing"
+  timeout 120 node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings or timed out — continuing"
   echo "✓ Seed complete"
 elif [ "$VET_PROFILE_COUNT" = "0" ]; then
   echo ""
   echo "━━━ No demo data detected — Seeding demo data ━━━"
-  timeout 300 node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings or timed out — continuing"
+  timeout 120 node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings or timed out — continuing"
   echo "✓ Seed complete"
 else
   echo "  ✓ Database already has demo data — skipping seed"

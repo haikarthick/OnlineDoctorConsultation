@@ -27,21 +27,58 @@ const connectWithRetry = async (maxAttempts = 5): Promise<void> => {
 };
 
 const startServer = async () => {
+  // ── 1. Bind HTTP port FIRST so Render's health check passes immediately ──
+  // On Render free tier, DB can take 30-60s to wake up. If the port isn't
+  // bound before Render's health check fires, the deploy is marked as failed.
+  const httpServer = http.createServer(app);
+  initSocketIO(httpServer);
+
+  const server = httpServer.listen(config.app.port, () => {
+    logger.info(`Server running on port ${config.app.port} in ${config.app.nodeEnv} mode`);
+  });
+
+  server.on('error', (err: any) => {
+    logger.error('Server error', { error: err.message });
+    process.exit(1);
+  });
+
+  // Graceful shutdown handler
+  const shutdown = async (signal: string) => {
+    logger.info(`${signal} received, shutting down gracefully`);
+    server.close(async () => {
+      try {
+        await database.disconnect();
+        await cacheManager.disconnect();
+        logger.info('Server shut down successfully');
+        process.exit(0);
+      } catch (error) {
+        logger.error('Error during shutdown', { error });
+        process.exit(1);
+      }
+    });
+
+    // Force shutdown after 30 seconds
+    setTimeout(() => {
+      logger.error('Forced shutdown after timeout');
+      process.exit(1);
+    }, 30000);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+
+  // ── 2. Initialize DB + services in background (does NOT block port binding) ──
   try {
-    // Connect to database (with retry for slow free-tier Render PostgreSQL)
     await connectWithRetry();
     logger.info('Database initialized');
 
-    // Initialize cache
     if (cacheManager.connect) {
       await cacheManager.connect();
     }
     logger.info('Cache initialized');
 
-    // Start background scheduler (document expiry checks, etc.)
     startScheduler();
 
-    // Start vaccine reminder daily job (runs once on startup, then every 24h)
     VaccineScheduleService.runDailyReminderJob().catch((err: any) =>
       logger.warn('[VaccineSchedule] Initial reminder job failed', { error: err.message })
     );
@@ -51,51 +88,12 @@ const startServer = async () => {
       );
     }, 24 * 60 * 60 * 1000);
 
-    // Start server
-    const httpServer = http.createServer(app);
-    initSocketIO(httpServer);
-
-    const server = httpServer.listen(config.app.port, () => {
-      logger.info(`Server running on port ${config.app.port} in ${config.app.nodeEnv} mode`);
-      // Fix demo passwords AFTER port is open so Render's health check passes immediately
-      fixDemoPasswords().catch((err: any) =>
-        logger.error('fixDemoPasswords failed', { error: err.message || String(err) })
-      );
-    });
-
-    // Handle server errors
-    server.on('error', (err: any) => {
-      logger.error('Server error', { error: err.message });
-      process.exit(1);
-    });
-
-    // Graceful shutdown handler
-    const shutdown = async (signal: string) => {
-      logger.info(`${signal} received, shutting down gracefully`);
-      server.close(async () => {
-        try {
-          await database.disconnect();
-          await cacheManager.disconnect();
-          logger.info('Server shut down successfully');
-          process.exit(0);
-        } catch (error) {
-          logger.error('Error during shutdown', { error });
-          process.exit(1);
-        }
-      });
-
-      // Force shutdown after 30 seconds
-      setTimeout(() => {
-        logger.error('Forced shutdown after timeout');
-        process.exit(1);
-      }, 30000);
-    };
-
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
-    process.on('SIGINT', () => shutdown('SIGINT'));
+    fixDemoPasswords().catch((err: any) =>
+      logger.error('fixDemoPasswords failed', { error: err.message || String(err) })
+    );
   } catch (error: any) {
-    logger.error('Failed to start server', { error: error.message || String(error) });
-    process.exit(1);
+    logger.error('Failed to initialize services after server start', { error: error.message || String(error) });
+    // Do NOT exit — server is already listening; DB may recover on its own
   }
 };
 
