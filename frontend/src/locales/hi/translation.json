@@ -203,7 +203,8 @@
     "validation": {
       "allRequired": "सभी फ़ील्ड आवश्यक हैं",
       "passwordMismatch": "पासवर्ड मेल नहीं खाते",
-      "passwordLength": "पासवर्ड कम से कम 6 अक्षर का होना चाहिए"
+      "passwordLength": "पासवर्ड कम से कम 8 अक्षर का होना चाहिए",
+      "passwordComplexity": "पासवर्ड में बड़े, छोटे अक्षर और संख्या होनी चाहिए"
     }
   },
   "home": {

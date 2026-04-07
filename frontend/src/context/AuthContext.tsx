@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (result.data?.refreshToken) localStorage.setItem('refreshToken', result.data.refreshToken)
         navigate('/dashboard')
       } else {
-        throw new Error(result.error?.message || result.error || 'Registration failed')
+        throw new Error(result.error?.message || result.message || result.error || 'Registration failed')
       }
     } catch (error) {
       throw error

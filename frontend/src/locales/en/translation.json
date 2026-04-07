@@ -229,7 +229,8 @@
     "validation": {
       "allRequired": "All fields are required",
       "passwordMismatch": "Passwords do not match",
-      "passwordLength": "Password must be at least 6 characters"
+      "passwordLength": "Password must be at least 8 characters",
+      "passwordComplexity": "Password must contain uppercase, lowercase, and a number"
     }
   },
   "home": {

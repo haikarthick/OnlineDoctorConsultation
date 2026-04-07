@@ -51,8 +51,14 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
       return
     }
 
-    if (formData.password.length < 6) {
+    if (formData.password.length < 8) {
       setMessage(t('register.validation.passwordLength'))
+      setLoading(false)
+      return
+    }
+
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      setMessage(t('register.validation.passwordComplexity'))
       setLoading(false)
       return
     }
@@ -184,8 +190,8 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="reg-password">{t('register.password')}</label>
-                <input id="reg-password" type="password" name="password" placeholder="Min 6 characters" value={formData.password} onChange={handleChange} required autoComplete="new-password" aria-required="true" aria-describedby="password-hint" />
-                <span id="password-hint" className="sr-only">Must be at least 6 characters</span>
+                <input id="reg-password" type="password" name="password" placeholder="Min 8 chars, A-Z, a-z, 0-9" value={formData.password} onChange={handleChange} required autoComplete="new-password" aria-required="true" aria-describedby="password-hint" />
+                <span id="password-hint" className="sr-only">Must be at least 8 characters with uppercase, lowercase, and number</span>
               </div>
               <div className="form-group">
                 <label htmlFor="reg-confirmPassword">{t('register.confirmPassword')}</label>
