@@ -10,6 +10,55 @@ Before implementing ANY feature or fix, the agent MUST:
 
 **This project has 5 locale files, a pre-push hook with 4 checks, and a 4-file permission sync. ALL must pass before every commit.**
 
+---
+
+## MEMORY UPDATE RULE (MANDATORY — AFTER EVERY CHANGE)
+
+**After completing ANY task, fix, feature, or investigation, the agent MUST update memory files before the session ends.**
+
+### When to update `memories/repo/past-bugs.md`:
+- After fixing ANY bug (deployment, auth, SQL, UI, i18n, permissions, navigation)
+- After discovering a root cause (even if not yet fixed)
+- After any "it was working before but now broken" investigation
+- Template entry:
+  ```
+  ### CATEGORY-NNN — Short title of bug
+  - **Symptom:** What the user saw / what error appeared
+  - **Root Cause:** Exact technical reason it failed
+  - **Fix:** What was changed and in which files
+  - **Rule:** One-line rule to NEVER repeat this mistake
+  ```
+
+### When to update `memories/repo/feature-tracker.md`:
+- After adding any new page, feature, endpoint, or UI component
+- After completing a planned feature (mark as ✅ Done)
+- After deciding NOT to implement something (mark with reason)
+
+### When to update `memories/repo/lessons.md` (create if missing):
+- After any architectural decision (e.g. "use gen_random_uuid not uuid_generate_v4")
+- After any "lesson learned" that applies to the whole codebase
+- After discovering a platform limitation (e.g. Render managed PG cannot CREATE EXTENSION)
+- Template entry:
+  ```
+  ### LESSON-NNN — Short title
+  - **Context:** What were we doing / what problem triggered this
+  - **Lesson:** The rule or principle learned
+  - **Apply to:** All future SQL / All future Render deploys / etc.
+  ```
+
+### Memory update is part of the task — NOT optional
+- Do NOT consider a task complete until memory files are updated
+- Commit memory file changes together with code changes (same commit is fine)
+- If a session ends before memory is updated, add a note at the top of `memories/session/pending-memory.md`
+
+### Before starting EVERY user instruction:
+1. Read `memories/repo/past-bugs.md` — check if this issue has been seen before
+2. Read `memories/repo/lessons.md` — apply known lessons to the approach
+3. If a known bug matches → apply the known fix immediately, skip investigation
+4. If a new bug → investigate, fix, THEN add to past-bugs.md
+
+---
+
 ## Architecture (DO NOT VIOLATE)
 
 ### Backend
