@@ -131,25 +131,62 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 
 ## Past Bugs — LEARN FROM THESE (do not repeat)
 
+### UI / CSS Bugs
 | Bug | Root Cause | Lesson |
 |-----|-----------|--------|
 | Scrollbar overflow | `.module-page { min-height: 100vh }` inside flex child | Use `calc(100vh - 64px)`, `box-sizing: border-box` |
 | Mobile nav hidden | CSS `display: none` overriding React conditional render | Never put `display: none` on React-rendered elements |
-| Pet owner seeing farm menus | `pet_owner` had `enterprise_manage` permission | Permission changes need 4-file sync |
-| Prescription "Failed to create" | Joi required `instructions`/`duration` but UI made them optional | Joi schemas must match frontend forms |
+| Missing CSS classes | Components used `.module-tabs` etc. that were never defined | Always verify CSS class exists when using className |
+| Nav bar items overflow at intermediate widths | Home nav total width exceeded container at 1024–1200px; no intermediate breakpoints | Count total width of ALL nav items at 1200px, 1024px before adding buttons. Always add intermediate breakpoints, not just 768px mobile |
+| Floating element overlapping fixed nav | Fixed-position floating element (`z-index: 9998`) overlapped fixed nav bar (`z-index: 1000`) | Fixed/floating elements must account for ALL fixed/sticky elements on every page they render on |
+
+### Permissions Bugs
+| Bug | Root Cause | Lesson |
+|-----|-----------|--------|
+| Pet owner seeing farm menus | `pet_owner` had `enterprise_manage` permission | Permission changes need 4-file sync: PermissionService + PermissionContext + Navigation + App.tsx |
+
+### Backend / API Bugs
+| Bug | Root Cause | Lesson |
+|-----|-----------|--------|
+| Prescription "Failed to create" | Joi required `instructions`/`duration` but UI made them optional | Joi schemas must match frontend forms exactly |
 | Error display mismatch | Backend `{ errors: [...] }` vs frontend expecting `error.message` | Always check error format between BE/FE |
 | AI chat messages invisible | PostgreSQL snake_case vs frontend camelCase | Use `AS "camelCase"` aliases in SELECT queries |
-| Missing CSS classes | Components used `.module-tabs` etc. that were never defined | Always verify CSS class exists when using className |
-| i18n namespace missing (HerdMedical) | `t('herdMedical.*')` used throughout but `"herdMedical": {}` top-level object never added to any locale file. react-i18next silently renders raw key paths (e.g. `herdMedical.pageTitle`) — NO runtime error, NO console warning | When a new page uses a new `t('namespace.*')` prefix, the `"namespace": { }` top-level object MUST exist in all 5 locale files BEFORE using any t() calls from it |
-| Missing auto-populate listing | Marketplace listing pre-fill from animal profile was in original plan but not implemented; caught by user after delivery | Before closing any feature, cross-check ALL planned sub-features in feature-tracker.md |
 | Inpatient search silent SQL error | Service used `a.microchip_number` and `a.avatar_url` — neither exists. PostgreSQL threw error, catch block swallowed it, frontend showed "No animals found" silently | Always cross-reference SQL column names against `docker/init.sql`. Silent try/catch masking SQL errors is a major trap |
+
+### i18n Bugs
+| Bug | Root Cause | Lesson |
+|-----|-----------|--------|
+| i18n namespace missing (HerdMedical) | `t('herdMedical.*')` used throughout but `"herdMedical": {}` top-level object never added to any locale file. react-i18next silently renders raw key paths — NO runtime error, NO console warning | When a new page uses a new `t('namespace.*')` prefix, the `"namespace": { }` top-level object MUST exist in all 5 locale files BEFORE using any t() calls from it |
+| Hindi locale JSON broken by double-comma | Two separate edits each added trailing comma on same key → `,,` invalid JSON. No explicit JSON validation in pre-push hook | After editing ANY locale JSON: validate with `node -e "require('./frontend/src/locales/hi/translation.json')"` before pushing |
+
+### Navigation & Deep Link Bugs
+| Bug | Root Cause | Lesson |
+|-----|-----------|--------|
 | "Open Full Record" → generic page | Navigation passed no record ID; target page didn't parse URL params; clicking a specific record opened the generic overview | EVERY navigation to a specific record MUST pass the record's ID via query/route param. Target page MUST auto-select and highlight the record |
 | Vet "My Pets" shows other people's animals | `listAnimalsByVeterinarian()` used booking/consultation tables (patients), not `owner_id = userId` | "My X" for ANY role always means the user's OWN records. Query must align with page purpose, not professional role |
+
+### Settings Enforcement Bugs
+| Bug | Root Cause | Lesson |
+|-----|-----------|--------|
 | Time slots ignoring admin time format | FindDoctor used hardcoded `formatTime12h()` helper ignoring admin `display.timeFormat`. Past slots for today also shown | ALL time/date/currency displays MUST use `useSettings()` formatters (`formatSlotTime`, `formatDate`, `formatCurrency`). NEVER create local format helpers. Filter past slots for today's date with 15-min buffer |
-| Nav bar items overflow at intermediate widths | Home nav total width exceeded container at 1024–1200px; no intermediate breakpoints | Count total width of ALL nav items at 1200px, 1024px before adding buttons. Always add intermediate breakpoints, not just 768px mobile |
+
+### Feature Completeness Bugs
+| Bug | Root Cause | Lesson |
+|-----|-----------|--------|
+| Missing auto-populate listing | Marketplace listing pre-fill from animal profile was in original plan but not implemented; caught by user after delivery | Before closing any feature, cross-check ALL planned sub-features in feature-tracker.md |
+
+### Testing Bugs
+| Bug | Root Cause | Lesson |
+|-----|-----------|--------|
 | E2E pre-push generator overwrites manual stubs | Generator script REWROTE `auto-discovered.spec.ts` on every run, stripping manually added stubs from prior commits | For frontend-only routes (accept-invite, animal-timeline etc.) manually append stubs to `auto-discovered.spec.ts`. Verify pre-push hook assertion count matches expected total |
-| Hindi locale JSON broken by double-comma | Two separate edits each added trailing comma on same key → `,,` invalid JSON. No explicit JSON validation in pre-push hook | After editing ANY locale JSON: validate with `node -e "require('./frontend/src/locales/hi/translation.json')"` before pushing |
-| Floating element overlapping fixed nav | Fixed-position floating element (`z-index: 9998`) overlapped fixed nav bar (`z-index: 1000`) | Fixed/floating elements must account for ALL fixed/sticky elements on every page they render on |
+
+### Deployment / Render Bugs
+| Bug | Root Cause | Lesson |
+|-----|-----------|--------|
+| Deploy "Exited with status 1" — intermittent | `index.ts` awaited `connectWithRetry()` (up to 190s: 5×30s timeout + 40s waits) BEFORE calling `httpServer.listen()`. Render's health check fires in ~60s. Free-tier PostgreSQL can take 30–90s to wake — port never bound in time → deploy fails | **Bind `httpServer.listen()` FIRST. Connect DB in background AFTER. NEVER call `process.exit(1)` on DB connect failure after port is already bound.** |
+| render-start.sh inline node hung forever | Inline `node -e "..."` scripts had `connectionTimeoutMillis` but NO outer shell `timeout` wrapper — if DB unreachable, node hung for minutes | Every `node` subprocess in render-start.sh MUST have BOTH: (1) outer `timeout N` shell wrapper AND (2) `connectionTimeoutMillis` < N |
+| Deploy fails instantly — no HTTP logs | `config/index.ts` has synchronous `process.exit(1)` at module load time if `DATABASE_URL` missing or `JWT_SECRET` is a default value — fires before `http.createServer()` is ever called | Always verify Render env vars before deploying: `DATABASE_URL`, `JWT_SECRET` (non-default), `NODE_ENV=production`, `DB_SCHEMA` |
+| enterpriseMigration exits with code 1 | `enterpriseMigration.ts` calls `process.exit(1)` on SQL error (unlike tier2/3/4 which throw) | The `\|\| echo "...continuing"` guards in render-start.sh catch this. NEVER remove those guards. Future fix: change to `throw error` to match tier2/3/4 |
 
 ## Admin Settings Rule (MANDATORY — GLOBAL ENFORCEMENT)
 
@@ -247,14 +284,64 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 - Uses OpenAI SDK with Groq baseURL for Groq provider
 - Models: `llama-3.3-70b-versatile` (Groq), `gpt-4o` (OpenAI)
 
-## Deployment & CI/CD
-- **Branch model**: `develop` (DEV) → `main` (PROD)
-- **All development** happens on `develop` branch (or feature branches merged into `develop`)
-- **Never push directly to `main`** — use the GitHub Actions "Promote DEV to PROD" workflow
-- **Database**: 1 free PostgreSQL on Render, schema-separated (`DB_SCHEMA` env var)
-  - DEV uses schema `vetcare_dev`, PROD uses schema `vetcare_prod`
-- Render.com hosts 2 web services: `vetcare-dev` (develop) + `vetcare-app` (main)
-- GitHub Actions CI/CD runs tests on every push to develop or main
-- `.env` is gitignored — production env vars in Render dashboard
-- `render-build.sh` builds frontend then backend
-- `render-start.sh` creates schema → runs init.sql → migrations → seed → server
+## Render Deployment Rules (MANDATORY — ZERO TOLERANCE)
+
+**These rules exist because free-tier Render PostgreSQL can take 30–90s to wake up after sleeping.**
+
+### Rule 1 — Bind HTTP Port FIRST, Always
+```typescript
+// index.ts — CORRECT (port first, DB second):
+const httpServer = http.createServer(app);
+initSocketIO(httpServer);
+const server = httpServer.listen(config.app.port, ...);  // ← FIRST
+
+// DB connect in background AFTER port is bound:
+try {
+  await connectWithRetry();
+  // cache, scheduler, fixDemoPasswords...
+} catch (error: any) {
+  logger.error('Services init failed', { error: error.message });
+  // NEVER process.exit(1) here — server stays alive
+}
+```
+- Render's health check fires within ~60s of deploy start
+- If port is not bound in time → deploy marked failed with "Exited with status 1"
+- DB failures after port is bound are logged but NEVER fatal
+
+### Rule 2 — Every node Subprocess in render-start.sh Needs a Timeout
+Every `node -e "..."` or `node dist/...` call MUST have:
+1. Outer `timeout N` shell wrapper
+2. `connectionTimeoutMillis` set to less than N (node fails cleanly before shell kills it)
+3. `|| echo "...continuing"` fallback so failures don't stop the script
+
+### Rule 3 — Render Environment Variables (verify before every deploy)
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `DATABASE_URL` | ✅ | Auto-set by Render PostgreSQL add-on |
+| `JWT_SECRET` | ✅ | Must NOT be any default value — or deploy exits immediately at module load |
+| `NODE_ENV` | ✅ | Must be `production` |
+| `DB_SCHEMA` | ✅ | `vetcare_dev` (develop branch) / `vetcare_prod` (main branch) |
+| `PORT` | Auto | Render sets this |
+| `RENDER_EXTERNAL_URL` | Auto | Render sets this |
+
+### Rule 4 — Render Startup Sequence (never change this order)
+```
+render-build.sh  →  npm install + build (frontend Vite, backend tsc)
+
+render-start.sh
+  Step 0: timeout 45  — schema + init.sql            [non-fatal: || echo continuing]
+  Step 1: timeout 40  — 4 migration scripts           [non-fatal: || echo continuing]
+  Step 2: timeout 20  — VET_PROFILE_COUNT check       [defaults to 0 on failure]
+        → timeout 120 — seed demo data if empty       [non-fatal: || echo continuing]
+  Step 3: exec node dist/index.js                     [MUST succeed — no fallback]
+    → httpServer.listen(PORT)     ← FIRST always
+    → connectWithRetry()          ← background, 5 attempts × 10s
+    → cache / scheduler / demo    ← background, non-fatal
+```
+
+### Rule 5 — Never Direct-Push to main
+- All development on `develop` branch
+- PROD deploys via GitHub Actions "Promote DEV to PROD" workflow only
+- `git push origin develop` — always, after every commit
+
+
