@@ -212,11 +212,11 @@ const ComplianceDocs: React.FC = () => {
                       return (
                         <tr key={d.id} className={isExpired ? 'row-danger' : isExpiring ? 'row-warning' : ''}>
                           <td><strong>{d.title}</strong></td>
-                          <td>{d.documentType.replace(/_/g, ' ')}</td>
+                          <td>{(d.documentType || '').replace(/_/g, ' ')}</td>
                           <td>{d.documentNumber || '–'}</td>
                           <td>{d.issuingAuthority || '–'}</td>
                           <td>{d.expiryDate ? new Date(d.expiryDate).toLocaleDateString() : '–'}</td>
-                          <td><span className="badge" style={{ background: STATUS_COLORS[d.status] || '#888' }}>{d.status.replace(/_/g, ' ')}</span></td>
+                          <td><span className="badge" style={{ background: STATUS_COLORS[d.status] || '#888' }}>{(d.status || '').replace(/_/g, ' ')}</span></td>
                           <td>{d.verifiedAt ? `✅ ${d.verifiedByName || ''}` : '—'}</td>
                           <td>
                             <button className="btn btn-sm" onClick={() => startEdit(d)}>{t('complianceDocs.table.edit')}</button>
@@ -276,7 +276,7 @@ const ComplianceDocs: React.FC = () => {
                   {(summary.byStatus || []).map(s => (
                     <div key={s.status} className="stat-item" style={{ borderLeft: `4px solid ${STATUS_COLORS[s.status] || '#888'}` }}>
                       <span className="stat-value">{s.count}</span>
-                      <span className="stat-label">{s.status.replace(/_/g, ' ')}</span>
+                      <span className="stat-label">{(s.status || '').replace(/_/g, ' ')}</span>
                     </div>
                   ))}
                 </div>

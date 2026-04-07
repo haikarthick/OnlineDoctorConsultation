@@ -175,7 +175,7 @@ const SupplyChainPage: React.FC = () => {
                   <div className="mini-chart-bar">
                     {dashboard.batchStatusDistribution.map((s: any, i: number) => (
                       <div key={i} className="bar-row">
-                        <span className="bar-label">{s.status.replace(/_/g, ' ')}</span>
+                        <span className="bar-label">{(s.status || '').replace(/_/g, ' ')}</span>
                         <div className="bar-track"><div className="bar-fill" style={{ width: `${(+s.count / Math.max(1, ...dashboard.batchStatusDistribution.map((x: any) => +x.count))) * 100}%`, backgroundColor: STATUS_COLORS[s.status] || '#6b7280' }} /></div>
                         <span className="bar-value">{s.count}</span>
                       </div>

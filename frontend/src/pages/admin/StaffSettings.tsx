@@ -165,7 +165,7 @@ export default function StaffSettings() {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 600, fontSize: 14 }}>{s.first_name} {s.last_name}</div>
-                      <div style={{ fontSize: 12, color: '#64748b' }}>{s.position.replace(/_/g, ' ')} • {s.email}</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>{(s.position || '').replace(/_/g, ' ')} • {s.email}</div>
                       {s.notes && <div style={{ fontSize: 11, color: '#94a3b8' }}>{s.notes}</div>}
                     </div>
                     {!s.is_active && <span style={{ padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600, background: '#fecaca', color: '#991b1b' }}>{t('staffSettings.inactive')}</span>}

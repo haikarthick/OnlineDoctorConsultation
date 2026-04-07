@@ -177,11 +177,11 @@ export default function InpatientManagement() {
                     <div style={{ fontSize: 13, color: '#64748b' }}>{p.animal_species}{p.animal_breed ? ` — ${p.animal_breed}` : ''}{p.animal_weight ? ` • ${p.animal_weight}kg` : ''}</div>
                     <div style={{ fontSize: 12, color: '#94a3b8' }}>{t('inpatientManagement.owner')}: {p.owner_first_name} {p.owner_last_name}{p.owner_phone ? ` • ${p.owner_phone}` : ''}</div>
                   </div>
-                  <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: sc.bg, color: sc.color }}>{p.status.replace(/_/g, ' ')}</span>
+                  <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: sc.bg, color: sc.color }}>{(p.status || '').replace(/_/g, ' ')}</span>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 13, marginBottom: 10 }}>
-                  <div><strong>{t('inpatientManagement.type')}:</strong> {p.admission_type.replace(/_/g, ' ')}</div>
+                  <div><strong>{t('inpatientManagement.type')}:</strong> {(p.admission_type || '').replace(/_/g, ' ')}</div>
                   {p.room_number && <div><strong>{t('inpatientManagement.room')}:</strong> {p.room_number}{p.bed_number ? ` / ${t('inpatientManagement.bed')} ${p.bed_number}` : ''}</div>}
                   <div><strong>{t('inpatientManagement.admittedAt')}:</strong> {formatDateTime(p.admitted_at)}</div>
                   {p.estimated_discharge && <div><strong>{t('inpatientManagement.estDischarge')}:</strong> {formatDateTime(p.estimated_discharge)}</div>}

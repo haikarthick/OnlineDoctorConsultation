@@ -174,6 +174,13 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 - **Fix:** Removed `a.avatar_url as "animalAvatar"` from the JOIN query and `animalAvatar: r.animalAvatar` from `mapRow()`.
 - **Rule:** ALWAYS grep `docker/init.sql` for a column name before using it in any SQL JOIN. Never assume columns from memory — especially from related tables. The animals table uses `name`, `species`, `breed`, `date_of_birth`, `gender` — NOT `avatar_url`.
 
+### API-007 — Unsafe String Method Calls on API Fields → Runtime Crash
+- **Symptom:** Clicking into a page (e.g. AlertCenter, FinancialAnalytics) throws `Cannot read properties of undefined (reading 'replace')`. Crashes the entire React component tree for that page.
+- **Root Cause:** Code calls `.replace()`, `.split()`, `.toUpperCase()` etc. directly on API response fields (e.g. `r.ruleType.replace(/_/g,' ')`). TypeScript types declare these as `string` but DB rows can have NULL values at runtime — TypeScript never catches this.
+- **Pattern seen in:** AlertCenter (ruleType), FinancialAnalytics (category), ComplianceDocs (documentType, status), ManageSchedule (holidayType), StaffSettings (position), InpatientManagement (status, admission_type), HospitalWorkflow (status), SupplyChain (status)
+- **Fix:** Always guard: `(field || '').replace(...)` — never `field.replace(...)` on any API-sourced field
+- **Rule:** ALL `.replace()` / `.split()` / `.toUpperCase()` / `.toLowerCase()` calls on API response fields MUST use `(field || '')` fallback. TypeScript types are compile-time only — DB NULLs bypass them entirely.
+
 ---
 
 ## 🔴 i18n Bugs

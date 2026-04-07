@@ -246,7 +246,7 @@ const AlertCenter: React.FC = () => {
                     {rules.map(r => (
                       <tr key={r.id}>
                         <td><strong>{r.name}</strong></td>
-                        <td>{r.ruleType.replace(/_/g, ' ')}</td>
+                        <td>{(r.ruleType || '').replace(/_/g, ' ')}</td>
                         <td><span className="badge" style={{ background: SEVERITY_COLORS[r.severity] }}>{r.severity}</span></td>
                         <td>
                           <button className={`btn btn-sm ${r.isEnabled ? 'btn-success' : 'btn-secondary'}`} onClick={() => handleToggleRule(r.id, r.isEnabled)}>

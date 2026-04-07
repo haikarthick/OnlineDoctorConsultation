@@ -280,7 +280,7 @@ export default function HospitalWorkflow() {
                   {q.reason && <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{q.reason}</div>}
                 </div>
                 <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: PRIORITY_COLORS[q.priority] + '20', color: PRIORITY_COLORS[q.priority] }}>{q.priority}</span>
-                <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#f1f5f9', color: '#475569' }}>{q.status.replace(/_/g, ' ')}</span>
+                <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#f1f5f9', color: '#475569' }}>{(q.status || '').replace(/_/g, ' ')}</span>
                 <div style={{ display: 'flex', gap: 4 }}>
                   {q.status === 'waiting' && (
                     <button onClick={() => { setTriageTarget(q); setTriageForm({ triageLevel: 3, triageNotes: '', priority: q.priority }); }} style={{ padding: '6px 12px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.triage')}</button>

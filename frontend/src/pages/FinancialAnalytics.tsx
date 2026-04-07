@@ -227,7 +227,7 @@ const FinancialAnalytics: React.FC = () => {
                   <thead><tr><th>{t('financialAnalytics.dashboard.headers.category')}</th><th>{t('financialAnalytics.dashboard.headers.total')}</th></tr></thead>
                   <tbody>
                     {(dashboard.topExpenseCategories || []).map(c => (
-                      <tr key={c.category}><td>{c.category.replace(/_/g, ' ')}</td><td className="text-danger">{formatCurrency(c.total)}</td></tr>
+                      <tr key={c.category}><td>{(c.category || '').replace(/_/g, ' ')}</td><td className="text-danger">{formatCurrency(c.total)}</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -240,7 +240,7 @@ const FinancialAnalytics: React.FC = () => {
                   <thead><tr><th>{t('financialAnalytics.dashboard.headers.category')}</th><th>{t('financialAnalytics.dashboard.headers.total')}</th></tr></thead>
                   <tbody>
                     {(dashboard.revenueByCategory || []).map(c => (
-                      <tr key={c.category}><td>{c.category.replace(/_/g, ' ')}</td><td className="text-success">{formatCurrency(c.total)}</td></tr>
+                      <tr key={c.category}><td>{(c.category || '').replace(/_/g, ' ')}</td><td className="text-success">{formatCurrency(c.total)}</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -257,7 +257,7 @@ const FinancialAnalytics: React.FC = () => {
                       <tr key={r.id}>
                         <td>{r.transactionDate ? new Date(r.transactionDate).toLocaleDateString() : '–'}</td>
                         <td><span className="badge" style={{ background: TYPE_COLORS[r.recordType] }}>{r.recordType}</span></td>
-                        <td>{r.category.replace(/_/g, ' ')}</td>
+                        <td>{(r.category || '').replace(/_/g, ' ')}</td>
                         <td className={r.recordType === 'income' ? 'text-success' : 'text-danger'}>{formatCurrency(r.amount)}</td>
                         <td>{r.description || '–'}</td>
                         <td>{r.referenceNumber || '–'}</td>

@@ -564,7 +564,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                       {new Date(h.holidayDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
                     <span style={{ marginLeft: 8 }} className={`badge ${h.holidayType === 'general' ? 'badge-active' : h.holidayType === 'emergency_closure' ? 'badge-danger' : 'badge-warning'}`}>
-                      {h.holidayType.replace('_', ' ')}
+                      {(h.holidayType || '').replace('_', ' ')}
                     </span>
                     {!h.isFullDay && <span style={{ marginLeft: 8, fontSize: 12, color: '#6b7280' }}>({formatSlotTime(h.startTime || '')}–{formatSlotTime(h.endTime || '')})</span>}
                   </div>
