@@ -130,7 +130,18 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 - **Root Cause:** PostgreSQL returned snake_case column names; frontend TypeScript expected camelCase
 - **Fix:** Use `AS "camelCase"` aliases in ALL SELECT queries that return data to the frontend
 
-### API-004 — Inpatient Search Silent SQL Error
+### API-005 — animals.map / R.map is not a function — API Response Shape Mismatch
+- **Symptom:** Clicking "New Reminder" (or any button that triggers a re-render with `animals.map()`) throws `R.map is not a function` / "Something went wrong"
+- **Root Cause (1):** `AnimalService.listAnimals()` returns `{ animals: [...], total: N }` but 3 pages accessed `.data?.items` (undefined) then fell back to `.data` (the whole object, not an array). `animals.map()` on an object → crash.
+- **Root Cause (2):** `WellnessService.listScorecards` returned raw DB rows where `recommendations` and `risk_flags` are stored as `JSON.stringify()` TEXT strings. Frontend called `sc.recommendations.map()` on a string → crash. Also `sc.riskFlags` was undefined (column name is `risk_flags` in snake_case, not camelCase).
+- **Files fixed:** `WellnessPortal.tsx`, `HospitalBooking.tsx`, `FloatingChatWidget.tsx`, `WellnessService.ts`
+- **Rule 1:** ALWAYS access `listAnimals` response as `res.data?.animals || res.data?.items || []` — never `.data` as fallback (it's an object, not array)
+- **Rule 2:** NEVER store arrays as `JSON.stringify()` TEXT in DB and call `.map()` on the raw return. Either use JSONB type or parse explicitly with a helper before returning from the service.
+- **Rule 3:** ALL SQL columns used in the frontend MUST be aliased to camelCase in SELECT. Never rely on snake_case column names reaching the frontend.
+
+---
+
+
 - **Root Cause:** Query used `a.microchip_number` and `a.avatar_url` — neither column exists in the schema. PostgreSQL threw an error, catch block swallowed it, frontend silently showed "No animals found"
 - **Fix:** ALWAYS cross-reference every column name against `docker/init.sql` before writing SQL. Silent try/catch is a major trap — log errors even if you continue.
 
