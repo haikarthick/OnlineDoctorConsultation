@@ -303,6 +303,49 @@ class PostgresDatabase {
       )
     `).catch(() => {});
 
+    // Backfill VC-IDs for existing animals that have NULL or non-VC-format unique_id
+    try {
+      const speciesCodeMap: Record<string, string> = {
+        dog: 'DOG', canine: 'DOG',
+        cat: 'CAT', feline: 'CAT',
+        rabbit: 'RAB',
+        bird: 'BRD',
+        reptile: 'REP',
+        cow: 'COW', cattle: 'COW', bovine: 'COW',
+        sheep: 'SHP', ovine: 'SHP',
+        pig: 'PIG', swine: 'PIG', porcine: 'PIG',
+        chicken: 'CHK', poultry: 'CHK',
+        horse: 'HRS', equine: 'HRS',
+        goat: 'GOT', caprine: 'GOT',
+      };
+      const noIdRes = await this.pool.query(
+        `SELECT id, species, EXTRACT(YEAR FROM created_at)::int AS yr
+         FROM animals
+         WHERE unique_id IS NULL OR unique_id NOT LIKE 'VC-%'
+         ORDER BY created_at`
+      );
+      for (const row of noIdRes.rows) {
+        const code = speciesCodeMap[(row.species || '').toLowerCase().trim()] || 'OTH';
+        const yr = row.yr % 100;
+        const seqRes = await this.pool.query(
+          `INSERT INTO animal_id_sequences (species, year, last_seq)
+           VALUES ($1, $2, 1)
+           ON CONFLICT (species, year) DO UPDATE
+             SET last_seq = animal_id_sequences.last_seq + 1
+           RETURNING last_seq`,
+          [code, yr]
+        );
+        const seq = seqRes.rows[0].last_seq as number;
+        const uid = `VC-${code}-${yr.toString().padStart(2, '0')}-${seq.toString().padStart(5, '0')}`;
+        await this.pool.query(`UPDATE animals SET unique_id = $1 WHERE id = $2`, [uid, row.id]);
+      }
+      if (noIdRes.rows.length > 0) {
+        logger.info(`Backfilled VC-IDs for ${noIdRes.rows.length} animal(s)`);
+      }
+    } catch (backfillErr: any) {
+      logger.warn('Animal VC-ID backfill skipped', { error: backfillErr.message });
+    }
+
     // Ensure animals columns added after initial table creation
     const animalColumns = [
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS enterprise_id UUID`,

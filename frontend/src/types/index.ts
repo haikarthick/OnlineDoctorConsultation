@@ -1355,6 +1355,8 @@ export interface MarketplaceListing {
   is_hot_deal?: boolean
   linkedAnimalId?: string
   linked_animal_id?: string
+  animalUniqueId?: string
+  animal_unique_id?: string
   auctionEndTime?: string
   auction_end_time?: string
   reservePrice?: number

@@ -388,10 +388,12 @@ class MarketplaceService {
                  l.auction_end_time, l.views_count, l.created_at, l.status,
                  l.seller_type, l.breeder_verified, l.welfare_attestation,
                  u.first_name as seller_name, l.location as seller_location,
+                 a.unique_id as animal_unique_id,
                  (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count,
                  (SELECT MAX(amount) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as highest_bid
                  FROM marketplace_listings l
                  LEFT JOIN users u ON l.seller_id = u.id
+                 LEFT JOIN animals a ON a.id = l.linked_animal_id
                  WHERE l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`;
     const params: any[] = []; let idx = 1;
 
@@ -444,11 +446,13 @@ class MarketplaceService {
               l.seller_type, l.breeder_verified, l.welfare_attestation,
               u.first_name as seller_name, l.location as seller_location,
               e.name as enterprise_name,
+              a.unique_id as animal_unique_id,
               (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count,
               (SELECT MAX(amount) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as highest_bid
        FROM marketplace_listings l
        LEFT JOIN users u ON l.seller_id = u.id
        LEFT JOIN enterprises e ON l.enterprise_id = e.id
+       LEFT JOIN animals a ON a.id = l.linked_animal_id
        WHERE l.id = $1 AND l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`, [id]
     );
     return result.rows[0] || null;

@@ -42,6 +42,7 @@ interface PassportProtocol {
 interface PassportAnimal {
   animalId: string
   animalName: string
+  animalUniqueId?: string
   species: string
   breed: string | null
   gender: string | null
@@ -269,6 +270,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   <h1>&#x1F43E; Vaccination Passport</h1>
   <div class="meta">
     <span><strong>Name:</strong> ${animal.animalName}</span>
+    <span><strong>Animal ID:</strong> ${animal.animalUniqueId || '-'}</span>
     <span><strong>Species:</strong> ${animal.species}</span>
     <span><strong>Breed:</strong> ${animal.breed || '-'}</span>
     <span><strong>Gender:</strong> ${animal.gender || '-'}</span>
@@ -318,6 +320,16 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
             <span className="vp-species-icon">{icon}</span>
             <div>
               <div className="vp-animal-name">{animal.animalName}</div>
+              {animal.animalUniqueId && (
+                <div
+                  className="vc-id-badge"
+                  title={`VetCare ID — click to copy`}
+                  onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(animal.animalUniqueId!).catch(() => {}) }}
+                  style={{ cursor: 'pointer', fontFamily: 'monospace', fontSize: 11, color: '#6366f1', background: '#eef2ff', borderRadius: 4, padding: '2px 6px', display: 'inline-block', marginTop: 2 }}
+                >
+                  🏷️ {animal.animalUniqueId}
+                </div>
+              )}
               <div className="vp-animal-meta">
                 {animal.species}
                 {animal.breed ? ` · ${animal.breed}` : ''}

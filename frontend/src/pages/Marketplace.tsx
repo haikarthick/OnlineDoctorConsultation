@@ -550,6 +550,18 @@ const Marketplace: React.FC = () => {
                         </select>
                       </div>
                       {selectedAnimalId && <div className="mp-auto-populated-badge">✅ {t('marketplace.sell.autoPopulated')}</div>}
+                      {selectedAnimalId && (() => {
+                        const sel = userAnimals.find((a: any) => a.id === selectedAnimalId)
+                        const vcId = sel?.uniqueId || sel?.unique_id
+                        return vcId ? (
+                          <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#6366f1', background: '#eef2ff', borderRadius: 4, padding: '4px 8px', display: 'inline-block', marginTop: 4, cursor: 'pointer' }}
+                            title="VetCare Animal ID — click to copy"
+                            onClick={() => navigator.clipboard?.writeText(vcId).catch(() => {})}
+                          >
+                            🏷️ {vcId}
+                          </div>
+                        ) : null
+                      })()}
                     </div>
                   )}
                   <div className="module-form-group">
@@ -1329,6 +1341,12 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
         </div>
 
         <h4 className="mp-card-title">{l.title}</h4>
+        {/* VC Animal ID badge */}
+        {(g(l, 'animalUniqueId', 'animal_unique_id')) && (
+          <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#6366f1', background: '#eef2ff', borderRadius: 4, padding: '2px 6px', display: 'inline-block', marginBottom: 4 }}>
+            🏷️ {g(l, 'animalUniqueId', 'animal_unique_id')}
+          </div>
+        )}
 
         {/* Livestock details row */}
         {(species || breed) && (

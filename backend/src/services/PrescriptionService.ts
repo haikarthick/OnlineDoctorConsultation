@@ -86,6 +86,7 @@ class PrescriptionService {
        COALESCE(v.first_name || ' ' || v.last_name, 'Unknown') as "vetName",
        COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+       a.unique_id as "animalUniqueId",
        a.date_of_birth as "animalDob", a.gender as "animalGender",
        c.diagnosis, c.symptom_description as "chiefComplaints",
        vp.license_number as "vetLicense",
@@ -147,6 +148,7 @@ class PrescriptionService {
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "vetName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+       a.unique_id as "animalUniqueId",
        a.gender as "animalGender",
        c.diagnosis
        FROM prescriptions p
@@ -173,6 +175,7 @@ class PrescriptionService {
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "petOwnerName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
+       a.unique_id as "animalUniqueId",
        a.gender as "animalGender",
        c.diagnosis
        FROM prescriptions p
