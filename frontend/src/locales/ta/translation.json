@@ -5417,6 +5417,14 @@
       "createTitle": "மருத்துவமனை நெட்வொர்க் உருவாக்கு",
       "editTitle": "நெட்வொர்க் திருத்து"
     },
+    "form": {
+      "idPrefix": "நெட்வொர்க் ID முன்னொட்டு",
+      "idPrefixHint": "2-10 பெரிய எழுத்துக்கள்/எண்கள். PREFIX-DOG-26-000001 போன்ற நோயாளி IDகளை உருவாக்க பயன்படுத்தப்படுகிறது"
+    },
+    "networkPatientId": "நெட்வொர்க் நோயாளி ID",
+    "enrollPatient": "நோயாளியை சேர்க்கவும்",
+    "enrolledPatients": "சேர்க்கப்பட்ட நோயாளிகள்",
+    "patientIdFormat": "நோயாளி IDகள்: {{prefix}}-SPE-YY-NNNNNN",
     "detail": {
       "hospitals": "மருத்துவமனைகள்",
       "staff": "பணியாளர்கள் மற்றும் நிர்வாகிகள்",

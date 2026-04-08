@@ -3321,7 +3321,7 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 
 -- Demo Hospital Network — "DemoVetGroup"
-INSERT INTO hospital_networks (id, name, legal_name, registration_number, network_type, country, headquarters_city, headquarters_state, contact_email, contact_phone, is_active, is_approved, approved_at, metadata)
+INSERT INTO hospital_networks (id, name, legal_name, registration_number, network_type, country, headquarters_city, headquarters_state, contact_email, contact_phone, is_active, is_approved, approved_at, id_prefix, metadata)
 VALUES (
   'hn000000-0000-0000-0000-000000000001',
   'DemoVetGroup',
@@ -3336,6 +3336,7 @@ VALUES (
   true,
   true,
   CURRENT_TIMESTAMP,
+  'DEMO',
   '{}'
 ) ON CONFLICT (id) DO NOTHING;
 

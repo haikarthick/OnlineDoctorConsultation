@@ -5360,6 +5360,14 @@
       "createTitle": "ఆసుపత్రి నెట్‌వర్క్ సృష్టించు",
       "editTitle": "నెట్‌వర్క్ సవరించు"
     },
+    "form": {
+      "idPrefix": "నెట్‌వర్క్ ID ఉపసర్గ",
+      "idPrefixHint": "2-10 పెద్ద అక్షరాలు/సంఖ్యలు. PREFIX-DOG-26-000001 వంటి రోగి IDలను రూపొందించడానికి ఉపయోగిస్తారు"
+    },
+    "networkPatientId": "నెట్‌వర్క్ రోగి ID",
+    "enrollPatient": "రోగిని నమోదు చేయండి",
+    "enrolledPatients": "నమోదైన రోగులు",
+    "patientIdFormat": "రోగి IDలు: {{prefix}}-SPE-YY-NNNNNN",
     "detail": {
       "hospitals": "ఆసుపత్రులు",
       "staff": "సిబ్బంది & నిర్వాహకులు",

@@ -32,6 +32,7 @@ export interface HospitalNetwork {
   approvedByName?: string;
   memberCount?: number;
   hospitalCount?: number;
+  idPrefix?: string;
 }
 
 export interface HospitalNetworkCreateDTO {
@@ -52,6 +53,7 @@ export interface HospitalNetworkCreateDTO {
   dpoEmail?: string;
   dataResidencyRegion?: string;
   metadata?: any;
+  idPrefix?: string;
 }
 
 export interface NetworkMember {
@@ -155,8 +157,8 @@ export class HospitalNetworkService {
            (name, legal_name, registration_number, tax_id, network_type,
             country, headquarters_address, headquarters_city, headquarters_state,
             contact_email, contact_phone, website, logo_url,
-            dpo_name, dpo_email, data_residency_region, metadata)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+            dpo_name, dpo_email, data_residency_region, metadata, id_prefix)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
          RETURNING *`,
         [
           data.name,
@@ -176,6 +178,7 @@ export class HospitalNetworkService {
           data.dpoEmail ?? null,
           data.dataResidencyRegion ?? null,
           data.metadata ?? null,
+          data.idPrefix ?? null,
         ]
       );
 
@@ -258,6 +261,7 @@ export class HospitalNetworkService {
       dpoEmail: 'dpo_email',
       dataResidencyRegion: 'data_residency_region',
       metadata: 'metadata',
+      idPrefix: 'id_prefix',
     };
 
     const setClauses: string[] = [];
@@ -596,6 +600,87 @@ export class HospitalNetworkService {
   }
 
   // ─── Row Mappers ──────────────────────────────────────────────
+  private async generateNetworkPatientId(networkId: string, species: string): Promise<string> {
+    const netRes = await database.query(
+      `SELECT id_prefix FROM hospital_networks WHERE id = $1`, [networkId]
+    );
+    const prefix = (netRes.rows[0]?.id_prefix ?? 'NET').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+
+    const SPECIES_CODES: Record<string, string> = {
+      dog: 'DOG', cat: 'CAT', horse: 'HRS', cow: 'COW', goat: 'GOT',
+      sheep: 'SHP', pig: 'PIG', chicken: 'CHK', duck: 'DUK', rabbit: 'RAB',
+      buffalo: 'BUF', camel: 'CAM', fish: 'FSH', bird: 'BRD',
+    };
+    const code = SPECIES_CODES[species.toLowerCase()] ?? species.toUpperCase().slice(0, 3);
+    const year = new Date().getFullYear() % 100;
+
+    const seqRes = await database.query(
+      `INSERT INTO network_patient_id_sequences (network_id, species, year, last_seq)
+       VALUES ($1, $2, $3, 1)
+       ON CONFLICT (network_id, species, year)
+       DO UPDATE SET last_seq = network_patient_id_sequences.last_seq + 1
+       RETURNING last_seq`,
+      [networkId, species.toLowerCase(), year]
+    );
+    const seq = seqRes.rows[0].last_seq;
+    return `${prefix}-${code}-${year.toString().padStart(2, '0')}-${seq.toString().padStart(6, '0')}`;
+  }
+
+  async enrollAnimal(data: { animalId: string; networkId: string; hospitalId?: string; enrolledBy: string; notes?: string }): Promise<{ id: string; animalId: string; networkId: string; networkPatientId: string; platformUniqueId: string | null }> {
+    try {
+      const animalRes = await database.query(
+        `SELECT id, species, unique_id FROM animals WHERE id = $1 AND is_active = true`, [data.animalId]
+      );
+      if (!animalRes.rows[0]) throw new Error('Animal not found');
+      const animal = animalRes.rows[0];
+
+      const networkPatientId = await this.generateNetworkPatientId(data.networkId, animal.species);
+
+      const result = await database.query(
+        `INSERT INTO animal_care_contexts
+           (animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id, enrolled_by, notes, visibility)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'private')
+         ON CONFLICT (animal_id, network_id) DO UPDATE
+           SET corporate_patient_id = EXCLUDED.corporate_patient_id,
+               hospital_id = EXCLUDED.hospital_id,
+               is_active = true,
+               enrolled_at = CURRENT_TIMESTAMP
+         RETURNING id, animal_id AS "animalId", network_id AS "networkId",
+                   corporate_patient_id AS "networkPatientId",
+                   platform_unique_id AS "platformUniqueId"`,
+        [data.animalId, data.networkId, data.hospitalId ?? null, animal.unique_id, networkPatientId, data.enrolledBy, data.notes ?? null]
+      );
+      return result.rows[0];
+    } catch (err: any) {
+      throw new Error(`Enroll animal failed: ${err.message}`);
+    }
+  }
+
+  async getNetworkPatients(networkId: string, limit = 50, offset = 0): Promise<{ total: number; patients: any[] }> {
+    try {
+      const countRes = await database.query(
+        `SELECT COUNT(*) AS total FROM animal_care_contexts WHERE network_id = $1 AND is_active = true`, [networkId]
+      );
+      const rows = await database.query(
+        `SELECT acc.id, acc.animal_id AS "animalId", acc.corporate_patient_id AS "networkPatientId",
+                acc.platform_unique_id AS "platformUniqueId", acc.enrolled_at AS "enrolledAt",
+                acc.hospital_id AS "hospitalId", acc.visibility,
+                a.name AS "animalName", a.species, a.breed, a.gender,
+                u.name AS "ownerName"
+         FROM animal_care_contexts acc
+         JOIN animals a ON acc.animal_id = a.id
+         JOIN users u ON a.owner_id = u.id
+         WHERE acc.network_id = $1 AND acc.is_active = true
+         ORDER BY acc.enrolled_at DESC
+         LIMIT $2 OFFSET $3`,
+        [networkId, limit, offset]
+      );
+      return { total: parseInt(countRes.rows[0].total), patients: rows.rows };
+    } catch (err: any) {
+      throw new Error(`Get network patients failed: ${err.message}`);
+    }
+  }
+
   private mapNetworkRow(row: any): HospitalNetwork {
     return {
       id: row.id,
@@ -620,6 +705,7 @@ export class HospitalNetworkService {
       approvedBy: row.approved_by,
       approvedAt: row.approved_at,
       metadata: row.metadata,
+      idPrefix: row.id_prefix,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       approvedByName: row.approvedByName,

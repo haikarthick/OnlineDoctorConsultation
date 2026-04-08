@@ -5371,6 +5371,14 @@
       "createTitle": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್ ರಚಿಸಿ",
       "editTitle": "ನೆಟ್‌ವರ್ಕ್ ಸಂಪಾದಿಸಿ"
     },
+    "form": {
+      "idPrefix": "ನೆಟ್‌ವರ್ಕ್ ID ಪೂರ್ವಪ್ರತ್ಯಯ",
+      "idPrefixHint": "2-10 ದೊಡ್ಡ ಅಕ್ಷರಗಳು/ಸಂಖ್ಯೆಗಳು. PREFIX-DOG-26-000001 ರೀತಿಯ ರೋಗಿ IDಗಳನ್ನು ರಚಿಸಲು ಬಳಸಲಾಗುತ್ತದೆ"
+    },
+    "networkPatientId": "ನೆಟ್‌ವರ್ಕ್ ರೋಗಿ ID",
+    "enrollPatient": "ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಿ",
+    "enrolledPatients": "ನೋಂದಾಯಿತ ರೋಗಿಗಳು",
+    "patientIdFormat": "ರೋಗಿ IDಗಳು: {{prefix}}-SPE-YY-NNNNNN",
     "detail": {
       "hospitals": "ಆಸ್ಪತ್ರೆಗಳು",
       "staff": "ಸಿಬ್ಬಂದಿ ಮತ್ತು ನಿರ್ವಾಹಕರು",

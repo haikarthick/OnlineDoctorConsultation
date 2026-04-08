@@ -5428,6 +5428,14 @@
       "createTitle": "हॉस्पिटल नेटवर्क बनाएं",
       "editTitle": "नेटवर्क संपादित करें"
     },
+    "form": {
+      "idPrefix": "नेटवर्क ID उपसर्ग",
+      "idPrefixHint": "2-10 बड़े अक्षर/संख्याएं। मरीज़ ID जैसे PREFIX-DOG-26-000001 बनाने के लिए उपयोग किया जाता है"
+    },
+    "networkPatientId": "नेटवर्क मरीज़ ID",
+    "enrollPatient": "मरीज़ नामांकित करें",
+    "enrolledPatients": "नामांकित मरीज़",
+    "patientIdFormat": "मरीज़ IDs: {{prefix}}-SPE-YY-NNNNNN",
     "detail": {
       "hospitals": "अस्पताल",
       "staff": "कर्मचारी और प्रशासक",

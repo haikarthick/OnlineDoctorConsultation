@@ -115,6 +115,15 @@ CREATE TABLE IF NOT EXISTS animal_id_sequences (
   PRIMARY KEY (species, year)
 );
 
+-- Per-network animal ID sequences (race-safe PREFIX-SPE-YY-NNNNNN generation)
+CREATE TABLE IF NOT EXISTS network_patient_id_sequences (
+  network_id  UUID        NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  species     VARCHAR(20) NOT NULL,
+  year        INTEGER     NOT NULL,
+  last_seq    INTEGER     NOT NULL DEFAULT 0,
+  PRIMARY KEY (network_id, species, year)
+);
+
 -- ============================================================
 -- 4. CONSULTATIONS
 -- ============================================================
@@ -1513,6 +1522,7 @@ CREATE TABLE IF NOT EXISTS hospital_networks (
   contact_phone VARCHAR(30),
   website VARCHAR(500),
   logo_url VARCHAR(500),
+  id_prefix VARCHAR(10),
   dpo_name VARCHAR(200),
   dpo_email VARCHAR(255),
   data_residency_region VARCHAR(100),

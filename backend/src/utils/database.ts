@@ -311,6 +311,22 @@ class PostgresDatabase {
       )
     `).catch(() => {});
 
+    // Ensure id_prefix column exists on hospital_networks
+    await this.pool.query(
+      `ALTER TABLE hospital_networks ADD COLUMN IF NOT EXISTS id_prefix VARCHAR(10)`
+    ).catch(() => {});
+
+    // Ensure network_patient_id_sequences table exists (race-safe per-network patient ID generation)
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS network_patient_id_sequences (
+        network_id  UUID        NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+        species     VARCHAR(20) NOT NULL,
+        year        INTEGER     NOT NULL,
+        last_seq    INTEGER     NOT NULL DEFAULT 0,
+        PRIMARY KEY (network_id, species, year)
+      )
+    `).catch(() => {});
+
     // Backfill VC-IDs for existing animals that have NULL or non-VC-format unique_id
     try {
       const speciesCodeMap: Record<string, string> = {
@@ -329,7 +345,7 @@ class PostgresDatabase {
       const noIdRes = await this.pool.query(
         `SELECT id, species, EXTRACT(YEAR FROM created_at)::int AS yr
          FROM animals
-         WHERE unique_id IS NULL OR unique_id NOT LIKE 'VC-%'
+         WHERE unique_id IS NULL OR unique_id !~ '^VC-[A-Z]+-[0-9]{2}-[0-9]{6}$'
          ORDER BY created_at`
       );
       for (const row of noIdRes.rows) {
@@ -344,7 +360,7 @@ class PostgresDatabase {
           [code, yr]
         );
         const seq = seqRes.rows[0].last_seq as number;
-        const uid = `VC-${code}-${yr.toString().padStart(2, '0')}-${seq.toString().padStart(5, '0')}`;
+        const uid = `VC-${code}-${yr.toString().padStart(2, '0')}-${seq.toString().padStart(6, '0')}`;
         await this.pool.query(`UPDATE animals SET unique_id = $1 WHERE id = $2`, [uid, row.id]);
       }
       if (noIdRes.rows.length > 0) {

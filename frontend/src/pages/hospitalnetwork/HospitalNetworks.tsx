@@ -28,6 +28,7 @@ interface HospitalNetwork {
   approvedByName?: string
   memberCount?: number
   hospitalCount?: number
+  idPrefix?: string
 }
 
 interface NetworkMember {
@@ -148,6 +149,7 @@ const EMPTY_FORM = {
   networkType: 'private', country: '', headquartersCity: '', headquartersState: '',
   contactEmail: '', contactPhone: '', website: '',
   dpoName: '', dpoEmail: '', dataResidencyRegion: '',
+  idPrefix: '',
 }
 
 const NetworkModal: React.FC<NetworkModalProps> = ({ editing, onClose, onSaved, t }) => {
@@ -172,6 +174,7 @@ const NetworkModal: React.FC<NetworkModalProps> = ({ editing, onClose, onSaved, 
         dpoName: (editing as any).dpoName ?? '',
         dpoEmail: (editing as any).dpoEmail ?? '',
         dataResidencyRegion: (editing as any).dataResidencyRegion ?? '',
+        idPrefix: editing.idPrefix ?? '',
       })
     } else {
       setForm({ ...EMPTY_FORM })
@@ -217,6 +220,13 @@ const NetworkModal: React.FC<NetworkModalProps> = ({ editing, onClose, onSaved, 
               <div className="module-form-group">
                 <label className="module-label">Legal Name</label>
                 <input className="module-input" value={form.legalName} onChange={e => set('legalName', e.target.value)} placeholder="Registered legal name" />
+              </div>
+            </div>
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">{t('hospitalNetworks.form.idPrefix')}</label>
+                <input className="module-input" value={(form as any).idPrefix} onChange={e => set('idPrefix', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} placeholder="e.g. APOLLO, NH1, TNGOV" maxLength={10} />
+                <small style={{color: '#666', fontSize: '12px'}}>{t('hospitalNetworks.form.idPrefixHint')}</small>
               </div>
             </div>
             <div className="module-form-row">
@@ -770,6 +780,7 @@ const HospitalNetworks: React.FC = () => {
                       <td>
                         <div className="hn-network-name">{network.name}</div>
                         {network.legalName && <div className="hn-network-legal">{network.legalName}</div>}
+                        {network.idPrefix && <span className="module-badge" style={{backgroundColor: '#e3f2fd', color: '#1565c0', fontSize: '11px'}}>{network.idPrefix}-*</span>}
                       </td>
                       <td><NetworkTypeLabel type={network.networkType} /></td>
                       <td>

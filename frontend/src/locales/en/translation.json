@@ -5483,6 +5483,14 @@
       "createTitle": "Create Hospital Network",
       "editTitle": "Edit Network"
     },
+    "form": {
+      "idPrefix": "Network ID Prefix",
+      "idPrefixHint": "2-10 uppercase letters/numbers. Used to generate patient IDs like PREFIX-DOG-26-000001"
+    },
+    "networkPatientId": "Network Patient ID",
+    "enrollPatient": "Enroll Patient",
+    "enrolledPatients": "Enrolled Patients",
+    "patientIdFormat": "Patient IDs: {{prefix}}-SPE-YY-NNNNNN",
     "detail": {
       "hospitals": "Hospitals",
       "staff": "Staff & Admins",

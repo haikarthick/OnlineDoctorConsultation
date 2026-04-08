@@ -89,6 +89,7 @@ import Tier4Controller from '../controllers/Tier4Controller';
 import VetHospitalController from '../controllers/VetHospitalController';
 import HospitalDocumentController from '../controllers/HospitalDocumentController';
 import HospitalNetworkController from '../controllers/HospitalNetworkController';
+import HospitalNetworkService from '../services/HospitalNetworkService';
 import WalletController from '../controllers/WalletController';
 import StaffWorkflowController from '../controllers/StaffWorkflowController';
 import { FileController } from '../controllers/FileController';
@@ -294,6 +295,43 @@ router.post('/hospital-networks/:id/members', authMiddleware, validateBody(addNe
 router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.removeNetworkMember(req, res)));
 router.get('/hospital-networks/:id/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getNetworkDashboard(req, res)));
 router.get('/hospital-networks/:id/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getAuditLogs(req, res)));
+
+// Enroll animal into a network (generates per-network patient ID)
+router.post('/hospital-networks/:networkId/enroll-animal', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { animalId, hospitalId, notes } = req.body;
+  if (!animalId) { res.status(400).json({ error: 'animalId is required' }); return; }
+  const result = await HospitalNetworkService.enrollAnimal({
+    animalId,
+    networkId: req.params.networkId,
+    hospitalId,
+    enrolledBy: (req as any).user!.id,
+    notes,
+  });
+  res.json(result);
+}));
+
+// List patients enrolled in a network
+router.get('/hospital-networks/:networkId/patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string) || 50;
+  const offset = parseInt(req.query.offset as string) || 0;
+  const result = await HospitalNetworkService.getNetworkPatients(req.params.networkId, limit, offset);
+  res.json(result);
+}));
+
+// Get all care contexts (network enrollments) for an animal
+router.get('/animals/:animalId/care-contexts', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT acc.id, acc.network_id AS "networkId", acc.corporate_patient_id AS "networkPatientId",
+            acc.platform_unique_id AS "platformUniqueId", acc.enrolled_at AS "enrolledAt",
+            acc.visibility, hn.name AS "networkName", hn.id_prefix AS "networkPrefix"
+     FROM animal_care_contexts acc
+     JOIN hospital_networks hn ON acc.network_id = hn.id
+     WHERE acc.animal_id = $1 AND acc.is_active = true
+     ORDER BY acc.enrolled_at DESC`,
+    [req.params.animalId]
+  );
+  res.json(result.rows);
+}));
 
 // Patient consent routes
 router.post('/patient-consent', authMiddleware, validateBody(createPatientConsentSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createConsent(req, res)));

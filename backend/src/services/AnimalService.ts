@@ -79,10 +79,10 @@ export class AnimalService {
         [code, year]
       );
       const seq = res.rows[0].last_seq as number;
-      return `VC-${code}-${year.toString().padStart(2, '0')}-${seq.toString().padStart(5, '0')}`;
+      return `VC-${code}-${year.toString().padStart(2, '0')}-${seq.toString().padStart(6, '0')}`;
     } catch {
       // Fallback: timestamp-based (won't race but non-sequential)
-      return `VC-${code}-${year.toString().padStart(2, '0')}-${Date.now().toString(36).toUpperCase().slice(-5)}`;
+      return `VC-${code}-${year.toString().padStart(2, '0')}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     }
   }
 
