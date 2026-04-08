@@ -86,17 +86,17 @@
 
 ---
 
-## ⚠️ Planned Items — Phase 0: DB Cleanup & Restructuring
+## ✅ Completed — Phase 0: DB Cleanup & Restructuring (2026-04-09)
 
 | # | Feature | Status | Notes |
 |---|---------|--------|-------|
-| P0-1 | Fix missing enterprise_members table in init.sql | ⚠️ Planned | Referenced in EnterpriseService.ts but missing from canonical schema |
-| P0-2 | Convert enterpriseMigration.ts → migrations/005_farm_enterprises.sql | ⚠️ Planned | TypeScript migrations must become numbered SQL files |
-| P0-3 | Convert tier2Migration.ts → migrations/006_tier2_features.sql | ⚠️ Planned | breeding_records, feed_inventory, compliance_documents, etc. |
-| P0-4 | Convert tier3Migration.ts → migrations/007_tier3_features.sql | ⚠️ Planned | disease_predictions, iot_sensors, traceability_events, etc. |
-| P0-5 | Convert tier4Migration.ts → migrations/008_tier4_features.sql | ⚠️ Planned | ai_chat_sessions, marketplace_listings, wellness_scorecards, etc. |
-| P0-6 | Update render-start.sh to use migrate.ts for all migrations | ⚠️ Planned | Replace 4 individual TS migration calls with single migrate.js call |
-| P0-7 | Split seed-demo-data.sql into platform_required + demo layers | ⚠️ Planned | seeds/01_platform_required.sql + seeds/03_demo_data.sql |
+| P0-1 | Fix missing enterprise_members table in init.sql | ✅ Done | Already existed — verified (2026-04-09) |
+| P0-2 | Convert enterpriseMigration.ts → migrations/005_farm_enterprises.sql | ✅ Done | SQL migration file already existed; dead TS file deleted (commit 76d9e20) |
+| P0-3 | Convert tier2Migration.ts → migrations/006_tier2_features.sql | ✅ Done | SQL migration file already existed; dead TS file deleted (commit 76d9e20) |
+| P0-4 | Convert tier3Migration.ts → migrations/007_tier3_features.sql | ✅ Done | SQL migration file already existed; dead TS file deleted (commit 76d9e20) |
+| P0-5 | Convert tier4Migration.ts → migrations/008_tier4_features.sql | ✅ Done | SQL migration file already existed; dead TS file deleted (commit 76d9e20) |
+| P0-6 | Update render-start.sh to use migrate.js for all migrations | ✅ Done | render-start.sh already used migrate.js; old TS comment removed; Step 1b added (commit 76d9e20) |
+| P0-7 | Split seed-demo-data.sql into platform_required + demo layers | ✅ Done | docker/seeds/01_platform_required.sql created + wired into render-start.sh Step 1b (commit 76d9e20) |
 
 ## ⚠️ Planned Items — Phase 1: Enterprise Hospital Network Foundation
 
@@ -122,7 +122,11 @@
 
 ## Recently Completed (last 10)
 
-1. ✅ Certificate Farm Extension (2026-04-09)
+1. ✅ P0 DB Cleanup (2026-04-09) — commit 76d9e20
+   - Deleted 4 dead TS migration files (enterpriseMigration.ts, tier2-4Migration.ts) — replaced by SQL files 005-008
+   - Added render-start.sh Step 1b: loads 01_platform_required.sql (admin + settings + permissions) on every deploy
+   - Fixed seed-demo-data.ts stale warning pointing to old TS migration commands
+2. ✅ Certificate Farm Extension (2026-04-09)
    - 4 new farm cert types: movement_permit, herd_health_certificate, slaughter_fitness, export_health_certificate
    - CertificateService.ts: new types in VALID_CERT_TYPES + movementDetails/herdDetails JSONB support
    - CertificateWriter.tsx: enterprise animals loading (by enterpriseId when farm cert selected), movement fields UI, herd fields UI, herd certs allow optional animal
