@@ -437,6 +437,66 @@ export class HospitalNetworkService {
   }
 
   // ─── Audit Log ────────────────────────────────────────────────
+  async getAuditLogs(
+    networkId: string,
+    filters: { page?: number; limit?: number; recordType?: string; accessGranted?: boolean; animalId?: string } = {}
+  ): Promise<{ rows: any[]; total: number }> {
+    const page = filters.page ?? 1;
+    const limit = Math.min(filters.limit ?? 50, 200);
+    const offset = (page - 1) * limit;
+
+    const conditions: string[] = ['cal.accessor_network_id = $1'];
+    const params: any[] = [networkId];
+    let idx = 2;
+
+    if (filters.recordType) { conditions.push(`cal.record_type = $${idx++}`); params.push(filters.recordType); }
+    if (filters.accessGranted !== undefined) { conditions.push(`cal.access_granted = $${idx++}`); params.push(filters.accessGranted); }
+    if (filters.animalId) { conditions.push(`cal.animal_id = $${idx++}`); params.push(filters.animalId); }
+
+    const where = `WHERE ${conditions.join(' AND ')}`;
+
+    const [dataRes, countRes] = await Promise.all([
+      database.query(
+        `SELECT cal.*,
+                u.first_name || ' ' || u.last_name AS "accessorName",
+                u.email AS "accessorEmail",
+                a.name AS "animalName",
+                a.unique_id AS "animalUniqueId"
+         FROM clinical_data_access_log cal
+         LEFT JOIN users u ON cal.accessed_by = u.id
+         LEFT JOIN animals a ON cal.animal_id = a.id
+         ${where}
+         ORDER BY cal.accessed_at DESC
+         LIMIT $${idx} OFFSET $${idx + 1}`,
+        [...params, limit, offset]
+      ),
+      database.query(
+        `SELECT COUNT(*) AS total FROM clinical_data_access_log cal ${where}`,
+        params
+      ),
+    ]);
+
+    return {
+      rows: dataRes.rows.map((r: any) => ({
+        id: r.id,
+        accessedBy: r.accessed_by,
+        accessorName: r.accessorName,
+        accessorEmail: r.accessorEmail,
+        accessorRole: r.accessor_role,
+        animalId: r.animal_id,
+        animalName: r.animalName,
+        animalUniqueId: r.animalUniqueId,
+        recordType: r.record_type,
+        accessType: r.access_type,
+        accessGranted: r.access_granted,
+        denialReason: r.denial_reason,
+        consentId: r.consent_id,
+        accessedAt: r.accessed_at,
+      })),
+      total: parseInt(countRes.rows[0]?.total || '0'),
+    };
+  }
+
   async logAccess(entry: AccessLogEntry): Promise<void> {
     try {
       await database.query(

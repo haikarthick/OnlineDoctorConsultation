@@ -191,6 +191,12 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 - **Rule:** ALWAYS normalize string enum fields (gender, species, status, role etc.) to the correct case at the point they leave the frontend — DB values can have inconsistent casing. NEVER trust that DB-sourced auto-fill values match Joi enum values.
 - **Rule:** When debugging a 400 error, ALWAYS log `e?.response?.data` in full — never just `e.message`. Frontend error display must check all possible error paths the backend uses.
 
+### API-009 — getNetworkAuditLogs URL Malformed in api.ts (regex instead of template literal)
+- **Symptom:** Would have caused runtime error: "Cannot call .get() with a regex argument" when Audit tab loaded
+- **Root Cause:** `api.ts` line 2160 had `this.client.get(/hospital-networks/\/audit-logs, ...)` — a regex literal instead of a template literal string. The URL parameter `networkId` was also missing.
+- **Fix:** Changed to `this.client.get(\`/hospital-networks/${networkId}/audit-logs\`, { params: filters })`
+- **Rule:** Always verify template literal backticks when writing URL paths with dynamic segments — regex-looking patterns near `/` characters can silently become regex literals if backticks are missing.
+
 ---
 
 ### I18N-001 — Page Shows Raw Key Paths (herdMedical.pageTitle etc.)

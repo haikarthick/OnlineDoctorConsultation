@@ -79,6 +79,19 @@ class HospitalNetworkController {
     res.json({ success: true, data: dashboard });
   }
 
+  // ─── Audit Log ─────────────────────────────────────────────────
+  async getAuditLogs(req: AuthRequest, res: Response): Promise<void> {
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!);
+    const filters: any = {};
+    if (req.query.page) filters.page = parseInt(req.query.page as string);
+    if (req.query.limit) filters.limit = parseInt(req.query.limit as string);
+    if (req.query.recordType) filters.recordType = req.query.recordType as string;
+    if (req.query.accessGranted !== undefined) filters.accessGranted = req.query.accessGranted === 'true';
+    if (req.query.animalId) filters.animalId = req.query.animalId as string;
+    const result = await HospitalNetworkService.getAuditLogs(req.params.id, filters);
+    res.json({ success: true, data: result });
+  }
+
   // ─── Patient Consent ──────────────────────────────────────────
   async createConsent(req: AuthRequest, res: Response): Promise<void> {
     const { animalId, consentScope } = req.body;

@@ -66,6 +66,30 @@ interface VetHospitalOption {
   city?: string
 }
 
+interface AuditEntry {
+  id: string
+  accessedBy: string
+  accessorName: string
+  accessorEmail: string
+  accessorRole: string
+  animalId: string
+  animalName: string
+  animalUniqueId: string
+  recordType: string
+  accessType: string
+  accessGranted: boolean
+  denialReason: string
+  consentId: string
+  accessedAt: string
+}
+
+interface AuditStats {
+  total: number
+  granted: number
+  denied: number
+  last7days: number
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 const NETWORK_TYPES = [
   { value: 'private', label: 'Private' },
@@ -82,6 +106,20 @@ const MEMBER_ROLES = [
   { value: 'auditor', label: 'Auditor' },
   { value: 'staff_vet', label: 'Staff Vet' },
 ]
+
+const AUDIT_RECORD_TYPE_LABELS: Record<string, string> = {
+  animal_profile: 'Profile',
+  consultations: 'Consultations',
+  prescriptions: 'Prescriptions',
+  vaccinations: 'Vaccinations',
+}
+
+const AUDIT_ROLE_STYLES: Record<string, { bg: string; color: string }> = {
+  veterinarian: { bg: '#dbeafe', color: '#1d4ed8' },
+  admin: { bg: '#fee2e2', color: '#dc2626' },
+  farmer: { bg: '#dcfce7', color: '#15803d' },
+  pet_owner: { bg: '#f3e8ff', color: '#7e22ce' },
+}
 
 // ─── RoleBadge ────────────────────────────────────────────────────────────────
 interface RoleBadgeProps { role: string }
@@ -421,6 +459,16 @@ const HospitalNetworks: React.FC = () => {
   const [showAssignHospital, setShowAssignHospital] = useState(false)
   const [showAddMember, setShowAddMember] = useState(false)
 
+  // ─── Audit State ──────────────────────────────────────────────────────────
+  const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([])
+  const [auditLoading, setAuditLoading] = useState(false)
+  const [auditPage, setAuditPage] = useState(1)
+  const [auditTotal, setAuditTotal] = useState(0)
+  const [auditRecordTypeFilter, setAuditRecordTypeFilter] = useState('')
+  const [auditGrantedFilter, setAuditGrantedFilter] = useState<'all' | 'granted' | 'denied'>('all')
+  const [auditSearch, setAuditSearch] = useState('')
+  const [auditStats, setAuditStats] = useState<AuditStats>({ total: 0, granted: 0, denied: 0, last7days: 0 })
+
   const loadNetworks = useCallback(async () => {
     setLoading(true); setError('')
     try {
@@ -456,6 +504,58 @@ const HospitalNetworks: React.FC = () => {
       setDetailLoading(false)
     }
   }, [])
+
+  const loadAuditLogs = useCallback(async (
+    networkId: string,
+    page: number,
+    recordType: string,
+    grantedFilter: 'all' | 'granted' | 'denied',
+  ) => {
+    setAuditLoading(true)
+    try {
+      const filters: { page: number; limit: number; recordType?: string; accessGranted?: boolean } = { page, limit: 50 }
+      if (recordType) filters.recordType = recordType
+      if (grantedFilter === 'granted') filters.accessGranted = true
+      else if (grantedFilter === 'denied') filters.accessGranted = false
+      const res = await apiService.getNetworkAuditLogs(networkId, filters)
+      const rows: AuditEntry[] = res?.data?.rows ?? (res as any)?.rows ?? []
+      setAuditLogs(rows)
+      setAuditTotal(res?.data?.total ?? (res as any)?.total ?? rows.length)
+    } catch {
+      setAuditLogs([])
+    } finally {
+      setAuditLoading(false)
+    }
+  }, [])
+
+  const loadAuditStats = useCallback(async (networkId: string) => {
+    try {
+      const res = await apiService.getNetworkAuditLogs(networkId, { page: 1, limit: 500 })
+      const rows: AuditEntry[] = res?.data?.rows ?? (res as any)?.rows ?? []
+      const total = res?.data?.total ?? (res as any)?.total ?? rows.length
+      const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+      setAuditStats({
+        total,
+        granted: rows.filter(r => r.accessGranted).length,
+        denied: rows.filter(r => !r.accessGranted).length,
+        last7days: rows.filter(r => new Date(r.accessedAt).getTime() > sevenDaysAgo).length,
+      })
+    } catch { /* silent */ }
+  }, [])
+
+  // Load stats once when switching to audit tab or selecting a new network
+  useEffect(() => {
+    if (activeTab !== 'audit' || !selectedNetwork) return
+    loadAuditStats(selectedNetwork.id)
+    setAuditPage(1)
+    setAuditSearch('')
+  }, [activeTab, selectedNetwork?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reload paginated table whenever tab/network/page/filter changes
+  useEffect(() => {
+    if (activeTab !== 'audit' || !selectedNetwork) return
+    loadAuditLogs(selectedNetwork.id, auditPage, auditRecordTypeFilter, auditGrantedFilter)
+  }, [activeTab, selectedNetwork?.id, auditPage, auditRecordTypeFilter, auditGrantedFilter]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleView = (network: HospitalNetwork) => {
     setSelectedNetwork(network)
@@ -514,6 +614,34 @@ const HospitalNetworks: React.FC = () => {
     approved: networks.filter(n => n.isApproved).length,
     pending: networks.filter(n => !n.isApproved).length,
     hospitals: networks.reduce((sum, n) => sum + (n.hospitalCount ?? 0), 0),
+  }
+
+  const filteredAuditLogs = auditLogs.filter(e => {
+    if (!auditSearch) return true
+    const q = auditSearch.toLowerCase()
+    return (e.accessorName ?? '').toLowerCase().includes(q) ||
+      (e.animalName ?? '').toLowerCase().includes(q)
+  })
+
+  const exportAuditCsv = () => {
+    const headers = ['Accessor', 'Email', 'Role', 'Animal', 'Animal ID', 'Record Type', 'Access Type', 'Result', 'Denial Reason', 'Date']
+    const rows = filteredAuditLogs.map(e => [
+      e.accessorName, e.accessorEmail, e.accessorRole,
+      e.animalName, e.animalUniqueId, e.recordType, e.accessType,
+      e.accessGranted ? 'Granted' : 'Denied',
+      e.denialReason ?? '',
+      e.accessedAt,
+    ])
+    const csv = [headers, ...rows]
+      .map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `audit-log-${selectedNetwork?.name ?? 'network'}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -827,11 +955,192 @@ const HospitalNetworks: React.FC = () => {
       {/* ════ TAB 3: AUDIT ════ */}
       {activeTab === 'audit' && (
         <div className="hn-tab-content">
-          <div className="module-card hn-audit-card">
-            <div className="hn-audit-icon">🔐</div>
-            <h2 className="hn-audit-title">{t('hospitalNetworks.audit.title')}</h2>
-            <p className="hn-audit-desc">{t('hospitalNetworks.audit.comingSoon')}</p>
-          </div>
+          {!selectedNetwork ? (
+            <div className="hn-empty-state">
+              <div className="hn-empty-icon">🔐</div>
+              <div className="hn-empty-title">{t('hospitalNetworks.audit.selectNetwork')}</div>
+              <button className="module-btn primary" onClick={() => setActiveTab('networks')}>
+                {t('hospitalNetworks.audit.goToNetworks')}
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="hn-audit-header">
+                <h2 className="hn-audit-section-title">{t('hospitalNetworks.audit.title')}</h2>
+                <p className="hn-subtitle">{t('hospitalNetworks.audit.subtitle')}</p>
+              </div>
+
+              {/* Stats */}
+              <div className="hn-audit-stats">
+                <div className="hn-stat-card hn-stat-blue">
+                  <div className="hn-stat-value">{auditStats.total}</div>
+                  <div className="hn-stat-label">{t('hospitalNetworks.audit.stats.total')}</div>
+                </div>
+                <div className="hn-stat-card hn-stat-green">
+                  <div className="hn-stat-value">{auditStats.granted}</div>
+                  <div className="hn-stat-label">{t('hospitalNetworks.audit.stats.granted')}</div>
+                </div>
+                <div className="hn-stat-card hn-stat-orange">
+                  <div className="hn-stat-value">{auditStats.denied}</div>
+                  <div className="hn-stat-label">{t('hospitalNetworks.audit.stats.denied')}</div>
+                </div>
+                <div className="hn-stat-card hn-stat-teal">
+                  <div className="hn-stat-value">{auditStats.last7days}</div>
+                  <div className="hn-stat-label">{t('hospitalNetworks.audit.stats.last7days')}</div>
+                </div>
+              </div>
+
+              {/* Filter Bar */}
+              <div className="hn-audit-filter-bar">
+                <select
+                  className="module-input hn-audit-filter-select"
+                  value={auditRecordTypeFilter}
+                  onChange={e => { setAuditRecordTypeFilter(e.target.value); setAuditPage(1) }}
+                >
+                  <option value="">{t('hospitalNetworks.audit.filters.allTypes')}</option>
+                  <option value="animal_profile">Animal Profile</option>
+                  <option value="consultations">Consultations</option>
+                  <option value="prescriptions">Prescriptions</option>
+                  <option value="vaccinations">Vaccinations</option>
+                </select>
+                <div className="hn-filter-toggle">
+                  {(['all', 'granted', 'denied'] as const).map(v => (
+                    <button
+                      key={v}
+                      className={`module-btn${auditGrantedFilter === v ? ' primary' : ''} small`}
+                      onClick={() => { setAuditGrantedFilter(v); setAuditPage(1) }}
+                    >
+                      {t(`hospitalNetworks.audit.filters.${v === 'all' ? 'allResults' : v}`)}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  className="module-input hn-search-input"
+                  placeholder={t('hospitalNetworks.audit.filters.search')}
+                  value={auditSearch}
+                  onChange={e => setAuditSearch(e.target.value)}
+                />
+                <button className="module-btn" onClick={exportAuditCsv}>
+                  {t('hospitalNetworks.audit.exportCsv')}
+                </button>
+              </div>
+
+              {/* Table */}
+              {auditLoading ? (
+                <div className="hn-loading">⏳ Loading audit logs…</div>
+              ) : filteredAuditLogs.length === 0 ? (
+                <div className="hn-empty-state">
+                  <div className="hn-empty-icon">🔐</div>
+                  <div className="hn-empty-title">{t('hospitalNetworks.audit.noLogs')}</div>
+                  <div className="hn-empty-desc">{t('hospitalNetworks.audit.noLogsDesc')}</div>
+                </div>
+              ) : (
+                <div className="module-card">
+                  <div className="hn-audit-table-wrapper data-table-container">
+                    <table className="module-table">
+                      <thead>
+                        <tr>
+                          <th>{t('hospitalNetworks.audit.table.accessor')}</th>
+                          <th>{t('hospitalNetworks.audit.table.role')}</th>
+                          <th>{t('hospitalNetworks.audit.table.animal')}</th>
+                          <th>{t('hospitalNetworks.audit.table.recordType')}</th>
+                          <th>{t('hospitalNetworks.audit.table.accessType')}</th>
+                          <th>{t('hospitalNetworks.audit.table.result')}</th>
+                          <th>{t('hospitalNetworks.audit.table.dateTime')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredAuditLogs.map(entry => {
+                          const roleStyle = AUDIT_ROLE_STYLES[entry.accessorRole] ?? { bg: '#f3f4f6', color: '#6b7280' }
+                          return (
+                            <tr key={entry.id}>
+                              <td>
+                                <div className="hn-accessor-cell">
+                                  <div className="hn-avatar-circle">
+                                    {(entry.accessorName ?? '?')[0].toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <div className="hn-accessor-name">{entry.accessorName}</div>
+                                    <div className="hn-accessor-email">{entry.accessorEmail}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>
+                                <span
+                                  className="hn-role-badge"
+                                  style={{ background: roleStyle.bg, color: roleStyle.color }}
+                                >
+                                  {entry.accessorRole}
+                                </span>
+                              </td>
+                              <td>
+                                <div className="hn-animal-name">{entry.animalName || '—'}</div>
+                                {entry.animalUniqueId && (
+                                  <div className="hn-animal-uid">{entry.animalUniqueId}</div>
+                                )}
+                              </td>
+                              <td>
+                                <span className="hn-record-type-badge">
+                                  {AUDIT_RECORD_TYPE_LABELS[entry.recordType] ?? entry.recordType}
+                                </span>
+                              </td>
+                              <td>
+                                <code className="hn-access-type">{entry.accessType}</code>
+                              </td>
+                              <td>
+                                {entry.accessGranted ? (
+                                  <span className="hn-result-badge-granted">
+                                    ✓ {t('hospitalNetworks.audit.filters.granted')}
+                                  </span>
+                                ) : (
+                                  <span
+                                    className="hn-result-badge-denied hn-denied-tooltip"
+                                    title={entry.denialReason || ''}
+                                  >
+                                    ✗ {t('hospitalNetworks.audit.filters.denied')}
+                                  </span>
+                                )}
+                              </td>
+                              <td>
+                                <div className="hn-audit-date">{formatDate(entry.accessedAt)}</div>
+                                <div className="hn-audit-time">
+                                  {new Date(entry.accessedAt).toLocaleTimeString()}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {auditTotal > 50 && (
+                    <div className="hn-audit-pagination">
+                      <button
+                        className="module-btn small"
+                        onClick={() => setAuditPage(p => Math.max(1, p - 1))}
+                        disabled={auditPage === 1}
+                      >
+                        ← Previous
+                      </button>
+                      <span className="hn-page-info">
+                        {t('hospitalNetworks.audit.pageOf', {
+                          page: auditPage,
+                          total: Math.ceil(auditTotal / 50),
+                        })}
+                      </span>
+                      <button
+                        className="module-btn small"
+                        onClick={() => setAuditPage(p => p + 1)}
+                        disabled={auditPage >= Math.ceil(auditTotal / 50)}
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 

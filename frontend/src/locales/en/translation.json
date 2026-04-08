@@ -5474,7 +5474,35 @@
     },
     "audit": {
       "title": "Audit & Compliance",
-      "comingSoon": "Audit log viewer — enterprise audit trail coming soon."
+      "subtitle": "Immutable access log for all private animal data",
+      "stats": {
+        "total": "Total Access Events",
+        "granted": "Granted",
+        "denied": "Denied",
+        "last7days": "Last 7 Days"
+      },
+      "filters": {
+        "allTypes": "All Types",
+        "allResults": "All Results",
+        "granted": "Granted",
+        "denied": "Denied",
+        "search": "Search accessor or animal..."
+      },
+      "exportCsv": "Export CSV",
+      "table": {
+        "accessor": "Accessor",
+        "role": "Role",
+        "animal": "Animal",
+        "recordType": "Record Type",
+        "accessType": "Access Type",
+        "result": "Result",
+        "dateTime": "Date & Time"
+      },
+      "noLogs": "No audit events yet",
+      "noLogsDesc": "Access events will appear here once your network members start accessing patient records.",
+      "selectNetwork": "Select a network to view its audit log",
+      "goToNetworks": "Go to Networks →",
+      "pageOf": "Page {{page}} of {{total}}"
     }
   },
   "patientConsent": {

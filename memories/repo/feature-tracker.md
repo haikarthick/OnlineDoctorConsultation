@@ -106,7 +106,7 @@
 | P1-2 | HospitalNetworkService + routes | ✅ Done | HospitalNetworkService.ts + HospitalNetworkController.ts + 17 routes |
 | P1-3 | corporate_admin + hospital_director roles — 4-file sync | ✅ Done | Permissions + navigation + App.tsx synced (2026-04-09) |
 | P1-4 | Hospital data isolation middleware | ✅ Done | hospitalDataIsolation.ts — checkAnimalAccess, requireAnimalAccess middleware, logClinicalAccess. Applied to /animals/:id, /consultations/animal/:id, /prescriptions/animal/:id, /vaccinations/animal/:id. Access-check endpoint added (2026-04-08) |
-| P1-5 | Corporate Admin — Hospital Network Management UI | ✅ Done | HospitalNetworks.tsx — 3-tab UI: Networks list/stats/approve, Network Detail (dashboard+hospitals+members), Audit placeholder (2026-04-08) |
+| P1-5 | Corporate Admin — Hospital Network Management UI | ✅ Done | HospitalNetworks.tsx — 3-tab UI: Networks list/stats/approve, Network Detail (dashboard+hospitals+members), Audit Tab fully implemented (2026-04-09) |
 | P1-6 | Patient Consent Management UI (pet_owner + farmer) | ✅ Done | PatientConsent.tsx — 2-panel layout, 6-dim consents, CSS toggles, presets (2026-04-08) |
 | P1-7 | Demo hospital network seed data | ✅ Done | DemoVetGroup + demo hospitals + corporate_admin in seed-demo-data.sql |
 
@@ -122,7 +122,8 @@
 
 ## Recently Completed (last 10)
 
-1. ✅ PatientConsent.tsx full UI — 2-panel layout, 6-dim consent, CSS toggle switches, presets (2026-04-08)
+1. ✅ HospitalNetworks.tsx Audit Tab (Tab 3) — stats row, filter bar, paginated table, CSV export, empty/loading states (2026-04-09)
+2. ✅ PatientConsent.tsx full UI — 2-panel layout, 6-dim consent, CSS toggle switches, presets (2026-04-08)
 2. ✅ HospitalNetworks.tsx full UI — 3-tab admin dashboard, network CRUD, member/hospital management (2026-04-08)
 3. ✅ api.ts — 14 new methods for hospital networks + patient consent (2026-04-08)
 4. ✅ Hospital Network 4-file permission sync — `hospital_network_manage/view/audit`, `patient_consent_manage` (2026-04-09)
