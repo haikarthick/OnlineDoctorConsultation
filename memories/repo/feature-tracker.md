@@ -122,16 +122,19 @@
 
 ## Recently Completed (last 10)
 
-1. ✅ HospitalNetworks.tsx Audit Tab (Tab 3) — stats row, filter bar, paginated table, CSV export, empty/loading states (2026-04-09)
-2. ✅ PatientConsent.tsx full UI — 2-panel layout, 6-dim consent, CSS toggle switches, presets (2026-04-08)
-2. ✅ HospitalNetworks.tsx full UI — 3-tab admin dashboard, network CRUD, member/hospital management (2026-04-08)
-3. ✅ api.ts — 14 new methods for hospital networks + patient consent (2026-04-08)
-4. ✅ Hospital Network 4-file permission sync — `hospital_network_manage/view/audit`, `patient_consent_manage` (2026-04-09)
-5. ✅ Empty-state shortcuts — contextual navigation buttons across BookConsultation, MedicalRecords, WellnessPortal (2026-04-08)
-6. ✅ Fix Render deploy — HTTP port bound FIRST before DB connect (2026-04-07)
-7. ✅ render-start.sh — tighten timeouts: connectionTimeoutMillis 30000→15000, migrations 60→40s (2026-04-07)
-8. ✅ connectWithRetry() — 5 attempts × 10s for free-tier Render PostgreSQL (2026-04-06)
-9. ✅ Inpatient search — SQL column names fixed and verified against init.sql (prior)
-10. ✅ FindDoctor — useSettings() formatters, past slot filtering with 15-min buffer (prior)
-
-11. `PatientConsent.tsx` — Full page implemented: 2-panel sidebar layout, animal list with active consent count badges, consent cards with scope badges + permissions grid + revoke action, Grant Consent modal with preset quick-fills, 6 data permission toggles (CSS-only), scope radio cards, grant-to tabs (Doctor/Hospital/Network), validity period pickers. All 5 locale files updated. PatientConsent.css with 4 responsive breakpoints.
+1. ✅ Animal Unique ID (VC-{SPE}-{YY}-{NNNNN}) — full system complete (2026-04-09)
+   - database.ts: backfill for all existing animals without VC-IDs on server startup
+   - PrescriptionService.ts: animalUniqueId in all prescription listing queries
+   - MarketplaceService.ts: JOIN animals on linked_animal_id → animal_unique_id in listings
+   - VaccinationPassport.tsx: VC-ID badge (copy-to-clipboard) + in print template
+   - Marketplace.tsx: VC-ID badge on sell form + on listing cards
+   - types/index.ts: animalUniqueId added to MarketplaceListing type
+2. ✅ HospitalNetworks.tsx Audit Tab (Tab 3) — stats row, filter bar, paginated table, CSV export, empty/loading states (2026-04-09)
+3. ✅ PatientConsent.tsx full UI — 2-panel layout, 6-dim consent, CSS toggle switches, presets (2026-04-08)
+4. ✅ HospitalNetworks.tsx full UI — 3-tab admin dashboard, network CRUD, member/hospital management (2026-04-08)
+5. ✅ api.ts — 14 new methods for hospital networks + patient consent (2026-04-08)
+6. ✅ Hospital Network 4-file permission sync — `hospital_network_manage/view/audit`, `patient_consent_manage` (2026-04-09)
+7. ✅ Empty-state shortcuts — contextual navigation buttons across BookConsultation, MedicalRecords, WellnessPortal (2026-04-08)
+8. ✅ Fix Render deploy — HTTP port bound FIRST before DB connect (2026-04-07)
+9. ✅ render-start.sh — tighten timeouts: connectionTimeoutMillis 30000→15000, migrations 60→40s (2026-04-07)
+10. ✅ connectWithRetry() — 5 attempts × 10s for free-tier Render PostgreSQL (2026-04-06)
