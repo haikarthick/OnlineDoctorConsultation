@@ -94,6 +94,9 @@ const VaccineProtocolAdmin = lazy(() => import('./pages/admin/VaccineProtocolAdm
 const VetCertificates = lazy(() => import('./pages/VetCertificates'))
 const CertificateWriter = lazy(() => import('./pages/doctor/CertificateWriter'))
 const CertificateSettings = lazy(() => import('./pages/admin/CertificateSettings'))
+// Hospital Network & Patient Consent
+const HospitalNetworks = React.lazy(() => import('./pages/hospitalnetwork/HospitalNetworks'))
+const PatientConsent = React.lazy(() => import('./pages/petowner/PatientConsent'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -287,6 +290,12 @@ function AppRoutes() {
       {/* ── Hospital Workflow Module ── */}
       <Route path="/hospital-workflow" element={<RoleRoute path="/hospital-workflow"><AppLayout><HospitalWorkflow /></AppLayout></RoleRoute>} />
       <Route path="/inpatient" element={<RoleRoute path="/inpatient"><AppLayout><InpatientManagement /></AppLayout></RoleRoute>} />
+
+      {/* ── Hospital Network Module ── */}
+      <Route path="/hospital-networks" element={<RoleRoute path="/hospital-networks"><AppLayout><HospitalNetworks /></AppLayout></RoleRoute>} />
+
+      {/* ── Patient Consent Module ── */}
+      <Route path="/patient-consent" element={<RoleRoute path="/patient-consent"><AppLayout><PatientConsent /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -140,6 +140,7 @@
     "certificateSettings": "Certificate Template",
     "hospitalMgmt": "Hospital Mgmt",
     "cancellations": "Cancellations",
+    "dataConsent": "Data Consent",
     "sections": {
       "main": "Main",
       "consultations": "Consultations",
@@ -5424,5 +5425,11 @@
     "autoNumberPrefixDesc": "e.g. VC for VC-2026-00001",
     "signatureRequired": "Require Digital Signature",
     "signatureRequiredDesc": "Force vets to upload signature before issuing"
+  },
+  "hospitalNetworks": {
+    "title": "Hospital Networks"
+  },
+  "patientConsent": {
+    "title": "Patient Data Consent"
   }
 }

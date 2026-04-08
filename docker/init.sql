@@ -96,6 +96,13 @@ CREATE TABLE IF NOT EXISTS animals (
   weight_unit VARCHAR(10) DEFAULT 'kg',
   last_weighed_at TIMESTAMP,
   current_location_id UUID,
+  status VARCHAR(30) DEFAULT 'active'
+    CHECK (status IN ('active','sold','deceased','transferred','quarantined','retired','lost')),
+  dam_id UUID,
+  sire_id UUID,
+  acquisition_date DATE,
+  acquisition_source VARCHAR(200),
+  production_type VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -179,6 +186,108 @@ CREATE TABLE IF NOT EXISTS animal_groups (
   color_code VARCHAR(20),
   description TEXT,
   is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 4c. ENTERPRISE MEMBERS (multi-user access to a farm/enterprise)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS enterprise_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role VARCHAR(30) NOT NULL DEFAULT 'worker'
+    CHECK (role IN ('owner', 'manager', 'supervisor', 'worker', 'farm_vet', 'viewer')),
+  title VARCHAR(100),
+  permissions JSONB DEFAULT '[]',
+  is_active BOOLEAN DEFAULT true,
+  joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(enterprise_id, user_id)
+);
+
+-- ============================================================
+-- 4d. LOCATIONS (barns, pens, paddocks, enclosures)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS locations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id) ON DELETE CASCADE,
+  name VARCHAR(200) NOT NULL,
+  location_type VARCHAR(50) NOT NULL
+    CHECK (location_type IN (
+      'barn', 'stable', 'pen', 'paddock', 'field', 'pasture',
+      'quarantine', 'isolation', 'aviary', 'tank', 'pond',
+      'enclosure', 'kennel', 'cattery', 'warehouse', 'office',
+      'treatment_area', 'milking_parlor', 'feed_storage', 'other'
+    )),
+  parent_location_id UUID REFERENCES locations(id) ON DELETE SET NULL,
+  capacity INTEGER DEFAULT 0,
+  current_occupancy INTEGER DEFAULT 0,
+  area DECIMAL(10,2),
+  area_unit VARCHAR(10) DEFAULT 'sqft',
+  gps_latitude DECIMAL(10,7),
+  gps_longitude DECIMAL(10,7),
+  description TEXT,
+  is_active BOOLEAN DEFAULT true,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 4e. MOVEMENT RECORDS (animal/group transfers between locations)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS movement_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id) ON DELETE CASCADE,
+  animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
+  group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL,
+  from_location_id UUID REFERENCES locations(id) ON DELETE SET NULL,
+  to_location_id UUID REFERENCES locations(id) ON DELETE SET NULL,
+  movement_type VARCHAR(30) NOT NULL DEFAULT 'transfer'
+    CHECK (movement_type IN ('transfer', 'intake', 'discharge', 'quarantine', 'sale', 'death', 'birth', 'import', 'export')),
+  reason TEXT,
+  animal_count INTEGER DEFAULT 1,
+  transport_method VARCHAR(50),
+  transport_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  regulatory_permit VARCHAR(100),
+  approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  recorded_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  notes TEXT,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 4f. TREATMENT CAMPAIGNS (group-level vaccinations, treatments)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS treatment_campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id) ON DELETE CASCADE,
+  group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL,
+  campaign_type VARCHAR(50) NOT NULL
+    CHECK (campaign_type IN (
+      'vaccination', 'deworming', 'testing', 'treatment',
+      'health_check', 'tagging', 'weighing', 'hoof_trimming',
+      'shearing', 'dipping', 'other'
+    )),
+  name VARCHAR(200) NOT NULL,
+  description TEXT,
+  product_used VARCHAR(200),
+  dosage VARCHAR(100),
+  target_count INTEGER DEFAULT 0,
+  completed_count INTEGER DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'planned'
+    CHECK (status IN ('planned', 'in_progress', 'completed', 'cancelled')),
+  scheduled_date DATE,
+  started_at TIMESTAMP,
+  completed_at TIMESTAMP,
+  administered_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  cost DECIMAL(12,2) DEFAULT 0,
+  notes TEXT,
+  metadata JSONB DEFAULT '{}',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -1339,4 +1448,207 @@ CREATE INDEX IF NOT EXISTS idx_vet_certs_status ON vet_certificates(status);
 
 DROP TRIGGER IF EXISTS update_vet_certificates_updated_at ON vet_certificates;
 CREATE TRIGGER update_vet_certificates_updated_at BEFORE UPDATE ON vet_certificates
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- ENTERPRISE TABLES — Triggers & Indexes
+-- ============================================================
+DROP TRIGGER IF EXISTS update_enterprises_updated_at ON enterprises;
+CREATE TRIGGER update_enterprises_updated_at BEFORE UPDATE ON enterprises
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_enterprise_members_updated_at ON enterprise_members;
+CREATE TRIGGER update_enterprise_members_updated_at BEFORE UPDATE ON enterprise_members
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_animal_groups_updated_at ON animal_groups;
+CREATE TRIGGER update_animal_groups_updated_at BEFORE UPDATE ON animal_groups
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_locations_updated_at ON locations;
+CREATE TRIGGER update_locations_updated_at BEFORE UPDATE ON locations
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_treatment_campaigns_updated_at ON treatment_campaigns;
+CREATE TRIGGER update_treatment_campaigns_updated_at BEFORE UPDATE ON treatment_campaigns
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE INDEX IF NOT EXISTS idx_enterprises_owner_id ON enterprises(owner_id);
+CREATE INDEX IF NOT EXISTS idx_enterprises_is_active ON enterprises(is_active);
+CREATE INDEX IF NOT EXISTS idx_enterprise_members_enterprise_id ON enterprise_members(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_enterprise_members_user_id ON enterprise_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_animal_groups_enterprise_id ON animal_groups(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_locations_enterprise_id ON locations(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_locations_parent ON locations(parent_location_id);
+CREATE INDEX IF NOT EXISTS idx_movement_records_enterprise_id ON movement_records(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_movement_records_animal_id ON movement_records(animal_id);
+CREATE INDEX IF NOT EXISTS idx_treatment_campaigns_enterprise_id ON treatment_campaigns(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_treatment_campaigns_status ON treatment_campaigns(status);
+CREATE INDEX IF NOT EXISTS idx_animals_enterprise_id ON animals(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_animals_group_id ON animals(group_id);
+CREATE INDEX IF NOT EXISTS idx_animals_status ON animals(status);
+
+-- ============================================================
+-- HOSPITAL NETWORK TABLES (Phase 1 — Clinical Domain)
+-- NOTE: Completely separate from farm enterprises table.
+--       enterprises = farm domain, hospital_networks = clinical domain.
+-- ============================================================
+
+-- 36. HOSPITAL NETWORKS (corporate umbrella entities)
+CREATE TABLE IF NOT EXISTS hospital_networks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  legal_name VARCHAR(255),
+  registration_number VARCHAR(100),
+  tax_id VARCHAR(100),
+  network_type VARCHAR(50) NOT NULL DEFAULT 'private'
+    CHECK (network_type IN ('private', 'government', 'ngo', 'cooperative', 'franchise')),
+  country VARCHAR(100) DEFAULT 'IN',
+  headquarters_address TEXT,
+  headquarters_city VARCHAR(100),
+  headquarters_state VARCHAR(100),
+  contact_email VARCHAR(255),
+  contact_phone VARCHAR(30),
+  website VARCHAR(500),
+  logo_url VARCHAR(500),
+  dpo_name VARCHAR(200),
+  dpo_email VARCHAR(255),
+  data_residency_region VARCHAR(100),
+  is_active BOOLEAN DEFAULT true,
+  is_approved BOOLEAN DEFAULT false,
+  approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  approved_at TIMESTAMP,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 37. HOSPITAL NETWORK MEMBERS (corporate staff: corporate_admin, hospital_director, auditor)
+CREATE TABLE IF NOT EXISTS hospital_network_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  network_role VARCHAR(50) NOT NULL DEFAULT 'hospital_staff'
+    CHECK (network_role IN ('corporate_admin', 'hospital_director', 'auditor', 'compliance_officer', 'hospital_staff')),
+  hospital_id UUID,
+  is_active BOOLEAN DEFAULT true,
+  granted_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  notes TEXT,
+  UNIQUE(network_id, user_id)
+);
+
+-- 38. HOSPITAL NETWORK FEATURE FLAGS (per-network feature toggles)
+CREATE TABLE IF NOT EXISTS hospital_network_feature_flags (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  feature_key VARCHAR(100) NOT NULL,
+  is_enabled BOOLEAN DEFAULT false,
+  config JSONB DEFAULT '{}',
+  updated_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(network_id, feature_key)
+);
+
+-- 39. ANIMAL CARE CONTEXTS (dual-ID patient linking: platform VC-ID + corporate patient ID)
+-- Represents an animal being treated in the context of a specific hospital network.
+-- An animal can have multiple contexts (different networks they've been treated at).
+CREATE TABLE IF NOT EXISTS animal_care_contexts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  hospital_id UUID,
+  platform_unique_id VARCHAR(20),
+  corporate_patient_id VARCHAR(100),
+  visibility VARCHAR(20) NOT NULL DEFAULT 'private'
+    CHECK (visibility IN ('private', 'network_only', 'treating_vet_only')),
+  enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  enrolled_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  is_active BOOLEAN DEFAULT true,
+  notes TEXT,
+  UNIQUE(animal_id, network_id)
+);
+
+-- 40. PATIENT DATA CONSENT (granular 6-dimension consent record)
+-- What data can be shared, with whom, for how long, what actions, whether hospital records included.
+CREATE TABLE IF NOT EXISTS patient_data_consent (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  -- Who can access
+  granted_to_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  granted_to_hospital_id UUID,
+  granted_to_network_id UUID REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  -- What data
+  consent_scope VARCHAR(50) NOT NULL DEFAULT 'basic_history'
+    CHECK (consent_scope IN ('basic_history', 'full_history', 'emergency_only', 'custom')),
+  allow_medical_records BOOLEAN DEFAULT true,
+  allow_vaccination_records BOOLEAN DEFAULT true,
+  allow_prescriptions BOOLEAN DEFAULT true,
+  allow_lab_results BOOLEAN DEFAULT false,
+  allow_genetic_data BOOLEAN DEFAULT false,
+  -- Whether hospital/network-scoped records are included (explicit opt-in, defaults false)
+  include_hospital_records BOOLEAN DEFAULT false,
+  -- Allowed actions
+  allow_view BOOLEAN DEFAULT true,
+  allow_create_notes BOOLEAN DEFAULT false,
+  allow_prescribe BOOLEAN DEFAULT false,
+  -- Duration
+  valid_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  valid_until TIMESTAMP,
+  is_active BOOLEAN DEFAULT true,
+  revoked_at TIMESTAMP,
+  revoked_reason TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 41. CLINICAL DATA ACCESS LOG (immutable audit trail — append only, never delete)
+-- Every access to hospital-scoped clinical records is logged here.
+-- Corporate admin, hospital director access is ALWAYS logged.
+CREATE TABLE IF NOT EXISTS clinical_data_access_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  -- Who accessed
+  accessed_by UUID NOT NULL REFERENCES users(id),
+  accessor_role VARCHAR(50) NOT NULL,
+  accessor_network_id UUID REFERENCES hospital_networks(id),
+  -- What was accessed
+  animal_id UUID REFERENCES animals(id),
+  record_type VARCHAR(50) NOT NULL,
+  record_id UUID,
+  -- Context
+  access_type VARCHAR(30) NOT NULL
+    CHECK (access_type IN ('view', 'search', 'export', 'print', 'api_call', 'audit')),
+  consent_id UUID REFERENCES patient_data_consent(id),
+  ip_address INET,
+  user_agent TEXT,
+  -- Outcome
+  access_granted BOOLEAN NOT NULL,
+  denial_reason TEXT,
+  accessed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  -- NOTE: No updated_at — this table is append-only, never update or delete rows
+);
+
+-- Indexes for hospital network tables
+CREATE INDEX IF NOT EXISTS idx_hospital_networks_is_active ON hospital_networks(is_active);
+CREATE INDEX IF NOT EXISTS idx_hospital_networks_is_approved ON hospital_networks(is_approved);
+CREATE INDEX IF NOT EXISTS idx_hospital_network_members_network ON hospital_network_members(network_id);
+CREATE INDEX IF NOT EXISTS idx_hospital_network_members_user ON hospital_network_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_hospital_network_members_role ON hospital_network_members(network_role);
+CREATE INDEX IF NOT EXISTS idx_animal_care_contexts_animal ON animal_care_contexts(animal_id);
+CREATE INDEX IF NOT EXISTS idx_animal_care_contexts_network ON animal_care_contexts(network_id);
+CREATE INDEX IF NOT EXISTS idx_patient_consent_animal ON patient_data_consent(animal_id);
+CREATE INDEX IF NOT EXISTS idx_patient_consent_owner ON patient_data_consent(owner_id);
+CREATE INDEX IF NOT EXISTS idx_patient_consent_active ON patient_data_consent(is_active);
+CREATE INDEX IF NOT EXISTS idx_clinical_access_log_animal ON clinical_data_access_log(animal_id);
+CREATE INDEX IF NOT EXISTS idx_clinical_access_log_accessor ON clinical_data_access_log(accessed_by);
+CREATE INDEX IF NOT EXISTS idx_clinical_access_log_network ON clinical_data_access_log(accessor_network_id);
+CREATE INDEX IF NOT EXISTS idx_clinical_access_log_time ON clinical_data_access_log(accessed_at);
+
+DROP TRIGGER IF EXISTS update_hospital_networks_updated_at ON hospital_networks;
+CREATE TRIGGER update_hospital_networks_updated_at BEFORE UPDATE ON hospital_networks
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_patient_consent_updated_at ON patient_data_consent;
+CREATE TRIGGER update_patient_consent_updated_at BEFORE UPDATE ON patient_data_consent
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

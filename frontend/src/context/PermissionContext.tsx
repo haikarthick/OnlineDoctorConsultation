@@ -68,6 +68,11 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   hospital_manage: ['/vet-hospitals/manage'],
   admin_hospitals: ['/admin/vet-hospitals'],
   admin_compliance: ['/admin/compliance'],
+  // Hospital Network
+  hospital_network_manage: ['/hospital-networks', '/hospital-networks/:id', '/hospital-networks/:id/hospitals', '/hospital-networks/:id/members'],
+  hospital_network_view: ['/hospital-networks'],
+  hospital_network_audit: ['/hospital-networks/:id/audit'],
+  patient_consent_manage: ['/patient-consent'],
   // Hospital Workflow
   hospital_workflow: ['/hospital-workflow'],
   inpatient_manage: ['/inpatient'],
@@ -150,6 +155,9 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'vet-hospitals-manage': 'hospital_manage',
   'admin-hospitals': 'admin_hospitals',
   'admin-compliance': 'admin_compliance',
+  // Hospital Network
+  'hospital-networks': 'hospital_network_manage',
+  'patient-consent': 'patient_consent_manage',
   // Hospital Workflow
   'hospital-workflow': 'hospital_workflow',
   'inpatient': 'inpatient_manage',

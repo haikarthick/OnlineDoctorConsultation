@@ -114,6 +114,7 @@
     "certificateSettings": "సర్టిఫికేట్ టెమ్ప్లేట్",
     "hospitalMgmt": "ఆసుపత్రి నిర్వహణ",
     "cancellations": "రద్దులు",
+    "dataConsent": "డేటా సమ్మతి",
     "sections": {
       "main": "ప్రధాన",
       "consultations": "సంప్రదింపులు",
@@ -5301,5 +5302,11 @@
     "autoNumberPrefixDesc": "e.g. VC for VC-2026-00001",
     "signatureRequired": "Require Digital Signature",
     "signatureRequiredDesc": "Force vets to upload signature before issuing"
+  },
+  "hospitalNetworks": {
+    "title": "ఆసుపత్రి నెట్‌వర్క్"
+  },
+  "patientConsent": {
+    "title": "రోగి డేటా సమ్మతి"
   }
 }

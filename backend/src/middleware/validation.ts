@@ -1338,3 +1338,52 @@ export const reviewHospitalDocSchema = Joi.object({
   status:          Joi.string().valid('approved', 'rejected').required(),
   rejectionReason: shortText(1000).optional().allow('', null),
 });
+
+// ─── Hospital Network ────────────────────────────────────────
+export const createHospitalNetworkSchema = Joi.object({
+  name: shortText().required(),
+  legalName: shortText().optional().allow('', null),
+  registrationNumber: shortText(100).optional().allow('', null),
+  taxId: shortText(100).optional().allow('', null),
+  networkType: Joi.string().valid('private', 'government', 'ngo', 'cooperative', 'franchise').default('private'),
+  country: shortText(100).optional().allow('', null),
+  headquartersAddress: shortText(500).optional().allow('', null),
+  headquartersCity: shortText(100).optional().allow('', null),
+  headquartersState: shortText(100).optional().allow('', null),
+  contactEmail: Joi.string().email().optional().allow('', null),
+  contactPhone: shortText(20).optional().allow('', null),
+  website: Joi.string().uri().optional().allow('', null),
+  logoUrl: Joi.string().uri().optional().allow('', null),
+  dpoName: shortText(200).optional().allow('', null),
+  dpoEmail: Joi.string().email().optional().allow('', null),
+  dataResidencyRegion: shortText(100).optional().allow('', null),
+  metadata: Joi.object().optional().allow(null),
+});
+
+export const addNetworkMemberSchema = Joi.object({
+  userId: requiredUuid,
+  networkRole: Joi.string()
+    .valid('corporate_admin', 'hospital_director', 'auditor', 'compliance_officer', 'hospital_staff')
+    .required(),
+  hospitalId: uuid.optional().allow(null),
+  notes: shortText(500).optional().allow('', null),
+});
+
+export const createPatientConsentSchema = Joi.object({
+  animalId: requiredUuid,
+  grantedToUserId: uuid.optional().allow(null),
+  grantedToHospitalId: uuid.optional().allow(null),
+  grantedToNetworkId: uuid.optional().allow(null),
+  consentScope: shortText(100).required(),
+  allowMedicalRecords: Joi.boolean().default(true),
+  allowVaccinationRecords: Joi.boolean().default(true),
+  allowPrescriptions: Joi.boolean().default(true),
+  allowLabResults: Joi.boolean().default(false),
+  allowGeneticData: Joi.boolean().default(false),
+  includeHospitalRecords: Joi.boolean().default(false),
+  allowView: Joi.boolean().default(true),
+  allowCreateNotes: Joi.boolean().default(false),
+  allowPrescribe: Joi.boolean().default(false),
+  validFrom: Joi.date().optional(),
+  validUntil: Joi.date().min(Joi.ref('validFrom')).optional().allow(null),
+});

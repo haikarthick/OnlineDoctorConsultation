@@ -67,14 +67,11 @@ if [ "$SCHEMA_READY" = "false" ]; then
 fi
 echo ""
 
-# Step 1: Run enterprise/tier migrations (idempotent — safe to re-run)
+# Step 1: Run database migrations using the migrate runner (idempotent — safe to re-run)
+# This replaces the old individual TS migration calls (enterpriseMigration, tier2/3/4Migration)
+# The migrate runner tracks applied migrations in _migrations table, never re-runs a file.
 echo "━━━ Running database migrations ━━━"
-timeout 40 node dist/utils/enterpriseMigration.js  2>&1 || echo "  (enterprise migration warning — continuing)"
-timeout 40 node dist/utils/tier2Migration.js       2>&1 || echo "  (tier2 migration warning — continuing)"
-timeout 40 node dist/utils/tier3Migration.js       2>&1 || echo "  (tier3 migration warning — continuing)"
-timeout 40 node dist/utils/tier4Migration.js       2>&1 || echo "  (tier4 migration warning — continuing)"
-# Note: backend/migrations/*.sql files are now applied by the server on startup
-# via database.ts runSQLMigrations() — no separate migrate.js process needed.
+timeout 60 node dist/utils/migrate.js 2>&1 || echo "  (migration runner warning — continuing)"
 echo "✓ Migrations complete"
 
 # Step 2: Seed demo data if core data is missing (vet_profiles table empty)

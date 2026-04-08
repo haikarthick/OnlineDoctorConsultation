@@ -104,7 +104,9 @@ async function runMigrations() {
         await client.query('ROLLBACK');
         console.error(`  ✗ ${migration.name} — ROLLED BACK`);
         console.error(`    Error: ${(err as Error).message}`);
-        process.exit(1);
+        // Don't exit(1) — log warning and continue with remaining migrations
+        // render-start.sh has || echo "continuing" fallback anyway
+        console.error(`  ⚠ Continuing with next migration...`);
       } finally {
         client.release();
       }

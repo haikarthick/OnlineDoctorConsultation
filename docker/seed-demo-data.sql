@@ -3313,3 +3313,74 @@ INSERT INTO consultations (id, user_id, veterinarian_id, animal_id, animal_type,
   ('f8000000-0000-0000-0000-000000000008','c0000000-0000-0000-0000-000000000004','b0000000-0000-0000-0000-000000000001','aa000000-0000-9999-0000-000000000006','Dog - Labrador Retriever','Emergency - cluster seizures. 3 events in 24 hours. Subtherapeutic phenobarbital due to missed doses.','completed','critical','2022-09-23 09:00:00','2022-09-23 09:05:00','2022-09-23 10:20:00',75,'Cluster seizures secondary to subtherapeutic phenobarbital (owner compliance issue - travel disrupted dosing). Diazepam rescue successful. Phenobarbital level confirmed 18 ug/mL (sub-therapeutic).','Potassium bromide 1065mg (30mg/kg) added once daily with food. Maintain phenobarbital 87mg BID. SAMe 400mg daily for hepatoprotection. Add ursodiol 355mg daily.','2023-06-20','Strict compliance counselling completed. Pillbox/phone alarm system established. Partner also trained on rescue medication. Next breakthrough seizure = hospital admission. Driving unsafe.'),
   ('f8000000-0000-0000-0000-000000000009','f0000000-0000-0000-0000-000000000001','b0000000-0000-0000-0000-000000000001','aa000000-0000-0000-0000-000000000008','Horse - Thoroughbred','Recurring left forelimb lameness grade 2/5 at trot. Previous 6-week rest unsuccessful.','completed','high','2025-02-18 08:00:00','2025-02-18 08:05:00','2025-02-18 09:30:00',85,'Grade 2/5 left forelimb lameness. Positive distal limb flexion test. Navicular region involvement suspected. MRI distal limb recommended for definitive diagnosis. Corrective heartbar shoe applied by farrier.','Meloxicam 0.6mg/kg daily for 14 days. Omeprazole (GastroGard) 4mg/kg daily for 28 days concurrent with NSAID. Box rest 14 days minimum.','2025-03-20','Prognosis depends on MRI findings. If DDFT lesion: stem cell/PRP injection + extended rest. If navicular bone sclerosis: corrective shoeing long-term. Return to work uncertain at this stage.')
 ON CONFLICT (id) DO NOTHING;
+
+
+-- ============================================================
+-- HOSPITAL NETWORK DEMO DATA (Phase 1)
+-- Demo hospital network that owns the 2 existing demo hospitals
+-- ============================================================
+
+-- Demo Hospital Network — "DemoVetGroup"
+INSERT INTO hospital_networks (id, name, legal_name, registration_number, network_type, country, headquarters_city, headquarters_state, contact_email, contact_phone, is_active, is_approved, approved_at, metadata)
+VALUES (
+  'hn000000-0000-0000-0000-000000000001',
+  'DemoVetGroup',
+  'DemoVetGroup Healthcare Pvt. Ltd.',
+  'DVHG-2024-001',
+  'private',
+  'IN',
+  'Chennai',
+  'Tamil Nadu',
+  'admin@demovetgroup.com',
+  '+91-44-1234-5678',
+  true,
+  true,
+  CURRENT_TIMESTAMP,
+  '{}'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Corporate Admin user for DemoVetGroup (uses admin account for demo)
+-- In production, this would be a separate corporate_admin user
+INSERT INTO hospital_network_members (id, network_id, user_id, network_role, is_active, granted_at)
+VALUES (
+  'hnm00000-0000-0000-0000-000000000001',
+  'hn000000-0000-0000-0000-000000000001',
+  'a0000000-0000-0000-0000-000000000001',
+  'corporate_admin',
+  true,
+  CURRENT_TIMESTAMP
+) ON CONFLICT (network_id, user_id) DO NOTHING;
+
+-- Assign demo vet as hospital_director for VetCare Central Hospital
+INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at)
+VALUES (
+  'hnm00000-0000-0000-0000-000000000002',
+  'hn000000-0000-0000-0000-000000000001',
+  'b0000000-0000-0000-0000-000000000001',
+  'hospital_director',
+  'h0000000-0000-0000-0000-000000000001',
+  true,
+  CURRENT_TIMESTAMP
+) ON CONFLICT (network_id, user_id) DO NOTHING;
+
+-- Feature flags for demo network
+INSERT INTO hospital_network_feature_flags (network_id, feature_key, is_enabled, config)
+VALUES
+  ('hn000000-0000-0000-0000-000000000001', 'patient_data_isolation', true, '{"default_visibility": "private"}'),
+  ('hn000000-0000-0000-0000-000000000001', 'corporate_audit_log', true, '{}'),
+  ('hn000000-0000-0000-0000-000000000001', 'inter_hospital_referrals', false, '{}'),
+  ('hn000000-0000-0000-0000-000000000001', 'shared_formulary', false, '{}')
+ON CONFLICT (network_id, feature_key) DO NOTHING;
+
+-- Demo animal care context (link demo animal to demo network with dual ID)
+INSERT INTO animal_care_contexts (id, animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id, visibility, enrolled_by)
+VALUES (
+  'acc00000-0000-0000-0000-000000000001',
+  'e0000000-0000-0000-0000-000000000001',
+  'hn000000-0000-0000-0000-000000000001',
+  'h0000000-0000-0000-0000-000000000001',
+  'VC-DOG-24-00001',
+  'DVG-P-00001',
+  'private',
+  'a0000000-0000-0000-0000-000000000001'
+) ON CONFLICT (animal_id, network_id) DO NOTHING;

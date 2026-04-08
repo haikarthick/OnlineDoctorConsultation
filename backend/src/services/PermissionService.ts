@@ -133,6 +133,10 @@ export const PERMISSION_CATEGORIES = {
       'hospital_workflow',
       'inpatient_manage',
       'admin_staff_settings',
+      'hospital_network_manage',
+      'hospital_network_view',
+      'hospital_network_audit',
+      'patient_consent_manage',
     ]
   }
 };
@@ -164,6 +168,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'ai_copilot', 'marketplace_access', 'wellness_portal',
     // Holiday management
     'admin_holidays',
+    // Hospital Network
+    'hospital_network_view',
     // Wallet
     'wallet',
     // Actions
@@ -186,6 +192,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // (user-scoped)
     'ai_copilot', 'marketplace_access', 'wellness_portal',
     'vaccination_passport', 'vet_certificates',
+    // Data consent
+    'patient_consent_manage',
     // Wallet
     'wallet',
     // Actions
@@ -217,6 +225,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'ai_copilot', 'digital_twin', 'marketplace_access',
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
     'vaccination_passport',
+    // Data consent
+    'patient_consent_manage',
     // Wallet
     'wallet',
     // Actions
@@ -255,6 +265,10 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'vaccination_passport', 'admin_vaccine_protocols', 'vet_certificates',
     // Certificates admin
     'admin_certificates',
+    // Hospital Network (full access)
+    'hospital_network_manage', 'hospital_network_view', 'hospital_network_audit',
+    // Patient consent (admin oversight)
+    'patient_consent_manage',
     // Wallet & Cancellation
     'wallet', 'admin_cancellation_dashboard',
     // Holiday management
@@ -346,6 +360,11 @@ export const PERMISSION_LABELS: Record<string, string> = {
   sustainability_manage: 'Sustainability & ESG',
   wellness_portal: 'Wellness Portal',
   geospatial_analytics: 'Geospatial Analytics',
+  // Hospital Network
+  hospital_network_manage: 'Hospital Network Management',
+  hospital_network_view: 'Hospital Network View',
+  hospital_network_audit: 'Hospital Network Audit',
+  patient_consent_manage: 'Patient Data Consent',
   // Timeline
   animal_timeline: 'Animal Life Timeline',
   // Dashboard widgets

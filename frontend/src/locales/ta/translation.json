@@ -112,6 +112,7 @@
     "vetCertificates": "கால்நடை சான்றிதழ்கள்",
     "certificateSettings": "சான்றிதழ் டெம்ப்ளேட்",
     "cancellations": "ரத்துகள்",
+    "dataConsent": "தரவு ஒப்புதல்",
     "sections": {
       "main": "முதன்மை",
       "consultations": "ஆலோசனைகள்",
@@ -5358,5 +5359,11 @@
     "autoNumberPrefixDesc": "e.g. VC for VC-2026-00001",
     "signatureRequired": "Require Digital Signature",
     "signatureRequiredDesc": "Force vets to upload signature before issuing"
+  },
+  "hospitalNetworks": {
+    "title": "மருத்துவமனை நெட்வொர்க்"
+  },
+  "patientConsent": {
+    "title": "நோயாளி தரவு ஒப்புதல்"
   }
 }

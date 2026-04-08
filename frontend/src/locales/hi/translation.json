@@ -114,6 +114,7 @@
     "certificateSettings": "प्रमाणपत्र टेम्पलेट",
     "hospitalMgmt": "अस्पताल प्रबंधन",
     "cancellations": "रद्दीकरण",
+    "dataConsent": "डेटा सहमति",
     "sections": {
       "main": "मुख्य",
       "consultations": "परामर्श",
@@ -5369,5 +5370,11 @@
     "autoNumberPrefixDesc": "उदा. VC के लिए VC-2026-00001",
     "signatureRequired": "डिजिटल हस्ताक्षर आवश्यक",
     "signatureRequiredDesc": "वेट्स को जारी करने से पहले हस्ताक्षर अपलोड करने के लिए बाध्य करें"
+  },
+  "hospitalNetworks": {
+    "title": "अस्पताल नेटवर्क"
+  },
+  "patientConsent": {
+    "title": "रोगी डेटा सहमति"
   }
 }

@@ -86,15 +86,44 @@
 
 ---
 
-## ⚠️ Planned Items (not yet implemented)
+## ⚠️ Planned Items — Phase 0: DB Cleanup & Restructuring
 
-_None currently. Add items here as features are discussed with the user._
+| # | Feature | Status | Notes |
+|---|---------|--------|-------|
+| P0-1 | Fix missing enterprise_members table in init.sql | ⚠️ Planned | Referenced in EnterpriseService.ts but missing from canonical schema |
+| P0-2 | Convert enterpriseMigration.ts → migrations/005_farm_enterprises.sql | ⚠️ Planned | TypeScript migrations must become numbered SQL files |
+| P0-3 | Convert tier2Migration.ts → migrations/006_tier2_features.sql | ⚠️ Planned | breeding_records, feed_inventory, compliance_documents, etc. |
+| P0-4 | Convert tier3Migration.ts → migrations/007_tier3_features.sql | ⚠️ Planned | disease_predictions, iot_sensors, traceability_events, etc. |
+| P0-5 | Convert tier4Migration.ts → migrations/008_tier4_features.sql | ⚠️ Planned | ai_chat_sessions, marketplace_listings, wellness_scorecards, etc. |
+| P0-6 | Update render-start.sh to use migrate.ts for all migrations | ⚠️ Planned | Replace 4 individual TS migration calls with single migrate.js call |
+| P0-7 | Split seed-demo-data.sql into platform_required + demo layers | ⚠️ Planned | seeds/01_platform_required.sql + seeds/03_demo_data.sql |
+
+## ⚠️ Planned Items — Phase 1: Enterprise Hospital Network Foundation
+
+| # | Feature | Status | Notes |
+|---|---------|--------|-------|
+| P1-1 | hospital_networks + supporting tables in init.sql + migration | ⚠️ Planned | hospital_networks, hospital_network_members, animal_care_contexts, patient_data_consent, clinical_data_access_log |
+| P1-2 | HospitalNetworkService + routes | ✅ Done | HospitalNetworkService.ts + HospitalNetworkController.ts + 17 routes under /api/v1/hospital-networks + patient-consent routes |
+| P1-3 | corporate_admin + hospital_director roles — 4-file sync | ⚠️ Planned | PermissionService + PermissionContext + Navigation + App.tsx |
+| P1-4 | Hospital data isolation middleware | ⚠️ Planned | SQL-level scoping; all corporate_admin access auto-logged |
+| P1-5 | Corporate Admin — Hospital Network Management UI | ⚠️ Planned | NetworkDashboard, HospitalList, HospitalDetail, NetworkSettings pages |
+| P1-6 | Patient Consent Management UI (pet_owner) | ⚠️ Planned | 6-dimension granular consent, include_hospital_records explicit flag |
+| P1-7 | Demo hospital network seed data | ⚠️ Planned | DemoVetGroup + assign existing demo hospitals + corporate_admin demo user |
+
+### Architecture Decisions (Locked)
+- Farm `enterprises` table and `hospital_networks` are COMPLETELY SEPARATE — never merged
+- Hospital data: opt-in, private by default, isolation enforced at SQL level
+- Multiple networks: each (Apollo, NH1, TN Govt) registers independently
+- Corporate admin: direct access to own network, every access immutably audit-logged
+- Dual patient ID: `VC-DOG-26-00001` (platform) + `APOLLO-P-00423` (corporate)
+- Patient consent: 6-dimension granular, `include_hospital_records` defaults to `false`
 
 ---
 
 ## Recently Completed (last 10)
 
-1. ✅ Empty-state shortcuts — contextual navigation buttons across BookConsultation, MedicalRecords, WellnessPortal, AnimalTimeline, Dashboard (2026-04-08)
+1. ✅ Hospital Network 4-file permission sync — added `hospital_network_manage/view/audit`, `patient_consent_manage` permissions; nav items for Hospital Networks (admin) and Data Consent (pet_owner/farmer); stub pages created (2026-04-09)
+2. ✅ Empty-state shortcuts — contextual navigation buttons across BookConsultation, MedicalRecords, WellnessPortal, AnimalTimeline, Dashboard (2026-04-08)
 2. ✅ Fix Render deploy — HTTP port bound FIRST before DB connect (2026-04-07)
 3. ✅ render-start.sh — tighten timeouts: connectionTimeoutMillis 30000→15000, migrations 60→40s, seed 300→120s (2026-04-07)
 4. ✅ connectWithRetry() — 5 attempts × 10s for free-tier Render PostgreSQL (2026-04-06)

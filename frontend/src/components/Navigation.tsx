@@ -80,6 +80,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Animals & Health' },
     { id: 'write-review', label: t('nav.writeReview'), icon: '✍️', path: '/write-review',
       roles: ['pet_owner', 'farmer'], section: 'Animals & Health' },
+    { id: 'patient-consent', label: t('nav.dataConsent'), icon: '🔒', path: '/patient-consent',
+      roles: ['pet_owner', 'farmer'], section: 'Animals & Health' },
     { id: 'my-reviews', label: t('nav.myReviews'), icon: '⭐', path: '/doctor/reviews',
       roles: ['veterinarian'], section: 'Animals & Health' },
 
@@ -186,6 +188,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-holidays', label: 'Holiday Management', icon: '🎉', path: '/admin/holidays',
       roles: ['admin', 'veterinarian'], section: 'Administration' },
+    { id: 'hospital-networks', label: 'Hospital Networks', icon: '🌐', path: '/hospital-networks',
+      roles: ['admin'], section: 'Administration' },
 
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',

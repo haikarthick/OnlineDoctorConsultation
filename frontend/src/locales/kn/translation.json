@@ -114,6 +114,7 @@
     "certificateSettings": "ಪ್ರಮಾಣಪತ್ರ ಟೆಮ್ಪ್ಲೇಟ್",
     "hospitalMgmt": "ಆಸ್ಪತ್ರೆ ನಿರ್ವಹಣೆ",
     "cancellations": "ರದ್ದತಿಗಳು",
+    "dataConsent": "ಡೇಟಾ ಒಪ್ಪಿಗೆ",
     "sections": {
       "main": "ಮುಖ್ಯ",
       "consultations": "ಸಮಾಲೋಚನೆಗಳು",
@@ -5312,5 +5313,11 @@
     "autoNumberPrefixDesc": "e.g. VC for VC-2026-00001",
     "signatureRequired": "Require Digital Signature",
     "signatureRequiredDesc": "Force vets to upload signature before issuing"
+  },
+  "hospitalNetworks": {
+    "title": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್"
+  },
+  "patientConsent": {
+    "title": "ರೋಗಿಯ ಡೇಟಾ ಒಪ್ಪಿಗೆ"
   }
 }

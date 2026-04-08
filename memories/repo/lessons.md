@@ -138,3 +138,51 @@
 - **Context:** FindDoctor page used a hardcoded `formatTime12h()` helper, ignoring admin's time format setting.
 - **Lesson:** NEVER create local format helpers for time, date, or currency. Always import and use `formatSlotTime`, `formatDate`, `formatCurrency` from `useSettings()`.
 - **Apply to:** Every page that displays time slots, dates, prices, or durations
+
+---
+
+## 🔵 Database Script Architecture Lessons
+
+### LESSON-021 — TypeScript Migration Files Are the Wrong Layer for Schema Changes
+- **Context:** enterpriseMigration.ts, tier2/3/4Migration.ts are TypeScript scripts that create tables. They have no transactional tracking, can't be rolled back, can't be audited by a DBA, and are called via raw `node dist/...` with no guarantee of ordering.
+- **Lesson:** ALL schema changes MUST be pure `.sql` files in `backend/migrations/` tracked by `migrate.ts`. TypeScript migration scripts were a stopgap — convert them to numbered SQL migrations.
+- **Apply to:** Every new table, column, or constraint change
+
+### LESSON-022 — Three Sources of Schema Truth Is One Too Many
+- **Context:** New tables were added in three places: `docker/init.sql`, `tierXMigration.ts`, and `database.ts seedDefaultSettings()`. Fresh deploys required running all three in the right order. Conflicts caused silent errors.
+- **Lesson:** Single source of truth = `docker/init.sql` for baseline + `backend/migrations/NNN_name.sql` for incremental changes. `database.ts` safety ALTERs are belt-and-suspenders only — NOT the canonical definition.
+- **Apply to:** Every new feature that requires DB changes
+
+### LESSON-023 — Separate Mandatory Platform Data from Demo Data
+- **Context:** `seed-demo-data.sql` was one monolithic file mixing mandatory platform configuration (role permissions, admin user, service categories) with optional demo records (demo patients, appointments). Production environments should never have demo records but MUST have platform config.
+- **Lesson:** Two layers: `seeds/01_platform_required.sql` (always run, every environment) and `seeds/03_demo_data.sql` (dev/demo only, never prod).
+- **Apply to:** Any new seed data — always classify as mandatory or optional before adding
+
+### LESSON-024 — enterprise_members Table Was Missing from init.sql (Deployment Risk)
+- **Context:** `EnterpriseService.ts` runs SQL against `enterprise_members` table. The table was NEVER defined in `docker/init.sql`. Worked locally because enterpriseMigration.ts ran first. On a fresh Render deploy without the TS migration completing, any enterprise query would fail silently.
+- **Lesson:** After adding a TypeScript migration file, ALWAYS also add the table DDL to `docker/init.sql`. The canonical schema must be self-contained — never depend on TS migrations for table existence.
+- **Apply to:** Every new table ever added to the codebase
+
+---
+
+## 🔵 Hospital Network Architecture Decisions (Locked — 2026-04-08)
+
+### LESSON-025 — Farm Enterprises and Hospital Networks Are Completely Separate
+- **Context:** The existing `enterprises` table is farm-domain only (farms, zoos, breeding facilities, sanctuaries). Hospital networks are clinical-domain. Merging them would create compliance/audit problems and confuse data models.
+- **Lesson:** NEVER reuse `enterprises` for hospital networks. Use `hospital_networks` as a completely separate table hierarchy. Farm domain stays in `enterprises`, clinical domain in `hospital_networks`.
+- **Apply to:** All hospital network feature development
+
+### LESSON-026 — Hospital Patient Data Is Private by Default (Opt-In Only)
+- **Context:** In standard vet platform, doctors see all patient data across all patients. For hospital networks, this is a major compliance/legal risk — corporate patient records must not leak outside the network.
+- **Lesson:** `animal_care_contexts.visibility` defaults to `'private'`. Isolation enforced at SQL query level (not application logic). `include_hospital_records` boolean on consent record defaults to `false` even for "full history" consent.
+- **Apply to:** Every query that joins animals with medical records — always check hospital scope
+
+### LESSON-027 — Corporate Admin Has Direct Access But Every Action Is Immutably Logged
+- **Context:** Corporate admin needs direct access to all data in their own network (no approval workflow needed). But this creates audit compliance risk if access is not tracked.
+- **Lesson:** `corporate_admin` gets direct read access to own network data. But EVERY access to clinical records by corporate_admin (or anyone above patient's treating vet) is written to `clinical_data_access_log` — append-only, never deletable.
+- **Apply to:** Any query in HospitalNetworkService, any corporate_admin route
+
+### LESSON-028 — Dual Patient IDs: Platform VC-ID + Corporate Patient ID
+- **Context:** A patient in hospital network has two identities: platform-wide `VC-DOG-26-00001` and hospital-specific `APOLLO-P-00423`. Both must be searchable, displayable, and cross-referenceable.
+- **Lesson:** Use `animal_care_contexts` linking table: `animal_id` (FK to animals) + `hospital_network_id` + `platform_unique_id` (VC- format) + `corporate_patient_id` (network-defined format). Both IDs must be displayed in clinical contexts.
+- **Apply to:** Any clinical UI showing patient identity in hospital context
