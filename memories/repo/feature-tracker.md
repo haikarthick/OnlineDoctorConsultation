@@ -106,6 +106,7 @@
 | P1-2 | HospitalNetworkService + routes | ✅ Done | HospitalNetworkService.ts + HospitalNetworkController.ts + 17 routes |
 | P1-3 | corporate_admin + hospital_director roles — 4-file sync | ✅ Done | Permissions + navigation + App.tsx synced (2026-04-09) |
 | P1-4 | Hospital data isolation middleware | ✅ Done | hospitalDataIsolation.ts — checkAnimalAccess, requireAnimalAccess middleware, logClinicalAccess. Applied to /animals/:id, /consultations/animal/:id, /prescriptions/animal/:id, /vaccinations/animal/:id. Access-check endpoint added (2026-04-08) |
+| P1-6 | 6-digit VC-IDs + per-network patient ID system | ✅ Done | VC-IDs upgraded to 6-digit (VC-DOG-26-000001). id_prefix on hospital_networks. network_patient_id_sequences table. enrollAnimal()/getNetworkPatients() in service. 3 new routes. Frontend form + badge. Migration 010. |
 | P1-5 | Corporate Admin — Hospital Network Management UI | ✅ Done | HospitalNetworks.tsx — 3-tab UI: Networks list/stats/approve, Network Detail (dashboard+hospitals+members), Audit Tab fully implemented (2026-04-09) |
 | P1-6 | Patient Consent Management UI (pet_owner + farmer) | ✅ Done | PatientConsent.tsx — 2-panel layout, 6-dim consents, CSS toggles, presets (2026-04-08) |
 | P1-7 | Demo hospital network seed data | ✅ Done | DemoVetGroup + demo hospitals + corporate_admin in seed-demo-data.sql |
@@ -122,7 +123,18 @@
 
 ## Recently Completed (last 10)
 
-1. ✅ P0 DB Cleanup (2026-04-09) — commit 76d9e20
+1. ✅ Animal Unique ID — 6-digit upgrade + Per-network patient ID series (2026-04-08)
+   - Platform VC-IDs upgraded: VC-DOG-26-000001 (was 5-digit)
+   - Per-network IDs: PREFIX-DOG-26-000042 (e.g. APOLLO-DOG-26-000042)
+   - New table: network_patient_id_sequences (race-safe per-network/species/year counter)
+   - hospital_networks.id_prefix VARCHAR(10) added (init.sql + migration 010 + database.ts safety net)
+   - HospitalNetworkService: generateNetworkPatientId(), enrollAnimal(), getNetworkPatients()
+   - 3 new routes: POST /hospital-networks/:id/enroll-animal, GET .../patients, GET /animals/:id/care-contexts
+   - HospitalNetworks.tsx: id_prefix field in network creation form + badge on cards
+   - database.ts backfill: re-generates old 5-digit IDs to 6-digit on server startup
+   - All 5 locale files: idPrefix, networkPatientId, enrollPatient, enrolledPatients keys
+   - seed-demo-data.sql: demo network gets id_prefix = 'DEMO'
+2. ✅ P0 DB Cleanup (2026-04-09) — commit 76d9e20
    - Deleted 4 dead TS migration files (enterpriseMigration.ts, tier2-4Migration.ts) — replaced by SQL files 005-008
    - Added render-start.sh Step 1b: loads 01_platform_required.sql (admin + settings + permissions) on every deploy
    - Fixed seed-demo-data.ts stale warning pointing to old TS migration commands
