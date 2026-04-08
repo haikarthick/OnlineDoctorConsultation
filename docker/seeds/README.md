@@ -75,7 +75,7 @@ docker compose run --rm migrate
 `render-start.sh` automatically handles seeding:
 1. `docker/init.sql` → applied via inline node script (Step 0)
 2. `backend/migrations/*.sql` → applied via `migrate.js` (Step 1)
-3. Demo data → applied via `seed-demo-data.js` ONLY if `VET_PROFILE_COUNT = 0` (Step 2)
+3. `docker/seeds/01_platform_required.sql` → applied via inline node script (Step 1b)
+4. Demo data → applied via `seed-demo-data.js` ONLY if `VET_PROFILE_COUNT = 0` (Step 2)
 
-`01_platform_required.sql` data is embedded in `seed-demo-data.sql` via `ON CONFLICT DO NOTHING`.  
-For a clean production-only deploy, run `01_platform_required.sql` separately and set `FORCE_RESEED=false`.
+Steps 1-3 are all idempotent (`ON CONFLICT DO NOTHING` / `IF NOT EXISTS`) — safe to re-run on every deploy.

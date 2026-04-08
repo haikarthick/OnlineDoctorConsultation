@@ -68,11 +68,39 @@ fi
 echo ""
 
 # Step 1: Run database migrations using the migrate runner (idempotent — safe to re-run)
-# This replaces the old individual TS migration calls (enterpriseMigration, tier2/3/4Migration)
 # The migrate runner tracks applied migrations in _migrations table, never re-runs a file.
 echo "━━━ Running database migrations ━━━"
 timeout 60 node dist/utils/migrate.js 2>&1 || echo "  (migration runner warning — continuing)"
 echo "✓ Migrations complete"
+
+# Step 1b: Load mandatory platform seed data (admin user, settings, permissions)
+# This is idempotent (ON CONFLICT DO NOTHING) — safe to re-run on every deploy.
+echo "━━━ Loading platform required data ━━━"
+timeout 45 node -e "
+const { Pool } = require('pg');
+const fs = require('fs');
+const path = require('path');
+async function main() {
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000, min: 0, max: 2 });
+  const client = await pool.connect();
+  try {
+    const schema = process.env.DB_SCHEMA || 'public';
+    await client.query('SET search_path TO ' + schema + ', public');
+    const sqlPath = path.join(process.cwd(), '..', 'docker', 'seeds', '01_platform_required.sql');
+    if (!fs.existsSync(sqlPath)) { console.log('  01_platform_required.sql not found — skipping'); return; }
+    const sql = fs.readFileSync(sqlPath, 'utf8');
+    await client.query(sql);
+    console.log('  ✓ Platform required data loaded (' + schema + ')');
+  } catch (e) {
+    console.log('  ⚠ Platform required seed warning:', e.message.substring(0, 120));
+  } finally {
+    client.release();
+    await pool.end();
+  }
+}
+main();
+" 2>&1 || echo "  (platform seed warning — continuing)"
+echo ""
 
 # Step 2: Seed demo data if core data is missing (vet_profiles table empty)
 # Users are created by fixDemoPasswords at server start, but the rest

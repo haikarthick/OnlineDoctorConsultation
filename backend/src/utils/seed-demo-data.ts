@@ -43,10 +43,7 @@ async function run() {
     console.log(`  ✓ ${tableRows[0].cnt} tables found in database`);
     if (tableRows[0].cnt < 50) {
       console.log('  ⚠ Expected ~62 tables. Run migrations first:');
-      console.log('    npx ts-node src/utils/enterpriseMigration.ts');
-      console.log('    npx ts-node src/utils/tier2Migration.ts');
-      console.log('    npx ts-node src/utils/tier3Migration.ts');
-      console.log('    npx ts-node src/utils/tier4Migration.ts');
+      console.log('    node dist/utils/migrate.js');
     }
 
     // 2. Execute the SQL seed file section by section
