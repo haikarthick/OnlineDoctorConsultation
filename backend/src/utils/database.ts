@@ -241,6 +241,12 @@ class PostgresDatabase {
       `ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS certificate_types TEXT[] DEFAULT '{}'`
     ).catch(() => {});
 
+    // Add new farm cert columns to vet_certificates (safety net for existing tables)
+    await Promise.all([
+      this.pool.query(`ALTER TABLE vet_certificates ADD COLUMN IF NOT EXISTS movement_details JSONB`).catch(() => {}),
+      this.pool.query(`ALTER TABLE vet_certificates ADD COLUMN IF NOT EXISTS herd_details JSONB`).catch(() => {}),
+    ]);
+
     // Ensure enterprise-related tables exist FIRST (vet_certificates has a FK to enterprises)
     await this.pool.query(
       `CREATE TABLE IF NOT EXISTS enterprises (
@@ -273,6 +279,8 @@ class PostgresDatabase {
         travel_details JSONB,
         breeding_details JSONB,
         valuation_details JSONB,
+        movement_details JSONB,
+        herd_details JSONB,
         issued_at TIMESTAMP,
         valid_until DATE,
         notes TEXT,

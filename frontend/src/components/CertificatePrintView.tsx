@@ -28,6 +28,22 @@ export interface CertificatePrintData {
     [k: string]: any
   }
   valuationDetails?: { amount?: string | number; basis?: string; [k: string]: any }
+  movementDetails?: {
+    fromLocation?: string
+    toLocation?: string
+    vehicleNumber?: string
+    transportDate?: string
+    driverName?: string
+    purpose?: string
+    [k: string]: any
+  }
+  herdDetails?: {
+    groupName?: string
+    animalCount?: number | string
+    species?: string
+    purpose?: string
+    [k: string]: any
+  }
   // Animal / patient
   animalName?: string
   animalSpecies?: string
@@ -244,6 +260,8 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
   const isTravelRelated = ['fitness_to_travel', 'pre_travel'].includes(cert.certificateType)
   const isBreedingRelated = ['breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation'].includes(cert.certificateType)
   const isValuation = cert.certificateType === 'animal_valuation'
+  const isMovement = ['movement_permit', 'slaughter_fitness', 'export_health_certificate'].includes(cert.certificateType)
+  const isHerd = cert.certificateType === 'herd_health_certificate'
 
   return (
     <div className="cert-overlay" ref={overlayRef} onClick={handleOverlayClick} id="cert-print-root">
@@ -485,6 +503,88 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
                   <>
                     <span className="cert-kv-key">{t('certificateWriter.valuationBasis')}:</span>
                     <span className="cert-kv-val">{cert.valuationDetails.basis}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Type-specific: Movement ── */}
+          {isMovement && cert.movementDetails && (
+            <div className="cert-section">
+              <div className="cert-section-header">
+                <span>🚛</span> {t('certificatePrint.movementDetails')}
+              </div>
+              <div className="cert-kv-grid">
+                {cert.movementDetails.fromLocation && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.movementFrom')}:</span>
+                    <span className="cert-kv-val">{cert.movementDetails.fromLocation}</span>
+                  </>
+                )}
+                {cert.movementDetails.toLocation && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.movementTo')}:</span>
+                    <span className="cert-kv-val">{cert.movementDetails.toLocation}</span>
+                  </>
+                )}
+                {cert.movementDetails.transportDate && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.transportDate')}:</span>
+                    <span className="cert-kv-val">{formatDate(cert.movementDetails.transportDate)}</span>
+                  </>
+                )}
+                {cert.movementDetails.vehicleNumber && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.vehicleNumber')}:</span>
+                    <span className="cert-kv-val">{cert.movementDetails.vehicleNumber}</span>
+                  </>
+                )}
+                {cert.movementDetails.driverName && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.driverName')}:</span>
+                    <span className="cert-kv-val">{cert.movementDetails.driverName}</span>
+                  </>
+                )}
+                {cert.movementDetails.purpose && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.movementPurpose')}:</span>
+                    <span className="cert-kv-val">{cert.movementDetails.purpose}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Type-specific: Herd ── */}
+          {isHerd && cert.herdDetails && (
+            <div className="cert-section">
+              <div className="cert-section-header">
+                <span>🐄</span> {t('certificatePrint.herdDetails')}
+              </div>
+              <div className="cert-kv-grid">
+                {cert.herdDetails.groupName && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.herdGroupName')}:</span>
+                    <span className="cert-kv-val">{cert.herdDetails.groupName}</span>
+                  </>
+                )}
+                {cert.herdDetails.animalCount && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.herdAnimalCount')}:</span>
+                    <span className="cert-kv-val">{cert.herdDetails.animalCount}</span>
+                  </>
+                )}
+                {cert.herdDetails.species && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.herdSpecies')}:</span>
+                    <span className="cert-kv-val">{cert.herdDetails.species}</span>
+                  </>
+                )}
+                {cert.herdDetails.purpose && (
+                  <>
+                    <span className="cert-kv-key">{t('certificateWriter.herdPurpose')}:</span>
+                    <span className="cert-kv-val">{cert.herdDetails.purpose}</span>
                   </>
                 )}
               </div>

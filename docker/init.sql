@@ -1432,6 +1432,8 @@ CREATE TABLE IF NOT EXISTS vet_certificates (
   travel_details JSONB,
   breeding_details JSONB,
   valuation_details JSONB,
+  movement_details JSONB,
+  herd_details JSONB,
   issued_at TIMESTAMP,
   valid_until DATE,
   notes TEXT,

@@ -37,6 +37,8 @@ const CERT_TYPES = [
   'pre_travel', 'sterilization', 'treatment', 'animal_injury', 'post_mortem',
   'breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation',
   'fitness_for_sale', 'animal_valuation',
+  // Farm/enterprise types
+  'movement_permit', 'herd_health_certificate', 'slaughter_fitness', 'export_health_certificate',
 ]
 
 const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {

@@ -19,7 +19,11 @@ const CERT_TYPES_PET = [
 
 const CERT_TYPES_FARM = [
   'breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation', 'animal_valuation',
+  'movement_permit', 'herd_health_certificate', 'slaughter_fitness', 'export_health_certificate',
 ]
+
+// Herd-level certs: animal selection optional (cert covers a group)
+const CERT_TYPES_HERD = ['herd_health_certificate']
 
 interface VaccineRow {
   vaccine: string; batchNo: string; dateAdministered: string; nextDue: string; manufacturer: string
@@ -88,6 +92,18 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
   // Valuation-specific
   const [valuationAmount, setValuationAmount] = useState('')
   const [valuationBasis, setValuationBasis] = useState('')
+  // Movement-specific (movement_permit, slaughter_fitness, export_health_certificate)
+  const [movementFrom, setMovementFrom] = useState('')
+  const [movementTo, setMovementTo] = useState('')
+  const [vehicleNumber, setVehicleNumber] = useState('')
+  const [transportDate, setTransportDate] = useState('')
+  const [driverName, setDriverName] = useState('')
+  const [movementPurpose, setMovementPurpose] = useState('')
+  // Herd-specific (herd_health_certificate)
+  const [herdGroupName, setHerdGroupName] = useState('')
+  const [herdAnimalCount, setHerdAnimalCount] = useState('')
+  const [herdPurpose, setHerdPurpose] = useState('')
+  const [herdSpecies, setHerdSpecies] = useState('')
 
   // Preview
   const [showPreview, setShowPreview] = useState(false)
@@ -98,6 +114,8 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
   const isTravelRelated = ['fitness_to_travel', 'pre_travel'].includes(certType)
   const isBreedingRelated = ['breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation'].includes(certType)
   const isValuation = certType === 'animal_valuation'
+  const isMovement = ['movement_permit', 'slaughter_fitness', 'export_health_certificate'].includes(certType)
+  const isHerd = CERT_TYPES_HERD.includes(certType)
 
   // ── Load edit data ──
   useEffect(() => {
@@ -132,6 +150,20 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
         if (cert.valuationDetails) {
           setValuationAmount(String(cert.valuationDetails.amount || ''))
           setValuationBasis(cert.valuationDetails.basis || '')
+        }
+        if (cert.movementDetails) {
+          setMovementFrom(cert.movementDetails.fromLocation || '')
+          setMovementTo(cert.movementDetails.toLocation || '')
+          setVehicleNumber(cert.movementDetails.vehicleNumber || '')
+          setTransportDate(cert.movementDetails.transportDate ? cert.movementDetails.transportDate.slice(0, 10) : '')
+          setDriverName(cert.movementDetails.driverName || '')
+          setMovementPurpose(cert.movementDetails.purpose || '')
+        }
+        if (cert.herdDetails) {
+          setHerdGroupName(cert.herdDetails.groupName || '')
+          setHerdAnimalCount(String(cert.herdDetails.animalCount || ''))
+          setHerdPurpose(cert.herdDetails.purpose || '')
+          setHerdSpecies(cert.herdDetails.species || '')
         }
         // Load owner info
         if (cert.petOwnerId) setSelectedOwnerId(cert.petOwnerId)
@@ -171,13 +203,18 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
     return () => clearTimeout(t_)
   }, [ownerSearch, searchOwners])
 
-  // ── Load animals when owner selected ──
+  // ── Load animals when owner OR enterprise selected ──
   useEffect(() => {
-    if (!selectedOwnerId) { setAnimals([]); return }
+    const isFarmCert = CERT_TYPES_FARM.includes(certType)
+    const useEnterprise = isFarmCert && selectedEnterpriseId
+    if (!useEnterprise && !selectedOwnerId) { setAnimals([]); return }
     const loadAnimals = async () => {
       try {
         setLoadingAnimals(true)
-        const res = await apiService.listAnimals({ ownerId: selectedOwnerId, limit: 100 })
+        const params = useEnterprise
+          ? { enterpriseId: selectedEnterpriseId, limit: 200 }
+          : { ownerId: selectedOwnerId, limit: 100 }
+        const res = await apiService.listAnimals(params)
         const list = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
         setAnimals(list.map((a: any) => ({ id: a.id, name: a.name, species: a.species, breed: a.breed, uniqueId: a.uniqueId || a.unique_id })))
         if (list.length === 1 && !selectedAnimalId) setSelectedAnimalId(list[0].id)
@@ -185,7 +222,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
       finally { setLoadingAnimals(false) }
     }
     loadAnimals()
-  }, [selectedOwnerId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedOwnerId, selectedEnterpriseId, certType]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Load recent consultations for this owner ──
   useEffect(() => {
@@ -233,6 +270,12 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
     }
     if (isValuation && valuationAmount) {
       payload.valuationDetails = { amount: valuationAmount, basis: valuationBasis }
+    }
+    if (isMovement && (movementFrom || movementTo)) {
+      payload.movementDetails = { fromLocation: movementFrom, toLocation: movementTo, vehicleNumber, transportDate, driverName, purpose: movementPurpose }
+    }
+    if (isHerd && (herdGroupName || herdAnimalCount)) {
+      payload.herdDetails = { groupName: herdGroupName, animalCount: herdAnimalCount ? Number(herdAnimalCount) : undefined, species: herdSpecies, purpose: herdPurpose }
     }
     return payload
   }
@@ -327,6 +370,8 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
         travelDetails: isTravelRelated && (destination || departureDate) ? { destination, departureDate, airline } : undefined,
         breedingDetails: isBreedingRelated && (breedingSoundness || pregnancyStatus) ? { soundness: breedingSoundness, pregnancyStatus, estimatedGestation } : undefined,
         valuationDetails: isValuation && valuationAmount ? { amount: valuationAmount, basis: valuationBasis } : undefined,
+        movementDetails: isMovement && (movementFrom || movementTo) ? { fromLocation: movementFrom, toLocation: movementTo, vehicleNumber, transportDate, driverName, purpose: movementPurpose } : undefined,
+        herdDetails: isHerd && (herdGroupName || herdAnimalCount) ? { groupName: herdGroupName, animalCount: herdAnimalCount ? Number(herdAnimalCount) : undefined, species: herdSpecies, purpose: herdPurpose } : undefined,
       }
       setPreviewData(preview)
       setShowPreview(true)
@@ -475,10 +520,12 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
             )}
           </div>
 
-          {/* Animal select */}
-          {selectedOwnerId && (
+          {/* Animal select — shown when owner selected OR enterprise selected for farm certs */}
+          {(selectedOwnerId || (CERT_TYPES_FARM.includes(certType) && selectedEnterpriseId)) && (
             <div className="module-form-group">
-              <label className="module-label">{t('certificateWriter.selectAnimal')} *</label>
+              <label className="module-label">
+                {t('certificateWriter.selectAnimal')} {isHerd ? `(${t('certificateWriter.optionalForHerd')})` : '*'}
+              </label>
               {loadingAnimals ? (
                 <div style={{ fontSize: 13, color: '#718096' }}>{t('common.loading')}</div>
               ) : animals.length === 0 ? (
@@ -489,7 +536,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                   value={selectedAnimalId}
                   onChange={e => setSelectedAnimalId(e.target.value)}
                 >
-                  <option value="">{t('certificateWriter.selectAnimal')}</option>
+                  <option value="">{isHerd ? `— ${t('certificateWriter.optionalForHerd')} —` : t('certificateWriter.selectAnimal')}</option>
                   {animals.map(a => (
                     <option key={a.id} value={a.id}>
                       {a.uniqueId ? `[${a.uniqueId}] ` : ''}{a.name} ({a.species}{a.breed ? ', ' + a.breed : ''})
@@ -500,7 +547,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
             </div>
           )}
 
-          {!selectedOwnerId && (
+          {!selectedOwnerId && !(CERT_TYPES_FARM.includes(certType) && selectedEnterpriseId) && (
             <p className="cw-hint">ℹ {t('certificateWriter.selectOwnerFirst')}</p>
           )}
 
@@ -536,7 +583,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           <div className="cw-next-bar">
             <button
               className="module-btn primary"
-              disabled={!certType || !selectedOwnerId || !selectedAnimalId}
+              disabled={!certType || !selectedOwnerId || (!isHerd && !selectedAnimalId)}
               onClick={() => setStep(2)}
             >
               {t('certificateWriter.next')} →
@@ -673,6 +720,95 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
             </div>
           )}
 
+          {/* Movement-specific (movement_permit, slaughter_fitness, export_health_certificate) */}
+          {isMovement && (
+            <div className="module-form-group">
+              <label className="module-label">🚛 {t('certificateWriter.movementDetails')}</label>
+              <div className="module-form-row">
+                <div className="module-form-group">
+                  <label className="module-label">{t('certificateWriter.movementFrom')} *</label>
+                  <input className="module-input" value={movementFrom} onChange={e => setMovementFrom(e.target.value)} placeholder="e.g. Farm Name, Village, District" />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('certificateWriter.movementTo')} *</label>
+                  <input className="module-input" value={movementTo} onChange={e => setMovementTo(e.target.value)} placeholder="e.g. Slaughterhouse, Export Port, Market" />
+                </div>
+              </div>
+              <div className="module-form-row-3">
+                <div className="module-form-group">
+                  <label className="module-label">{t('certificateWriter.vehicleNumber')}</label>
+                  <input className="module-input" value={vehicleNumber} onChange={e => setVehicleNumber(e.target.value)} placeholder="e.g. TN 01 AB 1234" />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('certificateWriter.transportDate')}</label>
+                  <input className="module-input" type="date" value={transportDate} onChange={e => setTransportDate(e.target.value)} />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('certificateWriter.driverName')}</label>
+                  <input className="module-input" value={driverName} onChange={e => setDriverName(e.target.value)} placeholder="Driver / Transporter name" />
+                </div>
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">{t('certificateWriter.movementPurpose')}</label>
+                <select className="module-input" value={movementPurpose} onChange={e => setMovementPurpose(e.target.value)}>
+                  <option value="">— Select purpose —</option>
+                  <option value="Sale">Sale</option>
+                  <option value="Slaughter">Slaughter</option>
+                  <option value="Export">Export</option>
+                  <option value="Breeding">Breeding</option>
+                  <option value="Treatment">Treatment / Veterinary Care</option>
+                  <option value="Exhibition">Exhibition / Show</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Herd-specific (herd_health_certificate) */}
+          {isHerd && (
+            <div className="module-form-group">
+              <label className="module-label">🐄 {t('certificateWriter.herdDetails')}</label>
+              <div className="module-form-row">
+                <div className="module-form-group">
+                  <label className="module-label">{t('certificateWriter.herdGroupName')} *</label>
+                  <input className="module-input" value={herdGroupName} onChange={e => setHerdGroupName(e.target.value)} placeholder="e.g. Block A Cattle, Pen 3 Sheep" />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('certificateWriter.herdAnimalCount')} *</label>
+                  <input className="module-input" type="number" min="1" value={herdAnimalCount} onChange={e => setHerdAnimalCount(e.target.value)} placeholder="Total number of animals" />
+                </div>
+              </div>
+              <div className="module-form-row">
+                <div className="module-form-group">
+                  <label className="module-label">{t('certificateWriter.herdSpecies')}</label>
+                  <select className="module-input" value={herdSpecies} onChange={e => setHerdSpecies(e.target.value)}>
+                    <option value="">— Select species —</option>
+                    <option value="Cattle">Cattle / Bovine</option>
+                    <option value="Sheep">Sheep</option>
+                    <option value="Goat">Goat</option>
+                    <option value="Pig">Pig / Swine</option>
+                    <option value="Poultry">Poultry</option>
+                    <option value="Horse">Horse / Equine</option>
+                    <option value="Mixed">Mixed Species</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('certificateWriter.herdPurpose')}</label>
+                  <select className="module-input" value={herdPurpose} onChange={e => setHerdPurpose(e.target.value)}>
+                    <option value="">— Select purpose —</option>
+                    <option value="Dairy">Dairy Production</option>
+                    <option value="Meat">Meat Production</option>
+                    <option value="Breeding">Breeding Stock</option>
+                    <option value="Draft">Draft / Work Animals</option>
+                    <option value="Mixed">Mixed Purpose</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Common clinical fields */}
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.clinicalFindings')}</label>
@@ -763,7 +899,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
               <button
                 className="module-btn primary"
                 onClick={handleIssue}
-                disabled={submitting || !certType || !selectedAnimalId || !selectedOwnerId}
+                disabled={submitting || !certType || (!isHerd && !selectedAnimalId) || !selectedOwnerId}
               >
                 {submitting ? t('common.saving') : `✅ ${t('certificateWriter.issueNow')}`}
               </button>

@@ -1,12 +1,14 @@
 import database from '../utils/database';
 import logger from '../utils/logger';
 
-// 14 valid certificate types
+// 18 valid certificate types (14 original + 4 new farm/enterprise types)
 const VALID_CERT_TYPES = [
   'health_certificate', 'fitness_to_travel', 'rabies_vaccination', 'vaccination_record',
   'pre_travel', 'sterilization', 'treatment', 'animal_injury', 'post_mortem',
   'breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation',
   'fitness_for_sale', 'animal_valuation',
+  // Farm/enterprise-specific types
+  'movement_permit', 'herd_health_certificate', 'slaughter_fitness', 'export_health_certificate',
 ];
 
 export interface CertificateData {
@@ -25,6 +27,8 @@ export interface CertificateData {
   travelDetails?: object;
   breedingDetails?: object;
   valuationDetails?: object;
+  movementDetails?: object;  // farm: fromLocation, toLocation, vehicleNumber, transportDate, driverName
+  herdDetails?: object;       // farm: groupName, animalCount, species, purpose, animalIds
   validUntil?: string;
   notes?: string;
 }
@@ -65,13 +69,13 @@ class CertificateService {
          pet_owner_id, animal_id, consultation_id, booking_id, enterprise_id,
          examination_date, clinical_findings, diagnosis, treatment_summary,
          recommendations, vaccination_details, travel_details, breeding_details,
-         valuation_details, valid_until, notes
+         valuation_details, movement_details, herd_details, valid_until, notes
        ) VALUES (
          gen_random_uuid(), $1, $2, 'draft', $3,
          $4, $5, $6, $7, $8,
          $9, $10, $11, $12,
          $13, $14, $15, $16,
-         $17, $18, $19
+         $17, $18, $19, $20, $21
        )
        RETURNING *`,
       [
@@ -86,6 +90,8 @@ class CertificateService {
         data.travelDetails ? JSON.stringify(data.travelDetails) : null,
         data.breedingDetails ? JSON.stringify(data.breedingDetails) : null,
         data.valuationDetails ? JSON.stringify(data.valuationDetails) : null,
+        data.movementDetails ? JSON.stringify(data.movementDetails) : null,
+        data.herdDetails ? JSON.stringify(data.herdDetails) : null,
         data.validUntil || null, data.notes || null,
       ]
     );
@@ -121,6 +127,8 @@ class CertificateService {
     setField('travel_details', data.travelDetails ? JSON.stringify(data.travelDetails) : undefined);
     setField('breeding_details', data.breedingDetails ? JSON.stringify(data.breedingDetails) : undefined);
     setField('valuation_details', data.valuationDetails ? JSON.stringify(data.valuationDetails) : undefined);
+    setField('movement_details', data.movementDetails ? JSON.stringify(data.movementDetails) : undefined);
+    setField('herd_details', data.herdDetails ? JSON.stringify(data.herdDetails) : undefined);
     if (data.animalId !== undefined) setField('animal_id', data.animalId);
     if (data.petOwnerId !== undefined) setField('pet_owner_id', data.petOwnerId);
     if (data.consultationId !== undefined) setField('consultation_id', data.consultationId);
@@ -386,6 +394,8 @@ class CertificateService {
       travelDetails: r.travel_details,
       breedingDetails: r.breeding_details,
       valuationDetails: r.valuation_details,
+      movementDetails: r.movement_details,
+      herdDetails: r.herd_details,
       issuedAt: r.issued_at,
       validUntil: r.valid_until,
       notes: r.notes,
