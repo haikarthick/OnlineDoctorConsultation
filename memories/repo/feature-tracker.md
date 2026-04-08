@@ -74,7 +74,7 @@
 | AI Copilot | ✅ | |
 | Vet Hospitals | ✅ | |
 | Inpatient Search | ✅ | SQL columns verified against init.sql |
-| Vet Certificates | ✅ | |
+| Vet Certificates | ✅ | Farm extension: 4 new farm types + movement/herd detail fields (2026-04-09) |
 
 ## Admin Module
 
@@ -122,7 +122,15 @@
 
 ## Recently Completed (last 10)
 
-1. ✅ Animal Unique ID (VC-{SPE}-{YY}-{NNNNN}) — full system complete (2026-04-09)
+1. ✅ Certificate Farm Extension (2026-04-09)
+   - 4 new farm cert types: movement_permit, herd_health_certificate, slaughter_fitness, export_health_certificate
+   - CertificateService.ts: new types in VALID_CERT_TYPES + movementDetails/herdDetails JSONB support
+   - CertificateWriter.tsx: enterprise animals loading (by enterpriseId when farm cert selected), movement fields UI, herd fields UI, herd certs allow optional animal
+   - CertificatePrintView.tsx: movement + herd detail sections rendered
+   - VetCertificates.tsx: 4 new types in filter dropdown
+   - database.ts: ALTER TABLE safety nets for movement_details + herd_details columns
+   - All 5 locale files: new cert type labels + all new field labels
+2. ✅ Animal Unique ID (VC-{SPE}-{YY}-{NNNNN}) — full system complete (2026-04-09)
    - database.ts: backfill for all existing animals without VC-IDs on server startup
    - PrescriptionService.ts: animalUniqueId in all prescription listing queries
    - MarketplaceService.ts: JOIN animals on linked_animal_id → animal_unique_id in listings
