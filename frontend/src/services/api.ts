@@ -2130,6 +2130,11 @@ class ApiService {
     return response.data
   }
 
+
+  async checkAnimalAccess(animalId: string) {
+    const response = await this.client.get(`/animals/${animalId}/access-check`)
+    return response.data
+  }
   // ─── Hospital Networks ──────────────────────────────────────────
   async listHospitalNetworks(filters: { isApproved?: boolean; isActive?: boolean } = {}) {
     const response = await this.client.get('/hospital-networks', { params: filters })
@@ -2192,4 +2197,5 @@ class ApiService {
 }
 export const apiService = new ApiService()
 export default apiService
+
 

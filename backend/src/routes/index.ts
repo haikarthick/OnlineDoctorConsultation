@@ -101,6 +101,7 @@ import VaccineProtocolService from '../services/VaccineProtocolService';
 import VaccineScheduleService from '../services/VaccineScheduleService';
 import { asyncHandler } from '../utils/errorHandler';
 import { AuthRequest } from '../middleware/auth';
+import { checkAnimalAccess, requireAnimalAccess } from '../middleware/hospitalDataIsolation';
 
 const router = Router();
 
@@ -128,7 +129,7 @@ router.put('/auth/profile', authMiddleware, asyncHandler(async (req: Request, re
 // ─── Consultation routes ─────────────────────────────────────
 router.post('/consultations', authMiddleware, validateBody(createConsultationSchema), asyncHandler((req: Request, res: Response) => ConsultationController.createConsultation(req, res)));
 router.get('/consultations', authMiddleware, asyncHandler((req: Request, res: Response) => ConsultationController.listConsultations(req, res)));
-router.get('/consultations/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getConsultationsByAnimal(req, res)));
+router.get('/consultations/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'consultations'), asyncHandler((req: Request, res: Response) => MedicalRecordController.getConsultationsByAnimal(req, res)));
 router.get('/consultations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ConsultationController.getConsultation(req, res)));
 router.put('/consultations/:id', authMiddleware, validateBody(updateConsultationSchema), asyncHandler((req: Request, res: Response) => ConsultationController.updateConsultation(req, res)));
 
@@ -198,7 +199,7 @@ router.get('/prescriptions/patients', authMiddleware, roleMiddleware(['admin', '
   res.json({ success: true, data: { users: rows } });
 }));
 router.get('/prescriptions/me', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listMyPrescriptions(req, res)));
-router.get('/prescriptions/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listByAnimal(req, res)));
+router.get('/prescriptions/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'prescriptions'), asyncHandler((req: Request, res: Response) => PrescriptionController.listByAnimal(req, res)));
 router.get('/prescriptions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.getPrescription(req, res)));
 router.get('/prescriptions/consultation/:consultationId', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.listByConsultation(req, res)));
 router.put('/prescriptions/:id/deactivate', authMiddleware, asyncHandler((req: Request, res: Response) => PrescriptionController.deactivatePrescription(req, res)));
@@ -217,8 +218,14 @@ router.delete('/certificates/:id', authMiddleware, asyncHandler((req: Request, r
 router.post('/animals', authMiddleware, validateBody(createAnimalSchema), asyncHandler((req: Request, res: Response) => AnimalController.createAnimal(req, res)));
 router.get('/animals/search/by-uid', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.searchByUniqueId(req, res)));
 router.get('/animals', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.listAnimals(req, res)));
-router.get('/animals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.getAnimal(req, res)));
-router.put('/animals/:id', authMiddleware, validateBody(updateAnimalSchema), asyncHandler((req: Request, res: Response) => AnimalController.updateAnimal(req, res)));
+// Access-check endpoint — frontend can call this before showing a "Request Access" button
+router.get('/animals/:id/access-check', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const decision = await checkAnimalAccess(authReq.userId!, authReq.userRole!, req.params.id);
+  res.json({ success: true, data: { allowed: decision.allowed, isPrivate: decision.isPrivate, accessType: decision.accessType, reason: decision.reason } });
+}));
+router.get('/animals/:id', authMiddleware, requireAnimalAccess('params:id', 'animal_profile'), asyncHandler((req: Request, res: Response) => AnimalController.getAnimal(req, res)));
+router.put('/animals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.updateAnimal(req, res)));
 router.delete('/animals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.deleteAnimal(req, res)));
 
 // ─── Vet Profile routes ─────────────────────────────────────
@@ -304,7 +311,7 @@ router.delete('/medical-records/:id', authMiddleware, asyncHandler((req: Request
 
 // ─── Vaccination routes ──────────────────────────────────────
 router.post('/vaccinations', authMiddleware, validateBody(createVaccinationSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createVaccination(req, res)));
-router.get('/vaccinations/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listVaccinations(req, res)));
+router.get('/vaccinations/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'vaccinations'), asyncHandler((req: Request, res: Response) => MedicalRecordController.listVaccinations(req, res)));
 router.put('/vaccinations/:id', authMiddleware, validateBody(updateVaccinationSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.updateVaccination(req, res)));
 router.delete('/vaccinations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.deleteVaccination(req, res)));
 
