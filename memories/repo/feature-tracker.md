@@ -102,13 +102,13 @@
 
 | # | Feature | Status | Notes |
 |---|---------|--------|-------|
-| P1-1 | hospital_networks + supporting tables in init.sql + migration | ⚠️ Planned | hospital_networks, hospital_network_members, animal_care_contexts, patient_data_consent, clinical_data_access_log |
-| P1-2 | HospitalNetworkService + routes | ✅ Done | HospitalNetworkService.ts + HospitalNetworkController.ts + 17 routes under /api/v1/hospital-networks + patient-consent routes |
-| P1-3 | corporate_admin + hospital_director roles — 4-file sync | ⚠️ Planned | PermissionService + PermissionContext + Navigation + App.tsx |
+| P1-1 | hospital_networks + supporting tables in init.sql + migration | ✅ Done | 6 tables added to init.sql + migration 009 |
+| P1-2 | HospitalNetworkService + routes | ✅ Done | HospitalNetworkService.ts + HospitalNetworkController.ts + 17 routes |
+| P1-3 | corporate_admin + hospital_director roles — 4-file sync | ✅ Done | Permissions + navigation + App.tsx synced (2026-04-09) |
 | P1-4 | Hospital data isolation middleware | ⚠️ Planned | SQL-level scoping; all corporate_admin access auto-logged |
-| P1-5 | Corporate Admin — Hospital Network Management UI | ✅ Done | HospitalNetworks.tsx — 3-tab UI: Networks list/stats/approve, Network Detail (dashboard+hospitals+members), Audit placeholder |
-| P1-6 | Patient Consent Management UI (pet_owner) | ⚠️ Planned | 6-dimension granular consent, include_hospital_records explicit flag |
-| P1-7 | Demo hospital network seed data | ⚠️ Planned | DemoVetGroup + assign existing demo hospitals + corporate_admin demo user |
+| P1-5 | Corporate Admin — Hospital Network Management UI | ✅ Done | HospitalNetworks.tsx — 3-tab UI: Networks list/stats/approve, Network Detail (dashboard+hospitals+members), Audit placeholder (2026-04-08) |
+| P1-6 | Patient Consent Management UI (pet_owner + farmer) | ✅ Done | PatientConsent.tsx — 2-panel layout, 6-dim consents, CSS toggles, presets (2026-04-08) |
+| P1-7 | Demo hospital network seed data | ✅ Done | DemoVetGroup + demo hospitals + corporate_admin in seed-demo-data.sql |
 
 ### Architecture Decisions (Locked)
 - Farm `enterprises` table and `hospital_networks` are COMPLETELY SEPARATE — never merged
@@ -122,16 +122,15 @@
 
 ## Recently Completed (last 10)
 
-1. ✅ Hospital Network 4-file permission sync — added `hospital_network_manage/view/audit`, `patient_consent_manage` permissions; nav items for Hospital Networks (admin) and Data Consent (pet_owner/farmer); stub pages created (2026-04-09)
-2. ✅ Empty-state shortcuts — contextual navigation buttons across BookConsultation, MedicalRecords, WellnessPortal, AnimalTimeline, Dashboard (2026-04-08)
-2. ✅ Fix Render deploy — HTTP port bound FIRST before DB connect (2026-04-07)
-3. ✅ render-start.sh — tighten timeouts: connectionTimeoutMillis 30000→15000, migrations 60→40s, seed 300→120s (2026-04-07)
-4. ✅ connectWithRetry() — 5 attempts × 10s for free-tier Render PostgreSQL (2026-04-06)
-5. ✅ render-start.sh — connectionTimeoutMillis:30000 + timeout guards on all migrations/seed (2026-04-06)
-6. ✅ Inpatient search — SQL column names fixed and verified against init.sql (prior)
-7. ✅ FindDoctor — useSettings() formatters, past slot filtering with 15-min buffer (prior)
-8. ✅ HerdMedical — i18n namespace added to all 5 locale files (prior)
-9. ✅ Marketplace — animal profile auto-populate listing (prior)
-10. ✅ Medical Records — deep navigation with animalId + recordId params (prior)
+1. ✅ PatientConsent.tsx full UI — 2-panel layout, 6-dim consent, CSS toggle switches, presets (2026-04-08)
+2. ✅ HospitalNetworks.tsx full UI — 3-tab admin dashboard, network CRUD, member/hospital management (2026-04-08)
+3. ✅ api.ts — 14 new methods for hospital networks + patient consent (2026-04-08)
+4. ✅ Hospital Network 4-file permission sync — `hospital_network_manage/view/audit`, `patient_consent_manage` (2026-04-09)
+5. ✅ Empty-state shortcuts — contextual navigation buttons across BookConsultation, MedicalRecords, WellnessPortal (2026-04-08)
+6. ✅ Fix Render deploy — HTTP port bound FIRST before DB connect (2026-04-07)
+7. ✅ render-start.sh — tighten timeouts: connectionTimeoutMillis 30000→15000, migrations 60→40s (2026-04-07)
+8. ✅ connectWithRetry() — 5 attempts × 10s for free-tier Render PostgreSQL (2026-04-06)
+9. ✅ Inpatient search — SQL column names fixed and verified against init.sql (prior)
+10. ✅ FindDoctor — useSettings() formatters, past slot filtering with 15-min buffer (prior)
 
 11. `PatientConsent.tsx` — Full page implemented: 2-panel sidebar layout, animal list with active consent count badges, consent cards with scope badges + permissions grid + revoke action, Grant Consent modal with preset quick-fills, 6 data permission toggles (CSS-only), scope radio cards, grant-to tabs (Doctor/Hospital/Network), validity period pickers. All 5 locale files updated. PatientConsent.css with 4 responsive breakpoints.
