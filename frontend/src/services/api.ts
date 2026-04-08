@@ -2129,7 +2129,67 @@ class ApiService {
     const response = await this.client.get(`/vaccine-certificate-log/animal/${animalId}`)
     return response.data
   }
-}
 
+  // ─── Hospital Networks ──────────────────────────────────────────
+  async listHospitalNetworks(filters: { isApproved?: boolean; isActive?: boolean } = {}) {
+    const response = await this.client.get('/hospital-networks', { params: filters })
+    return response.data
+  }
+  async createHospitalNetwork(data: Record<string, any>) {
+    const response = await this.client.post('/hospital-networks', data)
+    return response.data
+  }
+  async getHospitalNetwork(id: string) {
+    const response = await this.client.get(`/hospital-networks/${id}`)
+    return response.data
+  }
+  async updateHospitalNetwork(id: string, data: Record<string, any>) {
+    const response = await this.client.put(`/hospital-networks/${id}`, data)
+    return response.data
+  }
+  async approveHospitalNetwork(id: string) {
+    const response = await this.client.post(`/hospital-networks/${id}/approve`)
+    return response.data
+  }
+  async getNetworkDashboard(networkId: string) {
+    const response = await this.client.get(`/hospital-networks/${networkId}/dashboard`)
+    return response.data
+  }
+  async listNetworkHospitals(networkId: string) {
+    const response = await this.client.get(`/hospital-networks/${networkId}/hospitals`)
+    return response.data
+  }
+  async assignHospitalToNetwork(networkId: string, hospitalId: string) {
+    const response = await this.client.post(`/hospital-networks/${networkId}/hospitals/${hospitalId}`)
+    return response.data
+  }
+  async listNetworkMembers(networkId: string) {
+    const response = await this.client.get(`/hospital-networks/${networkId}/members`)
+    return response.data
+  }
+  async addNetworkMember(networkId: string, data: { userId: string; networkRole: string; hospitalId?: string; notes?: string }) {
+    const response = await this.client.post(`/hospital-networks/${networkId}/members`, data)
+    return response.data
+  }
+  async removeNetworkMember(networkId: string, userId: string) {
+    const response = await this.client.delete(`/hospital-networks/${networkId}/members/${userId}`)
+    return response.data
+  }
+
+  // ─── Patient Data Consent ───────────────────────────────────────
+  async createPatientConsent(data: Record<string, any>) {
+    const response = await this.client.post('/patient-consent', data)
+    return response.data
+  }
+  async listPatientConsents(animalId: string) {
+    const response = await this.client.get(`/patient-consent/${animalId}`)
+    return response.data
+  }
+  async revokePatientConsent(consentId: string) {
+    const response = await this.client.delete(`/patient-consent/${consentId}`)
+    return response.data
+  }
+}
 export const apiService = new ApiService()
 export default apiService
+

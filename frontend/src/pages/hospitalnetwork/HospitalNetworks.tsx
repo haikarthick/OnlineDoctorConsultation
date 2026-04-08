@@ -1,13 +1,874 @@
-import React from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '../../context/AuthContext'
+import { useSettings } from '../../context/SettingsContext'
+import apiService from '../../services/api'
+import { vetHospitalApi } from '../../services/api/vetHospitalApi'
+import '../ModulePage.css'
+import './HospitalNetworks.css'
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface HospitalNetwork {
+  id: string
+  name: string
+  legalName?: string
+  registrationNumber?: string
+  taxId?: string
+  networkType?: string
+  country?: string
+  headquartersCity?: string
+  headquartersState?: string
+  contactEmail?: string
+  contactPhone?: string
+  website?: string
+  isActive: boolean
+  isApproved: boolean
+  createdAt: string
+  updatedAt?: string
+  approvedByName?: string
+  memberCount?: number
+  hospitalCount?: number
+}
+
+interface NetworkMember {
+  id: string
+  networkId: string
+  userId: string
+  networkRole: string
+  hospitalId?: string
+  isActive: boolean
+  grantedAt: string
+  userName?: string
+  userEmail?: string
+  userRole?: string
+  hospitalName?: string
+}
+
+interface NetworkDashboard {
+  totalMembers: number
+  totalHospitals: number
+  totalPatients: number
+  activeConsents: number
+  recentAccessLogs?: any[]
+  membersByRole?: Record<string, number>
+}
+
+interface NetworkHospital {
+  id: string
+  name: string
+  city?: string
+  hospitalType?: string
+}
+
+interface VetHospitalOption {
+  id: string
+  name: string
+  city?: string
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+const NETWORK_TYPES = [
+  { value: 'private', label: 'Private' },
+  { value: 'government', label: 'Government' },
+  { value: 'ngo', label: 'NGO' },
+  { value: 'academic', label: 'Academic' },
+  { value: 'franchise', label: 'Franchise' },
+]
+
+const MEMBER_ROLES = [
+  { value: 'corporate_admin', label: 'Corporate Admin' },
+  { value: 'hospital_director', label: 'Hospital Director' },
+  { value: 'data_officer', label: 'Data Officer' },
+  { value: 'auditor', label: 'Auditor' },
+  { value: 'staff_vet', label: 'Staff Vet' },
+]
+
+// ─── RoleBadge ────────────────────────────────────────────────────────────────
+interface RoleBadgeProps { role: string }
+const RoleBadge: React.FC<RoleBadgeProps> = ({ role }) => {
+  const label = MEMBER_ROLES.find(r => r.value === role)?.label ?? role
+  return <span className={`hn-role-badge hn-role-badge-${role}`}>{label}</span>
+}
+
+// ─── NetworkTypeLabel ─────────────────────────────────────────────────────────
+interface NetworkTypeLabelProps { type?: string }
+const NetworkTypeLabel: React.FC<NetworkTypeLabelProps> = ({ type }) => {
+  const label = NETWORK_TYPES.find(t => t.value === type)?.label ?? type ?? '—'
+  return <span>{label}</span>
+}
+
+// ─── Create/Edit Modal ────────────────────────────────────────────────────────
+interface NetworkModalProps {
+  editing: HospitalNetwork | null
+  onClose: () => void
+  onSaved: (network: HospitalNetwork) => void
+  t: (key: string) => string
+}
+
+const EMPTY_FORM = {
+  name: '', legalName: '', registrationNumber: '', taxId: '',
+  networkType: 'private', country: '', headquartersCity: '', headquartersState: '',
+  contactEmail: '', contactPhone: '', website: '',
+  dpoName: '', dpoEmail: '', dataResidencyRegion: '',
+}
+
+const NetworkModal: React.FC<NetworkModalProps> = ({ editing, onClose, onSaved, t }) => {
+  const [form, setForm] = useState({ ...EMPTY_FORM })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (editing) {
+      setForm({
+        name: editing.name ?? '',
+        legalName: editing.legalName ?? '',
+        registrationNumber: editing.registrationNumber ?? '',
+        taxId: editing.taxId ?? '',
+        networkType: editing.networkType ?? 'private',
+        country: editing.country ?? '',
+        headquartersCity: editing.headquartersCity ?? '',
+        headquartersState: editing.headquartersState ?? '',
+        contactEmail: editing.contactEmail ?? '',
+        contactPhone: editing.contactPhone ?? '',
+        website: editing.website ?? '',
+        dpoName: (editing as any).dpoName ?? '',
+        dpoEmail: (editing as any).dpoEmail ?? '',
+        dataResidencyRegion: (editing as any).dataResidencyRegion ?? '',
+      })
+    } else {
+      setForm({ ...EMPTY_FORM })
+    }
+  }, [editing])
+
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name.trim()) { setError('Network name is required'); return }
+    setSaving(true); setError('')
+    try {
+      let result: any
+      if (editing) {
+        result = await apiService.updateHospitalNetwork(editing.id, form)
+      } else {
+        result = await apiService.createHospitalNetwork(form)
+      }
+      onSaved(result.data ?? result)
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? err?.message ?? 'An error occurred')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="hn-modal-overlay" onClick={onClose}>
+      <div className="hn-modal" onClick={e => e.stopPropagation()}>
+        <div className="hn-modal-header">
+          <h2>{editing ? t('hospitalNetworks.modal.editTitle') : t('hospitalNetworks.modal.createTitle')}</h2>
+          <button className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        <div className="hn-modal-body">
+          {error && <div className="module-alert error">{error}</div>}
+          <form className="module-form" onSubmit={handleSubmit}>
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">Network Name <span className="hn-required">*</span></label>
+                <input className="module-input" value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. PawCare Group" />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">Legal Name</label>
+                <input className="module-input" value={form.legalName} onChange={e => set('legalName', e.target.value)} placeholder="Registered legal name" />
+              </div>
+            </div>
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">Registration Number</label>
+                <input className="module-input" value={form.registrationNumber} onChange={e => set('registrationNumber', e.target.value)} />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">Tax ID</label>
+                <input className="module-input" value={form.taxId} onChange={e => set('taxId', e.target.value)} />
+              </div>
+            </div>
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">Network Type</label>
+                <select className="module-input" value={form.networkType} onChange={e => set('networkType', e.target.value)}>
+                  {NETWORK_TYPES.map(nt => <option key={nt.value} value={nt.value}>{nt.label}</option>)}
+                </select>
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">Country</label>
+                <input className="module-input" value={form.country} onChange={e => set('country', e.target.value)} placeholder="e.g. India" />
+              </div>
+            </div>
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">Headquarters City</label>
+                <input className="module-input" value={form.headquartersCity} onChange={e => set('headquartersCity', e.target.value)} />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">Headquarters State</label>
+                <input className="module-input" value={form.headquartersState} onChange={e => set('headquartersState', e.target.value)} />
+              </div>
+            </div>
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">Contact Email</label>
+                <input className="module-input" type="email" value={form.contactEmail} onChange={e => set('contactEmail', e.target.value)} />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">Contact Phone</label>
+                <input className="module-input" value={form.contactPhone} onChange={e => set('contactPhone', e.target.value)} />
+              </div>
+            </div>
+            <div className="module-form-group">
+              <label className="module-label">Website</label>
+              <input className="module-input" value={form.website} onChange={e => set('website', e.target.value)} placeholder="https://" />
+            </div>
+            <div className="hn-section-title">Data Protection</div>
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">DPO Name</label>
+                <input className="module-input" value={form.dpoName} onChange={e => set('dpoName', e.target.value)} placeholder="Data Protection Officer" />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">DPO Email</label>
+                <input className="module-input" type="email" value={form.dpoEmail} onChange={e => set('dpoEmail', e.target.value)} />
+              </div>
+            </div>
+            <div className="module-form-group">
+              <label className="module-label">Data Residency Region</label>
+              <input className="module-input" value={form.dataResidencyRegion} onChange={e => set('dataResidencyRegion', e.target.value)} placeholder="e.g. Asia-South1" />
+            </div>
+            <div className="hn-modal-actions">
+              <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
+              <button type="submit" className="module-btn primary" disabled={saving}>
+                {saving ? t('common.saving') : (editing ? t('common.update') : t('common.create'))}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Assign Hospital Modal ────────────────────────────────────────────────────
+interface AssignHospitalModalProps {
+  networkId: string
+  existingIds: string[]
+  onClose: () => void
+  onAssigned: () => void
+  t: (key: string) => string
+}
+
+const AssignHospitalModal: React.FC<AssignHospitalModalProps> = ({ networkId, existingIds, onClose, onAssigned, t }) => {
+  const [hospitals, setHospitals] = useState<VetHospitalOption[]>([])
+  const [selected, setSelected] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    vetHospitalApi.listHospitals({ limit: 200 }).then(res => {
+      const list: VetHospitalOption[] = ((res as any)?.hospitals ?? res ?? []).filter((h: any) => !existingIds.includes(h.id))
+      setHospitals(list)
+    }).catch(() => {})
+  }, [existingIds])
+
+  const handleAssign = async () => {
+    if (!selected) return
+    setSaving(true); setError('')
+    try {
+      await apiService.assignHospitalToNetwork(networkId, selected)
+      onAssigned()
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? 'Failed to assign hospital')
+    } finally { setSaving(false) }
+  }
+
+  return (
+    <div className="hn-modal-overlay" onClick={onClose}>
+      <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
+        <div className="hn-modal-header">
+          <h2>{t('hospitalNetworks.detail.assignHospital')}</h2>
+          <button className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        <div className="hn-modal-body">
+          {error && <div className="module-alert error">{error}</div>}
+          <div className="module-form-group">
+            <label className="module-label">Select Hospital</label>
+            <select className="module-input" value={selected} onChange={e => setSelected(e.target.value)}>
+              <option value="">— Choose a hospital —</option>
+              {hospitals.map(h => (
+                <option key={h.id} value={h.id}>{h.name}{h.city ? ` (${h.city})` : ''}</option>
+              ))}
+            </select>
+          </div>
+          <div className="hn-modal-actions">
+            <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
+            <button type="button" className="module-btn primary" disabled={saving || !selected} onClick={handleAssign}>
+              {saving ? t('common.saving') : t('hospitalNetworks.detail.assignHospital')}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Add Member Modal ─────────────────────────────────────────────────────────
+interface AddMemberModalProps {
+  networkId: string
+  networkHospitals: NetworkHospital[]
+  onClose: () => void
+  onAdded: () => void
+  t: (key: string) => string
+}
+
+const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospitals, onClose, onAdded, t }) => {
+  const [form, setForm] = useState({ userId: '', networkRole: 'staff_vet', hospitalId: '', notes: '' })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  const handleAdd = async () => {
+    if (!form.userId.trim()) { setError('User ID is required'); return }
+    setSaving(true); setError('')
+    try {
+      await apiService.addNetworkMember(networkId, {
+        userId: form.userId.trim(),
+        networkRole: form.networkRole,
+        hospitalId: form.hospitalId || undefined,
+        notes: form.notes || undefined,
+      })
+      onAdded()
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? 'Failed to add member')
+    } finally { setSaving(false) }
+  }
+
+  return (
+    <div className="hn-modal-overlay" onClick={onClose}>
+      <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
+        <div className="hn-modal-header">
+          <h2>{t('hospitalNetworks.detail.addMember')}</h2>
+          <button className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        <div className="hn-modal-body">
+          {error && <div className="module-alert error">{error}</div>}
+          <div className="module-form-group">
+            <label className="module-label">User ID <span className="hn-required">*</span></label>
+            <input className="module-input" value={form.userId} onChange={e => set('userId', e.target.value)} placeholder="Paste user UUID" />
+          </div>
+          <div className="module-form-group">
+            <label className="module-label">Network Role</label>
+            <select className="module-input" value={form.networkRole} onChange={e => set('networkRole', e.target.value)}>
+              {MEMBER_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+            </select>
+          </div>
+          {networkHospitals.length > 0 && (
+            <div className="module-form-group">
+              <label className="module-label">Assign to Hospital (optional)</label>
+              <select className="module-input" value={form.hospitalId} onChange={e => set('hospitalId', e.target.value)}>
+                <option value="">— None —</option>
+                {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+              </select>
+            </div>
+          )}
+          <div className="module-form-group">
+            <label className="module-label">Notes</label>
+            <input className="module-input" value={form.notes} onChange={e => set('notes', e.target.value)} />
+          </div>
+          <div className="hn-modal-actions">
+            <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
+            <button type="button" className="module-btn primary" disabled={saving} onClick={handleAdd}>
+              {saving ? t('common.saving') : t('hospitalNetworks.detail.addMember')}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 const HospitalNetworks: React.FC = () => {
   const { t } = useTranslation()
+  useAuth() // context available for future role-based checks
+  const { formatDate } = useSettings()
+
+  const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit'>('networks')
+  const [selectedNetwork, setSelectedNetwork] = useState<HospitalNetwork | null>(null)
+
+  const [networks, setNetworks] = useState<HospitalNetwork[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'pending'>('all')
+  const [approveState, setApproveState] = useState<Record<string, 'idle' | 'confirming'>>({})
+
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingNetwork, setEditingNetwork] = useState<HospitalNetwork | null>(null)
+
+  const [dashboard, setDashboard] = useState<NetworkDashboard | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [networkHospitals, setNetworkHospitals] = useState<NetworkHospital[]>([])
+  const [networkMembers, setNetworkMembers] = useState<NetworkMember[]>([])
+  const [showAssignHospital, setShowAssignHospital] = useState(false)
+  const [showAddMember, setShowAddMember] = useState(false)
+
+  const loadNetworks = useCallback(async () => {
+    setLoading(true); setError('')
+    try {
+      const result = await apiService.listHospitalNetworks()
+      setNetworks(result.data ?? result ?? [])
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? 'Failed to load networks')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { loadNetworks() }, [loadNetworks])
+
+  useEffect(() => {
+    if (!successMsg) return
+    const timer = setTimeout(() => setSuccessMsg(''), 3000)
+    return () => clearTimeout(timer)
+  }, [successMsg])
+
+  const loadDetail = useCallback(async (network: HospitalNetwork) => {
+    setDetailLoading(true)
+    try {
+      const [dashRes, hospRes, memRes] = await Promise.all([
+        apiService.getNetworkDashboard(network.id).catch(() => ({ data: null })),
+        apiService.listNetworkHospitals(network.id).catch(() => ({ data: [] })),
+        apiService.listNetworkMembers(network.id).catch(() => ({ data: [] })),
+      ])
+      setDashboard(dashRes.data ?? dashRes ?? null)
+      setNetworkHospitals(hospRes.data ?? hospRes ?? [])
+      setNetworkMembers(memRes.data ?? memRes ?? [])
+    } finally {
+      setDetailLoading(false)
+    }
+  }, [])
+
+  const handleView = (network: HospitalNetwork) => {
+    setSelectedNetwork(network)
+    setActiveTab('detail')
+    loadDetail(network)
+  }
+
+  const handleApproveClick = (network: HospitalNetwork) => {
+    setApproveState(s => ({ ...s, [network.id]: 'confirming' }))
+  }
+
+  const handleApproveConfirm = async (network: HospitalNetwork) => {
+    try {
+      await apiService.approveHospitalNetwork(network.id)
+      setSuccessMsg(`"${network.name}" approved successfully.`)
+      setApproveState(s => ({ ...s, [network.id]: 'idle' }))
+      await loadNetworks()
+      if (selectedNetwork?.id === network.id) {
+        setSelectedNetwork(prev => prev ? { ...prev, isApproved: true } : prev)
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? 'Approval failed')
+      setApproveState(s => ({ ...s, [network.id]: 'idle' }))
+    }
+  }
+
+  const handleNetworkSaved = async (network: HospitalNetwork) => {
+    setShowCreateModal(false)
+    setEditingNetwork(null)
+    setSuccessMsg(`Network "${network.name}" saved.`)
+    await loadNetworks()
+  }
+
+  const handleRemoveMember = async (member: NetworkMember) => {
+    if (!selectedNetwork) return
+    if (!window.confirm(`Remove ${member.userName ?? 'this member'} from the network?`)) return
+    try {
+      await apiService.removeNetworkMember(selectedNetwork.id, member.userId)
+      setSuccessMsg('Member removed.')
+      loadDetail(selectedNetwork)
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? 'Failed to remove member')
+    }
+  }
+
+  const filteredNetworks = networks.filter(n => {
+    const matchesSearch = !searchTerm || n.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (n.headquartersCity ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || (statusFilter === 'approved' && n.isApproved) ||
+      (statusFilter === 'pending' && !n.isApproved)
+    return matchesSearch && matchesStatus
+  })
+
+  const stats = {
+    total: networks.length,
+    approved: networks.filter(n => n.isApproved).length,
+    pending: networks.filter(n => !n.isApproved).length,
+    hospitals: networks.reduce((sum, n) => sum + (n.hospitalCount ?? 0), 0),
+  }
+
   return (
-    <div className="module-page">
+    <div className="module-page hn-page">
       <div className="module-header">
-        <h1>{t('hospitalNetworks.title')}</h1>
+        <div>
+          <h1>{t('hospitalNetworks.title')}</h1>
+          <p className="hn-subtitle">Manage enterprise hospital groups, members, and compliance.</p>
+        </div>
+        <div className="hn-header-actions">
+          {activeTab === 'networks' && (
+            <button className="module-btn primary" onClick={() => setShowCreateModal(true)}>
+              + {t('hospitalNetworks.createNetwork')}
+            </button>
+          )}
+          {activeTab === 'detail' && selectedNetwork && (
+            <button className="module-btn" onClick={() => setActiveTab('networks')}>
+              ← {t('hospitalNetworks.tabs.networks')}
+            </button>
+          )}
+        </div>
       </div>
+
+      {error && (
+        <div className="module-alert error">
+          {error}
+          <button className="hn-alert-close" onClick={() => setError('')}>✕</button>
+        </div>
+      )}
+      {successMsg && <div className="module-alert success">{successMsg}</div>}
+
+      <div className="module-tabs">
+        <button
+          className={`module-tab${activeTab === 'networks' ? ' active' : ''}`}
+          onClick={() => setActiveTab('networks')}
+        >
+          🏢 {t('hospitalNetworks.tabs.networks')}
+        </button>
+        <button
+          className={`module-tab${activeTab === 'detail' ? ' active' : ''}`}
+          onClick={() => setActiveTab('detail')}
+          disabled={!selectedNetwork}
+        >
+          📋 {t('hospitalNetworks.tabs.detail')}{selectedNetwork ? `: ${selectedNetwork.name}` : ''}
+        </button>
+        <button
+          className={`module-tab${activeTab === 'audit' ? ' active' : ''}`}
+          onClick={() => setActiveTab('audit')}
+        >
+          🔐 {t('hospitalNetworks.tabs.audit')}
+        </button>
+      </div>
+
+      {/* ════ TAB 1: NETWORKS ════ */}
+      {activeTab === 'networks' && (
+        <div className="hn-tab-content">
+          <div className="hn-stats-row">
+            <div className="hn-stat-card hn-stat-blue">
+              <div className="hn-stat-value">{stats.total}</div>
+              <div className="hn-stat-label">{t('hospitalNetworks.stats.total')}</div>
+            </div>
+            <div className="hn-stat-card hn-stat-green">
+              <div className="hn-stat-value">{stats.approved}</div>
+              <div className="hn-stat-label">{t('hospitalNetworks.stats.approved')}</div>
+            </div>
+            <div className="hn-stat-card hn-stat-orange">
+              <div className="hn-stat-value">{stats.pending}</div>
+              <div className="hn-stat-label">{t('hospitalNetworks.stats.pending')}</div>
+            </div>
+            <div className="hn-stat-card hn-stat-purple">
+              <div className="hn-stat-value">{stats.hospitals}</div>
+              <div className="hn-stat-label">{t('hospitalNetworks.stats.hospitals')}</div>
+            </div>
+          </div>
+
+          <div className="hn-filter-bar">
+            <div className="hn-filter-toggle">
+              {(['all', 'approved', 'pending'] as const).map(f => (
+                <button
+                  key={f}
+                  className={`module-btn small${statusFilter === f ? ' primary' : ''}`}
+                  onClick={() => setStatusFilter(f)}
+                >
+                  {f === 'all' ? t('common.all') : f === 'approved' ? t('hospitalNetworks.stats.approved') : t('hospitalNetworks.stats.pending')}
+                </button>
+              ))}
+            </div>
+            <input
+              className="module-input hn-search-input"
+              placeholder={`🔍 ${t('common.search')} networks…`}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {loading ? (
+            <div className="hn-loading">⏳ {t('common.loading')}</div>
+          ) : filteredNetworks.length === 0 ? (
+            <div className="hn-empty-state">
+              <div className="hn-empty-icon">🏢</div>
+              <div className="hn-empty-title">No networks found</div>
+              <div className="hn-empty-desc">
+                {searchTerm || statusFilter !== 'all'
+                  ? 'Try adjusting your filters.'
+                  : 'Create the first hospital network to get started.'}
+              </div>
+            </div>
+          ) : (
+            <div className="data-table-container">
+              <table className="module-table">
+                <thead>
+                  <tr>
+                    <th>{t('hospitalNetworks.table.name')}</th>
+                    <th>{t('hospitalNetworks.table.type')}</th>
+                    <th>{t('hospitalNetworks.table.headquarters')}</th>
+                    <th>{t('hospitalNetworks.table.members')}</th>
+                    <th>{t('hospitalNetworks.table.hospitals')}</th>
+                    <th>{t('hospitalNetworks.table.status')}</th>
+                    <th>{t('hospitalNetworks.table.created')}</th>
+                    <th>{t('hospitalNetworks.table.actions')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredNetworks.map(network => (
+                    <tr key={network.id}>
+                      <td>
+                        <div className="hn-network-name">{network.name}</div>
+                        {network.legalName && <div className="hn-network-legal">{network.legalName}</div>}
+                      </td>
+                      <td><NetworkTypeLabel type={network.networkType} /></td>
+                      <td>
+                        {[network.headquartersCity, network.headquartersState, network.country]
+                          .filter(Boolean).join(', ') || '—'}
+                      </td>
+                      <td>{network.memberCount ?? '—'}</td>
+                      <td>{network.hospitalCount ?? '—'}</td>
+                      <td>
+                        {network.isApproved
+                          ? <span className="badge badge-success">{t('hospitalNetworks.status.approved')}</span>
+                          : <span className="badge badge-pending">{t('hospitalNetworks.status.pending')}</span>
+                        }
+                      </td>
+                      <td>{formatDate(network.createdAt)}</td>
+                      <td>
+                        <div className="hn-actions">
+                          <button className="module-btn small" onClick={() => handleView(network)}>
+                            {t('hospitalNetworks.actions.view')}
+                          </button>
+                          <button className="module-btn small" onClick={() => setEditingNetwork(network)}>
+                            {t('hospitalNetworks.actions.edit')}
+                          </button>
+                          {!network.isApproved && (
+                            approveState[network.id] === 'confirming' ? (
+                              <div className="hn-confirm-row">
+                                <span className="hn-confirm-label">Sure?</span>
+                                <button className="module-btn small primary" onClick={() => handleApproveConfirm(network)}>Yes</button>
+                                <button className="module-btn small" onClick={() => setApproveState(s => ({ ...s, [network.id]: 'idle' }))}>No</button>
+                              </div>
+                            ) : (
+                              <button className="module-btn small hn-btn-approve" onClick={() => handleApproveClick(network)}>
+                                {t('hospitalNetworks.actions.approve')}
+                              </button>
+                            )
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ════ TAB 2: NETWORK DETAIL ════ */}
+      {activeTab === 'detail' && (
+        <div className="hn-tab-content">
+          {!selectedNetwork ? (
+            <div className="hn-empty-state">
+              <div className="hn-empty-icon">🔍</div>
+              <div className="hn-empty-title">{t('hospitalNetworks.selectNetwork')}</div>
+            </div>
+          ) : detailLoading ? (
+            <div className="hn-loading">⏳ {t('common.loading')}</div>
+          ) : (
+            <>
+              <div className="hn-detail-header module-card">
+                <div className="hn-detail-title-row">
+                  <h2 className="hn-detail-name">{selectedNetwork.name}</h2>
+                  <div className="hn-detail-badges">
+                    {selectedNetwork.isApproved
+                      ? <span className="badge badge-success">{t('hospitalNetworks.status.approved')}</span>
+                      : <span className="badge badge-pending">{t('hospitalNetworks.status.pending')}</span>
+                    }
+                  </div>
+                  <button className="module-btn small" onClick={() => setEditingNetwork(selectedNetwork)}>
+                    ✏ {t('hospitalNetworks.actions.edit')}
+                  </button>
+                </div>
+                <div className="hn-detail-meta">
+                  {selectedNetwork.networkType && (
+                    <span className="hn-detail-meta-item">
+                      🏷 <NetworkTypeLabel type={selectedNetwork.networkType} />
+                    </span>
+                  )}
+                  {selectedNetwork.contactEmail && (
+                    <span className="hn-detail-meta-item">✉ {selectedNetwork.contactEmail}</span>
+                  )}
+                  {selectedNetwork.contactPhone && (
+                    <span className="hn-detail-meta-item">📞 {selectedNetwork.contactPhone}</span>
+                  )}
+                  {selectedNetwork.website && (
+                    <a href={selectedNetwork.website} target="_blank" rel="noopener noreferrer" className="hn-detail-meta-item hn-website-link">
+                      🌐 Website
+                    </a>
+                  )}
+                  {selectedNetwork.country && (
+                    <span className="hn-detail-meta-item">
+                      📍 {[selectedNetwork.headquartersCity, selectedNetwork.headquartersState, selectedNetwork.country].filter(Boolean).join(', ')}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {dashboard && (
+                <div className="hn-stats-row">
+                  <div className="hn-stat-card hn-stat-blue">
+                    <div className="hn-stat-value">{dashboard.totalMembers ?? 0}</div>
+                    <div className="hn-stat-label">Members</div>
+                  </div>
+                  <div className="hn-stat-card hn-stat-green">
+                    <div className="hn-stat-value">{dashboard.totalHospitals ?? 0}</div>
+                    <div className="hn-stat-label">Hospitals</div>
+                  </div>
+                  <div className="hn-stat-card hn-stat-purple">
+                    <div className="hn-stat-value">{dashboard.totalPatients ?? 0}</div>
+                    <div className="hn-stat-label">Patients</div>
+                  </div>
+                  <div className="hn-stat-card hn-stat-teal">
+                    <div className="hn-stat-value">{dashboard.activeConsents ?? 0}</div>
+                    <div className="hn-stat-label">Active Consents</div>
+                  </div>
+                </div>
+              )}
+
+              <div className="hn-detail-panels">
+                <div className="module-card">
+                  <div className="hn-panel-header">
+                    <h3>{t('hospitalNetworks.detail.hospitals')}</h3>
+                    <button className="module-btn small primary" onClick={() => setShowAssignHospital(true)}>
+                      + {t('hospitalNetworks.detail.assignHospital')}
+                    </button>
+                  </div>
+                  <div className="card-body">
+                    {networkHospitals.length === 0 ? (
+                      <div className="hn-panel-empty">🏥 {t('hospitalNetworks.detail.noHospitals')}</div>
+                    ) : (
+                      <div className="hn-hospital-list">
+                        {networkHospitals.map(h => (
+                          <div key={h.id} className="hn-hospital-item">
+                            <span className="hn-hospital-icon">🏥</span>
+                            <div className="hn-hospital-info">
+                              <div className="hn-hospital-name">{h.name}</div>
+                              {h.city && <div className="hn-hospital-city">{h.city}</div>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="module-card">
+                  <div className="hn-panel-header">
+                    <h3>{t('hospitalNetworks.detail.staff')}</h3>
+                    <button className="module-btn small primary" onClick={() => setShowAddMember(true)}>
+                      + {t('hospitalNetworks.detail.addMember')}
+                    </button>
+                  </div>
+                  <div className="card-body">
+                    {networkMembers.length === 0 ? (
+                      <div className="hn-panel-empty">👥 {t('hospitalNetworks.detail.noMembers')}</div>
+                    ) : (
+                      <div className="hn-member-list">
+                        {networkMembers.map(m => (
+                          <div key={m.id} className="hn-member-item">
+                            <div className="hn-member-avatar">{(m.userName ?? 'U').charAt(0).toUpperCase()}</div>
+                            <div className="hn-member-info">
+                              <div className="hn-member-name">{m.userName ?? m.userEmail ?? 'Unknown'}</div>
+                              {m.hospitalName && <div className="hn-member-hospital">{m.hospitalName}</div>}
+                            </div>
+                            <RoleBadge role={m.networkRole} />
+                            <button
+                              className="hn-remove-btn"
+                              title="Remove member"
+                              onClick={() => handleRemoveMember(m)}
+                            >✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ════ TAB 3: AUDIT ════ */}
+      {activeTab === 'audit' && (
+        <div className="hn-tab-content">
+          <div className="module-card hn-audit-card">
+            <div className="hn-audit-icon">🔐</div>
+            <h2 className="hn-audit-title">{t('hospitalNetworks.audit.title')}</h2>
+            <p className="hn-audit-desc">{t('hospitalNetworks.audit.comingSoon')}</p>
+          </div>
+        </div>
+      )}
+
+      {(showCreateModal || editingNetwork) && (
+        <NetworkModal
+          editing={editingNetwork}
+          onClose={() => { setShowCreateModal(false); setEditingNetwork(null) }}
+          onSaved={handleNetworkSaved}
+          t={t}
+        />
+      )}
+      {showAssignHospital && selectedNetwork && (
+        <AssignHospitalModal
+          networkId={selectedNetwork.id}
+          existingIds={networkHospitals.map(h => h.id)}
+          onClose={() => setShowAssignHospital(false)}
+          onAssigned={() => {
+            setShowAssignHospital(false)
+            setSuccessMsg('Hospital assigned successfully.')
+            loadDetail(selectedNetwork)
+          }}
+          t={t}
+        />
+      )}
+      {showAddMember && selectedNetwork && (
+        <AddMemberModal
+          networkId={selectedNetwork.id}
+          networkHospitals={networkHospitals}
+          onClose={() => setShowAddMember(false)}
+          onAdded={() => {
+            setShowAddMember(false)
+            setSuccessMsg('Member added successfully.')
+            loadDetail(selectedNetwork)
+          }}
+          t={t}
+        />
+      )}
     </div>
   )
 }

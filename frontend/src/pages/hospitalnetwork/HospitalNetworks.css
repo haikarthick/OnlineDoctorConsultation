@@ -1,0 +1,634 @@
+/* ═══════════════════════════════════════════════════
+   HospitalNetworks.css — Hospital Networks module styles
+   ═══════════════════════════════════════════════════ */
+
+/* ─── Page Layout ─────────────────────────────────── */
+.hn-page {
+  min-height: calc(100vh - 64px);
+}
+
+.hn-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 4px 0 0;
+}
+
+.hn-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hn-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Stats Row ───────────────────────────────────── */
+.hn-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.hn-stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  border-top: 4px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hn-stat-blue  { border-top-color: #3b82f6; }
+.hn-stat-green { border-top-color: #22c55e; }
+.hn-stat-orange { border-top-color: #f97316; }
+.hn-stat-purple { border-top-color: #a855f7; }
+.hn-stat-teal  { border-top-color: #14b8a6; }
+
+.hn-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.hn-stat-label {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ─── Filter Bar ──────────────────────────────────── */
+.hn-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hn-filter-toggle {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hn-search-input {
+  flex: 1;
+  min-width: 220px;
+  max-width: 360px;
+}
+
+/* ─── Table Extras ─────────────────────────────────── */
+.hn-network-name {
+  font-weight: 600;
+  color: #111827;
+  font-size: 14px;
+}
+
+.hn-network-legal {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.hn-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hn-btn-approve {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+.hn-btn-approve:hover {
+  opacity: 0.9;
+}
+
+.hn-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hn-confirm-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ─── Alert close button ──────────────────────────── */
+.hn-alert-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: inherit;
+  padding: 0 0 0 12px;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+.hn-alert-close:hover {
+  opacity: 1;
+}
+
+/* ─── Loading & Empty ──────────────────────────────── */
+.hn-loading {
+  text-align: center;
+  padding: 48px 24px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.hn-empty-state {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.hn-empty-icon {
+  font-size: 40px;
+  margin-bottom: 4px;
+}
+
+.hn-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.hn-empty-desc {
+  font-size: 14px;
+  color: #6b7280;
+  max-width: 380px;
+}
+
+/* ─── Detail Header ─────────────────────────────────── */
+.hn-detail-header {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hn-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hn-detail-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.hn-detail-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.hn-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.hn-detail-meta-item {
+  font-size: 13px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hn-website-link {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.hn-website-link:hover {
+  text-decoration: underline;
+}
+
+/* ─── Detail Panels ─────────────────────────────────── */
+.hn-detail-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.hn-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 0;
+}
+
+.hn-panel-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.hn-panel-empty {
+  padding: 32px 20px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* ─── Hospital List ─────────────────────────────────── */
+.hn-hospital-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.hn-hospital-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.hn-hospital-item:last-child {
+  border-bottom: none;
+}
+
+.hn-hospital-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.hn-hospital-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.hn-hospital-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hn-hospital-city {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* ─── Member List ───────────────────────────────────── */
+.hn-member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.hn-member-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.hn-member-item:last-child {
+  border-bottom: none;
+}
+
+.hn-member-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.hn-member-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hn-member-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hn-member-hospital {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.hn-remove-btn {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 12px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.hn-remove-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+/* ─── Role Badges ───────────────────────────────────── */
+.hn-role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hn-role-badge-corporate_admin {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.hn-role-badge-hospital_director {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.hn-role-badge-data_officer {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.hn-role-badge-auditor {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.hn-role-badge-staff_vet {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* ─── Audit Tab ─────────────────────────────────────── */
+.hn-audit-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
+  text-align: center;
+  gap: 12px;
+}
+
+.hn-audit-icon {
+  font-size: 52px;
+  line-height: 1;
+}
+
+.hn-audit-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #374151;
+  margin: 0;
+}
+
+.hn-audit-desc {
+  font-size: 15px;
+  color: #6b7280;
+  max-width: 480px;
+  margin: 0;
+}
+
+/* ─── Modal ─────────────────────────────────────────── */
+.hn-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 16px;
+}
+
+.hn-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.hn-modal-sm {
+  max-width: 440px;
+}
+
+.hn-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.hn-modal-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.hn-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #9ca3af;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.hn-modal-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.hn-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.hn-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.hn-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #667eea;
+  margin: 16px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.hn-required {
+  color: #ef4444;
+}
+
+/* ─── Responsive: 1200px ─────────────────────────────── */
+@media (max-width: 1200px) {
+  .hn-stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+/* ─── Responsive: 768px ──────────────────────────────── */
+@media (max-width: 768px) {
+  .hn-detail-panels {
+    grid-template-columns: 1fr;
+  }
+
+  .hn-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hn-search-input {
+    max-width: 100%;
+  }
+
+  .data-table-container {
+    overflow-x: auto;
+  }
+
+  .hn-modal {
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .hn-detail-header {
+    padding: 16px;
+  }
+
+  .hn-detail-title-row {
+    gap: 8px;
+  }
+}
+
+/* ─── Responsive: 640px ──────────────────────────────── */
+@media (max-width: 640px) {
+  .hn-stats-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hn-filter-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .hn-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ─── Responsive: 480px ──────────────────────────────── */
+@media (max-width: 480px) {
+  .hn-stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .hn-stat-card {
+    padding: 14px 16px;
+  }
+
+  .hn-stat-value {
+    font-size: 22px;
+  }
+
+  .hn-modal-header {
+    padding: 16px 16px 12px;
+  }
+
+  .hn-modal-body {
+    padding: 14px 16px;
+  }
+
+  .hn-audit-card {
+    padding: 40px 20px;
+  }
+
+  .hn-audit-icon {
+    font-size: 40px;
+  }
+}

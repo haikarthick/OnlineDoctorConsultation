@@ -5427,9 +5427,104 @@
     "signatureRequiredDesc": "Force vets to upload signature before issuing"
   },
   "hospitalNetworks": {
-    "title": "Hospital Networks"
+    "title": "Hospital Networks",
+    "createNetwork": "Create Network",
+    "selectNetwork": "← Select a network from the Networks tab to view details",
+    "tabs": {
+      "networks": "Networks",
+      "detail": "Network Detail",
+      "audit": "Audit & Compliance"
+    },
+    "stats": {
+      "total": "Total Networks",
+      "approved": "Approved",
+      "pending": "Pending Approval",
+      "hospitals": "Total Hospitals"
+    },
+    "table": {
+      "name": "Network Name",
+      "type": "Type",
+      "headquarters": "Headquarters",
+      "members": "Members",
+      "hospitals": "Hospitals",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "actions": {
+      "view": "View",
+      "approve": "Approve",
+      "edit": "Edit"
+    },
+    "status": {
+      "approved": "Approved",
+      "pending": "Pending Approval"
+    },
+    "modal": {
+      "createTitle": "Create Hospital Network",
+      "editTitle": "Edit Network"
+    },
+    "detail": {
+      "hospitals": "Hospitals",
+      "staff": "Staff & Admins",
+      "assignHospital": "Assign Hospital",
+      "addMember": "Add Member",
+      "noHospitals": "No hospitals assigned",
+      "noMembers": "No members yet"
+    },
+    "audit": {
+      "title": "Audit & Compliance",
+      "comingSoon": "Audit log viewer — enterprise audit trail coming soon."
+    }
   },
   "patientConsent": {
-    "title": "Patient Data Consent"
+    "title": "Patient Data Consent",
+    "subtitle": "Control who can access your animals health records",
+    "selectAnimal": "Select an animal to manage consents",
+    "grantConsent": "Grant Consent",
+    "noConsents": "No consents granted",
+    "noConsentsDesc": "You control who can see their health data",
+    "grantedTo": "Granted To",
+    "validFrom": "Valid From",
+    "validUntil": "Valid Until",
+    "noExpiry": "No expiry",
+    "scope": {
+      "viewOnly": "View Only",
+      "fullHistory": "Full History",
+      "treatment": "Treatment",
+      "emergency": "Emergency"
+    },
+    "permissions": {
+      "medicalRecords": "Medical Records",
+      "vaccinationRecords": "Vaccination Records",
+      "prescriptions": "Prescriptions",
+      "labResults": "Lab Results",
+      "geneticData": "Genetic Data",
+      "hospitalRecords": "Hospital Records",
+      "allowView": "Allow View",
+      "allowNotes": "Allow Create Notes",
+      "allowPrescribe": "Allow Prescribe"
+    },
+    "actions": {
+      "revoke": "Revoke",
+      "revoking": "Revoking..."
+    },
+    "status": {
+      "active": "Active",
+      "revoked": "Revoked"
+    },
+    "modal": {
+      "title": "Grant Data Consent",
+      "preset": {
+        "viewOnly": "View Only for Consultation",
+        "treatment": "Full Treatment Access",
+        "emergency": "Emergency Access"
+      },
+      "grantTo": {
+        "doctor": "Doctor",
+        "hospital": "Hospital",
+        "network": "Network"
+      }
+    }
   }
 }

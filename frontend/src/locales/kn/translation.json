@@ -5315,9 +5315,104 @@
     "signatureRequiredDesc": "Force vets to upload signature before issuing"
   },
   "hospitalNetworks": {
-    "title": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್"
+    "title": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್‌ಗಳು",
+    "createNetwork": "ನೆಟ್‌ವರ್ಕ್ ರಚಿಸಿ",
+    "selectNetwork": "← ವಿವರಗಳನ್ನು ನೋಡಲು ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಟ್ಯಾಬ್‌ನಿಂದ ನೆಟ್‌ವರ್ಕ್ ಆಯ್ಕೆಮಾಡಿ",
+    "tabs": {
+      "networks": "ನೆಟ್‌ವರ್ಕ್‌ಗಳು",
+      "detail": "ನೆಟ್‌ವರ್ಕ್ ವಿವರ",
+      "audit": "ಆಡಿಟ್ ಮತ್ತು ಅನುಸರಣೆ"
+    },
+    "stats": {
+      "total": "ಒಟ್ಟು ನೆಟ್‌ವರ್ಕ್‌ಗಳು",
+      "approved": "ಅನುಮೋದಿತ",
+      "pending": "ಅನುಮೋದನೆ ಬಾಕಿ",
+      "hospitals": "ಒಟ್ಟು ಆಸ್ಪತ್ರೆಗಳು"
+    },
+    "table": {
+      "name": "ನೆಟ್‌ವರ್ಕ್ ಹೆಸರು",
+      "type": "ಪ್ರಕಾರ",
+      "headquarters": "ಮುಖ್ಯ ಕಚೇರಿ",
+      "members": "ಸದಸ್ಯರು",
+      "hospitals": "ಆಸ್ಪತ್ರೆಗಳು",
+      "status": "ಸ್ಥಿತಿ",
+      "created": "ರಚಿಸಲಾಗಿದೆ",
+      "actions": "ಕ್ರಿಯೆಗಳು"
+    },
+    "actions": {
+      "view": "ನೋಡಿ",
+      "approve": "ಅನುಮೋದಿಸಿ",
+      "edit": "ಸಂಪಾದಿಸಿ"
+    },
+    "status": {
+      "approved": "ಅನುಮೋದಿತ",
+      "pending": "ಅನುಮೋದನೆ ಬಾಕಿ"
+    },
+    "modal": {
+      "createTitle": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್ ರಚಿಸಿ",
+      "editTitle": "ನೆಟ್‌ವರ್ಕ್ ಸಂಪಾದಿಸಿ"
+    },
+    "detail": {
+      "hospitals": "ಆಸ್ಪತ್ರೆಗಳು",
+      "staff": "ಸಿಬ್ಬಂದಿ ಮತ್ತು ನಿರ್ವಾಹಕರು",
+      "assignHospital": "ಆಸ್ಪತ್ರೆ ನಿಯೋಜಿಸಿ",
+      "addMember": "ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ",
+      "noHospitals": "ಯಾವುದೇ ಆಸ್ಪತ್ರೆಗಳು ನಿಯೋಜಿಸಲಾಗಿಲ್ಲ",
+      "noMembers": "ಇನ್ನೂ ಸದಸ್ಯರಿಲ್ಲ"
+    },
+    "audit": {
+      "title": "ಆಡಿಟ್ ಮತ್ತು ಅನುಸರಣೆ",
+      "comingSoon": "ಆಡಿಟ್ ಲಾಗ್ ವ್ಯೂಯರ್ — ಎಂಟರ್‌ಪ್ರೈಸ್ ಆಡಿಟ್ ಟ್ರೇಲ್ ಶೀಘ್ರದಲ್ಲಿ ಬರಲಿದೆ."
+    }
   },
   "patientConsent": {
-    "title": "ರೋಗಿಯ ಡೇಟಾ ಒಪ್ಪಿಗೆ"
+    "title": "ರೋಗಿ ಡೇಟಾ ಸಮ್ಮತಿ",
+    "subtitle": "ನಿಮ್ಮ ಪ್ರಾಣಿಗಳ ಆರೋಗ್ಯ ದಾಖಲೆಗಳನ್ನು ಯಾರು ಪ್ರವೇಶಿಸಬಹುದು ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಿ",
+    "selectAnimal": "ಸಮ್ಮತಿಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಪ್ರಾಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "grantConsent": "ಸಮ್ಮತಿ ನೀಡಿ",
+    "noConsents": "ಯಾವುದೇ ಸಮ್ಮತಿ ನೀಡಲಾಗಿಲ್ಲ",
+    "noConsentsDesc": "ಅವರ ಆರೋಗ್ಯ ಡೇಟಾವನ್ನು ಯಾರು ನೋಡಬಹುದು ಎಂಬುದನ್ನು ನೀವು ನಿಯಂತ್ರಿಸುತ್ತೀರಿ",
+    "grantedTo": "ನೀಡಲಾಗಿದೆ",
+    "validFrom": "ಇಂದಿನಿಂದ ಮಾನ್ಯ",
+    "validUntil": "ವರೆಗೆ ಮಾನ್ಯ",
+    "noExpiry": "ಮುಕ್ತಾಯ ಇಲ್ಲ",
+    "scope": {
+      "viewOnly": "ಕೇವಲ ವೀಕ್ಷಿಸಿ",
+      "fullHistory": "ಸಂಪೂರ್ಣ ಇತಿಹಾಸ",
+      "treatment": "ಚಿಕಿತ್ಸೆ",
+      "emergency": "ತುರ್ತು"
+    },
+    "permissions": {
+      "medicalRecords": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
+      "vaccinationRecords": "ಲಸಿಕೆ ದಾಖಲೆಗಳು",
+      "prescriptions": "ಔಷಧ ಚೀಟಿಗಳು",
+      "labResults": "ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು",
+      "geneticData": "ಜೆನೆಟಿಕ್ ಡೇಟಾ",
+      "hospitalRecords": "ಆಸ್ಪತ್ರೆ ದಾಖಲೆಗಳು",
+      "allowView": "ವೀಕ್ಷಿಸಲು ಅನುಮತಿ",
+      "allowNotes": "ಟಿಪ್ಪಣಿ ರಚಿಸಲು ಅನುಮತಿ",
+      "allowPrescribe": "ಔಷಧ ನೀಡಲು ಅನುಮತಿ"
+    },
+    "actions": {
+      "revoke": "ರದ್ದು ಮಾಡಿ",
+      "revoking": "ರದ್ದು ಮಾಡಲಾಗುತ್ತಿದೆ..."
+    },
+    "status": {
+      "active": "ಸಕ್ರಿಯ",
+      "revoked": "ರದ್ದು ಮಾಡಲಾಗಿದೆ"
+    },
+    "modal": {
+      "title": "ಡೇಟಾ ಸಮ್ಮತಿ ನೀಡಿ",
+      "preset": {
+        "viewOnly": "ಸಮಾಲೋಚನೆಗೆ ಮಾತ್ರ ವೀಕ್ಷಿಸಿ",
+        "treatment": "ಸಂಪೂರ್ಣ ಚಿಕಿತ್ಸಾ ಪ್ರವೇಶ",
+        "emergency": "ತುರ್ತು ಪ್ರವೇಶ"
+      },
+      "grantTo": {
+        "doctor": "ವೈದ್ಯರು",
+        "hospital": "ಆಸ್ಪತ್ರೆ",
+        "network": "ನೆಟ್ವರ್ಕ್"
+      }
+    }
   }
 }

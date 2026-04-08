@@ -5304,9 +5304,104 @@
     "signatureRequiredDesc": "Force vets to upload signature before issuing"
   },
   "hospitalNetworks": {
-    "title": "ఆసుపత్రి నెట్‌వర్క్"
+    "title": "ఆసుపత్రి నెట్‌వర్క్‌లు",
+    "createNetwork": "నెట్‌వర్క్ సృష్టించు",
+    "selectNetwork": "← వివరాలు చూడటానికి నెట్‌వర్క్‌లు ట్యాబ్ నుండి నెట్‌వర్క్ ఎంచుకోండి",
+    "tabs": {
+      "networks": "నెట్‌వర్క్‌లు",
+      "detail": "నెట్‌వర్క్ వివరాలు",
+      "audit": "ఆడిట్ & సమ్మతి"
+    },
+    "stats": {
+      "total": "మొత్తం నెట్‌వర్క్‌లు",
+      "approved": "ఆమోదించబడింది",
+      "pending": "ఆమోదం పెండింగ్",
+      "hospitals": "మొత్తం ఆసుపత్రులు"
+    },
+    "table": {
+      "name": "నెట్‌వర్క్ పేరు",
+      "type": "రకం",
+      "headquarters": "ప్రధాన కార్యాలయం",
+      "members": "సభ్యులు",
+      "hospitals": "ఆసుపత్రులు",
+      "status": "స్థితి",
+      "created": "సృష్టించబడింది",
+      "actions": "చర్యలు"
+    },
+    "actions": {
+      "view": "చూడు",
+      "approve": "ఆమోదించు",
+      "edit": "సవరించు"
+    },
+    "status": {
+      "approved": "ఆమోదించబడింది",
+      "pending": "ఆమోదం పెండింగ్"
+    },
+    "modal": {
+      "createTitle": "ఆసుపత్రి నెట్‌వర్క్ సృష్టించు",
+      "editTitle": "నెట్‌వర్క్ సవరించు"
+    },
+    "detail": {
+      "hospitals": "ఆసుపత్రులు",
+      "staff": "సిబ్బంది & నిర్వాహకులు",
+      "assignHospital": "ఆసుపత్రి కేటాయించు",
+      "addMember": "సభ్యుడిని చేర్చు",
+      "noHospitals": "ఆసుపత్రులు ఏవీ కేటాయించబడలేదు",
+      "noMembers": "ఇంకా సభ్యులు లేరు"
+    },
+    "audit": {
+      "title": "ఆడిట్ & సమ్మతి",
+      "comingSoon": "ఆడిట్ లాగ్ వ్యూయర్ — ఎంటర్‌ప్రైజ్ ఆడిట్ ట్రయల్ త్వరలో వస్తుంది."
+    }
   },
   "patientConsent": {
-    "title": "రోగి డేటా సమ్మతి"
+    "title": "రోగి డేటా సమ్మతి",
+    "subtitle": "మీ జంతువుల ఆరోగ్య రికార్డులను ఎవరు యాక్సెస్ చేయవచ్చో నియంత్రించండి",
+    "selectAnimal": "సమ్మతులను నిర్వహించడానికి జంతువును ఎంచుకోండి",
+    "grantConsent": "సమ్మతి ఇవ్వండి",
+    "noConsents": "సమ్మతి ఇవ్వబడలేదు",
+    "noConsentsDesc": "వారి ఆరోగ్య డేటాను ఎవరు చూడవచ్చో మీరు నియంత్రిస్తారు",
+    "grantedTo": "ఇవ్వబడింది",
+    "validFrom": "నుండి చెల్లుబాటు",
+    "validUntil": "వరకు చెల్లుబాటు",
+    "noExpiry": "గడువు లేదు",
+    "scope": {
+      "viewOnly": "చూడడం మాత్రమే",
+      "fullHistory": "పూర్తి చరిత్ర",
+      "treatment": "చికిత్స",
+      "emergency": "అత్యవసర"
+    },
+    "permissions": {
+      "medicalRecords": "వైద్య రికార్డులు",
+      "vaccinationRecords": "టీకా రికార్డులు",
+      "prescriptions": "మందుల చీటీలు",
+      "labResults": "ల్యాబ్ ఫలితాలు",
+      "geneticData": "జన్యు డేటా",
+      "hospitalRecords": "ఆసుపత్రి రికార్డులు",
+      "allowView": "చూడడానికి అనుమతి",
+      "allowNotes": "నోట్స్ రాయడానికి అనుమతి",
+      "allowPrescribe": "మందులు సూచించడానికి అనుమతి"
+    },
+    "actions": {
+      "revoke": "రద్దు చేయి",
+      "revoking": "రద్దు చేస్తోంది..."
+    },
+    "status": {
+      "active": "చురుకుగా ఉంది",
+      "revoked": "రద్దు చేయబడింది"
+    },
+    "modal": {
+      "title": "డేటా సమ్మతి ఇవ్వండి",
+      "preset": {
+        "viewOnly": "సంప్రదింపుల కోసం మాత్రమే చూడండి",
+        "treatment": "పూర్తి చికిత్స యాక్సెస్",
+        "emergency": "అత్యవసర యాక్సెస్"
+      },
+      "grantTo": {
+        "doctor": "డాక్టర్",
+        "hospital": "ఆసుపత్రి",
+        "network": "నెట్వర్క్"
+      }
+    }
   }
 }

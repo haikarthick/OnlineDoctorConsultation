@@ -106,7 +106,7 @@
 | P1-2 | HospitalNetworkService + routes | ✅ Done | HospitalNetworkService.ts + HospitalNetworkController.ts + 17 routes under /api/v1/hospital-networks + patient-consent routes |
 | P1-3 | corporate_admin + hospital_director roles — 4-file sync | ⚠️ Planned | PermissionService + PermissionContext + Navigation + App.tsx |
 | P1-4 | Hospital data isolation middleware | ⚠️ Planned | SQL-level scoping; all corporate_admin access auto-logged |
-| P1-5 | Corporate Admin — Hospital Network Management UI | ⚠️ Planned | NetworkDashboard, HospitalList, HospitalDetail, NetworkSettings pages |
+| P1-5 | Corporate Admin — Hospital Network Management UI | ✅ Done | HospitalNetworks.tsx — 3-tab UI: Networks list/stats/approve, Network Detail (dashboard+hospitals+members), Audit placeholder |
 | P1-6 | Patient Consent Management UI (pet_owner) | ⚠️ Planned | 6-dimension granular consent, include_hospital_records explicit flag |
 | P1-7 | Demo hospital network seed data | ⚠️ Planned | DemoVetGroup + assign existing demo hospitals + corporate_admin demo user |
 
@@ -133,3 +133,5 @@
 8. ✅ HerdMedical — i18n namespace added to all 5 locale files (prior)
 9. ✅ Marketplace — animal profile auto-populate listing (prior)
 10. ✅ Medical Records — deep navigation with animalId + recordId params (prior)
+
+11. `PatientConsent.tsx` — Full page implemented: 2-panel sidebar layout, animal list with active consent count badges, consent cards with scope badges + permissions grid + revoke action, Grant Consent modal with preset quick-fills, 6 data permission toggles (CSS-only), scope radio cards, grant-to tabs (Doctor/Hospital/Network), validity period pickers. All 5 locale files updated. PatientConsent.css with 4 responsive breakpoints.

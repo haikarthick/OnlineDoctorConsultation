@@ -5372,9 +5372,104 @@
     "signatureRequiredDesc": "वेट्स को जारी करने से पहले हस्ताक्षर अपलोड करने के लिए बाध्य करें"
   },
   "hospitalNetworks": {
-    "title": "अस्पताल नेटवर्क"
+    "title": "हॉस्पिटल नेटवर्क",
+    "createNetwork": "नेटवर्क बनाएं",
+    "selectNetwork": "← Networks टैब से कोई नेटवर्क चुनें",
+    "tabs": {
+      "networks": "नेटवर्क",
+      "detail": "नेटवर्क विवरण",
+      "audit": "ऑडिट और अनुपालन"
+    },
+    "stats": {
+      "total": "कुल नेटवर्क",
+      "approved": "स्वीकृत",
+      "pending": "अनुमोदन लंबित",
+      "hospitals": "कुल अस्पताल"
+    },
+    "table": {
+      "name": "नेटवर्क नाम",
+      "type": "प्रकार",
+      "headquarters": "मुख्यालय",
+      "members": "सदस्य",
+      "hospitals": "अस्पताल",
+      "status": "स्थिति",
+      "created": "बनाया गया",
+      "actions": "कार्रवाई"
+    },
+    "actions": {
+      "view": "देखें",
+      "approve": "स्वीकृत करें",
+      "edit": "संपादित करें"
+    },
+    "status": {
+      "approved": "स्वीकृत",
+      "pending": "अनुमोदन लंबित"
+    },
+    "modal": {
+      "createTitle": "हॉस्पिटल नेटवर्क बनाएं",
+      "editTitle": "नेटवर्क संपादित करें"
+    },
+    "detail": {
+      "hospitals": "अस्पताल",
+      "staff": "कर्मचारी और प्रशासक",
+      "assignHospital": "अस्पताल असाइन करें",
+      "addMember": "सदस्य जोड़ें",
+      "noHospitals": "कोई अस्पताल असाइन नहीं",
+      "noMembers": "अभी तक कोई सदस्य नहीं"
+    },
+    "audit": {
+      "title": "ऑडिट और अनुपालन",
+      "comingSoon": "ऑडिट लॉग व्यूअर — एंटरप्राइज़ ऑडिट ट्रेल जल्द आ रहा है।"
+    }
   },
   "patientConsent": {
-    "title": "रोगी डेटा सहमति"
+    "title": "रोगी डेटा सहमति",
+    "subtitle": "नियंत्रित करें कि आपके जानवरों के स्वास्थ्य रिकॉर्ड तक किसकी पहुंच हो",
+    "selectAnimal": "सहमति प्रबंधित करने के लिए जानवर चुनें",
+    "grantConsent": "सहमति दें",
+    "noConsents": "कोई सहमति नहीं दी गई",
+    "noConsentsDesc": "आप नियंत्रित करते हैं कि उनका स्वास्थ्य डेटा कौन देख सकता है",
+    "grantedTo": "को दी गई",
+    "validFrom": "से मान्य",
+    "validUntil": "तक मान्य",
+    "noExpiry": "कोई समाप्ति नहीं",
+    "scope": {
+      "viewOnly": "केवल देखें",
+      "fullHistory": "पूर्ण इतिहास",
+      "treatment": "उपचार",
+      "emergency": "आपातकाल"
+    },
+    "permissions": {
+      "medicalRecords": "चिकित्सा रिकॉर्ड",
+      "vaccinationRecords": "टीकाकरण रिकॉर्ड",
+      "prescriptions": "नुस्खे",
+      "labResults": "लैब परिणाम",
+      "geneticData": "आनुवंशिक डेटा",
+      "hospitalRecords": "अस्पताल रिकॉर्ड",
+      "allowView": "देखने की अनुमति",
+      "allowNotes": "नोट्स बनाने की अनुमति",
+      "allowPrescribe": "नुस्खा लिखने की अनुमति"
+    },
+    "actions": {
+      "revoke": "रद्द करें",
+      "revoking": "रद्द हो रहा है..."
+    },
+    "status": {
+      "active": "सक्रिय",
+      "revoked": "रद्द"
+    },
+    "modal": {
+      "title": "डेटा सहमति दें",
+      "preset": {
+        "viewOnly": "परामर्श के लिए केवल देखें",
+        "treatment": "पूर्ण उपचार पहुंच",
+        "emergency": "आपातकालीन पहुंच"
+      },
+      "grantTo": {
+        "doctor": "डॉक्टर",
+        "hospital": "अस्पताल",
+        "network": "नेटवर्क"
+      }
+    }
   }
 }
