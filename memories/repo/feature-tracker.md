@@ -25,13 +25,33 @@
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Render.com DEV + PROD services | ✅ | vetcare-dev (develop) + vetcare-app (main) |
-| GitHub Actions CI/CD promotion | ✅ | develop → main via "Promote DEV to PROD" workflow |
-| DB schema separation | ✅ | vetcare_dev (develop) / vetcare_prod (main) |
+| Render.com DEV + DEMO services | ✅ | vetcare-dev (develop) + vetcare-demo (demo branch) |
+| GitHub Actions CI/CD promotion | ✅ | develop → demo via "Promote DEV to Demo" workflow |
+| DB schema separation | ✅ | vetcare_dev (Render Postgres) / vetcare_demo (Neon PostgreSQL) |
+| Neon PostgreSQL for Demo | ✅ | Permanent free tier, never expires — `neondb` project, ap-southeast-1 |
+| Cloudinary for Demo | ✅ | Cloud: dd8dcwzxz — env set via GitHub Actions |
+| Automated Demo env setup | ✅ | setup-demo-env.yml — calls Render API, no dashboard needed |
 | render-build.sh | ✅ | Builds frontend (Vite) then backend (tsc) |
 | render-start.sh with timeout guards | ✅ | All node subprocesses have timeout + connectionTimeoutMillis |
 | HTTP port bound before DB connect | ✅ | Fixed 2026-04-07 — critical for free-tier Render health check |
 | connectWithRetry (5 attempts × 10s) | ✅ | Added 2026-04-06 |
+
+### Branch → Environment Mapping
+| Branch | Environment | Render Service | DB |
+|--------|------------|----------------|----|
+| `develop` | Dev | `vetcare-dev` | Render Postgres (vetcare_dev schema) |
+| `demo` | Demo | `vetcare-demo` | Neon PostgreSQL (vetcare_demo schema) |
+| `main` | Archive only | none | — |
+
+### Demo Environment GitHub Secrets (required)
+| Secret | Purpose |
+|--------|---------|
+| `RENDER_API_KEY` | Render Account → API Keys |
+| `RENDER_DEMO_SERVICE_ID` | From Render service URL (`srv-xxx`) |
+| `DEMO_DATABASE_URL` | Neon connection string |
+| `DEMO_JWT_SECRET` | `MGK_wYpUugWh3T5okMqk1GntXnXqIywml2CcN7V0I9MV8nkIFE_JFe5H4WRd_M4F` |
+| `CLOUDINARY_URL` | `cloudinary://914841916273552:iKt-RX_vRyiCuGO1rmyFkISAR3o@dd8dcwzxz` |
+| `RENDER_DEPLOY_HOOK_DEMO` | Render → vetcare-demo → Settings → Deploy Hooks |
 
 ## Pet Owner Module
 

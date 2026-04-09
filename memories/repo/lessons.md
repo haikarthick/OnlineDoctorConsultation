@@ -266,3 +266,18 @@
 - **Context:** NetworkSubscriptions.tsx had a standalone `formatPrice()` helper with hardcoded `'en-IN'` locale; FinancialAnalytics.tsx used `toLocaleDateString()` directly — both bypass admin settings.
 - **Lesson:** `formatCurrency()`, `formatDate()`, `formatSlotTime()` from `useSettings()` are MANDATORY for every time/date/currency display. Never create local format helpers — they always get out of sync with admin settings. Search for `toLocaleDateString`, `toLocaleTimeString`, `Intl.NumberFormat`, `toLocaleString` before any commit and fix all occurrences.
 - **Apply to:** All pages, all future features
+
+### LESSON-043 — Demo Environment Uses demo Branch, Not main
+- **Context:** Previously PROD used `main` branch. Renamed to Demo to clarify purpose; `main` is now archive-only.
+- **Lesson:** Branch → Environment mapping is: `develop` → Dev (Render Postgres), `demo` → Demo (Neon DB). NEVER use `main` as a deployment target branch — it causes confusion between git history and live environments. The promote workflow merges `develop → demo`.
+- **Apply to:** All future branch strategy and CI/CD changes
+
+### LESSON-044 — Use Render REST API (not dashboard) to Set Env Vars Automatically
+- **Context:** Setting Demo env vars (DATABASE_URL, JWT_SECRET, CLOUDINARY_URL etc.) manually in Render dashboard is error-prone and not reproducible. 
+- **Lesson:** Use `PUT /v1/services/{service_id}/env-vars` Render API endpoint in a GitHub Actions `workflow_dispatch` workflow. All secrets stay in GitHub (one source of truth). Re-runnable any time. Requires `RENDER_API_KEY` and `RENDER_DEMO_SERVICE_ID` GitHub secrets.
+- **Apply to:** All future environment setup automation
+
+### LESSON-045 — Neon DB Requires SSL — Already Handled by config/index.ts
+- **Context:** Neon PostgreSQL requires SSL (`?sslmode=require` in connection string). Needed to verify backend handles this.
+- **Lesson:** `config/index.ts` already sets `ssl: { rejectUnauthorized: false }` whenever `DATABASE_URL` env var is present. Neon's SSL works automatically — no code change needed. The `?sslmode=require` in the Neon URL is sufficient.
+- **Apply to:** Any future external PostgreSQL provider (Supabase, Railway, etc.)
