@@ -123,7 +123,19 @@
 
 ## Recently Completed (last 10)
 
-1. ✅ Animal Unique ID — 6-digit upgrade + Per-network patient ID series (2026-04-08)
+1. ✅ Privacy-First Hospital Patient Onboarding — Consent-Before-Access (2026-04-09)
+   - HARD RULE: Hospital requests enrollment → patient must approve → data flows only after
+   - DB: enrollment_status (pending_consent/active/declined/revoked) on animal_care_contexts
+   - DB: hospital_patient_invites table (walk-in patients, 72hr crypto token, expiry tracking)
+   - Migration 011 + database.ts safety nets
+   - HospitalNetworkService: 7 new methods (searchPatients, enrollAnimal updated, acceptEnrollment, declineEnrollment, getMyEnrollments, inviteWalkInPatient, getPendingEnrollments)
+   - 6 new API routes: search-patients, all-enrollments, invite-walkin, accept, decline, my-network-enrollments
+   - HospitalNetworks.tsx: new Patients tab (smart search, walk-in invite modal, enrollment list with filter tabs)
+   - NetworkMemberships.tsx: new pet_owner page (pending approvals with consent level selector, active memberships, past/declined)
+   - 4-file permission sync: network_membership_manage for pet_owner + farmer
+   - All 5 locale files: networkMemberships namespace + hospitalNetworks.patients section
+   - lessons.md: LESSON-029/030/031 — consent-before-access, walk-in invite pattern, dual-ID system
+2. ✅ Animal Unique ID — 6-digit upgrade + Per-network patient ID series (2026-04-08)
    - Platform VC-IDs upgraded: VC-DOG-26-000001 (was 5-digit)
    - Per-network IDs: PREFIX-DOG-26-000042 (e.g. APOLLO-DOG-26-000042)
    - New table: network_patient_id_sequences (race-safe per-network/species/year counter)
