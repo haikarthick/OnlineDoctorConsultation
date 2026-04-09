@@ -272,6 +272,24 @@ await connectWithRetry();  // ← AFTER, failures are logged not fatal
 - **Root Cause:** Generator script rewrote `auto-discovered.spec.ts` on every run, stripping manually added stubs from prior commits
 - **Fix:** For frontend-only routes (accept-invite, animal-timeline etc.) manually append stubs to `auto-discovered.spec.ts`. Verify pre-push hook assertion count matches expected total before pushing.
 
+### UI-005 — UserManagement Role Dropdowns Used 'vet' Instead of 'veterinarian'
+- **Symptom:** Admin could not change a vet's role or filter vets by role — UI sent `'vet'` but DB stores `'veterinarian'`
+- **Root Cause:** `getRoleBadge()`, role filter `<select>`, and role-change modal dropdown all used value `'vet'` instead of `'veterinarian'`. Long-standing copy-paste error from initial implementation.
+- **Fix:** Changed all three locations to `'veterinarian'` in `UserManagement.tsx`. Also added `farmer` and `corporate_admin` options that were missing entirely.
+- **Rule:** The only valid role strings in the DB are: `pet_owner`, `veterinarian`, `farmer`, `admin`, `corporate_admin`. Never use abbreviated forms like `'vet'`.
+
+### INFRA-001 — PowerShell Here-String Corrupts Template Literals in TypeScript
+- **Symptom:** `adminApi.ts` had `/role-change-requests/+id+/cancel` instead of backtick template literal — TypeScript parsed this as regex, threw "Unterminated regular expression literal"
+- **Root Cause:** PowerShell `Add-Content` or `Out-File` with here-strings (`@"..."@`) corrupts backtick characters — PowerShell uses backtick as its own escape character, stripping them from content
+- **Fix:** Use the `edit` tool (not PowerShell file write) when inserting TypeScript template literals. If PowerShell writes fail, fix in the source file directly with edit tool.
+- **Rule:** NEVER use PowerShell `Add-Content`/`Out-File`/`Set-Content` to write TypeScript template literals (`\`...\``). Use the edit tool instead.
+
+### INFRA-002 — JSX `<style>` Tag Disconnected When Inserting JSX Before It
+- **Symptom:** Settings.tsx had raw CSS text (`.settings-container { ... }`) in the JSX body — TypeScript threw 50+ parse errors
+- **Root Cause:** Prior edit inserted new JSX section but left the `<style>{`` opening on the wrong line — the JSX `<style>` block was split, leaving raw CSS exposed as invalid JSX tokens
+- **Fix:** After inserting JSX before a `<style>` tag, always verify the `<style>{`` opening is intact on its own line immediately before the first CSS rule
+- **Rule:** When adding JSX before a `<style>` tag in a component, verify the closing `</div>` + `<style>{\`` sequence is correct after the edit
+
 ---
 
 ## Deployment Checklist (Run Before Every Deploy)

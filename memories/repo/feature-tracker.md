@@ -123,7 +123,21 @@
 
 ## Recently Completed (last 10)
 
-1. ✅ Comprehensive Species Expansion — 10 → 40+ species (2026-04-09)
+1. ✅ Role Change Request System (2026-04-10)
+   - Users can request role changes from Settings → "Role & Account Type" section
+   - Admin approves/rejects from UserManagement → "Role Change Requests" tab
+   - DB: role_change_requests table (init.sql table 42 + runtime migration in database.ts)
+   - DB: users.role CHECK constraint updated to include corporate_admin (DROP/ADD constraint migration)
+   - Backend: 6 endpoints — submit/my/cancel/admin-list/approve/reject
+   - Frontend: Settings.tsx — request form, pending/approved banners, history table, re-login prompt
+   - Frontend: UserManagement.tsx — full requests tab with approve/reject + reject modal
+   - api.ts + adminApi.ts — 6 new API methods
+   - Fix: UserManagement 'vet' → 'veterinarian' long-standing bug in filter/badge/modal
+   - Fix: adminApi.ts template literals corrupted by PowerShell → fixed in api.ts class
+   - All 5 locales: settings.roleChange.* (34 keys) + adminRoleRequests.* namespace
+   - Commit: 1a1553c
+
+2. ✅ Comprehensive Species Expansion — 10 → 40+ species (2026-04-09)
    - Animals.tsx: BREED_DATABASE expanded to 40+ species with India-focused breeds
    - SPECIES_CATEGORIES added for grouped optgroup dropdowns (10 category groups)
    - SPECIES_ICONS: emoji for all 40+ species

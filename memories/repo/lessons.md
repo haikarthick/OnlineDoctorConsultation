@@ -211,3 +211,18 @@
 - **Context:** Network patient identification
 - **Lesson:** Every patient has TWO IDs: platform VC-ID (VC-DOG-26-000001, global) and network patient ID (APOLLO-DOG-26-000042, per-network). The network ID is auto-generated on enrollment using the network's id_prefix + species + year + 6-digit sequence.
 - **Apply to:** All future hospital network features
+
+### LESSON-032 — PostgreSQL Inline CHECK Constraint Migration Pattern
+- **Context:** Adding `corporate_admin` to the `users.role` CHECK constraint on an existing production database. PostgreSQL inline `CHECK (role IN (...))` constraints are auto-named `users_role_check`. You cannot ALTER them — you must DROP then ADD.
+- **Lesson:** To add a new value to an existing CHECK constraint: (1) `ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;` (2) `ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('existing', 'values', ..., 'new_value'));` — both in a single transaction in `database.ts seedDefaultSettings()` with `.catch(() => {})` to be non-fatal. Also update `init.sql` for fresh installs.
+- **Apply to:** Any future role addition, any future ENUM-like CHECK constraint change
+
+### LESSON-033 — Two api.ts Files: Class-Based (api.ts) vs Modular (api/index.ts)
+- **Context:** New API methods added to `frontend/src/services/api/adminApi.ts` but pages use `import apiService from '../services/api'` which resolves to the class-based `api.ts`, NOT the modular `api/index.ts`.
+- **Lesson:** The main `ApiService` CLASS is in `frontend/src/services/api.ts`. This is what all pages import. Methods in `api/adminApi.ts` (modular style) are NOT automatically available to pages. When adding new API methods, ALWAYS add them to BOTH: (1) `api.ts` class for existing pages, (2) `api/adminApi.ts` for future modular use.
+- **Apply to:** Every new API method going forward
+
+### LESSON-034 — PowerShell Corrupts TypeScript Template Literals
+- **Context:** PowerShell `Add-Content`/`Out-File` treated backtick as an escape character, removing them from template literals — TypeScript saw `/role-change-requests/+id+/cancel` (regex syntax) instead of `` `/role-change-requests/${id}/cancel` ``.
+- **Lesson:** NEVER use PowerShell file-write commands for TypeScript source with template literals. Use the `edit` tool for all TypeScript source edits. If PowerShell must write TypeScript, use `[System.IO.File]::WriteAllText()` which doesn't interpret backticks.
+- **Apply to:** All TypeScript source edits — use edit tool exclusively

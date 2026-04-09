@@ -70,3 +70,32 @@
 </details>
 
 ---
+
+## 2026-04-09 10:29 · `1a1553c` · ✨ FEAT
+
+**Commit:** feat: Role Change Request system + corporate_admin role support  
+**Author:** haikarthick  
+**Categories:** API · UTILS · DB · DB-SCHEMA · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/utils/database.ts
+  - docker/init.sql
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Settings.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/services/api.ts
+  - frontend/src/services/api/adminApi.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
