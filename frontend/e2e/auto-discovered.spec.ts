@@ -166,3 +166,17 @@ test.describe('Auto-Discovered — /patient-consent', () => {
     await context.close()
   })
 })
+
+test.describe('Auto-Discovered — /network-memberships', () => {
+  test('should load /network-memberships without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'pet_owner')
+    await page.goto('/network-memberships')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})
