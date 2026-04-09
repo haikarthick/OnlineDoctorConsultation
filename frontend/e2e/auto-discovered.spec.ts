@@ -179,4 +179,27 @@ test.describe('Auto-Discovered — /network-memberships', () => {
     expect(content!.length).toBeGreaterThan(0)
     await context.close()
   })
+
+  // ── Stubs for manually-added routes (not auto-generated) ──
+  test('should load /admin/network-subscriptions without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'admin')
+    await page.goto('/admin/network-subscriptions')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+
+  test('should load /accept-hospital-invite without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await page.goto('/accept-hospital-invite')
+    await page.waitForLoadState('domcontentloaded')
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
 })
