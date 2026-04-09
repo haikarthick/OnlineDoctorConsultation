@@ -1,0 +1,83 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 520px;
+  width: 100%;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-content.modal-wide { max-width: 700px; }
+.modal-close {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  background: none; border: none;
+  font-size: 1.2rem; cursor: pointer; color: #666;
+}
+.modal-close:hover { color: #333; }
+
+.seat-usage { display: flex; flex-direction: column; gap: 4px; }
+.seat-count { font-size: 0.85rem; font-weight: 600; }
+.seat-bar-track { height: 6px; background: #e5e7eb; border-radius: 3px; min-width: 80px; }
+.seat-bar { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.seat-bar-green { background: #22c55e; }
+.seat-bar-amber { background: #f59e0b; }
+.seat-bar-red { background: #ef4444; }
+
+.no-plan-badge { color: #9ca3af; font-style: italic; font-size: 0.85rem; }
+
+.action-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.module-btn.danger { background: #ef4444; color: #fff; border-color: #ef4444; }
+.module-btn.danger:hover { background: #dc2626; }
+.module-btn.success { background: #22c55e; color: #fff; border-color: #22c55e; }
+
+.plan-desc { font-size: 0.75rem; color: #6b7280; margin-top: 2px; }
+
+.suspend-warning { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.9rem; }
+
+.publish-toggle-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; }
+.publish-toggle-label input[type="checkbox"] { width: 16px; height: 16px; }
+
+/* Pricing panel */
+.pricing-panel h3 { margin-bottom: 0.5rem; }
+.pricing-panel-desc { color: #6b7280; margin-bottom: 1.5rem; }
+.pricing-global-row { display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: #f9fafb; border-radius: 8px; margin-bottom: 1.5rem; }
+.pricing-hint { font-size: 0.8rem; color: #6b7280; margin-top: 4px; }
+.toggle-btn { padding: 6px 16px; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+.toggle-btn.on { background: #d1fae5; color: #065f46; }
+.toggle-btn.off { background: #fee2e2; color: #991b1b; }
+.toggle-btn.small { padding: 4px 10px; font-size: 0.8rem; }
+.toggle-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.pricing-cta-section { margin-bottom: 1.5rem; }
+.pricing-cta-section h4 { margin-bottom: 0.75rem; }
+.pricing-sections { margin-bottom: 1.5rem; }
+.pricing-sections h4 { margin-bottom: 0.75rem; }
+.pricing-section-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6; }
+
+.pricing-preview { margin-bottom: 1.5rem; background: #f9fafb; border-radius: 8px; padding: 1rem; }
+.pricing-preview h4 { margin-bottom: 0.75rem; }
+.preview-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; }
+.preview-plan-name { font-weight: 700; margin-bottom: 4px; }
+.preview-seats { color: #4b5563; margin-bottom: 4px; font-size: 0.9rem; }
+.preview-cta { color: #6366f1; font-size: 0.85rem; }
+.preview-price { color: #16a34a; font-size: 0.85rem; }
+
+@media (max-width: 768px) {
+  .modal-content, .modal-content.modal-wide { max-width: 100%; padding: 1.25rem; }
+  .pricing-global-row { flex-direction: column; gap: 1rem; align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  .action-buttons { flex-direction: column; }
+}

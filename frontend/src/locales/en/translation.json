@@ -1,4 +1,4 @@
-{
+﻿{
   "common": {
     "loading": "Loading...",
     "cancel": "Cancel",
@@ -5736,5 +5736,62 @@
     "consentViewOnly": "View medical history and vaccination records only",
     "consentBasic": "View records + add treatment notes",
     "consentFull": "Full access including lab results and prescriptions"
+  }
+,
+  "adminNetworkSubscriptions": {
+    "title": "Network Subscriptions",
+    "subtitle": "Manage hospital network plans, seat limits, and pricing visibility",
+    "networksTab": "Networks",
+    "plansTab": "Plans",
+    "pricingTab": "Pricing Visibility",
+    "plansTitle": "Subscription Plans",
+    "newPlan": "New Plan",
+    "col": {
+      "network": "Network",
+      "plan": "Plan",
+      "seats": "Seats",
+      "hospitals": "Hospitals",
+      "status": "Status",
+      "actions": "Actions",
+      "planName": "Plan Name",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "visibility": "Visibility"
+    },
+    "action": {
+      "setPlan": "Set Plan",
+      "overrideSeats": "Override Seats",
+      "suspend": "Suspend",
+      "unsuspend": "Unsuspend"
+    }
+  },
+  "hospitalStaff": {
+    "validatingInvite": "Validating your invite...",
+    "invalidInvite": "Invite Invalid or Expired",
+    "contactAdmin": "Please contact your hospital administrator to resend the invite.",
+    "goToLogin": "Go to Login",
+    "accountCreated": "Account Created!",
+    "accountCreatedDesc": "Welcome to {{network}}. You can now log in with your email and password.",
+    "proceedToLogin": "Log In Now",
+    "acceptInviteTitle": "Accept Hospital Invite",
+    "acceptInviteSubtitle": "You've been invited to join {{hospital}} on VetCare.",
+    "email": "Email",
+    "position": "Position",
+    "hospital": "Hospital",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "createAccount": "Create My Account",
+    "creating": "Creating account...",
+    "privacyNote": "Your data is private and only accessible within your hospital network. Patient data requires separate patient consent.",
+    "seatLimitReached": "Seat limit reached ({{used}}/{{limit}}). Contact platform admin to upgrade.",
+    "networkSuspended": "This network is suspended. Contact platform support."
+  },
+  "seatLimit": {
+    "atLimit": "Seat limit reached",
+    "nearLimit": "Near seat limit",
+    "contactUs": "Contact us to increase your seat limit"
   }
 }

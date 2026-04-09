@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+﻿import { Router, Request, Response } from 'express';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
@@ -68,6 +68,11 @@ import {
   createHospitalNetworkSchema, addNetworkMemberSchema, createPatientConsentSchema,
   // Role Change Requests
   roleChangeRequestSchema, rejectRoleChangeSchema,
+  // Network Subscriptions + Staff Invites
+  createNetworkPlanSchema, updateNetworkPlanSchema,
+  setNetworkSubscriptionSchema, overrideSeatLimitSchema,
+  suspendNetworkSchema, updatePricingSettingsSchema,
+  inviteHospitalStaffSchema, acceptStaffInviteSchema,
 } from '../middleware/validation';
 import { requireFeature, getAllFeatureFlags } from '../config/featureFlags';
 import AuthController from '../controllers/AuthController';
@@ -1176,6 +1181,275 @@ router.put('/admin/role-change-requests/:id/reject', authMiddleware, roleMiddlew
     `UPDATE role_change_requests SET status = 'rejected', reviewed_by = $1, reviewed_at = NOW(), rejection_reason = $2, updated_at = NOW() WHERE id = $3`,
     [authReq.userId, rejection_reason, req.params.id]
   );
+  res.json({ success: true });
+}));
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NETWORK SUBSCRIPTION PLANS (platform admin only)
+// ─────────────────────────────────────────────────────────────────────────────
+
+router.get('/network-subscription-plans', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const db = (await import('../utils/database')).default;
+  const isAdmin = authReq.role === 'admin';
+  const result = await db.query(
+    isAdmin
+      ? `SELECT * FROM network_subscription_plans ORDER BY sort_order, name`
+      : `SELECT id, name, description, max_seats, max_hospitals, price_monthly, price_annually, currency, features, sort_order FROM network_subscription_plans WHERE is_published = true AND is_active = true ORDER BY sort_order, name`
+  );
+  res.json({ success: true, data: result.rows });
+}));
+
+router.post('/admin/network-subscription-plans', authMiddleware, roleMiddleware(['admin']), validateBody(createNetworkPlanSchema), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const { name, description, max_seats, max_hospitals, price_monthly, price_annually, currency, features, is_published, sort_order } = req.body;
+  const result = await db.query(
+    `INSERT INTO network_subscription_plans (name, description, max_seats, max_hospitals, price_monthly, price_annually, currency, features, is_published, sort_order) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+    [name, description||null, max_seats||null, max_hospitals||null, price_monthly||null, price_annually||null, currency||'INR', features ? JSON.stringify(features) : '{}', is_published||false, sort_order||0]
+  );
+  res.status(201).json({ success: true, data: result.rows[0] });
+}));
+
+router.put('/admin/network-subscription-plans/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateNetworkPlanSchema), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const fields = req.body;
+  const setClauses = Object.keys(fields).map((k, i) => `"${k}" = $${i + 2}`).join(', ');
+  const values = Object.values(fields);
+  const result = await db.query(`UPDATE network_subscription_plans SET ${setClauses}, updated_at = NOW() WHERE id = $1 RETURNING *`, [req.params.id, ...values]);
+  if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Plan not found' });
+  res.json({ success: true, data: result.rows[0] });
+}));
+
+router.delete('/admin/network-subscription-plans/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const inUse = await db.query(`SELECT COUNT(*) FROM network_subscriptions WHERE plan_id = $1`, [req.params.id]);
+  if (parseInt(inUse.rows[0].count) > 0) return res.status(400).json({ success: false, message: 'Plan is in use by one or more networks' });
+  await db.query(`UPDATE network_subscription_plans SET is_active = false, updated_at = NOW() WHERE id = $1`, [req.params.id]);
+  res.json({ success: true });
+}));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NETWORK SUBSCRIPTIONS ADMIN MANAGEMENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function countSeatsUsed(db: any, networkId: string): Promise<number> {
+  const r = await db.query(`SELECT COUNT(*) FROM hospital_network_members WHERE network_id = $1 AND is_active = true`, [networkId]);
+  return parseInt(r.rows[0].count);
+}
+async function checkSeatLimit(networkId: string, db: any): Promise<{ allowed: boolean; used: number; limit: number; status: string }> {
+  const sub = await db.query(`SELECT seat_limit, status FROM network_subscriptions WHERE network_id = $1`, [networkId]);
+  if (sub.rows.length === 0) return { allowed: true, used: 0, limit: 5, status: 'trial' };
+  const { seat_limit, status } = sub.rows[0];
+  if (status === 'suspended') return { allowed: false, used: 0, limit: seat_limit, status };
+  const used = await countSeatsUsed(db, networkId);
+  return { allowed: used < seat_limit, used, limit: seat_limit, status };
+}
+
+router.get('/admin/network-subscriptions', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const result = await db.query(`
+    SELECT hn.id AS "networkId", hn.name AS "networkName", hn.is_approved AS "isApproved",
+      ns.id AS "subscriptionId", ns.seat_limit AS "seatLimit", ns.status,
+      ns.billing_cycle AS "billingCycle", ns.suspended_at AS "suspendedAt",
+      ns.suspension_reason AS "suspensionReason", ns.admin_notes AS "adminNotes",
+      nsp.name AS "planName", nsp.id AS "planId",
+      (SELECT COUNT(*) FROM hospital_network_members m WHERE m.network_id = hn.id AND m.is_active = true) AS "seatsUsed",
+      (SELECT COUNT(*) FROM vet_hospitals vh WHERE vh.network_id = hn.id) AS "hospitalsCount"
+    FROM hospital_networks hn
+    LEFT JOIN network_subscriptions ns ON ns.network_id = hn.id
+    LEFT JOIN network_subscription_plans nsp ON nsp.id = ns.plan_id
+    WHERE hn.is_active = true ORDER BY hn.name
+  `);
+  res.json({ success: true, data: result.rows });
+}));
+
+router.post('/admin/networks/:id/set-subscription', authMiddleware, roleMiddleware(['admin']), validateBody(setNetworkSubscriptionSchema), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const { plan_id, seat_limit, status, billing_cycle, ends_at, admin_notes } = req.body;
+  const result = await db.query(
+    `INSERT INTO network_subscriptions (network_id, plan_id, seat_limit, status, billing_cycle, ends_at, admin_notes) VALUES ($1,$2,$3,$4,$5,$6,$7)
+     ON CONFLICT (network_id) DO UPDATE SET plan_id=EXCLUDED.plan_id, seat_limit=EXCLUDED.seat_limit, status=EXCLUDED.status, billing_cycle=EXCLUDED.billing_cycle, ends_at=EXCLUDED.ends_at, admin_notes=EXCLUDED.admin_notes, updated_at=NOW() RETURNING *`,
+    [req.params.id, plan_id||null, seat_limit, status||'trial', billing_cycle||'none', ends_at||null, admin_notes||null]
+  );
+  res.json({ success: true, data: result.rows[0] });
+}));
+
+router.put('/admin/networks/:id/override-seat-limit', authMiddleware, roleMiddleware(['admin']), validateBody(overrideSeatLimitSchema), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const { seat_limit, admin_notes } = req.body;
+  const result = await db.query(
+    `INSERT INTO network_subscriptions (network_id, seat_limit, admin_notes) VALUES ($1,$2,$3)
+     ON CONFLICT (network_id) DO UPDATE SET seat_limit=EXCLUDED.seat_limit, admin_notes=COALESCE(EXCLUDED.admin_notes,network_subscriptions.admin_notes), updated_at=NOW() RETURNING *`,
+    [req.params.id, seat_limit, admin_notes||null]
+  );
+  res.json({ success: true, data: result.rows[0] });
+}));
+
+router.post('/admin/networks/:id/suspend', authMiddleware, roleMiddleware(['admin']), validateBody(suspendNetworkSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const db = (await import('../utils/database')).default;
+  const { suspension_reason } = req.body;
+  await db.query(
+    `INSERT INTO network_subscriptions (network_id, seat_limit, status, suspended_at, suspended_by, suspension_reason) VALUES ($1,5,'suspended',NOW(),$2,$3)
+     ON CONFLICT (network_id) DO UPDATE SET status='suspended', suspended_at=NOW(), suspended_by=$2, suspension_reason=$3, updated_at=NOW()`,
+    [req.params.id, authReq.userId, suspension_reason]
+  );
+  res.json({ success: true, message: 'Network suspended' });
+}));
+
+router.post('/admin/networks/:id/unsuspend', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  await db.query(`UPDATE network_subscriptions SET status='active', suspended_at=NULL, suspended_by=NULL, suspension_reason=NULL, updated_at=NOW() WHERE network_id=$1`, [req.params.id]);
+  res.json({ success: true, message: 'Network unsuspended' });
+}));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRICING VISIBILITY (public endpoint + admin management)
+// ─────────────────────────────────────────────────────────────────────────────
+
+router.get('/pricing/plans', asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const [plansResult, settingsResult] = await Promise.all([
+    db.query(`SELECT id, name, description, max_seats, max_hospitals, price_monthly, price_annually, currency, features, sort_order FROM network_subscription_plans WHERE is_published = true AND is_active = true ORDER BY sort_order`),
+    db.query(`SELECT key, value FROM system_settings WHERE key LIKE 'pricing.%'`),
+  ]);
+  const settings: Record<string, string> = {};
+  for (const row of settingsResult.rows) settings[row.key] = row.value;
+  const globalVisible = settings['pricing.visibility.global'] === 'true';
+  res.json({ success: true, data: {
+    isVisible: globalVisible,
+    plans: globalVisible ? plansResult.rows : [],
+    ctaText: settings['pricing.cta_text'] || 'Contact us for pricing',
+    ctaEmail: settings['pricing.cta_email'] || '',
+    ctaPhone: settings['pricing.cta_phone'] || '',
+    visibility: {
+      global: globalVisible,
+      landing_page: settings['pricing.visibility.landing_page'] === 'true',
+      registration: settings['pricing.visibility.registration'] === 'true',
+      corp_dashboard: settings['pricing.visibility.corp_dashboard'] === 'true',
+      upgrade_prompts: settings['pricing.visibility.upgrade_prompts'] === 'true',
+    },
+  }});
+}));
+
+router.get('/admin/pricing-settings', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const [plansResult, settingsResult] = await Promise.all([
+    db.query(`SELECT * FROM network_subscription_plans ORDER BY sort_order`),
+    db.query(`SELECT key, value FROM system_settings WHERE key LIKE 'pricing.%'`),
+  ]);
+  const settings: Record<string, string> = {};
+  for (const row of settingsResult.rows) settings[row.key] = row.value;
+  res.json({ success: true, data: { plans: plansResult.rows, settings } });
+}));
+
+router.put('/admin/pricing-settings', authMiddleware, roleMiddleware(['admin']), validateBody(updatePricingSettingsSchema), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  for (const [key, value] of Object.entries(req.body)) {
+    await db.query(`INSERT INTO system_settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`, [key, String(value)]);
+  }
+  res.json({ success: true });
+}));
+
+router.get('/my-network-subscription', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const db = (await import('../utils/database')).default;
+  const netResult = await db.query(
+    `SELECT id FROM hospital_networks WHERE id IN (SELECT network_id FROM hospital_network_members WHERE user_id=$1 AND network_role='corporate_admin' AND is_active=true) LIMIT 1`,
+    [authReq.userId]
+  );
+  if (netResult.rows.length === 0) return res.json({ success: true, data: null });
+  const networkId = netResult.rows[0].id;
+  const result = await db.query(
+    `SELECT ns.*, nsp.name AS "planName", nsp.price_monthly AS "priceMonthly", nsp.price_annually AS "priceAnnually",
+      (SELECT COUNT(*) FROM hospital_network_members m WHERE m.network_id=ns.network_id AND m.is_active=true) AS "seatsUsed"
+     FROM network_subscriptions ns LEFT JOIN network_subscription_plans nsp ON nsp.id=ns.plan_id WHERE ns.network_id=$1`,
+    [networkId]
+  );
+  const vis = await db.query(`SELECT value FROM system_settings WHERE key='pricing.visibility.corp_dashboard'`);
+  const showPrice = vis.rows[0]?.value === 'true';
+  const sub = result.rows[0] || { network_id: networkId, seat_limit: 5, status: 'trial', seatsUsed: 0, planName: 'Trial' };
+  if (!showPrice) { delete sub.priceMonthly; delete sub.priceAnnually; }
+  res.json({ success: true, data: sub });
+}));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HOSPITAL STAFF INVITES (invite-only registration for hospital_staff role)
+// ─────────────────────────────────────────────────────────────────────────────
+
+router.post('/hospital-networks/:id/invite-staff', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian']), validateBody(inviteHospitalStaffSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const db = (await import('../utils/database')).default;
+  const networkId = req.params.id;
+  const seat = await checkSeatLimit(networkId, db);
+  if (!seat.allowed) {
+    if (seat.status === 'suspended') return res.status(403).json({ success: false, message: 'This network has been suspended. Contact platform support.', code: 'network_suspended' });
+    return res.status(403).json({ success: false, message: `Seat limit reached (${seat.used}/${seat.limit}). Contact platform admin to upgrade.`, code: 'seat_limit_exceeded', used: seat.used, limit: seat.limit });
+  }
+  const { invitee_email, invitee_name, staff_position, hospital_id } = req.body;
+  const crypto = require('crypto');
+  const token = crypto.randomBytes(48).toString('hex');
+  const existing = await db.query(`SELECT id FROM hospital_staff_invites WHERE network_id=$1 AND invitee_email=$2 AND status='pending' AND expires_at>NOW()`, [networkId, invitee_email]);
+  if (existing.rows.length > 0) return res.status(409).json({ success: false, message: 'A pending invite already exists for this email' });
+  await db.query(`INSERT INTO hospital_staff_invites (network_id, hospital_id, invited_by, invitee_email, invitee_name, staff_position, invite_token) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+    [networkId, hospital_id||null, authReq.userId, invitee_email, invitee_name, staff_position, token]);
+  res.status(201).json({ success: true, message: 'Invite created. Share the acceptance link with the staff member.', data: { token, expires_in: '72 hours' } });
+}));
+
+router.get('/hospital-staff-invites/token/:token', asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const result = await db.query(
+    `SELECT hsi.*, hn.name AS "networkName", vh.name AS "hospitalName" FROM hospital_staff_invites hsi JOIN hospital_networks hn ON hn.id=hsi.network_id LEFT JOIN vet_hospitals vh ON vh.id=hsi.hospital_id WHERE hsi.invite_token=$1`,
+    [req.params.token]
+  );
+  if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Invite not found' });
+  const invite = result.rows[0];
+  if (invite.status !== 'pending') return res.status(400).json({ success: false, message: `Invite has been ${invite.status}` });
+  if (new Date(invite.expires_at) < new Date()) {
+    await db.query(`UPDATE hospital_staff_invites SET status='expired' WHERE invite_token=$1`, [req.params.token]);
+    return res.status(400).json({ success: false, message: 'This invite has expired. Ask your administrator to resend.' });
+  }
+  res.json({ success: true, data: { email: invite.invitee_email, name: invite.invitee_name, position: invite.staff_position, networkName: invite.networkName, hospitalName: invite.hospitalName } });
+}));
+
+router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSchema), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const { token, first_name, last_name, phone, password } = req.body;
+  const inviteResult = await db.query(`SELECT * FROM hospital_staff_invites WHERE invite_token=$1 AND status='pending' AND expires_at>NOW()`, [token]);
+  if (inviteResult.rows.length === 0) return res.status(400).json({ success: false, message: 'Invalid, expired, or already used invite' });
+  const invite = inviteResult.rows[0];
+  const seat = await checkSeatLimit(invite.network_id, db);
+  if (!seat.allowed) return res.status(403).json({ success: false, message: 'Seat limit reached. Contact your network administrator.', code: 'seat_limit_exceeded' });
+  const existing = await db.query(`SELECT id FROM users WHERE email=$1`, [invite.invitee_email]);
+  if (existing.rows.length > 0) return res.status(409).json({ success: false, message: 'An account with this email already exists. Please log in.' });
+  const bcrypt = require('bcryptjs');
+  const password_hash = await bcrypt.hash(password, 12);
+  const userResult = await db.query(
+    `INSERT INTO users (email, first_name, last_name, phone, role, password_hash) VALUES ($1,$2,$3,$4,'hospital_staff',$5) RETURNING id, email, first_name, last_name, role`,
+    [invite.invitee_email, first_name, last_name, phone, password_hash]
+  );
+  const newUser = userResult.rows[0];
+  await db.query(`INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by) VALUES ($1,$2,'hospital_staff',$3,$4) ON CONFLICT (network_id, user_id) DO NOTHING`,
+    [invite.network_id, newUser.id, invite.hospital_id, invite.invited_by]);
+  await db.query(`INSERT INTO staff_positions (hospital_id, user_id, position) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
+    [invite.hospital_id, newUser.id, invite.staff_position]).catch(()=>{});
+  await db.query(`UPDATE hospital_staff_invites SET status='accepted', accepted_at=NOW(), accepted_user_id=$1 WHERE invite_token=$2`, [newUser.id, token]);
+  res.status(201).json({ success: true, message: 'Account created successfully. You can now log in.' });
+}));
+
+router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  const result = await db.query(
+    `SELECT hsi.*, u.first_name AS "inviterFirstName", u.last_name AS "inviterLastName", vh.name AS "hospitalName" FROM hospital_staff_invites hsi JOIN users u ON u.id=hsi.invited_by LEFT JOIN vet_hospitals vh ON vh.id=hsi.hospital_id WHERE hsi.network_id=$1 ORDER BY hsi.created_at DESC`,
+    [req.params.id]
+  );
+  res.json({ success: true, data: result.rows });
+}));
+
+router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const db = (await import('../utils/database')).default;
+  await db.query(`UPDATE hospital_staff_invites SET status='revoked', updated_at=NOW() WHERE id=$1 AND network_id=$2 AND status='pending'`, [req.params.inviteId, req.params.id]);
   res.json({ success: true });
 }));
 

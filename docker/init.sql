@@ -1716,3 +1716,88 @@ CREATE INDEX IF NOT EXISTS idx_rcr_status ON role_change_requests(status);
 DROP TRIGGER IF EXISTS update_role_change_requests_updated_at ON role_change_requests;
 CREATE TRIGGER update_role_change_requests_updated_at BEFORE UPDATE ON role_change_requests
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- 43. NETWORK SUBSCRIPTION PLANS (platform admin defines tiers)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS network_subscription_plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  max_seats INTEGER,
+  max_hospitals INTEGER,
+  price_monthly DECIMAL(10,2),
+  price_annually DECIMAL(10,2),
+  currency VARCHAR(10) DEFAULT 'INR',
+  features JSONB DEFAULT '{}',
+  is_published BOOLEAN DEFAULT false,
+  sort_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_nsp_is_published ON network_subscription_plans(is_published);
+CREATE INDEX IF NOT EXISTS idx_nsp_is_active ON network_subscription_plans(is_active);
+DROP TRIGGER IF EXISTS update_nsp_updated_at ON network_subscription_plans;
+CREATE TRIGGER update_nsp_updated_at BEFORE UPDATE ON network_subscription_plans
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- 44. NETWORK SUBSCRIPTIONS (links a network to its plan + tracks seat usage)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS network_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  plan_id UUID REFERENCES network_subscription_plans(id) ON DELETE SET NULL,
+  seat_limit INTEGER NOT NULL DEFAULT 5,
+  status VARCHAR(20) NOT NULL DEFAULT 'trial'
+    CHECK (status IN ('trial', 'active', 'suspended', 'expired', 'cancelled')),
+  billing_cycle VARCHAR(20) DEFAULT 'none'
+    CHECK (billing_cycle IN ('monthly', 'annually', 'custom', 'none')),
+  starts_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  ends_at TIMESTAMP,
+  suspended_at TIMESTAMP,
+  suspended_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  suspension_reason TEXT,
+  admin_notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(network_id)
+);
+CREATE INDEX IF NOT EXISTS idx_ns_network_id ON network_subscriptions(network_id);
+CREATE INDEX IF NOT EXISTS idx_ns_status ON network_subscriptions(status);
+DROP TRIGGER IF EXISTS update_ns_updated_at ON network_subscriptions;
+CREATE TRIGGER update_ns_updated_at BEFORE UPDATE ON network_subscriptions
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- 45. HOSPITAL STAFF INVITES (invite-only registration for non-vet staff)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS hospital_staff_invites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+  invited_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  invitee_email VARCHAR(255) NOT NULL,
+  invitee_name VARCHAR(200) NOT NULL,
+  staff_position VARCHAR(50) NOT NULL
+    CHECK (staff_position IN (
+      'nurse','technician','receptionist','lab_tech',
+      'radiologist','anesthesiologist','pharmacist','intern','admin_staff'
+    )),
+  invite_token VARCHAR(128) NOT NULL UNIQUE,
+  status VARCHAR(20) DEFAULT 'pending'
+    CHECK (status IN ('pending','accepted','expired','revoked')),
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '72 hours'),
+  accepted_at TIMESTAMPTZ,
+  accepted_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_hsi_network_id ON hospital_staff_invites(network_id);
+CREATE INDEX IF NOT EXISTS idx_hsi_token ON hospital_staff_invites(invite_token);
+CREATE INDEX IF NOT EXISTS idx_hsi_email ON hospital_staff_invites(invitee_email);
+CREATE INDEX IF NOT EXISTS idx_hsi_status ON hospital_staff_invites(status);
+DROP TRIGGER IF EXISTS update_hsi_updated_at ON hospital_staff_invites;
+CREATE TRIGGER update_hsi_updated_at BEFORE UPDATE ON hospital_staff_invites
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

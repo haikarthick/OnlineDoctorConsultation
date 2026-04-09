@@ -97,6 +97,8 @@ const CertificateSettings = lazy(() => import('./pages/admin/CertificateSettings
 // Hospital Network & Patient Consent
 const HospitalNetworks = React.lazy(() => import('./pages/hospitalnetwork/HospitalNetworks'))
 const PatientConsent = React.lazy(() => import('./pages/petowner/PatientConsent'))
+const NetworkSubscriptions = React.lazy(() => import('./pages/admin/NetworkSubscriptions'))
+const AcceptHospitalInvite = React.lazy(() => import('./pages/AcceptHospitalInvite'))
 const NetworkMemberships = React.lazy(() => import('./pages/petowner/NetworkMemberships'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
@@ -294,6 +296,8 @@ function AppRoutes() {
 
       {/* ── Hospital Network Module ── */}
       <Route path="/hospital-networks" element={<RoleRoute path="/hospital-networks"><AppLayout><HospitalNetworks /></AppLayout></RoleRoute>} />
+      <Route path="/admin/network-subscriptions" element={<RoleRoute path="/admin/network-subscriptions"><AppLayout><NetworkSubscriptions /></AppLayout></RoleRoute>} />
+      <Route path="/accept-hospital-invite" element={<AcceptHospitalInvite />} />
 
       {/* ── Patient Consent Module ── */}
       <Route path="/patient-consent" element={<RoleRoute path="/patient-consent"><AppLayout><PatientConsent /></AppLayout></RoleRoute>} />

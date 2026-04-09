@@ -1,4 +1,4 @@
-export type UserRole = 'veterinarian' | 'pet_owner' | 'farmer' | 'admin' | 'corporate_admin'
+export type UserRole = 'veterinarian' | 'pet_owner' | 'farmer' | 'admin' | 'corporate_admin' | 'hospital_staff'
 export type ConsultationStatus = 'pending' | 'confirmed' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'rescheduled' | 'completed' | 'missed'
 export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded' | 'partially_refunded'

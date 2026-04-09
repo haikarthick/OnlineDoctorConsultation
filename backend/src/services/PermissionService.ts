@@ -1,4 +1,4 @@
-import database from '../utils/database';
+﻿import database from '../utils/database';
 import logger from '../utils/logger';
 
 // ─── Permission Definitions ─────────────────────────────────

@@ -1,0 +1,74 @@
+.invite-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.invite-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  text-align: center;
+}
+.invite-logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #6366f1;
+  margin-bottom: 1.5rem;
+}
+.invite-error-icon, .invite-success-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+.invite-error-msg { color: #ef4444; margin: 0.5rem 0 1rem; }
+.invite-hint { color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+.invite-header { margin-bottom: 1.5rem; }
+.invite-header h2 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+.invite-header p { color: #6b7280; font-size: 0.95rem; }
+
+.invite-info-box {
+  background: #f0f4ff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+.invite-info-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.9rem; }
+.invite-info-label { color: #6b7280; }
+.invite-info-val { font-weight: 600; color: #1f2937; }
+
+.invite-form { text-align: left; }
+.invite-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.invite-form-group { margin-bottom: 1rem; }
+.invite-form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
+.invite-form-group input {
+  width: 100%; padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db; border-radius: 6px;
+  font-size: 0.95rem; outline: none; box-sizing: border-box;
+}
+.invite-form-group input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+.invite-input-readonly { background: #f9fafb; color: #6b7280; cursor: not-allowed; }
+
+.invite-form-error { background: #fee2e2; color: #991b1b; border-radius: 6px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.9rem; }
+.invite-privacy-note { font-size: 0.8rem; color: #6b7280; margin-bottom: 1rem; padding: 0.5rem; background: #f9fafb; border-radius: 6px; }
+
+.invite-btn {
+  width: 100%; padding: 0.875rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; border: none; border-radius: 8px;
+  font-size: 1rem; font-weight: 600; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.invite-btn:hover { opacity: 0.9; }
+.invite-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+  .invite-card { padding: 1.5rem; }
+  .invite-form-row { grid-template-columns: 1fr; }
+}

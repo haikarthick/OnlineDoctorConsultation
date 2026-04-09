@@ -733,6 +733,116 @@ class PostgresDatabase {
       )
     `).catch(() => {});
 
+    // ── Network Subscription Plans (platform admin tiers) ──────────────────
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS network_subscription_plans (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        max_seats INTEGER,
+        max_hospitals INTEGER,
+        price_monthly DECIMAL(10,2),
+        price_annually DECIMAL(10,2),
+        currency VARCHAR(10) DEFAULT 'INR',
+        features JSONB DEFAULT '{}',
+        is_published BOOLEAN DEFAULT false,
+        sort_order INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `).catch(() => {});
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS network_subscriptions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+        plan_id UUID REFERENCES network_subscription_plans(id) ON DELETE SET NULL,
+        seat_limit INTEGER NOT NULL DEFAULT 5,
+        status VARCHAR(20) NOT NULL DEFAULT 'trial'
+          CHECK (status IN ('trial', 'active', 'suspended', 'expired', 'cancelled')),
+        billing_cycle VARCHAR(20) DEFAULT 'none'
+          CHECK (billing_cycle IN ('monthly', 'annually', 'custom', 'none')),
+        starts_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        ends_at TIMESTAMP,
+        suspended_at TIMESTAMP,
+        suspended_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        suspension_reason TEXT,
+        admin_notes TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(network_id)
+      )
+    `).catch(() => {});
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS hospital_staff_invites (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+        hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+        invited_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        invitee_email VARCHAR(255) NOT NULL,
+        invitee_name VARCHAR(200) NOT NULL,
+        staff_position VARCHAR(50) NOT NULL
+          CHECK (staff_position IN (
+            'nurse','technician','receptionist','lab_tech',
+            'radiologist','anesthesiologist','pharmacist','intern','admin_staff'
+          )),
+        invite_token VARCHAR(128) NOT NULL UNIQUE,
+        status VARCHAR(20) DEFAULT 'pending'
+          CHECK (status IN ('pending','accepted','expired','revoked')),
+        expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '72 hours'),
+        accepted_at TIMESTAMPTZ,
+        accepted_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `).catch(() => {});
+
+    // Seed 5 default subscription plans if none exist (prices NULL = private)
+    const planCount = await this.pool.query(`SELECT COUNT(*) FROM network_subscription_plans`).catch(() => ({ rows: [{ count: '0' }] }));
+    if (parseInt(planCount.rows[0].count) === 0) {
+      await this.pool.query(`
+        INSERT INTO network_subscription_plans (name, description, max_seats, max_hospitals, sort_order, is_published)
+        VALUES
+          ('Trial',      '30-day free trial for new networks',            5,    1,  0, false),
+          ('Starter',    'For small clinics and single-hospital networks', 20,   2,  1, false),
+          ('Growth',     'For growing multi-hospital networks',            75,   5,  2, false),
+          ('Enterprise', 'For large hospital chains',                      250,  20, 3, false),
+          ('Unlimited',  'Custom enterprise agreements',                   NULL, NULL, 4, false)
+        ON CONFLICT DO NOTHING
+      `).catch(() => {});
+    }
+
+    // Seed pricing visibility settings in platform_settings (key-value)
+    const pricingKeys = [
+      ['pricing.visibility.global',          'false'],
+      ['pricing.visibility.landing_page',     'false'],
+      ['pricing.visibility.registration',     'false'],
+      ['pricing.visibility.corp_dashboard',   'false'],
+      ['pricing.visibility.upgrade_prompts',  'false'],
+      ['pricing.cta_text',                    'Contact us for pricing'],
+      ['pricing.cta_email',                   ''],
+      ['pricing.cta_phone',                   ''],
+    ];
+    for (const [key, value] of pricingKeys) {
+      await this.pool.query(
+        `INSERT INTO system_settings (key, value, description, is_public)
+         VALUES ($1, $2, $3, false)
+         ON CONFLICT (key) DO NOTHING`,
+        [key, value, `Pricing visibility control: ${key}`]
+      ).catch(() => {});
+    }
+
+    // Also ensure users.role CHECK includes hospital_staff
+    await this.pool.query(`
+      ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check
+    `).catch(() => {});
+    await this.pool.query(`
+      ALTER TABLE users ADD CONSTRAINT users_role_check
+        CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff'))
+    `).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

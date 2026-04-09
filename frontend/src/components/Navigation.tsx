@@ -192,6 +192,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin', 'veterinarian'], section: 'Administration' },
     { id: 'hospital-networks', label: 'Hospital Networks', icon: '🌐', path: '/hospital-networks',
       roles: ['admin', 'corporate_admin'], section: 'Administration' },
+    { id: 'admin-network-subscriptions', label: 'Network Subscriptions', icon: '💳', path: '/admin/network-subscriptions',
+      roles: ['admin'], section: 'Administration' },
 
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',

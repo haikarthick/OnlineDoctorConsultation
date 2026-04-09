@@ -2253,6 +2253,86 @@ class ApiService {
     const response = await this.client.put(`/admin/role-change-requests/${id}/reject`, { rejection_reason })
     return response.data
   }
+
+  // ── Network Subscription Plans ──
+  async getNetworkSubscriptionPlans() {
+    const response = await this.client.get('/network-subscription-plans')
+    return response.data
+  }
+  async createNetworkPlan(data: Record<string, unknown>) {
+    const response = await this.client.post('/admin/network-subscription-plans', data)
+    return response.data
+  }
+  async updateNetworkPlan(id: string, data: Record<string, unknown>) {
+    const response = await this.client.put(`/admin/network-subscription-plans/${id}`, data)
+    return response.data
+  }
+  async deleteNetworkPlan(id: string) {
+    const response = await this.client.delete(`/admin/network-subscription-plans/${id}`)
+    return response.data
+  }
+
+  // ── Network Subscriptions ──
+  async adminListNetworkSubscriptions() {
+    const response = await this.client.get('/admin/network-subscriptions')
+    return response.data
+  }
+  async setNetworkSubscription(networkId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/admin/networks/${networkId}/set-subscription`, data)
+    return response.data
+  }
+  async overrideSeatLimit(networkId: string, seatLimit: number, adminNotes?: string) {
+    const response = await this.client.put(`/admin/networks/${networkId}/override-seat-limit`, { seat_limit: seatLimit, admin_notes: adminNotes })
+    return response.data
+  }
+  async suspendNetwork(networkId: string, suspensionReason: string) {
+    const response = await this.client.post(`/admin/networks/${networkId}/suspend`, { suspension_reason: suspensionReason })
+    return response.data
+  }
+  async unsuspendNetwork(networkId: string) {
+    const response = await this.client.post(`/admin/networks/${networkId}/unsuspend`, {})
+    return response.data
+  }
+  async getMyNetworkSubscription() {
+    const response = await this.client.get('/my-network-subscription')
+    return response.data
+  }
+
+  // ── Pricing (public + admin) ──
+  async getPricingPlans() {
+    const response = await this.client.get('/pricing/plans')
+    return response.data
+  }
+  async getPricingSettings() {
+    const response = await this.client.get('/admin/pricing-settings')
+    return response.data
+  }
+  async updatePricingSettings(settings: Record<string, string>) {
+    const response = await this.client.put('/admin/pricing-settings', settings)
+    return response.data
+  }
+
+  // ── Hospital Staff Invites ──
+  async inviteHospitalStaff(networkId: string, data: Record<string, unknown>) {
+    const response = await this.client.post(`/hospital-networks/${networkId}/invite-staff`, data)
+    return response.data
+  }
+  async listStaffInvites(networkId: string) {
+    const response = await this.client.get(`/hospital-networks/${networkId}/staff-invites`)
+    return response.data
+  }
+  async revokeStaffInvite(networkId: string, inviteId: string) {
+    const response = await this.client.delete(`/hospital-networks/${networkId}/staff-invites/${inviteId}`)
+    return response.data
+  }
+  async getStaffInviteByToken(token: string) {
+    const response = await this.client.get(`/hospital-staff-invites/token/${token}`)
+    return response.data
+  }
+  async acceptStaffInvite(data: { token: string; first_name: string; last_name: string; phone?: string; password: string }) {
+    const response = await this.client.post('/hospital-staff-invites/accept', data)
+    return response.data
+  }
 }
 export const apiService = new ApiService()
 export default apiService

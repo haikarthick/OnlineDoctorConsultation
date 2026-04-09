@@ -1396,3 +1396,71 @@ export const roleChangeRequestSchema = Joi.object({
 export const rejectRoleChangeSchema = Joi.object({
   rejection_reason: Joi.string().min(5).max(500).required(),
 });
+
+// ─── Network Subscription Plans ──────────────────────────────
+export const createNetworkPlanSchema = Joi.object({
+  name: Joi.string().max(100).required(),
+  description: Joi.string().max(1000).optional().allow('', null),
+  max_seats: Joi.number().integer().min(1).optional().allow(null),
+  max_hospitals: Joi.number().integer().min(1).optional().allow(null),
+  price_monthly: Joi.number().min(0).optional().allow(null),
+  price_annually: Joi.number().min(0).optional().allow(null),
+  currency: Joi.string().max(10).default('INR'),
+  features: Joi.object().optional().allow(null),
+  is_published: Joi.boolean().default(false),
+  sort_order: Joi.number().integer().min(0).default(0),
+});
+
+export const updateNetworkPlanSchema = createNetworkPlanSchema.fork(
+  ['name'],
+  (field) => field.optional()
+).min(1);
+
+export const setNetworkSubscriptionSchema = Joi.object({
+  plan_id: Joi.string().uuid().optional().allow(null),
+  seat_limit: Joi.number().integer().min(1).required(),
+  status: Joi.string().valid('trial', 'active', 'suspended', 'expired', 'cancelled').default('trial'),
+  billing_cycle: Joi.string().valid('monthly', 'annually', 'custom', 'none').default('none'),
+  ends_at: Joi.date().optional().allow(null),
+  admin_notes: Joi.string().max(2000).optional().allow('', null),
+});
+
+export const overrideSeatLimitSchema = Joi.object({
+  seat_limit: Joi.number().integer().min(1).required(),
+  admin_notes: Joi.string().max(2000).optional().allow('', null),
+});
+
+export const suspendNetworkSchema = Joi.object({
+  suspension_reason: Joi.string().min(5).max(1000).required(),
+});
+
+// ─── Pricing Visibility Settings ─────────────────────────────
+export const updatePricingSettingsSchema = Joi.object({
+  'pricing.visibility.global': Joi.boolean().optional(),
+  'pricing.visibility.landing_page': Joi.boolean().optional(),
+  'pricing.visibility.registration': Joi.boolean().optional(),
+  'pricing.visibility.corp_dashboard': Joi.boolean().optional(),
+  'pricing.visibility.upgrade_prompts': Joi.boolean().optional(),
+  'pricing.cta_text': Joi.string().max(200).optional().allow(''),
+  'pricing.cta_email': Joi.string().email().max(255).optional().allow(''),
+  'pricing.cta_phone': Joi.string().max(30).optional().allow(''),
+}).min(1);
+
+// ─── Hospital Staff Invites ───────────────────────────────────
+export const inviteHospitalStaffSchema = Joi.object({
+  invitee_email: Joi.string().email().required(),
+  invitee_name: Joi.string().max(200).required(),
+  staff_position: Joi.string().valid(
+    'nurse','technician','receptionist','lab_tech',
+    'radiologist','anesthesiologist','pharmacist','intern','admin_staff'
+  ).required(),
+  hospital_id: Joi.string().uuid().optional().allow(null),
+});
+
+export const acceptStaffInviteSchema = Joi.object({
+  token: Joi.string().min(20).required(),
+  first_name: Joi.string().max(100).required(),
+  last_name: Joi.string().max(100).required(),
+  phone: Joi.string().max(20).required(),
+  password: Joi.string().min(8).required(),
+});
