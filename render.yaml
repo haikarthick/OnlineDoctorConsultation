@@ -1,14 +1,15 @@
 # ─────────────────────────────────────────────────────────────
-# Render.com Blueprint  —  Free-Tier Setup (1 DB, 2 Services)
+# Render.com Blueprint  —  Two-Environment Setup
 # ─────────────────────────────────────────────────────────────
-# Uses ONE free PostgreSQL database with schema-based separation:
-#   DEV  → branch: develop → vetcare-dev  → schema: vetcare_dev
-#   PROD → branch: main    → vetcare-app  → schema: vetcare_prod
+# DEV  → branch: develop → vetcare-dev  → schema: vetcare_dev  → Render Postgres
+# DEMO → branch: demo    → vetcare-demo → schema: vetcare_demo → Neon PostgreSQL
+#
+# DATABASE_URL for vetcare-demo is set via GitHub Actions (setup-demo-env.yml)
+# using the Render API — do NOT add fromDatabase here for demo.
 #
 # To apply:
 #   1. Go to https://dashboard.render.com/select-repo?type=blueprint
 #   2. Select this repo → click "Apply"
-#   3. All 3 resources are created in one click
 # ─────────────────────────────────────────────────────────────
 
 databases:
@@ -42,26 +43,28 @@ services:
       - key: GROQ_API_KEY
         sync: false
 
-  # ── PROD Environment ────────────────────────────────────
+  # ── DEMO Environment ────────────────────────────────────
+  # DATABASE_URL is Neon PostgreSQL — set via GitHub Actions setup-demo-env.yml
+  # All sensitive env vars managed via GitHub Secrets → Render API
   - type: web
-    name: vetcare-app
+    name: vetcare-demo
     runtime: node
     plan: free
-    branch: main
+    branch: demo
     buildCommand: chmod +x render-build.sh && ./render-build.sh
     startCommand: chmod +x render-start.sh && ./render-start.sh
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: vetcare-db
-          property: connectionString
       - key: DB_SCHEMA
-        value: vetcare_prod
+        value: vetcare_demo
       - key: NODE_ENV
         value: production
       - key: SEED_ON_STARTUP
-        value: "false"
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
       - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_URL
         sync: false
       - key: GROQ_API_KEY
         sync: false

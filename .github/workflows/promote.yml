@@ -1,17 +1,17 @@
-name: Promote DEV to PROD
+name: Promote DEV to Demo
 
-# Manual workflow to promote code from develop → main (production)
+# Manual workflow to promote code from develop → demo
 on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Type "yes" to confirm promotion to production'
+        description: 'Type "yes" to confirm promotion to Demo environment'
         required: true
         type: string
 
 jobs:
   promote:
-    name: Merge develop → main (production)
+    name: Merge develop → demo
     runs-on: ubuntu-latest
     if: github.event.inputs.confirm == 'yes'
     permissions:
@@ -30,10 +30,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Merge develop into main
+      - name: Merge develop into demo
         run: |
-          git fetch origin develop main
-          git checkout main
-          git merge origin/develop --no-edit -m "promote: develop → main (production)"
-          git push origin main
-          echo "✅ Successfully promoted develop → main"
+          git fetch origin develop demo
+          git checkout demo
+          git merge origin/develop --no-edit -m "promote: develop → demo"
+          git push origin demo
+          echo "✅ Successfully promoted develop → demo"

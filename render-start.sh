@@ -11,7 +11,7 @@ echo "════════════════════════�
 
 cd backend
 
-# ── Resolve schema name (vetcare_dev / vetcare_prod / public) ──
+# ── Resolve schema name (vetcare_dev / vetcare_demo / public) ──
 DB_SCHEMA="${DB_SCHEMA:-public}"
 echo "  Schema: $DB_SCHEMA"
 

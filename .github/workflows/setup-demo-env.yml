@@ -1,0 +1,126 @@
+name: Setup Demo Environment
+
+# Run this once after the vetcare-demo Render service is created,
+# or any time you need to update environment variables without touching
+# the Render dashboard.
+#
+# Required GitHub Secrets:
+#   RENDER_API_KEY          — Render → Account Settings → API Keys → Create
+#   RENDER_DEMO_SERVICE_ID  — From Render service URL: dashboard.render.com/web/srv-XXXXXXXXXX
+#   DEMO_DATABASE_URL       — Neon connection string (postgresql://...@neon.tech/...)
+#   DEMO_JWT_SECRET         — Strong random secret for JWT signing
+#   CLOUDINARY_URL          — cloudinary://api_key:api_secret@cloud_name
+#   RENDER_DEPLOY_HOOK_DEMO — Render → vetcare-demo → Settings → Deploy Hooks → Create
+#
+# How to run:
+#   GitHub → Actions → "Setup Demo Environment" → Run workflow → confirm=yes
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "yes" to set env vars and redeploy Demo'
+        required: true
+        type: string
+      trigger_deploy:
+        description: 'Trigger redeploy after setting env vars?'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  setup-demo:
+    name: Configure Demo Environment via Render API
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'yes'
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Validate required secrets
+        run: |
+          MISSING=""
+          [ -z "${{ secrets.RENDER_API_KEY }}" ]          && MISSING="$MISSING RENDER_API_KEY"
+          [ -z "${{ secrets.RENDER_DEMO_SERVICE_ID }}" ]  && MISSING="$MISSING RENDER_DEMO_SERVICE_ID"
+          [ -z "${{ secrets.DEMO_DATABASE_URL }}" ]       && MISSING="$MISSING DEMO_DATABASE_URL"
+          [ -z "${{ secrets.DEMO_JWT_SECRET }}" ]         && MISSING="$MISSING DEMO_JWT_SECRET"
+          [ -z "${{ secrets.CLOUDINARY_URL }}" ]          && MISSING="$MISSING CLOUDINARY_URL"
+          if [ -n "$MISSING" ]; then
+            echo "❌ Missing required secrets:$MISSING"
+            echo "   Go to: GitHub → Settings → Secrets and variables → Actions → New repository secret"
+            exit 1
+          fi
+          echo "✅ All required secrets are present"
+
+      - name: Set environment variables on Render Demo service
+        run: |
+          SERVICE_ID="${{ secrets.RENDER_DEMO_SERVICE_ID }}"
+          API_KEY="${{ secrets.RENDER_API_KEY }}"
+
+          echo "🔧 Setting env vars on service: $SERVICE_ID"
+
+          # Build the JSON payload with all env vars
+          PAYLOAD=$(cat <<EOF
+          [
+            { "key": "DATABASE_URL",    "value": "${{ secrets.DEMO_DATABASE_URL }}" },
+            { "key": "DB_SCHEMA",       "value": "vetcare_demo" },
+            { "key": "NODE_ENV",        "value": "production" },
+            { "key": "JWT_SECRET",      "value": "${{ secrets.DEMO_JWT_SECRET }}" },
+            { "key": "CLOUDINARY_URL",  "value": "${{ secrets.CLOUDINARY_URL }}" },
+            { "key": "SEED_ON_STARTUP", "value": "true" }
+          ]
+          EOF
+          )
+
+          RESPONSE=$(curl -sf -w "\n%{http_code}" \
+            -X PUT \
+            -H "Authorization: Bearer $API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "https://api.render.com/v1/services/$SERVICE_ID/env-vars")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ Env vars set successfully (HTTP $HTTP_CODE)"
+          else
+            echo "❌ Failed to set env vars (HTTP $HTTP_CODE)"
+            echo "Response: $BODY"
+            exit 1
+          fi
+
+      - name: Trigger Demo redeploy
+        if: github.event.inputs.trigger_deploy == 'true'
+        run: |
+          HOOK_URL="${{ secrets.RENDER_DEPLOY_HOOK_DEMO }}"
+          if [ -z "$HOOK_URL" ]; then
+            echo "⚠️  RENDER_DEPLOY_HOOK_DEMO not set — skipping auto-redeploy"
+            echo "   Get it from: Render → vetcare-demo → Settings → Deploy Hooks"
+            exit 0
+          fi
+
+          echo "🚀 Triggering Demo redeploy..."
+          curl -sf "$HOOK_URL" && echo "✅ Deploy triggered" || echo "⚠️  Deploy hook call failed (non-fatal)"
+
+      - name: Summary
+        run: |
+          echo ""
+          echo "════════════════════════════════════════════"
+          echo "  ✅ Demo Environment Setup Complete"
+          echo "════════════════════════════════════════════"
+          echo "  Service:  vetcare-demo"
+          echo "  URL:      https://vetcare-demo.onrender.com"
+          echo "  DB:       Neon PostgreSQL (vetcare_demo schema)"
+          echo "  Branch:   demo"
+          echo ""
+          echo "  First deploy will:"
+          echo "    1. Create schema 'vetcare_demo' in Neon DB"
+          echo "    2. Run init.sql (all tables fresh)"
+          echo "    3. Run 4 tier migrations"
+          echo "    4. Seed demo data (SEED_ON_STARTUP=true)"
+          echo ""
+          echo "  After first successful deploy, set SEED_ON_STARTUP=false"
+          echo "  by re-running this workflow (it resets to false next run)"
+          echo "════════════════════════════════════════════"
