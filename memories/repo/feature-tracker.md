@@ -213,3 +213,44 @@
    - 4-file permission sync: network_membership_manage for pet_owner + farmer
    - All 5 locale files: networkMemberships namespace + hospitalNetworks.patients section
    - memories/repo/lessons.md: LESSON-029/030/031 (consent-before-access, dual-ID system, 72hr token)
+
+## Hospital Staff System + Seat Licensing + Pricing Visibility
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| hospital_staff user role | ✅ | Invite-only, cannot self-register |
+| Hospital staff invite system | ✅ | Token-based 72hr invite, seat-gated |
+| Seat licensing / user quota | ✅ | Per-network subscription with seat_limit enforcement |
+| Network subscription plans | ✅ | 5 default plans (Trial/Starter/Growth/Enterprise/Unlimited), all private by default |
+| Platform admin network subscriptions UI | ✅ | /admin/network-subscriptions — 3 tabs: Networks, Plans, Pricing Visibility |
+| Private pricing visibility system | ✅ | Global toggle + per-plan + per-section; all prices in DB only, never hardcoded |
+| usePricing() hook | ✅ | Reads /pricing/plans; returns isVisible, plans, ctaText |
+| AcceptHospitalInvite page | ✅ | /accept-hospital-invite?token=XXX — public, no auth required |
+| Network suspend/unsuspend | ✅ | Admin-only; suspended staff get 403, pet owners unaffected |
+| 4-file permission sync | ✅ | hospital_network_subscription + hospital_staff_invite perms |
+
+### DB Tables Added
+- `network_subscription_plans` — plan tiers with prices (NULL = not set yet), is_published flag
+- `network_subscriptions` — per-network subscription + seat limit (UNIQUE(network_id))
+- `hospital_staff_invites` — invite tokens with 72hr expiry, seat check at send + accept
+
+### API Endpoints Added (15 total)
+- GET/POST/PUT/DELETE /admin/network-subscription-plans
+- GET /admin/network-subscriptions
+- POST /admin/networks/:id/set-subscription
+- PUT /admin/networks/:id/override-seat-limit
+- POST /admin/networks/:id/suspend + unsuspend
+- GET /pricing/plans (public)
+- GET/PUT /admin/pricing-settings
+- GET /my-network-subscription
+- POST /hospital-networks/:id/invite-staff
+- GET /hospital-staff-invites/token/:token (public)
+- POST /hospital-staff-invites/accept (public)
+- GET/DELETE /hospital-networks/:id/staff-invites
+
+### Key Rules
+- Seat check runs at BOTH invite-send time AND invite-accept time (race condition protection)
+- Suspended network: all staff get 403, corporate_admin blocked, pet owners unaffected
+- Pricing: NEVER hardcode prices — all stored in DB, fetched via /pricing/plans API
+- hospital_staff role: must be added to users.role CHECK constraint (done in database.ts)
+- All 5 locale files: adminNetworkSubscriptions + hospitalStaff + seatLimit namespaces

@@ -226,3 +226,23 @@
 - **Context:** PowerShell `Add-Content`/`Out-File` treated backtick as an escape character, removing them from template literals — TypeScript saw `/role-change-requests/+id+/cancel` (regex syntax) instead of `` `/role-change-requests/${id}/cancel` ``.
 - **Lesson:** NEVER use PowerShell file-write commands for TypeScript source with template literals. Use the `edit` tool for all TypeScript source edits. If PowerShell must write TypeScript, use `[System.IO.File]::WriteAllText()` which doesn't interpret backticks.
 - **Apply to:** All TypeScript source edits — use edit tool exclusively
+
+### LESSON-035 — hospital_staff Role Cannot Self-Register — Invite-Only Pattern
+- **Context:** Implementing non-vet clinical staff (nurses, receptionists, lab techs) for hospital networks
+- **Lesson:** `hospital_staff` accounts are ONLY created via invite token flow (`/accept-hospital-invite?token=XXX`). Never allow role=hospital_staff in the standard /auth/register endpoint. The invite token validates email pre-assignment and seat availability before account creation.
+- **Apply to:** All future invite-only roles; any role that should be org-scoped not self-registered
+
+### LESSON-036 — Seat Limit Check Must Run at Both Send AND Accept Time
+- **Context:** Staff invite flow: invite is created → staff clicks link 72hrs later → accepts
+- **Lesson:** Between invite creation and acceptance, other invites may be accepted filling the seats. Always run `checkSeatLimit()` at BOTH points: (1) when invite is sent, and (2) when the acceptance endpoint is called. This prevents race conditions where seat limit is exceeded.
+- **Apply to:** Any quota-gated resource creation where there is a time gap between reservation and fulfilment
+
+### LESSON-037 — Never Hardcode Prices Anywhere in Source Code
+- **Context:** Pricing visibility system — admin controls when pricing is shown to corporate admins and public
+- **Lesson:** All plan prices are stored in DB only (NULL = not set yet). No price strings in any `.tsx`, `.ts`, or `.json` source file. Locale files may use interpolation like `"{{price}}/month"` but never `"₹2,999/month"`. The `usePricing()` hook fetches prices from `/pricing/plans` at runtime. When `isVisible=false`, all placeholders show CTA text.
+- **Apply to:** ALL future monetization features, all pricing displays
+
+### LESSON-038 — Suspended Network Affects Staff Logins Only, Not Pet Owners
+- **Context:** Network suspension for billing/non-payment scenarios
+- **Lesson:** When a hospital network is suspended, ONLY corporate_admin and hospital_staff accounts for that network should be blocked (403). Pet owners, farmers, and veterinarians using the general platform must NEVER be blocked by network suspension status. Check suspension only on network-specific logins.
+- **Apply to:** Any future org-level suspension or access control
