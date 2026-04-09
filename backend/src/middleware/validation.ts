@@ -32,8 +32,8 @@ export const registerSchema = Joi.object({
     'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
     'any.required': 'Password is required',
   }),
-  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian').default('pet_owner').messages({
-    'any.only': 'Role must be one of: pet_owner, farmer, veterinarian',
+  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin').default('pet_owner').messages({
+    'any.only': 'Role must be one of: pet_owner, farmer, veterinarian, corporate_admin',
   }),
   confirmPassword: Joi.string().optional().strip(),
 });

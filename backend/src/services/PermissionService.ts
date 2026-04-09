@@ -241,11 +241,29 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
     'dashboard_tips',
   ],
+  corporate_admin: [
+    // Core pages
+    'dashboard', 'settings',
+    // Hospital Network — full management access
+    'hospital_network_manage', 'hospital_network_view', 'hospital_network_audit',
+    // Patient consent oversight
+    'patient_consent_manage',
+    // Browse vets and hospitals
+    'hospital_browse',
+    // Analytics (for network-level reporting)
+    'health_analytics', 'financial_analytics',
+    // AI tools
+    'ai_copilot',
+    // Wallet
+    'wallet',
+    // Dashboard widgets
+    'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
+    'dashboard_tips',
+  ],
   admin: [
     // Pages
     'dashboard', 'consultations', 'settings',
     'animal_timeline',
-    // Admin pages
     'admin_dashboard', 'admin_users', 'admin_consultations', 'admin_payments',
     'admin_reviews', 'admin_settings', 'admin_audit', 'admin_permissions', 'admin_medical_records',
     'admin_hospitals', 'admin_compliance',
@@ -458,7 +476,7 @@ class PermissionService {
     );
 
     const matrix: Record<string, Record<string, boolean>> = {};
-    const roles = ['veterinarian', 'pet_owner', 'farmer', 'admin'];
+    const roles = ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'];
 
     // Initialize with defaults
     for (const role of roles) {
@@ -487,7 +505,7 @@ class PermissionService {
     if (!ALL_PERMISSIONS.includes(permission)) {
       throw new Error(`Unknown permission: ${permission}`);
     }
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -508,7 +526,7 @@ class PermissionService {
     permissions: Record<string, boolean>,
     updatedBy?: string
   ): Promise<void> {
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -528,7 +546,7 @@ class PermissionService {
 
   /** Reset a role's permissions to defaults */
   async resetToDefaults(role: string): Promise<void> {
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -567,12 +585,13 @@ class PermissionService {
       categories: PERMISSION_CATEGORIES,
       labels: PERMISSION_LABELS,
       allPermissions: ALL_PERMISSIONS,
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin'],
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'],
       roleLabels: {
         veterinarian: 'Veterinarian',
         pet_owner: 'Pet Owner',
         farmer: 'Farmer',
-        admin: 'Admin'
+        admin: 'Admin',
+        corporate_admin: 'Hospital Network Admin'
       }
     };
   }

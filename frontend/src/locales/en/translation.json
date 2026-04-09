@@ -211,6 +211,10 @@
     "roleFarmerDesc": "Enterprise livestock management",
     "roleVet": "Veterinarian",
     "roleVetDesc": "Provide consultations & care",
+    "roleCorporateAdmin": "Hospital Network",
+    "roleCorporateAdminDesc": "Manage multi-hospital networks & staff",
+    "corporateAdminCalloutTitle": "Setting up a Hospital Network?",
+    "corporateAdminCalloutBody": "As a Hospital Network Admin, you can create and manage multiple hospital branches, onboard doctors and staff, monitor performance, and manage network-wide patient care — all from your dedicated dashboard.",
     "createAccountBtn": "Create Account",
     "creatingAccount": "Creating Account...",
     "alreadyMember": "Already a member?",
@@ -224,7 +228,9 @@
       "secure": "Secure",
       "secureDesc": "HIPAA-grade privacy",
       "enterpriseReady": "Enterprise Ready",
-      "enterpriseReadyDesc": "Scale from 1 to 10,000+"
+      "enterpriseReadyDesc": "Scale from 1 to 10,000+",
+      "hospitalNetwork": "Hospital Network",
+      "hospitalNetworkDesc": "Create & manage multi-doctor clinics"
     },
     "success": "✓ Registration successful! Logging you in...",
     "error": "Registration failed",

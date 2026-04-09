@@ -185,6 +185,10 @@
     "roleFarmerDesc": "उद्यम पशुधन प्रबंधन",
     "roleVet": "पशु चिकित्सक",
     "roleVetDesc": "परामर्श और देखभाल प्रदान करें",
+    "roleCorporateAdmin": "हॉस्पिटल नेटवर्क",
+    "roleCorporateAdminDesc": "बहु-अस्पताल नेटवर्क और स्टाफ प्रबंधित करें",
+    "corporateAdminCalloutTitle": "हॉस्पिटल नेटवर्क स्थापित कर रहे हैं?",
+    "corporateAdminCalloutBody": "हॉस्पिटल नेटवर्क एडमिन के रूप में, आप कई अस्पताल शाखाएं बना और प्रबंधित कर सकते हैं, डॉक्टर और स्टाफ जोड़ सकते हैं, प्रदर्शन मॉनिटर कर सकते हैं और नेटवर्क-स्तरीय रोगी देखभाल प्रबंधित कर सकते हैं।",
     "createAccountBtn": "खाता बनाएं",
     "creatingAccount": "खाता बन रहा है...",
     "alreadyMember": "पहले से सदस्य हैं?",
@@ -198,7 +202,9 @@
       "secure": "सुरक्षित",
       "secureDesc": "HIPAA-स्तर गोपनीयता",
       "enterpriseReady": "एंटरप्राइज़ तैयार",
-      "enterpriseReadyDesc": "1 से 10,000+ तक स्केल करें"
+      "enterpriseReadyDesc": "1 से 10,000+ तक स्केल करें",
+      "hospitalNetwork": "हॉस्पिटल नेटवर्क",
+      "hospitalNetworkDesc": "बहु-डॉक्टर क्लीनिक बनाएं और प्रबंधित करें"
     },
     "success": "✓ पंजीकरण सफल! आपको लॉग इन किया जा रहा है...",
     "error": "पंजीकरण विफल",

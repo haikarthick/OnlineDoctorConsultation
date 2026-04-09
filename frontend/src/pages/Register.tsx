@@ -71,7 +71,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
         phone: formData.phone,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
-        role: formData.role as 'pet_owner' | 'farmer' | 'veterinarian'
+        role: formData.role as 'pet_owner' | 'farmer' | 'veterinarian' | 'corporate_admin'
       })
       setMessage(t('register.success'))
     } catch (error) {
@@ -85,6 +85,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
     { value: 'pet_owner', label: t('register.rolePetOwner'), icon: '🐕', desc: t('register.rolePetOwnerDesc') },
     { value: 'farmer', label: t('register.roleFarmer'), icon: '🐄', desc: t('register.roleFarmerDesc') },
     { value: 'veterinarian', label: t('register.roleVet'), icon: '👨‍⚕️', desc: t('register.roleVetDesc') },
+    { value: 'corporate_admin', label: t('register.roleCorporateAdmin'), icon: '🏥', desc: t('register.roleCorporateAdminDesc') },
   ]
 
   return (
@@ -101,7 +102,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
               <div className="register-feat"><span className="register-feat-icon">⚡</span><div><strong>{t('register.features.instantAccess')}</strong><span>{t('register.features.instantAccessDesc')}</span></div></div>
               <div className="register-feat"><span className="register-feat-icon">🔒</span><div><strong>{t('register.features.secure')}</strong><span>{t('register.features.secureDesc')}</span></div></div>
               <div className="register-feat"><span className="register-feat-icon">🏢</span><div><strong>{t('register.features.enterpriseReady')}</strong><span>{t('register.features.enterpriseReadyDesc')}</span></div></div>
-              <div className="register-feat"><span className="register-feat-icon">🏥</span><div><strong>Hospital Network</strong><span>Create &amp; manage multi-doctor clinics</span></div></div>
+              <div className="register-feat"><span className="register-feat-icon">🏥</span><div><strong>{t('register.features.hospitalNetwork')}</strong><span>{t('register.features.hospitalNetworkDesc')}</span></div></div>
             </div>
             <div className="register-trust">
               <span>Trusted by <strong>3,000+</strong> enterprises &amp; <strong>500+</strong> hospitals</span>
@@ -168,23 +169,19 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
                     <span className="role-desc" id={`role-desc-${opt.value}`}>{opt.desc}</span>
                   </label>
                 ))}
-                {/* Hospital info card — not a selectable role, it's created after vet registration */}
-                <div className="role-option role-option--info" aria-label="Vet Hospital info">
-                  <span className="role-icon" aria-hidden="true">🏥</span>
-                  <span className="role-label">Vet Hospital</span>
-                  <span className="role-desc">Register as a Veterinarian, then create your hospital from the dashboard</span>
-                </div>
               </div>
             </fieldset>
 
-            {/* Hospital pathway callout */}
-            <div className="hospital-callout" role="note">
-              <span className="hospital-callout-icon">🏥</span>
-              <div className="hospital-callout-body">
-                <strong>Running a Vet Hospital or Multi-Doctor Clinic?</strong>
-                <p>Register as a <em>Veterinarian</em> above. After signing in, you can <strong>create your hospital profile</strong>, add departments, staff, services and accept bookings — all from your dashboard. No separate account needed.</p>
+            {/* Contextual callout for corporate_admin role */}
+            {formData.role === 'corporate_admin' && (
+              <div className="hospital-callout" role="note">
+                <span className="hospital-callout-icon">🏥</span>
+                <div className="hospital-callout-body">
+                  <strong>{t('register.corporateAdminCalloutTitle')}</strong>
+                  <p>{t('register.corporateAdminCalloutBody')}</p>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Password row */}
             <div className="form-row">

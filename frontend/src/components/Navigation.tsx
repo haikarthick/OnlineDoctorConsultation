@@ -48,7 +48,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   const menuItems: MenuItem[] = [
     // ── Dashboard (always first, ungrouped) ──
     { id: 'dashboard', label: t('nav.dashboard'), icon: '📊', path: '/dashboard',
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin'], section: 'Main' },
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'], section: 'Main' },
     { id: 'marketplace', label: t('nav.marketplace'), icon: '🏪', path: '/marketplace',
       roles: ['farmer', 'admin', 'pet_owner', 'veterinarian'], section: 'Main' },
 
@@ -103,7 +103,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Analytics & Tools ──
     { id: 'health-analytics', label: t('nav.healthAnalytics'), icon: '📈', path: '/health-analytics',
-      roles: ['farmer', 'admin', 'veterinarian'], section: 'Analytics & Tools' },
+      roles: ['farmer', 'admin', 'veterinarian', 'corporate_admin'], section: 'Analytics & Tools' },
     { id: 'breeding', label: t('nav.breedingGenetics'), icon: '🧬', path: '/breeding',
       roles: ['farmer', 'admin'], section: 'Analytics & Tools' },
     { id: 'feed-inventory', label: t('nav.feedInventory'), icon: '🌾', path: '/feed-inventory',
@@ -131,7 +131,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Intelligence Modules ──
     { id: 'ai-copilot', label: t('nav.aiCopilot'), icon: '🤖', path: '/ai-copilot',
-      roles: ['veterinarian', 'farmer', 'admin', 'pet_owner'], section: 'Intelligence' },
+      roles: ['veterinarian', 'farmer', 'admin', 'pet_owner', 'corporate_admin'], section: 'Intelligence' },
     { id: 'digital-twin', label: t('nav.digitalTwin'), icon: '🔮', path: '/digital-twin',
       roles: ['farmer', 'admin'], section: 'Intelligence' },
     { id: 'sustainability', label: t('nav.sustainability'), icon: '🌱', path: '/sustainability',
@@ -143,7 +143,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Vet Hospital Network ──
     { id: 'vet-hospitals', label: t('nav.vetHospitals'), icon: '🏥', path: '/vet-hospitals',
-      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Vet Network' },
+      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin'], section: 'Vet Network' },
     { id: 'vet-hospitals-manage', label: t('nav.myHospital'), icon: '🏨', path: '/vet-hospitals/manage',
       roles: ['veterinarian'], section: 'Vet Network' },
     { id: 'hospital-workflow', label: 'Hospital Workflow', icon: '🔄', path: '/hospital-workflow',
@@ -153,7 +153,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Wallet ──
     { id: 'wallet', label: t('nav.myWallet'), icon: '💰', path: '/wallet',
-      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Account' },
+      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin'], section: 'Account' },
 
     // ── Administration (admin only) ──
     { id: 'admin-dashboard', label: t('nav.adminPanel'), icon: '🛡️', path: '/admin/dashboard',
@@ -191,11 +191,11 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'admin-holidays', label: 'Holiday Management', icon: '🎉', path: '/admin/holidays',
       roles: ['admin', 'veterinarian'], section: 'Administration' },
     { id: 'hospital-networks', label: 'Hospital Networks', icon: '🌐', path: '/hospital-networks',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin', 'corporate_admin'], section: 'Administration' },
 
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',
-      roles: ['veterinarian', 'pet_owner', 'farmer'], section: 'Preferences' }
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin'], section: 'Preferences' }
   ]
 
   // Filter by role AND permission
