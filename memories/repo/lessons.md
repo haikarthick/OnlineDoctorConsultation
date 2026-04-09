@@ -246,3 +246,23 @@
 - **Context:** Network suspension for billing/non-payment scenarios
 - **Lesson:** When a hospital network is suspended, ONLY corporate_admin and hospital_staff accounts for that network should be blocked (403). Pet owners, farmers, and veterinarians using the general platform must NEVER be blocked by network suspension status. Check suspension only on network-specific logins.
 - **Apply to:** Any future org-level suspension or access control
+
+### LESSON-039 — init.sql AND database.ts Safety Net Must BOTH Be Updated for New Roles/Enums
+- **Context:** hospital_staff role was added to database.ts safety net ALTER TABLE but NOT to init.sql CHECK constraint — fresh DB installs rejected the role.
+- **Lesson:** When adding a new user role or any DB enum value: (1) update init.sql CHECK constraint for fresh installs, (2) update database.ts ALTER TABLE safety net for existing DBs, (3) update Joi validation schemas. All 3 must be in sync. Missing init.sql means new Render deploys with fresh DB fail silently at first registration attempt.
+- **Apply to:** All future role additions, status enum expansions, position type changes
+
+### LESSON-040 — Dynamic SQL from req.body Keys Must Always Use allowedFields Whitelist
+- **Context:** PUT /admin/network-subscription-plans/:id built SQL dynamically from Object.keys(req.body) with no filtering.
+- **Lesson:** NEVER build UPDATE/INSERT SQL from request body keys directly. Always define an `allowedFields` string array and filter with `Object.entries(body).filter(([k]) => allowedFields.includes(k))`. This prevents arbitrary column injection even when input is authenticated.
+- **Apply to:** All dynamic SQL construction from user-controlled input
+
+### LESSON-041 — Check for Duplicate DB Constraint Updates in database.ts Before Adding New Ones
+- **Context:** Two ALTER TABLE constraint updates for users.role existed — first (incomplete, missing hospital_staff) at line 709, second (complete) at line 837. First ran but was immediately overwritten.
+- **Lesson:** Before adding a new constraint update in database.ts, search the file for existing updates to the same table/column. There must be EXACTLY ONE. Remove stale duplicates or consolidate into one.
+- **Apply to:** All future database.ts safety net additions
+
+### LESSON-042 — All Currency/Date Formatting Must Use useSettings() — No Local Helpers Allowed
+- **Context:** NetworkSubscriptions.tsx had a standalone `formatPrice()` helper with hardcoded `'en-IN'` locale; FinancialAnalytics.tsx used `toLocaleDateString()` directly — both bypass admin settings.
+- **Lesson:** `formatCurrency()`, `formatDate()`, `formatSlotTime()` from `useSettings()` are MANDATORY for every time/date/currency display. Never create local format helpers — they always get out of sync with admin settings. Search for `toLocaleDateString`, `toLocaleTimeString`, `Intl.NumberFormat`, `toLocaleString` before any commit and fix all occurrences.
+- **Apply to:** All pages, all future features

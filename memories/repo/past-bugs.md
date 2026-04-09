@@ -5,6 +5,28 @@
 
 ---
 
+## 🔴 DB Schema / SQL Bugs
+
+### SCHEMA-001 — hospital_staff missing from users.role CHECK → Fresh DB Install Rejects Role
+- **Symptom:** `hospital_staff` users created via invite-accept token get PostgreSQL CHECK violation on fresh DB install; existing DBs worked because database.ts safety net ran ALTER TABLE before any inserts.
+- **Root Cause:** `docker/init.sql` users.role CHECK constraint listed only `pet_owner, farmer, veterinarian, admin, corporate_admin` — `hospital_staff` was never added.
+- **Fix:** Added `hospital_staff` to users.role CHECK in init.sql. Also added `admin_staff` to staff_positions.position CHECK (was in Joi schema but not DB constraint).
+- **Rule:** Whenever a new role or enum value is added to Joi validation schemas, ALSO add it to the corresponding CHECK constraint in init.sql AND the database.ts safety-net ALTER TABLE.
+
+### SCHEMA-002 — Duplicate Role Constraint in database.ts → Incomplete Constraint Overwrites Complete One
+- **Symptom:** The first `ALTER TABLE users DROP CONSTRAINT ... ADD CONSTRAINT` at line 709 ran with incomplete role list (missing hospital_staff), then the complete one at line 837 ran and overwrote it — but between those two lines, any concurrent registration would hit the incomplete constraint.
+- **Root Cause:** Two separate ALTER TABLE constraint updates for the same column existed in database.ts. The first was a leftover from an earlier version and was never cleaned up.
+- **Fix:** Removed the first (incomplete) duplicate at lines 709-716. Only the complete constraint at line 837 remains.
+- **Rule:** There must be EXACTLY ONE ALTER TABLE constraint update per column in database.ts. Search for duplicate DROP/ADD CONSTRAINT blocks before adding new ones.
+
+## 🔴 Security Bugs
+
+### SEC-001 — Dynamic SQL Column Injection in Plan Update Route
+- **Symptom:** `PUT /admin/network-subscription-plans/:id` built UPDATE SQL dynamically from all keys in `req.body` without any filtering — an attacker could inject arbitrary column names.
+- **Root Cause:** `Object.keys(req.body).forEach(...)` with no whitelist; any key sent in the body became a column name in the SQL query.
+- **Fix:** Added `allowedFields` array whitelist; only fields in the whitelist are allowed through via `Object.fromEntries(Object.entries(req.body).filter(([k]) => allowedFields.includes(k)))`.
+- **Rule:** ANY dynamic SQL built from request body keys MUST use an explicit allowedFields whitelist. Never use `Object.keys(req.body)` directly in SQL construction.
+
 ## 🔴 Deployment / Render Bugs
 
 ### DEPLOY-008 — Unused Native Module (sharp) → Render Build Fails with Status 1

@@ -252,5 +252,9 @@
 - Seat check runs at BOTH invite-send time AND invite-accept time (race condition protection)
 - Suspended network: all staff get 403, corporate_admin blocked, pet owners unaffected
 - Pricing: NEVER hardcode prices — all stored in DB, fetched via /pricing/plans API
-- hospital_staff role: must be added to users.role CHECK constraint (done in database.ts)
+- hospital_staff role: added to users.role CHECK in BOTH init.sql (fresh install) AND database.ts safety-net (existing DBs) — must keep both in sync
+- admin_staff position: added to staff_positions.position CHECK in both init.sql and database.ts
+- Dynamic SQL in plan update route: uses allowedFields whitelist (SEC-001 fix)
 - All 5 locale files: adminNetworkSubscriptions + hospitalStaff + seatLimit namespaces
+- HospitalNetworks.tsx: "Invite Staff" button in Members panel → modal → calls POST /hospital-networks/:id/invite-staff
+- Codebase scan (session b4fd6b6e) fixed: SQL injection, duplicate constraint, formatPrice locale bug, hospital_staff nav gap, date formatting violations
