@@ -1150,6 +1150,18 @@
     "actions": {
       "cancel": "ರದ್ದುಮಾಡಿ",
       "bookConsultation": "📅 ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿ"
+    },
+    "speciesCategories": {
+      "commonPets": "ಸಾಮಾನ್ಯ ಸಾಕು ಪ್ರಾಣಿಗಳು",
+      "smallPets": "ಸಣ್ಣ ಸಾಕು ಪ್ರಾಣಿಗಳು",
+      "birds": "ಪಕ್ಷಿಗಳು",
+      "reptiles": "ಸರೀಸೃಪಗಳು",
+      "amphibians": "ಉಭಯಚರಗಳು",
+      "ornamentalFish": "ಅಲಂಕಾರಿಕ ಮೀನುಗಳು",
+      "livestock": "ಜಾನುವಾರು / ಕೃಷಿ",
+      "poultry": "ಕೋಳಿ ಸಾಕಾಣಿಕೆ",
+      "exoticLarge": "ಅಪರೂಪದ ದೊಡ್ಡ ಪ್ರಾಣಿಗಳು",
+      "other": "ಇತರೆ"
     }
   },
   "appointments": {

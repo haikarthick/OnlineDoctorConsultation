@@ -1150,6 +1150,18 @@
     "actions": {
       "cancel": "రద్దు చేయండి",
       "bookConsultation": "📅 సంప్రదింపు బుక్ చేయండి"
+    },
+    "speciesCategories": {
+      "commonPets": "సాధారణ పెంపుడు జంతువులు",
+      "smallPets": "చిన్న పెంపుడు జంతువులు",
+      "birds": "పక్షులు",
+      "reptiles": "సరీసృపాలు",
+      "amphibians": "ఉభయచరాలు",
+      "ornamentalFish": "అలంకార చేపలు",
+      "livestock": "పశువులు / వ్యవసాయం",
+      "poultry": "కోళ్ళ పెంపకం",
+      "exoticLarge": "అరుదైన పెద్ద జంతువులు",
+      "other": "ఇతరాలు"
     }
   },
   "appointments": {

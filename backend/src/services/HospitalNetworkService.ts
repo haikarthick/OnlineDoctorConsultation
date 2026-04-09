@@ -640,9 +640,22 @@ export class HospitalNetworkService {
     const prefix = (netRes.rows[0]?.id_prefix ?? 'NET').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
 
     const SPECIES_CODES: Record<string, string> = {
-      dog: 'DOG', cat: 'CAT', horse: 'HRS', cow: 'COW', goat: 'GOT',
-      sheep: 'SHP', pig: 'PIG', chicken: 'CHK', duck: 'DUK', rabbit: 'RAB',
-      buffalo: 'BUF', camel: 'CAM', fish: 'FSH', bird: 'BRD',
+      dog: 'DOG', canine: 'DOG', cat: 'CAT', feline: 'CAT',
+      rabbit: 'RAB', hamster: 'HAM', 'guinea pig': 'GNP', gerbil: 'GRB',
+      chinchilla: 'CHN', ferret: 'FRT', hedgehog: 'HDG', 'sugar glider': 'SGL',
+      parrot: 'PAR', budgerigar: 'BDG', budgie: 'BDG', cockatiel: 'CCT',
+      lovebird: 'LVB', finch: 'FNC', canary: 'CNR', mynah: 'MYN', myna: 'MYN',
+      pigeon: 'PGN', dove: 'PGN', bird: 'BRD',
+      tortoise: 'TOR', turtle: 'TRT', gecko: 'GCK', 'bearded dragon': 'BDR',
+      chameleon: 'CHL', snake: 'SNK', frog: 'FRG', axolotl: 'AXL',
+      'ornamental fish': 'FSH', fish: 'FSH', koi: 'KOI', arowana: 'ARW', goldfish: 'GLD',
+      cattle: 'COW', cow: 'COW', bovine: 'COW', buffalo: 'BUF', 'water buffalo': 'BUF',
+      horse: 'HRS', equine: 'HRS', donkey: 'DNK', mule: 'DNK',
+      sheep: 'SHP', ovine: 'SHP', goat: 'GOT', caprine: 'GOT',
+      pig: 'PIG', swine: 'PIG', porcine: 'PIG', camel: 'CAM', yak: 'YAK', deer: 'DER',
+      chicken: 'CHK', poultry: 'CHK', duck: 'DUK', turkey: 'TRK', quail: 'QAL',
+      emu: 'EMU', ostrich: 'OST', peacock: 'PCK', peafowl: 'PCK',
+      llama: 'LLA', alpaca: 'ALP',
     };
     const code = SPECIES_CODES[species.toLowerCase()] ?? species.toUpperCase().slice(0, 3);
     const year = new Date().getFullYear() % 100;

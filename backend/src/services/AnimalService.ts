@@ -50,18 +50,66 @@ export interface AnimalCreateDTO {
 export class AnimalService {
   // Map species name → 3-letter code for VC-SPE-YY-NNNNN format
   private getSpeciesCode(species: string): string {
-    const s = species.toLowerCase().trim();
+    const s = species.toLowerCase().trim().replace(/[^a-z\s]/g, '').trim();
+    // Common Pets
     if (s === 'dog' || s === 'canine') return 'DOG';
     if (s === 'cat' || s === 'feline') return 'CAT';
+    // Small Pets
     if (s === 'rabbit') return 'RAB';
+    if (s === 'hamster') return 'HAM';
+    if (s === 'guinea pig' || s === 'guinea_pig' || s === 'guineapig') return 'GNP';
+    if (s === 'gerbil') return 'GRB';
+    if (s === 'chinchilla') return 'CHN';
+    if (s === 'ferret') return 'FRT';
+    if (s === 'hedgehog') return 'HDG';
+    if (s === 'sugar glider' || s === 'sugar_glider') return 'SGL';
+    // Birds
+    if (s === 'parrot') return 'PAR';
+    if (s === 'budgerigar' || s === 'budgie') return 'BDG';
+    if (s === 'cockatiel') return 'CCT';
+    if (s === 'lovebird') return 'LVB';
+    if (s === 'finch') return 'FNC';
+    if (s === 'canary') return 'CNR';
+    if (s === 'mynah' || s === 'myna') return 'MYN';
+    if (s === 'pigeon' || s === 'dove') return 'PGN';
     if (s === 'bird') return 'BRD';
-    if (s === 'reptile') return 'REP';
-    if (s === 'cow' || s === 'cattle' || s === 'bovine') return 'COW';
-    if (s === 'sheep' || s === 'ovine') return 'SHP';
-    if (s === 'pig' || s === 'swine' || s === 'porcine') return 'PIG';
-    if (s === 'chicken' || s === 'poultry') return 'CHK';
+    // Reptiles
+    if (s === 'tortoise') return 'TOR';
+    if (s === 'turtle') return 'TRT';
+    if (s === 'gecko') return 'GCK';
+    if (s === 'bearded dragon' || s === 'bearded_dragon') return 'BDR';
+    if (s === 'chameleon') return 'CHL';
+    if (s === 'snake') return 'SNK';
+    // Amphibians
+    if (s === 'frog') return 'FRG';
+    if (s === 'axolotl') return 'AXL';
+    // Fish
+    if (s === 'ornamental fish' || s === 'ornamental_fish' || s === 'fish') return 'FSH';
+    if (s === 'koi') return 'KOI';
+    if (s === 'arowana') return 'ARW';
+    if (s === 'goldfish') return 'GLD';
+    // Livestock / Farm
+    if (s === 'cattle' || s === 'cow' || s === 'bovine') return 'COW';
+    if (s === 'buffalo' || s === 'water buffalo') return 'BUF';
     if (s === 'horse' || s === 'equine') return 'HRS';
+    if (s === 'donkey' || s === 'mule' || s === 'ass') return 'DNK';
+    if (s === 'sheep' || s === 'ovine') return 'SHP';
     if (s === 'goat' || s === 'caprine') return 'GOT';
+    if (s === 'pig' || s === 'swine' || s === 'porcine') return 'PIG';
+    if (s === 'camel') return 'CAM';
+    if (s === 'yak') return 'YAK';
+    if (s === 'deer') return 'DER';
+    // Poultry
+    if (s === 'chicken' || s === 'poultry') return 'CHK';
+    if (s === 'duck') return 'DUK';
+    if (s === 'turkey') return 'TRK';
+    if (s === 'quail') return 'QAL';
+    if (s === 'emu') return 'EMU';
+    if (s === 'ostrich') return 'OST';
+    if (s === 'peacock' || s === 'peafowl') return 'PCK';
+    // Exotic Large
+    if (s === 'llama') return 'LLA';
+    if (s === 'alpaca') return 'ALP';
     return 'OTH';
   }
 

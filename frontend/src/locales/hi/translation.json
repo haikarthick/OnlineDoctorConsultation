@@ -1150,6 +1150,18 @@
     "actions": {
       "cancel": "रद्द करें",
       "bookConsultation": "📅 परामर्श बुक करें"
+    },
+    "speciesCategories": {
+      "commonPets": "सामान्य पालतू जानवर",
+      "smallPets": "छोटे पालतू जानवर",
+      "birds": "पक्षी",
+      "reptiles": "सरीसृप",
+      "amphibians": "उभयचर",
+      "ornamentalFish": "सजावटी मछलियाँ",
+      "livestock": "पशुधन / खेत",
+      "poultry": "मुर्गीपालन",
+      "exoticLarge": "विदेशी बड़े पशु",
+      "other": "अन्य"
     }
   },
   "appointments": {

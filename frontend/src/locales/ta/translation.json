@@ -1148,6 +1148,18 @@
     "actions": {
       "cancel": "ரத்துசெய்",
       "bookConsultation": "📅 ஆலோசனை முன்பதிவு"
+    },
+    "speciesCategories": {
+      "commonPets": "பொதுவான செல்லப்பிராணிகள்",
+      "smallPets": "சிறிய செல்லப்பிராணிகள்",
+      "birds": "பறவைகள்",
+      "reptiles": "ஊர்வன",
+      "amphibians": "நீர்நில வாழ்விகள்",
+      "ornamentalFish": "அலங்கார மீன்கள்",
+      "livestock": "கால்நடை / பண்ணை",
+      "poultry": "கோழிப்பண்ணை",
+      "exoticLarge": "அரிய பெரிய விலங்குகள்",
+      "other": "மற்றவை"
     }
   },
   "appointments": {

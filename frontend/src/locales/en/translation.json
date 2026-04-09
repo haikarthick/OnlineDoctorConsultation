@@ -1182,6 +1182,18 @@
     "actions": {
       "cancel": "Cancel",
       "bookConsultation": "📅 Book Consultation"
+    },
+    "speciesCategories": {
+      "commonPets": "Common Pets",
+      "smallPets": "Small Pets",
+      "birds": "Birds",
+      "reptiles": "Reptiles",
+      "amphibians": "Amphibians",
+      "ornamentalFish": "Ornamental Fish",
+      "livestock": "Livestock / Farm",
+      "poultry": "Poultry",
+      "exoticLarge": "Exotic Large",
+      "other": "Other"
     }
   },
   "appointments": {
