@@ -2185,6 +2185,35 @@ class ApiService {
     return response.data
   }
 
+  async enrollAnimalInNetwork(networkId: string, data: { animalId: string; hospitalId?: string; notes?: string }) {
+    const response = await this.client.post(`/hospital-networks/${networkId}/enroll-animal`, data)
+    return response.data
+  }
+  async searchNetworkPatients(networkId: string, q: string) {
+    const response = await this.client.get(`/hospital-networks/${networkId}/search-patients`, { params: { q } })
+    return response.data
+  }
+  async getAllEnrollments(networkId: string) {
+    const response = await this.client.get(`/hospital-networks/${networkId}/all-enrollments`)
+    return response.data
+  }
+  async inviteWalkInPatient(networkId: string, data: Record<string, any>) {
+    const response = await this.client.post(`/hospital-networks/${networkId}/invite-walkin`, data)
+    return response.data
+  }
+  async acceptEnrollment(contextId: string, consentScope?: string) {
+    const response = await this.client.post(`/hospital-networks/enrollments/${contextId}/accept`, { consentScope })
+    return response.data
+  }
+  async declineEnrollment(contextId: string) {
+    const response = await this.client.post(`/hospital-networks/enrollments/${contextId}/decline`, {})
+    return response.data
+  }
+  async getMyNetworkEnrollments() {
+    const response = await this.client.get('/my-network-enrollments')
+    return response.data
+  }
+
   // ─── Patient Data Consent ───────────────────────────────────────
   async createPatientConsent(data: Record<string, any>) {
     const response = await this.client.post('/patient-consent', data)

@@ -162,3 +162,18 @@
 8. ✅ Fix Render deploy — HTTP port bound FIRST before DB connect (2026-04-07)
 9. ✅ render-start.sh — tighten timeouts: connectionTimeoutMillis 30000→15000, migrations 60→40s (2026-04-07)
 10. ✅ connectWithRetry() — 5 attempts × 10s for free-tier Render PostgreSQL (2026-04-06)
+
+11. ✅ Privacy-First Hospital Patient Onboarding — consent-before-access system (2026-04-09)
+   - CONSENT-BEFORE-ACCESS: hospitals REQUEST enrollment, patients APPROVE/DECLINE
+   - enrollment_status column on animal_care_contexts (pending_consent/active/declined/revoked)
+   - hospital_patient_invites table (72hr token, walk-in patient invite system)
+   - Migration 011 + database.ts ALTER TABLE safety nets
+   - HospitalNetworkService: searchPatients, acceptEnrollment, declineEnrollment, getMyEnrollments, inviteWalkInPatient, getPendingEnrollments
+   - 6 new backend API routes (search, all-enrollments, invite-walkin, accept, decline, my-network-enrollments)
+   - api.ts: 7 new methods (enrollAnimalInNetwork + 6 new)
+   - HospitalNetworks.tsx: Patients tab (Section A: smart search, Section B: invite modal, Section C: enrollment table with status badges)
+   - NetworkMemberships.tsx: pet owner page (pending requests with consent selector, active memberships, past memberships)
+   - NetworkMemberships.css: responsive 4-tier breakpoints, privacy-focused design
+   - 4-file permission sync: network_membership_manage for pet_owner + farmer
+   - All 5 locale files: networkMemberships namespace + hospitalNetworks.patients section
+   - memories/repo/lessons.md: LESSON-029/030/031 (consent-before-access, dual-ID system, 72hr token)

@@ -194,6 +194,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'vaccination_passport', 'vet_certificates',
     // Data consent
     'patient_consent_manage',
+    // Network memberships
+    'network_membership_manage',
     // Wallet
     'wallet',
     // Actions
@@ -227,6 +229,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'vaccination_passport',
     // Data consent
     'patient_consent_manage',
+    // Network memberships
+    'network_membership_manage',
     // Wallet
     'wallet',
     // Actions
@@ -365,6 +369,7 @@ export const PERMISSION_LABELS: Record<string, string> = {
   hospital_network_view: 'Hospital Network View',
   hospital_network_audit: 'Hospital Network Audit',
   patient_consent_manage: 'Patient Data Consent',
+  network_membership_manage: 'Network Membership Management',
   // Timeline
   animal_timeline: 'Animal Life Timeline',
   // Dashboard widgets

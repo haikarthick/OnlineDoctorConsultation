@@ -1,0 +1,341 @@
+.nm-page {
+  min-height: calc(100vh - 64px);
+}
+
+.nm-subtitle {
+  color: #666;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* Privacy Note Banner */
+.nm-privacy-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #2e7d32;
+}
+
+/* Pending Banner */
+.nm-pending-banner {
+  background: #fff8e1;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: #f57f17;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Section headers */
+.nm-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+/* Enrollment Cards */
+.nm-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.nm-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.nm-card.pending {
+  border-color: #ffc107;
+  border-width: 2px;
+}
+
+.nm-card.active {
+  border-color: #66bb6a;
+}
+
+.nm-card.declined,
+.nm-card.revoked {
+  border-color: #bdbdbd;
+  opacity: 0.8;
+}
+
+.nm-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.nm-card-icon {
+  font-size: 24px;
+}
+
+.nm-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.nm-card-sub {
+  font-size: 13px;
+  color: #666;
+  margin: 2px 0 0 0;
+}
+
+/* Status badges */
+.nm-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.nm-status-badge.pending_consent {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.nm-status-badge.active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.nm-status-badge.declined {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.nm-status-badge.revoked {
+  background: #f5f5f5;
+  color: #757575;
+}
+
+/* ID badges */
+.nm-id-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.nm-id-label {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.nm-id-value {
+  font-family: monospace;
+  font-size: 13px;
+  background: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #1a1a1a;
+}
+
+/* Consent level selector */
+.nm-consent-select-row {
+  margin-bottom: 12px;
+}
+
+.nm-consent-select-row label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.nm-consent-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.nm-consent-hint {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+}
+
+/* Card actions */
+.nm-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.nm-btn-accept {
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+}
+
+.nm-btn-accept:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+}
+
+.nm-btn-accept:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nm-btn-decline {
+  background: #fff;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nm-btn-decline:hover:not(:disabled) {
+  background: #ffebee;
+}
+
+.nm-btn-revoke {
+  background: #fff;
+  color: #757575;
+  border: 1px solid #bdbdbd;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.nm-btn-revoke:hover:not(:disabled) {
+  background: #f5f5f5;
+}
+
+/* Date info */
+.nm-date-info {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
+}
+
+/* Empty state */
+.nm-empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #999;
+}
+
+.nm-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.nm-empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.nm-empty-sub {
+  font-size: 14px;
+  color: #999;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Past section toggle */
+.nm-past-toggle {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.nm-past-toggle:hover {
+  background: #f5f5f5;
+}
+
+/* Loading */
+.nm-loading {
+  text-align: center;
+  padding: 48px;
+  color: #999;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .nm-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .nm-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nm-card-actions {
+    flex-direction: column;
+  }
+
+  .nm-btn-accept,
+  .nm-btn-decline {
+    flex: unset;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .nm-section-title {
+    font-size: 16px;
+  }
+
+  .nm-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nm-privacy-note {
+    font-size: 12px;
+  }
+
+  .nm-id-value {
+    font-size: 11px;
+  }
+}

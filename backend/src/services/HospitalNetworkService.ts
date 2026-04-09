@@ -147,6 +147,39 @@ export interface PatientConsentDTO {
   validUntil?: Date;
 }
 
+export interface EnrollmentRequest {
+  id: string;
+  animalId: string;
+  networkId: string;
+  hospitalId?: string;
+  enrollmentStatus: string;
+  corporatePatientId?: string;
+  platformUniqueId?: string;
+  enrollmentRequestedAt: Date;
+  enrollmentRespondedAt?: Date;
+  enrolledBy?: string;
+  notes?: string;
+  animalName?: string;
+  species?: string;
+  breed?: string;
+  ownerName?: string;
+  ownerEmail?: string;
+  networkName?: string;
+  hospitalName?: string;
+  enrolledByName?: string;
+}
+
+export interface WalkInInviteDTO {
+  networkId: string;
+  hospitalId?: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone?: string;
+  animalName?: string;
+  animalSpecies?: string;
+  message?: string;
+}
+
 export class HospitalNetworkService {
 
   // ─── Network CRUD ─────────────────────────────────────────────
@@ -626,30 +659,44 @@ export class HospitalNetworkService {
     return `${prefix}-${code}-${year.toString().padStart(2, '0')}-${seq.toString().padStart(6, '0')}`;
   }
 
-  async enrollAnimal(data: { animalId: string; networkId: string; hospitalId?: string; enrolledBy: string; notes?: string }): Promise<{ id: string; animalId: string; networkId: string; networkPatientId: string; platformUniqueId: string | null }> {
+  async enrollAnimal(data: { animalId: string; networkId: string; hospitalId?: string; enrolledBy: string; notes?: string }): Promise<{ id: string; animalId: string; networkId: string; networkPatientId: string; platformUniqueId: string | null; enrollmentStatus: string }> {
     try {
       const animalRes = await database.query(
-        `SELECT id, species, unique_id FROM animals WHERE id = $1 AND is_active = true`, [data.animalId]
+        `SELECT a.id, a.species, a.unique_id, a.name AS animal_name, a.owner_id,
+                u.name AS owner_name
+         FROM animals a JOIN users u ON a.owner_id = u.id
+         WHERE a.id = $1 AND a.is_active = true`, [data.animalId]
       );
       if (!animalRes.rows[0]) throw new Error('Animal not found');
       const animal = animalRes.rows[0];
 
       const networkPatientId = await this.generateNetworkPatientId(data.networkId, animal.species);
+      const netRes = await database.query(`SELECT name FROM hospital_networks WHERE id = $1`, [data.networkId]);
+      const networkName = netRes.rows[0]?.name ?? 'Hospital Network';
 
       const result = await database.query(
         `INSERT INTO animal_care_contexts
-           (animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id, enrolled_by, notes, visibility)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'private')
+           (animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id,
+            enrolled_by, notes, visibility, enrollment_status, enrollment_requested_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'private', 'pending_consent', CURRENT_TIMESTAMP)
          ON CONFLICT (animal_id, network_id) DO UPDATE
            SET corporate_patient_id = EXCLUDED.corporate_patient_id,
                hospital_id = EXCLUDED.hospital_id,
                is_active = true,
-               enrolled_at = CURRENT_TIMESTAMP
+               enrollment_status = 'pending_consent',
+               enrollment_requested_at = CURRENT_TIMESTAMP,
+               enrollment_responded_at = NULL
          RETURNING id, animal_id AS "animalId", network_id AS "networkId",
                    corporate_patient_id AS "networkPatientId",
-                   platform_unique_id AS "platformUniqueId"`,
+                   platform_unique_id AS "platformUniqueId",
+                   enrollment_status AS "enrollmentStatus"`,
         [data.animalId, data.networkId, data.hospitalId ?? null, animal.unique_id, networkPatientId, data.enrolledBy, data.notes ?? null]
       );
+
+      // TODO: Send in-app notification to animal owner via NotificationService
+      // (not inlined here to avoid circular dependencies — caller may handle separately)
+      logger.info('Enrollment request created', { networkName, animalName: animal.animal_name, ownerId: animal.owner_id });
+
       return result.rows[0];
     } catch (err: any) {
       throw new Error(`Enroll animal failed: ${err.message}`);
@@ -678,6 +725,160 @@ export class HospitalNetworkService {
       return { total: parseInt(countRes.rows[0].total), patients: rows.rows };
     } catch (err: any) {
       throw new Error(`Get network patients failed: ${err.message}`);
+    }
+  }
+
+  async searchPatients(query: string, limit = 10): Promise<Array<{
+    userId: string; userName: string; userEmail: string; userPhone?: string;
+    animals: Array<{ id: string; name: string; species: string; uniqueId?: string; }>
+  }>> {
+    try {
+      const q = `%${query.toLowerCase()}%`;
+      const result = await database.query(
+        `SELECT DISTINCT u.id AS "userId", u.name AS "userName", u.email AS "userEmail", u.phone AS "userPhone"
+         FROM users u
+         LEFT JOIN animals a ON a.owner_id = u.id AND a.is_active = true
+         WHERE u.role = 'pet_owner'
+           AND (LOWER(u.name) LIKE $1 OR LOWER(u.email) LIKE $1
+                OR u.phone LIKE $1 OR LOWER(a.unique_id) LIKE $1
+                OR LOWER(a.name) LIKE $1)
+         LIMIT $2`,
+        [q, limit]
+      );
+      const users = result.rows;
+      for (const user of users) {
+        const animalRes = await database.query(
+          `SELECT id, name, species, unique_id AS "uniqueId" FROM animals
+           WHERE owner_id = $1 AND is_active = true ORDER BY name`,
+          [user.userId]
+        );
+        user.animals = animalRes.rows;
+      }
+      return users;
+    } catch (err: any) {
+      throw new Error(`Search patients failed: ${err.message}`);
+    }
+  }
+
+  async acceptEnrollment(contextId: string, ownerId: string, consentScope?: string): Promise<void> {
+    try {
+      const check = await database.query(
+        `SELECT acc.id, acc.animal_id, acc.network_id, acc.corporate_patient_id,
+                a.owner_id, a.name AS animal_name, hn.name AS network_name
+         FROM animal_care_contexts acc
+         JOIN animals a ON acc.animal_id = a.id
+         JOIN hospital_networks hn ON acc.network_id = hn.id
+         WHERE acc.id = $1 AND a.owner_id = $2 AND acc.enrollment_status = 'pending_consent'`,
+        [contextId, ownerId]
+      );
+      if (!check.rows[0]) throw new Error('Enrollment request not found or already responded');
+      const ctx = check.rows[0];
+
+      await database.query(
+        `UPDATE animal_care_contexts
+         SET enrollment_status = 'active', enrollment_responded_at = CURRENT_TIMESTAMP, is_active = true
+         WHERE id = $1`,
+        [contextId]
+      );
+
+      await database.query(
+        `INSERT INTO patient_data_consent
+           (animal_id, owner_id, granted_to_network_id, consent_scope,
+            allow_medical_records, allow_vaccination_records, allow_prescriptions,
+            allow_lab_results, allow_genetic_data, include_hospital_records,
+            allow_view, allow_create_notes, allow_prescribe, is_active)
+         VALUES ($1, $2, $3, $4, true, true, true, false, false, false, true, true, false, true)
+         ON CONFLICT DO NOTHING`,
+        [ctx.animal_id, ownerId, ctx.network_id, consentScope ?? 'basic_history']
+      );
+    } catch (err: any) {
+      throw new Error(`Accept enrollment failed: ${err.message}`);
+    }
+  }
+
+  async declineEnrollment(contextId: string, ownerId: string): Promise<void> {
+    try {
+      const result = await database.query(
+        `UPDATE animal_care_contexts acc
+         SET enrollment_status = 'declined', enrollment_responded_at = CURRENT_TIMESTAMP, is_active = false
+         FROM animals a
+         WHERE acc.id = $1 AND acc.animal_id = a.id AND a.owner_id = $2
+           AND acc.enrollment_status = 'pending_consent'
+         RETURNING acc.id`,
+        [contextId, ownerId]
+      );
+      if (!result.rows[0]) throw new Error('Enrollment request not found');
+    } catch (err: any) {
+      throw new Error(`Decline enrollment failed: ${err.message}`);
+    }
+  }
+
+  async getMyEnrollments(ownerId: string): Promise<any[]> {
+    try {
+      const result = await database.query(
+        `SELECT acc.id, acc.animal_id AS "animalId", acc.network_id AS "networkId",
+                acc.hospital_id AS "hospitalId", acc.corporate_patient_id AS "networkPatientId",
+                acc.platform_unique_id AS "platformUniqueId", acc.enrollment_status AS "enrollmentStatus",
+                acc.enrollment_requested_at AS "enrollmentRequestedAt",
+                acc.enrollment_responded_at AS "enrollmentRespondedAt",
+                acc.visibility, acc.notes,
+                a.name AS "animalName", a.species, a.breed,
+                hn.name AS "networkName", hn.id_prefix AS "networkPrefix",
+                vh.name AS "hospitalName",
+                u_by.name AS "enrolledByName"
+         FROM animal_care_contexts acc
+         JOIN animals a ON acc.animal_id = a.id
+         JOIN hospital_networks hn ON acc.network_id = hn.id
+         LEFT JOIN vet_hospitals vh ON acc.hospital_id = vh.id
+         LEFT JOIN users u_by ON acc.enrolled_by = u_by.id
+         WHERE a.owner_id = $1
+         ORDER BY acc.enrollment_requested_at DESC`,
+        [ownerId]
+      );
+      return result.rows;
+    } catch (err: any) {
+      throw new Error(`Get my enrollments failed: ${err.message}`);
+    }
+  }
+
+  async inviteWalkInPatient(data: WalkInInviteDTO, invitedBy: string): Promise<{ id: string; inviteToken: string }> {
+    try {
+      const crypto = await import('crypto');
+      const token = crypto.randomBytes(48).toString('hex');
+      const result = await database.query(
+        `INSERT INTO hospital_patient_invites
+           (network_id, hospital_id, invited_by, patient_name, patient_email, patient_phone,
+            animal_name, animal_species, invite_token, message)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+         RETURNING id, invite_token AS "inviteToken"`,
+        [data.networkId, data.hospitalId ?? null, invitedBy, data.patientName, data.patientEmail,
+         data.patientPhone ?? null, data.animalName ?? null, data.animalSpecies ?? null, token, data.message ?? null]
+      );
+      return result.rows[0];
+    } catch (err: any) {
+      throw new Error(`Invite walk-in patient failed: ${err.message}`);
+    }
+  }
+
+  async getPendingEnrollments(networkId: string): Promise<any[]> {
+    try {
+      const result = await database.query(
+        `SELECT acc.id, acc.animal_id AS "animalId", acc.enrollment_status AS "enrollmentStatus",
+                acc.corporate_patient_id AS "networkPatientId",
+                acc.enrollment_requested_at AS "enrollmentRequestedAt",
+                acc.enrollment_responded_at AS "enrollmentRespondedAt",
+                a.name AS "animalName", a.species, a.breed,
+                u.name AS "ownerName", u.email AS "ownerEmail"
+         FROM animal_care_contexts acc
+         JOIN animals a ON acc.animal_id = a.id
+         JOIN users u ON a.owner_id = u.id
+         WHERE acc.network_id = $1
+         ORDER BY acc.enrollment_status, acc.enrollment_requested_at DESC`,
+        [networkId]
+      );
+      return result.rows;
+    } catch (err: any) {
+      throw new Error(`Get pending enrollments failed: ${err.message}`);
     }
   }
 

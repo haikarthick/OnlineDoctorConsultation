@@ -1,4 +1,4 @@
-{
+﻿{
   "common": {
     "loading": "లోడ్ అవుతోంది...",
     "cancel": "రద్దు",
@@ -115,6 +115,7 @@
     "hospitalMgmt": "ఆసుపత్రి నిర్వహణ",
     "cancellations": "రద్దులు",
     "dataConsent": "డేటా సమ్మతి",
+    "networkMemberships": "నెట్‌వర్క్ సభ్యత్వాలు",
     "sections": {
       "main": "ప్రధాన",
       "consultations": "సంప్రదింపులు",
@@ -5374,7 +5375,43 @@
       "assignHospital": "ఆసుపత్రి కేటాయించు",
       "addMember": "సభ్యుడిని చేర్చు",
       "noHospitals": "ఆసుపత్రులు ఏవీ కేటాయించబడలేదు",
-      "noMembers": "ఇంకా సభ్యులు లేరు"
+            "noMembers": "ఇంకా సభ్యులు లేరు"
+    },
+    "patients": {
+      "tab": "రోగులు",
+      "searchTitle": "ఇప్పటికే ఉన్న రోగిని వెతకండి",
+      "searchPlaceholder": "పేరు, ఇమెయిల్, ఫోన్ లేదా VC-ID ద్వారా వెతకండి...",
+      "searchMinChars": "వెతకడానికి కనీసం 2 అక్షరాలు టైప్ చేయండి",
+      "noResults": "రోగులు కనుగొనబడలేదు",
+      "requestEnrollment": "నమోదు అభ్యర్థన",
+      "enrollmentRequested": "నమోదు అభ్యర్థన పంపబడింది — రోగికి తెలియజేయబడుతుంది",
+      "inviteWalkIn": "వాక్-ఇన్ రోగిని ఆహ్వానించండి",
+      "inviteTitle": "కొత్త రోగిని ఆహ్వానించండి",
+      "invitePatientName": "రోగి పేరు",
+      "inviteEmail": "రోగి ఇమెయిల్",
+      "invitePhone": "ఫోన్ (ఐచ్ఛికం)",
+      "inviteAnimalName": "పెంపుడు జంతువు పేరు (ఐచ్ఛికం)",
+      "inviteSpecies": "జాతి (ఐచ్ఛికం)",
+      "inviteMessage": "రోగికి సందేశం (ఐచ్ఛికం)",
+      "inviteSend": "ఆహ్వానం పంపండి",
+      "inviteSuccess": "ఆహ్వానం పంపబడింది! లింక్ 72 గంటలలో గడువు ముగుస్తుంది.",
+      "allEnrollments": "అన్ని నమోదులు",
+      "filterAll": "అన్నీ",
+      "filterPending": "పెండింగ్",
+      "filterActive": "చురుకుగా",
+      "filterDeclined": "తిరస్కరించబడింది",
+      "colAnimal": "జంతువు",
+      "colOwner": "యజమాని",
+      "colNetworkId": "నెట్‌వర్క్ రోగి ID",
+      "colStatus": "స్థితి",
+      "colRequested": "అభ్యర్థించబడింది",
+      "statusPending": "సమ్మతి పెండింగ్",
+      "statusActive": "చురుకుగా",
+      "statusDeclined": "తిరస్కరించబడింది",
+      "statusRevoked": "రద్దు చేయబడింది",
+      "noPending": "పెండింగ్ నమోదులు లేవు",
+      "noActive": "చురుకుగా ఉన్న నమోదులు లేవు",
+      "noEnrollments": "ఇంకా నమోదులు లేవు"
     },
     "audit": {
       "title": "ఆడిట్ & సమ్మతి",
@@ -5458,5 +5495,41 @@
         "network": "నెట్వర్క్"
       }
     }
+  }
+,
+  "networkMemberships": {
+    "title": "నా ఆసుపత్రి నెట్‌వర్క్ సభ్యత్వాలు",
+    "subtitle": "ఆసుపత్రి నెట్‌వర్క్‌లలో మీ పెంపుడు జంతువుల నమోదులను నిర్వహించండి",
+    "pendingRequests": "పెండింగ్ నమోదు అభ్యర్థనలు",
+    "pendingBanner": "{{count}} పెండింగ్ నమోదు అభ్యర్థనలు మీ స్పందన కోసం వేచి ఉన్నాయి",
+    "activeMemberships": "చురుకుగా ఉన్న సభ్యత్వాలు",
+    "pastMemberships": "గత సభ్యత్వాలు",
+    "noEnrollments": "ఇంకా నెట్‌వర్క్ నమోదులు లేవు",
+    "noEnrollmentsSubtitle": "ఆసుపత్రి నెట్‌వర్క్ మీ పెంపుడు జంతువును నమోదు చేసినప్పుడు, అది ఇక్కడ కనిపిస్తుంది",
+    "requestFrom": "{{network}} {{animal}}ను నమోదు చేయాలని అభ్యర్థిస్తోంది",
+    "requestedBy": "{{name}} అభ్యర్థించారు",
+    "requestedOn": "{{date}} న",
+    "networkPatientId": "మీ నెట్‌వర్క్ రోగి ID",
+    "platformId": "ప్లాట్‌ఫారమ్ ID",
+    "enrolledSince": "{{date}} నుండి నమోదు",
+    "consentLevel": "డేటా యాక్సెస్ స్థాయి",
+    "viewOnly": "చూడడానికి మాత్రమే",
+    "basicTreatment": "ప్రాథమిక చికిత్స",
+    "fullAccess": "పూర్తి యాక్సెస్",
+    "accept": "అంగీకరించి నమోదు చేయండి",
+    "decline": "తిరస్కరించు",
+    "revokeAccess": "యాక్సెస్ రద్దు",
+    "revokeConfirm": "{{animal}} రికార్డులకు {{network}} యాక్సెస్‌ను రద్దు చేయాలనుకుంటున్నారా?",
+    "acceptSuccess": "నమోదు ఆమోదించబడింది. {{network}} ఇప్పుడు {{animal}} రికార్డులను యాక్సెస్ చేయవచ్చు.",
+    "declineSuccess": "నమోదు అభ్యర్థన తిరస్కరించబడింది.",
+    "revokeSuccess": "యాక్సెస్ విజయవంతంగా రద్దు చేయబడింది.",
+    "statusPending": "మీ ఆమోదం కోసం వేచి ఉంది",
+    "statusActive": "చురుకుగా",
+    "statusDeclined": "తిరస్కరించబడింది",
+    "statusRevoked": "రద్దు చేయబడింది",
+    "privacyNote": "మీరు మీ డేటాను నియంత్రిస్తారు. ఎప్పుడైనా యాక్సెస్‌ను రద్దు చేయవచ్చు.",
+    "consentViewOnly": "వైద్య చరిత్ర మరియు టీకా రికార్డులను మాత్రమే చూడండి",
+    "consentBasic": "రికార్డులు చూడండి + చికిత్స నోట్స్ జోడించండి",
+    "consentFull": "ల్యాబ్ ఫలితాలు మరియు ప్రిస్క్రిప్షన్‌లతో సహా పూర్తి యాక్సెస్"
   }
 }

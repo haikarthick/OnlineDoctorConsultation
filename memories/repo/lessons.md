@@ -186,3 +186,18 @@
 - **Context:** A patient in hospital network has two identities: platform-wide `VC-DOG-26-00001` and hospital-specific `APOLLO-P-00423`. Both must be searchable, displayable, and cross-referenceable.
 - **Lesson:** Use `animal_care_contexts` linking table: `animal_id` (FK to animals) + `hospital_network_id` + `platform_unique_id` (VC- format) + `corporate_patient_id` (network-defined format). Both IDs must be displayed in clinical contexts.
 - **Apply to:** Any clinical UI showing patient identity in hospital context
+
+### LESSON-029 — Consent-Before-Access: Hard Platform Rule
+- **Context:** Hospital network patient enrollment design
+- **Lesson:** A hospital can REQUEST patient enrollment. The patient MUST explicitly APPROVE before ANY clinical data is shared. `enrollment_status = 'pending_consent'` gates all data access. Never auto-activate enrollment.
+- **Apply to:** All future features involving data sharing, third-party access, inter-institution records
+
+### LESSON-030 — Walk-in Patient Invites: 72-hour Expiry Token Pattern
+- **Context:** Hospital patients without platform accounts
+- **Lesson:** Walk-in invites use crypto.randomBytes(48).toString('hex') tokens, stored in hospital_patient_invites table, expire in 72 hours, status tracked as pending/accepted/expired/revoked
+- **Apply to:** All future invite flows
+
+### LESSON-031 — Dual-ID Patient System
+- **Context:** Network patient identification
+- **Lesson:** Every patient has TWO IDs: platform VC-ID (VC-DOG-26-000001, global) and network patient ID (APOLLO-DOG-26-000042, per-network). The network ID is auto-generated on enrollment using the network's id_prefix + species + year + 6-digit sequence.
+- **Apply to:** All future hospital network features

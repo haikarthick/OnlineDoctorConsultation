@@ -338,6 +338,75 @@ router.post('/patient-consent', authMiddleware, validateBody(createPatientConsen
 router.get('/patient-consent/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listConsents(req, res)));
 router.delete('/patient-consent/:consentId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.revokeConsent(req, res)));
 
+// ─── Privacy-first patient enrollment routes ───────────────────
+// Search existing platform patients (for hospital staff)
+router.get('/hospital-networks/:networkId/search-patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const q = (req.query.q as string) ?? '';
+    if (!q || q.length < 2) { res.json([]); return; }
+    const results = await HospitalNetworkService.searchPatients(q, 10);
+    res.json(results);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+}));
+
+// Get all enrollments for a network (pending + active + declined)
+router.get('/hospital-networks/:networkId/all-enrollments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const results = await HospitalNetworkService.getPendingEnrollments(req.params.networkId);
+    res.json(results);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+}));
+
+// Invite a walk-in patient (no platform account)
+router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { patientName, patientEmail, patientPhone, animalName, animalSpecies, hospitalId, message } = req.body;
+    if (!patientName || !patientEmail) { res.status(400).json({ error: 'patientName and patientEmail are required' }); return; }
+    const result = await HospitalNetworkService.inviteWalkInPatient({
+      networkId: req.params.networkId, hospitalId, patientName, patientEmail,
+      patientPhone, animalName, animalSpecies, message,
+    }, (req as any).user!.id);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+}));
+
+// Patient accepts enrollment request (CONSENT-BEFORE-ACCESS)
+router.post('/hospital-networks/enrollments/:contextId/accept', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { consentScope } = req.body;
+    await HospitalNetworkService.acceptEnrollment(req.params.contextId, (req as any).user!.id, consentScope);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+}));
+
+// Patient declines enrollment request
+router.post('/hospital-networks/enrollments/:contextId/decline', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    await HospitalNetworkService.declineEnrollment(req.params.contextId, (req as any).user!.id);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+}));
+
+// Patient views all their network enrollments
+router.get('/my-network-enrollments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const results = await HospitalNetworkService.getMyEnrollments((req as any).user!.id);
+    res.json(results);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+}));
+
 
 // ─── Medical Record routes ───────────────────────────────────
 router.get('/medical-records/stats', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getStats(req, res)));

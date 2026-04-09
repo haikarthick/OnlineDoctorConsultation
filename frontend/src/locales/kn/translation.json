@@ -1,4 +1,4 @@
-{
+﻿{
   "common": {
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
     "cancel": "ರದ್ದುಮಾಡಿ",
@@ -115,6 +115,7 @@
     "hospitalMgmt": "ಆಸ್ಪತ್ರೆ ನಿರ್ವಹಣೆ",
     "cancellations": "ರದ್ದತಿಗಳು",
     "dataConsent": "ಡೇಟಾ ಒಪ್ಪಿಗೆ",
+    "networkMemberships": "ನೆಟ್‌ವರ್ಕ್ ಸದಸ್ಯತ್ವಗಳು",
     "sections": {
       "main": "ಮುಖ್ಯ",
       "consultations": "ಸಮಾಲೋಚನೆಗಳು",
@@ -5385,7 +5386,43 @@
       "assignHospital": "ಆಸ್ಪತ್ರೆ ನಿಯೋಜಿಸಿ",
       "addMember": "ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ",
       "noHospitals": "ಯಾವುದೇ ಆಸ್ಪತ್ರೆಗಳು ನಿಯೋಜಿಸಲಾಗಿಲ್ಲ",
-      "noMembers": "ಇನ್ನೂ ಸದಸ್ಯರಿಲ್ಲ"
+            "noMembers": "ಇನ್ನೂ ಸದಸ್ಯರಿಲ್ಲ"
+    },
+    "patients": {
+      "tab": "ರೋಗಿಗಳು",
+      "searchTitle": "ಈಗಾಗಲೇ ಇರುವ ರೋಗಿಯನ್ನು ಹುಡುಕಿ",
+      "searchPlaceholder": "ಹೆಸರು, ಇಮೇಲ್, ಫೋನ್ ಅಥವಾ VC-ID ಮೂಲಕ ಹುಡುಕಿ...",
+      "searchMinChars": "ಹುಡುಕಲು ಕನಿಷ್ಠ 2 ಅಕ್ಷರಗಳನ್ನು ಟೈಪ್ ಮಾಡಿ",
+      "noResults": "ರೋಗಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
+      "requestEnrollment": "ನೋಂದಣಿ ವಿನಂತಿ",
+      "enrollmentRequested": "ನೋಂದಣಿ ವಿನಂತಿ ಕಳುಹಿಸಲಾಗಿದೆ — ರೋಗಿಗೆ ತಿಳಿಸಲಾಗುತ್ತದೆ",
+      "inviteWalkIn": "ವಾಕ್-ಇನ್ ರೋಗಿಯನ್ನು ಆಹ್ವಾನಿಸಿ",
+      "inviteTitle": "ಹೊಸ ರೋಗಿಯನ್ನು ಆಹ್ವಾನಿಸಿ",
+      "invitePatientName": "ರೋಗಿಯ ಹೆಸರು",
+      "inviteEmail": "ರೋಗಿಯ ಇಮೇಲ್",
+      "invitePhone": "ಫೋನ್ (ಐಚ್ಛಿಕ)",
+      "inviteAnimalName": "ಸಾಕುಪ್ರಾಣಿ ಹೆಸರು (ಐಚ್ಛಿಕ)",
+      "inviteSpecies": "ಜಾತಿ (ಐಚ್ಛಿಕ)",
+      "inviteMessage": "ರೋಗಿಗೆ ಸಂದೇಶ (ಐಚ್ಛಿಕ)",
+      "inviteSend": "ಆಹ್ವಾನ ಕಳುಹಿಸಿ",
+      "inviteSuccess": "ಆಹ್ವಾನ ಕಳುಹಿಸಲಾಗಿದೆ! ಲಿಂಕ್ 72 ಗಂಟೆಗಳಲ್ಲಿ ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ.",
+      "allEnrollments": "ಎಲ್ಲಾ ನೋಂದಣಿಗಳು",
+      "filterAll": "ಎಲ್ಲಾ",
+      "filterPending": "ಬಾಕಿ",
+      "filterActive": "ಸಕ್ರಿಯ",
+      "filterDeclined": "ನಿರಾಕರಿಸಲಾಗಿದೆ",
+      "colAnimal": "ಪ್ರಾಣಿ",
+      "colOwner": "ಮಾಲೀಕರು",
+      "colNetworkId": "ನೆಟ್‌ವರ್ಕ್ ರೋಗಿ ID",
+      "colStatus": "ಸ್ಥಿತಿ",
+      "colRequested": "ವಿನಂತಿಸಲಾಗಿದೆ",
+      "statusPending": "ಒಪ್ಪಿಗೆ ಬಾಕಿ",
+      "statusActive": "ಸಕ್ರಿಯ",
+      "statusDeclined": "ನಿರಾಕರಿಸಲಾಗಿದೆ",
+      "statusRevoked": "ಹಿಂತೆಗೆದುಕೊಳ್ಳಲಾಗಿದೆ",
+      "noPending": "ಬಾಕಿ ನೋಂದಣಿಗಳಿಲ್ಲ",
+      "noActive": "ಸಕ್ರಿಯ ನೋಂದಣಿಗಳಿಲ್ಲ",
+      "noEnrollments": "ಇನ್ನೂ ನೋಂದಣಿಗಳಿಲ್ಲ"
     },
     "audit": {
       "title": "ಆಡಿಟ್ ಮತ್ತು ಅನುಸರಣೆ",
@@ -5469,5 +5506,41 @@
         "network": "ನೆಟ್ವರ್ಕ್"
       }
     }
+  }
+,
+  "networkMemberships": {
+    "title": "ನನ್ನ ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್ ಸದಸ್ಯತ್ವಗಳು",
+    "subtitle": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್‌ಗಳಲ್ಲಿ ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿಗಳ ನೋಂದಣಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+    "pendingRequests": "ಬಾಕಿ ನೋಂದಣಿ ವಿನಂತಿಗಳು",
+    "pendingBanner": "{{count}} ಬಾಕಿ ನೋಂದಣಿ ವಿನಂತಿಗಳು ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಗಾಗಿ ಕಾಯುತ್ತಿವೆ",
+    "activeMemberships": "ಸಕ್ರಿಯ ಸದಸ್ಯತ್ವಗಳು",
+    "pastMemberships": "ಹಿಂದಿನ ಸದಸ್ಯತ್ವಗಳು",
+    "noEnrollments": "ಇನ್ನೂ ನೆಟ್‌ವರ್ಕ್ ನೋಂದಣಿಗಳಿಲ್ಲ",
+    "noEnrollmentsSubtitle": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್ ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿಯನ್ನು ನೋಂದಾಯಿಸಿದಾಗ, ಅದು ಇಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ",
+    "requestFrom": "{{network}} {{animal}}ನ್ನು ನೋಂದಾಯಿಸಲು ವಿನಂತಿಸಿದೆ",
+    "requestedBy": "{{name}} ವಿನಂತಿಸಿದರು",
+    "requestedOn": "{{date}} ರಂದು",
+    "networkPatientId": "ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್ ರೋಗಿ ID",
+    "platformId": "ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ID",
+    "enrolledSince": "{{date}} ರಿಂದ ನೋಂದಾಯಿಸಲಾಗಿದೆ",
+    "consentLevel": "ಡೇಟಾ ಪ್ರವೇಶ ಮಟ್ಟ",
+    "viewOnly": "ವೀಕ್ಷಣೆ ಮಾತ್ರ",
+    "basicTreatment": "ಮೂಲ ಚಿಕಿತ್ಸೆ",
+    "fullAccess": "ಪೂರ್ಣ ಪ್ರವೇಶ",
+    "accept": "ಒಪ್ಪಿ ನೋಂದಾಯಿಸಿ",
+    "decline": "ನಿರಾಕರಿಸಿ",
+    "revokeAccess": "ಪ್ರವೇಶ ಹಿಂತೆಗೆದುಕೊಳ್ಳಿ",
+    "revokeConfirm": "{{animal}} ದಾಖಲೆಗಳಿಗೆ {{network}} ಪ್ರವೇಶವನ್ನು ಹಿಂತೆಗೆದುಕೊಳ್ಳಲು ಬಯಸುತ್ತೀರಾ?",
+    "acceptSuccess": "ನೋಂದಣಿ ಸ್ವೀಕರಿಸಲಾಗಿದೆ. {{network}} ಈಗ {{animal}} ದಾಖಲೆಗಳನ್ನು ಪ್ರವೇಶಿಸಬಹುದು.",
+    "declineSuccess": "ನೋಂದಣಿ ವಿನಂತಿ ನಿರಾಕರಿಸಲಾಗಿದೆ.",
+    "revokeSuccess": "ಪ್ರವೇಶ ಯಶಸ್ವಿಯಾಗಿ ಹಿಂತೆಗೆದುಕೊಳ್ಳಲಾಗಿದೆ.",
+    "statusPending": "ನಿಮ್ಮ ಒಪ್ಪಿಗೆ ಬಾಕಿ",
+    "statusActive": "ಸಕ್ರಿಯ",
+    "statusDeclined": "ನಿರಾಕರಿಸಲಾಗಿದೆ",
+    "statusRevoked": "ಹಿಂತೆಗೆದುಕೊಳ್ಳಲಾಗಿದೆ",
+    "privacyNote": "ನೀವು ನಿಮ್ಮ ಡೇಟಾವನ್ನು ನಿಯಂತ್ರಿಸುತ್ತೀರಿ. ಯಾವಾಗ ಬೇಕಾದರೂ ಪ್ರವೇಶ ಹಿಂತೆಗೆದುಕೊಳ್ಳಬಹುದು.",
+    "consentViewOnly": "ವೈದ್ಯಕೀಯ ಇತಿಹಾಸ ಮತ್ತು ಲಸಿಕೆ ದಾಖಲೆಗಳನ್ನು ಮಾತ್ರ ವೀಕ್ಷಿಸಿ",
+    "consentBasic": "ದಾಖಲೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ + ಚಿಕಿತ್ಸಾ ಟಿಪ್ಪಣಿಗಳನ್ನು ಸೇರಿಸಿ",
+    "consentFull": "ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು ಮತ್ತು ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳ ಸಹಿತ ಪೂರ್ಣ ಪ್ರವೇಶ"
   }
 }

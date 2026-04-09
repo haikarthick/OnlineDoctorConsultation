@@ -1260,6 +1260,31 @@ CREATE TABLE IF NOT EXISTS hospital_invites (
 CREATE INDEX IF NOT EXISTS idx_hospital_invites_token ON hospital_invites(invite_token);
 CREATE INDEX IF NOT EXISTS idx_hospital_invites_hospital ON hospital_invites(hospital_id);
 
+-- 40b. HOSPITAL PATIENT INVITES (walk-in patients without platform accounts)
+CREATE TABLE IF NOT EXISTS hospital_patient_invites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+  invited_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  patient_name VARCHAR(200) NOT NULL,
+  patient_email VARCHAR(255) NOT NULL,
+  patient_phone VARCHAR(30),
+  animal_name VARCHAR(100),
+  animal_species VARCHAR(50),
+  invite_token VARCHAR(128) NOT NULL UNIQUE,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending', 'accepted', 'expired', 'revoked')),
+  message TEXT,
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '72 hours'),
+  accepted_at TIMESTAMPTZ,
+  accepted_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_hosp_patient_invites_token ON hospital_patient_invites(invite_token);
+CREATE INDEX IF NOT EXISTS idx_hosp_patient_invites_email ON hospital_patient_invites(patient_email);
+CREATE INDEX IF NOT EXISTS idx_hosp_patient_invites_network ON hospital_patient_invites(network_id);
+
 CREATE TABLE IF NOT EXISTS hospital_documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
@@ -1578,6 +1603,10 @@ CREATE TABLE IF NOT EXISTS animal_care_contexts (
   enrolled_by UUID REFERENCES users(id) ON DELETE SET NULL,
   is_active BOOLEAN DEFAULT true,
   notes TEXT,
+  enrollment_status VARCHAR(20) NOT NULL DEFAULT 'pending_consent'
+    CHECK (enrollment_status IN ('pending_consent', 'active', 'declined', 'revoked')),
+  enrollment_requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  enrollment_responded_at TIMESTAMP,
   UNIQUE(animal_id, network_id)
 );
 
