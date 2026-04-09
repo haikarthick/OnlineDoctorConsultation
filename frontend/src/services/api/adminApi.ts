@@ -109,3 +109,34 @@ export async function healthCheck() {
   const response = await client.get('/health')
   return response.data
 }
+
+// ─── Role Change Requests ──────────────────────────────────────
+export async function submitRoleChangeRequest(requested_role: string, reason: string) {
+  const response = await client.post('/role-change-requests', { requested_role, reason })
+  return response.data
+}
+
+export async function getMyRoleChangeRequests() {
+  const response = await client.get('/role-change-requests/my')
+  return response.data
+}
+
+export async function cancelRoleChangeRequest(id: string) {
+  const response = await client.put(`/role-change-requests/${id}/cancel`, {})
+  return response.data
+}
+
+export async function adminListRoleChangeRequests(status = 'pending') {
+  const response = await client.get('/admin/role-change-requests', { params: { status } })
+  return response.data
+}
+
+export async function adminApproveRoleChangeRequest(id: string) {
+  const response = await client.put(`/admin/role-change-requests/${id}/approve`, {})
+  return response.data
+}
+
+export async function adminRejectRoleChangeRequest(id: string, rejection_reason: string) {
+  const response = await client.put(`/admin/role-change-requests/${id}/reject`, { rejection_reason })
+  return response.data
+}

@@ -1589,6 +1589,33 @@
       "failedUpdateProfile": "ಪ್ರೊಫೈಲ್ ನವೀಕರಿಸಲು ವಿಫಲವಾಗಿದೆ",
       "failedUpdateVetProfile": "ವೆಟೆರಿನರಿ ಪ್ರೊಫೈಲ್ ನವೀಕರಿಸಲು ವಿಫಲವಾಗಿದೆ",
       "failedUploadPhoto": "ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"
+    },
+    "roleChange": {
+      "sectionTitle": "ಪಾತ್ರ ಮತ್ತು ಖಾತೆ ಪ್ರಕಾರ",
+      "sectionDesc": "ನಿಮ್ಮ ಖಾತೆ ಪಾತ್ರ ಬದಲಾಯಿಸಲು ವಿನಂತಿ ಸಲ್ಲಿಸಿ. ನಿರ್ವಾಹಕ ಪರಿಶೀಲನೆ ಅಗತ್ಯ.",
+      "currentRole": "ಪ್ರಸ್ತುತ ಪಾತ್ರ",
+      "requestTitle": "ಪಾತ್ರ ಬದಲಾವಣೆ ವಿನಂತಿ",
+      "requestDesc": "ನೀವು ಬದಲಾಯಿಸಲು ಬಯಸುವ ಪಾತ್ರ ಆಯ್ಕೆಮಾಡಿ ಮತ್ತು ಕಾರಣ ನೀಡಿ.",
+      "selectRole": "ಹೊಸ ಪಾತ್ರ ಆಯ್ಕೆಮಾಡಿ",
+      "reasonLabel": "ಪಾತ್ರ ಬದಲಾವಣೆ ಕಾರಣ",
+      "reasonPlaceholder": "ಕಾರಣ ವಿವರಿಸಿ (ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳು)...",
+      "submitBtn": "ವಿನಂತಿ ಸಲ್ಲಿಸಿ",
+      "submitting": "ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ...",
+      "cancelBtn": "ವಿನಂತಿ ರದ್ದು ಮಾಡಿ",
+      "pendingTitle": "ಪಾತ್ರ ಬದಲಾವಣೆ ವಿನಂತಿ ಬಾಕಿ ಇದೆ",
+      "pendingDesc": "{{currentRole}} ನಿಂದ {{requestedRole}} ಬದಲಾವಣೆ ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ.",
+      "approvedTitle": "ಪಾತ್ರ ಬದಲಾವಣೆ ಅನುಮೋದಿಸಲಾಗಿದೆ!",
+      "approvedDesc": "ನಿಮ್ಮ ಪಾತ್ರ {{requestedRole}} ಗೆ ನವೀಕರಿಸಲಾಗಿದೆ. ಹೊಸ ಅನುಮತಿಗಳಿಗೆ ಮರು-ಲಾಗಿನ್ ಮಾಡಿ.",
+      "rejectedTitle": "ಪಾತ್ರ ಬದಲಾವಣೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+      "rejectedDesc": "ಕಾರಣ: {{reason}}",
+      "reLoginBtn": "ಲಾಗ್ ಔಟ್ & ಮರು-ಲಾಗಿನ್",
+      "historyTitle": "ವಿನಂತಿ ಇತಿಹಾಸ",
+      "submitted": "ಸಲ್ಲಿಸಲಾಗಿದೆ", "reviewed": "ಪರಿಶೀಲಿಸಿದವರು",
+      "statusPending": "ಬಾಕಿ", "statusApproved": "ಅನುಮೋದಿಸಲಾಗಿದೆ",
+      "statusRejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ", "statusCancelled": "ರದ್ದು",
+      "noHistory": "ಇನ್ನೂ ವಿನಂತಿಗಳಿಲ್ಲ.",
+      "errSameRole": "ಈ ಪಾತ್ರ ಈಗಾಗಲೇ ನಿಮ್ಮದಾಗಿದೆ.", "errAlreadyPending": "ಒಂದು ವಿನಂತಿ ಈಗಾಗಲೇ ಬಾಕಿ ಇದೆ.",
+      "successSubmit": "ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ!", "successCancel": "ವಿನಂತಿ ರದ್ದು ಮಾಡಲಾಗಿದೆ."
     }
   },
   "enterpriseManagement": {
@@ -4109,6 +4136,16 @@
     "custom": "Custom",
     "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
     "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
+  },
+  "adminRoleRequests": {
+    "title": "ಪಾತ್ರ ಬದಲಾವಣೆ ವಿನಂತಿಗಳು", "subtitle": "ಬಳಕೆದಾರ ಪಾತ್ರ ಬದಲಾವಣೆ ವಿನಂತಿಗಳನ್ನು ಪರಿಶೀಲಿಸಿ",
+    "tabs": { "pending": "ಬಾಕಿ", "approved": "ಅನುಮೋದಿಸಲಾಗಿದೆ", "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ" },
+    "table": { "user": "ಬಳಕೆದಾರ", "currentRole": "ಪ್ರಸ್ತುತ ಪಾತ್ರ", "requestedRole": "ಕೋರಿದ ಪಾತ್ರ", "reason": "ಕಾರಣ", "requestedAt": "ಕೋರಿದ ದಿನಾಂಕ", "actions": "ಕ್ರಿಯೆಗಳು" },
+    "approve": "ಅನುಮೋದಿಸಿ", "reject": "ತಿರಸ್ಕರಿಸಿ", "approving": "ಅನುಮೋದಿಸಲಾಗುತ್ತಿದೆ...", "rejecting": "ತಿರಸ್ಕರಿಸಲಾಗುತ್ತಿದೆ...",
+    "rejectModal": { "title": "ವಿನಂತಿ ತಿರಸ್ಕರಿಸಿ", "reasonLabel": "ತಿರಸ್ಕರಣ ಕಾರಣ", "reasonPlaceholder": "ಕಾರಣ ವಿವರಿಸಿ...", "confirmBtn": "ತಿರಸ್ಕರಿಸಿ", "cancelBtn": "ರದ್ದು" },
+    "noRequests": "{{status}} ವಿನಂತಿಗಳಿಲ್ಲ.",
+    "approveSuccess": "ಪಾತ್ರ ಬದಲಾವಣೆ ಅನುಮೋದಿಸಲಾಗಿದೆ.", "rejectSuccess": "ವಿನಂತಿ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.",
+    "reviewedBy": "ಪರಿಶೀಲನೆ: {{name}}", "rejectedReason": "ಕಾರಣ: {{reason}}"
   },
   "adminDashboard": {
     "title": "ಅಡ್ಮಿನ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",

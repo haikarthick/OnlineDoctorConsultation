@@ -706,6 +706,33 @@ class PostgresDatabase {
       )
     `).catch(() => {});
 
+    // Extend users.role CHECK constraint to include corporate_admin (existing prod DBs)
+    await this.pool.query(`
+      ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check
+    `).catch(() => {});
+    await this.pool.query(`
+      ALTER TABLE users ADD CONSTRAINT users_role_check
+        CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin'))
+    `).catch(() => {});
+
+    // role_change_requests table safety net
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS role_change_requests (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        current_role VARCHAR(50) NOT NULL,
+        requested_role VARCHAR(50) NOT NULL,
+        reason TEXT,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending'
+          CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+        reviewed_by UUID REFERENCES users(id),
+        reviewed_at TIMESTAMP,
+        rejection_reason TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

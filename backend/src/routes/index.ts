@@ -66,6 +66,8 @@ import {
   uploadHospitalDocSchema, reviewHospitalDocSchema,
   // Hospital Network
   createHospitalNetworkSchema, addNetworkMemberSchema, createPatientConsentSchema,
+  // Role Change Requests
+  roleChangeRequestSchema, rejectRoleChangeSchema,
 } from '../middleware/validation';
 import { requireFeature, getAllFeatureFlags } from '../config/featureFlags';
 import AuthController from '../controllers/AuthController';
@@ -1068,6 +1070,113 @@ router.get('/vaccine-certificate-log/animal/:animalId', authMiddleware, asyncHan
   }
   const logs = await VaccineProtocolService.getCertificateLogs(req.params.animalId);
   res.json({ success: true, data: logs });
+}));
+
+// ─── Role Change Requests ─────────────────────────────────────
+// User submits a role change request
+router.post('/role-change-requests', authMiddleware, validateBody(roleChangeRequestSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { requested_role, reason } = req.body;
+  const userId = authReq.userId;
+  const currentRole = authReq.role;
+  if (requested_role === currentRole) {
+    return res.status(400).json({ success: false, message: 'Requested role is the same as your current role' });
+  }
+  const existing = await (await import('../utils/database')).default.query(
+    `SELECT id FROM role_change_requests WHERE user_id = $1 AND status = 'pending'`, [userId]
+  );
+  if (existing.rows.length > 0) {
+    return res.status(409).json({ success: false, message: 'You already have a pending role change request' });
+  }
+  const result = await (await import('../utils/database')).default.query(
+    `INSERT INTO role_change_requests (user_id, current_role, requested_role, reason)
+     VALUES ($1, $2, $3, $4) RETURNING id, status, created_at`,
+    [userId, currentRole, requested_role, reason]
+  );
+  res.status(201).json({ success: true, data: result.rows[0] });
+}));
+
+// User views their own role change requests
+router.get('/role-change-requests/my', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const result = await (await import('../utils/database')).default.query(
+    `SELECT r.id, r.current_role AS "currentRole", r.requested_role AS "requestedRole",
+            r.reason, r.status, r.rejection_reason AS "rejectionReason",
+            r.reviewed_at AS "reviewedAt", r.created_at AS "createdAt",
+            u.first_name || ' ' || u.last_name AS "reviewedBy"
+     FROM role_change_requests r
+     LEFT JOIN users u ON u.id = r.reviewed_by
+     WHERE r.user_id = $1
+     ORDER BY r.created_at DESC`,
+    [authReq.userId]
+  );
+  res.json({ success: true, data: result.rows });
+}));
+
+// User cancels their own pending request
+router.put('/role-change-requests/:id/cancel', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const result = await (await import('../utils/database')).default.query(
+    `UPDATE role_change_requests SET status = 'cancelled', updated_at = NOW()
+     WHERE id = $1 AND user_id = $2 AND status = 'pending' RETURNING id`,
+    [req.params.id, authReq.userId]
+  );
+  if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Request not found or already processed' });
+  res.json({ success: true });
+}));
+
+// Admin lists all role change requests
+router.get('/admin/role-change-requests', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const { status = 'pending' } = req.query;
+  const result = await (await import('../utils/database')).default.query(
+    `SELECT r.id, r.current_role AS "currentRole", r.requested_role AS "requestedRole",
+            r.reason, r.status, r.rejection_reason AS "rejectionReason",
+            r.reviewed_at AS "reviewedAt", r.created_at AS "createdAt",
+            u.id AS "userId", u.first_name || ' ' || u.last_name AS "userName",
+            u.email AS "userEmail", u.unique_id AS "uniqueId",
+            rev.first_name || ' ' || rev.last_name AS "reviewedBy"
+     FROM role_change_requests r
+     JOIN users u ON u.id = r.user_id
+     LEFT JOIN users rev ON rev.id = r.reviewed_by
+     WHERE r.status = $1
+     ORDER BY r.created_at ASC`,
+    [status]
+  );
+  res.json({ success: true, data: result.rows });
+}));
+
+// Admin approves a role change request
+router.put('/admin/role-change-requests/:id/approve', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const db = (await import('../utils/database')).default;
+  const rcrResult = await db.query(
+    `SELECT r.*, u.id AS "uid" FROM role_change_requests r JOIN users u ON u.id = r.user_id WHERE r.id = $1`,
+    [req.params.id]
+  );
+  if (rcrResult.rows.length === 0) return res.status(404).json({ success: false, message: 'Request not found' });
+  const rcr = rcrResult.rows[0];
+  if (rcr.status !== 'pending') return res.status(400).json({ success: false, message: 'Request is no longer pending' });
+  await db.query(`UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2`, [rcr.requested_role, rcr.uid]);
+  await db.query(
+    `UPDATE role_change_requests SET status = 'approved', reviewed_by = $1, reviewed_at = NOW(), updated_at = NOW() WHERE id = $2`,
+    [authReq.userId, req.params.id]
+  );
+  res.json({ success: true, message: 'Role change approved. User must re-login to receive new permissions.' });
+}));
+
+// Admin rejects a role change request
+router.put('/admin/role-change-requests/:id/reject', authMiddleware, roleMiddleware(['admin']), validateBody(rejectRoleChangeSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { rejection_reason } = req.body;
+  const db = (await import('../utils/database')).default;
+  const rcrResult = await db.query(`SELECT id, status FROM role_change_requests WHERE id = $1`, [req.params.id]);
+  if (rcrResult.rows.length === 0) return res.status(404).json({ success: false, message: 'Request not found' });
+  if (rcrResult.rows[0].status !== 'pending') return res.status(400).json({ success: false, message: 'Request is no longer pending' });
+  await db.query(
+    `UPDATE role_change_requests SET status = 'rejected', reviewed_by = $1, reviewed_at = NOW(), rejection_reason = $2, updated_at = NOW() WHERE id = $3`,
+    [authReq.userId, rejection_reason, req.params.id]
+  );
+  res.json({ success: true });
 }));
 
 export default router;

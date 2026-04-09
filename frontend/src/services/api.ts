@@ -2227,6 +2227,32 @@ class ApiService {
     const response = await this.client.delete(`/patient-consent/${consentId}`)
     return response.data
   }
+
+  // Role Change Requests
+  async submitRoleChangeRequest(data: { requested_role: string; reason: string }) {
+    const response = await this.client.post('/role-change-requests', data)
+    return response.data
+  }
+  async getMyRoleChangeRequests() {
+    const response = await this.client.get('/role-change-requests/my')
+    return response.data
+  }
+  async cancelRoleChangeRequest(id: string) {
+    const response = await this.client.put(`/role-change-requests/${id}/cancel`, {})
+    return response.data
+  }
+  async adminListRoleChangeRequests(status = 'pending') {
+    const response = await this.client.get('/admin/role-change-requests', { params: { status } })
+    return response.data
+  }
+  async adminApproveRoleChangeRequest(id: string) {
+    const response = await this.client.put(`/admin/role-change-requests/${id}/approve`, {})
+    return response.data
+  }
+  async adminRejectRoleChangeRequest(id: string, rejection_reason: string) {
+    const response = await this.client.put(`/admin/role-change-requests/${id}/reject`, { rejection_reason })
+    return response.data
+  }
 }
 export const apiService = new ApiService()
 export default apiService

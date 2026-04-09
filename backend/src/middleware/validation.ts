@@ -340,7 +340,7 @@ export const toggleUserStatusSchema = Joi.object({
 });
 
 export const changeUserRoleSchema = Joi.object({
-  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'admin').required(),
+  role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin').required(),
 });
 
 export const processRefundSchema = Joi.object({
@@ -1386,4 +1386,13 @@ export const createPatientConsentSchema = Joi.object({
   allowPrescribe: Joi.boolean().default(false),
   validFrom: Joi.date().optional(),
   validUntil: Joi.date().min(Joi.ref('validFrom')).optional().allow(null),
+});
+
+export const roleChangeRequestSchema = Joi.object({
+  requested_role: Joi.string().valid('pet_owner', 'farmer', 'veterinarian', 'corporate_admin').required(),
+  reason: Joi.string().min(10).max(1000).required(),
+});
+
+export const rejectRoleChangeSchema = Joi.object({
+  rejection_reason: Joi.string().min(5).max(500).required(),
 });

@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
-  role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin')),
+  role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin')),
   phone VARCHAR(20) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT true,
@@ -1692,4 +1692,27 @@ CREATE TRIGGER update_hospital_networks_updated_at BEFORE UPDATE ON hospital_net
 
 DROP TRIGGER IF EXISTS update_patient_consent_updated_at ON patient_data_consent;
 CREATE TRIGGER update_patient_consent_updated_at BEFORE UPDATE ON patient_data_consent
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- ============================================================
+-- 42. ROLE CHANGE REQUESTS (user-initiated role upgrade/change with admin approval)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS role_change_requests (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    current_role VARCHAR(50) NOT NULL,
+    requested_role VARCHAR(50) NOT NULL,
+    reason TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+    reviewed_by UUID REFERENCES users(id),
+    reviewed_at TIMESTAMP,
+    rejection_reason TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_rcr_user_id ON role_change_requests(user_id);
+CREATE INDEX IF NOT EXISTS idx_rcr_status ON role_change_requests(status);
+
+DROP TRIGGER IF EXISTS update_role_change_requests_updated_at ON role_change_requests;
+CREATE TRIGGER update_role_change_requests_updated_at BEFORE UPDATE ON role_change_requests
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

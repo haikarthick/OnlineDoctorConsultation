@@ -1587,6 +1587,38 @@
       "failedUpdateProfile": "प्रोफ़ाइल अपडेट करने में विफल",
       "failedUpdateVetProfile": "पशु चिकित्सक प्रोफ़ाइल अपडेट करने में विफल",
       "failedUploadPhoto": "फ़ोटो अपलोड करने में विफल"
+    },
+    "roleChange": {
+      "sectionTitle": "भूमिका और खाता प्रकार",
+      "sectionDesc": "अपनी खाता भूमिका बदलने का अनुरोध करें। एडमिन की समीक्षा आवश्यक है।",
+      "currentRole": "वर्तमान भूमिका",
+      "requestTitle": "भूमिका परिवर्तन का अनुरोध करें",
+      "requestDesc": "वह भूमिका चुनें जिसमें आप बदलना चाहते हैं और कारण बताएं।",
+      "selectRole": "नई भूमिका चुनें",
+      "reasonLabel": "भूमिका परिवर्तन का कारण",
+      "reasonPlaceholder": "कारण बताएं (न्यूनतम 10 अक्षर)...",
+      "submitBtn": "अनुरोध सबमिट करें",
+      "submitting": "सबमिट हो रहा है...",
+      "cancelBtn": "अनुरोध रद्द करें",
+      "pendingTitle": "भूमिका परिवर्तन अनुरोध लंबित है",
+      "pendingDesc": "{{currentRole}} से {{requestedRole}} में परिवर्तन की समीक्षा हो रही है।",
+      "approvedTitle": "भूमिका परिवर्तन स्वीकृत!",
+      "approvedDesc": "आपकी भूमिका {{requestedRole}} में अपडेट की गई है। नई अनुमतियाँ सक्रिय करने के लिए लॉग आउट करें।",
+      "rejectedTitle": "भूमिका परिवर्तन अस्वीकृत",
+      "rejectedDesc": "कारण: {{reason}}",
+      "reLoginBtn": "लॉग आउट और पुनः लॉगिन करें",
+      "historyTitle": "अनुरोध इतिहास",
+      "submitted": "सबमिट किया",
+      "reviewed": "समीक्षा की",
+      "statusPending": "लंबित",
+      "statusApproved": "स्वीकृत",
+      "statusRejected": "अस्वीकृत",
+      "statusCancelled": "रद्द",
+      "noHistory": "अभी तक कोई भूमिका परिवर्तन अनुरोध नहीं।",
+      "errSameRole": "आपके पास पहले से यह भूमिका है।",
+      "errAlreadyPending": "आपका एक अनुरोध पहले से लंबित है।",
+      "successSubmit": "अनुरोध सबमिट हुआ! एडमिन जल्द समीक्षा करेगा।",
+      "successCancel": "अनुरोध रद्द किया गया।"
     }
   },
   "enterpriseManagement": {
@@ -4118,6 +4150,18 @@
     "custom": "कस्टम",
     "vacationInfoText": "उन सभी दिनों को अनुपलब्ध चिह्नित करने के लिए तिथि सीमा चुनें। उन तिथियों पर मौजूदा बुकिंग स्वचालित रूप से रद्द नहीं होंगी।",
     "daysWillBeMarked": "{{count}} दिन अनुपलब्ध चिह्नित किए जाएंगे"
+  },
+  "adminRoleRequests": {
+    "title": "भूमिका परिवर्तन अनुरोध",
+    "subtitle": "उपयोगकर्ता की भूमिका परिवर्तन अनुरोधों की समीक्षा करें",
+    "tabs": { "pending": "लंबित", "approved": "स्वीकृत", "rejected": "अस्वीकृत" },
+    "table": { "user": "उपयोगकर्ता", "currentRole": "वर्तमान भूमिका", "requestedRole": "अनुरोधित भूमिका", "reason": "कारण", "requestedAt": "अनुरोध तिथि", "actions": "कार्रवाई" },
+    "approve": "स्वीकृत करें", "reject": "अस्वीकृत करें", "approving": "स्वीकृत हो रहा है...", "rejecting": "अस्वीकृत हो रहा है...",
+    "rejectModal": { "title": "भूमिका परिवर्तन अस्वीकृत करें", "reasonLabel": "अस्वीकृति का कारण", "reasonPlaceholder": "कारण बताएं...", "confirmBtn": "अस्वीकृत करें", "cancelBtn": "रद्द करें" },
+    "noRequests": "कोई {{status}} अनुरोध नहीं।",
+    "approveSuccess": "भूमिका परिवर्तन स्वीकृत। उपयोगकर्ता को पुनः लॉगिन करना होगा।",
+    "rejectSuccess": "अनुरोध अस्वीकृत।",
+    "reviewedBy": "समीक्षा: {{name}}", "rejectedReason": "कारण: {{reason}}"
   },
   "adminDashboard": {
     "title": "एडमिन डैशबोर्ड",

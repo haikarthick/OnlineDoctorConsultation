@@ -1623,6 +1623,38 @@
       "failedUpdateProfile": "Failed to update profile",
       "failedUpdateVetProfile": "Failed to update vet profile",
       "failedUploadPhoto": "Failed to upload photo"
+    },
+    "roleChange": {
+      "sectionTitle": "Role & Account Type",
+      "sectionDesc": "Request to change your account role. Admin review required.",
+      "currentRole": "Current Role",
+      "requestTitle": "Request Role Change",
+      "requestDesc": "Select the role you want to switch to and provide a reason. Your request will be reviewed by an admin.",
+      "selectRole": "Select new role",
+      "reasonLabel": "Reason for role change",
+      "reasonPlaceholder": "Explain why you need this role change (min 10 characters)...",
+      "submitBtn": "Submit Request",
+      "submitting": "Submitting...",
+      "cancelBtn": "Cancel Request",
+      "pendingTitle": "Role Change Request Pending",
+      "pendingDesc": "Your request to change from {{currentRole}} to {{requestedRole}} is under review.",
+      "approvedTitle": "Role Change Approved!",
+      "approvedDesc": "Your role has been updated to {{requestedRole}}. Please log out and log back in to activate your new permissions.",
+      "rejectedTitle": "Role Change Rejected",
+      "rejectedDesc": "Reason: {{reason}}",
+      "reLoginBtn": "Log Out & Re-Login",
+      "historyTitle": "Request History",
+      "submitted": "Submitted",
+      "reviewed": "Reviewed by",
+      "statusPending": "Pending",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "statusCancelled": "Cancelled",
+      "noHistory": "No role change requests yet.",
+      "errSameRole": "You already have this role.",
+      "errAlreadyPending": "You already have a pending request.",
+      "successSubmit": "Request submitted! Admin will review shortly.",
+      "successCancel": "Request cancelled."
     }
   },
   "enterpriseManagement": {
@@ -4172,6 +4204,39 @@
     "custom": "Custom",
     "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
     "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
+  },
+  "adminRoleRequests": {
+    "title": "Role Change Requests",
+    "subtitle": "Review and act on user role change requests",
+    "tabs": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "table": {
+      "user": "User",
+      "currentRole": "Current Role",
+      "requestedRole": "Requested Role",
+      "reason": "Reason",
+      "requestedAt": "Requested At",
+      "actions": "Actions"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "approving": "Approving...",
+    "rejecting": "Rejecting...",
+    "rejectModal": {
+      "title": "Reject Role Change",
+      "reasonLabel": "Rejection reason (required)",
+      "reasonPlaceholder": "Explain why this request is denied...",
+      "confirmBtn": "Confirm Reject",
+      "cancelBtn": "Cancel"
+    },
+    "noRequests": "No {{status}} role change requests.",
+    "approveSuccess": "Role change approved. User must re-login.",
+    "rejectSuccess": "Role change request rejected.",
+    "reviewedBy": "Reviewed by {{name}}",
+    "rejectedReason": "Reason: {{reason}}"
   },
   "adminDashboard": {
     "title": "Admin Dashboard",

@@ -1585,6 +1585,36 @@
       "failedUpdateProfile": "சுயவிவரத்தைப் புதுப்பிக்க இயலவில்லை",
       "failedUpdateVetProfile": "கால்நடை மருத்துவர் சுயவிவரத்தைப் புதுப்பிக்க இயலவில்லை",
       "failedUploadPhoto": "புகைப்படம் பதிவேற்ற இயலவில்லை"
+    },
+    "roleChange": {
+      "sectionTitle": "பங்கு மற்றும் கணக்கு வகை",
+      "sectionDesc": "உங்கள் கணக்கு பங்கை மாற்ற கோரிக்கை சமர்ப்பிக்கவும். நிர்வாகி ஆய்வு தேவை.",
+      "currentRole": "தற்போதைய பங்கு",
+      "requestTitle": "பங்கு மாற்ற கோரிக்கை",
+      "requestDesc": "நீங்கள் மாற விரும்பும் பங்கை தேர்ந்தெடுத்து காரணம் கொடுக்கவும்.",
+      "selectRole": "புதிய பங்கை தேர்ந்தெடுக்கவும்",
+      "reasonLabel": "பங்கு மாற்ற காரணம்",
+      "reasonPlaceholder": "காரணம் விளக்குங்கள் (குறைந்தது 10 எழுத்துக்கள்)...",
+      "submitBtn": "கோரிக்கை சமர்ப்பி",
+      "submitting": "சமர்ப்பிக்கிறது...",
+      "cancelBtn": "கோரிக்கை ரத்து செய்",
+      "pendingTitle": "பங்கு மாற்ற கோரிக்கை நிலுவையில் உள்ளது",
+      "pendingDesc": "{{currentRole}} இலிருந்து {{requestedRole}} மாற்றம் ஆய்வில் உள்ளது.",
+      "approvedTitle": "பங்கு மாற்றம் அங்கீகரிக்கப்பட்டது!",
+      "approvedDesc": "உங்கள் பங்கு {{requestedRole}} ஆக மாற்றப்பட்டது. மீண்டும் உள்நுழையவும்.",
+      "rejectedTitle": "பங்கு மாற்றம் நிராகரிக்கப்பட்டது",
+      "rejectedDesc": "காரணம்: {{reason}}",
+      "reLoginBtn": "வெளியேறி மீண்டும் உள்நுழைக",
+      "historyTitle": "கோரிக்கை வரலாறு",
+      "submitted": "சமர்ப்பிக்கப்பட்டது",
+      "reviewed": "ஆய்வு செய்தவர்",
+      "statusPending": "நிலுவை", "statusApproved": "அங்கீகரிக்கப்பட்டது",
+      "statusRejected": "நிராகரிக்கப்பட்டது", "statusCancelled": "ரத்து",
+      "noHistory": "இதுவரை கோரிக்கைகள் இல்லை.",
+      "errSameRole": "இந்த பங்கு ஏற்கனவே உங்களிடம் உள்ளது.",
+      "errAlreadyPending": "ஏற்கனவே ஒரு நிலுவை கோரிக்கை உள்ளது.",
+      "successSubmit": "கோரிக்கை சமர்ப்பிக்கப்பட்டது!",
+      "successCancel": "கோரிக்கை ரத்து செய்யப்பட்டது."
     }
   },
   "enterpriseManagement": {
@@ -4107,6 +4137,17 @@
     "custom": "Custom",
     "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
     "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
+  },
+  "adminRoleRequests": {
+    "title": "பங்கு மாற்ற கோரிக்கைகள்",
+    "subtitle": "பயனர் பங்கு மாற்ற கோரிக்கைகளை ஆய்வு செய்யுங்கள்",
+    "tabs": { "pending": "நிலுவை", "approved": "அங்கீகரிக்கப்பட்டது", "rejected": "நிராகரிக்கப்பட்டது" },
+    "table": { "user": "பயனர்", "currentRole": "தற்போதைய பங்கு", "requestedRole": "கோரிய பங்கு", "reason": "காரணம்", "requestedAt": "கோரிய தேதி", "actions": "செயல்கள்" },
+    "approve": "அங்கீகரி", "reject": "நிராகரி", "approving": "அங்கீகரிக்கிறது...", "rejecting": "நிராகரிக்கிறது...",
+    "rejectModal": { "title": "கோரிக்கை நிராகரி", "reasonLabel": "நிராகரிப்பு காரணம்", "reasonPlaceholder": "காரணம் விளக்குங்கள்...", "confirmBtn": "நிராகரி", "cancelBtn": "ரத்து" },
+    "noRequests": "{{status}} கோரிக்கைகள் இல்லை.",
+    "approveSuccess": "பங்கு மாற்றம் அங்கீகரிக்கப்பட்டது.", "rejectSuccess": "கோரிக்கை நிராகரிக்கப்பட்டது.",
+    "reviewedBy": "ஆய்வு: {{name}}", "rejectedReason": "காரணம்: {{reason}}"
   },
   "adminDashboard": {
     "title": "நிர்வாகி டாஷ்போர்டு",

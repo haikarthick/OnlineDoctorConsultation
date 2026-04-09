@@ -22,7 +22,47 @@ const Settings: React.FC = () => {
   const [savingCertTypes, setSavingCertTypes] = useState(false)
   const [certTypesSaved, setCertTypesSaved] = useState(false)
 
-  // Basic profile
+  // Role change request
+  const [roleRequests, setRoleRequests] = useState<any[]>([])
+  const [rcLoading, setRcLoading] = useState(true)
+  const [rcSubmitting, setRcSubmitting] = useState(false)
+  const [rcMsg, setRcMsg] = useState('')
+  const [selectedNewRole, setSelectedNewRole] = useState('')
+  const [rcReason, setRcReason] = useState('')
+
+  React.useEffect(() => {
+    apiService.getMyRoleChangeRequests().then((r: any) => setRoleRequests(r.data || [])).catch(() => {}).finally(() => setRcLoading(false))
+  }, [])
+
+  const pendingRequest = roleRequests.find((r: any) => r.status === 'pending')
+  const approvedRequest = roleRequests.find((r: any) => r.status === 'approved')
+
+  const handleSubmitRoleChange = async () => {
+    if (!selectedNewRole || !rcReason.trim()) return
+    setRcSubmitting(true)
+    setRcMsg('')
+    try {
+      await apiService.submitRoleChangeRequest({ requested_role: selectedNewRole, reason: rcReason })
+      setRcMsg(t('settings.roleChange.successSubmit'))
+      setSelectedNewRole('')
+      setRcReason('')
+      const r = await apiService.getMyRoleChangeRequests()
+      setRoleRequests((r as any).data || [])
+    } catch (err: any) {
+      setRcMsg(err?.response?.data?.message || t('register.error'))
+    } finally {
+      setRcSubmitting(false)
+    }
+  }
+
+  const handleCancelRoleChange = async (id: string) => {
+    try {
+      await apiService.cancelRoleChangeRequest(id)
+      setRcMsg(t('settings.roleChange.successCancel'))
+      const r = await apiService.getMyRoleChangeRequests()
+      setRoleRequests((r as any).data || [])
+    } catch {}
+  }
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -467,6 +507,113 @@ const Settings: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Role & Account Type Section ── */}
+      <div className="settings-section">
+        <h2>{t('settings.roleChange.sectionTitle')}</h2>
+        <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 16 }}>{t('settings.roleChange.sectionDesc')}</p>
+
+        <div style={{ marginBottom: 16 }}>
+          <span style={{ fontSize: 13, color: '#6b7280' }}>{t('settings.roleChange.currentRole')}: </span>
+          <span className="badge badge-active" style={{ textTransform: 'capitalize' }}>{user?.role?.replace('_', ' ')}</span>
+        </div>
+
+        {rcMsg && <div className={`module-alert ${rcMsg.includes('✓') || rcMsg.includes('submitted') || rcMsg.includes('cancel') ? 'success' : 'error'}`} style={{ marginBottom: 16 }}>{rcMsg}</div>}
+
+        {/* Approved — need to re-login */}
+        {approvedRequest && (
+          <div className="module-alert success">
+            <strong>{t('settings.roleChange.approvedTitle')}</strong>
+            <p>{t('settings.roleChange.approvedDesc', { requestedRole: approvedRequest.requestedRole?.replace('_', ' ') })}</p>
+            <button className="module-btn primary" style={{ marginTop: 8 }} onClick={() => { localStorage.clear(); sessionStorage.clear(); window.location.href = '/'; }}>
+              {t('settings.roleChange.reLoginBtn')}
+            </button>
+          </div>
+        )}
+
+        {/* Pending request */}
+        {!approvedRequest && pendingRequest && (
+          <div className="module-alert" style={{ background: '#fefce8', borderColor: '#fbbf24' }}>
+            <strong>{t('settings.roleChange.pendingTitle')}</strong>
+            <p>{t('settings.roleChange.pendingDesc', { currentRole: pendingRequest.currentRole?.replace('_', ' '), requestedRole: pendingRequest.requestedRole?.replace('_', ' ') })}</p>
+            <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>{t('settings.roleChange.submitted')}: {new Date(pendingRequest.createdAt).toLocaleDateString()}</p>
+            <button className="module-btn" style={{ marginTop: 8 }} onClick={() => handleCancelRoleChange(pendingRequest.id)}>
+              {t('settings.roleChange.cancelBtn')}
+            </button>
+          </div>
+        )}
+
+        {/* Request form (no pending) */}
+        {!approvedRequest && !pendingRequest && !rcLoading && (
+          <div>
+            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{t('settings.roleChange.requestTitle')}</h3>
+            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>{t('settings.roleChange.requestDesc')}</p>
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">{t('settings.roleChange.selectRole')}</label>
+                <select className="module-input" value={selectedNewRole} onChange={e => setSelectedNewRole(e.target.value)}>
+                  <option value="">— {t('settings.roleChange.selectRole')} —</option>
+                  {(['pet_owner', 'farmer', 'veterinarian', 'corporate_admin'] as const)
+                    .filter(r => r !== user?.role)
+                    .map(r => (
+                      <option key={r} value={r}>{r.replace('_', ' ')}</option>
+                    ))}
+                </select>
+              </div>
+            </div>
+            <div className="module-form-group">
+              <label className="module-label">{t('settings.roleChange.reasonLabel')}</label>
+              <textarea
+                className="module-input"
+                rows={3}
+                value={rcReason}
+                onChange={e => setRcReason(e.target.value)}
+                placeholder={t('settings.roleChange.reasonPlaceholder')}
+                style={{ resize: 'vertical' }}
+              />
+            </div>
+            <button
+              className="module-btn primary"
+              disabled={!selectedNewRole || rcReason.length < 10 || rcSubmitting}
+              onClick={handleSubmitRoleChange}
+            >
+              {rcSubmitting ? t('settings.roleChange.submitting') : t('settings.roleChange.submitBtn')}
+            </button>
+          </div>
+        )}
+
+        {/* History */}
+        {roleRequests.length > 0 && (
+          <div style={{ marginTop: 24 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: '#6b7280', marginBottom: 10 }}>{t('settings.roleChange.historyTitle')}</h3>
+            <div className="data-table-container">
+              <table className="module-table">
+                <thead>
+                  <tr>
+                    <th>{t('settings.roleChange.selectRole')}</th>
+                    <th>Status</th>
+                    <th>{t('settings.roleChange.submitted')}</th>
+                    <th>{t('settings.roleChange.reviewed')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {roleRequests.map((r: any) => (
+                    <tr key={r.id}>
+                      <td>{r.requestedRole?.replace('_', ' ')}</td>
+                      <td><span className={`badge badge-${r.status === 'approved' ? 'active' : r.status === 'rejected' ? 'danger' : 'pending'}`}>{r.status}</span></td>
+                      <td style={{ fontSize: 12 }}>{new Date(r.createdAt).toLocaleDateString()}</td>
+                      <td style={{ fontSize: 12 }}>
+                        {r.reviewedBy || '—'}
+                        {r.rejectionReason && <div style={{ color: '#ef4444', fontSize: 11 }}>{r.rejectionReason}</div>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`

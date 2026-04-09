@@ -61,9 +61,62 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   const [vetSaving, setVetSaving] = useState(false)
   const [vetSaved, setVetSaved] = useState(false)
 
+  // Role Change Requests tab
+  const [activeTab, setActiveTab] = useState<'users' | 'requests'>('users')
+  const [roleRequests, setRoleRequests] = useState<any[]>([])
+  const [requestsFilter, setRequestsFilter] = useState<'pending' | 'approved' | 'rejected'>('pending')
+  const [requestsLoading, setRequestsLoading] = useState(false)
+  const [showRejectModal, setShowRejectModal] = useState<string | null>(null)
+  const [rejectionReason, setRejectionReason] = useState('')
+  const [requestProcessing, setRequestProcessing] = useState<string | null>(null)
+  const [requestMsg, setRequestMsg] = useState('')
+
   useEffect(() => {
     loadUsers()
   }, [search, roleFilter])
+
+  useEffect(() => {
+    if (activeTab === 'requests') loadRoleRequests()
+  }, [activeTab, requestsFilter])
+
+  const loadRoleRequests = async () => {
+    try {
+      setRequestsLoading(true)
+      setRequestMsg('')
+      const result = await apiService.adminListRoleChangeRequests(requestsFilter)
+      setRoleRequests(result.data || [])
+    } catch {
+    } finally {
+      setRequestsLoading(false)
+    }
+  }
+
+  const handleApproveRequest = async (id: string) => {
+    try {
+      setRequestProcessing(id)
+      await apiService.adminApproveRoleChangeRequest(id)
+      setRequestMsg(t('adminRoleRequests.approveSuccess'))
+      loadRoleRequests()
+    } catch {
+    } finally {
+      setRequestProcessing(null)
+    }
+  }
+
+  const handleRejectRequest = async () => {
+    if (!showRejectModal || !rejectionReason.trim()) return
+    try {
+      setRequestProcessing(showRejectModal)
+      await apiService.adminRejectRoleChangeRequest(showRejectModal, rejectionReason)
+      setRequestMsg(t('adminRoleRequests.rejectSuccess'))
+      setShowRejectModal(null)
+      setRejectionReason('')
+      loadRoleRequests()
+    } catch {
+    } finally {
+      setRequestProcessing(null)
+    }
+  }
 
   const loadUsers = async () => {
     try {
@@ -101,8 +154,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   }
 
   const getRoleBadge = (role: string) => {
-    const map: Record<string, string> = { admin: 'danger', vet: 'active', pet_owner: 'pending' }
-    return <span className={`badge badge-${map[role] || 'inactive'}`}>{role}</span>
+    const map: Record<string, string> = { admin: 'danger', veterinarian: 'active', pet_owner: 'pending', farmer: 'inactive', corporate_admin: 'info' }
+    return <span className={`badge badge-${map[role] || 'inactive'}`}>{role.replace('_', ' ')}</span>
   }
 
   const openVetProfile = async (user: User) => {
@@ -189,7 +242,134 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Tabs */}
+      <div className="module-tabs" style={{ marginBottom: 24 }}>
+        <button className={`module-tab${activeTab === 'users' ? ' active' : ''}`} onClick={() => setActiveTab('users')}>
+          👥 Users
+        </button>
+        <button className={`module-tab${activeTab === 'requests' ? ' active' : ''}`} onClick={() => setActiveTab('requests')}>
+          🔄 {t('adminRoleRequests.title')}
+        </button>
+      </div>
+
+      {/* ── Role Change Requests Tab ── */}
+      {activeTab === 'requests' && (
+        <div>
+          {requestMsg && <div className="module-alert success" style={{ marginBottom: 16 }}>{requestMsg}</div>}
+          <div className="module-tabs" style={{ marginBottom: 16 }}>
+            {(['pending', 'approved', 'rejected'] as const).map(s => (
+              <button key={s} className={`module-tab${requestsFilter === s ? ' active' : ''}`} onClick={() => setRequestsFilter(s)}>
+                {t(`adminRoleRequests.tabs.${s}`)}
+              </button>
+            ))}
+          </div>
+          {requestsLoading ? (
+            <div className="loading-container"><div className="loading-spinner" /></div>
+          ) : roleRequests.length === 0 ? (
+            <div className="empty-state">
+              <div style={{ fontSize: 40 }}>🔄</div>
+              <p>{t('adminRoleRequests.noRequests', { status: requestsFilter })}</p>
+            </div>
+          ) : (
+            <div className="data-table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>{t('adminRoleRequests.table.user')}</th>
+                    <th>{t('adminRoleRequests.table.currentRole')}</th>
+                    <th>{t('adminRoleRequests.table.requestedRole')}</th>
+                    <th>{t('adminRoleRequests.table.reason')}</th>
+                    <th>{t('adminRoleRequests.table.requestedAt')}</th>
+                    {requestsFilter === 'pending' && <th>{t('adminRoleRequests.table.actions')}</th>}
+                    {requestsFilter !== 'pending' && <th>Review</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {roleRequests.map(r => (
+                    <tr key={r.id}>
+                      <td>
+                        <div>
+                          <strong>{r.userName}</strong>
+                          <div style={{ fontSize: 12, color: '#6b7280' }}>{r.userEmail}</div>
+                          {r.uniqueId && <div style={{ fontSize: 11, color: '#9ca3af' }}>{r.uniqueId}</div>}
+                        </div>
+                      </td>
+                      <td>{getRoleBadge(r.currentRole)}</td>
+                      <td>{getRoleBadge(r.requestedRole)}</td>
+                      <td style={{ maxWidth: 200, fontSize: 13 }}>{r.reason}</td>
+                      <td style={{ fontSize: 13 }}>{new Date(r.createdAt).toLocaleDateString()}</td>
+                      {requestsFilter === 'pending' ? (
+                        <td>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button
+                              className="btn btn-sm btn-primary"
+                              disabled={requestProcessing === r.id}
+                              onClick={() => handleApproveRequest(r.id)}
+                            >
+                              {requestProcessing === r.id ? '...' : t('adminRoleRequests.approve')}
+                            </button>
+                            <button
+                              className="btn btn-sm btn-outline"
+                              disabled={requestProcessing === r.id}
+                              onClick={() => { setShowRejectModal(r.id); setRejectionReason('') }}
+                            >
+                              {t('adminRoleRequests.reject')}
+                            </button>
+                          </div>
+                        </td>
+                      ) : (
+                        <td style={{ fontSize: 12 }}>
+                          {r.reviewedBy && <div>{t('adminRoleRequests.reviewedBy', { name: r.reviewedBy })}</div>}
+                          {r.rejectionReason && <div style={{ color: '#ef4444' }}>{t('adminRoleRequests.rejectedReason', { reason: r.rejectionReason })}</div>}
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Reject Modal */}
+          {showRejectModal && (
+            <div className="modal-overlay" onClick={() => setShowRejectModal(null)}>
+              <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+                <div className="modal-header">
+                  <h2>{t('adminRoleRequests.rejectModal.title')}</h2>
+                  <button className="modal-close" onClick={() => setShowRejectModal(null)}>✕</button>
+                </div>
+                <div className="modal-body">
+                  <div className="form-group">
+                    <label className="form-label">{t('adminRoleRequests.rejectModal.reasonLabel')}</label>
+                    <textarea
+                      className="form-input"
+                      rows={3}
+                      value={rejectionReason}
+                      onChange={e => setRejectionReason(e.target.value)}
+                      placeholder={t('adminRoleRequests.rejectModal.reasonPlaceholder')}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+                    <button className="btn btn-outline" onClick={() => setShowRejectModal(null)}>
+                      {t('adminRoleRequests.rejectModal.cancelBtn')}
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      disabled={!rejectionReason.trim() || requestProcessing === showRejectModal}
+                      onClick={handleRejectRequest}
+                    >
+                      {requestProcessing === showRejectModal ? t('adminRoleRequests.rejecting') : t('adminRoleRequests.rejectModal.confirmBtn')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Users Tab ── */}
+      {activeTab === 'users' && (<>
       <div className="search-filter-bar" style={{ marginBottom: 24 }}>
         <input
           className="form-input"
@@ -201,7 +381,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         <select className="form-input" value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={{ width: 160 }}>
           <option value="">{t('userManagement.allRoles')}</option>
           <option value="pet_owner">{t('userManagement.petOwners')}</option>
-          <option value="vet">{t('userManagement.veterinarians')}</option>
+          <option value="veterinarian">{t('userManagement.veterinarians')}</option>
+          <option value="farmer">Farmers</option>
+          <option value="corporate_admin">Hospital Network</option>
           <option value="admin">{t('userManagement.admins')}</option>
         </select>
       </div>
@@ -222,7 +404,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                 <select className="form-input" value={newRole} onChange={e => setNewRole(e.target.value)}>
                   <option value="">{t('userManagement.selectRole')}</option>
                   <option value="pet_owner">{t('userManagement.petOwner')}</option>
-                  <option value="vet">{t('userManagement.veterinarian')}</option>
+                  <option value="veterinarian">{t('userManagement.veterinarian')}</option>
+                  <option value="farmer">Farmer</option>
+                  <option value="corporate_admin">Hospital Network Admin</option>
                   <option value="admin">{t('userManagement.admin')}</option>
                 </select>
               </div>
@@ -297,7 +481,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       >
                         {t('userManagement.role')}
                       </button>
-                      {(u.role === 'vet' || u.role === 'veterinarian') && (
+                      {(u.role === 'veterinarian') && (
                         <button
                           className="btn btn-sm btn-primary"
                           onClick={() => openVetProfile(u)}
@@ -405,6 +589,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
           </div>
         </div>
       )}
+      </>)}
     </div>
   )
 }

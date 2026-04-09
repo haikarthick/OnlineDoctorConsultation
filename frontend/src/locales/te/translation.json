@@ -1587,6 +1587,33 @@
       "failedUpdateProfile": "ప్రొఫైల్ అప్‌డేట్ చేయడం విఫలమైంది",
       "failedUpdateVetProfile": "వెటర్నరీ ప్రొఫైల్ అప్‌డేట్ చేయడం విఫలమైంది",
       "failedUploadPhoto": "ఫోటో అప్‌లోడ్ చేయడం విఫలమైంది"
+    },
+    "roleChange": {
+      "sectionTitle": "పాత్ర మరియు ఖాతా రకం",
+      "sectionDesc": "మీ ఖాతా పాత్రను మార్చడానికి అభ్యర్థించండి. నిర్వాహకుడి సమీక్ష అవసరం.",
+      "currentRole": "ప్రస్తుత పాత్ర",
+      "requestTitle": "పాత్ర మార్పు అభ్యర్థన",
+      "requestDesc": "మీరు మారాలనుకునే పాత్రను ఎంచుకుని కారణం తెలపండి.",
+      "selectRole": "కొత్త పాత్ర ఎంచుకోండి",
+      "reasonLabel": "పాత్ర మార్పు కారణం",
+      "reasonPlaceholder": "కారణం వివరించండి (కనిష్టం 10 అక్షరాలు)...",
+      "submitBtn": "అభ్యర్థన సమర్పించు",
+      "submitting": "సమర్పిస్తోంది...",
+      "cancelBtn": "అభ్యర్థన రద్దు చేయి",
+      "pendingTitle": "పాత్ర మార్పు అభ్యర్థన పెండింగ్‌లో ఉంది",
+      "pendingDesc": "{{currentRole}} నుండి {{requestedRole}} మార్పు సమీక్షలో ఉంది.",
+      "approvedTitle": "పాత్ర మార్పు ఆమోదించబడింది!",
+      "approvedDesc": "మీ పాత్ర {{requestedRole}}కి అప్‌డేట్ చేయబడింది. కొత్త అనుమతులకు మళ్ళీ లాగిన్ అవ్వండి.",
+      "rejectedTitle": "పాత్ర మార్పు తిరస్కరించబడింది",
+      "rejectedDesc": "కారణం: {{reason}}",
+      "reLoginBtn": "లాగ్ అవుట్ & మళ్ళీ లాగిన్",
+      "historyTitle": "అభ్యర్థన చరిత్ర",
+      "submitted": "సమర్పించబడింది", "reviewed": "సమీక్షించినది",
+      "statusPending": "పెండింగ్", "statusApproved": "ఆమోదించబడింది",
+      "statusRejected": "తిరస్కరించబడింది", "statusCancelled": "రద్దు",
+      "noHistory": "ఇంతవరకు అభ్యర్థనలు లేవు.",
+      "errSameRole": "ఈ పాత్ర ఇప్పటికే మీది.", "errAlreadyPending": "ఒక అభ్యర్థన ఇప్పటికే పెండింగ్‌లో ఉంది.",
+      "successSubmit": "అభ్యర్థన సమర్పించబడింది!", "successCancel": "అభ్యర్థన రద్దు చేయబడింది."
     }
   },
   "enterpriseManagement": {
@@ -4098,6 +4125,16 @@
     "custom": "Custom",
     "vacationInfoText": "Select a date range to mark all those days as unavailable. Existing bookings on those dates will NOT be automatically cancelled — please manage them separately.",
     "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
+  },
+  "adminRoleRequests": {
+    "title": "పాత్ర మార్పు అభ్యర్థనలు", "subtitle": "వినియోగదారు పాత్ర మార్పు అభ్యర్థనలను సమీక్షించండి",
+    "tabs": { "pending": "పెండింగ్", "approved": "ఆమోదించబడింది", "rejected": "తిరస్కరించబడింది" },
+    "table": { "user": "వినియోగదారు", "currentRole": "ప్రస్తుత పాత్ర", "requestedRole": "అభ్యర్థించిన పాత్ర", "reason": "కారణం", "requestedAt": "అభ్యర్థన తేదీ", "actions": "చర్యలు" },
+    "approve": "ఆమోదించు", "reject": "తిరస్కరించు", "approving": "ఆమోదిస్తోంది...", "rejecting": "తిరస్కరిస్తోంది...",
+    "rejectModal": { "title": "అభ్యర్థన తిరస్కరించు", "reasonLabel": "తిరస్కరణ కారణం", "reasonPlaceholder": "కారణం వివరించండి...", "confirmBtn": "తిరస్కరించు", "cancelBtn": "రద్దు" },
+    "noRequests": "{{status}} అభ్యర్థనలు లేవు.",
+    "approveSuccess": "పాత్ర మార్పు ఆమోదించబడింది.", "rejectSuccess": "అభ్యర్థన తిరస్కరించబడింది.",
+    "reviewedBy": "సమీక్ష: {{name}}", "rejectedReason": "కారణం: {{reason}}"
   },
   "adminDashboard": {
     "title": "అడ్మిన్ డాష్‌బోర్డ్",
