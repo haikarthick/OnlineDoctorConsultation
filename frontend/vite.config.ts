@@ -21,6 +21,23 @@ function silenceProxyErrors(proxy: any) {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    // Split vendor libs into separate chunks to reduce peak memory during minification.
+    // Render free tier has 512MB RAM — a single 1,585KB bundle OOM-kills the build process.
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-i18n': ['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'i18next-http-backend'],
+          'vendor-maps': ['leaflet', 'react-leaflet'],
+          'vendor-socket': ['socket.io-client'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-markdown': ['react-markdown'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
   server: {
     port: 5173,
     proxy: {

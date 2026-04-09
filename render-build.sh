@@ -13,7 +13,7 @@ echo "════════════════════════�
 echo ""
 echo "━━━ Building Frontend (React + Vite) ━━━"
 cd frontend
-npm ci
+npm install --include=dev
 npm run build
 echo "✓ Frontend built → frontend/dist/"
 
@@ -21,7 +21,7 @@ echo "✓ Frontend built → frontend/dist/"
 echo ""
 echo "━━━ Building Backend (Express + TypeScript) ━━━"
 cd ../backend
-npm ci
+npm install --include=dev
 npm run build
 echo "✓ Backend built → backend/dist/"
 
