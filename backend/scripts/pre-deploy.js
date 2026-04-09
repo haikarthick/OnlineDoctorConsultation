@@ -64,6 +64,34 @@ runCheck('Schema Validation', 'node scripts/schema-check.js', BACKEND);
 // 4. E2E route coverage (ensure all routes have tests)
 runCheck('E2E Route Coverage', 'node e2e/generate-tests.cjs', FRONTEND);
 
+// 5. Memory staleness check — warn if code changed but memory wasn't updated
+// (non-blocking: only prints warning, doesn't fail the push)
+(function checkMemoryStaleness() {
+  const { execSync: exec } = require('child_process');
+  try {
+    // Get commits being pushed (unpushed commits)
+    const log = exec('git log @{u}..HEAD --name-only --pretty=format:__COMMIT__', { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' }).trim();
+    if (!log) return; // nothing to check
+
+    const files = log.split('\n').filter(l => l && l !== '__COMMIT__');
+    const codeFiles = files.filter(f =>
+      (f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.sql') || f.endsWith('.sh')) &&
+      !f.startsWith('memories/')
+    );
+    const memoryFiles = files.filter(f => f.startsWith('memories/'));
+
+    if (codeFiles.length > 0 && memoryFiles.length === 0) {
+      console.log(`${YELLOW}⚠ Memory Check: ${codeFiles.length} code file(s) changed but no memory files updated.${RESET}`);
+      console.log(`${YELLOW}  Consider running: node backend/scripts/log-memory.js bug|lesson|feature ...${RESET}`);
+      console.log(`${DIM}  (This is a warning only — push is not blocked)${DIM}${RESET}\n`);
+    } else if (memoryFiles.length > 0) {
+      console.log(`  Memory Check ... ${GREEN}✓${RESET} (${memoryFiles.length} memory file(s) updated)`);
+    }
+  } catch {
+    // No upstream branch yet — skip check
+  }
+})();
+
 // Summary
 console.log('');
 if (failed === 0) {

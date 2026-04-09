@@ -51,11 +51,45 @@ Before implementing ANY feature or fix, the agent MUST:
 - Commit memory file changes together with code changes (same commit is fine)
 - If a session ends before memory is updated, add a note at the top of `memories/session/pending-memory.md`
 
+### AUTO-MEMORY SYSTEM (Installed — Use These Tools)
+
+The repo has an automated memory infrastructure. Use it every time:
+
+**Git post-commit hook** → auto-runs after EVERY commit:
+- Appends structured entry to `memories/repo/auto-commit-log.md`
+- Records: timestamp, hash, commit message, files changed, categories, memory-update status
+- Agents: read `auto-commit-log.md` to understand recent changes without reading all git history
+
+**Memory logger script** → one-command structured logging:
+```bash
+node backend/scripts/log-memory.js bug     "DEPLOY-010" "Title" "Symptom" "Root Cause" "Fix" "Rule"
+node backend/scripts/log-memory.js lesson  "LESSON-034" "Title" "Context" "Lesson" "Apply-to"
+node backend/scripts/log-memory.js feature "Feature Name" "done|planned|dropped" "Description"
+node backend/scripts/log-memory.js research "Topic" "Finding" "Context"
+node backend/scripts/log-memory.js note    "Title" "Content"
+```
+Or via npm: `npm run log:bug`, `npm run log:lesson`, `npm run log:feature` (from `backend/`)
+
+**Pre-push memory check** → runs as part of pre-push validation:
+- Warns (non-blocking) if code files changed but no `memories/` file was updated
+- Always fix the warning before considering a task done
+
+**Memory files index:**
+| File | Purpose | Updated by |
+|------|---------|------------|
+| `memories/repo/past-bugs.md` | ALL bugs ever fixed — read before every fix | Agent + log-memory.js |
+| `memories/repo/lessons.md` | Architectural lessons + platform rules | Agent + log-memory.js |
+| `memories/repo/feature-tracker.md` | Feature status — planned/done/dropped | Agent + log-memory.js |
+| `memories/repo/auto-commit-log.md` | Every commit auto-logged | post-commit hook (automatic) |
+| `memories/repo/research-log.md` | Analysis, research, investigations | Agent + log-memory.js |
+| `memories/repo/notes.md` | Ad-hoc notes, user decisions | Agent + log-memory.js |
+
 ### Before starting EVERY user instruction:
 1. Read `memories/repo/past-bugs.md` — check if this issue has been seen before
 2. Read `memories/repo/lessons.md` — apply known lessons to the approach
-3. If a known bug matches → apply the known fix immediately, skip investigation
-4. If a new bug → investigate, fix, THEN add to past-bugs.md
+3. Read `memories/repo/auto-commit-log.md` (last 10 entries) — understand what changed recently
+4. If a known bug matches → apply the known fix immediately, skip investigation
+5. If a new bug → investigate, fix, THEN add to past-bugs.md via `log-memory.js bug ...`
 
 ---
 

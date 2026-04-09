@@ -21,7 +21,12 @@
     "seed": "ts-node --project tsconfig.json src/utils/seedDatabase.ts",
     "schema-check": "node scripts/schema-check.js",
     "pre-deploy": "node scripts/pre-deploy.js",
-    "install-hooks": "node scripts/install-hooks.js"
+    "install-hooks": "node scripts/install-hooks.js",
+    "log:bug": "node scripts/log-memory.js bug",
+    "log:lesson": "node scripts/log-memory.js lesson",
+    "log:feature": "node scripts/log-memory.js feature",
+    "log:research": "node scripts/log-memory.js research",
+    "log:note": "node scripts/log-memory.js note"
   },
   "keywords": [
     "veterinary",
