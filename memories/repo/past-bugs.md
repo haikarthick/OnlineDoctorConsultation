@@ -7,7 +7,26 @@
 
 ## 🔴 Deployment / Render Bugs
 
-### DEPLOY-001 — HTTP Port Bound After DB Connect → Render Health Check Fails
+### DEPLOY-008 — Unused Native Module (sharp) → Render Build Fails with Status 1
+- **Symptom:** `Deploy failed: Exited with status 1` during build phase (not startup). Local `npm install` and `vite build` both pass fine.
+- **Root Cause:** `sharp` v0.34.5 was in `frontend/devDependencies` but **never imported anywhere** in the codebase. It is a native C++ module (libvips bindings). On Render's Linux build environment the pre-built binary can fail to install if glibc version mismatches, causing `npm install` to exit 1 and fail the entire build.
+- **Fix:** Removed `sharp` from `frontend/package.json` devDependencies. Updated `package-lock.json` (removed 85 sharp-related entries, 568 lines).
+- **Rule:** NEVER add native modules (sharp, canvas, bcrypt compiled, etc.) to frontend dependencies. If a native module is truly needed, verify it is actually imported before committing.
+
+### DEPLOY-009 — Vite Bundles 1,585KB Single Chunk → Render Free Tier OOM (Status 2)
+- **Symptom:** `Exited with status 2 because of an internal system error` — Render's wording for OOM kill during build. Local build passes perfectly.
+- **Root Cause:** Vite's default output is a single `index.js` bundle. At 1,585 KB minified, Rollup holds the entire bundle in RAM during minification. Render free tier has only 512 MB RAM — this OOM-kills the Node.js build process.
+- **Fix:** Added `build.rollupOptions.output.manualChunks` in `vite.config.ts` to split vendor libs into separate chunks. Rollup minifies each chunk independently so peak RAM = largest single chunk, not total bundle.
+  - `vendor-react`: react, react-dom, react-router-dom
+  - `vendor-maps`: leaflet, react-leaflet
+  - `vendor-markdown`: react-markdown
+  - `vendor-i18n`: i18next + plugins
+  - `vendor-socket`: socket.io-client
+  - `vendor-query`: @tanstack/react-query
+  - Result: index.js **1,585 KB → 1,174 KB**
+- **Rule:** ALWAYS configure `manualChunks` in `vite.config.ts` when adding large vendor dependencies. Never let the main `index.js` chunk exceed ~600 KB on a free-tier build environment.
+
+
 - **Symptom:** `Deploy failed: Exited with status 1` — intermittent, especially on cold Render deploys
 - **Root Cause:** `index.ts` awaited `connectWithRetry()` (up to 190 seconds: 5×30s timeout + 10s waits) BEFORE calling `httpServer.listen()`. Render's health check fires within ~60s. If the Render free-tier PostgreSQL DB is sleeping, the port is never bound in time → deploy marked failed.
 - **Why intermittent:** On fast days (DB warm) retry #1 succeeds in <5s and port binds in time. On slow days (DB cold) all 5 retries timeout → 190s with no port.

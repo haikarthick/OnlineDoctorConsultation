@@ -31,7 +31,17 @@
 
 ## 🔵 Render Deployment Lessons
 
-### LESSON-005 — Bind HTTP Port FIRST, DB Connect SECOND — Always
+### LESSON-032 — Never Add Unused Native Modules to Frontend Dependencies
+- **Context:** `sharp` (libvips C++ bindings) was in `frontend/devDependencies` but never imported in any `.ts`/`.tsx` file. Build failed with status 1 on Render's Linux builder.
+- **Lesson:** Native modules (sharp, canvas, node-gyp compiled packages) fail silently on mismatched glibc versions. Always verify a package is actually imported before adding it to `package.json`. Run `grep -r "from 'sharp'" src/` before adding.
+- **Apply to:** All frontend and backend dependency additions
+
+### LESSON-033 — Vite Must Use manualChunks to Avoid OOM on 512MB Render Free Tier
+- **Context:** Default Vite output was a single `index.js` of 1,585 KB. Rollup holds the entire bundle in RAM during minification. Render free tier = 512 MB → OOM kill → "Exited with status 2 internal system error".
+- **Lesson:** Always configure `build.rollupOptions.output.manualChunks` in `vite.config.ts`. Split at minimum: vendor-react, vendor-maps (leaflet is huge), vendor-i18n. Keep `index.js` below ~600 KB. Status 2 on Render build = OOM, not a code error.
+- **Apply to:** All future large dependency additions — check bundle impact with `npm run build` and watch for chunks >600 KB
+
+
 - **Context:** Server called `connectWithRetry()` before `httpServer.listen()`. Free-tier Render DB takes 30-90s to wake. Render health check fires at ~60s. Port never bound → "Exited with status 1".
 - **Lesson:** `httpServer.listen()` MUST be the FIRST operation. DB connect always goes in background after. NEVER put `process.exit(1)` in the DB connect failure path after port is already bound.
 - **Apply to:** `backend/src/index.ts` — never change this startup order
