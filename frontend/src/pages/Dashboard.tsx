@@ -36,6 +36,7 @@ const Dashboard: React.FC = () => {
   const isPetOwner = user?.role === 'pet_owner'
   const isFarmer = user?.role === 'farmer'
   const isAdmin = user?.role === 'admin'
+  const isHospitalStaff = user?.role === 'hospital_staff'
 
   useEffect(() => { loadDashboardData() }, [])
 
@@ -208,6 +209,15 @@ const Dashboard: React.FC = () => {
       ]
     }
 
+    if (isHospitalStaff) {
+      return [
+        { icon: '🔄', label: t('dashboard.quickActions.hospitalWorkflow'), path: '/hospital-workflow', color: '#667eea', description: t('dashboard.quickActions.desc.patientQueue') },
+        { icon: '🛏️', label: t('dashboard.quickActions.inpatient'), path: '/inpatient', color: '#10b981', description: t('dashboard.quickActions.desc.inpatientBoarding') },
+        { icon: '📋', label: t('dashboard.quickActions.medicalRecords'), path: '/medical-records', color: '#06b6d4', description: t('dashboard.quickActions.desc.patientRecords') },
+        { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
+      ]
+    }
+
     // Admin
     return [
       { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
@@ -218,7 +228,7 @@ const Dashboard: React.FC = () => {
       { icon: '📜', label: t('dashboard.quickActions.auditLogs'), path: '/admin/audit-logs', color: '#ef4444', description: t('dashboard.quickActions.desc.systemActivity') },
       { icon: '🏥', label: t('dashboard.quickActions.hospitalMgmt'), path: '/admin/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalOversight') },
     ]
-  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, t])
+  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, t])
 
   // Subtitle per role
   const subtitle = useMemo(() => {
@@ -226,8 +236,9 @@ const Dashboard: React.FC = () => {
     if (isPetOwner) return t('dashboard.subtitles.petOwner')
     if (isFarmer) return t('dashboard.subtitles.farmer')
     if (isAdmin) return t('dashboard.subtitles.admin')
+    if (isHospitalStaff) return t('dashboard.subtitles.hospitalStaff')
     return t('dashboard.greeting', { name: user?.firstName })
-  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, t, user?.firstName])
+  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, t, user?.firstName])
 
   return (
     <div className="dashboard-container">

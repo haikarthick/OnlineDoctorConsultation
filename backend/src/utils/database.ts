@@ -706,15 +706,8 @@ class PostgresDatabase {
       )
     `).catch(() => {});
 
-    // Extend users.role CHECK constraint to include corporate_admin (existing prod DBs)
-    await this.pool.query(`
-      ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check
-    `).catch(() => {});
-    await this.pool.query(`
-      ALTER TABLE users ADD CONSTRAINT users_role_check
-        CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin'))
-    `).catch(() => {});
-
+    // Extend users.role CHECK constraint — full list set below after hospital_staff tables (line ~837)
+    // (skipping partial update here to avoid overwriting the complete constraint)
     // role_change_requests table safety net
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS role_change_requests (

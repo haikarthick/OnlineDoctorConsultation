@@ -260,6 +260,16 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
     'dashboard_tips',
   ],
+  hospital_staff: [
+    // Core
+    'dashboard', 'settings',
+    // Hospital workflow — staff's primary work area
+    'hospital_workflow', 'inpatient_manage',
+    // Read access to relevant hospital data
+    'hospital_browse', 'hospital_manage',
+    // Dashboard widgets
+    'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
+  ],
   admin: [
     // Pages
     'dashboard', 'consultations', 'settings',

@@ -147,9 +147,9 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'vet-hospitals-manage', label: t('nav.myHospital'), icon: '🏨', path: '/vet-hospitals/manage',
       roles: ['veterinarian'], section: 'Vet Network' },
     { id: 'hospital-workflow', label: 'Hospital Workflow', icon: '🔄', path: '/hospital-workflow',
-      roles: ['veterinarian', 'admin'], section: 'Vet Network' },
+      roles: ['veterinarian', 'admin', 'hospital_staff'], section: 'Vet Network' },
     { id: 'inpatient', label: 'Inpatient & Boarding', icon: '🛏️', path: '/inpatient',
-      roles: ['veterinarian', 'admin'], section: 'Vet Network' },
+      roles: ['veterinarian', 'admin', 'hospital_staff'], section: 'Vet Network' },
 
     // ── Wallet ──
     { id: 'wallet', label: t('nav.myWallet'), icon: '💰', path: '/wallet',

@@ -498,6 +498,10 @@ const HospitalNetworks: React.FC = () => {
   const [networkMembers, setNetworkMembers] = useState<NetworkMember[]>([])
   const [showAssignHospital, setShowAssignHospital] = useState(false)
   const [showAddMember, setShowAddMember] = useState(false)
+  const [showInviteStaff, setShowInviteStaff] = useState(false)
+  const [inviteStaffForm, setInviteStaffForm] = useState({ email: '', name: '', position: 'receptionist', hospitalId: '' })
+  const [inviteStaffLoading, setInviteStaffLoading] = useState(false)
+  const [inviteStaffSuccess, setInviteStaffSuccess] = useState('')
 
   // ─── Audit State ──────────────────────────────────────────────────────────
   const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([])
@@ -1046,9 +1050,14 @@ const HospitalNetworks: React.FC = () => {
                 <div className="module-card">
                   <div className="hn-panel-header">
                     <h3>{t('hospitalNetworks.detail.staff')}</h3>
-                    <button className="module-btn small primary" onClick={() => setShowAddMember(true)}>
-                      + {t('hospitalNetworks.detail.addMember')}
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="module-btn small" onClick={() => setShowInviteStaff(true)}>
+                        ✉️ {t('hospitalNetworks.detail.inviteStaff')}
+                      </button>
+                      <button className="module-btn small primary" onClick={() => setShowAddMember(true)}>
+                        + {t('hospitalNetworks.detail.addMember')}
+                      </button>
+                    </div>
                   </div>
                   <div className="card-body">
                     {networkMembers.length === 0 ? (
@@ -1461,6 +1470,97 @@ const HospitalNetworks: React.FC = () => {
           }}
           t={t}
         />
+      )}
+
+      {/* Invite Hospital Staff Modal */}
+      {showInviteStaff && selectedNetwork && (
+        <div className="hn-modal-overlay" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess('') }}>
+          <div className="hn-modal" onClick={e => e.stopPropagation()}>
+            <div className="hn-modal-header">
+              <h2>✉️ {t('hospitalNetworks.detail.inviteStaff')}</h2>
+              <button className="hn-modal-close" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess('') }}>✕</button>
+            </div>
+            {inviteStaffSuccess ? (
+              <div style={{ padding: '2rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✅</div>
+                <p style={{ fontWeight: 600 }}>{inviteStaffSuccess}</p>
+                <p style={{ color: '#6b7280', fontSize: '0.9rem', marginTop: '0.5rem' }}>{t('hospitalStaff.inviteSentHint')}</p>
+                <button className="module-btn primary" style={{ marginTop: '1.5rem' }} onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess('') }}>
+                  {t('common.close')}
+                </button>
+              </div>
+            ) : (
+              <div className="hn-modal-body">
+                <p style={{ color: '#6b7280', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                  {t('hospitalNetworks.detail.inviteStaffDesc')}
+                </p>
+                <div className="module-form">
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalStaff.inviteeEmail')} *</label>
+                      <input type="email" className="module-input" value={inviteStaffForm.email}
+                        onChange={e => setInviteStaffForm(f => ({ ...f, email: e.target.value }))} />
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalStaff.inviteeName')}</label>
+                      <input type="text" className="module-input" value={inviteStaffForm.name}
+                        onChange={e => setInviteStaffForm(f => ({ ...f, name: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalStaff.staffPosition')} *</label>
+                      <select className="module-input" value={inviteStaffForm.position}
+                        onChange={e => setInviteStaffForm(f => ({ ...f, position: e.target.value }))}>
+                        <option value="nurse">Nurse</option>
+                        <option value="technician">Technician</option>
+                        <option value="receptionist">Receptionist</option>
+                        <option value="lab_tech">Lab Technician</option>
+                        <option value="radiologist">Radiologist</option>
+                        <option value="anesthesiologist">Anesthesiologist</option>
+                        <option value="pharmacist">Pharmacist</option>
+                        <option value="intern">Intern</option>
+                        <option value="admin_staff">Admin Staff</option>
+                      </select>
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalNetworks.detail.hospital')}</label>
+                      <select className="module-input" value={inviteStaffForm.hospitalId}
+                        onChange={e => setInviteStaffForm(f => ({ ...f, hospitalId: e.target.value }))}>
+                        <option value="">{t('common.select')}...</option>
+                        {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <button className="module-btn primary" disabled={inviteStaffLoading || !inviteStaffForm.email || !inviteStaffForm.position}
+                    onClick={async () => {
+                      setInviteStaffLoading(true)
+                      try {
+                        const res = await apiService.inviteHospitalStaff(selectedNetwork.id, {
+                          invitee_email: inviteStaffForm.email,
+                          invitee_name: inviteStaffForm.name,
+                          staff_position: inviteStaffForm.position,
+                          hospital_id: inviteStaffForm.hospitalId || undefined,
+                        })
+                        if (res.success) {
+                          setInviteStaffSuccess(t('hospitalStaff.inviteSent'))
+                          setInviteStaffForm({ email: '', name: '', position: 'receptionist', hospitalId: '' })
+                        } else {
+                          setError(res.message || 'Failed to send invite')
+                        }
+                      } catch (e: any) {
+                        setError(e.response?.data?.message || e.message)
+                      } finally {
+                        setInviteStaffLoading(false)
+                      }
+                    }}>
+                    {inviteStaffLoading ? t('common.saving') : t('hospitalStaff.sendInvite')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Walk-in Patient Invite Modal */}

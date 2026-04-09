@@ -15,7 +15,7 @@ const CATEGORIES = {
 
 const FinancialAnalytics: React.FC = () => {
   const { t } = useTranslation()
-  const { formatCurrency } = useSettings()
+  const { formatCurrency, formatDate } = useSettings()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -255,7 +255,7 @@ const FinancialAnalytics: React.FC = () => {
                   <tbody>
                     {records.map(r => (
                       <tr key={r.id}>
-                        <td>{r.transactionDate ? new Date(r.transactionDate).toLocaleDateString() : '–'}</td>
+                        <td>{r.transactionDate ? formatDate(r.transactionDate) : '–'}</td>
                         <td><span className="badge" style={{ background: TYPE_COLORS[r.recordType] }}>{r.recordType}</span></td>
                         <td>{(r.category || '').replace(/_/g, ' ')}</td>
                         <td className={r.recordType === 'income' ? 'text-success' : 'text-danger'}>{formatCurrency(r.amount)}</td>

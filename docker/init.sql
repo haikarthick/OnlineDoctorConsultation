@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- VetCare - Complete Database Schema (PostgreSQL 18)
 -- ============================================================
 -- Covers ALL 22 tables used by the application services.
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
-  role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin')),
+  role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff')),
   phone VARCHAR(20) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT true,
@@ -905,7 +905,7 @@ CREATE TABLE IF NOT EXISTS staff_positions (
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   position VARCHAR(50) NOT NULL
-    CHECK (position IN ('veterinarian','surgeon','nurse','technician','receptionist','intern','radiologist','lab_tech','anesthesiologist','pharmacist')),
+    CHECK (position IN ('veterinarian','surgeon','nurse','technician','receptionist','intern','radiologist','lab_tech','anesthesiologist','pharmacist','admin_staff')),
   department VARCHAR(100),
   is_active BOOLEAN DEFAULT true,
   hired_date DATE DEFAULT CURRENT_DATE,

@@ -1213,7 +1213,9 @@ router.post('/admin/network-subscription-plans', authMiddleware, roleMiddleware(
 
 router.put('/admin/network-subscription-plans/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateNetworkPlanSchema), asyncHandler(async (req: Request, res: Response) => {
   const db = (await import('../utils/database')).default;
-  const fields = req.body;
+  const allowedFields = ['name','description','max_seats','max_hospitals','price_monthly','price_annually','currency','features','is_published','sort_order','is_active'];
+  const fields = Object.fromEntries(Object.entries(req.body).filter(([k]) => allowedFields.includes(k)));
+  if (Object.keys(fields).length === 0) return res.status(400).json({ success: false, message: 'No valid fields to update' });
   const setClauses = Object.keys(fields).map((k, i) => `"${k}" = $${i + 2}`).join(', ');
   const values = Object.values(fields);
   const result = await db.query(`UPDATE network_subscription_plans SET ${setClauses}, updated_at = NOW() WHERE id = $1 RETURNING *`, [req.params.id, ...values]);

@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import { useSettings } from '../../context/SettingsContext'
 import './NetworkSubscriptions.css'
 
 interface SubscriptionPlan {
@@ -50,13 +51,11 @@ function getSeatColor(used: number, limit: number): string {
   return 'seat-bar-green'
 }
 
-function formatPrice(val?: number, currency = 'INR'): string {
-  if (!val && val !== 0) return '—'
-  return new Intl.NumberFormat('en-IN', { style: 'currency', currency, maximumFractionDigits: 0 }).format(val)
-}
+// formatPrice is replaced by useSettings().formatCurrency inside the component
 
 export default function NetworkSubscriptions() {
   const { t } = useTranslation()
+  const { formatCurrency } = useSettings()
   const [tab, setTab] = useState<TabType>('networks')
   const [networks, setNetworks] = useState<NetworkSub[]>([])
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
@@ -295,8 +294,8 @@ export default function NetworkSubscriptions() {
                     <td><strong>{plan.name}</strong>{plan.description && <div className="plan-desc">{plan.description}</div>}</td>
                     <td>{plan.maxSeats ?? '∞'}</td>
                     <td>{plan.maxHospitals ?? '∞'}</td>
-                    <td>{formatPrice(plan.priceMonthly, plan.currency)}</td>
-                    <td>{formatPrice(plan.priceAnnually, plan.currency)}</td>
+                    <td>{plan.priceMonthly != null ? formatCurrency(plan.priceMonthly) : '—'}</td>
+                    <td>{plan.priceAnnually != null ? formatCurrency(plan.priceAnnually) : '—'}</td>
                     <td>
                       <span className={`module-badge ${plan.isPublished ? 'badge-success' : 'badge-pending'}`}>
                         {plan.isPublished ? '🟢 Published' : '🔴 Hidden'}
