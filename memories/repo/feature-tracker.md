@@ -38,7 +38,7 @@
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Dashboard | ✅ | |
-| Animals (CRUD + profiles) | ✅ | |
+| Animals (CRUD + profiles) | ✅ | Species expanded: 10 → 40+ (India-focused breeds, grouped optgroup dropdown) |
 | Medical Records | ✅ | Deep navigation: `/medical-records?animalId=X&recordId=Y` |
 | Consultations (book, join, review) | ✅ | |
 | AI Copilot | ✅ | Groq → OpenAI → local fallback |
@@ -123,7 +123,17 @@
 
 ## Recently Completed (last 10)
 
-1. ✅ Privacy-First Hospital Patient Onboarding — Consent-Before-Access (2026-04-09)
+1. ✅ Comprehensive Species Expansion — 10 → 40+ species (2026-04-09)
+   - Animals.tsx: BREED_DATABASE expanded to 40+ species with India-focused breeds
+   - SPECIES_CATEGORIES added for grouped optgroup dropdowns (10 category groups)
+   - SPECIES_ICONS: emoji for all 40+ species
+   - EAR_TAG_SPECIES: expanded to include all farm/livestock/exotic large
+   - AnimalService.ts: getSpeciesCode() covers all 40+ species → 3-letter codes
+   - HospitalNetworkService.ts: SPECIES_CODES dict expanded to match
+   - seed-demo-data.sql: 6 new demo animals (Parrot, Tortoise, Arowana, Hamster, Peacock, Emu)
+   - All 5 locale files: speciesCategories translations (10 groups)
+   - Species groups: Common Pets / Small Pets / Birds / Reptiles / Amphibians / Ornamental Fish / Livestock / Poultry / Exotic Large / Other
+2. ✅ Privacy-First Hospital Patient Onboarding — Consent-Before-Access (2026-04-09)
    - HARD RULE: Hospital requests enrollment → patient must approve → data flows only after
    - DB: enrollment_status (pending_consent/active/declined/revoked) on animal_care_contexts
    - DB: hospital_patient_invites table (walk-in patients, 72hr crypto token, expiry tracking)
