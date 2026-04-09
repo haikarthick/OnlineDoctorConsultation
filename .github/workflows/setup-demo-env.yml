@@ -91,6 +91,11 @@ jobs:
             exit 1
           fi
 
+      - name: Wait for env vars to propagate
+        run: |
+          echo "⏳ Waiting 30s for Render to propagate env vars before triggering deploy..."
+          sleep 30
+
       - name: Trigger Demo redeploy
         if: github.event.inputs.trigger_deploy == 'true'
         run: |
