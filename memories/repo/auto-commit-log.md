@@ -419,3 +419,58 @@
 </details>
 
 ---
+
+## 2026-04-10 14:41 · `ee50b35` · 🔧 CHORE
+
+**Commit:** chore: update memory files — UI-012 nav scroll, UI-013 NetworkMemberships crash  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-04-10 16:25 · `3936f74` · 🐛 FIX
+
+**Commit:** fix: uptime monitor — dual-schedule + 90s timeout + retry on cold-start  
+**Author:** haikarthick  
+**Categories:** CONFIG  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - .github/workflows/uptime-monitor.yml
+
+</details>
+
+---
+
+## 2026-04-10 16:39 · `bc68aa8` · 🐛 FIX
+
+**Commit:** fix: inpatient vitals UX — labels, negative validation, history viewer + workflow no-show logic  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - frontend/src/pages/InpatientManagement.tsx
+
+</details>
+
+---

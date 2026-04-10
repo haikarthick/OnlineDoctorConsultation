@@ -416,3 +416,19 @@ render-start.sh
 - **Fix:** Always extract arrays defensively: try result.data fallback + filter nulls before any map/filter
 - **Rule:** Not specified
 
+
+### UI-014 — Vitals modal: no labels, accepts negatives, no history view
+- **Logged:** 2026-04-10 16:40
+- **Symptom:** Vitals inputs had placeholder-only labels (disappear on type); no min=0 attribute; no way to see full vitals history after recording
+- **Root Cause:** Added persistent labeled form groups, min=0+frontend validation, vitals history modal with reverse-chronological entries
+- **Fix:** ALL form fields must use persistent labels not just placeholders. Vitals/numeric fields always need min=0 + server-side guard
+- **Rule:** Not specified
+
+
+### UI-015 — HospitalWorkflow: No Show button visible for in-exam/in-treatment patients
+- **Logged:** 2026-04-10 16:40
+- **Symptom:** No Show button shown for all non-discharged queue items — patients in_examination or in_treatment are physically present, cannot be no-show
+- **Root Cause:** Fixed: No Show only visible when status === waiting
+- **Fix:** Queue status actions must be logically gated: no-show = waiting only, discharge = any active status
+- **Rule:** Not specified
+
