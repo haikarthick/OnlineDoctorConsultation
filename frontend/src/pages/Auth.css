@@ -215,6 +215,17 @@
   box-shadow: 0 2px 8px rgba(114, 28, 36, 0.1);
 }
 
+.message.db-waking {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d1e9f9 100%);
+  color: #1a5276;
+  border: 1px solid #aed6f1;
+  box-shadow: 0 2px 8px rgba(26, 82, 118, 0.1);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 .auth-divider {
   text-align: center;
   color: #999;

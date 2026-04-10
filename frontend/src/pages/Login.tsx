@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
@@ -17,17 +17,59 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [dbWaking, setDbWaking] = useState(false)
+  const [retryCountdown, setRetryCountdown] = useState(0)
+  const autoRetryRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  useEffect(() => {
+    return () => {
+      if (autoRetryRef.current) clearTimeout(autoRetryRef.current)
+      if (countdownRef.current) clearInterval(countdownRef.current)
+    }
+  }, [])
+
+  const scheduleAutoRetry = (email: string, password: string, seconds: number) => {
+    setRetryCountdown(seconds)
+    if (countdownRef.current) clearInterval(countdownRef.current)
+    countdownRef.current = setInterval(() => {
+      setRetryCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current!)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    if (autoRetryRef.current) clearTimeout(autoRetryRef.current)
+    autoRetryRef.current = setTimeout(() => attemptLogin(email, password, true), seconds * 1000)
+  }
+
+  const attemptLogin = async (email: string, password: string, isAutoRetry = false) => {
     setLoading(true)
-    setMessage('')
+    if (!isAutoRetry) {
+      setMessage('')
+      setDbWaking(false)
+      setRetryCountdown(0)
+      if (autoRetryRef.current) clearTimeout(autoRetryRef.current)
+      if (countdownRef.current) clearInterval(countdownRef.current)
+    }
 
     try {
       await login(email, password)
       setMessage('✓ Login successful! Redirecting...')
+      setDbWaking(false)
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t('login.error'))
+      const msg = error instanceof Error ? error.message : t('login.error')
+      if (msg.toLowerCase().includes('database is not ready') || msg.toLowerCase().includes('not ready yet')) {
+        setDbWaking(true)
+        setMessage('')
+        scheduleAutoRetry(email, password, 8)
+      } else {
+        setDbWaking(false)
+        setMessage(msg)
+      }
     } finally {
       setLoading(false)
     }
@@ -78,6 +120,15 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
               </div>
             </div>
 
+            {dbWaking && (
+              <div className="message db-waking" role="status" aria-live="polite">
+                <span className="spinner" aria-hidden="true" style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid #bbb', borderTopColor: '#2563eb', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginRight: 8 }} />
+                Database is waking up — retrying automatically in {retryCountdown}s…
+                <br />
+                <small style={{ opacity: 0.75 }}>This is normal on first visit. Please wait.</small>
+              </div>
+            )}
+
             {message && (
               <div
                 className={`message ${message.includes('✓') ? 'success' : 'error'}`}
@@ -88,7 +139,7 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="login-form" aria-label={t('login.signIn')}>
+            <form onSubmit={e => { e.preventDefault(); attemptLogin(email, password) }} className="login-form" aria-label={t('login.signIn')}>
               <div className="form-group">
                 <label htmlFor="login-email">{t('login.email')}</label>
                 <input

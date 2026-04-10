@@ -124,7 +124,8 @@ main();
 echo "  Database has $VET_PROFILE_COUNT vet profile(s)"
 
 FORCE_RESEED_LOWER=$(echo "$FORCE_RESEED" | tr '[:upper:]' '[:lower:]')
-if [ "$FORCE_RESEED_LOWER" = "true" ] || [ "$FORCE_RESEED" = "1" ]; then
+SEED_ON_STARTUP_LOWER=$(echo "$SEED_ON_STARTUP" | tr '[:upper:]' '[:lower:]')
+if [ "$FORCE_RESEED_LOWER" = "true" ] || [ "$FORCE_RESEED" = "1" ] || [ "$SEED_ON_STARTUP_LOWER" = "true" ] || [ "$SEED_ON_STARTUP" = "1" ]; then
   echo ""
   echo "━━━ FORCE_RESEED=true — Re-seeding demo data ━━━"
   timeout 120 node dist/utils/seed-demo-data.js 2>&1 || echo "  ⚠ Seed had warnings or timed out — continuing"
