@@ -295,3 +295,17 @@
 - **Lesson:** Any backend operation hitting Neon free-tier must retry at least 3-4 times with escalating delays. Single try/catch self-heal is never enough for cold-start scenarios
 - **Apply to:** All AuthController DB operations + any new Neon-backed endpoints
 
+
+### LESSON-048 — PostgreSQL reserved keywords as column names cause silent init failures
+- **Logged:** 2026-04-10 13:34
+- **Context:** role_change_requests table had current_role VARCHAR(50) - current_role is a PG system variable/reserved keyword
+- **Lesson:** Always quote column names that match PostgreSQL reserved words (current_role, current_user, session_user, etc.) using double-quotes in both CREATE TABLE and all SQL queries referencing them
+- **Apply to:** All future table definitions + SQL queries
+
+
+### LESSON-049 — init.sql forward references break statement-by-statement execution
+- **Logged:** 2026-04-10 13:34
+- **Context:** hospital_patient_invites (line 1264) referenced hospital_networks (line 1534) - forward dependency. When init.sql runs stmt-by-stmt, table creation fails
+- **Lesson:** Always define parent/referenced tables BEFORE child tables that reference them in init.sql. No forward references allowed.
+- **Apply to:** All future init.sql additions
+

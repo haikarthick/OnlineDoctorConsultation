@@ -330,3 +330,41 @@
 </details>
 
 ---
+
+## 2026-04-10 11:27 · `0bf45b8` · OTHER
+
+**Commit:** memory: Log DEMO-001 bug + LESSON-047 Neon cold-start retry pattern  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/lessons.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-04-10 13:31 · `029968a` · 🐛 FIX
+
+**Commit:** fix: Demo DB schema + uptime monitor  
+**Author:** haikarthick  
+**Categories:** CONFIG · API · UTILS · DB · DB-SCHEMA · DEPLOY  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - .github/workflows/uptime-monitor.yml
+  - backend/src/routes/index.ts
+  - backend/src/utils/database.ts
+  - docker/init.sql
+  - render-start.sh
+
+</details>
+
+---

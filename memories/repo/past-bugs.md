@@ -392,3 +392,11 @@ render-start.sh
 - **Fix:** AuthController: 4-attempt retry loop with 3/6/9s delays. Login.tsx: auto-retry UI with 8s countdown. render-start.sh: reads both FORCE_RESEED and SEED_ON_STARTUP
 - **Rule:** Always add retry loops for DB on Neon/free-tier cold-start - single attempt is never enough
 
+
+### DEMO-002 — Demo login - users table missing in Neon DB
+- **Logged:** 2026-04-10 13:34
+- **Symptom:** Login always failed even after retry fix. Health check showed usersTable missing.
+- **Root Cause:** init.sql never ran on Neon: (1) init.sql had forward reference - hospital_patient_invites before hospital_networks, (2) current_role is a PG reserved keyword causing syntax error on role_change_requests CREATE TABLE, (3) render-start.sh Step 0 timed out on Neon cold-start and all 4 retries failed. Tables never created.
+- **Fix:** Manually ran init.sql stmt-by-stmt. Fixed init.sql ordering + quoted current_role. Added uptime-monitor.yml (pings every 5min) to prevent Neon+Render spin-down.
+- **Rule:** ALWAYS: (1) quote PG reserved words as column names, (2) check forward references in init.sql, (3) add uptime monitor for free-tier services
+
