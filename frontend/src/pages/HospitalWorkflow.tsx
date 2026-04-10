@@ -292,10 +292,10 @@ export default function HospitalWorkflow() {
                     <button onClick={() => handleQueueStatus(q.id, 'in_treatment')} style={{ padding: '6px 12px', background: '#059669', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.treat')}</button>
                   )}
                   {q.status !== 'discharged' && q.status !== 'no_show' && (
-                    <>
-                      <button onClick={() => handleQueueStatus(q.id, 'discharged')} style={{ padding: '6px 12px', background: '#64748b', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.discharge')}</button>
-                      <button onClick={() => handleQueueStatus(q.id, 'no_show')} style={{ padding: '6px 10px', background: '#fecaca', color: '#dc2626', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.noShow')}</button>
-                    </>
+                    <button onClick={() => handleQueueStatus(q.id, 'discharged')} style={{ padding: '6px 12px', background: '#64748b', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.discharge')}</button>
+                  )}
+                  {q.status === 'waiting' && (
+                    <button onClick={() => handleQueueStatus(q.id, 'no_show')} style={{ padding: '6px 10px', background: '#fecaca', color: '#dc2626', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.noShow')}</button>
                   )}
                 </div>
               </div>

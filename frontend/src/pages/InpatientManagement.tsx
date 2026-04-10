@@ -26,6 +26,8 @@ export default function InpatientManagement() {
   const [loading, setLoading] = useState(true)
   const [showAdmit, setShowAdmit] = useState(false)
   const [showVitals, setShowVitals] = useState<any>(null)
+  const [vitalsError, setVitalsError] = useState('')
+  const [showVitalsHistory, setShowVitalsHistory] = useState<any>(null)
   const [statusFilter, setStatusFilter] = useState('')
   const [admitAnimal, setAdmitAnimal] = useState<any>(null)
   const [viewHistory, setViewHistory] = useState<any>(null)
@@ -88,11 +90,20 @@ export default function InpatientManagement() {
 
   async function handleVitalsSubmit() {
     if (!showVitals) return
+    setVitalsError('')
+    // Validate: no negative values
+    const temp = vitalsForm.temperature ? parseFloat(vitalsForm.temperature) : null
+    const hr = vitalsForm.heartRate ? parseInt(vitalsForm.heartRate) : null
+    const wt = vitalsForm.weight ? parseFloat(vitalsForm.weight) : null
+    if ((temp !== null && temp <= 0) || (hr !== null && hr <= 0) || (wt !== null && wt <= 0)) {
+      setVitalsError(t('inpatientManagement.vitalsErrorNegative'))
+      return
+    }
     try {
       const data: Record<string, unknown> = { notes: vitalsForm.notes }
-      if (vitalsForm.temperature) data.temperature = parseFloat(vitalsForm.temperature)
-      if (vitalsForm.heartRate) data.heartRate = parseInt(vitalsForm.heartRate)
-      if (vitalsForm.weight) data.weight = parseFloat(vitalsForm.weight)
+      if (temp !== null) data.temperature = temp
+      if (hr !== null) data.heartRate = hr
+      if (wt !== null) data.weight = wt
       await apiService.addVitalsLog(showVitals.id, data)
       setShowVitals(null)
       setVitalsForm({ temperature: '', heartRate: '', weight: '', notes: '' })
@@ -188,12 +199,19 @@ export default function InpatientManagement() {
                   {p.daily_rate > 0 && <div><strong>{t('inpatientManagement.dailyRate')}:</strong> {formatCurrency(p.daily_rate)}</div>}
                 </div>
 
-                {/* Last Vitals */}
+                {/* Last Vitals — clickable to open full history */}
                 {lastVitals && (
-                  <div style={{ background: '#f8fafc', borderRadius: 8, padding: '8px 10px', marginBottom: 10, fontSize: 12 }}>
-                    <strong>{t('inpatientManagement.lastVitals')}:</strong> {lastVitals.temperature && `🌡️ ${lastVitals.temperature}°F`} {lastVitals.heartRate && `❤️ ${lastVitals.heartRate}bpm`} {lastVitals.weight && `⚖️ ${lastVitals.weight}kg`}
+                  <button
+                    onClick={() => setShowVitalsHistory(p)}
+                    style={{ background: '#f8fafc', borderRadius: 8, padding: '8px 10px', marginBottom: 10, fontSize: 12, border: '1px solid #e2e8f0', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                  >
+                    <strong>{t('inpatientManagement.lastVitals')}:</strong>{' '}
+                    {lastVitals.temperature && `🌡️ ${lastVitals.temperature}°F`}{' '}
+                    {lastVitals.heartRate && `❤️ ${lastVitals.heartRate}bpm`}{' '}
+                    {lastVitals.weight && `⚖️ ${lastVitals.weight}kg`}
                     <span style={{ color: '#94a3b8', marginLeft: 8 }}>{lastVitals.timestamp && formatDateTime(lastVitals.timestamp)}</span>
-                  </div>
+                    <span style={{ float: 'right', color: '#8b5cf6', fontWeight: 600, fontSize: 11 }}>📈 {t('inpatientManagement.viewVitalsHistory')} ({vitals.length})</span>
+                  </button>
                 )}
 
                 {p.care_instructions && <div style={{ fontSize: 12, color: '#64748b', marginBottom: 8 }}><strong>{t('inpatientManagement.care')}:</strong> {p.care_instructions}</div>}
@@ -287,22 +305,124 @@ export default function InpatientManagement() {
 
       {/* Vitals Modal */}
       {showVitals && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 420, maxWidth: '90vw' }}>
-            <h3 style={{ marginTop: 0 }}>{t('inpatientManagement.recordVitals')} — {showVitals.animal_name}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <input type="number" step="0.1" placeholder={t('inpatientManagement.temperaturePlaceholder')} value={vitalsForm.temperature} onChange={e => setVitalsForm(f => ({ ...f, temperature: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-              <input type="number" placeholder={t('inpatientManagement.heartRatePlaceholder')} value={vitalsForm.heartRate} onChange={e => setVitalsForm(f => ({ ...f, heartRate: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-              <input type="number" step="0.1" placeholder={t('inpatientManagement.weightPlaceholder')} value={vitalsForm.weight} onChange={e => setVitalsForm(f => ({ ...f, weight: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
-              <textarea placeholder={t('inpatientManagement.notesPlaceholder')} value={vitalsForm.notes} onChange={e => setVitalsForm(f => ({ ...f, notes: e.target.value }))} rows={2} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical' }} />
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }} onClick={() => { setShowVitals(null); setVitalsError('') }}>
+          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 420, maxWidth: '90vw' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>📊 {t('inpatientManagement.recordVitals')} — {showVitals.animal_name}</h3>
+              <button onClick={() => { setShowVitals(null); setVitalsError('') }} style={{ background: '#f1f5f9', border: 'none', borderRadius: 6, padding: '6px 10px', cursor: 'pointer', fontSize: 16 }}>✕</button>
+            </div>
+            {vitalsError && (
+              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '8px 12px', marginBottom: 12, color: '#dc2626', fontSize: 13 }}>⚠️ {vitalsError}</div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', display: 'block', marginBottom: 4 }}>
+                  🌡️ {t('inpatientManagement.temperatureLabel')}
+                  <span style={{ fontWeight: 400, color: '#94a3b8', marginLeft: 6, fontSize: 12 }}>({t('inpatientManagement.normalTempHint')})</span>
+                </label>
+                <input
+                  type="number" step="0.1" min="0" placeholder="e.g. 101.5"
+                  value={vitalsForm.temperature}
+                  onChange={e => setVitalsForm(f => ({ ...f, temperature: e.target.value }))}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }}
+                />
+              </div>
+              <div>
+                <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', display: 'block', marginBottom: 4 }}>
+                  ❤️ {t('inpatientManagement.heartRateLabel')}
+                  <span style={{ fontWeight: 400, color: '#94a3b8', marginLeft: 6, fontSize: 12 }}>({t('inpatientManagement.normalHrHint')})</span>
+                </label>
+                <input
+                  type="number" min="0" placeholder="e.g. 80"
+                  value={vitalsForm.heartRate}
+                  onChange={e => setVitalsForm(f => ({ ...f, heartRate: e.target.value }))}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }}
+                />
+              </div>
+              <div>
+                <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', display: 'block', marginBottom: 4 }}>
+                  ⚖️ {t('inpatientManagement.weightLabel')}
+                  <span style={{ fontWeight: 400, color: '#94a3b8', marginLeft: 6, fontSize: 12 }}>({t('inpatientManagement.weightUnit')})</span>
+                </label>
+                <input
+                  type="number" step="0.1" min="0" placeholder="e.g. 12.5"
+                  value={vitalsForm.weight}
+                  onChange={e => setVitalsForm(f => ({ ...f, weight: e.target.value }))}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }}
+                />
+              </div>
+              <div>
+                <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', display: 'block', marginBottom: 4 }}>
+                  📝 {t('inpatientManagement.notesLabel')}
+                </label>
+                <textarea
+                  placeholder={t('inpatientManagement.notesPlaceholder')}
+                  value={vitalsForm.notes}
+                  onChange={e => setVitalsForm(f => ({ ...f, notes: e.target.value }))}
+                  rows={2}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box', fontSize: 14 }}
+                />
+              </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => setShowVitals(null)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('inpatientManagement.cancel')}</button>
+                <button onClick={() => { setShowVitals(null); setVitalsError('') }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('inpatientManagement.cancel')}</button>
                 <button onClick={handleVitalsSubmit} style={{ padding: '8px 16px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('inpatientManagement.saveVitals')}</button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Vitals History Modal */}
+      {showVitalsHistory && (() => {
+        const allVitals: any[] = (() => { try { return JSON.parse(showVitalsHistory.vitals_log || '[]') } catch { return [] } })()
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }} onClick={() => setShowVitalsHistory(null)}>
+            <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 520, maxWidth: '95vw', maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ margin: 0 }}>📈 {t('inpatientManagement.vitalsHistory')} — {showVitalsHistory.animal_name}</h3>
+                <button onClick={() => setShowVitalsHistory(null)} style={{ background: '#f1f5f9', border: 'none', borderRadius: 6, padding: '6px 10px', cursor: 'pointer', fontSize: 16 }}>✕</button>
+              </div>
+              {allVitals.length === 0 ? (
+                <p style={{ textAlign: 'center', color: '#94a3b8', padding: 30 }}>{t('inpatientManagement.noVitalsHistory')}</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {[...allVitals].reverse().map((v: any, i: number) => (
+                    <div key={i} style={{ background: i === 0 ? '#f5f3ff' : '#f8fafc', borderRadius: 10, padding: '12px 16px', border: i === 0 ? '1px solid #ddd6fe' : '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <span style={{ fontWeight: 700, fontSize: 13, color: i === 0 ? '#7c3aed' : '#374151' }}>
+                          {i === 0 ? `✨ ${t('inpatientManagement.latest')}` : `#${allVitals.length - i}`}
+                        </span>
+                        <span style={{ fontSize: 12, color: '#94a3b8' }}>{v.timestamp ? formatDateTime(v.timestamp) : ''}</span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, fontSize: 13 }}>
+                        {v.temperature != null && (
+                          <div style={{ background: '#fff', borderRadius: 8, padding: '8px 10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 2 }}>🌡️ {t('inpatientManagement.temperatureLabel')}</div>
+                            <div style={{ fontWeight: 700, color: '#374151' }}>{v.temperature}°F</div>
+                          </div>
+                        )}
+                        {v.heartRate != null && (
+                          <div style={{ background: '#fff', borderRadius: 8, padding: '8px 10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 2 }}>❤️ {t('inpatientManagement.heartRateLabel')}</div>
+                            <div style={{ fontWeight: 700, color: '#374151' }}>{v.heartRate} bpm</div>
+                          </div>
+                        )}
+                        {v.weight != null && (
+                          <div style={{ background: '#fff', borderRadius: 8, padding: '8px 10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 2 }}>⚖️ {t('inpatientManagement.weightLabel')}</div>
+                            <div style={{ fontWeight: 700, color: '#374151' }}>{v.weight} kg</div>
+                          </div>
+                        )}
+                      </div>
+                      {v.notes && <div style={{ fontSize: 12, color: '#64748b', marginTop: 8 }}>📝 {v.notes}</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Medical History Modal */}
       {viewHistory && (
