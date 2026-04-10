@@ -258,3 +258,75 @@
 </details>
 
 ---
+
+## 2026-04-09 14:31 · `d442334` · 📝 DOCS
+
+**Commit:** docs: update memory files — Demo environment setup (Neon DB + automated Render API)  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/feature-tracker.md
+  - memories/repo/lessons.md
+
+</details>
+
+---
+
+## 2026-04-09 16:07 · `e355240` · 🐛 FIX
+
+**Commit:** fix: add 30s propagation delay before deploy hook in setup-demo-env.yml  
+**Author:** haikarthick  
+**Categories:** CONFIG  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - .github/workflows/setup-demo-env.yml
+
+</details>
+
+---
+
+## 2026-04-10 11:07 · `590e6fc` · 🐛 FIX
+
+**Commit:** fix: runtime crashes on PatientConsent, NetworkMemberships, HospitalNetworks  
+**Author:** haikarthick  
+**Categories:** SERVICE · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/services/HospitalNetworkService.ts
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/pages/petowner/NetworkMemberships.tsx
+  - frontend/src/pages/petowner/PatientConsent.tsx
+
+</details>
+
+---
+
+## 2026-04-10 11:24 · `3e4e0e6` · 🐛 FIX
+
+**Commit:** fix: Demo login - handle Neon auto-suspend cold-start gracefully  
+**Author:** haikarthick  
+**Categories:** UI · DEPLOY  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/controllers/AuthController.ts
+  - frontend/src/pages/Auth.css
+  - frontend/src/pages/Login.tsx
+  - render-start.sh
+
+</details>
+
+---

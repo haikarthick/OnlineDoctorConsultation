@@ -281,3 +281,17 @@
 - **Context:** Neon PostgreSQL requires SSL (`?sslmode=require` in connection string). Needed to verify backend handles this.
 - **Lesson:** `config/index.ts` already sets `ssl: { rejectUnauthorized: false }` whenever `DATABASE_URL` env var is present. Neon's SSL works automatically — no code change needed. The `?sslmode=require` in the Neon URL is sufficient.
 - **Apply to:** Any future external PostgreSQL provider (Supabase, Railway, etc.)
+
+### LESSON-046 — API response array extraction pattern
+- **Logged:** 2026-04-10 11:09
+- **Context:** PatientConsent and NetworkMemberships both crashed because API responses wrap arrays differently per endpoint
+- **Lesson:** NEVER use res?.data||res||[] to extract arrays. Backend endpoints return either bare arrays, {data:[...]}, or {data:{animals:[],total:N}}. Always use explicit Array.isArray() check: Array.isArray(res?.data?.animals)?res.data.animals:Array.isArray(res?.data)?res.data:Array.isArray(res)?res:[]
+- **Apply to:** All future frontend API response parsing
+
+
+### LESSON-047 — Neon free-tier cold-start requires retry loops
+- **Logged:** 2026-04-10 11:27
+- **Context:** Demo login failed persistently due to Neon auto-suspend + Render spin-down racing each other on cold start
+- **Lesson:** Any backend operation hitting Neon free-tier must retry at least 3-4 times with escalating delays. Single try/catch self-heal is never enough for cold-start scenarios
+- **Apply to:** All AuthController DB operations + any new Neon-backed endpoints
+

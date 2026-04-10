@@ -368,3 +368,27 @@ render-start.sh
 **If steps 0–2 fail:** Logged + continued. Server still starts.
 **If step 3 port bind fails:** Deploy fails. Only happens on port conflict or OOM.
 **If DB never connects:** Server stays alive, logs errors. Render health check passes.
+
+### UI-010 — PatientConsent v.map crash
+- **Logged:** 2026-04-10 11:09
+- **Symptom:** Clicking Data Consent menu crashed with v.map is not a function
+- **Root Cause:** listAnimals() returns {success:true,data:{animals:[],total:N}}. PatientConsent extracted res?.data={animals:[]} (object not array) and called .map() on it
+- **Fix:** Fix: Array.isArray guard chain: res.data.animals -> res.data -> res -> []
+- **Rule:** NEVER use res?.data||res||[] pattern when backend wraps arrays in {animals:[],total:N}. Always use Array.isArray() to extract the actual array
+
+
+### UI-011 — NetworkMemberships SQL column u_by.name
+- **Logged:** 2026-04-10 11:09
+- **Symptom:** My Hospital Network Memberships page crashed with Cannot read properties of undefined (reading id)
+- **Root Cause:** getMyEnrollments SQL used u_by.name but users table has first_name+last_name only. SQL threw error causing 500, and also unsafe array guard setEnrollments(result??[]) kept non-array if result was truthy object
+- **Fix:** Fix: u_by.first_name||space||u_by.last_name AS enrolledByName + Array.isArray(result) guard
+- **Rule:** ALWAYS cross-reference SQL column names against docker/init.sql. users table has first_name and last_name NOT name
+
+
+### DEMO-001 — Demo login Database not ready
+- **Logged:** 2026-04-10 11:27
+- **Symptom:** vetcare-demo login shows persistent red error - Database is not ready yet
+- **Root Cause:** Neon free-tier auto-suspends + Render free-tier spins down simultaneously. Single AuthController self-heal attempt failed instantly. Also SEED_ON_STARTUP env var set by setup-demo-env.yml was ignored - render-start.sh only read FORCE_RESEED
+- **Fix:** AuthController: 4-attempt retry loop with 3/6/9s delays. Login.tsx: auto-retry UI with 8s countdown. render-start.sh: reads both FORCE_RESEED and SEED_ON_STARTUP
+- **Rule:** Always add retry loops for DB on Neon/free-tier cold-start - single attempt is never enough
+
