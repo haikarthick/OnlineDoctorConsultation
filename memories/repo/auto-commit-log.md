@@ -368,3 +368,54 @@
 </details>
 
 ---
+
+## 2026-04-10 13:34 · `ff461a2` · OTHER
+
+**Commit:** memory: Log DEMO-002, LESSON-048, LESSON-049 - Neon DB init failures  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/lessons.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-04-10 13:51 · `5b0952c` · 🐛 FIX
+
+**Commit:** fix: Book Consultation auto-advances past today when all slots are past  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/petowner/BookConsultation.tsx
+
+</details>
+
+---
+
+## 2026-04-10 14:36 · `d5dadd9` · 🐛 FIX
+
+**Commit:** fix: nav scroll persistence + NetworkMemberships null guards  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/pages/petowner/NetworkMemberships.tsx
+
+</details>
+
+---

@@ -400,3 +400,19 @@ render-start.sh
 - **Fix:** Manually ran init.sql stmt-by-stmt. Fixed init.sql ordering + quoted current_role. Added uptime-monitor.yml (pings every 5min) to prevent Neon+Render spin-down.
 - **Rule:** ALWAYS: (1) quote PG reserved words as column names, (2) check forward references in init.sql, (3) add uptime monitor for free-tier services
 
+
+### UI-012 — Nav scroll resets to top on menu click
+- **Logged:** 2026-04-10 14:40
+- **Symptom:** Every menu click re-renders Navigation component, causing .nav-menu scroll container to reset to top; active item not visible
+- **Root Cause:** Added useRef on .nav-menu + sessionStorage scroll persistence + rAF debounce save + scrollIntoView only when item outside visible area
+- **Fix:** Always use ref+sessionStorage to persist scroll in nav containers that re-render on route changes
+- **Rule:** Not specified
+
+
+### UI-013 — NetworkMemberships crash: Cannot read properties of undefined (reading id)
+- **Logged:** 2026-04-10 14:41
+- **Symptom:** API response shape ambiguous (plain array OR {data:[]} object); filter/map called on possibly-null elements causing runtime crash
+- **Root Cause:** Added result?.data fallback extraction, filter(item => item != null), optional chaining e?.enrollmentStatus, index-based key fallbacks
+- **Fix:** Always extract arrays defensively: try result.data fallback + filter nulls before any map/filter
+- **Rule:** Not specified
+
