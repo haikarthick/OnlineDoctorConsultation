@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { usePermission, NAV_PERMISSION_MAP } from '../context/PermissionContext'
@@ -12,6 +12,7 @@ interface NavigationProps {
 }
 
 const SIDEBAR_COLLAPSED_KEY = 'vetcare_sidebar_collapsed'
+const NAV_SCROLL_KEY = 'vetcare_nav_scroll'
 
 export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath }) => {
   const { user, logout } = useAuth()
@@ -23,6 +24,11 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   })
 
   const isPetOwner = user?.role === 'pet_owner'
+
+  // Ref for the scrollable nav-menu container
+  const navMenuRef = useRef<HTMLDivElement>(null)
+  // Ref for the active menu item (for scroll-into-view)
+  const activeItemRef = useRef<HTMLButtonElement>(null)
 
   // Persist collapse preference & notify Layout
   useEffect(() => {
@@ -41,6 +47,45 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [])
+
+  // Restore scroll position when component mounts
+  useEffect(() => {
+    const saved = sessionStorage.getItem(NAV_SCROLL_KEY)
+    if (saved && navMenuRef.current) {
+      navMenuRef.current.scrollTop = parseInt(saved, 10)
+    }
+  }, [])
+
+  // Save scroll position on scroll (debounced via requestAnimationFrame)
+  useEffect(() => {
+    const el = navMenuRef.current
+    if (!el) return
+    let rafId: number
+    const onScroll = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        try { sessionStorage.setItem(NAV_SCROLL_KEY, String(el.scrollTop)) } catch {}
+      })
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => { el.removeEventListener('scroll', onScroll); cancelAnimationFrame(rafId) }
+  }, [])
+
+  // When active item changes, scroll it into view only if it's outside the visible area
+  useEffect(() => {
+    const btn = activeItemRef.current
+    const container = navMenuRef.current
+    if (!btn || !container) return
+    const btnTop = btn.offsetTop
+    const btnBottom = btnTop + btn.offsetHeight
+    const containerTop = container.scrollTop
+    const containerBottom = containerTop + container.clientHeight
+    const isVisible = btnTop >= containerTop + 4 && btnBottom <= containerBottom - 4
+    if (!isVisible) {
+      container.scrollTop = btnTop - container.clientHeight / 2 + btn.offsetHeight / 2
+      try { sessionStorage.setItem(NAV_SCROLL_KEY, String(container.scrollTop)) } catch {}
+    }
+  }, [currentPath])
 
   /* ════════════════════════════════════════════════════════
    * MENU DEFINITIONS — properly grouped by module/section
@@ -349,7 +394,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
         </div>
 
         {/* Menu Items — grouped by section */}
-        <div className="nav-menu" role="menubar" aria-label="Navigation menu">
+        <div className="nav-menu" ref={navMenuRef} role="menubar" aria-label="Navigation menu">
           {groupedMenuItems.map((group) => {
             const isMainSection = group.section === 'Main'
             const isPreferences = group.section === 'Preferences'
@@ -381,6 +426,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
                     {group.items.map((item) => (
                       <li key={item.id} className="nav-menu-item" role="none">
                         <button
+                          ref={isActive(item.path) ? activeItemRef : undefined}
                           role="menuitem"
                           className={`nav-menu-link ${isActive(item.path) ? 'nav-menu-active' : ''}`}
                           onClick={() => handleMenuClick(item.path)}

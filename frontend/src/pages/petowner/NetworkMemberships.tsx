@@ -22,7 +22,8 @@ const NetworkMemberships: React.FC = () => {
     setError('')
     try {
       const result = await apiService.getMyNetworkEnrollments()
-      setEnrollments(Array.isArray(result) ? result : [])
+      const arr = Array.isArray(result) ? result : (Array.isArray(result?.data) ? result.data : [])
+      setEnrollments(arr.filter((item: any) => item != null))
     } catch (err: any) {
       setError(err?.response?.data?.error ?? err?.message ?? 'Failed to load enrollments')
     } finally {
@@ -38,9 +39,9 @@ const NetworkMemberships: React.FC = () => {
     return () => clearTimeout(t)
   }, [successMsg])
 
-  const pending = enrollments.filter(e => e.enrollmentStatus === 'pending_consent')
-  const active = enrollments.filter(e => e.enrollmentStatus === 'active')
-  const past = enrollments.filter(e => e.enrollmentStatus === 'declined' || e.enrollmentStatus === 'revoked')
+  const pending = enrollments.filter(e => e?.enrollmentStatus === 'pending_consent')
+  const active = enrollments.filter(e => e?.enrollmentStatus === 'active')
+  const past = enrollments.filter(e => e?.enrollmentStatus === 'declined' || e?.enrollmentStatus === 'revoked')
 
   const handleAccept = async (contextId: string, networkName: string, animalName: string) => {
     setActing(contextId)
@@ -123,8 +124,8 @@ const NetworkMemberships: React.FC = () => {
               </div>
               <h2 className="nm-section-title">{t('networkMemberships.pendingRequests')}</h2>
               <div className="nm-cards-grid">
-                {pending.map(e => (
-                  <div key={e.id} className="nm-card pending">
+                {pending.map((e, idx) => (
+                  <div key={e?.id ?? `pending-${idx}`} className="nm-card pending">
                     <div className="nm-card-header">
                       <span className="nm-card-icon">🏥</span>
                       <div>
@@ -192,8 +193,8 @@ const NetworkMemberships: React.FC = () => {
             <div className="module-card" style={{ marginBottom: 24 }}>
               <h2 className="nm-section-title">{t('networkMemberships.activeMemberships')}</h2>
               <div className="nm-cards-grid">
-                {active.map(e => (
-                  <div key={e.id} className="nm-card active">
+                {active.map((e, idx) => (
+                  <div key={e?.id ?? `active-${idx}`} className="nm-card active">
                     <div className="nm-card-header">
                       <span className="nm-card-icon">✅</span>
                       <div>
@@ -234,8 +235,8 @@ const NetworkMemberships: React.FC = () => {
               </button>
               {showPast && (
                 <div className="nm-cards-grid">
-                  {past.map(e => (
-                    <div key={e.id} className={`nm-card ${e.enrollmentStatus}`}>
+                  {past.map((e, idx) => (
+                    <div key={e?.id ?? `past-${idx}`} className={`nm-card ${e?.enrollmentStatus}`}>
                       <div className="nm-card-header">
                         <span className="nm-card-icon">📋</span>
                         <div>
