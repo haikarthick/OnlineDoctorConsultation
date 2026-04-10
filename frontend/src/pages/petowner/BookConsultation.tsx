@@ -243,6 +243,18 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
           setSelectedSlot(match)
           setStep(3) // skip the "Choose Time" step — user already chose in FindDoctor
         }
+      } else {
+        // If all slots for the selected date are in the past (common on initial load with today's date),
+        // automatically advance to the next available date rather than showing an empty slot list.
+        const now = new Date()
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+        if (date === todayStr && !autoSelectedDate) {
+          const futureSlots = filterFutureSlots(slots, date)
+          if (futureSlots.length === 0 && slots.length > 0) {
+            // Today has slots but all are past — skip to next available date
+            autoFindNextDate(selectedVet.userId, date)
+          }
+        }
       }
     } catch (err: any) {
       setAvailableSlots([])
@@ -263,22 +275,28 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
     autoFindNextDate(selectedVet.userId)
   }, [step, selectedVet])
 
-  const autoFindNextDate = async (vetId: string) => {
-    const today = new Date()
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  const autoFindNextDate = async (vetId: string, skipDate?: string) => {
+    const now = new Date()
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    // If it's past 23:00, skip today entirely in the monthly search
+    const isLateTodaySkip = now.getHours() >= 23 || skipDate === todayStr
     setDateSearching(true)
     setAutoSelectedDate(false)
     // Try current month then next month
     for (let offset = 0; offset <= 1; offset++) {
-      const d = new Date(today.getFullYear(), today.getMonth() + offset, 1)
+      const d = new Date(now.getFullYear(), now.getMonth() + offset, 1)
       const year = d.getFullYear()
       const month = d.getMonth() + 1
       try {
         const res = await apiService.getMonthlyAvailability(vetId, year, month)
         const days: { date: string; status: string }[] = res.data?.summary || res.data || []
-        const next = days.find(
-          day => day.date >= todayStr && (day.status === 'available' || day.status === 'custom')
-        )
+        const next = days.find(day => {
+          if (day.status !== 'available' && day.status !== 'custom') return false
+          if (day.date < todayStr) return false
+          // Skip today if explicitly told to (all slots were past) or very late in the day
+          if (day.date === todayStr && isLateTodaySkip) return false
+          return true
+        })
         if (next) {
           setSelectedDate(next.date)
           setAutoSelectedDate(true)
