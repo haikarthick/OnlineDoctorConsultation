@@ -713,7 +713,7 @@ class PostgresDatabase {
       CREATE TABLE IF NOT EXISTS role_change_requests (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        current_role VARCHAR(50) NOT NULL,
+        "current_role" VARCHAR(50) NOT NULL,
         requested_role VARCHAR(50) NOT NULL,
         reason TEXT,
         status VARCHAR(20) NOT NULL DEFAULT 'pending'

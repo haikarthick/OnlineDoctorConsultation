@@ -1260,30 +1260,7 @@ CREATE TABLE IF NOT EXISTS hospital_invites (
 CREATE INDEX IF NOT EXISTS idx_hospital_invites_token ON hospital_invites(invite_token);
 CREATE INDEX IF NOT EXISTS idx_hospital_invites_hospital ON hospital_invites(hospital_id);
 
--- 40b. HOSPITAL PATIENT INVITES (walk-in patients without platform accounts)
-CREATE TABLE IF NOT EXISTS hospital_patient_invites (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
-  hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
-  invited_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  patient_name VARCHAR(200) NOT NULL,
-  patient_email VARCHAR(255) NOT NULL,
-  patient_phone VARCHAR(30),
-  animal_name VARCHAR(100),
-  animal_species VARCHAR(50),
-  invite_token VARCHAR(128) NOT NULL UNIQUE,
-  status VARCHAR(20) NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'accepted', 'expired', 'revoked')),
-  message TEXT,
-  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '72 hours'),
-  accepted_at TIMESTAMPTZ,
-  accepted_by UUID REFERENCES users(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_hosp_patient_invites_token ON hospital_patient_invites(invite_token);
-CREATE INDEX IF NOT EXISTS idx_hosp_patient_invites_email ON hospital_patient_invites(patient_email);
-CREATE INDEX IF NOT EXISTS idx_hosp_patient_invites_network ON hospital_patient_invites(network_id);
+-- 40b. HOSPITAL PATIENT INVITES moved after hospital_networks definition (line ~1534)
 
 CREATE TABLE IF NOT EXISTS hospital_documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1693,13 +1670,40 @@ CREATE TRIGGER update_hospital_networks_updated_at BEFORE UPDATE ON hospital_net
 DROP TRIGGER IF EXISTS update_patient_consent_updated_at ON patient_data_consent;
 CREATE TRIGGER update_patient_consent_updated_at BEFORE UPDATE ON patient_data_consent
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- 40b. HOSPITAL PATIENT INVITES (walk-in patients without platform accounts)
+-- NOTE: Placed here (after hospital_networks) to resolve forward-reference dependency
+CREATE TABLE IF NOT EXISTS hospital_patient_invites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+  invited_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  patient_name VARCHAR(200) NOT NULL,
+  patient_email VARCHAR(255) NOT NULL,
+  patient_phone VARCHAR(30),
+  animal_name VARCHAR(100),
+  animal_species VARCHAR(50),
+  invite_token VARCHAR(128) NOT NULL UNIQUE,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending', 'accepted', 'expired', 'revoked')),
+  message TEXT,
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '72 hours'),
+  accepted_at TIMESTAMPTZ,
+  accepted_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_hosp_patient_invites_token ON hospital_patient_invites(invite_token);
+CREATE INDEX IF NOT EXISTS idx_hosp_patient_invites_email ON hospital_patient_invites(patient_email);
+CREATE INDEX IF NOT EXISTS idx_hosp_patient_invites_network ON hospital_patient_invites(network_id);
+
 -- ============================================================
 -- 42. ROLE CHANGE REQUESTS (user-initiated role upgrade/change with admin approval)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS role_change_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    current_role VARCHAR(50) NOT NULL,
+    "current_role" VARCHAR(50) NOT NULL,
     requested_role VARCHAR(50) NOT NULL,
     reason TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'pending'

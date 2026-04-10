@@ -1094,7 +1094,7 @@ router.post('/role-change-requests', authMiddleware, validateBody(roleChangeRequ
     return res.status(409).json({ success: false, message: 'You already have a pending role change request' });
   }
   const result = await (await import('../utils/database')).default.query(
-    `INSERT INTO role_change_requests (user_id, current_role, requested_role, reason)
+    `INSERT INTO role_change_requests (user_id, "current_role", requested_role, reason)
      VALUES ($1, $2, $3, $4) RETURNING id, status, created_at`,
     [userId, currentRole, requested_role, reason]
   );
@@ -1105,7 +1105,7 @@ router.post('/role-change-requests', authMiddleware, validateBody(roleChangeRequ
 router.get('/role-change-requests/my', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const result = await (await import('../utils/database')).default.query(
-    `SELECT r.id, r.current_role AS "currentRole", r.requested_role AS "requestedRole",
+    `SELECT r.id, r."current_role" AS "currentRole", r.requested_role AS "requestedRole",
             r.reason, r.status, r.rejection_reason AS "rejectionReason",
             r.reviewed_at AS "reviewedAt", r.created_at AS "createdAt",
             u.first_name || ' ' || u.last_name AS "reviewedBy"
@@ -1134,10 +1134,7 @@ router.put('/role-change-requests/:id/cancel', authMiddleware, asyncHandler(asyn
 router.get('/admin/role-change-requests', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
   const { status = 'pending' } = req.query;
   const result = await (await import('../utils/database')).default.query(
-    `SELECT r.id, r.current_role AS "currentRole", r.requested_role AS "requestedRole",
-            r.reason, r.status, r.rejection_reason AS "rejectionReason",
-            r.reviewed_at AS "reviewedAt", r.created_at AS "createdAt",
-            u.id AS "userId", u.first_name || ' ' || u.last_name AS "userName",
+    `SELECT r.id, r."current_role" AS "currentRole", r.requested_role AS "requestedRole",
             u.email AS "userEmail", u.unique_id AS "uniqueId",
             rev.first_name || ' ' || rev.last_name AS "reviewedBy"
      FROM role_change_requests r
