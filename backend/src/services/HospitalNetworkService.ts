@@ -838,7 +838,7 @@ export class HospitalNetworkService {
                 a.name AS "animalName", a.species, a.breed,
                 hn.name AS "networkName", hn.id_prefix AS "networkPrefix",
                 vh.name AS "hospitalName",
-                u_by.name AS "enrolledByName"
+                u_by.first_name || ' ' || u_by.last_name AS "enrolledByName"
          FROM animal_care_contexts acc
          JOIN animals a ON acc.animal_id = a.id
          JOIN hospital_networks hn ON acc.network_id = hn.id

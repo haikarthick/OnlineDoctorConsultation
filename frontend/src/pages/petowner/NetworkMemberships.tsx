@@ -22,7 +22,7 @@ const NetworkMemberships: React.FC = () => {
     setError('')
     try {
       const result = await apiService.getMyNetworkEnrollments()
-      setEnrollments(result ?? [])
+      setEnrollments(Array.isArray(result) ? result : [])
     } catch (err: any) {
       setError(err?.response?.data?.error ?? err?.message ?? 'Failed to load enrollments')
     } finally {

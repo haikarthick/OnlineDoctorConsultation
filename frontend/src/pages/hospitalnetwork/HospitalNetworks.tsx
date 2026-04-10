@@ -1327,11 +1327,11 @@ const HospitalNetworks: React.FC = () => {
                         </div>
                       </div>
                       <div style={{ marginTop: 10, width: '100%' }}>
-                        {patient.animals.length === 0 ? (
+                        {(patient.animals ?? []).length === 0 ? (
                           <p style={{ fontSize: 12, color: '#999' }}>No animals registered</p>
                         ) : (
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {patient.animals.map(animal => (
+                            {(patient.animals ?? []).map(animal => (
                               <div key={animal.id} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f5f5f5', borderRadius: 8, padding: '6px 10px' }}>
                                 <span style={{ fontSize: 13, fontWeight: 600 }}>{animal.name}</span>
                                 <span style={{ fontSize: 11, color: '#666' }}>{animal.species}</span>

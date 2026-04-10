@@ -147,7 +147,14 @@ const PatientConsentPage: React.FC = () => {
     setAnimalsLoading(true)
     apiService.listAnimals()
       .then((res: any) => {
-        const list: Animal[] = res?.data || res || []
+        // Backend returns { success: true, data: { animals: [...], total: N } }
+        const list: Animal[] = Array.isArray(res?.data?.animals)
+          ? res.data.animals
+          : Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+          ? res
+          : []
         setAnimals(list)
       })
       .catch(() => setErrorMsg('Failed to load animals.'))
