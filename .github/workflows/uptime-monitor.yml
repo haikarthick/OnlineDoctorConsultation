@@ -1,14 +1,32 @@
 name: Uptime Monitor — Keep Demo & Dev Warm
 
-# Pings both Render services every 5 minutes to prevent free-tier spin-down.
-# Render free tier spins down after 15 min of inactivity.
-# Neon free tier suspends compute after 5 min of inactivity.
-# Pinging every 5 min keeps BOTH warm.
+# WHY TWO CRON ENTRIES:
+#   GitHub Actions cron is NOT guaranteed to fire at exact times — it can be
+#   delayed 10-30+ minutes during high GitHub load. Render free tier spins down
+#   after exactly 15 minutes of inactivity. A single */5 schedule can miss the
+#   15-minute window when delayed. Two overlapping schedules (offset by 2 min)
+#   mean both would need to be delayed simultaneously (very unlikely) for the
+#   service to spin down.
+#
+# WHY 90-SECOND TIMEOUT:
+#   Render + Neon cold starts can take 50-90 seconds. The previous 45s timeout
+#   expired before the response arrived, logging "000" but the keep-alive ping
+#   still worked (Render counts the incoming request). 90s ensures we also get
+#   the actual HTTP response for proper health tracking.
+#
+# WHY RETRY ON 000:
+#   000 = curl timeout (cold start in progress). We wait 90s and ping again.
+#   The second ping confirms the service is fully up AND resets the idle timer
+#   with a fresh 15-minute window from a fully-warmed state.
 
 on:
   schedule:
-    # Every 5 minutes, 24/7
+    # Schedule A: every 5 min starting at :00 → 0,5,10,15,20,25,30,35,40,45,50,55
     - cron: '*/5 * * * *'
+    # Schedule B: every 5 min starting at :02 → 2,7,12,17,22,27,32,37,42,47,52,57
+    # Together A+B fire every ~2-3 minutes — even if GitHub delays one by 10+ min,
+    # the other fires within the 15-min Render idle window.
+    - cron: '2-59/5 * * * *'
   workflow_dispatch:
     inputs:
       environment:
@@ -22,42 +40,80 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  ping-demo:
-    name: Ping Demo
+  ping-services:
+    name: Ping Demo & Dev
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event.inputs.environment == 'both' || github.event.inputs.environment == 'demo'
     steps:
-      - name: Ping vetcare-demo health endpoint
+      - name: Ping vetcare-demo
+        if: github.event_name == 'schedule' || github.event.inputs.environment == 'both' || github.event.inputs.environment == 'demo'
         run: |
-          echo "⏰ $(date -u '+%Y-%m-%d %H:%M UTC') — Pinging vetcare-demo..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            --max-time 45 \
-            "https://vetcare-demo.onrender.com/api/v1/health" || echo "000")
-          echo "  Response: $HTTP_CODE"
-          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "503" ]; then
-            echo "  ✅ Demo is alive (HTTP $HTTP_CODE)"
+          DEMO_URL="https://vetcare-demo.onrender.com/api/v1/health"
+          echo "⏰ $(date -u '+%Y-%m-%d %H:%M:%S UTC') — Pinging vetcare-demo..."
+
+          ping_once() {
+            curl -s -o /tmp/demo_body.txt -w "%{http_code}" --max-time 90 "$DEMO_URL" 2>/dev/null || echo "000"
+          }
+
+          HTTP_CODE=$(ping_once)
+          echo "  Attempt 1 → HTTP $HTTP_CODE"
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "  ✅ Demo healthy"
+          elif [ "$HTTP_CODE" = "503" ]; then
+            echo "  ⚠️  Demo returned 503 (server starting up)"
+            sleep 30
+            HTTP_CODE2=$(ping_once)
+            echo "  Attempt 2 → HTTP $HTTP_CODE2"
+            [ "$HTTP_CODE2" = "200" ] && echo "  ✅ Demo recovered"
           elif [ "$HTTP_CODE" = "000" ]; then
-            echo "  ⚠️  Demo timed out or unreachable (cold start in progress — normal)"
+            echo "  🔄 Demo cold-starting (timed out) — waiting 90s then confirming wake..."
+            sleep 90
+            HTTP_CODE2=$(ping_once)
+            echo "  Attempt 2 → HTTP $HTTP_CODE2"
+            if [ "$HTTP_CODE2" = "200" ]; then
+              echo "  ✅ Demo woke up successfully"
+            elif [ "$HTTP_CODE2" = "000" ]; then
+              echo "  ⚠️  Demo still cold-starting after 180s total — Render may be deploying"
+            else
+              echo "  ❌ Demo returned unexpected: $HTTP_CODE2"
+            fi
           else
-            echo "  ❌ Demo returned unexpected status: $HTTP_CODE"
+            echo "  ❌ Demo returned unexpected: $HTTP_CODE"
           fi
 
-  ping-dev:
-    name: Ping Dev
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event.inputs.environment == 'both' || github.event.inputs.environment == 'dev'
-    steps:
-      - name: Ping vetcare-dev health endpoint
+      - name: Ping vetcare-dev
+        if: github.event_name == 'schedule' || github.event.inputs.environment == 'both' || github.event.inputs.environment == 'dev'
         run: |
-          echo "⏰ $(date -u '+%Y-%m-%d %H:%M UTC') — Pinging vetcare-dev..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            --max-time 45 \
-            "https://vetcare-dev.onrender.com/api/v1/health" || echo "000")
-          echo "  Response: $HTTP_CODE"
-          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "503" ]; then
-            echo "  ✅ Dev is alive (HTTP $HTTP_CODE)"
+          DEV_URL="https://vetcare-dev.onrender.com/api/v1/health"
+          echo "⏰ $(date -u '+%Y-%m-%d %H:%M:%S UTC') — Pinging vetcare-dev..."
+
+          ping_once() {
+            curl -s -o /tmp/dev_body.txt -w "%{http_code}" --max-time 90 "$DEV_URL" 2>/dev/null || echo "000"
+          }
+
+          HTTP_CODE=$(ping_once)
+          echo "  Attempt 1 → HTTP $HTTP_CODE"
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "  ✅ Dev healthy"
+          elif [ "$HTTP_CODE" = "503" ]; then
+            echo "  ⚠️  Dev returned 503 (server starting up)"
+            sleep 30
+            HTTP_CODE2=$(ping_once)
+            echo "  Attempt 2 → HTTP $HTTP_CODE2"
+            [ "$HTTP_CODE2" = "200" ] && echo "  ✅ Dev recovered"
           elif [ "$HTTP_CODE" = "000" ]; then
-            echo "  ⚠️  Dev timed out or unreachable (cold start in progress — normal)"
+            echo "  🔄 Dev cold-starting (timed out) — waiting 90s then confirming wake..."
+            sleep 90
+            HTTP_CODE2=$(ping_once)
+            echo "  Attempt 2 → HTTP $HTTP_CODE2"
+            if [ "$HTTP_CODE2" = "200" ]; then
+              echo "  ✅ Dev woke up successfully"
+            elif [ "$HTTP_CODE2" = "000" ]; then
+              echo "  ⚠️  Dev still cold-starting after 180s total — Render may be deploying"
+            else
+              echo "  ❌ Dev returned unexpected: $HTTP_CODE2"
+            fi
           else
-            echo "  ❌ Dev returned unexpected status: $HTTP_CODE"
+            echo "  ❌ Dev returned unexpected: $HTTP_CODE"
           fi
