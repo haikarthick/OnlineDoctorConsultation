@@ -5,13 +5,13 @@ import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import apiService from '../services/api'
 import AnimalSearchPicker from '../components/AnimalSearchPicker'
 
-const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  admitted: { bg: '#dbeafe', color: '#1d4ed8' },
-  in_treatment: { bg: '#fef3c7', color: '#92400e' },
-  recovering: { bg: '#dcfce7', color: '#166534' },
-  ready_to_discharge: { bg: '#f0fdf4', color: '#15803d' },
-  discharged: { bg: '#f1f5f9', color: '#64748b' },
-  icu: { bg: '#fecaca', color: '#991b1b' },
+const STATUS_COLORS: Record<string, { bg: string; color: string; icon: string }> = {
+  admitted:           { bg: '#dbeafe', color: '#1d4ed8', icon: '📋' },
+  in_treatment:       { bg: '#fef3c7', color: '#b45309', icon: '💊' },
+  recovering:         { bg: '#dcfce7', color: '#166534', icon: '🩹' },
+  ready_to_discharge: { bg: '#ecfdf5', color: '#0ea5e9', icon: '✅' },
+  discharged:         { bg: '#f1f5f9', color: '#64748b', icon: '👋' },
+  icu:                { bg: '#fee2e2', color: '#991b1b', icon: '🚨' },
 }
 const ADMISSION_TYPES = ['surgery_recovery', 'overnight_observation', 'boarding', 'icu', 'post_treatment', 'quarantine'] as const
 
@@ -144,29 +144,43 @@ export default function InpatientManagement() {
       {dashboard && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
           {[
-            { label: t('inpatientManagement.totalOccupied'), value: dashboard.total_occupied, color: '#2563eb', icon: '🛏️' },
-            { label: t('inpatientManagement.admitted'), value: dashboard.admitted, color: '#f59e0b', icon: '📋' },
-            { label: t('inpatientManagement.inTreatment'), value: dashboard.in_treatment, color: '#dc2626', icon: '💊' },
-            { label: t('inpatientManagement.recovering'), value: dashboard.recovering, color: '#059669', icon: '🩹' },
-            { label: t('inpatientManagement.readyToDischarge'), value: dashboard.ready_to_discharge, color: '#0ea5e9', icon: '✅' },
-            { label: t('inpatientManagement.icu'), value: dashboard.icu_count, color: '#991b1b', icon: '🚨' },
-            { label: t('inpatientManagement.dischargedToday'), value: dashboard.discharged_today, color: '#64748b', icon: '👋' },
-          ].map((s, i) => (
-            <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: `4px solid ${s.color}` }}>
-              <div style={{ fontSize: 12, color: '#64748b' }}>{s.icon} {s.label}</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value ?? 0}</div>
-            </div>
-          ))}
+            { label: t('inpatientManagement.totalOccupied'), value: dashboard.total_occupied,    statusKey: null,                 icon: '🛏️', color: '#2563eb' },
+            { label: t('inpatientManagement.admitted'),      value: dashboard.admitted,           statusKey: 'admitted' },
+            { label: t('inpatientManagement.inTreatment'),   value: dashboard.in_treatment,       statusKey: 'in_treatment' },
+            { label: t('inpatientManagement.recovering'),    value: dashboard.recovering,         statusKey: 'recovering' },
+            { label: t('inpatientManagement.readyToDischarge'), value: dashboard.ready_to_discharge, statusKey: 'ready_to_discharge' },
+            { label: t('inpatientManagement.icu'),           value: dashboard.icu_count,          statusKey: 'icu' },
+            { label: t('inpatientManagement.dischargedToday'), value: dashboard.discharged_today, statusKey: 'discharged' },
+          ].map((s, i) => {
+            const sc = s.statusKey ? STATUS_COLORS[s.statusKey] : null
+            const color = sc ? sc.color : (s.color || '#2563eb')
+            const icon  = sc ? sc.icon  : (s.icon || '🛏️')
+            return (
+              <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: `4px solid ${color}` }}>
+                <div style={{ fontSize: 12, color: '#64748b' }}>{icon} {s.label}</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color }}>{s.value ?? 0}</div>
+              </div>
+            )
+          })}
         </div>
       )}
 
       {/* Status Filters */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
-        {['', 'admitted', 'in_treatment', 'recovering', 'ready_to_discharge', 'discharged'].map(s => (
-          <button key={s} onClick={() => setStatusFilter(s)} style={{ padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', background: statusFilter === s ? '#2563eb' : '#e2e8f0', color: statusFilter === s ? '#fff' : '#475569', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
-            {s === '' ? t('inpatientManagement.active') : s.replace(/_/g, ' ')}
-          </button>
-        ))}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
+        {['', 'admitted', 'in_treatment', 'recovering', 'ready_to_discharge', 'discharged'].map(s => {
+          const sc = s ? STATUS_COLORS[s] : null
+          const isActive = statusFilter === s
+          return (
+            <button key={s} onClick={() => setStatusFilter(s)} style={{
+              padding: '6px 14px', borderRadius: 20, cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap', fontWeight: 600,
+              border: isActive && sc ? `2px solid ${sc.color}` : '2px solid transparent',
+              background: isActive ? (sc ? sc.color : '#2563eb') : (sc ? sc.bg : '#e2e8f0'),
+              color: isActive ? '#fff' : (sc ? sc.color : '#475569'),
+            }}>
+              {s === '' ? t('inpatientManagement.active') : `${sc?.icon || ''} ${s.replace(/_/g, ' ')}`}
+            </button>
+          )
+        })}
       </div>
 
       {/* Patient Cards */}
@@ -181,7 +195,7 @@ export default function InpatientManagement() {
             const vitals = (() => { try { return JSON.parse(p.vitals_log || '[]') } catch { return [] } })()
             const lastVitals = vitals.length > 0 ? vitals[vitals.length - 1] : null
             return (
-              <div key={p.id} style={{ background: '#fff', borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 4px rgba(0,0,0,.07)', borderTop: `3px solid ${sc.color}` }}>
+              <div key={p.id} style={{ background: '#fff', borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 4px rgba(0,0,0,.07)', borderTop: `3px solid ${sc.color}`, borderLeft: `4px solid ${sc.color}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 16 }}>{p.animal_name}</div>
