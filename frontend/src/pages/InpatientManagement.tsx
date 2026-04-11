@@ -38,6 +38,8 @@ export default function InpatientManagement() {
     admissionType: 'overnight_observation', roomNumber: '', bedNumber: '',
     careInstructions: '', specialNeeds: '', estimatedDischarge: '', dailyRate: 0,
   })
+  const [admitError, setAdmitError] = useState('')
+  const [admitSubmitting, setAdmitSubmitting] = useState(false)
   const [vitalsForm, setVitalsForm] = useState({ temperature: '', heartRate: '', weight: '', notes: '' })
 
   useEffect(() => {
@@ -68,6 +70,8 @@ export default function InpatientManagement() {
 
   async function handleAdmit() {
     if (!hospitalId || !admitAnimal) return
+    setAdmitError('')
+    setAdmitSubmitting(true)
     try {
       await apiService.admitPatient(hospitalId, {
         ...admitForm,
@@ -76,9 +80,13 @@ export default function InpatientManagement() {
       })
       setShowAdmit(false)
       setAdmitAnimal(null)
+      setAdmitError('')
       setAdmitForm({ admissionType: 'overnight_observation', roomNumber: '', bedNumber: '', careInstructions: '', specialNeeds: '', estimatedDischarge: '', dailyRate: 0 })
       loadData()
-    } catch { /* empty */ }
+    } catch (err: any) {
+      setAdmitError(err?.response?.data?.error || err?.message || 'Failed to admit patient. Please try again.')
+    }
+    setAdmitSubmitting(false)
   }
 
   async function handleStatusChange(id: string, status: string) {
@@ -248,17 +256,40 @@ export default function InpatientManagement() {
 
       {/* Admit Modal */}
       {showAdmit && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 520, maxWidth: '95vw', maxHeight: '85vh', overflowY: 'auto' }}>
-            <h3 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 8 }}>🛏️ {t('inpatientManagement.admitPatient')}</h3>
+        <div onClick={e => { if (e.target === e.currentTarget) { setShowAdmit(false); setAdmitAnimal(null); setAdmitError('') } }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '16px' }}>
+          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 520, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {/* Animal Search */}
-              <AnimalSearchPicker selectedAnimal={admitAnimal} onSelect={setAdmitAnimal} label={t('inpatientManagement.searchPatient')} />
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>🛏️ {t('inpatientManagement.admitPatient')}</h3>
+              <button onClick={() => { setShowAdmit(false); setAdmitAnimal(null); setAdmitError('') }}
+                style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#64748b', lineHeight: 1 }}>✕</button>
+            </div>
+
+            {/* API Error Banner */}
+            {admitError && (
+              <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, fontWeight: 500 }}>
+                ⚠️ {admitError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+              {/* Animal Search — Required */}
+              <div>
+                <AnimalSearchPicker selectedAnimal={admitAnimal} onSelect={a => { setAdmitAnimal(a); setAdmitError('') }} label={`🔍 ${t('inpatientManagement.searchPatient')} *`} />
+                {!admitAnimal && (
+                  <div style={{ marginTop: 6, fontSize: 12, color: '#b45309', background: '#fef3c7', borderRadius: 6, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>⚠️</span>
+                    <span><strong>Required:</strong> Type an animal name or owner name and select a patient from the dropdown to enable submission.</span>
+                  </div>
+                )}
+              </div>
 
               {/* Admission Type */}
               <div>
-                <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.admissionType')}</label>
+                <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 6, display: 'block' }}>{t('inpatientManagement.admissionType')} <span style={{ color: '#dc2626' }}>*</span></label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {ADMISSION_TYPES.map(at => (
                     <button key={at} onClick={() => setAdmitForm(f => ({ ...f, admissionType: at }))}
@@ -270,46 +301,56 @@ export default function InpatientManagement() {
               </div>
 
               {/* Room & Bed */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div>
-                  <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.roomNumber')}</label>
-                  <input placeholder="e.g. R101" value={admitForm.roomNumber} onChange={e => setAdmitForm(f => ({ ...f, roomNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                  <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.roomNumber')}</label>
+                  <input placeholder="e.g. R101" value={admitForm.roomNumber} onChange={e => setAdmitForm(f => ({ ...f, roomNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
                 </div>
                 <div>
-                  <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.bedNumber')}</label>
-                  <input placeholder="e.g. B1" value={admitForm.bedNumber} onChange={e => setAdmitForm(f => ({ ...f, bedNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                  <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.bedNumber')}</label>
+                  <input placeholder="e.g. B1" value={admitForm.bedNumber} onChange={e => setAdmitForm(f => ({ ...f, bedNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
                 </div>
               </div>
 
               {/* Care Instructions */}
               <div>
-                <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.careInstructions')}</label>
-                <textarea placeholder={t('inpatientManagement.careInstructionsPlaceholder')} value={admitForm.careInstructions} onChange={e => setAdmitForm(f => ({ ...f, careInstructions: e.target.value }))} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }} />
+                <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.careInstructions')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                <textarea placeholder={t('inpatientManagement.careInstructionsPlaceholder')} value={admitForm.careInstructions} onChange={e => setAdmitForm(f => ({ ...f, careInstructions: e.target.value }))} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box', fontSize: 14 }} />
               </div>
 
               {/* Special Needs */}
               <div>
-                <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.specialNeeds')}</label>
-                <textarea placeholder={t('inpatientManagement.specialNeedsPlaceholder')} value={admitForm.specialNeeds} onChange={e => setAdmitForm(f => ({ ...f, specialNeeds: e.target.value }))} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }} />
+                <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.specialNeeds')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                <textarea placeholder={t('inpatientManagement.specialNeedsPlaceholder')} value={admitForm.specialNeeds} onChange={e => setAdmitForm(f => ({ ...f, specialNeeds: e.target.value }))} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box', fontSize: 14 }} />
               </div>
 
-              {/* Discharge & Rate */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {/* Est. Discharge & Daily Rate */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div>
-                  <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.estDischarge')}</label>
-                  <input type="datetime-local" value={admitForm.estimatedDischarge} onChange={e => setAdmitForm(f => ({ ...f, estimatedDischarge: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                  <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.estDischarge')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                  <input type="datetime-local" value={admitForm.estimatedDischarge} onChange={e => setAdmitForm(f => ({ ...f, estimatedDischarge: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 13 }} />
                 </div>
                 <div>
-                  <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.dailyRateLabel')}</label>
-                  <input type="number" placeholder="0.00" value={admitForm.dailyRate || ''} onChange={e => setAdmitForm(f => ({ ...f, dailyRate: parseFloat(e.target.value) || 0 }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                  <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('inpatientManagement.dailyRateLabel')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                  <input type="number" min="0" placeholder="0.00" value={admitForm.dailyRate || ''} onChange={e => setAdmitForm(f => ({ ...f, dailyRate: parseFloat(e.target.value) || 0 }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
-                <button onClick={() => { setShowAdmit(false); setAdmitAnimal(null) }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('inpatientManagement.cancel')}</button>
-                <button onClick={handleAdmit} disabled={!admitAnimal}
-                  style={{ padding: '8px 16px', background: admitAnimal ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: admitAnimal ? 'pointer' : 'not-allowed', fontWeight: 600 }}>
-                  {t('inpatientManagement.admitPatient')}
+              {/* Required fields legend */}
+              <div style={{ fontSize: 12, color: '#94a3b8' }}>
+                <span style={{ color: '#dc2626' }}>*</span> Required field
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
+                <button onClick={() => { setShowAdmit(false); setAdmitAnimal(null); setAdmitError('') }}
+                  style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
+                  {t('inpatientManagement.cancel')}
+                </button>
+                <button onClick={handleAdmit} disabled={!admitAnimal || admitSubmitting}
+                  title={!admitAnimal ? 'Select a patient from the search above to enable this button' : ''}
+                  style={{ padding: '10px 20px', background: admitAnimal && !admitSubmitting ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: admitAnimal && !admitSubmitting ? 'pointer' : 'not-allowed', fontWeight: 700, fontSize: 14, minWidth: 140 }}>
+                  {admitSubmitting ? '⏳ Admitting...' : `🛏️ ${t('inpatientManagement.admitPatient')}`}
                 </button>
               </div>
             </div>

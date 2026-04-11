@@ -299,14 +299,36 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 - **Additive changes** (new endpoints, new pages, new fields) are OK without approval
 - **Modifications to existing behavior** ALWAYS require approval
 
-## Usability Standards Rule (MANDATORY — ALL SCREENS)
+## Usability Standards Rule (MANDATORY — ALL SCREENS, ZERO TOLERANCE)
 
-**ALL screens, modals, forms, and UI interactions MUST follow best usability standards:**
-- Edit/Create forms MUST open as centered modals with dark overlay backdrop — user must never wonder if a form opened
-- Every modal MUST have a visible close button (✕) in the top-right corner PLUS overlay-click-to-close
-- Error messages must be visible without scrolling (auto-scroll + highlight specific field)
+**ALL screens, modals, forms, and UI interactions MUST follow best usability standards. This is non-negotiable for every new or modified form/modal:**
+
+### Required field indicators
+- Every required field MUST show a red asterisk `*` next to its label
+- Every optional field MUST show `(optional)` next to its label
+- A legend `* Required field` MUST appear at the bottom of every form that has required fields
+
+### Disabled submit buttons — MUST explain why
+- A submit button that is disabled due to missing required input MUST be accompanied by a visible **inline amber/yellow helper text** directly above or below the blocking field explaining what the user needs to do
+- Example: `⚠️ Required: Search and select a patient from the dropdown to enable submission`
+- NEVER rely solely on `title` tooltip — not visible on mobile, not discoverable
+- The helper text MUST disappear once the condition is satisfied
+
+### Form error feedback — NEVER silent catch
+- Every form submit handler MUST have an `error` state variable displayed as a red banner at the top of the modal
+- `catch` blocks in form submits MUST extract and display the error: `err?.response?.data?.error || err?.message || 'Something went wrong'`
+- Submit button MUST show a loading indicator (`⏳ Saving...`) during async calls to prevent double-submit
+
+### Modal structure — mandatory elements
+- Edit/Create forms MUST open as centered modals with dark overlay backdrop
+- Every modal MUST have a visible `✕` close button in the top-right corner
+- Every modal MUST close on overlay click (clicking outside the modal box)
+- On mobile: modals full-width (`maxWidth: 100%`), forms stack vertically (single column)
+
+### General interaction standards
+- Error messages must be visible without scrolling (banner at top of modal, not bottom)
 - All interactive elements must have clear hover/focus states
-- On mobile: modals full-width, forms stack vertically
+- Number inputs MUST have `min="0"` for non-negative values + server-side validation to match
 
 ## Plan Adherence Rule (MANDATORY)
 

@@ -309,3 +309,10 @@
 - **Lesson:** Always define parent/referenced tables BEFORE child tables that reference them in init.sql. No forward references allowed.
 - **Apply to:** All future init.sql additions
 
+
+### LESSON-048 — Form UX — Disabled submit buttons must explain why
+- **Logged:** 2026-04-11 13:55
+- **Context:** User could not tell why Admit Patient button was grayed out — no indication that selecting a patient from dropdown was mandatory
+- **Lesson:** MANDATORY for ALL forms and modals: (1) Required fields must have red * marker. (2) Optional fields must be labeled (optional). (3) Disabled submit buttons MUST have visible inline helper text explaining the blocking condition — never rely on tooltip only. (4) All catch blocks in form submit handlers MUST surface error to user via visible error banner. (5) Submit button MUST show loading/spinner state during async calls to prevent double-submit. (6) All modals MUST have visible ✕ close button + overlay-click-to-close.
+- **Apply to:** ALL new and existing forms/modals/popups
+
