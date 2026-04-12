@@ -332,6 +332,7 @@ export const createReviewSchema = Joi.object({
   veterinarianId: requiredUuid,
   rating: Joi.number().integer().min(1).max(5).required(),
   comment: longText(2000).optional().allow('', null),
+  isPublic: Joi.boolean().optional(),
 });
 
 // ─── Admin ───────────────────────────────────────────────────
@@ -349,7 +350,7 @@ export const processRefundSchema = Joi.object({
 });
 
 export const moderateReviewSchema = Joi.object({
-  action: Joi.string().valid('approve', 'hide', 'remove').required(),
+  action: Joi.string().valid('approve', 'hide', 'remove', 'flag', 'unflag').required(),
 });
 
 export const updateSystemSettingSchema = Joi.object({

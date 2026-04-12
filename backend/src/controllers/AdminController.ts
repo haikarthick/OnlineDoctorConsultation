@@ -126,8 +126,8 @@ class AdminController {
   async moderateReview(req: Request, res: Response) {
     const authReq = this.assertAdmin(req);
     const { action } = req.body;
-    if (!action || !['approve', 'hide', 'remove'].includes(action)) {
-      throw new ValidationError('action must be one of: approve, hide, remove');
+    if (!action || !['approve', 'hide', 'remove', 'flag', 'unflag'].includes(action)) {
+      throw new ValidationError('action must be one of: approve, hide, remove, flag, unflag');
     }
 
     const review = await AdminService.moderateReview(req.params.id, action);

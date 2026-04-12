@@ -488,3 +488,11 @@ render-start.sh
 - **Fix:** Not specified
 - **Rule:** Not specified
 
+
+### PERF-001 — Marketplace 30s timeout on cold start
+- **Logged:** 2026-04-12 15:55
+- **Symptom:** timeout of 30000ms exceeded error on Marketplace page after Render free-tier DB wakes from sleep
+- **Root Cause:** 1. Axios timeout was 30s but free-tier Render DB takes 30-90s to wake. 2. listListings() used correlated subqueries (N+1 per row) for bid_count/highest_bid. 3. Missing composite indexes on (status,admin_approved) and (listing_id,status) on bids. 4. Timeout errors silently rejected with no user-friendly message.
+- **Fix:** 1. Raised Axios timeout to 60s in api.ts and client.ts. 2. Replaced correlated subqueries with aggregated LEFT JOIN in MarketplaceService.ts. 3. Added 4 perf indexes via seedDefaultSettings in database.ts (idempotent). 4. Added second interceptor to enrich timeout errors with isTimeout=true flag.
+- **Rule:** NEVER use correlated subqueries (SELECT ... FROM t WHERE id=l.id) inside main SELECT — always use aggregated LEFT JOIN. Always raise Axios timeout to 60s for free-tier Render.
+

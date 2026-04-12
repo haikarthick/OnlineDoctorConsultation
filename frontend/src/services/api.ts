@@ -677,13 +677,33 @@ class ApiService {
   }
 
   // ─── Reviews ──────────────────────────────────────────────
-  async createReview(data: { consultationId: string; veterinarianId: string; rating: number; comment?: string }) {
+  async createReview(data: { consultationId: string; veterinarianId: string; rating: number; comment?: string; isPublic?: boolean }) {
     const response = await this.client.post('/reviews', data)
+    return response.data
+  }
+
+  async getReviewableConsultations() {
+    const response = await this.client.get('/reviews/reviewable')
     return response.data
   }
 
   async listVetReviews(vetId: string, params?: { limit?: number; offset?: number }) {
     const response = await this.client.get(`/reviews/vet/${vetId}`, { params })
+    return response.data
+  }
+
+  async addVetResponse(reviewId: string, response: string) {
+    const res = await this.client.put(`/reviews/${reviewId}/vet-response`, { response })
+    return res.data
+  }
+
+  async markReviewHelpful(reviewId: string) {
+    const response = await this.client.post(`/reviews/${reviewId}/helpful`)
+    return response.data
+  }
+
+  async reportReview(reviewId: string) {
+    const response = await this.client.post(`/reviews/${reviewId}/report`)
     return response.data
   }
 

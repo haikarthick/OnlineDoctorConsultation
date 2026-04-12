@@ -710,3 +710,58 @@
 </details>
 
 ---
+
+## 2026-04-12 15:29 · `e5a7c4f` · 🐛 FIX
+
+**Commit:** fix: req.user!.id → req.userId in all hospital network routes  
+**Author:** haikarthick  
+**Categories:** CONFIG · API · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - .github/copilot-instructions.md
+  - backend/src/controllers/FileController.ts
+  - backend/src/routes/index.ts
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-04-12 15:41 · `f4ea859` · 🐛 FIX
+
+**Commit:** fix: auth topbar padding-right to prevent FloatingLanguageSelector overlap  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/Auth.css
+
+</details>
+
+---
+
+## 2026-04-12 15:53 · `a746922` · ⚡ PERF
+
+**Commit:** perf: fix marketplace timeout — optimise queries + raise axios timeout to 60s  
+**Author:** haikarthick  
+**Categories:** SERVICE · UTILS · DB  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/services/MarketplaceService.ts
+  - backend/src/utils/database.ts
+  - frontend/src/services/api.ts
+  - frontend/src/services/api/client.ts
+
+</details>
+
+---

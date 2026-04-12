@@ -848,6 +848,23 @@ class PostgresDatabase {
       await this.pool.query(ddl).catch(() => {});
     }
 
+    // Reviews integrity: unique constraint prevents duplicate reviews per consultation per reviewer
+    await this.pool.query(`
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'reviews_consultation_reviewer_unique'
+        ) THEN
+          ALTER TABLE reviews ADD CONSTRAINT reviews_consultation_reviewer_unique
+            UNIQUE (consultation_id, reviewer_id);
+        END IF;
+      END $$;
+    `).catch(() => {});
+
+    // Ensure total_reviews column on vet_profiles (safe on existing DBs)
+    await this.pool.query(
+      `ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS total_reviews INTEGER DEFAULT 0`
+    ).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "loading": "ஏற்றுகிறது...",
     "cancel": "ரத்துசெய்",
@@ -1617,8 +1617,10 @@
       "historyTitle": "கோரிக்கை வரலாறு",
       "submitted": "சமர்ப்பிக்கப்பட்டது",
       "reviewed": "ஆய்வு செய்தவர்",
-      "statusPending": "நிலுவை", "statusApproved": "அங்கீகரிக்கப்பட்டது",
-      "statusRejected": "நிராகரிக்கப்பட்டது", "statusCancelled": "ரத்து",
+      "statusPending": "நிலுவை",
+      "statusApproved": "அங்கீகரிக்கப்பட்டது",
+      "statusRejected": "நிராகரிக்கப்பட்டது",
+      "statusCancelled": "ரத்து",
       "noHistory": "இதுவரை கோரிக்கைகள் இல்லை.",
       "errSameRole": "இந்த பங்கு ஏற்கனவே உங்களிடம் உள்ளது.",
       "errAlreadyPending": "ஏற்கனவே ஒரு நிலுவை கோரிக்கை உள்ளது.",
@@ -3783,7 +3785,20 @@
     "errorSelectRating": "மதிப்பீட்டைத் தேர்ந்தெடுக்கவும்",
     "errorWriteComment": "ஒரு கருத்தை எழுதவும்",
     "errorMinChars": "கருத்து குறைந்தது 10 எழுத்துக்களாக இருக்க வேண்டும்",
-    "failedToSubmit": "Failed to submit review"
+    "failedToSubmit": "Failed to submit review",
+    "pickConsultation": "மதிப்பீட்டிற்கான ஆலோசனையை தேர்ந்தெடுக்கவும்",
+    "pickSubtitle": "நீங்கள் முடித்த ஆலோசனைகளை மட்டுமே மதிப்பிட முடியும்",
+    "noReviewable": "நிலுவையில் உள்ள மதிப்பீடு இல்ளை",
+    "noReviewableDesc": "அனைத்து முடிந்த ஆலோசனைகளும் மதிப்பிடப்பட்டன.",
+    "reviewingDoctor": "மதிப்பீடு செய்கிறீர்கள்",
+    "consultationOn": "ஆலோசனை தேதி",
+    "writeFor": "{{name}} க்கான மதிப்பீடு ெழுதுங்கள்",
+    "backToPick": "← ஆலோசனைகளுக்கு திரும்பு",
+    "isPublic": "இந்த மதிப்பீட்டை பொதுவில் வெளியிடவும்",
+    "isPublicDesc": "பொது மதிப்பீடுகள் மற்ற செல்லப்பிராணி உரிமையாளர்களுக்கு உதவுகின்றன",
+    "helpRequired": "தயவுசெய்து மதிப்பீடு தேர்ந்தெடுத்து குறைந்தது 10 எழுத்துக்கள் எழுதுங்கள்",
+    "submittedFor": "{{name}} க்கான உங்கள் மதிப்பீடு சமர்ப்பிக்கப்பட்டது.",
+    "helpCommunity": "VetCare சமூகத்திற்கு உதவியதற்கு நன்றி!"
   },
   "doctorDashboard": {
     "title": "மருத்துவர் டாஷ்போர்டு",
@@ -4150,13 +4165,35 @@
   "adminRoleRequests": {
     "title": "பங்கு மாற்ற கோரிக்கைகள்",
     "subtitle": "பயனர் பங்கு மாற்ற கோரிக்கைகளை ஆய்வு செய்யுங்கள்",
-    "tabs": { "pending": "நிலுவை", "approved": "அங்கீகரிக்கப்பட்டது", "rejected": "நிராகரிக்கப்பட்டது" },
-    "table": { "user": "பயனர்", "currentRole": "தற்போதைய பங்கு", "requestedRole": "கோரிய பங்கு", "reason": "காரணம்", "requestedAt": "கோரிய தேதி", "actions": "செயல்கள்" },
-    "approve": "அங்கீகரி", "reject": "நிராகரி", "approving": "அங்கீகரிக்கிறது...", "rejecting": "நிராகரிக்கிறது...",
-    "rejectModal": { "title": "கோரிக்கை நிராகரி", "reasonLabel": "நிராகரிப்பு காரணம்", "reasonPlaceholder": "காரணம் விளக்குங்கள்...", "confirmBtn": "நிராகரி", "cancelBtn": "ரத்து" },
+    "tabs": {
+      "pending": "நிலுவை",
+      "approved": "அங்கீகரிக்கப்பட்டது",
+      "rejected": "நிராகரிக்கப்பட்டது"
+    },
+    "table": {
+      "user": "பயனர்",
+      "currentRole": "தற்போதைய பங்கு",
+      "requestedRole": "கோரிய பங்கு",
+      "reason": "காரணம்",
+      "requestedAt": "கோரிய தேதி",
+      "actions": "செயல்கள்"
+    },
+    "approve": "அங்கீகரி",
+    "reject": "நிராகரி",
+    "approving": "அங்கீகரிக்கிறது...",
+    "rejecting": "நிராகரிக்கிறது...",
+    "rejectModal": {
+      "title": "கோரிக்கை நிராகரி",
+      "reasonLabel": "நிராகரிப்பு காரணம்",
+      "reasonPlaceholder": "காரணம் விளக்குங்கள்...",
+      "confirmBtn": "நிராகரி",
+      "cancelBtn": "ரத்து"
+    },
     "noRequests": "{{status}} கோரிக்கைகள் இல்லை.",
-    "approveSuccess": "பங்கு மாற்றம் அங்கீகரிக்கப்பட்டது.", "rejectSuccess": "கோரிக்கை நிராகரிக்கப்பட்டது.",
-    "reviewedBy": "ஆய்வு: {{name}}", "rejectedReason": "காரணம்: {{reason}}"
+    "approveSuccess": "பங்கு மாற்றம் அங்கீகரிக்கப்பட்டது.",
+    "rejectSuccess": "கோரிக்கை நிராகரிக்கப்பட்டது.",
+    "reviewedBy": "ஆய்வு: {{name}}",
+    "rejectedReason": "காரணம்: {{reason}}"
   },
   "adminDashboard": {
     "title": "நிர்வாகி டாஷ்போர்டு",
@@ -4478,7 +4515,12 @@
     "vetResponse": "கால்நடை மருத்துவர் பதில்",
     "approve": "ஒப்புதல்",
     "hide": "மறை",
-    "remove": "நீக்கு"
+    "remove": "நீக்கு",
+    "searchByVet": "கால்நடை மருத்துவர் பெயரால் தேடுங்கள்...",
+    "flag": "கொடியிடு",
+    "unflag": "கொடி நீக்கு",
+    "flagged": "கொடியிடப்பட்டது",
+    "consultationDate": "ஆலோசனை தேதி"
   },
   "staffSettings": {
     "title": "ஊழியர் மேலாண்மை",
@@ -5512,7 +5554,7 @@
       "assignHospital": "மருத்துவமனை ஒதுக்கு",
       "addMember": "உறுப்பினர் சேர்க்கவும்",
       "noHospitals": "மருத்துவமனைகள் எதுவும் ஒதுக்கப்படவில்லை",
-            "noMembers": "இன்னும் உறுப்பினர்கள் இல்லை"
+      "noMembers": "இன்னும் உறுப்பினர்கள் இல்லை"
     },
     "patients": {
       "tab": "நோயாளிகள்",
@@ -5632,8 +5674,7 @@
         "network": "நெட்வொர்க்"
       }
     }
-  }
-,
+  },
   "networkMemberships": {
     "title": "என் மருத்துவமனை நெட்வொர்க் உறுப்பினர்கள்",
     "subtitle": "மருத்துவமனை நெட்வொர்க்குகளில் உங்கள் செல்லப்பிராணிகளின் சேர்க்கைகளை நிர்வகிக்கவும்",
@@ -5668,8 +5709,7 @@
     "consentViewOnly": "மருத்துவ வரலாறு மற்றும் தடுப்பூசி பதிவுகளை மட்டும் பார்க்கவும்",
     "consentBasic": "பதிவுகள் பார்க்கவும் + சிகிச்சை குறிப்புகள் சேர்க்கவும்",
     "consentFull": "ஆய்வக முடிவுகள் மற்றும் மருந்துகள் உட்பட முழு அணுகல்"
-  }
-,
+  },
   "adminNetworkSubscriptions": {
     "title": "நெட்வொர்க் சந்தாக்கள்",
     "subtitle": "Manage hospital network plans, seat limits, and pricing visibility",

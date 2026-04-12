@@ -1,0 +1,341 @@
+/* WriteReview — 2-step consultation-linked review flow */
+
+.wr-consultation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.wr-consultation-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.wr-consultation-card:hover {
+  border-color: #6366f1;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
+}
+
+.wr-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.wr-avatar-initials {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.wr-vet-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.wr-vet-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 2px 0;
+}
+
+.wr-vet-meta {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 6px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wr-consult-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-weight: 500;
+}
+
+.wr-consult-date {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.wr-arrow {
+  color: #9ca3af;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* Doctor context banner (step 2) */
+.wr-context-banner {
+  background: linear-gradient(135deg, #eff6ff 0%, #ecfdf5 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wr-context-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.wr-context-initials {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.wr-context-info {
+  flex: 1;
+}
+
+.wr-context-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6366f1;
+  margin-bottom: 2px;
+}
+
+.wr-context-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e40af;
+  margin: 0 0 2px 0;
+}
+
+.wr-context-meta {
+  font-size: 12px;
+  color: #374151;
+}
+
+/* Star rating */
+.wr-stars {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.wr-star {
+  font-size: 38px;
+  cursor: pointer;
+  transition: transform 0.12s, color 0.12s;
+  color: #d1d5db;
+  line-height: 1;
+}
+
+.wr-star.active {
+  color: #f59e0b;
+  transform: scale(1.1);
+}
+
+.wr-star:hover {
+  transform: scale(1.15);
+}
+
+.wr-rating-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+  min-height: 20px;
+}
+
+/* Quick tags */
+.wr-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.wr-tag {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.12s;
+  color: #374151;
+}
+
+.wr-tag:hover {
+  border-color: #6366f1;
+  background: #eff6ff;
+  color: #6366f1;
+}
+
+.wr-tag.selected {
+  border-color: #6366f1;
+  background: #6366f1;
+  color: #fff;
+}
+
+/* Disabled submit helper */
+.wr-helper-text {
+  font-size: 13px;
+  color: #d97706;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+
+/* Empty state */
+.wr-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.wr-empty-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.wr-empty h3 {
+  margin: 0 0 8px 0;
+  color: #111827;
+}
+
+.wr-empty p {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0 0 20px 0;
+}
+
+/* Success screen */
+.wr-success {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.wr-success-icon {
+  font-size: 72px;
+  margin-bottom: 16px;
+}
+
+/* Legend */
+.wr-form-legend {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* Char count */
+.wr-char-count {
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* Error alert */
+.wr-error {
+  padding: 12px 16px;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  border: 1px solid #fecaca;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .wr-consultation-list {
+    max-width: 680px;
+  }
+}
+
+@media (max-width: 768px) {
+  .wr-consultation-card {
+    padding: 14px;
+  }
+
+  .wr-context-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .wr-tags {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 640px) {
+  .wr-vet-meta {
+    white-space: normal;
+  }
+
+  .wr-star {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wr-consultation-card {
+    flex-wrap: wrap;
+  }
+
+  .wr-avatar,
+  .wr-avatar-initials {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .wr-arrow {
+    display: none;
+  }
+}

@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "loading": "లోడ్ అవుతోంది...",
     "cancel": "రద్దు",
@@ -1617,12 +1617,17 @@
       "rejectedDesc": "కారణం: {{reason}}",
       "reLoginBtn": "లాగ్ అవుట్ & మళ్ళీ లాగిన్",
       "historyTitle": "అభ్యర్థన చరిత్ర",
-      "submitted": "సమర్పించబడింది", "reviewed": "సమీక్షించినది",
-      "statusPending": "పెండింగ్", "statusApproved": "ఆమోదించబడింది",
-      "statusRejected": "తిరస్కరించబడింది", "statusCancelled": "రద్దు",
+      "submitted": "సమర్పించబడింది",
+      "reviewed": "సమీక్షించినది",
+      "statusPending": "పెండింగ్",
+      "statusApproved": "ఆమోదించబడింది",
+      "statusRejected": "తిరస్కరించబడింది",
+      "statusCancelled": "రద్దు",
       "noHistory": "ఇంతవరకు అభ్యర్థనలు లేవు.",
-      "errSameRole": "ఈ పాత్ర ఇప్పటికే మీది.", "errAlreadyPending": "ఒక అభ్యర్థన ఇప్పటికే పెండింగ్‌లో ఉంది.",
-      "successSubmit": "అభ్యర్థన సమర్పించబడింది!", "successCancel": "అభ్యర్థన రద్దు చేయబడింది."
+      "errSameRole": "ఈ పాత్ర ఇప్పటికే మీది.",
+      "errAlreadyPending": "ఒక అభ్యర్థన ఇప్పటికే పెండింగ్‌లో ఉంది.",
+      "successSubmit": "అభ్యర్థన సమర్పించబడింది!",
+      "successCancel": "అభ్యర్థన రద్దు చేయబడింది."
     }
   },
   "enterpriseManagement": {
@@ -3782,7 +3787,20 @@
     "errorSelectRating": "దయచేసి రేటింగ్ ఎంచుకోండి",
     "errorWriteComment": "దయచేసి వ్యాఖ్య రాయండి",
     "errorMinChars": "వ్యాఖ్య కనిష్టంగా 10 అక్షరాలు ఉండాలి",
-    "failedToSubmit": "Failed to submit review"
+    "failedToSubmit": "Failed to submit review",
+    "pickConsultation": "సమీక్షకు సంప్రదింపు ఎంచుకోండి",
+    "pickSubtitle": "మీరు పూర్తి చేసిన సంప్రదింపులను మాత్రమే సమీక్షించవచ్చు",
+    "noReviewable": "పెండింగ్ సమీక్షలు లేవు",
+    "noReviewableDesc": "అన్ని పూర్తైన సంప్రదింపులు సమీక్షించబడ్డాయి.",
+    "reviewingDoctor": "సమీక్షిస్తున్నారు",
+    "consultationOn": "సంప్రదింపు తేది",
+    "writeFor": "{{name}} కోసం సమీక్ష రాయండి",
+    "backToPick": "← సంప్రదింపులకు తిరిగి",
+    "isPublic": "ఈ సమీక్షను బహిరంగంగా చేయండి",
+    "isPublicDesc": "బహిరంగ సమీక్షలు ఇతర పెంపుడు జంతువుల యజమానులకు సహాయపడతాయి",
+    "helpRequired": "దయచేసి రేటింగ్ ఎంచుకొని కనీసం 10 అక్షరాలు రాయండి",
+    "submittedFor": "{{name}} కోసం మీ సమీక్ష సమర్పించబడింది.",
+    "helpCommunity": "VetCare సమూహానికి సహాయం చేసినందుకు ధన్యవాదాలు!"
   },
   "doctorDashboard": {
     "title": "డాక్టర్ డాష్‌బోర్డ్",
@@ -4136,14 +4154,37 @@
     "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
   },
   "adminRoleRequests": {
-    "title": "పాత్ర మార్పు అభ్యర్థనలు", "subtitle": "వినియోగదారు పాత్ర మార్పు అభ్యర్థనలను సమీక్షించండి",
-    "tabs": { "pending": "పెండింగ్", "approved": "ఆమోదించబడింది", "rejected": "తిరస్కరించబడింది" },
-    "table": { "user": "వినియోగదారు", "currentRole": "ప్రస్తుత పాత్ర", "requestedRole": "అభ్యర్థించిన పాత్ర", "reason": "కారణం", "requestedAt": "అభ్యర్థన తేదీ", "actions": "చర్యలు" },
-    "approve": "ఆమోదించు", "reject": "తిరస్కరించు", "approving": "ఆమోదిస్తోంది...", "rejecting": "తిరస్కరిస్తోంది...",
-    "rejectModal": { "title": "అభ్యర్థన తిరస్కరించు", "reasonLabel": "తిరస్కరణ కారణం", "reasonPlaceholder": "కారణం వివరించండి...", "confirmBtn": "తిరస్కరించు", "cancelBtn": "రద్దు" },
+    "title": "పాత్ర మార్పు అభ్యర్థనలు",
+    "subtitle": "వినియోగదారు పాత్ర మార్పు అభ్యర్థనలను సమీక్షించండి",
+    "tabs": {
+      "pending": "పెండింగ్",
+      "approved": "ఆమోదించబడింది",
+      "rejected": "తిరస్కరించబడింది"
+    },
+    "table": {
+      "user": "వినియోగదారు",
+      "currentRole": "ప్రస్తుత పాత్ర",
+      "requestedRole": "అభ్యర్థించిన పాత్ర",
+      "reason": "కారణం",
+      "requestedAt": "అభ్యర్థన తేదీ",
+      "actions": "చర్యలు"
+    },
+    "approve": "ఆమోదించు",
+    "reject": "తిరస్కరించు",
+    "approving": "ఆమోదిస్తోంది...",
+    "rejecting": "తిరస్కరిస్తోంది...",
+    "rejectModal": {
+      "title": "అభ్యర్థన తిరస్కరించు",
+      "reasonLabel": "తిరస్కరణ కారణం",
+      "reasonPlaceholder": "కారణం వివరించండి...",
+      "confirmBtn": "తిరస్కరించు",
+      "cancelBtn": "రద్దు"
+    },
     "noRequests": "{{status}} అభ్యర్థనలు లేవు.",
-    "approveSuccess": "పాత్ర మార్పు ఆమోదించబడింది.", "rejectSuccess": "అభ్యర్థన తిరస్కరించబడింది.",
-    "reviewedBy": "సమీక్ష: {{name}}", "rejectedReason": "కారణం: {{reason}}"
+    "approveSuccess": "పాత్ర మార్పు ఆమోదించబడింది.",
+    "rejectSuccess": "అభ్యర్థన తిరస్కరించబడింది.",
+    "reviewedBy": "సమీక్ష: {{name}}",
+    "rejectedReason": "కారణం: {{reason}}"
   },
   "adminDashboard": {
     "title": "అడ్మిన్ డాష్‌బోర్డ్",
@@ -4465,7 +4506,12 @@
     "vetResponse": "పశువైద్యుని స్పందన",
     "approve": "ఆమోదించు",
     "hide": "దాచు",
-    "remove": "తొలగించు"
+    "remove": "తొలగించు",
+    "searchByVet": "పశువైద్య పేరు ద్వారా వెతకండి...",
+    "flag": "ఫ్లాగ్ చేయండి",
+    "unflag": "ఫ్లాగ్ తీసివేయండి",
+    "flagged": "ఫ్లాగ్ చేయబడింది",
+    "consultationDate": "సంప్రదింపు తేది"
   },
   "staffSettings": {
     "title": "సిబ్బంది నిర్వహణ",
@@ -5451,7 +5497,7 @@
       "assignHospital": "ఆసుపత్రి కేటాయించు",
       "addMember": "సభ్యుడిని చేర్చు",
       "noHospitals": "ఆసుపత్రులు ఏవీ కేటాయించబడలేదు",
-            "noMembers": "ఇంకా సభ్యులు లేరు"
+      "noMembers": "ఇంకా సభ్యులు లేరు"
     },
     "patients": {
       "tab": "రోగులు",
@@ -5571,8 +5617,7 @@
         "network": "నెట్వర్క్"
       }
     }
-  }
-,
+  },
   "networkMemberships": {
     "title": "నా ఆసుపత్రి నెట్‌వర్క్ సభ్యత్వాలు",
     "subtitle": "ఆసుపత్రి నెట్‌వర్క్‌లలో మీ పెంపుడు జంతువుల నమోదులను నిర్వహించండి",
@@ -5607,8 +5652,7 @@
     "consentViewOnly": "వైద్య చరిత్ర మరియు టీకా రికార్డులను మాత్రమే చూడండి",
     "consentBasic": "రికార్డులు చూడండి + చికిత్స నోట్స్ జోడించండి",
     "consentFull": "ల్యాబ్ ఫలితాలు మరియు ప్రిస్క్రిప్షన్‌లతో సహా పూర్తి యాక్సెస్"
-  }
-,
+  },
   "adminNetworkSubscriptions": {
     "title": "నెట్‌వర్క్ సభ్యత్వాలు",
     "subtitle": "Manage hospital network plans, seat limits, and pricing visibility",

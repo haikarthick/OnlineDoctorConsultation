@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "loading": "लोड हो रहा है...",
     "cancel": "रद्द करें",
@@ -3796,7 +3796,20 @@
     "errorSelectRating": "कृपया एक रेटिंग चुनें",
     "errorWriteComment": "कृपया एक टिप्पणी लिखें",
     "errorMinChars": "टिप्पणी कम से कम 10 अक्षरों की होनी चाहिए",
-    "failedToSubmit": "समीक्षा सबमिट करने में विफल"
+    "failedToSubmit": "समीक्षा सबमिट करने में विफल",
+    "pickConsultation": "समीक्षा के लिए परामर्श चुनें",
+    "pickSubtitle": "आप केवल पूर्ण परामर्शों की समीक्षा कर सकते हैं",
+    "noReviewable": "कोई लंबित समीक्षा नहीं",
+    "noReviewableDesc": "आप अप-टु-डेट हैं! सभी पूर्ण परामर्शों की समीक्षा हो चुकी है.",
+    "reviewingDoctor": "समीक्षा की जा रही है",
+    "consultationOn": "परामर्श दिनांक",
+    "writeFor": "{{name}} के लिए समीक्षा लिखें",
+    "backToPick": "← परामर्श सूची पर वापस",
+    "isPublic": "इस समीक्षा को सार्वजनिक करें",
+    "isPublicDesc": "सार्वजनिक समीक्षाएं अन्य पालतू मालिकों की मदद करती हैं",
+    "helpRequired": "कृपया रेटिंग चुनें और कम से कम 10 अक्षर लिखें",
+    "submittedFor": "{{name}} के लिए आपकी समीक्षा सबमिट हो गई है.",
+    "helpCommunity": "VetCare समुदाय की मदद करने के लिए धन्यवाद!"
   },
   "doctorDashboard": {
     "title": "डॉक्टर डैशबोर्ड",
@@ -4163,14 +4176,35 @@
   "adminRoleRequests": {
     "title": "भूमिका परिवर्तन अनुरोध",
     "subtitle": "उपयोगकर्ता की भूमिका परिवर्तन अनुरोधों की समीक्षा करें",
-    "tabs": { "pending": "लंबित", "approved": "स्वीकृत", "rejected": "अस्वीकृत" },
-    "table": { "user": "उपयोगकर्ता", "currentRole": "वर्तमान भूमिका", "requestedRole": "अनुरोधित भूमिका", "reason": "कारण", "requestedAt": "अनुरोध तिथि", "actions": "कार्रवाई" },
-    "approve": "स्वीकृत करें", "reject": "अस्वीकृत करें", "approving": "स्वीकृत हो रहा है...", "rejecting": "अस्वीकृत हो रहा है...",
-    "rejectModal": { "title": "भूमिका परिवर्तन अस्वीकृत करें", "reasonLabel": "अस्वीकृति का कारण", "reasonPlaceholder": "कारण बताएं...", "confirmBtn": "अस्वीकृत करें", "cancelBtn": "रद्द करें" },
+    "tabs": {
+      "pending": "लंबित",
+      "approved": "स्वीकृत",
+      "rejected": "अस्वीकृत"
+    },
+    "table": {
+      "user": "उपयोगकर्ता",
+      "currentRole": "वर्तमान भूमिका",
+      "requestedRole": "अनुरोधित भूमिका",
+      "reason": "कारण",
+      "requestedAt": "अनुरोध तिथि",
+      "actions": "कार्रवाई"
+    },
+    "approve": "स्वीकृत करें",
+    "reject": "अस्वीकृत करें",
+    "approving": "स्वीकृत हो रहा है...",
+    "rejecting": "अस्वीकृत हो रहा है...",
+    "rejectModal": {
+      "title": "भूमिका परिवर्तन अस्वीकृत करें",
+      "reasonLabel": "अस्वीकृति का कारण",
+      "reasonPlaceholder": "कारण बताएं...",
+      "confirmBtn": "अस्वीकृत करें",
+      "cancelBtn": "रद्द करें"
+    },
     "noRequests": "कोई {{status}} अनुरोध नहीं।",
     "approveSuccess": "भूमिका परिवर्तन स्वीकृत। उपयोगकर्ता को पुनः लॉगिन करना होगा।",
     "rejectSuccess": "अनुरोध अस्वीकृत।",
-    "reviewedBy": "समीक्षा: {{name}}", "rejectedReason": "कारण: {{reason}}"
+    "reviewedBy": "समीक्षा: {{name}}",
+    "rejectedReason": "कारण: {{reason}}"
   },
   "adminDashboard": {
     "title": "एडमिन डैशबोर्ड",
@@ -4492,7 +4526,12 @@
     "vetResponse": "पशु चिकित्सक की प्रतिक्रिया",
     "approve": "स्वीकृत करें",
     "hide": "छिपाएँ",
-    "remove": "हटाएँ"
+    "remove": "हटाएँ",
+    "searchByVet": "पशु चिकित्सक नाम से खोजें...",
+    "flag": "फ्लैग करें",
+    "unflag": "फ्लैग हटाएं",
+    "flagged": "फ्लैग किया गया",
+    "consultationDate": "परामर्श तिथि"
   },
   "staffSettings": {
     "title": "स्टाफ प्रबंधन",
@@ -5526,7 +5565,7 @@
       "assignHospital": "अस्पताल असाइन करें",
       "addMember": "सदस्य जोड़ें",
       "noHospitals": "कोई अस्पताल असाइन नहीं",
-            "noMembers": "अभी तक कोई सदस्य नहीं"
+      "noMembers": "अभी तक कोई सदस्य नहीं"
     },
     "patients": {
       "tab": "मरीज़",
@@ -5647,7 +5686,6 @@
       }
     }
   },
-
   "networkMemberships": {
     "title": "मेरी अस्पताल नेटवर्क सदस्यताएं",
     "subtitle": "अस्पताल नेटवर्क में अपने पालतुओं के नामांकन प्रबंधित करें",
@@ -5682,8 +5720,7 @@
     "consentViewOnly": "केवल चिकित्सा इतिहास और टीकाकरण रिकॉर्ड देखें",
     "consentBasic": "रिकॉर्ड देखें + उपचार नोट्स जोड़ें",
     "consentFull": "लैब परिणाम और नुस्खे सहित पूर्ण एक्सेस"
-  }
-,
+  },
   "adminNetworkSubscriptions": {
     "title": "नेटवर्क सदस्यता",
     "subtitle": "अस्पताल नेटवर्क योजनाएं, सीट सीमा और मूल्य दृश्यता प्रबंधित करें",

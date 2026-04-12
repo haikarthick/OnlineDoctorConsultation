@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
     "cancel": "ರದ್ದುಮಾಡಿ",
@@ -1619,12 +1619,17 @@
       "rejectedDesc": "ಕಾರಣ: {{reason}}",
       "reLoginBtn": "ಲಾಗ್ ಔಟ್ & ಮರು-ಲಾಗಿನ್",
       "historyTitle": "ವಿನಂತಿ ಇತಿಹಾಸ",
-      "submitted": "ಸಲ್ಲಿಸಲಾಗಿದೆ", "reviewed": "ಪರಿಶೀಲಿಸಿದವರು",
-      "statusPending": "ಬಾಕಿ", "statusApproved": "ಅನುಮೋದಿಸಲಾಗಿದೆ",
-      "statusRejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ", "statusCancelled": "ರದ್ದು",
+      "submitted": "ಸಲ್ಲಿಸಲಾಗಿದೆ",
+      "reviewed": "ಪರಿಶೀಲಿಸಿದವರು",
+      "statusPending": "ಬಾಕಿ",
+      "statusApproved": "ಅನುಮೋದಿಸಲಾಗಿದೆ",
+      "statusRejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+      "statusCancelled": "ರದ್ದು",
       "noHistory": "ಇನ್ನೂ ವಿನಂತಿಗಳಿಲ್ಲ.",
-      "errSameRole": "ಈ ಪಾತ್ರ ಈಗಾಗಲೇ ನಿಮ್ಮದಾಗಿದೆ.", "errAlreadyPending": "ಒಂದು ವಿನಂತಿ ಈಗಾಗಲೇ ಬಾಕಿ ಇದೆ.",
-      "successSubmit": "ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ!", "successCancel": "ವಿನಂತಿ ರದ್ದು ಮಾಡಲಾಗಿದೆ."
+      "errSameRole": "ಈ ಪಾತ್ರ ಈಗಾಗಲೇ ನಿಮ್ಮದಾಗಿದೆ.",
+      "errAlreadyPending": "ಒಂದು ವಿನಂತಿ ಈಗಾಗಲೇ ಬಾಕಿ ಇದೆ.",
+      "successSubmit": "ವಿನಂತಿ ಸಲ್ಲಿಸಲಾಗಿದೆ!",
+      "successCancel": "ವಿನಂತಿ ರದ್ದು ಮಾಡಲಾಗಿದೆ."
     }
   },
   "enterpriseManagement": {
@@ -3782,7 +3787,20 @@
     "errorSelectRating": "ದಯವಿಟ್ಟು ರೇಟಿಂಗ್ ಆಯ್ಕೆ ಮಾಡಿ",
     "errorWriteComment": "ದಯವಿಟ್ಟು ಕಾಮೆಂಟ್ ಬರೆಯಿರಿ",
     "errorMinChars": "ಕಾಮೆಂಟ್ ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು",
-    "failedToSubmit": "Failed to submit review"
+    "failedToSubmit": "Failed to submit review",
+    "pickConsultation": "ವಿಮರ್ಶೆಗಾಗಿ ಸಮಾಲೋಚನೆ ಆಯ್ಕೆ ಮಾಡಿ",
+    "pickSubtitle": "ನೀವು ಪೂರ್ಣಗೊಳಿಸಿದ ಸಮಾಲೋಚನೆಗಳನ್ನು ಮಾತ್ರ ವಿಮರ್ಶಿಸಬಹುದು",
+    "noReviewable": "ಯಾವುದೇ ಬಾಕಿ ವಿಮರ್ಶೆಗಳಿಲ್ಲ",
+    "noReviewableDesc": "ಎಲ್ಲಾ ಪೂರ್ಣ ಸಮಾಲೋಚನೆಗಳು ವಿಮರ್ಶಿಸಲ್ಪಟ್ಟಿವೆ.",
+    "reviewingDoctor": "ವಿಮರ್ಶಿಸಲಾಗುತ್ತಿದೆ",
+    "consultationOn": "ಸಮಾಲೋಚನೆ ದಿನಾಂಕ",
+    "writeFor": "{{name}} ಗಾಗಿ ವಿಮರ್ಶೆ ಬರೆಯಿರಿ",
+    "backToPick": "← ಸಮಾಲೋಚನೆಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
+    "isPublic": "ಈ ವಿಮರ್ಶೆಯನ್ನು ಸಾರ್ವಜನಿಕ ಮಾಡಿ",
+    "isPublicDesc": "ಸಾರ್ವಜನಿಕ ವಿಮರ್ಶೆಗಳು ಇತರ ಸಾಕು ಪ್ರಾಣಿ ಮಾಲೀಕರಿಗೆ ಸಹಾಯ ಮಾಡುತ್ತವೆ",
+    "helpRequired": "ದಯವಿಟ್ಟು ರೇಟಿಂಗ್ ಆಯ್ಕೆ ಮಾಡಿ ಮತ್ತು ಕನಿಷ್ಟ 10 ಅಕ್ಷರಗಳು ಬರೆಯಿರಿ",
+    "submittedFor": "{{name}} ಗಾಗಿ ನಿಮ್ಮ ವಿಮರ್ಶೆ ಸಲ್ಲಿಸಲಾಗಿದೆ.",
+    "helpCommunity": "VetCare ಸಮುದಾಯಕ್ಕೆ ಸಹಾಯ ಮಾಡಿದ್ದಕ್ಕಾಗಿ ಧನ್ಯವಾದಗಳು!"
   },
   "doctorDashboard": {
     "title": "ವೈದ್ಯರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
@@ -4147,14 +4165,37 @@
     "daysWillBeMarked": "{{count}} day(s) will be marked unavailable"
   },
   "adminRoleRequests": {
-    "title": "ಪಾತ್ರ ಬದಲಾವಣೆ ವಿನಂತಿಗಳು", "subtitle": "ಬಳಕೆದಾರ ಪಾತ್ರ ಬದಲಾವಣೆ ವಿನಂತಿಗಳನ್ನು ಪರಿಶೀಲಿಸಿ",
-    "tabs": { "pending": "ಬಾಕಿ", "approved": "ಅನುಮೋದಿಸಲಾಗಿದೆ", "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ" },
-    "table": { "user": "ಬಳಕೆದಾರ", "currentRole": "ಪ್ರಸ್ತುತ ಪಾತ್ರ", "requestedRole": "ಕೋರಿದ ಪಾತ್ರ", "reason": "ಕಾರಣ", "requestedAt": "ಕೋರಿದ ದಿನಾಂಕ", "actions": "ಕ್ರಿಯೆಗಳು" },
-    "approve": "ಅನುಮೋದಿಸಿ", "reject": "ತಿರಸ್ಕರಿಸಿ", "approving": "ಅನುಮೋದಿಸಲಾಗುತ್ತಿದೆ...", "rejecting": "ತಿರಸ್ಕರಿಸಲಾಗುತ್ತಿದೆ...",
-    "rejectModal": { "title": "ವಿನಂತಿ ತಿರಸ್ಕರಿಸಿ", "reasonLabel": "ತಿರಸ್ಕರಣ ಕಾರಣ", "reasonPlaceholder": "ಕಾರಣ ವಿವರಿಸಿ...", "confirmBtn": "ತಿರಸ್ಕರಿಸಿ", "cancelBtn": "ರದ್ದು" },
+    "title": "ಪಾತ್ರ ಬದಲಾವಣೆ ವಿನಂತಿಗಳು",
+    "subtitle": "ಬಳಕೆದಾರ ಪಾತ್ರ ಬದಲಾವಣೆ ವಿನಂತಿಗಳನ್ನು ಪರಿಶೀಲಿಸಿ",
+    "tabs": {
+      "pending": "ಬಾಕಿ",
+      "approved": "ಅನುಮೋದಿಸಲಾಗಿದೆ",
+      "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ"
+    },
+    "table": {
+      "user": "ಬಳಕೆದಾರ",
+      "currentRole": "ಪ್ರಸ್ತುತ ಪಾತ್ರ",
+      "requestedRole": "ಕೋರಿದ ಪಾತ್ರ",
+      "reason": "ಕಾರಣ",
+      "requestedAt": "ಕೋರಿದ ದಿನಾಂಕ",
+      "actions": "ಕ್ರಿಯೆಗಳು"
+    },
+    "approve": "ಅನುಮೋದಿಸಿ",
+    "reject": "ತಿರಸ್ಕರಿಸಿ",
+    "approving": "ಅನುಮೋದಿಸಲಾಗುತ್ತಿದೆ...",
+    "rejecting": "ತಿರಸ್ಕರಿಸಲಾಗುತ್ತಿದೆ...",
+    "rejectModal": {
+      "title": "ವಿನಂತಿ ತಿರಸ್ಕರಿಸಿ",
+      "reasonLabel": "ತಿರಸ್ಕರಣ ಕಾರಣ",
+      "reasonPlaceholder": "ಕಾರಣ ವಿವರಿಸಿ...",
+      "confirmBtn": "ತಿರಸ್ಕರಿಸಿ",
+      "cancelBtn": "ರದ್ದು"
+    },
     "noRequests": "{{status}} ವಿನಂತಿಗಳಿಲ್ಲ.",
-    "approveSuccess": "ಪಾತ್ರ ಬದಲಾವಣೆ ಅನುಮೋದಿಸಲಾಗಿದೆ.", "rejectSuccess": "ವಿನಂತಿ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.",
-    "reviewedBy": "ಪರಿಶೀಲನೆ: {{name}}", "rejectedReason": "ಕಾರಣ: {{reason}}"
+    "approveSuccess": "ಪಾತ್ರ ಬದಲಾವಣೆ ಅನುಮೋದಿಸಲಾಗಿದೆ.",
+    "rejectSuccess": "ವಿನಂತಿ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.",
+    "reviewedBy": "ಪರಿಶೀಲನೆ: {{name}}",
+    "rejectedReason": "ಕಾರಣ: {{reason}}"
   },
   "adminDashboard": {
     "title": "ಅಡ್ಮಿನ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
@@ -4476,7 +4517,12 @@
     "vetResponse": "ಪಶುವೈದ್ಯ ಪ್ರತಿಕ್ರಿಯೆ",
     "approve": "ಅನುಮೋದಿಸಿ",
     "hide": "ಮರೆಮಾಡಿ",
-    "remove": "ತೆಗೆದುಹಾಕಿ"
+    "remove": "ತೆಗೆದುಹಾಕಿ",
+    "searchByVet": "ಪಶು ವೈದ್ಯರ ಹೆಸರಿನಿಂದ ಹುಡುಕಿ...",
+    "flag": "ಫ್ಲ್ಯಾಗ್ ಮಾಡಿ",
+    "unflag": "ಫ್ಲ್ಯಾಗ್ ತೆಗೆಯಿರಿ",
+    "flagged": "ಫ್ಲ್ಯಾಗ್ ಮಾಡಲಾಗಿದೆ",
+    "consultationDate": "ಸಮಾಲೋಚನೆ ದಿನಾಂಕ"
   },
   "staffSettings": {
     "title": "ಸಿಬ್ಬಂದಿ ನಿರ್ವಹಣೆ",
@@ -5462,7 +5508,7 @@
       "assignHospital": "ಆಸ್ಪತ್ರೆ ನಿಯೋಜಿಸಿ",
       "addMember": "ಸದಸ್ಯರನ್ನು ಸೇರಿಸಿ",
       "noHospitals": "ಯಾವುದೇ ಆಸ್ಪತ್ರೆಗಳು ನಿಯೋಜಿಸಲಾಗಿಲ್ಲ",
-            "noMembers": "ಇನ್ನೂ ಸದಸ್ಯರಿಲ್ಲ"
+      "noMembers": "ಇನ್ನೂ ಸದಸ್ಯರಿಲ್ಲ"
     },
     "patients": {
       "tab": "ರೋಗಿಗಳು",
@@ -5582,8 +5628,7 @@
         "network": "ನೆಟ್ವರ್ಕ್"
       }
     }
-  }
-,
+  },
   "networkMemberships": {
     "title": "ನನ್ನ ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್ ಸದಸ್ಯತ್ವಗಳು",
     "subtitle": "ಆಸ್ಪತ್ರೆ ನೆಟ್‌ವರ್ಕ್‌ಗಳಲ್ಲಿ ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿಗಳ ನೋಂದಣಿಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
@@ -5618,8 +5663,7 @@
     "consentViewOnly": "ವೈದ್ಯಕೀಯ ಇತಿಹಾಸ ಮತ್ತು ಲಸಿಕೆ ದಾಖಲೆಗಳನ್ನು ಮಾತ್ರ ವೀಕ್ಷಿಸಿ",
     "consentBasic": "ದಾಖಲೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ + ಚಿಕಿತ್ಸಾ ಟಿಪ್ಪಣಿಗಳನ್ನು ಸೇರಿಸಿ",
     "consentFull": "ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು ಮತ್ತು ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳ ಸಹಿತ ಪೂರ್ಣ ಪ್ರವೇಶ"
-  }
-,
+  },
   "adminNetworkSubscriptions": {
     "title": "ನೆಟ್‌ವರ್ಕ್ ಚಂದಾದಾರಿಕೆಗಳು",
     "subtitle": "Manage hospital network plans, seat limits, and pricing visibility",

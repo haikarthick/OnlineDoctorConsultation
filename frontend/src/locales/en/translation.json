@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "loading": "Loading...",
     "cancel": "Cancel",
@@ -3851,7 +3851,20 @@
     "errorSelectRating": "Please select a rating",
     "errorWriteComment": "Please write a comment",
     "errorMinChars": "Comment must be at least 10 characters",
-    "failedToSubmit": "Failed to submit review"
+    "failedToSubmit": "Failed to submit review",
+    "pickConsultation": "Select a Consultation to Review",
+    "pickSubtitle": "You can only review consultations you have completed",
+    "noReviewable": "No Pending Reviews",
+    "noReviewableDesc": "You are all caught up! All completed consultations have been reviewed.",
+    "reviewingDoctor": "Reviewing",
+    "consultationOn": "Consultation on",
+    "writeFor": "Write a Review for {{name}}",
+    "backToPick": "← Back to Consultations",
+    "isPublic": "Make this review public",
+    "isPublicDesc": "Public reviews help other pet owners make informed decisions",
+    "helpRequired": "Please select a rating and write at least 10 characters to submit",
+    "submittedFor": "Your review for {{name}} has been submitted.",
+    "helpCommunity": "Thank you for helping the VetCare community!"
   },
   "doctorDashboard": {
     "title": "Doctor Dashboard",
@@ -4568,7 +4581,12 @@
     "vetResponse": "Vet Response",
     "approve": "Approve",
     "hide": "Hide",
-    "remove": "Remove"
+    "remove": "Remove",
+    "searchByVet": "Search by vet name...",
+    "flag": "Flag",
+    "unflag": "Unflag",
+    "flagged": "Flagged",
+    "consultationDate": "Consultation Date"
   },
   "staffSettings": {
     "title": "Staff Management",
@@ -5759,8 +5777,7 @@
     "consentViewOnly": "View medical history and vaccination records only",
     "consentBasic": "View records + add treatment notes",
     "consentFull": "Full access including lab results and prescriptions"
-  }
-,
+  },
   "adminNetworkSubscriptions": {
     "title": "Network Subscriptions",
     "subtitle": "Manage hospital network plans, seat limits, and pricing visibility",

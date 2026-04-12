@@ -225,8 +225,8 @@ class AdminService {
     };
   }
 
-  async moderateReview(reviewId: string, action: 'approve' | 'hide' | 'remove'): Promise<any> {
-    const statusMap: Record<string, string> = { approve: 'active', hide: 'hidden', remove: 'removed' };
+  async moderateReview(reviewId: string, action: 'approve' | 'hide' | 'remove' | 'flag' | 'unflag'): Promise<any> {
+    const statusMap: Record<string, string> = { approve: 'active', hide: 'hidden', remove: 'removed', flag: 'flagged', unflag: 'active' };
     const result = await database.query(
       `UPDATE reviews SET status = $1, updated_at = $2 WHERE id = $3
        RETURNING id, status, updated_at as "updatedAt"`,

@@ -467,8 +467,12 @@ router.get('/wallet/transactions', authMiddleware, asyncHandler((req: Request, r
 router.get('/doctors/:vetId/reliability', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getDoctorReliability(req, res)));
 
 // ─── Review routes ───────────────────────────────────────────
+router.get('/reviews/reviewable', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.listReviewableConsultations(req, res)));
 router.post('/reviews', authMiddleware, validateBody(createReviewSchema), asyncHandler((req: Request, res: Response) => ReviewController.createReview(req, res)));
-router.get('/reviews/vet/:vetId', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.listReviews(req, res)));
+router.get('/reviews/vet/:vetId', asyncHandler((req: Request, res: Response) => ReviewController.listReviews(req, res)));
+router.put('/reviews/:id/vet-response', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.addVetResponse(req, res)));
+router.post('/reviews/:id/helpful', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.markHelpful(req, res)));
+router.post('/reviews/:id/report', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.reportReview(req, res)));
 
 // ─── Admin routes (admin role required) ──────────────────────
 router.get('/admin/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getDashboardStats(req, res)));
