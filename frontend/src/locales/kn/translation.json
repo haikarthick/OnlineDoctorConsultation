@@ -1262,7 +1262,8 @@
       "labResults": "Lab Results",
       "allergies": "Allergies",
       "weight": "ತೂಕ",
-      "timeline": "Timeline"
+      "timeline": "Timeline",
+      "hospitalVisits": "ಆಸ್ಪತ್ರೆ ಭೇಟಿಗಳು"
     },
     "animalInfo": {
       "owner": "Owner:",
@@ -1390,6 +1391,14 @@
       "emptyTitle": "No medical history",
       "emptySubtitle": "Medical events will appear here as records are created",
       "by": "By:"
+    },
+    "hospitalVisitsTab": {
+      "selectPet": "ಸಾಕುಪ್ರಾಣಿ ಆಯ್ಕೆಮಾಡಿ",
+      "selectPetHint": "ಆಸ್ಪತ್ರೆ ಭೇಟಿ ಇತಿಹಾಸ ನೋಡಲು ಸಾಕುಪ್ರಾಣಿ ಆಯ್ಕೆಮಾಡಿ",
+      "emptyTitle": "ಆಸ್ಪತ್ರೆ ಭೇಟಿಗಳಿಲ್ಲ",
+      "emptyHint": "ಆಸ್ಪತ್ರೆ ಸಾಲು ಭೇಟಿಗಳು ಮತ್ತು ಒಳರೋಗಿ ದಾಖಲಾತಿಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ",
+      "queueVisits": "ಸಾಲು / ವಾಕ್-ಇನ್ ಭೇಟಿಗಳು",
+      "inpatientAdmissions": "ಒಳರೋಗಿ ದಾಖಲಾತಿಗಳು"
     },
     "modals": {
       "newRecord": "📄 New Medical Record",

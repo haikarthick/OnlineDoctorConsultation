@@ -532,8 +532,14 @@ export default function HospitalWorkflow() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>{t('hospitalWorkflow.clinicalCases')}</h2>
-            <button onClick={() => setShowNewCase(true)} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>+ {t('hospitalWorkflow.newCase')}</button>
+            <div>
+              <h2 style={{ margin: 0, fontSize: 18 }}>{t('hospitalWorkflow.clinicalCases')}</h2>
+              <p style={{ margin: '4px 0 0', fontSize: 12, color: '#64748b' }}>
+                📋 Tracks detailed clinical journey for each patient (triage → examination → treatment → observation → discharge).
+                Cases are <strong>auto-created</strong> when you click <em>Start Exam</em> in Queue &amp; Triage.
+              </p>
+            </div>
+            <button onClick={() => setShowNewCase(true)} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, alignSelf: 'flex-start' }}>+ {t('hospitalWorkflow.newCase')}</button>
           </div>
 
           {/* Cases List */}
