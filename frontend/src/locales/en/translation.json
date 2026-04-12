@@ -1295,7 +1295,8 @@
       "labResults": "Lab Results",
       "allergies": "Allergies",
       "weight": "Weight",
-      "timeline": "Timeline"
+      "timeline": "Timeline",
+      "hospitalVisits": "Hospital Visits"
     },
     "animalInfo": {
       "owner": "Owner:",
@@ -1423,6 +1424,14 @@
       "emptyTitle": "No medical history",
       "emptySubtitle": "Medical events will appear here as records are created",
       "by": "By:"
+    },
+    "hospitalVisitsTab": {
+      "selectPet": "Select a pet",
+      "selectPetHint": "Choose a pet to view its hospital visit history",
+      "emptyTitle": "No hospital visits",
+      "emptyHint": "Hospital queue visits and inpatient admissions will appear here",
+      "queueVisits": "Queue / Walk-in Visits",
+      "inpatientAdmissions": "Inpatient Admissions"
     },
     "modals": {
       "newRecord": "📄 New Medical Record",

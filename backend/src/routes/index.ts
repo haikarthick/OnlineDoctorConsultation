@@ -674,6 +674,7 @@ router.post('/hospitals/:hospitalId/inpatient/admit', authMiddleware, asyncHandl
 router.patch('/inpatient/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateInpatientStatus(req, res)));
 router.post('/inpatient/:id/vitals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.addVitalsLog(req, res)));
 router.put('/inpatient/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateInpatientDetails(req, res)));
+router.get('/animals/:animalId/hospital-visits', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalHospitalVisits(req, res)));
 
 // ─── Report Builder & Export Center ──────────────────
 router.get('/enterprises/:enterpriseId/reports/templates', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listReportTemplates(req, res)));

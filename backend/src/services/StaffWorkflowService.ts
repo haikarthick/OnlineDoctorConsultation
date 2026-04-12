@@ -194,12 +194,41 @@ class StaffWorkflowService {
   }
 
   async updateQueueStatus(queueId: string, status: string, userId: string) {
-    const updates: Record<string, string> = { status };
+    // Fetch queue entry first — needed for auto-creates
+    const queueEntry = await database.query(
+      `SELECT q.*, h.name AS hospital_name
+       FROM appointment_queue q
+       JOIN vet_hospitals h ON h.id = q.hospital_id
+       WHERE q.id = $1`,
+      [queueId]
+    );
+    const qe = queueEntry.rows[0];
+
     if (status === 'discharged' || status === 'no_show') {
       const result = await database.query(
         `UPDATE appointment_queue SET status = $1, completed_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`,
         [status, queueId]
       );
+      // Auto-create medical record on queue discharge (cross-module data visibility)
+      if (status === 'discharged' && qe?.animal_id) {
+        try {
+          const contentParts = [
+            `Queue Visit — ${qe.hospital_name || 'Hospital'}`,
+            qe.reason ? `Reason: ${qe.reason}` : null,
+            qe.priority !== 'normal' ? `Priority: ${qe.priority}` : null,
+            qe.triage_notes ? `Triage Notes: ${qe.triage_notes}` : null,
+          ].filter(Boolean).join('\n');
+          await database.query(`
+            INSERT INTO medical_records (id, user_id, animal_id, veterinarian_id, record_type, title, content, created_at)
+            VALUES ($1, $2, $3, $4, 'follow_up', $5, $6, NOW())
+          `, [uuidv4(), qe.owner_id || userId, qe.animal_id, userId,
+              `Hospital Visit: ${qe.hospital_name || 'Walk-in Queue'}`,
+              contentParts || 'Hospital queue visit discharge']);
+          logger.info('Medical record auto-created from queue discharge', { queueId, animalId: qe.animal_id });
+        } catch (err: any) {
+          logger.warn('Failed to auto-create medical record on queue discharge', { queueId, error: err.message });
+        }
+      }
       return result.rows[0] || null;
     }
     if (status === 'in_triage' || status === 'in_examination') {
@@ -207,6 +236,31 @@ class StaffWorkflowService {
         `UPDATE appointment_queue SET status = $1, called_at = COALESCE(called_at, CURRENT_TIMESTAMP) WHERE id = $2 RETURNING *`,
         [status, queueId]
       );
+      // Auto-create a linked clinical case when examination starts (cross-module data visibility)
+      if (status === 'in_examination' && qe?.hospital_id) {
+        try {
+          const existing = await database.query(
+            'SELECT id FROM workflow_cases WHERE queue_entry_id = $1 LIMIT 1',
+            [queueId]
+          );
+          if (!existing.rows[0]) {
+            const caseId = uuidv4();
+            await database.query(`
+              INSERT INTO workflow_cases (id, queue_entry_id, hospital_id, animal_id, owner_id,
+                assigned_vet_id, priority, chief_complaint, current_stage, status)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'examination', 'active')
+            `, [caseId, queueId, qe.hospital_id, qe.animal_id || null, qe.owner_id || null,
+                userId, qe.priority || 'normal', qe.reason || null]);
+            await database.query(`
+              INSERT INTO workflow_transitions (id, case_id, from_stage, to_stage, transitioned_by, notes)
+              VALUES ($1, $2, 'triage', 'examination', $3, 'Auto-created from queue entry')
+            `, [uuidv4(), caseId, userId]);
+            logger.info('Clinical case auto-created from queue examination', { queueId, caseId });
+          }
+        } catch (err: any) {
+          logger.warn('Failed to auto-create clinical case from queue', { queueId, error: err.message });
+        }
+      }
       return result.rows[0] || null;
     }
     const result = await database.query(
@@ -633,6 +687,43 @@ class StaffWorkflowService {
       WHERE hospital_id = $1
     `, [hospitalId]);
     return result.rows[0];
+  }
+
+  // Cross-module data visibility: all hospital visits for an animal (for Medical Records page)
+  async getAnimalHospitalVisits(animalId: string) {
+    const [queueVisits, inpatientAdmissions] = await Promise.all([
+      database.query(`
+        SELECT q.id, q.hospital_id, q.status, q.priority, q.triage_level, q.reason,
+          q.triage_notes, q.checked_in_at, q.completed_at, q.queue_number,
+          h.name AS hospital_name,
+          u.first_name AS vet_first_name, u.last_name AS vet_last_name,
+          wc.id AS case_id, wc.current_stage AS case_stage, wc.chief_complaint, wc.diagnosis
+        FROM appointment_queue q
+        JOIN vet_hospitals h ON h.id = q.hospital_id
+        LEFT JOIN users u ON u.id = q.assigned_vet_id
+        LEFT JOIN workflow_cases wc ON wc.queue_entry_id = q.id
+        WHERE q.animal_id = $1
+        ORDER BY q.checked_in_at DESC
+        LIMIT 50
+      `, [animalId]),
+      database.query(`
+        SELECT ia.id, ia.hospital_id, ia.admission_type, ia.status, ia.room_number, ia.bed_number,
+          ia.admitted_at, ia.discharged_at, ia.care_instructions, ia.discharge_notes,
+          ia.daily_rate, ia.vitals_log,
+          h.name AS hospital_name,
+          u.first_name AS vet_first_name, u.last_name AS vet_last_name
+        FROM inpatient_admissions ia
+        JOIN vet_hospitals h ON h.id = ia.hospital_id
+        LEFT JOIN users u ON u.id = ia.admitted_by
+        WHERE ia.animal_id = $1
+        ORDER BY ia.admitted_at DESC
+        LIMIT 50
+      `, [animalId]),
+    ]);
+    return {
+      queueVisits: queueVisits.rows,
+      inpatientAdmissions: inpatientAdmissions.rows,
+    };
   }
 }
 

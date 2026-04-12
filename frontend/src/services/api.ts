@@ -1605,6 +1605,10 @@ class ApiService {
     const response = await this.client.post(`/inpatient/${admissionId}/vitals`, data)
     return response.data
   }
+  async getAnimalHospitalVisits(animalId: string) {
+    const response = await this.client.get(`/animals/${animalId}/hospital-visits`)
+    return response.data
+  }
   async updateInpatientDetails(admissionId: string, data: Record<string, unknown>) {
     const response = await this.client.put(`/inpatient/${admissionId}`, data)
     return response.data

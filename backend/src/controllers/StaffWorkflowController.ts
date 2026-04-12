@@ -269,6 +269,14 @@ class StaffWorkflowController {
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
+
+  async getAnimalHospitalVisits(req: Request, res: Response) {
+    try {
+      const { animalId } = req.params;
+      const data = await staffWorkflowService.getAnimalHospitalVisits(animalId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
 }
 
 export default new StaffWorkflowController();

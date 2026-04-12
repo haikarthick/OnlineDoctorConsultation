@@ -6,7 +6,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 
-type Tab = 'overview' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline'
+type Tab = 'overview' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline' | 'hospital_visits'
 
 const RECORD_TYPES = [
   { value: 'diagnosis', label: 'Diagnosis', icon: '🩺', color: '#667eea' },
@@ -62,6 +62,8 @@ const MedicalRecords: React.FC = () => {
   const [consultations, setConsultations] = useState<any[]>([])
   const [consultationsTotal, setConsultationsTotal] = useState(0)
   const [prescriptionsTotal, setPrescriptionsTotal] = useState(0)
+  const [hospitalVisits, setHospitalVisits] = useState<{ queueVisits: any[]; inpatientAdmissions: any[] }>({ queueVisits: [], inpatientAdmissions: [] })
+  const [loadingHospitalVisits, setLoadingHospitalVisits] = useState(false)
   // Modal states
   const [showModal, setShowModal] = useState<string | null>(null)
   const [modalData, setModalData] = useState<any>({})
@@ -157,6 +159,16 @@ const MedicalRecords: React.FC = () => {
     } catch { setPrescriptions([]); setPrescriptionsTotal(0) }
   }, [selectedAnimal])
 
+  const loadHospitalVisits = useCallback(async () => {
+    if (!selectedAnimal) return
+    setLoadingHospitalVisits(true)
+    try {
+      const res = await apiService.getAnimalHospitalVisits(selectedAnimal)
+      setHospitalVisits(res.data || { queueVisits: [], inpatientAdmissions: [] })
+    } catch { setHospitalVisits({ queueVisits: [], inpatientAdmissions: [] }) }
+    setLoadingHospitalVisits(false)
+  }, [selectedAnimal])
+
   const loadConsultations = useCallback(async () => {
     if (!selectedAnimal) { setConsultations([]); setConsultationsTotal(0); return }
     try {
@@ -189,6 +201,7 @@ const MedicalRecords: React.FC = () => {
       if (activeTab === 'allergies') loadAllergies()
       if (activeTab === 'weight') loadWeightHistory()
       if (activeTab === 'timeline') loadTimeline()
+      if (activeTab === 'hospital_visits') loadHospitalVisits()
     } else {
       loadPrescriptions()
       loadStats()
@@ -335,6 +348,7 @@ const MedicalRecords: React.FC = () => {
     { key: 'allergies', icon: '⚠️', label: t('medicalRecords.tabs.allergies'), count: stats?.allergies?.total ?? allergies.length },
     { key: 'weight', icon: '⚖️', label: t('medicalRecords.tabs.weight'), count: weightHistory.length },
     { key: 'timeline', icon: '📅', label: t('medicalRecords.tabs.timeline') },
+    { key: 'hospital_visits', icon: '🏥', label: t('medicalRecords.tabs.hospitalVisits'), count: (hospitalVisits.queueVisits.length + hospitalVisits.inpatientAdmissions.length) || undefined },
   ]
 
   // ═══ RENDER ═══════════════════════════════════════════════
@@ -823,6 +837,89 @@ const MedicalRecords: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* ═══ HOSPITAL VISITS TAB ══════════════════════════════ */}
+        {activeTab === 'hospital_visits' && (
+          <div>
+            {!selectedAnimal ? (
+              <EmptyState icon="🏥" title={t('medicalRecords.hospitalVisitsTab.selectPet')} subtitle={t('medicalRecords.hospitalVisitsTab.selectPetHint')} />
+            ) : loadingHospitalVisits ? (
+              <div style={{ textAlign: 'center', padding: 40 }}><div className="loading-spinner" style={{ margin: '0 auto' }} /></div>
+            ) : (hospitalVisits.queueVisits.length === 0 && hospitalVisits.inpatientAdmissions.length === 0) ? (
+              <EmptyState icon="🏥" title={t('medicalRecords.hospitalVisitsTab.emptyTitle')} subtitle={t('medicalRecords.hospitalVisitsTab.emptyHint')} />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+                {/* Queue / Walk-in Visits */}
+                {hospitalVisits.queueVisits.length > 0 && (
+                  <div>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 10 }}>🚶 {t('medicalRecords.hospitalVisitsTab.queueVisits')} ({hospitalVisits.queueVisits.length})</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {hospitalVisits.queueVisits.map((v: any) => {
+                        const statusColor: Record<string, string> = { waiting: '#f59e0b', in_triage: '#8b5cf6', in_examination: '#2563eb', in_treatment: '#059669', discharged: '#64748b', no_show: '#dc2626' }
+                        const sc = statusColor[v.status] || '#64748b'
+                        return (
+                          <div key={v.id} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.07)', borderLeft: `4px solid ${sc}` }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                              <div>
+                                <div style={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>🏥 {v.hospital_name}</div>
+                                {v.reason && <div style={{ fontSize: 13, color: '#475569', marginTop: 2 }}>📋 {v.reason}</div>}
+                                {v.chief_complaint && v.chief_complaint !== v.reason && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Case: {v.chief_complaint}</div>}
+                                {v.diagnosis && <div style={{ fontSize: 12, color: '#059669', marginTop: 2 }}>🩺 {v.diagnosis}</div>}
+                                {(v.vet_first_name || v.vet_last_name) && <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>👨‍⚕️ Dr. {v.vet_first_name} {v.vet_last_name}</div>}
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                <span style={{ padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: `${sc}20`, color: sc }}>#{v.queue_number} · {(v.status || '').replace(/_/g, ' ')}</span>
+                                {v.priority !== 'normal' && <div style={{ fontSize: 11, color: '#b45309', marginTop: 4, fontWeight: 600 }}>⚡ {v.priority}</div>}
+                                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>{v.checked_in_at ? fmtDate(v.checked_in_at) : ''}</div>
+                                {v.case_stage && <div style={{ fontSize: 11, color: '#7c3aed', marginTop: 2 }}>📊 Case: {v.case_stage}</div>}
+                              </div>
+                            </div>
+                            {v.triage_notes && <div style={{ marginTop: 8, padding: '6px 10px', background: '#fef9c3', borderRadius: 6, fontSize: 12, color: '#92400e' }}>📝 Triage: {v.triage_notes}</div>}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Inpatient Admissions */}
+                {hospitalVisits.inpatientAdmissions.length > 0 && (
+                  <div>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 10 }}>🛏️ {t('medicalRecords.hospitalVisitsTab.inpatientAdmissions')} ({hospitalVisits.inpatientAdmissions.length})</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {hospitalVisits.inpatientAdmissions.map((a: any) => {
+                        const statusColor: Record<string, string> = { admitted: '#2563eb', in_treatment: '#b45309', recovering: '#059669', ready_to_discharge: '#0ea5e9', discharged: '#64748b', icu: '#991b1b' }
+                        const sc = statusColor[a.status] || '#64748b'
+                        const vitals = Array.isArray(a.vitals_log) ? a.vitals_log : (() => { try { return JSON.parse(a.vitals_log || '[]') } catch { return [] } })()
+                        return (
+                          <div key={a.id} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.07)', borderLeft: `4px solid ${sc}` }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                              <div>
+                                <div style={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>🏥 {a.hospital_name}</div>
+                                <div style={{ fontSize: 13, color: '#475569', marginTop: 2 }}>🛏️ {(a.admission_type || '').replace(/_/g, ' ')}{a.room_number ? ` · Room ${a.room_number}` : ''}</div>
+                                {a.care_instructions && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>💊 {a.care_instructions.substring(0, 80)}{a.care_instructions.length > 80 ? '...' : ''}</div>}
+                                {a.discharge_notes && <div style={{ fontSize: 12, color: '#374151', marginTop: 2 }}>📋 {a.discharge_notes.substring(0, 80)}</div>}
+                                {(a.vet_first_name || a.vet_last_name) && <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>👨‍⚕️ Dr. {a.vet_first_name} {a.vet_last_name}</div>}
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                <span style={{ padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: `${sc}20`, color: sc }}>{(a.status || '').replace(/_/g, ' ')}</span>
+                                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>In: {fmtDate(a.admitted_at)}</div>
+                                {a.discharged_at && <div style={{ fontSize: 11, color: '#94a3b8' }}>Out: {fmtDate(a.discharged_at)}</div>}
+                                {vitals.length > 0 && <div style={{ fontSize: 11, color: '#7c3aed', marginTop: 2 }}>📊 {vitals.length} vitals recorded</div>}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
 
       {/* ═══ CREATE MODALS ═══════════════════════════════════ */}
