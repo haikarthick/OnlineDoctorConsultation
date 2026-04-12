@@ -630,3 +630,43 @@
 </details>
 
 ---
+
+## 2026-04-12 14:09 · `2e88f14` · 🔧 CHORE
+
+**Commit:** chore: update memory — hospital visits feature + cross-module visibility lesson  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/feature-tracker.md
+  - memories/repo/lessons.md
+
+</details>
+
+---
+
+## 2026-04-12 14:11 · `521eaaf` · ✨ FEAT
+
+**Commit:** feat: hospital visits tab in Medical Records + Clinical Workflow auto-linking  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - backend/src/controllers/StaffWorkflowController.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/StaffWorkflowService.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/pages/MedicalRecords.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
