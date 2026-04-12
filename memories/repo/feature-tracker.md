@@ -278,3 +278,9 @@
 - All 5 locale files: adminNetworkSubscriptions + hospitalStaff + seatLimit namespaces
 - HospitalNetworks.tsx: "Invite Staff" button in Members panel → modal → calls POST /hospital-networks/:id/invite-staff
 - Codebase scan (session b4fd6b6e) fixed: SQL injection, duplicate constraint, formatPrice locale bug, hospital_staff nav gap, date formatting violations
+
+### ✅ Hospital Visits tab in Medical Records
+- **Logged:** 2026-04-12 14:09
+- **Status:** done
+- **Description:** New Hospital Visits tab in Medical Records page shows queue visits + inpatient admissions. Auto-creates medical record on queue discharge. Auto-creates Clinical Case when Start Exam clicked. backend route GET /animals/:animalId/hospital-visits added. All 5 locale files updated.
+

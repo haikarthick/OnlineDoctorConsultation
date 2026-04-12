@@ -323,3 +323,10 @@
 - **Lesson:** pg driver returns JSONB columns as native JS objects/arrays — JSON.parse(jsArray) silently fails. Always check Array.isArray() before parsing.
 - **Apply to:** All future code reading JSONB columns from PostgreSQL
 
+
+### LESSON-050 — Cross-module data visibility is mandatory
+- **Logged:** 2026-04-12 14:09
+- **Context:** Hospital module data (queue visits, vitals, inpatient) was completely absent from Medical Records page — no API calls existed for hospital data in MedicalRecords.tsx
+- **Lesson:** All modules that create patient-related data MUST expose that data via Medical Records. Any new hospital/clinical module must add an API endpoint for animal-scoped history retrieval.
+- **Apply to:** All future modules that create patient data
+

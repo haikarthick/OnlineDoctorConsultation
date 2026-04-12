@@ -593,3 +593,40 @@
 </details>
 
 ---
+
+## 2026-04-12 11:39 · `acfa86d` · OTHER
+
+**Commit:** memory: log UI-019 vitals JSONB bug + LESSON-049 parseJsonbArray rule  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/lessons.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-04-12 14:07 · `f6e033d` · 🐛 FIX
+
+**Commit:** fix: complete i18n hospitalVisitsTab for TA/TE/KN + Clinical Workflow tab explanation  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/HospitalWorkflow.tsx
+
+</details>
+
+---
