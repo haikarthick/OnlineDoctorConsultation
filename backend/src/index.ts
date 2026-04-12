@@ -1,4 +1,5 @@
 ﻿import http from 'http';
+import https from 'https';
 import app from './app';
 import config from './config';
 import logger from './utils/logger';
@@ -9,11 +10,46 @@ import { startScheduler } from './utils/scheduler';
 import { fixDemoPasswords } from './utils/fixDemoPasswords';
 import VaccineScheduleService from './services/VaccineScheduleService';
 
+/**
+ * Self-ping keep-alive for Render free-tier.
+ * Render spins down services after 15 min of inactivity (no incoming HTTP).
+ * GitHub Actions cron is unreliable (can be delayed 10-30+ min).
+ * Solution: ping our OWN external URL every 10 min from inside the process.
+ * Render's load balancer sees it as a real incoming request → resets idle timer.
+ * Uses built-in `https` module — no extra dependencies.
+ */
+const startSelfPing = () => {
+  const externalUrl = process.env.RENDER_EXTERNAL_URL;
+  if (!externalUrl || config.app.nodeEnv !== 'production') {
+    logger.info('[KeepAlive] Self-ping disabled (not on Render production)');
+    return;
+  }
+
+  const pingUrl = `${externalUrl}/api/v1/health`;
+  const INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+
+  const doPing = () => {
+    const req = https.get(pingUrl, { timeout: 10000 }, res => {
+      logger.info(`[KeepAlive] Self-ping → HTTP ${res.statusCode}`);
+      res.resume(); // drain response so connection closes
+    });
+    req.on('error', err => logger.warn(`[KeepAlive] Self-ping failed: ${err.message}`));
+    req.on('timeout', () => { req.destroy(); logger.warn('[KeepAlive] Self-ping timed out'); });
+  };
+
+  // First ping after 5 min (let server fully warm up first)
+  setTimeout(doPing, 5 * 60 * 1000);
+  // Then every 10 min
+  setInterval(doPing, INTERVAL_MS);
+
+  logger.info(`[KeepAlive] Self-ping scheduled every 10 min → ${pingUrl}`);
+};
+
 /** Retry database.connect() with exponential backoff.
  *  Free-tier Render PostgreSQL can be slow to respond after restarts.
  *  10 attempts at 12-second intervals = up to 120 seconds before giving up.
  */
-const connectWithRetry = async (maxAttempts = 10): Promise<void> => {
+const connectWithRetry= async (maxAttempts = 10): Promise<void> => {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await database.connect();
@@ -96,6 +132,9 @@ const startServer = async () => {
         );
       }, 30000);
     });
+
+    // Keep Render free-tier awake — self-ping every 10 min via external URL
+    startSelfPing();
   } catch (error: any) {
     logger.error('Failed to initialize services after server start', { error: error.message || String(error) });
     // Do NOT exit — server is already listening; DB may recover on its own
