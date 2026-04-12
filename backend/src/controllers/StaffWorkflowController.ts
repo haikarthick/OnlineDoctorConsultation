@@ -71,7 +71,15 @@ class StaffWorkflowController {
       const { hospitalId } = req.params;
       const data = await staffWorkflowService.checkInToQueue({ hospitalId, ...req.body });
       res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      if (err.message?.startsWith('DUPLICATE_CHECKIN:')) {
+        const [, queueNum, status] = err.message.split(':');
+        return res.status(409).json({
+          error: `This patient is already in the queue as #${queueNum} (${(status || '').replace(/_/g, ' ')}). Discharge or mark no-show before checking in again.`
+        });
+      }
+      res.status(500).json({ error: err.message });
+    }
   }
 
   async triagePatient(req: Request, res: Response) {

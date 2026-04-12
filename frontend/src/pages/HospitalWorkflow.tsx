@@ -37,6 +37,9 @@ export default function HospitalWorkflow() {
   const [queueStats, setQueueStats] = useState<any>(null)
   const [showCheckIn, setShowCheckIn] = useState(false)
   const [checkInForm, setCheckInForm] = useState({ reason: '', priority: 'normal', animalId: '', ownerId: '' })
+  const [checkInError, setCheckInError] = useState('')
+  const [checkInSubmitting, setCheckInSubmitting] = useState(false)
+  const [queueStatusFilter, setQueueStatusFilter] = useState<string>('')  // for clickable stat tiles
 
   // Workflow state
   const [cases, setCases] = useState<any[]>([])
@@ -122,6 +125,8 @@ export default function HospitalWorkflow() {
   // Actions
   async function handleCheckIn() {
     if (!hospitalId || !checkInAnimal) return
+    setCheckInError('')
+    setCheckInSubmitting(true)
     try {
       await apiService.checkInToQueue(hospitalId, {
         ...checkInForm,
@@ -131,8 +136,12 @@ export default function HospitalWorkflow() {
       setShowCheckIn(false)
       setCheckInForm({ reason: '', priority: 'normal', animalId: '', ownerId: '' })
       setCheckInAnimal(null)
+      setCheckInError('')
       loadQueue()
-    } catch { /* empty */ }
+    } catch (err: any) {
+      setCheckInError(err?.response?.data?.error || err?.message || 'Check-in failed. Please try again.')
+    }
+    setCheckInSubmitting(false)
   }
 
   async function handleTriage() {
@@ -253,80 +262,147 @@ export default function HospitalWorkflow() {
       {/* ═══ QUEUE TAB ═══ */}
       {tab === 'queue' && (
         <div>
-          {/* Stats Row */}
-          {queueStats && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
-              {[
-                { label: t('hospitalWorkflow.waiting'), value: queueStats.waiting_count, color: '#f59e0b' },
-                { label: t('hospitalWorkflow.inTriage'), value: queueStats.in_triage_count, color: '#8b5cf6' },
-                { label: t('hospitalWorkflow.inExam'), value: queueStats.in_exam_count, color: '#2563eb' },
-                { label: t('hospitalWorkflow.inTreatment'), value: queueStats.in_treatment_count, color: '#059669' },
-                { label: t('hospitalWorkflow.emergencies'), value: queueStats.emergency_count, color: '#dc2626' },
-                { label: t('hospitalWorkflow.avgWait'), value: `${Math.round(queueStats.avg_wait_minutes || 0)}m`, color: '#64748b' },
-                { label: t('hospitalWorkflow.todayTotal'), value: queueStats.today_total, color: '#0ea5e9' },
-              ].map((s, i) => (
-                <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: `4px solid ${s.color}` }}>
-                  <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{s.label}</div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value ?? 0}</div>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Stats Row — clickable tiles filter the queue below */}
+          {queueStats && (() => {
+            const tiles = [
+              { label: t('hospitalWorkflow.waiting'),     value: queueStats.waiting_count,    color: '#f59e0b', filter: 'waiting' },
+              { label: t('hospitalWorkflow.inTriage'),    value: queueStats.in_triage_count,  color: '#8b5cf6', filter: 'in_triage' },
+              { label: t('hospitalWorkflow.inExam'),      value: queueStats.in_exam_count,    color: '#2563eb', filter: 'in_examination' },
+              { label: t('hospitalWorkflow.inTreatment'),value: queueStats.in_treatment_count,color: '#059669', filter: 'in_treatment' },
+              { label: t('hospitalWorkflow.emergencies'), value: queueStats.emergency_count,  color: '#dc2626', filter: 'emergency' },
+              { label: t('hospitalWorkflow.avgWait'),     value: `${Math.round(queueStats.avg_wait_minutes || 0)}m`, color: '#64748b', filter: null },
+              { label: t('hospitalWorkflow.todayTotal'), value: queueStats.today_total,       color: '#0ea5e9', filter: null },
+            ]
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
+                {tiles.map((s, i) => {
+                  const isActive = s.filter && queueStatusFilter === s.filter
+                  const isClickable = s.filter !== null
+                  return (
+                    <div key={i}
+                      onClick={() => {
+                        if (!isClickable) return
+                        setQueueStatusFilter(prev => prev === s.filter ? '' : s.filter!)
+                      }}
+                      style={{
+                        background: isActive ? s.color : '#fff',
+                        borderRadius: 10, padding: '14px 16px',
+                        boxShadow: isActive ? `0 4px 12px ${s.color}40` : '0 1px 3px rgba(0,0,0,.08)',
+                        borderLeft: `4px solid ${s.color}`,
+                        cursor: isClickable ? 'pointer' : 'default',
+                        transition: 'all .15s',
+                        outline: isActive ? `2px solid ${s.color}` : 'none',
+                      }}>
+                      <div style={{ fontSize: 12, color: isActive ? '#fff' : '#64748b', marginBottom: 4 }}>{s.label} {isClickable && <span style={{ fontSize: 10, opacity: 0.7 }}>{isActive ? '▲' : '▼'}</span>}</div>
+                      <div style={{ fontSize: 22, fontWeight: 700, color: isActive ? '#fff' : s.color }}>{s.value ?? 0}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })()}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>{t('hospitalWorkflow.patientQueue')}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <h2 style={{ margin: 0, fontSize: 18 }}>{t('hospitalWorkflow.patientQueue')}</h2>
+              {queueStatusFilter && (
+                <span style={{ fontSize: 13, color: '#64748b', background: '#f1f5f9', borderRadius: 20, padding: '3px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  Filtered: <strong>{queueStatusFilter.replace(/_/g, ' ')}</strong>
+                  <button onClick={() => setQueueStatusFilter('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
+                </span>
+              )}
+            </div>
             <button onClick={() => setShowCheckIn(true)} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>
               + {t('hospitalWorkflow.checkInPatient')}
             </button>
           </div>
 
-          {/* Queue List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {queue.length === 0 && <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>{t('hospitalWorkflow.noPatients')}</p>}
-            {queue.map(q => (
-              <div key={q.id} style={{ background: '#fff', borderRadius: 10, padding: '14px 18px', boxShadow: '0 1px 3px rgba(0,0,0,.06)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', borderLeft: `4px solid ${PRIORITY_COLORS[q.priority] || '#2563eb'}` }}>
-                <div style={{ fontWeight: 700, fontSize: 18, color: '#2563eb', minWidth: 32 }}>#{q.queue_number}</div>
-                <div style={{ flex: 1, minWidth: 120 }}>
-                  <div style={{ fontWeight: 600 }}>{q.animal_name || t('hospitalWorkflow.unknownPatient')} <span style={{ fontSize: 12, color: '#94a3b8' }}>({q.animal_species}{q.animal_breed ? ` — ${q.animal_breed}` : ''})</span></div>
-                  <div style={{ fontSize: 13, color: '#64748b' }}>{t('hospitalWorkflow.owner')}: {q.owner_first_name} {q.owner_last_name}</div>
-                  {q.reason && <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{q.reason}</div>}
-                </div>
-                <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: PRIORITY_COLORS[q.priority] + '20', color: PRIORITY_COLORS[q.priority] }}>{q.priority}</span>
-                <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#f1f5f9', color: '#475569' }}>{(q.status || '').replace(/_/g, ' ')}</span>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {q.status === 'waiting' && (
-                    <button onClick={() => { setTriageTarget(q); setTriageForm({ triageLevel: 3, triageNotes: '' }); }} style={{ padding: '6px 12px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.triage')}</button>
-                  )}
-                  {['waiting', 'in_triage'].includes(q.status) && (
-                    <button onClick={() => handleQueueStatus(q.id, 'in_examination')} style={{ padding: '6px 12px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.startExam')}</button>
-                  )}
-                  {q.status === 'in_examination' && (
-                    <button onClick={() => handleQueueStatus(q.id, 'in_treatment')} style={{ padding: '6px 12px', background: '#059669', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.treat')}</button>
-                  )}
-                  {q.status !== 'discharged' && q.status !== 'no_show' && (
-                    <button onClick={() => handleQueueStatus(q.id, 'discharged')} style={{ padding: '6px 12px', background: '#64748b', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.discharge')}</button>
-                  )}
-                  {q.status === 'waiting' && (
-                    <button onClick={() => handleQueueStatus(q.id, 'no_show')} style={{ padding: '6px 10px', background: '#fecaca', color: '#dc2626', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.noShow')}</button>
-                  )}
-                </div>
+          {/* Queue List — filtered by status or emergency priority if tile selected */}
+          {(() => {
+            // Apply filter
+            let filtered = queue
+            if (queueStatusFilter === 'emergency') {
+              filtered = queue.filter(q => q.priority === 'emergency')
+            } else if (queueStatusFilter) {
+              filtered = queue.filter(q => q.status === queueStatusFilter)
+            }
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {filtered.length === 0 && <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>{t('hospitalWorkflow.noPatients')}</p>}
+                {filtered.map((q, idx) => (
+                  <div key={q.id} style={{ background: '#fff', borderRadius: 10, padding: '14px 18px', boxShadow: '0 1px 3px rgba(0,0,0,.06)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', borderLeft: `4px solid ${PRIORITY_COLORS[q.priority] || '#2563eb'}` }}>
+                    {/* Queue position: per-status index when filtered, global number when unfiltered */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 36 }}>
+                      <div style={{ fontWeight: 700, fontSize: 18, color: '#2563eb', lineHeight: 1 }}>
+                        #{queueStatusFilter ? idx + 1 : q.queue_number}
+                      </div>
+                      {queueStatusFilter && (
+                        <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>Q#{q.queue_number}</div>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 120 }}>
+                      <div style={{ fontWeight: 600 }}>{q.animal_name || t('hospitalWorkflow.unknownPatient')} <span style={{ fontSize: 12, color: '#94a3b8' }}>({q.animal_species}{q.animal_breed ? ` — ${q.animal_breed}` : ''})</span></div>
+                      <div style={{ fontSize: 13, color: '#64748b' }}>{t('hospitalWorkflow.owner')}: {q.owner_first_name} {q.owner_last_name}</div>
+                      {q.reason && <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{q.reason}</div>}
+                      {/* Check-in time */}
+                      <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 3 }}>🕐 Checked in: {formatDateTime(q.checked_in_at)}</div>
+                    </div>
+                    <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: PRIORITY_COLORS[q.priority] + '20', color: PRIORITY_COLORS[q.priority] }}>{q.priority}</span>
+                    <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#f1f5f9', color: '#475569' }}>{(q.status || '').replace(/_/g, ' ')}</span>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {q.status === 'waiting' && (
+                        <button onClick={() => { setTriageTarget(q); setTriageForm({ triageLevel: 3, triageNotes: '' }); }} style={{ padding: '6px 12px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.triage')}</button>
+                      )}
+                      {['waiting', 'in_triage'].includes(q.status) && (
+                        <button onClick={() => handleQueueStatus(q.id, 'in_examination')} style={{ padding: '6px 12px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.startExam')}</button>
+                      )}
+                      {q.status === 'in_examination' && (
+                        <button onClick={() => handleQueueStatus(q.id, 'in_treatment')} style={{ padding: '6px 12px', background: '#059669', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.treat')}</button>
+                      )}
+                      {q.status !== 'discharged' && q.status !== 'no_show' && (
+                        <button onClick={() => handleQueueStatus(q.id, 'discharged')} style={{ padding: '6px 12px', background: '#64748b', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.discharge')}</button>
+                      )}
+                      {q.status === 'waiting' && (
+                        <button onClick={() => handleQueueStatus(q.id, 'no_show')} style={{ padding: '6px 10px', background: '#fecaca', color: '#dc2626', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.noShow')}</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )
+          })()}
 
           {/* Check-in Modal */}
           {showCheckIn && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' }}>
-                <h3 style={{ marginTop: 0 }}>🏥 {t('hospitalWorkflow.checkInPatient')}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <AnimalSearchPicker selectedAnimal={checkInAnimal} onSelect={setCheckInAnimal} />
+            <div onClick={e => { if (e.target === e.currentTarget) { setShowCheckIn(false); setCheckInAnimal(null); setCheckInError('') } }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: 16 }}>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                  <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>🏥 {t('hospitalWorkflow.checkInPatient')}</h3>
+                  <button onClick={() => { setShowCheckIn(false); setCheckInAnimal(null); setCheckInError('') }} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#64748b' }}>✕</button>
+                </div>
+
+                {checkInError && (
+                  <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, fontWeight: 500 }}>
+                    ⚠️ {checkInError}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.reasonForVisit')}</label>
-                    <input placeholder="e.g., Vaccination, Limping, Skin rash..." value={checkInForm.reason} onChange={e => setCheckInForm(f => ({ ...f, reason: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                    <AnimalSearchPicker selectedAnimal={checkInAnimal} onSelect={a => { setCheckInAnimal(a); setCheckInError('') }} label={`🔍 Search Patient (Animal) *`} />
+                    {!checkInAnimal && (
+                      <div style={{ marginTop: 6, fontSize: 12, color: '#b45309', background: '#fef3c7', borderRadius: 6, padding: '6px 10px' }}>
+                        ⚠️ <strong>Required:</strong> Type an animal name and select a patient from the dropdown to enable check-in.
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.priority')}</label>
+                    <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.reasonForVisit')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                    <input placeholder="e.g., Vaccination, Limping, Skin rash..." value={checkInForm.reason} onChange={e => setCheckInForm(f => ({ ...f, reason: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                  </div>
+                  <div>
+                    <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 6, display: 'block' }}>{t('hospitalWorkflow.priority')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
                     <div style={{ display: 'flex', gap: 6 }}>
                       {PRIORITIES.map(p => (
                         <button key={p} onClick={() => setCheckInForm(f => ({ ...f, priority: p }))}
@@ -334,9 +410,13 @@ export default function HospitalWorkflow() {
                       ))}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
-                    <button onClick={() => { setShowCheckIn(false); setCheckInAnimal(null) }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('hospitalWorkflow.cancel')}</button>
-                    <button onClick={handleCheckIn} disabled={!checkInAnimal} style={{ padding: '8px 16px', background: checkInAnimal ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.checkIn')}</button>
+                  <div style={{ fontSize: 12, color: '#94a3b8' }}><span style={{ color: '#dc2626' }}>*</span> Required field</div>
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
+                    <button onClick={() => { setShowCheckIn(false); setCheckInAnimal(null); setCheckInError('') }} style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.cancel')}</button>
+                    <button onClick={handleCheckIn} disabled={!checkInAnimal || checkInSubmitting}
+                      style={{ padding: '10px 20px', background: checkInAnimal && !checkInSubmitting ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: checkInAnimal && !checkInSubmitting ? 'pointer' : 'not-allowed', fontWeight: 700, minWidth: 120 }}>
+                      {checkInSubmitting ? '⏳ Checking in...' : `✅ ${t('hospitalWorkflow.checkIn')}`}
+                    </button>
                   </div>
                 </div>
               </div>

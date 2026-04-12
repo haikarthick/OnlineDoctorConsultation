@@ -146,6 +146,22 @@ class StaffWorkflowService {
     hospitalId: string; animalId?: string; ownerId?: string; bookingId?: string;
     assignedVetId?: string; priority?: string; reason?: string;
   }) {
+    // Prevent duplicate active check-ins for the same animal today
+    if (data.animalId) {
+      const dupCheck = await database.query(
+        `SELECT queue_number, status FROM appointment_queue
+         WHERE hospital_id = $1 AND animal_id = $2
+           AND DATE(checked_in_at) = CURRENT_DATE
+           AND status NOT IN ('discharged', 'no_show')
+         LIMIT 1`,
+        [data.hospitalId, data.animalId]
+      );
+      if (dupCheck.rows.length > 0) {
+        const existing = dupCheck.rows[0];
+        throw new Error(`DUPLICATE_CHECKIN:${existing.queue_number}:${existing.status}`);
+      }
+    }
+
     // Get next queue number for today
     const countResult = await database.query(
       `SELECT COALESCE(MAX(queue_number), 0) + 1 AS next_num
