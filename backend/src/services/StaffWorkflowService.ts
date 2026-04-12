@@ -495,6 +495,18 @@ class StaffWorkflowService {
     careInstructions?: string; medications?: unknown[]; specialNeeds?: string;
     estimatedDischarge?: string; dailyRate?: number;
   }) {
+    // Prevent duplicate active admission for same animal at same hospital
+    const existing = await database.query(
+      `SELECT id, status FROM inpatient_admissions
+       WHERE animal_id = $1 AND hospital_id = $2
+       AND status NOT IN ('discharged', 'transferred', 'deceased')
+       LIMIT 1`,
+      [data.animalId, data.hospitalId]
+    );
+    if (existing.rows[0]) {
+      const existingStatus = existing.rows[0].status;
+      throw Object.assign(new Error(`DUPLICATE_ADMIT:${existingStatus}`), { code: 'DUPLICATE_ADMIT' });
+    }
     const id = uuidv4();
     const result = await database.query(`
       INSERT INTO inpatient_admissions (id, hospital_id, animal_id, owner_id, admitted_by,

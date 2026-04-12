@@ -215,7 +215,13 @@ class StaffWorkflowController {
         hospitalId, admittedBy: authReq.userId, ...req.body
       });
       res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      if (err.message?.startsWith('DUPLICATE_ADMIT:')) {
+        const existingStatus = err.message.split(':')[1]?.replace(/_/g, ' ') || 'active';
+        return res.status(409).json({ error: `This patient already has an active admission (${existingStatus}). Please discharge the current admission first before creating a new one.` });
+      }
+      res.status(500).json({ error: { message: err.message } });
+    }
   }
 
   async listInpatients(req: Request, res: Response) {

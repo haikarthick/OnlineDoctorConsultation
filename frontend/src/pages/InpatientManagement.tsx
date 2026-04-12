@@ -5,6 +5,12 @@ import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import apiService from '../services/api'
 import AnimalSearchPicker from '../components/AnimalSearchPicker'
 
+// JSONB columns from PostgreSQL arrive as JS objects — handle both string and array
+const parseJsonbArray = (val: any): any[] => {
+  if (Array.isArray(val)) return val
+  try { return JSON.parse(typeof val === 'string' ? val : '[]') } catch { return [] }
+}
+
 const STATUS_COLORS: Record<string, { bg: string; color: string; icon: string }> = {
   admitted:           { bg: '#dbeafe', color: '#1d4ed8', icon: '📋' },
   in_treatment:       { bg: '#fef3c7', color: '#b45309', icon: '💊' },
@@ -27,6 +33,7 @@ export default function InpatientManagement() {
   const [showAdmit, setShowAdmit] = useState(false)
   const [showVitals, setShowVitals] = useState<any>(null)
   const [vitalsError, setVitalsError] = useState('')
+  const [vitalsSubmitting, setVitalsSubmitting] = useState(false)
   const [showVitalsHistory, setShowVitalsHistory] = useState<any>(null)
   const [statusFilter, setStatusFilter] = useState('')
   const [admitAnimal, setAdmitAnimal] = useState<any>(null)
@@ -107,6 +114,7 @@ export default function InpatientManagement() {
       setVitalsError(t('inpatientManagement.vitalsErrorNegative'))
       return
     }
+    setVitalsSubmitting(true)
     try {
       const data: Record<string, unknown> = { notes: vitalsForm.notes }
       if (temp !== null) data.temperature = temp
@@ -116,7 +124,10 @@ export default function InpatientManagement() {
       setShowVitals(null)
       setVitalsForm({ temperature: '', heartRate: '', weight: '', notes: '' })
       loadData()
-    } catch { /* empty */ }
+    } catch (err: any) {
+      setVitalsError(err?.response?.data?.error || err?.message || 'Failed to save vitals. Please try again.')
+    }
+    setVitalsSubmitting(false)
   }
 
   async function loadMedicalHistory(patient: any) {
@@ -163,10 +174,25 @@ export default function InpatientManagement() {
             const sc = s.statusKey ? STATUS_COLORS[s.statusKey] : null
             const color = sc ? sc.color : (s.color || '#2563eb')
             const icon  = sc ? sc.icon  : (s.icon || '🛏️')
+            const isActive = s.statusKey === null ? statusFilter === '' : statusFilter === s.statusKey
             return (
-              <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: `4px solid ${color}` }}>
-                <div style={{ fontSize: 12, color: '#64748b' }}>{icon} {s.label}</div>
-                <div style={{ fontSize: 22, fontWeight: 700, color }}>{s.value ?? 0}</div>
+              <div key={i}
+                onClick={() => {
+                  if (s.statusKey === null) setStatusFilter('')
+                  else setStatusFilter(prev => prev === s.statusKey ? '' : s.statusKey as string)
+                }}
+                style={{
+                  background: isActive ? color : '#fff',
+                  borderRadius: 10, padding: '14px 16px',
+                  boxShadow: isActive ? `0 2px 8px ${color}44` : '0 1px 3px rgba(0,0,0,.08)',
+                  borderLeft: `4px solid ${color}`,
+                  cursor: 'pointer', transition: 'all 0.15s',
+                  outline: isActive ? `2px solid ${color}` : 'none',
+                  outlineOffset: 2,
+                }}>
+                <div style={{ fontSize: 12, color: isActive ? 'rgba(255,255,255,0.85)' : '#64748b' }}>{icon} {s.label}</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: isActive ? '#fff' : color }}>{s.value ?? 0}</div>
+                {isActive && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>🔍 Filtered</div>}
               </div>
             )
           })}
@@ -199,8 +225,8 @@ export default function InpatientManagement() {
           {patients.length === 0 && <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#94a3b8', padding: 40 }}>{t('inpatientManagement.noInpatients')}</p>}
           {patients.map(p => {
             const sc = STATUS_COLORS[p.status] || STATUS_COLORS.admitted
-            const meds = (() => { try { return JSON.parse(p.medications || '[]') } catch { return [] } })()
-            const vitals = (() => { try { return JSON.parse(p.vitals_log || '[]') } catch { return [] } })()
+            const meds = parseJsonbArray(p.medications)
+            const vitals = parseJsonbArray(p.vitals_log)
             const lastVitals = vitals.length > 0 ? vitals[vitals.length - 1] : null
             return (
               <div key={p.id} style={{ background: '#fff', borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 4px rgba(0,0,0,.07)', borderTop: `3px solid ${sc.color}`, borderLeft: `4px solid ${sc.color}` }}>
@@ -420,7 +446,7 @@ export default function InpatientManagement() {
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                 <button onClick={() => { setShowVitals(null); setVitalsError('') }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('inpatientManagement.cancel')}</button>
-                <button onClick={handleVitalsSubmit} style={{ padding: '8px 16px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('inpatientManagement.saveVitals')}</button>
+                <button onClick={handleVitalsSubmit} disabled={vitalsSubmitting} style={{ padding: '8px 16px', background: vitalsSubmitting ? '#94a3b8' : '#8b5cf6', color: '#fff', border: 'none', borderRadius: 8, cursor: vitalsSubmitting ? 'not-allowed' : 'pointer', fontWeight: 600, minWidth: 120 }}>{vitalsSubmitting ? '⏳ Saving...' : t('inpatientManagement.saveVitals')}</button>
               </div>
             </div>
           </div>
@@ -429,7 +455,7 @@ export default function InpatientManagement() {
 
       {/* Vitals History Modal */}
       {showVitalsHistory && (() => {
-        const allVitals: any[] = (() => { try { return JSON.parse(showVitalsHistory.vitals_log || '[]') } catch { return [] } })()
+        const allVitals: any[] = parseJsonbArray(showVitalsHistory.vitals_log)
         return (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }} onClick={() => setShowVitalsHistory(null)}>
             <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 520, maxWidth: '95vw', maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
@@ -537,7 +563,7 @@ export default function InpatientManagement() {
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>💊 {t('inpatientManagement.recentPrescriptions')}</div>
                     {medicalHistory.recentPrescriptions.slice(0, 5).map((rx: any, i: number) => {
-                      const meds = (() => { try { return typeof rx.medications === 'string' ? JSON.parse(rx.medications) : rx.medications || [] } catch { return [] } })()
+                      const meds = parseJsonbArray(typeof rx.medications === 'string' ? rx.medications : JSON.stringify(rx.medications || []))
                       return (
                         <div key={i} style={{ background: '#faf5ff', borderRadius: 8, padding: '8px 12px', marginBottom: 6, fontSize: 13 }}>
                           {meds.length > 0 ? meds.map((m: any, j: number) => (
