@@ -10,6 +10,16 @@ const PRIORITIES = ['emergency', 'urgent', 'high', 'normal', 'low'] as const
 const PRIORITY_COLORS: Record<string, string> = {
   emergency: '#dc2626', urgent: '#ea580c', high: '#d97706', normal: '#2563eb', low: '#6b7280',
 }
+
+// Triage level 1–5 maps directly to a priority — these are the SAME concept.
+// Never show both independently; derive priority from level automatically.
+const TRIAGE_LEVELS: Record<number, { priority: string; label: string; description: string; color: string; bg: string; icon: string }> = {
+  1: { priority: 'emergency', label: 'Critical',  description: 'Immediate life-threatening — act now',  color: '#dc2626', bg: '#fee2e2', icon: '🚨' },
+  2: { priority: 'urgent',    label: 'Urgent',    description: 'Serious condition — seen within 15 min', color: '#ea580c', bg: '#ffedd5', icon: '⚠️' },
+  3: { priority: 'high',      label: 'High',      description: 'Significant concern — monitor closely',  color: '#d97706', bg: '#fef3c7', icon: '🔶' },
+  4: { priority: 'normal',    label: 'Moderate',  description: 'Stable — routine attention required',    color: '#2563eb', bg: '#dbeafe', icon: '🔵' },
+  5: { priority: 'low',       label: 'Minor',     description: 'Non-urgent — can wait for treatment',    color: '#6b7280', bg: '#f1f5f9', icon: '🟢' },
+}
 const STAGE_ICONS: Record<string, string> = {
   triage: '🏥', examination: '🔍', treatment: '💊', observation: '👁️', discharge: '✅',
 }
@@ -43,7 +53,7 @@ export default function HospitalWorkflow() {
 
   // Triage modal
   const [triageTarget, setTriageTarget] = useState<any>(null)
-  const [triageForm, setTriageForm] = useState({ triageLevel: 3, triageNotes: '', priority: 'normal' })
+  const [triageForm, setTriageForm] = useState({ triageLevel: 3, triageNotes: '' })
 
   // Transition modal 
   const [transTarget, setTransTarget] = useState<any>(null)
@@ -128,8 +138,10 @@ export default function HospitalWorkflow() {
   async function handleTriage() {
     if (!triageTarget) return
     try {
-      await apiService.triagePatient(triageTarget.id, triageForm)
+      const priority = TRIAGE_LEVELS[triageForm.triageLevel]?.priority || 'normal'
+      await apiService.triagePatient(triageTarget.id, { ...triageForm, priority })
       setTriageTarget(null)
+      setTriageForm({ triageLevel: 3, triageNotes: '' })
       loadQueue()
     } catch { /* empty */ }
   }
@@ -283,7 +295,7 @@ export default function HospitalWorkflow() {
                 <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#f1f5f9', color: '#475569' }}>{(q.status || '').replace(/_/g, ' ')}</span>
                 <div style={{ display: 'flex', gap: 4 }}>
                   {q.status === 'waiting' && (
-                    <button onClick={() => { setTriageTarget(q); setTriageForm({ triageLevel: 3, triageNotes: '', priority: q.priority }); }} style={{ padding: '6px 12px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.triage')}</button>
+                    <button onClick={() => { setTriageTarget(q); setTriageForm({ triageLevel: 3, triageNotes: '' }); }} style={{ padding: '6px 12px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.triage')}</button>
                   )}
                   {['waiting', 'in_triage'].includes(q.status) && (
                     <button onClick={() => handleQueueStatus(q.id, 'in_examination')} style={{ padding: '6px 12px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.startExam')}</button>
@@ -333,24 +345,67 @@ export default function HospitalWorkflow() {
 
           {/* Triage Modal */}
           {triageTarget && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 420, maxWidth: '90vw' }}>
-                <h3 style={{ marginTop: 0 }}>Triage — #{triageTarget.queue_number} {triageTarget.animal_name}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <label style={{ fontWeight: 500, fontSize: 14 }}>{t('hospitalWorkflow.triageLevel')}</label>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {[1, 2, 3, 4, 5].map(n => (
-                      <button key={n} onClick={() => setTriageForm(f => ({ ...f, triageLevel: n }))}
-                        style={{ width: 42, height: 42, borderRadius: 8, border: triageForm.triageLevel === n ? '2px solid #2563eb' : '1px solid #d1d5db', background: triageForm.triageLevel === n ? '#dbeafe' : '#fff', fontWeight: 700, cursor: 'pointer', fontSize: 16 }}>{n}</button>
-                    ))}
+            <div onClick={e => { if (e.target === e.currentTarget) setTriageTarget(null) }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: 16 }}>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>🏥 Triage — #{triageTarget.queue_number} {triageTarget.animal_name}</h3>
+                    <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>Select severity level — priority is derived automatically</div>
                   </div>
-                  <select value={triageForm.priority} onChange={e => setTriageForm(f => ({ ...f, priority: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
-                    {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                  <textarea placeholder={t('hospitalWorkflow.triageNotesPlaceholder')} value={triageForm.triageNotes} onChange={e => setTriageForm(f => ({ ...f, triageNotes: e.target.value }))} rows={3} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical' }} />
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <button onClick={() => setTriageTarget(null)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('hospitalWorkflow.cancel')}</button>
-                    <button onClick={handleTriage} style={{ padding: '8px 16px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.saveTriage')}</button>
+                  <button onClick={() => setTriageTarget(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#64748b' }}>✕</button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {/* Unified triage level selector — number + label + color all in one */}
+                  <div>
+                    <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 8, display: 'block' }}>
+                      {t('hospitalWorkflow.triageLevel')} <span style={{ color: '#dc2626' }}>*</span>
+                    </label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {([1, 2, 3, 4, 5] as const).map(n => {
+                        const tl = TRIAGE_LEVELS[n]
+                        const isSelected = triageForm.triageLevel === n
+                        return (
+                          <button key={n} onClick={() => setTriageForm(f => ({ ...f, triageLevel: n }))}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 10, cursor: 'pointer', textAlign: 'left',
+                              border: isSelected ? `2px solid ${tl.color}` : '2px solid #e5e7eb',
+                              background: isSelected ? tl.bg : '#fafafa',
+                              transition: 'all .15s',
+                            }}>
+                            <span style={{ width: 32, height: 32, borderRadius: 8, background: isSelected ? tl.color : '#e5e7eb', color: isSelected ? '#fff' : '#6b7280', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 16, flexShrink: 0 }}>{n}</span>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: isSelected ? tl.color : '#374151', minWidth: 70 }}>{tl.icon} {tl.label}</span>
+                            <span style={{ fontSize: 12, color: isSelected ? tl.color : '#94a3b8' }}>{tl.description}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Derived priority badge — confirmation that priority auto-matches level */}
+                  {(() => {
+                    const tl = TRIAGE_LEVELS[triageForm.triageLevel]
+                    return (
+                      <div style={{ background: tl.bg, border: `1px solid ${tl.color}40`, borderRadius: 8, padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 12, color: tl.color, fontWeight: 600 }}>Priority assigned automatically:</span>
+                        <span style={{ padding: '2px 10px', borderRadius: 10, background: tl.color, color: '#fff', fontWeight: 700, fontSize: 12, textTransform: 'uppercase' }}>{tl.priority}</span>
+                      </div>
+                    )
+                  })()}
+
+                  {/* Notes */}
+                  <div>
+                    <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
+                      {t('hospitalWorkflow.triageNotesPlaceholder')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span>
+                    </label>
+                    <textarea placeholder="Observed symptoms, vital signs, reason for triage level..." value={triageForm.triageNotes} onChange={e => setTriageForm(f => ({ ...f, triageNotes: e.target.value }))} rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box', fontSize: 14 }} />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
+                    <button onClick={() => setTriageTarget(null)} style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.cancel')}</button>
+                    <button onClick={handleTriage} style={{ padding: '10px 20px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 700 }}>{t('hospitalWorkflow.saveTriage')}</button>
                   </div>
                 </div>
               </div>
