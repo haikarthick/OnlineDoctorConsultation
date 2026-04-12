@@ -598,6 +598,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.8rem 2.5rem;
+  padding-right: calc(2.5rem + 90px); /* reserve space for FloatingLanguageSelector */
   border-bottom: 1px solid #f3f4f6;
   background: #fafbfc;
   flex-shrink: 0;
@@ -783,6 +784,7 @@
 
   .register-form-topbar {
     padding: 0.8rem 1.8rem;
+    padding-right: calc(1.8rem + 90px);
   }
 
   .register-form-panel > .register-form-header,
@@ -858,6 +860,7 @@
 
   .register-form-topbar {
     padding: 0.6rem 1rem;
+    padding-right: calc(1rem + 50px); /* lang selector smaller on mobile */
     flex-wrap: wrap;
     gap: 0.4rem;
   }
@@ -996,6 +999,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.8rem 2.5rem;
+  padding-right: calc(2.5rem + 90px); /* reserve space for FloatingLanguageSelector */
   border-bottom: 1px solid #f3f4f6;
   background: #fafbfc;
   flex-shrink: 0;
@@ -1152,6 +1156,7 @@
 @media (max-width: 520px) {
   .login-topbar {
     padding: 0.6rem 1rem;
+    padding-right: calc(1rem + 50px); /* lang selector smaller on mobile */
     flex-wrap: wrap;
     gap: 0.4rem;
   }
