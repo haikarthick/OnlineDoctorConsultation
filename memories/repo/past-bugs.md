@@ -496,3 +496,19 @@ render-start.sh
 - **Fix:** 1. Raised Axios timeout to 60s in api.ts and client.ts. 2. Replaced correlated subqueries with aggregated LEFT JOIN in MarketplaceService.ts. 3. Added 4 perf indexes via seedDefaultSettings in database.ts (idempotent). 4. Added second interceptor to enrich timeout errors with isTimeout=true flag.
 - **Rule:** NEVER use correlated subqueries (SELECT ... FROM t WHERE id=l.id) inside main SELECT — always use aggregated LEFT JOIN. Always raise Axios timeout to 60s for free-tier Render.
 
+
+### REVIEW-001 — total_consultations used instead of total_reviews in vet profile update
+- **Logged:** 2026-04-12 16:30
+- **Symptom:** ReviewService.createReview() called UPDATE vet_profiles SET total_consultations = COUNT(*) FROM reviews — wrong column name and wrong semantics
+- **Root Cause:** Changed to total_reviews = COUNT(*) FROM reviews WHERE status='active'
+- **Fix:** NEVER update total_consultations when counting reviews; use total_reviews column which already exists in vet_profiles
+- **Rule:** Not specified
+
+
+### REVIEW-002 — ReviewModeration status mapping wrong — approved vs active
+- **Logged:** 2026-04-12 16:30
+- **Symptom:** Frontend handleModerate mapped action 'approve' to status 'approved' but DB constraint only allows active/hidden/flagged/removed. AdminService correctly maps approve->active but frontend state update had the wrong value, causing stale UI status badge
+- **Root Cause:** Fixed status map: approve->active, hide->hidden, flag->flagged, unflag->active, remove->removed
+- **Fix:** NEVER use 'approved' or 'pending' as review status values — DB CHECK constraint only allows active/hidden/flagged/removed
+- **Rule:** Not specified
+

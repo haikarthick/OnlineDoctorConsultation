@@ -765,3 +765,38 @@
 </details>
 
 ---
+
+## 2026-04-12 16:27 · `1e9a32a` · ✨ FEAT
+
+**Commit:** feat: verified-only reviews — consultation-linked, vet-context, helpful/report/response  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (20)</summary>
+
+  - VetCare_PROD_Stability_Plan.docx
+  - backend/src/controllers/AdminController.ts
+  - backend/src/controllers/ReviewController.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/AdminService.ts
+  - backend/src/services/ReviewService.ts
+  - backend/src/utils/database.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/ReviewModeration.tsx
+  - frontend/src/pages/petowner/WriteReview.css
+  - frontend/src/pages/petowner/WriteReview.tsx
+  - frontend/src/services/api.ts
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+  - ~$tCare_PROD_Stability_Plan.docx
+
+</details>
+
+---

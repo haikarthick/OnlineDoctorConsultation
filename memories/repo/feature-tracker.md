@@ -284,3 +284,9 @@
 - **Status:** done
 - **Description:** New Hospital Visits tab in Medical Records page shows queue visits + inpatient admissions. Auto-creates medical record on queue discharge. Auto-creates Clinical Case when Start Exam clicked. backend route GET /animals/:animalId/hospital-visits added. All 5 locale files updated.
 
+
+### ✅ Verified-Only Review System
+- **Logged:** 2026-04-12 16:30
+- **Status:** done
+- **Description:** Complete overhaul: consultation-linked reviews with ownership validation, vet context banner, 2-step WriteReview flow, helpful/report/vet-response endpoints, flag/unflag moderation, isPublic submission fix, total_reviews bug fix, UNIQUE constraint DB safety net, all 5 locales updated
+
