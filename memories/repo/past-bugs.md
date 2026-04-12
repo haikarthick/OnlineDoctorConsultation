@@ -432,3 +432,43 @@ render-start.sh
 - **Fix:** Queue status actions must be logically gated: no-show = waiting only, discharge = any active status
 - **Rule:** Not specified
 
+
+### UI-016 — Inpatient status color inconsistency
+- **Logged:** 2026-04-11 13:52
+- **Symptom:** Stat cards showed amber for admitted and red for in_treatment; patient card borders showed blue for admitted and amber for in_treatment; filter pills were all the same blue regardless of status — 3 different color systems for the same statuses
+- **Root Cause:** STATUS_COLORS map had no icon field; stat cards used hardcoded inline color array with different values; filter pills used flat hardcoded #2563eb
+- **Fix:** Added icon field to STATUS_COLORS; stat cards now reference STATUS_COLORS[statusKey].color and .icon; filter pills use STATUS_COLORS[s].bg when inactive and .color when active; patient cards kept existing STATUS_COLORS usage but also added borderLeft stripe
+- **Rule:** Single STATUS_COLORS map must be the ONLY source of truth for all status-based colors — never define parallel inline color arrays for the same statuses
+
+
+### DEPLOY-011 — Render free-tier keeps spinning down despite GitHub Actions uptime monitor
+- **Logged:** 2026-04-12 11:03
+- **Symptom:** Service wakes from inactivity on every user visit — GitHub Actions cron delayed 10-30+ min by GitHub queue pressure, missing Render's 15-min idle window even with two overlapping schedules
+- **Root Cause:** GitHub Actions cron is best-effort, not guaranteed — cannot be relied on as sole keep-alive for Render free tier
+- **Fix:** Added startSelfPing() in index.ts: server pings own RENDER_EXTERNAL_URL/api/v1/health every 10 min using built-in https module. Render load balancer sees it as real incoming traffic and resets idle timer. First ping after 5 min warmup. Only active in production with RENDER_EXTERNAL_URL set. GitHub Actions monitor kept as secondary fallback.
+- **Rule:** NEVER rely solely on GitHub Actions cron to keep Render free-tier warm — self-ping from within the Node.js process is the only reliable approach
+
+
+### UI-017 — Triage modal had contradictory dual-input: numeric level + priority dropdown
+- **Logged:** 2026-04-12 11:13
+- **Symptom:** triageLevel (1-5) and priority (emergency/urgent/high/normal/low) were the same concept shown as two independent controls — user could select Level 5 (Minor) + Emergency, a medically contradictory combination
+- **Root Cause:** Two separate state fields for the same concept; no coupling between them; no validation preventing contradiction
+- **Fix:** Removed priority field from triageForm; added TRIAGE_LEVELS map auto-deriving priority from level; redesigned modal with single color-coded row selector (number + label + description + color in one button); shows auto-derived priority badge as confirmation
+- **Rule:** NEVER represent the same concept as two independent UI controls — derive one from the other or merge into a single unified control
+
+
+### UI-018 — Hospital queue — duplicate check-in, non-clickable tiles, missing check-in time
+- **Logged:** 2026-04-12 11:24
+- **Symptom:** Same patient (Buddy) appeared twice in queue (#1 and #2) because no duplicate prevention existed. Stat tiles were static divs with no onClick. Queue rows showed no check-in timestamp. Filter numbered from global queue_number even when viewing a single status group.
+- **Root Cause:** No UNIQUE constraint or service-level duplicate check in checkInToQueue(); stat tiles had no filter state; checked_in_at was stored in DB but never rendered; queue numbering was always global
+- **Fix:** Backend: duplicate check before INSERT throws DUPLICATE_CHECKIN error surfaced as HTTP 409. Frontend: clickable tiles set queueStatusFilter state; per-status position shown as primary number when filtered; checked_in_at displayed on each row; check-in modal has error banner + loading state.
+- **Rule:** ALWAYS prevent duplicate active queue entries at the service layer before INSERT. ALWAYS make stat/dashboard tiles clickable to filter the related list below.
+
+
+### UI-019 — Vitals history always empty — JSONB parsed as JSON string
+- **Logged:** 2026-04-12 11:38
+- **Symptom:** Vitals recorded successfully but 'Last Vitals' bar never appeared; history modal showed 'No vitals recorded'
+- **Root Cause:** PostgreSQL JSONB columns are returned by the pg driver as native JS arrays. Frontend did JSON.parse(array) which threw SyntaxError silently caught by try/catch, always returning []
+- **Fix:** Added parseJsonbArray() helper: checks Array.isArray() first, falls back to JSON.parse only for strings. Applied to vitals_log and medications columns.
+- **Rule:** NEVER call JSON.parse() directly on JSONB columns — always check Array.isArray() first.
+

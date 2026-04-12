@@ -474,3 +474,122 @@
 </details>
 
 ---
+
+## 2026-04-10 16:40 · `9721ba9` · 🔧 CHORE
+
+**Commit:** chore: memory — UI-014 vitals UX, UI-015 no-show logic  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-04-11 13:48 · `a2ba40d` · 🐛 FIX
+
+**Commit:** fix: unify Inpatient status color system across stat cards, filter pills, patient cards  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/InpatientManagement.tsx
+
+</details>
+
+---
+
+## 2026-04-11 13:56 · `f0be1a7` · 🐛 FIX
+
+**Commit:** fix: Admit Patient modal UX — required indicators, inline helper, error banner, loading state  
+**Author:** haikarthick  
+**Categories:** CONFIG · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - .github/copilot-instructions.md
+  - frontend/src/pages/InpatientManagement.tsx
+  - memories/repo/lessons.md
+
+</details>
+
+---
+
+## 2026-04-12 10:59 · `a05a920` · 🐛 FIX
+
+**Commit:** fix: self-ping keep-alive — server pings own health endpoint every 10 min  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/index.ts
+
+</details>
+
+---
+
+## 2026-04-12 11:10 · `5cddcf3` · 🐛 FIX
+
+**Commit:** fix: triage modal — remove contradictory level+priority dual input, unify into single selector  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/HospitalWorkflow.tsx
+
+</details>
+
+---
+
+## 2026-04-12 11:21 · `0833677` · 🐛 FIX
+
+**Commit:** fix: queue workflow — duplicate prevention, clickable tiles, per-status numbering, check-in time  
+**Author:** haikarthick  
+**Categories:** SERVICE · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/controllers/StaffWorkflowController.ts
+  - backend/src/services/StaffWorkflowService.ts
+  - frontend/src/pages/HospitalWorkflow.tsx
+
+</details>
+
+---
+
+## 2026-04-12 11:36 · `4f4c830` · 🐛 FIX
+
+**Commit:** fix: vitals history + clickable stat tiles + duplicate admission prevention  
+**Author:** haikarthick  
+**Categories:** SERVICE · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/controllers/StaffWorkflowController.ts
+  - backend/src/services/StaffWorkflowService.ts
+  - frontend/src/pages/InpatientManagement.tsx
+
+</details>
+
+---
