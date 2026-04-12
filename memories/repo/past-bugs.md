@@ -472,3 +472,19 @@ render-start.sh
 - **Fix:** Added parseJsonbArray() helper: checks Array.isArray() first, falls back to JSON.parse only for strings. Applied to vitals_log and medications columns.
 - **Rule:** NEVER call JSON.parse() directly on JSONB columns — always check Array.isArray() first.
 
+
+### UI-018 — Referral form asked for raw Vet User ID UUID
+- **Logged:** 2026-04-12 15:20
+- **Symptom:** Symptom: New Specialist Referral modal had a plain text input labeled 'Vet user ID' — users had no way to discover other vets' UUIDs. Root Cause: toVetId was implemented as a text input with no search/autocomplete. Fix: Created VetSearchPicker component with GET /vets/search API, pre-loads all vets, smart search by name/specialization/clinic/license. Rule: NEVER implement foreign-key fields as raw UUID text inputs — always use a searchable picker component.
+- **Root Cause:** Not specified
+- **Fix:** Not specified
+- **Rule:** Not specified
+
+
+### API-019 — req.user!.id instead of req.userId in hospital network routes
+- **Logged:** 2026-04-12 15:28
+- **Symptom:** Symptom: My Hospital Network Memberships page showed 'Cannot read properties of undefined (reading id)'. Root Cause: Routes used (req as any).user!.id but auth middleware sets req.userId directly — req.user is always undefined. Affected routes: enrollAnimal, inviteWalkIn, acceptEnrollment, declineEnrollment, getMyEnrollments. Fix: Changed all 5 occurrences to (req as any).userId in routes/index.ts. Also fixed FileController.ts which used req.user?.userId silently falling back to 'anonymous'. Rule: NEVER use req.user in this codebase. Auth middleware sets req.userId (string) and req.userRole. Always use (req as any).userId.
+- **Root Cause:** Not specified
+- **Fix:** Not specified
+- **Rule:** Not specified
+

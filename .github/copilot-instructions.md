@@ -288,6 +288,32 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 - Pattern: `/medical-records?animalId=X&recordId=Y&tab=diagnoses`
 - This applies to: medical records, consultations, prescriptions, bookings, lab results, vaccinations, allergies, and ALL future entities
 
+## Zero Unhandled Errors Rule (MANDATORY — ABSOLUTE ZERO TOLERANCE)
+
+**NO UI action, navigation, button click, or page load may ever result in an unhandled error visible to the user. This must be enforced at implementation time — never post-mortem.**
+
+### Backend routes — req.userId is the ONLY correct pattern
+- The auth middleware sets `req.userId` and `req.userRole` directly on the request object
+- **NEVER use `(req as any).user?.id` or `(req as any).user!.id`** — `req.user` is ALWAYS `undefined`
+- Every new route must use `(req as any).userId` for the authenticated user's ID
+- Before committing any new route: grep for `.user!.` and `.user?.` in routes files — must return zero matches
+
+### Backend service methods — NEVER throw raw TypeErrors to the client
+- Every service method MUST have try/catch and throw descriptive `new Error(message)` — never let TypeErrors propagate
+- Controller catch blocks MUST return structured error: `res.status(4xx/5xx).json({ error: err.message })`
+- **NEVER** use `res.status(500).json({ error: err.message })` for all errors — use 400 for validation, 404 for not found, 500 for unexpected
+
+### Frontend — NEVER silent catch
+- **ALL** `catch` blocks in data-loading functions MUST set an error state variable: `setError(err?.response?.data?.error || err?.message || 'Something went wrong')`
+- **ALL** catch blocks in form submit handlers MUST display the error to the user (red banner at top)
+- NEVER write `catch { /* empty */ }` — at minimum log: `catch (err) { console.error(err) }`
+- Error state MUST be displayed as a dismissible red alert at the top of the page or modal
+
+### Pre-implementation check (MANDATORY before writing any new endpoint or component)
+1. For backend routes: confirm which field auth middleware sets — it is `req.userId`, not `req.user`
+2. For frontend components: confirm API response shape before accessing `.data`, `.id`, etc.
+3. Test the null/undefined path: what happens when the API returns empty array, 404, or 500?
+
 ## Functional Integrity Rule (MANDATORY — ZERO TOLERANCE)
 
 **Never break existing logic while adding new features.**

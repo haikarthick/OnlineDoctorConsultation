@@ -28,7 +28,7 @@ export class FileController {
     // Track in registry
     const record = {
       ...storedFile,
-      uploadedBy: (req as any).user?.userId || 'anonymous',
+      uploadedBy: (req as any).userId || 'anonymous',
       uploadedAt: new Date().toISOString(),
     };
     fileRegistry.set(storedFile.key, record);
@@ -54,7 +54,7 @@ export class FileController {
       const storedFile = await storage.save(file, folder);
       const record = {
         ...storedFile,
-        uploadedBy: (req as any).user?.userId || 'anonymous',
+        uploadedBy: (req as any).userId || 'anonymous',
         uploadedAt: new Date().toISOString(),
       };
       fileRegistry.set(storedFile.key, record);

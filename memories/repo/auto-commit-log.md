@@ -670,3 +670,43 @@
 </details>
 
 ---
+
+## 2026-04-12 14:12 · `03e066b` · 🔧 CHORE
+
+**Commit:** chore: update auto-commit-log  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-04-12 15:16 · `de7f274` · ✨ FEAT
+
+**Commit:** feat: smart vet search picker for specialist referrals + validation  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - backend/create_missing_tables.cjs
+  - backend/init_neon_db.cjs
+  - backend/src/controllers/StaffWorkflowController.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/StaffWorkflowService.ts
+  - check_neon.js
+  - frontend/src/components/VetSearchPicker.tsx
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---

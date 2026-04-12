@@ -311,7 +311,7 @@ router.post('/hospital-networks/:networkId/enroll-animal', authMiddleware, async
     animalId,
     networkId: req.params.networkId,
     hospitalId,
-    enrolledBy: (req as any).user!.id,
+    enrolledBy: (req as any).userId,
     notes,
   });
   res.json(result);
@@ -376,7 +376,7 @@ router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, async
     const result = await HospitalNetworkService.inviteWalkInPatient({
       networkId: req.params.networkId, hospitalId, patientName, patientEmail,
       patientPhone, animalName, animalSpecies, message,
-    }, (req as any).user!.id);
+    }, (req as any).userId);
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -387,7 +387,7 @@ router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, async
 router.post('/hospital-networks/enrollments/:contextId/accept', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const { consentScope } = req.body;
-    await HospitalNetworkService.acceptEnrollment(req.params.contextId, (req as any).user!.id, consentScope);
+    await HospitalNetworkService.acceptEnrollment(req.params.contextId, (req as any).userId, consentScope);
     res.json({ success: true });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -397,7 +397,7 @@ router.post('/hospital-networks/enrollments/:contextId/accept', authMiddleware, 
 // Patient declines enrollment request
 router.post('/hospital-networks/enrollments/:contextId/decline', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
-    await HospitalNetworkService.declineEnrollment(req.params.contextId, (req as any).user!.id);
+    await HospitalNetworkService.declineEnrollment(req.params.contextId, (req as any).userId);
     res.json({ success: true });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -407,7 +407,7 @@ router.post('/hospital-networks/enrollments/:contextId/decline', authMiddleware,
 // Patient views all their network enrollments
 router.get('/my-network-enrollments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
-    const results = await HospitalNetworkService.getMyEnrollments((req as any).user!.id);
+    const results = await HospitalNetworkService.getMyEnrollments((req as any).userId);
     res.json(results);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
