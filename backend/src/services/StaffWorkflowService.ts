@@ -24,6 +24,42 @@ class StaffWorkflowService {
     return result.rows;
   }
 
+  async searchVets(query: string, excludeUserId?: string, limit = 20) {
+    const params: unknown[] = [];
+    let whereClause = `u.role = 'veterinarian' AND u.is_active = true`;
+
+    if (excludeUserId) {
+      params.push(excludeUserId);
+      whereClause += ` AND u.id != $${params.length}`;
+    }
+
+    if (query.trim()) {
+      params.push(`%${query.trim()}%`);
+      const p = params.length;
+      whereClause += ` AND (
+        u.first_name ILIKE $${p} OR u.last_name ILIKE $${p} OR u.email ILIKE $${p}
+        OR vp.clinic_name ILIKE $${p} OR vp.license_number ILIKE $${p}
+        OR EXISTS (SELECT 1 FROM unnest(COALESCE(vp.specializations, '{}')) s WHERE s ILIKE $${p})
+      )`;
+    }
+
+    params.push(limit);
+    const limitParam = params.length;
+
+    const result = await database.query(`
+      SELECT u.id, u.first_name, u.last_name, u.email,
+        vp.specializations, vp.years_of_experience,
+        vp.clinic_name, vp.rating, vp.total_reviews, vp.license_number,
+        vp.is_verified, vp.is_available, vp.consultation_fee, vp.currency
+      FROM users u
+      LEFT JOIN vet_profiles vp ON vp.user_id = u.id
+      WHERE ${whereClause}
+      ORDER BY vp.is_verified DESC NULLS LAST, vp.rating DESC NULLS LAST, u.first_name ASC
+      LIMIT $${limitParam}
+    `, params);
+    return result.rows;
+  }
+
   async getAnimalMedicalSummary(animalId: string) {
     const [animal, records, prescriptions, vaccinations, allergies] = await Promise.all([
       database.query(`
@@ -488,6 +524,20 @@ class StaffWorkflowService {
     animalId?: string; reason: string; specialtyNeeded?: string;
     priority?: string; clinicalNotes?: string;
   }) {
+    // Validation
+    if (data.fromVetId === data.toVetId) {
+      throw new Error('Cannot create a referral to yourself');
+    }
+    if (!data.reason?.trim()) {
+      throw new Error('Reason for referral is required');
+    }
+    const vetCheck = await database.query(
+      `SELECT id FROM users WHERE id = $1 AND role = 'veterinarian' AND is_active = true`,
+      [data.toVetId]
+    );
+    if (vetCheck.rows.length === 0) {
+      throw new Error('Selected veterinarian not found or is inactive');
+    }
     const id = uuidv4();
     const result = await database.query(`
       INSERT INTO referrals (id, case_id, hospital_id, from_vet_id, to_vet_id, animal_id,

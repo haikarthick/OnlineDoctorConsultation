@@ -4,6 +4,7 @@ import { useSettings } from '../context/SettingsContext'
 import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import apiService from '../services/api'
 import AnimalSearchPicker from '../components/AnimalSearchPicker'
+import VetSearchPicker from '../components/VetSearchPicker'
 
 const STAGES = ['triage', 'examination', 'treatment', 'observation', 'discharge'] as const
 const PRIORITIES = ['emergency', 'urgent', 'high', 'normal', 'low'] as const
@@ -52,7 +53,10 @@ export default function HospitalWorkflow() {
   // Referral state
   const [referrals, setReferrals] = useState<any[]>([])
   const [showNewReferral, setShowNewReferral] = useState(false)
-  const [referralForm, setReferralForm] = useState({ toVetId: '', reason: '', specialtyNeeded: '', priority: 'normal', clinicalNotes: '' })
+  const [referralForm, setReferralForm] = useState({ reason: '', specialtyNeeded: '', priority: 'normal', clinicalNotes: '' })
+  const [selectedToVet, setSelectedToVet] = useState<any>(null)
+  const [referralError, setReferralError] = useState('')
+  const [referralSubmitting, setReferralSubmitting] = useState(false)
 
   // Triage modal
   const [triageTarget, setTriageTarget] = useState<any>(null)
@@ -189,17 +193,24 @@ export default function HospitalWorkflow() {
   }
 
   async function handleCreateReferral() {
-    if (!hospitalId) return
+    if (!hospitalId || !selectedToVet || !referralForm.reason.trim()) return
+    setReferralError('')
+    setReferralSubmitting(true)
     try {
       await apiService.createReferral(hospitalId, {
+        toVetId: selectedToVet.id,
         ...referralForm,
         ...(referralAnimal ? { animalId: referralAnimal.id } : {}),
       })
       setShowNewReferral(false)
-      setReferralForm({ toVetId: '', reason: '', specialtyNeeded: '', priority: 'normal', clinicalNotes: '' })
+      setReferralForm({ reason: '', specialtyNeeded: '', priority: 'normal', clinicalNotes: '' })
+      setSelectedToVet(null)
       setReferralAnimal(null)
       loadReferrals()
-    } catch { /* empty */ }
+    } catch (err: any) {
+      setReferralError(err?.response?.data?.error || err?.message || 'Failed to create referral')
+    }
+    setReferralSubmitting(false)
   }
 
   async function handleReferralAction(id: string, status: string) {
@@ -766,36 +777,106 @@ export default function HospitalWorkflow() {
 
           {/* Create Referral Modal */}
           {showNewReferral && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 500, maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' }}>
-                <h3 style={{ marginTop: 0 }}>🔀 {t('hospitalWorkflow.newSpecialistReferral')}</h3>
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}
+              onClick={e => { if (e.target === e.currentTarget) { setShowNewReferral(false); setSelectedToVet(null); setReferralAnimal(null); setReferralError('') } }}>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 520, maxWidth: '92vw', maxHeight: '88vh', overflowY: 'auto', position: 'relative' }}>
+                <button onClick={() => { setShowNewReferral(false); setSelectedToVet(null); setReferralAnimal(null); setReferralError('') }}
+                  style={{ position: 'absolute', top: 16, right: 16, background: '#f1f5f9', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>✕</button>
+                <h3 style={{ marginTop: 0, marginBottom: 16 }}>🔀 {t('hospitalWorkflow.newSpecialistReferral')}</h3>
+
+                {referralError && (
+                  <div style={{ background: '#fee2e2', color: '#dc2626', borderRadius: 8, padding: '10px 14px', marginBottom: 12, fontSize: 13 }}>
+                    ⚠️ {referralError}
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {/* Vet Search — required */}
+                  <VetSearchPicker selectedVet={selectedToVet} onSelect={setSelectedToVet} required />
+                  {!selectedToVet && (
+                    <p style={{ margin: '-6px 0 0', fontSize: 12, color: '#d97706' }}>
+                      ⚠️ Required: Search and select a veterinarian to enable submission
+                    </p>
+                  )}
+
+                  {/* Patient — optional */}
                   <AnimalSearchPicker selectedAnimal={referralAnimal} onSelect={setReferralAnimal} label="🔍 Patient (optional)" />
+
+                  {/* Reason — required */}
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.referringTo')}</label>
-                    <input placeholder="Vet user ID" value={referralForm.toVetId} onChange={e => setReferralForm(f => ({ ...f, toVetId: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
+                      {t('hospitalWorkflow.reasonForReferral')} <span style={{ color: '#dc2626' }}>*</span>
+                    </label>
+                    <input
+                      placeholder="e.g., Complex orthopedic case requiring specialist evaluation"
+                      value={referralForm.reason}
+                      onChange={e => setReferralForm(f => ({ ...f, reason: e.target.value }))}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: `1px solid ${!referralForm.reason.trim() ? '#fca5a5' : '#d1d5db'}`, boxSizing: 'border-box' }}
+                    />
+                    {!referralForm.reason.trim() && (
+                      <p style={{ margin: '4px 0 0', fontSize: 12, color: '#d97706' }}>
+                        ⚠️ Required: Provide a reason for the referral
+                      </p>
+                    )}
                   </div>
+
+                  {/* Specialty — optional */}
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.reasonForReferral')}</label>
-                    <input placeholder="e.g., Complex orthopedic case" value={referralForm.reason} onChange={e => setReferralForm(f => ({ ...f, reason: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
+                      {t('hospitalWorkflow.specialtyNeeded')} <span style={{ fontSize: 12, color: '#6b7280', fontWeight: 400 }}>(optional)</span>
+                    </label>
+                    <input
+                      placeholder="e.g., Cardiology, Orthopedics, Surgery"
+                      value={referralForm.specialtyNeeded}
+                      onChange={e => setReferralForm(f => ({ ...f, specialtyNeeded: e.target.value }))}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }}
+                    />
                   </div>
+
+                  {/* Priority */}
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.specialtyNeeded')}</label>
-                    <input placeholder="e.g., Cardiology, Orthopedics, Surgery" value={referralForm.specialtyNeeded} onChange={e => setReferralForm(f => ({ ...f, specialtyNeeded: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }} />
-                  </div>
-                  <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.priority')}</label>
-                    <select value={referralForm.priority} onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }}>
-                      {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
+                      {t('hospitalWorkflow.priority')} <span style={{ color: '#dc2626' }}>*</span>
+                    </label>
+                    <select
+                      value={referralForm.priority}
+                      onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }}
+                    >
+                      {PRIORITIES.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
                     </select>
                   </div>
+
+                  {/* Clinical Notes — optional */}
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.clinicalNotes')}</label>
-                    <textarea placeholder={t('hospitalWorkflow.clinicalNotesPlaceholder')} value={referralForm.clinicalNotes} onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))} rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }} />
+                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
+                      {t('hospitalWorkflow.clinicalNotes')} <span style={{ fontSize: 12, color: '#6b7280', fontWeight: 400 }}>(optional)</span>
+                    </label>
+                    <textarea
+                      placeholder={t('hospitalWorkflow.clinicalNotesPlaceholder')}
+                      value={referralForm.clinicalNotes}
+                      onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))}
+                      rows={3}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }}
+                    />
                   </div>
+
+                  <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6b7280' }}>
+                    <span style={{ color: '#dc2626' }}>*</span> Required field
+                  </p>
+
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
-                    <button onClick={() => { setShowNewReferral(false); setReferralAnimal(null) }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('hospitalWorkflow.cancel')}</button>
-                    <button onClick={handleCreateReferral} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.createReferral')}</button>
+                    <button
+                      onClick={() => { setShowNewReferral(false); setSelectedToVet(null); setReferralAnimal(null); setReferralError('') }}
+                      style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}
+                    >{t('hospitalWorkflow.cancel')}</button>
+                    <button
+                      onClick={handleCreateReferral}
+                      disabled={!selectedToVet || !referralForm.reason.trim() || referralSubmitting}
+                      style={{ padding: '8px 16px', background: (!selectedToVet || !referralForm.reason.trim() || referralSubmitting) ? '#93c5fd' : '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: (!selectedToVet || !referralForm.reason.trim() || referralSubmitting) ? 'not-allowed' : 'pointer', fontWeight: 600 }}
+                    >
+                      {referralSubmitting ? '⏳ Creating...' : t('hospitalWorkflow.createReferral')}
+                    </button>
                   </div>
                 </div>
               </div>

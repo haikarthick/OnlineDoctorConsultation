@@ -15,6 +15,15 @@ class StaffWorkflowController {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
+  async searchVets(req: Request, res: Response) {
+    try {
+      const query = (req.query.q as string) || '';
+      const authReq = req as any;
+      const data = await staffWorkflowService.searchVets(query, authReq.userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
   async getAnimalMedicalSummary(req: Request, res: Response) {
     try {
       const data = await staffWorkflowService.getAnimalMedicalSummary(req.params.animalId);
@@ -181,7 +190,10 @@ class StaffWorkflowController {
         hospitalId, fromVetId: authReq.userId, ...req.body
       });
       res.status(201).json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      const status = err.message?.includes('Cannot create') || err.message?.includes('not found') || err.message?.includes('required') ? 400 : 500;
+      res.status(status).json({ error: err.message });
+    }
   }
 
   async listReferrals(req: Request, res: Response) {

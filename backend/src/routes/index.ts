@@ -664,6 +664,7 @@ router.get('/workflow/cases/:id', authMiddleware, asyncHandler((req: Request, re
 router.put('/workflow/cases/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateWorkflowCase(req, res)));
 router.patch('/workflow/cases/:id/transition', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.transitionWorkflowStage(req, res)));
 // Referrals
+router.get('/vets/search', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.searchVets(req, res)));
 router.get('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listReferrals(req, res)));
 router.post('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.createReferral(req, res)));
 router.patch('/referrals/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateReferralStatus(req, res)));
