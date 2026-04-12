@@ -18,12 +18,16 @@ class MarketplaceService {
       species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender,
       listingTier, isHotDeal, vaccinationStatus, healthCertificate, sortBy,
     } = filters;
+    // Use aggregated LEFT JOIN instead of correlated subqueries (avoids N+1 per row)
     let query = `SELECT l.*, u.first_name || ' ' || u.last_name as seller_name, e.name as enterprise_name,
-                 (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count,
-                 (SELECT MAX(amount) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as highest_bid
+                 COALESCE(b.bid_count, 0) as bid_count, b.highest_bid
                  FROM marketplace_listings l
                  LEFT JOIN users u ON l.seller_id = u.id
                  LEFT JOIN enterprises e ON l.enterprise_id = e.id
+                 LEFT JOIN (
+                   SELECT listing_id, COUNT(*) as bid_count, MAX(amount) as highest_bid
+                   FROM marketplace_bids WHERE status = 'active' GROUP BY listing_id
+                 ) b ON b.listing_id = l.id
                  WHERE 1=1`;
     const params: any[] = []; let idx = 1;
 
@@ -295,10 +299,14 @@ class MarketplaceService {
   async adminListAllListings(filters: any = {}) {
     const { status, adminApproved, category, species, limit = 50, offset = 0 } = filters;
     let query = `SELECT l.*, u.first_name || ' ' || u.last_name as seller_name, e.name as enterprise_name,
-                 (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count
+                 COALESCE(b.bid_count, 0) as bid_count
                  FROM marketplace_listings l
                  LEFT JOIN users u ON l.seller_id = u.id
-                 LEFT JOIN enterprises e ON l.enterprise_id = e.id WHERE 1=1`;
+                 LEFT JOIN enterprises e ON l.enterprise_id = e.id
+                 LEFT JOIN (
+                   SELECT listing_id, COUNT(*) as bid_count
+                   FROM marketplace_bids WHERE status = 'active' GROUP BY listing_id
+                 ) b ON b.listing_id = l.id WHERE 1=1`;
     const params: any[] = []; let idx = 1;
     if (status) { query += ` AND l.status = $${idx++}`; params.push(status); }
     if (adminApproved !== undefined) { query += ` AND l.admin_approved = $${idx++}`; params.push(adminApproved === 'true' || adminApproved === true); }

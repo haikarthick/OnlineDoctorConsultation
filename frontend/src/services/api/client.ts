@@ -12,7 +12,7 @@ let csrfToken: string | null = null
 
 const client: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
+  timeout: 60000, // 60s — free-tier Render DB can take up to 30-90s to wake from sleep
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

@@ -15,7 +15,7 @@ class ApiService {
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 30000,
+      timeout: 60000, // 60s — free-tier Render DB can take up to 30-90s to wake from sleep
       withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
@@ -81,6 +81,22 @@ class ApiService {
             originalConfig._csrfRetry = true
             return this.client.request(originalConfig)
           }
+        }
+        return Promise.reject(error)
+      }
+    )
+
+    // Add timeout flag so pages can show user-friendly message instead of raw axios error
+    this.client.interceptors.response.use(
+      undefined,
+      (error: AxiosError) => {
+        if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+          const enriched = new Error(
+            'The server is taking longer than expected to respond (possibly waking from sleep). Please wait a moment and try again.'
+          ) as any
+          enriched.isTimeout = true
+          enriched.originalError = error
+          return Promise.reject(enriched)
         }
         return Promise.reject(error)
       }

@@ -836,6 +836,18 @@ class PostgresDatabase {
         CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff'))
     `).catch(() => {});
 
+    // Marketplace performance indexes — critical for free-tier Render cold-start
+    // These are idempotent (CREATE INDEX IF NOT EXISTS) so safe to run on every startup
+    const marketplaceIndexes = [
+      `CREATE INDEX IF NOT EXISTS idx_marketplace_listings_status_approved ON marketplace_listings(status, admin_approved)`,
+      `CREATE INDEX IF NOT EXISTS idx_marketplace_listings_hot_deal ON marketplace_listings(is_hot_deal, created_at DESC)`,
+      `CREATE INDEX IF NOT EXISTS idx_marketplace_listings_status ON marketplace_listings(status)`,
+      `CREATE INDEX IF NOT EXISTS idx_marketplace_bids_listing_status ON marketplace_bids(listing_id, status)`,
+    ];
+    for (const ddl of marketplaceIndexes) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
     logger.info('Default system settings seeded');
   }
 
