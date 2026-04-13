@@ -52,6 +52,15 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   const [historyLoading, setHistoryLoading] = useState(false)
   const [historyLoaded, setHistoryLoaded] = useState(false)
 
+  // Referral state
+  const [showReferralModal, setShowReferralModal] = useState(false)
+  const [referralForm, setReferralForm] = useState({ networkId: '', fromHospitalId: '', toHospitalId: '', reason: '', priority: 'normal', clinicalNotes: '' })
+  const [networksList, setNetworksList] = useState<any[]>([])
+  const [networkHospitals, setNetworkHospitals] = useState<any[]>([])
+  const [referralSubmitting, setReferralSubmitting] = useState(false)
+  const [referralSuccess, setReferralSuccess] = useState('')
+  const [referralError, setReferralError] = useState('')
+
   // Refs
   const chatEndRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -188,6 +197,48 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
       if (localVideoRef.current) localVideoRef.current.srcObject = active
     }
   }, [isCameraOff, mediaMode])
+
+  // Load available networks when referral modal opens
+  useEffect(() => {
+    if (showReferralModal) {
+      ;(apiService as any).listHospitalNetworks?.()
+        .then((res: any) => setNetworksList(res.networks || res.data || []))
+        .catch(() => {})
+    }
+  }, [showReferralModal])
+
+  // Load hospitals in selected network
+  useEffect(() => {
+    if (referralForm.networkId) {
+      ;(apiService as any).client.get(`/hospital-networks/${referralForm.networkId}/hospitals`)
+        .then((res: any) => setNetworkHospitals(res.data?.hospitals || []))
+        .catch(() => {})
+    }
+  }, [referralForm.networkId])
+
+  const handleCreateReferral = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!referralForm.networkId || !referralForm.toHospitalId || !referralForm.reason) {
+      setReferralError('Please fill all required fields')
+      return
+    }
+    setReferralSubmitting(true)
+    setReferralError('')
+    try {
+      await (apiService as any).createNetworkReferral({
+        ...referralForm,
+        animalId: animalInfo?.id,
+        consultationId: conId,
+      })
+      setReferralSuccess('Referral sent successfully!')
+      setShowReferralModal(false)
+      setTimeout(() => setReferralSuccess(''), 4000)
+    } catch (err: any) {
+      setReferralError(err?.response?.data?.error || err?.message || 'Failed to send referral')
+    } finally {
+      setReferralSubmitting(false)
+    }
+  }
 
   // --- Room Initialization ---------------------------------
   const initRoom = async () => {
@@ -684,6 +735,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
 
   // --- Main Consultation Room -------------------------------
   return (
+    <>
     <div className="module-page">
       <div className="page-header">
         <div>
@@ -697,6 +749,13 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
         <div className="page-header-actions">
           <button className="btn btn-outline" onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
             💊 {t('consultationRoom.prescription')}
+          </button>
+          <button
+            className="module-btn"
+            style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
+            onClick={() => setShowReferralModal(true)}
+          >
+            🔄 Refer to Network Hospital
           </button>
           {session?.status === 'active' && (
             <button className="btn btn-danger" onClick={handleEndCall} style={{ background: '#dc2626', color: 'white', border: 'none' }}>
@@ -1060,6 +1119,82 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
         </div>
       </div>
     </div>
+
+      {/* Referral Modal */}
+      {showReferralModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setShowReferralModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 28, width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0 }}>🔄 Refer Patient to Network Hospital</h3>
+              <button onClick={() => setShowReferralModal(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            </div>
+            {referralError && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '8px 12px', borderRadius: 6, marginBottom: 12 }}>{referralError}</div>}
+            <form onSubmit={handleCreateReferral}>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Network <span style={{ color: '#dc2626' }}>*</span></label>
+                <select style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }} required
+                  value={referralForm.networkId} onChange={e => setReferralForm(f => ({ ...f, networkId: e.target.value, toHospitalId: '' }))}>
+                  <option value="">— Select Network —</option>
+                  {networksList.map((n: any) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                </select>
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>
+                  Receiving Hospital <span style={{ color: '#dc2626' }}>*</span>
+                  {!referralForm.networkId && <span style={{ color: '#f59e0b', fontWeight: 400, fontSize: 12, marginLeft: 8 }}>⚠️ Select a network first</span>}
+                </label>
+                <select style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }} required
+                  disabled={!referralForm.networkId}
+                  value={referralForm.toHospitalId} onChange={e => setReferralForm(f => ({ ...f, toHospitalId: e.target.value }))}>
+                  <option value="">— Select Hospital —</option>
+                  {networkHospitals.map((h: any) => <option key={h.id} value={h.id}>{h.name}</option>)}
+                </select>
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Reason <span style={{ color: '#dc2626' }}>*</span></label>
+                <textarea style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0', resize: 'vertical' }}
+                  rows={3} required placeholder="Reason for referral..."
+                  value={referralForm.reason} onChange={e => setReferralForm(f => ({ ...f, reason: e.target.value }))} />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Priority</label>
+                <select style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}
+                  value={referralForm.priority} onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))}>
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                  <option value="emergency">Emergency</option>
+                </select>
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Clinical Notes (optional)</label>
+                <textarea style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0', resize: 'vertical' }}
+                  rows={4} placeholder="Include relevant history, diagnosis, what you need from the receiving hospital..."
+                  value={referralForm.clinicalNotes} onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))} />
+              </div>
+              <p style={{ fontSize: 12, color: '#94a3b8', margin: '0 0 12px' }}>* Required field</p>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button type="button" onClick={() => setShowReferralModal(false)} style={{ flex: 1, padding: '10px 20px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" disabled={referralSubmitting || !referralForm.networkId || !referralForm.toHospitalId}
+                  style={{ flex: 2, padding: '10px 20px', borderRadius: 8, border: 'none', background: (referralSubmitting || !referralForm.networkId || !referralForm.toHospitalId) ? '#94a3b8' : '#2563eb', color: '#fff', fontWeight: 600, cursor: (referralSubmitting || !referralForm.networkId || !referralForm.toHospitalId) ? 'not-allowed' : 'pointer' }}>
+                  {referralSubmitting ? '⏳ Sending...' : '🔄 Send Referral'}
+                </button>
+              </div>
+              {(!referralForm.networkId || !referralForm.toHospitalId) && (
+                <p style={{ color: '#f59e0b', fontSize: 12, marginTop: 8, textAlign: 'center' }}>⚠️ Select a network and hospital to enable submission</p>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
+      {referralSuccess && (
+        <div style={{ position: 'fixed', bottom: 24, right: 24, background: '#dcfce7', color: '#166534', padding: '12px 20px', borderRadius: 8, fontWeight: 600, zIndex: 3000 }}>
+          ✓ {referralSuccess}
+        </div>
+      )}
+    </>
   )
 }
 

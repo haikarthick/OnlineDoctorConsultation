@@ -240,6 +240,11 @@ export default function InpatientManagement() {
                         🏢 {p.enterpriseName}{p.groupName ? ` › ${p.groupName}` : ''}
                       </div>
                     )}
+                    {((p as any).referralId || (p as any).referral_id) && (
+                      <div style={{ fontSize: '12px', color: '#1d4ed8', fontWeight: 600, marginTop: 2 }}>
+                        🔄 Referred from Network
+                      </div>
+                    )}
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: sc.bg, color: sc.color }}>{(p.status || '').replace(/_/g, ' ')}</span>
                 </div>

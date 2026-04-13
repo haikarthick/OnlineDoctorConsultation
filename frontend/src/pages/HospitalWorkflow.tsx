@@ -359,6 +359,11 @@ export default function HospitalWorkflow() {
                           🏢 {q.enterpriseName}{q.groupName ? ` › ${q.groupName}` : ''}
                         </div>
                       )}
+                      {(q.referralId || (q as any).referral_id) && (
+                        <div style={{ fontSize: '12px', color: '#1d4ed8', fontWeight: 600, marginTop: 2 }}>
+                          🔄 Referred from Network
+                        </div>
+                      )}
                       {q.reason && <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{q.reason}</div>}
                       {/* Check-in time */}
                       <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 3 }}>🕐 Checked in: {formatDateTime(q.checked_in_at)}</div>

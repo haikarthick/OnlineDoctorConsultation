@@ -981,3 +981,59 @@
 </details>
 
 ---
+
+## 2026-04-13 11:03 · `4d8442d` · 🔧 CHORE
+
+**Commit:** chore: update memory — hospital network audit fixes (HN-001, HN-002)  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-04-13 11:24 · `ffcc28e` · ✨ FEAT
+
+**Commit:** feat: implement cross-hospital network referral system backend  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/HospitalNetworkService.ts
+  - backend/src/utils/database.ts
+  - memories/repo/feature-tracker.md
+
+</details>
+
+---
+
+## 2026-04-13 11:38 · `c795c6f` · ✨ FEAT
+
+**Commit:** feat: Add Referrals tab to Hospital Networks page  
+**Author:** haikarthick  
+**Categories:** UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/services/api.ts
+  - memories/repo/feature-tracker.md
+
+</details>
+
+---

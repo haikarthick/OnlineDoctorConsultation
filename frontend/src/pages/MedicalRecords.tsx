@@ -64,6 +64,7 @@ const MedicalRecords: React.FC = () => {
   const [prescriptionsTotal, setPrescriptionsTotal] = useState(0)
   const [hospitalVisits, setHospitalVisits] = useState<{ queueVisits: any[]; inpatientAdmissions: any[] }>({ queueVisits: [], inpatientAdmissions: [] })
   const [loadingHospitalVisits, setLoadingHospitalVisits] = useState(false)
+  const [networkReferralHistory, setNetworkReferralHistory] = useState<any[]>([])
   const [enterpriseFilter, setEnterpriseFilter] = useState('')
   // Modal states
   const [showModal, setShowModal] = useState<string | null>(null)
@@ -167,6 +168,10 @@ const MedicalRecords: React.FC = () => {
       const res = await apiService.getAnimalHospitalVisits(selectedAnimal)
       setHospitalVisits(res.data || { queueVisits: [], inpatientAdmissions: [] })
     } catch { setHospitalVisits({ queueVisits: [], inpatientAdmissions: [] }) }
+    try {
+      const refRes = await (apiService as any).listNetworkReferrals({ animalId: selectedAnimal })
+      setNetworkReferralHistory(refRes.referrals || refRes.data?.referrals || [])
+    } catch { setNetworkReferralHistory([]) }
     setLoadingHospitalVisits(false)
   }, [selectedAnimal])
 
@@ -938,6 +943,60 @@ const MedicalRecords: React.FC = () => {
                           </div>
                         )
                       })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Network Referral History */}
+                {networkReferralHistory.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 10 }}>🔄 Network Referral History ({networkReferralHistory.length})</h3>
+                    <div className="data-table-container">
+                      <table className="module-table">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>From Hospital</th>
+                            <th>To Hospital</th>
+                            <th>Reason</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {networkReferralHistory.map((ref: any) => (
+                            <tr key={ref.id}>
+                              <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
+                                {fmtDate(ref.created_at || ref.createdAt)}
+                              </td>
+                              <td style={{ fontSize: 13 }}>
+                                {ref.fromHospitalName || '—'}
+                                {ref.fromVetName && <><br /><span style={{ fontSize: 11, color: '#64748b' }}>{ref.fromVetName}</span></>}
+                              </td>
+                              <td style={{ fontSize: 13 }}>
+                                {ref.toHospitalName || '—'}
+                                {ref.toVetName && <><br /><span style={{ fontSize: 11, color: '#64748b' }}>{ref.toVetName}</span></>}
+                              </td>
+                              <td style={{ fontSize: 13, maxWidth: 180 }}>{ref.reason}</td>
+                              <td>
+                                <span style={{
+                                  padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600,
+                                  background: ref.priority === 'emergency' ? '#fee2e2' : ref.priority === 'high' ? '#fef3c7' : '#f1f5f9',
+                                  color: ref.priority === 'emergency' ? '#dc2626' : ref.priority === 'high' ? '#d97706' : '#64748b'
+                                }}>
+                                  {ref.priority || 'normal'}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={`module-badge ${
+                                  ref.status === 'accepted' || ref.status === 'completed' ? 'badge-success' :
+                                  ref.status === 'rejected' ? 'badge-error' : 'badge-pending'
+                                }`}>{ref.status}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}
