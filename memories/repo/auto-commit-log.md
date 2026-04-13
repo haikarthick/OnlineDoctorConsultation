@@ -818,3 +818,31 @@
 </details>
 
 ---
+
+## 2026-04-13 09:28 · `5f265fd` · ✨ FEAT
+
+**Commit:** feat: farmer/enterprise alignment -- enterprise context in clinical modules, booking validation, movement approval  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - backend/src/controllers/MedicalRecordController.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/AnimalService.ts
+  - backend/src/services/BookingService.ts
+  - backend/src/services/StaffWorkflowService.ts
+  - backend/src/utils/database.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Animals.tsx
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

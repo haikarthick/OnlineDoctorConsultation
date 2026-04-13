@@ -330,3 +330,10 @@
 - **Lesson:** All modules that create patient-related data MUST expose that data via Medical Records. Any new hospital/clinical module must add an API endpoint for animal-scoped history retrieval.
 - **Apply to:** All future modules that create patient data
 
+
+### LESSON-055 — Farmer enterprise alignment
+- **Logged:** 2026-04-13 09:30
+- **Context:** Farmer/enterprise model was only 60% implemented -- schema existed but enforcement, cross-module linking, and bulk operations were largely missing
+- **Lesson:** ALL new clinical tables (inpatient, queue, workflow_cases, referrals) MUST include enterprise_id column. ALL booking/admission flows MUST validate enterprise ownership. ALL animal lists for farmers MUST include enterprise filter.
+- **Apply to:** All future enterprise-related features
+
