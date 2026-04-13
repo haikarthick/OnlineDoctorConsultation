@@ -237,7 +237,7 @@ const NetworkModal: React.FC<NetworkModalProps> = ({ editing, onClose, onSaved, 
       <div className="hn-modal" onClick={e => e.stopPropagation()}>
         <div className="hn-modal-header">
           <h2>{editing ? t('hospitalNetworks.modal.editTitle') : t('hospitalNetworks.modal.createTitle')}</h2>
-          <button className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
+          <button type="button" className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="hn-modal-body">
           {error && <div className="module-alert error">{error}</div>}
@@ -379,7 +379,7 @@ const AssignHospitalModal: React.FC<AssignHospitalModalProps> = ({ networkId, ex
       <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
         <div className="hn-modal-header">
           <h2>{t('hospitalNetworks.detail.assignHospital')}</h2>
-          <button className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
+          <button type="button" className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="hn-modal-body">
           {error && <div className="module-alert error">{error}</div>}
@@ -443,7 +443,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
       <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
         <div className="hn-modal-header">
           <h2>{t('hospitalNetworks.detail.addMember')}</h2>
-          <button className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
+          <button type="button" className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="hn-modal-body">
           {error && <div className="module-alert error">{error}</div>}
@@ -1613,7 +1613,7 @@ const HospitalNetworks: React.FC = () => {
           <div className="hn-modal" onClick={e => e.stopPropagation()}>
             <div className="hn-modal-header">
               <h2>✉️ {t('hospitalNetworks.detail.inviteStaff')}</h2>
-              <button className="hn-modal-close" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess('') }}>✕</button>
+              <button type="button" className="hn-modal-close" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess('') }}>✕</button>
             </div>
             {inviteStaffSuccess ? (
               <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -1704,7 +1704,7 @@ const HospitalNetworks: React.FC = () => {
           <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
             <div className="hn-modal-header">
               <h2>{t('hospitalNetworks.patients.inviteTitle')}</h2>
-              <button className="hn-modal-close" onClick={() => setShowInviteModal(false)} aria-label="Close">✕</button>
+              <button type="button" className="hn-modal-close" onClick={() => setShowInviteModal(false)} aria-label="Close">✕</button>
             </div>
             <div className="hn-modal-body">
               {inviteSuccess ? (
@@ -1891,7 +1891,7 @@ const HospitalNetworks: React.FC = () => {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                   <h3 style={{ margin: 0 }}>{t('networkReferrals.createTitle')}</h3>
-                  <button onClick={() => setShowCreateReferralModal(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+                  <button type="button" onClick={() => setShowCreateReferralModal(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
                 </div>
                 {referralError && <div className="module-alert error" style={{ marginBottom: 12 }}>{referralError}</div>}
                 <form onSubmit={handleCreateReferral}>

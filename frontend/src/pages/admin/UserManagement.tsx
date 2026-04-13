@@ -70,6 +70,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   const [rejectionReason, setRejectionReason] = useState('')
   const [requestProcessing, setRequestProcessing] = useState<string | null>(null)
   const [requestMsg, setRequestMsg] = useState('')
+  const [actionError, setActionError] = useState('')
 
   useEffect(() => {
     loadUsers()
@@ -83,9 +84,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
     try {
       setRequestsLoading(true)
       setRequestMsg('')
+      setActionError('')
       const result = await apiService.adminListRoleChangeRequests(requestsFilter)
       setRoleRequests(result.data || [])
-    } catch {
+    } catch (err: any) {
+      console.error('Failed to load role requests:', err?.message)
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to load role change requests')
     } finally {
       setRequestsLoading(false)
     }
@@ -97,7 +101,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       await apiService.adminApproveRoleChangeRequest(id)
       setRequestMsg(t('adminRoleRequests.approveSuccess'))
       loadRoleRequests()
-    } catch {
+    } catch (err: any) {
+      console.error('Failed to approve request:', err?.message)
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to approve request')
     } finally {
       setRequestProcessing(null)
     }
@@ -112,7 +118,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setShowRejectModal(null)
       setRejectionReason('')
       loadRoleRequests()
-    } catch {
+    } catch (err: any) {
+      console.error('Failed to reject request:', err?.message)
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to reject request')
     } finally {
       setRequestProcessing(null)
     }
@@ -123,8 +131,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setLoading(true)
       const result = await apiService.adminListUsers({ search, role: roleFilter || undefined })
       setUsers(result.data?.items || (Array.isArray(result.data) ? result.data : []))
-    } catch (err) {
-} finally {
+    } catch (err: any) {
+      console.error('Failed to load users:', err?.message)
+    } finally {
       setLoading(false)
     }
   }
@@ -134,8 +143,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setProcessing(userId)
       await apiService.adminToggleUserStatus(userId, !users.find(u => u.id === userId)?.isActive)
       setUsers(users.map(u => u.id === userId ? { ...u, isActive: !u.isActive } : u))
-    } catch (err) {
-} finally {
+    } catch (err: any) {
+      console.error('Failed to toggle user status:', err?.message)
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to update user status')
+    } finally {
       setProcessing(null)
     }
   }
@@ -147,8 +158,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       await apiService.adminChangeUserRole(showRoleModal.id, newRole)
       setUsers(users.map(u => u.id === showRoleModal.id ? { ...u, role: newRole } : u))
       setShowRoleModal(null)
-    } catch (err) {
-} finally {
+    } catch (err: any) {
+      console.error('Failed to change role:', err?.message)
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to change user role')
+    } finally {
       setProcessing(null)
     }
   }
@@ -241,6 +254,13 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
           <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('userManagement.dashboard')}</button>
         </div>
       </div>
+
+      {actionError && (
+        <div className="module-alert error" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>⚠️ {actionError}</span>
+          <button type="button" onClick={() => setActionError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: 'inherit', marginLeft: 8 }}>✕</button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="module-tabs" style={{ marginBottom: 24 }}>

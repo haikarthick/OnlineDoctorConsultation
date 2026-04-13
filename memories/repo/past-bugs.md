@@ -600,3 +600,11 @@ render-start.sh
 - **Fix:** Changed to === development so only development gets details
 - **Rule:** Use === development not !== production for guarding debug details
 
+
+### FE-AUDIT-001 — Silent catch blocks swallowing frontend errors
+- **Logged:** 2026-04-13 15:57
+- **Symptom:** Multiple pages had .catch(() => {}) and catch {} blocks that silently swallowed errors, showing no feedback to user
+- **Root Cause:** Silent empty catch blocks in loadAnimals, openActionLog, loadRescheduleSlots, loadRoleRequests, loadUsers, handleApproveRequest, handleRejectRequest, handleToggleStatus, handleChangeRole, handleCancelRoleChange, loadInitialData
+- **Fix:** All catch blocks now console.error + set error state. ModalActions cancel and QuickBtn have type=button. mountedRef guards added to openActionLog in Consultations
+- **Rule:** NEVER write empty catch {} — minimum is console.error. Data-loading catches must set an error state variable displayed to user
+

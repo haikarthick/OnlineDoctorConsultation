@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
@@ -133,6 +133,9 @@ const Consultations: React.FC = () => {
   const isPetOwner = user?.role === 'pet_owner' || user?.role === 'farmer'
   const isAdmin = user?.role === 'admin'
 
+  const mountedRef = useRef(true)
+  useEffect(() => { return () => { mountedRef.current = false } }, [])
+
   const [searchParams] = useSearchParams()
   // Sync tab and status filter from URL whenever navigation occurs
   useEffect(() => {
@@ -157,9 +160,13 @@ const Consultations: React.FC = () => {
     setActionLogsLoading(true)
     try {
       const res = await apiService.getBookingActionLogs(bookingId)
-      setActionLogs(res.data || [])
-    } catch { setActionLogs([]) }
-    finally { setActionLogsLoading(false) }
+      if (mountedRef.current) setActionLogs(res.data || [])
+    } catch (err: any) {
+      console.error('Failed to load action logs:', err?.message)
+      if (mountedRef.current) setActionLogs([])
+    } finally {
+      if (mountedRef.current) setActionLogsLoading(false)
+    }
   }
 
   useEffect(() => { loadData() }, [])
@@ -222,8 +229,9 @@ const Consultations: React.FC = () => {
           specialization: (v.specializations && v.specializations[0]) || v.specialization || ''
         }))
         setVetList(vets)
-      } catch { /* ignore — dropdown will be empty, user can still proceed */ }
-      finally { setVetListLoading(false) }
+      } catch (err: any) {
+        console.error('Failed to load vet list:', err?.message)
+      } finally { setVetListLoading(false) }
     }
   }
 
@@ -240,7 +248,8 @@ const Consultations: React.FC = () => {
       if (data.holiday) setRescheduleDateMsg(`\uD83C\uDF89 Holiday: ${data.holiday}`)
       else if (data.unavailableReason) setRescheduleDateMsg(`\uD83D\uDEAB ${data.unavailableReason}`)
       setRescheduleSlots(data.slots || [])
-    } catch {
+    } catch (err: any) {
+      console.error('Failed to load reschedule slots:', err?.message)
       setRescheduleSlots([])
     } finally {
       setRescheduleSlotsLoading(false)
@@ -393,7 +402,7 @@ const Consultations: React.FC = () => {
         {[{ key: 'bookings' as const, label: t('consultations.tabs.appointments'), count: activeBookings.length },
           { key: 'consultations' as const, label: t('consultations.tabs.history'), count: historyBookings.length }
         ].map(t => (
-          <button key={t.key} onClick={() => handleTabSwitch(t.key)}
+          <button key={t.key} type="button" onClick={() => handleTabSwitch(t.key)}
             style={{ padding: '12px 24px', fontWeight: 600, fontSize: 14, cursor: 'pointer', border: 'none', background: 'none',
               borderBottom: activeTab === t.key ? '3px solid #667eea' : '3px solid transparent',
               color: activeTab === t.key ? '#667eea' : '#6b7280'
@@ -407,7 +416,7 @@ const Consultations: React.FC = () => {
       <div style={{ marginBottom: 16, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <span style={{ fontSize: 13, color: '#6b7280' }}>{t('consultations.filterLabel')}:</span>
         {['', ...currentFilterStatuses].map(s => (
-          <button key={s} onClick={() => setStatusFilter(s)}
+          <button key={s} type="button" onClick={() => setStatusFilter(s)}
             style={{ padding: '5px 14px', borderRadius: 16, fontSize: 12, fontWeight: 500, cursor: 'pointer',
               border: statusFilter === s ? '2px solid #667eea' : '1px solid #d1d5db',
               background: statusFilter === s ? '#eef2ff' : 'white', color: statusFilter === s ? '#667eea' : '#6b7280'
@@ -415,7 +424,7 @@ const Consultations: React.FC = () => {
             {s ? t(`consultations.statuses.${s}`, s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())) : t('consultations.filterAll')}
           </button>
         ))}
-        <button onClick={loadData} style={{ marginLeft: 'auto', padding: '5px 14px', borderRadius: 6, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#374151' }}>{t('common.refresh')}</button>
+        <button type="button" onClick={loadData} style={{ marginLeft: 'auto', padding: '5px 14px', borderRadius: 6, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#374151' }}>{t('common.refresh')}</button>
       </div>
 
       {/* Appointments Tab — items needing attention or upcoming */}
@@ -737,7 +746,7 @@ const Consultations: React.FC = () => {
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h2 style={{ margin: 0 }}>{t('consultations.reschedule.title')}</h2>
-              <button onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
+              <button type="button" onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
                 style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
@@ -876,8 +885,7 @@ const Consultations: React.FC = () => {
 
             {/* Confirm reschedule */}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
+              <button type="button" onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
                 style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 500 }}
               >{t('common.cancel')}</button>
               <button
@@ -909,7 +917,7 @@ const Consultations: React.FC = () => {
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ margin: 0, fontSize: 18 }}>{t('consultations.actionLog.title')}</h2>
-              <button onClick={() => setActionLogBookingId(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
+              <button type="button" onClick={() => setActionLogBookingId(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
 
             {actionLogsLoading && <p style={{ color: '#6b7280' }}>{t('consultations.actionLog.loading')}</p>}
@@ -967,7 +975,7 @@ const Consultations: React.FC = () => {
             )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-              <button className="btn-small" style={{ padding: '8px 20px' }} onClick={() => setActionLogBookingId(null)}>{t('consultations.actionLog.close')}</button>
+              <button type="button" className="btn-small" style={{ padding: '8px 20px' }} onClick={() => setActionLogBookingId(null)}>{t('consultations.actionLog.close')}</button>
             </div>
           </div>
         </div>
@@ -991,7 +999,7 @@ const Consultations: React.FC = () => {
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ margin: 0, fontSize: 18 }}>{t('consultations.cancelModal.title')}</h2>
-              <button onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
+              <button type="button" onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
                 style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
             </div>
             <div style={{ background: '#fef2f2', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13, color: '#991b1b' }}>
@@ -1016,6 +1024,7 @@ const Consultations: React.FC = () => {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {reasonPresets.map(r => (
                   <button key={r}
+                    type="button"
                     className={`btn btn-sm ${cancelModal.reason === r ? 'btn-primary' : 'btn-outline'}`}
                     onClick={() => setCancelModal({ ...cancelModal, reason: r })}
                     style={{ fontSize: 12 }}
@@ -1040,6 +1049,7 @@ const Consultations: React.FC = () => {
             )}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <button
+                type="button"
                 onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
                 style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 500 }}
               >{t('consultations.cancelModal.keepBooking')}</button>

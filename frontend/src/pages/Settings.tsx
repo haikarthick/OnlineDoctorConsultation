@@ -31,7 +31,9 @@ const Settings: React.FC = () => {
   const [rcReason, setRcReason] = useState('')
 
   React.useEffect(() => {
-    apiService.getMyRoleChangeRequests().then((r: any) => setRoleRequests(r.data || [])).catch(() => {}).finally(() => setRcLoading(false))
+    apiService.getMyRoleChangeRequests().then((r: any) => setRoleRequests(r.data || [])).catch((err: any) => {
+      console.error('Failed to load role requests:', err?.message)
+    }).finally(() => setRcLoading(false))
   }, [])
 
   const pendingRequest = roleRequests.find((r: any) => r.status === 'pending')
@@ -61,7 +63,9 @@ const Settings: React.FC = () => {
       setRcMsg(t('settings.roleChange.successCancel'))
       const r = await apiService.getMyRoleChangeRequests()
       setRoleRequests((r as any).data || [])
-    } catch {}
+    } catch (err: any) {
+      console.error('Failed to cancel role change request:', err?.message)
+    }
   }
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',

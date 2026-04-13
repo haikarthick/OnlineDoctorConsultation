@@ -169,12 +169,14 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                 prefillCtx.animalName = `${animal.name} (${animal.species})`
               }
             }
-          } catch { /* ignore */ }
+          } catch (err: any) {
+            console.error('Failed to load enterprise data:', err?.message)
+          }
           setPrefilledContext(prefillCtx)
         }
       }
-    } catch (err) {
-      /* ignore */
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message || err?.message || t('bookConsultation.failedToCreate'))
     } finally {
       setLoading(false)
     }
@@ -202,8 +204,8 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       const animalList = animalsRes.data?.items || animalsRes.data?.animals || (Array.isArray(animalsRes.data) ? animalsRes.data : [])
       setGroups(groupList)
       setEnterpriseAnimals(animalList)
-    } catch {
-      /* ignore */
+    } catch (err: any) {
+      console.error('Failed to load enterprise group data:', err?.message)
     } finally {
       setLoadingEnterpriseData(false)
     }
@@ -391,7 +393,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
           <p className="page-subtitle">{t('bookConsultation.subtitle')}</p>
         </div>
         <div className="page-header-actions">
-          <button className="page-back-btn" onClick={() => onNavigate('/find-doctor')}>
+          <button type="button" className="page-back-btn" onClick={() => onNavigate('/find-doctor')}>
             ← {t('common.back')}
           </button>
         </div>

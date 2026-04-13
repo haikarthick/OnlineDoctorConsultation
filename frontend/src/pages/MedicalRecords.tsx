@@ -93,7 +93,10 @@ const MedicalRecords: React.FC = () => {
         const target = deepLinkAnimalId && list.find((a: any) => a.id === deepLinkAnimalId)
         setSelectedAnimal(target ? target.id : list[0].id)
       }
-    } catch { /* ignore */ }
+    } catch (err: any) {
+      console.error('Failed to load animals:', err?.message)
+      setError(err?.response?.data?.error?.message || err?.message || t('medicalRecords.failedToLoad'))
+    }
   }, [selectedAnimal, deepLinkAnimalId])
 
   const loadStats = useCallback(async () => {
@@ -102,7 +105,9 @@ const MedicalRecords: React.FC = () => {
       if (selectedAnimal) params.animalId = selectedAnimal;
       const res = await apiService.getMedicalStats(params)
       setStats(res.data)
-    } catch { /* ignore */ }
+    } catch (err: any) {
+      console.error('Failed to load stats:', err?.message)
+    }
   }, [selectedAnimal])
 
   const loadVaccinations = useCallback(async () => {
@@ -1184,7 +1189,7 @@ const EmptyState: React.FC<{ icon: string; title: string; subtitle: string }> = 
 )
 
 const QuickBtn: React.FC<{ label: string; onClick: () => void }> = ({ label, onClick }) => (
-  <button onClick={onClick} style={{
+  <button type="button" onClick={onClick} style={{
     padding: '8px 16px', borderRadius: 6, border: '1px solid #d1d5db', background: '#fff',
     cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#374151'
   }}>{label}</button>
@@ -1201,7 +1206,7 @@ const ModalActions: React.FC<{ onCancel: () => void; onSave: () => void; saving:
   const { t } = useTranslation()
   return (
   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-    <button onClick={onCancel} style={{ padding: '8px 20px', borderRadius: 6, border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontSize: 13, color: '#374151' }}>{t('medicalRecords.modals.cancel')}</button>
+    <button type="button" onClick={onCancel} style={{ padding: '8px 20px', borderRadius: 6, border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontSize: 13, color: '#374151' }}>{t('medicalRecords.modals.cancel')}</button>
     <button onClick={onSave} disabled={disabled || saving} className="btn-primary" style={{ padding: '8px 20px', fontSize: 13, opacity: (disabled || saving) ? 0.5 : 1 }}>
       {saving ? t('medicalRecords.modals.saving') : t('medicalRecords.modals.save')}
     </button>
