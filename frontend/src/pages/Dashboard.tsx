@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 interface DashStats { bookings: number; consultations: number; animals: number; pending: number; enterprises?: number }
 interface ActivityItem { type: string; description: string; time: string; status: string }
 interface QuickAction { icon: string; label: string; path: string; color: string; description?: string }
+interface EnterpriseOverviewStats { totalAnimals: number; activeGroups: number; pendingMovements: number; activeCampaigns: number }
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation()
@@ -25,6 +26,7 @@ const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<DashStats>({ bookings: 0, consultations: 0, animals: 0, pending: 0, enterprises: 0 })
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [enterpriseOverview, setEnterpriseOverview] = useState<EnterpriseOverviewStats | null>(null)
 
   // Doctor-specific state
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([])
@@ -58,6 +60,25 @@ const Dashboard: React.FC = () => {
           const eRes = await apiService.listEnterprises({ limit: 50 })
           const enterprises = eRes.data?.items || (Array.isArray(eRes.data) ? eRes.data : [])
           eCount = enterprises.length
+          // Load enterprise overview for farmer
+          if (isFarmer && enterprises.length > 0) {
+            const firstEnt = enterprises[0]
+            try {
+              const [entStats, movRes, campRes] = await Promise.all([
+                apiService.getEnterpriseStats(firstEnt.id),
+                apiService.listMovements(firstEnt.id),
+                apiService.listCampaigns(firstEnt.id)
+              ])
+              const movements = movRes.data?.items || []
+              const campaigns = campRes.data?.items || []
+              setEnterpriseOverview({
+                totalAnimals: entStats.data?.totalAnimals || 0,
+                activeGroups: entStats.data?.totalGroups || 0,
+                pendingMovements: movements.filter((m: any) => (m.status || 'pending') === 'pending').length,
+                activeCampaigns: campaigns.filter((c: any) => c.status === 'in_progress' || c.status === 'planned').length
+              })
+            } catch { /* non-fatal */ }
+          }
         } catch {}
       }
 
@@ -463,6 +484,45 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* ── Role-Specific Feature Sections ── */}
+
+      {/* Farmer Enterprise Overview */}
+      {isFarmer && enterpriseOverview && (
+        <div className="module-card" style={{ marginBottom: '1.5rem' }}>
+          <div style={{ padding: '1rem 1.25rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>🏢 {t('dashboard.enterpriseOverview', 'Enterprise Overview')}</h3>
+            <button className="btn btn-sm btn-secondary" onClick={() => navigate('/enterprises')}>{t('common.viewAll', 'View All')}</button>
+          </div>
+          <div className="module-stats" style={{ padding: '0.75rem 1.25rem 1.25rem' }}>
+            <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/animals')}>
+              <div className="stat-icon">🐄</div>
+              <div className="stat-value">{enterpriseOverview.totalAnimals}</div>
+              <div className="stat-label">{t('dashboard.stats.myAnimals', 'Total Animals')}</div>
+            </div>
+            <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/campaigns')}>
+              <div className="stat-icon">💉</div>
+              <div className="stat-value">{enterpriseOverview.activeCampaigns}</div>
+              <div className="stat-label">{t('dashboard.enterpriseStats.activeCampaigns', 'Active Campaigns')}</div>
+            </div>
+            <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/movement-log')}>
+              <div className="stat-icon">⏳</div>
+              <div className="stat-value">{enterpriseOverview.pendingMovements}</div>
+              <div className="stat-label">{t('dashboard.enterpriseStats.pendingApprovals', 'Pending Approvals')}</div>
+            </div>
+            <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/animal-groups')}>
+              <div className="stat-icon">📂</div>
+              <div className="stat-value">{enterpriseOverview.activeGroups}</div>
+              <div className="stat-label">{t('dashboard.enterpriseStats.groups', 'Enterprise Groups')}</div>
+            </div>
+          </div>
+          <div style={{ padding: '0 1.25rem 1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button className="btn btn-secondary" style={{ fontSize: '0.85rem' }} onClick={() => navigate('/herd-medical')}>💊 {t('dashboard.features.herdMedicalTitle', 'Herd Medical')}</button>
+            <button className="btn btn-secondary" style={{ fontSize: '0.85rem' }} onClick={() => navigate('/campaigns')}>💉 {t('dashboard.features.treatmentCampaigns', 'Campaigns')}</button>
+            <button className="btn btn-secondary" style={{ fontSize: '0.85rem' }} onClick={() => navigate('/movement-log')}>🔄 {t('movementLog.pageTitle', 'Movement Log')}</button>
+            <button className="btn btn-secondary" style={{ fontSize: '0.85rem' }} onClick={() => navigate('/feed-inventory')}>🌾 {t('dashboard.features.feedTitle', 'Feed Inventory')}</button>
+          </div>
+        </div>
+      )}
+
       {isFarmer && (
         <div className="dashboard-feature-grid">
           <div className="feature-card" onClick={() => navigate('/herd-medical')}>

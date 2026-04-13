@@ -260,6 +260,44 @@ router.post('/enterprises/:id/members', authMiddleware, validateBody(addMemberSc
 router.put('/enterprises/:enterpriseId/members/:userId', authMiddleware, validateBody(updateMemberSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.updateMember(req, res)));
 router.delete('/enterprises/:enterpriseId/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.removeMember(req, res)));
 
+// Enterprise member invite by email (finds user by email then adds as member)
+router.post('/enterprises/:id/invite-member', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).userId;
+  const userRole = (req as any).userRole;
+  const { email, role } = req.body;
+
+  if (!email || !role) {
+    return res.status(400).json({ error: 'email and role are required' });
+  }
+
+  // Verify requester is enterprise owner or manager
+  const entResult = await database.query(
+    `SELECT id FROM enterprises WHERE id = $1 AND owner_id = $2`,
+    [req.params.id, userId]
+  );
+  const memberResult = await database.query(
+    `SELECT id FROM enterprise_members WHERE enterprise_id = $1 AND user_id = $2 AND role IN ('owner','manager') AND is_active = true`,
+    [req.params.id, userId]
+  );
+  if (userRole !== 'admin' && entResult.rows.length === 0 && memberResult.rows.length === 0) {
+    return res.status(403).json({ error: 'Not authorized to manage enterprise members' });
+  }
+
+  // Look up user by email
+  const userResult = await database.query(
+    `SELECT id FROM users WHERE email = $1 AND is_active = true`,
+    [email.toLowerCase().trim()]
+  );
+  if (userResult.rows.length === 0) {
+    return res.status(404).json({ error: 'No active user found with that email address' });
+  }
+
+  const targetUserId = userResult.rows[0].id;
+  const EnterpriseService = (await import('../services/EnterpriseService')).default;
+  const member = await EnterpriseService.addMember(req.params.id, targetUserId, role);
+  res.status(201).json({ success: true, data: member });
+}));
+
 // Animal Groups
 router.post('/animal-groups', authMiddleware, validateBody(createAnimalGroupSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createGroup(req, res)));
 router.get('/animal-groups/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getGroup(req, res)));

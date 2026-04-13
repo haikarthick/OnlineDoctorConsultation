@@ -918,6 +918,11 @@ class ApiService {
     return response.data
   }
 
+  async inviteEnterpriseMember(enterpriseId: string, data: { email: string; role: string }) {
+    const response = await this.client.post(`/enterprises/${enterpriseId}/invite-member`, data)
+    return response.data
+  }
+
   async updateEnterpriseMember(enterpriseId: string, userId: string, data: { role: string; title?: string }) {
     const response = await this.client.put(`/enterprises/${enterpriseId}/members/${userId}`, data)
     return response.data
@@ -1008,6 +1013,11 @@ class ApiService {
 
   async getMovement(id: string) {
     const response = await this.client.get(`/movements/${id}`)
+    return response.data
+  }
+
+  async approveMovement(id: string, action: 'approve' | 'reject') {
+    const response = await this.client.patch(`/movements/${id}/approve`, { action })
     return response.data
   }
 

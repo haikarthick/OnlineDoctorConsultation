@@ -26,6 +26,9 @@ const TreatmentCampaigns: React.FC = () => {
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
   const [campaigns, setCampaigns] = useState<TreatmentCampaign[]>([])
+  const [groups, setGroups] = useState<{ id: string; name: string; animalCount?: number }[]>([])
+  const [groupsLoading, setGroupsLoading] = useState(false)
+  const [groupsError, setGroupsError] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const formRef = useScrollToForm(showForm)
@@ -60,7 +63,21 @@ const TreatmentCampaigns: React.FC = () => {
     finally { setLoading(false) }
   }
 
-  useEffect(() => { if (selectedEnterpriseId) fetchCampaigns() }, [selectedEnterpriseId])
+  const fetchGroups = async (enterpriseId: string) => {
+    setGroupsLoading(true)
+    setGroupsError(false)
+    try {
+      const res = await apiService.listAnimalGroups(enterpriseId)
+      setGroups((res.data?.items || []).map((g: any) => ({ id: g.id, name: g.name, animalCount: g.animalCount })))
+    } catch {
+      setGroupsError(true)
+      setGroups([])
+    } finally {
+      setGroupsLoading(false)
+    }
+  }
+
+  useEffect(() => { if (selectedEnterpriseId) { fetchCampaigns(); fetchGroups(selectedEnterpriseId) } }, [selectedEnterpriseId])
 
   const resetForm = () => {
     setFormData({ name: '', campaignType: 'vaccination', description: '', targetSpecies: '', targetGroupId: '', status: 'planned', scheduledDate: '', medication: '', dosage: '', notes: '' })
@@ -221,6 +238,25 @@ const TreatmentCampaigns: React.FC = () => {
                 <div className="form-group">
                   <label>Target Species</label>
                   <input type="text" value={formData.targetSpecies} onChange={e => setFormData(f => ({ ...f, targetSpecies: e.target.value }))} placeholder="e.g. Cattle" />
+                </div>
+                <div className="form-group">
+                  <label>Target Group (optional)</label>
+                  {groupsError ? (
+                    <input type="text" value={formData.targetGroupId} onChange={e => setFormData(f => ({ ...f, targetGroupId: e.target.value }))} placeholder="Group ID" />
+                  ) : (
+                    <select value={formData.targetGroupId} onChange={e => setFormData(f => ({ ...f, targetGroupId: e.target.value }))}>
+                      <option value="">{groupsLoading ? 'Loading groups...' : 'All animals (no group filter)'}</option>
+                      {groups.map(g => <option key={g.id} value={g.id}>{g.name}{g.animalCount != null ? ` (${g.animalCount} animals)` : ''}</option>)}
+                    </select>
+                  )}
+                  {formData.targetGroupId && groups.length > 0 && (() => {
+                    const sel = groups.find(g => g.id === formData.targetGroupId)
+                    return sel && sel.animalCount != null ? (
+                      <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '0.25rem' }}>
+                        📊 {sel.animalCount} animals in this group will be included
+                      </small>
+                    ) : null
+                  })()}
                 </div>
                 <div className="form-group">
                   <label>Scheduled Date</label>

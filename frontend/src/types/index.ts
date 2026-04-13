@@ -577,6 +577,9 @@ export interface MovementRecord {
   recordedBy: string
   notes?: string
   createdAt: string
+  status?: 'pending' | 'approved' | 'rejected' | 'completed'
+  approvedBy?: string
+  approvedByName?: string
   animalName?: string
   groupName?: string
   fromLocationName?: string

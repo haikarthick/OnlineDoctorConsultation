@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { Enterprise, MovementRecord } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
+import { useAuth } from '../context/AuthContext'
 
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
   transfer: 'Transfer', intake: 'Intake', discharge: 'Discharge',
@@ -18,6 +19,7 @@ const MOVEMENT_TYPE_ICONS: Record<string, string> = {
 
 const MovementLog: React.FC = () => {
   const { t } = useTranslation()
+  const { user } = useAuth()
 
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
   const [selectedEnterpriseId, setSelectedEnterpriseId] = useState('')
@@ -27,6 +29,7 @@ const MovementLog: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const formRef = useScrollToForm(showForm)
+  const [approvingId, setApprovingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     movementType: 'transfer', animalId: '', groupId: '',
     fromLocationId: '', toLocationId: '', reason: '', notes: ''
@@ -63,6 +66,20 @@ const MovementLog: React.FC = () => {
   }
 
   useEffect(() => { if (selectedEnterpriseId) fetchMovements() }, [selectedEnterpriseId])
+
+  const handleApprove = async (movId: string, action: 'approve' | 'reject') => {
+    setApprovingId(`${movId}-${action}`)
+    try {
+      await apiService.approveMovement(movId, action)
+      setSuccessMsg(action === 'approve' ? t('movements.approved') : t('movements.rejected'))
+      setMovements(prev => prev.map(m => m.id === movId ? { ...m, status: action === 'approve' ? 'approved' : 'rejected' } : m))
+      setTimeout(() => setSuccessMsg(''), 3000)
+    } catch (err: any) {
+      setError(err.response?.data?.error || t('movementLog.toasts.failed'))
+    } finally {
+      setApprovingId(null)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setError('')
@@ -136,25 +153,61 @@ const MovementLog: React.FC = () => {
                 <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.from')}</th>
                 <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.to')}</th>
                 <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.reason')}</th>
+                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('common.status')}</th>
                 <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.date')}</th>
+                {user?.role === 'farmer' && <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('common.actions')}</th>}
               </tr>
             </thead>
             <tbody>
-              {movements.map(mov => (
-                <tr key={mov.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '0.75rem 1rem' }}>
-                    <span>{MOVEMENT_TYPE_ICONS[mov.movementType] || '🔄'}</span>{' '}
-                    <span className="badge">{MOVEMENT_TYPE_LABELS[mov.movementType] || mov.movementType}</span>
-                  </td>
-                  <td style={{ padding: '0.75rem 1rem' }}>
-                    {mov.animalName || mov.groupName || '—'}
-                  </td>
-                  <td style={{ padding: '0.75rem 1rem' }}>{mov.fromLocationName || '—'}</td>
-                  <td style={{ padding: '0.75rem 1rem' }}>{mov.toLocationName || '—'}</td>
-                  <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{mov.reason || '—'}</td>
-                  <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{formatDate(mov.createdAt)}</td>
-                </tr>
-              ))}
+              {movements.map(mov => {
+                const statusColors: Record<string, string> = {
+                  pending: '#f59e0b', approved: '#22c55e', rejected: '#ef4444', completed: '#3b82f6'
+                }
+                const status = mov.status || 'pending'
+                return (
+                  <tr key={mov.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '0.75rem 1rem' }}>
+                      <span>{MOVEMENT_TYPE_ICONS[mov.movementType] || '🔄'}</span>{' '}
+                      <span className="badge">{MOVEMENT_TYPE_LABELS[mov.movementType] || mov.movementType}</span>
+                    </td>
+                    <td style={{ padding: '0.75rem 1rem' }}>{mov.animalName || mov.groupName || '—'}</td>
+                    <td style={{ padding: '0.75rem 1rem' }}>{mov.fromLocationName || '—'}</td>
+                    <td style={{ padding: '0.75rem 1rem' }}>{mov.toLocationName || '—'}</td>
+                    <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{mov.reason || '—'}</td>
+                    <td style={{ padding: '0.75rem 1rem' }}>
+                      <span className="badge" style={{ background: statusColors[status] || '#94a3b8', color: '#fff', fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>
+                        {t(`movements.${status}`, status)}
+                      </span>
+                    </td>
+                    <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{formatDate(mov.createdAt)}</td>
+                    {user?.role === 'farmer' && (
+                      <td style={{ padding: '0.75rem 1rem', whiteSpace: 'nowrap' }}>
+                        {status === 'pending' ? (
+                          <>
+                            <button
+                              className="btn btn-sm"
+                              style={{ background: '#22c55e', color: '#fff', marginRight: '0.4rem' }}
+                              disabled={!!approvingId}
+                              onClick={() => handleApprove(mov.id, 'approve')}
+                            >
+                              {approvingId === `${mov.id}-approve` ? '⏳' : '✓'} {t('movements.approve')}
+                            </button>
+                            <button
+                              className="btn btn-sm btn-danger"
+                              disabled={!!approvingId}
+                              onClick={() => handleApprove(mov.id, 'reject')}
+                            >
+                              {approvingId === `${mov.id}-reject` ? '⏳' : '✗'} {t('movements.reject')}
+                            </button>
+                          </>
+                        ) : (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>—</span>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

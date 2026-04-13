@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { useScrollToForm } from '../hooks/useScrollToForm'
-import { Enterprise, ENTERPRISE_TYPE_LABELS, EnterpriseType, EnterpriseStats } from '../types'
+import { Enterprise, ENTERPRISE_TYPE_LABELS, EnterpriseType, EnterpriseStats, EnterpriseMember } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
 
@@ -18,6 +18,14 @@ const EnterpriseManagement: React.FC = () => {
   const [editingEnterprise, setEditingEnterprise] = useState<Enterprise | null>(null)
   const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null)
   const [stats, setStats] = useState<EnterpriseStats | null>(null)
+  const [members, setMembers] = useState<EnterpriseMember[]>([])
+  const [membersLoading, setMembersLoading] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('viewer')
+  const [inviteLoading, setInviteLoading] = useState(false)
+  const [inviteError, setInviteError] = useState('')
+  const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '', enterpriseType: '' as EnterpriseType, description: '',
     address: '', city: '', state: '', country: 'US', postalCode: '',
@@ -48,6 +56,66 @@ const EnterpriseManagement: React.FC = () => {
       const res = await apiService.getEnterpriseStats(id)
       setStats(res.data)
     } catch { setStats(null) }
+  }
+
+  const fetchMembers = async (id: string) => {
+    try {
+      setMembersLoading(true)
+      const res = await apiService.listEnterpriseMembers(id)
+      setMembers(res.data || [])
+    } catch { setMembers([]) }
+    finally { setMembersLoading(false) }
+  }
+
+  const handleInviteMember = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setInviteError('')
+    if (!inviteEmail || !inviteRole) {
+      setInviteError('Email and role are required')
+      return
+    }
+    if (!selectedEnterprise) return
+    setInviteLoading(true)
+    try {
+      await apiService.inviteEnterpriseMember(selectedEnterprise.id, { email: inviteEmail, role: inviteRole })
+      setSuccessMsg('Member invited successfully')
+      setInviteEmail(''); setInviteRole('viewer')
+      setShowInviteModal(false)
+      fetchMembers(selectedEnterprise.id)
+      setTimeout(() => setSuccessMsg(''), 3000)
+    } catch (err: any) {
+      setInviteError(err.response?.data?.error || 'Failed to invite member')
+    } finally {
+      setInviteLoading(false)
+    }
+  }
+
+  const handleUpdateMemberRole = async (userId: string, newRole: string) => {
+    if (!selectedEnterprise) return
+    setUpdatingMemberId(userId)
+    try {
+      await apiService.updateEnterpriseMember(selectedEnterprise.id, userId, { role: newRole })
+      setMembers(prev => prev.map(m => m.userId === userId ? { ...m, role: newRole as EnterpriseMember['role'] } : m))
+      setSuccessMsg('Member role updated')
+      setTimeout(() => setSuccessMsg(''), 3000)
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update role')
+    } finally {
+      setUpdatingMemberId(null)
+    }
+  }
+
+  const handleRemoveMember = async (userId: string) => {
+    if (!selectedEnterprise) return
+    if (!window.confirm('Remove this member from the enterprise?')) return
+    try {
+      await apiService.removeEnterpriseMember(selectedEnterprise.id, userId)
+      setMembers(prev => prev.filter(m => m.userId !== userId))
+      setSuccessMsg('Member removed')
+      setTimeout(() => setSuccessMsg(''), 3000)
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to remove member')
+    }
   }
 
   const resetForm = () => {
@@ -122,6 +190,7 @@ const EnterpriseManagement: React.FC = () => {
   const selectEnterprise = (ent: Enterprise) => {
     setSelectedEnterprise(ent)
     fetchStats(ent.id)
+    fetchMembers(ent.id)
   }
 
   const filtered = enterprises.filter(e =>
@@ -307,7 +376,96 @@ const EnterpriseManagement: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* Members Panel */}
+        {selectedEnterprise && (
+          <div style={{ width: '320px', background: 'var(--surface)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)', alignSelf: 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem' }}>👥 {t('enterpriseManagement.tabs.members')}</h3>
+              {(isAdmin || selectedEnterprise.ownerId === user?.id) && (
+                <button className="btn btn-sm btn-primary" onClick={() => { setShowInviteModal(true); setInviteError('') }}>+ Invite</button>
+              )}
+            </div>
+            {membersLoading ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Loading...</p>
+            ) : members.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No members yet</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {members.map(m => (
+                  <div key={m.userId} style={{ background: 'var(--background)', borderRadius: '8px', padding: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.userName || m.userEmail || m.userId.slice(0, 8)}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{m.userEmail}</div>
+                    </div>
+                    {m.role !== 'owner' && (isAdmin || selectedEnterprise.ownerId === user?.id) ? (
+                      <>
+                        <select
+                          value={m.role}
+                          disabled={updatingMemberId === m.userId}
+                          style={{ fontSize: '0.8rem', padding: '0.2rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--surface)' }}
+                          onChange={e => handleUpdateMemberRole(m.userId, e.target.value)}
+                        >
+                          <option value="manager">Manager</option>
+                          <option value="supervisor">Supervisor</option>
+                          <option value="farm_vet">Farm Vet</option>
+                          <option value="worker">Worker</option>
+                          <option value="viewer">Viewer</option>
+                        </select>
+                        <button className="btn btn-sm btn-danger" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleRemoveMember(m.userId)}>✗</button>
+                      </>
+                    ) : (
+                      <span className="badge" style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}>{m.role}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Invite Member Modal */}
+      {showInviteModal && <div className="edit-form-overlay" onClick={() => setShowInviteModal(false)} />}
+      {showInviteModal && (
+        <div className="edit-form-panel" style={{ maxWidth: '420px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <h2 style={{ margin: 0 }}>Invite Member</h2>
+            <button className="btn btn-sm btn-secondary" onClick={() => setShowInviteModal(false)}>✕</button>
+          </div>
+          <form onSubmit={handleInviteMember}>
+            {inviteError && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{inviteError}</div>}
+            <div className="form-group">
+              <label>Email Address <span style={{ color: '#ef4444' }}>*</span></label>
+              <input
+                type="email" required
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
+                placeholder="user@example.com"
+                className="module-input"
+              />
+            </div>
+            <div className="form-group">
+              <label>Role <span style={{ color: '#ef4444' }}>*</span></label>
+              <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className="module-input">
+                <option value="manager">Manager</option>
+                <option value="supervisor">Supervisor</option>
+                <option value="farm_vet">Farm Vet</option>
+                <option value="worker">Worker</option>
+                <option value="viewer">Viewer</option>
+              </select>
+            </div>
+            {!inviteEmail && <p style={{ color: '#f59e0b', fontSize: '0.85rem', margin: '0 0 0.75rem' }}>⚠️ Enter a registered user's email to proceed</p>}
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>* Required field</p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setShowInviteModal(false)}>Cancel</button>
+              <button type="submit" className="btn btn-primary" disabled={!inviteEmail || inviteLoading}>
+                {inviteLoading ? '⏳ Inviting...' : '+ Invite Member'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Create/Edit Form Modal */}
       {showForm && <div className="edit-form-overlay" onClick={() => { setShowForm(false); resetForm() }} />}
