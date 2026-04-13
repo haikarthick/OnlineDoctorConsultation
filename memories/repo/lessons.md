@@ -344,3 +344,10 @@
 - **Lesson:** Add LEFT JOIN enterprises + animal_groups to ALL vet-facing queries (getQueue, listInpatients, listWorkflowCases). Always propagate enterprise_name/group_name to frontend display.
 - **Apply to:** All vet-facing service queries
 
+
+### LESSON-057 — Network referrals must be their own table, not reuse internal referrals
+- **Logged:** 2026-04-13 13:54
+- **Context:** Hospital Network had an internal referrals table for intra-hospital doctor referrals but no cross-hospital referral table. The two concepts are completely different — internal referrals link two vets at one hospital; network referrals link two hospitals across a network with consultation context.
+- **Lesson:** Always model cross-hospital and intra-hospital referrals as separate tables. network_referrals needs: network_id, from_hospital_id, to_hospital_id, consultation_id FK for clinical continuity.
+- **Apply to:** All future referral features
+

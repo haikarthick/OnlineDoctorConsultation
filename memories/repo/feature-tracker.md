@@ -338,3 +338,15 @@
 - **Status:** done
 - **Description:** Added Referrals (TAB 5) to HospitalNetworks.tsx: direction filter (incoming/outgoing/all), referrals table with accept/reject modals, create referral modal. Added 3 API methods to api.ts: createNetworkReferral, updateNetworkReferralStatus, listNetworkReferrals. All translations already existed in all 5 locale files.
 
+
+### ✅ Network Referral UI Integration
+- **Logged:** 2026-04-13 13:54
+- **Status:** done
+- **Description:** Added referral UI to 4 frontend pages: ConsultationRoom (Refer to Network button + modal with disabled-state UX), MedicalRecords (Network Referral History table in hospitalVisits tab), HospitalWorkflow (Referred-from-Network badge on queue entries), InpatientManagement (Referred-from-Network badge on patient cards)
+
+
+### ✅ Hospital Network Cross-Module Referrals
+- **Logged:** 2026-04-13 13:54
+- **Status:** done
+- **Description:** Full network referral system: network_referrals table (DB), createNetworkReferral/updateNetworkReferralStatus/listNetworkReferrals services+routes, Referrals tab in HospitalNetworks (incoming/outgoing/all + accept/reject), Refer to Network button in ConsultationRoom, Referral history in MedicalRecords hospitalVisits tab, Referred-from-Network badge in HospitalWorkflow + InpatientManagement. All 5 locales: networkReferrals namespace.
+
