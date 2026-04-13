@@ -236,6 +236,15 @@ class PostgresDatabase {
       await this.pool.query(ddl).catch(() => {});
     }
 
+    // Extend booking_type constraint to allow farm_visit and herd_consultation
+    await this.pool.query(
+      `ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_booking_type_check`
+    ).catch(() => {});
+    await this.pool.query(
+      `ALTER TABLE bookings ADD CONSTRAINT bookings_booking_type_check
+       CHECK (booking_type IN ('video_call', 'chat', 'in_person', 'phone', 'farm_visit', 'herd_consultation'))`
+    ).catch(() => {});
+
     // Ensure vet_profiles columns added after initial table creation
     await this.pool.query(
       `ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS certificate_types TEXT[] DEFAULT '{}'`

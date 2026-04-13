@@ -235,6 +235,11 @@ export default function InpatientManagement() {
                     <div style={{ fontWeight: 700, fontSize: 16 }}>{p.animal_name}</div>
                     <div style={{ fontSize: 13, color: '#64748b' }}>{p.animal_species}{p.animal_breed ? ` — ${p.animal_breed}` : ''}{p.animal_weight ? ` • ${p.animal_weight}kg` : ''}</div>
                     <div style={{ fontSize: 12, color: '#94a3b8' }}>{t('inpatientManagement.owner')}: {p.owner_first_name} {p.owner_last_name}{p.owner_phone ? ` • ${p.owner_phone}` : ''}</div>
+                    {p.enterpriseName && (
+                      <div style={{ fontSize: '12px', color: '#059669', fontWeight: 600, marginTop: 2 }}>
+                        🏢 {p.enterpriseName}{p.groupName ? ` › ${p.groupName}` : ''}
+                      </div>
+                    )}
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: sc.bg, color: sc.color }}>{(p.status || '').replace(/_/g, ' ')}</span>
                 </div>

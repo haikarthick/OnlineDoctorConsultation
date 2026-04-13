@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
@@ -64,6 +64,7 @@ const MedicalRecords: React.FC = () => {
   const [prescriptionsTotal, setPrescriptionsTotal] = useState(0)
   const [hospitalVisits, setHospitalVisits] = useState<{ queueVisits: any[]; inpatientAdmissions: any[] }>({ queueVisits: [], inpatientAdmissions: [] })
   const [loadingHospitalVisits, setLoadingHospitalVisits] = useState(false)
+  const [enterpriseFilter, setEnterpriseFilter] = useState('')
   // Modal states
   const [showModal, setShowModal] = useState<string | null>(null)
   const [modalData, setModalData] = useState<any>({})
@@ -337,6 +338,19 @@ const MedicalRecords: React.FC = () => {
   }
   const getRecordTypeInfo = (type: string) => RECORD_TYPES.find(r => r.value === type) || RECORD_TYPES[7]
   const getSeverityInfo = (sev: string) => SEVERITY_OPTIONS.find(s => s.value === sev) || SEVERITY_OPTIONS[1]
+
+  const enterprises = useMemo(() => {
+    const map = new Map<string, string>()
+    animals.forEach((a: any) => { if (a.enterpriseId || a.enterprise_id) map.set(a.enterpriseId || a.enterprise_id, a.enterpriseName || a.enterprise_name || 'Unknown Farm') })
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }))
+  }, [animals])
+
+  const filteredAnimals = useMemo(() => {
+    if (!enterpriseFilter) return animals
+    if (enterpriseFilter === '__enterprise__') return animals.filter((a: any) => a.enterpriseId || a.enterprise_id)
+    return animals.filter((a: any) => (a.enterpriseId || a.enterprise_id) === enterpriseFilter)
+  }, [animals, enterpriseFilter])
+
   const selectedAnimalData = animals.find((a: any) => a.id === selectedAnimal)
 
   const TAB_ITEMS: { key: Tab; icon: string; label: string; count?: number }[] = [
@@ -388,13 +402,25 @@ const MedicalRecords: React.FC = () => {
         <h1>{t('medicalRecords.pageTitle')}</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Animal selector */}
+          {enterprises.length > 0 && (isVet || isAdmin) && (
+            <select
+              className="module-input"
+              value={enterpriseFilter}
+              onChange={e => setEnterpriseFilter(e.target.value)}
+              style={{ width: 'auto', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}
+            >
+              <option value="">All Animals</option>
+              <option value="__enterprise__">🏢 {t('medicalRecords.enterpriseFarmAnimals')}</option>
+              {enterprises.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+            </select>
+          )}
           <select
             value={selectedAnimal}
             onChange={(e) => setSelectedAnimal(e.target.value)}
             style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, minWidth: 180 }}
           >
             <option value="">{t('medicalRecords.allAnimals')}</option>
-            {animals.map((a: any) => (
+            {filteredAnimals.map((a: any) => (
               <option key={a.id} value={a.id}>
                 {a.uniqueId || a.unique_id || ''} {a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{(isAdmin || isVet) && a.ownerName ? ` · ${a.ownerName}` : ''}
               </option>

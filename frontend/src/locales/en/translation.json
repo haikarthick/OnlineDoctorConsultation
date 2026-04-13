@@ -1299,7 +1299,8 @@
   "medicalRecords": {
     "pageTitle": "📋 Medical Records",
     "allAnimals": "All Animals",
-    "newRecord": "+ New Record",
+    "enterpriseFarmAnimals": "Enterprise/Farm Animals",
+    "newRecord":"+ New Record",
     "tabs": {
       "overview": "Overview",
       "consultations": "Consultations",
@@ -3591,7 +3592,8 @@
     "phoneCall": "Phone Call",
     "inPerson": "In Person",
     "chatType": "Chat",
-    "availableSlots": "Available Time Slots",
+    "farmVisit": "Farm Visit (On-site)",
+    "availableSlots":"Available Time Slots",
     "noSlotsAvailable": "No slots available for this date. The doctor may not have a schedule on this day.",
     "allSlotsPassed": "All time slots for this date have passed or are already booked. Please select a different date.",
     "back": "← Back",

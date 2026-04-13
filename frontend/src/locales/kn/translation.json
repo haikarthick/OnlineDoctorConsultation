@@ -1257,6 +1257,7 @@
   "medicalRecords": {
     "pageTitle": "📋 ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
     "allAnimals": "All Animals",
+    "enterpriseFarmAnimals": "ಉದ್ಯಮ/ಕೃಷಿ ಪ್ರಾಣಿಗಳು",
     "newRecord": "+ New Record",
     "tabs": {
       "overview": "ಅವಲೋಕನ",
@@ -3536,6 +3537,7 @@
     "phoneCall": "ಫೋನ್ ಕಾಲ್",
     "inPerson": "ವ್ಯಕ್ತಿಗತವಾಗಿ",
     "chatType": "ಚಾಟ್",
+    "farmVisit": "ಫಾರ್ಮ್ ಭೇಟಿ (ಆನ್-ಸೈಟ್)",
     "availableSlots": "ಲಭ್ಯವಿರುವ ಸಮಯ ಸ್ಲಾಟ್‌ಗಳು",
     "noSlotsAvailable": "ಈ ದಿನಾಂಕಕ್ಕೆ ಸ್ಲಾಟ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ. ಈ ದಿನ ವೈದ್ಯರಿಗೆ ವೇಳಾಪಟ್ಟಿ ಇಲ್ಲದಿರಬಹುದು.",
     "allSlotsPassed": "ಈ ದಿನಾಂಕಕ್ಕೆ ಎಲ್ಲಾ ಸಮಯ ಸ್ಲಾಟ್‌ಗಳು ಕಳೆದಿವೆ ಅಥವಾ ಈಗಾಗಲೇ ಬುಕ್ ಆಗಿವೆ. ದಯವಿಟ್ಟು ಬೇರೆ ದಿನಾಂಕ ಆಯ್ಕೆ ಮಾಡಿ.",

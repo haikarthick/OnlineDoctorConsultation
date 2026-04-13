@@ -151,11 +151,15 @@ class StaffWorkflowService {
       SELECT aq.*,
         u_owner.first_name AS owner_first_name, u_owner.last_name AS owner_last_name,
         u_vet.first_name AS vet_first_name, u_vet.last_name AS vet_last_name,
-        a.name AS animal_name, a.species AS animal_species, a.breed AS animal_breed
+        a.name AS animal_name, a.species AS animal_species, a.breed AS animal_breed,
+        e.name AS "enterpriseName", e.enterprise_type AS "enterpriseType",
+        ag.name AS "groupName", ag.group_type AS "groupType"
       FROM appointment_queue aq
       LEFT JOIN users u_owner ON u_owner.id = aq.owner_id
       LEFT JOIN users u_vet ON u_vet.id = aq.assigned_vet_id
       LEFT JOIN animals a ON a.id = aq.animal_id
+      LEFT JOIN enterprises e ON e.id = a.enterprise_id
+      LEFT JOIN animal_groups ag ON ag.id = a.group_id
       WHERE aq.hospital_id = $1
     `;
     const params: unknown[] = [hospitalId];
@@ -358,12 +362,16 @@ class StaffWorkflowService {
         u_vet.first_name AS vet_first_name, u_vet.last_name AS vet_last_name,
         u_staff.first_name AS staff_first_name, u_staff.last_name AS staff_last_name,
         u_owner.first_name AS owner_first_name, u_owner.last_name AS owner_last_name,
-        a.name AS animal_name, a.species AS animal_species, a.breed AS animal_breed
+        a.name AS animal_name, a.species AS animal_species, a.breed AS animal_breed,
+        e.name AS "enterpriseName", e.enterprise_type AS "enterpriseType",
+        ag.name AS "groupName", ag.group_type AS "groupType"
       FROM workflow_cases wc
       LEFT JOIN users u_vet ON u_vet.id = wc.assigned_vet_id
       LEFT JOIN users u_staff ON u_staff.id = wc.assigned_staff_id
       LEFT JOIN users u_owner ON u_owner.id = wc.owner_id
       LEFT JOIN animals a ON a.id = wc.animal_id
+      LEFT JOIN enterprises e ON e.id = a.enterprise_id
+      LEFT JOIN animal_groups ag ON ag.id = a.group_id
       WHERE wc.hospital_id = $1
     `;
     const params: unknown[] = [hospitalId];
@@ -633,12 +641,14 @@ class StaffWorkflowService {
         a.name AS animal_name, a.species AS animal_species, a.breed AS animal_breed, a.weight AS animal_weight,
         u_owner.first_name AS owner_first_name, u_owner.last_name AS owner_last_name, u_owner.phone AS owner_phone,
         u_vet.first_name AS admitted_by_first, u_vet.last_name AS admitted_by_last,
-        e.name AS enterprise_name, e.id AS enterprise_id
+        e.name AS enterprise_name, e.id AS enterprise_id,
+        e.name AS "enterpriseName", ag.name AS "groupName"
       FROM inpatient_admissions ip
       JOIN animals a ON a.id = ip.animal_id
       JOIN users u_owner ON u_owner.id = ip.owner_id
       JOIN users u_vet ON u_vet.id = ip.admitted_by
       LEFT JOIN enterprises e ON e.id = ip.enterprise_id
+      LEFT JOIN animal_groups ag ON ag.id = a.group_id
       WHERE ip.hospital_id = $1
     `;
     const params: unknown[] = [hospitalId];

@@ -1257,6 +1257,7 @@
   "medicalRecords": {
     "pageTitle": "📋 चिकित्सा रिकॉर्ड",
     "allAnimals": "सभी पशु",
+    "enterpriseFarmAnimals": "उद्यम/खेत पशु",
     "newRecord": "+ नया रिकॉर्ड",
     "tabs": {
       "overview": "अवलोकन",
@@ -3545,6 +3546,7 @@
     "phoneCall": "फोन कॉल",
     "inPerson": "व्यक्तिगत रूप से",
     "chatType": "चैट",
+    "farmVisit": "फार्म विजिट (ऑन-साइट)",
     "availableSlots": "उपलब्ध समय स्लॉट",
     "noSlotsAvailable": "इस तारीख के लिए कोई स्लॉट उपलब्ध नहीं। डॉक्टर का इस दिन शेड्यूल नहीं हो सकता है।",
     "allSlotsPassed": "इस तारीख के सभी समय स्लॉट बीत चुके हैं या बुक हो चुके हैं। कृपया दूसरी तारीख चुनें।",

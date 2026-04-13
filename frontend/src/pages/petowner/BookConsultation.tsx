@@ -559,6 +559,9 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                     <option value="phone">📞 {t('bookConsultation.phoneCall')}</option>
                     <option value="in_person">🏥 {t('bookConsultation.inPerson')}</option>
                     <option value="chat">💬 {t('bookConsultation.chatType')}</option>
+                    {(user?.role === 'farmer' || selectionMode === 'enterprise') && (
+                      <option value="farm_visit">🚜 {t('bookConsultation.farmVisit')}</option>
+                    )}
                   </select>
                 </div>
               </div>

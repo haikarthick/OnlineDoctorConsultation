@@ -888,6 +888,12 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                       {animalInfo.weight ? ` — ${animalInfo.weight}kg` : ''}
                     </div>
                     {animalInfo.uniqueId && <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>ID: {animalInfo.uniqueId}</div>}
+                    {(animalInfo.enterpriseName || animalInfo.enterprise_name) && (
+                      <div style={{ fontSize: '13px', color: '#059669', fontWeight: 600, padding: '4px 8px', background: '#ecfdf5', borderRadius: 6, marginTop: 4 }}>
+                        🏢 Farm: {animalInfo.enterpriseName || animalInfo.enterprise_name}
+                        {(animalInfo.groupName || animalInfo.group_name) && ` › ${animalInfo.groupName || animalInfo.group_name}`}
+                      </div>
+                    )}
                   </div>
 
                   {/* Allergies */}

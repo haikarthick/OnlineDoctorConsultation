@@ -147,6 +147,11 @@ setError(err?.response?.data?.error?.message || err?.message || t('doctorDashboa
                       ? <span style={{ color: '#dc2626', fontWeight: 600 }}> — ⚠️ {booking.priority?.toUpperCase()}</span>
                       : null}
                   </p>
+                  {(booking as any).enterpriseName && (
+                    <div style={{ fontSize: '12px', color: '#059669', fontWeight: 600, marginTop: 2 }}>
+                      🏢 {(booking as any).enterpriseName}{(booking as any).groupName ? ` › ${(booking as any).groupName}` : ''}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button className="btn btn-primary" style={{ padding: '6px 16px', fontSize: 13 }} onClick={() => handleConfirm(booking.id)}>✓ {t('doctorDashboard.confirm')}</button>
@@ -208,6 +213,11 @@ setError(err?.response?.data?.error?.message || err?.message || t('doctorDashboa
                           {t(`common.${booking.priority || 'normal'}`)}
                         </span>
                       </p>
+                      {(booking as any).enterpriseName && (
+                        <div style={{ fontSize: '12px', color: '#059669', fontWeight: 600, marginTop: 2 }}>
+                          🏢 {(booking as any).enterpriseName}{(booking as any).groupName ? ` › ${(booking as any).groupName}` : ''}
+                        </div>
+                      )}
                     </div>
                     <span className={`badge badge-${booking.status === 'confirmed' ? 'active' : 'pending'}`}>
                       {statusText(booking.status)}

@@ -290,3 +290,21 @@
 - **Status:** done
 - **Description:** Complete overhaul: consultation-linked reviews with ownership validation, vet context banner, 2-step WriteReview flow, helpful/report/vet-response endpoints, flag/unflag moderation, isPublic submission fix, total_reviews bug fix, UNIQUE constraint DB safety net, all 5 locales updated
 
+
+### ✅ Farmer module phase 2
+- **Logged:** 2026-04-13 10:12
+- **Status:** done
+- **Description:** Completed remaining farmer gaps: movement approval UI (status badge + approve/reject buttons for farmers), enterprise dashboard stats (4 stat cards + quick farm actions), member management (invite by email, role update, remove), groups dropdown in TreatmentCampaigns, backend invite-member route, approveMovement API method
+
+
+### ✅ Farmer/Enterprise Integration Gaps
+- **Logged:** 2026-04-13 10:22
+- **Status:** done
+- **Description:** Added enterprise/group context (enterpriseName, enterpriseType, groupName, groupType) to getQueue(), listInpatients(), listWorkflowCases() in StaffWorkflowService. Added group-belongs-to-enterprise validation in BookingService. Added farm_visit and herd_consultation booking types to Joi validation and database constraint.
+
+
+### ✅ Farmer/Enterprise UI Integration
+- **Logged:** 2026-04-13 10:26
+- **Status:** done
+- **Description:** Added enterprise/farm badges (enterpriseName, groupName) to HospitalWorkflow queue list, InpatientManagement patient cards, DoctorDashboard pending+upcoming bookings, ConsultationRoom animal info panel. Added farm_visit booking type option in BookConsultation for farmer role / enterprise mode. Added enterprise filter dropdown in MedicalRecords for vet/admin roles using useMemo-computed enterprise list.
+

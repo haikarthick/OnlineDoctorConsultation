@@ -116,6 +116,15 @@ class BookingService {
         throw new Error('You do not have access to this animal group');
       }
     }
+    if (data.groupId && data.enterpriseId) {
+      const groupCheck = await database.query(
+        `SELECT id FROM animal_groups WHERE id = $1 AND enterprise_id = $2`,
+        [data.groupId, data.enterpriseId]
+      );
+      if (groupCheck.rows.length === 0) {
+        throw new Error('Group does not belong to this enterprise');
+      }
+    }
 
     // Check for conflicting bookings
     const conflicts = await database.query(
