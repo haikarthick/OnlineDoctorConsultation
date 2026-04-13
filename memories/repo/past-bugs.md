@@ -552,3 +552,19 @@ render-start.sh
 - **Fix:** NEVER use empty catch blocks in data-loading useEffect — always surface errors to the user
 - **Rule:** Not specified
 
+
+### HN-001 — Hospital Network — 9 critical backend security/logic gaps
+- **Logged:** 2026-04-13 11:03
+- **Symptom:** enrollAnimal had no auth check, createNetwork had no transaction, id_prefix had no unique constraint, invite accept didn't check expiry, no deactivation endpoint, audit log showed NULL animal names, hospitals list unpaginated
+- **Root Cause:** Wrapped createNetwork in BEGIN/COMMIT transaction, added UNIQUE INDEX on id_prefix, added hospital+user membership checks to enrollAnimal, added expiry check to acceptWalkInInvite, added PATCH deactivate endpoint, COALESCE for null animal names, paginated listNetworkHospitals
+- **Fix:** Always: (1) use DB transactions for multi-table inserts, (2) validate token expiry on accept, (3) verify membership before enrollment mutations
+- **Rule:** Not specified
+
+
+### HN-002 — Hospital Network — 7 frontend UX/i18n bugs
+- **Logged:** 2026-04-13 11:03
+- **Symptom:** AssignHospitalModal silently failed on API error showing blank dropdown. Staff invite had no success feedback. network_type had academic vs DB cooperative mismatch. Hardcoded strings not using t(). Missing i18n keys for deactivate, inviteSent, chooseHospital
+- **Root Cause:** Added loadingHospitals+hospitalsError states, success toast for staff invite, fixed academic→cooperative, replaced hardcoded strings with t(), added 8 missing keys to all 5 locale files, added deactivate network UI with confirmation
+- **Fix:** Always add loading+error states to every modal that fetches data. Never use .catch(() => {}) silently.
+- **Rule:** Not specified
+
