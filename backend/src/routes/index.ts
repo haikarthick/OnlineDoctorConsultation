@@ -282,6 +282,49 @@ router.post('/movements', authMiddleware, validateBody(createMovementSchema), as
 router.get('/movements/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getMovement(req, res)));
 router.get('/enterprises/:enterpriseId/movements', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listMovements(req, res)));
 
+// Movement approval/rejection (enterprise owner or admin)
+router.patch('/movements/:id/approve', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).userId;
+  const userRole = (req as any).userRole;
+  const { action } = req.body;
+
+  if (!action || !['approve', 'reject'].includes(action)) {
+    return res.status(400).json({ error: 'action must be "approve" or "reject"' });
+  }
+
+  const movement = await database.query(
+    `SELECT m.*, a.enterprise_id FROM movement_records m
+     LEFT JOIN animals a ON a.id = m.animal_id
+     WHERE m.id = $1`,
+    [req.params.id]
+  );
+
+  if (movement.rows.length === 0) {
+    return res.status(404).json({ error: 'Movement record not found' });
+  }
+
+  const mv = movement.rows[0];
+  const enterpriseId = mv.enterprise_id || mv.enterprise_id;
+
+  if (userRole !== 'admin') {
+    const enterpriseAccess = await database.query(
+      `SELECT id FROM enterprises WHERE id = $1 AND owner_id = $2`,
+      [enterpriseId, userId]
+    );
+    if (enterpriseAccess.rows.length === 0) {
+      return res.status(403).json({ error: 'Not authorized to approve this movement' });
+    }
+  }
+
+  const newStatus = action === 'approve' ? 'approved' : 'rejected';
+  await database.query(
+    `UPDATE movement_records SET status = $1, approved_by = $2 WHERE id = $3`,
+    [newStatus, userId, req.params.id]
+  );
+
+  res.json({ data: { status: newStatus, message: `Movement ${newStatus}` } });
+}));
+
 // Treatment Campaigns
 router.post('/campaigns', authMiddleware, validateBody(createCampaignSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createCampaign(req, res)));
 router.get('/campaigns/:id', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.getCampaign(req, res)));

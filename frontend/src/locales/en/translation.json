@@ -89,6 +89,15 @@
     "enterprises": "Enterprises",
     "animalGroups": "Animal Groups",
     "locations": "Locations",
+    "movements": {
+      "pendingApproval": "Pending Approval",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "completed": "Completed",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approvalRequired": "This movement requires manager approval"
+    },
     "movementLog": "Movement Log",
     "campaigns": "Campaigns",
     "healthAnalytics": "Health Analytics",
@@ -1184,7 +1193,12 @@
       "herdGroup": "Herd / Group",
       "noGroup": "-- No group --",
       "noGroupsFound": "No groups for this enterprise.",
-      "createOne": "Create one"
+      "createOne": "Create one",
+      "enterprise": "Enterprise",
+      "group": "Group",
+      "enterpriseAnimals": "Enterprise Animals",
+      "filterByEnterprise": "Filter by Enterprise",
+      "filterByGroup": "Filter by Group"
     },
     "actions": {
       "cancel": "Cancel",
@@ -5841,5 +5855,14 @@
     "atLimit": "Seat limit reached",
     "nearLimit": "Near seat limit",
     "contactUs": "Contact us to increase your seat limit"
+  },
+  "movements": {
+    "pendingApproval": "Pending Approval",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "completed": "Completed",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approvalRequired": "This movement requires manager approval"
   }
 }

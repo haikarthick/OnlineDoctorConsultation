@@ -94,7 +94,29 @@ class BookingService {
     if (requestedDate < todayStart) {
       throw new ValidationError('Cannot book a consultation in the past. Please select a future date and time.');
     }
-    
+
+    // Validate enterprise/group access for farmer bookings
+    if (data.enterpriseId) {
+      const enterpriseCheck = await database.query(
+        `SELECT id FROM enterprises WHERE id = $1 AND owner_id = $2`,
+        [data.enterpriseId, petOwnerId]
+      );
+      if (enterpriseCheck.rows.length === 0) {
+        throw new Error('You do not have access to this enterprise');
+      }
+    }
+    if (data.groupId && !data.enterpriseId) {
+      const groupCheck = await database.query(
+        `SELECT ag.id FROM animal_groups ag
+         JOIN enterprises e ON e.id = ag.enterprise_id
+         WHERE ag.id = $1 AND e.owner_id = $2`,
+        [data.groupId, petOwnerId]
+      );
+      if (groupCheck.rows.length === 0) {
+        throw new Error('You do not have access to this animal group');
+      }
+    }
+
     // Check for conflicting bookings
     const conflicts = await database.query(
       `SELECT id FROM bookings WHERE veterinarian_id = $1 AND scheduled_date = $2 

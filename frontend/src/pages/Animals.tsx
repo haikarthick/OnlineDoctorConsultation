@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+﻿import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
@@ -123,6 +123,7 @@ interface AnimalData {
   microchipId?: string; earTagId?: string; registrationNumber?: string;
   isNeutered?: boolean; insuranceProvider?: string; insurancePolicyNumber?: string;
   insuranceExpiry?: string; medicalNotes?: string; ownerName?: string;
+  enterpriseId?: string; groupId?: string; enterpriseName?: string; groupName?: string; groupColor?: string;
 }
 
 interface EnterpriseOption { id: string; name: string }
@@ -150,6 +151,8 @@ const Animals: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [speciesFilter, setSpeciesFilter] = useState('')
+  const [enterpriseFilter, setEnterpriseFilter] = useState('')
+  const [groupFilter, setGroupFilter] = useState('')
   const [vetView, setVetView] = useState<'my-pets' | 'patients'>('my-pets')
 
   // Enterprise / group options for farmer role
@@ -187,7 +190,22 @@ const Animals: React.FC = () => {
       const params: Record<string, string> = {}
       if (isVet && vetView === 'patients') params.view = 'patients'
       const res = await apiService.listAnimals(params)
-      setAnimals(res.data?.animals || [])
+      let animalList: AnimalData[] = res.data?.animals || []
+
+      // For farmers, also load enterprise animals (not personally owned but part of their enterprise)
+      if (isFarmer && enterpriseOptions.length > 0) {
+        const enterpriseAnimalPromises = enterpriseOptions.map(ent =>
+          apiService.listEnterpriseAnimals(ent.id, { limit: 200 }).catch(() => ({ data: { items: [] } }))
+        )
+        const enterpriseResults = await Promise.all(enterpriseAnimalPromises)
+        const enterpriseAnimals = enterpriseResults.flatMap((r: any) => r.data?.items || [])
+        const existingIds = new Set(animalList.map((a: AnimalData) => a.id))
+        const newEntAnimals = enterpriseAnimals.filter((a: any) => !existingIds.has(a.id))
+        animalList = [...animalList, ...newEntAnimals]
+      }
+
+      setAnimals(animalList)
+      
     } catch {
       setAnimals([])
     } finally {
@@ -291,7 +309,9 @@ const Animals: React.FC = () => {
       (a.earTagId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (a.microchipId || '').toLowerCase().includes(searchTerm.toLowerCase())
     const matchSpecies = !speciesFilter || a.species === speciesFilter
-    return matchSearch && matchSpecies
+        const matchEnterprise = !enterpriseFilter || a.enterpriseId === enterpriseFilter
+    const matchGroup = !groupFilter || a.groupId === groupFilter
+    return matchSearch && matchSpecies && matchEnterprise && matchGroup
   })
 
   const uniqueSpecies = [...new Set(animals.map(a => a.species))]
@@ -353,6 +373,18 @@ const Animals: React.FC = () => {
             <option value="">{t('animals.allSpecies')}</option>
             {uniqueSpecies.map(s => <option key={s} value={s}>{SPECIES_ICONS[s] || '🐾'} {s}</option>)}
           </select>
+          {isFarmer && enterpriseOptions.length > 0 && (
+            <select value={enterpriseFilter} onChange={e => { setEnterpriseFilter(e.target.value); setGroupFilter('') }} style={{ ...fieldStyle, maxWidth: 180 }}>
+              <option value=''>{t('animals.enterprise.filterByEnterprise')}</option>
+              {enterpriseOptions.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
+            </select>
+          )}
+          {isFarmer && enterpriseFilter && groupOptions.length > 0 && (
+            <select value={groupFilter} onChange={e => setGroupFilter(e.target.value)} style={{ ...fieldStyle, maxWidth: 160 }}>
+              <option value=''>{t('animals.enterprise.filterByGroup')}</option>
+              {groupOptions.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+            </select>
+          )}
           <span style={{ fontSize: 13, color: '#6b7280' }}>{filteredAnimals.length} {filteredAnimals.length !== 1 ? t('animals.animalsCount') : t('animals.animalCount')}</span>
         </div>
       )}
@@ -585,6 +617,17 @@ const Animals: React.FC = () => {
                       {animal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.dob')}</span> <strong>{formatDate(animal.dateOfBirth)}</strong></div>}
                       {animal.ownerName && (isVet || isAdmin) && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.owner')}</span> <strong>{animal.ownerName}</strong></div>}
                     </div>
+
+                                        {/* Enterprise / Group (Farmer view) */}
+                    {(animal.enterpriseName || animal.groupName) && (
+                      <div style={{ marginTop: 8, padding: '6px 12px', background: '#f0f4ff', borderRadius: 8, fontSize: 12 }}>
+                        {animal.groupColor && (
+                          <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: animal.groupColor, marginRight: 6, verticalAlign: 'middle' }} />
+                        )}
+                        {animal.enterpriseName && <span style={{ color: '#4338ca', fontWeight: 600 }}>🏢 {animal.enterpriseName}</span>}
+                        {animal.groupName && <span style={{ color: '#6b7280', marginLeft: 8 }}>· {animal.groupName}</span>}
+                      </div>
+                    )}
 
                     {/* IDs Row */}
                     {(animal.microchipId || animal.earTagId || animal.registrationNumber) && (

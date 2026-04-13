@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import MedicalRecordService from '../services/MedicalRecordService';
 import { ValidationError, ForbiddenError } from '../utils/errors';
+import database from '../utils/database';
 
 export class MedicalRecordController {
   // ═══ MEDICAL RECORDS ══════════════════════════════════════
@@ -22,8 +23,22 @@ export class MedicalRecordController {
 
   async getRecord(req: AuthRequest, res: Response): Promise<void> {
     const record = await MedicalRecordService.getRecord(req.params.id);
-    if (record.userId !== req.userId && record.createdBy !== req.userId && req.userRole !== 'admin' && req.userRole !== 'veterinarian') {
-      throw new ForbiddenError('You do not have permission to view this record');
+    const isOwner = record.userId === (req as any).userId || record.createdBy === (req as any).userId;
+    const isPrivileged = (req as any).userRole === 'admin' || (req as any).userRole === 'veterinarian';
+
+    let isFarmerWithAccess = false;
+    if ((req as any).userRole === 'farmer' && record.animalId) {
+      const animalResult = await database.query(
+        `SELECT a.enterprise_id FROM animals a
+         JOIN enterprises e ON e.id = a.enterprise_id
+         WHERE a.id = $1 AND e.owner_id = $2`,
+        [record.animalId, (req as any).userId]
+      );
+      isFarmerWithAccess = animalResult.rows.length > 0;
+    }
+
+    if (!isOwner && !isPrivileged && !isFarmerWithAccess) {
+      throw new ForbiddenError('Access denied to this medical record');
     }
     res.json({ success: true, data: record });
   }

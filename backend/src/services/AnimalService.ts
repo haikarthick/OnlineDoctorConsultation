@@ -360,6 +360,38 @@ export class AnimalService {
       throw new DatabaseError('Error deleting animal', { originalError: error });
     }
   }
+
+  async listEnterpriseAnimals(enterpriseId: string, filters: { species?: string; groupId?: string; limit?: number; offset?: number } = {}): Promise<{ items: any[]; total: number }> {
+    try {
+      const { species, groupId, limit = 100, offset = 0 } = filters;
+      const conditions: string[] = ['a.enterprise_id = $1', 'a.is_active = true'];
+      const params: any[] = [enterpriseId];
+      let idx = 2;
+      if (species) { conditions.push(`a.species = $${idx++}`); params.push(species); }
+      if (groupId) { conditions.push(`a.group_id = $${idx++}`); params.push(groupId); }
+      const where = conditions.join(' AND ');
+      const [rows, count] = await Promise.all([
+        database.query(
+          `SELECT a.id, a.name, a.species, a.breed, a.gender, a.date_of_birth as "dateOfBirth",
+                  a.weight, a.unique_id as "uniqueId", a.group_id as "groupId",
+                  a.enterprise_id as "enterpriseId", a.owner_id as "ownerId",
+                  ag.name as "groupName", ag.color_code as "groupColor",
+                  e.name as "enterpriseName"
+           FROM animals a
+           LEFT JOIN animal_groups ag ON ag.id = a.group_id
+           LEFT JOIN enterprises e ON e.id = a.enterprise_id
+           WHERE ${where}
+           ORDER BY ag.name NULLS LAST, a.name ASC
+           LIMIT $${idx} OFFSET $${idx + 1}`,
+          [...params, Math.min(+limit, 200), +offset]
+        ),
+        database.query(`SELECT COUNT(*) as count FROM animals a WHERE ${where}`, params),
+      ]);
+      return { items: rows.rows, total: parseInt(count.rows[0]?.count || '0') };
+    } catch (error) {
+      throw new DatabaseError('Error listing enterprise animals', { originalError: error });
+    }
+  }
 }
 
 export default new AnimalService();

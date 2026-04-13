@@ -632,11 +632,13 @@ class StaffWorkflowService {
       SELECT ip.*,
         a.name AS animal_name, a.species AS animal_species, a.breed AS animal_breed, a.weight AS animal_weight,
         u_owner.first_name AS owner_first_name, u_owner.last_name AS owner_last_name, u_owner.phone AS owner_phone,
-        u_vet.first_name AS admitted_by_first, u_vet.last_name AS admitted_by_last
+        u_vet.first_name AS admitted_by_first, u_vet.last_name AS admitted_by_last,
+        e.name AS enterprise_name, e.id AS enterprise_id
       FROM inpatient_admissions ip
       JOIN animals a ON a.id = ip.animal_id
       JOIN users u_owner ON u_owner.id = ip.owner_id
       JOIN users u_vet ON u_vet.id = ip.admitted_by
+      LEFT JOIN enterprises e ON e.id = ip.enterprise_id
       WHERE ip.hospital_id = $1
     `;
     const params: unknown[] = [hospitalId];

@@ -1151,7 +1151,12 @@
       "herdGroup": "झुंड / समूह",
       "noGroup": "-- कोई समूह नहीं --",
       "noGroupsFound": "इस उद्यम के लिए कोई समूह नहीं।",
-      "createOne": "एक बनाएं"
+      "createOne": "एक बनाएं",
+      "enterprise": "उद्यम",
+      "group": "समूह",
+      "enterpriseAnimals": "उद्यम पशु",
+      "filterByEnterprise": "उद्यम द्वारा फिल्टर",
+      "filterByGroup": "समूह द्वारा फिल्टर"
     },
     "actions": {
       "cancel": "रद्द करें",
@@ -5784,5 +5789,14 @@
     "atLimit": "Seat limit reached",
     "nearLimit": "Near seat limit",
     "contactUs": "Contact us to increase your seat limit"
+  },
+  "movements": {
+    "pendingApproval": "अनुमोदन लंबित",
+    "approved": "स्वीकृत",
+    "rejected": "अस्वीकृत",
+    "completed": "पूर्ण",
+    "approve": "स्वीकृत करें",
+    "reject": "अस्वीकार करें",
+    "approvalRequired": "स्थानांतरण के लिए प्रबंधक की मंजूरी आवश्यक है"
   }
 }

@@ -848,6 +848,35 @@ class PostgresDatabase {
       await this.pool.query(ddl).catch(() => {});
     }
 
+    // Enterprise alignment — add enterprise context to clinical tables
+    const enterpriseAlignmentDDL = [
+      `ALTER TABLE inpatient_admissions ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
+      `ALTER TABLE inpatient_admissions ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL`,
+      `ALTER TABLE workflow_cases ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
+      `ALTER TABLE referrals ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
+      `ALTER TABLE appointment_queue ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
+      `ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
+      `ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL`,
+      `ALTER TABLE movement_records ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected','completed'))`,
+      `ALTER TABLE medical_records ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
+      `ALTER TABLE medical_records ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL`,
+    ];
+    for (const ddl of enterpriseAlignmentDDL) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
+    // campaign_animals junction table for treatment tracking
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS campaign_animals (
+        campaign_id UUID NOT NULL REFERENCES treatment_campaigns(id) ON DELETE CASCADE,
+        animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+        status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending','completed','skipped')),
+        vaccination_record_id UUID REFERENCES vaccination_records(id) ON DELETE SET NULL,
+        completed_at TIMESTAMP,
+        PRIMARY KEY (campaign_id, animal_id)
+      )
+    `).catch(() => {});
+
     // Reviews integrity: unique constraint prevents duplicate reviews per consultation per reviewer
     await this.pool.query(`
       DO $$ BEGIN

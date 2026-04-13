@@ -800,3 +800,21 @@
 </details>
 
 ---
+
+## 2026-04-12 16:30 · `bd171b4` · 🔧 CHORE
+
+**Commit:** chore: update memory files for review system overhaul  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/feature-tracker.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---

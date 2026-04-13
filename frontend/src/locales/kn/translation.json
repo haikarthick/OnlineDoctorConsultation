@@ -1151,7 +1151,12 @@
       "herdGroup": "ಹಿಂಡು / ಗುಂಪು",
       "noGroup": "-- ಗುಂಪು ಇಲ್ಲ --",
       "noGroupsFound": "ಈ ಎಂಟರ್‌ಪ್ರೈಸ್‌ಗೆ ಗುಂಪುಗಳಿಲ್ಲ.",
-      "createOne": "ಒಂದನ್ನು ರಚಿಸಿ"
+      "createOne": "ಒಂದನ್ನು ರಚಿಸಿ",
+      "enterprise": "ಉದ್ಯಮ",
+      "group": "ಗುಂಪು",
+      "enterpriseAnimals": "ಉದ್ಯಮ ಪ್ರಾಣಿಗಳು",
+      "filterByEnterprise": "ಉದ್ಯಮದಿಂದ ಫಿಲ್ಟರ್ ಮಾಡಿ",
+      "filterByGroup": "ಗುಂಪಿನಿಂದ ಫಿಲ್ಟರ್ ಮಾಡಿ"
     },
     "actions": {
       "cancel": "ರದ್ದುಮಾಡಿ",
@@ -5727,5 +5732,14 @@
     "atLimit": "Seat limit reached",
     "nearLimit": "Near seat limit",
     "contactUs": "Contact us to increase your seat limit"
+  },
+  "movements": {
+    "pendingApproval": "ಅನುಮೋದನೆ ಬಾಕಿ",
+    "approved": "ಅನುಮೋದಿಸಲಾಗಿದೆ",
+    "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+    "completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+    "approve": "ಅನುಮೋದಿಸಿ",
+    "reject": "ತಿರಸ್ಕರಿಸಿ",
+    "approvalRequired": "ಈ ಚಲನೆಗೆ ವ್ಯವಸ್ಥಾಪಕರ ಅನುಮೋದನೆ ಅಗತ್ಯ"
   }
 }

@@ -1151,7 +1151,12 @@
       "herdGroup": "మంద / గుంపు",
       "noGroup": "-- గుంపు లేదు --",
       "noGroupsFound": "ఈ ఎంటర్‌ప్రైజ్‌కు గుంపులు లేవు.",
-      "createOne": "ఒకటి సృష్టించండి"
+      "createOne": "ఒకటి సృష్టించండి",
+      "enterprise": "సంస్థ",
+      "group": "సమూహం",
+      "enterpriseAnimals": "సంస్థ జంతువులు",
+      "filterByEnterprise": "సంస్థ ద్వారా వడపోత",
+      "filterByGroup": "సమూహం ద్వారా వడపోత"
     },
     "actions": {
       "cancel": "రద్దు చేయండి",
@@ -5716,5 +5721,14 @@
     "atLimit": "Seat limit reached",
     "nearLimit": "Near seat limit",
     "contactUs": "Contact us to increase your seat limit"
+  },
+  "movements": {
+    "pendingApproval": "ఆమోదం పెండింగ్",
+    "approved": "ఆమోదించబడింది",
+    "rejected": "తిరస్కరించబడింది",
+    "completed": "పూర్తయింది",
+    "approve": "ఆమోదించు",
+    "reject": "తిరస్కరించు",
+    "approvalRequired": "ఈ కదలికకు మేనేజర్ ఆమోదం అవసరం"
   }
 }

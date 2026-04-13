@@ -1149,7 +1149,12 @@
       "herdGroup": "மந்தை / குழு",
       "noGroup": "-- குழுவில்லை --",
       "noGroupsFound": "இந்த நிறுவனத்திற்கு குழுக்கள் இல்லை.",
-      "createOne": "ஒன்றை உருவாக்கு"
+      "createOne": "ஒன்றை உருவாக்கு",
+      "enterprise": "நிறுவனம்",
+      "group": "குழு",
+      "enterpriseAnimals": "நிறுவன விலங்குகள்",
+      "filterByEnterprise": "நிறுவனம் மூலம் வடிகட்டு",
+      "filterByGroup": "குழு மூலம் வடிகட்டு"
     },
     "actions": {
       "cancel": "ரத்துசெய்",
@@ -5773,5 +5778,14 @@
     "atLimit": "Seat limit reached",
     "nearLimit": "Near seat limit",
     "contactUs": "Contact us to increase your seat limit"
+  },
+  "movements": {
+    "pendingApproval": "ஒப்புதல் நிலுவையில்",
+    "approved": "அங்கீகரிக்கப்பட்டது",
+    "rejected": "நிராகரிக்கப்பட்டது",
+    "completed": "முடிந்தது",
+    "approve": "அங்கீகரிக்கவும்",
+    "reject": "நிராகரிக்கவும்",
+    "approvalRequired": "நகர்வுக்கு மேலாளர் ஒப்புதல் தேவை"
   }
 }
