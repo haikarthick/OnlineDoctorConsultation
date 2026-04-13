@@ -188,7 +188,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Vet Hospital Network ──
     { id: 'vet-hospitals', label: t('nav.vetHospitals'), icon: '🏥', path: '/vet-hospitals',
-      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin'], section: 'Vet Network' },
+      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Vet Network' },
     { id: 'vet-hospitals-manage', label: t('nav.myHospital'), icon: '🏨', path: '/vet-hospitals/manage',
       roles: ['veterinarian'], section: 'Vet Network' },
     { id: 'hospital-workflow', label: 'Hospital Workflow', icon: '🔄', path: '/hospital-workflow',

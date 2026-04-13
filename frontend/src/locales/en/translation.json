@@ -737,7 +737,8 @@
       "vet": "Here's your practice overview",
       "admin": "System administration overview",
       "farmer": "Here's your farm management overview",
-      "hospitalStaff": "Here's your hospital workflow overview"
+      "hospitalStaff": "Here's your hospital workflow overview",
+      "corporateAdmin": "Hospital network administration overview"
     },
     "pendingBookings": "🔔 Pending Booking Confirmations",
     "recentActivity": "Recent Activity",
@@ -769,7 +770,12 @@
       "myAnimals": "My Animals",
       "patients": "Patients",
       "pending": "Pending Actions",
-      "enterprises": "Enterprises"
+      "enterprises": "Enterprises",
+      "totalNetworks": "Total Networks",
+      "approvedNetworks": "Approved Networks",
+      "pendingApproval": "Pending Approval",
+      "branchHospitals": "Branch Hospitals",
+      "networkMembers": "Network Members"
     },
     "quickActions": {
       "viewConsultations": "View Consultations",
@@ -828,8 +834,13 @@
         "paymentManagement": "Payment management",
         "reviewModeration": "Review moderation",
         "systemActivity": "System activity",
-        "hospitalOversight": "Hospital oversight"
-      }
+        "hospitalOversight": "Hospital oversight",
+        "manageYourNetworks": "Manage your hospital network",
+        "networkHealthInsights": "Network health analytics",
+        "manageSettings": "Manage settings"
+      },
+      "hospitalNetworks": "Hospital Networks",
+      "settings": "Settings"
     },
     "pending": {
       "patient": "Patient",

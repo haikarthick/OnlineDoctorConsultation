@@ -350,3 +350,9 @@
 - **Status:** done
 - **Description:** Full network referral system: network_referrals table (DB), createNetworkReferral/updateNetworkReferralStatus/listNetworkReferrals services+routes, Referrals tab in HospitalNetworks (incoming/outgoing/all + accept/reject), Refer to Network button in ConsultationRoom, Referral history in MedicalRecords hospitalVisits tab, Referred-from-Network badge in HospitalWorkflow + InpatientManagement. All 5 locales: networkReferrals namespace.
 
+
+### ✅ corporate-admin backend fixes
+- **Logged:** 2026-04-13 16:24
+- **Status:** done
+- **Description:** Restrict network approval to admin-only route + self-approval guard; add getCorporateDashboardStats + createBranchHospital to HospitalNetworkService; branch hospital columns in init.sql/database.ts; filter branch hospitals from public listing; GET /dashboard/corporate and POST /hospital-networks/:id/branch-hospitals routes
+

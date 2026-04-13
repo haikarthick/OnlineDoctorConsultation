@@ -701,7 +701,9 @@
       "petOwner": "మీ పెంపుడు జంతువు సంరక్షణ అవలోకనం ఇక్కడ ఉంది",
       "vet": "మీ ప్రాక్టీస్ అవలోకనం ఇక్కడ ఉంది",
       "admin": "సిస్టమ్ పరిపాలన అవలోకనం",
-      "farmer": "మీ ఫారం నిర్వహణ అవలోకనం ఇక్కడ ఉంది"
+      "farmer": "మీ ఫారం నిర్వహణ అవలోకనం ఇక్కడ ఉంది",
+      "corporateAdmin": "Hospital network administration overview",
+      "hospitalStaff": "ఇక్కడ మీ ఆసుపత్రి వర్క్‌ఫ్లో అవలోకనం ఉంది"
     },
     "pendingBookings": "🔔 పెండింగ్ బుకింగ్ నిర్ధారణలు",
     "recentActivity": "ఇటీవలి కార్యకలాపం",
@@ -733,7 +735,12 @@
       "myAnimals": "నా జంతువులు",
       "patients": "రోగులు",
       "pending": "పెండింగ్ చర్యలు",
-      "enterprises": "సంస్థలు"
+      "enterprises": "సంస్థలు",
+      "totalNetworks": "Total Networks",
+      "approvedNetworks": "Approved Networks",
+      "pendingApproval": "Pending Approval",
+      "branchHospitals": "Branch Hospitals",
+      "networkMembers": "Network Members"
     },
     "quickActions": {
       "viewConsultations": "సంప్రదింపులు చూడండి",
@@ -792,8 +799,13 @@
         "paymentManagement": "చెల్లింపు నిర్వహణ",
         "reviewModeration": "సమీక్ష మోడరేషన్",
         "systemActivity": "సిస్టమ్ కార్యకలాపం",
-        "hospitalOversight": "ఆసుపత్రి పర్యవేక్షణ"
-      }
+        "hospitalOversight": "ఆసుపత్రి పర్యవేక్షణ",
+        "manageYourNetworks": "Manage your hospital network",
+        "networkHealthInsights": "Network health analytics",
+        "manageSettings": "Manage settings"
+      },
+      "hospitalNetworks": "Hospital Networks",
+      "settings": "Settings"
     },
     "pending": {
       "patient": "రోగి",
@@ -5610,8 +5622,19 @@
     "complete": "పూర్తి అని గుర్తించు",
     "responseNotes": "స్పందన నోట్స్",
     "responseNotesPlaceholder": "మీ నిర్ణయం గురించి నోట్స్ జోడించండి...",
-    "status": { "pending": "పెండింగ్", "accepted": "అంగీకరించారు", "rejected": "తిరస్కరించారు", "completed": "పూర్తయింది", "cancelled": "రద్దు" },
-    "priority_levels": { "low": "తక్కువ", "normal": "సాధారణ", "high": "అధిక", "emergency": "అత్యవసర" },
+    "status": {
+      "pending": "పెండింగ్",
+      "accepted": "అంగీకరించారు",
+      "rejected": "తిరస్కరించారు",
+      "completed": "పూర్తయింది",
+      "cancelled": "రద్దు"
+    },
+    "priority_levels": {
+      "low": "తక్కువ",
+      "normal": "సాధారణ",
+      "high": "అధిక",
+      "emergency": "అత్యవసర"
+    },
     "badge": "నెట్‌వర్క్ నుండి రెఫర్ చేయబడింది",
     "referredFrom": "నుండి రెఫర్ చేయబడింది",
     "referredTo": "కి రెఫర్ చేయబడింది",

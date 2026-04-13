@@ -701,7 +701,9 @@
       "petOwner": "ನಿಮ್ಮ ಸಾಕುಪ್ರಾಣಿ ಆರೈಕೆ ಅವಲೋಕನ ಇಲ್ಲಿದೆ",
       "vet": "ನಿಮ್ಮ ಪ್ರಾಕ್ಟೀಸ್ ಅವಲೋಕನ ಇಲ್ಲಿದೆ",
       "admin": "ವ್ಯವಸ್ಥೆ ನಿರ್ವಹಣೆ ಅವಲೋಕನ",
-      "farmer": "ನಿಮ್ಮ ಕೃಷಿ ನಿರ್ವಹಣೆ ಅವಲೋಕನ ಇಲ್ಲಿದೆ"
+      "farmer": "ನಿಮ್ಮ ಕೃಷಿ ನಿರ್ವಹಣೆ ಅವಲೋಕನ ಇಲ್ಲಿದೆ",
+      "corporateAdmin": "Hospital network administration overview",
+      "hospitalStaff": "ಇಲ್ಲಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ವರ್ಕ್‌ಫ್ಲೋ ಅವಲೋಕನ ಇದೆ"
     },
     "pendingBookings": "🔔 ಬಾಕಿ ಬುಕಿಂಗ್ ಖಚಿತೀಕರಣಗಳು",
     "recentActivity": "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ",
@@ -733,7 +735,12 @@
       "myAnimals": "ನನ್ನ ಪ್ರಾಣಿಗಳು",
       "patients": "ರೋಗಿಗಳು",
       "pending": "ಬಾಕಿ ಕ್ರಿಯೆಗಳು",
-      "enterprises": "ಉದ್ಯಮಗಳು"
+      "enterprises": "ಉದ್ಯಮಗಳು",
+      "totalNetworks": "Total Networks",
+      "approvedNetworks": "Approved Networks",
+      "pendingApproval": "Pending Approval",
+      "branchHospitals": "Branch Hospitals",
+      "networkMembers": "Network Members"
     },
     "quickActions": {
       "viewConsultations": "ಸಮಾಲೋಚನೆಗಳನ್ನು ನೋಡಿ",
@@ -792,8 +799,13 @@
         "paymentManagement": "ಪಾವತಿ ನಿರ್ವಹಣೆ",
         "reviewModeration": "ವಿಮರ್ಶೆ ಮಿತಗೊಳಿಸುವಿಕೆ",
         "systemActivity": "ಸಿಸ್ಟಮ್ ಚಟುವಟಿಕೆ",
-        "hospitalOversight": "ಆಸ್ಪತ್ರೆ ಮೇಲ್ವಿಚಾರಣೆ"
-      }
+        "hospitalOversight": "ಆಸ್ಪತ್ರೆ ಮೇಲ್ವಿಚಾರಣೆ",
+        "manageYourNetworks": "Manage your hospital network",
+        "networkHealthInsights": "Network health analytics",
+        "manageSettings": "Manage settings"
+      },
+      "hospitalNetworks": "Hospital Networks",
+      "settings": "Settings"
     },
     "pending": {
       "patient": "ರೋಗಿ",
@@ -5621,8 +5633,19 @@
     "complete": "ಪೂರ್ಣ ಎಂದು ಗುರುತಿಸಿ",
     "responseNotes": "ಪ್ರತಿಕ್ರಿಯೆ ಟಿಪ್ಪಣಿಗಳು",
     "responseNotesPlaceholder": "ನಿಮ್ಮ ನಿರ್ಧಾರದ ಬಗ್ಗೆ ಟಿಪ್ಪಣಿಗಳನ್ನು ಸೇರಿಸಿ...",
-    "status": { "pending": "ಬಾಕಿ", "accepted": "ಒಪ್ಪಿದರು", "rejected": "ತಿರಸ್ಕರಿಸಿದರು", "completed": "ಮುಗಿದಿದೆ", "cancelled": "ರದ್ದು" },
-    "priority_levels": { "low": "ಕಡಿಮೆ", "normal": "ಸಾಮಾನ್ಯ", "high": "ಹೆಚ್ಚು", "emergency": "ತುರ್ತು" },
+    "status": {
+      "pending": "ಬಾಕಿ",
+      "accepted": "ಒಪ್ಪಿದರು",
+      "rejected": "ತಿರಸ್ಕರಿಸಿದರು",
+      "completed": "ಮುಗಿದಿದೆ",
+      "cancelled": "ರದ್ದು"
+    },
+    "priority_levels": {
+      "low": "ಕಡಿಮೆ",
+      "normal": "ಸಾಮಾನ್ಯ",
+      "high": "ಹೆಚ್ಚು",
+      "emergency": "ತುರ್ತು"
+    },
     "badge": "ನೆಟ್‌ವರ್ಕ್‌ನಿಂದ ರೆಫರ್ ಮಾಡಲಾಗಿದೆ",
     "referredFrom": "ನಿಂದ ರೆಫರ್ ಮಾಡಲಾಗಿದೆ",
     "referredTo": "ಗೆ ರೆಫರ್ ಮಾಡಲಾಗಿದೆ",

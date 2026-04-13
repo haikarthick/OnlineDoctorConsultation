@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
-import { vetHospitalApi } from '../../services/api/vetHospitalApi'
 import '../ModulePage.css'
 import './HospitalNetworks.css'
 
@@ -59,12 +58,6 @@ interface NetworkHospital {
   name: string
   city?: string
   hospitalType?: string
-}
-
-interface VetHospitalOption {
-  id: string
-  name: string
-  city?: string
 }
 
 interface AuditEntry {
@@ -333,74 +326,122 @@ const NetworkModal: React.FC<NetworkModalProps> = ({ editing, onClose, onSaved, 
   )
 }
 
-// ─── Assign Hospital Modal ────────────────────────────────────────────────────
-interface AssignHospitalModalProps {
-  networkId: string
-  existingIds: string[]
-  onClose: () => void
-  onAssigned: () => void
-  t: (key: string) => string
+// ─── Create Branch Hospital Modal ─────────────────────────────────────────────
+interface BranchHospitalFormData {
+  name: string;
+  hospitalType: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  phone: string;
+  email: string;
+  description: string;
 }
 
-const AssignHospitalModal: React.FC<AssignHospitalModalProps> = ({ networkId, existingIds, onClose, onAssigned, t }) => {
-  const [hospitals, setHospitals] = useState<VetHospitalOption[]>([])
-  const [selected, setSelected] = useState('')
+const CreateBranchHospitalModal: React.FC<{
+  networkId: string;
+  onSuccess: () => void;
+  onClose: () => void;
+  t: any;
+}> = ({ networkId, onSuccess, onClose, t }) => {
+  const [form, setForm] = useState<BranchHospitalFormData>({
+    name: '', hospitalType: 'multi_specialty', address: '', city: '',
+    state: '', country: 'IN', postalCode: '', phone: '', email: '', description: ''
+  })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [loadingHospitals, setLoadingHospitals] = useState(false)
-  const [hospitalsError, setHospitalsError] = useState('')
 
-  useEffect(() => {
-    setLoadingHospitals(true)
-    setHospitalsError('')
-    vetHospitalApi.listHospitals({ limit: 200 }).then(res => {
-      const list: VetHospitalOption[] = ((res as any)?.hospitals ?? res ?? []).filter((h: any) => !existingIds.includes(h.id))
-      setHospitals(list)
-      setLoadingHospitals(false)
-    }).catch((err: any) => {
-      setHospitalsError(err?.response?.data?.error || err?.message || 'Failed to load hospitals')
-      setLoadingHospitals(false)
-    })
-  }, [existingIds])
-
-  const handleAssign = async () => {
-    if (!selected) return
-    setSaving(true); setError('')
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name.trim()) { setError('Hospital name is required'); return }
+    setSaving(true)
+    setError('')
     try {
-      await apiService.assignHospitalToNetwork(networkId, selected)
-      onAssigned()
+      await apiService.createBranchHospital(networkId, form)
+      onSuccess()
+      onClose()
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Failed to assign hospital')
-    } finally { setSaving(false) }
+      setError(err?.response?.data?.message || err?.message || 'Failed to create branch hospital')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
     <div className="hn-modal-overlay" onClick={onClose}>
-      <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
+      <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560 }}>
         <div className="hn-modal-header">
-          <h2>{t('hospitalNetworks.detail.assignHospital')}</h2>
-          <button type="button" className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
+          <h3>🏥 Create Branch Hospital</h3>
+          <button type="button" className="hn-modal-close" onClick={onClose}>✕</button>
         </div>
-        <div className="hn-modal-body">
-          {error && <div className="module-alert error">{error}</div>}
-          <div className="module-form-group">
-            <label className="module-label">Select Hospital</label>
-            {loadingHospitals && <div style={{ padding: 8, color: '#64748b', fontSize: 13 }}>⏳ Loading hospitals...</div>}
-            {hospitalsError && <div className="module-alert error">{hospitalsError}</div>}
-            <select className="module-input" value={selected} onChange={e => setSelected(e.target.value)} disabled={loadingHospitals}>
-              <option value="">{t('hospitalNetworks.form.chooseHospital')}</option>
-              {hospitals.map(h => (
-                <option key={h.id} value={h.id}>{h.name}{h.city ? ` (${h.city})` : ''}</option>
-              ))}
-            </select>
+        <form onSubmit={handleSubmit}>
+          <div className="hn-modal-body">
+            {error && <div className="module-alert error">{error}</div>}
+            <div className="module-form">
+              <div className="module-form-group">
+                <label className="module-label">Hospital Name <span style={{ color: 'red' }}>*</span></label>
+                <input className="module-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Chennai Branch - North" required />
+              </div>
+              <div className="module-form-row">
+                <div className="module-form-group">
+                  <label className="module-label">Type</label>
+                  <select className="module-input" value={form.hospitalType} onChange={e => setForm(f => ({ ...f, hospitalType: e.target.value }))}>
+                    <option value="multi_specialty">Multi Specialty</option>
+                    <option value="specialty">Specialty</option>
+                    <option value="clinic">Clinic</option>
+                    <option value="emergency">Emergency</option>
+                    <option value="referral">Referral</option>
+                  </select>
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">Phone</label>
+                  <input className="module-input" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+91 ..." />
+                </div>
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">Email</label>
+                <input className="module-input" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="branch@hospital.com" />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">Address</label>
+                <input className="module-input" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="Street address" />
+              </div>
+              <div className="module-form-row">
+                <div className="module-form-group">
+                  <label className="module-label">City</label>
+                  <input className="module-input" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} placeholder="City" />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">State</label>
+                  <input className="module-input" value={form.state} onChange={e => setForm(f => ({ ...f, state: e.target.value }))} placeholder="State" />
+                </div>
+              </div>
+              <div className="module-form-row">
+                <div className="module-form-group">
+                  <label className="module-label">Country</label>
+                  <input className="module-input" value={form.country} onChange={e => setForm(f => ({ ...f, country: e.target.value }))} placeholder="IN" />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">Postal Code</label>
+                  <input className="module-input" value={form.postalCode} onChange={e => setForm(f => ({ ...f, postalCode: e.target.value }))} placeholder="600001" />
+                </div>
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">Description <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+                <textarea className="module-input" rows={2} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description of this branch..." />
+              </div>
+            </div>
           </div>
           <div className="hn-modal-actions">
             <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
-            <button type="button" className="module-btn primary" disabled={saving || !selected} onClick={handleAssign}>
-              {saving ? t('common.saving') : t('hospitalNetworks.detail.assignHospital')}
+            <button type="submit" className="module-btn primary" disabled={saving || !form.name.trim()}>
+              {saving ? '⏳ Creating...' : '🏥 Create Branch Hospital'}
             </button>
           </div>
-        </div>
+          <p style={{ fontSize: '0.8em', color: '#888', marginTop: 8, padding: '0 1rem 1rem' }}>* Required field. This hospital will be private to your network only.</p>
+        </form>
       </div>
     </div>
   )
@@ -506,7 +547,7 @@ const HospitalNetworks: React.FC = () => {
   const [detailLoading, setDetailLoading] = useState(false)
   const [networkHospitals, setNetworkHospitals] = useState<NetworkHospital[]>([])
   const [networkMembers, setNetworkMembers] = useState<NetworkMember[]>([])
-  const [showAssignHospital, setShowAssignHospital] = useState(false)
+  const [showCreateBranch, setShowCreateBranch] = useState(false)
   const [showAddMember, setShowAddMember] = useState(false)
   const [showInviteStaff, setShowInviteStaff] = useState(false)
   const [inviteStaffForm, setInviteStaffForm] = useState({ email: '', name: '', position: 'receptionist', hospitalId: '' })
@@ -1043,18 +1084,22 @@ const HospitalNetworks: React.FC = () => {
                           <button className="module-btn small" onClick={() => setEditingNetwork(network)}>
                             {t('hospitalNetworks.actions.edit')}
                           </button>
-                          {!network.isApproved && (
+                          {!network.isApproved && user?.role === 'admin' && (
                             approveState[network.id] === 'confirming' ? (
                               <div className="hn-confirm-row">
                                 <span className="hn-confirm-label">Sure?</span>
-                                <button className="module-btn small primary" onClick={() => handleApproveConfirm(network)}>Yes</button>
-                                <button className="module-btn small" onClick={() => setApproveState(s => ({ ...s, [network.id]: 'idle' }))}>No</button>
+                                <button type="button" className="module-btn small primary" onClick={() => handleApproveConfirm(network)}>Yes</button>
+                                <button type="button" className="module-btn small" onClick={() => setApproveState(s => ({ ...s, [network.id]: 'idle' }))}>No</button>
                               </div>
                             ) : (
-                              <button className="module-btn small hn-btn-approve" onClick={() => handleApproveClick(network)}>
+                              <button type="button" className="module-btn small hn-btn-approve" onClick={() => handleApproveClick(network)}>
                                 {t('hospitalNetworks.actions.approve')}
                               </button>
                             )
+                          )}
+                          {/* Pending badge for non-admin users */}
+                          {!network.isApproved && user?.role !== 'admin' && (
+                            <span className="module-badge badge-pending" title="Awaiting platform admin approval">⏳ Pending Admin Approval</span>
                           )}
                         </div>
                       </td>
@@ -1151,8 +1196,8 @@ const HospitalNetworks: React.FC = () => {
                 <div className="module-card">
                   <div className="hn-panel-header">
                     <h3>{t('hospitalNetworks.detail.hospitals')}</h3>
-                    <button className="module-btn small primary" onClick={() => setShowAssignHospital(true)}>
-                      + {t('hospitalNetworks.detail.assignHospital')}
+                    <button type="button" className="module-btn small primary" onClick={() => setShowCreateBranch(true)}>
+                      + Add Branch Hospital
                     </button>
                   </div>
                   <div className="card-body">
@@ -1580,16 +1625,14 @@ const HospitalNetworks: React.FC = () => {
           t={t}
         />
       )}
-      {showAssignHospital && selectedNetwork && (
-        <AssignHospitalModal
+      {showCreateBranch && selectedNetwork && (
+        <CreateBranchHospitalModal
           networkId={selectedNetwork.id}
-          existingIds={networkHospitals.map(h => h.id)}
-          onClose={() => setShowAssignHospital(false)}
-          onAssigned={() => {
-            setShowAssignHospital(false)
-            setSuccessMsg('Hospital assigned successfully.')
+          onSuccess={() => {
+            setSuccessMsg('Branch hospital created successfully.')
             loadDetail(selectedNetwork)
           }}
+          onClose={() => setShowCreateBranch(false)}
           t={t}
         />
       )}

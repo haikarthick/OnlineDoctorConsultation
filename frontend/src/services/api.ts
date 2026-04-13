@@ -2426,6 +2426,26 @@ class ApiService {
     const response = await this.client.get('/network-referrals', { params })
     return response.data
   }
+
+  // ── Corporate Admin ──
+  async getCorporateDashboardStats(): Promise<any> {
+    return this.client.get('/dashboard/corporate')
+  }
+
+  async createBranchHospital(networkId: string, data: {
+    name: string;
+    hospitalType?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+    phone?: string;
+    email?: string;
+    description?: string;
+  }): Promise<any> {
+    return this.client.post(`/hospital-networks/${networkId}/branch-hospitals`, data)
+  }
 }
 export const apiService = new ApiService()
 export default apiService

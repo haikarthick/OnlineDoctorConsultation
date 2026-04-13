@@ -701,7 +701,9 @@
       "petOwner": "आपकी पालतू पशु देखभाल का अवलोकन",
       "vet": "आपके अभ्यास का अवलोकन",
       "admin": "सिस्टम प्रशासन अवलोकन",
-      "farmer": "आपकी कृषि प्रबंधन अवलोकन"
+      "farmer": "आपकी कृषि प्रबंधन अवलोकन",
+      "corporateAdmin": "Hospital network administration overview",
+      "hospitalStaff": "यहाँ आपके अस्पताल का कार्यप्रवाह अवलोकन है"
     },
     "pendingBookings": "🔔 लंबित बुकिंग पुष्टिकरण",
     "recentActivity": "हाल की गतिविधि",
@@ -733,7 +735,12 @@
       "myAnimals": "मेरे पशु",
       "patients": "मरीज़",
       "pending": "लंबित कार्य",
-      "enterprises": "उद्यम"
+      "enterprises": "उद्यम",
+      "totalNetworks": "Total Networks",
+      "approvedNetworks": "Approved Networks",
+      "pendingApproval": "Pending Approval",
+      "branchHospitals": "Branch Hospitals",
+      "networkMembers": "Network Members"
     },
     "quickActions": {
       "viewConsultations": "परामर्श देखें",
@@ -792,8 +799,13 @@
         "paymentManagement": "भुगतान प्रबंधन",
         "reviewModeration": "समीक्षा मॉडरेशन",
         "systemActivity": "सिस्टम गतिविधि",
-        "hospitalOversight": "अस्पताल निरीक्षण"
-      }
+        "hospitalOversight": "अस्पताल निरीक्षण",
+        "manageYourNetworks": "Manage your hospital network",
+        "networkHealthInsights": "Network health analytics",
+        "manageSettings": "Manage settings"
+      },
+      "hospitalNetworks": "Hospital Networks",
+      "settings": "Settings"
     },
     "pending": {
       "patient": "मरीज़",
@@ -5678,8 +5690,19 @@
     "complete": "पूर्ण चिह्नित करें",
     "responseNotes": "प्रतिक्रिया नोट्स",
     "responseNotesPlaceholder": "अपने निर्णय के बारे में नोट्स जोड़ें...",
-    "status": { "pending": "लंबित", "accepted": "स्वीकृत", "rejected": "अस्वीकृत", "completed": "पूर्ण", "cancelled": "रद्द" },
-    "priority_levels": { "low": "कम", "normal": "सामान्य", "high": "उच्च", "emergency": "आपातकाल" },
+    "status": {
+      "pending": "लंबित",
+      "accepted": "स्वीकृत",
+      "rejected": "अस्वीकृत",
+      "completed": "पूर्ण",
+      "cancelled": "रद्द"
+    },
+    "priority_levels": {
+      "low": "कम",
+      "normal": "सामान्य",
+      "high": "उच्च",
+      "emergency": "आपातकाल"
+    },
     "badge": "नेटवर्क से रेफर किया गया",
     "referredFrom": "से रेफर किया गया",
     "referredTo": "को रेफर किया गया",

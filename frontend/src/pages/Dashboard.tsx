@@ -27,6 +27,7 @@ const Dashboard: React.FC = () => {
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
   const [enterpriseOverview, setEnterpriseOverview] = useState<EnterpriseOverviewStats | null>(null)
+  const [corpStats, setCorpStats] = useState({ totalNetworks: 0, approvedNetworks: 0, pendingNetworks: 0, totalHospitals: 0, totalMembers: 0 })
 
   // Doctor-specific state
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([])
@@ -39,10 +40,31 @@ const Dashboard: React.FC = () => {
   const isFarmer = user?.role === 'farmer'
   const isAdmin = user?.role === 'admin'
   const isHospitalStaff = user?.role === 'hospital_staff'
+  const isCorporateAdmin = user?.role === 'corporate_admin'
 
   useEffect(() => { loadDashboardData() }, [])
 
   const loadDashboardData = async () => {
+    // Corporate admin loads network stats instead of booking/consultation data
+    if (isCorporateAdmin) {
+      try {
+        const corpRes = await apiService.getCorporateDashboardStats()
+        const d = corpRes.data?.data || corpRes.data || {}
+        setCorpStats({
+          totalNetworks: d.totalNetworks || 0,
+          approvedNetworks: d.approvedNetworks || 0,
+          pendingNetworks: d.pendingNetworks || 0,
+          totalHospitals: d.totalHospitals || 0,
+          totalMembers: d.totalMembers || 0,
+        })
+      } catch (err: any) {
+        console.error('Failed to load corporate stats:', err?.message)
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+
     try {
       setLoading(true)
       setError('')
@@ -179,6 +201,16 @@ const Dashboard: React.FC = () => {
       ]
     }
 
+    if (isCorporateAdmin) {
+      return [
+        { label: t('dashboard.stats.totalNetworks'), value: corpStats.totalNetworks, icon: '🌐', color: '#667eea', path: '/hospital-networks' },
+        { label: t('dashboard.stats.approvedNetworks'), value: corpStats.approvedNetworks, icon: '✅', color: '#10b981', path: '/hospital-networks' },
+        { label: t('dashboard.stats.pendingApproval'), value: corpStats.pendingNetworks, icon: '⏳', color: '#f59e0b', path: '/hospital-networks' },
+        { label: t('dashboard.stats.branchHospitals'), value: corpStats.totalHospitals, icon: '🏥', color: '#06b6d4', path: '/hospital-networks' },
+        { label: t('dashboard.stats.networkMembers'), value: corpStats.totalMembers, icon: '👥', color: '#8b5cf6', path: '/hospital-networks' },
+      ]
+    }
+
     // Admin
     return [
       { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
@@ -186,7 +218,7 @@ const Dashboard: React.FC = () => {
       { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
       { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
     ]
-  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, t])
+  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isCorporateAdmin, corpStats, t])
 
   // Quick actions — role-specific
   const quickActions: QuickAction[] = useMemo(() => {
@@ -239,6 +271,14 @@ const Dashboard: React.FC = () => {
       ]
     }
 
+    if (isCorporateAdmin) {
+      return [
+        { icon: '🌐', label: t('dashboard.quickActions.hospitalNetworks'), path: '/hospital-networks', color: '#667eea', description: t('dashboard.quickActions.desc.manageYourNetworks') },
+        { icon: '📊', label: t('dashboard.quickActions.healthAnalytics'), path: '/health-analytics', color: '#10b981', description: t('dashboard.quickActions.desc.networkHealthInsights') },
+        { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
+      ]
+    }
+
     // Admin
     return [
       { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
@@ -249,7 +289,7 @@ const Dashboard: React.FC = () => {
       { icon: '📜', label: t('dashboard.quickActions.auditLogs'), path: '/admin/audit-logs', color: '#ef4444', description: t('dashboard.quickActions.desc.systemActivity') },
       { icon: '🏥', label: t('dashboard.quickActions.hospitalMgmt'), path: '/admin/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalOversight') },
     ]
-  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, t])
+  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, t])
 
   // Subtitle per role
   const subtitle = useMemo(() => {
@@ -258,8 +298,9 @@ const Dashboard: React.FC = () => {
     if (isFarmer) return t('dashboard.subtitles.farmer')
     if (isAdmin) return t('dashboard.subtitles.admin')
     if (isHospitalStaff) return t('dashboard.subtitles.hospitalStaff')
+    if (isCorporateAdmin) return t('dashboard.subtitles.corporateAdmin')
     return t('dashboard.greeting', { name: user?.firstName })
-  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, t, user?.firstName])
+  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, isCorporateAdmin, t, user?.firstName])
 
   return (
     <div className="dashboard-container">
