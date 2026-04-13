@@ -544,3 +544,11 @@ render-start.sh
 - **Fix:** When adding an invite flow, ALWAYS add both the invite creation AND the accept endpoint together
 - **Rule:** Not specified
 
+
+### UI-012 — AssignHospitalModal blank dropdown on error
+- **Logged:** 2026-04-13 11:00
+- **Symptom:** AssignHospitalModal had .catch(()=>{}) — blank dropdown with no feedback on hospital load failure
+- **Root Cause:** Added loadingHospitals/hospitalsError states; useEffect now sets error; select disabled during load; error shown inline
+- **Fix:** NEVER use empty catch blocks in data-loading useEffect — always surface errors to the user
+- **Rule:** Not specified
+

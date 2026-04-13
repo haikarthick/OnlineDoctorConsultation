@@ -2210,6 +2210,11 @@ class ApiService {
     const response = await this.client.post(`/hospital-networks/${id}/approve`)
     return response.data
   }
+
+  async deactivateNetwork(networkId: string): Promise<any> {
+    const response = await this.client.patch(`/hospital-networks/${networkId}/deactivate`)
+    return response.data
+  }
   async getNetworkAuditLogs(networkId: string, filters: { page?: number; limit?: number; recordType?: string; accessGranted?: boolean; animalId?: string } = {}) {
     const response = await this.client.get(`/hospital-networks/${networkId}/audit-logs`, { params: filters })
     return response.data

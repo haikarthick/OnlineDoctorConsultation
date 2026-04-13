@@ -314,3 +314,9 @@
 - **Status:** done
 - **Description:** Vets and hospital staff now see enterprise/farm context in queue, inpatient, bookings, consultation room, and medical records. Farm Visit booking type added. Enterprise filter in MedicalRecords for vets/admins.
 
+
+### ✅ HospitalNetworks UX/i18n fixes
+- **Logged:** 2026-04-13 11:00
+- **Status:** done
+- **Description:** Fix 1: AssignHospitalModal loading/error states. Fix 2: staff invite success key update. Fix 3: academic->cooperative already done. Fix 4: Already Enrolled badge. Fix 5: missing i18n keys in all 5 locales. Fix 6: hardcoded strings -> t() calls. Fix 7: deactivateNetwork API + UI button.
+

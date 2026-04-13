@@ -347,12 +347,20 @@ const AssignHospitalModal: React.FC<AssignHospitalModalProps> = ({ networkId, ex
   const [selected, setSelected] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [loadingHospitals, setLoadingHospitals] = useState(false)
+  const [hospitalsError, setHospitalsError] = useState('')
 
   useEffect(() => {
+    setLoadingHospitals(true)
+    setHospitalsError('')
     vetHospitalApi.listHospitals({ limit: 200 }).then(res => {
       const list: VetHospitalOption[] = ((res as any)?.hospitals ?? res ?? []).filter((h: any) => !existingIds.includes(h.id))
       setHospitals(list)
-    }).catch(() => {})
+      setLoadingHospitals(false)
+    }).catch((err: any) => {
+      setHospitalsError(err?.response?.data?.error || err?.message || 'Failed to load hospitals')
+      setLoadingHospitals(false)
+    })
   }, [existingIds])
 
   const handleAssign = async () => {
@@ -377,8 +385,10 @@ const AssignHospitalModal: React.FC<AssignHospitalModalProps> = ({ networkId, ex
           {error && <div className="module-alert error">{error}</div>}
           <div className="module-form-group">
             <label className="module-label">Select Hospital</label>
-            <select className="module-input" value={selected} onChange={e => setSelected(e.target.value)}>
-              <option value="">— Choose a hospital —</option>
+            {loadingHospitals && <div style={{ padding: 8, color: '#64748b', fontSize: 13 }}>⏳ Loading hospitals...</div>}
+            {hospitalsError && <div className="module-alert error">{hospitalsError}</div>}
+            <select className="module-input" value={selected} onChange={e => setSelected(e.target.value)} disabled={loadingHospitals}>
+              <option value="">{t('hospitalNetworks.form.chooseHospital')}</option>
               {hospitals.map(h => (
                 <option key={h.id} value={h.id}>{h.name}{h.city ? ` (${h.city})` : ''}</option>
               ))}
@@ -439,7 +449,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
           {error && <div className="module-alert error">{error}</div>}
           <div className="module-form-group">
             <label className="module-label">User ID <span className="hn-required">*</span></label>
-            <input className="module-input" value={form.userId} onChange={e => set('userId', e.target.value)} placeholder="Paste user UUID" />
+            <input className="module-input" value={form.userId} onChange={e => set('userId', e.target.value)} placeholder={t('hospitalNetworks.form.pasteUserId')} />
           </div>
           <div className="module-form-group">
             <label className="module-label">Network Role</label>
@@ -475,7 +485,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
 // ─── Main Component ───────────────────────────────────────────────────────────
 const HospitalNetworks: React.FC = () => {
   const { t } = useTranslation()
-  useAuth() // context available for future role-based checks
+  const { user } = useAuth()
   const { formatDate } = useSettings()
 
   const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients'>('networks')
@@ -720,6 +730,17 @@ const HospitalNetworks: React.FC = () => {
     }
   }
 
+  const handleDeactivateNetwork = async (networkId: string) => {
+    if (!window.confirm(t('hospitalNetworks.deactivateConfirm'))) return
+    try {
+      await apiService.deactivateNetwork(networkId)
+      setSuccessMsg(t('hospitalNetworks.deactivated'))
+      loadNetworks()
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'Failed to deactivate network')
+    }
+  }
+
   const filteredNetworks = networks.filter(n => {
     const matchesSearch = !searchTerm || n.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (n.headquartersCity ?? '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -727,6 +748,8 @@ const HospitalNetworks: React.FC = () => {
       (statusFilter === 'pending' && !n.isApproved)
     return matchesSearch && matchesStatus
   })
+
+  const userNetworkRole = networkMembers.find(m => m.userId === user?.id)?.networkRole
 
   const stats = {
     total: networks.length,
@@ -973,6 +996,15 @@ const HospitalNetworks: React.FC = () => {
                   <button className="module-btn small" onClick={() => setEditingNetwork(selectedNetwork)}>
                     ✏ {t('hospitalNetworks.actions.edit')}
                   </button>
+                  {userNetworkRole === 'corporate_admin' && (
+                    <button
+                      className="module-btn small"
+                      style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' }}
+                      onClick={() => handleDeactivateNetwork(selectedNetwork.id)}
+                    >
+                      ⚠️ {t('hospitalNetworks.deactivate')}
+                    </button>
+                  )}
                 </div>
                 <div className="hn-detail-meta">
                   {selectedNetwork.networkType && (
@@ -1336,6 +1368,14 @@ const HospitalNetworks: React.FC = () => {
                                 <span style={{ fontSize: 13, fontWeight: 600 }}>{animal.name}</span>
                                 <span style={{ fontSize: 11, color: '#666' }}>{animal.species}</span>
                                 {animal.uniqueId && <span style={{ fontSize: 10, fontFamily: 'monospace', color: '#999' }}>{animal.uniqueId}</span>}
+                                {((animal as any).enrollmentStatus === 'active' || (animal as any).isEnrolled) && (
+                                  <span style={{
+                                    background: '#dcfce7', color: '#166534', padding: '2px 8px',
+                                    borderRadius: 12, fontSize: 11, fontWeight: 600, marginLeft: 8
+                                  }}>
+                                    ✓ Already Enrolled
+                                  </span>
+                                )}
                                 {enrollmentSuccessIds.has(animal.id) ? (
                                   <span style={{ fontSize: 11, color: '#2e7d32', fontWeight: 600 }}>✓ {t('hospitalNetworks.patients.enrollmentRequested')}</span>
                                 ) : (
@@ -1543,7 +1583,7 @@ const HospitalNetworks: React.FC = () => {
                           hospital_id: inviteStaffForm.hospitalId || undefined,
                         })
                         if (res.success) {
-                          setInviteStaffSuccess(t('hospitalStaff.inviteSent'))
+                          setInviteStaffSuccess(t('hospitalNetworks.staff.inviteSent'))
                           setInviteStaffForm({ email: '', name: '', position: 'receptionist', hospitalId: '' })
                         } else {
                           setError(res.message || 'Failed to send invite')
