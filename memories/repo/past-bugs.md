@@ -512,3 +512,35 @@ render-start.sh
 - **Fix:** NEVER use 'approved' or 'pending' as review status values — DB CHECK constraint only allows active/hidden/flagged/removed
 - **Rule:** Not specified
 
+
+### NETWORK-001 — createNetwork orphaned network on member INSERT failure
+- **Logged:** 2026-04-13 10:50
+- **Symptom:** If INSERT into hospital_network_members failed after INSERT into hospital_networks succeeded, an orphaned network with no admin existed in DB
+- **Root Cause:** Wrapped both INSERTs in a pg transaction with BEGIN/COMMIT/ROLLBACK using database.getPool().connect()
+- **Fix:** ALWAYS wrap multi-table INSERT flows in a pg transaction — never rely on sequential awaits
+- **Rule:** Not specified
+
+
+### NETWORK-002 — network_type enum mismatch academic vs cooperative
+- **Logged:** 2026-04-13 10:50
+- **Symptom:** Frontend had 'academic' in NETWORK_TYPES array but DB CHECK constraint only allows private/government/ngo/cooperative/franchise — 'academic' would fail constraint
+- **Root Cause:** Changed { value: 'academic', label: 'Academic' } to { value: 'cooperative', label: 'Cooperative' } in HospitalNetworks.tsx
+- **Fix:** ALWAYS cross-reference frontend enum values against DB CHECK constraints in init.sql before adding options
+- **Rule:** Not specified
+
+
+### NETWORK-003 — enrollAnimal had no authorization check
+- **Logged:** 2026-04-13 10:50
+- **Symptom:** Any authenticated user could enroll any animal into any network with any hospitalId — no check that hospital was in network or user had permission
+- **Root Cause:** Added hospital-in-network check and user permission check (hospital_network_members UNION hospital_staff) at start of enrollAnimal()
+- **Fix:** ALWAYS add authorization checks in service methods, not just route middleware
+- **Rule:** Not specified
+
+
+### NETWORK-004 — walk-in invite had no accept endpoint or expiry check
+- **Logged:** 2026-04-13 10:50
+- **Symptom:** inviteWalkInPatient() created tokens but there was no route or service method to accept them — tokens could never be used and expiry was never validated
+- **Root Cause:** Added acceptWalkInInvite() service method with expiry/status validation and POST /hospital-networks/walkin-invites/accept route
+- **Fix:** When adding an invite flow, ALWAYS add both the invite creation AND the accept endpoint together
+- **Rule:** Not specified
+

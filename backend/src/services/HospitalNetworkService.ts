@@ -184,8 +184,23 @@ export class HospitalNetworkService {
 
   // ─── Network CRUD ─────────────────────────────────────────────
   async createNetwork(data: HospitalNetworkCreateDTO, createdById: string): Promise<HospitalNetwork> {
+    // Fix 3: Validate id_prefix uniqueness BEFORE the transaction
+    if (data.idPrefix) {
+      const prefixCheck = await database.query(
+        `SELECT id FROM hospital_networks WHERE UPPER(id_prefix) = UPPER($1) LIMIT 1`,
+        [data.idPrefix]
+      );
+      if (prefixCheck.rows.length > 0) {
+        throw new Error('Network ID prefix is already in use by another network. Please choose a different prefix.');
+      }
+    }
+
+    // Fix 1: Wrap both INSERTs in a transaction so an orphaned network can never exist
+    const client = await database.getPool().connect();
     try {
-      const result = await database.query(
+      await client.query('BEGIN');
+
+      const result = await client.query(
         `INSERT INTO hospital_networks
            (name, legal_name, registration_number, tax_id, network_type,
             country, headquarters_address, headquarters_city, headquarters_state,
@@ -215,18 +230,25 @@ export class HospitalNetworkService {
         ]
       );
 
+      const network = result.rows[0];
+
       // Auto-add creator as corporate_admin
-      await database.query(
+      await client.query(
         `INSERT INTO hospital_network_members (network_id, user_id, network_role, granted_by)
          VALUES ($1, $2, 'corporate_admin', $2)`,
-        [result.rows[0].id, createdById]
+        [network.id, createdById]
       );
 
-      logger.info(`Hospital network created: ${data.name}`, { networkId: result.rows[0].id, createdById });
-      return this.mapNetworkRow(result.rows[0]);
-    } catch (error: any) {
-      logger.error('Failed to create hospital network', { error: error.message });
+      await client.query('COMMIT');
+      logger.info(`Hospital network created: ${data.name}`, { networkId: network.id, createdById });
+      return this.mapNetworkRow(network);
+    } catch (err: any) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to create hospital network', { error: err.message });
+      if (err.message.includes('already in use')) throw err;
       throw new DatabaseError('Failed to create hospital network');
+    } finally {
+      client.release();
     }
   }
 
@@ -403,7 +425,8 @@ export class HospitalNetworkService {
     }
   }
 
-  async listNetworkHospitals(networkId: string): Promise<any[]> {
+  async listNetworkHospitals(networkId: string, page: number = 1, limit: number = 20): Promise<any> {
+    const offset = (page - 1) * limit;
     const result = await database.query(
       `SELECT DISTINCT vh.id,
               vh.name,
@@ -418,10 +441,23 @@ export class HospitalNetworkService {
        FROM hospital_network_members hnm
        JOIN vet_hospitals vh ON hnm.hospital_id = vh.id
        WHERE hnm.network_id = $1 AND hnm.hospital_id IS NOT NULL AND hnm.is_active = true
-       ORDER BY vh.name ASC`,
+       ORDER BY vh.name ASC
+       LIMIT $2 OFFSET $3`,
+      [networkId, limit, offset]
+    );
+    const countResult = await database.query(
+      `SELECT COUNT(DISTINCT hnm.hospital_id) AS count
+       FROM hospital_network_members hnm
+       WHERE hnm.network_id = $1 AND hnm.hospital_id IS NOT NULL AND hnm.is_active = true`,
       [networkId]
     );
-    return result.rows;
+    const total = parseInt(countResult.rows[0]?.count ?? '0');
+    return {
+      hospitals: result.rows,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   // ─── Dashboard ─────────────────────────────────────────────────
@@ -497,7 +533,7 @@ export class HospitalNetworkService {
         `SELECT cal.*,
                 u.first_name || ' ' || u.last_name AS "accessorName",
                 u.email AS "accessorEmail",
-                a.name AS "animalName",
+                COALESCE(a.name, '[Animal ID: ' || cal.animal_id || ']') AS "animalName",
                 a.unique_id AS "animalUniqueId"
          FROM clinical_data_access_log cal
          LEFT JOIN users u ON cal.accessed_by = u.id
@@ -674,6 +710,34 @@ export class HospitalNetworkService {
 
   async enrollAnimal(data: { animalId: string; networkId: string; hospitalId?: string; enrolledBy: string; notes?: string }): Promise<{ id: string; animalId: string; networkId: string; networkPatientId: string; platformUniqueId: string | null; enrollmentStatus: string }> {
     try {
+      // Fix 4a: Verify hospital belongs to this network (only when hospitalId provided)
+      if (data.hospitalId) {
+        const hospitalInNetwork = await database.query(
+          `SELECT id FROM hospital_network_members 
+           WHERE network_id = $1 AND hospital_id = $2 AND is_active = true LIMIT 1`,
+          [data.networkId, data.hospitalId]
+        );
+        if (hospitalInNetwork.rows.length === 0) {
+          throw new Error('Hospital is not a member of this network');
+        }
+      }
+
+      // Fix 4b: Verify enrolledBy user has permission (network member or hospital staff)
+      const userPermission = await database.query(
+        `SELECT hnm.network_role 
+         FROM hospital_network_members hnm 
+         WHERE hnm.network_id = $1 AND hnm.user_id = $2 AND hnm.is_active = true
+         UNION
+         SELECT 'hospital_staff' AS network_role
+         FROM hospital_staff hs
+         WHERE hs.hospital_id = $3 AND hs.user_id = $2 AND hs.is_active = true
+         LIMIT 1`,
+        [data.networkId, data.enrolledBy, data.hospitalId ?? null]
+      );
+      if (userPermission.rows.length === 0) {
+        throw new Error('You do not have permission to enroll patients in this network');
+      }
+
       const animalRes = await database.query(
         `SELECT a.id, a.species, a.unique_id, a.name AS animal_name, a.owner_id,
                 u.name AS owner_name
@@ -873,6 +937,37 @@ export class HospitalNetworkService {
     }
   }
 
+  // Fix 6: Accept a walk-in patient invite by token, with expiry and status validation
+  async acceptWalkInInvite(token: string, acceptedByUserId: string): Promise<{ id: string; networkId: string; hospitalId: string | null }> {
+    try {
+      const inviteRes = await database.query(
+        `SELECT * FROM hospital_patient_invites WHERE invite_token = $1 LIMIT 1`,
+        [token]
+      );
+      if (inviteRes.rows.length === 0) {
+        throw new Error('Invitation not found. Please check the link and try again.');
+      }
+      const invite = inviteRes.rows[0];
+
+      if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+        throw new Error('This invitation has expired. Please request a new invitation.');
+      }
+      if (invite.status !== 'pending') {
+        throw new Error(`This invitation has already been ${invite.status}.`);
+      }
+
+      await database.query(
+        `UPDATE hospital_patient_invites
+         SET status = 'accepted', accepted_at = NOW(), accepted_by = $1, updated_at = NOW()
+         WHERE id = $2`,
+        [acceptedByUserId, invite.id]
+      );
+      return { id: invite.id, networkId: invite.network_id, hospitalId: invite.hospital_id };
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
+  }
+
   async getPendingEnrollments(networkId: string): Promise<any[]> {
     try {
       const result = await database.query(
@@ -893,6 +988,27 @@ export class HospitalNetworkService {
     } catch (err: any) {
       throw new Error(`Get pending enrollments failed: ${err.message}`);
     }
+  }
+
+  // Fix 7: Deactivate a network (only network corporate_admin or platform admin)
+  async deactivateNetwork(networkId: string, userId: string, userRole: string): Promise<any> {
+    if (userRole !== 'admin') {
+      const membership = await database.query(
+        `SELECT network_role FROM hospital_network_members 
+         WHERE network_id = $1 AND user_id = $2 AND is_active = true LIMIT 1`,
+        [networkId, userId]
+      );
+      if (membership.rows.length === 0 || membership.rows[0].network_role !== 'corporate_admin') {
+        throw new Error('Only network administrators can deactivate a network');
+      }
+    }
+    const result = await database.query(
+      `UPDATE hospital_networks SET is_active = false, updated_at = NOW() 
+       WHERE id = $1 RETURNING id, name, is_active AS "isActive"`,
+      [networkId]
+    );
+    if (result.rows.length === 0) throw new Error('Network not found');
+    return result.rows[0];
   }
 
   private mapNetworkRow(row: any): HospitalNetwork {

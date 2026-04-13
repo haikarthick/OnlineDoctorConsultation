@@ -38,6 +38,12 @@ class HospitalNetworkController {
     res.json({ success: true, message: 'Hospital network approved' });
   }
 
+  // Fix 7: Deactivate a network
+  async deactivateNetwork(req: AuthRequest, res: Response): Promise<void> {
+    const result = await HospitalNetworkService.deactivateNetwork(req.params.id, req.userId!, req.userRole!);
+    res.json({ success: true, data: result });
+  }
+
   // ─── Members ──────────────────────────────────────────────────
   async listNetworkMembers(req: AuthRequest, res: Response): Promise<void> {
     await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!);
@@ -62,8 +68,10 @@ class HospitalNetworkController {
   // ─── Hospital Assignment ───────────────────────────────────────
   async listNetworkHospitals(req: AuthRequest, res: Response): Promise<void> {
     await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!);
-    const hospitals = await HospitalNetworkService.listNetworkHospitals(req.params.id);
-    res.json({ success: true, data: hospitals });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const result = await HospitalNetworkService.listNetworkHospitals(req.params.id, page, limit);
+    res.json({ success: true, data: result });
   }
 
   async assignHospitalToNetwork(req: AuthRequest, res: Response): Promise<void> {

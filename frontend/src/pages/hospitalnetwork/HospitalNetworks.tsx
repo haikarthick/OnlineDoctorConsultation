@@ -126,7 +126,7 @@ const NETWORK_TYPES = [
   { value: 'private', label: 'Private' },
   { value: 'government', label: 'Government' },
   { value: 'ngo', label: 'NGO' },
-  { value: 'academic', label: 'Academic' },
+  { value: 'cooperative', label: 'Cooperative' },
   { value: 'franchise', label: 'Franchise' },
 ]
 

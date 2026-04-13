@@ -376,6 +376,7 @@ router.get('/hospital-networks', authMiddleware, asyncHandler((req: Request, res
 router.get('/hospital-networks/:id', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getNetwork(req, res)));
 router.put('/hospital-networks/:id', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.updateNetwork(req, res)));
 router.post('/hospital-networks/:id/approve', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.approveNetwork(req, res)));
+router.patch('/hospital-networks/:id/deactivate', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.deactivateNetwork(req, res)));
 router.get('/hospital-networks/:id/hospitals', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkHospitals(req, res)));
 router.post('/hospital-networks/:id/hospitals/:hospitalId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.assignHospitalToNetwork(req, res)));
 router.get('/hospital-networks/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkMembers(req, res)));
@@ -470,6 +471,18 @@ router.post('/hospital-networks/enrollments/:contextId/accept', authMiddleware, 
     const { consentScope } = req.body;
     await HospitalNetworkService.acceptEnrollment(req.params.contextId, (req as any).userId, consentScope);
     res.json({ success: true });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+}));
+
+// Accept a walk-in patient invite by token (Fix 6)
+router.post('/hospital-networks/walkin-invites/accept', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { token } = req.body;
+    if (!token) { res.status(400).json({ error: 'token is required' }); return; }
+    const result = await HospitalNetworkService.acceptWalkInInvite(token, (req as any).userId);
+    res.json({ success: true, data: result });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }

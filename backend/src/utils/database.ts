@@ -325,6 +325,12 @@ class PostgresDatabase {
       `ALTER TABLE hospital_networks ADD COLUMN IF NOT EXISTS id_prefix VARCHAR(10)`
     ).catch(() => {});
 
+    // Fix 2: Ensure id_prefix is unique across all networks
+    await this.pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_hospital_networks_id_prefix 
+      ON hospital_networks(id_prefix)
+    `).catch(() => {});
+
     // Ensure network_patient_id_sequences table exists (race-safe per-network patient ID generation)
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS network_patient_id_sequences (
