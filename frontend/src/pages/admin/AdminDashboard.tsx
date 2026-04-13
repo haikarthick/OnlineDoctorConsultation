@@ -120,6 +120,43 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
         </div>
       </div>
 
+      {/* Pending Actions */}
+      {(stats.pendingNetworkApprovals ?? 0) > 0 && (
+        <div className="module-alert error" style={{ marginTop: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+          onClick={() => onNavigate('/hospital-networks')}>
+          <span>⚠️ <strong>{stats.pendingNetworkApprovals}</strong> hospital network{(stats.pendingNetworkApprovals ?? 0) > 1 ? 's' : ''} pending your approval</span>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>Review → </span>
+        </div>
+      )}
+
+      {/* More Stats — row 3: network approvals */}
+      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginTop: 16 }}>
+        <div className="stat-card" onClick={() => onNavigate('/hospital-networks')} style={{ cursor: 'pointer', borderLeft: (stats.pendingNetworkApprovals ?? 0) > 0 ? '4px solid #f59e0b' : undefined }}
+          title="Hospital Networks awaiting approval">
+          <div className="stat-icon">🌐</div>
+          <div className="stat-value" style={{ color: (stats.pendingNetworkApprovals ?? 0) > 0 ? '#f59e0b' : undefined }}>{stats.pendingNetworkApprovals ?? 0}</div>
+          <div className="stat-label">Pending Network Approvals</div>
+          {(stats.pendingNetworkApprovals ?? 0) > 0 && (
+            <p style={{ fontSize: 12, color: '#f59e0b', margin: '4px 0 0', fontWeight: 600 }}>⚠️ Action Required</p>
+          )}
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">🎬</div>
+          <div className="stat-value">{stats.activeVideoSessions}</div>
+          <div className="stat-label">{t('adminDashboard.liveVideoSessions')}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">📋</div>
+          <div className="stat-value">{stats.totalBookings}</div>
+          <div className="stat-label">{t('adminDashboard.totalBookings')}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">✅</div>
+          <div className="stat-value">{stats.completedConsultations}</div>
+          <div className="stat-label">{t('adminDashboard.completedConsultations')}</div>
+        </div>
+      </div>
+
       {/* Quick Navigation */}
       <div className="card" style={{ marginTop: 24 }}>
         <div className="card-header"><h2>⚡ {t('adminDashboard.management')}</h2></div>

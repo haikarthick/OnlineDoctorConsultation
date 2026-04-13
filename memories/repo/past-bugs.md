@@ -640,3 +640,35 @@ render-start.sh
 - **Fix:** Added type='button' to all non-submit buttons in all modal forms
 - **Rule:** ALL buttons inside forms must have explicit type='button' unless they ARE the submit
 
+
+### CA-001 — corporate_admin could self-approve own network
+- **Logged:** 2026-04-13 16:36
+- **Symptom:** Corporate admin saw Approve button on their own network and could approve it without platform admin review
+- **Root Cause:** No role check on approve route; no creator check in approveNetwork()
+- **Fix:** Restricted approve route to admin role only; added DB creator check in service; Frontend hides Approve for non-admin
+- **Rule:** Network approval MUST be gated to platform admin only. Self-approval is a business logic flaw
+
+
+### CA-002 — corporate_admin dashboard showed wrong tiles (My Animals etc)
+- **Logged:** 2026-04-13 16:36
+- **Symptom:** No isCorporateAdmin branch in Dashboard.tsx — role fell through to admin fallback showing irrelevant bookings/animals tiles
+- **Root Cause:** Dashboard.tsx only had branches for veterinarian, pet_owner, farmer, admin, hospital_staff
+- **Fix:** Added isCorporateAdmin branch with network-specific stats and separate API endpoint
+- **Rule:** EVERY role must have an explicit branch in Dashboard.tsx stat cards, quick actions, and subtitle
+
+
+### CA-003 — corporate_admin assign hospital modal showed public hospitals
+- **Logged:** 2026-04-13 16:36
+- **Symptom:** Assign Hospital modal let corporate_admin pick any existing public hospital from dropdown — wrong for private closed networks
+- **Root Cause:** The modal fetched all vet_hospitals from the system rather than offering to CREATE new ones
+- **Fix:** Replaced with CreateBranchHospitalModal (full form). New hospitals are marked is_network_branch=true and hidden from public listing
+- **Rule:** Private network hospitals MUST be created within the network, not assigned from public registry
+
+
+### CA-004 — Admin pending actions count was always 0
+- **Logged:** 2026-04-13 16:36
+- **Symptom:** Platform admin dashboard showed 0 Pending Actions even when hospital networks were pending approval
+- **Root Cause:** AdminService.getDashboardStats() never queried hospital_networks for pending approvals
+- **Fix:** Added COUNT of is_approved=false networks to pendingActions in AdminService
+- **Rule:** Platform admin pending actions MUST aggregate ALL cross-module pending items
+

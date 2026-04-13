@@ -356,3 +356,9 @@
 - **Status:** done
 - **Description:** Restrict network approval to admin-only route + self-approval guard; add getCorporateDashboardStats + createBranchHospital to HospitalNetworkService; branch hospital columns in init.sql/database.ts; filter branch hospitals from public listing; GET /dashboard/corporate and POST /hospital-networks/:id/branch-hospitals routes
 
+
+### ✅ corporate_admin frontend fixes
+- **Logged:** 2026-04-13 16:35
+- **Status:** done
+- **Description:** Nav: removed Vet Hospitals from corporate_admin. Dashboard: isCorporateAdmin branch with corpStats, stat cards, quick actions, subtitle. HospitalNetworks: Approve button admin-only, Pending badge for others, AssignHospitalModal replaced by CreateBranchHospitalModal (full form), showAssignHospital->showCreateBranch. api.ts: getCorporateDashboardStats + createBranchHospital. i18n: 5 locales updated with corporateAdmin subtitle, network stats keys, hospitalNetworks quickAction, manageSettings desc.
+

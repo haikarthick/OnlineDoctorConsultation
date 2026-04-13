@@ -205,8 +205,8 @@ export class HospitalNetworkService {
            (name, legal_name, registration_number, tax_id, network_type,
             country, headquarters_address, headquarters_city, headquarters_state,
             contact_email, contact_phone, website, logo_url,
-            dpo_name, dpo_email, data_residency_region, metadata, id_prefix)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+            dpo_name, dpo_email, data_residency_region, metadata, id_prefix, created_by)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
          RETURNING *`,
         [
           data.name,
@@ -227,6 +227,7 @@ export class HospitalNetworkService {
           data.dataResidencyRegion ?? null,
           data.metadata ?? null,
           data.idPrefix ?? null,
+          createdById,
         ]
       );
 

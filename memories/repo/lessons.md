@@ -358,3 +358,10 @@
 - **Lesson:** 1) All tables in init.sql (not just database.ts). 2) All errors standardized to {success:false,message}. 3) No empty catch blocks. 4) type=button on all non-submit buttons. 5) Role checks on every sensitive route. 6) FK indexes on all foreign keys. 7) Never expose err.message to client in 500s. 8) isMounted guard on all async setState.
 - **Apply to:** All future features
 
+
+### LESSON-059 — corporate_admin is a separate role with isolated closed-network scope
+- **Logged:** 2026-04-13 16:36
+- **Context:** Implementing corporate_admin role for hospital network management
+- **Lesson:** 1) corporate_admin NEVER sees public Vet Hospitals — remove from nav. 2) Network approval is ALWAYS platform admin only. 3) Branch hospitals are private, marked is_network_branch=true, hidden from public. 4) Dashboard must have dedicated corporate_admin stat cards and API endpoint. 5) No self-approval of any kind.
+- **Apply to:** All future corporate_admin features
+

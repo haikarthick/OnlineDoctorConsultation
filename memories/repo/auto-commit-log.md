@@ -1169,3 +1169,29 @@
 </details>
 
 ---
+
+## 2026-04-13 16:33 · `f30f8e1` · OTHER
+
+**Commit:** fix(corporate-admin): frontend fixes — nav, dashboard, branch hospital modal  
+**Author:** haikarthick  
+**Categories:** UI · i18n · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Dashboard.tsx
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/services/api.ts
+  - memories/repo/auto-commit-log.md
+  - memories/repo/feature-tracker.md
+
+</details>
+
+---

@@ -1534,12 +1534,13 @@ CREATE TABLE IF NOT EXISTS hospital_networks (
   is_approved BOOLEAN DEFAULT false,
   approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
   approved_at TIMESTAMP,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
   metadata JSONB DEFAULT '{}',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 37. HOSPITAL NETWORK MEMBERS (corporate staff: corporate_admin, hospital_director, auditor)
+-- 37. HOSPITAL NETWORK MEMBERS(corporate staff: corporate_admin, hospital_director, auditor)
 CREATE TABLE IF NOT EXISTS hospital_network_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,

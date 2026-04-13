@@ -645,6 +645,8 @@ export interface AdminDashboardStats {
   totalBookings: number
   todayBookings: number
   activeVideoSessions: number
+  pendingNetworkApprovals: number
+  pendingActions: number
   systemHealth: {
     uptime: number
     memoryUsage: number
