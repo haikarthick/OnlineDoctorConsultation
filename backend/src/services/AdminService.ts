@@ -13,6 +13,11 @@ class AdminService {
     const reviewsResult = await database.query(`SELECT COUNT(*) as count, COALESCE(AVG(rating), 0) as "avgRating" FROM reviews`, []);
     const bookingsResult = await database.query(`SELECT COUNT(*) as count FROM bookings`, []);
     const videoResult = await database.query(`SELECT COUNT(*) as count FROM video_sessions WHERE status IN ('waiting', 'active')`, []);
+    const pendingNetworksResult = await database.query(
+      `SELECT COUNT(*) as count FROM hospital_networks WHERE is_approved = false`,
+      []
+    );
+    const pendingNetworkApprovals = parseInt(pendingNetworksResult.rows[0]?.count || '0');
 
     const userCounts: Record<string, number> = {};
     (usersResult.rows || []).forEach((r: any) => { userCounts[r.role] = parseInt(r.count || '0'); });
@@ -50,6 +55,8 @@ class AdminService {
       totalBookings: parseInt(bookingsResult.rows[0]?.count || '0'),
       todayBookings: 0,
       activeVideoSessions: parseInt(videoResult.rows[0]?.count || '0'),
+      pendingNetworkApprovals,
+      pendingActions: pendingNetworkApprovals,
       systemHealth: {
         uptime: process.uptime(),
         memoryUsage: process.memoryUsage().heapUsed / 1024 / 1024,

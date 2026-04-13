@@ -1478,3 +1478,17 @@ export const createNetworkReferralSchema = Joi.object({
   priority: Joi.string().valid('low', 'normal', 'high', 'emergency').default('normal'),
   clinicalNotes: Joi.string().max(2000).optional().allow(''),
 });
+
+export const createBranchHospitalSchema = Joi.object({
+  name: Joi.string().required().min(2).max(255),
+  hospitalType: Joi.string().valid('multi_specialty', 'specialty', 'clinic', 'emergency', 'referral', 'teaching').default('multi_specialty'),
+  address: Joi.string().allow('', null).optional(),
+  city: Joi.string().allow('', null).optional(),
+  state: Joi.string().allow('', null).optional(),
+  country: Joi.string().allow('', null).default('IN'),
+  postalCode: Joi.string().allow('', null).optional(),
+  phone: Joi.string().allow('', null).optional(),
+  email: Joi.string().email().allow('', null).optional(),
+  description: Joi.string().allow('', null).optional(),
+  specializations: Joi.array().items(Joi.string()).optional(),
+});

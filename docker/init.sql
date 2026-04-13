@@ -893,6 +893,8 @@ CREATE TABLE IF NOT EXISTS vet_hospitals (
   total_reviews INTEGER DEFAULT 0,
   total_consultations INTEGER DEFAULT 0,
   metadata JSONB DEFAULT '{}',
+  is_network_branch BOOLEAN DEFAULT false,
+  branch_network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -351,3 +351,10 @@
 - **Lesson:** Always model cross-hospital and intra-hospital referrals as separate tables. network_referrals needs: network_id, from_hospital_id, to_hospital_id, consultation_id FK for clinical continuity.
 - **Apply to:** All future referral features
 
+
+### LESSON-058 — Code scan baseline — security and quality patterns
+- **Logged:** 2026-04-13 15:59
+- **Context:** Full application code scan (security, performance, unhandled errors) run April 2026
+- **Lesson:** 1) All tables in init.sql (not just database.ts). 2) All errors standardized to {success:false,message}. 3) No empty catch blocks. 4) type=button on all non-submit buttons. 5) Role checks on every sensitive route. 6) FK indexes on all foreign keys. 7) Never expose err.message to client in 500s. 8) isMounted guard on all async setState.
+- **Apply to:** All future features
+

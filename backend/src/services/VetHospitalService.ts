@@ -405,7 +405,7 @@ export class VetHospitalService {
     const { search, city, hospitalType, specialization, hasEmergency, is24Hours, isVerified } = filters;
     const limit = Math.min(filters.limit || 20, 100);
     const offset = filters.offset || 0;
-    const conditions: string[] = ['h.is_active = true'];
+    const conditions: string[] = ['h.is_active = true', '(h.is_network_branch = false OR h.is_network_branch IS NULL)'];
     const params: any[] = [];
     let idx = 1;
     if (search) { conditions.push(`(h.name ILIKE $${idx} OR h.description ILIKE $${idx} OR h.city ILIKE $${idx})`); params.push(`%${search}%`); idx++; }

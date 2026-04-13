@@ -961,6 +961,10 @@ class PostgresDatabase {
       FOREIGN KEY (animal_id) REFERENCES animals(id) ON DELETE RESTRICT
     `).catch(() => {});
 
+    // Branch hospital support columns on vet_hospitals
+    await this.pool.query(`ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS is_network_branch BOOLEAN DEFAULT false`).catch(() => {});
+    await this.pool.query(`ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS branch_network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL`).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

@@ -148,6 +148,21 @@ class HospitalNetworkController {
     res.json({ success: true, ...result });
   }
 
+  // ─── Corporate Dashboard ───────────────────────────────────────
+  async getCorporateDashboard(req: AuthRequest, res: Response): Promise<void> {
+    const userId = req.userId!;
+    const stats = await HospitalNetworkService.getCorporateDashboardStats(userId);
+    res.json({ success: true, data: stats });
+  }
+
+  // ─── Branch Hospitals ─────────────────────────────────────────
+  async createBranchHospital(req: AuthRequest, res: Response): Promise<void> {
+    const networkId = req.params.id;
+    const userId = req.userId!;
+    const hospital = await HospitalNetworkService.createBranchHospital(networkId, req.body, userId);
+    res.status(201).json({ success: true, data: hospital, message: 'Branch hospital created successfully' });
+  }
+
   // ─── Helper ───────────────────────────────────────────────────
   private async ensureNetworkAccess(
     networkId: string,

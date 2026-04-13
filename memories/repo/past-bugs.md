@@ -608,3 +608,35 @@ render-start.sh
 - **Fix:** All catch blocks now console.error + set error state. ModalActions cancel and QuickBtn have type=button. mountedRef guards added to openActionLog in Consultations
 - **Rule:** NEVER write empty catch {} — minimum is console.error. Data-loading catches must set an error state variable displayed to user
 
+
+### SCAN-001 — Marketplace tables missing from init.sql
+- **Logged:** 2026-04-13 15:59
+- **Symptom:** Marketplace pages crashed on fresh DB deploy
+- **Root Cause:** 6 marketplace tables existed only in database.ts safety net, not in canonical init.sql schema
+- **Fix:** Added all 6 tables to docker/init.sql — fresh DB now fully self-contained
+- **Rule:** ALL new tables MUST appear in init.sql first, database.ts is safety-net only
+
+
+### SCAN-002 — consultations.animal_id FK was ON DELETE SET NULL
+- **Logged:** 2026-04-13 15:59
+- **Symptom:** Deleting an animal silently orphaned its consultation records — audit trail broken
+- **Root Cause:** FK constraint defaulted to SET NULL instead of RESTRICT
+- **Fix:** Altered via database.ts seedDefaultSettings to ON DELETE RESTRICT
+- **Rule:** Medical/audit FKs must always use RESTRICT — never SET NULL on clinical records
+
+
+### SCAN-003 — Silent .catch(() => {}) swallowing API errors in frontend
+- **Logged:** 2026-04-13 15:59
+- **Symptom:** Users saw blank/loading forever when API calls failed — no feedback
+- **Root Cause:** 6+ catch blocks in Consultations, MedicalRecords, Settings, UserManagement had empty catches
+- **Fix:** All fixed: set error state or console.error; buttons now show loading state
+- **Rule:** NEVER use empty catch. Always: setError(msg) or console.error. Zero tolerance.
+
+
+### SCAN-004 — Buttons without type='button' inside forms caused accidental submission
+- **Logged:** 2026-04-13 15:59
+- **Symptom:** Clicking Cancel or Close in modals sometimes submitted the enclosing form
+- **Root Cause:** HTML default for button is type=submit — inside a form this triggers form submission
+- **Fix:** Added type='button' to all non-submit buttons in all modal forms
+- **Rule:** ALL buttons inside forms must have explicit type='button' unless they ARE the submit
+

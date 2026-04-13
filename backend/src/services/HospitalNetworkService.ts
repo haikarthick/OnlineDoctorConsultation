@@ -342,6 +342,16 @@ export class HospitalNetworkService {
   }
 
   async approveNetwork(id: string, approverId: string): Promise<void> {
+    // Prevent creator from self-approving
+    const networkCheck = await database.query(
+      `SELECT created_by FROM hospital_networks WHERE id = $1`,
+      [id]
+    );
+    if (networkCheck.rows.length === 0) throw new NotFoundError('Hospital network not found');
+    if (networkCheck.rows[0].created_by === approverId) {
+      throw new Error('Network creators cannot approve their own network. Platform admin approval required.');
+    }
+
     const result = await database.query(
       `UPDATE hospital_networks
        SET is_approved = true, approved_by = $2, approved_at = NOW(), updated_at = NOW()
@@ -1225,6 +1235,114 @@ export class HospitalNetworkService {
       page,
       totalPages: Math.ceil(parseInt(countResult.rows[0].count, 10) / limit),
     };
+  }
+
+  async getCorporateDashboardStats(userId: string): Promise<{
+    totalNetworks: number;
+    approvedNetworks: number;
+    pendingNetworks: number;
+    totalHospitals: number;
+    totalMembers: number;
+    recentNetworks: any[];
+  }> {
+    const [networksRes, hospitalsRes, membersRes, recentRes] = await Promise.all([
+      database.query(
+        `SELECT
+           COUNT(*) as total,
+           COUNT(*) FILTER (WHERE is_approved = true) as approved,
+           COUNT(*) FILTER (WHERE is_approved = false) as pending
+         FROM hospital_networks WHERE created_by = $1`,
+        [userId]
+      ),
+      database.query(
+        `SELECT COUNT(DISTINCT hnh.hospital_id) as total
+         FROM hospital_network_hospitals hnh
+         JOIN hospital_networks hn ON hnh.network_id = hn.id
+         WHERE hn.created_by = $1`,
+        [userId]
+      ),
+      database.query(
+        `SELECT COUNT(DISTINCT hnm.user_id) as total
+         FROM hospital_network_members hnm
+         JOIN hospital_networks hn ON hnm.network_id = hn.id
+         WHERE hn.created_by = $1`,
+        [userId]
+      ),
+      database.query(
+        `SELECT id, name, network_type as "networkType", is_approved as "isApproved",
+                created_at as "createdAt"
+         FROM hospital_networks WHERE created_by = $1
+         ORDER BY created_at DESC LIMIT 5`,
+        [userId]
+      ),
+    ]);
+
+    return {
+      totalNetworks: parseInt(networksRes.rows[0]?.total || '0'),
+      approvedNetworks: parseInt(networksRes.rows[0]?.approved || '0'),
+      pendingNetworks: parseInt(networksRes.rows[0]?.pending || '0'),
+      totalHospitals: parseInt(hospitalsRes.rows[0]?.total || '0'),
+      totalMembers: parseInt(membersRes.rows[0]?.total || '0'),
+      recentNetworks: recentRes.rows,
+    };
+  }
+
+  async createBranchHospital(networkId: string, data: {
+    name: string;
+    hospitalType?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+    phone?: string;
+    email?: string;
+    description?: string;
+    specializations?: string[];
+  }, createdById: string): Promise<any> {
+    const netCheck = await database.query(
+      `SELECT id, created_by FROM hospital_networks WHERE id = $1`,
+      [networkId]
+    );
+    if (netCheck.rows.length === 0) throw new NotFoundError('Hospital network not found');
+
+    const client = await database.getPool().connect();
+    try {
+      await client.query('BEGIN');
+
+      const hospitalResult = await client.query(
+        `INSERT INTO vet_hospitals (name, hospital_type, address, city, state, country, postal_code, phone, email,
+          description, specializations, owner_id, is_network_branch, branch_network_id, is_verified, verification_status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, true, $13, false, 'approved')
+         RETURNING id, name, city, state, hospital_type as "hospitalType"`,
+        [
+          data.name, data.hospitalType || 'multi_specialty', data.address || null,
+          data.city || null, data.state || null, data.country || 'IN',
+          data.postalCode || null, data.phone || null, data.email || null,
+          data.description || null, data.specializations || [],
+          createdById, networkId
+        ]
+      );
+
+      const hospital = hospitalResult.rows[0];
+
+      await client.query(
+        `INSERT INTO hospital_network_hospitals (network_id, hospital_id, joined_at)
+         VALUES ($1, $2, NOW())
+         ON CONFLICT (network_id, hospital_id) DO NOTHING`,
+        [networkId, hospital.id]
+      );
+
+      await client.query('COMMIT');
+      logger.info('Branch hospital created', { networkId, hospitalId: hospital.id, createdById });
+      return hospital;
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to create branch hospital', { error: error.message });
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 }
 

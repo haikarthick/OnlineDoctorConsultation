@@ -67,7 +67,7 @@ import {
   uploadHospitalDocSchema, reviewHospitalDocSchema,
   // Hospital Network
   createHospitalNetworkSchema, addNetworkMemberSchema, createPatientConsentSchema,
-  createNetworkReferralSchema,
+  createNetworkReferralSchema, createBranchHospitalSchema,
   // Role Change Requests
   roleChangeRequestSchema, rejectRoleChangeSchema,
   // Network Subscriptions + Staff Invites
@@ -377,10 +377,11 @@ router.post('/hospital-networks', authMiddleware, validateBody(createHospitalNet
 router.get('/hospital-networks', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworks(req, res)));
 router.get('/hospital-networks/:id', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getNetwork(req, res)));
 router.put('/hospital-networks/:id', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.updateNetwork(req, res)));
-router.post('/hospital-networks/:id/approve', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.approveNetwork(req, res)));
+router.post('/hospital-networks/:id/approve', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => HospitalNetworkController.approveNetwork(req, res)));
 router.patch('/hospital-networks/:id/deactivate', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.deactivateNetwork(req, res)));
 router.get('/hospital-networks/:id/hospitals', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkHospitals(req, res)));
 router.post('/hospital-networks/:id/hospitals/:hospitalId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.assignHospitalToNetwork(req, res)));
+router.post('/hospital-networks/:id/branch-hospitals', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), validateBody(createBranchHospitalSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createBranchHospital(req, res)));
 router.get('/hospital-networks/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkMembers(req, res)));
 router.post('/hospital-networks/:id/members', authMiddleware, validateBody(addNetworkMemberSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.addNetworkMember(req, res)));
 router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.removeNetworkMember(req, res)));
@@ -585,6 +586,7 @@ router.post('/reviews/:id/helpful', authMiddleware, asyncHandler((req: Request, 
 router.post('/reviews/:id/report', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.reportReview(req, res)));
 
 // ─── Admin routes (admin role required) ──────────────────────
+router.get('/dashboard/corporate', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), asyncHandler((req: Request, res: Response) => HospitalNetworkController.getCorporateDashboard(req, res)));
 router.get('/admin/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getDashboardStats(req, res)));
 router.get('/admin/users', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listUsers(req, res)));
 router.put('/admin/users/:id/status', authMiddleware, roleMiddleware(['admin']), validateBody(toggleUserStatusSchema), asyncHandler((req: Request, res: Response) => AdminController.toggleUserStatus(req, res)));
