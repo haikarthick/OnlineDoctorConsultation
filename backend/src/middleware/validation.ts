@@ -1465,3 +1465,16 @@ export const acceptStaffInviteSchema = Joi.object({
   phone: Joi.string().max(20).required(),
   password: Joi.string().min(8).required(),
 });
+
+// ─── Network Referrals ───────────────────────────────────────
+export const createNetworkReferralSchema = Joi.object({
+  networkId: Joi.string().uuid().required(),
+  fromHospitalId: Joi.string().uuid().required(),
+  toHospitalId: Joi.string().uuid().required(),
+  toVetId: Joi.string().uuid().optional(),
+  animalId: Joi.string().uuid().required(),
+  consultationId: Joi.string().uuid().optional(),
+  reason: Joi.string().min(5).max(500).required(),
+  priority: Joi.string().valid('low', 'normal', 'high', 'emergency').default('normal'),
+  clinicalNotes: Joi.string().max(2000).optional().allow(''),
+});

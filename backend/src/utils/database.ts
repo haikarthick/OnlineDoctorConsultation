@@ -909,6 +909,40 @@ class PostgresDatabase {
       `ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS total_reviews INTEGER DEFAULT 0`
     ).catch(() => {});
 
+    // Network referrals table
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS network_referrals (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
+        from_hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+        to_hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+        from_vet_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        to_vet_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        animal_id UUID REFERENCES animals(id) ON DELETE CASCADE,
+        consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+        reason TEXT NOT NULL,
+        priority VARCHAR(20) DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'emergency')),
+        status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected', 'completed', 'cancelled')),
+        clinical_notes TEXT,
+        response_notes TEXT,
+        accepted_at TIMESTAMPTZ,
+        rejected_at TIMESTAMPTZ,
+        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `).catch(() => {});
+
+    await this.pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_network_referrals_network_id ON network_referrals(network_id)
+    `).catch(() => {});
+    await this.pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_network_referrals_to_hospital ON network_referrals(to_hospital_id, status)
+    `).catch(() => {});
+    await this.pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_network_referrals_animal ON network_referrals(animal_id)
+    `).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

@@ -119,6 +119,35 @@ class HospitalNetworkController {
     res.json({ success: true, message: 'Consent revoked' });
   }
 
+  // ─── Network Referrals ────────────────────────────────────────
+
+  async createNetworkReferral(req: AuthRequest, res: Response): Promise<void> {
+    const data = { ...req.body, createdBy: req.userId!, fromVetId: req.userId! };
+    const referral = await HospitalNetworkService.createNetworkReferral(data);
+    res.status(201).json({ success: true, data: referral });
+  }
+
+  async updateNetworkReferralStatus(req: AuthRequest, res: Response): Promise<void> {
+    const { id } = req.params;
+    const { status, responseNotes } = req.body;
+    const referral = await HospitalNetworkService.updateNetworkReferralStatus(id, status, req.userId!, responseNotes);
+    res.json({ success: true, data: referral });
+  }
+
+  async listNetworkReferrals(req: AuthRequest, res: Response): Promise<void> {
+    const { networkId, hospitalId, direction, animalId, status, page, limit } = req.query;
+    const result = await HospitalNetworkService.listNetworkReferrals({
+      networkId: networkId as string | undefined,
+      hospitalId: hospitalId as string | undefined,
+      direction: direction as 'incoming' | 'outgoing' | 'all' | undefined,
+      animalId: animalId as string | undefined,
+      status: status as string | undefined,
+      page: page ? parseInt(page as string, 10) : 1,
+      limit: limit ? parseInt(limit as string, 10) : 20,
+    });
+    res.json({ success: true, ...result });
+  }
+
   // ─── Helper ───────────────────────────────────────────────────
   private async ensureNetworkAccess(
     networkId: string,

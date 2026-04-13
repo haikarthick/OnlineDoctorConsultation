@@ -1093,6 +1093,139 @@ export class HospitalNetworkService {
       grantedToNetworkName: row.grantedToNetworkName,
     };
   }
+
+  // ─── Network Referrals ───────────────────────────────────────
+
+  async createNetworkReferral(data: {
+    networkId: string;
+    fromHospitalId: string;
+    toHospitalId: string;
+    fromVetId: string;
+    toVetId?: string;
+    animalId: string;
+    consultationId?: string;
+    reason: string;
+    priority?: string;
+    clinicalNotes?: string;
+    createdBy: string;
+  }): Promise<any> {
+    const fromMember = await database.query(
+      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND hospital_id = $2 AND is_active = true LIMIT 1`,
+      [data.networkId, data.fromHospitalId]
+    );
+    if (fromMember.rows.length === 0) {
+      throw new Error('Referring hospital is not a member of this network');
+    }
+    const toMember = await database.query(
+      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND hospital_id = $2 AND is_active = true LIMIT 1`,
+      [data.networkId, data.toHospitalId]
+    );
+    if (toMember.rows.length === 0) {
+      throw new Error('Receiving hospital is not a member of this network');
+    }
+
+    const result = await database.query(
+      `INSERT INTO network_referrals
+        (network_id, from_hospital_id, to_hospital_id, from_vet_id, to_vet_id,
+         animal_id, consultation_id, reason, priority, clinical_notes, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+       RETURNING *`,
+      [
+        data.networkId, data.fromHospitalId, data.toHospitalId,
+        data.fromVetId, data.toVetId || null,
+        data.animalId, data.consultationId || null,
+        data.reason, data.priority || 'normal',
+        data.clinicalNotes || null, data.createdBy,
+      ]
+    );
+    return result.rows[0];
+  }
+
+  async updateNetworkReferralStatus(
+    referralId: string,
+    status: 'accepted' | 'rejected' | 'completed' | 'cancelled',
+    _userId: string,
+    responseNotes?: string
+  ): Promise<any> {
+    const statusField = status === 'accepted' ? ', accepted_at = NOW()'
+      : status === 'rejected' ? ', rejected_at = NOW()' : '';
+
+    const result = await database.query(
+      `UPDATE network_referrals
+       SET status = $1, response_notes = $2, updated_at = NOW() ${statusField}
+       WHERE id = $3
+       RETURNING *`,
+      [status, responseNotes || null, referralId]
+    );
+    if (result.rows.length === 0) throw new Error('Referral not found');
+    return result.rows[0];
+  }
+
+  async listNetworkReferrals(params: {
+    networkId?: string;
+    hospitalId?: string;
+    direction?: 'incoming' | 'outgoing' | 'all';
+    animalId?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any> {
+    const { page = 1, limit = 20, direction = 'all' } = params;
+    const offset = (page - 1) * limit;
+    const conditions: string[] = ['1=1'];
+    const values: any[] = [];
+    let paramIdx = 1;
+
+    if (params.networkId)  { conditions.push(`nr.network_id = $${paramIdx++}`);  values.push(params.networkId); }
+    if (params.animalId)   { conditions.push(`nr.animal_id = $${paramIdx++}`);   values.push(params.animalId); }
+    if (params.status)     { conditions.push(`nr.status = $${paramIdx++}`);      values.push(params.status); }
+    if (params.hospitalId && direction === 'incoming') {
+      conditions.push(`nr.to_hospital_id = $${paramIdx++}`); values.push(params.hospitalId);
+    } else if (params.hospitalId && direction === 'outgoing') {
+      conditions.push(`nr.from_hospital_id = $${paramIdx++}`); values.push(params.hospitalId);
+    } else if (params.hospitalId) {
+      conditions.push(`(nr.from_hospital_id = $${paramIdx} OR nr.to_hospital_id = $${paramIdx})`);
+      values.push(params.hospitalId); paramIdx++;
+    }
+
+    const whereClause = conditions.join(' AND ');
+    values.push(limit, offset);
+
+    const result = await database.query(
+      `SELECT
+         nr.*,
+         fh.name AS "fromHospitalName",
+         th.name AS "toHospitalName",
+         a.name AS "animalName", a.species AS "animalSpecies",
+         CONCAT(fv.first_name, ' ', fv.last_name) AS "fromVetName",
+         CONCAT(tv.first_name, ' ', tv.last_name) AS "toVetName",
+         hn.name AS "networkName"
+       FROM network_referrals nr
+       LEFT JOIN vet_hospitals fh ON fh.id = nr.from_hospital_id
+       LEFT JOIN vet_hospitals th ON th.id = nr.to_hospital_id
+       LEFT JOIN animals a ON a.id = nr.animal_id
+       LEFT JOIN users fv ON fv.id = nr.from_vet_id
+       LEFT JOIN users tv ON tv.id = nr.to_vet_id
+       LEFT JOIN hospital_networks hn ON hn.id = nr.network_id
+       WHERE ${whereClause}
+       ORDER BY nr.created_at DESC
+       LIMIT $${paramIdx++} OFFSET $${paramIdx++}`,
+      values
+    );
+
+    const countVals = values.slice(0, -2);
+    const countResult = await database.query(
+      `SELECT COUNT(*) FROM network_referrals nr WHERE ${whereClause}`,
+      countVals
+    );
+
+    return {
+      referrals: result.rows,
+      total: parseInt(countResult.rows[0].count, 10),
+      page,
+      totalPages: Math.ceil(parseInt(countResult.rows[0].count, 10) / limit),
+    };
+  }
 }
 
 export default new HospitalNetworkService();

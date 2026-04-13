@@ -66,6 +66,7 @@ import {
   uploadHospitalDocSchema, reviewHospitalDocSchema,
   // Hospital Network
   createHospitalNetworkSchema, addNetworkMemberSchema, createPatientConsentSchema,
+  createNetworkReferralSchema,
   // Role Change Requests
   roleChangeRequestSchema, rejectRoleChangeSchema,
   // Network Subscriptions + Staff Invites
@@ -426,6 +427,11 @@ router.get('/animals/:animalId/care-contexts', authMiddleware, asyncHandler(asyn
 router.post('/patient-consent', authMiddleware, validateBody(createPatientConsentSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createConsent(req, res)));
 router.get('/patient-consent/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listConsents(req, res)));
 router.delete('/patient-consent/:consentId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.revokeConsent(req, res)));
+
+// Network Referrals
+router.get('/network-referrals', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkReferrals(req, res)));
+router.post('/network-referrals', authMiddleware, validateBody(createNetworkReferralSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createNetworkReferral(req, res)));
+router.patch('/network-referrals/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.updateNetworkReferralStatus(req, res)));
 
 // ─── Privacy-first patient enrollment routes ───────────────────
 // Search existing platform patients (for hospital staff)

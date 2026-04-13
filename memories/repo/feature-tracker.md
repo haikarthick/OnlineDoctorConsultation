@@ -320,3 +320,9 @@
 - **Status:** done
 - **Description:** Fix 1: AssignHospitalModal loading/error states. Fix 2: staff invite success key update. Fix 3: academic->cooperative already done. Fix 4: Already Enrolled badge. Fix 5: missing i18n keys in all 5 locales. Fix 6: hardcoded strings -> t() calls. Fix 7: deactivateNetwork API + UI button.
 
+
+### ✅ Network Referral System
+- **Logged:** 2026-04-13 11:24
+- **Status:** done
+- **Description:** Full cross-hospital network referral backend: network_referrals table (with indexes), 3 service methods (create/updateStatus/list), 3 controller methods, 3 routes (GET/POST /network-referrals, PATCH /network-referrals/:id/status), and Joi validation schema createNetworkReferralSchema
+
