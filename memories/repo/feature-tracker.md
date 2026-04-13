@@ -308,3 +308,9 @@
 - **Status:** done
 - **Description:** Added enterprise/farm badges (enterpriseName, groupName) to HospitalWorkflow queue list, InpatientManagement patient cards, DoctorDashboard pending+upcoming bookings, ConsultationRoom animal info panel. Added farm_visit booking type option in BookConsultation for farmer role / enterprise mode. Added enterprise filter dropdown in MedicalRecords for vet/admin roles using useMemo-computed enterprise list.
 
+
+### ✅ Farm-Vet Integration
+- **Logged:** 2026-04-13 10:34
+- **Status:** done
+- **Description:** Vets and hospital staff now see enterprise/farm context in queue, inpatient, bookings, consultation room, and medical records. Farm Visit booking type added. Enterprise filter in MedicalRecords for vets/admins.
+

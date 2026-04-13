@@ -886,3 +886,35 @@
 </details>
 
 ---
+
+## 2026-04-13 10:32 · `315ea89` · ✨ FEAT
+
+**Commit:** feat: farm/enterprise context visible to vets and hospitals  
+**Author:** haikarthick  
+**Categories:** SERVICE · UTILS · DB · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (17)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/services/BookingService.ts
+  - backend/src/services/StaffWorkflowService.ts
+  - backend/src/utils/database.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - frontend/src/pages/InpatientManagement.tsx
+  - frontend/src/pages/MedicalRecords.tsx
+  - frontend/src/pages/doctor/ConsultationRoom.tsx
+  - frontend/src/pages/doctor/DoctorDashboard.tsx
+  - frontend/src/pages/petowner/BookConsultation.tsx
+  - memories/repo/auto-commit-log.md
+  - memories/repo/feature-tracker.md
+
+</details>
+
+---

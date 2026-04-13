@@ -337,3 +337,10 @@
 - **Lesson:** ALL new clinical tables (inpatient, queue, workflow_cases, referrals) MUST include enterprise_id column. ALL booking/admission flows MUST validate enterprise ownership. ALL animal lists for farmers MUST include enterprise filter.
 - **Apply to:** All future enterprise-related features
 
+
+### LESSON-056 — Farm context visibility in vet-facing modules
+- **Logged:** 2026-04-13 10:34
+- **Context:** Farmer data (enterprise/group) was only on the farmer side. Vets/hospitals had no visibility into which farm an animal came from.
+- **Lesson:** Add LEFT JOIN enterprises + animal_groups to ALL vet-facing queries (getQueue, listInpatients, listWorkflowCases). Always propagate enterprise_name/group_name to frontend display.
+- **Apply to:** All vet-facing service queries
+
