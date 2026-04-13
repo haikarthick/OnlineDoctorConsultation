@@ -568,3 +568,35 @@ render-start.sh
 - **Fix:** Always add loading+error states to every modal that fetches data. Never use .catch(() => {}) silently.
 - **Rule:** Not specified
 
+
+### SEC-001 — Marketplace tables missing from init.sql
+- **Logged:** 2026-04-13 15:48
+- **Symptom:** Fresh DB install crashes marketplace — 6 tables only in database.ts safety net
+- **Root Cause:** Tables only existed as runtime safety nets in database.ts, not in canonical init.sql schema
+- **Fix:** Added all 6 tables to docker/init.sql after hospital_staff_invites table
+- **Rule:** ALL tables MUST be in init.sql — safety nets in database.ts are backup only
+
+
+### SEC-002 — Error responses leaked err.message in 500 routes
+- **Logged:** 2026-04-13 15:48
+- **Symptom:** routes/index.ts returned res.status(500).json({ error: err.message }) exposing internal errors
+- **Root Cause:** 500 catch blocks used { error: err.message } and inconsistent format vs { success, message }
+- **Fix:** Standardized to { success: false, message } — 500s use generic message + logger.error()
+- **Rule:** NEVER expose err.message in 500 responses. Use logger.error() + generic message
+
+
+### SEC-003 — search-patients endpoint had no role check
+- **Logged:** 2026-04-13 15:48
+- **Symptom:** GET /hospital-networks/:networkId/search-patients had only authMiddleware — any role could search all patients
+- **Root Cause:** No role check on sensitive patient search endpoint
+- **Fix:** Added inline role check: only admin/veterinarian/hospital_staff can call this endpoint
+- **Rule:** Sensitive data endpoints MUST have explicit role checks, not just authMiddleware
+
+
+### SEC-004 — errorHandler leaked stack traces in staging
+- **Logged:** 2026-04-13 15:48
+- **Symptom:** process.env.NODE_ENV !== production leaked details in staging environments (only production blocked)
+- **Root Cause:** Condition was !== production so staging/qa environments would expose stack traces
+- **Fix:** Changed to === development so only development gets details
+- **Rule:** Use === development not !== production for guarding debug details
+
