@@ -104,6 +104,18 @@ class BookingService {
       if (enterpriseCheck.rows.length === 0) {
         throw new Error('You do not have access to this enterprise');
       }
+      // Validate animal belongs to this enterprise
+      if (data.animalId) {
+        const animalEntCheck = await database.query(
+          `SELECT enterprise_id FROM animals WHERE id = $1`,
+          [data.animalId]
+        );
+        if (animalEntCheck.rows.length > 0 &&
+            animalEntCheck.rows[0].enterprise_id &&
+            animalEntCheck.rows[0].enterprise_id !== data.enterpriseId) {
+          throw new Error('The selected animal does not belong to this enterprise');
+        }
+      }
     }
     if (data.groupId && !data.enterpriseId) {
       const groupCheck = await database.query(

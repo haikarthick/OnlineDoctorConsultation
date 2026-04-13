@@ -1805,3 +1805,80 @@ CREATE INDEX IF NOT EXISTS idx_hsi_status ON hospital_staff_invites(status);
 DROP TRIGGER IF EXISTS update_hsi_updated_at ON hospital_staff_invites;
 CREATE TRIGGER update_hsi_updated_at BEFORE UPDATE ON hospital_staff_invites
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ─── Marketplace monetization tables (canonical schema) ─────────────────────
+CREATE TABLE IF NOT EXISTS marketplace_monetization_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  setting_key VARCHAR(100) UNIQUE NOT NULL,
+  setting_value JSONB NOT NULL DEFAULT '{}',
+  is_enabled BOOLEAN DEFAULT false,
+  description TEXT,
+  category VARCHAR(50) DEFAULT 'general',
+  updated_by UUID REFERENCES users(id),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS marketplace_plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  price NUMERIC(10,2) NOT NULL DEFAULT 0,
+  currency VARCHAR(10) DEFAULT 'INR',
+  duration_days INTEGER NOT NULL DEFAULT 30,
+  features JSONB NOT NULL DEFAULT '{}',
+  max_listings INTEGER,
+  max_boosts_per_month INTEGER DEFAULT 0,
+  priority_support BOOLEAN DEFAULT false,
+  analytics_access BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS marketplace_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
+  plan_id UUID NOT NULL REFERENCES marketplace_plans(id),
+  status VARCHAR(20) DEFAULT 'active',
+  starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMPTZ NOT NULL,
+  auto_renew BOOLEAN DEFAULT false,
+  cancelled_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS listing_boosts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id),
+  boost_type VARCHAR(30) DEFAULT 'standard',
+  price_paid NUMERIC(10,2) DEFAULT 0,
+  starts_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMPTZ NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS marketplace_inquiries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
+  buyer_id UUID NOT NULL REFERENCES users(id),
+  seller_id UUID NOT NULL REFERENCES users(id),
+  message TEXT,
+  contact_revealed BOOLEAN DEFAULT false,
+  fee_charged NUMERIC(10,2) DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'pending',
+  responded_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS marketplace_transactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
+  transaction_type VARCHAR(30) NOT NULL,
+  amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  currency VARCHAR(10) DEFAULT 'INR',
+  status VARCHAR(20) DEFAULT 'completed',
+  reference_id UUID,
+  reference_type VARCHAR(30),
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);

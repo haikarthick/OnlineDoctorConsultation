@@ -943,6 +943,24 @@ class PostgresDatabase {
       CREATE INDEX IF NOT EXISTS idx_network_referrals_animal ON network_referrals(animal_id)
     `).catch(() => {});
 
+    // Missing FK indexes — prevent full table scans on common JOINs
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_consultations_animal_id ON consultations(animal_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_bookings_animal_id ON bookings(animal_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_bookings_consultation_id ON bookings(consultation_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_prescriptions_animal_id ON prescriptions(animal_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_medical_records_animal_id ON medical_records(animal_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_network_referrals_consultation_id ON network_referrals(consultation_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_workflow_cases_animal_id ON workflow_cases(animal_id)`).catch(() => {});
+
+    // Prevent accidental animal deletion when consultations exist
+    await this.pool.query(`
+      ALTER TABLE consultations DROP CONSTRAINT IF EXISTS consultations_animal_id_fkey
+    `).catch(() => {});
+    await this.pool.query(`
+      ALTER TABLE consultations ADD CONSTRAINT consultations_animal_id_fkey
+      FOREIGN KEY (animal_id) REFERENCES animals(id) ON DELETE RESTRICT
+    `).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

@@ -126,6 +126,9 @@ export class AnimalService {
          RETURNING last_seq`,
         [code, year]
       );
+      if (!res.rows || res.rows.length === 0) {
+        throw new Error('Failed to retrieve sequence data');
+      }
       const seq = res.rows[0].last_seq as number;
       return `VC-${code}-${year.toString().padStart(2, '0')}-${seq.toString().padStart(6, '0')}`;
     } catch {

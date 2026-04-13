@@ -1,4 +1,5 @@
 ﻿import { Router, Request, Response } from 'express';
+import logger from '../utils/logger';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
@@ -268,7 +269,7 @@ router.post('/enterprises/:id/invite-member', authMiddleware, asyncHandler(async
   const { email, role } = req.body;
 
   if (!email || !role) {
-    return res.status(400).json({ error: 'email and role are required' });
+    return res.status(400).json({ success: false, message: 'email and role are required' });
   }
 
   // Verify requester is enterprise owner or manager
@@ -281,7 +282,7 @@ router.post('/enterprises/:id/invite-member', authMiddleware, asyncHandler(async
     [req.params.id, userId]
   );
   if (userRole !== 'admin' && entResult.rows.length === 0 && memberResult.rows.length === 0) {
-    return res.status(403).json({ error: 'Not authorized to manage enterprise members' });
+    return res.status(403).json({ success: false, message: 'Not authorized to manage enterprise members' });
   }
 
   // Look up user by email
@@ -290,7 +291,7 @@ router.post('/enterprises/:id/invite-member', authMiddleware, asyncHandler(async
     [email.toLowerCase().trim()]
   );
   if (userResult.rows.length === 0) {
-    return res.status(404).json({ error: 'No active user found with that email address' });
+    return res.status(404).json({ success: false, message: 'No active user found with that email address' });
   }
 
   const targetUserId = userResult.rows[0].id;
@@ -328,7 +329,7 @@ router.patch('/movements/:id/approve', authMiddleware, asyncHandler(async (req: 
   const { action } = req.body;
 
   if (!action || !['approve', 'reject'].includes(action)) {
-    return res.status(400).json({ error: 'action must be "approve" or "reject"' });
+    return res.status(400).json({ success: false, message: 'action must be "approve" or "reject"' });
   }
 
   const movement = await database.query(
@@ -339,7 +340,7 @@ router.patch('/movements/:id/approve', authMiddleware, asyncHandler(async (req: 
   );
 
   if (movement.rows.length === 0) {
-    return res.status(404).json({ error: 'Movement record not found' });
+    return res.status(404).json({ success: false, message: 'Movement record not found' });
   }
 
   const mv = movement.rows[0];
@@ -351,7 +352,7 @@ router.patch('/movements/:id/approve', authMiddleware, asyncHandler(async (req: 
       [enterpriseId, userId]
     );
     if (enterpriseAccess.rows.length === 0) {
-      return res.status(403).json({ error: 'Not authorized to approve this movement' });
+      return res.status(403).json({ success: false, message: 'Not authorized to approve this movement' });
     }
   }
 
@@ -389,7 +390,7 @@ router.get('/hospital-networks/:id/audit-logs', authMiddleware, asyncHandler((re
 // Enroll animal into a network (generates per-network patient ID)
 router.post('/hospital-networks/:networkId/enroll-animal', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const { animalId, hospitalId, notes } = req.body;
-  if (!animalId) { res.status(400).json({ error: 'animalId is required' }); return; }
+  if (!animalId) { res.status(400).json({ success: false, message: 'animalId is required' }); return; }
   const result = await HospitalNetworkService.enrollAnimal({
     animalId,
     networkId: req.params.networkId,
@@ -437,12 +438,18 @@ router.patch('/network-referrals/:id/status', authMiddleware, asyncHandler((req:
 // Search existing platform patients (for hospital staff)
 router.get('/hospital-networks/:networkId/search-patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
+    const userRole = (req as any).userRole;
+    if (!['admin', 'veterinarian', 'hospital_staff'].includes(userRole)) {
+      res.status(403).json({ success: false, message: 'Access denied' });
+      return;
+    }
     const q = (req.query.q as string) ?? '';
     if (!q || q.length < 2) { res.json([]); return; }
     const results = await HospitalNetworkService.searchPatients(q, 10);
     res.json(results);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    logger.error('Route error', { path: req.path, error: err.message });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 }));
 
@@ -452,7 +459,8 @@ router.get('/hospital-networks/:networkId/all-enrollments', authMiddleware, asyn
     const results = await HospitalNetworkService.getPendingEnrollments(req.params.networkId);
     res.json(results);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    logger.error('Route error', { path: req.path, error: err.message });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 }));
 
@@ -460,14 +468,15 @@ router.get('/hospital-networks/:networkId/all-enrollments', authMiddleware, asyn
 router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const { patientName, patientEmail, patientPhone, animalName, animalSpecies, hospitalId, message } = req.body;
-    if (!patientName || !patientEmail) { res.status(400).json({ error: 'patientName and patientEmail are required' }); return; }
+    if (!patientName || !patientEmail) { res.status(400).json({ success: false, message: 'patientName and patientEmail are required' }); return; }
     const result = await HospitalNetworkService.inviteWalkInPatient({
       networkId: req.params.networkId, hospitalId, patientName, patientEmail,
       patientPhone, animalName, animalSpecies, message,
     }, (req as any).userId);
     res.json(result);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    logger.error('Route error', { path: req.path, error: err.message });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 }));
 
@@ -478,7 +487,7 @@ router.post('/hospital-networks/enrollments/:contextId/accept', authMiddleware, 
     await HospitalNetworkService.acceptEnrollment(req.params.contextId, (req as any).userId, consentScope);
     res.json({ success: true });
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ success: false, message: err.message });
   }
 }));
 
@@ -486,11 +495,11 @@ router.post('/hospital-networks/enrollments/:contextId/accept', authMiddleware, 
 router.post('/hospital-networks/walkin-invites/accept', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const { token } = req.body;
-    if (!token) { res.status(400).json({ error: 'token is required' }); return; }
+    if (!token) { res.status(400).json({ success: false, message: 'token is required' }); return; }
     const result = await HospitalNetworkService.acceptWalkInInvite(token, (req as any).userId);
     res.json({ success: true, data: result });
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ success: false, message: err.message });
   }
 }));
 
@@ -500,7 +509,7 @@ router.post('/hospital-networks/enrollments/:contextId/decline', authMiddleware,
     await HospitalNetworkService.declineEnrollment(req.params.contextId, (req as any).userId);
     res.json({ success: true });
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ success: false, message: err.message });
   }
 }));
 
@@ -510,7 +519,8 @@ router.get('/my-network-enrollments', authMiddleware, asyncHandler(async (req: R
     const results = await HospitalNetworkService.getMyEnrollments((req as any).userId);
     res.json(results);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    logger.error('Route error', { path: req.path, error: err.message });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 }));
 
