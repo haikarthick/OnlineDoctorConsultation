@@ -688,3 +688,19 @@ render-start.sh
 - **Fix:** Added pendingNetworkApprovals + pendingActions to AdminDashboardStats type. Added stat card with orange highlight + alert banner to AdminDashboard.tsx
 - **Rule:** When adding new fields to a service response, ALWAYS also update the type AND the rendering UI — type alone is not enough.
 
+
+### CA-007 — hospital_network_hospitals table missing - 500 on Create Branch Hospital
+- **Logged:** 2026-04-13 17:01
+- **Symptom:** POST /hospital-networks/:id/branch-hospitals returned 500
+- **Root Cause:** Service used INSERT INTO hospital_network_hospitals but table never existed in init.sql or database.ts safety nets
+- **Fix:** Added table to init.sql + CREATE TABLE IF NOT EXISTS safety net in database.ts
+- **Rule:** EVERY table used in a service query MUST exist in init.sql AND have a database.ts safety net
+
+
+### CA-008 — AddMemberModal required raw UUID - unusable by end users
+- **Logged:** 2026-04-13 17:01
+- **Symptom:** Add Member modal showed a plain text input labeled User ID expecting a UUID GUID string
+- **Root Cause:** UI was designed for developer-level input; end users have no way to know a user UUID
+- **Fix:** Replaced with name/email search (debounced, dropdown, selected-user badge). Backend /network-user-search endpoint returns matching users
+- **Rule:** Member invite flows MUST use name/email search, NEVER raw UUID input
+
