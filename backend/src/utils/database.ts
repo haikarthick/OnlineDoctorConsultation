@@ -970,6 +970,27 @@ class PostgresDatabase {
     await this.pool.query(`ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS is_network_branch BOOLEAN DEFAULT false`).catch(() => {});
     await this.pool.query(`ALTER TABLE vet_hospitals ADD COLUMN IF NOT EXISTS branch_network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL`).catch(() => {});
 
+    // hospital_network_hospitals junction table (branch hospital ↔ network)
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS hospital_network_hospitals (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+        hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
+        joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        is_active BOOLEAN DEFAULT true,
+        UNIQUE(network_id, hospital_id)
+      )
+    `).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_hn_hospitals_network_id ON hospital_network_hospitals(network_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_hn_hospitals_hospital_id ON hospital_network_hospitals(hospital_id)`).catch(() => {});
+
+    // Ensure vet_hospitals.verification_status allows 'approved'
+    await this.pool.query(`ALTER TABLE vet_hospitals DROP CONSTRAINT IF EXISTS vet_hospitals_verification_status_check`).catch(() => {});
+    await this.pool.query(`
+      ALTER TABLE vet_hospitals ADD CONSTRAINT vet_hospitals_verification_status_check
+      CHECK (verification_status IN ('pending_documents', 'under_review', 'approved', 'rejected', 'expired'))
+    `).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

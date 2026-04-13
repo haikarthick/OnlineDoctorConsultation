@@ -371,14 +371,14 @@ const CreateBranchHospitalModal: React.FC<{
 
   return (
     <div className="hn-modal-overlay" onClick={onClose}>
-      <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560 }}>
+      <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
         <div className="hn-modal-header">
           <h3>🏥 Create Branch Hospital</h3>
           <button type="button" className="hn-modal-close" onClick={onClose}>✕</button>
         </div>
-        <form onSubmit={handleSubmit}>
-          <div className="hn-modal-body">
-            {error && <div className="module-alert error">{error}</div>}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 12px' }}>
+            {error && <div className="module-alert error" style={{ margin: '12px 0' }}>{error}</div>}
             <div className="module-form">
               <div className="module-form-group">
                 <label className="module-label">Hospital Name <span style={{ color: 'red' }}>*</span></label>
@@ -434,13 +434,13 @@ const CreateBranchHospitalModal: React.FC<{
               </div>
             </div>
           </div>
-          <div className="hn-modal-actions">
+          <div style={{ padding: '16px 20px', borderTop: '1px solid #e5e7eb', background: '#fff', display: 'flex', gap: 12, justifyContent: 'flex-end', alignItems: 'center', borderRadius: '0 0 12px 12px' }}>
+            <p style={{ fontSize: '0.8em', color: '#888', margin: 0, flex: 1 }}>* Name required</p>
             <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
             <button type="submit" className="module-btn primary" disabled={saving || !form.name.trim()}>
               {saving ? '⏳ Creating...' : '🏥 Create Branch Hospital'}
             </button>
           </div>
-          <p style={{ fontSize: '0.8em', color: '#888', marginTop: 8, padding: '0 1rem 1rem' }}>* Required field. This hospital will be private to your network only.</p>
         </form>
       </div>
     </div>
@@ -457,21 +457,38 @@ interface AddMemberModalProps {
 }
 
 const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospitals, onClose, onAdded, t }) => {
-  const [form, setForm] = useState({ userId: '', networkRole: 'staff_vet', hospitalId: '', notes: '' })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Array<{ id: string; firstName: string; lastName: string; email: string; role: string }>>([])
+  const [selectedUser, setSelectedUser] = useState<{ id: string; firstName: string; lastName: string; email: string; role: string } | null>(null)
+  const [searching, setSearching] = useState(false)
+  const [networkRole, setNetworkRole] = useState('hospital_staff')
+  const [hospitalId, setHospitalId] = useState('')
+  const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+  useEffect(() => {
+    if (searchQuery.length < 2) { setSearchResults([]); return }
+    const timer = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const res = await apiService.searchNetworkUsers(searchQuery)
+        setSearchResults(res.data?.data || [])
+      } catch { setSearchResults([]) }
+      finally { setSearching(false) }
+    }, 350)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   const handleAdd = async () => {
-    if (!form.userId.trim()) { setError('User ID is required'); return }
+    if (!selectedUser) { setError('Please search and select a user first'); return }
     setSaving(true); setError('')
     try {
       await apiService.addNetworkMember(networkId, {
-        userId: form.userId.trim(),
-        networkRole: form.networkRole,
-        hospitalId: form.hospitalId || undefined,
-        notes: form.notes || undefined,
+        userId: selectedUser.id,
+        networkRole,
+        hospitalId: hospitalId || undefined,
+        notes: notes || undefined,
       })
       onAdded()
     } catch (err: any) {
@@ -483,40 +500,87 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
     <div className="hn-modal-overlay" onClick={onClose}>
       <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
         <div className="hn-modal-header">
-          <h2>{t('hospitalNetworks.detail.addMember')}</h2>
+          <h2>➕ {t('hospitalNetworks.detail.addMember')}</h2>
           <button type="button" className="hn-modal-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="hn-modal-body">
           {error && <div className="module-alert error">{error}</div>}
+
           <div className="module-form-group">
-            <label className="module-label">User ID <span className="hn-required">*</span></label>
-            <input className="module-input" value={form.userId} onChange={e => set('userId', e.target.value)} placeholder={t('hospitalNetworks.form.pasteUserId')} />
+            <label className="module-label">Search User <span style={{ color: 'red' }}>*</span></label>
+            <input
+              className="module-input"
+              value={searchQuery}
+              onChange={e => { setSearchQuery(e.target.value); setSelectedUser(null) }}
+              placeholder="Type name or email to search..."
+              autoFocus
+            />
+            {searching && <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>🔍 Searching...</p>}
+
+            {searchResults.length > 0 && !selectedUser && (
+              <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, marginTop: 4, maxHeight: 200, overflowY: 'auto', background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                {searchResults.map(u => (
+                  <div
+                    key={u.id}
+                    onClick={() => { setSelectedUser(u); setSearchQuery(`${u.firstName} ${u.lastName} (${u.email})`) }}
+                    style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: 2 }}
+                    onMouseEnter={e => (e.currentTarget.style.background = '#f9fafb')}
+                    onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
+                  >
+                    <span style={{ fontWeight: 600, fontSize: 14 }}>{u.firstName} {u.lastName}</span>
+                    <span style={{ fontSize: 12, color: '#6b7280' }}>{u.email} • {u.role}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {searchQuery.length >= 2 && searchResults.length === 0 && !searching && !selectedUser && (
+              <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>No users found. The user must be registered on the platform first.</p>
+            )}
+
+            {selectedUser && (
+              <div style={{ marginTop: 8, padding: '8px 12px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <span style={{ fontWeight: 600 }}>✅ {selectedUser.firstName} {selectedUser.lastName}</span>
+                  <span style={{ fontSize: 12, color: '#6b7280', marginLeft: 8 }}>{selectedUser.email}</span>
+                </div>
+                <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }} onClick={() => { setSelectedUser(null); setSearchQuery('') }}>✕</button>
+              </div>
+            )}
           </div>
+
           <div className="module-form-group">
             <label className="module-label">Network Role</label>
-            <select className="module-input" value={form.networkRole} onChange={e => set('networkRole', e.target.value)}>
+            <select className="module-input" value={networkRole} onChange={e => setNetworkRole(e.target.value)}>
               {MEMBER_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
           </div>
+
           {networkHospitals.length > 0 && (
             <div className="module-form-group">
-              <label className="module-label">Assign to Hospital (optional)</label>
-              <select className="module-input" value={form.hospitalId} onChange={e => set('hospitalId', e.target.value)}>
-                <option value="">— None —</option>
+              <label className="module-label">Assign to Branch Hospital <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+              <select className="module-input" value={hospitalId} onChange={e => setHospitalId(e.target.value)}>
+                <option value="">— Not assigned to specific hospital —</option>
                 {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
               </select>
             </div>
           )}
+
           <div className="module-form-group">
-            <label className="module-label">Notes</label>
-            <input className="module-input" value={form.notes} onChange={e => set('notes', e.target.value)} />
+            <label className="module-label">Notes <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+            <input className="module-input" value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. Head of Cardiology" />
           </div>
-          <div className="hn-modal-actions">
-            <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
-            <button type="button" className="module-btn primary" disabled={saving} onClick={handleAdd}>
-              {saving ? t('common.saving') : t('hospitalNetworks.detail.addMember')}
-            </button>
-          </div>
+
+          {!selectedUser && (
+            <p style={{ fontSize: 12, color: '#f59e0b', marginTop: 4 }}>⚠️ Required: Search and select a user above to enable adding</p>
+          )}
+          <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 8 }}>* Required field. User must already have a VetCare account.</p>
+        </div>
+
+        <div className="hn-modal-actions" style={{ borderTop: '1px solid #e5e7eb', padding: '16px 20px', background: '#fff', borderRadius: '0 0 12px 12px' }}>
+          <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
+          <button type="button" className="module-btn primary" disabled={saving || !selectedUser} onClick={handleAdd}>
+            {saving ? '⏳ Adding...' : `➕ ${t('hospitalNetworks.detail.addMember')}`}
+          </button>
         </div>
       </div>
     </div>

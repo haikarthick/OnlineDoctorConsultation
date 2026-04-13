@@ -1555,6 +1555,19 @@ CREATE TABLE IF NOT EXISTS hospital_network_members (
   UNIQUE(network_id, user_id)
 );
 
+-- 38b. HOSPITAL NETWORK HOSPITALS (many-to-many: networks ↔ branch hospitals)
+CREATE TABLE IF NOT EXISTS hospital_network_hospitals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  hospital_id UUID NOT NULL REFERENCES vet_hospitals(id) ON DELETE CASCADE,
+  joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  is_active BOOLEAN DEFAULT true,
+  UNIQUE(network_id, hospital_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_hn_hospitals_network_id ON hospital_network_hospitals(network_id);
+CREATE INDEX IF NOT EXISTS idx_hn_hospitals_hospital_id ON hospital_network_hospitals(hospital_id);
+
 -- 38. HOSPITAL NETWORK FEATURE FLAGS (per-network feature toggles)
 CREATE TABLE IF NOT EXISTS hospital_network_feature_flags (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

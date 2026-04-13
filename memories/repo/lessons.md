@@ -365,3 +365,10 @@
 - **Lesson:** 1) corporate_admin NEVER sees public Vet Hospitals — remove from nav. 2) Network approval is ALWAYS platform admin only. 3) Branch hospitals are private, marked is_network_branch=true, hidden from public. 4) Dashboard must have dedicated corporate_admin stat cards and API endpoint. 5) No self-approval of any kind.
 - **Apply to:** All future corporate_admin features
 
+
+### LESSON-060 — Column-query mismatch is the 1 source of production 500 errors
+- **Logged:** 2026-04-13 16:50
+- **Context:** Hospital network approve returned 500 because created_by column was added to service queries but never added to the table schema
+- **Lesson:** 1) Before writing ANY SQL that references a column, verify it EXISTS in init.sql using grep. 2) When adding a column to a service, ALWAYS do: init.sql + database.ts ALTER + service INSERT/UPDATE. 3) New service response fields need: type update + UI rendering + admin dashboard tile if action-related. 4) Test the exact API endpoint before shipping — not just TypeScript compile.
+- **Apply to:** All future SQL and service development
+

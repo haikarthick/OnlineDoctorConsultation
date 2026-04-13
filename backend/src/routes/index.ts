@@ -388,6 +388,32 @@ router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHan
 router.get('/hospital-networks/:id/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getNetworkDashboard(req, res)));
 router.get('/hospital-networks/:id/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getAuditLogs(req, res)));
 
+// User search for network member invite (corporate_admin can search registered users by name/email)
+router.get('/network-user-search', authMiddleware, roleMiddleware(['admin', 'corporate_admin']), asyncHandler(async (req: Request, res: Response) => {
+  const search = ((req.query.q as string) || '').trim();
+  if (!search || search.length < 2) { res.json({ success: true, data: [] }); return; }
+  try {
+    const result = await database.query(
+      `SELECT id, first_name as "firstName", last_name as "lastName", email, role
+       FROM users
+       WHERE is_active = true
+         AND (
+           email ILIKE $1
+           OR first_name ILIKE $1
+           OR last_name ILIKE $1
+           OR (first_name || ' ' || last_name) ILIKE $1
+         )
+       ORDER BY first_name, last_name
+       LIMIT 20`,
+      [`%${search}%`]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    logger.error('Network user search failed', { error: err.message });
+    res.status(500).json({ success: false, message: 'Search failed' });
+  }
+}));
+
 // Enroll animal into a network (generates per-network patient ID)
 router.post('/hospital-networks/:networkId/enroll-animal', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const { animalId, hospitalId, notes } = req.body;

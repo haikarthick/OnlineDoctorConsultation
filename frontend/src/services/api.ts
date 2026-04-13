@@ -2432,6 +2432,10 @@ class ApiService {
     return this.client.get('/dashboard/corporate')
   }
 
+  async searchNetworkUsers(query: string): Promise<any> {
+    return this.client.get('/network-user-search', { params: { q: query } })
+  }
+
   async createBranchHospital(networkId: string, data: {
     name: string;
     hospitalType?: string;

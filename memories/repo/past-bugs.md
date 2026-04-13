@@ -672,3 +672,19 @@ render-start.sh
 - **Fix:** Added COUNT of is_approved=false networks to pendingActions in AdminService
 - **Rule:** Platform admin pending actions MUST aggregate ALL cross-module pending items
 
+
+### CA-005 — 500 Internal Server Error on hospital network approve
+- **Logged:** 2026-04-13 16:50
+- **Symptom:** Clicking Approve on hospital network returned 500 Internal Server Error
+- **Root Cause:** hospital_networks table had NO created_by column in init.sql. approveNetwork() queried SELECT created_by → PostgreSQL column-not-found error → 500. createNetwork() INSERT also never saved the creator.
+- **Fix:** Added created_by to init.sql + ALTER TABLE safety net in database.ts. Fixed createNetwork() INSERT to include created_by as param 19.
+- **Rule:** EVERY new column used in service queries MUST exist in init.sql first. Services that query a column that does not exist cause 500 errors that are invisible until runtime.
+
+
+### CA-006 — Admin dashboard missing Pending Network Approvals tile
+- **Logged:** 2026-04-13 16:50
+- **Symptom:** Platform admin dashboard showed 0 Pending Actions even after AdminService returned pendingNetworkApprovals count
+- **Root Cause:** AdminDashboard.tsx had no UI tile for pendingNetworkApprovals. AdminDashboardStats type also missing the field — TypeScript did not catch it because the field was just unused.
+- **Fix:** Added pendingNetworkApprovals + pendingActions to AdminDashboardStats type. Added stat card with orange highlight + alert banner to AdminDashboard.tsx
+- **Rule:** When adding new fields to a service response, ALWAYS also update the type AND the rendering UI — type alone is not enough.
+
