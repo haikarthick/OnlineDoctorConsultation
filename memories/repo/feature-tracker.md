@@ -326,3 +326,15 @@
 - **Status:** done
 - **Description:** Full cross-hospital network referral backend: network_referrals table (with indexes), 3 service methods (create/updateStatus/list), 3 controller methods, 3 routes (GET/POST /network-referrals, PATCH /network-referrals/:id/status), and Joi validation schema createNetworkReferralSchema
 
+
+### ✅ networkReferrals i18n namespace
+- **Logged:** 2026-04-13 11:29
+- **Status:** done
+- **Description:** Added networkReferrals top-level namespace to all 5 locale files (en/hi/ta/te/kn) with 40+ keys covering referral CRUD UI, status labels, priority levels, and confirmation dialogs. Inserted alphabetically between hospitalNetworks and patientConsent.
+
+
+### ✅ Hospital Networks — Referrals Tab
+- **Logged:** 2026-04-13 11:38
+- **Status:** done
+- **Description:** Added Referrals (TAB 5) to HospitalNetworks.tsx: direction filter (incoming/outgoing/all), referrals table with accept/reject modals, create referral modal. Added 3 API methods to api.ts: createNetworkReferral, updateNetworkReferralStatus, listNetworkReferrals. All translations already existed in all 5 locale files.
+

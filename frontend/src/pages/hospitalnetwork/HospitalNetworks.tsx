@@ -488,7 +488,7 @@ const HospitalNetworks: React.FC = () => {
   const { user } = useAuth()
   const { formatDate } = useSettings()
 
-  const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients'>('networks')
+  const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients' | 'referrals'>('networks')
   const [selectedNetwork, setSelectedNetwork] = useState<HospitalNetwork | null>(null)
 
   const [networks, setNetworks] = useState<HospitalNetwork[]>([])
@@ -536,6 +536,23 @@ const HospitalNetworks: React.FC = () => {
   const [inviteForm, setInviteForm] = useState<WalkInInviteForm>({ patientName: '', patientEmail: '', patientPhone: '', animalName: '', animalSpecies: '', message: '' })
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteSuccess, setInviteSuccess] = useState(false)
+
+  // ─── Referrals Tab State ───────────────────────────────────────────────────
+  const [referrals, setReferrals] = useState<any[]>([])
+  const [referralsLoading, setReferralsLoading] = useState(false)
+  const [referralDirection, setReferralDirection] = useState<'incoming' | 'outgoing' | 'all'>('incoming')
+  const [showCreateReferralModal, setShowCreateReferralModal] = useState(false)
+  const [referralForm, setReferralForm] = useState({
+    networkId: '', fromHospitalId: '', toHospitalId: '', toVetId: '',
+    animalId: '', reason: '', priority: 'normal', clinicalNotes: ''
+  })
+  const [referralNetworkHospitals, setReferralNetworkHospitals] = useState<any[]>([])
+  const [referralSubmitting, setReferralSubmitting] = useState(false)
+  const [referralSuccess, setReferralSuccess] = useState('')
+  const [referralError, setReferralError] = useState('')
+  const [responseModal, setResponseModal] = useState<{ referral: any; action: 'accepted' | 'rejected' } | null>(null)
+  const [responseNotes, setResponseNotes] = useState('')
+  const [respondingSubmitting, setRespondingSubmitting] = useState(false)
 
   const loadNetworks = useCallback(async () => {
     setLoading(true); setError('')
@@ -653,6 +670,76 @@ const HospitalNetworks: React.FC = () => {
       loadAllEnrollments(selectedNetwork.id)
     }
   }, [activeTab, selectedNetwork?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Referrals logic ──────────────────────────────────────────────────────
+  const loadReferrals = useCallback(async (direction: 'incoming' | 'outgoing' | 'all' = referralDirection) => {
+    if (!selectedNetwork) return
+    setReferralsLoading(true)
+    try {
+      const result = await apiService.listNetworkReferrals({ networkId: selectedNetwork.id, direction })
+      setReferrals(result.referrals || result.data || [])
+    } catch (err: any) {
+      setReferralError(err?.response?.data?.error || err?.message || t('networkReferrals.error'))
+    } finally {
+      setReferralsLoading(false)
+    }
+  }, [selectedNetwork, referralDirection, t]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (activeTab === 'referrals') loadReferrals(referralDirection)
+  }, [activeTab, selectedNetwork, referralDirection]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (showCreateReferralModal && selectedNetwork) {
+      ;(apiService as any).client
+        .get(`/hospital-networks/${selectedNetwork.id}/hospitals`)
+        .then((res: any) => setReferralNetworkHospitals(res.data?.hospitals || res.data || []))
+        .catch(() => {})
+    }
+  }, [showCreateReferralModal, selectedNetwork])
+
+  const handleCreateReferral = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!referralForm.reason || !referralForm.toHospitalId || !referralForm.animalId) {
+      setReferralError(t('common.fillRequired', 'Please fill all required fields'))
+      return
+    }
+    setReferralSubmitting(true)
+    setReferralError('')
+    try {
+      await apiService.createNetworkReferral({
+        ...referralForm,
+        networkId: selectedNetwork?.id || referralForm.networkId,
+        fromHospitalId: referralForm.fromHospitalId,
+      })
+      setReferralSuccess(t('networkReferrals.sent'))
+      setShowCreateReferralModal(false)
+      setReferralForm({ networkId: '', fromHospitalId: '', toHospitalId: '', toVetId: '', animalId: '', reason: '', priority: 'normal', clinicalNotes: '' })
+      loadReferrals(referralDirection)
+      setTimeout(() => setReferralSuccess(''), 4000)
+    } catch (err: any) {
+      setReferralError(err?.response?.data?.error || err?.message || t('networkReferrals.error'))
+    } finally {
+      setReferralSubmitting(false)
+    }
+  }
+
+  const handleReferralResponse = async () => {
+    if (!responseModal) return
+    setRespondingSubmitting(true)
+    try {
+      await apiService.updateNetworkReferralStatus(responseModal.referral.id, responseModal.action, responseNotes)
+      setReferralSuccess(responseModal.action === 'accepted' ? t('networkReferrals.accepted') : t('networkReferrals.rejected'))
+      setResponseModal(null)
+      setResponseNotes('')
+      loadReferrals(referralDirection)
+      setTimeout(() => setReferralSuccess(''), 4000)
+    } catch (err: any) {
+      setReferralError(err?.response?.data?.error || err?.message || t('networkReferrals.error'))
+    } finally {
+      setRespondingSubmitting(false)
+    }
+  }
 
   const handleRequestEnrollment = async (animalId: string) => {
     if (!selectedNetwork) return
@@ -847,6 +934,14 @@ const HospitalNetworks: React.FC = () => {
             </span>
           )}
         </button>
+        {selectedNetwork && (
+          <button
+            className={`module-tab${activeTab === 'referrals' ? ' active' : ''}`}
+            onClick={() => setActiveTab('referrals')}
+          >
+            🔄 {t('networkReferrals.tab')}
+          </button>
+        )}
       </div>
 
       {/* ════ TAB 1: NETWORKS ════ */}
@@ -1660,6 +1755,252 @@ const HospitalNetworks: React.FC = () => {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ════ TAB 5: REFERRALS ════ */}
+      {activeTab === 'referrals' && selectedNetwork && (
+        <div className="hn-tab-content">
+          {/* Header */}
+          <div className="module-header" style={{ marginBottom: 20 }}>
+            <div>
+              <h2 style={{ margin: 0 }}>{t('networkReferrals.title')}</h2>
+              <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 14 }}>{selectedNetwork.name}</p>
+            </div>
+            <button className="module-btn primary" onClick={() => setShowCreateReferralModal(true)}>
+              + {t('networkReferrals.create')}
+            </button>
+          </div>
+
+          {/* Alerts */}
+          {referralSuccess && <div className="module-alert success" style={{ marginBottom: 16 }}>{referralSuccess}</div>}
+          {referralError && <div className="module-alert error" style={{ marginBottom: 16 }}>{referralError}</div>}
+
+          {/* Direction sub-tabs */}
+          <div className="module-tabs" style={{ marginBottom: 20 }}>
+            {(['incoming', 'outgoing', 'all'] as const).map(dir => (
+              <button
+                key={dir}
+                className={`module-tab${referralDirection === dir ? ' active' : ''}`}
+                onClick={() => { setReferralDirection(dir); loadReferrals(dir) }}
+              >
+                {dir === 'incoming' ? `📥 ${t('networkReferrals.incoming')}` :
+                 dir === 'outgoing' ? `📤 ${t('networkReferrals.outgoing')}` :
+                 `📋 ${t('networkReferrals.all')}`}
+              </button>
+            ))}
+          </div>
+
+          {/* Table or empty state */}
+          {referralsLoading ? (
+            <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>⏳ {t('common.loading')}</div>
+          ) : referrals.length === 0 ? (
+            <div className="module-card" style={{ textAlign: 'center', padding: 40 }}>
+              <div style={{ fontSize: 48 }}>🔄</div>
+              <p style={{ color: '#64748b', marginTop: 12 }}>
+                {referralDirection === 'incoming' ? t('networkReferrals.noIncoming') :
+                 referralDirection === 'outgoing' ? t('networkReferrals.noOutgoing') :
+                 t('networkReferrals.noReferrals')}
+              </p>
+            </div>
+          ) : (
+            <div className="data-table-container">
+              <table className="module-table">
+                <thead>
+                  <tr>
+                    <th>{t('networkReferrals.animal')}</th>
+                    <th>{t('networkReferrals.fromHospital')}</th>
+                    <th>{t('networkReferrals.toHospitalLabel')}</th>
+                    <th>{t('networkReferrals.reason')}</th>
+                    <th>{t('common.status')}</th>
+                    <th>{t('networkReferrals.date')}</th>
+                    <th>{t('networkReferrals.actions')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {referrals.map(ref => (
+                    <tr key={ref.id}>
+                      <td>
+                        <strong>{ref.animalName}</strong><br />
+                        <span style={{ fontSize: 12, color: '#64748b' }}>{ref.animalSpecies}</span>
+                      </td>
+                      <td>
+                        {ref.fromHospitalName}<br />
+                        <span style={{ fontSize: 12, color: '#64748b' }}>{ref.fromVetName}</span>
+                      </td>
+                      <td>
+                        {ref.toHospitalName}<br />
+                        <span style={{ fontSize: 12, color: '#64748b' }}>{ref.toVetName || '—'}</span>
+                      </td>
+                      <td style={{ maxWidth: 200 }}>{ref.reason}</td>
+                      <td>
+                        <span className={`module-badge ${
+                          ref.status === 'accepted' ? 'badge-success' :
+                          ref.status === 'rejected' ? 'badge-error' :
+                          ref.status === 'completed' ? 'badge-success' : 'badge-pending'
+                        }`}>
+                          {String(t(`networkReferrals.status.${ref.status}` as any, ref.status))}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: 13 }}>{new Date(ref.created_at || ref.createdAt).toLocaleDateString()}</td>
+                      <td>
+                        {ref.status === 'pending' && referralDirection !== 'outgoing' && (
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button
+                              className="module-btn small"
+                              style={{ background: '#dcfce7', color: '#166534' }}
+                              onClick={() => setResponseModal({ referral: ref, action: 'accepted' })}
+                            >
+                              ✓ {t('networkReferrals.accept')}
+                            </button>
+                            <button
+                              className="module-btn small"
+                              style={{ background: '#fee2e2', color: '#dc2626' }}
+                              onClick={() => setResponseModal({ referral: ref, action: 'rejected' })}
+                            >
+                              ✗ {t('networkReferrals.reject')}
+                            </button>
+                          </div>
+                        )}
+                        {ref.consultationId && (
+                          <button
+                            className="module-btn small"
+                            style={{ marginTop: 4 }}
+                            onClick={() => window.open(`/consultation/${ref.consultationId}`, '_blank')}
+                          >
+                            🔗 {t('networkReferrals.viewConsultation')}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Create Referral Modal */}
+          {showCreateReferralModal && (
+            <div
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              onClick={() => setShowCreateReferralModal(false)}
+            >
+              <div
+                style={{ background: '#fff', borderRadius: 12, padding: 32, width: '100%', maxWidth: 540, maxHeight: '90vh', overflowY: 'auto' }}
+                onClick={e => e.stopPropagation()}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <h3 style={{ margin: 0 }}>{t('networkReferrals.createTitle')}</h3>
+                  <button onClick={() => setShowCreateReferralModal(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+                </div>
+                {referralError && <div className="module-alert error" style={{ marginBottom: 12 }}>{referralError}</div>}
+                <form onSubmit={handleCreateReferral}>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('networkReferrals.toHospital')}</label>
+                    <select
+                      className="module-input"
+                      required
+                      value={referralForm.toHospitalId}
+                      onChange={e => setReferralForm(f => ({ ...f, toHospitalId: e.target.value }))}
+                    >
+                      <option value="">{t('networkReferrals.selectHospital')}</option>
+                      {referralNetworkHospitals.map((h: any) => (
+                        <option key={h.id} value={h.id}>{h.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">
+                      {t('networkReferrals.reason')} <span style={{ color: '#dc2626' }}>*</span>
+                    </label>
+                    <textarea
+                      className="module-input"
+                      required
+                      rows={3}
+                      placeholder={t('networkReferrals.reasonPlaceholder')}
+                      value={referralForm.reason}
+                      onChange={e => setReferralForm(f => ({ ...f, reason: e.target.value }))}
+                    />
+                  </div>
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('networkReferrals.priority')}</label>
+                      <select
+                        className="module-input"
+                        value={referralForm.priority}
+                        onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))}
+                      >
+                        {(['low', 'normal', 'high', 'emergency'] as const).map(p => (
+                          <option key={p} value={p}>{t(`networkReferrals.priority_levels.${p}`, p)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('networkReferrals.clinicalNotes')}</label>
+                    <textarea
+                      className="module-input"
+                      rows={4}
+                      placeholder={t('networkReferrals.clinicalNotesPlaceholder')}
+                      value={referralForm.clinicalNotes}
+                      onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))}
+                    />
+                  </div>
+                  <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>* {t('common.requiredField', 'Required field')}</p>
+                  <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+                    <button type="button" className="module-btn" onClick={() => setShowCreateReferralModal(false)}>
+                      {t('common.cancel')}
+                    </button>
+                    <button type="submit" className="module-btn primary" disabled={referralSubmitting}>
+                      {referralSubmitting ? `⏳ ${t('networkReferrals.sending')}` : `🔄 ${t('networkReferrals.send')}`}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Accept / Reject Response Modal */}
+          {responseModal && (
+            <div
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              onClick={() => setResponseModal(null)}
+            >
+              <div
+                style={{ background: '#fff', borderRadius: 12, padding: 28, width: '100%', maxWidth: 460 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <h3 style={{ margin: '0 0 16px' }}>
+                  {responseModal.action === 'accepted' ? `✓ ${t('networkReferrals.accept')}` : `✗ ${t('networkReferrals.reject')}`}
+                </h3>
+                <p style={{ color: '#64748b', marginBottom: 16 }}>
+                  {responseModal.action === 'accepted' ? t('networkReferrals.confirmAccept') : t('networkReferrals.confirmReject')}
+                </p>
+                <div className="module-form-group">
+                  <label className="module-label">{t('networkReferrals.responseNotes')}</label>
+                  <textarea
+                    className="module-input"
+                    rows={3}
+                    placeholder={t('networkReferrals.responseNotesPlaceholder')}
+                    value={responseNotes}
+                    onChange={e => setResponseNotes(e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+                  <button className="module-btn" onClick={() => setResponseModal(null)}>{t('common.cancel')}</button>
+                  <button
+                    className="module-btn primary"
+                    disabled={respondingSubmitting}
+                    style={responseModal.action === 'rejected' ? { background: '#dc2626' } : {}}
+                    onClick={handleReferralResponse}
+                  >
+                    {respondingSubmitting ? `⏳ ${t('common.saving')}` :
+                     responseModal.action === 'accepted' ? `✓ ${t('networkReferrals.accept')}` : `✗ ${t('networkReferrals.reject')}`}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

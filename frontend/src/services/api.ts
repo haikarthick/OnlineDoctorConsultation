@@ -2392,6 +2392,40 @@ class ApiService {
     const response = await this.client.post('/hospital-staff-invites/accept', data)
     return response.data
   }
+
+  // ── Network Referrals ──
+  async createNetworkReferral(data: {
+    networkId: string;
+    fromHospitalId: string;
+    toHospitalId: string;
+    toVetId?: string;
+    animalId: string;
+    consultationId?: string;
+    reason: string;
+    priority?: string;
+    clinicalNotes?: string;
+  }): Promise<any> {
+    const response = await this.client.post('/network-referrals', data)
+    return response.data
+  }
+
+  async updateNetworkReferralStatus(referralId: string, status: string, responseNotes?: string): Promise<any> {
+    const response = await this.client.patch(`/network-referrals/${referralId}/status`, { status, responseNotes })
+    return response.data
+  }
+
+  async listNetworkReferrals(params: {
+    networkId?: string;
+    hospitalId?: string;
+    direction?: 'incoming' | 'outgoing' | 'all';
+    animalId?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any> {
+    const response = await this.client.get('/network-referrals', { params })
+    return response.data
+  }
 }
 export const apiService = new ApiService()
 export default apiService
