@@ -1399,3 +1399,21 @@
 </details>
 
 ---
+
+## 2026-04-14 09:36 · `a9f6cca` · 🐛 FIX
+
+**Commit:** fix: seed SQL table/column fixes + auto-seed network data on existing DBs  
+**Author:** haikarthick  
+**Categories:** UTILS · DB-SCHEMA · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/utils/fixDemoPasswords.ts
+  - docker/seed-demo-data.sql
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

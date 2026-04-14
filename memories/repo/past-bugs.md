@@ -7,6 +7,23 @@
 
 ## 🔴 DB Schema / SQL Bugs
 
+### SEED-001 — 5 Wrong Table/Column Names in Seed SQL → Network Demo Data Silently Fails
+- **Symptom:** `netadmin@vetcare.com` logs in but dashboard is empty — no branch hospitals, no staff, no audit data. All other network demo users can't log in.
+- **Root Cause:** `seed-demo-data.sql` used 5 wrong table/column names that don't exist in `init.sql`:
+  1. `hospital_network_hospitals` INSERT had `added_by` column — column doesn't exist
+  2. `animal_care_contexts.visibility` used `'network_visible'` — CHECK only allows `'private', 'network_only', 'treating_vet_only'`
+  3. `data_access_consents` table — correct name is `patient_data_consent`
+  4. `corporate_audit_log` table — correct name is `clinical_data_access_log`
+  5. `inter_hospital_referrals` table — correct name is `referrals` (uses `from_vet_id`/`to_vet_id`, not `from_hospital_id`/`to_hospital_id`)
+- **Fix:** Corrected all 5 mismatches in seed-demo-data.sql with correct table names and column names verified against init.sql.
+- **Rule:** BEFORE writing ANY seed SQL, run `grep -n "CREATE TABLE" docker/init.sql` to get exact table names, then `grep -n "column" docker/init.sql` for every column used. NEVER guess table/column names from memory.
+
+### SEED-002 — SEED_ON_STARTUP=true Does NOT Re-Seed Existing DBs → Network Data Never Appears
+- **Symptom:** User set `SEED_ON_STARTUP=true` in Render but network demo data still missing after deploy.
+- **Root Cause:** `fixDemoPasswords.ts` checks `vet_profiles >= 3 AND consultations > 0` — if true, it returns early and NEVER runs seed SQL. `SEED_ON_STARTUP` only controls the `render-start.sh` pre-app seeding, which has the same VET_PROFILE_COUNT guard. So once any data exists, new seed sections are permanently skipped.
+- **Fix:** Added independent hospital network seed check in fixDemoPasswords.ts: even when full seed data exists, it checks `hospital_network_members WHERE network_id = demo_network_id` — if < 3 members, extracts and runs only the "HOSPITAL NETWORK COMPREHENSIVE DEMO DATA" section from seed SQL.
+- **Rule:** When adding NEW seed data sections (for new features), ALWAYS add an independent check that runs regardless of the main seed guard. New feature data must seed even on existing DBs.
+
 ### SCHEMA-001 — hospital_staff missing from users.role CHECK → Fresh DB Install Rejects Role
 - **Symptom:** `hospital_staff` users created via invite-accept token get PostgreSQL CHECK violation on fresh DB install; existing DBs worked because database.ts safety net ran ALTER TABLE before any inserts.
 - **Root Cause:** `docker/init.sql` users.role CHECK constraint listed only `pet_owner, farmer, veterinarian, admin, corporate_admin` — `hospital_staff` was never added.

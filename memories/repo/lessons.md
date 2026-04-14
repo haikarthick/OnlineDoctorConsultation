@@ -61,6 +61,11 @@
 - **Lesson:** Any env var read by render-start.sh must be set BEFORE triggering the deploy. For `FORCE_RESEED`: set it → trigger manual deploy → watch logs → then set back to false.
 - **Apply to:** Render env var changes that affect startup scripts
 
+### LESSON-008b — New Feature Seed Data Needs Independent Checks (Not Just Main Guard)
+- **Context:** Hospital network demo data was added to seed-demo-data.sql but never ran on deployed DB because `fixDemoPasswords.ts` exits early when `vet_profiles >= 3`. The main seed guard blocks ALL new sections, not just the original ones.
+- **Lesson:** When adding seed data for a new feature, ALWAYS add an independent check in fixDemoPasswords.ts that runs REGARDLESS of the main seed guard. Check if the feature's data exists (e.g. `hospital_network_members WHERE network_id = X`), and if not, extract and run only that section.
+- **Apply to:** Every new feature that adds demo data to seed-demo-data.sql
+
 ### LESSON-009 — Render PROD Requires These Env Vars or Server Dies Instantly
 | Variable | Why critical |
 |----------|-------------|
