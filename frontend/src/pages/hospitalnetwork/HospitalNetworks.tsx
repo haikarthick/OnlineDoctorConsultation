@@ -2058,6 +2058,10 @@ const HospitalNetworks: React.FC = () => {
                 <input className="module-input" value={editingMember.userName || editingMember.userEmail || 'Unknown'} disabled />
               </div>
               <div className="module-form-group">
+                <label className="module-label">{t('hospitalNetworks.detail.memberEmail', 'Email')}</label>
+                <input className="module-input" value={editingMember.userEmail || '—'} disabled />
+              </div>
+              <div className="module-form-group">
                 <label className="module-label">{t('hospitalNetworks.detail.networkRole', 'Role')} <span style={{ color: '#ef4444' }}>*</span></label>
                 <select className="module-input" value={editMemberForm.networkRole} onChange={e => setEditMemberForm(p => ({ ...p, networkRole: e.target.value }))}>
                   {MEMBER_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}

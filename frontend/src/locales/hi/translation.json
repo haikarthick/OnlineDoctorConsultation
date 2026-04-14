@@ -5612,7 +5612,8 @@
       "hospital": "अस्पताल",
       "editMember": "Edit Member",
       "networkRole": "Role",
-      "memberName": "Member"
+      "memberName": "Member",
+      "memberEmail": "ईमेल"
     },
     "patients": {
       "tab": "मरीज़",

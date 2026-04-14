@@ -400,14 +400,37 @@ export class VetHospitalService {
   async listHospitals(filters: {
     search?: string; city?: string; hospitalType?: string; specialization?: string;
     hasEmergency?: boolean; is24Hours?: boolean; isVerified?: boolean;
-    limit?: number; offset?: number;
+    limit?: number; offset?: number; userId?: string;
   }): Promise<{ hospitals: VetHospital[]; total: number }> {
-    const { search, city, hospitalType, specialization, hasEmergency, is24Hours, isVerified } = filters;
+    const { search, city, hospitalType, specialization, hasEmergency, is24Hours, isVerified, userId } = filters;
     const limit = Math.min(filters.limit || 20, 100);
     const offset = filters.offset || 0;
-    const conditions: string[] = ['h.is_active = true', '(h.is_network_branch = false OR h.is_network_branch IS NULL)'];
-    const params: any[] = [];
-    let idx = 1;
+
+    // Check if the requesting user is a network member — if so, show only their network's hospitals
+    let networkHospitalIds: string[] | null = null;
+    if (userId) {
+      const memberCheck = await database.query(
+        `SELECT hnm.network_id, hnh.hospital_id
+         FROM hospital_network_members hnm
+         JOIN hospital_network_hospitals hnh ON hnh.network_id = hnm.network_id
+         WHERE hnm.user_id = $1 AND hnm.is_active = true`,
+        [userId]
+      );
+      if (memberCheck.rows.length > 0) {
+        networkHospitalIds = memberCheck.rows.map((r: any) => r.hospital_id);
+      }
+    }
+
+    const conditions: string[] = ['h.is_active = true'];
+    if (networkHospitalIds && networkHospitalIds.length > 0) {
+      // Network member: show ONLY their network's branch hospitals
+      conditions.push(`h.id = ANY($1::uuid[])`);
+    } else {
+      // Non-network user: show only public (non-branch) hospitals
+      conditions.push('(h.is_network_branch = false OR h.is_network_branch IS NULL)');
+    }
+    const params: any[] = networkHospitalIds && networkHospitalIds.length > 0 ? [networkHospitalIds] : [];
+    let idx = params.length + 1;
     if (search) { conditions.push(`(h.name ILIKE $${idx} OR h.description ILIKE $${idx} OR h.city ILIKE $${idx})`); params.push(`%${search}%`); idx++; }
     if (city) { conditions.push(`h.city ILIKE $${idx}`); params.push(`%${city}%`); idx++; }
     if (hospitalType) { conditions.push(`h.hospital_type = $${idx}`); params.push(hospitalType); idx++; }

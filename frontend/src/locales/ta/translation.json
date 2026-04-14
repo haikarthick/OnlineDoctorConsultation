@@ -5601,7 +5601,8 @@
       "hospital": "மருத்துவமனை",
       "editMember": "Edit Member",
       "networkRole": "Role",
-      "memberName": "Member"
+      "memberName": "Member",
+      "memberEmail": "மின்னஞ்சல்"
     },
     "patients": {
       "tab": "நோயாளிகள்",

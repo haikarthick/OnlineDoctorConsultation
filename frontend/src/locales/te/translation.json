@@ -5544,7 +5544,8 @@
       "hospital": "ఆసుపత్రి",
       "editMember": "Edit Member",
       "networkRole": "Role",
-      "memberName": "Member"
+      "memberName": "Member",
+      "memberEmail": "ఇమెయిల్"
     },
     "patients": {
       "tab": "రోగులు",

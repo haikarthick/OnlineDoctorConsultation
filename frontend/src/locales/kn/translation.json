@@ -5555,7 +5555,8 @@
       "hospital": "ಆಸ್ಪತ್ರೆ",
       "editMember": "Edit Member",
       "networkRole": "Role",
-      "memberName": "Member"
+      "memberName": "Member",
+      "memberEmail": "ಇಮೇಲ್"
     },
     "patients": {
       "tab": "ರೋಗಿಗಳು",

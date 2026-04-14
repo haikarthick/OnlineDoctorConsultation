@@ -34,6 +34,7 @@ class VetHospitalController {
       isVerified: isVerified === 'true',
       limit: parseInt(limit) || 20,
       offset: parseInt(offset) || 0,
+      userId: req.userId,
     });
     res.json({ success: true, data: result });
   }

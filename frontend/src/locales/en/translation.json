@@ -5677,7 +5677,8 @@
       "hospital": "Hospital",
       "editMember": "Edit Member",
       "networkRole": "Role",
-      "memberName": "Member"
+      "memberName": "Member",
+      "memberEmail": "Email"
     },
     "patients": {
       "tab": "Patients",
