@@ -3394,10 +3394,10 @@ UPDATE vet_hospitals SET is_network_branch = true, branch_network_id = 'hn000000
 WHERE id IN ('h0000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002');
 
 -- Link hospitals to network
-INSERT INTO hospital_network_hospitals (network_id, hospital_id, added_by, is_active)
+INSERT INTO hospital_network_hospitals (network_id, hospital_id, is_active)
 VALUES
-  ('hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', true),
-  ('hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000001', true)
+  ('hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', true),
+  ('hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002', true)
 ON CONFLICT (network_id, hospital_id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
@@ -3511,43 +3511,43 @@ INSERT INTO animal_care_contexts (id, animal_id, network_id, hospital_id, platfo
 VALUES
   ('acc00000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'VC-DOG-24-00001', 'DVG-P-00001', 'private', 'd0000000-0000-0000-0000-000000000001'),
   ('acc00000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000002', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'VC-CAT-24-00001', 'DVG-P-00002', 'private', 'd0000000-0000-0000-0000-000000000001'),
-  ('acc00000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002', 'VC-DOG-24-00002', 'DVG-P-00003', 'network_visible', 'd0000000-0000-0000-0000-000000000001')
+  ('acc00000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002', 'VC-DOG-24-00002', 'DVG-P-00003', 'network_only', 'd0000000-0000-0000-0000-000000000001')
 ON CONFLICT (animal_id, network_id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- DATA ACCESS CONSENTS
+-- PATIENT DATA CONSENTS
 -- ═══════════════════════════════════════════════════════════
-INSERT INTO data_access_consents (id, animal_id, network_id, owner_id, consent_type, status, granted_at, granted_scope)
+INSERT INTO patient_data_consent (id, animal_id, owner_id, granted_to_network_id, consent_scope, allow_medical_records, allow_vaccination_records, allow_prescriptions, allow_lab_results, allow_view, is_active)
 VALUES
-  ('dac00000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'hn000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'treatment', 'active', CURRENT_TIMESTAMP - INTERVAL '20 days', '{"medical_records": true, "vaccinations": true, "prescriptions": true}'),
-  ('dac00000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000002', 'hn000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'treatment', 'active', CURRENT_TIMESTAMP - INTERVAL '15 days', '{"medical_records": true, "vaccinations": true}'),
-  ('dac00000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'hn000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000002', 'treatment', 'active', CURRENT_TIMESTAMP - INTERVAL '10 days', '{"medical_records": true}')
+  ('dac00000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'hn000000-0000-0000-0000-000000000001', 'full_history', true, true, true, true, true, true),
+  ('dac00000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', 'hn000000-0000-0000-0000-000000000001', 'basic_history', true, true, false, false, true, true),
+  ('dac00000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', 'hn000000-0000-0000-0000-000000000001', 'basic_history', true, false, false, false, true, true)
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- CORPORATE AUDIT LOG — sample access events
+-- CLINICAL DATA ACCESS LOG — sample audit trail entries
 -- ═══════════════════════════════════════════════════════════
-INSERT INTO corporate_audit_log (id, network_id, hospital_id, user_id, action_type, resource_type, resource_id, access_result, ip_address, details)
+INSERT INTO clinical_data_access_log (id, accessed_by, accessor_role, accessor_network_id, animal_id, record_type, access_type, consent_id, access_granted, denial_reason)
 VALUES
-  ('cal00000-0000-0000-0000-000000000001', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000002', 'read', 'medical_record', 'e0000000-0000-0000-0000-000000000001', 'granted', '192.168.1.100', '{"reason": "Treatment review", "consent_id": "dac00000-0000-0000-0000-000000000001"}'),
-  ('cal00000-0000-0000-0000-000000000002', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000003', 'read', 'patient_info', 'e0000000-0000-0000-0000-000000000001', 'granted', '192.168.1.101', '{"reason": "Nursing assessment"}'),
-  ('cal00000-0000-0000-0000-000000000003', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000005', 'read', 'lab_result', 'e0000000-0000-0000-0000-000000000002', 'granted', '192.168.1.102', '{"reason": "Lab analysis"}'),
-  ('cal00000-0000-0000-0000-000000000004', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000004', 'read', 'patient_info', 'e0000000-0000-0000-0000-000000000003', 'denied', '192.168.1.103', '{"reason": "No active consent for this patient"}'),
-  ('cal00000-0000-0000-0000-000000000005', 'hn000000-0000-0000-0000-000000000001', NULL, 'd0000000-0000-0000-0000-000000000001', 'admin', 'network_settings', 'hn000000-0000-0000-0000-000000000001', 'granted', '192.168.1.104', '{"action": "Updated feature flags"}')
+  ('cal00000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000002', 'veterinarian', 'hn000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'medical_record', 'view', 'dac00000-0000-0000-0000-000000000001', true, NULL),
+  ('cal00000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000003', 'hospital_staff', 'hn000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'vaccination', 'view', 'dac00000-0000-0000-0000-000000000001', true, NULL),
+  ('cal00000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000005', 'hospital_staff', 'hn000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000002', 'lab_result', 'view', 'dac00000-0000-0000-0000-000000000002', true, NULL),
+  ('cal00000-0000-0000-0000-000000000004', 'd0000000-0000-0000-0000-000000000004', 'hospital_staff', 'hn000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000003', 'medical_record', 'view', NULL, false, 'No active consent for this patient'),
+  ('cal00000-0000-0000-0000-000000000005', 'd0000000-0000-0000-0000-000000000001', 'corporate_admin', 'hn000000-0000-0000-0000-000000000001', NULL, 'audit', 'audit', NULL, true, NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
--- INTER-HOSPITAL REFERRAL — sample referral between branches
+-- INTER-HOSPITAL REFERRAL — sample referral between branch vets
 -- ═══════════════════════════════════════════════════════════
-INSERT INTO inter_hospital_referrals (id, network_id, from_hospital_id, to_hospital_id, animal_id, referred_by, referral_reason, urgency, status, clinical_notes)
+INSERT INTO referrals (id, hospital_id, from_vet_id, to_vet_id, animal_id, reason, specialty_needed, priority, status, clinical_notes)
 VALUES (
   'ihr00000-0000-0000-0000-000000000001',
-  'hn000000-0000-0000-0000-000000000001',
   'h0000000-0000-0000-0000-000000000001',
-  'h0000000-0000-0000-0000-000000000002',
-  'e0000000-0000-0000-0000-000000000001',
   'd0000000-0000-0000-0000-000000000002',
+  'b0000000-0000-0000-0000-000000000002',
+  'e0000000-0000-0000-0000-000000000001',
   'Advanced diagnostic imaging required — suspected cruciate ligament tear',
+  'Orthopedic Surgery',
   'high',
   'accepted',
   'Patient presenting with grade 3/5 left hind lameness. Positive cranial drawer test. Radiographs inconclusive. MRI recommended at Branch 2 facility.'

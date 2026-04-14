@@ -1376,3 +1376,26 @@
 </details>
 
 ---
+
+## 2026-04-14 08:07 · `dfc0871` · 🐛 FIX
+
+**Commit:** fix: accept-invite 500 + comprehensive hospital network demo data  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/PermissionService.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/fixDemoPasswords.ts
+  - docker/init.sql
+  - docker/seed-demo-data.sql
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---

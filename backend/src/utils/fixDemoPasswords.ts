@@ -197,7 +197,52 @@ ON CONFLICT (id) DO NOTHING;
       logger.warn('Dog/cat vaccine protocol seed failed: ' + dcErr.message.substring(0, 200));
     }
 
-    if (vpRows[0].cnt >= 3 && cRows[0].cnt > 0) return; // Full seed data already exists
+    if (vpRows[0].cnt >= 3 && cRows[0].cnt > 0) {
+      // Full seed data already exists — but check if hospital network demo data is missing
+      try {
+        const { rows: hnRows } = await database.query(
+          `SELECT COUNT(*)::int AS cnt FROM hospital_network_members WHERE network_id = 'hn000000-0000-0000-0000-000000000001'`
+        );
+        if (hnRows[0].cnt < 3) {
+          logger.info('Hospital network demo data missing — seeding network data...');
+          // Find seed SQL file
+          const networkSeedPaths = [
+            path.join(__dirname, '..', '..', '..', 'docker', 'seed-demo-data.sql'),
+            path.join(__dirname, '..', '..', 'docker', 'seed-demo-data.sql'),
+            path.join(process.cwd(), '..', 'docker', 'seed-demo-data.sql'),
+            path.join(process.cwd(), 'docker', 'seed-demo-data.sql'),
+          ];
+          let networkSeedPath: string | null = null;
+          for (const p of networkSeedPaths) {
+            if (fs.existsSync(p)) { networkSeedPath = p; break; }
+          }
+          if (networkSeedPath) {
+            const fullSql = fs.readFileSync(networkSeedPath, 'utf-8').replace(/\r\n/g, '\n');
+            // Extract everything after "HOSPITAL NETWORK COMPREHENSIVE DEMO DATA"
+            const networkStart = fullSql.indexOf('HOSPITAL NETWORK COMPREHENSIVE DEMO DATA');
+            if (networkStart > -1) {
+              const networkSql = fullSql.substring(networkStart);
+              // Split into individual statements and execute each
+              const stmts = networkSql.split(/;\s*\n/).filter(s => /\b(INSERT|UPDATE)\b/i.test(s));
+              let ok = 0, fail = 0;
+              for (const stmt of stmts) {
+                try {
+                  await database.query(stmt.trim() + ';');
+                  ok++;
+                } catch (e: any) {
+                  fail++;
+                  logger.warn(`Network seed stmt failed: ${e.message.substring(0, 150)}`);
+                }
+              }
+              logger.info(`Hospital network seed: ${ok} succeeded, ${fail} failed`);
+            }
+          }
+        }
+      } catch (hnErr: any) {
+        logger.warn('Hospital network seed check failed: ' + hnErr.message.substring(0, 200));
+      }
+      return; // Full seed data already exists
+    }
 
     logger.info('No demo data found — seeding via app database connection...');
 
