@@ -127,6 +127,11 @@ class ApiService {
     return response.data
   }
 
+  /** Generic HTTP GET — use for ad-hoc endpoints without a typed wrapper */
+  async get(url: string, config?: { params?: Record<string, any> }) {
+    return this.client.get(url, config)
+  }
+
   async getProfile() {
     const response = await this.client.get('/auth/profile')
     return response.data

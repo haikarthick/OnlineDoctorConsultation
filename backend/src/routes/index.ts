@@ -456,6 +456,72 @@ router.post('/patient-consent', authMiddleware, validateBody(createPatientConsen
 router.get('/patient-consent/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listConsents(req, res)));
 router.delete('/patient-consent/:consentId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.revokeConsent(req, res)));
 
+// Consent search endpoints (search-and-select dropdowns)
+router.get('/consent/search-doctors', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const q = ((req.query.q as string) || '').trim();
+  try {
+    const filter = q.length >= 1 ? `%${q}%` : '%';
+    const result = await database.query(
+      `SELECT u.id, u.first_name || ' ' || u.last_name AS name, u.email,
+              COALESCE(vp.specializations[1], '') AS specialization
+       FROM users u
+       LEFT JOIN vet_profiles vp ON vp.user_id = u.id
+       WHERE u.role = 'veterinarian' AND u.is_active = true
+         AND (
+           u.first_name ILIKE $1 OR u.last_name ILIKE $1 OR u.email ILIKE $1
+           OR (u.first_name || ' ' || u.last_name) ILIKE $1
+         )
+       ORDER BY u.first_name, u.last_name
+       LIMIT 20`,
+      [filter]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    logger.error('Consent doctor search failed', { error: err.message });
+    res.status(500).json({ success: false, message: 'Search failed' });
+  }
+}));
+
+router.get('/consent/search-hospitals', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const q = ((req.query.q as string) || '').trim();
+  try {
+    const filter = q.length >= 1 ? `%${q}%` : '%';
+    const result = await database.query(
+      `SELECT id, name, city, state
+       FROM vet_hospitals
+       WHERE verification_status = 'approved'
+         AND (is_network_branch = false OR is_network_branch IS NULL)
+         AND (name ILIKE $1 OR city ILIKE $1)
+       ORDER BY name
+       LIMIT 20`,
+      [filter]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    logger.error('Consent hospital search failed', { error: err.message });
+    res.status(500).json({ success: false, message: 'Search failed' });
+  }
+}));
+
+router.get('/consent/search-networks', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const q = ((req.query.q as string) || '').trim();
+  try {
+    const filter = q.length >= 1 ? `%${q}%` : '%';
+    const result = await database.query(
+      `SELECT id, name, network_type AS "networkType", id_prefix AS "idPrefix"
+       FROM hospital_networks
+       WHERE is_approved = true AND (name ILIKE $1)
+       ORDER BY name
+       LIMIT 20`,
+      [filter]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    logger.error('Consent network search failed', { error: err.message });
+    res.status(500).json({ success: false, message: 'Search failed' });
+  }
+}));
+
 // Network Referrals
 router.get('/network-referrals', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkReferrals(req, res)));
 router.post('/network-referrals', authMiddleware, validateBody(createNetworkReferralSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createNetworkReferral(req, res)));
@@ -614,6 +680,31 @@ router.post('/reviews/:id/report', authMiddleware, asyncHandler((req: Request, r
 // ─── Admin routes (admin role required) ──────────────────────
 router.get('/dashboard/corporate', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), asyncHandler((req: Request, res: Response) => HospitalNetworkController.getCorporateDashboard(req, res)));
 router.get('/admin/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getDashboardStats(req, res)));
+router.get('/admin/users/search', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const q = ((req.query.q as string) || '').trim();
+  const role = (req.query.role as string) || '';
+  try {
+    const filter = q.length >= 1 ? `%${q}%` : '%';
+    const params: any[] = [filter];
+    let roleClause = '';
+    if (role) { params.push(role); roleClause = `AND role = $${params.length}`; }
+    const result = await database.query(
+      `SELECT id, first_name AS "firstName", last_name AS "lastName", email, role
+       FROM users
+       WHERE is_active = true
+         AND (first_name ILIKE $1 OR last_name ILIKE $1 OR email ILIKE $1
+              OR (first_name || ' ' || last_name) ILIKE $1)
+         ${roleClause}
+       ORDER BY first_name, last_name
+       LIMIT 30`,
+      params
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    logger.error('Admin user search failed', { error: err.message });
+    res.status(500).json({ success: false, message: 'Search failed' });
+  }
+}));
 router.get('/admin/users', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listUsers(req, res)));
 router.put('/admin/users/:id/status', authMiddleware, roleMiddleware(['admin']), validateBody(toggleUserStatusSchema), asyncHandler((req: Request, res: Response) => AdminController.toggleUserStatus(req, res)));
 router.put('/admin/users/:id/role', authMiddleware, roleMiddleware(['admin']), validateBody(changeUserRoleSchema), asyncHandler((req: Request, res: Response) => AdminController.changeUserRole(req, res)));

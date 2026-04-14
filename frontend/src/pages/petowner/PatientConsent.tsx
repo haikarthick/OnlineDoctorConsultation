@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
+import SearchSelect, { SearchSelectOption } from '../../components/SearchSelect'
 import '../../styles/modules.css'
 import './PatientConsent.css'
 
@@ -139,6 +140,7 @@ const PatientConsentPage: React.FC = () => {
   const [form, setForm] = useState<ConsentFormState>({ ...DEFAULT_FORM })
   const [submitting, setSubmitting] = useState(false)
   const [revoking, setRevoking] = useState<string | null>(null)
+  const [grantToLabel, setGrantToLabel] = useState('')
 
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
@@ -534,7 +536,7 @@ const PatientConsentPage: React.FC = () => {
                         key={tab}
                         type="button"
                         className={'pc-grant-to-tab' + (form.grantToType === tab ? ' active' : '')}
-                        onClick={() => setForm(f => ({ ...f, grantToType: tab, grantToId: '' }))}
+                        onClick={() => { setForm(f => ({ ...f, grantToType: tab, grantToId: '' })); setGrantToLabel('') }}
                       >
                         {t('patientConsent.modal.grantTo.' + tab)}
                       </button>
@@ -542,21 +544,46 @@ const PatientConsentPage: React.FC = () => {
                   </div>
                   <div className="module-form-group">
                     <label className="module-label">
-                      {form.grantToType === 'doctor'   && 'Doctor Email / ID'}
-                      {form.grantToType === 'hospital' && 'Hospital ID'}
-                      {form.grantToType === 'network'  && 'Network ID'}
+                      {form.grantToType === 'doctor'   && 'Search Doctor *'}
+                      {form.grantToType === 'hospital' && 'Search Hospital *'}
+                      {form.grantToType === 'network'  && 'Search Network *'}
                     </label>
-                    <input
-                      className="module-input"
-                      type="text"
-                      value={form.grantToId}
-                      onChange={e => setForm(f => ({ ...f, grantToId: e.target.value }))}
+                    <SearchSelect
                       placeholder={
-                        form.grantToType === 'doctor'   ? 'e.g. doctor@example.com' :
-                        form.grantToType === 'hospital' ? 'e.g. hospital-uuid' :
-                        'e.g. network-uuid'
+                        form.grantToType === 'doctor'   ? 'Search by name or email...' :
+                        form.grantToType === 'hospital' ? 'Search by hospital name or city...' :
+                        'Search by network name...'
                       }
+                      value={form.grantToId}
+                      displayValue={grantToLabel}
+                      loadOnOpen={true}
                       required
+                      onSelect={(val, label) => { setForm(f => ({ ...f, grantToId: val })); setGrantToLabel(label) }}
+                      onClear={() => { setForm(f => ({ ...f, grantToId: '' })); setGrantToLabel('') }}
+                      onSearch={async (q: string): Promise<SearchSelectOption[]> => {
+                        if (form.grantToType === 'doctor') {
+                          const res = await apiService.get('/consent/search-doctors', { params: { q } })
+                          return (res.data?.data || []).map((d: any) => ({
+                            value: d.id,
+                            label: d.name,
+                            sublabel: [d.email, d.specialization].filter(Boolean).join(' · '),
+                          }))
+                        } else if (form.grantToType === 'hospital') {
+                          const res = await apiService.get('/consent/search-hospitals', { params: { q } })
+                          return (res.data?.data || []).map((h: any) => ({
+                            value: h.id,
+                            label: h.name,
+                            sublabel: [h.city, h.state].filter(Boolean).join(', '),
+                          }))
+                        } else {
+                          const res = await apiService.get('/consent/search-networks', { params: { q } })
+                          return (res.data?.data || []).map((n: any) => ({
+                            value: n.id,
+                            label: n.name,
+                            sublabel: n.networkType,
+                          }))
+                        }
+                      }}
                     />
                   </div>
                 </div>

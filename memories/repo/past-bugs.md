@@ -704,3 +704,35 @@ render-start.sh
 - **Fix:** Replaced with name/email search (debounced, dropdown, selected-user badge). Backend /network-user-search endpoint returns matching users
 - **Rule:** Member invite flows MUST use name/email search, NEVER raw UUID input
 
+
+### CA-007 — Create Branch Hospital 500 — hospital_network_hospitals table missing
+- **Logged:** 2026-04-13 17:03
+- **Symptom:** Clicking Create Branch Hospital returned Internal Server Error immediately
+- **Root Cause:** hospital_network_hospitals junction table never added to init.sql or database.ts safety net. Service tried INSERT INTO hospital_network_hospitals → PostgreSQL relation does not exist → 500.
+- **Fix:** Added table to init.sql + CREATE TABLE IF NOT EXISTS in database.ts. Same pattern as LESSON-060.
+- **Rule:** Every table referenced in service SQL MUST exist in init.sql. Junction tables are easy to miss when added only in service code.
+
+
+### CA-008 — AddMember modal asked for raw UUID GUID — unusable UX
+- **Logged:** 2026-04-13 17:03
+- **Symptom:** End users cannot know other users UUIDs. Modal had a plain text input for userId expecting a valid UUID.
+- **Root Cause:** Joi validation on backend correctly required a valid UUID, but the frontend just passed whatever the user typed. No user can produce a UUID from memory.
+- **Fix:** Replaced with debounced name/email search → results dropdown → selected user badge. Submit disabled until user selected. Added GET /network-user-search endpoint (corporate_admin + admin only).
+- **Rule:** NEVER use raw ID inputs in any data entry form. Any foreign-key reference MUST use search-and-select or a dropdown populated from the API.
+
+
+### CA-009 — CreateBranchHospital submit button hidden below modal scroll area
+- **Logged:** 2026-04-13 17:03
+- **Symptom:** The Create Branch Hospital modal had a long form. The submit button was below the visible area and users could not find it even after zoom-out.
+- **Root Cause:** Modal had no maxHeight and no flex column layout. Form body and footer were all in the same scroll container.
+- **Fix:** Added maxHeight: 90vh + flex column to modal. Form body gets flex:1 + overflowY:auto. Footer with action buttons is outside scroll area — always visible.
+- **Rule:** ALL modals with forms longer than ~400px MUST use: modal maxHeight:90vh + flex-column, scrollable body, sticky footer with action buttons.
+
+
+### AUTH-001 — authReq.role undefined — should be authReq.userRole
+- **Logged:** 2026-04-14 04:53
+- **Symptom:** POST /role-change-requests returned 500 Internal Server Error when submitting a role change request
+- **Root Cause:** Auth middleware sets req.userRole not req.role. Using authReq.role returns undefined. INSERT into role_change_requests with current_role NOT NULL → PostgreSQL error → 500.
+- **Fix:** Fixed authReq.role → authReq.userRole in 2 places in routes/index.ts
+- **Rule:** ALWAYS use authReq.userRole (never authReq.role) — auth middleware only sets userId and userRole. Grep for authReq.role before every push.
+

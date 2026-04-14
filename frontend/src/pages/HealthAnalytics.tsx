@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { Enterprise, HealthObservation, HealthDashboard } from '../types'
 import { useTranslation } from 'react-i18next'
+import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
 const SEVERITY_COLORS: Record<string, string> = {
   low: '#22c55e', medium: '#eab308', high: '#f97316', critical: '#ef4444'
@@ -27,6 +28,7 @@ const HealthAnalytics: React.FC = () => {
   })
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [animalLabel, setAnimalLabel] = useState('')
 
   useEffect(() => {
     const fetchEnterprises = async () => {
@@ -134,8 +136,25 @@ const HealthAnalytics: React.FC = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Animal ID (optional)</label>
-                  <input value={formData.animalId} onChange={e => setFormData({ ...formData, animalId: e.target.value })} placeholder="UUID" />
+                  <label>Animal (optional)</label>
+                  <SearchSelect
+                    placeholder="Search animal by name..."
+                    value={formData.animalId}
+                    displayValue={animalLabel}
+                    loadOnOpen={true}
+                    onSelect={(val, label) => { setFormData(f => ({ ...f, animalId: val })); setAnimalLabel(label) }}
+                    onClear={() => { setFormData(f => ({ ...f, animalId: '' })); setAnimalLabel('') }}
+                    onSearch={async (q: string): Promise<SearchSelectOption[]> => {
+                      if (!selectedEnterpriseId) return []
+                      const res = await apiService.get(`/enterprises/${selectedEnterpriseId}/animals`, { params: { search: q, limit: 20 } })
+                      const items = res.data?.items || res.data?.animals || res.data || []
+                      return items.map((a: any) => ({
+                        value: a.id,
+                        label: a.name,
+                        sublabel: [a.species, a.breed].filter(Boolean).join(' · '),
+                      }))
+                    }}
+                  />
                 </div>
                 <div className="form-group">
                   <label>Body Temperature</label>

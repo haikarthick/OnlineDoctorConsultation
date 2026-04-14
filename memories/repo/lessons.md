@@ -372,3 +372,17 @@
 - **Lesson:** 1) Before writing ANY SQL that references a column, verify it EXISTS in init.sql using grep. 2) When adding a column to a service, ALWAYS do: init.sql + database.ts ALTER + service INSERT/UPDATE. 3) New service response fields need: type update + UI rendering + admin dashboard tile if action-related. 4) Test the exact API endpoint before shipping — not just TypeScript compile.
 - **Apply to:** All future SQL and service development
 
+
+### LESSON-061 — Data entry UX golden rules — 3 mandatory patterns
+- **Logged:** 2026-04-13 17:03
+- **Context:** Three UX failures found in hospital network data entry forms in one session
+- **Lesson:** 1) NEVER use raw ID/UUID inputs — always use search-and-select (name/email search with dropdown). 2) ALL modal forms with >3 fields MUST have sticky footer: modal maxHeight:90vh, flex-column, body scrolls, footer always visible. 3) Submit button MUST be disabled + show helper text when required selection is missing. Apply these to every form before shipping.
+- **Apply to:** All future data entry modals and forms
+
+
+### LESSON-062 — Search-select mandatory for all ID/entity inputs
+- **Logged:** 2026-04-14 05:11
+- **Context:** User reported Doctor Email/ID and Hospital ID raw text inputs in PatientConsent — impossible UX
+- **Lesson:** NEVER use raw text inputs for IDs, UUIDs, emails, or any entity that exists in the database. ALWAYS implement as search-and-select: load options on focus, filter on type, show human-readable label, store ID internally. Create SearchSelect.tsx as reusable component.
+- **Apply to:** All future forms with entity references
+

@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { GeofenceZone, GeospatialEvent } from '../types'
 import MapView from '../components/MapView'
 import { useTranslation } from 'react-i18next'
+import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
 const ZONE_TYPES = ['pasture', 'barn', 'medical', 'quarantine', 'feeding', 'water', 'boundary', 'custom']
 const ZONE_COLORS: Record<string, string> = { pasture: '#22c55e', barn: '#a78bfa', medical: '#ef4444', quarantine: '#f97316', feeding: '#eab308', water: '#3b82f6', boundary: '#64748b', custom: '#ec4899' }
@@ -25,6 +26,8 @@ const GeospatialAnalytics: React.FC = () => {
   const [showZoneForm, setShowZoneForm] = useState(false)
   const [showEventForm, setShowEventForm] = useState(false)
   const [trailAnimalId, setTrailAnimalId] = useState('')
+  const [trailAnimalLabel, setTrailAnimalLabel] = useState('')
+  const [eventAnimalLabel, setEventAnimalLabel] = useState('')
   const [trailData, setTrailData] = useState<any>(null)
 
   const [zoneForm, setZoneForm] = useState({
@@ -309,7 +312,22 @@ const GeospatialAnalytics: React.FC = () => {
               <p style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>💡 Click on the map below to set the event coordinates</p>
               <div className="module-form">
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.animalId')}</label><input className="module-input" value={eventForm.animalId} onChange={e => setEventForm(f => ({ ...f, animalId: e.target.value }))} placeholder="Enter animal UUID" /></div>
+                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.animalId')}</label>
+                    <SearchSelect
+                      placeholder="Search animal by name..."
+                      value={eventForm.animalId}
+                      displayValue={eventAnimalLabel}
+                      loadOnOpen={true}
+                      onSelect={(val, label) => { setEventForm(f => ({ ...f, animalId: val })); setEventAnimalLabel(label) }}
+                      onClear={() => { setEventForm(f => ({ ...f, animalId: '' })); setEventAnimalLabel('') }}
+                      onSearch={async (q: string): Promise<SearchSelectOption[]> => {
+                        if (!enterpriseId) return []
+                        const res = await apiService.get(`/enterprises/${enterpriseId}/animals`, { params: { search: q, limit: 20 } })
+                        const items = res.data?.items || res.data?.animals || res.data || []
+                        return items.map((a: any) => ({ value: a.id, label: a.name, sublabel: [a.species, a.breed].filter(Boolean).join(' · ') }))
+                      }}
+                    />
+                  </div>
                   <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.eventType')}</label>
                     <select className="module-input" value={eventForm.eventType} onChange={e => setEventForm(f => ({ ...f, eventType: e.target.value }))}>
                       {EVENT_TYPES.map(et => <option key={et} value={et}>{et.replace(/_/g, ' ')}</option>)}</select></div>
@@ -458,8 +476,22 @@ const GeospatialAnalytics: React.FC = () => {
             <h3>🐾 {t('geospatialAnalytics.movementTrail')}</h3>
             <p style={{ fontSize: 13, color: '#888' }}>{t('geospatialAnalytics.trackAnimalMovement')}</p>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <input className="module-input" placeholder="Enter Animal ID" value={trailAnimalId}
-                onChange={e => setTrailAnimalId(e.target.value)} style={{ flex: 1 }} />
+              <div style={{ flex: 1 }}>
+                <SearchSelect
+                  placeholder="Search animal by name..."
+                  value={trailAnimalId}
+                  displayValue={trailAnimalLabel}
+                  loadOnOpen={true}
+                  onSelect={(val, label) => { setTrailAnimalId(val); setTrailAnimalLabel(label) }}
+                  onClear={() => { setTrailAnimalId(''); setTrailAnimalLabel(''); setTrailData(null) }}
+                  onSearch={async (q: string): Promise<SearchSelectOption[]> => {
+                    if (!enterpriseId) return []
+                    const res = await apiService.get(`/enterprises/${enterpriseId}/animals`, { params: { search: q, limit: 20 } })
+                    const items = res.data?.items || res.data?.animals || res.data || []
+                    return items.map((a: any) => ({ value: a.id, label: a.name, sublabel: [a.species, a.breed].filter(Boolean).join(' · ') }))
+                  }}
+                />
+              </div>
               <button className="module-btn primary" onClick={loadTrail}>{t('geospatialAnalytics.loadTrail')}</button>
             </div>
 

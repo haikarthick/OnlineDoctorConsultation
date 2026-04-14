@@ -5,6 +5,7 @@ import { Enterprise, MovementRecord } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAuth } from '../context/AuthContext'
+import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
 
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
   transfer: 'Transfer', intake: 'Intake', discharge: 'Discharge',
@@ -36,6 +37,7 @@ const MovementLog: React.FC = () => {
   })
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [animalLabel, setAnimalLabel] = useState('')
 
   useEffect(() => {
     const fetchEnterprises = async () => {
@@ -228,7 +230,20 @@ const MovementLog: React.FC = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
                   <label>{t('movementLog.form.animalId')}</label>
-                  <input type="text" placeholder={t('movementLog.form.animalId')} value={formData.animalId} onChange={e => setFormData(f => ({ ...f, animalId: e.target.value }))} />
+                  <SearchSelect
+                    placeholder="Search animal by name..."
+                    value={formData.animalId}
+                    displayValue={animalLabel}
+                    loadOnOpen={true}
+                    onSelect={(val, label) => { setFormData(f => ({ ...f, animalId: val })); setAnimalLabel(label) }}
+                    onClear={() => { setFormData(f => ({ ...f, animalId: '' })); setAnimalLabel('') }}
+                    onSearch={async (q: string): Promise<SearchSelectOption[]> => {
+                      if (!selectedEnterpriseId) return []
+                      const res = await apiService.get(`/enterprises/${selectedEnterpriseId}/animals`, { params: { search: q, limit: 20 } })
+                      const items = res.data?.items || res.data?.animals || res.data || []
+                      return items.map((a: any) => ({ value: a.id, label: a.name, sublabel: [a.species, a.breed].filter(Boolean).join(' · ') }))
+                    }}
+                  />
                 </div>
                 <div className="form-group">
                   <label>{t('movementLog.form.group')}</label>

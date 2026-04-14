@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { vetHospitalApi } from '../../services/api/vetHospitalApi'
 import apiService from '../../services/api'
+import SearchSelect, { SearchSelectOption } from '../../components/SearchSelect'
 
 const POSITIONS = [
   'veterinarian', 'senior_veterinarian', 'vet_technician', 'vet_nurse',
@@ -33,6 +34,7 @@ export default function StaffSettings() {
 
   const [form, setForm] = useState({ userId: '', position: 'vet_technician', department: '', notes: '' })
   const [editForm, setEditForm] = useState({ position: '', department: '', notes: '', isActive: true })
+  const [userLabel, setUserLabel] = useState('')
 
   useEffect(() => {
     (async () => {
@@ -62,6 +64,7 @@ export default function StaffSettings() {
       await apiService.addStaffPosition(hospitalId, form)
       setShowAdd(false)
       setForm({ userId: '', position: 'vet_technician', department: '', notes: '' })
+      setUserLabel('')
       loadStaff()
     } catch { /* empty */ }
   }
@@ -187,7 +190,22 @@ export default function StaffSettings() {
           <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 440, maxWidth: '90vw' }}>
             <h3 style={{ marginTop: 0 }}>{t('staffSettings.addStaffPosition')}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <input placeholder={t('staffSettings.userIdPlaceholder')} value={form.userId} onChange={e => setForm(f => ({ ...f, userId: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }} />
+              <SearchSelect
+                placeholder={t('staffSettings.userIdPlaceholder')}
+                value={form.userId}
+                displayValue={userLabel}
+                loadOnOpen={true}
+                onSelect={(val, label) => { setForm(f => ({ ...f, userId: val })); setUserLabel(label) }}
+                onClear={() => { setForm(f => ({ ...f, userId: '' })); setUserLabel('') }}
+                onSearch={async (q: string): Promise<SearchSelectOption[]> => {
+                  const res = await apiService.get('/network-user-search', { params: { q: q || 'a' } })
+                  return (res.data?.data || []).map((u: any) => ({
+                    value: u.id,
+                    label: `${u.firstName} ${u.lastName}`,
+                    sublabel: `${u.email} · ${u.role}`,
+                  }))
+                }}
+              />
               <select value={form.position} onChange={e => setForm(f => ({ ...f, position: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
                 {POSITIONS.map(p => <option key={p} value={p}>{POSITION_ICONS[p]} {p.replace(/_/g, ' ')}</option>)}
               </select>
@@ -197,7 +215,7 @@ export default function StaffSettings() {
               </select>
               <textarea placeholder={t('staffSettings.notesPlaceholder')} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical' }} />
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => setShowAdd(false)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('staffSettings.cancel')}</button>
+                <button onClick={() => { setShowAdd(false); setUserLabel('') }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('staffSettings.cancel')}</button>
                 <button onClick={handleAdd} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('staffSettings.add')}</button>
               </div>
             </div>

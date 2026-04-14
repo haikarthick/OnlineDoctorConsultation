@@ -1242,3 +1242,36 @@
 </details>
 
 ---
+
+## 2026-04-13 17:01 · `d3a453a` · OTHER
+
+**Commit:** chore(memory): log CA-007 + CA-008 bugs  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-04-14 04:51 · `d2d5c78` · 🐛 FIX
+
+**Commit:** fix: role change request 500 — authReq.role → authReq.userRole  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/routes/index.ts
+
+</details>
+
+---
