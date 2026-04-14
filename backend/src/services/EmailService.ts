@@ -11,6 +11,7 @@
  */
 
 import nodemailer, { Transporter } from 'nodemailer';
+import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 import logger from '../utils/logger';
 
 // ── Types ─────────────────────────────────────────────────────
@@ -143,50 +144,57 @@ class EmailService {
     this.from = process.env.SMTP_FROM || 'VetCare <noreply@vetcare.app>';
   }
 
-  /** Lazy-initialize the nodemailer transporter */
+  /** Lazy-initialize the nodemailer transporter with retry across ports */
   private async getTransporter(): Promise<Transporter> {
     if (this.transporter) return this.transporter;
 
     if (process.env.SMTP_HOST) {
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587', 10),
-        secure: (process.env.SMTP_PORT || '587') === '465',
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-      logger.info('Email transporter configured with real SMTP');
-      // Verify SMTP connection immediately so misconfiguration surfaces in logs
-      try {
-        await this.transporter.verify();
-        logger.info('SMTP connection verified successfully');
-      } catch (verifyErr: any) {
-        logger.error('SMTP connection verification failed — emails will not send', {
-          host: process.env.SMTP_HOST,
-          port: process.env.SMTP_PORT,
-          user: process.env.SMTP_USER,
-          error: verifyErr.message,
-        });
-        this.transporter = null; // Reset so it can retry later
-        throw verifyErr;
+      const host = process.env.SMTP_HOST;
+      const user = process.env.SMTP_USER;
+      const pass = process.env.SMTP_PASS;
+      const requestedPort = parseInt(process.env.SMTP_PORT || '587', 10);
+
+      // Try requested port first, then alternate (587↔465) for Render/cloud environments
+      const portsToTry = requestedPort === 465 ? [465, 587] : [587, 465];
+
+      for (const port of portsToTry) {
+        const secure = port === 465;
+        try {
+          const opts: SMTPTransport.Options = {
+            host,
+            port,
+            secure,
+            auth: { user, pass },
+            connectionTimeout: 15000,
+            greetingTimeout: 15000,
+            socketTimeout: 30000,
+            tls: { rejectUnauthorized: false },
+          };
+          const transport = nodemailer.createTransport(opts);
+          await transport.verify();
+          this.transporter = transport;
+          logger.info(`SMTP connection verified on port ${port} (secure=${secure})`);
+          return this.transporter;
+        } catch (err: any) {
+          logger.warn(`SMTP port ${port} failed: ${err.message}`);
+        }
       }
-    } else {
-      // Use Ethereal test account in dev
-      const testAccount = await nodemailer.createTestAccount();
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
+
+      // All SMTP ports failed — log clearly and fall through to Ethereal
+      logger.error('All SMTP connection attempts failed — falling back to Ethereal email capture', {
+        host, ports: portsToTry, user,
       });
-      logger.info(`Email transporter using Ethereal test account: ${testAccount.user}`);
     }
 
+    // Ethereal fallback — captures emails for preview without real SMTP
+    const testAccount = await nodemailer.createTestAccount();
+    this.transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: { user: testAccount.user, pass: testAccount.pass },
+    });
+    logger.info(`Email transporter using Ethereal test account: ${testAccount.user}`);
     return this.transporter;
   }
 
@@ -195,8 +203,6 @@ class EmailService {
    * If a template is specified, it takes precedence over raw html/text.
    */
   async send(options: EmailOptions): Promise<{ messageId: string; previewUrl?: string | false }> {
-    const transporter = await this.getTransporter();
-
     let subject = options.subject;
     let html = options.html || '';
     let text = options.text || '';
@@ -219,21 +225,34 @@ class EmailService {
       logger.info(`Email redirected to dev address: ${devRedirect} (original: ${options.to})`);
     }
 
-    const info = await transporter.sendMail({
-      from: this.from,
-      to: actualTo,
-      subject,
-      html,
-      text,
-    });
+    // Retry once with transporter reset on transient failure
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const transporter = await this.getTransporter();
+        const info = await transporter.sendMail({
+          from: this.from,
+          to: actualTo,
+          subject,
+          html,
+          text,
+        });
 
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    if (previewUrl) {
-      logger.info(`Email preview URL: ${previewUrl}`);
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+        if (previewUrl) {
+          logger.info(`Email preview URL: ${previewUrl}`);
+        }
+        logger.info(`Email sent: ${info.messageId} → ${actualTo}`);
+        return { messageId: info.messageId, previewUrl };
+      } catch (sendErr: any) {
+        if (attempt === 1) {
+          logger.warn(`Email send attempt 1 failed (${sendErr.message}), resetting transporter and retrying...`);
+          this.transporter = null; // Force fresh transporter on retry
+        } else {
+          throw sendErr;
+        }
+      }
     }
-
-    logger.info(`Email sent: ${info.messageId} → ${actualTo}`);
-    return { messageId: info.messageId, previewUrl };
+    throw new Error('Email send failed after all attempts');
   }
 
   /** Helper: send a welcome email */

@@ -753,16 +753,17 @@ router.put('/admin/settings', authMiddleware, roleMiddleware(['admin']), validat
 router.post('/admin/settings/test-email', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
   const { to } = req.body;
   if (!to) return res.status(400).json({ success: false, message: 'Recipient email required' });
+  const devRedirect = process.env.EMAIL_DEV_REDIRECT;
   try {
     const result = await emailService.send({
       to,
       subject: 'VetCare — Test Email',
-      html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from VetCare admin panel.</p><p>Sent at: ${new Date().toISOString()}</p></div>`,
+      html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from VetCare admin panel.</p><p>Sent at: ${new Date().toISOString()}</p><p>SMTP: ${process.env.SMTP_HOST || 'not configured'}:${process.env.SMTP_PORT || '?'}</p><p>Dev redirect: ${devRedirect || 'off'}</p></div>`,
       text: `Email is working! Sent at: ${new Date().toISOString()}`,
     });
-    res.json({ success: true, message: 'Test email sent', data: { previewUrl: result.previewUrl || null } });
+    res.json({ success: true, message: 'Test email sent successfully', data: { messageId: result.messageId, previewUrl: result.previewUrl || null, redirectedTo: devRedirect || null, smtpHost: process.env.SMTP_HOST || null } });
   } catch (err: any) {
-    res.status(500).json({ success: false, message: `Email failed: ${err.message}` });
+    res.status(500).json({ success: false, message: `Email failed: ${err.message}`, smtpHost: process.env.SMTP_HOST || 'not configured', smtpPort: process.env.SMTP_PORT || 'not set', devRedirect: devRedirect || null });
   }
 }));
 router.get('/admin/audit-logs', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));
