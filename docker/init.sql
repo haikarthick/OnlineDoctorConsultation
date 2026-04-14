@@ -1664,6 +1664,35 @@ CREATE TABLE IF NOT EXISTS clinical_data_access_log (
   -- NOTE: No updated_at — this table is append-only, never update or delete rows
 );
 
+-- 41b. NETWORK REFERRALS (inter-hospital referrals and patient transfers within a network)
+CREATE TABLE IF NOT EXISTS network_referrals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
+  from_hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+  to_hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+  from_vet_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  to_vet_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  animal_id UUID REFERENCES animals(id) ON DELETE CASCADE,
+  consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+  reason TEXT NOT NULL,
+  priority VARCHAR(20) DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'emergency')),
+  status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected', 'completed', 'cancelled')),
+  clinical_notes TEXT,
+  response_notes TEXT,
+  referral_type VARCHAR(20) DEFAULT 'referral' CHECK (referral_type IN ('referral', 'transfer')),
+  transfer_reason TEXT,
+  transferred_at TIMESTAMPTZ,
+  accepted_at TIMESTAMPTZ,
+  rejected_at TIMESTAMPTZ,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_network_referrals_network_id ON network_referrals(network_id);
+CREATE INDEX IF NOT EXISTS idx_network_referrals_to_hospital ON network_referrals(to_hospital_id, status);
+CREATE INDEX IF NOT EXISTS idx_network_referrals_animal ON network_referrals(animal_id);
+CREATE INDEX IF NOT EXISTS idx_network_referrals_consultation_id ON network_referrals(consultation_id);
+
 -- Indexes for hospital network tables
 CREATE INDEX IF NOT EXISTS idx_hospital_networks_is_active ON hospital_networks(is_active);
 CREATE INDEX IF NOT EXISTS idx_hospital_networks_is_approved ON hospital_networks(is_approved);
@@ -1822,6 +1851,31 @@ CREATE INDEX IF NOT EXISTS idx_hsi_status ON hospital_staff_invites(status);
 DROP TRIGGER IF EXISTS update_hsi_updated_at ON hospital_staff_invites;
 CREATE TRIGGER update_hsi_updated_at BEFORE UPDATE ON hospital_staff_invites
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- STAFF LEAVE REQUESTS (Holiday/Leave Management)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS staff_leave_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  leave_type VARCHAR(30) NOT NULL DEFAULT 'annual'
+    CHECK (leave_type IN ('annual', 'sick', 'personal', 'maternity', 'paternity', 'unpaid', 'training', 'other')),
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  reason TEXT,
+  status VARCHAR(20) DEFAULT 'pending'
+    CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+  approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  approved_at TIMESTAMPTZ,
+  rejection_reason TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_leave_requests_network ON staff_leave_requests(network_id);
+CREATE INDEX IF NOT EXISTS idx_leave_requests_user ON staff_leave_requests(user_id);
+CREATE INDEX IF NOT EXISTS idx_leave_requests_hospital ON staff_leave_requests(hospital_id);
 
 -- ─── Marketplace monetization tables (canonical schema) ─────────────────────
 CREATE TABLE IF NOT EXISTS marketplace_monetization_settings (

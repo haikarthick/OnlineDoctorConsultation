@@ -2398,6 +2398,41 @@ class ApiService {
     const response = await this.client.delete(`/hospital-networks/${networkId}/staff-invites/${inviteId}`)
     return response.data
   }
+
+  // Audit log export
+  async exportAuditLogs(networkId: string): Promise<any> {
+    return this.client.get(`/hospital-networks/${networkId}/audit-logs/export`, {
+      responseType: 'blob'
+    })
+  }
+
+  // Financial summary
+  async getNetworkFinancialSummary(networkId: string): Promise<any> {
+    return this.client.get(`/hospital-networks/${networkId}/financial-summary`)
+  }
+
+  // Leave management
+  async listLeaveRequests(networkId: string, params: Record<string, any> = {}): Promise<any> {
+    return this.client.get(`/hospital-networks/${networkId}/leave-requests`, { params })
+  }
+  async createLeaveRequest(networkId: string, data: Record<string, any>): Promise<any> {
+    return this.client.post(`/hospital-networks/${networkId}/leave-requests`, data)
+  }
+  async updateLeaveRequest(networkId: string, requestId: string, data: Record<string, any>): Promise<any> {
+    return this.client.patch(`/hospital-networks/${networkId}/leave-requests/${requestId}`, data)
+  }
+
+  // Patient transfers
+  async listPatientTransfers(networkId: string): Promise<any> {
+    return this.client.get(`/hospital-networks/${networkId}/patient-transfers`)
+  }
+  async createPatientTransfer(networkId: string, data: Record<string, any>): Promise<any> {
+    return this.client.post(`/hospital-networks/${networkId}/patient-transfers`, data)
+  }
+  async completePatientTransfer(networkId: string, transferId: string): Promise<any> {
+    return this.client.post(`/hospital-networks/${networkId}/patient-transfers/${transferId}/complete`)
+  }
+
   async getStaffInviteByToken(token: string) {
     const response = await this.client.get(`/hospital-staff-invites/token/${token}`)
     return response.data
@@ -2444,6 +2479,10 @@ class ApiService {
   // ── Corporate Admin ──
   async getCorporateDashboardStats(): Promise<any> {
     return this.client.get('/dashboard/corporate')
+  }
+
+  async getHospitalStaffDashboard(): Promise<any> {
+    return this.client.get('/dashboard/hospital-staff')
   }
 
   async searchNetworkUsers(query: string): Promise<any> {

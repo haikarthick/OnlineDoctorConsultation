@@ -809,3 +809,11 @@ render-start.sh
 - **Fix:** Fixed 6 catch blocks in HospitalNetworks.tsx to use .data?.message
 - **Rule:** ALWAYS use err?.response?.data?.message for error extraction. The .error field is an object containing {message,code,statusCode} — NOT a string
 
+
+### EMAIL-001 — SMTP blocked on Render free-tier
+- **Logged:** 2026-04-14 15:37
+- **Symptom:** User reported no emails received despite correct SMTP config in Render env vars
+- **Root Cause:** Render free-tier blocks outbound TCP on ports 587 and 465 — nodemailer connection hangs until OS TCP timeout (127s). No error in application logs because email was fire-and-forget with .catch() swallowing errors
+- **Fix:** Added Resend (HTTP-based) as primary email provider. Priority: Resend API → SMTP → log-only fallback. Log-only mode captures full email content in server logs with unique IDs. 10s hard Promise.race timeout prevents TCP hangs.
+- **Rule:** NEVER assume SMTP works on cloud platforms. Always use HTTP-based email providers (Resend/SendGrid) as primary for Render. Always test email on deployed env, not just locally.
+

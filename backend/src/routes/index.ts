@@ -713,6 +713,11 @@ router.post('/reviews/:id/helpful', authMiddleware, asyncHandler((req: Request, 
 router.post('/reviews/:id/report', authMiddleware, asyncHandler((req: Request, res: Response) => ReviewController.reportReview(req, res)));
 
 // ─── Admin routes (admin role required) ──────────────────────
+router.get('/dashboard/hospital-staff', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).userId;
+  const result = await HospitalNetworkService.getHospitalStaffDashboard(userId);
+  res.json({ success: true, data: result });
+}));
 router.get('/dashboard/corporate', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), asyncHandler((req: Request, res: Response) => HospitalNetworkController.getCorporateDashboard(req, res)));
 router.get('/admin/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getDashboardStats(req, res)));
 router.get('/admin/users/search', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
@@ -1773,6 +1778,150 @@ router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, 
   const db = (await import('../utils/database')).default;
   await db.query(`UPDATE hospital_staff_invites SET status='revoked', updated_at=NOW() WHERE id=$1 AND network_id=$2 AND status='pending'`, [req.params.inviteId, req.params.id]);
   res.json({ success: true });
+}));
+
+// G10 — Export audit logs as CSV
+router.get('/hospital-networks/:id/audit-logs/export', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const networkId = req.params.id;
+  const userId = (req as any).userId;
+
+  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
+  if (!member) {
+    return res.status(403).json({ success: false, error: 'Not a member of this network' });
+  }
+
+  const result = await database.query(
+    `SELECT cal.id, cal.accessed_by,
+            COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as accessor_name,
+            cal.animal_id, COALESCE(a.name, 'Unknown') as animal_name,
+            cal.record_type, cal.access_type, cal.access_granted,
+            cal.denial_reason, cal.ip_address, cal.accessed_at
+     FROM clinical_data_access_log cal
+     LEFT JOIN users u ON u.id = cal.accessed_by
+     LEFT JOIN animals a ON a.id = cal.animal_id
+     WHERE cal.accessor_network_id = $1
+     ORDER BY cal.accessed_at DESC
+     LIMIT 5000`,
+    [networkId]
+  );
+
+  const headers = 'ID,Accessor,Animal,Record Type,Access Type,Granted,Denial Reason,IP Address,Timestamp\n';
+  const rows = result.rows.map((r: any) =>
+    `"${r.id}","${r.accessor_name}","${r.animal_name}","${r.record_type || ''}","${r.access_type || ''}","${r.access_granted}","${(r.denial_reason || '').replace(/"/g, '""')}","${r.ip_address || ''}","${r.accessed_at}"`
+  ).join('\n');
+
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename=audit-log-${networkId.slice(0,8)}-${new Date().toISOString().slice(0,10)}.csv`);
+  res.send(headers + rows);
+}));
+
+// G11 — Network financial summary
+router.get('/hospital-networks/:id/financial-summary', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const networkId = req.params.id;
+  const userId = (req as any).userId;
+  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
+  if (!member || !['corporate_admin', 'hospital_director', 'auditor'].includes(member.networkRole)) {
+    return res.status(403).json({ success: false, error: 'Insufficient permissions' });
+  }
+  const result = await HospitalNetworkService.getNetworkFinancialSummary(networkId);
+  res.json({ success: true, data: result });
+}));
+
+// G12 — Staff leave management
+router.get('/hospital-networks/:id/leave-requests', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const networkId = req.params.id;
+  const userId = (req as any).userId;
+  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
+  if (!member) return res.status(403).json({ success: false, error: 'Not a member' });
+
+  const filters: any = {
+    page: parseInt(req.query.page as string) || 1,
+    limit: parseInt(req.query.limit as string) || 20,
+  };
+  if (req.query.hospitalId) filters.hospitalId = req.query.hospitalId;
+  if (req.query.status) filters.status = req.query.status;
+  if (!['corporate_admin', 'hospital_director'].includes(member.networkRole)) {
+    filters.userId = userId;
+  }
+
+  const result = await HospitalNetworkService.listLeaveRequests(networkId, filters);
+  res.json({ success: true, data: result });
+}));
+
+router.post('/hospital-networks/:id/leave-requests', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const networkId = req.params.id;
+  const userId = (req as any).userId;
+  const { leaveType, startDate, endDate, reason, hospitalId } = req.body;
+
+  if (!leaveType || !startDate || !endDate) {
+    return res.status(400).json({ success: false, error: 'leaveType, startDate, and endDate are required' });
+  }
+
+  const result = await HospitalNetworkService.createLeaveRequest({
+    networkId, hospitalId, userId, leaveType, startDate, endDate, reason
+  });
+  res.json({ success: true, data: result });
+}));
+
+router.patch('/hospital-networks/:id/leave-requests/:requestId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { id: networkId, requestId } = req.params;
+  const userId = (req as any).userId;
+  const { status, rejectionReason } = req.body;
+
+  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
+  if (!member || !['corporate_admin', 'hospital_director'].includes(member.networkRole)) {
+    return res.status(403).json({ success: false, error: 'Only directors and admins can approve/reject leave' });
+  }
+
+  const result = await HospitalNetworkService.updateLeaveRequestStatus(requestId, status, userId, rejectionReason);
+  res.json({ success: true, data: result });
+}));
+
+// G13 — Patient transfers
+router.post('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const networkId = req.params.id;
+  const userId = (req as any).userId;
+  const { fromHospitalId, toHospitalId, animalId, reason, transferReason, clinicalNotes } = req.body;
+
+  if (!fromHospitalId || !toHospitalId || !animalId || !reason) {
+    return res.status(400).json({ success: false, error: 'fromHospitalId, toHospitalId, animalId, and reason are required' });
+  }
+
+  const result = await HospitalNetworkService.createPatientTransfer({
+    networkId, fromHospitalId, toHospitalId, animalId, reason, transferReason, clinicalNotes, createdBy: userId
+  });
+  res.json({ success: true, data: result });
+}));
+
+router.post('/hospital-networks/:id/patient-transfers/:transferId/complete', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { transferId } = req.params;
+  const userId = (req as any).userId;
+  const result = await HospitalNetworkService.completePatientTransfer(transferId, userId);
+  res.json({ success: true, data: result });
+}));
+
+router.get('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const networkId = req.params.id;
+  const userId = (req as any).userId;
+  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
+  if (!member) return res.status(403).json({ success: false, error: 'Not a member' });
+
+  const result = await database.query(
+    `SELECT nr.*,
+            fh.name as "fromHospitalName", th.name as "toHospitalName",
+            a.name as "animalName", a.species as "animalSpecies",
+            COALESCE(cu.first_name || ' ' || cu.last_name, '') as "createdByName"
+     FROM network_referrals nr
+     LEFT JOIN vet_hospitals fh ON fh.id = nr.from_hospital_id
+     LEFT JOIN vet_hospitals th ON th.id = nr.to_hospital_id
+     LEFT JOIN animals a ON a.id = nr.animal_id
+     LEFT JOIN users cu ON cu.id = nr.created_by
+     WHERE nr.network_id = $1 AND nr.referral_type = 'transfer'
+     ORDER BY nr.created_at DESC
+     LIMIT 50`,
+    [networkId]
+  );
+  res.json({ success: true, data: result.rows });
 }));
 
 export default router;

@@ -385,6 +385,23 @@ export class HospitalNetworkService {
     }
   }
 
+  async getNetworkMember(networkId: string, userId: string): Promise<NetworkMember | null> {
+    const result = await database.query(
+      `SELECT hnm.*,
+              u.first_name || ' ' || u.last_name AS "userName",
+              u.email AS "userEmail",
+              u.role AS "userRole",
+              vh.name AS "hospitalName"
+       FROM hospital_network_members hnm
+       JOIN users u ON hnm.user_id = u.id
+       LEFT JOIN vet_hospitals vh ON hnm.hospital_id = vh.id
+       WHERE hnm.network_id = $1 AND hnm.user_id = $2 AND hnm.is_active = true`,
+      [networkId, userId]
+    );
+    if (result.rows.length === 0) return null;
+    return this.mapMemberRow(result.rows[0]);
+  }
+
   async listNetworkMembers(networkId: string): Promise<NetworkMember[]> {
     const result = await database.query(
       `SELECT hnm.*,
@@ -541,6 +558,75 @@ export class HospitalNetworkService {
       activeConsents: parseInt(consents.rows[0]?.count || '0'),
       recentAccessLogs: parseInt(accessLogs.rows[0]?.count || '0'),
       membersByRole: membersByRoleMap,
+    };
+  }
+
+  async getHospitalStaffDashboard(userId: string): Promise<any> {
+    // Find user's network and hospital
+    const memberResult = await database.query(
+      `SELECT hnm.network_id, hnm.hospital_id, hn.name as network_name, vh.name as hospital_name
+       FROM hospital_network_members hnm
+       LEFT JOIN hospital_networks hn ON hn.id = hnm.network_id
+       LEFT JOIN vet_hospitals vh ON vh.id = hnm.hospital_id
+       WHERE hnm.user_id = $1 AND hnm.is_active = true LIMIT 1`,
+      [userId]
+    );
+    if (memberResult.rows.length === 0) {
+      return {
+        networkName: '', hospitalName: '',
+        enrolledPatients: 0, todayQueueCount: 0, activeInpatients: 0,
+        pendingReferrals: 0, staffCount: 0, recentActivity: []
+      };
+    }
+    const { network_id, hospital_id, network_name, hospital_name } = memberResult.rows[0];
+
+    const queries = await Promise.all([
+      // Enrolled patients in network
+      database.query(
+        `SELECT COUNT(*) as count FROM animal_care_contexts 
+         WHERE network_id = $1 AND enrollment_status = 'active' AND is_active = true`,
+        [network_id]
+      ),
+      // Today's queue (if hospital assigned)
+      hospital_id ? database.query(
+        `SELECT COUNT(*) as count FROM queue_entries 
+         WHERE hospital_id = $1 AND created_at::date = CURRENT_DATE`,
+        [hospital_id]
+      ) : Promise.resolve({ rows: [{ count: '0' }] }),
+      // Active inpatients
+      hospital_id ? database.query(
+        `SELECT COUNT(*) as count FROM inpatient_admissions 
+         WHERE hospital_id = $1 AND status = 'admitted'`,
+        [hospital_id]
+      ) : Promise.resolve({ rows: [{ count: '0' }] }),
+      // Pending referrals
+      database.query(
+        `SELECT COUNT(*) as count FROM network_referrals 
+         WHERE network_id = $1 AND status = 'pending'`,
+        [network_id]
+      ),
+      // Staff count at hospital
+      hospital_id ? database.query(
+        `SELECT COUNT(*) as count FROM hospital_network_members 
+         WHERE network_id = $1 AND hospital_id = $2 AND is_active = true`,
+        [network_id, hospital_id]
+      ) : database.query(
+        `SELECT COUNT(*) as count FROM hospital_network_members 
+         WHERE network_id = $1 AND is_active = true`,
+        [network_id]
+      ),
+    ]);
+
+    return {
+      networkName: network_name || '',
+      hospitalName: hospital_name || '',
+      networkId: network_id,
+      hospitalId: hospital_id,
+      enrolledPatients: parseInt(queries[0].rows[0]?.count || '0'),
+      todayQueueCount: parseInt(queries[1].rows[0]?.count || '0'),
+      activeInpatients: parseInt(queries[2].rows[0]?.count || '0'),
+      pendingReferrals: parseInt(queries[3].rows[0]?.count || '0'),
+      staffCount: parseInt(queries[4].rows[0]?.count || '0'),
     };
   }
 
@@ -1159,6 +1245,16 @@ export class HospitalNetworkService {
       throw new ValidationError('Receiving hospital is not a member of this network');
     }
 
+    // Verify caller is a member of this network
+    const callerMember = await database.query(
+      `SELECT id, network_role FROM hospital_network_members 
+       WHERE network_id = $1 AND user_id = $2 AND is_active = true LIMIT 1`,
+      [data.networkId, data.createdBy]
+    );
+    if (callerMember.rows.length === 0) {
+      throw new ForbiddenError('You are not a member of this network');
+    }
+
     const result = await database.query(
       `INSERT INTO network_referrals
         (network_id, from_hospital_id, to_hospital_id, from_vet_id, to_vet_id,
@@ -1179,9 +1275,28 @@ export class HospitalNetworkService {
   async updateNetworkReferralStatus(
     referralId: string,
     status: 'accepted' | 'rejected' | 'completed' | 'cancelled',
-    _userId: string,
+    userId: string,
     responseNotes?: string
   ): Promise<any> {
+    // First fetch the referral to check authorization
+    const referralCheck = await database.query(
+      `SELECT r.network_id, r.from_hospital_id, r.to_hospital_id
+       FROM network_referrals r WHERE r.id = $1`,
+      [referralId]
+    );
+    if (referralCheck.rows.length === 0) throw new NotFoundError('Network referral');
+
+    const referral = referralCheck.rows[0];
+    // Verify caller is a member of this network
+    const callerMember = await database.query(
+      `SELECT id FROM hospital_network_members 
+       WHERE network_id = $1 AND user_id = $2 AND is_active = true LIMIT 1`,
+      [referral.network_id, userId]
+    );
+    if (callerMember.rows.length === 0) {
+      throw new ForbiddenError('You are not authorized to update this referral');
+    }
+
     const statusField = status === 'accepted' ? ', accepted_at = NOW()'
       : status === 'rejected' ? ', rejected_at = NOW()' : '';
 
@@ -1392,11 +1507,241 @@ export class HospitalNetworkService {
       client.release();
     }
   }
+
+  // ─── Financial Summary ────────────────────────────────────────
+  async getNetworkFinancialSummary(networkId: string): Promise<any> {
+    try {
+      // Get branch hospital IDs
+      const hospitalsResult = await database.query(
+        `SELECT hospital_id FROM hospital_network_hospitals WHERE network_id = $1`,
+        [networkId]
+      );
+      const hospitalIds = hospitalsResult.rows.map((r: any) => r.hospital_id);
+
+      if (hospitalIds.length === 0) {
+        return {
+          totalConsultations: 0, totalBookings: 0, monthlyConsultations: [],
+          hospitalBreakdown: [], staffCounts: {}
+        };
+      }
+
+      const placeholders = hospitalIds.map((_: any, i: number) => `$${i + 1}`).join(',');
+
+      const [consultations, bookings, monthly, perHospital, staffByRole] = await Promise.all([
+        database.query(
+          `SELECT COUNT(*) as count FROM consultations c
+           JOIN bookings b ON b.consultation_id = c.id
+           WHERE b.hospital_id IN (${placeholders})`,
+          hospitalIds
+        ),
+        database.query(
+          `SELECT COUNT(*) as count FROM bookings WHERE hospital_id IN (${placeholders})`,
+          hospitalIds
+        ),
+        database.query(
+          `SELECT DATE_TRUNC('month', c.created_at) as month, COUNT(*) as count
+           FROM consultations c
+           JOIN bookings b ON b.consultation_id = c.id
+           WHERE b.hospital_id IN (${placeholders})
+             AND c.created_at >= NOW() - INTERVAL '6 months'
+           GROUP BY DATE_TRUNC('month', c.created_at)
+           ORDER BY month DESC`,
+          hospitalIds
+        ),
+        database.query(
+          `SELECT vh.id, vh.name,
+                  (SELECT COUNT(*) FROM bookings WHERE hospital_id = vh.id) as booking_count,
+                  (SELECT COUNT(*) FROM queue_entries WHERE hospital_id = vh.id) as queue_count,
+                  (SELECT COUNT(*) FROM inpatient_admissions WHERE hospital_id = vh.id) as inpatient_count
+           FROM vet_hospitals vh
+           WHERE vh.id IN (${placeholders})`,
+          hospitalIds
+        ),
+        database.query(
+          `SELECT network_role, COUNT(*) as count
+           FROM hospital_network_members
+           WHERE network_id = $1 AND is_active = true
+           GROUP BY network_role`,
+          [networkId]
+        ),
+      ]);
+
+      const staffCounts: Record<string, number> = {};
+      for (const row of staffByRole.rows) {
+        staffCounts[row.network_role] = parseInt(row.count);
+      }
+
+      return {
+        totalConsultations: parseInt(consultations.rows[0]?.count || '0'),
+        totalBookings: parseInt(bookings.rows[0]?.count || '0'),
+        monthlyConsultations: monthly.rows.map((r: any) => ({
+          month: r.month,
+          count: parseInt(r.count),
+        })),
+        hospitalBreakdown: perHospital.rows.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          bookings: parseInt(r.booking_count || '0'),
+          queueVisits: parseInt(r.queue_count || '0'),
+          inpatients: parseInt(r.inpatient_count || '0'),
+        })),
+        staffCounts,
+      };
+    } catch (error) {
+      throw new DatabaseError('Error fetching network financial summary', { originalError: error });
+    }
+  }
+
+  // ─── Leave Management ───────────────────────────────────────
+  async createLeaveRequest(data: {
+    networkId: string; hospitalId?: string; userId: string;
+    leaveType: string; startDate: string; endDate: string; reason?: string;
+  }): Promise<any> {
+    const member = await database.query(
+      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [data.networkId, data.userId]
+    );
+    if (member.rows.length === 0) throw new ValidationError('Not a member of this network');
+
+    const result = await database.query(
+      `INSERT INTO staff_leave_requests (network_id, hospital_id, user_id, leave_type, start_date, end_date, reason)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [data.networkId, data.hospitalId || null, data.userId, data.leaveType, data.startDate, data.endDate, data.reason || null]
+    );
+    return result.rows[0];
+  }
+
+  async listLeaveRequests(networkId: string, filters: {
+    hospitalId?: string; userId?: string; status?: string;
+    page?: number; limit?: number;
+  } = {}): Promise<{ rows: any[]; total: number }> {
+    const conditions: string[] = ['lr.network_id = $1'];
+    const params: any[] = [networkId];
+    let idx = 1;
+
+    if (filters.hospitalId) { idx++; conditions.push(`lr.hospital_id = $${idx}`); params.push(filters.hospitalId); }
+    if (filters.userId) { idx++; conditions.push(`lr.user_id = $${idx}`); params.push(filters.userId); }
+    if (filters.status) { idx++; conditions.push(`lr.status = $${idx}`); params.push(filters.status); }
+
+    const where = `WHERE ${conditions.join(' AND ')}`;
+    const page = filters.page ?? 1;
+    const limit = Math.min(filters.limit ?? 20, 100);
+    const offset = (page - 1) * limit;
+
+    const [rowsResult, countResult] = await Promise.all([
+      database.query(
+        `SELECT lr.*,
+                COALESCE(u.first_name || ' ' || u.last_name, '') as "userName",
+                COALESCE(ap.first_name || ' ' || ap.last_name, '') as "approverName",
+                vh.name as "hospitalName"
+         FROM staff_leave_requests lr
+         LEFT JOIN users u ON u.id = lr.user_id
+         LEFT JOIN users ap ON ap.id = lr.approved_by
+         LEFT JOIN vet_hospitals vh ON vh.id = lr.hospital_id
+         ${where}
+         ORDER BY lr.created_at DESC
+         LIMIT $${idx + 1} OFFSET $${idx + 2}`,
+        [...params, limit, offset]
+      ),
+      database.query(
+        `SELECT COUNT(*) as count FROM staff_leave_requests lr ${where}`,
+        params
+      ),
+    ]);
+
+    return {
+      rows: rowsResult.rows,
+      total: parseInt(countResult.rows[0]?.count || '0'),
+    };
+  }
+
+  async updateLeaveRequestStatus(
+    requestId: string, status: 'approved' | 'rejected' | 'cancelled',
+    userId: string, rejectionReason?: string
+  ): Promise<any> {
+    const extraFields = status === 'approved' ? ', approved_by = $4, approved_at = NOW()' : '';
+    const result = await database.query(
+      `UPDATE staff_leave_requests
+       SET status = $1, rejection_reason = $2, updated_at = NOW() ${extraFields}
+       WHERE id = $3 RETURNING *`,
+      status === 'approved'
+        ? [status, rejectionReason || null, requestId, userId]
+        : [status, rejectionReason || null, requestId]
+    );
+    if (result.rows.length === 0) throw new NotFoundError('Leave request');
+    return result.rows[0];
+  }
+
+  // ─── Patient Transfer ───────────────────────────────────────
+  async createPatientTransfer(data: {
+    networkId: string; fromHospitalId: string; toHospitalId: string;
+    animalId: string; reason: string; transferReason?: string;
+    clinicalNotes?: string; createdBy: string;
+  }): Promise<any> {
+    const fromCheck = await database.query(
+      `SELECT id FROM hospital_network_hospitals WHERE network_id = $1 AND hospital_id = $2`,
+      [data.networkId, data.fromHospitalId]
+    );
+    if (fromCheck.rows.length === 0) throw new ValidationError('Source hospital is not in this network');
+
+    const toCheck = await database.query(
+      `SELECT id FROM hospital_network_hospitals WHERE network_id = $1 AND hospital_id = $2`,
+      [data.networkId, data.toHospitalId]
+    );
+    if (toCheck.rows.length === 0) throw new ValidationError('Destination hospital is not in this network');
+
+    const callerCheck = await database.query(
+      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [data.networkId, data.createdBy]
+    );
+    if (callerCheck.rows.length === 0) throw new ForbiddenError('Not authorized to create transfers');
+
+    const result = await database.query(
+      `INSERT INTO network_referrals
+        (network_id, from_hospital_id, to_hospital_id, animal_id, reason,
+         clinical_notes, transfer_reason, referral_type, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'transfer', $8)
+       RETURNING *`,
+      [data.networkId, data.fromHospitalId, data.toHospitalId, data.animalId,
+       data.reason, data.clinicalNotes || null, data.transferReason || null, data.createdBy]
+    );
+    return result.rows[0];
+  }
+
+  async completePatientTransfer(transferId: string, userId: string): Promise<any> {
+    const transfer = await database.query(
+      `SELECT * FROM network_referrals WHERE id = $1 AND referral_type = 'transfer'`,
+      [transferId]
+    );
+    if (transfer.rows.length === 0) throw new NotFoundError('Patient transfer');
+
+    const callerCheck = await database.query(
+      `SELECT id FROM hospital_network_members
+       WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [transfer.rows[0].network_id, userId]
+    );
+    if (callerCheck.rows.length === 0) throw new ForbiddenError('Not authorized');
+
+    await database.query(
+      `UPDATE animal_care_contexts
+       SET hospital_id = $1
+       WHERE network_id = $2 AND animal_id = $3 AND is_active = true`,
+      [transfer.rows[0].to_hospital_id, transfer.rows[0].network_id, transfer.rows[0].animal_id]
+    );
+
+    const result = await database.query(
+      `UPDATE network_referrals
+       SET status = 'completed', transferred_at = NOW(), updated_at = NOW()
+       WHERE id = $1 RETURNING *`,
+      [transferId]
+    );
+    return result.rows[0];
+  }
 }
 
 export default new HospitalNetworkService();
 
-// ─── Update Branch Hospital ───────────────────────────────────────────────────
+// ─── Update Branch Hospital───────────────────────────────────────────────────
 export async function updateBranchHospital(hospitalId: string, networkId: string, data: {
   name?: string; hospitalType?: string; address?: string; city?: string; state?: string;
   country?: string; postalCode?: string; phone?: string; email?: string;

@@ -28,6 +28,7 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [enterpriseOverview, setEnterpriseOverview] = useState<EnterpriseOverviewStats | null>(null)
   const [corpStats, setCorpStats] = useState({ totalNetworks: 0, approvedNetworks: 0, pendingNetworks: 0, totalHospitals: 0, totalMembers: 0 })
+  const [staffDashboard, setStaffDashboard] = useState<any>(null)
 
   // Doctor-specific state
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([])
@@ -63,6 +64,19 @@ const Dashboard: React.FC = () => {
         setLoading(false)
       }
       return
+    }
+
+    // Hospital staff: load network-specific dashboard
+    if (isHospitalStaff) {
+      try {
+        const staffRes = await apiService.getHospitalStaffDashboard();
+        setStaffDashboard(staffRes.data?.data || staffRes.data || {});
+      } catch (err: any) {
+        console.error('Failed to load staff dashboard:', err?.message);
+        setStaffDashboard({ enrolledPatients: 0, todayQueueCount: 0, activeInpatients: 0, pendingReferrals: 0, staffCount: 0 });
+      }
+      setLoading(false);
+      return;
     }
 
     try {
@@ -336,6 +350,42 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── Hospital Staff Dashboard ── */}
+      {isHospitalStaff && staffDashboard && (
+        <div className="module-stats" style={{ marginBottom: 24 }}>
+          <div className="stat-card">
+            <div className="stat-icon">🏥</div>
+            <div className="stat-value">{staffDashboard.hospitalName || t('dashboard.noHospital')}</div>
+            <div className="stat-label">{t('dashboard.stats.myHospital')}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">🐾</div>
+            <div className="stat-value">{staffDashboard.enrolledPatients || 0}</div>
+            <div className="stat-label">{t('dashboard.stats.enrolledPatients')}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">📋</div>
+            <div className="stat-value">{staffDashboard.todayQueueCount || 0}</div>
+            <div className="stat-label">{t('dashboard.stats.todayQueue')}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">🛏️</div>
+            <div className="stat-value">{staffDashboard.activeInpatients || 0}</div>
+            <div className="stat-label">{t('dashboard.stats.activeInpatients')}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">🔄</div>
+            <div className="stat-value">{staffDashboard.pendingReferrals || 0}</div>
+            <div className="stat-label">{t('dashboard.stats.pendingReferrals')}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-icon">👥</div>
+            <div className="stat-value">{staffDashboard.staffCount || 0}</div>
+            <div className="stat-label">{t('dashboard.stats.branchStaff')}</div>
+          </div>
         </div>
       )}
 

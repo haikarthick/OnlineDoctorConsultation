@@ -728,6 +728,7 @@
     "cancelBooking": "இந்த முன்பதிவை ரத்துசெய்யவா?",
     "declinedByDoctor": "மருத்துவரால் நிராகரிக்கப்பட்டது",
     "pageTitle": "சமீபத்திய ஆலோசனைகள்",
+    "noHospital": "ஒதுக்கப்படவில்லை",
     "stats": {
       "appointments": "சந்திப்புகள்",
       "consultations": "ஆலோசனைகள்",
@@ -739,7 +740,13 @@
       "approvedNetworks": "Approved Networks",
       "pendingApproval": "Pending Approval",
       "branchHospitals": "Branch Hospitals",
-      "networkMembers": "Network Members"
+      "networkMembers": "Network Members",
+      "myHospital": "எனது மருத்துவமனை",
+      "enrolledPatients": "பதிவு செய்த நோயாளிகள்",
+      "todayQueue": "இன்றைய வரிசை",
+      "activeInpatients": "செயலில் உள்ள உள்நோயாளிகள்",
+      "pendingReferrals": "நிலுவையில் உள்ள பரிந்துரைகள்",
+      "branchStaff": "கிளை ஊழியர்கள்"
     },
     "quickActions": {
       "viewConsultations": "ஆலோசனைகளைக் காண்க",
@@ -5630,7 +5637,8 @@
       "statusRevoked": "திரும்பப் பெறப்பட்டது",
       "noPending": "நிலுவையில் உள்ள சேர்க்கைகள் இல்லை",
       "noActive": "செயலில் உள்ள சேர்க்கைகள் இல்லை",
-      "noEnrollments": "இன்னும் சேர்க்கைகள் இல்லை"
+      "noEnrollments": "இன்னும் சேர்க்கைகள் இல்லை",
+      "searchHelper": "இருக்கும் பயனர்களை தேடி பதிவு கோரிக்கை அனுப்பவும். நோயாளி ஒப்புக்கொள்ள வேண்டும்."
     },
     "audit": {
       "title": "தணிக்கை மற்றும் இணக்கம்",
@@ -5669,7 +5677,37 @@
     },
     "deactivate": "நெட்வொர்க்கை செயலிழக்கச் செய்",
     "deactivateConfirm": "இந்த நெட்வொர்க்கை செயலிழக்கச் செய்ய விரும்புகிறீர்களா? இதை எளிதில் மீட்டெடுக்க முடியாது.",
-    "deactivated": "நெட்வொர்க் வெற்றிகரமாக செயலிழக்கப்பட்டது"
+    "deactivated": "நெட்வொர்க் வெற்றிகரமாக செயலிழக்கப்பட்டது",
+    "financial": {
+      "title": "நெட்வொர்க் செயல்திறன்",
+      "consultations": "மொத்த ஆலோசனைகள்",
+      "bookings": "மொத்த முன்பதிவுகள்",
+      "hospital": "மருத்துவமனை",
+      "queueVisits": "வரிசை வருகைகள்",
+      "inpatients": "உள்நோயாளிகள்"
+    },
+    "leave": {
+      "tab": "விடுப்பு",
+      "title": "ஊழியர் விடுப்பு மேலாண்மை",
+      "requestLeave": "விடுப்பு கோரிக்கை",
+      "noRequests": "விடுப்பு கோரிக்கைகள் இல்லை",
+      "staffName": "ஊழியர்",
+      "type": "விடுப்பு வகை",
+      "dates": "தேதிகள்",
+      "status": "நிலை",
+      "actions": "நடவடிக்கைகள்"
+    },
+    "transfers": {
+      "title": "நோயாளி மாற்றம்",
+      "noTransfers": "மாற்றங்கள் இல்லை",
+      "patient": "நோயாளி",
+      "from": "அனுப்பும் மருத்துவமனை",
+      "to": "பெறும் மருத்துவமனை",
+      "reason": "காரணம்",
+      "status": "நிலை",
+      "actions": "நடவடிக்கைகள்",
+      "complete": "முடிக்கவும்"
+    }
   },
   "networkReferrals": {
     "title": "நெட்வொர்க் பரிந்துரைகள்",

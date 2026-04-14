@@ -412,3 +412,10 @@
 - **Lesson:** The error handler ONLY extracts messages from AppError subclasses. Plain Error objects ALWAYS return 500 Internal Server Error. Use: ValidationError(msg)=400, NotFoundError(resource)=404, ForbiddenError(msg)=403, ConflictError(msg)=409, DatabaseError(msg)=500
 - **Apply to:** All backend services — every throw statement
 
+
+### LESSON-042 — Never confirm a fix without deployed verification
+- **Logged:** 2026-04-14 15:37
+- **Context:** Email was marked 'fixed' after local SMTP test passed, but Render free-tier blocks outbound SMTP entirely. The bug was only caught after user repeatedly asked 'did you test it?' and we finally called the deployed API.
+- **Lesson:** EVERY fix that touches backend behavior MUST be verified by calling the deployed Render API endpoint AFTER deploy completes — NEVER rely on local testing alone. The confirmation sequence is: code fix → commit → push → wait for deploy → call deployed API → confirm response → THEN tell user it is fixed.
+- **Apply to:** All future backend fixes, all future feature confirmations
+

@@ -716,7 +716,7 @@ const HospitalNetworks: React.FC = () => {
   const { user } = useAuth()
   const { formatDate } = useSettings()
 
-  const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients' | 'referrals'>('networks')
+  const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients' | 'referrals' | 'leave'>('networks')
   const [selectedNetwork, setSelectedNetwork] = useState<HospitalNetwork | null>(null)
 
   const [networks, setNetworks] = useState<HospitalNetwork[]>([])
@@ -789,6 +789,12 @@ const HospitalNetworks: React.FC = () => {
   const [responseNotes, setResponseNotes] = useState('')
   const [respondingSubmitting, setRespondingSubmitting] = useState(false)
 
+  // ─── Financial / Leave / Transfers State ────────────────────────────────────
+  const [financialData, setFinancialData] = useState<any>(null)
+  const [leaveRequests, setLeaveRequests] = useState<any[]>([])
+  const [showLeaveModal, setShowLeaveModal] = useState(false)
+  const [transfers, setTransfers] = useState<any[]>([])
+
   const loadNetworks = useCallback(async () => {
     setLoading(true); setError('')
     try {
@@ -821,6 +827,10 @@ const HospitalNetworks: React.FC = () => {
       const rawHospitals = hospRes?.data?.hospitals ?? hospRes?.hospitals ?? hospRes?.data ?? hospRes ?? []
       setNetworkHospitals(Array.isArray(rawHospitals) ? rawHospitals : [])
       setNetworkMembers(memRes.data ?? memRes ?? [])
+      // Load financial summary
+      apiService.getNetworkFinancialSummary(network.id).then((res: any) => {
+        setFinancialData(res.data?.data || res.data || null)
+      }).catch(() => setFinancialData(null))
     } finally {
       setDetailLoading(false)
     }
@@ -923,7 +933,34 @@ const HospitalNetworks: React.FC = () => {
 
   useEffect(() => {
     if (activeTab === 'referrals') loadReferrals(referralDirection)
+    if (activeTab === 'leave') loadLeaveRequests()
   }, [activeTab, selectedNetwork, referralDirection]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Leave Management logic ─────────────────────────────────────────────────
+  const loadLeaveRequests = async () => {
+    if (!selectedNetwork) return
+    try {
+      const res = await apiService.listLeaveRequests(selectedNetwork.id)
+      setLeaveRequests(res.data?.data?.rows || res.data?.rows || res.data?.data || [])
+    } catch (err: any) {
+      console.error('Failed to load leave requests:', err?.message)
+    }
+  }
+
+  // ─── Patient Transfers logic ────────────────────────────────────────────────
+  const loadTransfers = async () => {
+    if (!selectedNetwork) return
+    try {
+      const res = await apiService.listPatientTransfers(selectedNetwork.id)
+      setTransfers(res.data?.data || res.data || [])
+    } catch (err: any) {
+      console.error('Failed to load transfers:', err?.message)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'referrals' && selectedNetwork) loadTransfers()
+  }, [activeTab, selectedNetwork]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (showCreateReferralModal && selectedNetwork) {
@@ -1111,7 +1148,22 @@ const HospitalNetworks: React.FC = () => {
       (e.animalName ?? '').toLowerCase().includes(q)
   })
 
-  const exportAuditCsv = () => {
+  const exportAuditCsv = async () => {
+    if (selectedNetwork) {
+      try {
+        const res = await apiService.exportAuditLogs(selectedNetwork.id)
+        const blob = new Blob([res.data], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.csv`
+        a.click()
+        window.URL.revokeObjectURL(url)
+        return
+      } catch {
+        // Fall back to client-side export
+      }
+    }
     const headers = ['Accessor', 'Email', 'Role', 'Animal', 'Animal ID', 'Record Type', 'Access Type', 'Result', 'Denial Reason', 'Date']
     const rows = filteredAuditLogs.map(e => [
       e.accessorName, e.accessorEmail, e.accessorRole,
@@ -1199,6 +1251,14 @@ const HospitalNetworks: React.FC = () => {
             onClick={() => setActiveTab('referrals')}
           >
             🔄 {t('networkReferrals.tab')}
+          </button>
+        )}
+        {selectedNetwork && (
+          <button
+            className={`module-tab${activeTab === 'leave' ? ' active' : ''}`}
+            onClick={() => setActiveTab('leave')}
+          >
+            🏖️ {t('hospitalNetworks.leave.tab')}
           </button>
         )}
       </div>
@@ -1406,6 +1466,52 @@ const HospitalNetworks: React.FC = () => {
                   <div className="hn-stat-card hn-stat-teal">
                     <div className="hn-stat-value">{dashboard.activeConsents ?? 0}</div>
                     <div className="hn-stat-label">Active Consents</div>
+                  </div>
+                </div>
+              )}
+
+              {financialData && (
+                <div className="module-card hn-financial-card">
+                  <div className="card-header">
+                    <h3>📊 {t('hospitalNetworks.financial.title')}</h3>
+                  </div>
+                  <div className="card-body">
+                    <div className="module-stats">
+                      <div className="stat-card">
+                        <div className="stat-icon">📋</div>
+                        <div className="stat-value">{financialData.totalConsultations || 0}</div>
+                        <div className="stat-label">{t('hospitalNetworks.financial.consultations')}</div>
+                      </div>
+                      <div className="stat-card">
+                        <div className="stat-icon">📅</div>
+                        <div className="stat-value">{financialData.totalBookings || 0}</div>
+                        <div className="stat-label">{t('hospitalNetworks.financial.bookings')}</div>
+                      </div>
+                    </div>
+                    {financialData.hospitalBreakdown?.length > 0 && (
+                      <div className="data-table-container hn-financial-table">
+                        <table className="module-table">
+                          <thead>
+                            <tr>
+                              <th>{t('hospitalNetworks.financial.hospital')}</th>
+                              <th>{t('hospitalNetworks.financial.bookings')}</th>
+                              <th>{t('hospitalNetworks.financial.queueVisits')}</th>
+                              <th>{t('hospitalNetworks.financial.inpatients')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {financialData.hospitalBreakdown.map((h: any) => (
+                              <tr key={h.id}>
+                                <td>{h.name}</td>
+                                <td>{h.bookings}</td>
+                                <td>{h.queueVisits}</td>
+                                <td>{h.inpatients}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -1722,6 +1828,9 @@ const HospitalNetworks: React.FC = () => {
                   </button>
                 </div>
                 <div className="card-body">
+                  <p className="module-form-helper" style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>
+                    {t('hospitalNetworks.patients.searchHelper')}
+                  </p>
                   <div className="module-form-group">
                     <input
                       className="module-input"
@@ -2275,6 +2384,60 @@ const HospitalNetworks: React.FC = () => {
             </div>
           )}
 
+          {/* ── Patient Transfers Section ── */}
+          <div className="module-card hn-transfers-card">
+            <div className="card-header">
+              <h3>🔄 {t('hospitalNetworks.transfers.title')}</h3>
+            </div>
+            <div className="card-body">
+              {transfers.length === 0 ? (
+                <p className="hn-panel-empty">{t('hospitalNetworks.transfers.noTransfers')}</p>
+              ) : (
+                <div className="data-table-container">
+                  <table className="module-table">
+                    <thead>
+                      <tr>
+                        <th>{t('hospitalNetworks.transfers.patient')}</th>
+                        <th>{t('hospitalNetworks.transfers.from')}</th>
+                        <th>{t('hospitalNetworks.transfers.to')}</th>
+                        <th>{t('hospitalNetworks.transfers.reason')}</th>
+                        <th>{t('hospitalNetworks.transfers.status')}</th>
+                        <th>{t('hospitalNetworks.transfers.actions')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transfers.map((t_item: any) => (
+                        <tr key={t_item.id}>
+                          <td>{t_item.animalName} ({t_item.animalSpecies})</td>
+                          <td>{t_item.fromHospitalName}</td>
+                          <td>{t_item.toHospitalName}</td>
+                          <td>{t_item.reason}</td>
+                          <td>
+                            <span className={`module-badge ${t_item.status === 'completed' ? 'badge-success' : 'badge-pending'}`}>
+                              {t_item.status}
+                            </span>
+                          </td>
+                          <td>
+                            {t_item.status === 'accepted' && (
+                              <button className="module-btn small" onClick={async () => {
+                                try {
+                                  await apiService.completePatientTransfer(selectedNetwork!.id, t_item.id)
+                                  loadTransfers()
+                                } catch (err: any) { console.error(err) }
+                              }}>
+                                ✅ {t('hospitalNetworks.transfers.complete')}
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Create Referral Modal */}
           {showCreateReferralModal && (
             <div
@@ -2394,6 +2557,129 @@ const HospitalNetworks: React.FC = () => {
                      responseModal.action === 'accepted' ? `✓ ${t('networkReferrals.accept')}` : `✗ ${t('networkReferrals.reject')}`}
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ════ TAB 6: LEAVE MANAGEMENT ════ */}
+      {activeTab === 'leave' && selectedNetwork && (
+        <div className="hn-tab-content">
+          <div className="hn-audit-header">
+            <div>
+              <h2 className="hn-audit-section-title">🏖️ {t('hospitalNetworks.leave.title')}</h2>
+            </div>
+            <button className="module-btn primary" onClick={() => setShowLeaveModal(true)}>
+              + {t('hospitalNetworks.leave.requestLeave')}
+            </button>
+          </div>
+          {leaveRequests.length === 0 ? (
+            <div className="hn-empty-state">
+              <div className="hn-empty-icon">🏖️</div>
+              <div className="hn-empty-title">{t('hospitalNetworks.leave.noRequests')}</div>
+            </div>
+          ) : (
+            <div className="data-table-container">
+              <table className="module-table">
+                <thead>
+                  <tr>
+                    <th>{t('hospitalNetworks.leave.staffName')}</th>
+                    <th>{t('hospitalNetworks.leave.type')}</th>
+                    <th>{t('hospitalNetworks.leave.dates')}</th>
+                    <th>{t('hospitalNetworks.leave.status')}</th>
+                    <th>{t('hospitalNetworks.leave.actions')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaveRequests.map((lr: any) => (
+                    <tr key={lr.id}>
+                      <td>{lr.userName || '—'}</td>
+                      <td><span className="module-badge">{lr.leave_type}</span></td>
+                      <td>{new Date(lr.start_date).toLocaleDateString()} – {new Date(lr.end_date).toLocaleDateString()}</td>
+                      <td>
+                        <span className={`module-badge ${lr.status === 'approved' ? 'badge-success' : lr.status === 'rejected' ? 'badge-error' : 'badge-pending'}`}>
+                          {lr.status}
+                        </span>
+                      </td>
+                      <td>
+                        {lr.status === 'pending' && (
+                          <div className="hn-leave-actions">
+                            <button className="module-btn small" onClick={async () => {
+                              try {
+                                await apiService.updateLeaveRequest(selectedNetwork!.id, lr.id, { status: 'approved' })
+                                loadLeaveRequests()
+                              } catch (err: any) { console.error(err) }
+                            }}>✅</button>
+                            <button className="module-btn small" onClick={async () => {
+                              try {
+                                await apiService.updateLeaveRequest(selectedNetwork!.id, lr.id, { status: 'rejected', rejectionReason: 'Declined by admin' })
+                                loadLeaveRequests()
+                              } catch (err: any) { console.error(err) }
+                            }}>❌</button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Leave Request Modal */}
+          {showLeaveModal && (
+            <div
+              className="hn-modal-overlay"
+              onClick={() => setShowLeaveModal(false)}
+            >
+              <div className="hn-modal-content" onClick={e => e.stopPropagation()}>
+                <div className="hn-modal-header">
+                  <h3>🏖️ {t('hospitalNetworks.leave.requestLeave')}</h3>
+                  <button type="button" className="hn-modal-close" onClick={() => setShowLeaveModal(false)}>✕</button>
+                </div>
+                <form onSubmit={async (ev) => {
+                  ev.preventDefault()
+                  const fd = new FormData(ev.currentTarget)
+                  try {
+                    await apiService.createLeaveRequest(selectedNetwork!.id, {
+                      leave_type: fd.get('leave_type'),
+                      start_date: fd.get('start_date'),
+                      end_date: fd.get('end_date'),
+                      reason: fd.get('reason'),
+                    })
+                    setShowLeaveModal(false)
+                    loadLeaveRequests()
+                  } catch (err: any) { console.error(err) }
+                }}>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('hospitalNetworks.leave.type')} *</label>
+                    <select name="leave_type" className="module-input" required>
+                      <option value="annual">Annual</option>
+                      <option value="sick">Sick</option>
+                      <option value="personal">Personal</option>
+                      <option value="emergency">Emergency</option>
+                    </select>
+                  </div>
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalNetworks.leave.dates')} *</label>
+                      <input type="date" name="start_date" className="module-input" required />
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">&nbsp;</label>
+                      <input type="date" name="end_date" className="module-input" required />
+                    </div>
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('hospitalNetworks.transfers.reason')}</label>
+                    <textarea name="reason" className="module-input" rows={3} />
+                  </div>
+                  <div className="hn-modal-actions">
+                    <button type="button" className="module-btn" onClick={() => setShowLeaveModal(false)}>{t('common.cancel', 'Cancel')}</button>
+                    <button type="submit" className="module-btn primary">{t('hospitalNetworks.leave.requestLeave')}</button>
+                  </div>
+                </form>
               </div>
             </div>
           )}

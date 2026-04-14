@@ -56,10 +56,19 @@ export class MedicalRecordController {
 
     if (req.userRole === 'admin') {
       filters.isAdmin = true;
-    } else {
-      filters.userId = req.userId;
+      const result = await MedicalRecordService.listRecords(filters);
+      res.json({ success: true, data: result });
+      return;
     }
 
+    if (req.userRole === 'hospital_staff' || req.userRole === 'corporate_admin') {
+      filters.userId = req.userId!;
+      const result = await MedicalRecordService.listNetworkRecords(filters);
+      res.json({ success: true, data: result });
+      return;
+    }
+
+    filters.userId = req.userId;
     const result = await MedicalRecordService.listRecords(filters);
     res.json({ success: true, data: result });
   }

@@ -730,6 +730,7 @@
     "cancelBooking": "ಈ ಬುಕಿಂಗ್ ರದ್ದುಮಾಡಬೇಕೇ?",
     "declinedByDoctor": "ವೈದ್ಯರಿಂದ ನಿರಾಕರಿಸಲಾಗಿದೆ",
     "pageTitle": "ಇತ್ತೀಚಿನ ಸಮಾಲೋಚನೆಗಳು",
+    "noHospital": "ನಿಯೋಜಿಸಲಾಗಿಲ್ಲ",
     "stats": {
       "appointments": "ನೇಮಕಾತಿಗಳು",
       "consultations": "ಸಮಾಲೋಚನೆಗಳು",
@@ -741,7 +742,13 @@
       "approvedNetworks": "Approved Networks",
       "pendingApproval": "Pending Approval",
       "branchHospitals": "Branch Hospitals",
-      "networkMembers": "Network Members"
+      "networkMembers": "Network Members",
+      "myHospital": "ನನ್ನ ಆಸ್ಪತ್ರೆ",
+      "enrolledPatients": "ನೋಂದಾಯಿತ ರೋಗಿಗಳು",
+      "todayQueue": "ಇಂದಿನ ಸರತಿ",
+      "activeInpatients": "ಸಕ್ರಿಯ ಒಳರೋಗಿಗಳು",
+      "pendingReferrals": "ಬಾಕಿ ರೆಫರಲ್‌ಗಳು",
+      "branchStaff": "ಶಾಖೆ ಸಿಬ್ಬಂದಿ"
     },
     "quickActions": {
       "viewConsultations": "ಸಮಾಲೋಚನೆಗಳನ್ನು ನೋಡಿ",
@@ -5584,7 +5591,8 @@
       "statusRevoked": "ಹಿಂತೆಗೆದುಕೊಳ್ಳಲಾಗಿದೆ",
       "noPending": "ಬಾಕಿ ನೋಂದಣಿಗಳಿಲ್ಲ",
       "noActive": "ಸಕ್ರಿಯ ನೋಂದಣಿಗಳಿಲ್ಲ",
-      "noEnrollments": "ಇನ್ನೂ ನೋಂದಣಿಗಳಿಲ್ಲ"
+      "noEnrollments": "ಇನ್ನೂ ನೋಂದಣಿಗಳಿಲ್ಲ",
+      "searchHelper": "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬಳಕೆದಾರರನ್ನು ಹುಡುಕಿ ನೋಂದಣಿ ವಿನಂತಿ ಕಳುಹಿಸಿ. ರೋಗಿ ಒಪ್ಪಿಕೊಳ್ಳಬೇಕು."
     },
     "audit": {
       "title": "ಆಡಿಟ್ ಮತ್ತು ಅನುಸರಣೆ",
@@ -5623,7 +5631,37 @@
     },
     "deactivate": "ನೆಟ್‌ವರ್ಕ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
     "deactivateConfirm": "ಈ ನೆಟ್‌ವರ್ಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಬಯಸುತ್ತೀರಾ? ಇದನ್ನು ಸುಲಭವಾಗಿ ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.",
-    "deactivated": "ನೆಟ್‌ವರ್ಕ್ ಯಶಸ್ವಿಯಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"
+    "deactivated": "ನೆಟ್‌ವರ್ಕ್ ಯಶಸ್ವಿಯಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
+    "financial": {
+      "title": "ನೆಟ್‌ವರ್ಕ್ ಕಾರ್ಯಕ್ಷಮತೆ",
+      "consultations": "ಒಟ್ಟು ಸಮಾಲೋಚನೆಗಳು",
+      "bookings": "ಒಟ್ಟು ಬುಕಿಂಗ್‌ಗಳು",
+      "hospital": "ಆಸ್ಪತ್ರೆ",
+      "queueVisits": "ಸರತಿ ಭೇಟಿಗಳು",
+      "inpatients": "ಒಳರೋಗಿಗಳು"
+    },
+    "leave": {
+      "tab": "ರಜೆ",
+      "title": "ಸಿಬ್ಬಂದಿ ರಜೆ ನಿರ್ವಹಣೆ",
+      "requestLeave": "ರಜೆ ವಿನಂತಿ",
+      "noRequests": "ರಜೆ ವಿನಂತಿಗಳಿಲ್ಲ",
+      "staffName": "ಸಿಬ್ಬಂದಿ",
+      "type": "ರಜೆ ಪ್ರಕಾರ",
+      "dates": "ದಿನಾಂಕಗಳು",
+      "status": "ಸ್ಥಿತಿ",
+      "actions": "ಕ್ರಮಗಳು"
+    },
+    "transfers": {
+      "title": "ರೋಗಿ ವರ್ಗಾವಣೆ",
+      "noTransfers": "ವರ್ಗಾವಣೆಗಳಿಲ್ಲ",
+      "patient": "ರೋಗಿ",
+      "from": "ಇಂದ ಆಸ್ಪತ್ರೆ",
+      "to": "ಗೆ ಆಸ್ಪತ್ರೆ",
+      "reason": "ಕಾರಣ",
+      "status": "ಸ್ಥಿತಿ",
+      "actions": "ಕ್ರಮಗಳು",
+      "complete": "ಪೂರ್ಣಗೊಳಿಸಿ"
+    }
   },
   "networkReferrals": {
     "title": "ನೆಟ್‌ವರ್ಕ್ ರೆಫರಲ್‌ಗಳು",

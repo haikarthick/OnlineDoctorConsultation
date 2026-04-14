@@ -308,6 +308,69 @@ export class MedicalRecordService {
     }
   }
 
+  async listNetworkRecords(filters: {
+    userId: string;
+    animalId?: string; recordType?: string;
+    status?: string; severity?: string;
+    search?: string; limit?: number; offset?: number;
+  }): Promise<{ records: MedicalRecord[]; total: number }> {
+    try {
+      // Find user's network
+      const memberResult = await database.query(
+        `SELECT network_id, hospital_id FROM hospital_network_members 
+         WHERE user_id = $1 AND is_active = true LIMIT 1`,
+        [filters.userId]
+      );
+      if (memberResult.rows.length === 0) {
+        return { records: [], total: 0 };
+      }
+      const { network_id } = memberResult.rows[0];
+
+      const conditions: string[] = [
+        'acc.network_id = $1',
+        'acc.enrollment_status = \'active\'',
+        'acc.is_active = true',
+      ];
+      const params: any[] = [network_id];
+      let idx = 1;
+
+      if (filters.animalId) { idx++; conditions.push(`mr.animal_id = $${idx}`); params.push(filters.animalId); }
+      if (filters.recordType) { idx++; conditions.push(`mr.record_type = $${idx}`); params.push(filters.recordType); }
+      if (filters.status) { idx++; conditions.push(`mr.status = $${idx}`); params.push(filters.status); }
+      if (filters.severity) { idx++; conditions.push(`mr.severity = $${idx}`); params.push(filters.severity); }
+      if (filters.search) {
+        idx++; conditions.push(`(mr.title ILIKE $${idx} OR mr.content ILIKE $${idx} OR mr.record_number ILIKE $${idx} OR a.name ILIKE $${idx})`);
+        params.push(`%${filters.search}%`);
+      }
+
+      const where = `WHERE ${conditions.join(' AND ')}`;
+      const limit = Math.min(filters.limit || 20, 100);
+      const offset = filters.offset || 0;
+
+      const query = `
+        SELECT ${RECORD_SELECT}
+        ${RECORD_FROM}
+        JOIN animal_care_contexts acc ON acc.animal_id = mr.animal_id
+        ${where}
+        ORDER BY mr.created_at DESC LIMIT $${idx + 1} OFFSET $${idx + 2}
+      `;
+      const countQuery = `
+        SELECT COUNT(*) as count FROM medical_records mr
+        LEFT JOIN animals a ON a.id = mr.animal_id
+        JOIN animal_care_contexts acc ON acc.animal_id = mr.animal_id
+        ${where}
+      `;
+
+      const [recordsResult, countResult] = await Promise.all([
+        database.query(query, [...params, limit, offset]),
+        database.query(countQuery, params),
+      ]);
+      return { records: recordsResult.rows, total: parseInt(countResult.rows[0]?.count || '0', 10) };
+    } catch (error) {
+      throw new DatabaseError('Error listing network medical records', { originalError: error });
+    }
+  }
+
   async updateRecord(recordId: string, updates: Partial<MedicalRecordCreateDTO>, updatedBy?: string, updatedByName?: string, changeReason?: string): Promise<MedicalRecord> {
     try {
       const oldRecord = await this.getRecord(recordId);

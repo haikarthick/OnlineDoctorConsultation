@@ -66,8 +66,9 @@ export class AnimalController {
         result = await AnimalService.listAnimalsByOwner(req.userId!, limit, offset);
       }
     } else if (req.userRole === 'admin') {
-      // Admins see all animals
       result = await AnimalService.listAllAnimals(limit, offset);
+    } else if (req.userRole === 'hospital_staff' || req.userRole === 'corporate_admin') {
+      result = await AnimalService.listAnimalsForNetworkStaff(req.userId!, limit, offset);
     } else {
       // Pet owners/farmers see their own animals
       result = await AnimalService.listAnimalsByOwner(req.userId!, limit, offset);

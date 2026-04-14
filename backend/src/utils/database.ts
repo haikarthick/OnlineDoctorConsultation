@@ -948,6 +948,42 @@ class PostgresDatabase {
       CREATE INDEX IF NOT EXISTS idx_network_referrals_animal ON network_referrals(animal_id)
     `).catch(() => {});
 
+    // Add referral_type column for transfer support
+    await this.pool.query(
+      `ALTER TABLE network_referrals ADD COLUMN IF NOT EXISTS referral_type VARCHAR(20) DEFAULT 'referral' CHECK (referral_type IN ('referral', 'transfer'))`
+    ).catch(() => {});
+    await this.pool.query(
+      `ALTER TABLE network_referrals ADD COLUMN IF NOT EXISTS transfer_reason TEXT`
+    ).catch(() => {});
+    await this.pool.query(
+      `ALTER TABLE network_referrals ADD COLUMN IF NOT EXISTS transferred_at TIMESTAMPTZ`
+    ).catch(() => {});
+
+    // Staff leave requests table
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS staff_leave_requests (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        network_id UUID REFERENCES hospital_networks(id) ON DELETE CASCADE,
+        hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        leave_type VARCHAR(30) NOT NULL DEFAULT 'annual'
+          CHECK (leave_type IN ('annual', 'sick', 'personal', 'maternity', 'paternity', 'unpaid', 'training', 'other')),
+        start_date DATE NOT NULL,
+        end_date DATE NOT NULL,
+        reason TEXT,
+        status VARCHAR(20) DEFAULT 'pending'
+          CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+        approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        approved_at TIMESTAMPTZ,
+        rejection_reason TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_leave_requests_network ON staff_leave_requests(network_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_leave_requests_user ON staff_leave_requests(user_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_leave_requests_hospital ON staff_leave_requests(hospital_id)`).catch(() => {});
+
     // Missing FK indexes — prevent full table scans on common JOINs
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_consultations_animal_id ON consultations(animal_id)`).catch(() => {});
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_bookings_animal_id ON bookings(animal_id)`).catch(() => {});

@@ -3552,3 +3552,128 @@ VALUES (
   'accepted',
   'Patient presenting with grade 3/5 left hind lameness. Positive cranial drawer test. Radiographs inconclusive. MRI recommended at Branch 2 facility.'
 ) ON CONFLICT (id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- NETWORK REFERRALS — between branches within DemoVetGroup
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO network_referrals (id, network_id, from_hospital_id, to_hospital_id, from_vet_id, animal_id, reason, priority, status, clinical_notes, referral_type, created_by)
+VALUES
+  ('nr000000-0000-0000-0000-000000000001',
+   'hn000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000002',
+   'd0000000-0000-0000-0000-000000000002',
+   'e0000000-0000-0000-0000-000000000001',
+   'Specialist ophthalmology consultation needed — bilateral cataracts suspected',
+   'high', 'accepted',
+   'Bilateral lens opacity noted on slit lamp exam. Intraocular pressure 18 mmHg bilateral. ERG recommended at Coimbatore branch.',
+   'referral', 'd0000000-0000-0000-0000-000000000002'),
+  ('nr000000-0000-0000-0000-000000000002',
+   'hn000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000002',
+   'h0000000-0000-0000-0000-000000000001',
+   'd0000000-0000-0000-0000-000000000002',
+   'e0000000-0000-0000-0000-000000000002',
+   'Advanced dental procedure — root canal needed',
+   'normal', 'pending',
+   'Grade 4 periodontal disease, tooth #108 requires root canal or extraction. Refer to Chennai branch dental suite.',
+   'referral', 'd0000000-0000-0000-0000-000000000002'),
+  ('nr000000-0000-0000-0000-000000000003',
+   'hn000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000002',
+   'd0000000-0000-0000-0000-000000000002',
+   'e0000000-0000-0000-0000-000000000003',
+   'Patient transfer — owner relocating to Coimbatore',
+   'normal', 'completed',
+   'Owner moving permanently. Full records transferred. Last exam unremarkable.',
+   'transfer', 'd0000000-0000-0000-0000-000000000001')
+ON CONFLICT (id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- STAFF LEAVE REQUESTS — demo leave records
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO staff_leave_requests (id, network_id, hospital_id, user_id, leave_type, start_date, end_date, reason, status, approved_by, approved_at)
+VALUES
+  ('slr00000-0000-0000-0000-000000000001',
+   'hn000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000001',
+   'd0000000-0000-0000-0000-000000000003',
+   'annual', CURRENT_DATE + INTERVAL '7 days', CURRENT_DATE + INTERVAL '14 days',
+   'Annual family vacation — Ooty trip', 'approved',
+   'd0000000-0000-0000-0000-000000000001', NOW() - INTERVAL '2 days'),
+  ('slr00000-0000-0000-0000-000000000002',
+   'hn000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000001',
+   'd0000000-0000-0000-0000-000000000004',
+   'sick', CURRENT_DATE - INTERVAL '3 days', CURRENT_DATE - INTERVAL '1 day',
+   'Flu — doctor advised 3 days rest', 'approved',
+   'd0000000-0000-0000-0000-000000000002', NOW() - INTERVAL '3 days'),
+  ('slr00000-0000-0000-0000-000000000003',
+   'hn000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000002',
+   'd0000000-0000-0000-0000-000000000005',
+   'training', CURRENT_DATE + INTERVAL '21 days', CURRENT_DATE + INTERVAL '23 days',
+   'Advanced lab diagnostics certification course — TANUVAS', 'pending',
+   NULL, NULL),
+  ('slr00000-0000-0000-0000-000000000004',
+   'hn000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000001',
+   'd0000000-0000-0000-0000-000000000002',
+   'personal', CURRENT_DATE + INTERVAL '30 days', CURRENT_DATE + INTERVAL '31 days',
+   'Personal commitment', 'pending',
+   NULL, NULL)
+ON CONFLICT (id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- QUEUE ENTRIES — today's patient queue for demo branches
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO queue_entries (id, hospital_id, animal_id, owner_id, checked_in_by, status, priority, reason, triage_notes)
+VALUES
+  ('qe000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000001',
+   'e0000000-0000-0000-0000-000000000001',
+   'c0000000-0000-0000-0000-000000000001',
+   'd0000000-0000-0000-0000-000000000004',
+   'waiting', 'normal', 'Annual vaccination booster',
+   'No acute symptoms. Due for DHPP booster.'),
+  ('qe000000-0000-0000-0000-000000000002',
+   'h0000000-0000-0000-0000-000000000001',
+   'e0000000-0000-0000-0000-000000000002',
+   'c0000000-0000-0000-0000-000000000001',
+   'd0000000-0000-0000-0000-000000000004',
+   'in_consultation', 'high', 'Persistent vomiting since yesterday',
+   'T: 39.2°C, HR: 140bpm. Dehydration grade 2. Blood panel ordered.'),
+  ('qe000000-0000-0000-0000-000000000003',
+   'h0000000-0000-0000-0000-000000000002',
+   'e0000000-0000-0000-0000-000000000003',
+   'c0000000-0000-0000-0000-000000000002',
+   'd0000000-0000-0000-0000-000000000005',
+   'waiting', 'normal', 'Post-surgery follow-up — spay',
+   'Day 10 post-op. Incision check and suture removal.')
+ON CONFLICT (id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- INPATIENT ADMISSIONS — demo inpatient records
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO inpatient_admissions (id, hospital_id, animal_id, owner_id, admitted_by, admission_type, room_number, bed_number, status, diagnosis, treatment_plan)
+VALUES
+  ('ia000000-0000-0000-0000-000000000001',
+   'h0000000-0000-0000-0000-000000000001',
+   'e0000000-0000-0000-0000-000000000002',
+   'c0000000-0000-0000-0000-000000000001',
+   'd0000000-0000-0000-0000-000000000002',
+   'overnight_observation', 'R-101', 'B-1',
+   'admitted',
+   'Acute gastroenteritis — suspected dietary indiscretion',
+   'IV fluid therapy (LRS 10ml/kg/hr), maropitant 1mg/kg SQ q24h, NPO 12h then bland diet'),
+  ('ia000000-0000-0000-0000-000000000002',
+   'h0000000-0000-0000-0000-000000000002',
+   'e0000000-0000-0000-0000-000000000003',
+   'c0000000-0000-0000-0000-000000000002',
+   'd0000000-0000-0000-0000-000000000002',
+   'surgery_recovery', 'R-201', 'B-1',
+   'recovering',
+   'Post ovariohysterectomy — routine spay',
+   'Pain management: meloxicam 0.1mg/kg PO q24h x 5d. Activity restriction 14d. E-collar.')
+ON CONFLICT (id) DO NOTHING;

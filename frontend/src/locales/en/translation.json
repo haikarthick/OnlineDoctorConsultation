@@ -765,6 +765,7 @@
     "cancelBooking": "Cancel this booking?",
     "declinedByDoctor": "Declined by doctor",
     "pageTitle": "Recent Consultations",
+    "noHospital": "Not Assigned",
     "stats": {
       "appointments": "Appointments",
       "consultations": "Consultations",
@@ -776,7 +777,13 @@
       "approvedNetworks": "Approved Networks",
       "pendingApproval": "Pending Approval",
       "branchHospitals": "Branch Hospitals",
-      "networkMembers": "Network Members"
+      "networkMembers": "Network Members",
+      "myHospital": "My Hospital",
+      "enrolledPatients": "Enrolled Patients",
+      "todayQueue": "Today's Queue",
+      "activeInpatients": "Active Inpatients",
+      "pendingReferrals": "Pending Referrals",
+      "branchStaff": "Branch Staff"
     },
     "quickActions": {
       "viewConsultations": "View Consultations",
@@ -5706,7 +5713,8 @@
       "statusRevoked": "Revoked",
       "noPending": "No pending enrollments",
       "noActive": "No active enrollments",
-      "noEnrollments": "No enrollments yet"
+      "noEnrollments": "No enrollments yet",
+      "searchHelper": "Search for existing platform users to send enrollment requests. Patients must accept before their data becomes visible to network staff."
     },
     "audit": {
       "title": "Audit & Compliance",
@@ -5745,7 +5753,37 @@
     },
     "deactivate": "Deactivate Network",
     "deactivateConfirm": "Are you sure you want to deactivate this network? This cannot be easily undone.",
-    "deactivated": "Network deactivated successfully"
+    "deactivated": "Network deactivated successfully",
+    "financial": {
+      "title": "Network Performance",
+      "consultations": "Total Consultations",
+      "bookings": "Total Bookings",
+      "hospital": "Hospital",
+      "queueVisits": "Queue Visits",
+      "inpatients": "Inpatients"
+    },
+    "leave": {
+      "tab": "Leave",
+      "title": "Staff Leave Management",
+      "requestLeave": "Request Leave",
+      "noRequests": "No leave requests found",
+      "staffName": "Staff Member",
+      "type": "Leave Type",
+      "dates": "Dates",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "transfers": {
+      "title": "Patient Transfers",
+      "noTransfers": "No patient transfers found",
+      "patient": "Patient",
+      "from": "From Hospital",
+      "to": "To Hospital",
+      "reason": "Reason",
+      "status": "Status",
+      "actions": "Actions",
+      "complete": "Complete"
+    }
   },
   "networkReferrals": {
     "title": "Network Referrals",

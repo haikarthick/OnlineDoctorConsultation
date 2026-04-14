@@ -321,6 +321,61 @@ export class AnimalService {
     }
   }
 
+  async listAnimalsForNetworkStaff(userId: string, limit: number = 100, offset: number = 0): Promise<{ animals: Animal[]; total: number }> {
+    try {
+      // Find user's network membership
+      const memberResult = await database.query(
+        `SELECT network_id, hospital_id FROM hospital_network_members 
+         WHERE user_id = $1 AND is_active = true LIMIT 1`,
+        [userId]
+      );
+      if (memberResult.rows.length === 0) {
+        return { animals: [], total: 0 };
+      }
+      const { network_id } = memberResult.rows[0];
+
+      const query = `
+        SELECT DISTINCT a.id, a.owner_id as "ownerId", a.unique_id as "uniqueId", a.name, a.species, a.breed,
+               a.date_of_birth as "dateOfBirth", a.gender, a.weight, a.color,
+               a.microchip_id as "microchipId", a.ear_tag_id as "earTagId",
+               a.registration_number as "registrationNumber", a.is_neutered as "isNeutered",
+               a.insurance_provider as "insuranceProvider", a.insurance_policy_number as "insurancePolicyNumber",
+               a.insurance_expiry as "insuranceExpiry", a.medical_notes as "medicalNotes",
+               a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
+               a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
+               a.expected_due_date as "expectedDueDate",
+               a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
+               COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
+        FROM animals a
+        LEFT JOIN users u ON u.id = a.owner_id
+        JOIN animal_care_contexts acc ON acc.animal_id = a.id
+        WHERE a.is_active = true
+          AND acc.network_id = $1
+          AND acc.enrollment_status = 'active'
+          AND acc.is_active = true
+        ORDER BY a.name ASC LIMIT $2 OFFSET $3
+      `;
+      const countQuery = `
+        SELECT COUNT(DISTINCT a.id) as count FROM animals a
+        JOIN animal_care_contexts acc ON acc.animal_id = a.id
+        WHERE a.is_active = true
+          AND acc.network_id = $1
+          AND acc.enrollment_status = 'active'
+          AND acc.is_active = true
+      `;
+      const [animalsResult, countResult] = await Promise.all([
+        database.query(query, [network_id, limit, offset]),
+        database.query(countQuery, [network_id]),
+      ]);
+      return {
+        animals: animalsResult.rows,
+        total: parseInt(countResult.rows[0]?.count || '0', 10),
+      };
+    } catch (error) {
+      throw new DatabaseError('Error listing network staff animals', { originalError: error });
+    }
+  }
+
   async updateAnimal(animalId: string, updates: Partial<AnimalCreateDTO>): Promise<Animal> {
     try {
       const fieldMap: Record<string, string> = {

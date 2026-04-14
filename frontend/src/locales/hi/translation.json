@@ -730,6 +730,7 @@
     "cancelBooking": "इस बुकिंग को रद्द करें?",
     "declinedByDoctor": "डॉक्टर द्वारा अस्वीकृत",
     "pageTitle": "हाल की परामर्श",
+    "noHospital": "नियुक्त नहीं",
     "stats": {
       "appointments": "अपॉइंटमेंट",
       "consultations": "परामर्श",
@@ -741,7 +742,13 @@
       "approvedNetworks": "Approved Networks",
       "pendingApproval": "Pending Approval",
       "branchHospitals": "Branch Hospitals",
-      "networkMembers": "Network Members"
+      "networkMembers": "Network Members",
+      "myHospital": "मेरा अस्पताल",
+      "enrolledPatients": "नामांकित मरीज़",
+      "todayQueue": "आज की कतार",
+      "activeInpatients": "सक्रिय भर्ती",
+      "pendingReferrals": "लंबित रेफरल",
+      "branchStaff": "शाखा स्टाफ"
     },
     "quickActions": {
       "viewConsultations": "परामर्श देखें",
@@ -5641,7 +5648,8 @@
       "statusRevoked": "रद्द",
       "noPending": "कोई प्रतीक्षित नामांकन नहीं",
       "noActive": "कोई सक्रिय नामांकन नहीं",
-      "noEnrollments": "अभी कोई नामांकन नहीं"
+      "noEnrollments": "अभी कोई नामांकन नहीं",
+      "searchHelper": "मौजूदा प्लेटफ़ॉर्म उपयोगकर्ताओं को खोजें और नामांकन अनुरोध भेजें। मरीज़ को स्वीकृति देनी होगी।"
     },
     "audit": {
       "title": "ऑडिट और अनुपालन",
@@ -5680,7 +5688,37 @@
     },
     "deactivate": "नेटवर्क निष्क्रिय करें",
     "deactivateConfirm": "क्या आप इस नेटवर्क को निष्क्रिय करना चाहते हैं? इसे आसानी से पूर्ववत नहीं किया जा सकता।",
-    "deactivated": "नेटवर्क सफलतापूर्वक निष्क्रिय किया गया"
+    "deactivated": "नेटवर्क सफलतापूर्वक निष्क्रिय किया गया",
+    "financial": {
+      "title": "नेटवर्क प्रदर्शन",
+      "consultations": "कुल परामर्श",
+      "bookings": "कुल बुकिंग",
+      "hospital": "अस्पताल",
+      "queueVisits": "कतार विज़िट",
+      "inpatients": "भर्ती मरीज़"
+    },
+    "leave": {
+      "tab": "छुट्टी",
+      "title": "स्टाफ छुट्टी प्रबंधन",
+      "requestLeave": "छुट्टी का अनुरोध",
+      "noRequests": "कोई छुट्टी अनुरोध नहीं",
+      "staffName": "स्टाफ सदस्य",
+      "type": "छुट्टी प्रकार",
+      "dates": "तिथियां",
+      "status": "स्थिति",
+      "actions": "कार्रवाई"
+    },
+    "transfers": {
+      "title": "मरीज़ स्थानांतरण",
+      "noTransfers": "कोई स्थानांतरण नहीं",
+      "patient": "मरीज़",
+      "from": "स्रोत अस्पताल",
+      "to": "गंतव्य अस्पताल",
+      "reason": "कारण",
+      "status": "स्थिति",
+      "actions": "कार्रवाई",
+      "complete": "पूर्ण करें"
+    }
   },
   "networkReferrals": {
     "title": "नेटवर्क रेफरल",
