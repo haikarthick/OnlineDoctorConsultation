@@ -1417,3 +1417,62 @@
 </details>
 
 ---
+
+## 2026-04-14 09:39 · `19f4fb6` · 📝 DOCS
+
+**Commit:** docs: update past-bugs + lessons with SEED-001, SEED-002, LESSON-008b  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/lessons.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-04-14 09:53 · `d7b6892` · 🐛 FIX
+
+**Commit:** fix: severity 'normal' Joi validation + add Records tab to Medical Records  
+**Author:** haikarthick  
+**Categories:** i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - backend/src/middleware/validation.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/MedicalRecords.tsx
+
+</details>
+
+---
+
+## 2026-04-14 10:28 · `469ff6f` · 🐛 FIX
+
+**Commit:** fix: 30 error handler fixes + unique_id collision + resilient demo user creation  
+**Author:** haikarthick  
+**Categories:** SERVICE · UTILS · DB-SCHEMA · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/services/HospitalNetworkService.ts
+  - backend/src/utils/fixDemoPasswords.ts
+  - docker/seed-demo-data.sql
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+
+</details>
+
+---

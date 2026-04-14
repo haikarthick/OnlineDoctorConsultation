@@ -405,3 +405,10 @@
 - **Lesson:** When 0 search results: always show an alternate action (e.g. invite by email). Never leave user in a dead-end with no way forward
 - **Apply to:** All search-and-select modals with invite/register as alternate flows
 
+
+### LESSON-040 — AppError subclasses are the ONLY way to return meaningful errors
+- **Logged:** 2026-04-14 10:43
+- **Context:** HospitalNetworkService had 30 throw new Error() that all resulted in generic Internal Server Error. Users had no idea what went wrong
+- **Lesson:** The error handler ONLY extracts messages from AppError subclasses. Plain Error objects ALWAYS return 500 Internal Server Error. Use: ValidationError(msg)=400, NotFoundError(resource)=404, ForbiddenError(msg)=403, ConflictError(msg)=409, DatabaseError(msg)=500
+- **Apply to:** All backend services — every throw statement
+

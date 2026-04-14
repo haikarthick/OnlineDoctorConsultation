@@ -785,3 +785,27 @@ render-start.sh
 - **Fix:** ALWAYS use e?.response?.data?.message in catch blocks — never e.message alone for API errors
 - **Rule:** Not specified
 
+
+### ERROR-001 — 30 generic throw new Error() in HospitalNetworkService
+- **Logged:** 2026-04-14 10:42
+- **Symptom:** All hospital network API endpoints returned generic 'Internal Server Error' instead of actual error messages
+- **Root Cause:** HospitalNetworkService.ts had 30 instances of throw new Error(msg) instead of proper AppError subclasses. The error handler only returns meaningful messages for AppError subclasses; plain Error always returns 500 Internal Server Error
+- **Fix:** Replaced all 30 with ValidationError(400), ForbiddenError(403), ConflictError(409), NotFoundError(404), DatabaseError(500) with descriptive messages
+- **Rule:** NEVER use throw new Error() in services. ALWAYS use AppError subclasses (ValidationError, ForbiddenError, ConflictError, NotFoundError, DatabaseError) so the error handler returns the actual message to the client
+
+
+### SEED-003 — unique_id collision blocking 4 of 5 network demo users
+- **Logged:** 2026-04-14 10:43
+- **Symptom:** branch.director, staff.nurse, staff.reception, staff.labtech users failed to create. Only netadmin worked. DB showed 21 users instead of 25
+- **Root Cause:** fixDemoPasswords assigned USR-VET-004 to branch.director but seed-demo-data.sql already used USR-VET-004 for dr.priya.sharma. UNIQUE constraint violation on unique_id killed entire for-loop (no per-user try/catch)
+- **Fix:** Changed network demo unique_ids to USR-NET-002..005. Added per-user try/catch so one failure does not block remaining users. Added unique_id collision clearing before INSERT
+- **Rule:** ALWAYS use distinct unique_id prefixes per user category (USR-CRP for corporate, USR-NET for network, USR-VET for vets). ALWAYS wrap each user INSERT in individual try/catch
+
+
+### FRONTEND-001 — Error extraction using .data?.error instead of .data?.message
+- **Logged:** 2026-04-14 10:43
+- **Symptom:** Frontend catch blocks showed [object Object] or undefined instead of the actual error message in hospital network modals
+- **Root Cause:** The error handler returns { success, message, error: { message, code, statusCode } }. Frontend was using err.response.data.error (which is an OBJECT) instead of err.response.data.message (which is the string)
+- **Fix:** Fixed 6 catch blocks in HospitalNetworks.tsx to use .data?.message
+- **Rule:** ALWAYS use err?.response?.data?.message for error extraction. The .error field is an object containing {message,code,statusCode} — NOT a string
+
