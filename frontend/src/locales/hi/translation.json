@@ -1419,6 +1419,17 @@
       "queueVisits": "कतार / वॉक-इन यात्राएं",
       "inpatientAdmissions": "इनपेशेंट प्रवेश"
     },
+    "recordsTab": {
+      "selectPet": "एक पालतू चुनें",
+      "selectPetHint": "चिकित्सा रिकॉर्ड देखने के लिए एक पालतू चुनें",
+      "emptyTitle": "कोई रिकॉर्ड नहीं",
+      "emptySubtitle": "चिकित्सा रिकॉर्ड यहाँ दिखाई देंगे",
+      "filterBy": "फ़िल्टर करें:",
+      "allTypes": "सभी प्रकार",
+      "confidential": "गोपनीय",
+      "followUp": "फॉलो-अप:",
+      "by": "द्वारा:"
+    },
     "modals": {
       "newRecord": "📄 नया चिकित्सा रिकॉर्ड",
       "recordType": "रिकॉर्ड प्रकार",

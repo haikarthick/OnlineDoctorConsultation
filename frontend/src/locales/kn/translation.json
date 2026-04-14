@@ -1419,6 +1419,17 @@
       "queueVisits": "ಸಾಲು / ವಾಕ್-ಇನ್ ಭೇಟಿಗಳು",
       "inpatientAdmissions": "ಒಳರೋಗಿ ದಾಖಲಾತಿಗಳು"
     },
+    "recordsTab": {
+      "selectPet": "ಸಾಕುಪ್ರಾಣಿ ಆಯ್ಕೆಮಾಡಿ",
+      "selectPetHint": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳನ್ನು ನೋಡಲು ಸಾಕುಪ್ರಾಣಿ ಆಯ್ಕೆಮಾಡಿ",
+      "emptyTitle": "ದಾಖಲೆಗಳಿಲ್ಲ",
+      "emptySubtitle": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ",
+      "filterBy": "ಫಿಲ್ಟರ್:",
+      "allTypes": "ಎಲ್ಲಾ ವಿಧಗಳು",
+      "confidential": "ರಹಸ್ಯ",
+      "followUp": "ಫಾಲೋ-ಅಪ್:",
+      "by": "ಮೂಲಕ:"
+    },
     "modals": {
       "newRecord": "📄 New Medical Record",
       "recordType": "Record Type",

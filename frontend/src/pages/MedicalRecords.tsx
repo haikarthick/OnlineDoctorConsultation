@@ -6,7 +6,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 
-type Tab = 'overview' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline' | 'hospital_visits'
+type Tab = 'overview' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline' | 'hospital_visits' | 'records'
 
 const RECORD_TYPES = [
   { value: 'diagnosis', label: 'Diagnosis', icon: '🩺', color: '#667eea' },
@@ -65,6 +65,8 @@ const MedicalRecords: React.FC = () => {
   const [hospitalVisits, setHospitalVisits] = useState<{ queueVisits: any[]; inpatientAdmissions: any[] }>({ queueVisits: [], inpatientAdmissions: [] })
   const [loadingHospitalVisits, setLoadingHospitalVisits] = useState(false)
   const [networkReferralHistory, setNetworkReferralHistory] = useState<any[]>([])
+  const [medRecords, setMedRecords] = useState<any[]>([])
+  const [recordTypeFilter, setRecordTypeFilter] = useState('')
   const [enterpriseFilter, setEnterpriseFilter] = useState('')
   // Modal states
   const [showModal, setShowModal] = useState<string | null>(null)
@@ -190,6 +192,16 @@ const MedicalRecords: React.FC = () => {
     } catch { setConsultations([]); setConsultationsTotal(0) }
   }, [selectedAnimal])
 
+  const loadMedRecords = useCallback(async (typeFilter?: string) => {
+    if (!selectedAnimal) { setMedRecords([]); return }
+    try {
+      const params: any = { animalId: selectedAnimal, limit: 100 }
+      if (typeFilter) params.recordType = typeFilter
+      const res = await apiService.listMedicalRecords(params)
+      setMedRecords(res.data?.records || res.data?.items || (Array.isArray(res.data) ? res.data : []))
+    } catch { setMedRecords([]) }
+  }, [selectedAnimal])
+
   const loadAllData = useCallback(async () => {
     setLoading(true)
     setError('')
@@ -213,6 +225,7 @@ const MedicalRecords: React.FC = () => {
       if (activeTab === 'weight') loadWeightHistory()
       if (activeTab === 'timeline') loadTimeline()
       if (activeTab === 'hospital_visits') loadHospitalVisits()
+      if (activeTab === 'records') loadMedRecords(recordTypeFilter)
     } else {
       loadPrescriptions()
       loadStats()
@@ -251,6 +264,7 @@ const MedicalRecords: React.FC = () => {
       })
       setShowModal(null); setModalData({})
       loadStats()
+      if (activeTab === 'records') loadMedRecords(recordTypeFilter)
     } catch (err: any) {
       setModalError(err?.response?.data?.message || err?.response?.data?.error?.message || t('medicalRecords.failedToSaveRecord'))
     } finally { setSaving(false) }
@@ -371,6 +385,7 @@ const MedicalRecords: React.FC = () => {
     { key: 'lab_results', icon: '🔬', label: t('medicalRecords.tabs.labResults'), count: stats?.labResults?.total ?? labResults.length },
     { key: 'allergies', icon: '⚠️', label: t('medicalRecords.tabs.allergies'), count: stats?.allergies?.total ?? allergies.length },
     { key: 'weight', icon: '⚖️', label: t('medicalRecords.tabs.weight'), count: weightHistory.length },
+    { key: 'records', icon: '📋', label: t('medicalRecords.tabs.records'), count: stats?.totalRecords || undefined },
     { key: 'timeline', icon: '📅', label: t('medicalRecords.tabs.timeline') },
     { key: 'hospital_visits', icon: '🏥', label: t('medicalRecords.tabs.hospitalVisits'), count: (hospitalVisits.queueVisits.length + hospitalVisits.inpatientAdmissions.length) || undefined },
   ]
@@ -507,8 +522,10 @@ const MedicalRecords: React.FC = () => {
                 <StatCard icon="🔬" label={t('medicalRecords.overview.stats.labResults')} value={stats.labResults?.total || 0}
                   sub={stats.labResults?.pending ? `${stats.labResults.pending} ${t('medicalRecords.overview.pending')}` : ''} color="#d97706" />
                 <StatCard icon="⚠️" label={t('medicalRecords.overview.stats.activeAllergies')} value={stats.allergies?.active || 0} color="#dc2626" />
-                <StatCard icon="📋" label={t('medicalRecords.overview.stats.medicalRecords')} value={stats.totalRecords || 0} color="#6b7280" />
-                <StatCard icon="📅" label={t('medicalRecords.overview.stats.followUps')} value={stats.upcomingFollowUps || 0} color="#ea580c" />
+                <StatCard icon="📋" label={t('medicalRecords.overview.stats.medicalRecords')} value={stats.totalRecords || 0} color="#6b7280"
+                  onClick={stats.totalRecords ? () => { setRecordTypeFilter(''); setActiveTab('records'); loadMedRecords('') } : undefined} />
+                <StatCard icon="📅" label={t('medicalRecords.overview.stats.followUps')} value={stats.upcomingFollowUps || 0} color="#ea580c"
+                  onClick={stats.upcomingFollowUps ? () => { setRecordTypeFilter('follow_up'); setActiveTab('records'); loadMedRecords('follow_up') } : undefined} />
               </div>
             )}
 
@@ -874,6 +891,73 @@ const MedicalRecords: React.FC = () => {
           </div>
         )}
 
+        {/* ═══ RECORDS TAB ═══════════════════════════════════════ */}
+        {activeTab === 'records' && (
+          <div>
+            {!selectedAnimal ? (
+              <EmptyState icon="📋" title={t('medicalRecords.recordsTab.selectPet')} subtitle={t('medicalRecords.recordsTab.selectPetHint')} />
+            ) : (
+              <>
+                {/* Filter bar */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontSize: 13, color: '#6b7280', fontWeight: 500 }}>{t('medicalRecords.recordsTab.filterBy')}</span>
+                  {[{ value: '', label: t('medicalRecords.recordsTab.allTypes') }, ...RECORD_TYPES].map(rt => (
+                    <button
+                      key={rt.value}
+                      onClick={() => { setRecordTypeFilter(rt.value); loadMedRecords(rt.value) }}
+                      style={{
+                        padding: '4px 12px', borderRadius: 16, fontSize: 12, fontWeight: 500, border: '1px solid',
+                        borderColor: recordTypeFilter === rt.value ? '#667eea' : '#e5e7eb',
+                        background: recordTypeFilter === rt.value ? '#667eea' : '#fff',
+                        color: recordTypeFilter === rt.value ? '#fff' : '#374151',
+                        cursor: 'pointer',
+                      }}
+                    >{'icon' in rt ? `${rt.icon} ` : ''}{rt.label}</button>
+                  ))}
+                </div>
+                {medRecords.length === 0 ? (
+                  <EmptyState icon="📋" title={t('medicalRecords.recordsTab.emptyTitle')} subtitle={t('medicalRecords.recordsTab.emptySubtitle')} />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {medRecords.map((rec: any) => {
+                      const rtInfo = getRecordTypeInfo(rec.recordType || rec.record_type)
+                      const sev = rec.severity
+                      const sevInfo = getSeverityInfo(sev)
+                      return (
+                        <div key={rec.id} className="record-item" style={{ padding: '14px 16px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, borderLeft: `4px solid ${rtInfo.color}` }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 4 }}>
+                                <span style={{ fontSize: 16 }}>{rtInfo.icon}</span>
+                                <strong style={{ fontSize: 14 }}>{rec.title}</strong>
+                                <span className="badge" style={{ background: rtInfo.color, color: '#fff', fontSize: 10 }}>{rtInfo.label}</span>
+                                {sev && sev !== 'normal' && (
+                                  <span className="badge" style={{ background: sevInfo.color, color: '#fff', fontSize: 10 }}>{sev}</span>
+                                )}
+                                {rec.isConfidential && <span className="badge" style={{ background: '#f3f4f6', color: '#374151', fontSize: 10 }}>🔒 {t('medicalRecords.recordsTab.confidential')}</span>}
+                              </div>
+                              <p style={{ fontSize: 13, color: '#374151', margin: '4px 0', lineHeight: 1.5 }}>{rec.content}</p>
+                              {rec.followUpDate && (
+                                <p style={{ fontSize: 12, color: '#ea580c', marginTop: 4 }}>📅 {t('medicalRecords.recordsTab.followUp')} {fmtDate(rec.followUpDate || rec.follow_up_date)}</p>
+                              )}
+                            </div>
+                            <span style={{ fontSize: 11, color: '#9ca3af', whiteSpace: 'nowrap' }}>{fmtDate(rec.createdAt || rec.created_at)}</span>
+                          </div>
+                          {rec.veterinarianName && (
+                            <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>
+                              {t('medicalRecords.recordsTab.by')} {rec.veterinarianName}
+                            </p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
         {/* ═══ HOSPITAL VISITS TAB ══════════════════════════════ */}
         {activeTab === 'hospital_visits' && (
           <div>
@@ -1171,12 +1255,18 @@ const MedicalRecords: React.FC = () => {
 
 const inputStyle: React.CSSProperties = { width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }
 
-const StatCard: React.FC<{ icon: string; label: string; value: number; color: string; sub?: string }> = ({ icon, label, value, color, sub }) => (
-  <div style={{ padding: 16, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, borderLeft: `4px solid ${color}` }}>
+const StatCard: React.FC<{ icon: string; label: string; value: number; color: string; sub?: string; onClick?: () => void }> = ({ icon, label, value, color, sub, onClick }) => (
+  <div
+    onClick={onClick}
+    style={{ padding: 16, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, borderLeft: `4px solid ${color}`, cursor: onClick ? 'pointer' : 'default', transition: 'box-shadow 0.15s' }}
+    onMouseEnter={onClick ? (e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)' } : undefined}
+    onMouseLeave={onClick ? (e) => { (e.currentTarget as HTMLElement).style.boxShadow = 'none' } : undefined}
+  >
     <div style={{ fontSize: 24, marginBottom: 4 }}>{icon}</div>
     <div style={{ fontSize: 24, fontWeight: 700, color }}>{value}</div>
     <div style={{ fontSize: 12, color: '#6b7280', fontWeight: 500 }}>{label}</div>
     {sub && <div style={{ fontSize: 11, color: '#d97706', marginTop: 4 }}>{sub}</div>}
+    {onClick && <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 4 }}>Click to view →</div>}
   </div>
 )
 

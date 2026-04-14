@@ -1460,6 +1460,17 @@
       "queueVisits": "Queue / Walk-in Visits",
       "inpatientAdmissions": "Inpatient Admissions"
     },
+    "recordsTab": {
+      "selectPet": "Select a pet",
+      "selectPetHint": "Choose a pet to view its medical records",
+      "emptyTitle": "No records found",
+      "emptySubtitle": "Medical records (diagnoses, follow-ups, surgeries etc.) will appear here",
+      "filterBy": "Filter by:",
+      "allTypes": "All Types",
+      "confidential": "Confidential",
+      "followUp": "Follow-up:",
+      "by": "By:"
+    },
     "modals": {
       "newRecord": "📄 New Medical Record",
       "recordType": "Record Type",

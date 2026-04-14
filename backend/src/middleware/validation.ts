@@ -224,7 +224,7 @@ export const createMedicalRecordSchema = Joi.object({
   recordType: shortText(50).required(),
   title: shortText().required(),
   content: longText(10000).required(),
-  severity: Joi.string().valid('low', 'medium', 'high', 'critical').optional(),
+  severity: Joi.string().valid('low', 'normal', 'high', 'critical').optional(),
   medications: Joi.array().items(Joi.object()).optional(),
   attachments: Joi.array().items(Joi.object()).optional(),
   isConfidential: Joi.boolean().optional(),
