@@ -40,7 +40,13 @@ INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash,
   ('c0000000-0000-0000-0000-000000000002', 'robert.chen@email.com',   'Robert',    'Chen',     'pet_owner',    '+1-555-300-0002', '$2a$10$OtuDm/nGqi3c8ymKklb1h.0XXbr.MN.TSVXTTb.JTYZjuku6Oqv2W', true, 'USR-PET-002'),
   -- Farmers (password: Farmer@123)
   ('f0000000-0000-0000-0000-000000000001', 'tom.wilson@example.com',       'Tom',     'Wilson',   'farmer',       '+1-555-400-0001', '$2a$10$9lvpT/PhXramRLyjABSXfO7ks10U4KvWGlfYS6XZYeUNpTjuM.rtm', true, 'USR-FRM-001'),
-  ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$9lvpT/PhXramRLyjABSXfO7ks10U4KvWGlfYS6XZYeUNpTjuM.rtm', true, 'USR-FRM-002')
+  ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$9lvpT/PhXramRLyjABSXfO7ks10U4KvWGlfYS6XZYeUNpTjuM.rtm', true, 'USR-FRM-002'),
+  -- Hospital Network Demo Users (password: Demo@123 — fixDemoPasswords corrects hash at startup)
+  ('d0000000-0000-0000-0000-000000000001', 'netadmin@vetcare.com',         'Rajesh',  'Sharma',   'corporate_admin', '+91-98765-43210', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-CRP-001'),
+  ('d0000000-0000-0000-0000-000000000002', 'branch.director@vetcare.com', 'Priya',   'Nair',     'veterinarian',    '+91-98765-43211', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-VET-004'),
+  ('d0000000-0000-0000-0000-000000000003', 'staff.nurse@vetcare.com',     'Anitha',  'Kumar',    'hospital_staff',  '+91-98765-43212', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-STF-001'),
+  ('d0000000-0000-0000-0000-000000000004', 'staff.reception@vetcare.com', 'Karthik', 'Rajan',    'hospital_staff',  '+91-98765-43213', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-STF-002'),
+  ('d0000000-0000-0000-0000-000000000005', 'staff.labtech@vetcare.com',   'Meena',   'Sundaram', 'hospital_staff',  '+91-98765-43214', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-STF-003')
 ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, email = EXCLUDED.email, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, role = EXCLUDED.role, phone = EXCLUDED.phone, is_active = EXCLUDED.is_active;
 
 -- ============================================================
@@ -3323,12 +3329,15 @@ ON CONFLICT (id) DO NOTHING;
 
 
 -- ============================================================
--- HOSPITAL NETWORK DEMO DATA (Phase 1)
--- Demo hospital network that owns the 2 existing demo hospitals
+-- HOSPITAL NETWORK COMPREHENSIVE DEMO DATA
+-- Two networks: one approved (DemoVetGroup), one pending (PawsCare Network)
+-- Full lifecycle: branches, staff positions, members, patients, referrals, audit
 -- ============================================================
 
--- Demo Hospital Network — "DemoVetGroup"
-INSERT INTO hospital_networks (id, name, legal_name, registration_number, network_type, country, headquarters_city, headquarters_state, contact_email, contact_phone, is_active, is_approved, approved_at, id_prefix, metadata)
+-- ═══════════════════════════════════════════════════════════
+-- NETWORK 1: DemoVetGroup (APPROVED) — owned by netadmin@vetcare.com
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO hospital_networks (id, name, legal_name, registration_number, network_type, country, headquarters_address, headquarters_city, headquarters_state, contact_email, contact_phone, website, is_active, is_approved, approved_by, approved_at, id_prefix, created_by, metadata)
 VALUES (
   'hn000000-0000-0000-0000-000000000001',
   'DemoVetGroup',
@@ -3336,59 +3345,210 @@ VALUES (
   'DVHG-2024-001',
   'private',
   'IN',
+  '42 Anna Salai, Guindy',
   'Chennai',
   'Tamil Nadu',
   'admin@demovetgroup.com',
   '+91-44-1234-5678',
+  'https://demovetgroup.com',
   true,
   true,
-  CURRENT_TIMESTAMP,
-  'DEMO',
-  '{}'
-) ON CONFLICT (id) DO NOTHING;
+  'a0000000-0000-0000-0000-000000000001',
+  CURRENT_TIMESTAMP - INTERVAL '30 days',
+  'DVG',
+  'd0000000-0000-0000-0000-000000000001',
+  '{"specializations": ["small_animal", "large_animal", "exotic"], "accreditations": ["NABH", "ISO 9001"]}'
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name, legal_name = EXCLUDED.legal_name, is_approved = EXCLUDED.is_approved,
+  approved_by = EXCLUDED.approved_by, approved_at = EXCLUDED.approved_at, created_by = EXCLUDED.created_by,
+  headquarters_address = EXCLUDED.headquarters_address, website = EXCLUDED.website, metadata = EXCLUDED.metadata;
 
--- Corporate Admin user for DemoVetGroup (uses admin account for demo)
--- In production, this would be a separate corporate_admin user
-INSERT INTO hospital_network_members (id, network_id, user_id, network_role, is_active, granted_at)
+-- ═══════════════════════════════════════════════════════════
+-- NETWORK 2: PawsCare Network (PENDING APPROVAL) — for admin to see in dashboard
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO hospital_networks (id, name, legal_name, registration_number, network_type, country, headquarters_city, headquarters_state, contact_email, contact_phone, is_active, is_approved, id_prefix, created_by, metadata)
+VALUES (
+  'hn000000-0000-0000-0000-000000000002',
+  'PawsCare Network',
+  'PawsCare Animal Healthcare Ltd.',
+  'PCAH-2025-042',
+  'private',
+  'IN',
+  'Bangalore',
+  'Karnataka',
+  'contact@pawscare.in',
+  '+91-80-9876-5432',
+  true,
+  false,
+  'PCN',
+  'd0000000-0000-0000-0000-000000000001',
+  '{"specializations": ["small_animal"], "note": "Pending platform admin approval"}'
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name, is_approved = EXCLUDED.is_approved, created_by = EXCLUDED.created_by;
+
+-- ═══════════════════════════════════════════════════════════
+-- BRANCH HOSPITALS for DemoVetGroup
+-- Mark existing demo hospitals as network branches
+-- ═══════════════════════════════════════════════════════════
+UPDATE vet_hospitals SET is_network_branch = true, branch_network_id = 'hn000000-0000-0000-0000-000000000001'
+WHERE id IN ('h0000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002');
+
+-- Link hospitals to network
+INSERT INTO hospital_network_hospitals (network_id, hospital_id, added_by, is_active)
+VALUES
+  ('hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', true),
+  ('hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000001', true)
+ON CONFLICT (network_id, hospital_id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- NETWORK MEMBERS — full role hierarchy
+-- ═══════════════════════════════════════════════════════════
+
+-- Corporate Admin (network owner)
+INSERT INTO hospital_network_members (id, network_id, user_id, network_role, is_active, granted_at, granted_by)
 VALUES (
   'hnm00000-0000-0000-0000-000000000001',
   'hn000000-0000-0000-0000-000000000001',
-  'a0000000-0000-0000-0000-000000000001',
+  'd0000000-0000-0000-0000-000000000001',
   'corporate_admin',
   true,
-  CURRENT_TIMESTAMP
+  CURRENT_TIMESTAMP - INTERVAL '30 days',
+  'd0000000-0000-0000-0000-000000000001'
 ) ON CONFLICT (network_id, user_id) DO NOTHING;
 
--- Assign demo vet as hospital_director for VetCare Central Hospital
-INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at)
+-- Hospital Director (Priya Nair — manages branch hospital 1)
+INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at, granted_by)
 VALUES (
   'hnm00000-0000-0000-0000-000000000002',
   'hn000000-0000-0000-0000-000000000001',
-  'b0000000-0000-0000-0000-000000000001',
+  'd0000000-0000-0000-0000-000000000002',
   'hospital_director',
   'h0000000-0000-0000-0000-000000000001',
   true,
-  CURRENT_TIMESTAMP
+  CURRENT_TIMESTAMP - INTERVAL '25 days',
+  'd0000000-0000-0000-0000-000000000001'
 ) ON CONFLICT (network_id, user_id) DO NOTHING;
 
--- Feature flags for demo network
+-- Existing demo vet (Sarah Johnson) as hospital_director for branch 2
+INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at, granted_by)
+VALUES (
+  'hnm00000-0000-0000-0000-000000000003',
+  'hn000000-0000-0000-0000-000000000001',
+  'b0000000-0000-0000-0000-000000000002',
+  'hospital_director',
+  'h0000000-0000-0000-0000-000000000002',
+  true,
+  CURRENT_TIMESTAMP - INTERVAL '20 days',
+  'd0000000-0000-0000-0000-000000000001'
+) ON CONFLICT (network_id, user_id) DO NOTHING;
+
+-- Nurse (Anitha Kumar) — hospital_staff at branch 1
+INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at, granted_by)
+VALUES (
+  'hnm00000-0000-0000-0000-000000000004',
+  'hn000000-0000-0000-0000-000000000001',
+  'd0000000-0000-0000-0000-000000000003',
+  'hospital_staff',
+  'h0000000-0000-0000-0000-000000000001',
+  true,
+  CURRENT_TIMESTAMP - INTERVAL '15 days',
+  'd0000000-0000-0000-0000-000000000001'
+) ON CONFLICT (network_id, user_id) DO NOTHING;
+
+-- Receptionist (Karthik Rajan) — hospital_staff at branch 1
+INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at, granted_by)
+VALUES (
+  'hnm00000-0000-0000-0000-000000000005',
+  'hn000000-0000-0000-0000-000000000001',
+  'd0000000-0000-0000-0000-000000000004',
+  'hospital_staff',
+  'h0000000-0000-0000-0000-000000000001',
+  true,
+  CURRENT_TIMESTAMP - INTERVAL '10 days',
+  'd0000000-0000-0000-0000-000000000001'
+) ON CONFLICT (network_id, user_id) DO NOTHING;
+
+-- Lab Tech (Meena Sundaram) — hospital_staff at branch 2
+INSERT INTO hospital_network_members (id, network_id, user_id, network_role, hospital_id, is_active, granted_at, granted_by)
+VALUES (
+  'hnm00000-0000-0000-0000-000000000006',
+  'hn000000-0000-0000-0000-000000000001',
+  'd0000000-0000-0000-0000-000000000005',
+  'hospital_staff',
+  'h0000000-0000-0000-0000-000000000002',
+  true,
+  CURRENT_TIMESTAMP - INTERVAL '5 days',
+  'd0000000-0000-0000-0000-000000000001'
+) ON CONFLICT (network_id, user_id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- STAFF POSITIONS — clinical roles at branches
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO staff_positions (id, hospital_id, user_id, position, department, is_active, hired_date)
+VALUES
+  ('sp000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000002', 'veterinarian', 'General Surgery', true, '2024-12-01'),
+  ('sp000000-0000-0000-0000-000000000002', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000003', 'nurse', 'General Care', true, '2025-01-15'),
+  ('sp000000-0000-0000-0000-000000000003', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000004', 'receptionist', 'Front Desk', true, '2025-02-01'),
+  ('sp000000-0000-0000-0000-000000000004', 'h0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000005', 'lab_tech', 'Diagnostics Lab', true, '2025-03-01'),
+  ('sp000000-0000-0000-0000-000000000005', 'h0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'veterinarian', 'Emergency Care', true, '2024-11-01')
+ON CONFLICT (hospital_id, user_id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- FEATURE FLAGS for demo network
+-- ═══════════════════════════════════════════════════════════
 INSERT INTO hospital_network_feature_flags (network_id, feature_key, is_enabled, config)
 VALUES
   ('hn000000-0000-0000-0000-000000000001', 'patient_data_isolation', true, '{"default_visibility": "private"}'),
   ('hn000000-0000-0000-0000-000000000001', 'corporate_audit_log', true, '{}'),
-  ('hn000000-0000-0000-0000-000000000001', 'inter_hospital_referrals', false, '{}'),
-  ('hn000000-0000-0000-0000-000000000001', 'shared_formulary', false, '{}')
-ON CONFLICT (network_id, feature_key) DO NOTHING;
+  ('hn000000-0000-0000-0000-000000000001', 'inter_hospital_referrals', true, '{"auto_approve": false}'),
+  ('hn000000-0000-0000-0000-000000000001', 'shared_formulary', true, '{}')
+ON CONFLICT (network_id, feature_key) DO UPDATE SET is_enabled = EXCLUDED.is_enabled;
 
--- Demo animal care context (link demo animal to demo network with dual ID)
+-- ═══════════════════════════════════════════════════════════
+-- PATIENT ENROLLMENT — demo animals enrolled in network
+-- ═══════════════════════════════════════════════════════════
 INSERT INTO animal_care_contexts (id, animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id, visibility, enrolled_by)
+VALUES
+  ('acc00000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'VC-DOG-24-00001', 'DVG-P-00001', 'private', 'd0000000-0000-0000-0000-000000000001'),
+  ('acc00000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000002', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'VC-CAT-24-00001', 'DVG-P-00002', 'private', 'd0000000-0000-0000-0000-000000000001'),
+  ('acc00000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002', 'VC-DOG-24-00002', 'DVG-P-00003', 'network_visible', 'd0000000-0000-0000-0000-000000000001')
+ON CONFLICT (animal_id, network_id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- DATA ACCESS CONSENTS
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO data_access_consents (id, animal_id, network_id, owner_id, consent_type, status, granted_at, granted_scope)
+VALUES
+  ('dac00000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'hn000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'treatment', 'active', CURRENT_TIMESTAMP - INTERVAL '20 days', '{"medical_records": true, "vaccinations": true, "prescriptions": true}'),
+  ('dac00000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000002', 'hn000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'treatment', 'active', CURRENT_TIMESTAMP - INTERVAL '15 days', '{"medical_records": true, "vaccinations": true}'),
+  ('dac00000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'hn000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000002', 'treatment', 'active', CURRENT_TIMESTAMP - INTERVAL '10 days', '{"medical_records": true}')
+ON CONFLICT (id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- CORPORATE AUDIT LOG — sample access events
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO corporate_audit_log (id, network_id, hospital_id, user_id, action_type, resource_type, resource_id, access_result, ip_address, details)
+VALUES
+  ('cal00000-0000-0000-0000-000000000001', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000002', 'read', 'medical_record', 'e0000000-0000-0000-0000-000000000001', 'granted', '192.168.1.100', '{"reason": "Treatment review", "consent_id": "dac00000-0000-0000-0000-000000000001"}'),
+  ('cal00000-0000-0000-0000-000000000002', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000003', 'read', 'patient_info', 'e0000000-0000-0000-0000-000000000001', 'granted', '192.168.1.101', '{"reason": "Nursing assessment"}'),
+  ('cal00000-0000-0000-0000-000000000003', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000005', 'read', 'lab_result', 'e0000000-0000-0000-0000-000000000002', 'granted', '192.168.1.102', '{"reason": "Lab analysis"}'),
+  ('cal00000-0000-0000-0000-000000000004', 'hn000000-0000-0000-0000-000000000001', 'h0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000004', 'read', 'patient_info', 'e0000000-0000-0000-0000-000000000003', 'denied', '192.168.1.103', '{"reason": "No active consent for this patient"}'),
+  ('cal00000-0000-0000-0000-000000000005', 'hn000000-0000-0000-0000-000000000001', NULL, 'd0000000-0000-0000-0000-000000000001', 'admin', 'network_settings', 'hn000000-0000-0000-0000-000000000001', 'granted', '192.168.1.104', '{"action": "Updated feature flags"}')
+ON CONFLICT (id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- INTER-HOSPITAL REFERRAL — sample referral between branches
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO inter_hospital_referrals (id, network_id, from_hospital_id, to_hospital_id, animal_id, referred_by, referral_reason, urgency, status, clinical_notes)
 VALUES (
-  'acc00000-0000-0000-0000-000000000001',
-  'e0000000-0000-0000-0000-000000000001',
+  'ihr00000-0000-0000-0000-000000000001',
   'hn000000-0000-0000-0000-000000000001',
   'h0000000-0000-0000-0000-000000000001',
-  'VC-DOG-24-00001',
-  'DVG-P-00001',
-  'private',
-  'a0000000-0000-0000-0000-000000000001'
-) ON CONFLICT (animal_id, network_id) DO NOTHING;
+  'h0000000-0000-0000-0000-000000000002',
+  'e0000000-0000-0000-0000-000000000001',
+  'd0000000-0000-0000-0000-000000000002',
+  'Advanced diagnostic imaging required — suspected cruciate ligament tear',
+  'high',
+  'accepted',
+  'Patient presenting with grade 3/5 left hind lameness. Positive cranial drawer test. Radiographs inconclusive. MRI recommended at Branch 2 facility.'
+) ON CONFLICT (id) DO NOTHING;

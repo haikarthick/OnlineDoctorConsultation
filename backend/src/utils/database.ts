@@ -994,6 +994,17 @@ class PostgresDatabase {
     // Make invitee_name optional on hospital_staff_invites (label says "(optional)")
     await this.pool.query(`ALTER TABLE hospital_staff_invites ALTER COLUMN invitee_name DROP NOT NULL`).catch(() => {});
 
+    // Make users.phone nullable — hospital_staff registering via invite may not have a phone
+    await this.pool.query(`ALTER TABLE users ALTER COLUMN phone DROP NOT NULL`).catch(() => {});
+
+    // Add unique constraint to staff_positions if not exists (needed for ON CONFLICT)
+    await this.pool.query(`
+      DO $$ BEGIN
+        ALTER TABLE staff_positions ADD CONSTRAINT staff_positions_hospital_user_unique UNIQUE (hospital_id, user_id);
+      EXCEPTION WHEN duplicate_table THEN NULL;
+      END $$;
+    `).catch(() => {});
+
     // Email settings defaults
     await this.pool.query(`
       INSERT INTO system_settings (key, value, description, category) VALUES

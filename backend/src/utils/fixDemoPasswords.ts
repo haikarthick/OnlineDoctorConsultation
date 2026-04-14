@@ -13,6 +13,12 @@ const DEMO_USERS = [
   { id: 'c0000000-0000-0000-0000-000000000002', email: 'robert.chen@email.com',         password: 'Demo@123',   firstName: 'Robert', lastName: 'Chen',          role: 'pet_owner',    phone: '+1-555-300-0002', uniqueId: 'USR-PET-002' },
   { id: 'f0000000-0000-0000-0000-000000000001', email: 'tom.wilson@example.com',        password: 'Demo@123',   firstName: 'Tom',    lastName: 'Wilson',        role: 'farmer',       phone: '+1-555-400-0001', uniqueId: 'USR-FRM-001' },
   { id: 'f0000000-0000-0000-0000-000000000002', email: 'maria.garcia@sunrisefarm.com',  password: 'Demo@123',   firstName: 'Maria',  lastName: 'Garcia',        role: 'farmer',       phone: '+1-555-400-0002', uniqueId: 'USR-FRM-002' },
+  // Hospital Network demo users
+  { id: 'd0000000-0000-0000-0000-000000000001', email: 'netadmin@vetcare.com',           password: 'Demo@123',   firstName: 'Rajesh', lastName: 'Sharma',        role: 'corporate_admin', phone: '+91-98765-43210', uniqueId: 'USR-CRP-001' },
+  { id: 'd0000000-0000-0000-0000-000000000002', email: 'branch.director@vetcare.com',   password: 'Demo@123',   firstName: 'Priya',  lastName: 'Nair',          role: 'veterinarian',    phone: '+91-98765-43211', uniqueId: 'USR-VET-004' },
+  { id: 'd0000000-0000-0000-0000-000000000003', email: 'staff.nurse@vetcare.com',       password: 'Demo@123',   firstName: 'Anitha', lastName: 'Kumar',         role: 'hospital_staff',  phone: '+91-98765-43212', uniqueId: 'USR-STF-001' },
+  { id: 'd0000000-0000-0000-0000-000000000004', email: 'staff.reception@vetcare.com',   password: 'Demo@123',   firstName: 'Karthik',lastName: 'Rajan',         role: 'hospital_staff',  phone: '+91-98765-43213', uniqueId: 'USR-STF-002' },
+  { id: 'd0000000-0000-0000-0000-000000000005', email: 'staff.labtech@vetcare.com',     password: 'Demo@123',   firstName: 'Meena',  lastName: 'Sundaram',      role: 'hospital_staff',  phone: '+91-98765-43214', uniqueId: 'USR-STF-003' },
 ];
 
 export async function fixDemoPasswords(): Promise<void> {

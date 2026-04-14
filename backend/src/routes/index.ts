@@ -1704,19 +1704,28 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
   if (!seat.allowed) return res.status(403).json({ success: false, message: 'Seat limit reached. Contact your network administrator.', code: 'seat_limit_exceeded' });
   const existing = await db.query(`SELECT id FROM users WHERE email=$1`, [invite.invitee_email]);
   if (existing.rows.length > 0) return res.status(409).json({ success: false, message: 'An account with this email already exists. Please log in.' });
-  const bcrypt = require('bcryptjs');
-  const password_hash = await bcrypt.hash(password, 12);
-  const userResult = await db.query(
-    `INSERT INTO users (email, first_name, last_name, phone, role, password_hash) VALUES ($1,$2,$3,$4,'hospital_staff',$5) RETURNING id, email, first_name, last_name, role`,
-    [invite.invitee_email, first_name, last_name, phone || null, password_hash]
-  );
-  const newUser = userResult.rows[0];
-  await db.query(`INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by) VALUES ($1,$2,'hospital_staff',$3,$4) ON CONFLICT (network_id, user_id) DO NOTHING`,
-    [invite.network_id, newUser.id, invite.hospital_id, invite.invited_by]);
-  await db.query(`INSERT INTO staff_positions (hospital_id, user_id, position) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
-    [invite.hospital_id, newUser.id, invite.staff_position]).catch(()=>{});
-  await db.query(`UPDATE hospital_staff_invites SET status='accepted', accepted_at=NOW(), accepted_user_id=$1 WHERE invite_token=$2`, [newUser.id, token]);
-  res.status(201).json({ success: true, message: 'Account created successfully. You can now log in.' });
+  try {
+    const bcrypt = require('bcryptjs');
+    const password_hash = await bcrypt.hash(password, 12);
+    const userResult = await db.query(
+      `INSERT INTO users (email, first_name, last_name, phone, role, password_hash) VALUES ($1,$2,$3,$4,'hospital_staff',$5) RETURNING id, email, first_name, last_name, role`,
+      [invite.invitee_email, first_name, last_name, phone || '', password_hash]
+    );
+    const newUser = userResult.rows[0];
+    await db.query(`INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by) VALUES ($1,$2,'hospital_staff',$3,$4) ON CONFLICT (network_id, user_id) DO NOTHING`,
+      [invite.network_id, newUser.id, invite.hospital_id, invite.invited_by]);
+    // staff_positions may not have a unique constraint — use INSERT only if not exists
+    const existingPos = await db.query(`SELECT id FROM staff_positions WHERE hospital_id=$1 AND user_id=$2`, [invite.hospital_id, newUser.id]);
+    if (existingPos.rows.length === 0 && invite.hospital_id) {
+      await db.query(`INSERT INTO staff_positions (hospital_id, user_id, position) VALUES ($1,$2,$3)`,
+        [invite.hospital_id, newUser.id, invite.staff_position]).catch((err: any) => logger.error('Staff position insert failed', { error: err.message }));
+    }
+    await db.query(`UPDATE hospital_staff_invites SET status='accepted', accepted_at=NOW(), accepted_user_id=$1 WHERE invite_token=$2`, [newUser.id, token]);
+    res.status(201).json({ success: true, message: 'Account created successfully. You can now log in.' });
+  } catch (err: any) {
+    logger.error('Accept invite failed', { error: err.message, stack: err.stack });
+    res.status(500).json({ success: false, message: err.message || 'Failed to create account' });
+  }
 }));
 
 router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {

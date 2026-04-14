@@ -752,3 +752,19 @@ render-start.sh
 - **Fix:** NEVER return pet_owner/farmer in staff/member search contexts — always filter by eligible roles
 - **Rule:** Not specified
 
+
+### I18N-002 — common.select rendering as raw key in dropdowns
+- **Logged:** 2026-04-14 07:26
+- **Symptom:** t('common.select') used in HospitalNetworks invite modal but 'select' key was missing from all 5 locale files — only 'selectOption' existed
+- **Root Cause:** Added 'select': 'Select' to common section in all 5 locale files via Python script
+- **Fix:** When adding t('common.X') calls, always verify X exists in ALL 5 locale files — not just en
+- **Rule:** Not specified
+
+
+### INVITE-001 — Accept hospital invite showing generic 400 error to user
+- **Logged:** 2026-04-14 07:26
+- **Symptom:** Frontend catch used e.message (axios generic) not e.response.data.message; Joi phone was required but form had no required indicator
+- **Root Cause:** Fixed catch to use e?.response?.data?.message; made phone optional in Joi schema
+- **Fix:** ALWAYS use e?.response?.data?.message in catch blocks — never e.message alone for API errors
+- **Rule:** Not specified
+

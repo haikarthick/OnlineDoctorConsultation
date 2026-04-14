@@ -244,12 +244,11 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   corporate_admin: [
     // Core pages
     'dashboard', 'settings',
+    'dashboard_stats', 'dashboard_quick_actions',
     // Hospital Network — full management access
     'hospital_network_manage', 'hospital_network_view', 'hospital_network_audit',
     // Patient consent oversight
     'patient_consent_manage',
-    // Browse vets and hospitals
-    'hospital_browse',
     // Analytics (for network-level reporting)
     'health_analytics', 'financial_analytics',
     // AI tools
