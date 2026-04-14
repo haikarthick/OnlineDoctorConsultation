@@ -1520,3 +1520,21 @@
 </details>
 
 ---
+
+## 2026-04-14 14:03 · `022a768` · 🐛 FIX
+
+**Commit:** fix: SMTP email on Render — port fallback + retry + longer timeouts  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/EmailService.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

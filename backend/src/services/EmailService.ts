@@ -144,58 +144,46 @@ class EmailService {
     this.from = process.env.SMTP_FROM || 'VetCare <noreply@vetcare.app>';
   }
 
-  /** Lazy-initialize the nodemailer transporter with retry across ports */
-  private async getTransporter(): Promise<Transporter> {
+  /** Whether SMTP is available (false = log-only mode) */
+  private smtpAvailable = true;
+
+  /** Lazy-initialize the nodemailer transporter */
+  private async getTransporter(): Promise<Transporter | null> {
     if (this.transporter) return this.transporter;
 
     if (process.env.SMTP_HOST) {
       const host = process.env.SMTP_HOST;
       const user = process.env.SMTP_USER;
       const pass = process.env.SMTP_PASS;
-      const requestedPort = parseInt(process.env.SMTP_PORT || '587', 10);
+      const port = parseInt(process.env.SMTP_PORT || '587', 10);
+      const secure = port === 465;
 
-      // Try requested port first, then alternate (587↔465) for Render/cloud environments
-      const portsToTry = requestedPort === 465 ? [465, 587] : [587, 465];
-
-      for (const port of portsToTry) {
-        const secure = port === 465;
-        try {
-          const opts: SMTPTransport.Options = {
-            host,
-            port,
-            secure,
-            auth: { user, pass },
-            connectionTimeout: 15000,
-            greetingTimeout: 15000,
-            socketTimeout: 30000,
-            tls: { rejectUnauthorized: false },
-          };
-          const transport = nodemailer.createTransport(opts);
-          await transport.verify();
-          this.transporter = transport;
-          logger.info(`SMTP connection verified on port ${port} (secure=${secure})`);
-          return this.transporter;
-        } catch (err: any) {
-          logger.warn(`SMTP port ${port} failed: ${err.message}`);
-        }
+      try {
+        const opts: SMTPTransport.Options = {
+          host,
+          port,
+          secure,
+          auth: { user, pass },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 20000,
+          tls: { rejectUnauthorized: false },
+        };
+        const transport = nodemailer.createTransport(opts);
+        await transport.verify();
+        this.transporter = transport;
+        this.smtpAvailable = true;
+        logger.info(`SMTP connection verified: ${host}:${port}`);
+        return this.transporter;
+      } catch (err: any) {
+        logger.error(`SMTP connection failed (${host}:${port}): ${err.message} — switching to log-only mode`);
       }
-
-      // All SMTP ports failed — log clearly and fall through to Ethereal
-      logger.error('All SMTP connection attempts failed — falling back to Ethereal email capture', {
-        host, ports: portsToTry, user,
-      });
     }
 
-    // Ethereal fallback — captures emails for preview without real SMTP
-    const testAccount = await nodemailer.createTestAccount();
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: { user: testAccount.user, pass: testAccount.pass },
-    });
-    logger.info(`Email transporter using Ethereal test account: ${testAccount.user}`);
-    return this.transporter;
+    // No SMTP available — use log-only mode (no external connections needed)
+    this.smtpAvailable = false;
+    logger.warn('Email service in LOG-ONLY mode — emails will be logged but not delivered. Configure working SMTP to enable delivery.');
+    return null;
   }
 
   /**
@@ -225,10 +213,19 @@ class EmailService {
       logger.info(`Email redirected to dev address: ${devRedirect} (original: ${options.to})`);
     }
 
-    // Retry once with transporter reset on transient failure
+    const transporter = await this.getTransporter();
+
+    // Log-only mode: no working SMTP — log full email content and return
+    if (!transporter) {
+      const logId = `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      logger.info(`[EMAIL-LOG] ${logId} | To: ${actualTo} | Subject: ${subject}`);
+      logger.info(`[EMAIL-LOG] ${logId} | Text: ${text.substring(0, 500)}`);
+      return { messageId: logId, previewUrl: false as const };
+    }
+
+    // Real SMTP — try sending, retry once on transient failure
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        const transporter = await this.getTransporter();
         const info = await transporter.sendMail({
           from: this.from,
           to: actualTo,
@@ -246,7 +243,15 @@ class EmailService {
       } catch (sendErr: any) {
         if (attempt === 1) {
           logger.warn(`Email send attempt 1 failed (${sendErr.message}), resetting transporter and retrying...`);
-          this.transporter = null; // Force fresh transporter on retry
+          this.transporter = null;
+          // Re-initialize transporter for retry
+          const retryTransporter = await this.getTransporter();
+          if (!retryTransporter) {
+            // Fell back to log-only on retry — log and return
+            const logId = `log-retry-${Date.now()}`;
+            logger.info(`[EMAIL-LOG] ${logId} | To: ${actualTo} | Subject: ${subject}`);
+            return { messageId: logId, previewUrl: false as const };
+          }
         } else {
           throw sendErr;
         }

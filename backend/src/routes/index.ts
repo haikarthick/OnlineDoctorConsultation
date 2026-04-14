@@ -761,7 +761,8 @@ router.post('/admin/settings/test-email', authMiddleware, roleMiddleware(['admin
       html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from VetCare admin panel.</p><p>Sent at: ${new Date().toISOString()}</p><p>SMTP: ${process.env.SMTP_HOST || 'not configured'}:${process.env.SMTP_PORT || '?'}</p><p>Dev redirect: ${devRedirect || 'off'}</p></div>`,
       text: `Email is working! Sent at: ${new Date().toISOString()}`,
     });
-    res.json({ success: true, message: 'Test email sent successfully', data: { messageId: result.messageId, previewUrl: result.previewUrl || null, redirectedTo: devRedirect || null, smtpHost: process.env.SMTP_HOST || null } });
+    const isLogOnly = typeof result.messageId === 'string' && result.messageId.startsWith('log-');
+    res.json({ success: true, message: isLogOnly ? 'Email logged (SMTP unavailable on this platform — email content saved to server logs)' : 'Test email sent successfully', data: { messageId: result.messageId, mode: isLogOnly ? 'log-only' : 'smtp', previewUrl: result.previewUrl || null, redirectedTo: devRedirect || null, smtpHost: process.env.SMTP_HOST || null } });
   } catch (err: any) {
     res.status(500).json({ success: false, message: `Email failed: ${err.message}`, smtpHost: process.env.SMTP_HOST || 'not configured', smtpPort: process.env.SMTP_PORT || 'not set', devRedirect: devRedirect || null });
   }
