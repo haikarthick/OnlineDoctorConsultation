@@ -133,9 +133,9 @@ const NETWORK_TYPES = [
 const MEMBER_ROLES = [
   { value: 'corporate_admin', label: 'Corporate Admin' },
   { value: 'hospital_director', label: 'Hospital Director' },
-  { value: 'data_officer', label: 'Data Officer' },
+  { value: 'compliance_officer', label: 'Compliance Officer' },
   { value: 'auditor', label: 'Auditor' },
-  { value: 'staff_vet', label: 'Staff Vet' },
+  { value: 'hospital_staff', label: 'Hospital Staff' },
 ]
 
 const AUDIT_RECORD_TYPE_LABELS: Record<string, string> = {
@@ -912,7 +912,7 @@ const HospitalNetworks: React.FC = () => {
       const result = await apiService.listNetworkReferrals({ networkId: selectedNetwork.id, direction })
       setReferrals(result.referrals || result.data || [])
     } catch (err: any) {
-      setReferralError(err?.response?.data?.error || err?.message || t('networkReferrals.error'))
+      setReferralError(err?.response?.data?.message || err?.message || t('networkReferrals.error'))
     } finally {
       setReferralsLoading(false)
     }
@@ -951,7 +951,7 @@ const HospitalNetworks: React.FC = () => {
       loadReferrals(referralDirection)
       setTimeout(() => setReferralSuccess(''), 4000)
     } catch (err: any) {
-      setReferralError(err?.response?.data?.error || err?.message || t('networkReferrals.error'))
+      setReferralError(err?.response?.data?.message || err?.message || t('networkReferrals.error'))
     } finally {
       setReferralSubmitting(false)
     }
@@ -968,7 +968,7 @@ const HospitalNetworks: React.FC = () => {
       loadReferrals(referralDirection)
       setTimeout(() => setReferralSuccess(''), 4000)
     } catch (err: any) {
-      setReferralError(err?.response?.data?.error || err?.message || t('networkReferrals.error'))
+      setReferralError(err?.response?.data?.message || err?.message || t('networkReferrals.error'))
     } finally {
       setRespondingSubmitting(false)
     }
@@ -982,7 +982,7 @@ const HospitalNetworks: React.FC = () => {
       setEnrollmentSuccessIds(s => new Set(s).add(animalId))
       loadAllEnrollments(selectedNetwork.id)
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? 'Failed to request enrollment')
+      setError(err?.response?.data?.message ?? 'Failed to request enrollment')
     } finally { setRequestingEnrollment(null) }
   }
 
@@ -1002,7 +1002,7 @@ const HospitalNetworks: React.FC = () => {
       setInviteSuccess(true)
       setTimeout(() => { setShowInviteModal(false); setInviteSuccess(false); setInviteForm({ patientName: '', patientEmail: '', patientPhone: '', animalName: '', animalSpecies: '', message: '' }) }, 2000)
     } catch (err: any) {
-      setError(err?.response?.data?.error ?? 'Failed to send invite')
+      setError(err?.response?.data?.message ?? 'Failed to send invite')
     } finally { setInviteLoading(false) }
   }
 
@@ -1057,7 +1057,7 @@ const HospitalNetworks: React.FC = () => {
       setSuccessMsg(t('hospitalNetworks.deactivated'))
       loadNetworks()
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || 'Failed to deactivate network')
+      setError(err?.response?.data?.message || err?.message || 'Failed to deactivate network')
     }
   }
 

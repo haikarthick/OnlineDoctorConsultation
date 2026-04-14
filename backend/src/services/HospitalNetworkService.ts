@@ -1,5 +1,5 @@
 import database from '../utils/database';
-import { DatabaseError, NotFoundError, ForbiddenError } from '../utils/errors';
+import { DatabaseError, NotFoundError, ForbiddenError, ValidationError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
 
 // ─── Interfaces ──────────────────────────────────────────────
@@ -191,7 +191,7 @@ export class HospitalNetworkService {
         [data.idPrefix]
       );
       if (prefixCheck.rows.length > 0) {
-        throw new Error('Network ID prefix is already in use by another network. Please choose a different prefix.');
+        throw new ConflictError('Network ID prefix is already in use by another network. Please choose a different prefix.');
       }
     }
 
@@ -331,7 +331,7 @@ export class HospitalNetworkService {
       }
     }
 
-    if (setClauses.length === 0) throw new Error('No fields to update');
+    if (setClauses.length === 0) throw new ValidationError('No fields to update');
     params.push(id);
 
     await database.query(
@@ -350,7 +350,7 @@ export class HospitalNetworkService {
     );
     if (networkCheck.rows.length === 0) throw new NotFoundError('Hospital network not found');
     if (networkCheck.rows[0].created_by === approverId) {
-      throw new Error('Network creators cannot approve their own network. Platform admin approval required.');
+      throw new ForbiddenError('Network creators cannot approve their own network. Platform admin approval required.');
     }
 
     const result = await database.query(
@@ -753,7 +753,7 @@ export class HospitalNetworkService {
           [data.networkId, data.hospitalId]
         );
         if (hospitalInNetwork.rows.length === 0) {
-          throw new Error('Hospital is not a member of this network');
+          throw new ValidationError('Hospital is not a member of this network');
         }
       }
 
@@ -770,7 +770,7 @@ export class HospitalNetworkService {
         [data.networkId, data.enrolledBy, data.hospitalId ?? null]
       );
       if (userPermission.rows.length === 0) {
-        throw new Error('You do not have permission to enroll patients in this network');
+        throw new ForbiddenError('You do not have permission to enroll patients in this network');
       }
 
       const animalRes = await database.query(
@@ -779,7 +779,7 @@ export class HospitalNetworkService {
          FROM animals a JOIN users u ON a.owner_id = u.id
          WHERE a.id = $1 AND a.is_active = true`, [data.animalId]
       );
-      if (!animalRes.rows[0]) throw new Error('Animal not found');
+      if (!animalRes.rows[0]) throw new NotFoundError('Animal');
       const animal = animalRes.rows[0];
 
       const networkPatientId = await this.generateNetworkPatientId(data.networkId, animal.species);
@@ -811,7 +811,7 @@ export class HospitalNetworkService {
 
       return result.rows[0];
     } catch (err: any) {
-      throw new Error(`Enroll animal failed: ${err.message}`);
+      throw new DatabaseError(`Enroll animal failed: ${err.message}`);
     }
   }
 
@@ -836,7 +836,7 @@ export class HospitalNetworkService {
       );
       return { total: parseInt(countRes.rows[0].total), patients: rows.rows };
     } catch (err: any) {
-      throw new Error(`Get network patients failed: ${err.message}`);
+      throw new DatabaseError(`Get network patients failed: ${err.message}`);
     }
   }
 
@@ -868,7 +868,7 @@ export class HospitalNetworkService {
       }
       return users;
     } catch (err: any) {
-      throw new Error(`Search patients failed: ${err.message}`);
+      throw new DatabaseError(`Search patients failed: ${err.message}`);
     }
   }
 
@@ -883,7 +883,7 @@ export class HospitalNetworkService {
          WHERE acc.id = $1 AND a.owner_id = $2 AND acc.enrollment_status = 'pending_consent'`,
         [contextId, ownerId]
       );
-      if (!check.rows[0]) throw new Error('Enrollment request not found or already responded');
+      if (!check.rows[0]) throw new NotFoundError('Enrollment request not found or already responded');
       const ctx = check.rows[0];
 
       await database.query(
@@ -904,7 +904,7 @@ export class HospitalNetworkService {
         [ctx.animal_id, ownerId, ctx.network_id, consentScope ?? 'basic_history']
       );
     } catch (err: any) {
-      throw new Error(`Accept enrollment failed: ${err.message}`);
+      throw new DatabaseError(`Accept enrollment failed: ${err.message}`);
     }
   }
 
@@ -919,9 +919,9 @@ export class HospitalNetworkService {
          RETURNING acc.id`,
         [contextId, ownerId]
       );
-      if (!result.rows[0]) throw new Error('Enrollment request not found');
+      if (!result.rows[0]) throw new NotFoundError('Enrollment request');
     } catch (err: any) {
-      throw new Error(`Decline enrollment failed: ${err.message}`);
+      throw new DatabaseError(`Decline enrollment failed: ${err.message}`);
     }
   }
 
@@ -949,7 +949,7 @@ export class HospitalNetworkService {
       );
       return result.rows;
     } catch (err: any) {
-      throw new Error(`Get my enrollments failed: ${err.message}`);
+      throw new DatabaseError(`Get my enrollments failed: ${err.message}`);
     }
   }
 
@@ -968,7 +968,7 @@ export class HospitalNetworkService {
       );
       return result.rows[0];
     } catch (err: any) {
-      throw new Error(`Invite walk-in patient failed: ${err.message}`);
+      throw new DatabaseError(`Invite walk-in patient failed: ${err.message}`);
     }
   }
 
@@ -980,15 +980,15 @@ export class HospitalNetworkService {
         [token]
       );
       if (inviteRes.rows.length === 0) {
-        throw new Error('Invitation not found. Please check the link and try again.');
+        throw new NotFoundError('Invitation not found. Please check the link and try again.');
       }
       const invite = inviteRes.rows[0];
 
       if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
-        throw new Error('This invitation has expired. Please request a new invitation.');
+        throw new ValidationError('This invitation has expired. Please request a new invitation.');
       }
       if (invite.status !== 'pending') {
-        throw new Error(`This invitation has already been ${invite.status}.`);
+        throw new ConflictError(`This invitation has already been ${invite.status}.`);
       }
 
       await database.query(
@@ -999,7 +999,7 @@ export class HospitalNetworkService {
       );
       return { id: invite.id, networkId: invite.network_id, hospitalId: invite.hospital_id };
     } catch (err: any) {
-      throw new Error(err.message);
+      throw new DatabaseError(err.message);
     }
   }
 
@@ -1021,7 +1021,7 @@ export class HospitalNetworkService {
       );
       return result.rows;
     } catch (err: any) {
-      throw new Error(`Get pending enrollments failed: ${err.message}`);
+      throw new DatabaseError(`Get pending enrollments failed: ${err.message}`);
     }
   }
 
@@ -1034,7 +1034,7 @@ export class HospitalNetworkService {
         [networkId, userId]
       );
       if (membership.rows.length === 0 || membership.rows[0].network_role !== 'corporate_admin') {
-        throw new Error('Only network administrators can deactivate a network');
+        throw new ForbiddenError('Only network administrators can deactivate a network');
       }
     }
     const result = await database.query(
@@ -1042,7 +1042,7 @@ export class HospitalNetworkService {
        WHERE id = $1 RETURNING id, name, is_active AS "isActive"`,
       [networkId]
     );
-    if (result.rows.length === 0) throw new Error('Network not found');
+    if (result.rows.length === 0) throw new NotFoundError('Hospital network');
     return result.rows[0];
   }
 
@@ -1149,14 +1149,14 @@ export class HospitalNetworkService {
       [data.networkId, data.fromHospitalId]
     );
     if (fromMember.rows.length === 0) {
-      throw new Error('Referring hospital is not a member of this network');
+      throw new ValidationError('Referring hospital is not a member of this network');
     }
     const toMember = await database.query(
       `SELECT id FROM hospital_network_members WHERE network_id = $1 AND hospital_id = $2 AND is_active = true LIMIT 1`,
       [data.networkId, data.toHospitalId]
     );
     if (toMember.rows.length === 0) {
-      throw new Error('Receiving hospital is not a member of this network');
+      throw new ValidationError('Receiving hospital is not a member of this network');
     }
 
     const result = await database.query(
@@ -1192,7 +1192,7 @@ export class HospitalNetworkService {
        RETURNING *`,
       [status, responseNotes || null, referralId]
     );
-    if (result.rows.length === 0) throw new Error('Referral not found');
+    if (result.rows.length === 0) throw new NotFoundError('Network referral');
     return result.rows[0];
   }
 
@@ -1333,7 +1333,7 @@ export class HospitalNetworkService {
 
     // Verify requester has access to this network (admin bypasses)
     const userCheck = await database.query(`SELECT role FROM users WHERE id = $1`, [createdById]);
-    if (userCheck.rows.length === 0) throw new Error('Invalid requester');
+    if (userCheck.rows.length === 0) throw new ValidationError('Invalid requester');
     if (userCheck.rows[0].role !== 'admin') {
       const accessCheck = await database.query(
         `SELECT id FROM hospital_networks WHERE id = $1 AND created_by = $2
@@ -1342,7 +1342,7 @@ export class HospitalNetworkService {
          LIMIT 1`,
         [networkId, createdById]
       );
-      if (accessCheck.rows.length === 0) throw new Error('You do not have permission to create branch hospitals in this network');
+      if (accessCheck.rows.length === 0) throw new ForbiddenError('You do not have permission to create branch hospitals in this network');
     }
 
     // Duplicate name check within the same network
@@ -1350,7 +1350,7 @@ export class HospitalNetworkService {
       `SELECT id FROM vet_hospitals WHERE branch_network_id = $1 AND LOWER(name) = LOWER($2) LIMIT 1`,
       [networkId, data.name]
     );
-    if (dupCheck.rows.length > 0) throw new Error(`A branch hospital named "${data.name}" already exists in this network`);
+    if (dupCheck.rows.length > 0) throw new ConflictError(`A branch hospital named "${data.name}" already exists in this network`);
 
     const client = await database.getPool().connect();
     try {
@@ -1384,8 +1384,10 @@ export class HospitalNetworkService {
       return hospital;
     } catch (error: any) {
       await client.query('ROLLBACK');
-      logger.error('Failed to create branch hospital', { error: error.message });
-      throw error;
+      logger.error('Failed to create branch hospital', { error: error.message, stack: error.stack });
+      if (error.code === '23505') throw new ConflictError('A branch hospital with this name already exists');
+      if (error.code === '23503') throw new ValidationError('Invalid reference: check that the network and user exist');
+      throw new DatabaseError(`Failed to create branch hospital: ${error.message}`);
     } finally {
       client.release();
     }
@@ -1424,7 +1426,7 @@ export async function updateBranchHospital(hospitalId: string, networkId: string
       hospitalId, networkId
     ]
   );
-  if (result.rows.length === 0) throw new Error('Branch hospital not found in this network');
+  if (result.rows.length === 0) throw new NotFoundError('Branch hospital not found in this network');
   return result.rows[0];
 }
 
@@ -1434,7 +1436,7 @@ export async function deleteBranchHospital(hospitalId: string, networkId: string
     `SELECT id FROM vet_hospitals WHERE id = $1 AND branch_network_id = $2 AND is_network_branch = true`,
     [hospitalId, networkId]
   );
-  if (check.rows.length === 0) throw new Error('Branch hospital not found in this network');
+  if (check.rows.length === 0) throw new NotFoundError('Branch hospital not found in this network');
   // Remove from junction table
   await database.query(`DELETE FROM hospital_network_hospitals WHERE hospital_id = $1 AND network_id = $2`, [hospitalId, networkId]);
   // Mark hospital as inactive rather than hard delete

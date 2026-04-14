@@ -15,10 +15,10 @@ const DEMO_USERS = [
   { id: 'f0000000-0000-0000-0000-000000000002', email: 'maria.garcia@sunrisefarm.com',  password: 'Demo@123',   firstName: 'Maria',  lastName: 'Garcia',        role: 'farmer',       phone: '+1-555-400-0002', uniqueId: 'USR-FRM-002' },
   // Hospital Network demo users
   { id: 'd0000000-0000-0000-0000-000000000001', email: 'netadmin@vetcare.com',           password: 'Demo@123',   firstName: 'Rajesh', lastName: 'Sharma',        role: 'corporate_admin', phone: '+91-98765-43210', uniqueId: 'USR-CRP-001' },
-  { id: 'd0000000-0000-0000-0000-000000000002', email: 'branch.director@vetcare.com',   password: 'Demo@123',   firstName: 'Priya',  lastName: 'Nair',          role: 'veterinarian',    phone: '+91-98765-43211', uniqueId: 'USR-VET-004' },
-  { id: 'd0000000-0000-0000-0000-000000000003', email: 'staff.nurse@vetcare.com',       password: 'Demo@123',   firstName: 'Anitha', lastName: 'Kumar',         role: 'hospital_staff',  phone: '+91-98765-43212', uniqueId: 'USR-STF-001' },
-  { id: 'd0000000-0000-0000-0000-000000000004', email: 'staff.reception@vetcare.com',   password: 'Demo@123',   firstName: 'Karthik',lastName: 'Rajan',         role: 'hospital_staff',  phone: '+91-98765-43213', uniqueId: 'USR-STF-002' },
-  { id: 'd0000000-0000-0000-0000-000000000005', email: 'staff.labtech@vetcare.com',     password: 'Demo@123',   firstName: 'Meena',  lastName: 'Sundaram',      role: 'hospital_staff',  phone: '+91-98765-43214', uniqueId: 'USR-STF-003' },
+  { id: 'd0000000-0000-0000-0000-000000000002', email: 'branch.director@vetcare.com',   password: 'Demo@123',   firstName: 'Priya',  lastName: 'Nair',          role: 'veterinarian',    phone: '+91-98765-43211', uniqueId: 'USR-NET-002' },
+  { id: 'd0000000-0000-0000-0000-000000000003', email: 'staff.nurse@vetcare.com',       password: 'Demo@123',   firstName: 'Anitha', lastName: 'Kumar',         role: 'hospital_staff',  phone: '+91-98765-43212', uniqueId: 'USR-NET-003' },
+  { id: 'd0000000-0000-0000-0000-000000000004', email: 'staff.reception@vetcare.com',   password: 'Demo@123',   firstName: 'Karthik',lastName: 'Rajan',         role: 'hospital_staff',  phone: '+91-98765-43213', uniqueId: 'USR-NET-004' },
+  { id: 'd0000000-0000-0000-0000-000000000005', email: 'staff.labtech@vetcare.com',     password: 'Demo@123',   firstName: 'Meena',  lastName: 'Sundaram',      role: 'hospital_staff',  phone: '+91-98765-43214', uniqueId: 'USR-NET-005' },
 ];
 
 export async function fixDemoPasswords(): Promise<void> {
@@ -27,6 +27,7 @@ export async function fixDemoPasswords(): Promise<void> {
     let fixed = 0;
     let created = 0;
     for (const u of DEMO_USERS) {
+      try {
       const { rows } = await database.query(
         'SELECT id, password_hash FROM users WHERE email = $1', [u.email]
       );
@@ -59,11 +60,13 @@ export async function fixDemoPasswords(): Promise<void> {
 
       if (rows.length === 0 || (rows.length > 0 && rows[0].id !== u.id)) {
         const hash = await bcrypt.hash(u.password, 10);
+        // Clear any stale unique_id collision before inserting
+        await database.query('UPDATE users SET unique_id = NULL WHERE unique_id = $1 AND id != $2', [u.uniqueId, u.id]).catch(() => {});
         await database.query(
           `INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active, unique_id)
            VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8)
            ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, email = EXCLUDED.email,
-             first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name`,
+             first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, unique_id = EXCLUDED.unique_id`,
           [u.id, u.email, u.firstName, u.lastName, u.role, u.phone, hash, u.uniqueId]
         );
         created++;
@@ -79,6 +82,9 @@ export async function fixDemoPasswords(): Promise<void> {
         [newHash, u.email, u.firstName, u.lastName, u.id]
       );
       fixed++;
+      } catch (userErr: any) {
+        logger.warn(`Demo user ${u.email} setup failed (continuing): ${userErr.message.substring(0, 200)}`);
+      }
     }
     if (fixed > 0 || created > 0) {
       logger.info(`Demo users: ${created} created, ${fixed} passwords fixed`);

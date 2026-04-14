@@ -43,10 +43,10 @@ INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash,
   ('f0000000-0000-0000-0000-000000000002', 'maria.garcia@sunrisefarm.com','Maria',   'Garcia',   'farmer',       '+1-555-400-0002', '$2a$10$9lvpT/PhXramRLyjABSXfO7ks10U4KvWGlfYS6XZYeUNpTjuM.rtm', true, 'USR-FRM-002'),
   -- Hospital Network Demo Users (password: Demo@123 — fixDemoPasswords corrects hash at startup)
   ('d0000000-0000-0000-0000-000000000001', 'netadmin@vetcare.com',         'Rajesh',  'Sharma',   'corporate_admin', '+91-98765-43210', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-CRP-001'),
-  ('d0000000-0000-0000-0000-000000000002', 'branch.director@vetcare.com', 'Priya',   'Nair',     'veterinarian',    '+91-98765-43211', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-VET-004'),
-  ('d0000000-0000-0000-0000-000000000003', 'staff.nurse@vetcare.com',     'Anitha',  'Kumar',    'hospital_staff',  '+91-98765-43212', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-STF-001'),
-  ('d0000000-0000-0000-0000-000000000004', 'staff.reception@vetcare.com', 'Karthik', 'Rajan',    'hospital_staff',  '+91-98765-43213', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-STF-002'),
-  ('d0000000-0000-0000-0000-000000000005', 'staff.labtech@vetcare.com',   'Meena',   'Sundaram', 'hospital_staff',  '+91-98765-43214', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-STF-003')
+  ('d0000000-0000-0000-0000-000000000002', 'branch.director@vetcare.com', 'Priya',   'Nair',     'veterinarian',    '+91-98765-43211', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-NET-002'),
+  ('d0000000-0000-0000-0000-000000000003', 'staff.nurse@vetcare.com',     'Anitha',  'Kumar',    'hospital_staff',  '+91-98765-43212', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-NET-003'),
+  ('d0000000-0000-0000-0000-000000000004', 'staff.reception@vetcare.com', 'Karthik', 'Rajan',    'hospital_staff',  '+91-98765-43213', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-NET-004'),
+  ('d0000000-0000-0000-0000-000000000005', 'staff.labtech@vetcare.com',   'Meena',   'Sundaram', 'hospital_staff',  '+91-98765-43214', '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K', true, 'USR-NET-005')
 ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, email = EXCLUDED.email, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, role = EXCLUDED.role, phone = EXCLUDED.phone, is_active = EXCLUDED.is_active;
 
 -- ============================================================
