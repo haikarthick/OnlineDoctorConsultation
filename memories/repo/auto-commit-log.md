@@ -1538,3 +1538,21 @@
 </details>
 
 ---
+
+## 2026-04-14 14:24 · `2945f7f` · 🐛 FIX
+
+**Commit:** fix: email log-only fallback when SMTP blocked on Render  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/EmailService.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

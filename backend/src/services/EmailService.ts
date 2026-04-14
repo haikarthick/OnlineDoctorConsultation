@@ -146,10 +146,14 @@ class EmailService {
 
   /** Whether SMTP is available (false = log-only mode) */
   private smtpAvailable = true;
+  /** Tracks if we already tried and failed SMTP (skip on subsequent calls) */
+  private smtpChecked = false;
 
   /** Lazy-initialize the nodemailer transporter */
   private async getTransporter(): Promise<Transporter | null> {
     if (this.transporter) return this.transporter;
+    // If we already tried SMTP and it failed, go straight to log-only
+    if (this.smtpChecked && !this.smtpAvailable) return null;
 
     if (process.env.SMTP_HOST) {
       const host = process.env.SMTP_HOST;
@@ -164,15 +168,20 @@ class EmailService {
           port,
           secure,
           auth: { user, pass },
-          connectionTimeout: 10000,
-          greetingTimeout: 10000,
-          socketTimeout: 20000,
+          connectionTimeout: 8000,
+          greetingTimeout: 8000,
+          socketTimeout: 15000,
           tls: { rejectUnauthorized: false },
         };
         const transport = nodemailer.createTransport(opts);
-        await transport.verify();
+        // Hard 10s timeout — OS TCP retries can exceed nodemailer's connectionTimeout
+        await Promise.race([
+          transport.verify(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('SMTP verify timeout (10s hard limit)')), 10000)),
+        ]);
         this.transporter = transport;
         this.smtpAvailable = true;
+        this.smtpChecked = true;
         logger.info(`SMTP connection verified: ${host}:${port}`);
         return this.transporter;
       } catch (err: any) {
@@ -182,7 +191,8 @@ class EmailService {
 
     // No SMTP available — use log-only mode (no external connections needed)
     this.smtpAvailable = false;
-    logger.warn('Email service in LOG-ONLY mode — emails will be logged but not delivered. Configure working SMTP to enable delivery.');
+    this.smtpChecked = true;
+    logger.warn('Email service in LOG-ONLY mode — emails will be logged but not delivered. Configure working SMTP or use an HTTP email provider (Resend/SendGrid).');
     return null;
   }
 
