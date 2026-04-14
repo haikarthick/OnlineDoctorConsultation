@@ -1331,6 +1331,27 @@ export class HospitalNetworkService {
     );
     if (netCheck.rows.length === 0) throw new NotFoundError('Hospital network not found');
 
+    // Verify requester has access to this network (admin bypasses)
+    const userCheck = await database.query(`SELECT role FROM users WHERE id = $1`, [createdById]);
+    if (userCheck.rows.length === 0) throw new Error('Invalid requester');
+    if (userCheck.rows[0].role !== 'admin') {
+      const accessCheck = await database.query(
+        `SELECT id FROM hospital_networks WHERE id = $1 AND created_by = $2
+         UNION
+         SELECT network_id as id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true
+         LIMIT 1`,
+        [networkId, createdById]
+      );
+      if (accessCheck.rows.length === 0) throw new Error('You do not have permission to create branch hospitals in this network');
+    }
+
+    // Duplicate name check within the same network
+    const dupCheck = await database.query(
+      `SELECT id FROM vet_hospitals WHERE branch_network_id = $1 AND LOWER(name) = LOWER($2) LIMIT 1`,
+      [networkId, data.name]
+    );
+    if (dupCheck.rows.length > 0) throw new Error(`A branch hospital named "${data.name}" already exists in this network`);
+
     const client = await database.getPool().connect();
     try {
       await client.query('BEGIN');

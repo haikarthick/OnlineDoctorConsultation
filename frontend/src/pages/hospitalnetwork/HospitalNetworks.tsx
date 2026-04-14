@@ -57,7 +57,14 @@ interface NetworkHospital {
   id: string
   name: string
   city?: string
+  state?: string
   hospitalType?: string
+  contactEmail?: string
+  contactPhone?: string
+  isVerified?: boolean
+  isNetworkBranch?: boolean
+  specializations?: string[]
+  staffCount?: number
 }
 
 interface AuditEntry {
@@ -453,10 +460,11 @@ interface AddMemberModalProps {
   networkHospitals: NetworkHospital[]
   onClose: () => void
   onAdded: () => void
+  onInviteInstead: () => void
   t: (key: string) => string
 }
 
-const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospitals, onClose, onAdded, t }) => {
+const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospitals, onClose, onAdded, onInviteInstead, t }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<Array<{ id: string; firstName: string; lastName: string; email: string; role: string }>>([])
   const [selectedUser, setSelectedUser] = useState<{ id: string; firstName: string; lastName: string; email: string; role: string } | null>(null)
@@ -534,7 +542,17 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
               </div>
             )}
             {searchQuery.length >= 2 && searchResults.length === 0 && !searching && !selectedUser && (
-              <p style={{ fontSize: 13, color: '#ef4444', marginTop: 4 }}>No users found. The user must be registered on the platform first.</p>
+              <div style={{ marginTop: 8, padding: '10px 12px', background: '#fffbeb', border: '1px solid #fbbf24', borderRadius: 6 }}>
+                <p style={{ fontSize: 13, color: '#92400e', margin: '0 0 6px' }}>No registered users found for "{searchQuery}".</p>
+                <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 8px' }}>This person may not have a VetCare account yet.</p>
+                <button
+                  type="button"
+                  onClick={onInviteInstead}
+                  style={{ fontSize: 13, color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline', fontWeight: 600 }}
+                >
+                  ✉️ Invite them by email instead →
+                </button>
+              </div>
             )}
 
             {selectedUser && (
@@ -1276,8 +1294,17 @@ const HospitalNetworks: React.FC = () => {
                           <div key={h.id} className="hn-hospital-item">
                             <span className="hn-hospital-icon">🏥</span>
                             <div className="hn-hospital-info">
-                              <div className="hn-hospital-name">{h.name}</div>
-                              {h.city && <div className="hn-hospital-city">{h.city}</div>}
+                              <div className="hn-hospital-name">
+                                {h.name}
+                                {h.isNetworkBranch && <span style={{ marginLeft: 6, fontSize: 11, background: '#dbeafe', color: '#1d4ed8', borderRadius: 10, padding: '1px 7px', fontWeight: 600 }}>Branch</span>}
+                                {h.isVerified && <span style={{ marginLeft: 4, fontSize: 11, background: '#dcfce7', color: '#15803d', borderRadius: 10, padding: '1px 7px', fontWeight: 600 }}>✓ Verified</span>}
+                              </div>
+                              <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                {h.city && <span>📍 {h.city}{h.state ? `, ${h.state}` : ''}</span>}
+                                {h.hospitalType && <span>🏷️ {h.hospitalType.replace(/_/g, ' ')}</span>}
+                                {h.staffCount != null && <span>👥 {h.staffCount} staff</span>}
+                                {h.contactPhone && <span>📞 {h.contactPhone}</span>}
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -1712,6 +1739,11 @@ const HospitalNetworks: React.FC = () => {
             setShowAddMember(false)
             setSuccessMsg('Member added successfully.')
             loadDetail(selectedNetwork)
+          }}
+          onInviteInstead={() => {
+            setShowAddMember(false)
+            setShowInviteStaff(true)
+            setInviteStaffError('')
           }}
           t={t}
         />

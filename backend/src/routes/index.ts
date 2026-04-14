@@ -398,6 +398,7 @@ router.get('/network-user-search', authMiddleware, roleMiddleware(['admin', 'cor
       `SELECT id, first_name as "firstName", last_name as "lastName", email, role
        FROM users
        WHERE is_active = true
+         AND role NOT IN ('pet_owner', 'farmer')
          AND (
            email ILIKE $1
            OR first_name ILIKE $1
