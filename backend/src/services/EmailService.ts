@@ -1,17 +1,18 @@
 /**
  * Email Service
  *
- * Provides a template-driven email sending layer using nodemailer.
+ * Priority: Resend (HTTP) → SMTP → Log-only fallback
  *
  * Configuration via environment variables:
- *   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM
- *
- * In development the service falls back to Ethereal (https://ethereal.email)
- * so emails are captured for inspection without a real SMTP server.
+ *   RESEND_API_KEY          — Resend HTTP API (works on all platforms including Render)
+ *   SMTP_HOST/PORT/USER/PASS — Traditional SMTP (may be blocked on some cloud platforms)
+ *   SMTP_FROM               — Sender address for both providers
+ *   EMAIL_DEV_REDIRECT      — Redirect ALL emails to this address in dev/demo
  */
 
 import nodemailer, { Transporter } from 'nodemailer';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { Resend } from 'resend';
 import logger from '../utils/logger';
 
 // ── Types ─────────────────────────────────────────────────────
@@ -138,69 +139,76 @@ const templates: Record<string, EmailTemplate> = {
 
 class EmailService {
   private transporter: Transporter | null = null;
+  private resendClient: Resend | null = null;
   private from: string;
+  /** 'resend' | 'smtp' | 'log-only' */
+  private mode: string = 'unknown';
+  private initialized = false;
 
   constructor() {
     this.from = process.env.SMTP_FROM || 'VetCare <noreply@vetcare.app>';
+    // Eagerly check for Resend API key
+    if (process.env.RESEND_API_KEY) {
+      this.resendClient = new Resend(process.env.RESEND_API_KEY);
+      this.mode = 'resend';
+      this.initialized = true;
+      logger.info('Email service using Resend HTTP API');
+    }
   }
 
-  /** Whether SMTP is available (false = log-only mode) */
-  private smtpAvailable = true;
-  /** Tracks if we already tried and failed SMTP (skip on subsequent calls) */
-  private smtpChecked = false;
+  /** Initialize SMTP transporter (only called if Resend not available) */
+  private async initSmtp(): Promise<boolean> {
+    if (!process.env.SMTP_HOST) return false;
 
-  /** Lazy-initialize the nodemailer transporter */
-  private async getTransporter(): Promise<Transporter | null> {
-    if (this.transporter) return this.transporter;
-    // If we already tried SMTP and it failed, go straight to log-only
-    if (this.smtpChecked && !this.smtpAvailable) return null;
+    const host = process.env.SMTP_HOST;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+    const port = parseInt(process.env.SMTP_PORT || '587', 10);
+    const secure = port === 465;
 
-    if (process.env.SMTP_HOST) {
-      const host = process.env.SMTP_HOST;
-      const user = process.env.SMTP_USER;
-      const pass = process.env.SMTP_PASS;
-      const port = parseInt(process.env.SMTP_PORT || '587', 10);
-      const secure = port === 465;
-
-      try {
-        const opts: SMTPTransport.Options = {
-          host,
-          port,
-          secure,
-          auth: { user, pass },
-          connectionTimeout: 8000,
-          greetingTimeout: 8000,
-          socketTimeout: 15000,
-          tls: { rejectUnauthorized: false },
-        };
-        const transport = nodemailer.createTransport(opts);
-        // Hard 10s timeout — OS TCP retries can exceed nodemailer's connectionTimeout
-        await Promise.race([
-          transport.verify(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('SMTP verify timeout (10s hard limit)')), 10000)),
-        ]);
-        this.transporter = transport;
-        this.smtpAvailable = true;
-        this.smtpChecked = true;
-        logger.info(`SMTP connection verified: ${host}:${port}`);
-        return this.transporter;
-      } catch (err: any) {
-        logger.error(`SMTP connection failed (${host}:${port}): ${err.message} — switching to log-only mode`);
-      }
+    try {
+      const opts: SMTPTransport.Options = {
+        host, port, secure,
+        auth: { user, pass },
+        connectionTimeout: 8000,
+        greetingTimeout: 8000,
+        socketTimeout: 15000,
+        tls: { rejectUnauthorized: false },
+      };
+      const transport = nodemailer.createTransport(opts);
+      await Promise.race([
+        transport.verify(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('SMTP verify timeout (10s hard limit)')), 10000)),
+      ]);
+      this.transporter = transport;
+      this.mode = 'smtp';
+      logger.info(`SMTP connection verified: ${host}:${port}`);
+      return true;
+    } catch (err: any) {
+      logger.error(`SMTP connection failed (${host}:${port}): ${err.message}`);
+      return false;
     }
+  }
 
-    // No SMTP available — use log-only mode (no external connections needed)
-    this.smtpAvailable = false;
-    this.smtpChecked = true;
-    logger.warn('Email service in LOG-ONLY mode — emails will be logged but not delivered. Configure working SMTP or use an HTTP email provider (Resend/SendGrid).');
-    return null;
+  /** Ensure the service is initialized (lazy for SMTP) */
+  private async ensureInitialized(): Promise<void> {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    // Try SMTP
+    if (await this.initSmtp()) return;
+
+    // All providers failed — log-only mode
+    this.mode = 'log-only';
+    logger.warn('Email service in LOG-ONLY mode. Set RESEND_API_KEY (recommended) or configure working SMTP for delivery.');
   }
 
   /**
-   * Send an email.
-   * If a template is specified, it takes precedence over raw html/text.
+   * Send an email via Resend, SMTP, or log-only depending on available provider.
    */
-  async send(options: EmailOptions): Promise<{ messageId: string; previewUrl?: string | false }> {
+  async send(options: EmailOptions): Promise<{ messageId: string; previewUrl?: string | false; mode?: string }> {
+    await this.ensureInitialized();
+
     let subject = options.subject;
     let html = options.html || '';
     let text = options.text || '';
@@ -214,7 +222,7 @@ class EmailService {
       text = tpl.text(data);
     }
 
-    // Dev/demo email redirect — routes all emails to a configured address
+    // Dev/demo email redirect
     const devRedirect = process.env.EMAIL_DEV_REDIRECT;
     let actualTo = Array.isArray(options.to) ? options.to.join(', ') : options.to;
     if (devRedirect) {
@@ -223,52 +231,44 @@ class EmailService {
       logger.info(`Email redirected to dev address: ${devRedirect} (original: ${options.to})`);
     }
 
-    const transporter = await this.getTransporter();
-
-    // Log-only mode: no working SMTP — log full email content and return
-    if (!transporter) {
-      const logId = `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      logger.info(`[EMAIL-LOG] ${logId} | To: ${actualTo} | Subject: ${subject}`);
-      logger.info(`[EMAIL-LOG] ${logId} | Text: ${text.substring(0, 500)}`);
-      return { messageId: logId, previewUrl: false as const };
-    }
-
-    // Real SMTP — try sending, retry once on transient failure
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    // ── Resend (HTTP API) ──
+    if (this.mode === 'resend' && this.resendClient) {
       try {
-        const info = await transporter.sendMail({
+        const { data: resendData, error } = await this.resendClient.emails.send({
           from: this.from,
           to: actualTo,
           subject,
           html,
           text,
         });
-
-        const previewUrl = nodemailer.getTestMessageUrl(info);
-        if (previewUrl) {
-          logger.info(`Email preview URL: ${previewUrl}`);
-        }
-        logger.info(`Email sent: ${info.messageId} → ${actualTo}`);
-        return { messageId: info.messageId, previewUrl };
-      } catch (sendErr: any) {
-        if (attempt === 1) {
-          logger.warn(`Email send attempt 1 failed (${sendErr.message}), resetting transporter and retrying...`);
-          this.transporter = null;
-          // Re-initialize transporter for retry
-          const retryTransporter = await this.getTransporter();
-          if (!retryTransporter) {
-            // Fell back to log-only on retry — log and return
-            const logId = `log-retry-${Date.now()}`;
-            logger.info(`[EMAIL-LOG] ${logId} | To: ${actualTo} | Subject: ${subject}`);
-            return { messageId: logId, previewUrl: false as const };
-          }
-        } else {
-          throw sendErr;
-        }
+        if (error) throw new Error(error.message);
+        const messageId = resendData?.id || `resend-${Date.now()}`;
+        logger.info(`Email sent via Resend: ${messageId} → ${actualTo}`);
+        return { messageId, mode: 'resend' };
+      } catch (err: any) {
+        logger.error(`Resend send failed: ${err.message}`);
+        throw err;
       }
     }
-    throw new Error('Email send failed after all attempts');
+
+    // ── SMTP (nodemailer) ──
+    if (this.mode === 'smtp' && this.transporter) {
+      const info = await this.transporter.sendMail({ from: this.from, to: actualTo, subject, html, text });
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      if (previewUrl) logger.info(`Email preview URL: ${previewUrl}`);
+      logger.info(`Email sent via SMTP: ${info.messageId} → ${actualTo}`);
+      return { messageId: info.messageId, previewUrl, mode: 'smtp' };
+    }
+
+    // ── Log-only fallback ──
+    const logId = `log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    logger.info(`[EMAIL-LOG] ${logId} | To: ${actualTo} | Subject: ${subject}`);
+    logger.info(`[EMAIL-LOG] ${logId} | Text: ${text.substring(0, 500)}`);
+    return { messageId: logId, previewUrl: false as const, mode: 'log-only' };
   }
+
+  /** Get current email provider mode */
+  getMode(): string { return this.mode; }
 
   /** Helper: send a welcome email */
   async sendWelcome(to: string, data: { firstName: string; email: string; role: string }) {

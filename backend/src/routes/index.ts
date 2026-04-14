@@ -758,13 +758,18 @@ router.post('/admin/settings/test-email', authMiddleware, roleMiddleware(['admin
     const result = await emailService.send({
       to,
       subject: 'VetCare — Test Email',
-      html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from VetCare admin panel.</p><p>Sent at: ${new Date().toISOString()}</p><p>SMTP: ${process.env.SMTP_HOST || 'not configured'}:${process.env.SMTP_PORT || '?'}</p><p>Dev redirect: ${devRedirect || 'off'}</p></div>`,
+      html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from VetCare admin panel.</p><p>Sent at: ${new Date().toISOString()}</p><p>Dev redirect: ${devRedirect || 'off'}</p></div>`,
       text: `Email is working! Sent at: ${new Date().toISOString()}`,
     });
-    const isLogOnly = typeof result.messageId === 'string' && result.messageId.startsWith('log-');
-    res.json({ success: true, message: isLogOnly ? 'Email logged (SMTP unavailable on this platform — email content saved to server logs)' : 'Test email sent successfully', data: { messageId: result.messageId, mode: isLogOnly ? 'log-only' : 'smtp', previewUrl: result.previewUrl || null, redirectedTo: devRedirect || null, smtpHost: process.env.SMTP_HOST || null } });
+    const mode = result.mode || emailService.getMode();
+    const messages: Record<string, string> = {
+      'resend': 'Test email sent via Resend (HTTP)',
+      'smtp': 'Test email sent via SMTP',
+      'log-only': 'Email logged (no email provider available — add RESEND_API_KEY for delivery)',
+    };
+    res.json({ success: true, message: messages[mode] || 'Email processed', data: { messageId: result.messageId, mode, previewUrl: result.previewUrl || null, redirectedTo: devRedirect || null } });
   } catch (err: any) {
-    res.status(500).json({ success: false, message: `Email failed: ${err.message}`, smtpHost: process.env.SMTP_HOST || 'not configured', smtpPort: process.env.SMTP_PORT || 'not set', devRedirect: devRedirect || null });
+    res.status(500).json({ success: false, message: `Email failed: ${err.message}`, mode: emailService.getMode() });
   }
 }));
 router.get('/admin/audit-logs', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));

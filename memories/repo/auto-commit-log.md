@@ -1556,3 +1556,20 @@
 </details>
 
 ---
+
+## 2026-04-14 14:32 · `d2d89d4` · 🐛 FIX
+
+**Commit:** fix: hard 10s Promise.race timeout + smtpChecked skip on repeat calls  
+**Author:** haikarthick  
+**Categories:** SERVICE · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/services/EmailService.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
