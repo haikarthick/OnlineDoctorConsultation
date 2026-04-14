@@ -443,23 +443,47 @@ export class HospitalNetworkService {
               vh.name,
               vh.city,
               vh.state,
-              vh.contact_email AS "contactEmail",
-              vh.contact_phone AS "contactPhone",
+              vh.hospital_type AS "hospitalType",
+              vh.email AS "contactEmail",
+              vh.phone AS "contactPhone",
               vh.is_verified AS "isVerified",
+              vh.is_network_branch AS "isNetworkBranch",
               vh.specializations,
               (SELECT COUNT(*) FROM hospital_network_members
                WHERE network_id = $1 AND hospital_id = vh.id AND is_active = true) AS "staffCount"
-       FROM hospital_network_members hnm
-       JOIN vet_hospitals vh ON hnm.hospital_id = vh.id
-       WHERE hnm.network_id = $1 AND hnm.hospital_id IS NOT NULL AND hnm.is_active = true
-       ORDER BY vh.name ASC
+       FROM vet_hospitals vh
+       WHERE vh.is_network_branch = true AND vh.branch_network_id = $1
+      UNION
+      SELECT DISTINCT vh.id,
+              vh.name,
+              vh.city,
+              vh.state,
+              vh.hospital_type AS "hospitalType",
+              vh.email AS "contactEmail",
+              vh.phone AS "contactPhone",
+              vh.is_verified AS "isVerified",
+              vh.is_network_branch AS "isNetworkBranch",
+              vh.specializations,
+              (SELECT COUNT(*) FROM hospital_network_members
+               WHERE network_id = $1 AND hospital_id = vh.id AND is_active = true) AS "staffCount"
+       FROM hospital_network_hospitals hnh
+       JOIN vet_hospitals vh ON hnh.hospital_id = vh.id
+       WHERE hnh.network_id = $1 AND hnh.is_active = true
+       ORDER BY name ASC
        LIMIT $2 OFFSET $3`,
       [networkId, limit, offset]
     );
     const countResult = await database.query(
-      `SELECT COUNT(DISTINCT hnm.hospital_id) AS count
-       FROM hospital_network_members hnm
-       WHERE hnm.network_id = $1 AND hnm.hospital_id IS NOT NULL AND hnm.is_active = true`,
+      `SELECT COUNT(*) AS count FROM (
+        SELECT DISTINCT vh.id
+        FROM vet_hospitals vh
+        WHERE vh.is_network_branch = true AND vh.branch_network_id = $1
+        UNION
+        SELECT DISTINCT vh.id
+        FROM hospital_network_hospitals hnh
+        JOIN vet_hospitals vh ON hnh.hospital_id = vh.id
+        WHERE hnh.network_id = $1 AND hnh.is_active = true
+      ) AS combined`,
       [networkId]
     );
     const total = parseInt(countResult.rows[0]?.count ?? '0');

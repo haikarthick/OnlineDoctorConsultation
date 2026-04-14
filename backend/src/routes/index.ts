@@ -112,6 +112,7 @@ import VaccineScheduleService from '../services/VaccineScheduleService';
 import { asyncHandler } from '../utils/errorHandler';
 import { AuthRequest } from '../middleware/auth';
 import { checkAnimalAccess, requireAnimalAccess } from '../middleware/hospitalDataIsolation';
+import emailService from '../services/EmailService';
 
 const router = Router();
 
@@ -715,6 +716,21 @@ router.get('/admin/reviews', authMiddleware, roleMiddleware(['admin']), asyncHan
 router.put('/admin/reviews/:id/moderate', authMiddleware, roleMiddleware(['admin']), validateBody(moderateReviewSchema), asyncHandler((req: Request, res: Response) => AdminController.moderateReview(req, res)));
 router.get('/admin/settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getSystemSettings(req, res)));
 router.put('/admin/settings', authMiddleware, roleMiddleware(['admin']), validateBody(updateSystemSettingSchema), asyncHandler((req: Request, res: Response) => AdminController.updateSystemSetting(req, res)));
+router.post('/admin/settings/test-email', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const { to } = req.body;
+  if (!to) return res.status(400).json({ success: false, message: 'Recipient email required' });
+  try {
+    const result = await emailService.send({
+      to,
+      subject: 'VetCare — Test Email',
+      html: `<div style="font-family:Arial,sans-serif;padding:24px"><h2>✅ Email is working!</h2><p>This is a test email from VetCare admin panel.</p><p>Sent at: ${new Date().toISOString()}</p></div>`,
+      text: `Email is working! Sent at: ${new Date().toISOString()}`,
+    });
+    res.json({ success: true, message: 'Test email sent', data: { previewUrl: result.previewUrl || null } });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: `Email failed: ${err.message}` });
+  }
+}));
 router.get('/admin/audit-logs', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));
 router.get('/admin/compliance/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getComplianceDashboard(req, res)));
 router.get('/admin/compliance/phi-access', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getPhiAccessLog(req, res)));
@@ -1627,8 +1643,30 @@ router.post('/hospital-networks/:id/invite-staff', authMiddleware, roleMiddlewar
   const existing = await db.query(`SELECT id FROM hospital_staff_invites WHERE network_id=$1 AND invitee_email=$2 AND status='pending' AND expires_at>NOW()`, [networkId, invitee_email]);
   if (existing.rows.length > 0) return res.status(409).json({ success: false, message: 'A pending invite already exists for this email' });
   await db.query(`INSERT INTO hospital_staff_invites (network_id, hospital_id, invited_by, invitee_email, invitee_name, staff_position, invite_token) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-    [networkId, hospital_id||null, authReq.userId, invitee_email, invitee_name, staff_position, token]);
-  res.status(201).json({ success: true, message: 'Invite created. Share the acceptance link with the staff member.', data: { token, expires_in: '72 hours' } });
+    [networkId, hospital_id||null, authReq.userId, invitee_email, invitee_name || '', staff_position, token]);
+
+  // Build invite URL
+  const frontendUrl = process.env.FRONTEND_URL || (process.env.RENDER_EXTERNAL_URL ? process.env.RENDER_EXTERNAL_URL.replace('/api/v1', '') : '') || 'http://localhost:5173';
+  const inviteUrl = `${frontendUrl}/accept-hospital-invite?token=${token}`;
+
+  // Fetch network + hospital names for email
+  const networkResult = await db.query(`SELECT name FROM hospital_networks WHERE id = $1`, [networkId]);
+  const networkName = networkResult.rows[0]?.name || 'the network';
+  let hospitalName = '';
+  if (hospital_id) {
+    const hRes = await db.query(`SELECT name FROM vet_hospitals WHERE id = $1`, [hospital_id]);
+    hospitalName = hRes.rows[0]?.name || '';
+  }
+
+  // Send invite email (non-blocking)
+  emailService.send({
+    to: invitee_email,
+    subject: '',
+    template: 'staff_invite',
+    data: { inviteeName: invitee_name, networkName, hospitalName, position: staff_position, inviteUrl },
+  }).catch((err: any) => logger.error('Staff invite email failed', { error: err.message }));
+
+  res.status(201).json({ success: true, message: 'Invite created. Email sent if configured.', data: { token, inviteUrl } });
 }));
 
 router.get('/hospital-staff-invites/token/:token', asyncHandler(async (req: Request, res: Response) => {

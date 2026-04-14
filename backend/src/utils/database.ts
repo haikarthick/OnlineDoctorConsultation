@@ -991,6 +991,18 @@ class PostgresDatabase {
       CHECK (verification_status IN ('pending_documents', 'under_review', 'approved', 'rejected', 'expired'))
     `).catch(() => {});
 
+    // Make invitee_name optional on hospital_staff_invites (label says "(optional)")
+    await this.pool.query(`ALTER TABLE hospital_staff_invites ALTER COLUMN invitee_name DROP NOT NULL`).catch(() => {});
+
+    // Email settings defaults
+    await this.pool.query(`
+      INSERT INTO system_settings (key, value, description, category) VALUES
+        ('email.devRedirect', '', 'Dev/demo email redirect address (all emails go here when set)', 'email'),
+        ('email.fromName', 'VetCare', 'Email sender display name', 'email'),
+        ('email.fromAddress', 'noreply@vetcare.app', 'Email sender address', 'email')
+      ON CONFLICT (key) DO NOTHING
+    `).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

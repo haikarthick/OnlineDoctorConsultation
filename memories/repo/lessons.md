@@ -386,3 +386,10 @@
 - **Lesson:** NEVER use raw text inputs for IDs, UUIDs, emails, or any entity that exists in the database. ALWAYS implement as search-and-select: load options on focus, filter on type, show human-readable label, store ID internally. Create SearchSelect.tsx as reusable component.
 - **Apply to:** All future forms with entity references
 
+
+### LESSON-063 — Email system: dev redirect + inviteURL display
+- **Logged:** 2026-04-14 05:45
+- **Context:** Staff invite emails not sending because route never called emailService; no SMTP configured; admin had no way to configure email
+- **Lesson:** Wire emailService to every route that should notify users. Add EMAIL_DEV_REDIRECT env var to redirect all emails to a test address in dev. Always show invite URL in UI as fallback when email might not be configured.
+- **Apply to:** All future routes that create invites, bookings, or notifications
+

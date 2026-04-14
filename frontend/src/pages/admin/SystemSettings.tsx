@@ -33,6 +33,9 @@ const MANAGED_KEYS = new Set([
   'cancellation.partialRefundWindowHours',
   'cancellation.goodwillBonusPercent',
   'cancellation.doctorMaxCancellationsPerMonth',
+  'email.devRedirect',
+  'email.fromName',
+  'email.fromAddress',
 ])
 
 const inputStyle: React.CSSProperties = { color: '#111827', WebkitTextFillColor: '#111827' }
@@ -86,6 +89,16 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const [cancellationWindowHours, setCancellationWindowHours] = useState(24)
   const [maxReschedules, setMaxReschedules] = useState(1)
 
+  // Email settings card state
+  const [emailDevRedirect, setEmailDevRedirect] = useState('')
+  const [emailFromName, setEmailFromName] = useState('VetCare')
+  const [emailFromAddress, setEmailFromAddress] = useState('noreply@vetcare.app')
+  const [emailSaving, setEmailSaving] = useState(false)
+  const [emailSaved, setEmailSaved] = useState(false)
+  const [testEmailTo, setTestEmailTo] = useState('')
+  const [testEmailSending, setTestEmailSending] = useState(false)
+  const [testEmailResult, setTestEmailResult] = useState<{ success: boolean; message: string; previewUrl?: string | null } | null>(null)
+
   useEffect(() => {
     loadSettings()
     loadGatewaySettings()
@@ -105,6 +118,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       if (find('booking.cancellationWindowHours')) setCancellationWindowHours(parseInt(find('booking.cancellationWindowHours')!, 10) || 24)
       if (find('booking.maxReschedules')) setMaxReschedules(parseInt(find('booking.maxReschedules')!, 10) || 1)
       if (find('payment.currency')) setSelectedCurrency(find('payment.currency')!)
+      if (find('email.devRedirect') !== undefined) setEmailDevRedirect(find('email.devRedirect') || '')
+      if (find('email.fromName')) setEmailFromName(find('email.fromName')!)
+      if (find('email.fromAddress')) setEmailFromAddress(find('email.fromAddress')!)
     } catch {
     } finally {
       setLoading(false)
@@ -252,6 +268,37 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     } catch {
     } finally {
       setSavingCancellation(false)
+    }
+  }
+
+  const handleSaveEmailSettings = async () => {
+    try {
+      setEmailSaving(true)
+      setEmailSaved(false)
+      await Promise.all([
+        apiService.adminUpdateSetting('email.devRedirect', emailDevRedirect),
+        apiService.adminUpdateSetting('email.fromName', emailFromName),
+        apiService.adminUpdateSetting('email.fromAddress', emailFromAddress),
+      ])
+      setEmailSaved(true)
+      setTimeout(() => setEmailSaved(false), 3000)
+    } catch {
+    } finally {
+      setEmailSaving(false)
+    }
+  }
+
+  const handleSendTestEmail = async () => {
+    if (!testEmailTo) return
+    try {
+      setTestEmailSending(true)
+      setTestEmailResult(null)
+      const res = await apiService.adminSendTestEmail(testEmailTo)
+      setTestEmailResult({ success: true, message: res.message || 'Sent', previewUrl: res.data?.previewUrl })
+    } catch (err: any) {
+      setTestEmailResult({ success: false, message: err.response?.data?.message || err.message || 'Failed' })
+    } finally {
+      setTestEmailSending(false)
     }
   }
 
@@ -955,6 +1002,65 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
           </div>
         </div>
       )}
+
+      {/* ─── Email Configuration ─── */}
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div className="card-header">
+          <h2 style={{ color: '#111827' }}>📧 Email Configuration</h2>
+        </div>
+        <div className="card-body">
+          <div className="module-form">
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">Dev/Demo Email Redirect</label>
+                <input type="email" className="module-input" value={emailDevRedirect} style={inputStyle}
+                  onChange={e => setEmailDevRedirect(e.target.value)}
+                  placeholder="test@example.com" />
+                <p style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>When set, ALL outgoing emails are redirected to this address instead of the actual recipient. Use for testing.</p>
+              </div>
+            </div>
+            <div className="module-form-row">
+              <div className="module-form-group">
+                <label className="module-label">From Name</label>
+                <input type="text" className="module-input" value={emailFromName} style={inputStyle}
+                  onChange={e => setEmailFromName(e.target.value)}
+                  placeholder="VetCare" />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">From Address</label>
+                <input type="email" className="module-input" value={emailFromAddress} style={inputStyle}
+                  onChange={e => setEmailFromAddress(e.target.value)}
+                  placeholder="noreply@vetcare.app" />
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6', marginTop: 12 }}>
+            {emailSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ Saved</span>}
+            <button className="btn btn-primary" disabled={emailSaving} onClick={handleSaveEmailSettings}>
+              {emailSaving ? 'Saving...' : 'Save Email Settings'}
+            </button>
+          </div>
+          <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #f3f4f6' }}>
+            <label className="module-label">Send Test Email</label>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <input type="email" className="module-input" value={testEmailTo} style={{ ...inputStyle, flex: 1 }}
+                onChange={e => setTestEmailTo(e.target.value)}
+                placeholder="recipient@example.com" />
+              <button className="btn btn-primary" disabled={testEmailSending || !testEmailTo} onClick={handleSendTestEmail}>
+                {testEmailSending ? 'Sending...' : '📤 Send Test'}
+              </button>
+            </div>
+            {testEmailResult && (
+              <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 6, background: testEmailResult.success ? '#f0fdf4' : '#fef2f2', color: testEmailResult.success ? '#059669' : '#dc2626', fontSize: 13 }}>
+                {testEmailResult.success ? '✅ ' : '❌ '}{testEmailResult.message}
+                {testEmailResult.previewUrl && (
+                  <> — <a href={testEmailResult.previewUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#0369a1' }}>Preview Email</a></>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* ─── Other Settings (non-managed only) ─── */}
       <div id="settings-section-other">

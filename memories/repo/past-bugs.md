@@ -736,3 +736,11 @@ render-start.sh
 - **Fix:** Fixed authReq.role → authReq.userRole in 2 places in routes/index.ts
 - **Rule:** ALWAYS use authReq.userRole (never authReq.role) — auth middleware only sets userId and userRole. Grep for authReq.role before every push.
 
+
+### EMAIL-001 — Modal error displayed on parent page
+- **Logged:** 2026-04-14 05:44
+- **Symptom:** Invite Staff modal error appeared on the background Hospital Networks page, not inside the modal
+- **Root Cause:** Modal was inline JSX with no local error state — called parent setError() which rendered in parent component
+- **Fix:** Added inviteStaffError state variable; replaced parent setError() calls with setInviteStaffError() inside modal block
+- **Rule:** EVERY inline modal that has error handling MUST have its OWN error state variable — never use parent setError() scope inside a modal
+

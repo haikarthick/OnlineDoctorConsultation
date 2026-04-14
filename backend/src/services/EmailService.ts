@@ -112,6 +112,25 @@ const templates: Record<string, EmailTemplate> = {
       </div>`,
     text: (d) => `Payment of $${(d.amount / 100).toFixed(2)} received.\nPayment ID: ${d.paymentId}\nConsultation: ${d.consultationId}`,
   },
+
+  staff_invite: {
+    subject: (d) => `You're invited to join ${d.networkName} on VetCare`,
+    html: (d) => `
+    <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:32px;background:#fff;border:1px solid #e5e7eb;border-radius:12px">
+      <div style="text-align:center;margin-bottom:24px"><span style="font-size:48px">🏥</span></div>
+      <h2 style="color:#667eea;text-align:center">You've been invited!</h2>
+      <p>Hi ${d.inviteeName || 'there'},</p>
+      <p>You've been invited to join <strong>${d.networkName}</strong> as a <strong>${d.position}</strong>${d.hospitalName ? ` at <strong>${d.hospitalName}</strong>` : ''}.</p>
+      <p>Click the button below to create your account and accept the invitation:</p>
+      <p style="text-align:center;margin:24px 0">
+        <a href="${d.inviteUrl}" style="background:#667eea;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">Accept Invitation</a>
+      </p>
+      <p style="color:#6b7280;font-size:13px">This invitation expires in 7 days. If you did not expect this invitation, you can safely ignore this email.</p>
+      <p style="color:#6b7280;font-size:13px">Or copy this link: <a href="${d.inviteUrl}">${d.inviteUrl}</a></p>
+      <p style="margin-top:32px;color:#999;font-size:12px">— The VetCare Team</p>
+    </div>`,
+    text: (d) => `You've been invited to join ${d.networkName} as a ${d.position}.\n\nAccept here: ${d.inviteUrl}\n\nThis link expires in 7 days.`,
+  },
 };
 
 // ── Service ───────────────────────────────────────────────────
@@ -178,9 +197,18 @@ class EmailService {
       text = tpl.text(data);
     }
 
+    // Dev/demo email redirect — routes all emails to a configured address
+    const devRedirect = process.env.EMAIL_DEV_REDIRECT;
+    let actualTo = Array.isArray(options.to) ? options.to.join(', ') : options.to;
+    if (devRedirect) {
+      subject = `[DEV→${actualTo}] ${subject}`;
+      actualTo = devRedirect;
+      logger.info(`Email redirected to dev address: ${devRedirect} (original: ${options.to})`);
+    }
+
     const info = await transporter.sendMail({
       from: this.from,
-      to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
+      to: actualTo,
       subject,
       html,
       text,
@@ -191,7 +219,7 @@ class EmailService {
       logger.info(`Email preview URL: ${previewUrl}`);
     }
 
-    logger.info(`Email sent: ${info.messageId} → ${options.to}`);
+    logger.info(`Email sent: ${info.messageId} → ${actualTo}`);
     return { messageId: info.messageId, previewUrl };
   }
 

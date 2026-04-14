@@ -617,6 +617,8 @@ const HospitalNetworks: React.FC = () => {
   const [inviteStaffForm, setInviteStaffForm] = useState({ email: '', name: '', position: 'receptionist', hospitalId: '' })
   const [inviteStaffLoading, setInviteStaffLoading] = useState(false)
   const [inviteStaffSuccess, setInviteStaffSuccess] = useState('')
+  const [inviteStaffError, setInviteStaffError] = useState('')
+  const [inviteLink, setInviteLink] = useState('')
 
   // ─── Audit State ──────────────────────────────────────────────────────────
   const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([])
@@ -688,7 +690,8 @@ const HospitalNetworks: React.FC = () => {
         apiService.listNetworkMembers(network.id).catch(() => ({ data: [] })),
       ])
       setDashboard(dashRes.data ?? dashRes ?? null)
-      setNetworkHospitals(hospRes.data ?? hospRes ?? [])
+      const rawHospitals = hospRes?.data?.hospitals ?? hospRes?.hospitals ?? hospRes?.data ?? hospRes ?? []
+      setNetworkHospitals(Array.isArray(rawHospitals) ? rawHospitals : [])
       setNetworkMembers(memRes.data ?? memRes ?? [])
     } finally {
       setDetailLoading(false)
@@ -1287,7 +1290,7 @@ const HospitalNetworks: React.FC = () => {
                   <div className="hn-panel-header">
                     <h3>{t('hospitalNetworks.detail.staff')}</h3>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="module-btn small" onClick={() => setShowInviteStaff(true)}>
+                      <button className="module-btn small" onClick={() => { setShowInviteStaff(true); setInviteStaffError('') }}>
                         ✉️ {t('hospitalNetworks.detail.inviteStaff')}
                       </button>
                       <button className="module-btn small primary" onClick={() => setShowAddMember(true)}>
@@ -1716,23 +1719,34 @@ const HospitalNetworks: React.FC = () => {
 
       {/* Invite Hospital Staff Modal */}
       {showInviteStaff && selectedNetwork && (
-        <div className="hn-modal-overlay" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess('') }}>
+        <div className="hn-modal-overlay" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteStaffError(''); setInviteLink('') }}>
           <div className="hn-modal" onClick={e => e.stopPropagation()}>
             <div className="hn-modal-header">
               <h2>✉️ {t('hospitalNetworks.detail.inviteStaff')}</h2>
-              <button type="button" className="hn-modal-close" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess('') }}>✕</button>
+              <button type="button" className="hn-modal-close" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteStaffError(''); setInviteLink('') }}>✕</button>
             </div>
             {inviteStaffSuccess ? (
               <div style={{ padding: '2rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✅</div>
                 <p style={{ fontWeight: 600 }}>{inviteStaffSuccess}</p>
                 <p style={{ color: '#6b7280', fontSize: '0.9rem', marginTop: '0.5rem' }}>{t('hospitalStaff.inviteSentHint')}</p>
-                <button className="module-btn primary" style={{ marginTop: '1.5rem' }} onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess('') }}>
+                {inviteLink && (
+                  <div style={{ marginTop: 16, background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: 16, textAlign: 'left' }}>
+                    <p style={{ fontWeight: 600, fontSize: 13, marginBottom: 8, color: '#0369a1' }}>📋 Share this invite link if email is not configured:</p>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input readOnly value={inviteLink} style={{ flex: 1, padding: '8px 12px', border: '1px solid #bae6fd', borderRadius: 6, fontSize: 12, background: '#fff' }} />
+                      <button type="button" style={{ padding: '8px 12px', background: '#0369a1', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}
+                        onClick={() => { navigator.clipboard.writeText(inviteLink) }}>Copy</button>
+                    </div>
+                  </div>
+                )}
+                <button className="module-btn primary" style={{ marginTop: '1.5rem' }} onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteLink('') }}>
                   {t('common.close')}
                 </button>
               </div>
             ) : (
               <div className="hn-modal-body">
+                {inviteStaffError && <div className="module-alert error" style={{ marginBottom: 12 }}>{inviteStaffError}</div>}
                 <p style={{ color: '#6b7280', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
                   {t('hospitalNetworks.detail.inviteStaffDesc')}
                 </p>
@@ -1786,12 +1800,13 @@ const HospitalNetworks: React.FC = () => {
                         })
                         if (res.success) {
                           setInviteStaffSuccess(t('hospitalNetworks.staff.inviteSent'))
+                          setInviteLink(res.data?.inviteUrl || '')
                           setInviteStaffForm({ email: '', name: '', position: 'receptionist', hospitalId: '' })
                         } else {
-                          setError(res.message || 'Failed to send invite')
+                          setInviteStaffError(res.message || 'Failed to send invite')
                         }
                       } catch (e: any) {
-                        setError(e.response?.data?.message || e.message)
+                        setInviteStaffError(e.response?.data?.message || e.message)
                       } finally {
                         setInviteStaffLoading(false)
                       }

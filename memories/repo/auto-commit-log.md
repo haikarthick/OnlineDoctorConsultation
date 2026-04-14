@@ -1275,3 +1275,29 @@
 </details>
 
 ---
+
+## 2026-04-14 05:12 · `d0545cf` · ✨ FEAT
+
+**Commit:** feat: replace all raw ID inputs with search-and-select dropdowns  
+**Author:** haikarthick  
+**Categories:** API · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - backend/src/routes/index.ts
+  - frontend/src/components/SearchSelect.tsx
+  - frontend/src/pages/GeospatialAnalytics.tsx
+  - frontend/src/pages/HealthAnalytics.tsx
+  - frontend/src/pages/MovementLog.tsx
+  - frontend/src/pages/admin/StaffSettings.tsx
+  - frontend/src/pages/petowner/PatientConsent.tsx
+  - frontend/src/services/api.ts
+  - memories/repo/auto-commit-log.md
+  - memories/repo/lessons.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---

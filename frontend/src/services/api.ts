@@ -796,6 +796,11 @@ class ApiService {
     return response.data
   }
 
+  async adminSendTestEmail(to: string) {
+    const response = await this.client.post('/admin/settings/test-email', { to })
+    return response.data
+  }
+
   async adminGetAuditLogs(params?: { limit?: number; offset?: number; userId?: string; action?: string }) {
     const response = await this.client.get('/admin/audit-logs', { params })
     return response.data

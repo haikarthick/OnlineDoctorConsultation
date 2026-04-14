@@ -1450,7 +1450,7 @@ export const updatePricingSettingsSchema = Joi.object({
 // ─── Hospital Staff Invites ───────────────────────────────────
 export const inviteHospitalStaffSchema = Joi.object({
   invitee_email: Joi.string().email().required(),
-  invitee_name: Joi.string().max(200).required(),
+  invitee_name: Joi.string().max(200).optional().allow('', null),
   staff_position: Joi.string().valid(
     'nurse','technician','receptionist','lab_tech',
     'radiologist','anesthesiologist','pharmacist','intern','admin_staff'
