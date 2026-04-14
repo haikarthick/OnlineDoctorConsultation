@@ -437,17 +437,23 @@ export class VetHospitalService {
   }
 
   async listHospitalsForVet(vetId: string): Promise<VetHospital[]> {
+    // Union: hospitals where user is a doctor OR a network member (staff) OR has a staff_position
     const result = await database.query(
-      `SELECT h.*,
+      `SELECT DISTINCT ON (h.id) h.*,
               u.first_name || ' ' || u.last_name AS owner_name,
-              hd.hospital_role, hd.title, hd.is_primary_hospital,
+              COALESCE(hd.hospital_role, sp.position, hnm.network_role, 'staff') AS hospital_role,
+              COALESCE(hd.title, sp.department, '') AS title,
+              COALESCE(hd.is_primary_hospital, false) AS is_primary_hospital,
               (SELECT COUNT(*) FROM hospital_doctors WHERE hospital_id = h.id AND is_active = true) AS doctor_count,
               (SELECT COUNT(*) FROM hospital_departments WHERE hospital_id = h.id AND is_active = true) AS department_count
        FROM vet_hospitals h
        JOIN users u ON h.owner_id = u.id
-       JOIN hospital_doctors hd ON hd.hospital_id = h.id AND hd.doctor_id = $1 AND hd.is_active = true
+       LEFT JOIN hospital_doctors hd ON hd.hospital_id = h.id AND hd.doctor_id = $1 AND hd.is_active = true
+       LEFT JOIN staff_positions sp ON sp.hospital_id = h.id AND sp.user_id = $1 AND sp.is_active = true
+       LEFT JOIN hospital_network_members hnm ON hnm.hospital_id = h.id AND hnm.user_id = $1 AND hnm.is_active = true
        WHERE h.is_active = true
-       ORDER BY hd.is_primary_hospital DESC, h.name ASC`,
+         AND (hd.id IS NOT NULL OR sp.id IS NOT NULL OR hnm.id IS NOT NULL)
+       ORDER BY h.id, hd.is_primary_hospital DESC NULLS LAST, h.name ASC`,
       [vetId]
     );
     return result.rows.map((r: any) => this.mapHospitalRow(r));

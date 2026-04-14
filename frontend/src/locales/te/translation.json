@@ -4859,7 +4859,9 @@
     "recentMedicalRecords": "ఇటీవలి వైద్య రికార్డులు",
     "recentPrescriptions": "ఇటీవలి ప్రిస్క్రిప్షన్‌లు",
     "vaccinations": "టీకాలు",
-    "noMedicalHistory": "ఈ రోగికి వైద్య చరిత్ర కనుగొనబడలేదు"
+    "noMedicalHistory": "ఈ రోగికి వైద్య చరిత్ర కనుగొనబడలేదు",
+    "noHospitals": "No Hospital Assigned",
+    "noHospitalsDesc": "You are not currently assigned to any hospital. Please contact your network administrator to get assigned to a branch hospital."
   },
   "publicMarketplace": {
     "heroTitle": "పునర్వాసానికి జంతువులను బ్రౌజ్ చేయండి",
@@ -5532,7 +5534,10 @@
       "noHospitals": "ఆసుపత్రులు ఏవీ కేటాయించబడలేదు",
       "noMembers": "ఇంకా సభ్యులు లేరు",
       "inviteStaffDesc": "కొత్త సిబ్బంది సభ్యుడికి ఆహ్వాన లింక్ పంపండి. వారు లింక్ ఉపయోగించి ఖాతాను సృష్టిస్తారు.",
-      "hospital": "ఆసుపత్రి"
+      "hospital": "ఆసుపత్రి",
+      "editMember": "Edit Member",
+      "networkRole": "Role",
+      "memberName": "Member"
     },
     "patients": {
       "tab": "రోగులు",

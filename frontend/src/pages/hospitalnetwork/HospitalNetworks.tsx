@@ -738,6 +738,9 @@ const HospitalNetworks: React.FC = () => {
   const [editingBranch, setEditingBranch] = useState<NetworkHospital | null>(null)
   const [deletingBranch, setDeletingBranch] = useState<NetworkHospital | null>(null)
   const [showAddMember, setShowAddMember] = useState(false)
+  const [editingMember, setEditingMember] = useState<NetworkMember | null>(null)
+  const [editMemberForm, setEditMemberForm] = useState({ networkRole: '', hospitalId: '' })
+  const [editMemberLoading, setEditMemberLoading] = useState(false)
   const [showInviteStaff, setShowInviteStaff] = useState(false)
   const [inviteStaffForm, setInviteStaffForm] = useState({ email: '', name: '', position: 'receptionist', hospitalId: '' })
   const [inviteStaffLoading, setInviteStaffLoading] = useState(false)
@@ -1047,6 +1050,29 @@ const HospitalNetworks: React.FC = () => {
       loadDetail(selectedNetwork)
     } catch (err: any) {
       setError(err?.response?.data?.message ?? 'Failed to remove member')
+    }
+  }
+
+  const handleEditMember = (member: NetworkMember) => {
+    setEditingMember(member)
+    setEditMemberForm({ networkRole: member.networkRole, hospitalId: member.hospitalId || '' })
+  }
+
+  const handleUpdateMember = async () => {
+    if (!selectedNetwork || !editingMember) return
+    setEditMemberLoading(true)
+    try {
+      await apiService.updateNetworkMember(selectedNetwork.id, editingMember.userId, {
+        networkRole: editMemberForm.networkRole,
+        hospitalId: editMemberForm.hospitalId || undefined,
+      })
+      setSuccessMsg('Member updated successfully.')
+      setEditingMember(null)
+      loadDetail(selectedNetwork)
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? 'Failed to update member')
+    } finally {
+      setEditMemberLoading(false)
     }
   }
 
@@ -1461,6 +1487,12 @@ const HospitalNetworks: React.FC = () => {
                               {m.hospitalName && <div className="hn-member-hospital">{m.hospitalName}</div>}
                             </div>
                             <RoleBadge role={m.networkRole} />
+                            <button
+                              className="hn-edit-btn"
+                              title="Edit member"
+                              onClick={() => handleEditMember(m)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#6366f1', padding: '2px 6px' }}
+                            >✏️</button>
                             <button
                               className="hn-remove-btn"
                               title="Remove member"
@@ -1903,6 +1935,43 @@ const HospitalNetworks: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Edit Member Modal */}
+      {editingMember && selectedNetwork && (
+        <div className="hn-modal-overlay" onClick={() => setEditingMember(null)}>
+          <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <div className="hn-modal-header">
+              <h2>✏️ {t('hospitalNetworks.detail.editMember', 'Edit Member')}</h2>
+              <button type="button" className="hn-modal-close" onClick={() => setEditingMember(null)}>✕</button>
+            </div>
+            <div className="hn-modal-body">
+              <div className="module-form-group">
+                <label className="module-label">{t('hospitalNetworks.memberName', 'Member')}</label>
+                <input className="module-input" value={editingMember.userName || editingMember.userEmail || 'Unknown'} disabled />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">{t('hospitalNetworks.detail.networkRole', 'Role')} <span style={{ color: '#ef4444' }}>*</span></label>
+                <select className="module-input" value={editMemberForm.networkRole} onChange={e => setEditMemberForm(p => ({ ...p, networkRole: e.target.value }))}>
+                  {MEMBER_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">{t('hospitalNetworks.detail.hospital', 'Assigned Hospital')}</label>
+                <select className="module-input" value={editMemberForm.hospitalId} onChange={e => setEditMemberForm(p => ({ ...p, hospitalId: e.target.value }))}>
+                  <option value="">{t('common.none', '— None (Corporate Level) —')}</option>
+                  {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="hn-modal-footer">
+              <button type="button" className="module-btn" onClick={() => setEditingMember(null)}>{t('common.cancel', 'Cancel')}</button>
+              <button type="button" className="module-btn primary" disabled={editMemberLoading} onClick={handleUpdateMember}>
+                {editMemberLoading ? '⏳ ' + t('common.saving', 'Saving...') : t('common.save', 'Save Changes')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showAddMember && selectedNetwork && (
         <AddMemberModal
           networkId={selectedNetwork.id}

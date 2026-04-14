@@ -4868,7 +4868,9 @@
     "recentMedicalRecords": "சமீபத்திய மருத்துவ பதிவுகள்",
     "recentPrescriptions": "சமீபத்திய மருந்துச் சீட்டுகள்",
     "vaccinations": "தடுப்பூசிகள்",
-    "noMedicalHistory": "இந்த நோயாளிக்கு மருத்துவ வரலாறு இல்லை"
+    "noMedicalHistory": "இந்த நோயாளிக்கு மருத்துவ வரலாறு இல்லை",
+    "noHospitals": "No Hospital Assigned",
+    "noHospitalsDesc": "You are not currently assigned to any hospital. Please contact your network administrator to get assigned to a branch hospital."
   },
   "publicMarketplace": {
     "heroTitle": "புனர்வாசத்திற்கு விலங்குகளை உலாவுங்கள்",
@@ -5589,7 +5591,10 @@
       "noHospitals": "மருத்துவமனைகள் எதுவும் ஒதுக்கப்படவில்லை",
       "noMembers": "இன்னும் உறுப்பினர்கள் இல்லை",
       "inviteStaffDesc": "புதிய ஊழியருக்கு அழைப்பு இணைப்பை அனுப்பவும். அவர்கள் இணைப்பை பயன்படுத்தி கணக்கை உருவாக்குவார்கள்.",
-      "hospital": "மருத்துவமனை"
+      "hospital": "மருத்துவமனை",
+      "editMember": "Edit Member",
+      "networkRole": "Role",
+      "memberName": "Member"
     },
     "patients": {
       "tab": "நோயாளிகள்",

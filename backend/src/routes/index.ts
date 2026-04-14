@@ -393,6 +393,31 @@ router.delete('/hospital-networks/:id/branch-hospitals/:hospitalId', authMiddlew
 }));
 router.get('/hospital-networks/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkMembers(req, res)));
 router.post('/hospital-networks/:id/members', authMiddleware, validateBody(addNetworkMemberSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.addNetworkMember(req, res)));
+router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const networkId = req.params.id;
+  const targetUserId = req.params.userId;
+  const userId = (req as any).userId;
+  const { networkRole, hospitalId } = req.body;
+  // Verify caller is corporate_admin or admin
+  const userRole = (req as any).userRole;
+  if (userRole !== 'admin') {
+    const memberCheck = await database.query(
+      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [networkId, userId]
+    );
+    if (!memberCheck.rows.length || memberCheck.rows[0].network_role !== 'corporate_admin') {
+      return res.status(403).json({ success: false, message: 'Only corporate admins can update members' });
+    }
+  }
+  const updates: string[] = [];
+  const params: any[] = [networkId, targetUserId];
+  let idx = 3;
+  if (networkRole) { updates.push(`network_role = $${idx++}`); params.push(networkRole); }
+  if (hospitalId !== undefined) { updates.push(`hospital_id = $${idx++}`); params.push(hospitalId || null); }
+  if (updates.length === 0) return res.status(400).json({ success: false, message: 'No fields to update' });
+  await database.query(`UPDATE hospital_network_members SET ${updates.join(', ')} WHERE network_id = $1 AND user_id = $2`, params);
+  res.json({ success: true, message: 'Member updated successfully' });
+}));
 router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.removeNetworkMember(req, res)));
 router.get('/hospital-networks/:id/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getNetworkDashboard(req, res)));
 router.get('/hospital-networks/:id/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getAuditLogs(req, res)));

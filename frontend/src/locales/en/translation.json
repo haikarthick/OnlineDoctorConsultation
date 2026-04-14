@@ -4943,7 +4943,9 @@
     "recentMedicalRecords": "Recent Medical Records",
     "recentPrescriptions": "Recent Prescriptions",
     "vaccinations": "Vaccinations",
-    "noMedicalHistory": "No medical history found for this patient"
+    "noMedicalHistory": "No medical history found for this patient",
+    "noHospitals": "No Hospital Assigned",
+    "noHospitalsDesc": "You are not currently assigned to any hospital. Please contact your network administrator to get assigned to a branch hospital."
   },
   "publicMarketplace": {
     "heroTitle": "Browse Animals for Rehoming",
@@ -5665,7 +5667,10 @@
       "noMembers": "No members yet",
       "inviteStaff": "Invite Staff Member",
       "inviteStaffDesc": "Send an invite link to a new staff member. They will create their account using the link.",
-      "hospital": "Hospital"
+      "hospital": "Hospital",
+      "editMember": "Edit Member",
+      "networkRole": "Role",
+      "memberName": "Member"
     },
     "patients": {
       "tab": "Patients",

@@ -4879,7 +4879,9 @@
     "recentMedicalRecords": "हाल के चिकित्सा रिकॉर्ड",
     "recentPrescriptions": "हाल के प्रिस्क्रिप्शन",
     "vaccinations": "टीकाकरण",
-    "noMedicalHistory": "इस रोगी का कोई चिकित्सा इतिहास नहीं मिला"
+    "noMedicalHistory": "इस रोगी का कोई चिकित्सा इतिहास नहीं मिला",
+    "noHospitals": "No Hospital Assigned",
+    "noHospitalsDesc": "You are not currently assigned to any hospital. Please contact your network administrator to get assigned to a branch hospital."
   },
   "publicMarketplace": {
     "heroTitle": "पुनर्वास के लिए पशु ब्राउज़ करें",
@@ -5600,7 +5602,10 @@
       "noHospitals": "कोई अस्पताल असाइन नहीं",
       "noMembers": "अभी तक कोई सदस्य नहीं",
       "inviteStaffDesc": "एक नए स्टाफ सदस्य को आमंत्रण लिंक भेजें। वे लिंक का उपयोग करके अपना खाता बनाएंगे।",
-      "hospital": "अस्पताल"
+      "hospital": "अस्पताल",
+      "editMember": "Edit Member",
+      "networkRole": "Role",
+      "memberName": "Member"
     },
     "patients": {
       "tab": "मरीज़",

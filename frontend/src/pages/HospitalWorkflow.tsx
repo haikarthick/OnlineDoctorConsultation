@@ -75,6 +75,7 @@ export default function HospitalWorkflow() {
   const [caseMedicalSummary, setCaseMedicalSummary] = useState<any>(null)
 
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
 
   // Load hospitals
   useEffect(() => {
@@ -83,7 +84,12 @@ export default function HospitalWorkflow() {
         const list = await vetHospitalApi.listMyHospitals()
         setHospitals(list || [])
         if (list.length > 0) setHospitalId(list[0].id)
-      } catch { /* empty */ }
+      } catch (err: any) {
+        console.error('Failed to load hospitals:', err)
+        setLoadError(err?.response?.data?.message || err?.message || 'Failed to load hospitals')
+      } finally {
+        setLoading(false)
+      }
     })()
   }, [])
 
@@ -97,7 +103,10 @@ export default function HospitalWorkflow() {
       ])
       setQueue(q.data || [])
       setQueueStats(s.data || null)
-    } catch { /* empty */ }
+    } catch (err: any) {
+      console.error('Failed to load queue:', err)
+      setLoadError(err?.response?.data?.message || 'Failed to load queue data')
+    }
   }, [hospitalId])
 
   const loadWorkflow = useCallback(async () => {
@@ -109,7 +118,9 @@ export default function HospitalWorkflow() {
       ])
       setCases(c.data || [])
       setDashboard(d.data || null)
-    } catch { /* empty */ }
+    } catch (err: any) {
+      console.error('Failed to load workflow:', err)
+    }
   }, [hospitalId, stageFilter])
 
   const loadReferrals = useCallback(async () => {
@@ -117,7 +128,9 @@ export default function HospitalWorkflow() {
     try {
       const r = await apiService.listReferrals(hospitalId)
       setReferrals(r.data || [])
-    } catch { /* empty */ }
+    } catch (err: any) {
+      console.error('Failed to load referrals:', err)
+    }
   }, [hospitalId])
 
   useEffect(() => {
@@ -143,7 +156,7 @@ export default function HospitalWorkflow() {
       setCheckInError('')
       loadQueue()
     } catch (err: any) {
-      setCheckInError(err?.response?.data?.error || err?.message || 'Check-in failed. Please try again.')
+      setCheckInError(err?.response?.data?.message || err?.message || 'Check-in failed. Please try again.')
     }
     setCheckInSubmitting(false)
   }
@@ -241,8 +254,36 @@ export default function HospitalWorkflow() {
     return <div className="module-page" style={{ minHeight: 'calc(100vh - 64px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div className="spinner" /></div>
   }
 
+  if (!loading && hospitals.length === 0) {
+    return (
+      <div className="module-page" style={{ minHeight: 'calc(100vh - 64px)', padding: '24px' }}>
+        <h1 style={{ margin: 0, fontSize: 24 }}>🏥 {t('hospitalWorkflow.title')}</h1>
+        <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: 14 }}>{t('hospitalWorkflow.subtitle')}</p>
+        {loadError && (
+          <div className="module-alert error" style={{ marginTop: 16 }}>
+            <span>⚠️ {loadError}</span>
+            <button onClick={() => setLoadError('')} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>✕</button>
+          </div>
+        )}
+        <div style={{ marginTop: 48, textAlign: 'center', padding: 40, background: '#f8fafc', borderRadius: 12, border: '2px dashed #cbd5e1' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🏥</div>
+          <h2 style={{ margin: '0 0 8px', color: '#334155' }}>{t('hospitalWorkflow.noHospitals', 'No Hospital Assigned')}</h2>
+          <p style={{ color: '#64748b', maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
+            {t('hospitalWorkflow.noHospitalsDesc', 'You are not currently assigned to any hospital. Please contact your network administrator to get assigned to a branch hospital.')}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="module-page" style={{ minHeight: 'calc(100vh - 64px)', padding: '24px' }}>
+      {loadError && (
+        <div className="module-alert error" style={{ marginBottom: 16 }}>
+          <span>⚠️ {loadError}</span>
+          <button onClick={() => setLoadError('')} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>✕</button>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 24 }}>🏥 {t('hospitalWorkflow.title')}</h1>
