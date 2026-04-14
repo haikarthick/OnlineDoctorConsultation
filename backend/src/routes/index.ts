@@ -1227,7 +1227,7 @@ router.post('/role-change-requests', authMiddleware, validateBody(roleChangeRequ
   const authReq = req as any;
   const { requested_role, reason } = req.body;
   const userId = authReq.userId;
-  const currentRole = authReq.role;
+  const currentRole = authReq.userRole;
   if (requested_role === currentRole) {
     return res.status(400).json({ success: false, message: 'Requested role is the same as your current role' });
   }
@@ -1333,7 +1333,7 @@ router.put('/admin/role-change-requests/:id/reject', authMiddleware, roleMiddlew
 router.get('/network-subscription-plans', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
-  const isAdmin = authReq.role === 'admin';
+  const isAdmin = authReq.userRole === 'admin';
   const result = await db.query(
     isAdmin
       ? `SELECT * FROM network_subscription_plans ORDER BY sort_order, name`
