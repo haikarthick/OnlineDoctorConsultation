@@ -1462,7 +1462,7 @@ export const acceptStaffInviteSchema = Joi.object({
   token: Joi.string().min(20).required(),
   first_name: Joi.string().max(100).required(),
   last_name: Joi.string().max(100).required(),
-  phone: Joi.string().max(20).required(),
+  phone: Joi.string().max(20).allow('', null).optional(),
   password: Joi.string().min(8).required(),
 });
 

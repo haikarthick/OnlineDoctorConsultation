@@ -98,7 +98,7 @@ import Tier4Controller from '../controllers/Tier4Controller';
 import VetHospitalController from '../controllers/VetHospitalController';
 import HospitalDocumentController from '../controllers/HospitalDocumentController';
 import HospitalNetworkController from '../controllers/HospitalNetworkController';
-import HospitalNetworkService from '../services/HospitalNetworkService';
+import HospitalNetworkService, { updateBranchHospital, deleteBranchHospital } from '../services/HospitalNetworkService';
 import WalletController from '../controllers/WalletController';
 import StaffWorkflowController from '../controllers/StaffWorkflowController';
 import { FileController } from '../controllers/FileController';
@@ -383,6 +383,14 @@ router.patch('/hospital-networks/:id/deactivate', authMiddleware, asyncHandler((
 router.get('/hospital-networks/:id/hospitals', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkHospitals(req, res)));
 router.post('/hospital-networks/:id/hospitals/:hospitalId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.assignHospitalToNetwork(req, res)));
 router.post('/hospital-networks/:id/branch-hospitals', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), validateBody(createBranchHospitalSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createBranchHospital(req, res)));
+router.put('/hospital-networks/:id/branch-hospitals/:hospitalId', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+  const hospital = await updateBranchHospital(req.params.hospitalId, req.params.id, req.body);
+  res.json({ success: true, data: hospital, message: 'Branch hospital updated' });
+}));
+router.delete('/hospital-networks/:id/branch-hospitals/:hospitalId', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+  await deleteBranchHospital(req.params.hospitalId, req.params.id);
+  res.json({ success: true, message: 'Branch hospital removed from network' });
+}));
 router.get('/hospital-networks/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkMembers(req, res)));
 router.post('/hospital-networks/:id/members', authMiddleware, validateBody(addNetworkMemberSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.addNetworkMember(req, res)));
 router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.removeNetworkMember(req, res)));
@@ -1700,7 +1708,7 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
   const password_hash = await bcrypt.hash(password, 12);
   const userResult = await db.query(
     `INSERT INTO users (email, first_name, last_name, phone, role, password_hash) VALUES ($1,$2,$3,$4,'hospital_staff',$5) RETURNING id, email, first_name, last_name, role`,
-    [invite.invitee_email, first_name, last_name, phone, password_hash]
+    [invite.invitee_email, first_name, last_name, phone || null, password_hash]
   );
   const newUser = userResult.rows[0];
   await db.query(`INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by) VALUES ($1,$2,'hospital_staff',$3,$4) ON CONFLICT (network_id, user_id) DO NOTHING`,

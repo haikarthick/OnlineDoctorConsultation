@@ -2460,6 +2460,14 @@ class ApiService {
   }): Promise<any> {
     return this.client.post(`/hospital-networks/${networkId}/branch-hospitals`, data)
   }
+
+  async updateBranchHospital(networkId: string, hospitalId: string, data: Record<string, any>): Promise<any> {
+    return this.client.put(`/hospital-networks/${networkId}/branch-hospitals/${hospitalId}`, data)
+  }
+
+  async deleteBranchHospital(networkId: string, hospitalId: string): Promise<any> {
+    return this.client.delete(`/hospital-networks/${networkId}/branch-hospitals/${hospitalId}`)
+  }
 }
 export const apiService = new ApiService()
 export default apiService

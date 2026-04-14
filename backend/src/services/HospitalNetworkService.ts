@@ -1393,3 +1393,51 @@ export class HospitalNetworkService {
 }
 
 export default new HospitalNetworkService();
+
+// ─── Update Branch Hospital ───────────────────────────────────────────────────
+export async function updateBranchHospital(hospitalId: string, networkId: string, data: {
+  name?: string; hospitalType?: string; address?: string; city?: string; state?: string;
+  country?: string; postalCode?: string; phone?: string; email?: string;
+  description?: string; specializations?: string[];
+}) {
+  const result = await database.query(
+    `UPDATE vet_hospitals SET
+       name = COALESCE($1, name),
+       hospital_type = COALESCE($2, hospital_type),
+       address = COALESCE($3, address),
+       city = COALESCE($4, city),
+       state = COALESCE($5, state),
+       country = COALESCE($6, country),
+       postal_code = COALESCE($7, postal_code),
+       phone = COALESCE($8, phone),
+       email = COALESCE($9, email),
+       description = COALESCE($10, description),
+       specializations = COALESCE($11, specializations),
+       updated_at = NOW()
+     WHERE id = $12 AND branch_network_id = $13 AND is_network_branch = true
+     RETURNING id, name, city, state, hospital_type AS "hospitalType", phone, email, description, specializations`,
+    [
+      data.name || null, data.hospitalType || null, data.address || null,
+      data.city || null, data.state || null, data.country || null,
+      data.postalCode || null, data.phone || null, data.email || null,
+      data.description || null, data.specializations ? JSON.stringify(data.specializations) : null,
+      hospitalId, networkId
+    ]
+  );
+  if (result.rows.length === 0) throw new Error('Branch hospital not found in this network');
+  return result.rows[0];
+}
+
+// ─── Delete Branch Hospital ───────────────────────────────────────────────────
+export async function deleteBranchHospital(hospitalId: string, networkId: string) {
+  const check = await database.query(
+    `SELECT id FROM vet_hospitals WHERE id = $1 AND branch_network_id = $2 AND is_network_branch = true`,
+    [hospitalId, networkId]
+  );
+  if (check.rows.length === 0) throw new Error('Branch hospital not found in this network');
+  // Remove from junction table
+  await database.query(`DELETE FROM hospital_network_hospitals WHERE hospital_id = $1 AND network_id = $2`, [hospitalId, networkId]);
+  // Mark hospital as inactive rather than hard delete
+  await database.query(`UPDATE vet_hospitals SET is_active = false, updated_at = NOW() WHERE id = $1`, [hospitalId]);
+  return { success: true };
+}

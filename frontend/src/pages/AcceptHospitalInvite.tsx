@@ -73,7 +73,7 @@ export default function AcceptHospitalInvite() {
         setFormError(res.message || 'Failed to create account')
       }
     } catch (e: any) {
-      setFormError(e.message || 'Failed to create account')
+      setFormError(e?.response?.data?.message || e?.message || 'Failed to create account')
     } finally {
       setSubmitting(false)
     }

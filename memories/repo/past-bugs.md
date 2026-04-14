@@ -744,3 +744,11 @@ render-start.sh
 - **Fix:** Added inviteStaffError state variable; replaced parent setError() calls with setInviteStaffError() inside modal block
 - **Rule:** EVERY inline modal that has error handling MUST have its OWN error state variable — never use parent setError() scope inside a modal
 
+
+### NETWORK-002 — Hospital network member search returned all platform roles
+- **Logged:** 2026-04-14 07:07
+- **Symptom:** Search returned pet_owner, farmer, admin — confusing and wrong for network staff selection
+- **Root Cause:** Added AND role NOT IN ('pet_owner', 'farmer') to /network-user-search SQL
+- **Fix:** NEVER return pet_owner/farmer in staff/member search contexts — always filter by eligible roles
+- **Rule:** Not specified
+

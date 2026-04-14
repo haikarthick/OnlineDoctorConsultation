@@ -148,7 +148,6 @@ class EmailService {
     if (this.transporter) return this.transporter;
 
     if (process.env.SMTP_HOST) {
-      // Real SMTP configuration
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587', 10),
@@ -159,6 +158,20 @@ class EmailService {
         },
       });
       logger.info('Email transporter configured with real SMTP');
+      // Verify SMTP connection immediately so misconfiguration surfaces in logs
+      try {
+        await this.transporter.verify();
+        logger.info('SMTP connection verified successfully');
+      } catch (verifyErr: any) {
+        logger.error('SMTP connection verification failed — emails will not send', {
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT,
+          user: process.env.SMTP_USER,
+          error: verifyErr.message,
+        });
+        this.transporter = null; // Reset so it can retry later
+        throw verifyErr;
+      }
     } else {
       // Use Ethereal test account in dev
       const testAccount = await nodemailer.createTestAccount();

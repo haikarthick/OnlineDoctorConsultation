@@ -393,3 +393,10 @@
 - **Lesson:** Wire emailService to every route that should notify users. Add EMAIL_DEV_REDIRECT env var to redirect all emails to a test address in dev. Always show invite URL in UI as fallback when email might not be configured.
 - **Apply to:** All future routes that create invites, bookings, or notifications
 
+
+### LESSON-064 — AddMemberModal dead-end UX pattern
+- **Logged:** 2026-04-14 07:08
+- **Context:** When a search-and-select modal finds 0 results, the old 'user must register first' message was a dead-end with no action path
+- **Lesson:** When 0 search results: always show an alternate action (e.g. invite by email). Never leave user in a dead-end with no way forward
+- **Apply to:** All search-and-select modals with invite/register as alternate flows
+
