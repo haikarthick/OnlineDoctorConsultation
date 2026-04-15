@@ -589,7 +589,7 @@ export class HospitalNetworkService {
       ),
       // Today's queue (if hospital assigned)
       hospital_id ? database.query(
-        `SELECT COUNT(*) as count FROM queue_entries 
+        `SELECT COUNT(*) as count FROM appointment_queue 
          WHERE hospital_id = $1 AND created_at::date = CURRENT_DATE`,
         [hospital_id]
       ) : Promise.resolve({ rows: [{ count: '0' }] }),
@@ -1630,7 +1630,7 @@ export class HospitalNetworkService {
         database.query(
           `SELECT vh.id, vh.name,
                   (SELECT COUNT(*) FROM bookings WHERE hospital_id = vh.id) as booking_count,
-                  (SELECT COUNT(*) FROM queue_entries WHERE hospital_id = vh.id) as queue_count,
+                  (SELECT COUNT(*) FROM appointment_queue WHERE hospital_id = vh.id) as queue_count,
                   (SELECT COUNT(*) FROM inpatient_admissions WHERE hospital_id = vh.id) as inpatient_count
            FROM vet_hospitals vh
            WHERE vh.id IN (${placeholders})`,

@@ -3628,27 +3628,24 @@ ON CONFLICT (id) DO NOTHING;
 -- ═══════════════════════════════════════════════════════════
 -- QUEUE ENTRIES — today's patient queue for demo branches
 -- ═══════════════════════════════════════════════════════════
-INSERT INTO queue_entries (id, hospital_id, animal_id, owner_id, checked_in_by, status, priority, reason, triage_notes)
+INSERT INTO appointment_queue (id, hospital_id, animal_id, owner_id, status, priority, reason, triage_notes)
 VALUES
   ('qe000000-0000-0000-0000-000000000001',
    'h0000000-0000-0000-0000-000000000001',
    'e0000000-0000-0000-0000-000000000001',
    'c0000000-0000-0000-0000-000000000001',
-   'd0000000-0000-0000-0000-000000000004',
    'waiting', 'normal', 'Annual vaccination booster',
    'No acute symptoms. Due for DHPP booster.'),
   ('qe000000-0000-0000-0000-000000000002',
    'h0000000-0000-0000-0000-000000000001',
    'e0000000-0000-0000-0000-000000000002',
    'c0000000-0000-0000-0000-000000000001',
-   'd0000000-0000-0000-0000-000000000004',
-   'in_consultation', 'high', 'Persistent vomiting since yesterday',
+   'in_examination', 'high', 'Persistent vomiting since yesterday',
    'T: 39.2°C, HR: 140bpm. Dehydration grade 2. Blood panel ordered.'),
   ('qe000000-0000-0000-0000-000000000003',
    'h0000000-0000-0000-0000-000000000002',
    'e0000000-0000-0000-0000-000000000003',
    'c0000000-0000-0000-0000-000000000002',
-   'd0000000-0000-0000-0000-000000000005',
    'waiting', 'normal', 'Post-surgery follow-up — spay',
    'Day 10 post-op. Incision check and suture removal.')
 ON CONFLICT (id) DO NOTHING;
@@ -3656,7 +3653,7 @@ ON CONFLICT (id) DO NOTHING;
 -- ═══════════════════════════════════════════════════════════
 -- INPATIENT ADMISSIONS — demo inpatient records
 -- ═══════════════════════════════════════════════════════════
-INSERT INTO inpatient_admissions (id, hospital_id, animal_id, owner_id, admitted_by, admission_type, room_number, bed_number, status, diagnosis, treatment_plan)
+INSERT INTO inpatient_admissions (id, hospital_id, animal_id, owner_id, admitted_by, admission_type, room_number, bed_number, status, care_instructions, special_needs)
 VALUES
   ('ia000000-0000-0000-0000-000000000001',
    'h0000000-0000-0000-0000-000000000001',
@@ -3665,8 +3662,8 @@ VALUES
    'd0000000-0000-0000-0000-000000000002',
    'overnight_observation', 'R-101', 'B-1',
    'admitted',
-   'Acute gastroenteritis — suspected dietary indiscretion',
-   'IV fluid therapy (LRS 10ml/kg/hr), maropitant 1mg/kg SQ q24h, NPO 12h then bland diet'),
+   'IV fluid therapy (LRS 10ml/kg/hr), maropitant 1mg/kg SQ q24h, NPO 12h then bland diet',
+   'Acute gastroenteritis — suspected dietary indiscretion'),
   ('ia000000-0000-0000-0000-000000000002',
    'h0000000-0000-0000-0000-000000000002',
    'e0000000-0000-0000-0000-000000000003',
@@ -3674,6 +3671,6 @@ VALUES
    'd0000000-0000-0000-0000-000000000002',
    'surgery_recovery', 'R-201', 'B-1',
    'recovering',
-   'Post ovariohysterectomy — routine spay',
-   'Pain management: meloxicam 0.1mg/kg PO q24h x 5d. Activity restriction 14d. E-collar.')
+   'Pain management: meloxicam 0.1mg/kg PO q24h x 5d. Activity restriction 14d. E-collar.',
+   'Post ovariohysterectomy — routine spay')
 ON CONFLICT (id) DO NOTHING;
