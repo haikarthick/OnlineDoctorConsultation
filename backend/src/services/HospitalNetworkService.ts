@@ -1089,6 +1089,85 @@ export class HospitalNetworkService {
     }
   }
 
+  // Direct walk-in registration: Staff registers patient on-site, treatment starts immediately.
+  // No invite or consent needed — patient is enrolled as 'active' with 'walkin' visibility.
+  // If the patient later wants online portal access, staff can send an invite separately.
+  async registerWalkInPatientDirect(data: {
+    networkId: string; hospitalId: string; registeredBy: string;
+    patientName: string; patientPhone?: string; patientEmail?: string;
+    animalName: string; animalSpecies: string; animalBreed?: string;
+    reasonForVisit?: string;
+  }): Promise<{ patientId: string; networkPatientId: string; animalId: string }> {
+    try {
+      // Verify the registering user is a network member
+      const member = await this.getNetworkMember(data.networkId, data.registeredBy);
+      if (!member) throw new ForbiddenError('You are not a member of this network');
+
+      // Create a placeholder user for the walk-in patient (or find existing by email/phone)
+      let ownerId: string | null = null;
+      if (data.patientEmail) {
+        const existing = await database.query(
+          `SELECT id FROM users WHERE email = $1 LIMIT 1`, [data.patientEmail]
+        );
+        if (existing.rows.length > 0) ownerId = existing.rows[0].id;
+      }
+
+      // If no existing user found, create a walk-in placeholder account
+      if (!ownerId) {
+        const crypto = await import('crypto');
+        const placeholderPassword = crypto.randomBytes(32).toString('hex');
+        const nameParts = data.patientName.trim().split(/\s+/);
+        const firstName = nameParts[0] || 'Walk-In';
+        const lastName = nameParts.slice(1).join(' ') || 'Patient';
+        const userRes = await database.query(
+          `INSERT INTO users (first_name, last_name, email, phone, password_hash, role, is_active)
+           VALUES ($1, $2, $3, $4, $5, 'pet_owner', true)
+           ON CONFLICT (email) DO UPDATE SET first_name = EXCLUDED.first_name
+           RETURNING id`,
+          [firstName, lastName, data.patientEmail || `walkin-${Date.now()}@placeholder.local`,
+           data.patientPhone || null, placeholderPassword]
+        );
+        ownerId = userRes.rows[0].id;
+      }
+
+      // Create the animal record
+      const animalUniqueId = `VC-${data.animalSpecies.substring(0, 3).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+      const animalRes = await database.query(
+        `INSERT INTO animals (name, species, breed, owner_id, unique_id, is_active)
+         VALUES ($1, $2, $3, $4, $5, true)
+         RETURNING id`,
+        [data.animalName, data.animalSpecies, data.animalBreed || null, ownerId, animalUniqueId]
+      );
+      const animalId = animalRes.rows[0].id;
+
+      // Enroll directly as active — no consent needed for walk-in treatment
+      const networkPatientId = await this.generateNetworkPatientId(data.networkId, data.animalSpecies);
+      const contextRes = await database.query(
+        `INSERT INTO animal_care_contexts
+           (animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id,
+            enrolled_by, visibility, enrollment_status, enrollment_requested_at, enrollment_responded_at, notes)
+         VALUES ($1, $2, $3, $4, $5, $6, 'network_only', 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $7)
+         ON CONFLICT (animal_id, network_id) DO UPDATE
+           SET enrollment_status = 'active', enrollment_responded_at = CURRENT_TIMESTAMP,
+               hospital_id = EXCLUDED.hospital_id, is_active = true
+         RETURNING id`,
+        [animalId, data.networkId, data.hospitalId, animalUniqueId, networkPatientId,
+         data.registeredBy, data.reasonForVisit || 'Walk-in registration']
+      );
+
+      logger.info('Walk-in patient registered directly', { networkPatientId, animalName: data.animalName, hospitalId: data.hospitalId });
+
+      return {
+        patientId: contextRes.rows[0].id,
+        networkPatientId,
+        animalId
+      };
+    } catch (err: any) {
+      if (err instanceof ForbiddenError || err instanceof ValidationError) throw err;
+      throw new DatabaseError(`Walk-in registration failed: ${err.message}`);
+    }
+  }
+
   async getPendingEnrollments(networkId: string): Promise<any[]> {
     try {
       const result = await database.query(

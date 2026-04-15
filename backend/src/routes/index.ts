@@ -608,6 +608,25 @@ router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, async
   }
 }));
 
+// Direct walk-in patient registration — no invite needed, treatment starts immediately
+router.post('/hospital-networks/:networkId/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { hospitalId, patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed, reasonForVisit } = req.body;
+    if (!patientName || !animalName || !animalSpecies || !hospitalId) {
+      res.status(400).json({ success: false, message: 'patientName, animalName, animalSpecies, and hospitalId are required' }); return;
+    }
+    const result = await HospitalNetworkService.registerWalkInPatientDirect({
+      networkId: req.params.networkId, hospitalId, registeredBy: (req as any).userId,
+      patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed, reasonForVisit,
+    });
+    res.json({ success: true, data: result });
+  } catch (err: any) {
+    logger.error('Route error', { path: req.path, error: err.message });
+    const status = err.message?.includes('permission') || err.message?.includes('Forbidden') ? 403 : 500;
+    res.status(status).json({ success: false, message: err.message });
+  }
+}));
+
 // Patient accepts enrollment request (CONSENT-BEFORE-ACCESS)
 router.post('/hospital-networks/enrollments/:contextId/accept', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {

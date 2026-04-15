@@ -93,7 +93,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   const menuItems: MenuItem[] = [
     // ── Dashboard (always first, ungrouped) ──
     { id: 'dashboard', label: t('nav.dashboard'), icon: '📊', path: '/dashboard',
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'], section: 'Main' },
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'], section: 'Main' },
     { id: 'marketplace', label: t('nav.marketplace'), icon: '🏪', path: '/marketplace',
       roles: ['farmer', 'admin', 'pet_owner', 'veterinarian'], section: 'Main' },
 
@@ -188,7 +188,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Vet Hospital Network ──
     { id: 'vet-hospitals', label: t('nav.vetHospitals'), icon: '🏥', path: '/vet-hospitals',
-      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin'], section: 'Vet Network' },
+      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin', 'hospital_staff'], section: 'Vet Network' },
     { id: 'vet-hospitals-manage', label: t('nav.myHospital'), icon: '🏨', path: '/vet-hospitals/manage',
       roles: ['veterinarian'], section: 'Vet Network' },
     { id: 'hospital-workflow', label: 'Hospital Workflow', icon: '🔄', path: '/hospital-workflow',
@@ -242,7 +242,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin'], section: 'Preferences' }
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff'], section: 'Preferences' }
   ]
 
   // Filter by role AND permission

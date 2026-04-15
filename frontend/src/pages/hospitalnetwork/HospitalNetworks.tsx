@@ -771,6 +771,10 @@ const HospitalNetworks: React.FC = () => {
   const [inviteForm, setInviteForm] = useState<WalkInInviteForm>({ patientName: '', patientEmail: '', patientPhone: '', animalName: '', animalSpecies: '', message: '' })
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteSuccess, setInviteSuccess] = useState(false)
+  const [showWalkInRegModal, setShowWalkInRegModal] = useState(false)
+  const [walkInForm, setWalkInForm] = useState({ patientName: '', patientPhone: '', patientEmail: '', animalName: '', animalSpecies: '', animalBreed: '', reasonForVisit: '', hospitalId: '' })
+  const [walkInLoading, setWalkInLoading] = useState(false)
+  const [walkInSuccess, setWalkInSuccess] = useState('')
 
   // ─── Referrals Tab State ───────────────────────────────────────────────────
   const [referrals, setReferrals] = useState<any[]>([])
@@ -1044,6 +1048,32 @@ const HospitalNetworks: React.FC = () => {
     } catch (err: any) {
       setError(err?.response?.data?.message ?? 'Failed to send invite')
     } finally { setInviteLoading(false) }
+  }
+
+  const handleRegisterWalkIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedNetwork) return
+    setWalkInLoading(true); setError('')
+    try {
+      const result = await apiService.registerWalkInPatientDirect(selectedNetwork.id, {
+        hospitalId: walkInForm.hospitalId,
+        patientName: walkInForm.patientName,
+        patientPhone: walkInForm.patientPhone || undefined,
+        patientEmail: walkInForm.patientEmail || undefined,
+        animalName: walkInForm.animalName,
+        animalSpecies: walkInForm.animalSpecies,
+        animalBreed: walkInForm.animalBreed || undefined,
+        reasonForVisit: walkInForm.reasonForVisit || undefined,
+      })
+      setWalkInSuccess(result?.data?.networkPatientId || 'Registered')
+      loadAllEnrollments(selectedNetwork.id)
+      setTimeout(() => {
+        setShowWalkInRegModal(false); setWalkInSuccess('')
+        setWalkInForm({ patientName: '', patientPhone: '', patientEmail: '', animalName: '', animalSpecies: '', animalBreed: '', reasonForVisit: '', hospitalId: '' })
+      }, 2500)
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? 'Walk-in registration failed')
+    } finally { setWalkInLoading(false) }
   }
 
   const handleView = (network: HospitalNetwork) => {
@@ -1823,9 +1853,14 @@ const HospitalNetworks: React.FC = () => {
               <div className="module-card" style={{ marginBottom: 24 }}>
                 <div className="hn-panel-header">
                   <h3>{t('hospitalNetworks.patients.searchTitle')}</h3>
-                  <button className="module-btn small primary" onClick={() => setShowInviteModal(true)}>
-                    + {t('hospitalNetworks.patients.inviteWalkIn')}
-                  </button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="module-btn small primary" onClick={() => setShowWalkInRegModal(true)}>
+                      + {t('hospitalNetworks.patients.registerWalkIn', 'Register Walk-In')}
+                    </button>
+                    <button className="module-btn small" onClick={() => setShowInviteModal(true)}>
+                      ✉️ {t('hospitalNetworks.patients.inviteForOnlineAccess', 'Invite for Online Access')}
+                    </button>
+                  </div>
                 </div>
                 <div className="card-body">
                   <p className="module-form-helper" style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>
@@ -2258,6 +2293,81 @@ const HospitalNetworks: React.FC = () => {
                     <button type="button" className="module-btn" onClick={() => setShowInviteModal(false)}>{t('common.cancel')}</button>
                     <button type="submit" className="module-btn primary" disabled={inviteLoading}>
                       {inviteLoading ? t('common.saving') : t('hospitalNetworks.patients.inviteSend')}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Walk-In Direct Registration Modal */}
+      {showWalkInRegModal && selectedNetwork && (
+        <div className="hn-modal-overlay" onClick={() => setShowWalkInRegModal(false)}>
+          <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()}>
+            <div className="hn-modal-header">
+              <h2>🏥 {t('hospitalNetworks.patients.registerWalkInTitle', 'Register Walk-In Patient')}</h2>
+              <button type="button" className="hn-modal-close" onClick={() => setShowWalkInRegModal(false)} aria-label="Close">✕</button>
+            </div>
+            <div className="hn-modal-body">
+              {walkInSuccess ? (
+                <div className="module-alert success">✅ {t('hospitalNetworks.patients.walkInSuccess', 'Patient registered!')} ID: {walkInSuccess}</div>
+              ) : (
+                <form onSubmit={handleRegisterWalkIn}>
+                  <p className="module-form-helper" style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>
+                    {t('hospitalNetworks.patients.walkInHelperText', 'Register a walk-in patient for immediate treatment. No invite or account needed — patient can be given online access later.')}
+                  </p>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('hospitalNetworks.patients.invitePatientName', 'Patient Name')} <span className="hn-required">*</span></label>
+                    <input className="module-input" required value={walkInForm.patientName} onChange={e => setWalkInForm(f => ({ ...f, patientName: e.target.value }))} />
+                  </div>
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalNetworks.patients.invitePhone', 'Phone')}</label>
+                      <input className="module-input" value={walkInForm.patientPhone} onChange={e => setWalkInForm(f => ({ ...f, patientPhone: e.target.value }))} />
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalNetworks.patients.inviteEmail', 'Email')} ({t('common.optional', 'optional')})</label>
+                      <input className="module-input" type="email" value={walkInForm.patientEmail} onChange={e => setWalkInForm(f => ({ ...f, patientEmail: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalNetworks.patients.inviteAnimalName', 'Animal Name')} <span className="hn-required">*</span></label>
+                      <input className="module-input" required value={walkInForm.animalName} onChange={e => setWalkInForm(f => ({ ...f, animalName: e.target.value }))} />
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalNetworks.patients.inviteSpecies', 'Species')} <span className="hn-required">*</span></label>
+                      <select className="module-input" required value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value }))}>
+                        <option value="">{t('common.select', '— Select —')}</option>
+                        <option value="dog">Dog</option><option value="cat">Cat</option>
+                        <option value="cattle">Cattle</option><option value="horse">Horse</option>
+                        <option value="bird">Bird</option><option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="module-form-row">
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalNetworks.patients.breed', 'Breed')} ({t('common.optional', 'optional')})</label>
+                      <input className="module-input" value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} />
+                    </div>
+                    <div className="module-form-group">
+                      <label className="module-label">{t('hospitalNetworks.detail.hospital', 'Hospital')} <span className="hn-required">*</span></label>
+                      <select className="module-input" required value={walkInForm.hospitalId} onChange={e => setWalkInForm(f => ({ ...f, hospitalId: e.target.value }))}>
+                        <option value="">{t('common.select', '— Select —')}</option>
+                        {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="module-form-group">
+                    <label className="module-label">{t('hospitalNetworks.patients.reasonForVisit', 'Reason for Visit')}</label>
+                    <textarea className="module-input" rows={2} value={walkInForm.reasonForVisit} onChange={e => setWalkInForm(f => ({ ...f, reasonForVisit: e.target.value }))} style={{ resize: 'vertical' }} />
+                  </div>
+                  <div className="hn-modal-actions">
+                    <button type="button" className="module-btn" onClick={() => setShowWalkInRegModal(false)}>{t('common.cancel', 'Cancel')}</button>
+                    <button type="submit" className="module-btn primary" disabled={walkInLoading}>
+                      {walkInLoading ? '⏳ ' + t('common.saving', 'Saving...') : t('hospitalNetworks.patients.registerNow', 'Register & Start Treatment')}
                     </button>
                   </div>
                 </form>

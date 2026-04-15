@@ -1679,3 +1679,53 @@
 </details>
 
 ---
+
+## 2026-04-14 23:54 · `6597678` · 🐛 FIX
+
+**Commit:** fix: network staff sees only their branch hospitals + email field in Edit Member modal  
+**Author:** haikarthick  
+**Categories:** SERVICE · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - backend/src/controllers/VetHospitalController.ts
+  - backend/src/services/VetHospitalService.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-04-15 00:10 · `0cf8b7b` · 🐛 FIX
+
+**Commit:** fix: hospital_staff nav menus + direct walk-in patient registration  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UI · i18n · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/HospitalNetworkService.ts
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/services/api.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

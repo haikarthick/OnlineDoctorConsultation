@@ -2274,6 +2274,10 @@ class ApiService {
     const response = await this.client.post(`/hospital-networks/${networkId}/invite-walkin`, data)
     return response.data
   }
+  async registerWalkInPatientDirect(networkId: string, data: { hospitalId: string; patientName: string; patientPhone?: string; patientEmail?: string; animalName: string; animalSpecies: string; animalBreed?: string; reasonForVisit?: string }) {
+    const response = await this.client.post(`/hospital-networks/${networkId}/register-walkin`, data)
+    return response.data
+  }
   async acceptEnrollment(contextId: string, consentScope?: string) {
     const response = await this.client.post(`/hospital-networks/enrollments/${contextId}/accept`, { consentScope })
     return response.data
