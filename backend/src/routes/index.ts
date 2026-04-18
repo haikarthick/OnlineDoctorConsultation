@@ -99,6 +99,7 @@ import VetHospitalController from '../controllers/VetHospitalController';
 import HospitalDocumentController from '../controllers/HospitalDocumentController';
 import HospitalNetworkController from '../controllers/HospitalNetworkController';
 import HospitalNetworkService, { updateBranchHospital, deleteBranchHospital } from '../services/HospitalNetworkService';
+import VetHospitalService from '../services/VetHospitalService';
 import WalletController from '../controllers/WalletController';
 import StaffWorkflowController from '../controllers/StaffWorkflowController';
 import { FileController } from '../controllers/FileController';
@@ -624,6 +625,25 @@ router.post('/hospital-networks/:networkId/register-walkin', authMiddleware, asy
     logger.error('Route error', { path: req.path, error: err.message });
     const status = err.message?.includes('permission') || err.message?.includes('Forbidden') ? 403 : 500;
     res.status(status).json({ success: false, message: err.message });
+  }
+}));
+
+// Walk-in registration for standalone (non-network) hospitals
+router.post('/hospitals/:hospitalId/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed } = req.body;
+    if (!patientName || !animalName || !animalSpecies) {
+      res.status(400).json({ success: false, message: 'patientName, animalName, and animalSpecies are required' }); return;
+    }
+    const result = await VetHospitalService.registerWalkInStandalone({
+      hospitalId: req.params.hospitalId,
+      registeredBy: (req as any).userId,
+      patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed,
+    });
+    res.json({ success: true, data: result });
+  } catch (err: any) {
+    logger.error('Route error', { path: req.path, error: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 }));
 

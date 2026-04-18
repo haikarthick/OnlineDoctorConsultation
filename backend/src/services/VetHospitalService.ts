@@ -1028,6 +1028,59 @@ export class VetHospitalService {
     const hospital = await this.getHospital(invite.hospital_id);
     return { user: { id: userId, email: invite.email }, hospital };
   }
+
+  // Walk-in registration for standalone (non-network) hospitals.
+  // Creates a placeholder user account and animal record without needing a network context.
+  async registerWalkInStandalone(data: {
+    hospitalId: string; registeredBy: string;
+    patientName: string; patientPhone?: string; patientEmail?: string;
+    animalName: string; animalSpecies: string; animalBreed?: string;
+  }): Promise<{ ownerId: string; animalId: string }> {
+    try {
+      // Find or create a placeholder user for the walk-in owner
+      let ownerId: string | null = null;
+      if (data.patientEmail) {
+        const existing = await database.query(
+          `SELECT id FROM users WHERE email = $1 LIMIT 1`,
+          [data.patientEmail]
+        );
+        if (existing.rows.length > 0) ownerId = existing.rows[0].id;
+      }
+
+      if (!ownerId) {
+        const crypto = await import('crypto');
+        const placeholderPassword = crypto.randomBytes(32).toString('hex');
+        const placeholderEmailSuffix = crypto.randomBytes(8).toString('hex');
+        const nameParts = data.patientName.trim().split(/\s+/);
+        const firstName = nameParts[0] || 'Walk-In';
+        const lastName = nameParts.slice(1).join(' ') || 'Patient';
+        const placeholderEmail = data.patientEmail || `walkin-${placeholderEmailSuffix}@placeholder.local`;
+        const userRes = await database.query(
+          `INSERT INTO users (first_name, last_name, email, phone, password_hash, role, is_active)
+           VALUES ($1, $2, $3, $4, $5, 'pet_owner', true)
+           ON CONFLICT (email) DO UPDATE SET first_name = EXCLUDED.first_name
+           RETURNING id`,
+          [firstName, lastName, placeholderEmail, data.patientPhone || null, placeholderPassword]
+        );
+        ownerId = userRes.rows[0].id;
+      }
+
+      // Create the animal record
+      const animalUniqueId = `VC-${data.animalSpecies.substring(0, 3).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+      const animalRes = await database.query(
+        `INSERT INTO animals (name, species, breed, owner_id, unique_id, is_active)
+         VALUES ($1, $2, $3, $4, $5, true)
+         RETURNING id`,
+        [data.animalName, data.animalSpecies, data.animalBreed || null, ownerId, animalUniqueId]
+      );
+      const animalId = animalRes.rows[0].id;
+
+      logger.info('Walk-in patient registered (standalone)', { animalId, hospitalId: data.hospitalId });
+      return { ownerId, animalId };
+    } catch (err: any) {
+      throw new Error(`Walk-in registration failed: ${err.message}`);
+    }
+  }
 }
 
 export default new VetHospitalService();

@@ -179,7 +179,7 @@ export default function HospitalWorkflow() {
   }
 
   async function handleWalkInRegister() {
-    if (!networkId || !hospitalId) return
+    if (!hospitalId) return
     const { ownerName, animalName, animalSpecies } = walkInForm
     if (!ownerName.trim() || !animalName.trim() || !animalSpecies.trim()) {
       setWalkInError(t('hospitalWorkflow.walkIn.requiredFields'))
@@ -188,22 +188,35 @@ export default function HospitalWorkflow() {
     setWalkInError('')
     setWalkInRegistering(true)
     try {
-      const res = await apiService.registerWalkInPatientDirect(networkId, {
-        hospitalId,
-        patientName: walkInForm.ownerName.trim(),
-        patientPhone: walkInForm.ownerPhone.trim() || undefined,
-        patientEmail: walkInForm.ownerEmail.trim() || undefined,
-        animalName: walkInForm.animalName.trim(),
-        animalSpecies: walkInForm.animalSpecies.trim(),
-        animalBreed: walkInForm.animalBreed.trim() || undefined,
-        reasonForVisit: checkInForm.reason.trim() || undefined,
-      })
+      let registered: { animalId: string; ownerId?: string; patientId?: string; networkPatientId?: string }
+      if (networkId) {
+        const res = await apiService.registerWalkInPatientDirect(networkId, {
+          hospitalId,
+          patientName: walkInForm.ownerName.trim(),
+          patientPhone: walkInForm.ownerPhone.trim() || undefined,
+          patientEmail: walkInForm.ownerEmail.trim() || undefined,
+          animalName: walkInForm.animalName.trim(),
+          animalSpecies: walkInForm.animalSpecies.trim(),
+          animalBreed: walkInForm.animalBreed.trim() || undefined,
+          reasonForVisit: checkInForm.reason.trim() || undefined,
+        })
+        registered = res.data
+      } else {
+        const res = await apiService.registerWalkInStandalone(hospitalId, {
+          patientName: walkInForm.ownerName.trim(),
+          patientPhone: walkInForm.ownerPhone.trim() || undefined,
+          patientEmail: walkInForm.ownerEmail.trim() || undefined,
+          animalName: walkInForm.animalName.trim(),
+          animalSpecies: walkInForm.animalSpecies.trim(),
+          animalBreed: walkInForm.animalBreed.trim() || undefined,
+        })
+        registered = res.data
+      }
       // Auto-select the newly registered animal for check-in
-      const registered = res.data
       const nameParts = walkInForm.ownerName.trim().split(/\s+/)
       setCheckInAnimal({
         id: registered.animalId,
-        owner_id: registered.patientId,
+        owner_id: registered.ownerId || registered.patientId || '',
         name: walkInForm.animalName.trim(),
         species: walkInForm.animalSpecies.trim(),
         breed: walkInForm.animalBreed.trim() || '',
@@ -525,7 +538,7 @@ export default function HospitalWorkflow() {
                         selectedAnimal={checkInAnimal}
                         onSelect={a => { setCheckInAnimal(a); setCheckInError('') }}
                         label={`🔍 ${t('hospitalWorkflow.searchPatient')} *`}
-                        onRegisterNew={networkId ? openRegisterMode : undefined}
+                        onRegisterNew={openRegisterMode}
                       />
                       {!checkInAnimal && (
                         <div style={{ marginTop: 6, fontSize: 12, color: '#b45309', background: '#fef3c7', borderRadius: 6, padding: '6px 10px' }}>
@@ -533,7 +546,7 @@ export default function HospitalWorkflow() {
                         </div>
                       )}
                     </div>
-                    {networkId && !checkInAnimal && (
+                    {!checkInAnimal && (
                       <div style={{ textAlign: 'center', padding: '4px 0' }}>
                         <span style={{ fontSize: 12, color: '#94a3b8' }}>{t('hospitalWorkflow.walkIn.or')} </span>
                         <button onClick={openRegisterMode}
