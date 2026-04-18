@@ -1571,8 +1571,8 @@ class ApiService {
   }
 
   // Appointment Queue
-  async searchWorkflowAnimals(query: string) {
-    const response = await this.client.get('/workflow/animals/search', { params: { q: query } })
+  async searchWorkflowAnimals(query: string, hospitalId?: string) {
+    const response = await this.client.get('/workflow/animals/search', { params: { q: query, hospitalId } })
     return response.data
   }
   async getAnimalMedicalSummary(animalId: string) {

@@ -825,3 +825,11 @@ render-start.sh
 - **Fix:** Added openRegisterMode form in check-in modal using /hospital-networks/:networkId/register-walkin endpoint. branchNetworkId exposed from VetHospitalService.mapHospitalRow
 - **Rule:** Network hospital check-in modal must have walk-in registration form when hospital.branchNetworkId is set
 
+
+### NET-001 — Network staff register button missing (networkId null)
+- **Logged:** 2026-04-18 16:37
+- **Symptom:** Register button hidden for hospital staff at a network branch hospital
+- **Root Cause:** listHospitalsForVet selected h.* which relied on vet_hospitals.branch_network_id being set. In live DBs where seed UPDATE didn't run, branch_network_id is NULL even though hospital_network_members.network_id is correct. networkId = null → button gated away.
+- **Fix:** Added COALESCE(h.branch_network_id, hnm.network_id) AS branch_network_id to listHospitalsForVet SELECT. Network ID is now always derived from membership record even if the hospital row's column is unset.
+- **Rule:** NEVER rely solely on vet_hospitals.branch_network_id. Always COALESCE with hnm.network_id in listHospitalsForVet.
+

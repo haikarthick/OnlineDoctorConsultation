@@ -539,6 +539,7 @@ export default function HospitalWorkflow() {
                         onSelect={a => { setCheckInAnimal(a); setCheckInError('') }}
                         label={`🔍 ${t('hospitalWorkflow.searchPatient')} *`}
                         onRegisterNew={openRegisterMode}
+                        hospitalId={hospitalId || undefined}
                       />
                       {!checkInAnimal && (
                         <div style={{ marginTop: 6, fontSize: 12, color: '#b45309', background: '#fef3c7', borderRadius: 6, padding: '6px 10px' }}>
@@ -939,7 +940,7 @@ export default function HospitalWorkflow() {
               <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' }}>
                 <h3 style={{ marginTop: 0 }}>🔄 {t('hospitalWorkflow.newClinicalCase')}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <AnimalSearchPicker selectedAnimal={caseAnimal} onSelect={setCaseAnimal} />
+                  <AnimalSearchPicker selectedAnimal={caseAnimal} onSelect={setCaseAnimal} hospitalId={hospitalId || undefined} />
                   <div>
                     <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.chiefComplaint')}</label>
                     <textarea placeholder={t('hospitalWorkflow.chiefComplaintPlaceholder')} value={caseForm.chiefComplaint} onChange={e => setCaseForm(f => ({ ...f, chiefComplaint: e.target.value }))} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }} />
@@ -1023,7 +1024,7 @@ export default function HospitalWorkflow() {
                   )}
 
                   {/* Patient — optional */}
-                  <AnimalSearchPicker selectedAnimal={referralAnimal} onSelect={setReferralAnimal} label="🔍 Patient (optional)" />
+                  <AnimalSearchPicker selectedAnimal={referralAnimal} onSelect={setReferralAnimal} label="🔍 Patient (optional)" hospitalId={hospitalId || undefined} />
 
                   {/* Reason — required */}
                   <div>

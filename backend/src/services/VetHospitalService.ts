@@ -462,7 +462,10 @@ export class VetHospitalService {
   }
 
   async listHospitalsForVet(vetId: string): Promise<VetHospital[]> {
-    // Union: hospitals where user is a doctor OR a network member (staff) OR has a staff_position
+    // Union: hospitals where user is a doctor OR a network member (staff) OR has a staff_position.
+    // IMPORTANT: branch_network_id is derived via COALESCE(h.branch_network_id, hnm.network_id)
+    // so that network staff always see the correct networkId even when the hospital row's
+    // branch_network_id column was not set (e.g., hospitals enrolled without createBranchHospital).
     const result = await database.query(
       `SELECT DISTINCT ON (h.id) h.*,
               u.first_name || ' ' || u.last_name AS owner_name,
@@ -470,7 +473,9 @@ export class VetHospitalService {
               COALESCE(hd.title, sp.department, '') AS title,
               COALESCE(hd.is_primary_hospital, false) AS is_primary_hospital,
               (SELECT COUNT(*) FROM hospital_doctors WHERE hospital_id = h.id AND is_active = true) AS doctor_count,
-              (SELECT COUNT(*) FROM hospital_departments WHERE hospital_id = h.id AND is_active = true) AS department_count
+              (SELECT COUNT(*) FROM hospital_departments WHERE hospital_id = h.id AND is_active = true) AS department_count,
+              COALESCE(h.branch_network_id, hnm.network_id) AS branch_network_id,
+              (h.is_network_branch = true OR hnm.id IS NOT NULL) AS is_network_branch
        FROM vet_hospitals h
        JOIN users u ON h.owner_id = u.id
        LEFT JOIN hospital_doctors hd ON hd.hospital_id = h.id AND hd.doctor_id = $1 AND hd.is_active = true

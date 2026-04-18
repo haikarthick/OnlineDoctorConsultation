@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
 
-export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, onRegisterNew }: {
-  onSelect: (animal: any) => void; selectedAnimal: any; label?: string; onRegisterNew?: (query: string) => void;
+export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, onRegisterNew, hospitalId }: {
+  onSelect: (animal: any) => void; selectedAnimal: any; label?: string; onRegisterNew?: (query: string) => void; hospitalId?: string;
 }) {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
@@ -25,7 +25,7 @@ export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, on
     if (q.length < 2) { setResults([]); return }
     setSearching(true)
     try {
-      const res = await apiService.searchWorkflowAnimals(q)
+      const res = await apiService.searchWorkflowAnimals(q, hospitalId)
       setResults(res.data || [])
     } catch { setResults([]) }
     setSearching(false)

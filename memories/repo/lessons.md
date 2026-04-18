@@ -426,3 +426,10 @@
 - **Lesson:** Always add new DB columns to mapHospitalRow AND to both the backend VetHospital interface AND the frontend VetHospital type
 - **Apply to:** All SQL-to-type mapping in VetHospitalService
 
+
+### LESSON-035 — Network hospital animal search must be scoped to network
+- **Logged:** 2026-04-18 16:37
+- **Context:** searchAnimals was globally scoped - any staff member could see all animals in the system
+- **Lesson:** Animal search for hospital workflow MUST be scoped to the hospital's network via animal_care_contexts. Use COALESCE(h.branch_network_id, hnh.network_id) to get the network, then JOIN animal_care_contexts. Standalone hospitals fall back to queue/cases history.
+- **Apply to:** All future animal/patient search endpoints used by hospital staff
+
