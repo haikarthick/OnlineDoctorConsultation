@@ -1054,8 +1054,10 @@ export class VetHospitalService {
 
       if (!ownerId) {
         const crypto = await import('crypto');
+        const bcrypt = await import('bcryptjs');
         const placeholderPassword = crypto.randomBytes(32).toString('hex');
         const placeholderEmailSuffix = crypto.randomBytes(8).toString('hex');
+        const passwordHash = await bcrypt.hash(placeholderPassword, 10);
         const nameParts = data.patientName.trim().split(/\s+/);
         const firstName = nameParts[0] || 'Walk-In';
         const lastName = nameParts.slice(1).join(' ') || 'Patient';
@@ -1065,7 +1067,7 @@ export class VetHospitalService {
            VALUES ($1, $2, $3, $4, $5, 'pet_owner', true)
            ON CONFLICT (email) DO UPDATE SET first_name = EXCLUDED.first_name
            RETURNING id`,
-          [firstName, lastName, placeholderEmail, data.patientPhone || null, placeholderPassword]
+          [firstName, lastName, placeholderEmail, data.patientPhone || null, passwordHash]
         );
         ownerId = userRes.rows[0].id;
       }

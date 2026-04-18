@@ -1159,6 +1159,7 @@ export class HospitalNetworkService {
 
       return {
         patientId: contextRes.rows[0].id,
+        ownerId,
         networkPatientId,
         animalId
       };
