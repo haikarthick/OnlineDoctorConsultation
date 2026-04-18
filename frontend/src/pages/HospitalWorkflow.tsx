@@ -200,14 +200,15 @@ export default function HospitalWorkflow() {
       })
       // Auto-select the newly registered animal for check-in
       const registered = res.data
+      const nameParts = walkInForm.ownerName.trim().split(/\s+/)
       setCheckInAnimal({
         id: registered.animalId,
         owner_id: registered.patientId,
         name: walkInForm.animalName.trim(),
         species: walkInForm.animalSpecies.trim(),
         breed: walkInForm.animalBreed.trim() || '',
-        owner_first_name: walkInForm.ownerName.trim().split(' ')[0],
-        owner_last_name: walkInForm.ownerName.trim().split(' ').slice(1).join(' '),
+        owner_first_name: nameParts[0],
+        owner_last_name: nameParts.length > 1 ? nameParts.slice(1).join(' ') : '',
         owner_phone: walkInForm.ownerPhone.trim() || '',
         networkPatientId: registered.networkPatientId,
       })
@@ -311,6 +312,10 @@ export default function HospitalWorkflow() {
   if (loading && !hospitalId) {
     return <div className="module-page" style={{ minHeight: 'calc(100vh - 64px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div className="spinner" /></div>
   }
+
+  // Derived helpers for walk-in form (extracted to avoid duplication)
+  const walkInFormValid = walkInForm.ownerName.trim() !== '' && walkInForm.animalName.trim() !== '' && walkInForm.animalSpecies.trim() !== ''
+  function openRegisterMode() { setCheckInMode('register'); setWalkInError('') }
 
   if (!loading && hospitals.length === 0) {
     return (
@@ -520,7 +525,7 @@ export default function HospitalWorkflow() {
                         selectedAnimal={checkInAnimal}
                         onSelect={a => { setCheckInAnimal(a); setCheckInError('') }}
                         label={`🔍 ${t('hospitalWorkflow.searchPatient')} *`}
-                        onRegisterNew={networkId ? () => { setCheckInMode('register'); setWalkInError('') } : undefined}
+                        onRegisterNew={networkId ? openRegisterMode : undefined}
                       />
                       {!checkInAnimal && (
                         <div style={{ marginTop: 6, fontSize: 12, color: '#b45309', background: '#fef3c7', borderRadius: 6, padding: '6px 10px' }}>
@@ -531,7 +536,7 @@ export default function HospitalWorkflow() {
                     {networkId && !checkInAnimal && (
                       <div style={{ textAlign: 'center', padding: '4px 0' }}>
                         <span style={{ fontSize: 12, color: '#94a3b8' }}>{t('hospitalWorkflow.walkIn.or')} </span>
-                        <button onClick={() => { setCheckInMode('register'); setWalkInError('') }}
+                        <button onClick={openRegisterMode}
                           style={{ background: 'none', border: 'none', color: '#2563eb', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '2px 4px', textDecoration: 'underline' }}>
                           ➕ {t('hospitalWorkflow.walkIn.registerNew')}
                         </button>
@@ -628,8 +633,8 @@ export default function HospitalWorkflow() {
                     <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
                       <button onClick={() => { setCheckInMode('search'); setWalkInError('') }} style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>← {t('hospitalWorkflow.walkIn.backToSearch')}</button>
                       <button onClick={handleWalkInRegister}
-                        disabled={!walkInForm.ownerName.trim() || !walkInForm.animalName.trim() || !walkInForm.animalSpecies.trim() || walkInRegistering}
-                        style={{ padding: '10px 20px', background: (walkInForm.ownerName.trim() && walkInForm.animalName.trim() && walkInForm.animalSpecies.trim() && !walkInRegistering) ? '#15803d' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: (walkInForm.ownerName.trim() && walkInForm.animalName.trim() && walkInForm.animalSpecies.trim() && !walkInRegistering) ? 'pointer' : 'not-allowed', fontWeight: 700, minWidth: 140 }}>
+                        disabled={!walkInFormValid || walkInRegistering}
+                        style={{ padding: '10px 20px', background: walkInFormValid && !walkInRegistering ? '#15803d' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: walkInFormValid && !walkInRegistering ? 'pointer' : 'not-allowed', fontWeight: 700, minWidth: 140 }}>
                         {walkInRegistering ? `⏳ ${t('hospitalWorkflow.walkIn.registering')}` : `✅ ${t('hospitalWorkflow.walkIn.registerAndContinue')}`}
                       </button>
                     </div>
