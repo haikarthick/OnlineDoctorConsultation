@@ -419,3 +419,10 @@
 - **Lesson:** EVERY fix that touches backend behavior MUST be verified by calling the deployed Render API endpoint AFTER deploy completes — NEVER rely on local testing alone. The confirmation sequence is: code fix → commit → push → wait for deploy → call deployed API → confirm response → THEN tell user it is fixed.
 - **Apply to:** All future backend fixes, all future feature confirmations
 
+
+### LESSON-035 — VetHospitalService.mapHospitalRow must expose all needed frontend fields
+- **Logged:** 2026-04-18 13:13
+- **Context:** A hospital's branchNetworkId was in the DB (branch_network_id) and returned by h.* queries but not mapped in mapHospitalRow — frontend always got undefined
+- **Lesson:** Always add new DB columns to mapHospitalRow AND to both the backend VetHospital interface AND the frontend VetHospital type
+- **Apply to:** All SQL-to-type mapping in VetHospitalService
+

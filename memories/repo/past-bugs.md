@@ -817,3 +817,11 @@ render-start.sh
 - **Fix:** Added Resend (HTTP-based) as primary email provider. Priority: Resend API → SMTP → log-only fallback. Log-only mode captures full email content in server logs with unique IDs. 10s hard Promise.race timeout prevents TCP hangs.
 - **Rule:** NEVER assume SMTP works on cloud platforms. Always use HTTP-based email providers (Resend/SendGrid) as primary for Render. Always test email on deployed env, not just locally.
 
+
+### WORKFLOW-001 — No walk-in registration for network hospital check-in
+- **Logged:** 2026-04-18 13:13
+- **Symptom:** Staff tried to check in a new walk-in patient but the modal only showed search — no registration path
+- **Root Cause:** Network hospital patients are in closed visibility so search returns no results for new walk-ins
+- **Fix:** Added openRegisterMode form in check-in modal using /hospital-networks/:networkId/register-walkin endpoint. branchNetworkId exposed from VetHospitalService.mapHospitalRow
+- **Rule:** Network hospital check-in modal must have walk-in registration form when hospital.branchNetworkId is set
+
