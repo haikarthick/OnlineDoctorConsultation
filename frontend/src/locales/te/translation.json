@@ -50,7 +50,19 @@
     "myAnimals": "My Animals",
     "select": "Select",
     "selectOption": "Select an option",
-    "average": "Average"
+    "average": "Average",
+    "species": {
+      "dog": "కుక్క",
+      "cat": "పిల్లి",
+      "bird": "పక్షి",
+      "rabbit": "కుందేలు",
+      "horse": "గుర్రం",
+      "cow": "ఆవు",
+      "goat": "మేక",
+      "sheep": "గొర్రె",
+      "pig": "పంది",
+      "other": "ఇతర"
+    }
   },
   "nav": {
     "brand": "VetCare",
@@ -4829,8 +4841,10 @@
       "or": "— లేదా —",
       "requiredFields": "యజమాని పేరు, జంతువు పేరు మరియు జాతి అవసరం.",
       "registerFailed": "వాక్-ఇన్ నమోదు విఫలమైంది. మళ్ళీ ప్రయత్నించండి.",
-      "searchRequired": "అవసరం: చెక్-ఇన్ చేయడానికి జంతువు పేరు టైప్ చేసి ఎంచుకోండి."
-    }
+      "searchRequired": "అవసరం: చెక్-ఇన్ చేయడానికి జంతువు పేరు టైప్ చేసి ఎంచుకోండి.",
+      "registerNewDesc": "ఆసుపత్రికి కొత్త వాక్-ఇన్ రోగిని జోడించండి"
+    },
+    "noAnimalsFound": "జంతువులు కనుగొనబడలేదు"
   },
   "inpatientManagement": {
     "title": "ఇన్‌పేషంట్ & బోర్డింగ్",

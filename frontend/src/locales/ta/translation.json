@@ -50,7 +50,19 @@
     "myAnimals": "My Animals",
     "select": "Select",
     "selectOption": "Select an option",
-    "average": "Average"
+    "average": "Average",
+    "species": {
+      "dog": "நாய்",
+      "cat": "பூனை",
+      "bird": "பறவை",
+      "rabbit": "முயல்",
+      "horse": "குதிரை",
+      "cow": "பசு",
+      "goat": "ஆடு",
+      "sheep": "செம்மறி",
+      "pig": "பன்றி",
+      "other": "மற்றவை"
+    }
   },
   "nav": {
     "brand": "VetCare",
@@ -4838,8 +4850,10 @@
       "or": "— அல்லது —",
       "requiredFields": "உரிமையாளர் பெயர், விலங்கின் பெயர் மற்றும் இனம் அவசியம்.",
       "registerFailed": "வாக்-இன் பதிவு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
-      "searchRequired": "அவசியம்: செக்-இன் செய்ய விலங்கின் பெயரை தட்டச்சு செய்து தேர்ந்தெடுக்கவும்."
-    }
+      "searchRequired": "அவசியம்: செக்-இன் செய்ய விலங்கின் பெயரை தட்டச்சு செய்து தேர்ந்தெடுக்கவும்.",
+      "registerNewDesc": "மருத்துவமனையில் புதிய வாக்-இன் நோயாளியை சேர்க்கவும்"
+    },
+    "noAnimalsFound": "எந்த விலங்கும் கிடைக்கவில்லை"
   },
   "inpatientManagement": {
     "title": "உள்நோயாளி & தங்கும் வசதி",

@@ -50,7 +50,19 @@
     "myAnimals": "My Animals",
     "select": "Select",
     "selectOption": "Select an option",
-    "average": "Average"
+    "average": "Average",
+    "species": {
+      "dog": "ನಾಯಿ",
+      "cat": "ಬೆಕ್ಕು",
+      "bird": "ಹಕ್ಕಿ",
+      "rabbit": "ಮೊಲ",
+      "horse": "ಕುದುರೆ",
+      "cow": "ಹಸು",
+      "goat": "ಆಡು",
+      "sheep": "ಕುರಿ",
+      "pig": "ಹಂದಿ",
+      "other": "ಇತರ"
+    }
   },
   "nav": {
     "brand": "VetCare",
@@ -4840,8 +4852,10 @@
       "or": "— ಅಥವಾ —",
       "requiredFields": "ಮಾಲೀಕರ ಹೆಸರು, ಪ್ರಾಣಿಯ ಹೆಸರು ಮತ್ತು ಪ್ರಭೇದ ಅಗತ್ಯ.",
       "registerFailed": "ವಾಕ್-ಇನ್ ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
-      "searchRequired": "ಅಗತ್ಯ: ಚೆಕ್-ಇನ್ ಮಾಡಲು ಪ್ರಾಣಿಯ ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ ಆಯ್ಕೆ ಮಾಡಿ."
-    }
+      "searchRequired": "ಅಗತ್ಯ: ಚೆಕ್-ಇನ್ ಮಾಡಲು ಪ್ರಾಣಿಯ ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ ಆಯ್ಕೆ ಮಾಡಿ.",
+      "registerNewDesc": "ಆಸ್ಪತ್ರೆಗೆ ಹೊಸ ವಾಕ್-ಇನ್ ರೋಗಿಯನ್ನು ಸೇರಿಸಿ"
+    },
+    "noAnimalsFound": "ಯಾವುದೇ ಪ್ರಾಣಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
   },
   "inpatientManagement": {
     "title": "ಒಳರೋಗಿ & ಬೋರ್ಡಿಂಗ್",

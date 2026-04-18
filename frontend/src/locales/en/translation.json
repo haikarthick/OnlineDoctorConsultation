@@ -77,7 +77,19 @@
     "myAnimals": "My Animals",
     "select": "Select",
     "selectOption": "Select an option",
-    "average": "Average"
+    "average": "Average",
+    "species": {
+      "dog": "Dog",
+      "cat": "Cat",
+      "bird": "Bird",
+      "rabbit": "Rabbit",
+      "horse": "Horse",
+      "cow": "Cow",
+      "goat": "Goat",
+      "sheep": "Sheep",
+      "pig": "Pig",
+      "other": "Other"
+    }
   },
   "nav": {
     "brand": "VetCare",
@@ -4913,8 +4925,10 @@
       "or": "— or —",
       "requiredFields": "Owner name, animal name, and species are required.",
       "registerFailed": "Walk-in registration failed. Please try again.",
-      "searchRequired": "Required: Type an animal name and select a patient from the dropdown to enable check-in."
-    }
+      "searchRequired": "Required: Type an animal name and select a patient from the dropdown to enable check-in.",
+      "registerNewDesc": "Add a new walk-in patient to the hospital"
+    },
+    "noAnimalsFound": "No animals found"
   },
   "inpatientManagement": {
     "title": "Inpatient & Boarding",

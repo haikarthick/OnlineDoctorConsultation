@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
 
 export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, onRegisterNew }: {
   onSelect: (animal: any) => void; selectedAnimal: any; label?: string; onRegisterNew?: (query: string) => void;
 }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<any[]>([])
   const [searching, setSearching] = useState(false)
@@ -66,7 +68,7 @@ export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, on
           {searching && <div style={{ padding: 12, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>Searching...</div>}
           {!searching && results.length === 0 && (
             <div>
-              <div style={{ padding: 12, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>No animals found</div>
+              <div style={{ padding: 12, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>{t('hospitalWorkflow.noAnimalsFound', 'No animals found')}</div>
               {onRegisterNew && (
                 <div
                   onClick={() => { setShowDropdown(false); onRegisterNew(query) }}
@@ -75,8 +77,8 @@ export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, on
                   onMouseLeave={e => (e.currentTarget.style.background = '#f0fdf4')}>
                   <span style={{ fontSize: 16 }}>➕</span>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: 13, color: '#15803d' }}>Register as New Patient</div>
-                    <div style={{ fontSize: 11, color: '#16a34a' }}>Add a new walk-in patient to the hospital</div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: '#15803d' }}>{t('hospitalWorkflow.walkIn.registerNew')}</div>
+                    <div style={{ fontSize: 11, color: '#16a34a' }}>{t('hospitalWorkflow.walkIn.registerNewDesc', 'Add a new walk-in patient to the hospital')}</div>
                   </div>
                 </div>
               )}

@@ -604,16 +604,16 @@ export default function HospitalWorkflow() {
                             <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.species')} <span style={{ color: '#dc2626' }}>*</span></label>
                             <select value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
                               <option value="">{t('hospitalWorkflow.walkIn.selectSpecies')}</option>
-                              <option value="dog">🐕 Dog</option>
-                              <option value="cat">🐈 Cat</option>
-                              <option value="bird">🐦 Bird</option>
-                              <option value="rabbit">🐇 Rabbit</option>
-                              <option value="horse">🐎 Horse</option>
-                              <option value="cow">🐄 Cow</option>
-                              <option value="goat">🐐 Goat</option>
-                              <option value="sheep">🐑 Sheep</option>
-                              <option value="pig">🐖 Pig</option>
-                              <option value="other">Other</option>
+                              <option value="dog">🐕 {t('common.species.dog')}</option>
+                              <option value="cat">🐈 {t('common.species.cat')}</option>
+                              <option value="bird">🐦 {t('common.species.bird')}</option>
+                              <option value="rabbit">🐇 {t('common.species.rabbit')}</option>
+                              <option value="horse">🐎 {t('common.species.horse')}</option>
+                              <option value="cow">🐄 {t('common.species.cow')}</option>
+                              <option value="goat">🐐 {t('common.species.goat')}</option>
+                              <option value="sheep">🐑 {t('common.species.sheep')}</option>
+                              <option value="pig">🐖 {t('common.species.pig')}</option>
+                              <option value="other">{t('common.species.other')}</option>
                             </select>
                           </div>
                           <div>
