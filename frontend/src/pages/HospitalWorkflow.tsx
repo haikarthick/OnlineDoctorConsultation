@@ -74,8 +74,18 @@ export default function HospitalWorkflow() {
   // Medical summary for case detail
   const [caseMedicalSummary, setCaseMedicalSummary] = useState<any>(null)
 
+  // Walk-in patient registration (within check-in modal)
+  const [checkInMode, setCheckInMode] = useState<'search' | 'register'>('search')
+  const [walkInForm, setWalkInForm] = useState({ ownerName: '', ownerPhone: '', ownerEmail: '', animalName: '', animalSpecies: '', animalBreed: '' })
+  const [walkInRegistering, setWalkInRegistering] = useState(false)
+  const [walkInError, setWalkInError] = useState('')
+
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
+
+  // Derived: current hospital's network ID (for walk-in registration)
+  const currentHospital = hospitals.find(h => h.id === hospitalId)
+  const networkId: string | null = currentHospital?.branchNetworkId || null
 
   // Load hospitals
   useEffect(() => {
@@ -140,6 +150,15 @@ export default function HospitalWorkflow() {
   }, [hospitalId, loadQueue, loadWorkflow, loadReferrals])
 
   // Actions
+  function closeCheckInModal() {
+    setShowCheckIn(false)
+    setCheckInAnimal(null)
+    setCheckInError('')
+    setCheckInMode('search')
+    setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', animalName: '', animalSpecies: '', animalBreed: '' })
+    setWalkInError('')
+  }
+
   async function handleCheckIn() {
     if (!hospitalId || !checkInAnimal) return
     setCheckInError('')
@@ -150,15 +169,54 @@ export default function HospitalWorkflow() {
         animalId: checkInAnimal.id,
         ownerId: checkInAnimal.owner_id,
       })
-      setShowCheckIn(false)
+      closeCheckInModal()
       setCheckInForm({ reason: '', priority: 'normal', animalId: '', ownerId: '' })
-      setCheckInAnimal(null)
-      setCheckInError('')
       loadQueue()
     } catch (err: any) {
       setCheckInError(err?.response?.data?.message || err?.message || 'Check-in failed. Please try again.')
     }
     setCheckInSubmitting(false)
+  }
+
+  async function handleWalkInRegister() {
+    if (!networkId || !hospitalId) return
+    const { ownerName, animalName, animalSpecies } = walkInForm
+    if (!ownerName.trim() || !animalName.trim() || !animalSpecies.trim()) {
+      setWalkInError(t('hospitalWorkflow.walkIn.requiredFields'))
+      return
+    }
+    setWalkInError('')
+    setWalkInRegistering(true)
+    try {
+      const res = await apiService.registerWalkInPatientDirect(networkId, {
+        hospitalId,
+        patientName: walkInForm.ownerName.trim(),
+        patientPhone: walkInForm.ownerPhone.trim() || undefined,
+        patientEmail: walkInForm.ownerEmail.trim() || undefined,
+        animalName: walkInForm.animalName.trim(),
+        animalSpecies: walkInForm.animalSpecies.trim(),
+        animalBreed: walkInForm.animalBreed.trim() || undefined,
+        reasonForVisit: checkInForm.reason.trim() || undefined,
+      })
+      // Auto-select the newly registered animal for check-in
+      const registered = res.data
+      setCheckInAnimal({
+        id: registered.animalId,
+        owner_id: registered.patientId,
+        name: walkInForm.animalName.trim(),
+        species: walkInForm.animalSpecies.trim(),
+        breed: walkInForm.animalBreed.trim() || '',
+        owner_first_name: walkInForm.ownerName.trim().split(' ')[0],
+        owner_last_name: walkInForm.ownerName.trim().split(' ').slice(1).join(' '),
+        owner_phone: walkInForm.ownerPhone.trim() || '',
+        networkPatientId: registered.networkPatientId,
+      })
+      setCheckInMode('search')
+      setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', animalName: '', animalSpecies: '', animalBreed: '' })
+    } catch (err: any) {
+      setWalkInError(err?.response?.data?.message || err?.message || t('hospitalWorkflow.walkIn.registerFailed'))
+    }
+    setWalkInRegistering(false)
   }
 
   async function handleTriage() {
@@ -436,12 +494,17 @@ export default function HospitalWorkflow() {
 
           {/* Check-in Modal */}
           {showCheckIn && (
-            <div onClick={e => { if (e.target === e.currentTarget) { setShowCheckIn(false); setCheckInAnimal(null); setCheckInError('') } }}
+            <div onClick={e => { if (e.target === e.currentTarget) closeCheckInModal() }}
               style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: 16 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 520, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                  <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>🏥 {t('hospitalWorkflow.checkInPatient')}</h3>
-                  <button onClick={() => { setShowCheckIn(false); setCheckInAnimal(null); setCheckInError('') }} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#64748b' }}>✕</button>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>🏥 {t('hospitalWorkflow.checkInPatient')}</h3>
+                    {checkInMode === 'register' && (
+                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{t('hospitalWorkflow.walkIn.subtitle')}</div>
+                    )}
+                  </div>
+                  <button onClick={closeCheckInModal} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#64748b' }}>✕</button>
                 </div>
 
                 {checkInError && (
@@ -450,37 +513,128 @@ export default function HospitalWorkflow() {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  <div>
-                    <AnimalSearchPicker selectedAnimal={checkInAnimal} onSelect={a => { setCheckInAnimal(a); setCheckInError('') }} label={`🔍 Search Patient (Animal) *`} />
-                    {!checkInAnimal && (
-                      <div style={{ marginTop: 6, fontSize: 12, color: '#b45309', background: '#fef3c7', borderRadius: 6, padding: '6px 10px' }}>
-                        ⚠️ <strong>Required:</strong> Type an animal name and select a patient from the dropdown to enable check-in.
+                {checkInMode === 'search' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div>
+                      <AnimalSearchPicker
+                        selectedAnimal={checkInAnimal}
+                        onSelect={a => { setCheckInAnimal(a); setCheckInError('') }}
+                        label={`🔍 ${t('hospitalWorkflow.searchPatient')} *`}
+                        onRegisterNew={networkId ? () => { setCheckInMode('register'); setWalkInError('') } : undefined}
+                      />
+                      {!checkInAnimal && (
+                        <div style={{ marginTop: 6, fontSize: 12, color: '#b45309', background: '#fef3c7', borderRadius: 6, padding: '6px 10px' }}>
+                          ⚠️ <strong>{t('hospitalWorkflow.walkIn.searchRequired')}</strong>
+                        </div>
+                      )}
+                    </div>
+                    {networkId && !checkInAnimal && (
+                      <div style={{ textAlign: 'center', padding: '4px 0' }}>
+                        <span style={{ fontSize: 12, color: '#94a3b8' }}>{t('hospitalWorkflow.walkIn.or')} </span>
+                        <button onClick={() => { setCheckInMode('register'); setWalkInError('') }}
+                          style={{ background: 'none', border: 'none', color: '#2563eb', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '2px 4px', textDecoration: 'underline' }}>
+                          ➕ {t('hospitalWorkflow.walkIn.registerNew')}
+                        </button>
                       </div>
                     )}
-                  </div>
-                  <div>
-                    <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.reasonForVisit')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                    <input placeholder="e.g., Vaccination, Limping, Skin rash..." value={checkInForm.reason} onChange={e => setCheckInForm(f => ({ ...f, reason: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
-                  </div>
-                  <div>
-                    <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 6, display: 'block' }}>{t('hospitalWorkflow.priority')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      {PRIORITIES.map(p => (
-                        <button key={p} onClick={() => setCheckInForm(f => ({ ...f, priority: p }))}
-                          style={{ flex: 1, padding: '8px 4px', borderRadius: 8, border: checkInForm.priority === p ? `2px solid ${PRIORITY_COLORS[p]}` : '1px solid #d1d5db', background: checkInForm.priority === p ? PRIORITY_COLORS[p] + '15' : '#fff', fontWeight: 600, cursor: 'pointer', fontSize: 12, color: PRIORITY_COLORS[p], textTransform: 'capitalize' }}>{p}</button>
-                      ))}
+                    <div>
+                      <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.reasonForVisit')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                      <input placeholder="e.g., Vaccination, Limping, Skin rash..." value={checkInForm.reason} onChange={e => setCheckInForm(f => ({ ...f, reason: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                    </div>
+                    <div>
+                      <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 6, display: 'block' }}>{t('hospitalWorkflow.priority')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        {PRIORITIES.map(p => (
+                          <button key={p} onClick={() => setCheckInForm(f => ({ ...f, priority: p }))}
+                            style={{ flex: 1, padding: '8px 4px', borderRadius: 8, border: checkInForm.priority === p ? `2px solid ${PRIORITY_COLORS[p]}` : '1px solid #d1d5db', background: checkInForm.priority === p ? PRIORITY_COLORS[p] + '15' : '#fff', fontWeight: 600, cursor: 'pointer', fontSize: 12, color: PRIORITY_COLORS[p], textTransform: 'capitalize' }}>{p}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 12, color: '#94a3b8' }}><span style={{ color: '#dc2626' }}>*</span> Required field</div>
+                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
+                      <button onClick={closeCheckInModal} style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.cancel')}</button>
+                      <button onClick={handleCheckIn} disabled={!checkInAnimal || checkInSubmitting}
+                        style={{ padding: '10px 20px', background: checkInAnimal && !checkInSubmitting ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: checkInAnimal && !checkInSubmitting ? 'pointer' : 'not-allowed', fontWeight: 700, minWidth: 120 }}>
+                        {checkInSubmitting ? `⏳ ${t('hospitalWorkflow.checkingIn')}` : `✅ ${t('hospitalWorkflow.checkIn')}`}
+                      </button>
                     </div>
                   </div>
-                  <div style={{ fontSize: 12, color: '#94a3b8' }}><span style={{ color: '#dc2626' }}>*</span> Required field</div>
-                  <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
-                    <button onClick={() => { setShowCheckIn(false); setCheckInAnimal(null); setCheckInError('') }} style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.cancel')}</button>
-                    <button onClick={handleCheckIn} disabled={!checkInAnimal || checkInSubmitting}
-                      style={{ padding: '10px 20px', background: checkInAnimal && !checkInSubmitting ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: checkInAnimal && !checkInSubmitting ? 'pointer' : 'not-allowed', fontWeight: 700, minWidth: 120 }}>
-                      {checkInSubmitting ? '⏳ Checking in...' : `✅ ${t('hospitalWorkflow.checkIn')}`}
-                    </button>
+                ) : (
+                  /* Walk-in Patient Registration Form */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#15803d' }}>
+                      🐾 {t('hospitalWorkflow.walkIn.instructions')}
+                    </div>
+
+                    {walkInError && (
+                      <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: 8, padding: '10px 14px', fontSize: 13, fontWeight: 500 }}>
+                        ⚠️ {walkInError}
+                      </div>
+                    )}
+
+                    <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>👤 {t('hospitalWorkflow.walkIn.ownerDetails')}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div>
+                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.ownerName')} <span style={{ color: '#dc2626' }}>*</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.ownerNamePlaceholder')} value={walkInForm.ownerName} onChange={e => setWalkInForm(f => ({ ...f, ownerName: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                          <div>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.ownerPhone')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <input placeholder="+91 9876543210" value={walkInForm.ownerPhone} onChange={e => setWalkInForm(f => ({ ...f, ownerPhone: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          </div>
+                          <div>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.ownerEmail')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <input placeholder="owner@email.com" type="email" value={walkInForm.ownerEmail} onChange={e => setWalkInForm(f => ({ ...f, ownerEmail: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>🐾 {t('hospitalWorkflow.walkIn.patientDetails')}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div>
+                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalName')} <span style={{ color: '#dc2626' }}>*</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.animalNamePlaceholder')} value={walkInForm.animalName} onChange={e => setWalkInForm(f => ({ ...f, animalName: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                          <div>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.species')} <span style={{ color: '#dc2626' }}>*</span></label>
+                            <select value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
+                              <option value="">{t('hospitalWorkflow.walkIn.selectSpecies')}</option>
+                              <option value="dog">🐕 Dog</option>
+                              <option value="cat">🐈 Cat</option>
+                              <option value="bird">🐦 Bird</option>
+                              <option value="rabbit">🐇 Rabbit</option>
+                              <option value="horse">🐎 Horse</option>
+                              <option value="cow">🐄 Cow</option>
+                              <option value="goat">🐐 Goat</option>
+                              <option value="sheep">🐑 Sheep</option>
+                              <option value="pig">🐖 Pig</option>
+                              <option value="other">Other</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.breed')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <input placeholder={t('hospitalWorkflow.walkIn.breedPlaceholder')} value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: 12, color: '#94a3b8' }}><span style={{ color: '#dc2626' }}>*</span> Required field</div>
+                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
+                      <button onClick={() => { setCheckInMode('search'); setWalkInError('') }} style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>← {t('hospitalWorkflow.walkIn.backToSearch')}</button>
+                      <button onClick={handleWalkInRegister}
+                        disabled={!walkInForm.ownerName.trim() || !walkInForm.animalName.trim() || !walkInForm.animalSpecies.trim() || walkInRegistering}
+                        style={{ padding: '10px 20px', background: (walkInForm.ownerName.trim() && walkInForm.animalName.trim() && walkInForm.animalSpecies.trim() && !walkInRegistering) ? '#15803d' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: (walkInForm.ownerName.trim() && walkInForm.animalName.trim() && walkInForm.animalSpecies.trim() && !walkInRegistering) ? 'pointer' : 'not-allowed', fontWeight: 700, minWidth: 140 }}>
+                        {walkInRegistering ? `⏳ ${t('hospitalWorkflow.walkIn.registering')}` : `✅ ${t('hospitalWorkflow.walkIn.registerAndContinue')}`}
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}

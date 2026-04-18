@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import apiService from '../services/api'
 
-export default function AnimalSearchPicker({ onSelect, selectedAnimal, label }: {
-  onSelect: (animal: any) => void; selectedAnimal: any; label?: string;
+export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, onRegisterNew }: {
+  onSelect: (animal: any) => void; selectedAnimal: any; label?: string; onRegisterNew?: (query: string) => void;
 }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<any[]>([])
@@ -64,7 +64,24 @@ export default function AnimalSearchPicker({ onSelect, selectedAnimal, label }: 
       {showDropdown && (query.length >= 2) && (
         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,.12)', maxHeight: 240, overflowY: 'auto', zIndex: 100, marginTop: 4 }}>
           {searching && <div style={{ padding: 12, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>Searching...</div>}
-          {!searching && results.length === 0 && <div style={{ padding: 12, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>No animals found</div>}
+          {!searching && results.length === 0 && (
+            <div>
+              <div style={{ padding: 12, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>No animals found</div>
+              {onRegisterNew && (
+                <div
+                  onClick={() => { setShowDropdown(false); onRegisterNew(query) }}
+                  style={{ padding: '10px 14px', cursor: 'pointer', borderTop: '1px solid #e5e7eb', background: '#f0fdf4', display: 'flex', alignItems: 'center', gap: 8 }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#dcfce7')}
+                  onMouseLeave={e => (e.currentTarget.style.background = '#f0fdf4')}>
+                  <span style={{ fontSize: 16 }}>➕</span>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: '#15803d' }}>Register as New Patient</div>
+                    <div style={{ fontSize: 11, color: '#16a34a' }}>Add a new walk-in patient to the hospital</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           {results.map(a => (
             <div key={a.id} onClick={() => { onSelect(a); setQuery(''); setShowDropdown(false) }}
               style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f3f4f6', transition: 'background .1s' }}

@@ -1650,6 +1650,8 @@ export interface VetHospital {
   totalDoctors?: number       // alias for doctorCount
   totalDepartments?: number   // alias for departmentCount
   hospitalRole?: string  // current user's role (when listing own hospitals)
+  isNetworkBranch?: boolean
+  branchNetworkId?: string | null
 }
 
 export interface HospitalDepartment {

@@ -60,6 +60,8 @@ export interface VetHospital {
   ownerName?: string;
   doctorCount?: number;
   departmentCount?: number;
+  isNetworkBranch?: boolean;
+  branchNetworkId?: string | null;
 }
 
 export interface HospitalDepartment {
@@ -824,6 +826,8 @@ export class VetHospitalService {
       ownerName: row.owner_name,
       doctorCount: row.doctor_count !== undefined ? parseInt(row.doctor_count) : undefined,
       departmentCount: row.department_count !== undefined ? parseInt(row.department_count) : undefined,
+      isNetworkBranch: row.is_network_branch || false,
+      branchNetworkId: row.branch_network_id || null,
     };
   }
 
