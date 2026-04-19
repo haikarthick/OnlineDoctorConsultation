@@ -266,6 +266,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'hospital_workflow', 'inpatient_manage',
     // Read access to relevant hospital data
     'hospital_browse', 'hospital_manage',
+    // Hospital Network — view access for their assigned network
+    'hospital_network_view',
     // Dashboard widgets
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
   ],

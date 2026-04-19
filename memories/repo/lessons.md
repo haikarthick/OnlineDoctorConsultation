@@ -433,3 +433,9 @@
 - **Lesson:** Animal search for hospital workflow MUST be scoped to the hospital's network via animal_care_contexts. Use COALESCE(h.branch_network_id, hnh.network_id) to get the network, then JOIN animal_care_contexts. Standalone hospitals fall back to queue/cases history.
 - **Apply to:** All future animal/patient search endpoints used by hospital staff
 
+### LESSON-037b — Dual Role System: System Role vs Network Role
+- **Logged:** 2026-04-19
+- **Context:** Hospital network has TWO overlapping role systems that caused 6 permission bugs. System role (`users.role`): `pet_owner, farmer, veterinarian, admin, corporate_admin, hospital_staff`. Network role (`hospital_network_members.network_role`): `corporate_admin, hospital_director, compliance_officer, auditor, hospital_staff`. Route middleware `roleMiddleware()` checks SYSTEM role only. Controller `ensureNetworkAccess()` checks NETWORK role.
+- **Lesson:** When protecting network routes: (1) `roleMiddleware` must include ALL system roles that could hold the target network role — e.g. `hospital_director` network role can be held by `veterinarian` OR `hospital_staff` system role. (2) Always add a secondary network-role check after the system-role gate. (3) PUT/POST/DELETE on the same resource must use IDENTICAL role lists — never allow add+delete but not edit.
+- **Apply to:** All hospital network routes, any future multi-level role system
+
