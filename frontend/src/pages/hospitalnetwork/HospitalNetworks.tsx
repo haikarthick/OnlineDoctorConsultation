@@ -1292,12 +1292,14 @@ const HospitalNetworks: React.FC = () => {
             🏖️ {t('hospitalNetworks.leave.tab')}
           </button>
         )}
+        {selectedNetwork && (
         <button
           className={`module-tab${activeTab === 'roleMatrix' ? ' active' : ''}`}
           onClick={() => setActiveTab('roleMatrix')}
         >
           🔑 {t('networkRoleMatrix.tabLabel')}
         </button>
+        )}
       </div>
 
       {/* ════ TAB 1: NETWORKS ════ */}
@@ -2808,9 +2810,13 @@ const HospitalNetworks: React.FC = () => {
       )}
 
       {/* ════ TAB 7: ROLE MATRIX ════ */}
-      {activeTab === 'roleMatrix' && (
+      {activeTab === 'roleMatrix' && selectedNetwork && (
         <div className="hn-tab-content">
-          <NetworkRoleMatrix />
+          <NetworkRoleMatrix
+            networkId={selectedNetwork.id}
+            networkName={selectedNetwork.name}
+            adminMode={true}
+          />
         </div>
       )}
     </div>

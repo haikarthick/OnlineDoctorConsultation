@@ -20,6 +20,8 @@ interface MatrixCategory {
 }
 
 interface NetworkRoleMatrixProps {
+  networkId: string;
+  networkName?: string;
   adminMode?: boolean;
 }
 
@@ -93,7 +95,7 @@ const ROLE_DESCRIPTIONS: Record<string, { icon: string; descKey: string }> = {
 /** Actions that cannot be toggled (controlled by platform admin only) */
 const PLATFORM_ONLY_ACTIONS = ['deactivateNetwork'];
 
-const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ adminMode = false }) => {
+const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networkName, adminMode = false }) => {
   const { t } = useTranslation();
 
   // Admin-mode state
@@ -105,23 +107,23 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ adminMode = false
   const [success, setSuccess] = useState('');
 
   const loadMatrix = useCallback(async () => {
-    if (!adminMode) return;
+    if (!adminMode || !networkId) return;
     try {
       setLoadingMatrix(true);
       setError('');
-      const res = await apiService.adminGetNetworkRolePermissions();
+      const res = await apiService.adminGetNetworkRolePermissions(networkId);
       setDbMatrix(res.data?.matrix || {});
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || 'Failed to load network permissions');
     } finally {
       setLoadingMatrix(false);
     }
-  }, [adminMode]);
+  }, [adminMode, networkId]);
 
   useEffect(() => { loadMatrix(); }, [loadMatrix]);
 
   const handleToggle = async (networkRole: string, featureKey: string) => {
-    if (!adminMode || PLATFORM_ONLY_ACTIONS.includes(featureKey)) return;
+    if (!adminMode || PLATFORM_ONLY_ACTIONS.includes(featureKey) || !networkId) return;
     const current = dbMatrix[networkRole]?.[featureKey] ?? false;
     const newValue = !current;
     const cellKey = `${networkRole}.${featureKey}`;
@@ -134,7 +136,7 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ adminMode = false
     try {
       setSavingCell(cellKey);
       setError('');
-      await apiService.adminUpdateNetworkRolePermission(networkRole, featureKey, newValue);
+      await apiService.adminUpdateNetworkRolePermission(networkId, networkRole, featureKey, newValue);
       setSuccess(`Saved: ${featureKey} for ${networkRole}`);
       setTimeout(() => setSuccess(''), 2000);
     } catch (err: any) {
@@ -149,11 +151,11 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ adminMode = false
   };
 
   const handleResetRole = async (networkRole: string) => {
-    if (!adminMode) return;
+    if (!adminMode || !networkId) return;
     try {
       setResettingRole(networkRole);
       setError('');
-      const res = await apiService.adminResetNetworkRolePermissions(networkRole);
+      const res = await apiService.adminResetNetworkRolePermissions(networkId, networkRole);
       setDbMatrix(res.data?.matrix || {});
       setSuccess(`Reset ${networkRole} to defaults`);
       setTimeout(() => setSuccess(''), 2500);
@@ -208,9 +210,10 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ adminMode = false
       <div className="nrm-header">
         <div>
           <h2 className="nrm-title">🔑 {t('networkRoleMatrix.title')}</h2>
+          {networkName && <p className="nrm-network-name">Network: <strong>{networkName}</strong></p>}
           <p className="nrm-subtitle">
             {adminMode
-              ? 'Click any cell to toggle access. Changes take effect immediately.'
+              ? 'Click any cell to toggle access. Changes take effect immediately and apply only to this network.'
               : t('networkRoleMatrix.subtitle')}
           </p>
         </div>

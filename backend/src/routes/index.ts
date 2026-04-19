@@ -879,24 +879,28 @@ router.post('/admin/permissions/reset', authMiddleware, roleMiddleware(['admin']
   res.json({ success: true, data: { matrix: updated }, message: `Permissions reset to defaults for ${role}` });
 }));
 
-// ─── Network Role Permissions (admin-configurable) ────────────────────────────
-router.get('/admin/network-role-permissions', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
-  const matrix = await NetworkRolePermissionService.getMatrix();
+// ─── Network Role Permissions (admin-configurable, per-network) ───────────────
+router.get('/admin/network-role-permissions', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const { networkId } = req.query;
+  if (!networkId || typeof networkId !== 'string') {
+    return res.status(400).json({ success: false, error: 'networkId query parameter is required' });
+  }
+  const matrix = await NetworkRolePermissionService.getMatrix(networkId);
   const metadata = NetworkRolePermissionService.getMetadata();
   res.json({ success: true, data: { matrix, metadata } });
 }));
 
 router.put('/admin/network-role-permissions', authMiddleware, roleMiddleware(['admin']), validateBody(updateNetworkRolePermissionSchema), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
-  const { networkRole, action, isEnabled } = req.body;
-  await NetworkRolePermissionService.updatePermission(networkRole, action, isEnabled, authReq.userId!);
+  const { networkId, networkRole, action, isEnabled } = req.body;
+  await NetworkRolePermissionService.updatePermission(networkId, networkRole, action, isEnabled, authReq.userId!);
   res.json({ success: true, message: `Network permission '${action}' for '${networkRole}' set to ${isEnabled}` });
 }));
 
 router.post('/admin/network-role-permissions/reset', authMiddleware, roleMiddleware(['admin']), validateBody(resetNetworkRolePermissionsSchema), asyncHandler(async (req: Request, res: Response) => {
-  const { networkRole } = req.body;
-  await NetworkRolePermissionService.resetToDefaults(networkRole);
-  const matrix = await NetworkRolePermissionService.getMatrix();
+  const { networkId, networkRole } = req.body;
+  await NetworkRolePermissionService.resetToDefaults(networkId, networkRole);
+  const matrix = await NetworkRolePermissionService.getMatrix(networkId);
   res.json({ success: true, data: { matrix }, message: networkRole ? `Network permissions reset for ${networkRole}` : 'All network role permissions reset to defaults' });
 }));
 

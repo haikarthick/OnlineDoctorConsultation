@@ -185,7 +185,7 @@ class HospitalNetworkController {
         }
       } else {
         // DB-backed path: check network_role_permissions table
-        const hasAccess = await NetworkRolePermissionService.checkAccess(membership.networkRole, actionOrRoles);
+        const hasAccess = await NetworkRolePermissionService.checkAccess(networkId, membership.networkRole, actionOrRoles);
         if (!hasAccess) throw new ForbiddenError('Insufficient role for this action');
       }
     }

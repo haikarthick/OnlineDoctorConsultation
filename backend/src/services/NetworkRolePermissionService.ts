@@ -13,11 +13,11 @@ export const NETWORK_ACTIONS = [
   'networkDashboardStats', 'healthAnalytics', 'financialAnalytics', 'interHospitalReferrals',
 ] as const;
 
-/** Platform-only actions — never configurable by admin UI */
+/** Platform-only actions — never configurable */
 export const PLATFORM_ONLY_ACTIONS = ['deactivateNetwork'];
 
-/** Default access matrix — true = role has access to that action */
-const DEFAULTS: Record<string, Record<string, boolean>> = {
+/** Code defaults — used as fallback when no DB row exists for a network */
+export const DEFAULTS: Record<string, Record<string, boolean>> = {
   corporate_admin: {
     viewNetworkDetails: true, editNetworkSettings: true, deactivateNetwork: true,
     viewBranchHospitals: true, addHospitalToNetwork: true,
@@ -63,41 +63,48 @@ const DEFAULTS: Record<string, Record<string, boolean>> = {
 class NetworkRolePermissionService {
 
   async ensureTable(): Promise<void> {
+    // If table exists but has old schema (no network_id), drop and recreate
+    await database.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.tables
+          WHERE table_name = 'network_role_permissions'
+        ) AND NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'network_role_permissions' AND column_name = 'network_id'
+        ) THEN
+          DROP TABLE network_role_permissions;
+        END IF;
+      END
+      $$
+    `);
     await database.query(`
       CREATE TABLE IF NOT EXISTS network_role_permissions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
         network_role VARCHAR(50) NOT NULL,
         action VARCHAR(100) NOT NULL,
         is_enabled BOOLEAN NOT NULL DEFAULT true,
         updated_by UUID,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        UNIQUE(network_role, action)
+        UNIQUE(network_id, network_role, action)
       )
     `);
-    logger.info('network_role_permissions table ensured');
+    await database.query(`
+      CREATE INDEX IF NOT EXISTS idx_nrp_network_id ON network_role_permissions(network_id)
+    `);
+    logger.info('network_role_permissions table ensured (network-scoped)');
   }
 
-  async seedDefaults(): Promise<void> {
-    let inserted = 0;
-    for (const [role, actions] of Object.entries(DEFAULTS)) {
-      for (const [action, isEnabled] of Object.entries(actions)) {
-        const res = await database.query(
-          `INSERT INTO network_role_permissions (network_role, action, is_enabled)
-           VALUES ($1, $2, $3)
-           ON CONFLICT (network_role, action) DO UPDATE
-             SET is_enabled = EXCLUDED.is_enabled
-             WHERE network_role_permissions.updated_by IS NULL`,
-          [role, action, isEnabled]
-        );
-        if (res.rowCount && res.rowCount > 0) inserted++;
-      }
-    }
-    if (inserted > 0) logger.info(`Seeded ${inserted} network role permission entries`);
-  }
-
-  async getMatrix(): Promise<Record<string, Record<string, boolean>>> {
+  /** Get permission matrix for a specific network (falls back to code defaults for missing rows) */
+  async getMatrix(networkId: string): Promise<Record<string, Record<string, boolean>>> {
     const result = await database.query(
-      `SELECT network_role, action, is_enabled FROM network_role_permissions ORDER BY network_role, action`
+      `SELECT network_role, action, is_enabled
+       FROM network_role_permissions
+       WHERE network_id = $1
+       ORDER BY network_role, action`,
+      [networkId]
     );
 
     const matrix: Record<string, Record<string, boolean>> = {};
@@ -106,7 +113,7 @@ class NetworkRolePermissionService {
       matrix[row.network_role][row.action] = row.is_enabled;
     }
 
-    // Fill in code defaults for any missing rows
+    // Fill in code defaults for any missing role/action combinations
     for (const [role, actions] of Object.entries(DEFAULTS)) {
       if (!matrix[role]) matrix[role] = {};
       for (const [action, isEnabled] of Object.entries(actions)) {
@@ -116,11 +123,13 @@ class NetworkRolePermissionService {
     return matrix;
   }
 
-  async checkAccess(networkRole: string, action: string): Promise<boolean> {
+  /** Check if a specific role can perform an action in a specific network */
+  async checkAccess(networkId: string, networkRole: string, action: string): Promise<boolean> {
     try {
       const result = await database.query(
-        `SELECT is_enabled FROM network_role_permissions WHERE network_role = $1 AND action = $2`,
-        [networkRole, action]
+        `SELECT is_enabled FROM network_role_permissions
+         WHERE network_id = $1 AND network_role = $2 AND action = $3`,
+        [networkId, networkRole, action]
       );
       if (result.rows.length > 0) return result.rows[0].is_enabled;
     } catch {
@@ -129,26 +138,27 @@ class NetworkRolePermissionService {
     return DEFAULTS[networkRole]?.[action] ?? false;
   }
 
-  async updatePermission(networkRole: string, action: string, isEnabled: boolean, updatedBy: string): Promise<void> {
+  async updatePermission(networkId: string, networkRole: string, action: string, isEnabled: boolean, updatedBy: string): Promise<void> {
     await database.query(
-      `INSERT INTO network_role_permissions (network_role, action, is_enabled, updated_by)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (network_role, action) DO UPDATE
-         SET is_enabled = $3, updated_by = $4, updated_at = NOW()`,
-      [networkRole, action, isEnabled, updatedBy]
+      `INSERT INTO network_role_permissions (network_id, network_role, action, is_enabled, updated_by)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (network_id, network_role, action) DO UPDATE
+         SET is_enabled = $4, updated_by = $5, updated_at = NOW()`,
+      [networkId, networkRole, action, isEnabled, updatedBy]
     );
   }
 
-  async resetToDefaults(networkRole?: string): Promise<void> {
+  /** Reset permissions for a network (and optionally a specific role) back to code defaults */
+  async resetToDefaults(networkId: string, networkRole?: string): Promise<void> {
     const roles = networkRole ? [networkRole] : Object.keys(DEFAULTS);
     for (const role of roles) {
       for (const [action, isEnabled] of Object.entries(DEFAULTS[role] || {})) {
         await database.query(
-          `INSERT INTO network_role_permissions (network_role, action, is_enabled)
-           VALUES ($1, $2, $3)
-           ON CONFLICT (network_role, action) DO UPDATE
+          `INSERT INTO network_role_permissions (network_id, network_role, action, is_enabled)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (network_id, network_role, action) DO UPDATE
              SET is_enabled = EXCLUDED.is_enabled, updated_by = NULL, updated_at = NOW()`,
-          [role, action, isEnabled]
+          [networkId, role, action, isEnabled]
         );
       }
     }

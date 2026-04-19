@@ -386,3 +386,9 @@
 - **Status:** done
 - **Description:** Static matrix showing 5 network roles (corporate_admin, hospital_director, compliance_officer, auditor, hospital_staff) x 15 features across 6 categories. Added as tab in HospitalNetworks.tsx and PermissionManagement.tsx. Also fixed backend enforcement gaps: updateNetwork restricted to corporate_admin, getAuditLogs restricted to management roles. hospital_staff added to all PermissionService role lists. corporate_admin gained hospital_workflow+inpatient_manage permissions. All 6 locale files updated.
 
+
+### ✅ Editable Network Role Permissions
+- **Logged:** 2026-04-19 14:29
+- **Status:** done
+- **Description:** DB-backed network role permission matrix: admin can click cells to toggle access per role/action. Enforced via DB in HospitalNetworkController. 17 actions x 5 roles. Platform-only actions locked.
+

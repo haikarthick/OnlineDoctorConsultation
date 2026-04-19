@@ -374,12 +374,14 @@ export const resetPermissionsSchema = Joi.object({
 });
 
 export const updateNetworkRolePermissionSchema = Joi.object({
+  networkId: Joi.string().uuid().required(),
   networkRole: Joi.string().required(),
   action: Joi.string().required(),
   isEnabled: Joi.boolean().required(),
 });
 
 export const resetNetworkRolePermissionsSchema = Joi.object({
+  networkId: Joi.string().uuid().required(),
   networkRole: Joi.string().optional(),
 });
 

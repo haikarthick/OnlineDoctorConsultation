@@ -880,18 +880,18 @@ class ApiService {
     return response.data
   }
 
-  async adminGetNetworkRolePermissions() {
-    const response = await this.client.get('/admin/network-role-permissions')
+  async adminGetNetworkRolePermissions(networkId: string) {
+    const response = await this.client.get('/admin/network-role-permissions', { params: { networkId } })
     return response.data
   }
 
-  async adminUpdateNetworkRolePermission(networkRole: string, action: string, isEnabled: boolean) {
-    const response = await this.client.put('/admin/network-role-permissions', { networkRole, action, isEnabled })
+  async adminUpdateNetworkRolePermission(networkId: string, networkRole: string, action: string, isEnabled: boolean) {
+    const response = await this.client.put('/admin/network-role-permissions', { networkId, networkRole, action, isEnabled })
     return response.data
   }
 
-  async adminResetNetworkRolePermissions(networkRole?: string) {
-    const response = await this.client.post('/admin/network-role-permissions/reset', { networkRole })
+  async adminResetNetworkRolePermissions(networkId: string, networkRole?: string) {
+    const response = await this.client.post('/admin/network-role-permissions/reset', { networkId, networkRole })
     return response.data
   }
 

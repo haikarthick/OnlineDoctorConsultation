@@ -81,9 +81,8 @@ class PostgresDatabase {
       try { await PermissionService.ensureTable(); } catch (e: any) { logger.warn('PermissionService.ensureTable failed', { error: e.message }); }
       try { await PermissionService.seedDefaults(); } catch (e: any) { logger.warn('PermissionService.seedDefaults failed', { error: e.message }); }
 
-      // Ensure network role permissions table and seed defaults
+      // Ensure network role permissions table (network-scoped, no global seed needed)
       try { await NetworkRolePermissionService.ensureTable(); } catch (e: any) { logger.warn('NetworkRolePermissionService.ensureTable failed', { error: e.message }); }
-      try { await NetworkRolePermissionService.seedDefaults(); } catch (e: any) { logger.warn('NetworkRolePermissionService.seedDefaults failed', { error: e.message }); }
 
       // Ensure refresh tokens table
       try { await RefreshTokenService.ensureTable(); } catch (e: any) { logger.warn('RefreshTokenService.ensureTable failed', { error: e.message }); }

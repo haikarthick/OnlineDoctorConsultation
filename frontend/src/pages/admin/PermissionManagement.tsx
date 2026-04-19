@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
-import NetworkRoleMatrix from '../hospitalnetwork/NetworkRoleMatrix'
 import '../../styles/modules.css'
 
 interface PermissionManagementProps {
@@ -18,7 +17,6 @@ interface PermissionMetadata {
 
 const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate: _onNavigate }) => {
   const { t } = useTranslation()
-  const [pageTab, setPageTab] = useState<'system' | 'network'>('system')
   const [matrix, setMatrix] = useState<Record<string, Record<string, boolean>>>({})
   const [metadata, setMetadata] = useState<PermissionMetadata | null>(null)
   const [loading, setLoading] = useState(true)
@@ -170,35 +168,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
         </div>
       </div>
 
-      {/* Page-level tabs: System Roles vs Network Roles */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, borderBottom: '2px solid #e5e7eb', paddingBottom: 0 }}>
-        <button
-          onClick={() => setPageTab('system')}
-          style={{
-            padding: '10px 20px', border: 'none',
-            borderBottom: pageTab === 'system' ? '3px solid #667eea' : '3px solid transparent',
-            background: 'transparent',
-            color: pageTab === 'system' ? '#667eea' : '#6b7280',
-            fontWeight: pageTab === 'system' ? 700 : 400,
-            cursor: 'pointer', fontSize: 14, marginBottom: -2,
-          }}
-        >👤 {t('permissionManagement.systemRolesTab')}</button>
-        <button
-          onClick={() => setPageTab('network')}
-          style={{
-            padding: '10px 20px', border: 'none',
-            borderBottom: pageTab === 'network' ? '3px solid #667eea' : '3px solid transparent',
-            background: 'transparent',
-            color: pageTab === 'network' ? '#667eea' : '#6b7280',
-            fontWeight: pageTab === 'network' ? 700 : 400,
-            cursor: 'pointer', fontSize: 14, marginBottom: -2,
-          }}
-        >🔑 {t('networkRoleMatrix.tabLabel')}</button>
-      </div>
-
-      {pageTab === 'network' && <NetworkRoleMatrix adminMode={true} />}
-
-      {pageTab === 'system' && (<>
+      {/* Page-level content */}
       {error && (
         <div style={{ padding: '14px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
           ⚠️ {error}
@@ -414,7 +384,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
           </table>
         </div>
       </div>
-      </>)}
+      
     </div>
   )
 }

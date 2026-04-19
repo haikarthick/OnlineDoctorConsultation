@@ -446,3 +446,10 @@
 - **Lesson:** NEVER use VARCHAR(N) for: base64 images, avatar URLs, long descriptions, JSON, or any user-generated content of unknown length. ALWAYS use TEXT. Only use VARCHAR(N) for short codes, enums, phone numbers, IDs where the max length is truly bounded and known.
 - **Apply to:** All future DB column definitions
 
+
+### LESSON-038 — Network role vs system role enforcement
+- **Logged:** 2026-04-19 14:29
+- **Context:** Network role access (corporate_admin/hospital_director etc.) must be enforced via DB table not hardcoded arrays. Use action string in ensureNetworkAccess to allow runtime config.
+- **Lesson:** All future HospitalNetworkController enforcement changes
+- **Apply to:** All future work
+
