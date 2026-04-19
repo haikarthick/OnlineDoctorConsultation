@@ -362,3 +362,9 @@
 - **Status:** done
 - **Description:** Nav: removed Vet Hospitals from corporate_admin. Dashboard: isCorporateAdmin branch with corpStats, stat cards, quick actions, subtitle. HospitalNetworks: Approve button admin-only, Pending badge for others, AssignHospitalModal replaced by CreateBranchHospitalModal (full form), showAssignHospital->showCreateBranch. api.ts: getCorporateDashboardStats + createBranchHospital. i18n: 5 locales updated with corporateAdmin subtitle, network stats keys, hospitalNetworks quickAction, manageSettings desc.
 
+
+### ✅ Walk-in patient registration in check-in modal
+- **Logged:** 2026-04-18 13:13
+- **Status:** done
+- **Description:** Network hospital staff can register new walk-in patients directly from the Check In Patient modal. Collects owner name/phone/email + animal name/species/breed, calls /hospital-networks/:networkId/register-walkin, auto-selects animal for immediate check-in. Only shown when hospital.branchNetworkId is set.
+

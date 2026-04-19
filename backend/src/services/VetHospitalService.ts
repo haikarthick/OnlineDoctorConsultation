@@ -60,6 +60,8 @@ export interface VetHospital {
   ownerName?: string;
   doctorCount?: number;
   departmentCount?: number;
+  isNetworkBranch?: boolean;
+  branchNetworkId?: string | null;
 }
 
 export interface HospitalDepartment {
@@ -460,7 +462,10 @@ export class VetHospitalService {
   }
 
   async listHospitalsForVet(vetId: string): Promise<VetHospital[]> {
-    // Union: hospitals where user is a doctor OR a network member (staff) OR has a staff_position
+    // Union: hospitals where user is a doctor OR a network member (staff) OR has a staff_position.
+    // IMPORTANT: branch_network_id is derived via COALESCE(h.branch_network_id, hnm.network_id)
+    // so that network staff always see the correct networkId even when the hospital row's
+    // branch_network_id column was not set (e.g., hospitals enrolled without createBranchHospital).
     const result = await database.query(
       `SELECT DISTINCT ON (h.id) h.*,
               u.first_name || ' ' || u.last_name AS owner_name,
@@ -468,7 +473,9 @@ export class VetHospitalService {
               COALESCE(hd.title, sp.department, '') AS title,
               COALESCE(hd.is_primary_hospital, false) AS is_primary_hospital,
               (SELECT COUNT(*) FROM hospital_doctors WHERE hospital_id = h.id AND is_active = true) AS doctor_count,
-              (SELECT COUNT(*) FROM hospital_departments WHERE hospital_id = h.id AND is_active = true) AS department_count
+              (SELECT COUNT(*) FROM hospital_departments WHERE hospital_id = h.id AND is_active = true) AS department_count,
+              COALESCE(h.branch_network_id, hnm.network_id) AS branch_network_id,
+              (h.is_network_branch = true OR hnm.id IS NOT NULL) AS is_network_branch
        FROM vet_hospitals h
        JOIN users u ON h.owner_id = u.id
        LEFT JOIN hospital_doctors hd ON hd.hospital_id = h.id AND hd.doctor_id = $1 AND hd.is_active = true
@@ -824,6 +831,8 @@ export class VetHospitalService {
       ownerName: row.owner_name,
       doctorCount: row.doctor_count !== undefined ? parseInt(row.doctor_count) : undefined,
       departmentCount: row.department_count !== undefined ? parseInt(row.department_count) : undefined,
+      isNetworkBranch: row.is_network_branch || false,
+      branchNetworkId: row.branch_network_id || null,
     };
   }
 
@@ -1023,6 +1032,61 @@ export class VetHospitalService {
 
     const hospital = await this.getHospital(invite.hospital_id);
     return { user: { id: userId, email: invite.email }, hospital };
+  }
+
+  // Walk-in registration for standalone (non-network) hospitals.
+  // Creates a placeholder user account and animal record without needing a network context.
+  async registerWalkInStandalone(data: {
+    hospitalId: string; registeredBy: string;
+    patientName: string; patientPhone?: string; patientEmail?: string;
+    animalName: string; animalSpecies: string; animalBreed?: string;
+  }): Promise<{ ownerId: string; animalId: string }> {
+    try {
+      // Find or create a placeholder user for the walk-in owner
+      let ownerId: string | null = null;
+      if (data.patientEmail) {
+        const existing = await database.query(
+          `SELECT id FROM users WHERE email = $1 LIMIT 1`,
+          [data.patientEmail]
+        );
+        if (existing.rows.length > 0) ownerId = existing.rows[0].id;
+      }
+
+      if (!ownerId) {
+        const crypto = await import('crypto');
+        const bcrypt = await import('bcryptjs');
+        const placeholderPassword = crypto.randomBytes(32).toString('hex');
+        const placeholderEmailSuffix = crypto.randomBytes(8).toString('hex');
+        const passwordHash = await bcrypt.hash(placeholderPassword, 10);
+        const nameParts = data.patientName.trim().split(/\s+/);
+        const firstName = nameParts[0] || 'Walk-In';
+        const lastName = nameParts.slice(1).join(' ') || 'Patient';
+        const placeholderEmail = data.patientEmail || `walkin-${placeholderEmailSuffix}@placeholder.local`;
+        const userRes = await database.query(
+          `INSERT INTO users (first_name, last_name, email, phone, password_hash, role, is_active)
+           VALUES ($1, $2, $3, $4, $5, 'pet_owner', true)
+           ON CONFLICT (email) DO UPDATE SET first_name = EXCLUDED.first_name
+           RETURNING id`,
+          [firstName, lastName, placeholderEmail, data.patientPhone || null, passwordHash]
+        );
+        ownerId = userRes.rows[0].id;
+      }
+
+      // Create the animal record
+      const animalUniqueId = `VC-${data.animalSpecies.substring(0, 3).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+      const animalRes = await database.query(
+        `INSERT INTO animals (name, species, breed, owner_id, unique_id, is_active)
+         VALUES ($1, $2, $3, $4, $5, true)
+         RETURNING id`,
+        [data.animalName, data.animalSpecies, data.animalBreed || null, ownerId, animalUniqueId]
+      );
+      const animalId = animalRes.rows[0].id;
+
+      logger.info('Walk-in patient registered (standalone)', { animalId, hospitalId: data.hospitalId });
+      return { ownerId, animalId };
+    } catch (err: any) {
+      throw new Error(`Walk-in registration failed: ${err.message}`);
+    }
   }
 }
 

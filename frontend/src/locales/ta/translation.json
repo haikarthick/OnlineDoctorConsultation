@@ -50,7 +50,19 @@
     "myAnimals": "My Animals",
     "select": "Select",
     "selectOption": "Select an option",
-    "average": "Average"
+    "average": "Average",
+    "species": {
+      "dog": "நாய்",
+      "cat": "பூனை",
+      "bird": "பறவை",
+      "rabbit": "முயல்",
+      "horse": "குதிரை",
+      "cow": "பசு",
+      "goat": "ஆடு",
+      "sheep": "செம்மறி",
+      "pig": "பன்றி",
+      "other": "மற்றவை"
+    }
   },
   "nav": {
     "brand": "VetCare",
@@ -4813,7 +4825,35 @@
     "specialtyNeeded": "தேவையான நிபுணத்துவம்",
     "clinicalNotes": "மருத்துவ குறிப்புகள்",
     "clinicalNotesPlaceholder": "மருத்துவ குறிப்புகள் மற்றும் கவனிப்புகள்...",
-    "createReferral": "பரிந்துரை உருவாக்கு"
+    "createReferral": "பரிந்துரை உருவாக்கு",
+    "searchPatient": "நோயாளியை தேடு (விலங்கு)",
+    "checkingIn": "சரிபார்க்கப்படுகிறது...",
+    "walkIn": {
+      "subtitle": "புதிய வாக்-இன் நோயாளியை பதிவு செய்யுங்கள்",
+      "instructions": "புதிய வாக்-இன் நோயாளியை பதிவு செய்ய உரிமையாளர் மற்றும் நோயாளி விவரங்களை நிரப்பவும். அவர்கள் இந்த மருத்துவமனையின் நெட்வொர்க்கில் பதிவு செய்யப்படுவார்கள்.",
+      "ownerDetails": "உரிமையாளர் விவரங்கள்",
+      "patientDetails": "நோயாளி விவரங்கள்",
+      "ownerName": "உரிமையாளர் பெயர்",
+      "ownerNamePlaceholder": "எ.கா., ராம் குமார்",
+      "ownerPhone": "தொலைபேசி",
+      "ownerEmail": "மின்னஞ்சல்",
+      "animalName": "விலங்கின் பெயர்",
+      "animalNamePlaceholder": "எ.கா., டாமி",
+      "species": "இனம்",
+      "selectSpecies": "இனம் தேர்ந்தெடு...",
+      "breed": "ஜாதி",
+      "breedPlaceholder": "எ.கா., லேப்ரடார்",
+      "registerNew": "புதிய நோயாளியை பதிவு செய்",
+      "backToSearch": "தேடலுக்கு திரும்பு",
+      "registerAndContinue": "பதிவு செய்து தொடர்",
+      "registering": "பதிவு செய்யப்படுகிறது...",
+      "or": "— அல்லது —",
+      "requiredFields": "உரிமையாளர் பெயர், விலங்கின் பெயர் மற்றும் இனம் அவசியம்.",
+      "registerFailed": "வாக்-இன் பதிவு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
+      "searchRequired": "அவசியம்: செக்-இன் செய்ய விலங்கின் பெயரை தட்டச்சு செய்து தேர்ந்தெடுக்கவும்.",
+      "registerNewDesc": "மருத்துவமனையில் புதிய வாக்-இன் நோயாளியை சேர்க்கவும்"
+    },
+    "noAnimalsFound": "எந்த விலங்கும் கிடைக்கவில்லை"
   },
   "inpatientManagement": {
     "title": "உள்நோயாளி & தங்கும் வசதி",

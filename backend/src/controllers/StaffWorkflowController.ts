@@ -10,7 +10,8 @@ class StaffWorkflowController {
     try {
       const query = (req.query.q as string) || '';
       if (query.length < 2) return res.json({ data: [] });
-      const data = await staffWorkflowService.searchAnimals(query);
+      const hospitalId = (req.query.hospitalId as string) || undefined;
+      const data = await staffWorkflowService.searchAnimals(query, hospitalId);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }

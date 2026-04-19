@@ -8,7 +8,69 @@ class StaffWorkflowService {
 
   // ═══════════════════ ANIMAL SEARCH (for workflow integration) ═══════════════════
 
-  async searchAnimals(query: string, limit = 15) {
+  async searchAnimals(query: string, hospitalId?: string, limit = 15) {
+    // ── Network isolation rule ────────────────────────────────────────────────
+    // Network hospital patient data is CORPORATE PRIVATE and must not be visible
+    // outside the network. When a hospitalId is provided and that hospital belongs
+    // to a network, search is scoped to animals enrolled in that network/hospital
+    // via animal_care_contexts. Standalone (non-network) hospitals fall back to a
+    // broader search since they have no formal network isolation requirement.
+    // ─────────────────────────────────────────────────────────────────────────
+    if (hospitalId) {
+      // Determine the hospital's network context
+      const networkResult = await database.query(
+        `SELECT COALESCE(h.branch_network_id, hnh.network_id) AS network_id
+         FROM vet_hospitals h
+         LEFT JOIN hospital_network_hospitals hnh ON hnh.hospital_id = h.id AND hnh.is_active = true
+         WHERE h.id = $1
+         LIMIT 1`,
+        [hospitalId]
+      );
+      const networkId: string | null = networkResult.rows[0]?.network_id || null;
+
+      if (networkId) {
+        // NETWORK hospital: return ONLY animals enrolled in this network/hospital
+        const result = await database.query(
+          `SELECT DISTINCT a.id, a.name, a.species, a.breed, a.weight, a.date_of_birth,
+             a.gender, a.microchip_id, a.color,
+             u.id AS owner_id, u.first_name AS owner_first_name, u.last_name AS owner_last_name,
+             u.phone AS owner_phone, u.email AS owner_email
+           FROM animals a
+           JOIN users u ON u.id = a.owner_id
+           JOIN animal_care_contexts acc ON acc.animal_id = a.id
+             AND acc.enrollment_status = 'active'
+             AND (acc.network_id = $2 OR acc.hospital_id = $3)
+           WHERE (a.name ILIKE $1 OR u.first_name ILIKE $1 OR u.last_name ILIKE $1
+             OR a.microchip_id ILIKE $1 OR a.species ILIKE $1)
+           ORDER BY a.name ASC
+           LIMIT $4`,
+          [`%${query}%`, networkId, hospitalId, limit]
+        );
+        return result.rows;
+      }
+
+      // STANDALONE hospital (no network): scope to animals in their queue or recent cases
+      const result = await database.query(
+        `SELECT DISTINCT a.id, a.name, a.species, a.breed, a.weight, a.date_of_birth,
+           a.gender, a.microchip_id, a.color,
+           u.id AS owner_id, u.first_name AS owner_first_name, u.last_name AS owner_last_name,
+           u.phone AS owner_phone, u.email AS owner_email
+         FROM animals a
+         JOIN users u ON u.id = a.owner_id
+         WHERE (a.name ILIKE $1 OR u.first_name ILIKE $1 OR u.last_name ILIKE $1
+           OR a.microchip_id ILIKE $1 OR a.species ILIKE $1)
+           AND (
+             EXISTS (SELECT 1 FROM appointment_queue aq WHERE aq.animal_id = a.id AND aq.hospital_id = $2)
+             OR EXISTS (SELECT 1 FROM workflow_cases wc WHERE wc.animal_id = a.id AND wc.hospital_id = $2)
+           )
+         ORDER BY a.name ASC
+         LIMIT $3`,
+        [`%${query}%`, hospitalId, limit]
+      );
+      return result.rows;
+    }
+
+    // No hospital context — global fallback (admin / vet without assigned hospital)
     const result = await database.query(`
       SELECT a.id, a.name, a.species, a.breed, a.weight, a.date_of_birth,
         a.gender, a.microchip_id, a.color,

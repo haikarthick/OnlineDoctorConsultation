@@ -77,7 +77,19 @@
     "myAnimals": "My Animals",
     "select": "Select",
     "selectOption": "Select an option",
-    "average": "Average"
+    "average": "Average",
+    "species": {
+      "dog": "Dog",
+      "cat": "Cat",
+      "bird": "Bird",
+      "rabbit": "Rabbit",
+      "horse": "Horse",
+      "cow": "Cow",
+      "goat": "Goat",
+      "sheep": "Sheep",
+      "pig": "Pig",
+      "other": "Other"
+    }
   },
   "nav": {
     "brand": "VetCare",
@@ -4888,7 +4900,35 @@
     "specialtyNeeded": "Specialty Needed",
     "clinicalNotes": "Clinical Notes",
     "clinicalNotesPlaceholder": "Clinical notes and observations...",
-    "createReferral": "Create Referral"
+    "createReferral": "Create Referral",
+    "searchPatient": "Search Patient (Animal)",
+    "checkingIn": "Checking in...",
+    "walkIn": {
+      "subtitle": "Register a new walk-in patient",
+      "instructions": "Fill in the owner and patient details to register a new walk-in patient. They will be enrolled in this hospital's network and can be checked in immediately.",
+      "ownerDetails": "Owner Details",
+      "patientDetails": "Patient Details",
+      "ownerName": "Owner Name",
+      "ownerNamePlaceholder": "e.g., John Smith",
+      "ownerPhone": "Phone",
+      "ownerEmail": "Email",
+      "animalName": "Animal Name",
+      "animalNamePlaceholder": "e.g., Buddy",
+      "species": "Species",
+      "selectSpecies": "Select species...",
+      "breed": "Breed",
+      "breedPlaceholder": "e.g., Labrador",
+      "registerNew": "Register New Patient",
+      "backToSearch": "Back to Search",
+      "registerAndContinue": "Register & Continue",
+      "registering": "Registering...",
+      "or": "— or —",
+      "requiredFields": "Owner name, animal name, and species are required.",
+      "registerFailed": "Walk-in registration failed. Please try again.",
+      "searchRequired": "Required: Type an animal name and select a patient from the dropdown to enable check-in.",
+      "registerNewDesc": "Add a new walk-in patient to the hospital"
+    },
+    "noAnimalsFound": "No animals found"
   },
   "inpatientManagement": {
     "title": "Inpatient & Boarding",

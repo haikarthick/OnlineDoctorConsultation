@@ -50,7 +50,19 @@
     "myAnimals": "My Animals",
     "select": "Select",
     "selectOption": "Select an option",
-    "average": "Average"
+    "average": "Average",
+    "species": {
+      "dog": "कुत्ता",
+      "cat": "बिल्ली",
+      "bird": "पक्षी",
+      "rabbit": "खरगोश",
+      "horse": "घोड़ा",
+      "cow": "गाय",
+      "goat": "बकरी",
+      "sheep": "भेड़",
+      "pig": "सुअर",
+      "other": "अन्य"
+    }
   },
   "nav": {
     "brand": "VetCare",
@@ -4824,7 +4836,35 @@
     "specialtyNeeded": "आवश्यक विशेषज्ञता",
     "clinicalNotes": "नैदानिक नोट्स",
     "clinicalNotesPlaceholder": "नैदानिक नोट्स और अवलोकन...",
-    "createReferral": "रेफ़रल बनाएँ"
+    "createReferral": "रेफ़रल बनाएँ",
+    "searchPatient": "रोगी खोजें (पशु)",
+    "checkingIn": "चेक-इन हो रहा है...",
+    "walkIn": {
+      "subtitle": "नए वॉक-इन रोगी को पंजीकृत करें",
+      "instructions": "नए वॉक-इन रोगी को पंजीकृत करने के लिए मालिक और रोगी का विवरण भरें। उन्हें इस अस्पताल के नेटवर्क में नामांकित किया जाएगा।",
+      "ownerDetails": "मालिक का विवरण",
+      "patientDetails": "रोगी का विवरण",
+      "ownerName": "मालिक का नाम",
+      "ownerNamePlaceholder": "जैसे, रमेश शर्मा",
+      "ownerPhone": "फ़ोन",
+      "ownerEmail": "ईमेल",
+      "animalName": "पशु का नाम",
+      "animalNamePlaceholder": "जैसे, टॉमी",
+      "species": "प्रजाति",
+      "selectSpecies": "प्रजाति चुनें...",
+      "breed": "नस्ल",
+      "breedPlaceholder": "जैसे, लैब्राडोर",
+      "registerNew": "नया रोगी पंजीकृत करें",
+      "backToSearch": "खोज पर वापस जाएं",
+      "registerAndContinue": "पंजीकृत करें और जारी रखें",
+      "registering": "पंजीकृत हो रहा है...",
+      "or": "— या —",
+      "requiredFields": "मालिक का नाम, पशु का नाम और प्रजाति आवश्यक है।",
+      "registerFailed": "वॉक-इन पंजीकरण विफल। कृपया पुनः प्रयास करें।",
+      "searchRequired": "आवश्यक: चेक-इन सक्षम करने के लिए पशु का नाम टाइप करें और ड्रॉपडाउन से चुनें।",
+      "registerNewDesc": "अस्पताल में नया वॉक-इन रोगी जोड़ें"
+    },
+    "noAnimalsFound": "कोई पशु नहीं मिला"
   },
   "inpatientManagement": {
     "title": "इनपेशेंट और बोर्डिंग",

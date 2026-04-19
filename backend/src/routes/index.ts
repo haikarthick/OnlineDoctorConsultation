@@ -99,6 +99,7 @@ import VetHospitalController from '../controllers/VetHospitalController';
 import HospitalDocumentController from '../controllers/HospitalDocumentController';
 import HospitalNetworkController from '../controllers/HospitalNetworkController';
 import HospitalNetworkService, { updateBranchHospital, deleteBranchHospital } from '../services/HospitalNetworkService';
+import VetHospitalService from '../services/VetHospitalService';
 import WalletController from '../controllers/WalletController';
 import StaffWorkflowController from '../controllers/StaffWorkflowController';
 import { FileController } from '../controllers/FileController';
@@ -398,16 +399,20 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
   const targetUserId = req.params.userId;
   const userId = (req as any).userId;
   const { networkRole, hospitalId } = req.body;
-  // Verify caller is corporate_admin or admin
+  // Verify caller is corporate_admin, hospital_director, or platform admin
   const userRole = (req as any).userRole;
   if (userRole !== 'admin') {
     const memberCheck = await database.query(
       `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
       [networkId, userId]
     );
-    if (!memberCheck.rows.length || memberCheck.rows[0].network_role !== 'corporate_admin') {
-      return res.status(403).json({ success: false, message: 'Only corporate admins can update members' });
+    if (!memberCheck.rows.length || !['corporate_admin', 'hospital_director'].includes(memberCheck.rows[0].network_role)) {
+      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can update members' });
     }
+  }
+  const allowedRoles = ['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor', 'hospital_staff'];
+  if (networkRole && !allowedRoles.includes(networkRole)) {
+    return res.status(400).json({ success: false, message: `Invalid network role. Allowed: ${allowedRoles.join(', ')}` });
   }
   const updates: string[] = [];
   const params: any[] = [networkId, targetUserId];
@@ -423,7 +428,7 @@ router.get('/hospital-networks/:id/dashboard', authMiddleware, asyncHandler((req
 router.get('/hospital-networks/:id/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getAuditLogs(req, res)));
 
 // User search for network member invite (corporate_admin can search registered users by name/email)
-router.get('/network-user-search', authMiddleware, roleMiddleware(['admin', 'corporate_admin']), asyncHandler(async (req: Request, res: Response) => {
+router.get('/network-user-search', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'hospital_staff', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {
   const search = ((req.query.q as string) || '').trim();
   if (!search || search.length < 2) { res.json({ success: true, data: [] }); return; }
   try {
@@ -624,6 +629,25 @@ router.post('/hospital-networks/:networkId/register-walkin', authMiddleware, asy
     logger.error('Route error', { path: req.path, error: err.message });
     const status = err.message?.includes('permission') || err.message?.includes('Forbidden') ? 403 : 500;
     res.status(status).json({ success: false, message: err.message });
+  }
+}));
+
+// Walk-in registration for standalone (non-network) hospitals
+router.post('/hospitals/:hospitalId/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed } = req.body;
+    if (!patientName || !animalName || !animalSpecies) {
+      res.status(400).json({ success: false, message: 'patientName, animalName, and animalSpecies are required' }); return;
+    }
+    const result = await VetHospitalService.registerWalkInStandalone({
+      hospitalId: req.params.hospitalId,
+      registeredBy: (req as any).userId,
+      patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed,
+    });
+    res.json({ success: true, data: result });
+  } catch (err: any) {
+    logger.error('Route error', { path: req.path, error: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 }));
 
@@ -1693,10 +1717,20 @@ router.get('/my-network-subscription', authMiddleware, roleMiddleware(['corporat
 // HOSPITAL STAFF INVITES (invite-only registration for hospital_staff role)
 // ─────────────────────────────────────────────────────────────────────────────
 
-router.post('/hospital-networks/:id/invite-staff', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian']), validateBody(inviteHospitalStaffSchema), asyncHandler(async (req: Request, res: Response) => {
+router.post('/hospital-networks/:id/invite-staff', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), validateBody(inviteHospitalStaffSchema), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
   const networkId = req.params.id;
+  // Secondary check: verify caller has appropriate network role (corporate_admin or hospital_director)
+  if (authReq.userRole !== 'admin') {
+    const callerMember = await db.query(
+      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [networkId, authReq.userId]
+    );
+    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
+      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can invite staff' });
+    }
+  }
   const seat = await checkSeatLimit(networkId, db);
   if (!seat.allowed) {
     if (seat.status === 'suspended') return res.status(403).json({ success: false, message: 'This network has been suspended. Contact platform support.', code: 'network_suspended' });
@@ -1784,8 +1818,19 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
   }
 }));
 
-router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
   const db = (await import('../utils/database')).default;
+  // Secondary check: verify caller has appropriate network role
+  if (authReq.userRole !== 'admin') {
+    const callerMember = await db.query(
+      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [req.params.id, authReq.userId]
+    );
+    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
+      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can view invites' });
+    }
+  }
   const result = await db.query(
     `SELECT hsi.*, u.first_name AS "inviterFirstName", u.last_name AS "inviterLastName", vh.name AS "hospitalName" FROM hospital_staff_invites hsi JOIN users u ON u.id=hsi.invited_by LEFT JOIN vet_hospitals vh ON vh.id=hsi.hospital_id WHERE hsi.network_id=$1 ORDER BY hsi.created_at DESC`,
     [req.params.id]
@@ -1793,8 +1838,19 @@ router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewar
   res.json({ success: true, data: result.rows });
 }));
 
-router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
   const db = (await import('../utils/database')).default;
+  // Secondary check: verify caller has appropriate network role
+  if (authReq.userRole !== 'admin') {
+    const callerMember = await db.query(
+      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [req.params.id, authReq.userId]
+    );
+    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
+      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can manage invites' });
+    }
+  }
   await db.query(`UPDATE hospital_staff_invites SET status='revoked', updated_at=NOW() WHERE id=$1 AND network_id=$2 AND status='pending'`, [req.params.inviteId, req.params.id]);
   res.json({ success: true });
 }));

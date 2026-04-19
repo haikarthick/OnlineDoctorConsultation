@@ -236,7 +236,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'admin-holidays', label: 'Holiday Management', icon: '🎉', path: '/admin/holidays',
       roles: ['admin', 'veterinarian'], section: 'Administration' },
     { id: 'hospital-networks', label: 'Hospital Networks', icon: '🌐', path: '/hospital-networks',
-      roles: ['admin', 'corporate_admin'], section: 'Administration' },
+      roles: ['admin', 'corporate_admin', 'hospital_staff'], section: 'Administration' },
     { id: 'admin-network-subscriptions', label: 'Network Subscriptions', icon: '💳', path: '/admin/network-subscriptions',
       roles: ['admin'], section: 'Administration' },
 

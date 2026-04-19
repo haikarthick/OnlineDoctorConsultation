@@ -50,7 +50,19 @@
     "myAnimals": "My Animals",
     "select": "Select",
     "selectOption": "Select an option",
-    "average": "Average"
+    "average": "Average",
+    "species": {
+      "dog": "ನಾಯಿ",
+      "cat": "ಬೆಕ್ಕು",
+      "bird": "ಹಕ್ಕಿ",
+      "rabbit": "ಮೊಲ",
+      "horse": "ಕುದುರೆ",
+      "cow": "ಹಸು",
+      "goat": "ಆಡು",
+      "sheep": "ಕುರಿ",
+      "pig": "ಹಂದಿ",
+      "other": "ಇತರ"
+    }
   },
   "nav": {
     "brand": "VetCare",
@@ -4815,7 +4827,35 @@
     "specialtyNeeded": "ಅಗತ್ಯ ವಿಶೇಷತೆ",
     "clinicalNotes": "ಕ್ಲಿನಿಕಲ್ ಟಿಪ್ಪಣಿಗಳು",
     "clinicalNotesPlaceholder": "ಕ್ಲಿನಿಕಲ್ ಟಿಪ್ಪಣಿಗಳು ಮತ್ತು ಅವಲೋಕನಗಳು...",
-    "createReferral": "ಉಲ್ಲೇಖ ರಚಿಸಿ"
+    "createReferral": "ಉಲ್ಲೇಖ ರಚಿಸಿ",
+    "searchPatient": "ರೋಗಿಯನ್ನು ಹುಡುಕಿ (ಪ್ರಾಣಿ)",
+    "checkingIn": "ಚೆಕ್-ಇನ್ ಆಗುತ್ತಿದೆ...",
+    "walkIn": {
+      "subtitle": "ಹೊಸ ವಾಕ್-ಇನ್ ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಿ",
+      "instructions": "ಹೊಸ ವಾಕ್-ಇನ್ ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಲು ಮಾಲೀಕರ ಮತ್ತು ರೋಗಿಯ ವಿವರಗಳನ್ನು ತುಂಬಿಸಿ. ಅವರನ್ನು ಈ ಆಸ್ಪತ್ರೆಯ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ನೋಂದಾಯಿಸಲಾಗುತ್ತದೆ.",
+      "ownerDetails": "ಮಾಲೀಕರ ವಿವರಗಳು",
+      "patientDetails": "ರೋಗಿಯ ವಿವರಗಳು",
+      "ownerName": "ಮಾಲೀಕರ ಹೆಸರು",
+      "ownerNamePlaceholder": "ಉದಾ., ರಾಮ್ ಕುಮಾರ್",
+      "ownerPhone": "ಫೋನ್",
+      "ownerEmail": "ಇಮೇಲ್",
+      "animalName": "ಪ್ರಾಣಿಯ ಹೆಸರು",
+      "animalNamePlaceholder": "ಉದಾ., ಟಾಮಿ",
+      "species": "ಪ್ರಭೇದ",
+      "selectSpecies": "ಪ್ರಭೇದ ಆಯ್ಕೆಮಾಡಿ...",
+      "breed": "ತಳಿ",
+      "breedPlaceholder": "ಉದಾ., ಲ್ಯಾಬ್ರಡಾರ್",
+      "registerNew": "ಹೊಸ ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಿ",
+      "backToSearch": "ಹುಡುಕಾಟಕ್ಕೆ ಹಿಂತಿರುಗಿ",
+      "registerAndContinue": "ನೋಂದಾಯಿಸಿ ಮುಂದುವರಿಯಿರಿ",
+      "registering": "ನೋಂದಾಯಿಸಲಾಗುತ್ತಿದೆ...",
+      "or": "— ಅಥವಾ —",
+      "requiredFields": "ಮಾಲೀಕರ ಹೆಸರು, ಪ್ರಾಣಿಯ ಹೆಸರು ಮತ್ತು ಪ್ರಭೇದ ಅಗತ್ಯ.",
+      "registerFailed": "ವಾಕ್-ಇನ್ ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+      "searchRequired": "ಅಗತ್ಯ: ಚೆಕ್-ಇನ್ ಮಾಡಲು ಪ್ರಾಣಿಯ ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ ಆಯ್ಕೆ ಮಾಡಿ.",
+      "registerNewDesc": "ಆಸ್ಪತ್ರೆಗೆ ಹೊಸ ವಾಕ್-ಇನ್ ರೋಗಿಯನ್ನು ಸೇರಿಸಿ"
+    },
+    "noAnimalsFound": "ಯಾವುದೇ ಪ್ರಾಣಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
   },
   "inpatientManagement": {
     "title": "ಒಳರೋಗಿ & ಬೋರ್ಡಿಂಗ್",

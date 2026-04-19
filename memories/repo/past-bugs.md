@@ -44,7 +44,32 @@
 - **Fix:** Added `allowedFields` array whitelist; only fields in the whitelist are allowed through via `Object.fromEntries(Object.entries(req.body).filter(([k]) => allowedFields.includes(k)))`.
 - **Rule:** ANY dynamic SQL built from request body keys MUST use an explicit allowedFields whitelist. Never use `Object.keys(req.body)` directly in SQL construction.
 
-## 🔴 Deployment / Render Bugs
+### SEC-002 — PUT /hospital-networks/:id/members/:userId Only Checked corporate_admin — Hospital Director Excluded
+- **Symptom:** Hospital director could add members (POST) and remove members (DELETE), but could NOT edit member roles (PUT returned 403). Inconsistent permission enforcement across the three member management operations.
+- **Root Cause:** PUT route inline handler checked `network_role !== 'corporate_admin'` only. POST and DELETE both used controller's `ensureNetworkAccess(['corporate_admin', 'hospital_director'])`. Also: no whitelist validation on the `networkRole` body field — any string was accepted as a valid network role.
+- **Fix:** Changed PUT check to `!['corporate_admin', 'hospital_director'].includes(...)`. Added `allowedRoles` whitelist for networkRole body field.
+- **Rule:** POST, PUT, and DELETE on the same resource MUST use identical role authorization. When one is updated, grep for the others and sync.
+
+## 🔴 Permission / Role Bugs
+
+### PERM-001 — hospital_staff Could Not See Hospital Networks Nav Menu or Access Page
+- **Symptom:** Users with system role `hospital_staff` (including those who are hospital directors in their network) could not navigate to Hospital Networks page — menu item was hidden and route guard blocked access.
+- **Root Cause:** 4-file desync: (1) Navigation.tsx only listed `['admin', 'corporate_admin']` for hospital-networks menu. (2) PermissionService.ts didn't give `hospital_staff` any `hospital_network_*` permission. (3) NAV_PERMISSION_MAP pointed at `hospital_network_manage` (which only corporate_admin and admin had).
+- **Fix:** (1) Added `hospital_staff` to nav roles. (2) Added `hospital_network_view` to hospital_staff permissions. (3) Changed NAV_PERMISSION_MAP to use `hospital_network_view` (lower bar).
+- **Rule:** When adding a role to any one of the 4 permission files, ALWAYS check all 4. The nav item needs BOTH the role in the `roles` array AND a permission the role actually has in PermissionService.ts.
+
+### PERM-002 — Staff Invite Routes Only Accepted System Roles admin/corporate_admin/veterinarian — Not hospital_staff
+- **Symptom:** Hospital director with system role `hospital_staff` (created via invite-accept flow) could not invite new staff, view invites, or revoke invites. Got 403 Forbidden.
+- **Root Cause:** `roleMiddleware(['admin', 'corporate_admin', 'veterinarian'])` checks the user's SYSTEM role (`users.role`), not their network role. Hospital directors created via the invite flow have system role `hospital_staff`, which wasn't in the list.
+- **Fix:** Added `hospital_staff` to roleMiddleware for invite-staff, staff-invites list, and staff-invites delete. Added secondary inline network-role check (`['corporate_admin', 'hospital_director']`) to verify the caller actually has authority within the specific network.
+- **Rule:** Route middleware `roleMiddleware()` checks SYSTEM role. If a network role (hospital_director) can be held by multiple system roles (veterinarian, hospital_staff), ALL system roles must be in the middleware list. Always add secondary network-role verification inline.
+
+### PERM-003 — Dead Permission `hospital_staff_invite: []` in PermissionContext.tsx
+- **Symptom:** No functional impact, but confusing dead code — an empty permission mapping that was never used.
+- **Fix:** Removed the dead entry.
+- **Rule:** Permission entries in PERMISSION_ROUTE_MAP must map to at least one route. Empty arrays are dead code.
+
+
 
 ### DEPLOY-008 — Unused Native Module (sharp) → Render Build Fails with Status 1
 - **Symptom:** `Deploy failed: Exited with status 1` during build phase (not startup). Local `npm install` and `vite build` both pass fine.
@@ -816,4 +841,20 @@ render-start.sh
 - **Root Cause:** Render free-tier blocks outbound TCP on ports 587 and 465 — nodemailer connection hangs until OS TCP timeout (127s). No error in application logs because email was fire-and-forget with .catch() swallowing errors
 - **Fix:** Added Resend (HTTP-based) as primary email provider. Priority: Resend API → SMTP → log-only fallback. Log-only mode captures full email content in server logs with unique IDs. 10s hard Promise.race timeout prevents TCP hangs.
 - **Rule:** NEVER assume SMTP works on cloud platforms. Always use HTTP-based email providers (Resend/SendGrid) as primary for Render. Always test email on deployed env, not just locally.
+
+
+### WORKFLOW-001 — No walk-in registration for network hospital check-in
+- **Logged:** 2026-04-18 13:13
+- **Symptom:** Staff tried to check in a new walk-in patient but the modal only showed search — no registration path
+- **Root Cause:** Network hospital patients are in closed visibility so search returns no results for new walk-ins
+- **Fix:** Added openRegisterMode form in check-in modal using /hospital-networks/:networkId/register-walkin endpoint. branchNetworkId exposed from VetHospitalService.mapHospitalRow
+- **Rule:** Network hospital check-in modal must have walk-in registration form when hospital.branchNetworkId is set
+
+
+### NET-001 — Network staff register button missing (networkId null)
+- **Logged:** 2026-04-18 16:37
+- **Symptom:** Register button hidden for hospital staff at a network branch hospital
+- **Root Cause:** listHospitalsForVet selected h.* which relied on vet_hospitals.branch_network_id being set. In live DBs where seed UPDATE didn't run, branch_network_id is NULL even though hospital_network_members.network_id is correct. networkId = null → button gated away.
+- **Fix:** Added COALESCE(h.branch_network_id, hnm.network_id) AS branch_network_id to listHospitalsForVet SELECT. Network ID is now always derived from membership record even if the hospital row's column is unset.
+- **Rule:** NEVER rely solely on vet_hospitals.branch_network_id. Always COALESCE with hnm.network_id in listHospitalsForVet.
 
