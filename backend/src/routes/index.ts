@@ -616,13 +616,17 @@ router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, async
 // Direct walk-in patient registration — no invite needed, treatment starts immediately
 router.post('/hospital-networks/:networkId/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { hospitalId, patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed, reasonForVisit } = req.body;
+    const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, reasonForVisit } = req.body;
     if (!patientName || !animalName || !animalSpecies || !hospitalId) {
       res.status(400).json({ success: false, message: 'patientName, animalName, animalSpecies, and hospitalId are required' }); return;
     }
     const result = await HospitalNetworkService.registerWalkInPatientDirect({
       networkId: req.params.networkId, hospitalId, registeredBy: (req as any).userId,
-      patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed, reasonForVisit,
+      patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
+      animalGender, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
+      animalColor, animalMicrochipId, animalRegistrationNumber,
+      animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true',
+      animalMedicalNotes, animalAvatarUrl, reasonForVisit,
     });
     res.json({ success: true, data: result });
   } catch (err: any) {
@@ -635,14 +639,18 @@ router.post('/hospital-networks/:networkId/register-walkin', authMiddleware, asy
 // Walk-in registration for standalone (non-network) hospitals
 router.post('/hospitals/:hospitalId/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed } = req.body;
+    const { patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl } = req.body;
     if (!patientName || !animalName || !animalSpecies) {
       res.status(400).json({ success: false, message: 'patientName, animalName, and animalSpecies are required' }); return;
     }
     const result = await VetHospitalService.registerWalkInStandalone({
       hospitalId: req.params.hospitalId,
       registeredBy: (req as any).userId,
-      patientName, patientPhone, patientEmail, animalName, animalSpecies, animalBreed,
+      patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
+      animalGender, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
+      animalColor, animalMicrochipId, animalRegistrationNumber,
+      animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true',
+      animalMedicalNotes, animalAvatarUrl,
     });
     res.json({ success: true, data: result });
   } catch (err: any) {

@@ -2274,11 +2274,24 @@ class ApiService {
     const response = await this.client.post(`/hospital-networks/${networkId}/invite-walkin`, data)
     return response.data
   }
-  async registerWalkInPatientDirect(networkId: string, data: { hospitalId: string; patientName: string; patientPhone?: string; patientEmail?: string; animalName: string; animalSpecies: string; animalBreed?: string; reasonForVisit?: string }) {
+  async registerWalkInPatientDirect(networkId: string, data: {
+    hospitalId: string; patientName: string; patientPhone?: string; patientEmail?: string; patientAddress?: string;
+    animalName: string; animalSpecies: string; animalBreed?: string;
+    animalGender?: string; animalDob?: string; animalWeight?: number;
+    animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
+    animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
+    reasonForVisit?: string;
+  }) {
     const response = await this.client.post(`/hospital-networks/${networkId}/register-walkin`, data)
     return response.data
   }
-  async registerWalkInStandalone(hospitalId: string, data: { patientName: string; patientPhone?: string; patientEmail?: string; animalName: string; animalSpecies: string; animalBreed?: string }) {
+  async registerWalkInStandalone(hospitalId: string, data: {
+    patientName: string; patientPhone?: string; patientEmail?: string; patientAddress?: string;
+    animalName: string; animalSpecies: string; animalBreed?: string;
+    animalGender?: string; animalDob?: string; animalWeight?: number;
+    animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
+    animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
+  }) {
     const response = await this.client.post(`/hospitals/${hospitalId}/register-walkin`, data)
     return response.data
   }

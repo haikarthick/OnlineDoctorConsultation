@@ -1094,8 +1094,11 @@ export class HospitalNetworkService {
   // If the patient later wants online portal access, staff can send an invite separately.
   async registerWalkInPatientDirect(data: {
     networkId: string; hospitalId: string; registeredBy: string;
-    patientName: string; patientPhone?: string; patientEmail?: string;
+    patientName: string; patientPhone?: string; patientEmail?: string; patientAddress?: string;
     animalName: string; animalSpecies: string; animalBreed?: string;
+    animalGender?: string; animalDob?: string; animalWeight?: number;
+    animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
+    animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     reasonForVisit?: string;
   }): Promise<{ patientId: string; networkPatientId: string; animalId: string; ownerId: string | null }> {
     try {
@@ -1133,10 +1136,24 @@ export class HospitalNetworkService {
       // Create the animal record
       const animalUniqueId = `VC-${data.animalSpecies.substring(0, 3).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
       const animalRes = await database.query(
-        `INSERT INTO animals (name, species, breed, owner_id, unique_id, is_active)
-         VALUES ($1, $2, $3, $4, $5, true)
+        `INSERT INTO animals
+           (name, species, breed, owner_id, unique_id, is_active,
+            gender, date_of_birth, weight, color, microchip_id, registration_number,
+            is_neutered, medical_notes, avatar_url)
+         VALUES ($1, $2, $3, $4, $5, true, $6, $7, $8, $9, $10, $11, $12, $13, $14)
          RETURNING id`,
-        [data.animalName, data.animalSpecies, data.animalBreed || null, ownerId, animalUniqueId]
+        [
+          data.animalName, data.animalSpecies, data.animalBreed || null, ownerId, animalUniqueId,
+          data.animalGender || null,
+          data.animalDob || null,
+          data.animalWeight ?? null,
+          data.animalColor || null,
+          data.animalMicrochipId || null,
+          data.animalRegistrationNumber || null,
+          data.animalIsNeutered ?? false,
+          data.animalMedicalNotes || null,
+          data.animalAvatarUrl || null,
+        ]
       );
       const animalId = animalRes.rows[0].id;
 

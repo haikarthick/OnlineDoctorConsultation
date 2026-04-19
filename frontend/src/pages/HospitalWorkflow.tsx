@@ -76,7 +76,15 @@ export default function HospitalWorkflow() {
 
   // Walk-in patient registration (within check-in modal)
   const [checkInMode, setCheckInMode] = useState<'search' | 'register'>('search')
-  const [walkInForm, setWalkInForm] = useState({ ownerName: '', ownerPhone: '', ownerEmail: '', animalName: '', animalSpecies: '', animalBreed: '' })
+  const [walkInForm, setWalkInForm] = useState({
+    ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '',
+    animalName: '', animalSpecies: '', animalBreed: '',
+    animalGender: '', animalDob: '', animalWeight: '',
+    animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '',
+    animalIsNeutered: false, animalMedicalNotes: '',
+  })
+  const [walkInPhotoFile, setWalkInPhotoFile] = useState<File | null>(null)
+  const [walkInPhotoPreview, setWalkInPhotoPreview] = useState<string>('')
   const [walkInRegistering, setWalkInRegistering] = useState(false)
   const [walkInError, setWalkInError] = useState('')
 
@@ -155,7 +163,9 @@ export default function HospitalWorkflow() {
     setCheckInAnimal(null)
     setCheckInError('')
     setCheckInMode('search')
-    setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', animalName: '', animalSpecies: '', animalBreed: '' })
+    setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '' })
+    setWalkInPhotoFile(null)
+    setWalkInPhotoPreview('')
     setWalkInError('')
   }
 
@@ -188,6 +198,32 @@ export default function HospitalWorkflow() {
     setWalkInError('')
     setWalkInRegistering(true)
     try {
+      // Convert photo to base64 if provided
+      let animalAvatarUrl: string | undefined
+      if (walkInPhotoFile) {
+        animalAvatarUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(walkInPhotoFile)
+        })
+      }
+
+      const commonAnimalData = {
+        animalName: walkInForm.animalName.trim(),
+        animalSpecies: walkInForm.animalSpecies.trim(),
+        animalBreed: walkInForm.animalBreed.trim() || undefined,
+        animalGender: walkInForm.animalGender || undefined,
+        animalDob: walkInForm.animalDob || undefined,
+        animalWeight: walkInForm.animalWeight ? parseFloat(walkInForm.animalWeight) : undefined,
+        animalColor: walkInForm.animalColor.trim() || undefined,
+        animalMicrochipId: walkInForm.animalMicrochipId.trim() || undefined,
+        animalRegistrationNumber: walkInForm.animalRegistrationNumber.trim() || undefined,
+        animalIsNeutered: walkInForm.animalIsNeutered,
+        animalMedicalNotes: walkInForm.animalMedicalNotes.trim() || undefined,
+        animalAvatarUrl,
+      }
+
       let registered: { animalId: string; ownerId?: string; patientId?: string; networkPatientId?: string }
       if (networkId) {
         const res = await apiService.registerWalkInPatientDirect(networkId, {
@@ -195,10 +231,9 @@ export default function HospitalWorkflow() {
           patientName: walkInForm.ownerName.trim(),
           patientPhone: walkInForm.ownerPhone.trim() || undefined,
           patientEmail: walkInForm.ownerEmail.trim() || undefined,
-          animalName: walkInForm.animalName.trim(),
-          animalSpecies: walkInForm.animalSpecies.trim(),
-          animalBreed: walkInForm.animalBreed.trim() || undefined,
+          patientAddress: walkInForm.ownerAddress.trim() || undefined,
           reasonForVisit: checkInForm.reason.trim() || undefined,
+          ...commonAnimalData,
         })
         registered = res.data
       } else {
@@ -206,9 +241,8 @@ export default function HospitalWorkflow() {
           patientName: walkInForm.ownerName.trim(),
           patientPhone: walkInForm.ownerPhone.trim() || undefined,
           patientEmail: walkInForm.ownerEmail.trim() || undefined,
-          animalName: walkInForm.animalName.trim(),
-          animalSpecies: walkInForm.animalSpecies.trim(),
-          animalBreed: walkInForm.animalBreed.trim() || undefined,
+          patientAddress: walkInForm.ownerAddress.trim() || undefined,
+          ...commonAnimalData,
         })
         registered = res.data
       }
@@ -224,9 +258,12 @@ export default function HospitalWorkflow() {
         owner_last_name: nameParts.length > 1 ? nameParts.slice(1).join(' ') : '',
         owner_phone: walkInForm.ownerPhone.trim() || '',
         networkPatientId: registered.networkPatientId,
+        avatar_url: animalAvatarUrl,
       })
       setCheckInMode('search')
-      setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', animalName: '', animalSpecies: '', animalBreed: '' })
+      setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '' })
+      setWalkInPhotoFile(null)
+      setWalkInPhotoPreview('')
     } catch (err: any) {
       setWalkInError(err?.response?.data?.message || err?.message || t('hospitalWorkflow.walkIn.registerFailed'))
     }
@@ -591,7 +628,35 @@ export default function HospitalWorkflow() {
                       </div>
                     )}
 
-                    <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: 10 }}>
+                    {/* Photo upload */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                      <div
+                        onClick={() => document.getElementById('walkInPhotoInput')?.click()}
+                        style={{ width: 80, height: 80, borderRadius: '50%', border: '2px dashed #d1d5db', background: walkInPhotoPreview ? 'transparent' : '#f8fafc', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, position: 'relative' }}
+                      >
+                        {walkInPhotoPreview
+                          ? <img src={walkInPhotoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <span style={{ fontSize: 28, color: '#94a3b8' }}>🐾</span>
+                        }
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>{t('hospitalWorkflow.walkIn.animalPhoto')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></div>
+                        <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{walkInPhotoPreview ? t('hospitalWorkflow.walkIn.photoChangeHint') : t('hospitalWorkflow.walkIn.photoUploadHint')}</div>
+                        {walkInPhotoPreview && <button onClick={() => { setWalkInPhotoFile(null); setWalkInPhotoPreview('') }} style={{ marginTop: 6, fontSize: 11, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>✕ {t('hospitalWorkflow.walkIn.removePhoto')}</button>}
+                      </div>
+                      <input id="walkInPhotoInput" type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        setWalkInPhotoFile(file)
+                        const reader = new FileReader()
+                        reader.onload = () => setWalkInPhotoPreview(reader.result as string)
+                        reader.readAsDataURL(file)
+                        e.target.value = ''
+                      }} />
+                    </div>
+
+                    {/* Owner Details */}
+                    <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: 14 }}>
                       <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>👤 {t('hospitalWorkflow.walkIn.ownerDetails')}</div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         <div>
@@ -608,10 +673,15 @@ export default function HospitalWorkflow() {
                             <input placeholder="owner@email.com" type="email" value={walkInForm.ownerEmail} onChange={e => setWalkInForm(f => ({ ...f, ownerEmail: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
                           </div>
                         </div>
+                        <div>
+                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.ownerAddress')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.ownerAddressPlaceholder')} value={walkInForm.ownerAddress} onChange={e => setWalkInForm(f => ({ ...f, ownerAddress: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                        </div>
                       </div>
                     </div>
 
-                    <div>
+                    {/* Patient Details — core */}
+                    <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: 14 }}>
                       <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>🐾 {t('hospitalWorkflow.walkIn.patientDetails')}</div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         <div>
@@ -640,7 +710,63 @@ export default function HospitalWorkflow() {
                             <input placeholder={t('hospitalWorkflow.walkIn.breedPlaceholder')} value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
                           </div>
                         </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                          <div>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalGender')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <select value={walkInForm.animalGender} onChange={e => setWalkInForm(f => ({ ...f, animalGender: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
+                              <option value="">{t('hospitalWorkflow.walkIn.selectGender')}</option>
+                              <option value="male">{t('hospitalWorkflow.walkIn.male')}</option>
+                              <option value="female">{t('hospitalWorkflow.walkIn.female')}</option>
+                              <option value="unknown">{t('hospitalWorkflow.walkIn.genderUnknown')}</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalDob')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <input type="date" value={walkInForm.animalDob} onChange={e => setWalkInForm(f => ({ ...f, animalDob: e.target.value }))} max={new Date().toISOString().split('T')[0]} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          </div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                          <div>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalWeight')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <input type="number" step="0.1" min="0" placeholder="e.g., 12.5" value={walkInForm.animalWeight} onChange={e => setWalkInForm(f => ({ ...f, animalWeight: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          </div>
+                          <div>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalColor')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <input placeholder={t('hospitalWorkflow.walkIn.animalColorPlaceholder')} value={walkInForm.animalColor} onChange={e => setWalkInForm(f => ({ ...f, animalColor: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingTop: 2 }}>
+                          <input type="checkbox" id="walkInNeutered" checked={walkInForm.animalIsNeutered} onChange={e => setWalkInForm(f => ({ ...f, animalIsNeutered: e.target.checked }))} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+                          <label htmlFor="walkInNeutered" style={{ fontWeight: 500, fontSize: 13, color: '#374151', cursor: 'pointer' }}>{t('hospitalWorkflow.walkIn.animalIsNeutered')}</label>
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Identification */}
+                    <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: 14 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>🔖 {t('hospitalWorkflow.walkIn.identificationDetails')}</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <div>
+                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalMicrochipId')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.animalMicrochipPlaceholder')} value={walkInForm.animalMicrochipId} onChange={e => setWalkInForm(f => ({ ...f, animalMicrochipId: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                        </div>
+                        <div>
+                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalRegistrationNumber')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.animalRegistrationPlaceholder')} value={walkInForm.animalRegistrationNumber} onChange={e => setWalkInForm(f => ({ ...f, animalRegistrationNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Medical Notes */}
+                    <div>
+                      <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>📋 {t('hospitalWorkflow.walkIn.animalMedicalNotes')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                      <textarea
+                        placeholder={t('hospitalWorkflow.walkIn.animalMedicalNotesPlaceholder')}
+                        value={walkInForm.animalMedicalNotes}
+                        onChange={e => setWalkInForm(f => ({ ...f, animalMedicalNotes: e.target.value }))}
+                        rows={3}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, resize: 'vertical' }}
+                      />
                     </div>
 
                     <div style={{ fontSize: 12, color: '#94a3b8' }}><span style={{ color: '#dc2626' }}>*</span> Required field</div>

@@ -858,3 +858,11 @@ render-start.sh
 - **Fix:** Added COALESCE(h.branch_network_id, hnm.network_id) AS branch_network_id to listHospitalsForVet SELECT. Network ID is now always derived from membership record even if the hospital row's column is unset.
 - **Rule:** NEVER rely solely on vet_hospitals.branch_network_id. Always COALESCE with hnm.network_id in listHospitalsForVet.
 
+
+### DEPLOY-011 — Browser-agent PR TypeScript errors break Render build
+- **Logged:** 2026-04-19 10:52
+- **Symptom:** Render failed with exit code 2 — tsc errors TS2353 and TS2322 in HospitalNetworkService and VetHospitalService
+- **Root Cause:** Browser-agent added ownerId to return object but not to declared return type (TS2353); ownerId was string|null but return type said string (TS2322)
+- **Fix:** Fix: add ownerId to return type in HospitalNetworkService.ts; use non-null assertion ownerId! in VetHospitalService.ts
+- **Rule:** ALWAYS run tsc locally after merging browser-agent PRs before pushing to develop
+

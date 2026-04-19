@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS animals (
   acquisition_date DATE,
   acquisition_source VARCHAR(200),
   production_type VARCHAR(50),
+  avatar_url VARCHAR(500),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
