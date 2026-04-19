@@ -439,3 +439,10 @@
 - **Lesson:** When protecting network routes: (1) `roleMiddleware` must include ALL system roles that could hold the target network role — e.g. `hospital_director` network role can be held by `veterinarian` OR `hospital_staff` system role. (2) Always add a secondary network-role check after the system-role gate. (3) PUT/POST/DELETE on the same resource must use IDENTICAL role lists — never allow add+delete but not edit.
 - **Apply to:** All hospital network routes, any future multi-level role system
 
+
+### LESSON-043 — Always use TEXT for base64 images and unbounded strings — never VARCHAR(N)
+- **Logged:** 2026-04-19 13:13
+- **Context:** Walk-in photo upload failed in production with VARCHAR(500) overflow. Base64 images are 50k-500k+ chars. TypeScript compile passed because both are 'string' — the bug was invisible until real data hit the DB.
+- **Lesson:** NEVER use VARCHAR(N) for: base64 images, avatar URLs, long descriptions, JSON, or any user-generated content of unknown length. ALWAYS use TEXT. Only use VARCHAR(N) for short codes, enums, phone numbers, IDs where the max length is truly bounded and known.
+- **Apply to:** All future DB column definitions
+

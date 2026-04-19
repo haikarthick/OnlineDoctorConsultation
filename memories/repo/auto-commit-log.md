@@ -1877,3 +1877,22 @@
 </details>
 
 ---
+
+## 2026-04-19 13:02 · `3e30b8d` · 🐛 FIX
+
+**Commit:** fix: widen avatar_url from VARCHAR(500) to TEXT for base64 photo storage  
+**Author:** haikarthick  
+**Categories:** UTILS · DB · DB-SCHEMA · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/utils/database.ts
+  - docker/init.sql
+  - memories/repo/auto-commit-log.md
+  - memories/repo/feature-tracker.md
+
+</details>
+
+---

@@ -167,6 +167,37 @@ Items filtered by BOTH `roles.includes(user.role)` AND `hasPermission(NAV_PERMIS
 4. Test that `.env` secrets are not committed (gitignored)
 5. Always `git push origin develop` after committing — raw `git commit` does NOT push
 
+## End-to-End Testing Rule (MANDATORY — ZERO TOLERANCE)
+
+**NEVER declare a feature or fix complete without verifying it actually works end-to-end. TypeScript compiling is NOT testing.**
+
+### For every new form / UI feature:
+- Think through the full data path: UI input → API payload → SQL column type → DB storage → response → UI display
+- Ask: "What is the maximum size of this data?" — especially for: text areas, file uploads, base64 images, JSON blobs, URLs
+- **Always use `TEXT` for any column that stores: base64 images, user-uploaded content, long descriptions, JSON, or URLs** — never `VARCHAR(N)` with an arbitrary limit
+- Mentally submit the form with realistic data (photo, long text, special characters) before committing
+
+### For every new API endpoint:
+- Verify the endpoint with a real HTTP call (curl or Postman) against the deployed Render URL after deploy
+- Check the actual DB row was written with correct values
+- Test the error path: what happens with missing required fields, invalid types, duplicate records
+
+### Confirmation sequence (MANDATORY — per LESSON-042):
+```
+code fix → commit → push → wait for Render deploy → call deployed API / use deployed UI → confirm it works → THEN tell user it is fixed
+```
+**NEVER say "done" or "fixed" before the deployed verification step is complete.**
+
+### Data type checklist — run mentally before every new DB column:
+| Data | Correct Type | NEVER use |
+|------|-------------|-----------|
+| Base64 image | `TEXT` | `VARCHAR(N)` |
+| URL / avatar | `TEXT` | `VARCHAR(500)` |
+| Long description | `TEXT` | `VARCHAR(N)` |
+| JSON blob | `JSONB` or `TEXT` | `VARCHAR(N)` |
+| Short code / enum | `VARCHAR(50)` | `TEXT` (wastes index) |
+| Phone / ID / name | `VARCHAR(100–255)` | `TEXT` |
+
 ## Feature Coverage Rule (MANDATORY)
 
 **ANY feature added MUST be accessible to ALL relevant user roles.**

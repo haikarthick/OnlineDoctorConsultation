@@ -866,3 +866,11 @@ render-start.sh
 - **Fix:** Fix: add ownerId to return type in HospitalNetworkService.ts; use non-null assertion ownerId! in VetHospitalService.ts
 - **Rule:** ALWAYS run tsc locally after merging browser-agent PRs before pushing to develop
 
+
+### UI-012 — Walk-in registration fails with VARCHAR(500) overflow on photo upload
+- **Logged:** 2026-04-19 13:03
+- **Symptom:** Error: value too long for type character varying(500) when submitting walk-in form with animal photo
+- **Root Cause:** avatar_url defined as VARCHAR(500) in init.sql and database.ts ALTER TABLE — base64 photos are 50k-500k+ chars
+- **Fix:** Changed VARCHAR(500) to TEXT in init.sql (both users and animals tables); added ALTER COLUMN TYPE TEXT migration in database.ts to fix existing production columns
+- **Rule:** NEVER use VARCHAR with a fixed limit for any column that stores base64 image data or URLs to user-uploaded content — always use TEXT
+
