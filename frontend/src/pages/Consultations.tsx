@@ -27,6 +27,7 @@ interface ConsultRow {
   id: string; animalType?: string; symptomDescription?: string;
   status: string; diagnosis?: string; scheduledAt?: string;
   createdAt?: string; veterinarianId?: string;
+  networkId?: string; networkName?: string;
 }
 interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
 
@@ -89,8 +90,9 @@ const Consultations: React.FC = () => {
   const activeBookings = bookings.filter(b => activeStatuses.includes(b.status))
   const historyBookings = bookings.filter(b => historyStatuses.includes(b.status))
 
-  // Build diagnosis lookup from consultations
+  // Build diagnosis and network lookups from consultations
   const diagnosisMap = new Map(consultations.map(c => [c.id, c.diagnosis || '']))
+  const networkMap = new Map(consultations.filter(c => c.networkId).map(c => [c.id, { networkId: c.networkId!, networkName: c.networkName || '' }]))
 
   // Apply client-side status filter
   const filteredActive = statusFilter ? activeBookings.filter(b => b.status === statusFilter) : activeBookings
@@ -648,6 +650,7 @@ const Consultations: React.FC = () => {
             <div className="appt-card-grid">
               {filteredHistory.map(b => {
                 const diagnosis = b.consultationId ? diagnosisMap.get(b.consultationId) : ''
+                const networkInfo = b.consultationId ? networkMap.get(b.consultationId) : undefined
                 return (
                   <div key={b.id} className="appt-card">
                     {/* Card Header */}
@@ -657,7 +660,14 @@ const Consultations: React.FC = () => {
                         {isPetOwner && <strong>{b.vetName || t('common.doctor')}</strong>}
                         {isAdmin && <span>{b.petOwnerName || '—'} / {b.vetName || '—'}</span>}
                       </div>
-                      {badge(b.status)}
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
+                        {networkInfo && networkInfo.networkName && (
+                          <span className="badge" style={{ background: '#e8f4f8', color: '#1a6a8a', fontSize: '0.7rem', padding: '2px 6px', borderRadius: 4 }}>
+                            🏥 {networkInfo.networkName}
+                          </span>
+                        )}
+                        {badge(b.status)}
+                      </div>
                     </div>
 
                     {/* Card Body */}

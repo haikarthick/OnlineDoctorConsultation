@@ -150,12 +150,13 @@ CREATE TABLE IF NOT EXISTS consultations (
   follow_up_date DATE,
   notes TEXT,
   booking_id UUID,
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================
--- 4b. ENTERPRISES & ANIMAL GROUPS (required before bookings FK)
+-- 4b. ENTERPRISES & ANIMAL GROUPS(required before bookings FK)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS enterprises (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -372,6 +373,7 @@ CREATE TABLE IF NOT EXISTS video_sessions (
   recording_url VARCHAR(500),
   quality VARCHAR(10) DEFAULT 'high'
     CHECK (quality IN ('low', 'medium', 'high', 'hd')),
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -403,6 +405,7 @@ CREATE TABLE IF NOT EXISTS prescriptions (
   instructions TEXT,
   valid_until DATE,
   is_active BOOLEAN DEFAULT true,
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -432,6 +435,7 @@ CREATE TABLE IF NOT EXISTS medical_records (
   tags TEXT[] DEFAULT '{}',
   file_url VARCHAR(500),
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -455,6 +459,7 @@ CREATE TABLE IF NOT EXISTS vaccination_records (
   reaction_notes TEXT,
   is_valid BOOLEAN DEFAULT true,
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -533,6 +538,7 @@ CREATE TABLE IF NOT EXISTS lab_results (
   consultation_id UUID,
   attachments JSONB DEFAULT '[]',
   notes TEXT,
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -755,6 +761,7 @@ CREATE INDEX IF NOT EXISTS idx_consultations_status ON consultations(status);
 CREATE INDEX IF NOT EXISTS idx_consultations_scheduled_at ON consultations(scheduled_at);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_consultations_booking_id ON consultations(booking_id) WHERE booking_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_consultations_vet_user ON consultations(veterinarian_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_consultations_network ON consultations(network_id);
 
 CREATE INDEX IF NOT EXISTS idx_bookings_pet_owner_id ON bookings(pet_owner_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_veterinarian_id ON bookings(veterinarian_id);
@@ -766,12 +773,14 @@ CREATE INDEX IF NOT EXISTS idx_vet_schedules_vet_id ON vet_schedules(veterinaria
 CREATE INDEX IF NOT EXISTS idx_video_sessions_consultation ON video_sessions(consultation_id);
 CREATE INDEX IF NOT EXISTS idx_video_sessions_room ON video_sessions(room_id);
 CREATE INDEX IF NOT EXISTS idx_video_sessions_status ON video_sessions(status);
+CREATE INDEX IF NOT EXISTS idx_video_sessions_network ON video_sessions(network_id);
 
 CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id);
 
 CREATE INDEX IF NOT EXISTS idx_prescriptions_consultation ON prescriptions(consultation_id);
 CREATE INDEX IF NOT EXISTS idx_prescriptions_vet ON prescriptions(veterinarian_id);
 CREATE INDEX IF NOT EXISTS idx_prescriptions_owner ON prescriptions(pet_owner_id);
+CREATE INDEX IF NOT EXISTS idx_prescriptions_network ON prescriptions(network_id);
 
 CREATE INDEX IF NOT EXISTS idx_medical_records_user_id ON medical_records(user_id);
 CREATE INDEX IF NOT EXISTS idx_medical_records_animal_id ON medical_records(animal_id);
@@ -779,12 +788,15 @@ CREATE INDEX IF NOT EXISTS idx_medical_records_record_type ON medical_records(re
 CREATE INDEX IF NOT EXISTS idx_medical_records_record_number ON medical_records(record_number);
 CREATE INDEX IF NOT EXISTS idx_medical_records_status ON medical_records(status);
 CREATE INDEX IF NOT EXISTS idx_medical_records_veterinarian_id ON medical_records(veterinarian_id);
+CREATE INDEX IF NOT EXISTS idx_medical_records_network ON medical_records(network_id);
 CREATE INDEX IF NOT EXISTS idx_vaccination_records_animal_id ON vaccination_records(animal_id);
 CREATE INDEX IF NOT EXISTS idx_vaccination_records_next_due ON vaccination_records(next_due_date);
+CREATE INDEX IF NOT EXISTS idx_vaccination_records_network ON vaccination_records(network_id);
 CREATE INDEX IF NOT EXISTS idx_weight_history_animal_id ON weight_history(animal_id);
 CREATE INDEX IF NOT EXISTS idx_allergy_records_animal_id ON allergy_records(animal_id);
 CREATE INDEX IF NOT EXISTS idx_lab_results_animal_id ON lab_results(animal_id);
 CREATE INDEX IF NOT EXISTS idx_lab_results_status ON lab_results(status);
+CREATE INDEX IF NOT EXISTS idx_lab_results_network ON lab_results(network_id);
 CREATE INDEX IF NOT EXISTS idx_medical_audit_log_record ON medical_record_audit_log(record_id);
 CREATE INDEX IF NOT EXISTS idx_medical_audit_log_action ON medical_record_audit_log(action);
 CREATE INDEX IF NOT EXISTS idx_users_unique_id ON users(unique_id);
@@ -969,12 +981,13 @@ CREATE TABLE IF NOT EXISTS workflow_cases (
     CHECK (status IN ('active','completed','referred','cancelled')),
   started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   completed_at TIMESTAMP,
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================
--- 22. WORKFLOW TRANSITIONS (Stage change audit log)
+-- 22. WORKFLOW TRANSITIONS(Stage change audit log)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS workflow_transitions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1050,6 +1063,7 @@ CREATE INDEX IF NOT EXISTS idx_appointment_queue_status ON appointment_queue(sta
 CREATE INDEX IF NOT EXISTS idx_workflow_cases_hospital ON workflow_cases(hospital_id);
 CREATE INDEX IF NOT EXISTS idx_workflow_cases_stage ON workflow_cases(current_stage);
 CREATE INDEX IF NOT EXISTS idx_workflow_cases_status ON workflow_cases(status);
+CREATE INDEX IF NOT EXISTS idx_workflow_cases_network ON workflow_cases(network_id);
 CREATE INDEX IF NOT EXISTS idx_workflow_transitions_case ON workflow_transitions(case_id);
 CREATE INDEX IF NOT EXISTS idx_referrals_hospital ON referrals(hospital_id);
 CREATE INDEX IF NOT EXISTS idx_referrals_status ON referrals(status);

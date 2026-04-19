@@ -428,3 +428,27 @@
 - **Status:** done
 - **Description:** Added valid_from/valid_until columns to hospital_network_members in init.sql and database.ts migrations. getNetworkMember and listNetworkMembers filter out expired memberships. addNetworkMember accepts validUntil param. Joi schema updated. Controller passes validUntil to service.
 
+
+### ✅ P2 Network Hospital Security
+- **Logged:** 2026-04-19 17:14
+- **Status:** done
+- **Description:** Consolidated dual hospital-assignment paths, added network-origin badge to animal list, implemented security audit trail table+wiring, added time-bound permissions (valid_from/valid_until) on network members
+
+
+### ✅ P3-CRITICAL1: network_id on medical tables
+- **Logged:** 2026-04-19 17:24
+- **Status:** done
+- **Description:** Added network_id UUID FK to consultations, prescriptions, medical_records, lab_results, vaccination_records, workflow_cases, video_sessions — both in docker/init.sql (column + index) and database.ts runtime migrations
+
+
+### ✅ P3-HIGH5: Network badge on consultations
+- **Logged:** 2026-04-19 17:24
+- **Status:** done
+- **Description:** ConsultationService.listConsultations now joins hospital_networks and returns networkId/networkName. ConsultationController passes networkId query param. ConsultRow interface updated. History tab shows hospital network badge.
+
+
+### ✅ P3-GAP4: POST staff invite route
+- **Logged:** 2026-04-19 17:24
+- **Status:** done
+- **Description:** Added POST /hospital-networks/:id/staff-invites route with role/network checks, duplicate detection, token generation, and email send via emailService.send(). Uses EmailService.send() not sendEmail().
+

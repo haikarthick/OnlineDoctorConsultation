@@ -1929,6 +1929,83 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
   }
 }));
 
+// Send a staff invite via email
+router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const db = (await import('../utils/database')).default;
+  // Verify caller has appropriate network role
+  if (authReq.userRole !== 'admin') {
+    const callerMember = await db.query(
+      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [req.params.id, authReq.userId]
+    );
+    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
+      return res.status(403).json({ success: false, error: 'Only corporate admins and hospital directors can send staff invites' });
+    }
+  }
+
+  const { inviteeEmail, inviteeName, staffPosition, hospitalId, expiresInHours = 72 } = req.body;
+  if (!inviteeEmail || !inviteeName || !staffPosition) {
+    return res.status(400).json({ success: false, error: 'inviteeEmail, inviteeName, and staffPosition are required' });
+  }
+
+  const allowedPositions = ['nurse','technician','receptionist','lab_tech','radiologist','anesthesiologist','pharmacist','intern','admin_staff'];
+  if (!allowedPositions.includes(staffPosition)) {
+    return res.status(400).json({ success: false, error: `staffPosition must be one of: ${allowedPositions.join(', ')}` });
+  }
+
+  // Check if email is already an active member
+  const existingUser = await db.query(
+    `SELECT u.id FROM users u
+     JOIN hospital_network_members hnm ON hnm.user_id = u.id
+     WHERE LOWER(u.email) = LOWER($1) AND hnm.network_id = $2 AND hnm.is_active = true`,
+    [inviteeEmail, req.params.id]
+  );
+  if (existingUser.rows.length > 0) {
+    return res.status(409).json({ success: false, error: 'This user is already a member of this network' });
+  }
+
+  // Check for existing pending invite
+  const existingInvite = await db.query(
+    `SELECT id FROM hospital_staff_invites WHERE LOWER(invitee_email) = LOWER($1) AND network_id = $2 AND status = 'pending' AND expires_at > NOW()`,
+    [inviteeEmail, req.params.id]
+  );
+  if (existingInvite.rows.length > 0) {
+    return res.status(409).json({ success: false, error: 'A pending invite already exists for this email address' });
+  }
+
+  const crypto = await import('crypto');
+  const token = crypto.randomBytes(48).toString('hex');
+  const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000).toISOString();
+
+  const result = await db.query(
+    `INSERT INTO hospital_staff_invites (network_id, hospital_id, invited_by, invitee_email, invitee_name, staff_position, invite_token, expires_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     RETURNING id, invite_token AS "inviteToken", invitee_email AS "inviteeEmail", invitee_name AS "inviteeName", staff_position AS "staffPosition", expires_at AS "expiresAt"`,
+    [req.params.id, hospitalId || null, authReq.userId, inviteeEmail, inviteeName, staffPosition, token, expiresAt]
+  );
+
+  const invite = result.rows[0];
+
+  // Send email invitation (non-fatal)
+  try {
+    const emailService = (await import('../services/EmailService')).default;
+    const networkResult = await db.query(`SELECT name FROM hospital_networks WHERE id = $1`, [req.params.id]);
+    const networkName = networkResult.rows[0]?.name ?? 'the hospital network';
+    const inviteUrl = `${process.env.FRONTEND_URL || 'https://vetcare.app'}/accept-staff-invite?token=${token}`;
+    await emailService.send({
+      to: inviteeEmail,
+      subject: `You've been invited to join ${networkName} as ${staffPosition}`,
+      text: `Hi ${inviteeName},\n\nYou have been invited to join ${networkName} as a ${staffPosition}.\n\nAccept your invitation here: ${inviteUrl}\n\nThis invitation expires in ${expiresInHours} hours.\n\nIf you did not expect this invitation, you can safely ignore this email.`,
+      html: `<p>Hi <strong>${inviteeName}</strong>,</p><p>You have been invited to join <strong>${networkName}</strong> as a <strong>${staffPosition}</strong>.</p><p><a href="${inviteUrl}" style="background:#2563eb;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">Accept Invitation</a></p><p>This invitation expires in ${expiresInHours} hours.</p><p>If you did not expect this invitation, you can safely ignore this email.</p>`,
+    }).catch((err: any) => logger.warn('Staff invite email failed to send', { error: err.message }));
+  } catch (emailErr: any) {
+    logger.warn('Staff invite email setup failed', { error: emailErr.message });
+  }
+
+  res.status(201).json({ success: true, data: invite, message: 'Invitation sent successfully' });
+}));
+
 router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const db = (await import('../utils/database')).default;

@@ -467,3 +467,10 @@
 - **Lesson:** Any route under /hospital-networks/:networkId/* or /hospitals/:hospitalId/* that modifies or reads sensitive data MUST verify network membership
 - **Apply to:** All future network hospital routes
 
+
+### LESSON-037 — Hospital-to-network assignment must write canonical path first
+- **Logged:** 2026-04-19 17:14
+- **Context:** Found two separate paths for hospital-network membership: vet_hospitals.branch_network_id (canonical) and hospital_network_hospitals junction table
+- **Lesson:** Always write both in assignHospitalToNetwork; query using only branch_network_id to avoid UNION duplicates
+- **Apply to:** All future network assignment code
+

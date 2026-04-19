@@ -100,35 +100,46 @@ export class ConsultationService {
     }
   }
 
-  async listConsultations(userId?: string, veterinarianId?: string, limit: number = 10, offset: number = 0, status?: string) {
+  async listConsultations(userId?: string, veterinarianId?: string, limit: number = 10, offset: number = 0, status?: string, networkId?: string) {
     try {
-      let query = `SELECT id, user_id as "userId", veterinarian_id as "veterinarianId", animal_id as "animalId", animal_type as "animalType",
-                   symptom_description as "symptomDescription", status, scheduled_at as "scheduledAt",
-                   diagnosis, notes, duration,
-                   created_at as "createdAt", updated_at as "updatedAt"
-                   FROM consultations WHERE 1=1`;
+      let query = `SELECT c.id, c.user_id AS "userId", c.veterinarian_id AS "veterinarianId", c.animal_id AS "animalId", c.animal_type AS "animalType",
+                   c.symptom_description AS "symptomDescription", c.status, c.scheduled_at AS "scheduledAt",
+                   c.diagnosis, c.notes, c.duration,
+                   c.network_id AS "networkId", hn.name AS "networkName",
+                   c.created_at AS "createdAt", c.updated_at AS "updatedAt"
+                   FROM consultations c
+                   LEFT JOIN hospital_networks hn ON hn.id = c.network_id
+                   WHERE 1=1`;
       const params: any[] = [];
       let paramCount = 0;
 
       if (userId) {
         paramCount++;
-        query += ` AND user_id = $${paramCount}`;
+        query += ` AND c.user_id = $${paramCount}`;
         params.push(userId);
       }
 
       if (veterinarianId) {
         paramCount++;
-        query += ` AND veterinarian_id = $${paramCount}`;
+        query += ` AND c.veterinarian_id = $${paramCount}`;
         params.push(veterinarianId);
       }
 
       if (status) {
         paramCount++;
-        query += ` AND status = $${paramCount}`;
+        query += ` AND c.status = $${paramCount}`;
         params.push(status);
       }
 
-      query += ` ORDER BY scheduled_at DESC LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`;
+      if (networkId === 'none') {
+        query += ` AND c.network_id IS NULL`;
+      } else if (networkId) {
+        paramCount++;
+        query += ` AND c.network_id = $${paramCount}`;
+        params.push(networkId);
+      }
+
+      query += ` ORDER BY c.scheduled_at DESC LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`;
       params.push(limit, offset);
 
       const result = await database.query(query, params);

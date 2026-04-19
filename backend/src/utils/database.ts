@@ -1089,6 +1089,12 @@ class PostgresDatabase {
     await this.pool.query(`ALTER TABLE hospital_network_members ADD COLUMN IF NOT EXISTS valid_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP`).catch(() => {});
     await this.pool.query(`ALTER TABLE hospital_network_members ADD COLUMN IF NOT EXISTS valid_until TIMESTAMP`).catch(() => {});
 
+    // P3-CRITICAL1: Add network_id to medical data tables
+    for (const table of ['consultations', 'prescriptions', 'medical_records', 'lab_results', 'vaccination_records', 'workflow_cases', 'video_sessions']) {
+      await this.pool.query(`ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL`).catch(() => {});
+      await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_${table}_network ON ${table}(network_id)`).catch(() => {});
+    }
+
     logger.info('Default system settings seeded');
   }
 

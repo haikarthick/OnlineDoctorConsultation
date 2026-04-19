@@ -193,7 +193,8 @@ export class ConsultationController {
       }
 
       const status = req.query.status as string | undefined;
-      const consultations = await ConsultationService.listConsultations(userId, veterinarianId, limit, offset, status);
+      const networkId = req.query.networkId as string | undefined;
+      const consultations = await ConsultationService.listConsultations(userId, veterinarianId, limit, offset, status, networkId);
 
       res.json({
         success: true,
