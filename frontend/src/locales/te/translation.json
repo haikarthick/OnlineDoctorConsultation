@@ -4538,6 +4538,54 @@
     "failedToReset": "అనుమతులను రీసెట్ చేయడం విఫలమైంది",
     "resetConfirm": "అన్ని అనుమతులను డిఫాల్ట్‌లకు రీసెట్ చేయాలా? ఇది తిరిగి మార్చలేరు."
   },
+  "networkRoleMatrix": {
+    "title": "నెట్‌వర్క్ పాత్ర యాక్సెస్ మాతృక",
+    "subtitle": "హాస్పిటల్ నెట్‌వర్క్‌లో ప్రతి నెట్‌వర్క్ పాత్ర ఏమి చేయగలదో నిర్వచిస్తుంది",
+    "tabLabel": "నెట్‌వర్క్ పాత్ర మాతృక",
+    "feature": "Feature / Functionality",
+    "platformNote": "Network deactivation and final approval require Platform Admin access.",
+    "roles": {
+      "corporate_admin": "Network Admin",
+      "hospital_director": "Hospital Director",
+      "compliance_officer": "Compliance Officer",
+      "auditor": "Auditor",
+      "hospital_staff": "Hospital Staff"
+    },
+    "roleDescriptions": {
+      "corporateAdminDesc": "Full control over the network, settings, members, and hospitals",
+      "hospitalDirectorDesc": "Manages branch operations, members, and oversees clinical workflows",
+      "complianceOfficerDesc": "Monitors compliance, audit logs, and patient consent records",
+      "auditorDesc": "Read-only access to logs, analytics, and consent data for auditing",
+      "hospitalStaffDesc": "Handles day-to-day patient workflow, registration, and inpatient care"
+    },
+    "categories": {
+      "networkManagement": "Network Management",
+      "branchHospitals": "Branch Hospitals",
+      "memberManagement": "Member Management",
+      "complianceAudit": "Compliance & Audit",
+      "hospitalOperations": "Hospital Operations",
+      "analyticsReporting": "Analytics & Reporting"
+    },
+    "features": {
+      "viewNetworkDetails": "View Network Details",
+      "editNetworkSettings": "Edit Network Settings",
+      "deactivateNetwork": "Deactivate Network",
+      "viewBranchHospitals": "View Branch Hospitals",
+      "addHospitalToNetwork": "Add Hospital to Network",
+      "viewNetworkMembers": "View Network Members",
+      "addRemoveMembers": "Add / Remove Members",
+      "editMemberRoles": "Edit Member Roles",
+      "viewAuditLogs": "View Audit Logs",
+      "patientConsentManagement": "Patient Consent Management",
+      "hospitalWorkflowQueue": "Hospital Workflow & Queue",
+      "walkInRegistration": "Walk-in Registration",
+      "inpatientManagement": "Inpatient Management",
+      "networkDashboardStats": "Network Dashboard Stats",
+      "healthAnalytics": "Health Analytics",
+      "financialAnalytics": "Financial Analytics",
+      "interHospitalReferrals": "Inter-Hospital Referrals"
+    }
+  },
   "reviewModeration": {
     "title": "సమీక్ష నిర్వహణ",
     "subtitle": "{{total}} మొత్తం సమీక్షలు · {{pending}} పెండింగ్ · {{flagged}} ఫ్లాగ్ చేయబడినవి",

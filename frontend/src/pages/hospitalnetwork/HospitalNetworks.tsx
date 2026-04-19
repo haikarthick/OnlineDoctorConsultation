@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
+import NetworkRoleMatrix from './NetworkRoleMatrix'
 import '../ModulePage.css'
 import './HospitalNetworks.css'
 
@@ -716,7 +717,7 @@ const HospitalNetworks: React.FC = () => {
   const { user } = useAuth()
   const { formatDate } = useSettings()
 
-  const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients' | 'referrals' | 'leave'>('networks')
+  const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients' | 'referrals' | 'leave' | 'roleMatrix'>('networks')
   const [selectedNetwork, setSelectedNetwork] = useState<HospitalNetwork | null>(null)
 
   const [networks, setNetworks] = useState<HospitalNetwork[]>([])
@@ -1291,6 +1292,12 @@ const HospitalNetworks: React.FC = () => {
             🏖️ {t('hospitalNetworks.leave.tab')}
           </button>
         )}
+        <button
+          className={`module-tab${activeTab === 'roleMatrix' ? ' active' : ''}`}
+          onClick={() => setActiveTab('roleMatrix')}
+        >
+          🔑 {t('networkRoleMatrix.tabLabel')}
+        </button>
       </div>
 
       {/* ════ TAB 1: NETWORKS ════ */}
@@ -2797,6 +2804,13 @@ const HospitalNetworks: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ════ TAB 7: ROLE MATRIX ════ */}
+      {activeTab === 'roleMatrix' && (
+        <div className="hn-tab-content">
+          <NetworkRoleMatrix />
         </div>
       )}
     </div>

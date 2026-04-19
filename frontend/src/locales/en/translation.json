@@ -4621,6 +4621,54 @@
     "failedToReset": "Failed to reset permissions",
     "resetConfirm": "Reset all permissions to defaults? This cannot be undone."
   },
+  "networkRoleMatrix": {
+    "title": "Network Role Access Matrix",
+    "subtitle": "Defines what each network role can do within a hospital network",
+    "tabLabel": "Network Role Matrix",
+    "feature": "Feature / Functionality",
+    "platformNote": "Network deactivation and final approval require Platform Admin (system admin) access.",
+    "roles": {
+      "corporate_admin": "Network Admin",
+      "hospital_director": "Hospital Director",
+      "compliance_officer": "Compliance Officer",
+      "auditor": "Auditor",
+      "hospital_staff": "Hospital Staff"
+    },
+    "roleDescriptions": {
+      "corporateAdminDesc": "Full control over the network, settings, members, and hospitals",
+      "hospitalDirectorDesc": "Manages branch operations, members, and oversees clinical workflows",
+      "complianceOfficerDesc": "Monitors compliance, audit logs, and patient consent records",
+      "auditorDesc": "Read-only access to logs, analytics, and consent data for auditing",
+      "hospitalStaffDesc": "Handles day-to-day patient workflow, registration, and inpatient care"
+    },
+    "categories": {
+      "networkManagement": "Network Management",
+      "branchHospitals": "Branch Hospitals",
+      "memberManagement": "Member Management",
+      "complianceAudit": "Compliance & Audit",
+      "hospitalOperations": "Hospital Operations",
+      "analyticsReporting": "Analytics & Reporting"
+    },
+    "features": {
+      "viewNetworkDetails": "View Network Details",
+      "editNetworkSettings": "Edit Network Settings",
+      "deactivateNetwork": "Deactivate Network",
+      "viewBranchHospitals": "View Branch Hospitals",
+      "addHospitalToNetwork": "Add Hospital to Network",
+      "viewNetworkMembers": "View Network Members",
+      "addRemoveMembers": "Add / Remove Members",
+      "editMemberRoles": "Edit Member Roles",
+      "viewAuditLogs": "View Audit Logs",
+      "patientConsentManagement": "Patient Consent Management",
+      "hospitalWorkflowQueue": "Hospital Workflow & Queue",
+      "walkInRegistration": "Walk-in Registration",
+      "inpatientManagement": "Inpatient Management",
+      "networkDashboardStats": "Network Dashboard Stats",
+      "healthAnalytics": "Health Analytics",
+      "financialAnalytics": "Financial Analytics",
+      "interHospitalReferrals": "Inter-Hospital Referrals"
+    }
+  },
   "reviewModeration": {
     "title": "Review Moderation",
     "subtitle": "{{total}} total reviews · {{pending}} pending · {{flagged}} flagged",

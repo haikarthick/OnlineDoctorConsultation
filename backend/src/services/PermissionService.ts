@@ -1,4 +1,4 @@
-﻿import database from '../utils/database';
+import database from '../utils/database';
 import logger from '../utils/logger';
 
 // ─── Permission Definitions ─────────────────────────────────
@@ -247,6 +247,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'dashboard_stats', 'dashboard_quick_actions',
     // Hospital Network — full management access
     'hospital_network_manage', 'hospital_network_view', 'hospital_network_audit',
+    // Hospital operations oversight (network admin supervises ops)
+    'hospital_workflow', 'inpatient_manage', 'hospital_browse', 'hospital_manage',
     // Patient consent oversight
     'patient_consent_manage',
     // Analytics (for network-level reporting)
@@ -487,7 +489,7 @@ class PermissionService {
     );
 
     const matrix: Record<string, Record<string, boolean>> = {};
-    const roles = ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'];
+    const roles = ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'];
 
     // Initialize with defaults
     for (const role of roles) {
@@ -516,7 +518,7 @@ class PermissionService {
     if (!ALL_PERMISSIONS.includes(permission)) {
       throw new Error(`Unknown permission: ${permission}`);
     }
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -537,7 +539,7 @@ class PermissionService {
     permissions: Record<string, boolean>,
     updatedBy?: string
   ): Promise<void> {
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -557,7 +559,7 @@ class PermissionService {
 
   /** Reset a role's permissions to defaults */
   async resetToDefaults(role: string): Promise<void> {
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -596,13 +598,14 @@ class PermissionService {
       categories: PERMISSION_CATEGORIES,
       labels: PERMISSION_LABELS,
       allPermissions: ALL_PERMISSIONS,
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin'],
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'],
       roleLabels: {
         veterinarian: 'Veterinarian',
         pet_owner: 'Pet Owner',
         farmer: 'Farmer',
         admin: 'Admin',
-        corporate_admin: 'Hospital Network Admin'
+        corporate_admin: 'Hospital Network Admin',
+        hospital_staff: 'Hospital Staff'
       }
     };
   }

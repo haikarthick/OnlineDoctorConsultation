@@ -4558,6 +4558,54 @@
     "failedToReset": "अनुमतियाँ रीसेट करने में विफल",
     "resetConfirm": "सभी अनुमतियों को डिफ़ॉल्ट पर रीसेट करें? यह पूर्ववत नहीं किया जा सकता।"
   },
+  "networkRoleMatrix": {
+    "title": "नेटवर्क भूमिका एक्सेस मैट्रिक्स",
+    "subtitle": "परिभाषित करता है कि प्रत्येक नेटवर्क भूमिका अस्पताल नेटवर्क में क्या कर सकती है",
+    "tabLabel": "नेटवर्क भूमिका मैट्रिक्स",
+    "feature": "Feature / Functionality",
+    "platformNote": "Network deactivation and final approval require Platform Admin access.",
+    "roles": {
+      "corporate_admin": "Network Admin",
+      "hospital_director": "Hospital Director",
+      "compliance_officer": "Compliance Officer",
+      "auditor": "Auditor",
+      "hospital_staff": "Hospital Staff"
+    },
+    "roleDescriptions": {
+      "corporateAdminDesc": "Full control over the network, settings, members, and hospitals",
+      "hospitalDirectorDesc": "Manages branch operations, members, and oversees clinical workflows",
+      "complianceOfficerDesc": "Monitors compliance, audit logs, and patient consent records",
+      "auditorDesc": "Read-only access to logs, analytics, and consent data for auditing",
+      "hospitalStaffDesc": "Handles day-to-day patient workflow, registration, and inpatient care"
+    },
+    "categories": {
+      "networkManagement": "Network Management",
+      "branchHospitals": "Branch Hospitals",
+      "memberManagement": "Member Management",
+      "complianceAudit": "Compliance & Audit",
+      "hospitalOperations": "Hospital Operations",
+      "analyticsReporting": "Analytics & Reporting"
+    },
+    "features": {
+      "viewNetworkDetails": "View Network Details",
+      "editNetworkSettings": "Edit Network Settings",
+      "deactivateNetwork": "Deactivate Network",
+      "viewBranchHospitals": "View Branch Hospitals",
+      "addHospitalToNetwork": "Add Hospital to Network",
+      "viewNetworkMembers": "View Network Members",
+      "addRemoveMembers": "Add / Remove Members",
+      "editMemberRoles": "Edit Member Roles",
+      "viewAuditLogs": "View Audit Logs",
+      "patientConsentManagement": "Patient Consent Management",
+      "hospitalWorkflowQueue": "Hospital Workflow & Queue",
+      "walkInRegistration": "Walk-in Registration",
+      "inpatientManagement": "Inpatient Management",
+      "networkDashboardStats": "Network Dashboard Stats",
+      "healthAnalytics": "Health Analytics",
+      "financialAnalytics": "Financial Analytics",
+      "interHospitalReferrals": "Inter-Hospital Referrals"
+    }
+  },
   "reviewModeration": {
     "title": "समीक्षा मॉडरेशन",
     "subtitle": "{{total}} कुल समीक्षाएँ · {{pending}} लंबित · {{flagged}} चिह्नित",

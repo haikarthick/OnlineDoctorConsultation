@@ -27,7 +27,7 @@ class HospitalNetworkController {
   }
 
   async updateNetwork(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!);
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, ['corporate_admin']);
     const updated = await HospitalNetworkService.updateNetwork(req.params.id, req.body, req.userId!);
     res.json({ success: true, data: updated });
   }
@@ -89,7 +89,7 @@ class HospitalNetworkController {
 
   // ─── Audit Log ─────────────────────────────────────────────────
   async getAuditLogs(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!);
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, ['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor']);
     const filters: any = {};
     if (req.query.page) filters.page = parseInt(req.query.page as string);
     if (req.query.limit) filters.limit = parseInt(req.query.limit as string);

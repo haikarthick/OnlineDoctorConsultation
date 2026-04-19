@@ -1896,3 +1896,22 @@
 </details>
 
 ---
+
+## 2026-04-19 13:13 · `d0c10e0` · OTHER
+
+**Commit:** rule: add End-to-End Testing Rule to copilot-instructions + LESSON-043  
+**Author:** haikarthick  
+**Categories:** CONFIG · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - .github/copilot-instructions.md
+  - memories/repo/auto-commit-log.md
+  - memories/repo/lessons.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
