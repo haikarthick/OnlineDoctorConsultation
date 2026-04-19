@@ -4883,7 +4883,12 @@
       "insurancePolicyNumber": "ಪಾಲಿಸಿ ನಂಬರ್",
       "insurancePolicyPlaceholder": "ಉದಾ., INS-2024-001234",
       "insuranceExpiry": "ಪಾಲಿಸಿ ಅವಧಿ ಮುಕ್ತಾಯ ದಿನಾಂಕ",
-      "insuranceExpired": "ಈ ವಿಮಾ ಪಾಲಿಸಿಯ ಅವಧಿ ಮುಗಿದಿದೆ"
+      "insuranceExpired": "ಈ ವಿಮಾ ಪಾಲಿಸಿಯ ಅವಧಿ ಮುಗಿದಿದೆ",
+      "selectBreed": "ತಳಿ ಆಯ್ಕೆಮಾಡಿ...",
+      "customBreed": "ಕಸ್ಟಮ್ ತಳಿ ಹೆಸರು",
+      "customBreedPlaceholder": "ತಳಿ ಹೆಸರು ನಮೂದಿಸಿ",
+      "animalEarTagId": "ಕಿವಿ ಟ್ಯಾಗ್ ID",
+      "animalEarTagPlaceholder": "ಉದಾ., ET-2024-001"
     },
     "noAnimalsFound": "ಯಾವುದೇ ಪ್ರಾಣಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
   },

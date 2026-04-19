@@ -4956,7 +4956,12 @@
       "insurancePolicyNumber": "Policy Number",
       "insurancePolicyPlaceholder": "e.g., INS-2024-001234",
       "insuranceExpiry": "Policy Expiry Date",
-      "insuranceExpired": "This insurance policy has expired"
+      "insuranceExpired": "This insurance policy has expired",
+      "selectBreed": "Select breed...",
+      "customBreed": "Custom Breed Name",
+      "customBreedPlaceholder": "Enter breed name",
+      "animalEarTagId": "Ear Tag ID",
+      "animalEarTagPlaceholder": "e.g., ET-2024-001"
     },
     "noAnimalsFound": "No animals found"
   },

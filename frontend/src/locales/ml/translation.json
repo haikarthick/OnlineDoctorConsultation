@@ -3857,7 +3857,12 @@
       "insurancePolicyNumber": "പോളിസി നമ്പർ",
       "insurancePolicyPlaceholder": "ഉദാ., INS-2024-001234",
       "insuranceExpiry": "പോളിസി കാലഹരണ തീയതി",
-      "insuranceExpired": "ഈ ഇൻഷുറൻസ് പോളിസിയുടെ കാലാവധി കഴിഞ്ഞു"
+      "insuranceExpired": "ഈ ഇൻഷുറൻസ് പോളിസിയുടെ കാലാവധി കഴിഞ്ഞു",
+      "selectBreed": "ഇനം തിരഞ്ഞെടുക്കുക...",
+      "customBreed": "കസ്റ്റം ഇനം പേര്",
+      "customBreedPlaceholder": "ഇനത്തിന്റെ പേര് നൽകുക",
+      "animalEarTagId": "ചെവി ടാഗ് ID",
+      "animalEarTagPlaceholder": "ഉദാ., ET-2024-001"
     },
     "noAnimalsFound": "മൃഗങ്ങളൊന്നും കണ്ടെത്തിയില്ല"
   },

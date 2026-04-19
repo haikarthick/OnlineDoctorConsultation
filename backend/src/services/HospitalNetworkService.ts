@@ -1100,6 +1100,7 @@ export class HospitalNetworkService {
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
     animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
+    animalEarTagId?: string;
     reasonForVisit?: string;
   }): Promise<{ patientId: string; networkPatientId: string; animalId: string; ownerId: string | null }> {
     try {
@@ -1141,8 +1142,9 @@ export class HospitalNetworkService {
            (name, species, breed, owner_id, unique_id, is_active,
             gender, date_of_birth, weight, color, microchip_id, registration_number,
             is_neutered, medical_notes, avatar_url,
-            insurance_provider, insurance_policy_number, insurance_expiry)
-         VALUES ($1, $2, $3, $4, $5, true, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+            insurance_provider, insurance_policy_number, insurance_expiry,
+            ear_tag_id)
+         VALUES ($1, $2, $3, $4, $5, true, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
          RETURNING id`,
         [
           data.animalName, data.animalSpecies, data.animalBreed || null, ownerId, animalUniqueId,
@@ -1158,6 +1160,7 @@ export class HospitalNetworkService {
           data.animalInsuranceProvider || null,
           data.animalInsurancePolicyNumber || null,
           data.animalInsuranceExpiry || null,
+          data.animalEarTagId || null,
         ]
       );
       const animalId = animalRes.rows[0].id;

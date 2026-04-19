@@ -4892,7 +4892,12 @@
       "insurancePolicyNumber": "पॉलिसी नंबर",
       "insurancePolicyPlaceholder": "उदा., INS-2024-001234",
       "insuranceExpiry": "पॉलिसी समाप्ति तिथि",
-      "insuranceExpired": "यह बीमा पॉलिसी समाप्त हो गई है"
+      "insuranceExpired": "यह बीमा पॉलिसी समाप्त हो गई है",
+      "selectBreed": "नस्ल चुनें...",
+      "customBreed": "कस्टम नस्ल का नाम",
+      "customBreedPlaceholder": "नस्ल का नाम दर्ज करें",
+      "animalEarTagId": "कान का टैग ID",
+      "animalEarTagPlaceholder": "उदा., ET-2024-001"
     },
     "noAnimalsFound": "कोई पशु नहीं मिला"
   },

@@ -4872,7 +4872,12 @@
       "insurancePolicyNumber": "పాలసీ నంబర్",
       "insurancePolicyPlaceholder": "ఉదా., INS-2024-001234",
       "insuranceExpiry": "పాలసీ గడువు తేదీ",
-      "insuranceExpired": "ఈ బీమా పాలసీ గడువు ముగిసింది"
+      "insuranceExpired": "ఈ బీమా పాలసీ గడువు ముగిసింది",
+      "selectBreed": "జాతి ఎంచుకోండి...",
+      "customBreed": "అనుకూల జాతి పేరు",
+      "customBreedPlaceholder": "జాతి పేరు నమోదు చేయండి",
+      "animalEarTagId": "చెవి ట్యాగ్ ID",
+      "animalEarTagPlaceholder": "ఉదా., ET-2024-001"
     },
     "noAnimalsFound": "జంతువులు కనుగొనబడలేదు"
   },

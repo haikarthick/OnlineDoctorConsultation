@@ -4881,7 +4881,12 @@
       "insurancePolicyNumber": "பாலிசி எண்",
       "insurancePolicyPlaceholder": "எ.கா., INS-2024-001234",
       "insuranceExpiry": "பாலிசி காலாவதி தேதி",
-      "insuranceExpired": "இந்த காப்பீட்டு பாலிசி காலாவதியாகிவிட்டது"
+      "insuranceExpired": "இந்த காப்பீட்டு பாலிசி காலாவதியாகிவிட்டது",
+      "selectBreed": "இனம் தேர்ந்தெடுக்கவும்...",
+      "customBreed": "தனிப்பயன் இன பெயர்",
+      "customBreedPlaceholder": "இன பெயரை உள்ளிடவும்",
+      "animalEarTagId": "காது குறி ID",
+      "animalEarTagPlaceholder": "எ.கா., ET-2024-001"
     },
     "noAnimalsFound": "எந்த விலங்கும் கிடைக்கவில்லை"
   },

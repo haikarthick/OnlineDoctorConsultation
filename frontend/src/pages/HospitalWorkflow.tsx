@@ -8,6 +8,41 @@ import VetSearchPicker from '../components/VetSearchPicker'
 
 const STAGES = ['triage', 'examination', 'treatment', 'observation', 'discharge'] as const
 const PRIORITIES = ['emergency', 'urgent', 'high', 'normal', 'low'] as const
+
+const WALKIN_BREED_DATABASE: Record<string, string[]> = {
+  Dog: ['Indian Pariah', 'Mudhol Hound', 'Rajapalayam', 'Labrador Retriever', 'Golden Retriever', 'German Shepherd', 'Beagle', 'Pug', 'Dachshund', 'Rottweiler', 'Doberman Pinscher', 'Great Dane', 'Siberian Husky', 'Shih Tzu', 'Pomeranian', 'Cocker Spaniel', 'Boxer', 'Dalmatian', 'Border Collie', 'Maltese', 'Poodle', 'French Bulldog', 'Yorkshire Terrier', 'Mixed Breed', 'Other'],
+  Cat: ['Persian', 'Siamese', 'Bengal', 'Maine Coon', 'Russian Blue', 'British Shorthair', 'Scottish Fold', 'Ragdoll', 'Himalayan', 'Bombay', 'Indian Domestic', 'Mixed Breed', 'Other'],
+  Rabbit: ['New Zealand White', 'Dutch', 'Rex', 'Angora', 'Mini Lop', 'Holland Lop', 'Flemish Giant', 'Lionhead', 'Mixed Breed', 'Other'],
+  Bird: ['Mixed / Unknown', 'Other'],
+  Parrot: ['African Grey', 'Blue and Gold Macaw', 'Cockatoo', 'Sun Conure', 'Alexandrine Parakeet', 'Rose-ringed Parakeet', 'Mixed', 'Other'],
+  Budgerigar: ['English Budgie', 'American Budgie', 'Lutino', 'Albino', 'Pied', 'Mixed', 'Other'],
+  Cockatiel: ['Normal Grey', 'Lutino', 'Pearl', 'Cinnamon', 'Pied', 'Mixed', 'Other'],
+  Tortoise: ['Indian Star Tortoise', 'Russian Tortoise', 'Sulcata', 'Mixed', 'Other'],
+  Snake: ['Ball Python', 'Corn Snake', 'Boa Constrictor', 'Mixed', 'Other'],
+  'Ornamental Fish': ['Betta', 'Guppy', 'Angelfish', 'Discus', 'Clownfish', 'Mixed', 'Other'],
+  Cattle: ['Gir', 'Sahiwal', 'Red Sindhi', 'Tharparkar', 'Ongole', 'Hallikar', 'Holstein Friesian (HF)', 'Jersey', 'Brown Swiss', 'Mixed Breed', 'Other'],
+  Buffalo: ['Murrah', 'Surti', 'Mehsana', 'Jaffarabadi', 'Nili-Ravi', 'Mixed', 'Other'],
+  Horse: ['Marwari', 'Kathiawari', 'Thoroughbred', 'Arabian', 'Quarter Horse', 'Mixed Breed', 'Other'],
+  Donkey: ['Indian Donkey', 'Halari', 'Mixed', 'Other'],
+  Sheep: ['Nellore', 'Deccani', 'Mandya', 'Bellary', 'Merino', 'Suffolk', 'Mixed Breed', 'Other'],
+  Goat: ['Jamunapari', 'Barbari', 'Sirohi', 'Black Bengal', 'Osmanabadi', 'Boer', 'Alpine', 'Saanen', 'Mixed Breed', 'Other'],
+  Pig: ['Desi (Indigenous)', 'Yorkshire (Large White)', 'Landrace', 'Duroc', 'Hampshire', 'Mixed Breed', 'Other'],
+  Camel: ['Dromedary (One-humped)', 'Bactrian (Two-humped)', 'Mixed', 'Other'],
+  Chicken: ['Aseel', 'Kadaknath', 'Broiler', 'White Leghorn', 'Rhode Island Red', 'Mixed Breed', 'Other'],
+  Duck: ['Indian Runner', 'Khaki Campbell', 'Pekin', 'Muscovy', 'Mixed', 'Other'],
+}
+const WALKIN_SPECIES_CATEGORIES = [
+  { label: 'Common Pets', species: ['Dog', 'Cat'] },
+  { label: 'Small Pets', species: ['Rabbit', 'Hamster', 'Guinea Pig', 'Gerbil', 'Chinchilla', 'Ferret', 'Hedgehog'] },
+  { label: 'Birds', species: ['Parrot', 'Budgerigar', 'Cockatiel', 'Lovebird', 'Finch', 'Canary', 'Pigeon', 'Bird'] },
+  { label: 'Reptiles', species: ['Tortoise', 'Turtle', 'Gecko', 'Bearded Dragon', 'Chameleon', 'Snake'] },
+  { label: 'Fish', species: ['Ornamental Fish', 'Koi', 'Goldfish'] },
+  { label: 'Livestock / Farm', species: ['Cattle', 'Buffalo', 'Horse', 'Donkey', 'Sheep', 'Goat', 'Pig', 'Camel', 'Yak', 'Deer'] },
+  { label: 'Poultry', species: ['Chicken', 'Duck', 'Turkey', 'Quail', 'Emu', 'Ostrich', 'Peacock'] },
+  { label: 'Exotic Large', species: ['Llama', 'Alpaca'] },
+  { label: 'Other', species: ['Other'] },
+]
+const WALKIN_EAR_TAG_SPECIES = ['Cattle', 'Buffalo', 'Sheep', 'Goat', 'Pig', 'Horse', 'Donkey', 'Camel', 'Yak', 'Deer', 'Emu', 'Ostrich', 'Llama', 'Alpaca']
 const PRIORITY_COLORS: Record<string, string> = {
   emergency: '#dc2626', urgent: '#ea580c', high: '#d97706', normal: '#2563eb', low: '#6b7280',
 }
@@ -83,6 +118,7 @@ export default function HospitalWorkflow() {
     animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '',
     animalIsNeutered: false, animalMedicalNotes: '',
     animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '',
+    animalEarTagId: '', animalCustomBreed: '',
   })
   const [walkInPhotoFile, setWalkInPhotoFile] = useState<File | null>(null)
   const [walkInPhotoPreview, setWalkInPhotoPreview] = useState<string>('')
@@ -164,7 +200,7 @@ export default function HospitalWorkflow() {
     setCheckInAnimal(null)
     setCheckInError('')
     setCheckInMode('search')
-    setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '' })
+    setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalCustomBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '', animalEarTagId: '' })
     setWalkInPhotoFile(null)
     setWalkInPhotoPreview('')
     setWalkInError('')
@@ -213,7 +249,7 @@ export default function HospitalWorkflow() {
       const commonAnimalData = {
         animalName: walkInForm.animalName.trim(),
         animalSpecies: walkInForm.animalSpecies.trim(),
-        animalBreed: walkInForm.animalBreed.trim() || undefined,
+        animalBreed: (walkInForm.animalBreed === 'Other' ? walkInForm.animalCustomBreed.trim() : walkInForm.animalBreed.trim()) || undefined,
         animalGender: walkInForm.animalGender || undefined,
         animalDob: walkInForm.animalDob || undefined,
         animalWeight: walkInForm.animalWeight ? parseFloat(walkInForm.animalWeight) : undefined,
@@ -226,6 +262,7 @@ export default function HospitalWorkflow() {
         animalInsuranceProvider: walkInForm.animalInsuranceProvider.trim() || undefined,
         animalInsurancePolicyNumber: walkInForm.animalInsurancePolicyNumber.trim() || undefined,
         animalInsuranceExpiry: walkInForm.animalInsuranceExpiry || undefined,
+        animalEarTagId: walkInForm.animalEarTagId.trim() || undefined,
       }
 
       let registered: { animalId: string; ownerId?: string; patientId?: string; networkPatientId?: string }
@@ -265,7 +302,7 @@ export default function HospitalWorkflow() {
         avatar_url: animalAvatarUrl,
       })
       setCheckInMode('search')
-      setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '' })
+      setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalCustomBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '', animalEarTagId: '' })
       setWalkInPhotoFile(null)
       setWalkInPhotoPreview('')
     } catch (err: any) {
@@ -695,25 +732,33 @@ export default function HospitalWorkflow() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                           <div>
                             <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.species')} <span style={{ color: '#dc2626' }}>*</span></label>
-                            <select value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
+                            <select value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value, animalBreed: '', animalCustomBreed: '' }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
                               <option value="">{t('hospitalWorkflow.walkIn.selectSpecies')}</option>
-                              <option value="dog">🐕 {t('common.species.dog')}</option>
-                              <option value="cat">🐈 {t('common.species.cat')}</option>
-                              <option value="bird">🐦 {t('common.species.bird')}</option>
-                              <option value="rabbit">🐇 {t('common.species.rabbit')}</option>
-                              <option value="horse">🐎 {t('common.species.horse')}</option>
-                              <option value="cow">🐄 {t('common.species.cow')}</option>
-                              <option value="goat">🐐 {t('common.species.goat')}</option>
-                              <option value="sheep">🐑 {t('common.species.sheep')}</option>
-                              <option value="pig">🐖 {t('common.species.pig')}</option>
-                              <option value="other">{t('common.species.other')}</option>
+                              {WALKIN_SPECIES_CATEGORIES.map(cat => (
+                                <optgroup key={cat.label} label={cat.label}>
+                                  {cat.species.map(sp => <option key={sp} value={sp}>{sp}</option>)}
+                                </optgroup>
+                              ))}
                             </select>
                           </div>
                           <div>
                             <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.breed')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                            <input placeholder={t('hospitalWorkflow.walkIn.breedPlaceholder')} value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                            {WALKIN_BREED_DATABASE[walkInForm.animalSpecies]?.length > 0 ? (
+                              <select value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value, animalCustomBreed: '' }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
+                                <option value="">{t('hospitalWorkflow.walkIn.selectBreed')}</option>
+                                {WALKIN_BREED_DATABASE[walkInForm.animalSpecies].map(b => <option key={b} value={b}>{b}</option>)}
+                              </select>
+                            ) : (
+                              <input placeholder={t('hospitalWorkflow.walkIn.breedPlaceholder')} value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                            )}
                           </div>
                         </div>
+                        {walkInForm.animalBreed === 'Other' && (
+                          <div>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.customBreed')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <input placeholder={t('hospitalWorkflow.walkIn.customBreedPlaceholder')} value={walkInForm.animalCustomBreed} onChange={e => setWalkInForm(f => ({ ...f, animalCustomBreed: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          </div>
+                        )}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                           <div>
                             <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalGender')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
@@ -758,6 +803,12 @@ export default function HospitalWorkflow() {
                           <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalRegistrationNumber')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
                           <input placeholder={t('hospitalWorkflow.walkIn.animalRegistrationPlaceholder')} value={walkInForm.animalRegistrationNumber} onChange={e => setWalkInForm(f => ({ ...f, animalRegistrationNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
                         </div>
+                        {WALKIN_EAR_TAG_SPECIES.includes(walkInForm.animalSpecies) && (
+                          <div style={{ gridColumn: '1 / -1' }}>
+                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalEarTagId')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <input placeholder={t('hospitalWorkflow.walkIn.animalEarTagPlaceholder')} value={walkInForm.animalEarTagId} onChange={e => setWalkInForm(f => ({ ...f, animalEarTagId: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          </div>
+                        )}
                       </div>
                     </div>
 

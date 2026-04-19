@@ -2281,6 +2281,7 @@ class ApiService {
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
     animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
+    animalEarTagId?: string;
     reasonForVisit?: string;
   }) {
     const response = await this.client.post(`/hospital-networks/${networkId}/register-walkin`, data)
@@ -2293,6 +2294,7 @@ class ApiService {
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
     animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
+    animalEarTagId?: string;
   }) {
     const response = await this.client.post(`/hospitals/${hospitalId}/register-walkin`, data)
     return response.data
