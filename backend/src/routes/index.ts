@@ -1819,7 +1819,18 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
 }));
 
 router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
   const db = (await import('../utils/database')).default;
+  // Secondary check: verify caller has appropriate network role
+  if (authReq.userRole !== 'admin') {
+    const callerMember = await db.query(
+      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [req.params.id, authReq.userId]
+    );
+    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
+      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can view invites' });
+    }
+  }
   const result = await db.query(
     `SELECT hsi.*, u.first_name AS "inviterFirstName", u.last_name AS "inviterLastName", vh.name AS "hospitalName" FROM hospital_staff_invites hsi JOIN users u ON u.id=hsi.invited_by LEFT JOIN vet_hospitals vh ON vh.id=hsi.hospital_id WHERE hsi.network_id=$1 ORDER BY hsi.created_at DESC`,
     [req.params.id]
@@ -1828,7 +1839,18 @@ router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewar
 }));
 
 router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
   const db = (await import('../utils/database')).default;
+  // Secondary check: verify caller has appropriate network role
+  if (authReq.userRole !== 'admin') {
+    const callerMember = await db.query(
+      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [req.params.id, authReq.userId]
+    );
+    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
+      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can manage invites' });
+    }
+  }
   await db.query(`UPDATE hospital_staff_invites SET status='revoked', updated_at=NOW() WHERE id=$1 AND network_id=$2 AND status='pending'`, [req.params.inviteId, req.params.id]);
   res.json({ success: true });
 }));
