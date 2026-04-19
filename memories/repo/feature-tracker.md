@@ -404,3 +404,27 @@
 - **Status:** done
 - **Description:** 6 security/bug fixes: vet permissions for hospital_network_manage+patient_consent_manage; walk-in invite membership check; enrollAnimal ownership+consent check with notification; walk-in registration consent tracking; inpatient network scoping with branch_network_id check; notifications wired into approve/addMember/removeMember/createReferral controller methods
 
+
+### ✅ P2-HIGH2 Hospital Assignment Consolidation
+- **Logged:** 2026-04-19 17:11
+- **Status:** done
+- **Description:** Replaced dual-path hospital assignment (vet_hospitals flags + junction table UNION) with canonical branch_network_id path. assignHospitalToNetwork now writes both paths atomically. listNetworkHospitals uses single canonical query eliminating duplicates. Added network_id column to inpatient_admissions in init.sql.
+
+
+### ✅ P2-HIGH4 Network Origin Badge for Walk-in Animals
+- **Logged:** 2026-04-19 17:11
+- **Status:** done
+- **Description:** listAnimalsByOwner now uses correlated subqueries to add networkId, networkName, networkEnrollmentStatus, networkVisibility fields. Uses most-recently-enrolled active context per animal. Safe additive approach, no duplicates.
+
+
+### ✅ P2-GAP1 Network Security Audit Trail
+- **Logged:** 2026-04-19 17:11
+- **Status:** done
+- **Description:** Added network_security_audit table to init.sql and database.ts migrations. Added logAudit method to HospitalNetworkService. Wired audit calls in HospitalNetworkController for addNetworkMember, removeNetworkMember, updateNetwork. Added GET /hospital-networks/:networkId/security-audit route with role check.
+
+
+### ✅ P2-GAP3 Time-Bound Network Member Permissions
+- **Logged:** 2026-04-19 17:11
+- **Status:** done
+- **Description:** Added valid_from/valid_until columns to hospital_network_members in init.sql and database.ts migrations. getNetworkMember and listNetworkMembers filter out expired memberships. addNetworkMember accepts validUntil param. Joi schema updated. Controller passes validUntil to service.
+

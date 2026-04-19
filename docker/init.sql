@@ -1037,6 +1037,7 @@ CREATE TABLE IF NOT EXISTS inpatient_admissions (
   vitals_log JSONB DEFAULT '[]',
   special_needs TEXT,
   daily_rate DECIMAL(10,2) DEFAULT 0,
+  network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -1055,6 +1056,7 @@ CREATE INDEX IF NOT EXISTS idx_referrals_status ON referrals(status);
 CREATE INDEX IF NOT EXISTS idx_inpatient_hospital ON inpatient_admissions(hospital_id);
 CREATE INDEX IF NOT EXISTS idx_inpatient_status ON inpatient_admissions(status);
 CREATE INDEX IF NOT EXISTS idx_inpatient_animal ON inpatient_admissions(animal_id);
+CREATE INDEX IF NOT EXISTS idx_inpatient_network ON inpatient_admissions(network_id);
 
 -- Triggers for new tables
 DROP TRIGGER IF EXISTS update_staff_positions_updated_at ON staff_positions;
@@ -1554,6 +1556,8 @@ CREATE TABLE IF NOT EXISTS hospital_network_members (
   granted_by UUID REFERENCES users(id) ON DELETE SET NULL,
   granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   notes TEXT,
+  valid_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  valid_until TIMESTAMP,
   UNIQUE(network_id, user_id)
 );
 
@@ -1582,7 +1586,27 @@ CREATE TABLE IF NOT EXISTS hospital_network_feature_flags (
   UNIQUE(network_id, feature_key)
 );
 
--- 39. ANIMAL CARE CONTEXTS (dual-ID patient linking: platform VC-ID + corporate patient ID)
+-- Network Security Audit Log
+CREATE TABLE IF NOT EXISTS network_security_audit (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  actor_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  action VARCHAR(100) NOT NULL,
+  target_type VARCHAR(50),
+  target_id VARCHAR(255),
+  old_value JSONB,
+  new_value JSONB,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_nsa_network ON network_security_audit(network_id);
+CREATE INDEX IF NOT EXISTS idx_nsa_actor ON network_security_audit(actor_id);
+CREATE INDEX IF NOT EXISTS idx_nsa_action ON network_security_audit(action);
+CREATE INDEX IF NOT EXISTS idx_nsa_created ON network_security_audit(created_at DESC);
+
+-- 39. ANIMAL CARE CONTEXTS(dual-ID patient linking: platform VC-ID + corporate patient ID)
 -- Represents an animal being treated in the context of a specific hospital network.
 -- An animal can have multiple contexts (different networks they've been treated at).
 CREATE TABLE IF NOT EXISTS animal_care_contexts (

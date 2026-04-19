@@ -33,6 +33,15 @@ class HospitalNetworkController {
   async updateNetwork(req: AuthRequest, res: Response): Promise<void> {
     await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'editNetworkSettings');
     const updated = await HospitalNetworkService.updateNetwork(req.params.id, req.body, req.userId!);
+    await HospitalNetworkService.logAudit({
+      networkId: req.params.id,
+      actorId: req.userId!,
+      action: 'network_updated',
+      targetType: 'network',
+      targetId: req.params.id,
+      newValue: req.body,
+      ipAddress: req.ip,
+    });
     res.json({ success: true, data: updated });
   }
 
@@ -69,9 +78,9 @@ class HospitalNetworkController {
 
   async addNetworkMember(req: AuthRequest, res: Response): Promise<void> {
     await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'addRemoveMembers');
-    const { userId, networkRole, hospitalId, notes } = req.body;
+    const { userId, networkRole, hospitalId, notes, validUntil } = req.body;
     if (!userId || !networkRole) throw new ValidationError('userId and networkRole are required');
-    await HospitalNetworkService.addNetworkMember(req.params.id, userId, networkRole, hospitalId, req.userId!);
+    await HospitalNetworkService.addNetworkMember(req.params.id, userId, networkRole, hospitalId, req.userId!, validUntil);
     // Notify added member
     try {
       await NotificationService.createNotification(
@@ -81,6 +90,15 @@ class HospitalNetworkController {
         'all', { networkId: req.params.id, networkRole }
       );
     } catch (notifErr: any) { logger.warn('Notify member added failed', { error: notifErr.message }); }
+    await HospitalNetworkService.logAudit({
+      networkId: req.params.id,
+      actorId: req.userId!,
+      action: 'member_added',
+      targetType: 'user',
+      targetId: userId,
+      newValue: { networkRole },
+      ipAddress: req.ip,
+    });
     res.status(201).json({ success: true, message: 'Member added to network' });
   }
 
@@ -96,6 +114,14 @@ class HospitalNetworkController {
         'in_app', { networkId: req.params.id }
       );
     } catch (notifErr: any) { logger.warn('Notify member removed failed', { error: notifErr.message }); }
+    await HospitalNetworkService.logAudit({
+      networkId: req.params.id,
+      actorId: req.userId!,
+      action: 'member_removed',
+      targetType: 'user',
+      targetId: req.params.userId,
+      ipAddress: req.ip,
+    });
     res.json({ success: true, message: 'Member removed from network' });
   }
 

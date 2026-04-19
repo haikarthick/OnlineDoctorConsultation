@@ -898,3 +898,35 @@ render-start.sh
 - **Fix:** Added hospital_network_members membership check before calling inviteWalkInPatient
 - **Rule:** Always verify caller is a network member before network-scoped mutation routes
 
+
+### NETWORK-001 — Walk-in invite route had no permission check
+- **Logged:** 2026-04-19 17:02
+- **Symptom:** Any authenticated user could invite patients to any network
+- **Root Cause:** Route had authMiddleware but no network membership check
+- **Fix:** Added hospital_network_members query before inviteWalkInPatient call
+- **Rule:** Always add ensureNetworkAccess or inline membership check on ALL /hospital-networks/:id/* routes
+
+
+### NETWORK-002 — enrollAnimal had no ownership check
+- **Logged:** 2026-04-19 17:02
+- **Symptom:** Any network admin could enroll any animal without owner consent
+- **Root Cause:** No check on animal.owner_id vs enrolledBy userId
+- **Fix:** Added ownership+consent+role check before enrollment proceeds
+- **Rule:** Before enrolling any animal: verify caller owns it OR has admin role + active consent
+
+
+### NETWORK-003 — Walk-in registration bypassed consent entirely
+- **Logged:** 2026-04-19 17:02
+- **Symptom:** Walk-in registration set enrollment_status=active regardless of consent
+- **Root Cause:** registerWalkInPatientDirect always wrote active status
+- **Fix:** Added consentCollected flag: status is pending_consent unless consent explicitly collected
+- **Rule:** Walk-in registration MUST collect and record consent; never auto-activate without it
+
+
+### NETWORK-004 — Inpatient routes had no network membership enforcement
+- **Logged:** 2026-04-19 17:02
+- **Symptom:** Vet from any network could access inpatient records of hospitals in other networks
+- **Root Cause:** Routes used hospitalId without checking network membership
+- **Fix:** Added checkInpatientNetworkAccess helper querying vet_hospitals.branch_network_id
+- **Rule:** All hospital-scoped routes must check network membership if hospital belongs to a network
+

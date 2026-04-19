@@ -429,6 +429,41 @@ router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHan
 router.get('/hospital-networks/:id/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getNetworkDashboard(req, res)));
 router.get('/hospital-networks/:id/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getAuditLogs(req, res)));
 
+// Network Security Audit Log
+router.get('/hospital-networks/:networkId/security-audit', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const userRole = (req as any).userRole;
+    if (userRole !== 'admin') {
+      const memberRes = await database.query(
+        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        [req.params.networkId, userId]
+      );
+      if (!memberRes.rows[0] || !['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor'].includes(memberRes.rows[0].network_role)) {
+        res.status(403).json({ success: false, error: 'Insufficient permissions to view audit log' });
+        return;
+      }
+    }
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const result = await database.query(
+      `SELECT nsa.id, nsa.action, nsa.target_type AS "targetType", nsa.target_id AS "targetId",
+              nsa.old_value AS "oldValue", nsa.new_value AS "newValue", nsa.ip_address AS "ipAddress",
+              nsa.created_at AS "createdAt",
+              u.first_name || ' ' || u.last_name AS "actorName"
+       FROM network_security_audit nsa
+       JOIN users u ON u.id = nsa.actor_id
+       WHERE nsa.network_id = $1
+       ORDER BY nsa.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [req.params.networkId, limit, offset]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}));
+
 // User search for network member invite (corporate_admin can search registered users by name/email)
 router.get('/network-user-search', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'hospital_staff', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {
   const search = ((req.query.q as string) || '').trim();

@@ -460,3 +460,10 @@
 - **Lesson:** Always add network_id FK when a permission/config table belongs to a parent entity. UNIQUE must include the parent key.
 - **Apply to:** All future per-entity permission tables
 
+
+### LESSON-036 — Network routes need membership check before ALL data operations
+- **Logged:** 2026-04-19 17:02
+- **Context:** Found 4 routes without network access guards
+- **Lesson:** Any route under /hospital-networks/:networkId/* or /hospitals/:hospitalId/* that modifies or reads sensitive data MUST verify network membership
+- **Apply to:** All future network hospital routes
+

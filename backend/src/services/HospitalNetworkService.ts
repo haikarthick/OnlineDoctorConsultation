@@ -371,15 +371,17 @@ export class HospitalNetworkService {
     userId: string,
     role: string,
     hospitalId?: string,
-    grantedBy?: string
+    grantedBy?: string,
+    validUntil?: string
   ): Promise<void> {
     try {
       await database.query(
-        `INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by)
-         VALUES ($1, $2, $3, $4, $5)
+        `INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by, valid_until)
+         VALUES ($1, $2, $3, $4, $5, $6)
          ON CONFLICT (network_id, user_id)
-         DO UPDATE SET network_role = $3, hospital_id = $4, is_active = true, granted_at = NOW()`,
-        [networkId, userId, role, hospitalId ?? null, grantedBy ?? null]
+         DO UPDATE SET network_role = $3, hospital_id = $4, is_active = true, granted_at = NOW(),
+                       valid_until = COALESCE($6, hospital_network_members.valid_until)`,
+        [networkId, userId, role, hospitalId ?? null, grantedBy ?? null, validUntil ?? null]
       );
     } catch (error: any) {
       logger.error('Failed to add network member', { error: error.message });
@@ -397,7 +399,8 @@ export class HospitalNetworkService {
        FROM hospital_network_members hnm
        JOIN users u ON hnm.user_id = u.id
        LEFT JOIN vet_hospitals vh ON hnm.hospital_id = vh.id
-       WHERE hnm.network_id = $1 AND hnm.user_id = $2 AND hnm.is_active = true`,
+       WHERE hnm.network_id = $1 AND hnm.user_id = $2 AND hnm.is_active = true
+         AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())`,
       [networkId, userId]
     );
     if (result.rows.length === 0) return null;
@@ -415,6 +418,7 @@ export class HospitalNetworkService {
        JOIN users u ON hnm.user_id = u.id
        LEFT JOIN vet_hospitals vh ON hnm.hospital_id = vh.id
        WHERE hnm.network_id = $1 AND hnm.is_active = true
+         AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())
        ORDER BY CASE hnm.network_role
          WHEN 'corporate_admin' THEN 1
          WHEN 'hospital_director' THEN 2
@@ -434,12 +438,51 @@ export class HospitalNetworkService {
     );
   }
 
+  async logAudit(params: {
+    networkId: string;
+    actorId: string;
+    action: string;
+    targetType?: string;
+    targetId?: string;
+    oldValue?: any;
+    newValue?: any;
+    ipAddress?: string;
+  }): Promise<void> {
+    try {
+      await database.query(
+        `INSERT INTO network_security_audit
+           (network_id, actor_id, action, target_type, target_id, old_value, new_value, ip_address)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          params.networkId, params.actorId, params.action,
+          params.targetType ?? null, params.targetId ?? null,
+          params.oldValue ? JSON.stringify(params.oldValue) : null,
+          params.newValue ? JSON.stringify(params.newValue) : null,
+          params.ipAddress ?? null,
+        ]
+      );
+    } catch (err: any) {
+      logger.warn('Audit log failed', { error: err.message });
+    }
+  }
+
   // ─── Hospital Assignment ───────────────────────────────────────
   async assignHospitalToNetwork(networkId: string, hospitalId: string, assignedBy: string): Promise<void> {
-    // Verify network exists
     await this.getNetworkById(networkId);
-
     try {
+      // Primary path: update vet_hospitals flags (canonical network membership)
+      await database.query(
+        `UPDATE vet_hospitals SET is_network_branch = true, branch_network_id = $1 WHERE id = $2`,
+        [networkId, hospitalId]
+      );
+      // Also insert into junction table (kept for backward compat queries)
+      await database.query(
+        `INSERT INTO hospital_network_hospitals (network_id, hospital_id, is_active)
+         VALUES ($1, $2, true)
+         ON CONFLICT (network_id, hospital_id) DO UPDATE SET is_active = true`,
+        [networkId, hospitalId]
+      );
+      // Add hospital owner as hospital_staff member if not already a member
       await database.query(
         `INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by)
          SELECT $1, u.id, 'hospital_staff', $2, $3
@@ -458,7 +501,7 @@ export class HospitalNetworkService {
   async listNetworkHospitals(networkId: string, page: number = 1, limit: number = 20): Promise<any> {
     const offset = (page - 1) * limit;
     const result = await database.query(
-      `SELECT DISTINCT vh.id,
+      `SELECT vh.id,
               vh.name,
               vh.city,
               vh.state,
@@ -471,38 +514,13 @@ export class HospitalNetworkService {
               (SELECT COUNT(*) FROM hospital_network_members
                WHERE network_id = $1 AND hospital_id = vh.id AND is_active = true) AS "staffCount"
        FROM vet_hospitals vh
-       WHERE vh.is_network_branch = true AND vh.branch_network_id = $1
-      UNION
-      SELECT DISTINCT vh.id,
-              vh.name,
-              vh.city,
-              vh.state,
-              vh.hospital_type AS "hospitalType",
-              vh.email AS "contactEmail",
-              vh.phone AS "contactPhone",
-              vh.is_verified AS "isVerified",
-              vh.is_network_branch AS "isNetworkBranch",
-              vh.specializations,
-              (SELECT COUNT(*) FROM hospital_network_members
-               WHERE network_id = $1 AND hospital_id = vh.id AND is_active = true) AS "staffCount"
-       FROM hospital_network_hospitals hnh
-       JOIN vet_hospitals vh ON hnh.hospital_id = vh.id
-       WHERE hnh.network_id = $1 AND hnh.is_active = true
-       ORDER BY name ASC
+       WHERE vh.branch_network_id = $1 AND vh.is_network_branch = true
+       ORDER BY vh.name ASC
        LIMIT $2 OFFSET $3`,
       [networkId, limit, offset]
     );
     const countResult = await database.query(
-      `SELECT COUNT(*) AS count FROM (
-        SELECT DISTINCT vh.id
-        FROM vet_hospitals vh
-        WHERE vh.is_network_branch = true AND vh.branch_network_id = $1
-        UNION
-        SELECT DISTINCT vh.id
-        FROM hospital_network_hospitals hnh
-        JOIN vet_hospitals vh ON hnh.hospital_id = vh.id
-        WHERE hnh.network_id = $1 AND hnh.is_active = true
-      ) AS combined`,
+      `SELECT COUNT(*) AS count FROM vet_hospitals WHERE branch_network_id = $1 AND is_network_branch = true`,
       [networkId]
     );
     const total = parseInt(countResult.rows[0]?.count ?? '0');
@@ -510,6 +528,7 @@ export class HospitalNetworkService {
       hospitals: result.rows,
       total,
       page,
+      limit,
       totalPages: Math.ceil(total / limit),
     };
   }

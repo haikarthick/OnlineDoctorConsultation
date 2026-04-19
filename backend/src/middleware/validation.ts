@@ -1380,6 +1380,7 @@ export const addNetworkMemberSchema = Joi.object({
     .required(),
   hospitalId: uuid.optional().allow(null),
   notes: shortText(500).optional().allow('', null),
+  validUntil: Joi.string().isoDate().optional().allow(null),
 });
 
 export const createPatientConsentSchema = Joi.object({

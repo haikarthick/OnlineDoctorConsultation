@@ -221,17 +221,30 @@ export class AnimalService {
   async listAnimalsByOwner(ownerId: string, limit: number = 20, offset: number = 0): Promise<{ animals: Animal[]; total: number }> {
     try {
       const query = `
-        SELECT id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
-               gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
-               registration_number as "registrationNumber", is_neutered as "isNeutered",
-               insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
-               insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
-               breeding_status as "breedingStatus", current_weight as "currentWeight",
-               weight_unit as "weightUnit", last_breeding_date as "lastBreedingDate",
-               expected_due_date as "expectedDueDate",
-               is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
-        FROM animals WHERE owner_id = $1 AND is_active = true
-        ORDER BY name ASC LIMIT $2 OFFSET $3
+        SELECT a.id, a.owner_id as "ownerId", a.unique_id as "uniqueId", a.name, a.species, a.breed, a.date_of_birth as "dateOfBirth",
+               a.gender, a.weight, a.color, a.microchip_id as "microchipId", a.ear_tag_id as "earTagId",
+               a.registration_number as "registrationNumber", a.is_neutered as "isNeutered",
+               a.insurance_provider as "insuranceProvider", a.insurance_policy_number as "insurancePolicyNumber",
+               a.insurance_expiry as "insuranceExpiry", a.medical_notes as "medicalNotes",
+               a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
+               a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
+               a.expected_due_date as "expectedDueDate",
+               a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
+               (SELECT acc.network_id FROM animal_care_contexts acc
+                WHERE acc.animal_id = a.id AND acc.is_active = true
+                ORDER BY acc.enrolled_at DESC LIMIT 1) AS "networkId",
+               (SELECT hn.name FROM animal_care_contexts acc
+                JOIN hospital_networks hn ON hn.id = acc.network_id
+                WHERE acc.animal_id = a.id AND acc.is_active = true
+                ORDER BY acc.enrolled_at DESC LIMIT 1) AS "networkName",
+               (SELECT acc.enrollment_status FROM animal_care_contexts acc
+                WHERE acc.animal_id = a.id AND acc.is_active = true
+                ORDER BY acc.enrolled_at DESC LIMIT 1) AS "networkEnrollmentStatus",
+               (SELECT acc.visibility FROM animal_care_contexts acc
+                WHERE acc.animal_id = a.id AND acc.is_active = true
+                ORDER BY acc.enrolled_at DESC LIMIT 1) AS "networkVisibility"
+        FROM animals a WHERE a.owner_id = $1 AND a.is_active = true
+        ORDER BY a.name ASC LIMIT $2 OFFSET $3
       `;
       const countQuery = `SELECT COUNT(*) as count FROM animals WHERE owner_id = $1 AND is_active = true`;
       const [animalsResult, countResult] = await Promise.all([
