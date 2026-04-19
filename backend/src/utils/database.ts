@@ -886,6 +886,7 @@ class PostgresDatabase {
     const enterpriseAlignmentDDL = [
       `ALTER TABLE inpatient_admissions ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
       `ALTER TABLE inpatient_admissions ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES animal_groups(id) ON DELETE SET NULL`,
+      `ALTER TABLE inpatient_admissions ADD COLUMN IF NOT EXISTS network_id UUID REFERENCES hospital_networks(id)`,
       `ALTER TABLE workflow_cases ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
       `ALTER TABLE referrals ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,
       `ALTER TABLE appointment_queue ADD COLUMN IF NOT EXISTS enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL`,

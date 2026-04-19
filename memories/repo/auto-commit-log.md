@@ -1970,3 +1970,30 @@
 </details>
 
 ---
+
+## 2026-04-19 16:02 · `572aa88` · ✨ FEAT
+
+**Commit:** feat: network role matrix now scoped per-network (networkId as parent key)  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (12)</summary>
+
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/NetworkRolePermissionService.ts
+  - backend/src/utils/database.ts
+  - frontend/src/pages/admin/PermissionManagement.tsx
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/pages/hospitalnetwork/NetworkRoleMatrix.tsx
+  - frontend/src/services/api.ts
+  - memories/repo/auto-commit-log.md
+  - memories/repo/feature-tracker.md
+  - memories/repo/lessons.md
+
+</details>
+
+---

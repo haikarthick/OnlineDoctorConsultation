@@ -453,3 +453,10 @@
 - **Lesson:** All future HospitalNetworkController enforcement changes
 - **Apply to:** All future work
 
+
+### LESSON-035 — Network-scoped permission tables need networkId as FK not global
+- **Logged:** 2026-04-19 16:03
+- **Context:** Global network_role_permissions table had UNIQUE(network_role, action) — worked across all networks but couldn't differ per network
+- **Lesson:** Always add network_id FK when a permission/config table belongs to a parent entity. UNIQUE must include the parent key.
+- **Apply to:** All future per-entity permission tables
+

@@ -169,7 +169,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     // Holiday management
     'admin_holidays',
     // Hospital Network
-    'hospital_network_view',
+    'hospital_network_view', 'hospital_network_manage',
+    // Patient consent
+    'patient_consent_manage',
     // Wallet
     'wallet',
     // Actions

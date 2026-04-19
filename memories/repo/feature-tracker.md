@@ -392,3 +392,15 @@
 - **Status:** done
 - **Description:** DB-backed network role permission matrix: admin can click cells to toggle access per role/action. Enforced via DB in HospitalNetworkController. 17 actions x 5 roles. Platform-only actions locked.
 
+
+### ✅ Network Role Matrix (per-network scoped)
+- **Logged:** 2026-04-19 16:03
+- **Status:** done
+- **Description:** Role access matrix for hospital network roles, scoped per network_id. Editable only within Hospital Networks section (not PermissionManagement). Each network has its own permission rows in network_role_permissions table with UNIQUE(network_id, network_role, action). Falls back to code defaults for networks with no DB rows. Tab only visible when a network is selected.
+
+
+### ✅ Hospital Network Security Hardening
+- **Logged:** 2026-04-19 16:59
+- **Status:** done
+- **Description:** 6 security/bug fixes: vet permissions for hospital_network_manage+patient_consent_manage; walk-in invite membership check; enrollAnimal ownership+consent check with notification; walk-in registration consent tracking; inpatient network scoping with branch_network_id check; notifications wired into approve/addMember/removeMember/createReferral controller methods
+

@@ -1,6 +1,7 @@
 import database from '../utils/database';
 import { DatabaseError, NotFoundError, ForbiddenError, ValidationError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
+import NotificationService from './NotificationService';
 
 // ─── Interfaces ──────────────────────────────────────────────
 export interface HospitalNetwork {
@@ -28,6 +29,7 @@ export interface HospitalNetwork {
   metadata?: any;
   createdAt: Date;
   updatedAt: Date;
+  createdBy?: string;
   // joined
   approvedByName?: string;
   memberCount?: number;
@@ -868,6 +870,29 @@ export class HospitalNetworkService {
       if (!animalRes.rows[0]) throw new NotFoundError('Animal');
       const animal = animalRes.rows[0];
 
+      // Ownership / consent check: only the owner, or a network admin with consent, can enroll
+      const ownerCheck = await database.query(
+        `SELECT 1 FROM animals WHERE id = $1 AND owner_id = $2`,
+        [data.animalId, data.enrolledBy]
+      );
+      const consentCheck = await database.query(
+        `SELECT 1 FROM patient_data_consent 
+         WHERE animal_id = $1 AND granted_to_network_id = $2 AND status = 'active'`,
+        [data.animalId, data.networkId]
+      );
+      const userRoleRes = await database.query(
+        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        [data.networkId, data.enrolledBy]
+      );
+      const userNetworkRole = userRoleRes.rows[0]?.network_role;
+      const isOwner = ownerCheck.rows.length > 0;
+      const hasConsent = consentCheck.rows.length > 0;
+      const isNetworkAdmin = ['corporate_admin', 'hospital_director'].includes(userNetworkRole);
+
+      if (!isOwner && !hasConsent && !isNetworkAdmin) {
+        throw new ForbiddenError('You do not have permission to enroll this animal. Only the owner or a network admin can enroll animals.');
+      }
+
       const networkPatientId = await this.generateNetworkPatientId(data.networkId, animal.species);
       const netRes = await database.query(`SELECT name FROM hospital_networks WHERE id = $1`, [data.networkId]);
       const networkName = netRes.rows[0]?.name ?? 'Hospital Network';
@@ -891,8 +916,17 @@ export class HospitalNetworkService {
         [data.animalId, data.networkId, data.hospitalId ?? null, animal.unique_id, networkPatientId, data.enrolledBy, data.notes ?? null]
       );
 
-      // TODO: Send in-app notification to animal owner via NotificationService
-      // (not inlined here to avoid circular dependencies — caller may handle separately)
+      // Notify the animal owner about the enrollment request
+      try {
+        const notifTitle = 'Network Enrollment Request';
+        const notifMessage = `${networkName} has requested to enroll your animal "${animal.animal_name}" into their network. Please review and accept or decline.`;
+        await NotificationService.createNotification(
+          animal.owner_id, 'enrollment_requested', notifTitle, notifMessage, 'all',
+          { networkId: data.networkId, networkName, animalId: data.animalId, animalName: animal.animal_name }
+        );
+      } catch (notifErr: any) {
+        logger.warn('Failed to send enrollment notification', { error: notifErr.message });
+      }
       logger.info('Enrollment request created', { networkName, animalName: animal.animal_name, ownerId: animal.owner_id });
 
       return result.rows[0];
@@ -1102,6 +1136,7 @@ export class HospitalNetworkService {
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
     animalEarTagId?: string;
     reasonForVisit?: string;
+    consentCollected?: boolean; consentMethod?: string;
   }): Promise<{ patientId: string; networkPatientId: string; animalId: string; ownerId: string | null }> {
     try {
       // Verify the registering user is a network member
@@ -1165,20 +1200,38 @@ export class HospitalNetworkService {
       );
       const animalId = animalRes.rows[0].id;
 
-      // Enroll directly as active — no consent needed for walk-in treatment
+      // Enroll — active if consent was collected, pending_consent otherwise
+      const enrollmentStatus = data.consentCollected === true ? 'active' : 'pending_consent';
       const networkPatientId = await this.generateNetworkPatientId(data.networkId, data.animalSpecies);
       const contextRes = await database.query(
         `INSERT INTO animal_care_contexts
            (animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id,
             enrolled_by, visibility, enrollment_status, enrollment_requested_at, enrollment_responded_at, notes)
-         VALUES ($1, $2, $3, $4, $5, $6, 'network_only', 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $7)
+         VALUES ($1, $2, $3, $4, $5, $6, 'network_only', $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $8)
          ON CONFLICT (animal_id, network_id) DO UPDATE
-           SET enrollment_status = 'active', enrollment_responded_at = CURRENT_TIMESTAMP,
+           SET enrollment_status = $7, enrollment_responded_at = CURRENT_TIMESTAMP,
                hospital_id = EXCLUDED.hospital_id, is_active = true
          RETURNING id`,
         [animalId, data.networkId, data.hospitalId, animalUniqueId, networkPatientId,
-         data.registeredBy, data.reasonForVisit || 'Walk-in registration']
+         data.registeredBy, enrollmentStatus, data.reasonForVisit || 'Walk-in registration']
       );
+
+      // Notify owner about walk-in registration (if they have an email)
+      if (data.patientEmail && ownerId) {
+        try {
+          const networkRes = await database.query(`SELECT name FROM hospital_networks WHERE id = $1`, [data.networkId]);
+          const networkName = networkRes.rows[0]?.name ?? 'the hospital';
+          await NotificationService.createNotification(
+            ownerId, 'walkin_registered',
+            'Walk-in Registration Completed',
+            `Your animal "${data.animalName}" has been registered at ${networkName}. ${data.consentCollected ? 'Consent was collected at registration.' : 'Please log in to review and confirm the enrollment.'}`,
+            data.consentCollected ? 'in_app' : 'all',
+            { networkId: data.networkId, animalId, consentRequired: !data.consentCollected }
+          );
+        } catch (notifErr: any) {
+          logger.warn('Failed to send walk-in registration notification', { error: notifErr.message });
+        }
+      }
 
       logger.info('Walk-in patient registered directly', { networkPatientId, animalName: data.animalName, hospitalId: data.hospitalId });
 
@@ -1267,6 +1320,7 @@ export class HospitalNetworkService {
       approvedByName: row.approvedByName,
       memberCount: row.memberCount !== undefined ? parseInt(row.memberCount) : undefined,
       hospitalCount: row.hospitalCount !== undefined ? parseInt(row.hospitalCount) : undefined,
+      createdBy: row.created_by,
     };
   }
 

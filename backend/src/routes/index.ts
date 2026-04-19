@@ -602,23 +602,33 @@ router.get('/hospital-networks/:networkId/all-enrollments', authMiddleware, asyn
 // Invite a walk-in patient (no platform account)
 router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).userId;
+    // Verify the caller is an active member of this network
+    const memberRes = await database.query(
+      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      [req.params.networkId, userId]
+    );
+    if (memberRes.rows.length === 0) {
+      res.status(403).json({ success: false, error: 'You must be a network member to invite patients' });
+      return;
+    }
     const { patientName, patientEmail, patientPhone, animalName, animalSpecies, hospitalId, message } = req.body;
-    if (!patientName || !patientEmail) { res.status(400).json({ success: false, message: 'patientName and patientEmail are required' }); return; }
+    if (!patientName || !patientEmail) { res.status(400).json({ success: false, error: 'patientName and patientEmail are required' }); return; }
     const result = await HospitalNetworkService.inviteWalkInPatient({
       networkId: req.params.networkId, hospitalId, patientName, patientEmail,
       patientPhone, animalName, animalSpecies, message,
-    }, (req as any).userId);
-    res.json(result);
+    }, userId);
+    res.json({ success: true, data: result });
   } catch (err: any) {
     logger.error('Route error', { path: req.path, error: err.message });
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ success: false, error: err.message || 'Internal server error' });
   }
 }));
 
 // Direct walk-in patient registration — no invite needed, treatment starts immediately
 router.post('/hospital-networks/:networkId/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit } = req.body;
+    const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit, consentCollected, consentMethod } = req.body;
     if (!patientName || !animalName || !animalSpecies || !hospitalId) {
       res.status(400).json({ success: false, message: 'patientName, animalName, animalSpecies, and hospitalId are required' }); return;
     }
@@ -629,6 +639,8 @@ router.post('/hospital-networks/:networkId/register-walkin', authMiddleware, asy
       animalColor, animalMicrochipId, animalRegistrationNumber,
       animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true',
       animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit,
+      consentCollected: consentCollected === true || consentCollected === 'true',
+      consentMethod: consentMethod || 'verbal',
     });
     res.json({ success: true, data: result });
   } catch (err: any) {
@@ -1042,9 +1054,38 @@ router.get('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler((req
 router.post('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.createReferral(req, res)));
 router.patch('/referrals/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateReferralStatus(req, res)));
 // Inpatient / Boarding
-router.get('/hospitals/:hospitalId/inpatient/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getInpatientDashboard(req, res)));
-router.get('/hospitals/:hospitalId/inpatient', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listInpatients(req, res)));
-router.post('/hospitals/:hospitalId/inpatient/admit', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.admitPatient(req, res)));
+// Network-aware inpatient access helper
+async function checkInpatientNetworkAccess(req: Request, res: Response): Promise<boolean> {
+  const userId = (req as any).userId;
+  const userRole = (req as any).userRole;
+  if (userRole === 'admin') return true;
+  const hospitalId = req.params.hospitalId;
+  const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
+  const networkId = hospitalRes.rows[0]?.branch_network_id;
+  if (!networkId) return true; // standalone hospital — no network check needed
+  const memberRes = await database.query(
+    `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+    [networkId, userId]
+  );
+  if (memberRes.rows.length === 0) {
+    res.status(403).json({ success: false, error: 'You are not a member of the network that owns this hospital' });
+    return false;
+  }
+  return true;
+}
+
+router.get('/hospitals/:hospitalId/inpatient/dashboard', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.getInpatientDashboard(req, res);
+}));
+router.get('/hospitals/:hospitalId/inpatient', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.listInpatients(req, res);
+}));
+router.post('/hospitals/:hospitalId/inpatient/admit', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.admitPatient(req, res);
+}));
 router.patch('/inpatient/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateInpatientStatus(req, res)));
 router.post('/inpatient/:id/vitals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.addVitalsLog(req, res)));
 router.put('/inpatient/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateInpatientDetails(req, res)));

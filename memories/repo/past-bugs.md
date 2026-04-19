@@ -890,3 +890,11 @@ render-start.sh
 - **Fix:** Always pass requiredRoles to ensureNetworkAccess for write operations
 - **Rule:** Not specified
 
+
+### SECURITY-001 — Hospital Network walk-in invite had no membership check
+- **Logged:** 2026-04-19 16:59
+- **Symptom:** Any authenticated user could call /hospital-networks/:id/invite-walkin without being a member
+- **Root Cause:** No membership check on the route
+- **Fix:** Added hospital_network_members membership check before calling inviteWalkInPatient
+- **Rule:** Always verify caller is a network member before network-scoped mutation routes
+

@@ -11,3 +11,10 @@
 
 ---
 
+## Network Hospital Integration Analysis
+- **Logged:** 2026-04-19 16:52
+- **Finding:** CRITICAL-1: No network_id on medical tables (consultations, medical_records, prescriptions, inpatient_admissions, lab_results, vaccinations, workflow_cases, video_sessions). CRITICAL-2: enrollAnimal() has no ownership check - corporate_admin can enroll any animal without owner consent. CRITICAL-3: Walk-in registration creates user+animal+active enrollment BEFORE consent collected. CRITICAL-4: inpatient_admissions has no network_id - any vet can access any hospital inpatients. HIGH-1: Single role per user (users.role VARCHAR) blocks vet+corporate_admin dual role. HIGH-2: Two hospital assignment paths (is_network_branch flag + junction table) - same hospital can be in multiple networks. HIGH-3: veterinarian role only has hospital_network_view, cannot manage own network. HIGH-4: Walk-in animals appear in pet owner My Animals with no network context badge. HIGH-5: Consultations/prescriptions mixed between platform and network with no network_id. HIGH-6: ZERO notifications for any network hospital event (TODO comment exists at line 894). MEDIUM-1: Consent is per-network not per-hospital-branch. MEDIUM-2: Two referral systems (referrals + network_referrals) with no link. MEDIUM-3: Dynamic roles will break all hardcoded role name comparisons. MEDIUM-4: walk-in invite endpoint has NO permission check - any user can call it.
+- **Context:** Deep code analysis of network hospital integration against full platform - April 2026
+
+---
+

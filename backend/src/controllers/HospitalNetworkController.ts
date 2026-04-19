@@ -2,7 +2,10 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import HospitalNetworkService from '../services/HospitalNetworkService';
 import NetworkRolePermissionService from '../services/NetworkRolePermissionService';
+import NotificationService from '../services/NotificationService';
 import { ValidationError, ForbiddenError } from '../utils/errors';
+import database from '../utils/database';
+import logger from '../utils/logger';
 
 class HospitalNetworkController {
 
@@ -36,6 +39,18 @@ class HospitalNetworkController {
   async approveNetwork(req: AuthRequest, res: Response): Promise<void> {
     if (req.userRole !== 'admin') throw new ForbiddenError('Only admins can approve hospital networks');
     await HospitalNetworkService.approveNetwork(req.params.id, req.userId!);
+    // Notify network creator
+    try {
+      const network = await HospitalNetworkService.getNetworkById(req.params.id);
+      if (network?.createdBy) {
+        await NotificationService.createNotification(
+          network.createdBy, 'network_approved',
+          '🎉 Hospital Network Approved',
+          `Your hospital network "${network.name}" has been approved and is now active.`,
+          'all', { networkId: req.params.id, networkName: network.name }
+        );
+      }
+    } catch (notifErr: any) { logger.warn('Notify network approval failed', { error: notifErr.message }); }
     res.json({ success: true, message: 'Hospital network approved' });
   }
 
@@ -57,12 +72,30 @@ class HospitalNetworkController {
     const { userId, networkRole, hospitalId, notes } = req.body;
     if (!userId || !networkRole) throw new ValidationError('userId and networkRole are required');
     await HospitalNetworkService.addNetworkMember(req.params.id, userId, networkRole, hospitalId, req.userId!);
+    // Notify added member
+    try {
+      await NotificationService.createNotification(
+        userId, 'network_member_added',
+        '🏥 Added to Hospital Network',
+        `You have been added to a hospital network as ${networkRole}. Check your Network Memberships page for details.`,
+        'all', { networkId: req.params.id, networkRole }
+      );
+    } catch (notifErr: any) { logger.warn('Notify member added failed', { error: notifErr.message }); }
     res.status(201).json({ success: true, message: 'Member added to network' });
   }
 
   async removeNetworkMember(req: AuthRequest, res: Response): Promise<void> {
     await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'addRemoveMembers');
     await HospitalNetworkService.removeNetworkMember(req.params.id, req.params.userId);
+    // Notify removed member
+    try {
+      await NotificationService.createNotification(
+        req.params.userId, 'network_member_removed',
+        'Removed from Hospital Network',
+        'You have been removed from a hospital network. Contact the network admin if you believe this is an error.',
+        'in_app', { networkId: req.params.id }
+      );
+    } catch (notifErr: any) { logger.warn('Notify member removed failed', { error: notifErr.message }); }
     res.json({ success: true, message: 'Member removed from network' });
   }
 
@@ -125,6 +158,26 @@ class HospitalNetworkController {
   async createNetworkReferral(req: AuthRequest, res: Response): Promise<void> {
     const data = { ...req.body, createdBy: req.userId!, fromVetId: req.userId! };
     const referral = await HospitalNetworkService.createNetworkReferral(data);
+    // Notify directors of the receiving hospital
+    try {
+      const refData = req.body;
+      if (refData.toHospitalId) {
+        const directors = await database.query(
+          `SELECT hnm.user_id FROM hospital_network_members hnm
+           JOIN vet_hospitals vh ON vh.branch_network_id = hnm.network_id
+           WHERE vh.id = $1 AND hnm.network_role IN ('hospital_director', 'corporate_admin') AND hnm.is_active = true`,
+          [refData.toHospitalId]
+        );
+        for (const director of directors.rows) {
+          await NotificationService.createNotification(
+            director.user_id, 'referral_received',
+            '📋 New Patient Referral',
+            `A new inter-hospital referral has been received. Please review in the Referrals tab.`,
+            'in_app', { networkId: req.body.networkId, referralId: referral.id }
+          );
+        }
+      }
+    } catch (notifErr: any) { logger.warn('Notify referral failed', { error: notifErr.message }); }
     res.status(201).json({ success: true, data: referral });
   }
 
