@@ -1083,7 +1083,7 @@ export class VetHospitalService {
       const animalId = animalRes.rows[0].id;
 
       logger.info('Walk-in patient registered (standalone)', { animalId, hospitalId: data.hospitalId });
-      return { ownerId, animalId };
+      return { ownerId: ownerId!, animalId };
     } catch (err: any) {
       throw new Error(`Walk-in registration failed: ${err.message}`);
     }

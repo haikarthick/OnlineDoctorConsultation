@@ -1755,3 +1755,22 @@
 </details>
 
 ---
+
+## 2026-04-15 01:15 · `92b6ef2` · 🐛 FIX
+
+**Commit:** fix: queue_entries→appointment_queue + inpatient_admissions column fixes  
+**Author:** haikarthick  
+**Categories:** SERVICE · DB-SCHEMA · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/smoke-test-email.js
+  - backend/src/services/HospitalNetworkService.ts
+  - docker/seed-demo-data.sql
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

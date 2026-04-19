@@ -1097,7 +1097,7 @@ export class HospitalNetworkService {
     patientName: string; patientPhone?: string; patientEmail?: string;
     animalName: string; animalSpecies: string; animalBreed?: string;
     reasonForVisit?: string;
-  }): Promise<{ patientId: string; networkPatientId: string; animalId: string }> {
+  }): Promise<{ patientId: string; networkPatientId: string; animalId: string; ownerId: string | null }> {
     try {
       // Verify the registering user is a network member
       const member = await this.getNetworkMember(data.networkId, data.registeredBy);
