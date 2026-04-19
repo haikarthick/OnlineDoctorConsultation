@@ -4865,7 +4865,14 @@
       "photoUploadHint": "ఫోటో అప్‌లోడ్ చేయడానికి క్లిక్ చేయండి",
       "photoChangeHint": "ఫోటో మార్చడానికి క్లిక్ చేయండి",
       "removePhoto": "తొలగించు",
-      "identificationDetails": "గుర్తింపు"
+      "identificationDetails": "గుర్తింపు",
+      "insuranceSection": "బీమా వివరాలు",
+      "insuranceProvider": "బీమా సంస్థ",
+      "insuranceProviderPlaceholder": "ఉదా., BlueCross, PetFirst",
+      "insurancePolicyNumber": "పాలసీ నంబర్",
+      "insurancePolicyPlaceholder": "ఉదా., INS-2024-001234",
+      "insuranceExpiry": "పాలసీ గడువు తేదీ",
+      "insuranceExpired": "ఈ బీమా పాలసీ గడువు ముగిసింది"
     },
     "noAnimalsFound": "జంతువులు కనుగొనబడలేదు"
   },

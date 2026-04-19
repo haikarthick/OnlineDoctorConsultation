@@ -4876,7 +4876,14 @@
       "photoUploadHint": "ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ಕ್ಲಿಕ್ ಮಾಡಿ",
       "photoChangeHint": "ಫೋಟೋ ಬದಲಾಯಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ",
       "removePhoto": "ತೆಗೆದುಹಾಕಿ",
-      "identificationDetails": "ಗುರುತಿಸುವಿಕೆ"
+      "identificationDetails": "ಗುರುತಿಸುವಿಕೆ",
+      "insuranceSection": "ವಿಮಾ ವಿವರಗಳು",
+      "insuranceProvider": "ವಿಮಾ ಕಂಪನಿ",
+      "insuranceProviderPlaceholder": "ಉದಾ., BlueCross, PetFirst",
+      "insurancePolicyNumber": "ಪಾಲಿಸಿ ನಂಬರ್",
+      "insurancePolicyPlaceholder": "ಉದಾ., INS-2024-001234",
+      "insuranceExpiry": "ಪಾಲಿಸಿ ಅವಧಿ ಮುಕ್ತಾಯ ದಿನಾಂಕ",
+      "insuranceExpired": "ಈ ವಿಮಾ ಪಾಲಿಸಿಯ ಅವಧಿ ಮುಗಿದಿದೆ"
     },
     "noAnimalsFound": "ಯಾವುದೇ ಪ್ರಾಣಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
   },

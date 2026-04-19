@@ -3850,7 +3850,14 @@
       "photoUploadHint": "ഫോട്ടോ അപ്‌ലോഡ് ചെയ്യാൻ ക്ലിക്ക് ചെയ്യുക",
       "photoChangeHint": "ഫോട്ടോ മാറ്റാൻ ക്ലിക്ക് ചെയ്യുക",
       "removePhoto": "നീക്കം ചെയ്യുക",
-      "identificationDetails": "തിരിച്ചറിയൽ"
+      "identificationDetails": "തിരിച്ചറിയൽ",
+      "insuranceSection": "ഇൻഷുറൻസ് വിവരങ്ങൾ",
+      "insuranceProvider": "ഇൻഷുറൻസ് ദാതാവ്",
+      "insuranceProviderPlaceholder": "ഉദാ., BlueCross, PetFirst",
+      "insurancePolicyNumber": "പോളിസി നമ്പർ",
+      "insurancePolicyPlaceholder": "ഉദാ., INS-2024-001234",
+      "insuranceExpiry": "പോളിസി കാലഹരണ തീയതി",
+      "insuranceExpired": "ഈ ഇൻഷുറൻസ് പോളിസിയുടെ കാലാവധി കഴിഞ്ഞു"
     },
     "noAnimalsFound": "മൃഗങ്ങളൊന്നും കണ്ടെത്തിയില്ല"
   },

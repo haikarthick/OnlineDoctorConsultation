@@ -4885,7 +4885,14 @@
       "photoUploadHint": "फोटो अपलोड करने के लिए क्लिक करें",
       "photoChangeHint": "फोटो बदलने के लिए क्लिक करें",
       "removePhoto": "हटाएं",
-      "identificationDetails": "पहचान"
+      "identificationDetails": "पहचान",
+      "insuranceSection": "बीमा विवरण",
+      "insuranceProvider": "बीमा प्रदाता",
+      "insuranceProviderPlaceholder": "उदा., BlueCross, PetFirst",
+      "insurancePolicyNumber": "पॉलिसी नंबर",
+      "insurancePolicyPlaceholder": "उदा., INS-2024-001234",
+      "insuranceExpiry": "पॉलिसी समाप्ति तिथि",
+      "insuranceExpired": "यह बीमा पॉलिसी समाप्त हो गई है"
     },
     "noAnimalsFound": "कोई पशु नहीं मिला"
   },

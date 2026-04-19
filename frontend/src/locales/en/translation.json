@@ -4949,7 +4949,14 @@
       "photoUploadHint": "Click to upload a photo",
       "photoChangeHint": "Click to change photo",
       "removePhoto": "Remove",
-      "identificationDetails": "Identification"
+      "identificationDetails": "Identification",
+      "insuranceSection": "Insurance Details",
+      "insuranceProvider": "Insurance Provider",
+      "insuranceProviderPlaceholder": "e.g., BlueCross, PetFirst",
+      "insurancePolicyNumber": "Policy Number",
+      "insurancePolicyPlaceholder": "e.g., INS-2024-001234",
+      "insuranceExpiry": "Policy Expiry Date",
+      "insuranceExpired": "This insurance policy has expired"
     },
     "noAnimalsFound": "No animals found"
   },

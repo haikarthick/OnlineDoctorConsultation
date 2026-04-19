@@ -368,3 +368,9 @@
 - **Status:** done
 - **Description:** Network hospital staff can register new walk-in patients directly from the Check In Patient modal. Collects owner name/phone/email + animal name/species/breed, calls /hospital-networks/:networkId/register-walkin, auto-selects animal for immediate check-in. Only shown when hospital.branchNetworkId is set.
 
+
+### ✅ Walk-in Registration Form Expansion
+- **Logged:** 2026-04-19 12:17
+- **Status:** done
+- **Description:** Full animal attributes + photo upload added to hospital walk-in form. Fields: gender, DOB, weight, color, microchip ID, registration number, is_neutered, medical_notes, owner address, avatar_url. All optional except ownerName, animalName, animalSpecies. Base64 photo stored in animals.avatar_url. All 6 locale files updated.
+

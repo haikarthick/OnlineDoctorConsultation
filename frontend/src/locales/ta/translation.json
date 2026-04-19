@@ -4874,7 +4874,14 @@
       "photoUploadHint": "புகைப்படம் பதிவேற்ற கிளிக் செய்யவும்",
       "photoChangeHint": "புகைப்படம் மாற்ற கிளிக் செய்யவும்",
       "removePhoto": "நீக்கு",
-      "identificationDetails": "அடையாளம்"
+      "identificationDetails": "அடையாளம்",
+      "insuranceSection": "காப்பீட்டு விவரங்கள்",
+      "insuranceProvider": "காப்பீட்டு நிறுவனம்",
+      "insuranceProviderPlaceholder": "எ.கா., BlueCross, PetFirst",
+      "insurancePolicyNumber": "பாலிசி எண்",
+      "insurancePolicyPlaceholder": "எ.கா., INS-2024-001234",
+      "insuranceExpiry": "பாலிசி காலாவதி தேதி",
+      "insuranceExpired": "இந்த காப்பீட்டு பாலிசி காலாவதியாகிவிட்டது"
     },
     "noAnimalsFound": "எந்த விலங்கும் கிடைக்கவில்லை"
   },

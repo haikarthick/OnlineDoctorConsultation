@@ -82,6 +82,7 @@ export default function HospitalWorkflow() {
     animalGender: '', animalDob: '', animalWeight: '',
     animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '',
     animalIsNeutered: false, animalMedicalNotes: '',
+    animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '',
   })
   const [walkInPhotoFile, setWalkInPhotoFile] = useState<File | null>(null)
   const [walkInPhotoPreview, setWalkInPhotoPreview] = useState<string>('')
@@ -163,7 +164,7 @@ export default function HospitalWorkflow() {
     setCheckInAnimal(null)
     setCheckInError('')
     setCheckInMode('search')
-    setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '' })
+    setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '' })
     setWalkInPhotoFile(null)
     setWalkInPhotoPreview('')
     setWalkInError('')
@@ -222,6 +223,9 @@ export default function HospitalWorkflow() {
         animalIsNeutered: walkInForm.animalIsNeutered,
         animalMedicalNotes: walkInForm.animalMedicalNotes.trim() || undefined,
         animalAvatarUrl,
+        animalInsuranceProvider: walkInForm.animalInsuranceProvider.trim() || undefined,
+        animalInsurancePolicyNumber: walkInForm.animalInsurancePolicyNumber.trim() || undefined,
+        animalInsuranceExpiry: walkInForm.animalInsuranceExpiry || undefined,
       }
 
       let registered: { animalId: string; ownerId?: string; patientId?: string; networkPatientId?: string }
@@ -261,7 +265,7 @@ export default function HospitalWorkflow() {
         avatar_url: animalAvatarUrl,
       })
       setCheckInMode('search')
-      setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '' })
+      setWalkInForm({ ownerName: '', ownerPhone: '', ownerEmail: '', ownerAddress: '', animalName: '', animalSpecies: '', animalBreed: '', animalGender: '', animalDob: '', animalWeight: '', animalColor: '', animalMicrochipId: '', animalRegistrationNumber: '', animalIsNeutered: false, animalMedicalNotes: '', animalInsuranceProvider: '', animalInsurancePolicyNumber: '', animalInsuranceExpiry: '' })
       setWalkInPhotoFile(null)
       setWalkInPhotoPreview('')
     } catch (err: any) {
@@ -767,6 +771,26 @@ export default function HospitalWorkflow() {
                         rows={3}
                         style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, resize: 'vertical' }}
                       />
+                    </div>
+
+                    {/* Insurance Details */}
+                    <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>🛡️ {t('hospitalWorkflow.walkIn.insuranceSection')}</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div>
+                        <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.insuranceProvider')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                        <input placeholder={t('hospitalWorkflow.walkIn.insuranceProviderPlaceholder')} value={walkInForm.animalInsuranceProvider} onChange={e => setWalkInForm(f => ({ ...f, animalInsuranceProvider: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                      </div>
+                      <div>
+                        <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.insurancePolicyNumber')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                        <input placeholder={t('hospitalWorkflow.walkIn.insurancePolicyPlaceholder')} value={walkInForm.animalInsurancePolicyNumber} onChange={e => setWalkInForm(f => ({ ...f, animalInsurancePolicyNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                      </div>
+                    </div>
+                    <div>
+                      <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.insuranceExpiry')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                      <input type="date" value={walkInForm.animalInsuranceExpiry} onChange={e => setWalkInForm(f => ({ ...f, animalInsuranceExpiry: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                      {walkInForm.animalInsuranceExpiry && new Date(walkInForm.animalInsuranceExpiry) < new Date() && (
+                        <div style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>⚠️ {t('hospitalWorkflow.walkIn.insuranceExpired')}</div>
+                      )}
                     </div>
 
                     <div style={{ fontSize: 12, color: '#94a3b8' }}><span style={{ color: '#dc2626' }}>*</span> Required field</div>
