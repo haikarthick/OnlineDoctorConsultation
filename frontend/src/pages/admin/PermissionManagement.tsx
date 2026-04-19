@@ -196,7 +196,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
         >🔑 {t('networkRoleMatrix.tabLabel')}</button>
       </div>
 
-      {pageTab === 'network' && <NetworkRoleMatrix />}
+      {pageTab === 'network' && <NetworkRoleMatrix adminMode={true} />}
 
       {pageTab === 'system' && (<>
       {error && (

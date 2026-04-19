@@ -31,6 +31,7 @@ import {
   // Admin
   toggleUserStatusSchema, changeUserRoleSchema, processRefundSchema, moderateReviewSchema, updateSystemSettingSchema,
   updatePermissionSchema, bulkUpdatePermissionsSchema, resetPermissionsSchema,
+  updateNetworkRolePermissionSchema, resetNetworkRolePermissionsSchema,
   // Enterprise
   createEnterpriseSchema, updateEnterpriseSchema, addMemberSchema, updateMemberSchema,
   createAnimalGroupSchema, updateAnimalGroupSchema, assignAnimalToGroupSchema,
@@ -106,6 +107,7 @@ import { FileController } from '../controllers/FileController';
 import { uploadAny } from '../middleware/upload';
 import AdminService from '../services/AdminService';
 import PermissionService from '../services/PermissionService';
+import NetworkRolePermissionService from '../services/NetworkRolePermissionService';
 import VetProfileService from '../services/VetProfileService';
 import UserService from '../services/UserService';
 import VaccineProtocolService from '../services/VaccineProtocolService';
@@ -875,6 +877,27 @@ router.post('/admin/permissions/reset', authMiddleware, roleMiddleware(['admin']
   await PermissionService.resetToDefaults(role);
   const updated = await PermissionService.getFullPermissionMatrix();
   res.json({ success: true, data: { matrix: updated }, message: `Permissions reset to defaults for ${role}` });
+}));
+
+// ─── Network Role Permissions (admin-configurable) ────────────────────────────
+router.get('/admin/network-role-permissions', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  const matrix = await NetworkRolePermissionService.getMatrix();
+  const metadata = NetworkRolePermissionService.getMetadata();
+  res.json({ success: true, data: { matrix, metadata } });
+}));
+
+router.put('/admin/network-role-permissions', authMiddleware, roleMiddleware(['admin']), validateBody(updateNetworkRolePermissionSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { networkRole, action, isEnabled } = req.body;
+  await NetworkRolePermissionService.updatePermission(networkRole, action, isEnabled, authReq.userId!);
+  res.json({ success: true, message: `Network permission '${action}' for '${networkRole}' set to ${isEnabled}` });
+}));
+
+router.post('/admin/network-role-permissions/reset', authMiddleware, roleMiddleware(['admin']), validateBody(resetNetworkRolePermissionsSchema), asyncHandler(async (req: Request, res: Response) => {
+  const { networkRole } = req.body;
+  await NetworkRolePermissionService.resetToDefaults(networkRole);
+  const matrix = await NetworkRolePermissionService.getMatrix();
+  res.json({ success: true, data: { matrix }, message: networkRole ? `Network permissions reset for ${networkRole}` : 'All network role permissions reset to defaults' });
 }));
 
 // ═══════════════════════════════════════════════════════════════

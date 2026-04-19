@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import HospitalNetworkService from '../services/HospitalNetworkService';
+import NetworkRolePermissionService from '../services/NetworkRolePermissionService';
 import { ValidationError, ForbiddenError } from '../utils/errors';
 
 class HospitalNetworkController {
@@ -27,7 +28,7 @@ class HospitalNetworkController {
   }
 
   async updateNetwork(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, ['corporate_admin']);
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'editNetworkSettings');
     const updated = await HospitalNetworkService.updateNetwork(req.params.id, req.body, req.userId!);
     res.json({ success: true, data: updated });
   }
@@ -52,7 +53,7 @@ class HospitalNetworkController {
   }
 
   async addNetworkMember(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, ['corporate_admin', 'hospital_director']);
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'addRemoveMembers');
     const { userId, networkRole, hospitalId, notes } = req.body;
     if (!userId || !networkRole) throw new ValidationError('userId and networkRole are required');
     await HospitalNetworkService.addNetworkMember(req.params.id, userId, networkRole, hospitalId, req.userId!);
@@ -60,7 +61,7 @@ class HospitalNetworkController {
   }
 
   async removeNetworkMember(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, ['corporate_admin', 'hospital_director']);
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'addRemoveMembers');
     await HospitalNetworkService.removeNetworkMember(req.params.id, req.params.userId);
     res.json({ success: true, message: 'Member removed from network' });
   }
@@ -75,7 +76,7 @@ class HospitalNetworkController {
   }
 
   async assignHospitalToNetwork(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, ['corporate_admin']);
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'addHospitalToNetwork');
     await HospitalNetworkService.assignHospitalToNetwork(req.params.id, req.params.hospitalId, req.userId!);
     res.status(201).json({ success: true, message: 'Hospital assigned to network' });
   }
@@ -89,7 +90,7 @@ class HospitalNetworkController {
 
   // ─── Audit Log ─────────────────────────────────────────────────
   async getAuditLogs(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, ['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor']);
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'viewAuditLogs');
     const filters: any = {};
     if (req.query.page) filters.page = parseInt(req.query.page as string);
     if (req.query.limit) filters.limit = parseInt(req.query.limit as string);
@@ -168,7 +169,7 @@ class HospitalNetworkController {
     networkId: string,
     userId: string,
     userRole: string,
-    requiredRoles?: string[]
+    actionOrRoles?: string | string[]
   ): Promise<void> {
     if (userRole === 'admin') return;
 
@@ -176,8 +177,17 @@ class HospitalNetworkController {
     const membership = members.find((m) => m.userId === userId);
     if (!membership) throw new ForbiddenError('You do not have access to this network');
 
-    if (requiredRoles && !requiredRoles.includes(membership.networkRole)) {
-      throw new ForbiddenError('Insufficient role for this action');
+    if (actionOrRoles) {
+      if (Array.isArray(actionOrRoles)) {
+        // Legacy path: check against hardcoded role list
+        if (!actionOrRoles.includes(membership.networkRole)) {
+          throw new ForbiddenError('Insufficient role for this action');
+        }
+      } else {
+        // DB-backed path: check network_role_permissions table
+        const hasAccess = await NetworkRolePermissionService.checkAccess(membership.networkRole, actionOrRoles);
+        if (!hasAccess) throw new ForbiddenError('Insufficient role for this action');
+      }
     }
   }
 }

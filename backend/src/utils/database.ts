@@ -4,6 +4,7 @@ import logger from './logger';
 import * as fs from 'fs';
 import * as path from 'path';
 import PermissionService from '../services/PermissionService';
+import NetworkRolePermissionService from '../services/NetworkRolePermissionService';
 import RefreshTokenService from '../services/RefreshTokenService';
 import VetHospitalService from '../services/VetHospitalService';
 
@@ -79,6 +80,10 @@ class PostgresDatabase {
       // Ensure RBAC permission table and seed defaults
       try { await PermissionService.ensureTable(); } catch (e: any) { logger.warn('PermissionService.ensureTable failed', { error: e.message }); }
       try { await PermissionService.seedDefaults(); } catch (e: any) { logger.warn('PermissionService.seedDefaults failed', { error: e.message }); }
+
+      // Ensure network role permissions table and seed defaults
+      try { await NetworkRolePermissionService.ensureTable(); } catch (e: any) { logger.warn('NetworkRolePermissionService.ensureTable failed', { error: e.message }); }
+      try { await NetworkRolePermissionService.seedDefaults(); } catch (e: any) { logger.warn('NetworkRolePermissionService.seedDefaults failed', { error: e.message }); }
 
       // Ensure refresh tokens table
       try { await RefreshTokenService.ensureTable(); } catch (e: any) { logger.warn('RefreshTokenService.ensureTable failed', { error: e.message }); }

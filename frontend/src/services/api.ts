@@ -880,6 +880,21 @@ class ApiService {
     return response.data
   }
 
+  async adminGetNetworkRolePermissions() {
+    const response = await this.client.get('/admin/network-role-permissions')
+    return response.data
+  }
+
+  async adminUpdateNetworkRolePermission(networkRole: string, action: string, isEnabled: boolean) {
+    const response = await this.client.put('/admin/network-role-permissions', { networkRole, action, isEnabled })
+    return response.data
+  }
+
+  async adminResetNetworkRolePermissions(networkRole?: string) {
+    const response = await this.client.post('/admin/network-role-permissions/reset', { networkRole })
+    return response.data
+  }
+
   // ─── Health check ──────────────────────────────────────────
   async healthCheck() {
     const response = await this.client.get('/health')

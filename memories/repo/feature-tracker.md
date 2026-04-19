@@ -380,3 +380,9 @@
 - **Status:** done
 - **Description:** Species dropdown now uses grouped optgroups (Pets/Farm/Exotic). Breed field shows smart dropdown when breeds exist for selected species; 'Other' shows custom breed text input. Ear tag ID field appears conditionally for livestock species. All 6 locale files updated. 18-param SQL INSERT complete.
 
+
+### ✅ Network Hospital Role Access Matrix
+- **Logged:** 2026-04-19 13:52
+- **Status:** done
+- **Description:** Static matrix showing 5 network roles (corporate_admin, hospital_director, compliance_officer, auditor, hospital_staff) x 15 features across 6 categories. Added as tab in HospitalNetworks.tsx and PermissionManagement.tsx. Also fixed backend enforcement gaps: updateNetwork restricted to corporate_admin, getAuditLogs restricted to management roles. hospital_staff added to all PermissionService role lists. corporate_admin gained hospital_workflow+inpatient_manage permissions. All 6 locale files updated.
+

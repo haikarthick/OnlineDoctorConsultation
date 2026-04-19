@@ -373,6 +373,16 @@ export const resetPermissionsSchema = Joi.object({
   role: Joi.string().required(),
 });
 
+export const updateNetworkRolePermissionSchema = Joi.object({
+  networkRole: Joi.string().required(),
+  action: Joi.string().required(),
+  isEnabled: Joi.boolean().required(),
+});
+
+export const resetNetworkRolePermissionsSchema = Joi.object({
+  networkRole: Joi.string().optional(),
+});
+
 // ─── Enterprise ──────────────────────────────────────────────
 export const createEnterpriseSchema = Joi.object({
   name: shortText().required(),

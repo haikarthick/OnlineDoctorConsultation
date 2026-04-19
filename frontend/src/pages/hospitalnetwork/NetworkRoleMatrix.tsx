@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import apiService from '../../services/api';
 import './NetworkRoleMatrix.css';
 
 type AccessLevel = 'full' | 'view' | 'none' | 'platform_only';
@@ -16,6 +17,10 @@ interface MatrixRow {
 interface MatrixCategory {
   categoryKey: string;
   rows: MatrixRow[];
+}
+
+interface NetworkRoleMatrixProps {
+  adminMode?: boolean;
 }
 
 const MATRIX_DATA: MatrixCategory[] = [
@@ -85,15 +90,143 @@ const ROLE_DESCRIPTIONS: Record<string, { icon: string; descKey: string }> = {
   hospital_staff: { icon: '👩‍⚕️', descKey: 'hospitalStaffDesc' },
 };
 
-const NetworkRoleMatrix: React.FC = () => {
+/** Actions that cannot be toggled (controlled by platform admin only) */
+const PLATFORM_ONLY_ACTIONS = ['deactivateNetwork'];
+
+const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ adminMode = false }) => {
   const { t } = useTranslation();
+
+  // Admin-mode state
+  const [dbMatrix, setDbMatrix] = useState<Record<string, Record<string, boolean>>>({});
+  const [loadingMatrix, setLoadingMatrix] = useState(false);
+  const [savingCell, setSavingCell] = useState<string | null>(null);
+  const [resettingRole, setResettingRole] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const loadMatrix = useCallback(async () => {
+    if (!adminMode) return;
+    try {
+      setLoadingMatrix(true);
+      setError('');
+      const res = await apiService.adminGetNetworkRolePermissions();
+      setDbMatrix(res.data?.matrix || {});
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'Failed to load network permissions');
+    } finally {
+      setLoadingMatrix(false);
+    }
+  }, [adminMode]);
+
+  useEffect(() => { loadMatrix(); }, [loadMatrix]);
+
+  const handleToggle = async (networkRole: string, featureKey: string) => {
+    if (!adminMode || PLATFORM_ONLY_ACTIONS.includes(featureKey)) return;
+    const current = dbMatrix[networkRole]?.[featureKey] ?? false;
+    const newValue = !current;
+    const cellKey = `${networkRole}.${featureKey}`;
+
+    setDbMatrix(prev => ({
+      ...prev,
+      [networkRole]: { ...prev[networkRole], [featureKey]: newValue },
+    }));
+
+    try {
+      setSavingCell(cellKey);
+      setError('');
+      await apiService.adminUpdateNetworkRolePermission(networkRole, featureKey, newValue);
+      setSuccess(`Saved: ${featureKey} for ${networkRole}`);
+      setTimeout(() => setSuccess(''), 2000);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'Failed to save permission');
+      setDbMatrix(prev => ({
+        ...prev,
+        [networkRole]: { ...prev[networkRole], [featureKey]: current },
+      }));
+    } finally {
+      setSavingCell(null);
+    }
+  };
+
+  const handleResetRole = async (networkRole: string) => {
+    if (!adminMode) return;
+    try {
+      setResettingRole(networkRole);
+      setError('');
+      const res = await apiService.adminResetNetworkRolePermissions(networkRole);
+      setDbMatrix(res.data?.matrix || {});
+      setSuccess(`Reset ${networkRole} to defaults`);
+      setTimeout(() => setSuccess(''), 2500);
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'Failed to reset permissions');
+    } finally {
+      setResettingRole(null);
+    }
+  };
+
+  const renderCell = (role: typeof NETWORK_ROLES[number], row: MatrixRow) => {
+    const featureKey = row.featureKey;
+    const isPlatformOnly = PLATFORM_ONLY_ACTIONS.includes(featureKey);
+    const staticLevel = row[role];
+    const cellKey = `${role}.${featureKey}`;
+    const isSaving = savingCell === cellKey;
+
+    if (!adminMode) {
+      const cfg = ACCESS_CONFIG[staticLevel];
+      return (
+        <td key={role} className={`nrm-cell ${cfg.className}`} title={cfg.label}>
+          {cfg.icon}
+        </td>
+      );
+    }
+
+    // Admin mode: show toggle
+    if (isPlatformOnly) {
+      return (
+        <td key={role} className="nrm-cell nrm-cell-platform" title="Platform Admin Only — not configurable">
+          🔐
+        </td>
+      );
+    }
+
+    const isEnabled = dbMatrix[role]?.[featureKey] ?? (staticLevel !== 'none' && staticLevel !== 'platform_only');
+    return (
+      <td
+        key={role}
+        className={`nrm-cell nrm-cell-toggle ${isEnabled ? 'nrm-cell-full' : 'nrm-cell-none'}`}
+        title={isEnabled ? 'Click to disable' : 'Click to enable'}
+        onClick={() => handleToggle(role, featureKey)}
+        style={{ cursor: isSaving ? 'wait' : 'pointer' }}
+      >
+        {isSaving ? '⏳' : isEnabled ? '✅' : '❌'}
+      </td>
+    );
+  };
 
   return (
     <div className="nrm-container">
       <div className="nrm-header">
-        <h2 className="nrm-title">🔑 {t('networkRoleMatrix.title')}</h2>
-        <p className="nrm-subtitle">{t('networkRoleMatrix.subtitle')}</p>
+        <div>
+          <h2 className="nrm-title">🔑 {t('networkRoleMatrix.title')}</h2>
+          <p className="nrm-subtitle">
+            {adminMode
+              ? 'Click any cell to toggle access. Changes take effect immediately.'
+              : t('networkRoleMatrix.subtitle')}
+          </p>
+        </div>
+        {adminMode && loadingMatrix && <span className="nrm-loading">⏳ Loading...</span>}
       </div>
+
+      {error && (
+        <div className="module-alert error" style={{ marginBottom: 16 }}>
+          ⚠️ {error} <button onClick={() => setError('')} style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+        </div>
+      )}
+      {success && (
+        <div className="module-alert success" style={{ marginBottom: 16 }}>
+          ✅ {success}
+        </div>
+      )}
 
       {/* Role description cards */}
       <div className="nrm-role-cards">
@@ -102,18 +235,37 @@ const NetworkRoleMatrix: React.FC = () => {
             <div className="nrm-role-icon">{ROLE_DESCRIPTIONS[role].icon}</div>
             <div className="nrm-role-name">{t(`networkRoleMatrix.roles.${role}`)}</div>
             <div className="nrm-role-desc">{t(`networkRoleMatrix.roleDescriptions.${ROLE_DESCRIPTIONS[role].descKey}`)}</div>
+            {adminMode && (
+              <button
+                className="nrm-reset-btn"
+                onClick={() => handleResetRole(role)}
+                disabled={resettingRole === role}
+                title={`Reset ${role} to defaults`}
+              >
+                {resettingRole === role ? '⏳' : '↺'} Reset
+              </button>
+            )}
           </div>
         ))}
       </div>
 
       {/* Legend */}
-      <div className="nrm-legend">
-        {(Object.entries(ACCESS_CONFIG) as [AccessLevel, typeof ACCESS_CONFIG[AccessLevel]][]).map(([level, cfg]) => (
-          <span key={level} className={`nrm-legend-item ${cfg.className}`}>
-            {cfg.icon} {cfg.label}
-          </span>
-        ))}
-      </div>
+      {!adminMode && (
+        <div className="nrm-legend">
+          {(Object.entries(ACCESS_CONFIG) as [AccessLevel, typeof ACCESS_CONFIG[AccessLevel]][]).map(([level, cfg]) => (
+            <span key={level} className={`nrm-legend-item ${cfg.className}`}>
+              {cfg.icon} {cfg.label}
+            </span>
+          ))}
+        </div>
+      )}
+      {adminMode && (
+        <div className="nrm-legend">
+          <span className="nrm-legend-item nrm-cell-full">✅ Enabled (click to disable)</span>
+          <span className="nrm-legend-item nrm-cell-none">❌ Disabled (click to enable)</span>
+          <span className="nrm-legend-item nrm-cell-platform">🔐 Platform Admin Only (not configurable)</span>
+        </div>
+      )}
 
       {/* Matrix table */}
       <div className="nrm-table-wrapper">
@@ -142,15 +294,7 @@ const NetworkRoleMatrix: React.FC = () => {
                     <td className="nrm-feature-name">
                       {t(`networkRoleMatrix.features.${row.featureKey}`)}
                     </td>
-                    {NETWORK_ROLES.map(role => {
-                      const level = row[role];
-                      const cfg = ACCESS_CONFIG[level];
-                      return (
-                        <td key={role} className={`nrm-cell ${cfg.className}`} title={cfg.label}>
-                          {cfg.icon}
-                        </td>
-                      );
-                    })}
+                    {NETWORK_ROLES.map(role => renderCell(role, row))}
                   </tr>
                 ))}
               </React.Fragment>
@@ -159,11 +303,18 @@ const NetworkRoleMatrix: React.FC = () => {
         </table>
       </div>
 
-      <p className="nrm-note">
-        🔐 {t('networkRoleMatrix.platformNote')}
-      </p>
+      {adminMode ? (
+        <p className="nrm-note">
+          ⚙️ Changes are saved immediately and enforced in real-time. Use Reset to restore role defaults.
+        </p>
+      ) : (
+        <p className="nrm-note">
+          🔐 {t('networkRoleMatrix.platformNote')}
+        </p>
+      )}
     </div>
   );
 };
 
 export default NetworkRoleMatrix;
+

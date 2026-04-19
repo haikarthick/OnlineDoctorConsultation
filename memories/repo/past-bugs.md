@@ -874,3 +874,19 @@ render-start.sh
 - **Fix:** Changed VARCHAR(500) to TEXT in init.sql (both users and animals tables); added ALTER COLUMN TYPE TEXT migration in database.ts to fix existing production columns
 - **Rule:** NEVER use VARCHAR with a fixed limit for any column that stores base64 image data or URLs to user-uploaded content — always use TEXT
 
+
+### PERM-001 — hospital_staff excluded from PermissionService
+- **Logged:** 2026-04-19 13:52
+- **Symptom:** getFullPermissionMatrix, updatePermission, bulkUpdate, resetToDefaults, getPermissionMetadata all had hardcoded 5-role list excluding hospital_staff
+- **Root Cause:** Fixed: added hospital_staff to all 5 hardcoded role lists in PermissionService.ts
+- **Fix:** Always include ALL system roles when hardcoding role lists in PermissionService
+- **Rule:** Not specified
+
+
+### PERM-002 — updateNetwork allowed any network member to edit
+- **Logged:** 2026-04-19 13:52
+- **Symptom:** ensureNetworkAccess called with no requiredRoles on updateNetwork endpoint - any member could edit network settings
+- **Root Cause:** Fixed: added corporateadmin to requiredRoles in HospitalNetworkController.ts
+- **Fix:** Always pass requiredRoles to ensureNetworkAccess for write operations
+- **Rule:** Not specified
+

@@ -158,6 +158,45 @@
 .nrm-cell-none { opacity: 0.5; }
 .nrm-cell-platform { background: #faf5ff12; }
 
+/* Editable toggle cells (adminMode) */
+.nrm-cell-toggle {
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  user-select: none;
+}
+.nrm-cell-toggle:hover {
+  filter: brightness(0.85);
+}
+
+/* Reset button inside role cards */
+.nrm-reset-btn {
+  margin-top: 8px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  background: transparent;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  color: #718096;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nrm-reset-btn:hover:not(:disabled) {
+  background: #edf2f7;
+  border-color: #a0aec0;
+  color: #4a5568;
+}
+.nrm-reset-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading indicator */
+.nrm-loading {
+  color: #718096;
+  font-size: 0.85rem;
+  align-self: center;
+}
+
 .nrm-note {
   margin-top: 16px;
   font-size: 0.82rem;
