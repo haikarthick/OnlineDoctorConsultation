@@ -374,3 +374,9 @@
 - **Status:** done
 - **Description:** Full animal attributes + photo upload added to hospital walk-in form. Fields: gender, DOB, weight, color, microchip ID, registration number, is_neutered, medical_notes, owner address, avatar_url. All optional except ownerName, animalName, animalSpecies. Base64 photo stored in animals.avatar_url. All 6 locale files updated.
 
+
+### ✅ Walk-in Form — Ear Tag + Smart Breed Dropdown
+- **Logged:** 2026-04-19 12:41
+- **Status:** done
+- **Description:** Species dropdown now uses grouped optgroups (Pets/Farm/Exotic). Breed field shows smart dropdown when breeds exist for selected species; 'Other' shows custom breed text input. Ear tag ID field appears conditionally for livestock species. All 6 locale files updated. 18-param SQL INSERT complete.
+

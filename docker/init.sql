@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR(20) DEFAULT '',
   password_hash VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT true,
-  avatar_url VARCHAR(500),
+  avatar_url TEXT,
   unique_id VARCHAR(20) UNIQUE,
   default_enterprise_id UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS animals (
   acquisition_date DATE,
   acquisition_source VARCHAR(200),
   production_type VARCHAR(50),
-  avatar_url VARCHAR(500),
+  avatar_url TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

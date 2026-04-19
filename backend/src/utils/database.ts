@@ -401,9 +401,18 @@ class PostgresDatabase {
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS weight_unit VARCHAR(10) DEFAULT 'kg'`,
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS last_weighed_at TIMESTAMP`,
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS current_location_id UUID`,
-      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(500)`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS avatar_url TEXT`,
     ];
     for (const ddl of animalColumns) {
+      await this.pool.query(ddl).catch(() => {});
+    }
+
+    // Widen avatar_url columns from VARCHAR(500) to TEXT (base64 photos exceed 500 chars)
+    const widenAvatarUrl = [
+      `ALTER TABLE animals ALTER COLUMN avatar_url TYPE TEXT`,
+      `ALTER TABLE users ALTER COLUMN avatar_url TYPE TEXT`,
+    ];
+    for (const ddl of widenAvatarUrl) {
       await this.pool.query(ddl).catch(() => {});
     }
 
