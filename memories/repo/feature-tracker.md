@@ -470,3 +470,21 @@
 - **Status:** done
 - **Description:** network_custom_roles table + CRUD API + NetworkRoleMatrix UI. Custom roles inherit base_template permissions, can override per-action in network_role_permissions table. Corporate admins and hospital directors can create/edit/deactivate custom roles.
 
+
+### ✅ P4-HIGH1 Dual Role System
+- **Logged:** 2026-04-20 00:48
+- **Status:** done
+- **Description:** user_roles table, secondary role management via admin UI, multi-role nav/permission merging, roles[] in JWT response
+
+
+### ✅ P4-MED1 Per-Branch Consent
+- **Logged:** 2026-04-20 00:48
+- **Status:** done
+- **Description:** animal_care_contexts.hospital_id safety-net ALTER, consent scope badge in NetworkMemberships (All Branches vs specific hospital)
+
+
+### ✅ P4-MED2 Unified Referral System
+- **Logged:** 2026-04-20 00:48
+- **Status:** done
+- **Description:** referrals.network_referral_id + network_referrals.platform_referral_id FK, GET /animals/:id/referrals unified endpoint, MedicalRecords shows type badges
+

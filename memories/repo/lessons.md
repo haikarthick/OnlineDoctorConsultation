@@ -481,3 +481,17 @@
 - **Lesson:** Add network_id nullable FK to all clinical tables; use LEFT JOIN hospital_networks to get networkName for display
 - **Apply to:** All future clinical data tables
 
+
+### LESSON-043 — Dual-role systems need permission merging at /permissions/my endpoint
+- **Logged:** 2026-04-20 00:48
+- **Context:** Adding secondary roles to user_roles table is additive. BUT the permission endpoint must also merge permissions from all roles — not just primary — otherwise secondary roles have no effect on route access.
+- **Lesson:** All future multi-role or role-stacking features
+- **Apply to:** All future work
+
+
+### LESSON-044 — Regex replacements in JSON locale files can corrupt structure
+- **Logged:** 2026-04-20 00:48
+- **Context:** Using PowerShell regex on JSON to add keys can accidentally insert content inside nested objects if the pattern matches inside a sub-object. Always validate JSON after regex edits with node -e require()
+- **Lesson:** All locale file edits
+- **Apply to:** All future work
+

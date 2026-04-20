@@ -2157,3 +2157,37 @@
 </details>
 
 ---
+
+## 2026-04-20 00:46 · `830200d` · OTHER
+
+**Commit:** feat(P4): dual role system + per-branch consent + unified referrals  
+**Author:** haikarthick  
+**Categories:** API · UTILS · DB · DB-SCHEMA · UI · AUTH/PERM · i18n · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (19)</summary>
+
+  - backend/src/controllers/AuthController.ts
+  - backend/src/middleware/auth.ts
+  - backend/src/routes/index.ts
+  - backend/src/utils/database.ts
+  - docker/init.sql
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/AuthContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/MedicalRecords.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/pages/petowner/NetworkMemberships.tsx
+  - frontend/src/services/api.ts
+  - frontend/src/types/index.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
