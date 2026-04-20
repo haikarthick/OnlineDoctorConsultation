@@ -6095,4 +6095,26 @@
     "reject": "अस्वीकार करें",
     "approvalRequired": "स्थानांतरण के लिए प्रबंधक की मंजूरी आवश्यक है"
   }
+,
+  "networkAnalytics": {
+    "title": "नेटवर्क विश्लेषण",
+    "totalMembers": "कुल सदस्य",
+    "totalHospitals": "शाखा अस्पताल",
+    "activePatients": "सक्रिय मरीज़",
+    "consultations30d": "परामर्श (30 दिन)",
+    "referrals30d": "रेफ़रल (30 दिन)",
+    "auditEvents7d": "ऑडिट घटनाएं (7 दिन)",
+    "pendingInvites": "लंबित आमंत्रण",
+    "enrollmentTrend": "मरीज़ नामांकन प्रवृत्ति",
+    "lastNMonths": "पिछले {{n}} महीने",
+    "noData": "कोई विश्लेषण डेटा उपलब्ध नहीं"
+  },
+  "complianceExport": {
+    "exportReport": "रिपोर्ट निर्यात करें",
+    "exportDateRange": "तिथि सीमा चुनें",
+    "exportFrom": "प्रारंभ तिथि",
+    "exportTo": "अंतिम तिथि",
+    "generating": "रिपोर्ट तैयार हो रही है...",
+    "downloadReport": "रिपोर्ट डाउनलोड करें"
+  }
 }

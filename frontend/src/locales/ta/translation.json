@@ -6084,4 +6084,26 @@
     "reject": "நிராகரிக்கவும்",
     "approvalRequired": "நகர்வுக்கு மேலாளர் ஒப்புதல் தேவை"
   }
+,
+  "networkAnalytics": {
+    "title": "நெட்வொர்க் பகுப்பாய்வு",
+    "totalMembers": "மொத்த உறுப்பினர்கள்",
+    "totalHospitals": "கிளை மருத்துவமனைகள்",
+    "activePatients": "செயலில் உள்ள நோயாளிகள்",
+    "consultations30d": "ஆலோசனைகள் (30 நாட்கள்)",
+    "referrals30d": "பரிந்துரைகள் (30 நாட்கள்)",
+    "auditEvents7d": "தணிக்கை நிகழ்வுகள் (7 நாட்கள்)",
+    "pendingInvites": "நிலுவையில் உள்ள அழைப்புகள்",
+    "enrollmentTrend": "நோயாளி பதிவு போக்கு",
+    "lastNMonths": "கடந்த {{n}} மாதங்கள்",
+    "noData": "பகுப்பாய்வு தரவு இல்லை"
+  },
+  "complianceExport": {
+    "exportReport": "அறிக்கை ஏற்றுமதி",
+    "exportDateRange": "தேதி வரம்பை தேர்ந்தெடுக்கவும்",
+    "exportFrom": "தொடக்க தேதி",
+    "exportTo": "முடிவு தேதி",
+    "generating": "அறிக்கை உருவாக்கப்படுகிறது...",
+    "downloadReport": "அறிக்கை பதிவிறக்கம்"
+  }
 }

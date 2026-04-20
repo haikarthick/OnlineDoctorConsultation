@@ -6147,4 +6147,26 @@
     "reject": "Reject",
     "approvalRequired": "This movement requires manager approval"
   }
+,
+  "networkAnalytics": {
+    "title": "Network Analytics",
+    "totalMembers": "Total Members",
+    "totalHospitals": "Branch Hospitals",
+    "activePatients": "Active Patients",
+    "consultations30d": "Consultations (30d)",
+    "referrals30d": "Referrals (30d)",
+    "auditEvents7d": "Audit Events (7d)",
+    "pendingInvites": "Pending Invites",
+    "enrollmentTrend": "Patient Enrollment Trend",
+    "lastNMonths": "Last {{n}} months",
+    "noData": "No analytics data available"
+  },
+  "complianceExport": {
+    "exportReport": "Export Report",
+    "exportDateRange": "Select Date Range",
+    "exportFrom": "From Date",
+    "exportTo": "To Date",
+    "generating": "Generating report...",
+    "downloadReport": "Download Report"
+  }
 }

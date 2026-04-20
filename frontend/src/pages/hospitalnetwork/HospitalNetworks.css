@@ -786,3 +786,67 @@
     gap: 10px;
   }
 }
+
+/* ─── P5 Analytics ───────────────────────────────── */
+.hn-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.hn-stat-red { border-top-color: #ef4444; }
+
+.hn-trend-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.hn-trend-row:last-child { border-bottom: none; }
+
+.hn-trend-month {
+  width: 90px;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.hn-trend-bar-wrap {
+  flex: 1;
+  background: #f3f4f6;
+  border-radius: 4px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.hn-trend-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  border-radius: 4px;
+  min-width: 4px;
+  transition: width 0.3s ease;
+}
+
+.hn-trend-count {
+  width: 32px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+@media (max-width: 768px) {
+  .hn-analytics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .hn-analytics-grid {
+    grid-template-columns: 1fr;
+  }
+  .hn-trend-month { width: 70px; font-size: 12px; }
+}

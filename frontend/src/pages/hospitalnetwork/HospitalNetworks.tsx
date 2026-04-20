@@ -717,7 +717,7 @@ const HospitalNetworks: React.FC = () => {
   const { user } = useAuth()
   const { formatDate } = useSettings()
 
-  const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients' | 'referrals' | 'leave' | 'roleMatrix'>('networks')
+  const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients' | 'referrals' | 'leave' | 'roleMatrix' | 'analytics'>('networks')
   const [selectedNetwork, setSelectedNetwork] = useState<HospitalNetwork | null>(null)
 
   const [networks, setNetworks] = useState<HospitalNetwork[]>([])
@@ -793,6 +793,18 @@ const HospitalNetworks: React.FC = () => {
   const [responseModal, setResponseModal] = useState<{ referral: any; action: 'accepted' | 'rejected' } | null>(null)
   const [responseNotes, setResponseNotes] = useState('')
   const [respondingSubmitting, setRespondingSubmitting] = useState(false)
+
+  // ─── Analytics State ───────────────────────────────────────────────────────
+  const [analyticsData, setAnalyticsData] = useState<Record<string, any> | null>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(false)
+  const [analyticsError, setAnalyticsError] = useState('')
+
+  // ─── Compliance Export State ───────────────────────────────────────────────
+  const [showComplianceModal, setShowComplianceModal] = useState(false)
+  const [complianceFrom, setComplianceFrom] = useState('')
+  const [complianceTo, setComplianceTo] = useState('')
+  const [complianceGenerating, setComplianceGenerating] = useState(false)
+  const [complianceError, setComplianceError] = useState('')
 
   // ─── Financial / Leave / Transfers State ────────────────────────────────────
   const [financialData, setFinancialData] = useState<any>(null)
@@ -939,7 +951,41 @@ const HospitalNetworks: React.FC = () => {
   useEffect(() => {
     if (activeTab === 'referrals') loadReferrals(referralDirection)
     if (activeTab === 'leave') loadLeaveRequests()
+    if (activeTab === 'analytics' && selectedNetwork) loadAnalytics(selectedNetwork.id)
   }, [activeTab, selectedNetwork, referralDirection]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadAnalytics = async (networkId: string) => {
+    setAnalyticsLoading(true); setAnalyticsError('')
+    try {
+      const res = await apiService.getNetworkAnalytics(networkId)
+      setAnalyticsData(res.data?.data ?? res.data ?? null)
+    } catch (err: any) {
+      setAnalyticsError(err?.response?.data?.message || err?.message || 'Failed to load analytics')
+    } finally {
+      setAnalyticsLoading(false)
+    }
+  }
+
+  const handleExportCompliance = async () => {
+    if (!selectedNetwork || !complianceFrom || !complianceTo) return
+    setComplianceGenerating(true); setComplianceError('')
+    try {
+      const res = await apiService.getNetworkComplianceReport(selectedNetwork.id, complianceFrom, complianceTo)
+      const report = res.data?.data ?? res.data
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `compliance-report-${selectedNetwork.id}-${complianceFrom}-${complianceTo}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      setShowComplianceModal(false)
+    } catch (err: any) {
+      setComplianceError(err?.response?.data?.message || err?.message || 'Failed to generate report')
+    } finally {
+      setComplianceGenerating(false)
+    }
+  }
 
   // ─── Leave Management logic ─────────────────────────────────────────────────
   const loadLeaveRequests = async () => {
@@ -1301,6 +1347,14 @@ const HospitalNetworks: React.FC = () => {
         >
           🔑 {t('networkRoleMatrix.tabLabel')}
         </button>
+        )}
+        {selectedNetwork && (
+          <button
+            className={`module-tab${activeTab === 'analytics' ? ' active' : ''}`}
+            onClick={() => setActiveTab('analytics')}
+          >
+            📊 {t('networkAnalytics.title')}
+          </button>
         )}
       </div>
 
@@ -1727,6 +1781,9 @@ const HospitalNetworks: React.FC = () => {
                 />
                 <button className="module-btn" onClick={exportAuditCsv}>
                   {t('hospitalNetworks.audit.exportCsv')}
+                </button>
+                <button className="module-btn primary" onClick={() => setShowComplianceModal(true)}>
+                  📋 {t('complianceExport.exportReport')}
                 </button>
               </div>
 
@@ -2841,6 +2898,115 @@ const HospitalNetworks: React.FC = () => {
             networkName={selectedNetwork.name}
             adminMode={true}
           />
+        </div>
+      )}
+
+      {/* ════ TAB 8: ANALYTICS ════ */}
+      {activeTab === 'analytics' && selectedNetwork && (
+        <div className="hn-tab-content">
+          <div className="hn-audit-header">
+            <h2 className="hn-audit-section-title">📊 {t('networkAnalytics.title')}</h2>
+          </div>
+          {analyticsLoading && <div className="hn-loading">⏳ {t('common.loading')}</div>}
+          {analyticsError && <div className="module-alert error">{analyticsError}</div>}
+          {!analyticsLoading && !analyticsError && analyticsData && (
+            <>
+              <div className="hn-analytics-grid">
+                <div className="hn-stat-card hn-stat-blue">
+                  <div className="hn-stat-value">{analyticsData.totalMembers ?? 0}</div>
+                  <div className="hn-stat-label">👤 {t('networkAnalytics.totalMembers')}</div>
+                </div>
+                <div className="hn-stat-card hn-stat-green">
+                  <div className="hn-stat-value">{analyticsData.totalHospitals ?? 0}</div>
+                  <div className="hn-stat-label">🏥 {t('networkAnalytics.totalHospitals')}</div>
+                </div>
+                <div className="hn-stat-card hn-stat-teal">
+                  <div className="hn-stat-value">{analyticsData.totalPatients ?? 0}</div>
+                  <div className="hn-stat-label">🐾 {t('networkAnalytics.activePatients')}</div>
+                </div>
+                <div className="hn-stat-card hn-stat-orange">
+                  <div className="hn-stat-value">{analyticsData.activeConsultations ?? 0}</div>
+                  <div className="hn-stat-label">🩺 {t('networkAnalytics.consultations30d')}</div>
+                </div>
+                <div className="hn-stat-card hn-stat-purple">
+                  <div className="hn-stat-value">{analyticsData.referrals30d ?? 0}</div>
+                  <div className="hn-stat-label">🔄 {t('networkAnalytics.referrals30d')}</div>
+                </div>
+                <div className="hn-stat-card hn-stat-red">
+                  <div className="hn-stat-value">{analyticsData.auditEvents7d ?? 0}</div>
+                  <div className="hn-stat-label">🛡️ {t('networkAnalytics.auditEvents7d')}</div>
+                </div>
+              </div>
+
+              {/* Enrollment Trend */}
+              {Array.isArray(analyticsData.enrollmentTrend) && analyticsData.enrollmentTrend.length > 0 && (
+                <div className="module-card" style={{ marginTop: 24 }}>
+                  <div className="hn-panel-header">
+                    <h3>{t('networkAnalytics.enrollmentTrend')}</h3>
+                    <span style={{ fontSize: 12, color: '#6b7280' }}>{t('networkAnalytics.lastNMonths', { n: 6 })}</span>
+                  </div>
+                  <div className="card-body">
+                    {[...analyticsData.enrollmentTrend].reverse().map((item: any, i: number) => {
+                      const month = item.month ? new Date(item.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'
+                      const count = parseInt(item.count ?? 0)
+                      const max = Math.max(...analyticsData.enrollmentTrend.map((r: any) => parseInt(r.count ?? 0)), 1)
+                      return (
+                        <div key={i} className="hn-trend-row">
+                          <span className="hn-trend-month">{month}</span>
+                          <div className="hn-trend-bar-wrap">
+                            <div className="hn-trend-bar" style={{ width: `${(count / max) * 100}%` }} />
+                          </div>
+                          <span className="hn-trend-count">{count}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          {!analyticsLoading && !analyticsError && !analyticsData && (
+            <div className="hn-empty-state">
+              <div className="hn-empty-icon">📊</div>
+              <div className="hn-empty-title">{t('networkAnalytics.noData')}</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Compliance Export Modal */}
+      {showComplianceModal && selectedNetwork && (
+        <div className="hn-modal-overlay" onClick={() => setShowComplianceModal(false)}>
+          <div className="hn-modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+            <div className="hn-modal-header">
+              <h2>📋 {t('complianceExport.exportDateRange')}</h2>
+              <button type="button" className="hn-modal-close" onClick={() => setShowComplianceModal(false)}>✕</button>
+            </div>
+            <div className="hn-modal-body">
+              {complianceError && <div className="module-alert error">{complianceError}</div>}
+              <div className="module-form-row">
+                <div className="module-form-group">
+                  <label className="module-label">{t('complianceExport.exportFrom')} <span className="hn-required">*</span></label>
+                  <input type="date" className="module-input" value={complianceFrom} onChange={e => setComplianceFrom(e.target.value)} />
+                </div>
+                <div className="module-form-group">
+                  <label className="module-label">{t('complianceExport.exportTo')} <span className="hn-required">*</span></label>
+                  <input type="date" className="module-input" value={complianceTo} onChange={e => setComplianceTo(e.target.value)} />
+                </div>
+              </div>
+            </div>
+            <div className="hn-modal-actions">
+              <button type="button" className="module-btn" onClick={() => setShowComplianceModal(false)}>{t('common.cancel')}</button>
+              <button
+                type="button"
+                className="module-btn primary"
+                disabled={!complianceFrom || !complianceTo || complianceGenerating}
+                onClick={handleExportCompliance}
+              >
+                {complianceGenerating ? `⏳ ${t('complianceExport.generating')}` : `⬇️ ${t('complianceExport.downloadReport')}`}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

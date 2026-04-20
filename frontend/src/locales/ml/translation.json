@@ -4031,4 +4031,26 @@
     "specificBranch": "Specific Branch",
     "branchConsent": "Branch-Specific Consent"
   }
+,
+  "networkAnalytics": {
+    "title": "നെറ്റ്‌വർക്ക് അനലിറ്റിക്സ്",
+    "totalMembers": "ആകെ അംഗങ്ങൾ",
+    "totalHospitals": "ശാഖാ ആശുപത്രികൾ",
+    "activePatients": "സജീവ രോഗികൾ",
+    "consultations30d": "കൺസൾട്ടേഷനുകൾ (30 ദിവസം)",
+    "referrals30d": "റഫറലുകൾ (30 ദിവസം)",
+    "auditEvents7d": "ഓഡിറ്റ് ഇവന്റുകൾ (7 ദിവസം)",
+    "pendingInvites": "കാത്തിരിക്കുന്ന ക്ഷണങ്ങൾ",
+    "enrollmentTrend": "രോഗി എൻറോൾമെന്റ് ട്രെൻഡ്",
+    "lastNMonths": "കഴിഞ്ഞ {{n}} മാസങ്ങൾ",
+    "noData": "അനലിറ്റിക്സ് ഡേറ്റ ലഭ്യമല്ല"
+  },
+  "complianceExport": {
+    "exportReport": "റിപ്പോർട്ട് കയറ്റുമതി",
+    "exportDateRange": "തീയതി പരിധി തിരഞ്ഞെടുക്കുക",
+    "exportFrom": "ആരംഭ തീയതി",
+    "exportTo": "അവസാന തീയതി",
+    "generating": "റിപ്പോർട്ട് തയ്യാറാക്കുന്നു...",
+    "downloadReport": "റിപ്പോർട്ട് ഡൗൺലോഡ്"
+  }
 }

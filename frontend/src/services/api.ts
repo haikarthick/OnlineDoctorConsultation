@@ -2600,6 +2600,16 @@ class ApiService {
   async deleteBranchHospital(networkId: string, hospitalId: string): Promise<any> {
     return this.client.delete(`/hospital-networks/${networkId}/branch-hospitals/${hospitalId}`)
   }
+
+  // P5-ANALYTICS
+  async getNetworkAnalytics(networkId: string): Promise<any> {
+    return this.client.get(`/hospital-networks/${networkId}/analytics`)
+  }
+
+  // P5-COMPLIANCE-EXPORT
+  async getNetworkComplianceReport(networkId: string, from: string, to: string): Promise<any> {
+    return this.client.get(`/hospital-networks/${networkId}/compliance-report`, { params: { from, to } })
+  }
 }
 export const apiService = new ApiService()
 export default apiService

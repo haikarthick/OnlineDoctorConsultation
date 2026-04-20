@@ -6038,4 +6038,26 @@
     "reject": "ತಿರಸ್ಕರಿಸಿ",
     "approvalRequired": "ಈ ಚಲನೆಗೆ ವ್ಯವಸ್ಥಾಪಕರ ಅನುಮೋದನೆ ಅಗತ್ಯ"
   }
+,
+  "networkAnalytics": {
+    "title": "ನೆಟ್‌ವರ್ಕ್ ವಿಶ್ಲೇಷಣೆ",
+    "totalMembers": "ಒಟ್ಟು ಸದಸ್ಯರು",
+    "totalHospitals": "ಶಾಖಾ ಆಸ್ಪತ್ರೆಗಳು",
+    "activePatients": "ಸಕ್ರಿಯ ರೋಗಿಗಳು",
+    "consultations30d": "ಸಮಾಲೋಚನೆಗಳು (30 ದಿನ)",
+    "referrals30d": "ರೆಫರಲ್‌ಗಳು (30 ದಿನ)",
+    "auditEvents7d": "ಲೆಕ್ಕಪರಿಶೋಧನಾ ಘಟನೆಗಳು (7 ದಿನ)",
+    "pendingInvites": "ಬಾಕಿ ಆಮಂತ್ರಣಗಳು",
+    "enrollmentTrend": "ರೋಗಿ ನೋಂದಣಿ ಪ್ರವೃತ್ತಿ",
+    "lastNMonths": "ಕಳೆದ {{n}} ತಿಂಗಳುಗಳು",
+    "noData": "ವಿಶ್ಲೇಷಣಾ ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ"
+  },
+  "complianceExport": {
+    "exportReport": "ವರದಿ ರಫ್ತು",
+    "exportDateRange": "ದಿನಾಂಕ ಶ್ರೇಣಿ ಆಯ್ಕೆ",
+    "exportFrom": "ಆರಂಭ ದಿನಾಂಕ",
+    "exportTo": "ಅಂತ್ಯ ದಿನಾಂಕ",
+    "generating": "ವರದಿ ರಚಿಸಲಾಗುತ್ತಿದೆ...",
+    "downloadReport": "ವರದಿ ಡೌನ್‌ಲೋಡ್"
+  }
 }

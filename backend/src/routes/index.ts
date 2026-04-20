@@ -673,17 +673,66 @@ router.patch('/network-referrals/:id/status', authMiddleware, asyncHandler((req:
 router.get('/hospital-networks/:networkId/search-patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const userRole = (req as any).userRole;
-    if (!['admin', 'veterinarian', 'hospital_staff'].includes(userRole)) {
+    if (!['admin', 'veterinarian', 'hospital_staff', 'corporate_admin', 'compliance_officer'].includes(userRole)) {
       res.status(403).json({ success: false, message: 'Access denied' });
       return;
     }
+    const { networkId } = req.params;
     const q = (req.query.q as string) ?? '';
     if (!q || q.length < 2) { res.json([]); return; }
-    const results = await HospitalNetworkService.searchPatients(q, 10);
+    const results = await HospitalNetworkService.searchNetworkPatients(networkId, q, 20);
     res.json(results);
   } catch (err: any) {
     logger.error('Route error', { path: req.path, error: err.message });
     res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+}));
+
+// P5-ANALYTICS: Network analytics dashboard
+router.get('/hospital-networks/:networkId/analytics', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { networkId } = req.params;
+    const userId = (req as any).userId;
+    const userRole = (req as any).userRole;
+    if (userRole !== 'admin') {
+      const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
+      if (!member || !['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor'].includes(member.networkRole)) {
+        res.status(403).json({ success: false, message: 'Access denied' });
+        return;
+      }
+    }
+    const analytics = await HospitalNetworkService.getNetworkAnalytics(networkId);
+    const trend = await HospitalNetworkService.getPatientEnrollmentTrend(networkId);
+    res.json({ success: true, data: { ...analytics, enrollmentTrend: trend } });
+  } catch (err: any) {
+    logger.error('Analytics route error', { error: err.message });
+    res.status(500).json({ success: false, message: err.message });
+  }
+}));
+
+// P5-COMPLIANCE-EXPORT: Compliance report
+router.get('/hospital-networks/:networkId/compliance-report', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const { networkId } = req.params;
+    const userId = (req as any).userId;
+    const userRole = (req as any).userRole;
+    const { from, to } = req.query as { from?: string; to?: string };
+    if (!from || !to) {
+      res.status(400).json({ success: false, message: 'from and to date params are required' });
+      return;
+    }
+    if (userRole !== 'admin') {
+      const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
+      if (!member || !['corporate_admin', 'compliance_officer', 'auditor'].includes(member.networkRole)) {
+        res.status(403).json({ success: false, message: 'Access denied' });
+        return;
+      }
+    }
+    const report = await HospitalNetworkService.generateComplianceReport(networkId, from, to);
+    res.json({ success: true, data: report });
+  } catch (err: any) {
+    logger.error('Compliance report error', { error: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 }));
 

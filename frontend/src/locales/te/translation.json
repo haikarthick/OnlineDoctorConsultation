@@ -6027,4 +6027,26 @@
     "reject": "తిరస్కరించు",
     "approvalRequired": "ఈ కదలికకు మేనేజర్ ఆమోదం అవసరం"
   }
+,
+  "networkAnalytics": {
+    "title": "నెట్‌వర్క్ విశ్లేషణలు",
+    "totalMembers": "మొత్తం సభ్యులు",
+    "totalHospitals": "శాఖా ఆసుపత్రులు",
+    "activePatients": "చురుకైన రోగులు",
+    "consultations30d": "సంప్రదింపులు (30 రోజులు)",
+    "referrals30d": "రెఫెరల్స్ (30 రోజులు)",
+    "auditEvents7d": "ఆడిట్ ఈవెంట్లు (7 రోజులు)",
+    "pendingInvites": "పెండింగ్ ఆహ్వానాలు",
+    "enrollmentTrend": "రోగి నమోదు ట్రెండ్",
+    "lastNMonths": "గత {{n}} నెలలు",
+    "noData": "విశ్లేషణ డేటా అందుబాటులో లేదు"
+  },
+  "complianceExport": {
+    "exportReport": "నివేదిక ఎగుమతి",
+    "exportDateRange": "తేదీ పరిధి ఎంచుకోండి",
+    "exportFrom": "ప్రారంభ తేదీ",
+    "exportTo": "ముగింపు తేదీ",
+    "generating": "నివేదిక రూపొందిస్తోంది...",
+    "downloadReport": "నివేదిక డౌన్‌లోడ్"
+  }
 }
