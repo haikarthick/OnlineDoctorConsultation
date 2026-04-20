@@ -30,6 +30,17 @@ const Settings: React.FC = () => {
   const [selectedNewRole, setSelectedNewRole] = useState('')
   const [rcReason, setRcReason] = useState('')
 
+  // P6-NOTIFICATIONS: notification preferences
+  const [digestEnabled, setDigestEnabled] = useState(true)
+  const [prefSaving, setPrefSaving] = useState(false)
+  const [prefSaved, setPrefSaved] = useState(false)
+
+  React.useEffect(() => {
+    apiService.getNotificationPreferences().then((r: any) => {
+      setDigestEnabled(r.data?.data?.digestEmailsEnabled ?? r.data?.digestEmailsEnabled ?? true)
+    }).catch(() => {})
+  }, [])
+
   React.useEffect(() => {
     apiService.getMyRoleChangeRequests().then((r: any) => setRoleRequests(r.data || [])).catch((err: any) => {
       console.error('Failed to load role requests:', err?.message)
@@ -618,6 +629,42 @@ const Settings: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* P6-NOTIFICATIONS: Notification Preferences */}
+        <div className="settings-section">
+          <h3 style={{ marginBottom: 12, fontSize: 16, fontWeight: 700 }}>🔔 {t('notificationPreferences.title')}</h3>
+          {prefSaved && <div className="module-alert success" style={{ marginBottom: 12 }}>✅ {t('notificationPreferences.preferenceSaved')}</div>}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}>
+              <input type="checkbox" checked={digestEnabled} style={{ marginTop: 3, width: 16, height: 16 }}
+                onChange={e => setDigestEnabled(e.target.checked)} />
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{t('notificationPreferences.weeklyDigest')}</div>
+                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{t('notificationPreferences.weeklyDigestDesc')}</div>
+              </div>
+            </label>
+          </div>
+          <button
+            className="module-btn primary"
+            style={{ marginTop: 16 }}
+            disabled={prefSaving}
+            onClick={async () => {
+              setPrefSaving(true)
+              setPrefSaved(false)
+              try {
+                await apiService.updateNotificationPreferences({ digestEmailsEnabled: digestEnabled })
+                setPrefSaved(true)
+                setTimeout(() => setPrefSaved(false), 3000)
+              } catch (err: any) {
+                console.error('Failed to save preferences:', err?.message)
+              } finally {
+                setPrefSaving(false)
+              }
+            }}
+          >
+            {prefSaving ? `⏳ ${t('common.saving')}` : t('common.save')}
+          </button>
+        </div>
       </div>
 
       <style>{`

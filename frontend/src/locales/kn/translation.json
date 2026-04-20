@@ -6060,4 +6060,49 @@
     "generating": "ವರದಿ ರಚಿಸಲಾಗುತ್ತಿದೆ...",
     "downloadReport": "ವರದಿ ಡೌನ್‌ಲೋಡ್"
   }
+,
+  "networkApproval": {
+    "title": "Approval History",
+    "requestInfo": "Request More Info",
+    "approveNetwork": "Approve Network",
+    "rejectNetwork": "Reject Network",
+    "addNotes": "Notes (optional)",
+    "submitted": "Submitted",
+    "underReview": "Under Review",
+    "infoRequested": "Info Requested",
+    "infoProvided": "Info Provided",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "suspended": "Suspended",
+    "reactivated": "Reactivated",
+    "noHistory": "No approval history yet",
+    "actedBy": "by {{name}}"
+  },
+  "networkSettings": {
+    "title": "Network Settings",
+    "branding": "Branding & Identity",
+    "logoUpload": "Network Logo",
+    "contactInfo": "Contact Information",
+    "contactEmail": "Contact Email",
+    "contactPhone": "Contact Phone",
+    "website": "Website URL",
+    "operatingHours": "Operating Hours",
+    "specializations": "Specializations",
+    "emergencyServices": "24/7 Emergency Services",
+    "openTime": "Open",
+    "closeTime": "Close",
+    "closed": "Closed",
+    "saveSettings": "Save Settings",
+    "settingsSaved": "Settings saved successfully",
+    "tab": "⚙️ Settings"
+  },
+  "notificationPreferences": {
+    "title": "Notification Preferences",
+    "weeklyDigest": "Weekly Network Summary Email",
+    "weeklyDigestDesc": "Receive a weekly summary of network activity every Monday",
+    "dailyDigest": "Daily Operations Digest",
+    "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
+    "emailNotifications": "Email Notifications",
+    "preferenceSaved": "Notification preferences saved"
+  }
 }

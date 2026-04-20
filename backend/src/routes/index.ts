@@ -99,7 +99,7 @@ import Tier4Controller from '../controllers/Tier4Controller';
 import VetHospitalController from '../controllers/VetHospitalController';
 import HospitalDocumentController from '../controllers/HospitalDocumentController';
 import HospitalNetworkController from '../controllers/HospitalNetworkController';
-import HospitalNetworkService, { updateBranchHospital, deleteBranchHospital } from '../services/HospitalNetworkService';
+import HospitalNetworkService, { updateBranchHospital, deleteBranchHospital, addApprovalEvent, getApprovalHistory, updateNetworkBranding, getNotificationPreferences, updateNotificationPreferences } from '../services/HospitalNetworkService';
 import VetHospitalService from '../services/VetHospitalService';
 import WalletController from '../controllers/WalletController';
 import StaffWorkflowController from '../controllers/StaffWorkflowController';
@@ -381,8 +381,92 @@ router.post('/hospital-networks', authMiddleware, validateBody(createHospitalNet
 router.get('/hospital-networks', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworks(req, res)));
 router.get('/hospital-networks/:id', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getNetwork(req, res)));
 router.put('/hospital-networks/:id', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.updateNetwork(req, res)));
-router.post('/hospital-networks/:id/approve', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => HospitalNetworkController.approveNetwork(req, res)));
+router.post('/hospital-networks/:id/approve', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await HospitalNetworkController.approveNetwork(req, res);
+  // Also record the approval event (fire-and-forget so it doesn't affect response)
+  addApprovalEvent(req.params.id, (req as any).userId, (req as any).userRole, 'approved', (req as any).body?.notes).catch(() => {});
+}));
 router.patch('/hospital-networks/:id/deactivate', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.deactivateNetwork(req, res)));
+
+// P6-APPROVAL: approval workflow routes
+router.post('/hospital-networks/:id/approval-events', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const { eventType, notes } = req.body;
+  if (!eventType) return res.status(400).json({ error: 'eventType is required' });
+  const allowedTypes = ['submitted','under_review','info_requested','info_provided','approved','rejected','suspended','reactivated'];
+  if (!allowedTypes.includes(eventType)) return res.status(400).json({ error: `eventType must be one of: ${allowedTypes.join(', ')}` });
+  await addApprovalEvent(req.params.id, (req as any).userId, (req as any).userRole, eventType, notes);
+  // If approve/reject/suspend/reactivate — also update the network status
+  if (eventType === 'approved') {
+    await database.query(
+      `UPDATE hospital_networks SET is_approved = true, approved_by = $2, approved_at = NOW(), updated_at = NOW() WHERE id = $1`,
+      [req.params.id, (req as any).userId]
+    );
+  } else if (eventType === 'rejected' || eventType === 'suspended') {
+    await database.query(`UPDATE hospital_networks SET is_approved = false, is_active = false, updated_at = NOW() WHERE id = $1`, [req.params.id]);
+  } else if (eventType === 'reactivated') {
+    await database.query(`UPDATE hospital_networks SET is_approved = true, is_active = true, updated_at = NOW() WHERE id = $1`, [req.params.id]);
+  }
+  // Notify corporate_admin when info_requested
+  if (eventType === 'info_requested') {
+    const corpAdmins = await database.query(
+      `SELECT user_id FROM hospital_network_members WHERE network_id = $1 AND network_role = 'corporate_admin' AND is_active = true`,
+      [req.params.id]
+    );
+    const networkRes = await database.query(`SELECT name FROM hospital_networks WHERE id = $1`, [req.params.id]);
+    const networkName = networkRes.rows[0]?.name ?? 'Your network';
+    const NotificationService = (await import('../services/NotificationService')).default;
+    for (const m of corpAdmins.rows) {
+      await NotificationService.createNotification(
+        m.user_id, 'network_info_requested',
+        'Additional Information Required',
+        `Platform admin has requested more information for ${networkName}${notes ? `: ${notes}` : '.'}`,
+        'all'
+      );
+    }
+  }
+  res.json({ success: true, message: 'Approval event recorded' });
+}));
+
+router.get('/hospital-networks/:id/approval-history', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const role = (req as any).userRole;
+  if (!['admin', 'corporate_admin', 'compliance_officer'].includes(role)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const history = await getApprovalHistory(req.params.id);
+  res.json({ data: history });
+}));
+
+// P6-BRANDING
+router.put('/hospital-networks/:id/branding', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+  const { logoUrl, contactEmail, contactPhone, websiteUrl, operatingHours, specializations, emergencyServices } = req.body;
+  const updated = await updateNetworkBranding(req.params.id, { logoUrl, contactEmail, contactPhone, websiteUrl, operatingHours, specializations, emergencyServices });
+  res.json({ success: true, data: updated });
+}));
+
+router.get('/hospital-networks/:id/public', asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT id, name, logo_url AS "logoUrl", contact_email AS "contactEmail",
+            website AS "website", website_url AS "websiteUrl", specializations,
+            emergency_services AS "emergencyServices", headquarters_city AS "headquartersCity",
+            headquarters_state AS "headquartersState", country
+     FROM hospital_networks WHERE id = $1 AND is_active = true AND is_approved = true`,
+    [req.params.id]
+  );
+  if (result.rows.length === 0) return res.status(404).json({ error: 'Network not found' });
+  res.json({ data: result.rows[0] });
+}));
+
+// P6-NOTIFICATIONS: notification preferences
+router.get('/notification-preferences', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const prefs = await getNotificationPreferences((req as any).userId);
+  res.json({ data: prefs });
+}));
+
+router.put('/notification-preferences', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { digestEmailsEnabled } = req.body;
+  await updateNotificationPreferences((req as any).userId, { digestEmailsEnabled });
+  res.json({ success: true, message: 'Notification preferences updated' });
+}));
 router.get('/hospital-networks/:id/hospitals', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkHospitals(req, res)));
 router.post('/hospital-networks/:id/hospitals/:hospitalId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.assignHospitalToNetwork(req, res)));
 router.post('/hospital-networks/:id/branch-hospitals', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), validateBody(createBranchHospitalSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createBranchHospital(req, res)));

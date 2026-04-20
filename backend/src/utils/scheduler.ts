@@ -7,14 +7,18 @@
  * Jobs:
  *   - Hospital document expiry check: runs once at startup then every 24 hours
  *   - Missed bookings check: runs every 15 minutes to mark expired confirmed bookings
+ *   - Network weekly digest: runs Monday 08:00 UTC for all active networks
  */
 
 import HospitalDocumentService from '../services/HospitalDocumentService';
 import BookingService from '../services/BookingService';
+import NotificationService from '../services/NotificationService';
+import database from './database';
 import logger from './logger';
 
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
 
 export function startScheduler(): void {
   logger.info('Scheduler starting...');
@@ -29,7 +33,11 @@ export function startScheduler(): void {
   // Check for missed bookings every 15 minutes
   setInterval(runMissedBookingsCheck, FIFTEEN_MINUTES);
 
-  logger.info('Scheduler started — hospital document expiry check runs every 24 hours, missed bookings check every 15 minutes');
+  // Check every hour whether it's time to send weekly digests (Monday 08:00 UTC)
+  scheduleWeeklyDigest();
+  setInterval(scheduleWeeklyDigest, ONE_HOUR);
+
+  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h');
 }
 
 async function runExpiryCheck(): Promise<void> {
@@ -48,5 +56,39 @@ async function runMissedBookingsCheck(): Promise<void> {
     }
   } catch (err: any) {
     logger.error('Scheduled missed bookings check threw an unhandled error', { error: err.message });
+  }
+}
+
+/** Runs Monday 08:00 UTC — sends weekly digest to corporate_admin and hospital_director members */
+async function scheduleWeeklyDigest(): Promise<void> {
+  try {
+    const now = new Date();
+    // Day 1 = Monday in JS Date (0=Sunday)
+    if (now.getUTCDay() !== 1 || now.getUTCHours() !== 8) return;
+
+    logger.info('[WeeklyDigest] Monday 08:00 UTC — sending network digests');
+
+    const networksRes = await database.query(
+      `SELECT id FROM hospital_networks WHERE is_active = true AND is_approved = true`
+    );
+
+    for (const network of networksRes.rows) {
+      try {
+        const membersRes = await database.query(
+          `SELECT user_id FROM hospital_network_members
+           WHERE network_id = $1 AND network_role IN ('corporate_admin', 'hospital_director') AND is_active = true`,
+          [network.id]
+        );
+        for (const member of membersRes.rows) {
+          await NotificationService.sendNetworkDigest(network.id, member.user_id, 'weekly');
+        }
+      } catch (err: any) {
+        logger.error('[WeeklyDigest] Failed for network', { networkId: network.id, error: err.message });
+      }
+    }
+
+    logger.info('[WeeklyDigest] Completed');
+  } catch (err: any) {
+    logger.error('[WeeklyDigest] Unhandled error', { error: err.message });
   }
 }

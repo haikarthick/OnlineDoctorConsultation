@@ -140,6 +140,63 @@ export class NotificationService {
       throw new DatabaseError('Error marking all notifications as read', { originalError: error });
     }
   }
+
+  /** Send a weekly or daily network digest email to a recipient */
+  async sendNetworkDigest(networkId: string, recipientUserId: string, digestType: 'weekly' | 'daily'): Promise<void> {
+    try {
+      const days = digestType === 'weekly' ? 7 : 1;
+      const since = `NOW() - INTERVAL '${days} days'`;
+
+      // Check user preference
+      const prefRes = await database.query(
+        `SELECT digest_emails_enabled FROM users WHERE id = $1`,
+        [recipientUserId]
+      );
+      if (prefRes.rows[0]?.digest_emails_enabled === false) return;
+
+      const [networkRes, newPatientsRes, newStaffRes, referralsRes, pendingInvitesRes] = await Promise.all([
+        database.query(`SELECT name FROM hospital_networks WHERE id = $1`, [networkId]),
+        database.query(
+          `SELECT COUNT(*) AS count FROM animal_care_contexts WHERE network_id = $1 AND created_at >= ${since}`,
+          [networkId]
+        ),
+        database.query(
+          `SELECT COUNT(*) AS count FROM hospital_network_members WHERE network_id = $1 AND granted_at >= ${since}`,
+          [networkId]
+        ),
+        database.query(
+          `SELECT COUNT(*) AS count FROM network_referrals WHERE network_id = $1 AND created_at >= ${since}`,
+          [networkId]
+        ),
+        database.query(
+          `SELECT COUNT(*) AS count FROM hospital_staff_invites WHERE network_id = $1 AND status = 'pending'`,
+          [networkId]
+        ),
+      ]);
+
+      const networkName = networkRes.rows[0]?.name ?? 'Your Network';
+      const newPatients = parseInt(newPatientsRes.rows[0]?.count ?? '0', 10);
+      const newStaff = parseInt(newStaffRes.rows[0]?.count ?? '0', 10);
+      const referrals = parseInt(referralsRes.rows[0]?.count ?? '0', 10);
+      const pendingInvites = parseInt(pendingInvitesRes.rows[0]?.count ?? '0', 10);
+
+      const label = digestType === 'weekly' ? 'Weekly' : 'Daily';
+      const subject = `VetCare Network ${label} Summary — ${networkName}`;
+      const message = `Here is your ${label.toLowerCase()} summary for ${networkName}:\n\n` +
+        `• New Patients Enrolled: ${newPatients}\n` +
+        `• Referrals This Period: ${referrals}\n` +
+        `• New Staff Members: ${newStaff}\n` +
+        `• Pending Staff Invites: ${pendingInvites}`;
+
+      await this.createNotification(recipientUserId, 'network_digest', subject, message, 'email', {
+        networkId, digestType, newPatients, referrals, newStaff, pendingInvites,
+      });
+
+      logger.info(`Network ${label} digest sent`, { networkId, recipientUserId });
+    } catch (err: any) {
+      logger.error('Failed to send network digest', { networkId, recipientUserId, error: err.message });
+    }
+  }
 }
 
 export default new NotificationService();

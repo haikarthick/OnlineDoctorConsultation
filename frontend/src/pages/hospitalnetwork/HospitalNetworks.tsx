@@ -728,6 +728,23 @@ const HospitalNetworks: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'pending'>('all')
   const [approveState, setApproveState] = useState<Record<string, 'idle' | 'confirming'>>({})
 
+  // P6-APPROVAL state
+  const [approvalHistory, setApprovalHistory] = useState<any[]>([])
+  const [approvalLoading, setApprovalLoading] = useState(false)
+  const [showApprovalModal, setShowApprovalModal] = useState<null | 'info_requested' | 'approved' | 'rejected' | 'suspended' | 'reactivated'>(null)
+  const [approvalNotes, setApprovalNotes] = useState('')
+  const [approvalSaving, setApprovalSaving] = useState(false)
+
+  // P6-BRANDING state
+  const [brandingForm, setBrandingForm] = useState({
+    logoUrl: '', contactEmail: '', contactPhone: '', websiteUrl: '',
+    operatingHours: {} as Record<string, {open: string; close: string; closed: boolean}>,
+    specializations: [] as string[], emergencyServices: false
+  })
+  const [brandingSaving, setBrandingSaving] = useState(false)
+  const [brandingSaved, setBrandingSaved] = useState(false)
+  const [showBrandingPanel, setShowBrandingPanel] = useState(false)
+
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingNetwork, setEditingNetwork] = useState<HospitalNetwork | null>(null)
 
@@ -848,9 +865,76 @@ const HospitalNetworks: React.FC = () => {
       apiService.getNetworkFinancialSummary(network.id).then((res: any) => {
         setFinancialData(res.data?.data || res.data || null)
       }).catch(() => setFinancialData(null))
+      // P6-APPROVAL: load approval history (admin + corporate_admin)
+      loadApprovalHistory(network.id)
     } finally {
       setDetailLoading(false)
     }
+  }, [])
+
+  const loadApprovalHistory = useCallback(async (networkId: string) => {
+    setApprovalLoading(true)
+    try {
+      const res = await apiService.getNetworkApprovalHistory(networkId)
+      setApprovalHistory(res.data?.data ?? res.data ?? [])
+    } catch {
+      setApprovalHistory([])
+    } finally {
+      setApprovalLoading(false)
+    }
+  }, [])
+
+  const handleApprovalAction = async () => {
+    if (!selectedNetwork || !showApprovalModal) return
+    setApprovalSaving(true)
+    try {
+      await apiService.addNetworkApprovalEvent(selectedNetwork.id, showApprovalModal, approvalNotes || undefined)
+      setShowApprovalModal(null)
+      setApprovalNotes('')
+      setSuccessMsg(`Action recorded: ${showApprovalModal}`)
+      await loadNetworks()
+      await loadApprovalHistory(selectedNetwork.id)
+    } catch (err: any) {
+      setError(err?.response?.data?.error ?? err?.message ?? 'Failed to record action')
+    } finally {
+      setApprovalSaving(false)
+    }
+  }
+
+  const handleBrandingSubmit = async () => {
+    if (!selectedNetwork) return
+    setBrandingSaving(true)
+    setBrandingSaved(false)
+    try {
+      await apiService.updateNetworkBranding(selectedNetwork.id, {
+        logoUrl: brandingForm.logoUrl || undefined,
+        contactEmail: brandingForm.contactEmail || undefined,
+        contactPhone: brandingForm.contactPhone || undefined,
+        websiteUrl: brandingForm.websiteUrl || undefined,
+        operatingHours: Object.keys(brandingForm.operatingHours).length > 0 ? brandingForm.operatingHours : undefined,
+        specializations: brandingForm.specializations.length > 0 ? brandingForm.specializations : undefined,
+        emergencyServices: brandingForm.emergencyServices,
+      })
+      setBrandingSaved(true)
+      setTimeout(() => setBrandingSaved(false), 3000)
+    } catch (err: any) {
+      setError(err?.response?.data?.error ?? err?.message ?? 'Failed to save settings')
+    } finally {
+      setBrandingSaving(false)
+    }
+  }
+
+  const initBrandingForm = useCallback((network: HospitalNetwork) => {
+    const n = network as any
+    setBrandingForm({
+      logoUrl: n.logoUrl ?? '',
+      contactEmail: n.contactEmail ?? '',
+      contactPhone: n.contactPhone ?? '',
+      websiteUrl: n.websiteUrl ?? n.website ?? '',
+      operatingHours: n.operatingHours ?? {},
+      specializations: n.specializations ?? [],
+      emergencyServices: n.emergencyServices ?? false,
+    })
   }, [])
 
   const loadAuditLogs = useCallback(async (
@@ -1129,6 +1213,7 @@ const HospitalNetworks: React.FC = () => {
     setSelectedNetwork(network)
     setActiveTab('detail')
     loadDetail(network)
+    initBrandingForm(network)
   }
 
   const handleApproveClick = (network: HospitalNetwork) => {
@@ -1662,6 +1747,167 @@ const HospitalNetworks: React.FC = () => {
                     )}
                   </div>
                 </div>
+
+                {/* P6-APPROVAL: Approval Workflow Panel */}
+                {(['admin', 'corporate_admin', 'compliance_officer'] as string[]).includes(user?.role ?? '') && (
+                  <div className="module-card">
+                    <div className="hn-panel-header">
+                      <h3>📋 {t('networkApproval.title')}</h3>
+                      {user?.role === 'admin' && !selectedNetwork.isApproved && (
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button className="module-btn small" style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fcd34d' }} onClick={() => setShowApprovalModal('info_requested')}>
+                            ❓ {t('networkApproval.requestInfo')}
+                          </button>
+                          <button className="module-btn small primary" onClick={() => setShowApprovalModal('approved')}>
+                            ✅ {t('networkApproval.approveNetwork')}
+                          </button>
+                          <button className="module-btn small" style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' }} onClick={() => setShowApprovalModal('rejected')}>
+                            ❌ {t('networkApproval.rejectNetwork')}
+                          </button>
+                        </div>
+                      )}
+                      {user?.role === 'admin' && selectedNetwork.isApproved && (
+                        <button className="module-btn small" style={{ background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa' }} onClick={() => setShowApprovalModal('suspended')}>
+                          ⏸ Suspend Network
+                        </button>
+                      )}
+                    </div>
+                    <div className="card-body">
+                      {approvalLoading ? (
+                        <div className="hn-loading">⏳ {t('common.loading')}</div>
+                      ) : approvalHistory.length === 0 ? (
+                        <div className="hn-panel-empty">📋 {t('networkApproval.noHistory')}</div>
+                      ) : (
+                        <div className="hn-approval-timeline">
+                          {approvalHistory.map((ev, idx) => {
+                            const icons: Record<string, string> = {
+                              submitted: '📨', under_review: '🔍', info_requested: '❓',
+                              info_provided: '📝', approved: '✅', rejected: '❌',
+                              suspended: '⏸', reactivated: '🔄',
+                            }
+                            return (
+                              <div key={ev.id} className={`hn-approval-event ${idx === 0 ? 'hn-approval-event-latest' : ''}`}>
+                                <div className="hn-approval-event-icon">{icons[ev.eventType] ?? '📋'}</div>
+                                <div className="hn-approval-event-body">
+                                  <div className="hn-approval-event-type">{t(`networkApproval.${ev.eventType}` as any) || ev.eventType}</div>
+                                  <div className="hn-approval-event-meta">
+                                    {t('networkApproval.actedBy', { name: ev.actorName })} · {formatDate(ev.createdAt)}
+                                  </div>
+                                  {ev.notes && <div className="hn-approval-event-notes">"{ev.notes}"</div>}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* P6-BRANDING: Settings Panel */}
+                {(userNetworkRole === 'corporate_admin' || user?.role === 'admin') && (
+                  <div className="module-card">
+                    <div className="hn-panel-header">
+                      <h3>⚙️ {t('networkSettings.title')}</h3>
+                      <button className="module-btn small" onClick={() => setShowBrandingPanel(p => !p)}>
+                        {showBrandingPanel ? '▲ Collapse' : '▼ Expand'}
+                      </button>
+                    </div>
+                    {showBrandingPanel && (
+                      <div className="card-body">
+                        {brandingSaved && <div className="module-alert success">✅ {t('networkSettings.settingsSaved')}</div>}
+                        <div className="hn-branding-section-title">{t('networkSettings.branding')}</div>
+                        <div className="module-form-group">
+                          <label className="module-label">{t('networkSettings.logoUpload')}</label>
+                          {brandingForm.logoUrl && (
+                            <div style={{ marginBottom: 8 }}>
+                              <img src={brandingForm.logoUrl} alt="Network Logo" style={{ maxWidth: 120, maxHeight: 60, objectFit: 'contain', border: '1px solid #e5e7eb', borderRadius: 6, padding: 4 }} />
+                            </div>
+                          )}
+                          <input type="file" accept="image/*" className="module-input"
+                            onChange={e => {
+                              const file = e.target.files?.[0]
+                              if (!file) return
+                              const reader = new FileReader()
+                              reader.onload = ev => setBrandingForm(f => ({ ...f, logoUrl: (ev.target?.result as string) ?? '' }))
+                              reader.readAsDataURL(file)
+                            }}
+                          />
+                        </div>
+                        <div className="hn-branding-section-title">{t('networkSettings.contactInfo')}</div>
+                        <div className="module-form-row">
+                          <div className="module-form-group">
+                            <label className="module-label">{t('networkSettings.contactEmail')}</label>
+                            <input className="module-input" type="email" value={brandingForm.contactEmail}
+                              onChange={e => setBrandingForm(f => ({ ...f, contactEmail: e.target.value }))} />
+                          </div>
+                          <div className="module-form-group">
+                            <label className="module-label">{t('networkSettings.contactPhone')}</label>
+                            <input className="module-input" value={brandingForm.contactPhone}
+                              onChange={e => setBrandingForm(f => ({ ...f, contactPhone: e.target.value }))} />
+                          </div>
+                        </div>
+                        <div className="module-form-group">
+                          <label className="module-label">{t('networkSettings.website')}</label>
+                          <input className="module-input" placeholder="https://" value={brandingForm.websiteUrl}
+                            onChange={e => setBrandingForm(f => ({ ...f, websiteUrl: e.target.value }))} />
+                        </div>
+                        <div className="hn-branding-section-title">{t('networkSettings.specializations')}</div>
+                        <div className="hn-spec-chips">
+                          {['Cardiology','Oncology','Orthopedics','Neurology','Dermatology','Ophthalmology','Dentistry','Surgery'].map(spec => (
+                            <button key={spec} type="button"
+                              className={`hn-spec-chip${brandingForm.specializations.includes(spec) ? ' active' : ''}`}
+                              onClick={() => setBrandingForm(f => ({
+                                ...f,
+                                specializations: f.specializations.includes(spec)
+                                  ? f.specializations.filter(s => s !== spec)
+                                  : [...f.specializations, spec]
+                              }))}>
+                              {spec}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="module-form-group" style={{ marginTop: 12 }}>
+                          <label className="module-label" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <input type="checkbox" checked={brandingForm.emergencyServices}
+                              onChange={e => setBrandingForm(f => ({ ...f, emergencyServices: e.target.checked }))} />
+                            {t('networkSettings.emergencyServices')}
+                          </label>
+                        </div>
+                        <div className="hn-branding-section-title">{t('networkSettings.operatingHours')}</div>
+                        <div className="hn-hours-grid">
+                          {['mon','tue','wed','thu','fri','sat','sun'].map(day => {
+                            const h = brandingForm.operatingHours[day] ?? { open: '09:00', close: '18:00', closed: false }
+                            return (
+                              <div key={day} className="hn-hours-row">
+                                <span className="hn-hours-day">{day.charAt(0).toUpperCase() + day.slice(1)}</span>
+                                <label className="hn-hours-closed-label">
+                                  <input type="checkbox" checked={!!h.closed}
+                                    onChange={e => setBrandingForm(f => ({ ...f, operatingHours: { ...f.operatingHours, [day]: { ...h, closed: e.target.checked } } }))} />
+                                  {t('networkSettings.closed')}
+                                </label>
+                                {!h.closed && (
+                                  <>
+                                    <input type="time" className="hn-hours-input" value={h.open}
+                                      onChange={e => setBrandingForm(f => ({ ...f, operatingHours: { ...f.operatingHours, [day]: { ...h, open: e.target.value } } }))} />
+                                    <span>–</span>
+                                    <input type="time" className="hn-hours-input" value={h.close}
+                                      onChange={e => setBrandingForm(f => ({ ...f, operatingHours: { ...f.operatingHours, [day]: { ...h, close: e.target.value } } }))} />
+                                  </>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                        <div className="hn-modal-actions" style={{ marginTop: 16 }}>
+                          <button className="module-btn primary" disabled={brandingSaving} onClick={handleBrandingSubmit}>
+                            {brandingSaving ? `⏳ ${t('common.saving')}` : t('networkSettings.saveSettings')}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="module-card">
                   <div className="hn-panel-header">
@@ -3005,6 +3251,38 @@ const HospitalNetworks: React.FC = () => {
               >
                 {complianceGenerating ? `⏳ ${t('complianceExport.generating')}` : `⬇️ ${t('complianceExport.downloadReport')}`}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* P6-APPROVAL: Approval Action Modal */}
+      {showApprovalModal && (
+        <div className="hn-modal-overlay" onClick={() => { setShowApprovalModal(null); setApprovalNotes('') }}>
+          <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <div className="hn-modal-header">
+              <h3>
+                {showApprovalModal === 'info_requested' && ('❓ ' + t('networkApproval.requestInfo'))}
+                {showApprovalModal === 'approved' && ('✅ ' + t('networkApproval.approveNetwork'))}
+                {showApprovalModal === 'rejected' && ('❌ ' + t('networkApproval.rejectNetwork'))}
+                {showApprovalModal === 'suspended' && '⏸ Suspend Network'}
+                {showApprovalModal === 'reactivated' && '🔄 Reactivate Network'}
+              </h3>
+              <button type="button" className="hn-modal-close" onClick={() => { setShowApprovalModal(null); setApprovalNotes('') }}>✕</button>
+            </div>
+            <div className="hn-modal-body">
+              <div className="module-form-group">
+                <label className="module-label">{t('networkApproval.addNotes')}</label>
+                <textarea className="module-input" rows={4} value={approvalNotes}
+                  onChange={e => setApprovalNotes(e.target.value)}
+                  placeholder="Describe the reason or required changes..." />
+              </div>
+              <div className="hn-modal-actions">
+                <button type="button" className="module-btn" onClick={() => { setShowApprovalModal(null); setApprovalNotes('') }}>{t('common.cancel')}</button>
+                <button type="button" className="module-btn primary" disabled={approvalSaving} onClick={handleApprovalAction}>
+                  {approvalSaving ? ('⏳ ' + t('common.saving')) : t('common.confirm')}
+                </button>
+              </div>
             </div>
           </div>
         </div>

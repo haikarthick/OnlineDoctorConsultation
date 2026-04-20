@@ -1,4 +1,4 @@
-﻿-- ============================================================
+-- ============================================================
 -- VetCare - Complete Database Schema (PostgreSQL 18)
 -- ============================================================
 -- Covers ALL 22 tables used by the application services.
@@ -1541,9 +1541,10 @@ CREATE TABLE IF NOT EXISTS hospital_networks (
   headquarters_city VARCHAR(100),
   headquarters_state VARCHAR(100),
   contact_email VARCHAR(255),
-  contact_phone VARCHAR(30),
-  website VARCHAR(500),
-  logo_url VARCHAR(500),
+  contact_phone VARCHAR(50),
+  website TEXT,
+  logo_url TEXT,
+  website_url TEXT,
   id_prefix VARCHAR(10),
   dpo_name VARCHAR(200),
   dpo_email VARCHAR(255),
@@ -1554,6 +1555,9 @@ CREATE TABLE IF NOT EXISTS hospital_networks (
   approved_at TIMESTAMP,
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
   metadata JSONB DEFAULT '{}',
+  operating_hours JSONB,
+  specializations TEXT[],
+  emergency_services BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -1747,6 +1751,19 @@ CREATE INDEX IF NOT EXISTS idx_clinical_access_log_animal ON clinical_data_acces
 CREATE INDEX IF NOT EXISTS idx_clinical_access_log_accessor ON clinical_data_access_log(accessed_by);
 CREATE INDEX IF NOT EXISTS idx_clinical_access_log_network ON clinical_data_access_log(accessor_network_id);
 CREATE INDEX IF NOT EXISTS idx_clinical_access_log_time ON clinical_data_access_log(accessed_at);
+-- P6-APPROVAL: Network approval workflow event log
+CREATE TABLE IF NOT EXISTS network_approval_events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  event_type VARCHAR(50) NOT NULL CHECK (event_type IN (
+    'submitted','under_review','info_requested','info_provided','approved','rejected','suspended','reactivated'
+  )),
+  actor_id UUID NOT NULL REFERENCES users(id),
+  actor_role VARCHAR(50) NOT NULL,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_network_approval_network_id ON network_approval_events(network_id);
 
 DROP TRIGGER IF EXISTS update_hospital_networks_updated_at ON hospital_networks;
 CREATE TRIGGER update_hospital_networks_updated_at BEFORE UPDATE ON hospital_networks
@@ -2035,3 +2052,4 @@ CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles(user_id);
 -- Link platform referrals ↔ network referrals (P4-MED2)
 ALTER TABLE referrals ADD COLUMN IF NOT EXISTS network_referral_id UUID REFERENCES network_referrals(id) ON DELETE SET NULL;
 ALTER TABLE network_referrals ADD COLUMN IF NOT EXISTS platform_referral_id UUID REFERENCES referrals(id) ON DELETE SET NULL;
+

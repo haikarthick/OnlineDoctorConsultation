@@ -1149,6 +1149,35 @@ class PostgresDatabase {
       `ALTER TABLE network_referrals ADD COLUMN IF NOT EXISTS platform_referral_id UUID REFERENCES referrals(id) ON DELETE SET NULL`
     ).catch(() => {});
 
+    // P6-BRANDING: New branding/operational columns for hospital_networks
+    await this.pool.query(`ALTER TABLE hospital_networks ADD COLUMN IF NOT EXISTS website_url TEXT`).catch(() => {});
+    await this.pool.query(`ALTER TABLE hospital_networks ADD COLUMN IF NOT EXISTS operating_hours JSONB`).catch(() => {});
+    await this.pool.query(`ALTER TABLE hospital_networks ADD COLUMN IF NOT EXISTS specializations TEXT[]`).catch(() => {});
+    await this.pool.query(`ALTER TABLE hospital_networks ADD COLUMN IF NOT EXISTS emergency_services BOOLEAN DEFAULT false`).catch(() => {});
+    // Widen existing varchar columns to TEXT for base64 storage
+    await this.pool.query(`ALTER TABLE hospital_networks ALTER COLUMN logo_url TYPE TEXT`).catch(() => {});
+    await this.pool.query(`ALTER TABLE hospital_networks ALTER COLUMN website TYPE TEXT`).catch(() => {});
+    await this.pool.query(`ALTER TABLE hospital_networks ALTER COLUMN contact_phone TYPE VARCHAR(50)`).catch(() => {});
+
+    // P6-APPROVAL: network_approval_events table
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS network_approval_events (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+        event_type VARCHAR(50) NOT NULL CHECK (event_type IN (
+          'submitted','under_review','info_requested','info_provided','approved','rejected','suspended','reactivated'
+        )),
+        actor_id UUID NOT NULL REFERENCES users(id),
+        actor_role VARCHAR(50) NOT NULL,
+        notes TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_network_approval_network_id ON network_approval_events(network_id)`).catch(() => {});
+
+    // P6-NOTIFICATIONS: digest preference column on users
+    await this.pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS digest_emails_enabled BOOLEAN DEFAULT true`).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

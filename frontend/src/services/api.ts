@@ -2610,6 +2610,29 @@ class ApiService {
   async getNetworkComplianceReport(networkId: string, from: string, to: string): Promise<any> {
     return this.client.get(`/hospital-networks/${networkId}/compliance-report`, { params: { from, to } })
   }
+
+  // P6-APPROVAL
+  async getNetworkApprovalHistory(networkId: string): Promise<any> {
+    return this.client.get(`/hospital-networks/${networkId}/approval-history`)
+  }
+
+  async addNetworkApprovalEvent(networkId: string, eventType: string, notes?: string): Promise<any> {
+    return this.client.post(`/hospital-networks/${networkId}/approval-events`, { eventType, notes })
+  }
+
+  // P6-BRANDING
+  async updateNetworkBranding(networkId: string, data: Record<string, any>): Promise<any> {
+    return this.client.put(`/hospital-networks/${networkId}/branding`, data)
+  }
+
+  // P6-NOTIFICATIONS
+  async getNotificationPreferences(): Promise<any> {
+    return this.client.get('/notification-preferences')
+  }
+
+  async updateNotificationPreferences(prefs: Record<string, any>): Promise<any> {
+    return this.client.put('/notification-preferences', prefs)
+  }
 }
 export const apiService = new ApiService()
 export default apiService
