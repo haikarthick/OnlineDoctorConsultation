@@ -120,6 +120,31 @@ class NetworkRolePermissionService {
         if (matrix[role][action] === undefined) matrix[role][action] = isEnabled;
       }
     }
+
+    // Include custom roles (inherit from their base_template)
+    try {
+      const customRoles = await database.query(
+        `SELECT role_key, base_template, display_name, icon FROM network_custom_roles
+         WHERE network_id = $1 AND is_active = true`,
+        [networkId]
+      );
+      for (const cr of customRoles.rows) {
+        if (!matrix[cr.role_key]) {
+          matrix[cr.role_key] = { ...DEFAULTS[cr.base_template] };
+        }
+        const customPerms = await database.query(
+          `SELECT action, is_enabled FROM network_role_permissions
+           WHERE network_id = $1 AND network_role = $2`,
+          [networkId, cr.role_key]
+        );
+        for (const perm of customPerms.rows) {
+          matrix[cr.role_key][perm.action] = perm.is_enabled;
+        }
+      }
+    } catch (err: any) {
+      logger.warn('Failed to load custom roles for matrix', { error: err.message });
+    }
+
     return matrix;
   }
 
@@ -133,7 +158,21 @@ class NetworkRolePermissionService {
       );
       if (result.rows.length > 0) return result.rows[0].is_enabled;
     } catch {
-      // Fall through to code defaults on DB error
+      // Fall through
+    }
+    // Check if it's a custom role — inherit from base_template
+    try {
+      const customRole = await database.query(
+        `SELECT base_template FROM network_custom_roles
+         WHERE network_id = $1 AND role_key = $2 AND is_active = true`,
+        [networkId, networkRole]
+      );
+      if (customRole.rows.length > 0) {
+        const baseTemplate = customRole.rows[0].base_template;
+        return DEFAULTS[baseTemplate]?.[action] ?? false;
+      }
+    } catch {
+      // Fall through
     }
     return DEFAULTS[networkRole]?.[action] ?? false;
   }
@@ -177,6 +216,102 @@ class NetworkRolePermissionService {
         hospital_staff: 'Hospital Staff',
       },
     };
+  }
+
+  /** Get all roles for a network (static + custom) */
+  async getNetworkRoles(networkId: string): Promise<Array<{
+    roleKey: string;
+    displayName: string;
+    description?: string;
+    baseTemplate: string;
+    icon: string;
+    isCustom: boolean;
+    id?: string;
+  }>> {
+    const meta = this.getMetadata();
+    const staticRoles = NETWORK_ROLES.map(r => ({
+      roleKey: r,
+      displayName: meta.roleLabels[r],
+      baseTemplate: r,
+      icon: this.getRoleIcon(r),
+      isCustom: false,
+    }));
+    try {
+      const customRoles = await database.query(
+        `SELECT id, role_key AS "roleKey", display_name AS "displayName",
+                description, base_template AS "baseTemplate", icon
+         FROM network_custom_roles
+         WHERE network_id = $1 AND is_active = true
+         ORDER BY created_at ASC`,
+        [networkId]
+      );
+      return [
+        ...staticRoles,
+        ...customRoles.rows.map((r: any) => ({ ...r, isCustom: true })),
+      ];
+    } catch {
+      return staticRoles;
+    }
+  }
+
+  /** Create a custom role for a network */
+  async createCustomRole(networkId: string, data: {
+    roleKey: string;
+    displayName: string;
+    description?: string;
+    baseTemplate: string;
+    icon?: string;
+    createdBy: string;
+  }): Promise<{ id: string; roleKey: string; displayName: string }> {
+    const slug = data.roleKey.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    if ((NETWORK_ROLES as readonly string[]).includes(slug)) {
+      throw new Error(`"${slug}" is a reserved role name and cannot be used as a custom role`);
+    }
+    const result = await database.query(
+      `INSERT INTO network_custom_roles (network_id, role_key, display_name, description, base_template, icon, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, role_key AS "roleKey", display_name AS "displayName"`,
+      [networkId, slug, data.displayName, data.description ?? null,
+       data.baseTemplate, data.icon ?? '👤', data.createdBy]
+    );
+    return result.rows[0];
+  }
+
+  /** Update a custom role */
+  async updateCustomRole(networkId: string, roleKey: string, data: {
+    displayName?: string;
+    description?: string;
+    baseTemplate?: string;
+    icon?: string;
+    updatedBy: string;
+  }): Promise<void> {
+    await database.query(
+      `UPDATE network_custom_roles
+       SET display_name = COALESCE($3, display_name),
+           description = COALESCE($4, description),
+           base_template = COALESCE($5, base_template),
+           icon = COALESCE($6, icon),
+           updated_at = NOW()
+       WHERE network_id = $1 AND role_key = $2`,
+      [networkId, roleKey, data.displayName ?? null, data.description ?? null,
+       data.baseTemplate ?? null, data.icon ?? null]
+    );
+  }
+
+  /** Deactivate (soft-delete) a custom role */
+  async deactivateCustomRole(networkId: string, roleKey: string): Promise<void> {
+    await database.query(
+      `UPDATE network_custom_roles SET is_active = false WHERE network_id = $1 AND role_key = $2`,
+      [networkId, roleKey]
+    );
+  }
+
+  private getRoleIcon(role: string): string {
+    const icons: Record<string, string> = {
+      corporate_admin: '🏢', hospital_director: '🏥',
+      compliance_officer: '📋', auditor: '🔍', hospital_staff: '👩‍⚕️',
+    };
+    return icons[role] ?? '👤';
   }
 }
 

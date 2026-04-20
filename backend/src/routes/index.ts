@@ -951,6 +951,96 @@ router.post('/admin/network-role-permissions/reset', authMiddleware, roleMiddlew
   res.json({ success: true, data: { matrix }, message: networkRole ? `Network permissions reset for ${networkRole}` : 'All network role permissions reset to defaults' });
 }));
 
+// ─── Network Custom Roles CRUD ─────────────────────────────────────────────────
+
+router.get('/hospital-networks/:networkId/roles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const userRole = (req as any).userRole;
+    if (userRole !== 'admin') {
+      const memberRes = await database.query(
+        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        [req.params.networkId, userId]
+      );
+      if (!memberRes.rows[0]) { res.status(403).json({ success: false, error: 'Not a member of this network' }); return; }
+    }
+    const roles = await NetworkRolePermissionService.getNetworkRoles(req.params.networkId);
+    res.json({ success: true, data: roles });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}));
+
+router.post('/hospital-networks/:networkId/roles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const userRole = (req as any).userRole;
+    if (userRole !== 'admin') {
+      const memberRes = await database.query(
+        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        [req.params.networkId, userId]
+      );
+      if (!memberRes.rows[0] || !['corporate_admin', 'hospital_director'].includes(memberRes.rows[0].network_role)) {
+        res.status(403).json({ success: false, error: 'Only corporate admins and hospital directors can create custom roles' }); return;
+      }
+    }
+    const { roleKey, displayName, description, baseTemplate, icon } = req.body;
+    if (!roleKey || !displayName || !baseTemplate) {
+      res.status(400).json({ success: false, error: 'roleKey, displayName, and baseTemplate are required' }); return;
+    }
+    const result = await NetworkRolePermissionService.createCustomRole(req.params.networkId, {
+      roleKey, displayName, description, baseTemplate, icon, createdBy: userId,
+    });
+    res.status(201).json({ success: true, data: result });
+  } catch (err: any) {
+    res.status(err.message.includes('reserved') || err.message.includes('unique') ? 400 : 500)
+       .json({ success: false, error: err.message });
+  }
+}));
+
+router.put('/hospital-networks/:networkId/roles/:roleKey', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const userRole = (req as any).userRole;
+    if (userRole !== 'admin') {
+      const memberRes = await database.query(
+        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        [req.params.networkId, userId]
+      );
+      if (!memberRes.rows[0] || !['corporate_admin', 'hospital_director'].includes(memberRes.rows[0].network_role)) {
+        res.status(403).json({ success: false, error: 'Insufficient permissions' }); return;
+      }
+    }
+    const { displayName, description, baseTemplate, icon } = req.body;
+    await NetworkRolePermissionService.updateCustomRole(req.params.networkId, req.params.roleKey, {
+      displayName, description, baseTemplate, icon, updatedBy: userId,
+    });
+    res.json({ success: true, message: 'Custom role updated' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}));
+
+router.delete('/hospital-networks/:networkId/roles/:roleKey', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const userRole = (req as any).userRole;
+    if (userRole !== 'admin') {
+      const memberRes = await database.query(
+        `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        [req.params.networkId, userId]
+      );
+      if (!memberRes.rows[0] || !['corporate_admin'].includes(memberRes.rows[0].network_role)) {
+        res.status(403).json({ success: false, error: 'Only corporate admins can delete custom roles' }); return;
+      }
+    }
+    await NetworkRolePermissionService.deactivateCustomRole(req.params.networkId, req.params.roleKey);
+    res.json({ success: true, message: 'Custom role deactivated' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}));
+
 // ═══════════════════════════════════════════════════════════════
 // ─── Health Analytics ────────────────────────────────
 router.get('/enterprises/:enterpriseId/health/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.getHealthDashboard(req, res)));

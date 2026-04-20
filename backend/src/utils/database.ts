@@ -1045,6 +1045,25 @@ class PostgresDatabase {
     // Make invitee_name optional on hospital_staff_invites (label says "(optional)")
     await this.pool.query(`ALTER TABLE hospital_staff_invites ALTER COLUMN invitee_name DROP NOT NULL`).catch(() => {});
 
+    // Network Custom Roles table (safety net — canonical schema is in init.sql)
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS network_custom_roles (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+        role_key VARCHAR(50) NOT NULL,
+        display_name VARCHAR(100) NOT NULL,
+        description TEXT,
+        base_template VARCHAR(50) NOT NULL DEFAULT 'hospital_staff',
+        icon VARCHAR(10) DEFAULT '👤',
+        is_active BOOLEAN DEFAULT true,
+        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(network_id, role_key)
+      )
+    `).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_ncr_network ON network_custom_roles(network_id)`).catch(() => {});
+
     // Make users.phone nullable — hospital_staff registering via invite may not have a phone
     await this.pool.query(`ALTER TABLE users ALTER COLUMN phone DROP NOT NULL`).catch(() => {});
 

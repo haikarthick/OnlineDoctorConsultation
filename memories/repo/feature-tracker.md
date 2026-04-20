@@ -452,3 +452,15 @@
 - **Status:** done
 - **Description:** Added POST /hospital-networks/:id/staff-invites route with role/network checks, duplicate detection, token generation, and email send via emailService.send(). Uses EmailService.send() not sendEmail().
 
+
+### ✅ P3 Network Hospital Data Integrity
+- **Logged:** 2026-04-19 17:26
+- **Status:** done
+- **Description:** Added network_id column to 7 medical tables (consultations, prescriptions, medical_records, lab_results, vaccinations, workflow_cases, video_sessions); consultation network context badge in UI; staff invite POST endpoint
+
+
+### ✅ P3-GAP2: Dynamic Custom Roles per Hospital Network
+- **Logged:** 2026-04-20 00:01
+- **Status:** done
+- **Description:** Added network_custom_roles table (init.sql + database.ts safety net). Extended NetworkRolePermissionService with getNetworkRoles, createCustomRole, updateCustomRole, deactivateCustomRole, getRoleIcon, and updated checkAccess/getMatrix for custom role fallback. Added 4 CRUD routes in routes/index.ts. Added 4 API methods in frontend/src/services/api.ts. Added Custom Roles UI section in NetworkRoleMatrix.tsx. Updated all 6 locale files with customRoles, createCustomRole, roleKey, displayName, baseTemplate, noCustomRoles keys.
+

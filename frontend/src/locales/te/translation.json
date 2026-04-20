@@ -4584,7 +4584,13 @@
       "healthAnalytics": "Health Analytics",
       "financialAnalytics": "Financial Analytics",
       "interHospitalReferrals": "Inter-Hospital Referrals"
-    }
+    },
+    "customRoles": "అనుకూల పాత్రలు",
+    "createCustomRole": "అనుకూల పాత్ర సృష్టించు",
+    "roleKey": "పాత్ర కీ",
+    "displayName": "ప్రదర్శన పేరు",
+    "baseTemplate": "బేస్ టెంప్లేట్",
+    "noCustomRoles": "ఇంకా అనుకూల పాత్రలు లేవు. నెట్‌వర్క్-నిర్దిష్ట పాత్రలను నిర్వచించడానికి పైన ఒకటి సృష్టించండి."
   },
   "reviewModeration": {
     "title": "సమీక్ష నిర్వహణ",

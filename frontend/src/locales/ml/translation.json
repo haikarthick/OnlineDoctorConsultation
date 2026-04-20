@@ -3575,7 +3575,13 @@
       "healthAnalytics": "Health Analytics",
       "financialAnalytics": "Financial Analytics",
       "interHospitalReferrals": "Inter-Hospital Referrals"
-    }
+    },
+    "customRoles": "ഇഷ്ടാനുസൃത റോളുകൾ",
+    "createCustomRole": "ഇഷ്ടാനുസൃത റോൾ സൃഷ്ടിക്കുക",
+    "roleKey": "റോൾ കീ",
+    "displayName": "പ്രദർശന നാമം",
+    "baseTemplate": "അടിസ്ഥാന ടെംപ്ലേറ്റ്",
+    "noCustomRoles": "ഇതുവരെ ഇഷ്ടാനുസൃത റോളുകൾ ഇല്ല. നെറ്റ്‌വർക്ക്-നിർദ്ദിഷ്ട റോളുകൾ നിർവ്വചിക്കാൻ മുകളിൽ ഒന്ന് സൃഷ്ടിക്കുക."
   },
   "reviewModeration": {
     "title": "അവലോകന മോഡറേഷൻ",

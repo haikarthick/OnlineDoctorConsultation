@@ -4595,7 +4595,13 @@
       "healthAnalytics": "Health Analytics",
       "financialAnalytics": "Financial Analytics",
       "interHospitalReferrals": "Inter-Hospital Referrals"
-    }
+    },
+    "customRoles": "ಕಸ್ಟಮ್ ಪಾತ್ರಗಳು",
+    "createCustomRole": "ಕಸ್ಟಮ್ ಪಾತ್ರ ರಚಿಸಿ",
+    "roleKey": "ಪಾತ್ರ ಕೀ",
+    "displayName": "ಪ್ರದರ್ಶನ ಹೆಸರು",
+    "baseTemplate": "ಮೂಲ ಟೆಂಪ್ಲೇಟ್",
+    "noCustomRoles": "ಇನ್ನೂ ಕಸ್ಟಮ್ ಪಾತ್ರಗಳಿಲ್ಲ. ನೆಟ್‌ವರ್ಕ್-ನಿರ್ದಿಷ್ಟ ಪಾತ್ರಗಳನ್ನು ವ್ಯಾಖ್ಯಾನಿಸಲು ಮೇಲೆ ಒಂದನ್ನು ರಚಿಸಿ."
   },
   "reviewModeration": {
     "title": "ವಿಮರ್ಶೆ ನಿರ್ವಹಣೆ",

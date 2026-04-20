@@ -474,3 +474,10 @@
 - **Lesson:** Always write both in assignHospitalToNetwork; query using only branch_network_id to avoid UNION duplicates
 - **Apply to:** All future network assignment code
 
+
+### LESSON-038 — Medical tables must carry network_id for cross-network isolation
+- **Logged:** 2026-04-19 17:26
+- **Context:** Found consultations/prescriptions/medical_records had no network_id - impossible to tell platform vs network records apart
+- **Lesson:** Add network_id nullable FK to all clinical tables; use LEFT JOIN hospital_networks to get networkName for display
+- **Apply to:** All future clinical data tables
+

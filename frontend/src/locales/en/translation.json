@@ -4667,19 +4667,16 @@
       "healthAnalytics": "Health Analytics",
       "financialAnalytics": "Financial Analytics",
       "interHospitalReferrals": "Inter-Hospital Referrals"
-    }
+    },
+    "customRoles": "Custom Roles",
+    "createCustomRole": "Create Custom Role",
+    "roleKey": "Role Key",
+    "displayName": "Display Name",
+    "baseTemplate": "Base Template",
+    "noCustomRoles": "No custom roles yet. Create one above to define network-specific job roles."
   },
   "reviewModeration": {
     "title": "Review Moderation",
-    "subtitle": "{{total}} total reviews · {{pending}} pending · {{flagged}} flagged",
-    "dashboard": "Dashboard",
-    "allStatuses": "All Statuses",
-    "pending": "Pending",
-    "approved": "Approved",
-    "hidden": "Hidden",
-    "removed": "Removed",
-    "refresh": "Refresh",
-    "noReviews": "No reviews found",
     "petOwner": "Pet Owner",
     "vet": "Vet",
     "helpful": "helpful",

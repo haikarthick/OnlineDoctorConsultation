@@ -4604,7 +4604,13 @@
       "healthAnalytics": "Health Analytics",
       "financialAnalytics": "Financial Analytics",
       "interHospitalReferrals": "Inter-Hospital Referrals"
-    }
+    },
+    "customRoles": "कस्टम भूमिकाएँ",
+    "createCustomRole": "कस्टम भूमिका बनाएं",
+    "roleKey": "भूमिका कुंजी",
+    "displayName": "प्रदर्शन नाम",
+    "baseTemplate": "आधार टेम्पलेट",
+    "noCustomRoles": "अभी तक कोई कस्टम भूमिका नहीं है। नेटवर्क-विशिष्ट भूमिका परिभाषित करने के लिए ऊपर एक बनाएं।"
   },
   "reviewModeration": {
     "title": "समीक्षा मॉडरेशन",

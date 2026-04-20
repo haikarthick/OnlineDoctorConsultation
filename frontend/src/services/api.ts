@@ -895,6 +895,31 @@ class ApiService {
     return response.data
   }
 
+  // ─── Network Custom Roles ──────────────────────────────────────
+  async getNetworkRoles(networkId: string) {
+    const response = await this.client.get(`/hospital-networks/${networkId}/roles`)
+    return response.data
+  }
+
+  async createNetworkCustomRole(networkId: string, data: {
+    roleKey: string; displayName: string; description?: string; baseTemplate: string; icon?: string;
+  }) {
+    const response = await this.client.post(`/hospital-networks/${networkId}/roles`, data)
+    return response.data
+  }
+
+  async updateNetworkCustomRole(networkId: string, roleKey: string, data: {
+    displayName?: string; description?: string; baseTemplate?: string; icon?: string;
+  }) {
+    const response = await this.client.put(`/hospital-networks/${networkId}/roles/${roleKey}`, data)
+    return response.data
+  }
+
+  async deleteNetworkCustomRole(networkId: string, roleKey: string) {
+    const response = await this.client.delete(`/hospital-networks/${networkId}/roles/${roleKey}`)
+    return response.data
+  }
+
   // ─── Health check ──────────────────────────────────────────
   async healthCheck() {
     const response = await this.client.get('/health')

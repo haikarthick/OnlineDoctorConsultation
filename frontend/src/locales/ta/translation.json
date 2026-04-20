@@ -4593,7 +4593,13 @@
       "healthAnalytics": "Health Analytics",
       "financialAnalytics": "Financial Analytics",
       "interHospitalReferrals": "Inter-Hospital Referrals"
-    }
+    },
+    "customRoles": "தனிப்பயன் பாத்திரங்கள்",
+    "createCustomRole": "தனிப்பயன் பாத்திரம் உருவாக்கு",
+    "roleKey": "பாத்திர சாவி",
+    "displayName": "காட்சி பெயர்",
+    "baseTemplate": "அடிப்படை வார்ப்புரு",
+    "noCustomRoles": "இன்னும் தனிப்பயன் பாத்திரங்கள் இல்லை. நெட்வொர்க்-குறிப்பிட்ட பாத்திரங்களை வரையறுக்க மேலே ஒன்றை உருவாக்கவும்."
   },
   "reviewModeration": {
     "title": "மதிப்பாய்வு மேலாண்மை",

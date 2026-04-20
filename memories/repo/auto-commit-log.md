@@ -2048,3 +2048,27 @@
 </details>
 
 ---
+
+## 2026-04-19 17:24 · `bdebb89` · OTHER
+
+**Commit:** fix(P3): add network_id to medical tables, consultation context badge, staff invite POST route  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - backend/src/controllers/ConsultationController.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/ConsultationService.ts
+  - backend/src/utils/database.ts
+  - docker/init.sql
+  - frontend/src/pages/Consultations.tsx
+  - memories/repo/auto-commit-log.md
+  - memories/repo/feature-tracker.md
+  - memories/repo/lessons.md
+
+</details>
+
+---

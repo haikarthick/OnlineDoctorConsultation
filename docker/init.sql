@@ -1892,6 +1892,30 @@ CREATE TRIGGER update_hsi_updated_at BEFORE UPDATE ON hospital_staff_invites
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================
+-- NETWORK CUSTOM ROLES (Dynamic per-network role definitions)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS network_custom_roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  role_key VARCHAR(50) NOT NULL,
+  display_name VARCHAR(100) NOT NULL,
+  description TEXT,
+  base_template VARCHAR(50) NOT NULL DEFAULT 'hospital_staff'
+    CHECK (base_template IN ('corporate_admin','hospital_director','compliance_officer','auditor','hospital_staff')),
+  icon VARCHAR(10) DEFAULT '👤',
+  is_active BOOLEAN DEFAULT true,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(network_id, role_key)
+);
+CREATE INDEX IF NOT EXISTS idx_ncr_network ON network_custom_roles(network_id);
+CREATE INDEX IF NOT EXISTS idx_ncr_role_key ON network_custom_roles(network_id, role_key);
+DROP TRIGGER IF EXISTS update_ncr_updated_at ON network_custom_roles;
+CREATE TRIGGER update_ncr_updated_at BEFORE UPDATE ON network_custom_roles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
 -- STAFF LEAVE REQUESTS (Holiday/Leave Management)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS staff_leave_requests (
