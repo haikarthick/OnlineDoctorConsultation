@@ -954,3 +954,27 @@ render-start.sh
 - **Fix:** Updated api.ts to POST /staff-invites with typed camelCase params; updated HospitalNetworks.tsx form to pass camelCase fields; fixed inviteUrl fallback to construct URL from returned inviteToken; made inviteeName optional server-side
 - **Rule:** When adding a new API route with different field naming conventions, update BOTH the api.ts method AND all UI call sites in the same commit
 
+
+### NETWORK-005 — Walk-in consent checkbox missing from form
+- **Logged:** 2026-04-20 00:16
+- **Symptom:** Walk-in registration always sent no consentCollected flag despite P0-CRITICAL3 backend fix — backend defaulted to pending_consent for every walk-in
+- **Root Cause:** Added consentCollected checkbox + consentMethod to walkInForm state and API call in HospitalNetworks.tsx
+- **Fix:** Backend-only fixes are useless without matching frontend form fields — always verify form submits ALL params the backend requires
+- **Rule:** Not specified
+
+
+### NETWORK-006 — Staff invite route path mismatch
+- **Logged:** 2026-04-20 00:16
+- **Symptom:** api.ts called old /invite-staff path, new P3-GAP4 route is /staff-invites — all staff invites silently 404'd
+- **Root Cause:** Updated api.ts inviteHospitalStaff to POST /staff-invites with camelCase params
+- **Fix:** When adding a new backend route that replaces an old one, ALWAYS update the matching api.ts call in the same commit
+- **Rule:** Not specified
+
+
+### NETWORK-007 — Veterinarian missing from hospital-networks nav menu
+- **Logged:** 2026-04-20 00:16
+- **Symptom:** Navigation.tsx menuItem for hospital-networks had roles array without veterinarian despite PermissionService granting them hospital_network_manage
+- **Root Cause:** Added veterinarian to hospital-networks roles array in Navigation.tsx
+- **Fix:** 4-file permission sync: PermissionService + PermissionContext + Navigation + App.tsx must ALL be checked together
+- **Rule:** Not specified
+
