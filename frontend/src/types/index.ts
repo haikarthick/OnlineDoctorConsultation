@@ -13,6 +13,7 @@ export interface User {
   lastName: string
   phone?: string
   role: UserRole
+  roles?: string[]
   avatar?: string
   isActive?: boolean
   isVerified?: boolean
@@ -27,6 +28,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   register: (data: RegisterData) => Promise<void>
   logout: () => void
+  hasRole: (role: string) => boolean
 }
 
 export interface RegisterData {

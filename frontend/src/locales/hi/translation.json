@@ -1540,7 +1540,11 @@
     "selectPetGenericSub": "ऊपर ड्रॉपडाउन से पशु चुनें",
     "noAnimalsTitle": "कोई जानवर पंजीकृत नहीं",
     "registerAnimal": "जानवर पंजीकृत करें",
-    "noAnimalsHint": "चिकित्सा रिकॉर्ड देखने के लिए पहले अपने पालतू जानवर पंजीकृत करें।"
+    "noAnimalsHint": "चिकित्सा रिकॉर्ड देखने के लिए पहले अपने पालतू जानवर पंजीकृत करें।",
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "settings": {
     "pageTitle": "⚙️ सेटिंग्स",
@@ -3482,7 +3486,11 @@
     },
     "addAnimal": "जानवर पंजीकृत करें",
     "noAnimalsTitle": "कोई जानवर पंजीकृत नहीं",
-    "noAnimalsHint": "वेलनेस ट्रैक करने के लिए अपने पालतू जानवर जोड़ें।"
+    "noAnimalsHint": "वेलनेस ट्रैक करने के लिए अपने पालतू जानवर जोड़ें।",
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "geospatialAnalytics": {
     "pageTitle": "🗺️ भू-स्थानिक विश्लेषण",
@@ -4775,7 +4783,15 @@
     "acceptEmergencies": "आपातकाल स्वीकार करें",
     "saveVetProfile": "पशु चिकित्सक प्रोफ़ाइल सहेजें",
     "saved": "सहेजा गया!",
-    "failedUpdateVet": "पशु चिकित्सक प्रोफ़ाइल अपडेट करने में विफल"
+    "failedUpdateVet": "पशु चिकित्सक प्रोफ़ाइल अपडेट करने में विफल",
+    "roles": "Roles",
+    "addRole": "Add Role",
+    "removeRole": "Remove Role",
+    "primaryRole": "Primary Role",
+    "secondaryRoles": "Secondary Roles",
+    "roleGranted": "Role granted successfully",
+    "roleRemoved": "Role removed successfully",
+    "cannotRemovePrimary": "Cannot remove the primary role"
   },
   "vetHospitalAdmin": {
     "title": "पशु अस्पताल प्रशासन",
@@ -6000,7 +6016,11 @@
     "privacyNote": "आप अपने डेटा को नियंत्रित करते हैं। आप किसी भी समय एक्सेस रद्द कर सकते हैं।",
     "consentViewOnly": "केवल चिकित्सा इतिहास और टीकाकरण रिकॉर्ड देखें",
     "consentBasic": "रिकॉर्ड देखें + उपचार नोट्स जोड़ें",
-    "consentFull": "लैब परिणाम और नुस्खे सहित पूर्ण एक्सेस"
+    "consentFull": "लैब परिणाम और नुस्खे सहित पूर्ण एक्सेस",
+    "consentScope": "Consent Scope",
+    "allBranches": "All Branches",
+    "specificBranch": "Specific Branch",
+    "branchConsent": "Branch-Specific Consent"
   },
   "adminNetworkSubscriptions": {
     "title": "नेटवर्क सदस्यता",

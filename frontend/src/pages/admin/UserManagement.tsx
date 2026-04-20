@@ -72,6 +72,15 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   const [requestMsg, setRequestMsg] = useState('')
   const [actionError, setActionError] = useState('')
 
+  // Secondary roles modal (P4-HIGH1)
+  const [showSecondaryRolesModal, setShowSecondaryRolesModal] = useState<User | null>(null)
+  const [secondaryRoles, setSecondaryRoles] = useState<any[]>([])
+  const [secondaryRolesLoading, setSecondaryRolesLoading] = useState(false)
+  const [addRoleValue, setAddRoleValue] = useState('')
+  const [addRoleNotes, setAddRoleNotes] = useState('')
+  const [rolesActionMsg, setRolesActionMsg] = useState('')
+  const [rolesActionErr, setRolesActionErr] = useState('')
+
   useEffect(() => {
     loadUsers()
   }, [search, roleFilter])
@@ -169,6 +178,51 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   const getRoleBadge = (role: string) => {
     const map: Record<string, string> = { admin: 'danger', veterinarian: 'active', pet_owner: 'pending', farmer: 'inactive', corporate_admin: 'info' }
     return <span className={`badge badge-${map[role] || 'inactive'}`}>{role.replace('_', ' ')}</span>
+  }
+
+  // P4-HIGH1: Secondary roles management
+  const openSecondaryRoles = async (u: User) => {
+    setShowSecondaryRolesModal(u)
+    setSecondaryRoles([])
+    setRolesActionMsg('')
+    setRolesActionErr('')
+    setAddRoleValue('')
+    setAddRoleNotes('')
+    setSecondaryRolesLoading(true)
+    try {
+      const result = await apiService.getUserRoles(u.id)
+      setSecondaryRoles(result.data || [])
+    } catch (err: any) {
+      setRolesActionErr(err?.response?.data?.error || err?.message || 'Failed to load roles')
+    } finally {
+      setSecondaryRolesLoading(false)
+    }
+  }
+
+  const handleAddSecondaryRole = async () => {
+    if (!showSecondaryRolesModal || !addRoleValue) return
+    try {
+      await apiService.addUserRole(showSecondaryRolesModal.id, addRoleValue, addRoleNotes || undefined)
+      setRolesActionMsg(t('userManagement.roleGranted'))
+      setAddRoleValue('')
+      setAddRoleNotes('')
+      const result = await apiService.getUserRoles(showSecondaryRolesModal.id)
+      setSecondaryRoles(result.data || [])
+    } catch (err: any) {
+      setRolesActionErr(err?.response?.data?.error || err?.message || 'Failed to add role')
+    }
+  }
+
+  const handleRemoveSecondaryRole = async (role: string) => {
+    if (!showSecondaryRolesModal) return
+    try {
+      await apiService.removeUserRole(showSecondaryRolesModal.id, role)
+      setRolesActionMsg(t('userManagement.roleRemoved'))
+      const result = await apiService.getUserRoles(showSecondaryRolesModal.id)
+      setSecondaryRoles(result.data || [])
+    } catch (err: any) {
+      setRolesActionErr(err?.response?.data?.error || err?.message || 'Failed to remove role')
+    }
   }
 
   const openVetProfile = async (user: User) => {
@@ -509,6 +563,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                           🩺 Profile
                         </button>
                       )}
+                      <button
+                        className="btn btn-sm btn-outline"
+                        onClick={() => openSecondaryRoles(u)}
+                      >
+                        🔑 {t('userManagement.roles')}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -604,6 +664,71 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                     {vetSaved && <span style={{ color: '#16a34a', alignSelf: 'center', fontSize: 13 }}>✓ {t('userManagement.saved')}</span>}
                   </div>
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Secondary Roles Modal (P4-HIGH1) */}
+      {showSecondaryRolesModal && (
+        <div className="modal-overlay" onClick={() => setShowSecondaryRolesModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, maxHeight: '90vh', overflow: 'auto' }}>
+            <div className="modal-header">
+              <h2>🔑 {t('userManagement.roles')} — {showSecondaryRolesModal.firstName} {showSecondaryRolesModal.lastName}</h2>
+              <button className="modal-close" onClick={() => setShowSecondaryRolesModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              {rolesActionMsg && <div className="module-alert success" style={{ marginBottom: 12 }}>{rolesActionMsg}</div>}
+              {rolesActionErr && <div className="module-alert error" style={{ marginBottom: 12 }}>{rolesActionErr}<button style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setRolesActionErr('')}>✕</button></div>}
+
+              {secondaryRolesLoading ? (
+                <div className="loading-container"><div className="loading-spinner" /></div>
+              ) : (
+                <>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{t('userManagement.primaryRole')}</h3>
+                    {getRoleBadge(showSecondaryRolesModal.role)}
+                  </div>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{t('userManagement.secondaryRoles')}</h3>
+                    {secondaryRoles.filter(r => !r.isPrimary).length === 0 ? (
+                      <p style={{ color: '#6b7280', fontSize: 13 }}>No secondary roles assigned.</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {secondaryRoles.filter(r => !r.isPrimary).map((r: any) => (
+                          <div key={r.role} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '4px 8px' }}>
+                            {getRoleBadge(r.role)}
+                            <button
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 14, padding: 0 }}
+                              onClick={() => handleRemoveSecondaryRole(r.role)}
+                              title={t('userManagement.removeRole')}
+                            >✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{t('userManagement.addRole')}</h3>
+                    <div className="form-group">
+                      <select className="form-input" value={addRoleValue} onChange={e => setAddRoleValue(e.target.value)}>
+                        <option value="">{t('userManagement.selectRole')}</option>
+                        {['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff']
+                          .filter(r => r !== showSecondaryRolesModal.role && !secondaryRoles.some(sr => sr.role === r))
+                          .map(r => <option key={r} value={r}>{r.replace('_', ' ')}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <input className="form-input" placeholder="Notes (optional)" value={addRoleNotes} onChange={e => setAddRoleNotes(e.target.value)} />
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                      <button className="btn btn-outline" onClick={() => setShowSecondaryRolesModal(null)}>{t('userManagement.cancel')}</button>
+                      <button className="btn btn-primary" disabled={!addRoleValue} onClick={handleAddSecondaryRole}>
+                        {t('userManagement.addRole')}
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>

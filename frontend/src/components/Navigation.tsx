@@ -245,9 +245,10 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff'], section: 'Preferences' }
   ]
 
-  // Filter by role AND permission
+  // Filter by role AND permission — supports multi-role users (P4-HIGH1)
   const filteredMenuItems = menuItems.filter(item => {
-    if (!item.roles.includes(user?.role as UserRole)) return false
+    const userRoles = user?.roles && user.roles.length > 0 ? user.roles : (user?.role ? [user.role] : [])
+    if (!item.roles.some(r => userRoles.includes(r as UserRole))) return false
     const permKey = NAV_PERMISSION_MAP[item.id]
     if (permKey && !hasPermission(permKey)) return false
     return true

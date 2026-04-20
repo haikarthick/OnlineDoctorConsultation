@@ -8,6 +8,7 @@ import logger from '../utils/logger';
 export interface AuthRequest extends Request {
   userId?: string;
   userRole?: string;
+  userRoles?: string[];
   token?: string;
 }
 
@@ -21,7 +22,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, config.jwt.secret) as any;
 
-    // Verify the user actually exists in the database
+    // Verify the user actually exists in the database and fetch all roles
     const userCheck = await database.query('SELECT id, role FROM users WHERE id = $1', [decoded.userId]);
     if (userCheck.rows.length === 0) {
       logger.warn('Token references non-existent user', { userId: decoded.userId });
@@ -31,6 +32,19 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     req.userId = decoded.userId;
     req.userRole = userCheck.rows[0].role; // Use DB role (source of truth) instead of JWT claim
     req.token = token;
+
+    // Fetch secondary roles (P4-HIGH1) — non-blocking, falls back to primary role only
+    try {
+      const rolesRes = await database.query(
+        `SELECT role FROM user_roles WHERE user_id = $1`,
+        [decoded.userId]
+      );
+      req.userRoles = rolesRes.rows.length > 0
+        ? rolesRes.rows.map((r: any) => r.role)
+        : [userCheck.rows[0].role];
+    } catch {
+      req.userRoles = [userCheck.rows[0].role];
+    }
 
     next();
   } catch (error) {

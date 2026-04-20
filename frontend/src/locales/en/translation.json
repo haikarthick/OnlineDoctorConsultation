@@ -1581,7 +1581,11 @@
     "selectPetGenericSub": "Choose a pet from the dropdown above",
     "noAnimalsTitle": "No Animals Registered",
     "registerAnimal": "Register an Animal",
-    "noAnimalsHint": "Register your pets or animals first to view their medical records."
+    "noAnimalsHint": "Register your pets or animals first to view their medical records.",
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "settings": {
     "pageTitle": "⚙️ Settings",
@@ -4830,7 +4834,15 @@
     "acceptEmergencies": "Accept Emergencies",
     "saveVetProfile": "Save Vet Profile",
     "saved": "Saved!",
-    "failedUpdateVet": "Failed to update vet profile"
+    "failedUpdateVet": "Failed to update vet profile",
+    "roles": "Roles",
+    "addRole": "Add Role",
+    "removeRole": "Remove Role",
+    "primaryRole": "Primary Role",
+    "secondaryRoles": "Secondary Roles",
+    "roleGranted": "Role granted successfully",
+    "roleRemoved": "Role removed successfully",
+    "cannotRemovePrimary": "Cannot remove the primary role"
   },
   "vetHospitalAdmin": {
     "title": "Vet Hospital Admin",
@@ -6056,7 +6068,11 @@
     "privacyNote": "You control your data. You can revoke access at any time. Hospital staff can only see what you approve.",
     "consentViewOnly": "View medical history and vaccination records only",
     "consentBasic": "View records + add treatment notes",
-    "consentFull": "Full access including lab results and prescriptions"
+    "consentFull": "Full access including lab results and prescriptions",
+    "consentScope": "Consent Scope",
+    "allBranches": "All Branches",
+    "specificBranch": "Specific Branch",
+    "branchConsent": "Branch-Specific Consent"
   },
   "adminNetworkSubscriptions": {
     "title": "Network Subscriptions",

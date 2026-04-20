@@ -1540,7 +1540,11 @@
     "selectPetGenericSub": "పైన ఉన్న డ్రాప్‌డౌన్ నుండి ఎంచుకోండి",
     "noAnimalsTitle": "జంతువులు నమోదు చేయబడలేదు",
     "registerAnimal": "జంతువును నమోదు చేయండి",
-    "noAnimalsHint": "వైద్య రికార్డులు చూడటానికి ముందు మీ జంతువులను నమోదు చేయండి."
+    "noAnimalsHint": "వైద్య రికార్డులు చూడటానికి ముందు మీ జంతువులను నమోదు చేయండి.",
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "settings": {
     "pageTitle": "⚙️ సెట్టింగ్‌లు",
@@ -3473,7 +3477,11 @@
     },
     "addAnimal": "జంతువును నమోదు చేయండి",
     "noAnimalsTitle": "జంతువులు నమోదు చేయబడలేదు",
-    "noAnimalsHint": "ఆరోగ్యాన్ని ట్రాక్ చేయడానికి మీ జంతువులను జోడించండి."
+    "noAnimalsHint": "ఆరోగ్యాన్ని ట్రాక్ చేయడానికి మీ జంతువులను జోడించండి.",
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "geospatialAnalytics": {
     "pageTitle": "🗺️ భౌగోళిక విశ్లేషణ",
@@ -4755,7 +4763,15 @@
     "acceptEmergencies": "ఎమర్జెన్సీలు అంగీకరించు",
     "saveVetProfile": "పశువైద్యుని ప్రొఫైల్ సేవ్ చేయండి",
     "saved": "సేవ్ చేయబడింది!",
-    "failedUpdateVet": "పశువైద్యుని ప్రొఫైల్ అప్‌డేట్ చేయడం విఫలమైంది"
+    "failedUpdateVet": "పశువైద్యుని ప్రొఫైల్ అప్‌డేట్ చేయడం విఫలమైంది",
+    "roles": "Roles",
+    "addRole": "Add Role",
+    "removeRole": "Remove Role",
+    "primaryRole": "Primary Role",
+    "secondaryRoles": "Secondary Roles",
+    "roleGranted": "Role granted successfully",
+    "roleRemoved": "Role removed successfully",
+    "cannotRemovePrimary": "Cannot remove the primary role"
   },
   "vetHospitalAdmin": {
     "title": "పశు ఆసుపత్రి నిర్వహణ",
@@ -5932,7 +5948,11 @@
     "privacyNote": "మీరు మీ డేటాను నియంత్రిస్తారు. ఎప్పుడైనా యాక్సెస్‌ను రద్దు చేయవచ్చు.",
     "consentViewOnly": "వైద్య చరిత్ర మరియు టీకా రికార్డులను మాత్రమే చూడండి",
     "consentBasic": "రికార్డులు చూడండి + చికిత్స నోట్స్ జోడించండి",
-    "consentFull": "ల్యాబ్ ఫలితాలు మరియు ప్రిస్క్రిప్షన్‌లతో సహా పూర్తి యాక్సెస్"
+    "consentFull": "ల్యాబ్ ఫలితాలు మరియు ప్రిస్క్రిప్షన్‌లతో సహా పూర్తి యాక్సెస్",
+    "consentScope": "Consent Scope",
+    "allBranches": "All Branches",
+    "specificBranch": "Specific Branch",
+    "branchConsent": "Branch-Specific Consent"
   },
   "adminNetworkSubscriptions": {
     "title": "నెట్‌వర్క్ సభ్యత్వాలు",

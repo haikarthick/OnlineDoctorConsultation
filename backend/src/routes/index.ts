@@ -528,6 +528,70 @@ router.get('/animals/:animalId/care-contexts', authMiddleware, asyncHandler(asyn
   res.json(result.rows);
 }));
 
+// P4-MED2: Unified referral history for an animal (merges platform referrals + network referrals)
+router.get('/animals/:animalId/referrals', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const animalId = req.params.animalId;
+
+    const platformRes = await database.query(
+      `SELECT r.id, 'platform' AS type,
+              fv.first_name || ' ' || fv.last_name AS "fromVetName",
+              tv.first_name || ' ' || tv.last_name AS "toVetName",
+              NULL::TEXT AS "toHospitalName",
+              r.reason, r.status, r.priority,
+              r.created_at AS "createdAt",
+              r.network_referral_id AS "networkReferralId",
+              NULL::UUID AS "platformReferralId"
+       FROM referrals r
+       LEFT JOIN users fv ON r.from_vet_id = fv.id
+       LEFT JOIN users tv ON r.to_vet_id = tv.id
+       WHERE r.animal_id = $1
+       ORDER BY r.created_at DESC`,
+      [animalId]
+    );
+
+    const networkRes = await database.query(
+      `SELECT nr.id, 'network' AS type,
+              fv.first_name || ' ' || fv.last_name AS "fromVetName",
+              tv.first_name || ' ' || tv.last_name AS "toVetName",
+              th.name AS "toHospitalName",
+              nr.reason, nr.status, nr.priority,
+              nr.created_at AS "createdAt",
+              NULL::UUID AS "networkReferralId",
+              nr.platform_referral_id AS "platformReferralId"
+       FROM network_referrals nr
+       LEFT JOIN users fv ON nr.from_vet_id = fv.id
+       LEFT JOIN users tv ON nr.to_vet_id = tv.id
+       LEFT JOIN vet_hospitals th ON nr.to_hospital_id = th.id
+       WHERE nr.animal_id = $1
+       ORDER BY nr.created_at DESC`,
+      [animalId]
+    );
+
+    const referrals = [...platformRes.rows, ...networkRes.rows]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    res.json({ success: true, data: { referrals, total: referrals.length } });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+}));
+
+// Get all care contexts (network enrollments) for an animal
+router.get('/animals/:animalId/care-contexts', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT acc.id, acc.network_id AS "networkId", acc.corporate_patient_id AS "networkPatientId",
+            acc.platform_unique_id AS "platformUniqueId", acc.enrolled_at AS "enrolledAt",
+            acc.visibility, hn.name AS "networkName", hn.id_prefix AS "networkPrefix"
+     FROM animal_care_contexts acc
+     JOIN hospital_networks hn ON acc.network_id = hn.id
+     WHERE acc.animal_id = $1 AND acc.is_active = true
+     ORDER BY acc.enrolled_at DESC`,
+    [req.params.animalId]
+  );
+  res.json(result.rows);
+}));
+
 // Patient consent routes
 router.post('/patient-consent', authMiddleware, validateBody(createPatientConsentSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createConsent(req, res)));
 router.get('/patient-consent/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listConsents(req, res)));
@@ -848,6 +912,57 @@ router.get('/admin/users/search', authMiddleware, roleMiddleware(['admin']), asy
 router.get('/admin/users', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listUsers(req, res)));
 router.put('/admin/users/:id/status', authMiddleware, roleMiddleware(['admin']), validateBody(toggleUserStatusSchema), asyncHandler((req: Request, res: Response) => AdminController.toggleUserStatus(req, res)));
 router.put('/admin/users/:id/role', authMiddleware, roleMiddleware(['admin']), validateBody(changeUserRoleSchema), asyncHandler((req: Request, res: Response) => AdminController.changeUserRole(req, res)));
+
+// P4-HIGH1: Secondary role management (admin only)
+router.get('/users/:id/roles', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const rows = await database.query(
+    `SELECT ur.id, ur.role, ur.is_primary AS "isPrimary", ur.notes,
+            ur.granted_at AS "grantedAt",
+            gb.first_name || ' ' || gb.last_name AS "grantedByName"
+     FROM user_roles ur
+     LEFT JOIN users gb ON ur.granted_by = gb.id
+     WHERE ur.user_id = $1
+     ORDER BY ur.is_primary DESC, ur.granted_at ASC`,
+    [req.params.id]
+  );
+  res.json({ success: true, data: rows.rows });
+}));
+
+router.post('/users/:id/roles', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const { role, notes } = req.body;
+  const validRoles = ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff'];
+  if (!role || !validRoles.includes(role)) {
+    return res.status(400).json({ error: `role must be one of: ${validRoles.join(', ')}` });
+  }
+  // Cannot add a role the user already has as primary
+  const existing = await database.query(`SELECT role FROM users WHERE id = $1`, [req.params.id]);
+  if (existing.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+
+  await database.query(
+    `INSERT INTO user_roles (user_id, role, is_primary, granted_by, notes)
+     VALUES ($1, $2, false, $3, $4)
+     ON CONFLICT (user_id, role) DO UPDATE SET notes = EXCLUDED.notes, granted_by = EXCLUDED.granted_by`,
+    [req.params.id, role, (req as any).userId, notes ?? null]
+  );
+  res.json({ success: true, message: 'Role granted successfully' });
+}));
+
+router.delete('/users/:id/roles/:role', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  // Cannot remove the primary role
+  const userRow = await database.query(`SELECT role FROM users WHERE id = $1`, [req.params.id]);
+  if (userRow.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+  if (userRow.rows[0].role === req.params.role) {
+    return res.status(400).json({ error: 'Cannot remove the primary role' });
+  }
+  const result = await database.query(
+    `DELETE FROM user_roles WHERE user_id = $1 AND role = $2 AND is_primary = false`,
+    [req.params.id, req.params.role]
+  );
+  if (result.rowCount === 0) {
+    return res.status(404).json({ error: 'Secondary role not found for this user' });
+  }
+  res.json({ success: true, message: 'Role removed successfully' });
+}));
 router.get('/admin/consultations', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listConsultations(req, res)));
 router.get('/admin/payments', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listPayments(req, res)));
 router.post('/admin/payments/:id/refund', authMiddleware, roleMiddleware(['admin']), validateBody(processRefundSchema), asyncHandler((req: Request, res: Response) => AdminController.processRefund(req, res)));
@@ -893,7 +1008,12 @@ router.put('/admin/vet-profiles/:userId', authMiddleware, roleMiddleware(['admin
 // ─── Permission routes ───────────────────────────────────────
 router.get('/permissions/my', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
-  const permissions = await PermissionService.getPermissionsForRole(authReq.userRole || '');
+  // P4-HIGH1: merge permissions from all roles the user has
+  const rolesToCheck = authReq.userRoles && authReq.userRoles.length > 0
+    ? authReq.userRoles
+    : [authReq.userRole || ''];
+  const permSets = await Promise.all(rolesToCheck.map(r => PermissionService.getPermissionsForRole(r)));
+  const permissions = [...new Set(permSets.flat())];
   const metadata = PermissionService.getPermissionMetadata();
   res.json({ success: true, data: { permissions, metadata } });
 }));

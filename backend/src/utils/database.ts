@@ -1114,6 +1114,41 @@ class PostgresDatabase {
       await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_${table}_network ON ${table}(network_id)`).catch(() => {});
     }
 
+    // P4-HIGH1: user_roles table (secondary roles, additive)
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS user_roles (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        role VARCHAR(50) NOT NULL CHECK (role IN ('pet_owner','farmer','veterinarian','admin','corporate_admin','hospital_staff')),
+        is_primary BOOLEAN DEFAULT false,
+        granted_by UUID REFERENCES users(id),
+        granted_at TIMESTAMPTZ DEFAULT NOW(),
+        notes TEXT,
+        UNIQUE(user_id, role)
+      )
+    `).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles(user_id)`).catch(() => {});
+
+    // Backfill user_roles from users.role for existing users (idempotent via ON CONFLICT DO NOTHING)
+    await this.pool.query(`
+      INSERT INTO user_roles (user_id, role, is_primary, granted_at)
+      SELECT id, role, true, created_at FROM users
+      ON CONFLICT (user_id, role) DO NOTHING
+    `).catch(() => {});
+
+    // P4-MED1: animal_care_contexts.hospital_id safety-net (already in init.sql CREATE TABLE)
+    await this.pool.query(
+      `ALTER TABLE animal_care_contexts ADD COLUMN IF NOT EXISTS hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL`
+    ).catch(() => {});
+
+    // P4-MED2: Link platform referrals ↔ network referrals
+    await this.pool.query(
+      `ALTER TABLE referrals ADD COLUMN IF NOT EXISTS network_referral_id UUID REFERENCES network_referrals(id) ON DELETE SET NULL`
+    ).catch(() => {});
+    await this.pool.query(
+      `ALTER TABLE network_referrals ADD COLUMN IF NOT EXISTS platform_referral_id UUID REFERENCES referrals(id) ON DELETE SET NULL`
+    ).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

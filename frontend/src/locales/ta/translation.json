@@ -1538,7 +1538,11 @@
     "selectPetGenericSub": "மேலே உள்ள டிராப்டௌனிலிருந்து தேர்ந்தெடுக்கவும்",
     "noAnimalsTitle": "விலங்குகள் பதிவு செய்யப்படவில்லை",
     "registerAnimal": "விலங்கை பதிவு செய்யுங்கள்",
-    "noAnimalsHint": "மருத்துவ பதிவுகளை பார்க்க முதலில் உங்கள் விலங்குகளை பதிவு செய்யுங்கள்."
+    "noAnimalsHint": "மருத்துவ பதிவுகளை பார்க்க முதலில் உங்கள் விலங்குகளை பதிவு செய்யுங்கள்.",
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "settings": {
     "pageTitle": "⚙️ அமைப்புகள்",
@@ -3471,7 +3475,11 @@
     },
     "addAnimal": "விலங்கை பதிவு செய்யுங்கள்",
     "noAnimalsTitle": "விலங்குகள் பதிவு செய்யப்படவில்லை",
-    "noAnimalsHint": "ஆரோக்கியத்தை கண்காணிக்க உங்கள் விலங்குகளை சேர்க்கவும்."
+    "noAnimalsHint": "ஆரோக்கியத்தை கண்காணிக்க உங்கள் விலங்குகளை சேர்க்கவும்.",
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "geospatialAnalytics": {
     "pageTitle": "🗺️ புவிசார் பகுப்பாய்வு",
@@ -4764,7 +4772,15 @@
     "acceptEmergencies": "அவசரநிலைகள் ஏற்றுக்கொள்",
     "saveVetProfile": "கால்நடை மருத்துவர் சுயவிவரத்தைச் சேமி",
     "saved": "சேமிக்கப்பட்டது!",
-    "failedUpdateVet": "கால்நடை மருத்துவர் சுயவிவரத்தைப் புதுப்பிக்க முடியவில்லை"
+    "failedUpdateVet": "கால்நடை மருத்துவர் சுயவிவரத்தைப் புதுப்பிக்க முடியவில்லை",
+    "roles": "Roles",
+    "addRole": "Add Role",
+    "removeRole": "Remove Role",
+    "primaryRole": "Primary Role",
+    "secondaryRoles": "Secondary Roles",
+    "roleGranted": "Role granted successfully",
+    "roleRemoved": "Role removed successfully",
+    "cannotRemovePrimary": "Cannot remove the primary role"
   },
   "vetHospitalAdmin": {
     "title": "கால்நடை மருத்துவமனை நிர்வாகம்",
@@ -5989,7 +6005,11 @@
     "privacyNote": "நீங்கள் உங்கள் தரவை கட்டுப்படுத்துகிறீர்கள். எந்த நேரத்திலும் அணுகலை திரும்பப் பெறலாம்.",
     "consentViewOnly": "மருத்துவ வரலாறு மற்றும் தடுப்பூசி பதிவுகளை மட்டும் பார்க்கவும்",
     "consentBasic": "பதிவுகள் பார்க்கவும் + சிகிச்சை குறிப்புகள் சேர்க்கவும்",
-    "consentFull": "ஆய்வக முடிவுகள் மற்றும் மருந்துகள் உட்பட முழு அணுகல்"
+    "consentFull": "ஆய்வக முடிவுகள் மற்றும் மருந்துகள் உட்பட முழு அணுகல்",
+    "consentScope": "Consent Scope",
+    "allBranches": "All Branches",
+    "specificBranch": "Specific Branch",
+    "branchConsent": "Branch-Specific Consent"
   },
   "adminNetworkSubscriptions": {
     "title": "நெட்வொர்க் சந்தாக்கள்",

@@ -132,12 +132,27 @@ export class AuthController {
         ipAddress: req.ip,
       });
 
+      // Fetch all roles for the user (P4-HIGH1)
+      let userRoles: string[] = [user.role];
+      try {
+        const rolesRes = await database.query(`SELECT role FROM user_roles WHERE user_id = $1`, [user.id]);
+        if (rolesRes.rows.length > 0) {
+          userRoles = rolesRes.rows.map((r: any) => r.role);
+        } else {
+          // Backfill primary role if user_roles table is empty for this user
+          await database.query(
+            `INSERT INTO user_roles (user_id, role, is_primary) VALUES ($1, $2, true) ON CONFLICT (user_id, role) DO NOTHING`,
+            [user.id, user.role]
+          ).catch(() => {});
+        }
+      } catch { /* fall back to primary role only */ }
+
       logger.info('User logged in', { userId: user.id, email: user.email });
 
       res.json({
         success: true,
         data: {
-          user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+          user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, roles: userRoles },
           token: accessToken,
           refreshToken
         }

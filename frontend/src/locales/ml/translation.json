@@ -1295,7 +1295,11 @@
       "normal": "സാധാരണം",
       "high": "ഉയർന്നത്",
       "critical": "ഗുരുതരം"
-    }
+    },
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "settings": {
     "pageTitle": "⚙️ ക്രമീകരണങ്ങൾ",
@@ -3740,7 +3744,15 @@
     "acceptEmergencies": "അടിയന്തരങ്ങൾ സ്വീകരിക്കുക",
     "saveVetProfile": "വെറ്റ് പ്രൊഫൈൽ സേവ് ചെയ്യുക",
     "saved": "സേവ് ചെയ്തു!",
-    "failedUpdateVet": "വെറ്റ് പ്രൊഫൈൽ അപ്‌ഡേറ്റ് ചെയ്യാനായില്ല"
+    "failedUpdateVet": "വെറ്റ് പ്രൊഫൈൽ അപ്‌ഡേറ്റ് ചെയ്യാനായില്ല",
+    "roles": "Roles",
+    "addRole": "Add Role",
+    "removeRole": "Remove Role",
+    "primaryRole": "Primary Role",
+    "secondaryRoles": "Secondary Roles",
+    "roleGranted": "Role granted successfully",
+    "roleRemoved": "Role removed successfully",
+    "cannotRemovePrimary": "Cannot remove the primary role"
   },
   "vetHospitalAdmin": {
     "title": "വെറ്റ് ആശുപത്രി അഡ്മിൻ",
@@ -4012,5 +4024,11 @@
       "browseNow": "മാർക്കറ്റ്‌പ്ലേസ് ബ്രൗസ് ചെയ്യുക",
       "sellYours": "നിങ്ങളുടെ മൃഗങ്ങളെ റീഹോം ചെയ്യുക"
     }
+  },
+  "networkMemberships": {
+    "consentScope": "Consent Scope",
+    "allBranches": "All Branches",
+    "specificBranch": "Specific Branch",
+    "branchConsent": "Branch-Specific Consent"
   }
 }

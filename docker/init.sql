@@ -2016,3 +2016,22 @@ CREATE TABLE IF NOT EXISTS marketplace_transactions (
   metadata JSONB DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- ============================================================
+-- 46. USER ROLES (secondary roles — additive, does not replace users.role)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS user_roles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role VARCHAR(50) NOT NULL CHECK (role IN ('pet_owner','farmer','veterinarian','admin','corporate_admin','hospital_staff')),
+  is_primary BOOLEAN DEFAULT false,
+  granted_by UUID REFERENCES users(id),
+  granted_at TIMESTAMPTZ DEFAULT NOW(),
+  notes TEXT,
+  UNIQUE(user_id, role)
+);
+CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles(user_id);
+
+-- Link platform referrals ↔ network referrals (P4-MED2)
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS network_referral_id UUID REFERENCES network_referrals(id) ON DELETE SET NULL;
+ALTER TABLE network_referrals ADD COLUMN IF NOT EXISTS platform_referral_id UUID REFERENCES referrals(id) ON DELETE SET NULL;

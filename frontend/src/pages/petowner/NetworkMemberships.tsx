@@ -205,6 +205,23 @@ const NetworkMemberships: React.FC = () => {
 
                     <span className={`nm-status-badge active`}>{getStatusBadgeText('active')}</span>
 
+                    {/* P4-MED1: Per-branch consent scope badge */}
+                    {e.hospitalName ? (
+                      <div className="nm-id-row">
+                        <span className="nm-id-label">{t('networkMemberships.consentScope')}</span>
+                        <span className="nm-id-value" style={{ background: '#eff6ff', color: '#1d4ed8', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>
+                          🏥 {e.hospitalName}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="nm-id-row">
+                        <span className="nm-id-label">{t('networkMemberships.consentScope')}</span>
+                        <span className="nm-id-value" style={{ background: '#f0fdf4', color: '#15803d', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>
+                          🌐 {t('networkMemberships.allBranches')}
+                        </span>
+                      </div>
+                    )}
+
                     {e.networkPatientId && (
                       <div className="nm-id-row">
                         <span className="nm-id-label">{t('networkMemberships.networkPatientId')}</span>

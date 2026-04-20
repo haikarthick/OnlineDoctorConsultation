@@ -733,6 +733,28 @@ class ApiService {
     return response.data
   }
 
+  // P4-HIGH1: Secondary role management
+  async getUserRoles(userId: string) {
+    const response = await this.client.get(`/users/${userId}/roles`)
+    return response.data
+  }
+
+  async addUserRole(userId: string, role: string, notes?: string) {
+    const response = await this.client.post(`/users/${userId}/roles`, { role, notes })
+    return response.data
+  }
+
+  async removeUserRole(userId: string, role: string) {
+    const response = await this.client.delete(`/users/${userId}/roles/${role}`)
+    return response.data
+  }
+
+  // P4-MED2: Unified referral history for an animal
+  async getAnimalReferrals(animalId: string) {
+    const response = await this.client.get(`/animals/${animalId}/referrals`)
+    return response.data
+  }
+
   async adminListConsultations(params?: { limit?: number; offset?: number; status?: string }) {
     const response = await this.client.get('/admin/consultations', { params })
     return response.data

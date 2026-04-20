@@ -58,7 +58,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           firstName: data.data?.firstName || email.split('@')[0],
           lastName: '',
           role: 'pet_owner' as UserRole,
+          roles: ['pet_owner'],
           id: Math.random().toString()
+        }
+        // Ensure roles array is populated
+        if (!userData.roles || userData.roles.length === 0) {
+          userData.roles = [userData.role]
         }
 
         setToken(authToken)
@@ -96,6 +101,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           lastName: data.lastName,
           phone: data.phone,
           role: data.role,
+          roles: [data.role],
           createdAt: new Date().toISOString()
         }
 
@@ -135,8 +141,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     navigate('/')
   }
 
+  // hasRole checks all roles the user has (primary + secondary)
+  const hasRole = (role: string): boolean => {
+    if (!user) return false
+    if (user.roles && user.roles.length > 0) return user.roles.includes(role)
+    return user.role === role
+  }
+
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, register, logout, hasRole }}>
       {children}
     </AuthContext.Provider>
   )

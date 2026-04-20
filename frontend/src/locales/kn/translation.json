@@ -1542,7 +1542,11 @@
     "selectPetGenericSub": "Choose a pet from the dropdown above",
     "noAnimalsTitle": "ಯಾವ ಪ್ರಾಣಿಗಳನ್ನೂ ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ",
     "registerAnimal": "ಪ್ರಾಣಿ ನೋಂದಾಯಿಸಿ",
-    "noAnimalsHint": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಮೊದಲು ನಿಮ್ಮ ಪ್ರಾಣಿಗಳನ್ನು ನೋಂದಾಯಿಸಿ."
+    "noAnimalsHint": "ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಮೊದಲು ನಿಮ್ಮ ಪ್ರಾಣಿಗಳನ್ನು ನೋಂದಾಯಿಸಿ.",
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "settings": {
     "pageTitle": "⚙️ ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
@@ -3473,7 +3477,11 @@
     },
     "addAnimal": "ಪ್ರಾಣಿ ನೋಂದಾಯಿಸಿ",
     "noAnimalsTitle": "ಯಾವ ಪ್ರಾಣಿಗಳನ್ನೂ ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ",
-    "noAnimalsHint": "ಆರೋಗ್ಯವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು ನಿಮ್ಮ ಪ್ರಾಣಿಗಳನ್ನು ಸೇರಿಸಿ."
+    "noAnimalsHint": "ಆರೋಗ್ಯವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು ನಿಮ್ಮ ಪ್ರಾಣಿಗಳನ್ನು ಸೇರಿಸಿ.",
+    "unifiedReferrals": "Referral History",
+    "platformReferral": "Platform Referral",
+    "networkReferral": "Network Referral",
+    "referralLinked": "Linked referral"
   },
   "geospatialAnalytics": {
     "pageTitle": "🗺️ Geospatial Analytics",
@@ -4766,7 +4774,15 @@
     "acceptEmergencies": "ತುರ್ತು ಸ್ವೀಕರಿಸಿ",
     "saveVetProfile": "ಪಶುವೈದ್ಯ ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ",
     "saved": "ಉಳಿಸಲಾಗಿದೆ!",
-    "failedUpdateVet": "ಪಶುವೈದ್ಯ ಪ್ರೊಫೈಲ್ ನವೀಕರಿಸಲು ವಿಫಲವಾಗಿದೆ"
+    "failedUpdateVet": "ಪಶುವೈದ್ಯ ಪ್ರೊಫೈಲ್ ನವೀಕರಿಸಲು ವಿಫಲವಾಗಿದೆ",
+    "roles": "Roles",
+    "addRole": "Add Role",
+    "removeRole": "Remove Role",
+    "primaryRole": "Primary Role",
+    "secondaryRoles": "Secondary Roles",
+    "roleGranted": "Role granted successfully",
+    "roleRemoved": "Role removed successfully",
+    "cannotRemovePrimary": "Cannot remove the primary role"
   },
   "vetHospitalAdmin": {
     "title": "ಪಶು ಆಸ್ಪತ್ರೆ ನಿರ್ವಹಣೆ",
@@ -5943,7 +5959,11 @@
     "privacyNote": "ನೀವು ನಿಮ್ಮ ಡೇಟಾವನ್ನು ನಿಯಂತ್ರಿಸುತ್ತೀರಿ. ಯಾವಾಗ ಬೇಕಾದರೂ ಪ್ರವೇಶ ಹಿಂತೆಗೆದುಕೊಳ್ಳಬಹುದು.",
     "consentViewOnly": "ವೈದ್ಯಕೀಯ ಇತಿಹಾಸ ಮತ್ತು ಲಸಿಕೆ ದಾಖಲೆಗಳನ್ನು ಮಾತ್ರ ವೀಕ್ಷಿಸಿ",
     "consentBasic": "ದಾಖಲೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ + ಚಿಕಿತ್ಸಾ ಟಿಪ್ಪಣಿಗಳನ್ನು ಸೇರಿಸಿ",
-    "consentFull": "ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು ಮತ್ತು ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳ ಸಹಿತ ಪೂರ್ಣ ಪ್ರವೇಶ"
+    "consentFull": "ಲ್ಯಾಬ್ ಫಲಿತಾಂಶಗಳು ಮತ್ತು ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳ ಸಹಿತ ಪೂರ್ಣ ಪ್ರವೇಶ",
+    "consentScope": "Consent Scope",
+    "allBranches": "All Branches",
+    "specificBranch": "Specific Branch",
+    "branchConsent": "Branch-Specific Consent"
   },
   "adminNetworkSubscriptions": {
     "title": "ನೆಟ್‌ವರ್ಕ್ ಚಂದಾದಾರಿಕೆಗಳು",

@@ -176,8 +176,9 @@ const MedicalRecords: React.FC = () => {
       setHospitalVisits(res.data || { queueVisits: [], inpatientAdmissions: [] })
     } catch { setHospitalVisits({ queueVisits: [], inpatientAdmissions: [] }) }
     try {
-      const refRes = await (apiService as any).listNetworkReferrals({ animalId: selectedAnimal })
-      setNetworkReferralHistory(refRes.referrals || refRes.data?.referrals || [])
+      // P4-MED2: Use unified referral endpoint instead of network-only endpoint
+      const refRes = await apiService.getAnimalReferrals(selectedAnimal)
+      setNetworkReferralHistory(refRes.data?.referrals || [])
     } catch { setNetworkReferralHistory([]) }
     setLoadingHospitalVisits(false)
   }, [selectedAnimal])
@@ -1036,17 +1037,18 @@ const MedicalRecords: React.FC = () => {
                   </div>
                 )}
 
-                {/* Network Referral History */}
+                {/* P4-MED2: Unified Referral History */}
                 {networkReferralHistory.length > 0 && (
                   <div style={{ marginTop: 8 }}>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 10 }}>🔄 Network Referral History ({networkReferralHistory.length})</h3>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 10 }}>🔄 {t('medicalRecords.unifiedReferrals')} ({networkReferralHistory.length})</h3>
                     <div className="data-table-container">
                       <table className="module-table">
                         <thead>
                           <tr>
                             <th>Date</th>
-                            <th>From Hospital</th>
-                            <th>To Hospital</th>
+                            <th>Type</th>
+                            <th>From Vet</th>
+                            <th>To Vet / Hospital</th>
                             <th>Reason</th>
                             <th>Priority</th>
                             <th>Status</th>
@@ -1054,17 +1056,22 @@ const MedicalRecords: React.FC = () => {
                         </thead>
                         <tbody>
                           {networkReferralHistory.map((ref: any) => (
-                            <tr key={ref.id}>
+                            <tr key={`${ref.type}-${ref.id}`}>
                               <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
-                                {fmtDate(ref.created_at || ref.createdAt)}
+                                {fmtDate(ref.createdAt)}
                               </td>
-                              <td style={{ fontSize: 13 }}>
-                                {ref.fromHospitalName || '—'}
-                                {ref.fromVetName && <><br /><span style={{ fontSize: 11, color: '#64748b' }}>{ref.fromVetName}</span></>}
+                              <td>
+                                <span style={{
+                                  padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600,
+                                  background: ref.type === 'network' ? '#eff6ff' : '#f5f3ff',
+                                  color: ref.type === 'network' ? '#1d4ed8' : '#7c3aed'
+                                }}>
+                                  {ref.type === 'network' ? t('medicalRecords.networkReferral') : t('medicalRecords.platformReferral')}
+                                </span>
                               </td>
+                              <td style={{ fontSize: 13 }}>{ref.fromVetName || '—'}</td>
                               <td style={{ fontSize: 13 }}>
-                                {ref.toHospitalName || '—'}
-                                {ref.toVetName && <><br /><span style={{ fontSize: 11, color: '#64748b' }}>{ref.toVetName}</span></>}
+                                {ref.toHospitalName || ref.toVetName || '—'}
                               </td>
                               <td style={{ fontSize: 13, maxWidth: 180 }}>{ref.reason}</td>
                               <td>
