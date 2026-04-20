@@ -1,4 +1,4 @@
-﻿import { Router, Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import logger from '../utils/logger';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
 import database from '../utils/database';
@@ -514,14 +514,14 @@ router.get('/hospital-networks/:id/dashboard', authMiddleware, asyncHandler((req
 router.get('/hospital-networks/:id/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getAuditLogs(req, res)));
 
 // Network Security Audit Log
-router.get('/hospital-networks/:networkId/security-audit', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/hospital-networks/:id/security-audit', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
     if (userRole !== 'admin') {
       const memberRes = await database.query(
         `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.networkId, userId]
+        [req.params.id, userId]
       );
       if (!memberRes.rows[0] || !['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor'].includes(memberRes.rows[0].network_role)) {
         res.status(403).json({ success: false, error: 'Insufficient permissions to view audit log' });
@@ -540,7 +540,7 @@ router.get('/hospital-networks/:networkId/security-audit', authMiddleware, async
        WHERE nsa.network_id = $1
        ORDER BY nsa.created_at DESC
        LIMIT $2 OFFSET $3`,
-      [req.params.networkId, limit, offset]
+      [req.params.id, limit, offset]
     );
     res.json({ success: true, data: result.rows });
   } catch (err: any) {
@@ -576,12 +576,12 @@ router.get('/network-user-search', authMiddleware, roleMiddleware(['admin', 'cor
 }));
 
 // Enroll animal into a network (generates per-network patient ID)
-router.post('/hospital-networks/:networkId/enroll-animal', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/hospital-networks/:id/enroll-animal', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const { animalId, hospitalId, notes } = req.body;
   if (!animalId) { res.status(400).json({ success: false, message: 'animalId is required' }); return; }
   const result = await HospitalNetworkService.enrollAnimal({
     animalId,
-    networkId: req.params.networkId,
+    networkId: req.params.id,
     hospitalId,
     enrolledBy: (req as any).userId,
     notes,
@@ -590,10 +590,10 @@ router.post('/hospital-networks/:networkId/enroll-animal', authMiddleware, async
 }));
 
 // List patients enrolled in a network
-router.get('/hospital-networks/:networkId/patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/hospital-networks/:id/patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
-  const result = await HospitalNetworkService.getNetworkPatients(req.params.networkId, limit, offset);
+  const result = await HospitalNetworkService.getNetworkPatients(req.params.id, limit, offset);
   res.json(result);
 }));
 
@@ -754,7 +754,7 @@ router.patch('/network-referrals/:id/status', authMiddleware, asyncHandler((req:
 
 // ─── Privacy-first patient enrollment routes ───────────────────
 // Search existing platform patients (for hospital staff)
-router.get('/hospital-networks/:networkId/search-patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/hospital-networks/:id/search-patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const userRole = (req as any).userRole;
     if (!['admin', 'veterinarian', 'hospital_staff', 'corporate_admin', 'compliance_officer'].includes(userRole)) {
@@ -773,9 +773,9 @@ router.get('/hospital-networks/:networkId/search-patients', authMiddleware, asyn
 }));
 
 // P5-ANALYTICS: Network analytics dashboard
-router.get('/hospital-networks/:networkId/analytics', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/hospital-networks/:id/analytics', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { networkId } = req.params;
+    const networkId = req.params.id;
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
     if (userRole !== 'admin') {
@@ -795,9 +795,9 @@ router.get('/hospital-networks/:networkId/analytics', authMiddleware, asyncHandl
 }));
 
 // P5-COMPLIANCE-EXPORT: Compliance report
-router.get('/hospital-networks/:networkId/compliance-report', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/hospital-networks/:id/compliance-report', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { networkId } = req.params;
+    const networkId = req.params.id;
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
     const { from, to } = req.query as { from?: string; to?: string };
@@ -821,9 +821,9 @@ router.get('/hospital-networks/:networkId/compliance-report', authMiddleware, as
 }));
 
 // Get all enrollments for a network (pending + active + declined)
-router.get('/hospital-networks/:networkId/all-enrollments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/hospital-networks/:id/all-enrollments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
-    const results = await HospitalNetworkService.getPendingEnrollments(req.params.networkId);
+    const results = await HospitalNetworkService.getPendingEnrollments(req.params.id);
     res.json(results);
   } catch (err: any) {
     logger.error('Route error', { path: req.path, error: err.message });
@@ -832,13 +832,13 @@ router.get('/hospital-networks/:networkId/all-enrollments', authMiddleware, asyn
 }));
 
 // Invite a walk-in patient (no platform account)
-router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/hospital-networks/:id/invite-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     // Verify the caller is an active member of this network
     const memberRes = await database.query(
       `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [req.params.networkId, userId]
+      [req.params.id, userId]
     );
     if (memberRes.rows.length === 0) {
       res.status(403).json({ success: false, error: 'You must be a network member to invite patients' });
@@ -847,7 +847,7 @@ router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, async
     const { patientName, patientEmail, patientPhone, animalName, animalSpecies, hospitalId, message } = req.body;
     if (!patientName || !patientEmail) { res.status(400).json({ success: false, error: 'patientName and patientEmail are required' }); return; }
     const result = await HospitalNetworkService.inviteWalkInPatient({
-      networkId: req.params.networkId, hospitalId, patientName, patientEmail,
+      networkId: req.params.id, hospitalId, patientName, patientEmail,
       patientPhone, animalName, animalSpecies, message,
     }, userId);
     res.json({ success: true, data: result });
@@ -858,14 +858,14 @@ router.post('/hospital-networks/:networkId/invite-walkin', authMiddleware, async
 }));
 
 // Direct walk-in patient registration — no invite needed, treatment starts immediately
-router.post('/hospital-networks/:networkId/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/hospital-networks/:id/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit, consentCollected, consentMethod } = req.body;
     if (!patientName || !animalName || !animalSpecies || !hospitalId) {
       res.status(400).json({ success: false, message: 'patientName, animalName, animalSpecies, and hospitalId are required' }); return;
     }
     const result = await HospitalNetworkService.registerWalkInPatientDirect({
-      networkId: req.params.networkId, hospitalId, registeredBy: (req as any).userId,
+      networkId: req.params.id, hospitalId, registeredBy: (req as any).userId,
       patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
       animalGender, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
       animalColor, animalMicrochipId, animalRegistrationNumber,
@@ -1206,32 +1206,32 @@ router.post('/admin/network-role-permissions/reset', authMiddleware, roleMiddlew
 
 // ─── Network Custom Roles CRUD ─────────────────────────────────────────────────
 
-router.get('/hospital-networks/:networkId/roles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/hospital-networks/:id/roles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
     if (userRole !== 'admin') {
       const memberRes = await database.query(
         `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.networkId, userId]
+        [req.params.id, userId]
       );
       if (!memberRes.rows[0]) { res.status(403).json({ success: false, error: 'Not a member of this network' }); return; }
     }
-    const roles = await NetworkRolePermissionService.getNetworkRoles(req.params.networkId);
+    const roles = await NetworkRolePermissionService.getNetworkRoles(req.params.id);
     res.json({ success: true, data: roles });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
 }));
 
-router.post('/hospital-networks/:networkId/roles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/hospital-networks/:id/roles', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
     if (userRole !== 'admin') {
       const memberRes = await database.query(
         `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.networkId, userId]
+        [req.params.id, userId]
       );
       if (!memberRes.rows[0] || !['corporate_admin', 'hospital_director'].includes(memberRes.rows[0].network_role)) {
         res.status(403).json({ success: false, error: 'Only corporate admins and hospital directors can create custom roles' }); return;
@@ -1241,7 +1241,7 @@ router.post('/hospital-networks/:networkId/roles', authMiddleware, asyncHandler(
     if (!roleKey || !displayName || !baseTemplate) {
       res.status(400).json({ success: false, error: 'roleKey, displayName, and baseTemplate are required' }); return;
     }
-    const result = await NetworkRolePermissionService.createCustomRole(req.params.networkId, {
+    const result = await NetworkRolePermissionService.createCustomRole(req.params.id, {
       roleKey, displayName, description, baseTemplate, icon, createdBy: userId,
     });
     res.status(201).json({ success: true, data: result });
@@ -1251,21 +1251,21 @@ router.post('/hospital-networks/:networkId/roles', authMiddleware, asyncHandler(
   }
 }));
 
-router.put('/hospital-networks/:networkId/roles/:roleKey', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.put('/hospital-networks/:id/roles/:roleKey', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
     if (userRole !== 'admin') {
       const memberRes = await database.query(
         `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.networkId, userId]
+        [req.params.id, userId]
       );
       if (!memberRes.rows[0] || !['corporate_admin', 'hospital_director'].includes(memberRes.rows[0].network_role)) {
         res.status(403).json({ success: false, error: 'Insufficient permissions' }); return;
       }
     }
     const { displayName, description, baseTemplate, icon } = req.body;
-    await NetworkRolePermissionService.updateCustomRole(req.params.networkId, req.params.roleKey, {
+    await NetworkRolePermissionService.updateCustomRole(req.params.id, req.params.roleKey, {
       displayName, description, baseTemplate, icon, updatedBy: userId,
     });
     res.json({ success: true, message: 'Custom role updated' });
@@ -1274,20 +1274,20 @@ router.put('/hospital-networks/:networkId/roles/:roleKey', authMiddleware, async
   }
 }));
 
-router.delete('/hospital-networks/:networkId/roles/:roleKey', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.delete('/hospital-networks/:id/roles/:roleKey', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
     if (userRole !== 'admin') {
       const memberRes = await database.query(
         `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-        [req.params.networkId, userId]
+        [req.params.id, userId]
       );
       if (!memberRes.rows[0] || !['corporate_admin'].includes(memberRes.rows[0].network_role)) {
         res.status(403).json({ success: false, error: 'Only corporate admins can delete custom roles' }); return;
       }
     }
-    await NetworkRolePermissionService.deactivateCustomRole(req.params.networkId, req.params.roleKey);
+    await NetworkRolePermissionService.deactivateCustomRole(req.params.id, req.params.roleKey);
     res.json({ success: true, message: 'Custom role deactivated' });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });

@@ -488,3 +488,21 @@
 - **Status:** done
 - **Description:** referrals.network_referral_id + network_referrals.platform_referral_id FK, GET /animals/:id/referrals unified endpoint, MedicalRecords shows type badges
 
+
+### ✅ P6-APPROVAL: Network Approval Workflow
+- **Logged:** 2026-04-20 01:33
+- **Status:** done
+- **Description:** Multi-level approval workflow with network_approval_events table, tracked history timeline in frontend, admin actions (Request Info/Approve/Reject/Suspend), corporate_admin read-only history view, notifications on info_requested
+
+
+### ✅ P6-BRANDING: Network Branding Settings
+- **Logged:** 2026-04-20 01:33
+- **Status:** done
+- **Description:** Corp admins can set logo (base64), contact info, website, operating hours (day-by-day), specializations (chip-select), emergency services toggle via PUT /hospital-networks/:id/branding
+
+
+### ✅ P6-NOTIFICATIONS: Weekly Digest Email
+- **Logged:** 2026-04-20 01:33
+- **Status:** done
+- **Description:** Weekly Monday 08:00 UTC digest job in scheduler.ts, sendNetworkDigest in NotificationService, digest_emails_enabled on users table, GET/PUT /notification-preferences routes, Settings.tsx preference panel
+
