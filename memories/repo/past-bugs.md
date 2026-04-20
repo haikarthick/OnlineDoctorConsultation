@@ -930,3 +930,27 @@ render-start.sh
 - **Fix:** Added checkInpatientNetworkAccess helper querying vet_hospitals.branch_network_id
 - **Rule:** All hospital-scoped routes must check network membership if hospital belongs to a network
 
+
+### HN-001 — veterinarian missing from Hospital Networks nav
+- **Logged:** 2026-04-20 00:12
+- **Symptom:** Veterinarian role could not see Hospital Networks in navigation sidebar
+- **Root Cause:** Navigation.tsx hospital-networks menuItem had roles: admin, corporate_admin, hospital_staff — missing veterinarian despite vet having hospital_network_manage permission
+- **Fix:** Added veterinarian to the roles array in Navigation.tsx
+- **Rule:** 4-file sync check: after adding permissions to a role in PermissionService.ts, ALWAYS verify Navigation.tsx roles array also includes that role
+
+
+### HN-002 — consentCollected missing from walk-in registration form
+- **Logged:** 2026-04-20 00:12
+- **Symptom:** Walk-in patients always registered as pending_consent even when vet had collected consent in person
+- **Root Cause:** walkInForm state lacked consentCollected field; handleRegisterWalkIn did not pass it to API; form UI had no checkbox; registerWalkInPatientDirect type signature omitted it
+- **Fix:** Added consentCollected boolean to walkInForm state+reset, API call, and a checkbox UI with amber warning when unchecked; added consentCollected/consentMethod to api.ts type signature
+- **Rule:** Walk-in registration P0 fix is end-to-end ONLY if the UI form submits consentCollected — always verify the full data path from form field to API call to service logic
+
+
+### HN-003 — inviteHospitalStaff called old /invite-staff route with snake_case fields
+- **Logged:** 2026-04-20 00:12
+- **Symptom:** Staff invites sent via UI used the old /invite-staff route with snake_case fields instead of new P3 /staff-invites route with camelCase; inviteUrl was undefined after success
+- **Root Cause:** api.ts inviteHospitalStaff pointed to /invite-staff with snake_case data; UI passed invitee_email etc; new /staff-invites route expects camelCase inviteeEmail etc; success handler read res.data.inviteUrl which new route does not return
+- **Fix:** Updated api.ts to POST /staff-invites with typed camelCase params; updated HospitalNetworks.tsx form to pass camelCase fields; fixed inviteUrl fallback to construct URL from returned inviteToken; made inviteeName optional server-side
+- **Rule:** When adding a new API route with different field naming conventions, update BOTH the api.ts method AND all UI call sites in the same commit
+

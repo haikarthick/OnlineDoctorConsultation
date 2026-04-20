@@ -773,7 +773,7 @@ const HospitalNetworks: React.FC = () => {
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteSuccess, setInviteSuccess] = useState(false)
   const [showWalkInRegModal, setShowWalkInRegModal] = useState(false)
-  const [walkInForm, setWalkInForm] = useState({ patientName: '', patientPhone: '', patientEmail: '', animalName: '', animalSpecies: '', animalBreed: '', reasonForVisit: '', hospitalId: '' })
+  const [walkInForm, setWalkInForm] = useState({ patientName: '', patientPhone: '', patientEmail: '', animalName: '', animalSpecies: '', animalBreed: '', reasonForVisit: '', hospitalId: '', consentCollected: false })
   const [walkInLoading, setWalkInLoading] = useState(false)
   const [walkInSuccess, setWalkInSuccess] = useState('')
 
@@ -1065,12 +1065,14 @@ const HospitalNetworks: React.FC = () => {
         animalSpecies: walkInForm.animalSpecies,
         animalBreed: walkInForm.animalBreed || undefined,
         reasonForVisit: walkInForm.reasonForVisit || undefined,
+        consentCollected: walkInForm.consentCollected,
+        consentMethod: walkInForm.consentCollected ? 'verbal' : undefined,
       })
       setWalkInSuccess(result?.data?.networkPatientId || 'Registered')
       loadAllEnrollments(selectedNetwork.id)
       setTimeout(() => {
         setShowWalkInRegModal(false); setWalkInSuccess('')
-        setWalkInForm({ patientName: '', patientPhone: '', patientEmail: '', animalName: '', animalSpecies: '', animalBreed: '', reasonForVisit: '', hospitalId: '' })
+        setWalkInForm({ patientName: '', patientPhone: '', patientEmail: '', animalName: '', animalSpecies: '', animalBreed: '', reasonForVisit: '', hospitalId: '', consentCollected: false })
       }, 2500)
     } catch (err: any) {
       setError(err?.response?.data?.message ?? 'Walk-in registration failed')
@@ -2224,14 +2226,15 @@ const HospitalNetworks: React.FC = () => {
                       setInviteStaffLoading(true)
                       try {
                         const res = await apiService.inviteHospitalStaff(selectedNetwork.id, {
-                          invitee_email: inviteStaffForm.email,
-                          invitee_name: inviteStaffForm.name,
-                          staff_position: inviteStaffForm.position,
-                          hospital_id: inviteStaffForm.hospitalId || undefined,
+                          inviteeEmail: inviteStaffForm.email,
+                          inviteeName: inviteStaffForm.name,
+                          staffPosition: inviteStaffForm.position,
+                          hospitalId: inviteStaffForm.hospitalId || undefined,
                         })
                         if (res.success) {
                           setInviteStaffSuccess(t('hospitalNetworks.staff.inviteSent'))
-                          setInviteLink(res.data?.inviteUrl || '')
+                          const token = res.data?.inviteToken || res.data?.token
+                          setInviteLink(res.data?.inviteUrl || (token ? `${window.location.origin}/accept-staff-invite?token=${token}` : ''))
                           setInviteStaffForm({ email: '', name: '', position: 'receptionist', hospitalId: '' })
                         } else {
                           setInviteStaffError(res.message || 'Failed to send invite')
@@ -2372,6 +2375,27 @@ const HospitalNetworks: React.FC = () => {
                   <div className="module-form-group">
                     <label className="module-label">{t('hospitalNetworks.patients.reasonForVisit', 'Reason for Visit')}</label>
                     <textarea className="module-input" rows={2} value={walkInForm.reasonForVisit} onChange={e => setWalkInForm(f => ({ ...f, reasonForVisit: e.target.value }))} style={{ resize: 'vertical' }} />
+                  </div>
+                  <div className="module-form-group" style={{ marginTop: 12 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
+                      <input
+                        type="checkbox"
+                        checked={walkInForm.consentCollected}
+                        onChange={e => setWalkInForm(f => ({ ...f, consentCollected: e.target.checked }))}
+                        style={{ width: 16, height: 16, cursor: 'pointer' }}
+                      />
+                      <span style={{ fontSize: 14, fontWeight: 500 }}>
+                        {t('hospitalNetworks.patients.consentCollected', 'Patient consent has been collected in person')}
+                        <span style={{ marginLeft: 6, fontSize: 12, color: '#6b7280', fontWeight: 400 }}>
+                          ({t('hospitalNetworks.patients.consentCollectedHint', 'Check if owner signed consent form or gave verbal consent')})
+                        </span>
+                      </span>
+                    </label>
+                    {!walkInForm.consentCollected && (
+                      <p style={{ fontSize: 12, color: '#f59e0b', marginTop: 4 }}>
+                        ⚠️ {t('hospitalNetworks.patients.consentPendingWarning', 'Without consent, the animal will be registered as "Pending Consent" and the owner must accept before full access is granted.')}
+                      </p>
+                    )}
                   </div>
                   <div className="hn-modal-actions">
                     <button type="button" className="module-btn" onClick={() => setShowWalkInRegModal(false)}>{t('common.cancel', 'Cancel')}</button>

@@ -464,3 +464,9 @@
 - **Status:** done
 - **Description:** Added network_custom_roles table (init.sql + database.ts safety net). Extended NetworkRolePermissionService with getNetworkRoles, createCustomRole, updateCustomRole, deactivateCustomRole, getRoleIcon, and updated checkAccess/getMatrix for custom role fallback. Added 4 CRUD routes in routes/index.ts. Added 4 API methods in frontend/src/services/api.ts. Added Custom Roles UI section in NetworkRoleMatrix.tsx. Updated all 6 locale files with customRoles, createCustomRole, roleKey, displayName, baseTemplate, noCustomRoles keys.
 
+
+### ✅ P3-GAP2 Dynamic Custom Roles
+- **Logged:** 2026-04-20 00:03
+- **Status:** done
+- **Description:** network_custom_roles table + CRUD API + NetworkRoleMatrix UI. Custom roles inherit base_template permissions, can override per-action in network_role_permissions table. Corporate admins and hospital directors can create/edit/deactivate custom roles.
+

@@ -2034,9 +2034,9 @@ router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewa
     }
   }
 
-  const { inviteeEmail, inviteeName, staffPosition, hospitalId, expiresInHours = 72 } = req.body;
-  if (!inviteeEmail || !inviteeName || !staffPosition) {
-    return res.status(400).json({ success: false, error: 'inviteeEmail, inviteeName, and staffPosition are required' });
+  const { inviteeEmail, inviteeName = '', staffPosition, hospitalId, expiresInHours = 72 } = req.body;
+  if (!inviteeEmail || !staffPosition) {
+    return res.status(400).json({ success: false, error: 'inviteeEmail and staffPosition are required' });
   }
 
   const allowedPositions = ['nurse','technician','receptionist','lab_tech','radiologist','anesthesiologist','pharmacist','intern','admin_staff'];

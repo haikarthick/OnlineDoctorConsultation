@@ -2285,7 +2285,7 @@ class ApiService {
     const response = await this.client.get(`/hospital-networks/${networkId}/members`)
     return response.data
   }
-  async addNetworkMember(networkId: string, data: { userId: string; networkRole: string; hospitalId?: string; notes?: string }) {
+  async addNetworkMember(networkId: string, data: { userId: string; networkRole: string; hospitalId?: string; notes?: string; validUntil?: string }) {
     const response = await this.client.post(`/hospital-networks/${networkId}/members`, data)
     return response.data
   }
@@ -2323,6 +2323,8 @@ class ApiService {
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
     animalEarTagId?: string;
     reasonForVisit?: string;
+    consentCollected?: boolean;
+    consentMethod?: string;
   }) {
     const response = await this.client.post(`/hospital-networks/${networkId}/register-walkin`, data)
     return response.data
@@ -2451,8 +2453,8 @@ class ApiService {
   }
 
   // ── Hospital Staff Invites ──
-  async inviteHospitalStaff(networkId: string, data: Record<string, unknown>) {
-    const response = await this.client.post(`/hospital-networks/${networkId}/invite-staff`, data)
+  async inviteHospitalStaff(networkId: string, data: { inviteeEmail: string; inviteeName?: string; staffPosition: string; hospitalId?: string; expiresInHours?: number }) {
+    const response = await this.client.post(`/hospital-networks/${networkId}/staff-invites`, data)
     return response.data
   }
   async listStaffInvites(networkId: string) {
