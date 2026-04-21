@@ -8,6 +8,7 @@ import './ModulePage.css'
 import './VetHospitals.css'
 import { useSettings } from '../context/SettingsContext'
 import { useTranslation } from 'react-i18next'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
 
@@ -66,24 +67,26 @@ const HospitalBooking: React.FC = () => {
   const [bookingSuccess, setBookingSuccess] = useState(false)
 
   // Load hospital data
-  useEffect(() => {
+  const loadHospitalData = useCallback(async () => {
     if (!hospitalId) return
-    const load = async () => {
-      setLoading(true)
-      try {
-        const [h, docs, depts] = await Promise.all([
-          vetHospitalApi.getHospital(hospitalId),
-          vetHospitalApi.listDoctors(hospitalId),
-          vetHospitalApi.listDepartments(hospitalId),
-        ])
-        setHospital(h)
-        setDoctors(docs.filter(d => d.isAcceptingPatients !== false))
-        setDepartments(depts)
-      } catch { setError('Failed to load hospital information') }
-      finally { setLoading(false) }
-    }
-    load()
+    setLoading(true)
+    try {
+      const [h, docs, depts] = await Promise.all([
+        vetHospitalApi.getHospital(hospitalId),
+        vetHospitalApi.listDoctors(hospitalId),
+        vetHospitalApi.listDepartments(hospitalId),
+      ])
+      setHospital(h)
+      setDoctors(docs.filter(d => d.isAcceptingPatients !== false))
+      setDepartments(depts)
+    } catch { setError('Failed to load hospital information') }
+    finally { setLoading(false) }
   }, [hospitalId])
+
+  useEffect(() => {
+    loadHospitalData()
+  }, [loadHospitalData])
+  useAutoRefresh('bookings', loadHospitalData)
 
   // Load user's animals
   useEffect(() => {

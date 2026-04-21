@@ -4,6 +4,7 @@ import { useSettings } from '../context/SettingsContext'
 import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import apiService from '../services/api'
 import AnimalSearchPicker from '../components/AnimalSearchPicker'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 // JSONB columns from PostgreSQL arrive as JS objects — handle both string and array
 const parseJsonbArray = (val: any): any[] => {
@@ -74,6 +75,7 @@ export default function InpatientManagement() {
   }, [hospitalId, statusFilter])
 
   useEffect(() => { loadData() }, [loadData])
+  useAutoRefresh('inpatients', loadData)
 
   async function handleAdmit() {
     if (!hospitalId || !admitAnimal) return

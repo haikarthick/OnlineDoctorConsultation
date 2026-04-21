@@ -6,6 +6,7 @@ import apiService from '../../services/api'
 import NetworkRoleMatrix from './NetworkRoleMatrix'
 import '../ModulePage.css'
 import './HospitalNetworks.css'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface HospitalNetwork {
@@ -842,6 +843,7 @@ const HospitalNetworks: React.FC = () => {
   }, [])
 
   useEffect(() => { loadNetworks() }, [loadNetworks])
+  useAutoRefresh(['hospital-networks', 'patients'], loadNetworks)
 
   useEffect(() => {
     if (!successMsg) return

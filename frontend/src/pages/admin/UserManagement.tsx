@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import '../../styles/modules.css'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 interface User {
   id: string
@@ -146,6 +147,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setLoading(false)
     }
   }
+  useAutoRefresh('users', loadUsers)
 
   const handleToggleStatus = async (userId: string) => {
     try {

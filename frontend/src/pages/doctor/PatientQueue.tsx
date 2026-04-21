@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { Booking } from '../../types'
 import '../../styles/modules.css'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 interface TimeSlot {
   startTime: string
@@ -85,6 +86,7 @@ const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
       setLoading(false)
     }
   }
+  useAutoRefresh('queue', loadBookings)
 
   const handleConfirm = async (bookingId: string) => {
     try {

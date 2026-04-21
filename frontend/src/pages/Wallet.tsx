@@ -4,6 +4,7 @@ import apiService from '../services/api'
 import { Wallet as WalletType, WalletTransaction } from '../types'
 import '../styles/modules.css'
 import { useTranslation } from 'react-i18next'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 interface WalletProps {
   onNavigate: (path: string) => void
@@ -36,6 +37,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
       setLoading(false)
     }
   }
+  useAutoRefresh('wallet', loadWallet)
 
   const loadTransactions = async (newOffset: number) => {
     try {

@@ -4,6 +4,7 @@ import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { Booking } from '../../types'
 import '../../styles/modules.css'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
 
@@ -84,6 +85,7 @@ const MyBookings: React.FC<MyBookingsProps> = ({ onNavigate }) => {
       setLoading(false)
     }
   }
+  useAutoRefresh('bookings', loadBookings)
 
   const handleCancelBooking = async () => {
     try {

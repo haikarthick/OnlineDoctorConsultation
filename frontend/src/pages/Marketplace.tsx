@@ -6,6 +6,7 @@ import './Marketplace.css'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData } from '../types'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
   { value: '', labelKey: 'marketplace.categories.all' },
@@ -122,6 +123,7 @@ const Marketplace: React.FC = () => {
   }, [filters, sortBy])
 
   useEffect(() => { fetchDashboard(); fetchListings() }, [])
+  useAutoRefresh('marketplace', fetchListings)
   useEffect(() => { fetchListings() }, [filters, sortBy])
 
   const viewListing = async (listing: MarketplaceListing) => {

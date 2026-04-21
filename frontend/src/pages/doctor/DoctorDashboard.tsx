@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import { Booking, Consultation } from '../../types'
 import '../../styles/modules.css'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 interface DoctorDashboardProps {
   onNavigate: (path: string) => void
@@ -64,6 +65,7 @@ setError(err?.response?.data?.error?.message || err?.message || t('doctorDashboa
       setLoading(false)
     }
   }
+  useAutoRefresh(['bookings', 'consultations', 'queue'], loadDashboard)
 
   const handleConfirm = async (id: string) => {
     try { await apiService.confirmBooking(id); loadDashboard() }

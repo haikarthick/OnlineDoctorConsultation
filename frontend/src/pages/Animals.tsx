@@ -7,6 +7,7 @@ import AutocompleteInput from '../components/AutocompleteInput'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 // ─── Breed Database by Species ──────────────────────────────
 // ── Common Pets ──────────────────────────────────────────────────────
@@ -214,6 +215,7 @@ const Animals: React.FC = () => {
   }
 
   useEffect(() => { fetchAnimals() }, [vetView])
+  useAutoRefresh('animals', fetchAnimals)
 
   const resetForm = () => {
     setFormData({

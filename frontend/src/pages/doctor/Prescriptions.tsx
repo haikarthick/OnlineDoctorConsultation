@@ -5,6 +5,7 @@ import { useSettings } from '../../context/SettingsContext'
 import apiService from '../../services/api'
 import PrescriptionPrintView, { PrescriptionPrintData, PrescriptionTemplate } from '../../components/PrescriptionPrintView'
 import '../../styles/modules.css'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 interface PrescriptionsProps {
   onNavigate: (path: string) => void
@@ -63,6 +64,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
   }, [t])
 
   useEffect(() => { loadPrescriptions() }, [loadPrescriptions])
+  useAutoRefresh('prescriptions', loadPrescriptions)
 
   // Apply search + status filter
   useEffect(() => {

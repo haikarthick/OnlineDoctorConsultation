@@ -5,6 +5,7 @@ import { vetHospitalApi } from '../services/api/vetHospitalApi'
 import apiService from '../services/api'
 import AnimalSearchPicker from '../components/AnimalSearchPicker'
 import VetSearchPicker from '../components/VetSearchPicker'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const STAGES = ['triage', 'examination', 'treatment', 'observation', 'discharge'] as const
 const PRIORITIES = ['emergency', 'urgent', 'high', 'normal', 'low'] as const
@@ -193,6 +194,9 @@ export default function HospitalWorkflow() {
     setLoading(true)
     Promise.all([loadQueue(), loadWorkflow(), loadReferrals()]).finally(() => setLoading(false))
   }, [hospitalId, loadQueue, loadWorkflow, loadReferrals])
+
+  const refreshWorkflow = useCallback(() => { Promise.all([loadQueue(), loadWorkflow(), loadReferrals()]) }, [loadQueue, loadWorkflow, loadReferrals])
+  useAutoRefresh('workflow', refreshWorkflow)
 
   // Actions
   function closeCheckInModal() {

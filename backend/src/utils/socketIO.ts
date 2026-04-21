@@ -41,6 +41,7 @@ export function initSocketIO(httpServer: HTTPServer): Server {
         const decoded = jwt.verify(token, config.jwt.secret) as any
         const userId = decoded.userId
         socket.join(`user:${userId}`)
+        socket.join(`role:${decoded.role}`)
         socket.data.userId = userId
         socket.data.role = decoded.role
         socket.emit('authenticated', { userId })
@@ -101,4 +102,19 @@ export function emitToUser(userId: string, event: string, data: unknown): void {
 /** Emit to a consultation room */
 export function emitToConsultation(consultationId: string, event: string, data: unknown): void {
   io?.to(`consultation:${consultationId}`).emit(event, data)
+}
+
+/** Emit a data:refresh event to a specific user */
+export function emitDataRefresh(userId: string, type: string): void {
+  io?.to(`user:${userId}`).emit('data:refresh', { type })
+}
+
+/** Emit a data:refresh event to all users with a specific role */
+export function emitRoleRefresh(role: string, type: string): void {
+  io?.to(`role:${role}`).emit('data:refresh', { type })
+}
+
+/** Emit a data:refresh event to all connected users (broadcast) */
+export function emitBroadcastRefresh(type: string): void {
+  io?.emit('data:refresh', { type })
 }

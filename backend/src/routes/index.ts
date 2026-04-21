@@ -116,6 +116,7 @@ import { asyncHandler } from '../utils/errorHandler';
 import { AuthRequest } from '../middleware/auth';
 import { checkAnimalAccess, requireAnimalAccess } from '../middleware/hospitalDataIsolation';
 import emailService from '../services/EmailService';
+import { emitDataRefresh, emitRoleRefresh, emitBroadcastRefresh } from '../utils/socketIO'
 
 const router = Router();
 
@@ -141,19 +142,37 @@ router.put('/auth/profile', authMiddleware, asyncHandler(async (req: Request, re
 }));
 
 // ─── Consultation routes ─────────────────────────────────────
-router.post('/consultations', authMiddleware, validateBody(createConsultationSchema), asyncHandler((req: Request, res: Response) => ConsultationController.createConsultation(req, res)));
+router.post('/consultations', authMiddleware, validateBody(createConsultationSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'consultations'); emitRoleRefresh('admin', 'consultations') } })
+  await ConsultationController.createConsultation(req, res)
+}));
 router.get('/consultations', authMiddleware, asyncHandler((req: Request, res: Response) => ConsultationController.listConsultations(req, res)));
 router.get('/consultations/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'consultations'), asyncHandler((req: Request, res: Response) => MedicalRecordController.getConsultationsByAnimal(req, res)));
 router.get('/consultations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ConsultationController.getConsultation(req, res)));
-router.put('/consultations/:id', authMiddleware, validateBody(updateConsultationSchema), asyncHandler((req: Request, res: Response) => ConsultationController.updateConsultation(req, res)));
+router.put('/consultations/:id', authMiddleware, validateBody(updateConsultationSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'consultations'); emitRoleRefresh('admin', 'consultations') } })
+  await ConsultationController.updateConsultation(req, res)
+}));
 
 // ─── Booking routes ──────────────────────────────────────────
-router.post('/bookings', authMiddleware, validateBody(createBookingSchema), asyncHandler((req: Request, res: Response) => BookingController.createBooking(req, res)));
+router.post('/bookings', authMiddleware, validateBody(createBookingSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'bookings'); emitRoleRefresh('admin', 'bookings') } })
+  await BookingController.createBooking(req, res)
+}));
 router.get('/bookings', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.listBookings(req, res)));
 router.get('/bookings/:id', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getBooking(req, res)));
-router.put('/bookings/:id/confirm', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.confirmBooking(req, res)));
-router.put('/bookings/:id/cancel', authMiddleware, validateBody(cancelBookingSchema), asyncHandler((req: Request, res: Response) => BookingController.cancelBooking(req, res)));
-router.put('/bookings/:id/reschedule', authMiddleware, validateBody(rescheduleBookingSchema), asyncHandler((req: Request, res: Response) => BookingController.rescheduleBooking(req, res)));
+router.put('/bookings/:id/confirm', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'bookings'); emitRoleRefresh('admin', 'bookings') } })
+  await BookingController.confirmBooking(req, res)
+}));
+router.put('/bookings/:id/cancel', authMiddleware, validateBody(cancelBookingSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'bookings'); emitRoleRefresh('admin', 'bookings') } })
+  await BookingController.cancelBooking(req, res)
+}));
+router.put('/bookings/:id/reschedule', authMiddleware, validateBody(rescheduleBookingSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'bookings'); emitRoleRefresh('admin', 'bookings') } })
+  await BookingController.rescheduleBooking(req, res)
+}));
 router.get('/bookings/:id/action-logs', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getBookingActionLogs(req, res)));
 router.get('/action-logs/my', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getMyActionLogs(req, res)));
 
@@ -198,7 +217,10 @@ router.put('/holidays/:id', authMiddleware, asyncHandler((req: Request, res: Res
 router.delete('/holidays/:id', authMiddleware, asyncHandler((req: Request, res: Response) => ScheduleController.deleteHoliday(req, res)));
 
 // ─── Prescription routes ─────────────────────────────────────
-router.post('/prescriptions', authMiddleware, validateBody(createPrescriptionSchema), asyncHandler((req: Request, res: Response) => PrescriptionController.createPrescription(req, res)));
+router.post('/prescriptions', authMiddleware, validateBody(createPrescriptionSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'prescriptions'); emitRoleRefresh('admin', 'prescriptions') } })
+  await PrescriptionController.createPrescription(req, res)
+}));
 router.get('/prescriptions/patients', authMiddleware, roleMiddleware(['admin', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {
   // Return pet_owner and farmer users for standalone prescription patient selector
   const limit = Math.min(parseInt(req.query.limit as string) || 200, 500);
@@ -229,7 +251,10 @@ router.put('/certificates/:id', authMiddleware, asyncHandler((req: Request, res:
 router.delete('/certificates/:id', authMiddleware, asyncHandler((req: Request, res: Response) => CertificateController.deleteCertificate(req, res)));
 
 // ─── Animal / Pet routes ─────────────────────────────────────
-router.post('/animals', authMiddleware, validateBody(createAnimalSchema), asyncHandler((req: Request, res: Response) => AnimalController.createAnimal(req, res)));
+router.post('/animals', authMiddleware, validateBody(createAnimalSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'animals') } })
+  await AnimalController.createAnimal(req, res)
+}));
 router.get('/animals/search/by-uid', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.searchByUniqueId(req, res)));
 router.get('/animals', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.listAnimals(req, res)));
 // Access-check endpoint — frontend can call this before showing a "Request Access" button
@@ -239,8 +264,14 @@ router.get('/animals/:id/access-check', authMiddleware, asyncHandler(async (req:
   res.json({ success: true, data: { allowed: decision.allowed, isPrivate: decision.isPrivate, accessType: decision.accessType, reason: decision.reason } });
 }));
 router.get('/animals/:id', authMiddleware, requireAnimalAccess('params:id', 'animal_profile'), asyncHandler((req: Request, res: Response) => AnimalController.getAnimal(req, res)));
-router.put('/animals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.updateAnimal(req, res)));
-router.delete('/animals/:id', authMiddleware, asyncHandler((req: Request, res: Response) => AnimalController.deleteAnimal(req, res)));
+router.put('/animals/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'animals') } })
+  await AnimalController.updateAnimal(req, res)
+}));
+router.delete('/animals/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'animals') } })
+  await AnimalController.deleteAnimal(req, res)
+}));
 
 // ─── Vet Profile routes ─────────────────────────────────────
 router.post('/vet-profiles', authMiddleware, validateBody(createVetProfileSchema), asyncHandler((req: Request, res: Response) => VetProfileController.createProfile(req, res)));
@@ -1461,12 +1492,16 @@ router.get('/hospitals/:hospitalId/inpatient', authMiddleware, asyncHandler(asyn
   return StaffWorkflowController.listInpatients(req, res);
 }));
 router.post('/hospitals/:hospitalId/inpatient/admit', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { emitRoleRefresh('veterinarian', 'inpatients'); emitRoleRefresh('hospital_staff', 'inpatients') } })
   if (!await checkInpatientNetworkAccess(req, res)) return;
   return StaffWorkflowController.admitPatient(req, res);
 }));
 router.patch('/inpatient/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateInpatientStatus(req, res)));
 router.post('/inpatient/:id/vitals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.addVitalsLog(req, res)));
-router.put('/inpatient/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateInpatientDetails(req, res)));
+router.put('/inpatient/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { emitRoleRefresh('veterinarian', 'inpatients'); emitRoleRefresh('hospital_staff', 'inpatients') } })
+  await StaffWorkflowController.updateInpatientDetails(req, res)
+}));
 router.get('/animals/:animalId/hospital-visits', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalHospitalVisits(req, res)));
 
 // ─── Report Builder & Export Center ──────────────────
@@ -1507,8 +1542,14 @@ router.delete('/simulations/:id', authMiddleware, asyncHandler((req: Request, re
 router.get('/marketplace/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceDashboard(req, res)));
 router.get('/marketplace/listings', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceListings(req, res)));
 router.get('/marketplace/listings/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceListing(req, res)));
-router.post('/marketplace/listings', authMiddleware, validateBody(createMarketplaceListingSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createMarketplaceListing(req, res)));
-router.put('/marketplace/listings/:id', authMiddleware, validateBody(updateMarketplaceListingSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateMarketplaceListing(req, res)));
+router.post('/marketplace/listings', authMiddleware, validateBody(createMarketplaceListingSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { emitRoleRefresh('admin', 'marketplace') } })
+  await Tier4Controller.createMarketplaceListing(req, res)
+}));
+router.put('/marketplace/listings/:id', authMiddleware, validateBody(updateMarketplaceListingSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { emitRoleRefresh('admin', 'marketplace') } })
+  await Tier4Controller.updateMarketplaceListing(req, res)
+}));
 router.delete('/marketplace/listings/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteMarketplaceListing(req, res)));
 router.get('/marketplace/listings/:listingId/bids', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceBids(req, res)));
 router.post('/marketplace/listings/:listingId/bids', authMiddleware, validateBody(placeBidSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.placeMarketplaceBid(req, res)));

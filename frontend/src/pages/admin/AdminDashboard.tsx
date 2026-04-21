@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import apiService from '../../services/api'
 import { AdminDashboardStats } from '../../types'
 import '../../styles/modules.css'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 interface AdminDashboardProps {
   onNavigate: (path: string) => void
@@ -32,6 +33,7 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
       setLoading(false)
     }
   }
+  useAutoRefresh(['dashboard', 'bookings', 'consultations', 'users'], loadStats)
 
   if (loading) {
     return (

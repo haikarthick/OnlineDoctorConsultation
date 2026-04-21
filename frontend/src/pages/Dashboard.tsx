@@ -7,6 +7,7 @@ import apiService from '../services/api'
 import { Booking, Consultation } from '../types'
 import './Dashboard.css'
 import { useTranslation } from 'react-i18next'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 /* ════════════════════════════════════════════════════════
  * TYPES
@@ -166,6 +167,7 @@ const Dashboard: React.FC = () => {
       setLoading(false)
     }
   }
+  useAutoRefresh(['bookings', 'consultations', 'dashboard'], loadDashboardData)
 
   // ── Doctor actions ──
   const handleConfirm = async (id: string) => {

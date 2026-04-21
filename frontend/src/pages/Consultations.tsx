@@ -5,6 +5,7 @@ import { useSettings } from '../context/SettingsContext'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 interface BookingRow {
   id: string; petOwnerName?: string; petOwnerId?: string; vetName?: string; scheduledDate: string;
@@ -186,8 +187,9 @@ const Consultations: React.FC = () => {
       setError(err?.response?.data?.error?.message || err?.message || t('consultations.failedToLoad'))
     } finally { setLoading(false) }
   }
+  useAutoRefresh(['bookings', 'consultations'], loadData)
 
-  const handleConfirmBooking = async (id: string) => {
+  const handleConfirmBooking= async (id: string) => {
     try { await apiService.confirmBooking(id); loadData() }
     catch (err: any) { setError(err?.response?.data?.error?.message || t('consultations.failedToConfirm')) }
   }

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 type Tab = 'overview' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline' | 'hospital_visits' | 'records'
 
@@ -214,6 +215,7 @@ const MedicalRecords: React.FC = () => {
   }, [loadAnimals, loadStats, loadPrescriptions, loadConsultations])
 
   useEffect(() => { loadAllData() }, [])
+  useAutoRefresh(['animals', 'prescriptions'], loadAnimals)
 
   useEffect(() => {
     if (selectedAnimal) {

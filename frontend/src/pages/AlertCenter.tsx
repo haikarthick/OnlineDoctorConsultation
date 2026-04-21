@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { Enterprise, AlertRule, AlertEvent } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const SEVERITY_COLORS: Record<string, string> = { info: '#3b82f6', warning: '#f97316', critical: '#ef4444' }
 const RULE_TYPES = ['vaccination_due', 'breeding_due', 'low_feed_stock', 'document_expiry', 'health_threshold', 'custom']
@@ -54,6 +55,7 @@ const AlertCenter: React.FC = () => {
   }
 
   useEffect(() => { fetchData() }, [selectedEnterpriseId])
+  useAutoRefresh('alerts', fetchData)
 
   const handleCreateRule = async (e: React.FormEvent) => {
     e.preventDefault()

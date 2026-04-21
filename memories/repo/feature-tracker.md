@@ -524,3 +524,15 @@
 - **Status:** done
 - **Description:** network_approval_events table + tracked approval timeline + info-request flow; network logo/contact/hours/specializations settings; weekly digest email service + notification preferences settings
 
+
+### ✅ Auto-Refresh System
+- **Logged:** 2026-04-21 10:45
+- **Status:** done
+- **Description:** useAutoRefresh hook (interval + socket push), socketIO role rooms, emitDataRefresh/emitRoleRefresh/emitBroadcastRefresh exports, 12 mutation routes instrumented (bookings, consultations, animals, prescriptions, inpatients, marketplace)
+
+
+### ✅ useAutoRefresh hook integration
+- **Logged:** 2026-04-21 10:55
+- **Status:** done
+- **Description:** Applied useAutoRefresh hook to 17 React pages for silent background refresh (30s interval + socket push): Dashboard, AdminDashboard, DoctorDashboard, Consultations, Animals, InpatientManagement, PatientQueue, Marketplace, Prescriptions, HospitalNetworks, MyBookings, AlertCenter, HospitalWorkflow, Wallet, UserManagement, HospitalBooking, MedicalRecords. Note: for const-declared functions (not useCallback), useAutoRefresh must be placed AFTER the function declaration to avoid TS2448 used-before-declaration errors.
+
