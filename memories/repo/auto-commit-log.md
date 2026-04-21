@@ -2304,3 +2304,39 @@
 </details>
 
 ---
+
+## 2026-04-21 10:55 · `c90fee6` · ✨ FEAT
+
+**Commit:** feat: apply useAutoRefresh hook to 17 pages for background data refresh  
+**Author:** haikarthick  
+**Categories:** API · UTILS · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (22)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/utils/socketIO.ts
+  - frontend/src/hooks/useAutoRefresh.ts
+  - frontend/src/pages/AlertCenter.tsx
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/Consultations.tsx
+  - frontend/src/pages/Dashboard.tsx
+  - frontend/src/pages/HospitalBooking.tsx
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - frontend/src/pages/InpatientManagement.tsx
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/pages/MedicalRecords.tsx
+  - frontend/src/pages/Wallet.tsx
+  - frontend/src/pages/admin/AdminDashboard.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/pages/doctor/DoctorDashboard.tsx
+  - frontend/src/pages/doctor/PatientQueue.tsx
+  - frontend/src/pages/doctor/Prescriptions.tsx
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/pages/petowner/MyBookings.tsx
+  - ... and 2 more
+
+</details>
+
+---

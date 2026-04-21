@@ -536,3 +536,9 @@
 - **Status:** done
 - **Description:** Applied useAutoRefresh hook to 17 React pages for silent background refresh (30s interval + socket push): Dashboard, AdminDashboard, DoctorDashboard, Consultations, Animals, InpatientManagement, PatientQueue, Marketplace, Prescriptions, HospitalNetworks, MyBookings, AlertCenter, HospitalWorkflow, Wallet, UserManagement, HospitalBooking, MedicalRecords. Note: for const-declared functions (not useCallback), useAutoRefresh must be placed AFTER the function declaration to avoid TS2448 used-before-declaration errors.
 
+
+### ✅ Auto-Refresh System
+- **Logged:** 2026-04-21 10:59
+- **Status:** done
+- **Description:** 30s polling + socket push across 17 pages. useAutoRefresh hook + emitDataRefresh/emitRoleRefresh/emitBroadcastRefresh. Backend routes emit data:refresh on mutations. Users join role rooms on socket auth.
+
