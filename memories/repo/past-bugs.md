@@ -978,3 +978,11 @@ render-start.sh
 - **Fix:** 4-file permission sync: PermissionService + PermissionContext + Navigation + App.tsx must ALL be checked together
 - **Rule:** Not specified
 
+
+### P4P6-ROUTE-001 — Route parameter inconsistency in hospital-networks routes
+- **Logged:** 2026-04-20 03:03
+- **Symptom:** API endpoints returning 404 or routing to wrong handlers
+- **Root Cause:** Mixed use of :id and :networkId parameters in Express routes caused generic catch-all route to intercept specific sub-path routes
+- **Fix:** Standardized all hospital-networks route parameters to :id in routes/index.ts
+- **Rule:** Express routes MUST use consistent parameter names across all related endpoints; place specific routes before generic catch-all routes
+

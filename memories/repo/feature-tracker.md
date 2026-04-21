@@ -506,3 +506,21 @@
 - **Status:** done
 - **Description:** Weekly Monday 08:00 UTC digest job in scheduler.ts, sendNetworkDigest in NotificationService, digest_emails_enabled on users table, GET/PUT /notification-preferences routes, Settings.tsx preference panel
 
+
+### ✅ P4 - Dual Role System + Per-Branch Consent + Unified Referrals
+- **Logged:** 2026-04-20 03:03
+- **Status:** done
+- **Description:** user_roles table with secondary roles; AuthContext hasRole() multi-role; Nav multi-role filtering; per-branch consent hospital_id on animal_care_contexts; unified referrals GET /animals/:id/referrals merging platform + network referrals
+
+
+### ✅ P5 - Network Analytics + Patient Search + Compliance Export
+- **Logged:** 2026-04-20 03:03
+- **Status:** done
+- **Description:** GET /hospital-networks/:id/analytics (8 stats + trend); enhanced network-wide patient search with consent filter + deep-link; GET /hospital-networks/:id/compliance-report with date range JSON export UI
+
+
+### ✅ P6 - Approval Workflow + Network Branding + Notification Digest
+- **Logged:** 2026-04-20 03:03
+- **Status:** done
+- **Description:** network_approval_events table + tracked approval timeline + info-request flow; network logo/contact/hours/specializations settings; weekly digest email service + notification preferences settings
+
