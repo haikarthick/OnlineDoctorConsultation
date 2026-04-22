@@ -2405,3 +2405,34 @@
 </details>
 
 ---
+
+## 2026-04-22 07:18 · `049da05` · 🐛 FIX
+
+**Commit:** fix: C1-C8 critical bugs — booking race condition, confirm status check, notifications, payment gate, consent scope, network role guard, admin password reset, wallet summary  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (16)</summary>
+
+  - backend/src/controllers/BookingController.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/BookingService.ts
+  - backend/src/services/HospitalNetworkService.ts
+  - backend/src/utils/database.ts
+  - docker/init.sql
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/PaymentManagement.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/services/api.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

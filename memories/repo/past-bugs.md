@@ -994,3 +994,27 @@ render-start.sh
 - **Fix:** Changed to RESTRICT in init.sql; added DO block migration in database.ts seedDefaultSettings() for existing DBs
 - **Rule:** NEVER use ON DELETE CASCADE for FK to users(id) on business data tables. Use RESTRICT for critical records, SET NULL for audit/history tables
 
+
+### SEC-003 — Double-booking race condition
+- **Logged:** 2026-04-22 07:20
+- **Symptom:** Two users book same vet slot simultaneously; SELECT+INSERT not atomic
+- **Root Cause:** Added unique partial index idx_bookings_vet_slot_unique on (vet_id, date, slot) WHERE status NOT IN (cancelled, missed); INSERT wrapped to catch 23505
+- **Fix:** Always use DB-level unique constraints for race-prone operations, not just application-level checks
+- **Rule:** Not specified
+
+
+### BKG-001 — confirmBooking allowed non-pending status transitions
+- **Logged:** 2026-04-22 07:20
+- **Symptom:** confirmBooking() only checked time, not current status; could re-confirm already-confirmed or cancelled bookings
+- **Root Cause:** Added status !== pending check throwing ValidationError before time check in confirmBooking()
+- **Fix:** Always validate state machine transitions before processing status changes
+- **Rule:** Not specified
+
+
+### NET-001 — search-patients route used wrong req.params key
+- **Logged:** 2026-04-22 07:20
+- **Symptom:** Route is /:id/search-patients but code destructured const { networkId } = req.params — always undefined, returns empty results
+- **Root Cause:** Fixed to const networkId = req.params.id
+- **Fix:** Always use req.params.id for :id params; never destructure with a different key name
+- **Rule:** Not specified
+

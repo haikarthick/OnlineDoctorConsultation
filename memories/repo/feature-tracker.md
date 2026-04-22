@@ -542,3 +542,15 @@
 - **Status:** done
 - **Description:** 30s polling + socket push across 17 pages. useAutoRefresh hook + emitDataRefresh/emitRoleRefresh/emitBroadcastRefresh. Backend routes emit data:refresh on mutations. Users join role rooms on socket auth.
 
+
+### ✅ Admin Password Reset
+- **Logged:** 2026-04-22 07:20
+- **Status:** done
+- **Description:** POST /admin/users/:id/reset-password with bcrypt hashing + audit log; UI modal in UserManagement.tsx
+
+
+### ✅ Admin Wallet Summary
+- **Logged:** 2026-04-22 07:20
+- **Status:** done
+- **Description:** GET /admin/wallet-summary aggregates wallet stats + top-10 balances; Wallet Overview tab in PaymentManagement.tsx
+
