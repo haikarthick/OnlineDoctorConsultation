@@ -2474,3 +2474,36 @@
 </details>
 
 ---
+
+## 2026-04-22 07:46 · `ed701f6` · 🐛 FIX
+
+**Commit:** fix: H8-H12 high priority — disputes, revenue trends, vet patient access, farmer bulk import  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · UI · AUTH/PERM · i18n · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (18)</summary>
+
+  - backend/src/middleware/hospitalDataIsolation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/PermissionService.ts
+  - backend/src/utils/database.ts
+  - docker/init.sql
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/admin/AdminDashboard.tsx
+  - frontend/src/pages/admin/DisputeManagement.tsx
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
