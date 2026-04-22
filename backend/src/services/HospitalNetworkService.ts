@@ -1617,6 +1617,7 @@ export class HospitalNetworkService {
     email?: string;
     description?: string;
     specializations?: string[];
+    operatingHours?: string;
   }, createdById: string): Promise<any> {
     const netCheck = await database.query(
       `SELECT id, created_by FROM hospital_networks WHERE id = $1`,
@@ -1651,14 +1652,15 @@ export class HospitalNetworkService {
 
       const hospitalResult = await client.query(
         `INSERT INTO vet_hospitals (name, hospital_type, address, city, state, country, postal_code, phone, email,
-          description, specializations, owner_id, is_network_branch, branch_network_id, is_verified, verification_status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, true, $13, false, 'approved')
+          description, specializations, operating_hours, owner_id, is_network_branch, branch_network_id, is_verified, verification_status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb, $13, true, $14, false, 'approved')
          RETURNING id, name, city, state, hospital_type as "hospitalType"`,
         [
           data.name, data.hospitalType || 'multi_specialty', data.address || null,
           data.city || null, data.state || null, data.country || 'IN',
           data.postalCode || null, data.phone || null, data.email || null,
           data.description || null, data.specializations || [],
+          data.operatingHours ? JSON.stringify({ text: data.operatingHours }) : '{}',
           createdById, networkId
         ]
       );

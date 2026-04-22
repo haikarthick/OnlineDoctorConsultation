@@ -347,6 +347,8 @@ interface BranchHospitalFormData {
   phone: string;
   email: string;
   description: string;
+  operatingHours?: string;
+  specializations?: string[];
 }
 
 const CreateBranchHospitalModal: React.FC<{
@@ -357,7 +359,8 @@ const CreateBranchHospitalModal: React.FC<{
 }> = ({ networkId, onSuccess, onClose, t }) => {
   const [form, setForm] = useState<BranchHospitalFormData>({
     name: '', hospitalType: 'multi_specialty', address: '', city: '',
-    state: '', country: 'IN', postalCode: '', phone: '', email: '', description: ''
+    state: '', country: 'IN', postalCode: '', phone: '', email: '', description: '',
+    operatingHours: '', specializations: []
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -440,6 +443,49 @@ const CreateBranchHospitalModal: React.FC<{
               <div className="module-form-group">
                 <label className="module-label">Description <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
                 <textarea className="module-input" rows={2} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description of this branch..." />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">{t('networkSettings.operatingHours')} <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+                <input
+                  className="module-input"
+                  value={form.operatingHours || ''}
+                  onChange={e => setForm(f => ({ ...f, operatingHours: e.target.value }))}
+                  placeholder={t('hospitalNetworks.operatingHoursPlaceholder')}
+                />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">{t('networkSettings.specializations')} <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                  {(form.specializations || []).map(spec => (
+                    <span key={spec} style={{ background: '#e0e7ff', color: '#3730a3', padding: '2px 10px', borderRadius: 20, fontSize: 13, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      {spec}
+                      <button type="button" onClick={() => setForm(f => ({ ...f, specializations: (f.specializations || []).filter(s => s !== spec) }))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 14, color: '#3730a3', lineHeight: 1 }}>×</button>
+                    </span>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {['Cardiology', 'Surgery', 'Emergency', 'Orthopedics', 'Dermatology', 'Ophthalmology', 'Neurology', 'Oncology', 'Internal Medicine', 'General Practice'].map(spec => (
+                    <button
+                      key={spec}
+                      type="button"
+                      onClick={() => setForm(f => ({
+                        ...f,
+                        specializations: (f.specializations || []).includes(spec)
+                          ? (f.specializations || []).filter(s => s !== spec)
+                          : [...(f.specializations || []), spec]
+                      }))}
+                      style={{
+                        padding: '3px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer', border: '1px solid',
+                        background: (form.specializations || []).includes(spec) ? '#4f46e5' : '#f3f4f6',
+                        color: (form.specializations || []).includes(spec) ? '#fff' : '#374151',
+                        borderColor: (form.specializations || []).includes(spec) ? '#4f46e5' : '#d1d5db'
+                      }}
+                    >
+                      {spec}
+                    </button>
+                  ))}
+                </div>
+                <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>{t('hospitalNetworks.specializationsHint')}</p>
               </div>
             </div>
           </div>
@@ -829,6 +875,10 @@ const HospitalNetworks: React.FC = () => {
   const [leaveRequests, setLeaveRequests] = useState<any[]>([])
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [transfers, setTransfers] = useState<any[]>([])
+
+  // Onboarding checklist state
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [onboardingNetwork, setOnboardingNetwork] = useState<HospitalNetwork | null>(null)
 
   const loadNetworks = useCallback(async () => {
     setLoading(true); setError('')
@@ -1238,10 +1288,15 @@ const HospitalNetworks: React.FC = () => {
   }
 
   const handleNetworkSaved = async (network: HospitalNetwork) => {
+    const isNew = !editingNetwork
     setShowCreateModal(false)
     setEditingNetwork(null)
     setSuccessMsg(`Network "${network.name}" saved.`)
     await loadNetworks()
+    if (isNew) {
+      setOnboardingNetwork(network)
+      setShowOnboarding(true)
+    }
   }
 
   const handleRemoveMember = async (member: NetworkMember) => {
@@ -2334,6 +2389,42 @@ const HospitalNetworks: React.FC = () => {
           t={t}
         />
       )}
+
+      {/* ═══ ONBOARDING CHECKLIST MODAL ═══ */}
+      {showOnboarding && onboardingNetwork && (
+        <div className="hn-modal-overlay" onClick={() => setShowOnboarding(false)}>
+          <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="hn-modal-header">
+              <h3>🚀 {t('hospitalNetworks.onboarding.title')}</h3>
+              <button type="button" className="hn-modal-close" onClick={() => setShowOnboarding(false)}>✕</button>
+            </div>
+            <div className="hn-modal-body">
+              <p style={{ margin: '0 0 20px', color: '#6b7280', fontSize: 14 }}>{t('hospitalNetworks.onboarding.subtitle')}</p>
+              {[
+                { id: 'details', label: t('hospitalNetworks.onboarding.networkDetails'), done: true },
+                { id: 'branch', label: t('hospitalNetworks.onboarding.addBranch'), done: false },
+                { id: 'director', label: t('hospitalNetworks.onboarding.assignDirector'), done: false },
+                { id: 'staff', label: t('hospitalNetworks.onboarding.inviteStaff'), done: false },
+                { id: 'compliance', label: t('hospitalNetworks.onboarding.complianceOfficer'), done: false },
+              ].map(item => (
+                <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
+                  <span style={{ fontSize: 20 }}>{item.done ? '✅' : '⬜'}</span>
+                  <span style={{ fontSize: 14, color: item.done ? '#059669' : '#374151', fontWeight: item.done ? 600 : 400 }}>{item.label}</span>
+                </div>
+              ))}
+              <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end' }}>
+                <button className="module-btn primary" onClick={() => {
+                  setShowOnboarding(false)
+                  handleView(onboardingNetwork)
+                  setActiveTab('detail')
+                }}>
+                  🏗️ {t('hospitalNetworks.onboarding.dismiss')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {showCreateBranch && selectedNetwork && (
         <CreateBranchHospitalModal
           networkId={selectedNetwork.id}
@@ -3107,10 +3198,10 @@ const HospitalNetworks: React.FC = () => {
                   <div className="module-form-group">
                     <label className="module-label">{t('hospitalNetworks.leave.type')} *</label>
                     <select name="leave_type" className="module-input" required>
-                      <option value="annual">Annual</option>
-                      <option value="sick">Sick</option>
-                      <option value="personal">Personal</option>
-                      <option value="emergency">Emergency</option>
+                      <option value="annual">{t('hospitalNetworks.leave.annualLeave')}</option>
+                      <option value="sick">{t('hospitalNetworks.leave.sickLeave')}</option>
+                      <option value="personal">{t('hospitalNetworks.leave.personalLeave')}</option>
+                      <option value="emergency">{t('hospitalNetworks.leave.emergencyLeave')}</option>
                     </select>
                   </div>
                   <div className="module-form-row">

@@ -4355,7 +4355,11 @@
     "resourceId": "संसाधन आईडी",
     "resourceType": "संसाधन प्रकार",
     "ip": "आईपी",
-    "details": "विवरण"
+    "details": "विवरण",
+    "filterByUser": "Filter by User",
+    "searchUser": "Search by user name or email",
+    "allUsers": "All Users",
+    "filterActive": "Filtered by user"
   },
   "cancellationDashboard": {
     "title": "रद्दीकरण विश्लेषण",
@@ -4777,7 +4781,12 @@
     "addCustomSetting": "कस्टम सेटिंग जोड़ें",
     "noMatch": "\"{{query}}\" से मिलती कोई सेटिंग नहीं",
     "noMatchDesc": "कोई अलग खोज शब्द आज़माएँ",
-    "clearSearch": "खोज साफ़ करें"
+    "clearSearch": "खोज साफ़ करें",
+    "maintenanceMode": "Maintenance Mode",
+    "maintenanceEnabled": "Enable Maintenance Mode",
+    "maintenanceMessage": "Maintenance Message for Users",
+    "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
+    "maintenanceAdminBypass": "Admin access - maintenance mode active"
   },
   "userManagement": {
     "title": "उपयोगकर्ता प्रबंधन",
@@ -5909,7 +5918,17 @@
       "type": "छुट्टी प्रकार",
       "dates": "तिथियां",
       "status": "स्थिति",
-      "actions": "कार्रवाई"
+      "actions": "कार्रवाई",
+      "annualLeave": "Annual Leave",
+      "sickLeave": "Sick Leave",
+      "personalLeave": "Personal Leave",
+      "emergencyLeave": "Emergency Leave",
+      "approveLeave": "Approve",
+      "rejectLeave": "Reject",
+      "managerComment": "Manager Comment (optional)",
+      "leaveStartDate": "Start Date",
+      "leaveEndDate": "End Date",
+      "leaveReason": "Reason"
     },
     "transfers": {
       "title": "मरीज़ स्थानांतरण",
@@ -5921,7 +5940,19 @@
       "status": "स्थिति",
       "actions": "कार्रवाई",
       "complete": "पूर्ण करें"
-    }
+    },
+    "onboarding": {
+      "title": "Network Setup Checklist",
+      "subtitle": "Complete these steps to get your network ready",
+      "networkDetails": "Network created successfully",
+      "addBranch": "Add a branch hospital",
+      "assignDirector": "Assign a Hospital Director",
+      "inviteStaff": "Invite staff members",
+      "complianceOfficer": "Assign a Compliance Officer",
+      "dismiss": "Got it, let's go!"
+    },
+    "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
+    "specializationsHint": "Click to add or remove specializations"
   },
   "networkReferrals": {
     "title": "नेटवर्क रेफरल",

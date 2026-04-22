@@ -1,4 +1,5 @@
-import React, { Suspense, lazy } from 'react'
+import React, { Suspense, lazy, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
@@ -179,8 +180,61 @@ function RoutedPage({ Component, paramKey }: { Component: React.FC<any>, paramKe
 
 function AppRoutes() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const { t } = useTranslation()
+  const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [maintenanceMessage, setMaintenanceMessage] = useState('')
+  const [maintenanceDismissed, setMaintenanceDismissed] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/v1/settings/public').then(r => r.json()).then(data => {
+      const s: Record<string, string> = {}
+      if (Array.isArray(data.data)) {
+        data.data.forEach((row: any) => { s[row.key] = row.value })
+      } else if (data.data && typeof data.data === 'object') {
+        Object.assign(s, data.data)
+      }
+      if (s['maintenance.enabled'] === 'true') {
+        setMaintenanceMode(true)
+        setMaintenanceMessage(s['maintenance.message'] || 'System maintenance in progress. Please try again later.')
+      } else {
+        setMaintenanceMode(false)
+      }
+    }).catch(() => {})
+  }, [])
 
   return (
+    <>
+      {maintenanceMode && !maintenanceDismissed && user && user.role !== 'admin' && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9998,
+          background: '#fef3c7', borderBottom: '2px solid #f59e0b',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 20px', gap: 12
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>🔧</span>
+            <span style={{ fontSize: 14, color: '#92400e', fontWeight: 500 }}>
+              {maintenanceMessage || t('systemSettings.maintenanceActive')}
+            </span>
+          </div>
+          <button
+            onClick={() => setMaintenanceDismissed(true)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#92400e', lineHeight: 1 }}
+          >✕</button>
+        </div>
+      )}
+      {maintenanceMode && user?.role === 'admin' && !maintenanceDismissed && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9998,
+          background: '#fef9c3', borderBottom: '2px solid #eab308',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '8px 20px'
+        }}>
+          <span style={{ fontSize: 13, color: '#713f12' }}>⚠️ {t('systemSettings.maintenanceAdminBypass')}</span>
+          <button onClick={() => setMaintenanceDismissed(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#713f12' }}>✕</button>
+        </div>
+      )}
     <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* Public pages */}
@@ -311,6 +365,7 @@ function AppRoutes() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
     </Suspense>
+    </>
   )
 }
 

@@ -4335,7 +4335,11 @@
     "resourceId": "రిసోర్స్ ఐడి",
     "resourceType": "రిసోర్స్ రకం",
     "ip": "ఐపి",
-    "details": "వివరాలు"
+    "details": "వివరాలు",
+    "filterByUser": "Filter by User",
+    "searchUser": "Search by user name or email",
+    "allUsers": "All Users",
+    "filterActive": "Filtered by user"
   },
   "cancellationDashboard": {
     "title": "రద్దు విశ్లేషణ",
@@ -4757,7 +4761,12 @@
     "addCustomSetting": "కస్టమ్ సెట్టింగ్ చేర్చు",
     "noMatch": "\"{{query}}\"కు సరిపోయే సెట్టింగ్‌లు లేవు",
     "noMatchDesc": "వేరే శోధన పదాన్ని ప్రయత్నించండి",
-    "clearSearch": "శోధన క్లియర్ చేయండి"
+    "clearSearch": "శోధన క్లియర్ చేయండి",
+    "maintenanceMode": "Maintenance Mode",
+    "maintenanceEnabled": "Enable Maintenance Mode",
+    "maintenanceMessage": "Maintenance Message for Users",
+    "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
+    "maintenanceAdminBypass": "Admin access - maintenance mode active"
   },
   "userManagement": {
     "title": "వినియోగదారు నిర్వహణ",
@@ -5841,7 +5850,17 @@
       "type": "సెలవు రకం",
       "dates": "తేదీలు",
       "status": "స్థితి",
-      "actions": "చర్యలు"
+      "actions": "చర్యలు",
+      "annualLeave": "Annual Leave",
+      "sickLeave": "Sick Leave",
+      "personalLeave": "Personal Leave",
+      "emergencyLeave": "Emergency Leave",
+      "approveLeave": "Approve",
+      "rejectLeave": "Reject",
+      "managerComment": "Manager Comment (optional)",
+      "leaveStartDate": "Start Date",
+      "leaveEndDate": "End Date",
+      "leaveReason": "Reason"
     },
     "transfers": {
       "title": "రోగి బదిలీ",
@@ -5853,7 +5872,19 @@
       "status": "స్థితి",
       "actions": "చర్యలు",
       "complete": "పూర్తి చేయండి"
-    }
+    },
+    "onboarding": {
+      "title": "Network Setup Checklist",
+      "subtitle": "Complete these steps to get your network ready",
+      "networkDetails": "Network created successfully",
+      "addBranch": "Add a branch hospital",
+      "assignDirector": "Assign a Hospital Director",
+      "inviteStaff": "Invite staff members",
+      "complianceOfficer": "Assign a Compliance Officer",
+      "dismiss": "Got it, let's go!"
+    },
+    "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
+    "specializationsHint": "Click to add or remove specializations"
   },
   "networkReferrals": {
     "title": "నెట్‌వర్క్ రెఫరల్స్",

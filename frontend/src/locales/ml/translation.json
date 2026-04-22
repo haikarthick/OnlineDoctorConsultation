@@ -3322,7 +3322,11 @@
     "resourceId": "റിസോഴ്‌സ് ഐഡി",
     "resourceType": "റിസോഴ്‌സ് തരം",
     "ip": "IP",
-    "details": "വിശദാംശങ്ങൾ"
+    "details": "വിശദാംശങ്ങൾ",
+    "filterByUser": "Filter by User",
+    "searchUser": "Search by user name or email",
+    "allUsers": "All Users",
+    "filterActive": "Filtered by user"
   },
   "cancellationDashboard": {
     "title": "റദ്ദാക്കൽ അനലിറ്റിക്‌സ്",
@@ -3738,7 +3742,12 @@
     "addCustomSetting": "ഇഷ്ടാനുസൃത ക്രമീകരണം ചേർക്കുക",
     "noMatch": "\"{{query}}\" എന്നതുമായി പൊരുത്തപ്പെടുന്ന ക്രമീകരണങ്ങളില്ല",
     "noMatchDesc": "മറ്റൊരു തിരയൽ പദം പരീക്ഷിക്കുക",
-    "clearSearch": "തിരയൽ മായ്ക്കുക"
+    "clearSearch": "തിരയൽ മായ്ക്കുക",
+    "maintenanceMode": "Maintenance Mode",
+    "maintenanceEnabled": "Enable Maintenance Mode",
+    "maintenanceMessage": "Maintenance Message for Users",
+    "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
+    "maintenanceAdminBypass": "Admin access - maintenance mode active"
   },
   "userManagement": {
     "title": "ഉപയോക്തൃ മാനേജ്‌മെന്റ്",
@@ -4144,5 +4153,204 @@
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
     "preferenceSaved": "Notification preferences saved"
+  },
+  "hospitalNetworks": {
+    "title": "Hospital Networks",
+    "createNetwork": "Create Network",
+    "selectNetwork": "← Select a network from the Networks tab to view details",
+    "tabs": {
+      "networks": "Networks",
+      "detail": "Network Detail",
+      "audit": "Audit & Compliance"
+    },
+    "stats": {
+      "total": "Total Networks",
+      "approved": "Approved",
+      "pending": "Pending Approval",
+      "hospitals": "Total Hospitals"
+    },
+    "table": {
+      "name": "Network Name",
+      "type": "Type",
+      "headquarters": "Headquarters",
+      "members": "Members",
+      "hospitals": "Hospitals",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "actions": {
+      "view": "View",
+      "approve": "Approve",
+      "edit": "Edit"
+    },
+    "status": {
+      "approved": "Approved",
+      "pending": "Pending Approval"
+    },
+    "modal": {
+      "createTitle": "Create Hospital Network",
+      "editTitle": "Edit Network"
+    },
+    "form": {
+      "idPrefix": "Network ID Prefix",
+      "idPrefixHint": "2-10 uppercase letters/numbers. Used to generate patient IDs like PREFIX-DOG-26-000001",
+      "chooseHospital": "— Choose a hospital —",
+      "pasteUserId": "Paste user UUID"
+    },
+    "networkPatientId": "Network Patient ID",
+    "enrollPatient": "Enroll Patient",
+    "enrolledPatients": "Enrolled Patients",
+    "patientIdFormat": "Patient IDs: {{prefix}}-SPE-YY-NNNNNN",
+    "detail": {
+      "hospitals": "Hospitals",
+      "staff": "Staff & Admins",
+      "assignHospital": "Assign Hospital",
+      "addMember": "Add Member",
+      "noHospitals": "No hospitals assigned",
+      "noMembers": "No members yet",
+      "inviteStaff": "Invite Staff Member",
+      "inviteStaffDesc": "Send an invite link to a new staff member. They will create their account using the link.",
+      "hospital": "Hospital",
+      "editMember": "Edit Member",
+      "networkRole": "Role",
+      "memberName": "Member",
+      "memberEmail": "Email"
+    },
+    "patients": {
+      "tab": "Patients",
+      "searchTitle": "Find Existing Patient",
+      "searchPlaceholder": "Search by name, email, phone or VC-ID...",
+      "searchMinChars": "Type at least 2 characters to search",
+      "noResults": "No patients found",
+      "requestEnrollment": "Request Enrollment",
+      "enrollmentRequested": "Enrollment request sent — patient will be notified to approve",
+      "inviteWalkIn": "Invite Walk-in Patient",
+      "registerWalkIn": "Register Walk-In",
+      "registerWalkInTitle": "Register Walk-In Patient",
+      "walkInSuccess": "Patient registered!",
+      "walkInHelperText": "Register a walk-in patient for immediate treatment. No invite or account needed — patient can be given online access later.",
+      "inviteForOnlineAccess": "Invite for Online Access",
+      "registerNow": "Register & Start Treatment",
+      "reasonForVisit": "Reason for Visit",
+      "breed": "Breed",
+      "inviteTitle": "Invite New Patient",
+      "invitePatientName": "Patient Name",
+      "inviteEmail": "Patient Email",
+      "invitePhone": "Phone (Optional)",
+      "inviteAnimalName": "Pet Name (Optional)",
+      "inviteSpecies": "Species (Optional)",
+      "inviteMessage": "Message to Patient (Optional)",
+      "inviteSend": "Send Invitation",
+      "inviteSuccess": "Invitation sent! Link expires in 72 hours.",
+      "allEnrollments": "All Enrollments",
+      "filterAll": "All",
+      "filterPending": "Pending",
+      "filterActive": "Active",
+      "filterDeclined": "Declined",
+      "colAnimal": "Animal",
+      "colOwner": "Owner",
+      "colNetworkId": "Network Patient ID",
+      "colStatus": "Status",
+      "colRequested": "Requested",
+      "statusPending": "Pending Consent",
+      "statusActive": "Active",
+      "statusDeclined": "Declined",
+      "statusRevoked": "Revoked",
+      "noPending": "No pending enrollments",
+      "noActive": "No active enrollments",
+      "noEnrollments": "No enrollments yet",
+      "searchHelper": "Search for existing platform users to send enrollment requests. Patients must accept before their data becomes visible to network staff."
+    },
+    "audit": {
+      "title": "Audit & Compliance",
+      "subtitle": "Immutable access log for all private animal data",
+      "stats": {
+        "total": "Total Access Events",
+        "granted": "Granted",
+        "denied": "Denied",
+        "last7days": "Last 7 Days"
+      },
+      "filters": {
+        "allTypes": "All Types",
+        "allResults": "All Results",
+        "granted": "Granted",
+        "denied": "Denied",
+        "search": "Search accessor or animal..."
+      },
+      "exportCsv": "Export CSV",
+      "table": {
+        "accessor": "Accessor",
+        "role": "Role",
+        "animal": "Animal",
+        "recordType": "Record Type",
+        "accessType": "Access Type",
+        "result": "Result",
+        "dateTime": "Date & Time"
+      },
+      "noLogs": "No audit events yet",
+      "noLogsDesc": "Access events will appear here once your network members start accessing patient records.",
+      "selectNetwork": "Select a network to view its audit log",
+      "goToNetworks": "Go to Networks →",
+      "pageOf": "Page {{page}} of {{total}}"
+    },
+    "staff": {
+      "inviteSent": "Invitation sent successfully!"
+    },
+    "deactivate": "Deactivate Network",
+    "deactivateConfirm": "Are you sure you want to deactivate this network? This cannot be easily undone.",
+    "deactivated": "Network deactivated successfully",
+    "financial": {
+      "title": "Network Performance",
+      "consultations": "Total Consultations",
+      "bookings": "Total Bookings",
+      "hospital": "Hospital",
+      "queueVisits": "Queue Visits",
+      "inpatients": "Inpatients"
+    },
+    "leave": {
+      "tab": "Leave",
+      "title": "Staff Leave Management",
+      "requestLeave": "Request Leave",
+      "noRequests": "No leave requests found",
+      "staffName": "Staff Member",
+      "type": "Leave Type",
+      "dates": "Dates",
+      "status": "Status",
+      "actions": "Actions",
+      "annualLeave": "Annual Leave",
+      "sickLeave": "Sick Leave",
+      "personalLeave": "Personal Leave",
+      "emergencyLeave": "Emergency Leave",
+      "approveLeave": "Approve",
+      "rejectLeave": "Reject",
+      "managerComment": "Manager Comment (optional)",
+      "leaveStartDate": "Start Date",
+      "leaveEndDate": "End Date",
+      "leaveReason": "Reason"
+    },
+    "transfers": {
+      "title": "Patient Transfers",
+      "noTransfers": "No patient transfers found",
+      "patient": "Patient",
+      "from": "From Hospital",
+      "to": "To Hospital",
+      "reason": "Reason",
+      "status": "Status",
+      "actions": "Actions",
+      "complete": "Complete"
+    },
+    "onboarding": {
+      "title": "Network Setup Checklist",
+      "subtitle": "Complete these steps to get your network ready",
+      "networkDetails": "Network created successfully",
+      "addBranch": "Add a branch hospital",
+      "assignDirector": "Assign a Hospital Director",
+      "inviteStaff": "Invite staff members",
+      "complianceOfficer": "Assign a Compliance Officer",
+      "dismiss": "Got it, let's go!"
+    },
+    "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
+    "specializationsHint": "Click to add or remove specializations"
   }
 }

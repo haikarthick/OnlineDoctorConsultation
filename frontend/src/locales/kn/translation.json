@@ -4346,7 +4346,11 @@
     "resourceId": "ರಿಸೋರ್ಸ್ ಐಡಿ",
     "resourceType": "ರಿಸೋರ್ಸ್ ಪ್ರಕಾರ",
     "ip": "ಐಪಿ",
-    "details": "ವಿವರಗಳು"
+    "details": "ವಿವರಗಳು",
+    "filterByUser": "Filter by User",
+    "searchUser": "Search by user name or email",
+    "allUsers": "All Users",
+    "filterActive": "Filtered by user"
   },
   "cancellationDashboard": {
     "title": "ರದ್ದತಿ ವಿಶ್ಲೇಷಣೆ",
@@ -4768,7 +4772,12 @@
     "addCustomSetting": "ಕಸ್ಟಮ್ ಸೆಟ್ಟಿಂಗ್ ಸೇರಿಸಿ",
     "noMatch": "\"{{query}}\"ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಲ್ಲ",
     "noMatchDesc": "ಬೇರೆ ಹುಡುಕಾಟ ಪದವನ್ನು ಪ್ರಯತ್ನಿಸಿ",
-    "clearSearch": "ಹುಡುಕಾಟ ತೆರವುಗೊಳಿಸಿ"
+    "clearSearch": "ಹುಡುಕಾಟ ತೆರವುಗೊಳಿಸಿ",
+    "maintenanceMode": "Maintenance Mode",
+    "maintenanceEnabled": "Enable Maintenance Mode",
+    "maintenanceMessage": "Maintenance Message for Users",
+    "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
+    "maintenanceAdminBypass": "Admin access - maintenance mode active"
   },
   "userManagement": {
     "title": "ಬಳಕೆದಾರ ನಿರ್ವಹಣೆ",
@@ -5852,7 +5861,17 @@
       "type": "ರಜೆ ಪ್ರಕಾರ",
       "dates": "ದಿನಾಂಕಗಳು",
       "status": "ಸ್ಥಿತಿ",
-      "actions": "ಕ್ರಮಗಳು"
+      "actions": "ಕ್ರಮಗಳು",
+      "annualLeave": "Annual Leave",
+      "sickLeave": "Sick Leave",
+      "personalLeave": "Personal Leave",
+      "emergencyLeave": "Emergency Leave",
+      "approveLeave": "Approve",
+      "rejectLeave": "Reject",
+      "managerComment": "Manager Comment (optional)",
+      "leaveStartDate": "Start Date",
+      "leaveEndDate": "End Date",
+      "leaveReason": "Reason"
     },
     "transfers": {
       "title": "ರೋಗಿ ವರ್ಗಾವಣೆ",
@@ -5864,7 +5883,19 @@
       "status": "ಸ್ಥಿತಿ",
       "actions": "ಕ್ರಮಗಳು",
       "complete": "ಪೂರ್ಣಗೊಳಿಸಿ"
-    }
+    },
+    "onboarding": {
+      "title": "Network Setup Checklist",
+      "subtitle": "Complete these steps to get your network ready",
+      "networkDetails": "Network created successfully",
+      "addBranch": "Add a branch hospital",
+      "assignDirector": "Assign a Hospital Director",
+      "inviteStaff": "Invite staff members",
+      "complianceOfficer": "Assign a Compliance Officer",
+      "dismiss": "Got it, let's go!"
+    },
+    "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
+    "specializationsHint": "Click to add or remove specializations"
   },
   "networkReferrals": {
     "title": "ನೆಟ್‌ವರ್ಕ್ ರೆಫರಲ್‌ಗಳು",

@@ -4344,7 +4344,11 @@
     "resourceId": "வள ஐடி",
     "resourceType": "வள வகை",
     "ip": "ஐபி",
-    "details": "விவரங்கள்"
+    "details": "விவரங்கள்",
+    "filterByUser": "Filter by User",
+    "searchUser": "Search by user name or email",
+    "allUsers": "All Users",
+    "filterActive": "Filtered by user"
   },
   "cancellationDashboard": {
     "title": "ரத்து பகுப்பாய்வு",
@@ -4766,7 +4770,12 @@
     "addCustomSetting": "தனிப்பயன் அமைப்பு சேர்",
     "noMatch": "\"{{query}}\" உடன் பொருந்தும் அமைப்புகள் இல்லை",
     "noMatchDesc": "வேறு தேடல் சொல்லை முயற்சிக்கவும்",
-    "clearSearch": "தேடலை அழி"
+    "clearSearch": "தேடலை அழி",
+    "maintenanceMode": "Maintenance Mode",
+    "maintenanceEnabled": "Enable Maintenance Mode",
+    "maintenanceMessage": "Maintenance Message for Users",
+    "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
+    "maintenanceAdminBypass": "Admin access - maintenance mode active"
   },
   "userManagement": {
     "title": "பயனர் மேலாண்மை",
@@ -5898,7 +5907,17 @@
       "type": "விடுப்பு வகை",
       "dates": "தேதிகள்",
       "status": "நிலை",
-      "actions": "நடவடிக்கைகள்"
+      "actions": "நடவடிக்கைகள்",
+      "annualLeave": "Annual Leave",
+      "sickLeave": "Sick Leave",
+      "personalLeave": "Personal Leave",
+      "emergencyLeave": "Emergency Leave",
+      "approveLeave": "Approve",
+      "rejectLeave": "Reject",
+      "managerComment": "Manager Comment (optional)",
+      "leaveStartDate": "Start Date",
+      "leaveEndDate": "End Date",
+      "leaveReason": "Reason"
     },
     "transfers": {
       "title": "நோயாளி மாற்றம்",
@@ -5910,7 +5929,19 @@
       "status": "நிலை",
       "actions": "நடவடிக்கைகள்",
       "complete": "முடிக்கவும்"
-    }
+    },
+    "onboarding": {
+      "title": "Network Setup Checklist",
+      "subtitle": "Complete these steps to get your network ready",
+      "networkDetails": "Network created successfully",
+      "addBranch": "Add a branch hospital",
+      "assignDirector": "Assign a Hospital Director",
+      "inviteStaff": "Invite staff members",
+      "complianceOfficer": "Assign a Compliance Officer",
+      "dismiss": "Got it, let's go!"
+    },
+    "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
+    "specializationsHint": "Click to add or remove specializations"
   },
   "networkReferrals": {
     "title": "நெட்வொர்க் பரிந்துரைகள்",
