@@ -157,6 +157,14 @@ const Animals: React.FC = () => {
   const [groupFilter, setGroupFilter] = useState('')
   const [vetView, setVetView] = useState<'my-pets' | 'patients'>('my-pets')
 
+  // Bulk import state (farmer only)
+  const [showBulkImport, setShowBulkImport] = useState(false)
+  const [importPreview, setImportPreview] = useState<any[]>([])
+  const [importResults, setImportResults] = useState<{ created: number; failed: number; errors: string[] } | null>(null)
+  const [importLoading, setImportLoading] = useState(false)
+  const [importError, setImportError] = useState('')
+  const csvInputRef = React.useRef<HTMLInputElement>(null)
+
   // Enterprise / group options for farmer role
   const [enterpriseOptions, setEnterpriseOptions] = useState<EnterpriseOption[]>([])
   const [groupOptions, setGroupOptions] = useState<GroupOption[]>([])
@@ -217,6 +225,54 @@ const Animals: React.FC = () => {
 
   useEffect(() => { fetchAnimals() }, [vetView])
   useAutoRefresh('animals', fetchAnimals)
+
+  const handleCSVFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string
+      const lines = text.split('\n').filter(l => l.trim())
+      if (lines.length < 2) { setImportError('CSV must have a header row and at least one data row'); return }
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''))
+      const rows = lines.slice(1).map(line => {
+        const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''))
+        return headers.reduce((obj: any, h, i) => { obj[h] = vals[i] || ''; return obj }, {})
+      }).filter((r: any) => r.name)
+      setImportPreview(rows)
+      setImportError('')
+      setImportResults(null)
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
+
+  const downloadTemplate = () => {
+    const csv = 'name,species,breed,gender,dateOfBirth,weight,color,microchipId\n' +
+      'Bessie,Cattle,Gir,female,2020-01-15,450,Black & White,900118001234567\n' +
+      'Raja,Horse,Marwari,male,2019-06-01,520,Brown,\n'
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = 'animal_import_template.csv'; a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleBulkImport = async () => {
+    if (importPreview.length === 0) return
+    setImportLoading(true)
+    setImportError('')
+    try {
+      const result = await (apiService as any).post('/animals/bulk-import', { animals: importPreview })
+      setImportResults(result?.data?.data || result?.data)
+      setImportPreview([])
+      await fetchAnimals()
+    } catch (err: any) {
+      setImportError(err?.response?.data?.error || err?.message || 'Import failed')
+    } finally {
+      setImportLoading(false)
+    }
+  }
 
   const resetForm = () => {
     setFormData({
@@ -343,6 +399,16 @@ const Animals: React.FC = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          {isFarmer && (
+            <>
+              <button className="btn-small" onClick={downloadTemplate} style={{ fontSize: 13 }}>
+                ⬇️ {t('animals.downloadTemplate')}
+              </button>
+              <button className="btn-small" onClick={() => { setShowBulkImport(true); setImportPreview([]); setImportResults(null); setImportError('') }} style={{ fontSize: 13 }}>
+                📥 {t('animals.importCSV')}
+              </button>
+            </>
+          )}
           {canManageAnimals && (
             <button className="btn-primary" onClick={() => { resetForm(); setShowForm(!showForm) }}>
               {showForm ? t('animals.actions.cancel') : t('animals.registerAnimal')}
@@ -747,6 +813,95 @@ const Animals: React.FC = () => {
               {canManageAnimals && <button className="btn-small" style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }} onClick={() => { setDetailAnimal(null); openEditForm(detailAnimal) }}>{t('animals.detailModal.editBtn')}</button>}
               <button className="btn-small" onClick={() => setDetailAnimal(null)} style={{ padding: '6px 20px' }}>{t('animals.detailModal.closeBtn')}</button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* ── Bulk Import Modal ────────────────────────────── */}
+      {showBulkImport && (
+        <div className="edit-form-overlay" onClick={() => setShowBulkImport(false)}>
+          <div className="edit-form-panel edit-form-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 700 }}>
+            <button className="edit-form-close" onClick={() => setShowBulkImport(false)} aria-label="Close">✕</button>
+            <h2>📥 {t('animals.bulkImport')}</h2>
+            <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 12px' }}>{t('animals.csvHeaders')}</p>
+
+            {importError && (
+              <div style={{ padding: '10px 14px', background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', borderRadius: 8, marginBottom: 12 }}>{importError}</div>
+            )}
+
+            {!importResults && (
+              <>
+                <input ref={csvInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleCSVFile} />
+                <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                  <button className="btn-primary" onClick={() => csvInputRef.current?.click()}>
+                    📂 {t('animals.importCSV')}
+                  </button>
+                  <button className="btn-small" onClick={downloadTemplate}>⬇️ {t('animals.downloadTemplate')}</button>
+                </div>
+                <p style={{ color: '#6b7280', fontSize: 13 }}>{t('animals.maxAnimals')}</p>
+              </>
+            )}
+
+            {importPreview.length > 0 && !importResults && (
+              <>
+                <h4 style={{ margin: '0 0 8px' }}>{t('animals.importPreview')} ({importPreview.length} {t('animals.animalsCount')})</h4>
+                <div className="data-table-container" style={{ maxHeight: 300, overflowY: 'auto' }}>
+                  <table className="module-table">
+                    <thead>
+                      <tr>
+                        <th>{t('animals.registerModal.name')}</th>
+                        <th>{t('animals.registerModal.species')}</th>
+                        <th>{t('animals.registerModal.breed')}</th>
+                        <th>{t('animals.registerModal.gender')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importPreview.slice(0, 20).map((row, i) => (
+                        <tr key={i}>
+                          <td>{row.name}</td>
+                          <td>{row.species}</td>
+                          <td>{row.breed || '—'}</td>
+                          <td>{row.gender || '—'}</td>
+                        </tr>
+                      ))}
+                      {importPreview.length > 20 && (
+                        <tr><td colSpan={4} style={{ textAlign: 'center', color: '#6b7280' }}>…and {importPreview.length - 20} more</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 16, justifyContent: 'flex-end' }}>
+                  <button className="btn-small" onClick={() => setImportPreview([])}>✕ Clear</button>
+                  <button className="btn-primary" onClick={handleBulkImport} disabled={importLoading}>
+                    {importLoading ? '⏳ Importing...' : `✅ Import ${importPreview.length} animals`}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {importResults && (
+              <div>
+                <h4 style={{ margin: '0 0 12px' }}>{t('animals.importResults')}</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                  <div style={{ padding: 16, background: '#e8f5e9', borderRadius: 8, textAlign: 'center' }}>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: '#2e7d32' }}>{importResults.created}</div>
+                    <div style={{ fontSize: 13, color: '#4caf50' }}>{t('animals.animalsCreated')}</div>
+                  </div>
+                  <div style={{ padding: 16, background: importResults.failed > 0 ? '#ffebee' : '#f5f5f5', borderRadius: 8, textAlign: 'center' }}>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: importResults.failed > 0 ? '#c62828' : '#9e9e9e' }}>{importResults.failed}</div>
+                    <div style={{ fontSize: 13, color: '#9e9e9e' }}>{t('animals.animalsFailed')}</div>
+                  </div>
+                </div>
+                {importResults.errors.length > 0 && (
+                  <div style={{ background: '#fff8e1', padding: 12, borderRadius: 8, fontSize: 13, maxHeight: 150, overflowY: 'auto' }}>
+                    <strong>{t('animals.importErrors')}:</strong>
+                    {importResults.errors.map((e, i) => <div key={i} style={{ color: '#f57c00', marginTop: 4 }}>• {e}</div>)}
+                  </div>
+                )}
+                <div style={{ marginTop: 16, textAlign: 'right' }}>
+                  <button className="btn-primary" onClick={() => setShowBulkImport(false)}>✓ Done</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

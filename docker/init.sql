@@ -2070,3 +2070,22 @@ CREATE INDEX IF NOT EXISTS idx_workflow_transitions_transitioned_by ON workflow_
 ALTER TABLE referrals ADD COLUMN IF NOT EXISTS network_referral_id UUID REFERENCES network_referrals(id) ON DELETE SET NULL;
 ALTER TABLE network_referrals ADD COLUMN IF NOT EXISTS platform_referral_id UUID REFERENCES referrals(id) ON DELETE SET NULL;
 
+
+-- 44. DISPUTES (user-submitted dispute resolution)
+CREATE TABLE IF NOT EXISTS disputes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reported_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
+  consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+  subject VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  dispute_type VARCHAR(50) NOT NULL CHECK (dispute_type IN ('billing', 'service_quality', 'no_show', 'data_privacy', 'other')),
+  status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'under_review', 'resolved', 'dismissed', 'escalated')),
+  resolution TEXT,
+  resolved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_disputes_reported_by ON disputes(reported_by);
+CREATE INDEX IF NOT EXISTS idx_disputes_status ON disputes(status);

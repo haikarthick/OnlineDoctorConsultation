@@ -45,6 +45,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_cancellation_dashboard',
       'admin_vaccine_protocols',
       'admin_certificates',
+      'dispute_management',
     ]
   },
   actions: {
@@ -282,6 +283,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'admin_dashboard', 'admin_users', 'admin_consultations', 'admin_payments',
     'admin_reviews', 'admin_settings', 'admin_audit', 'admin_permissions', 'admin_medical_records',
     'admin_hospitals', 'admin_compliance',
+    'dispute_management',
     // Hospital (full access)
     'hospital_browse', 'hospital_create', 'hospital_manage',
     'hospital_departments', 'hospital_services', 'hospital_staff',
@@ -405,6 +407,8 @@ export const PERMISSION_LABELS: Record<string, string> = {
   network_membership_manage: 'Network Membership Management',
   // Timeline
   animal_timeline: 'Animal Life Timeline',
+  // Dispute Management
+  dispute_management: 'Dispute Management',
   // Dashboard widgets
   dashboard_stats: 'Dashboard Stats Cards',
   dashboard_quick_actions: 'Dashboard Quick Actions',

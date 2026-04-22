@@ -1247,6 +1247,23 @@ class PostgresDatabase {
       END $$;
     `).catch((e: any) => logger.warn('FK migration warning:', e.message));
 
+    // Disputes table safety net
+    await this.pool.query(`CREATE TABLE IF NOT EXISTS disputes (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      reported_by UUID REFERENCES users(id) ON DELETE SET NULL,
+      booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
+      consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+      subject VARCHAR(255) NOT NULL,
+      description TEXT NOT NULL,
+      dispute_type VARCHAR(50) NOT NULL,
+      status VARCHAR(20) DEFAULT 'open',
+      resolution TEXT,
+      resolved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+      resolved_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )`).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

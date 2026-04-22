@@ -6,6 +6,19 @@ import { AdminDashboardStats } from '../../types'
 import '../../styles/modules.css'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
+interface RevenueTrend {
+  date: string
+  revenue: number
+  transactions: number
+  refunds: number
+}
+
+interface TopVet {
+  vetName: string
+  totalRevenue: number
+  consultations: number
+}
+
 interface AdminDashboardProps {
   onNavigate: (path: string) => void
 }
@@ -16,9 +29,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
   const [stats, setStats] = useState<AdminDashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [revenueTrends, setRevenueTrends] = useState<{ daily: RevenueTrend[], topVets: TopVet[] } | null>(null)
 
   useEffect(() => {
     loadStats()
+    loadRevenueTrends()
   }, [])
 
   const loadStats = async () => {
@@ -31,6 +46,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
 setError(err?.response?.data?.error?.message || err?.message || 'Failed to load dashboard data')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadRevenueTrends = async () => {
+    try {
+      const result = await (apiService as any).get('/admin/revenue-trends?days=30')
+      setRevenueTrends(result?.data?.data || null)
+    } catch {
+      // non-fatal — revenue trends unavailable
     }
   }
   useAutoRefresh(['dashboard', 'bookings', 'consultations', 'users'], loadStats)
@@ -215,6 +239,67 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
           </div>
         </div>
       </div>
+      {/* Revenue Trends */}
+      {revenueTrends && (
+        <div className="card" style={{ marginTop: 24 }}>
+          <div className="card-header"><h2>📈 {t('adminDashboard.revenueTrends')} — {t('adminDashboard.last30Days')}</h2></div>
+          <div className="card-body">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+              {/* Top Earning Vets */}
+              <div>
+                <h4 style={{ margin: '0 0 12px', color: '#374151' }}>🏆 {t('adminDashboard.topEarningVets')}</h4>
+                {revenueTrends.topVets.length === 0 ? (
+                  <p style={{ color: '#9ca3af', fontSize: 14 }}>No data</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {revenueTrends.topVets.map((v, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#f9fafb', borderRadius: 8 }}>
+                        <div>
+                          <span style={{ fontWeight: 600, fontSize: 14 }}>{i + 1}. {v.vetName}</span>
+                          <span style={{ fontSize: 12, color: '#6b7280', marginLeft: 8 }}>{v.consultations} consults</span>
+                        </div>
+                        <span style={{ fontWeight: 700, color: '#059669' }}>${((v.totalRevenue || 0) / 100).toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Daily Revenue (last 7 days) */}
+              <div>
+                <h4 style={{ margin: '0 0 12px', color: '#374151' }}>📊 {t('adminDashboard.dailyRevenue')}</h4>
+                {revenueTrends.daily.length === 0 ? (
+                  <p style={{ color: '#9ca3af', fontSize: 14 }}>No data</p>
+                ) : (() => {
+                  const last7 = revenueTrends.daily.slice(-7)
+                  const maxRev = Math.max(...last7.map(d => Number(d.revenue) || 0), 1)
+                  const totalTx = revenueTrends.daily.reduce((s, d) => s + (Number(d.transactions) || 0), 0)
+                  const totalRefunds = revenueTrends.daily.reduce((s, d) => s + (Number(d.refunds) || 0), 0)
+                  return (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 80, marginBottom: 8 }}>
+                        {last7.map((d, i) => {
+                          const h = Math.max(4, Math.round(((Number(d.revenue) || 0) / maxRev) * 72))
+                          return (
+                            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                              <div style={{ width: '100%', height: h, background: 'linear-gradient(180deg,#6366f1,#818cf8)', borderRadius: '4px 4px 0 0' }} title={`$${((Number(d.revenue) || 0) / 100).toFixed(2)}`} />
+                              <span style={{ fontSize: 10, color: '#9ca3af' }}>{new Date(d.date).getDate()}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 13 }}>
+                        <span><strong>{totalTx}</strong> {t('adminDashboard.totalTransactions')}</span>
+                        <span style={{ color: '#ef4444' }}><strong>${((totalRefunds || 0) / 100).toFixed(2)}</strong> {t('adminDashboard.refundsIssued')}</span>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

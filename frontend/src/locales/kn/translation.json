@@ -1205,7 +1205,17 @@
       "poultry": "ಕೋಳಿ ಸಾಕಾಣಿಕೆ",
       "exoticLarge": "ಅಪರೂಪದ ದೊಡ್ಡ ಪ್ರಾಣಿಗಳು",
       "other": "ಇತರೆ"
-    }
+    },
+    "importCSV": "Import CSV",
+    "downloadTemplate": "Download Template",
+    "bulkImport": "Bulk Import Animals",
+    "importPreview": "Preview",
+    "importResults": "Import Results",
+    "animalsCreated": "Animals Created",
+    "animalsFailed": "Failed",
+    "importErrors": "Errors",
+    "maxAnimals": "Maximum 500 animals per import",
+    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId"
   },
   "appointments": {
     "pageTitle": "📅 ನೇಮಕಾತಿಗಳು",
@@ -4284,7 +4294,36 @@
     "database": "ಡೇಟಾಬೇಸ್",
     "connected": "ಸಂಪರ್ಕಿತವಾಗಿದೆ",
     "videoService": "ವೀಡಿಯೋ ಸೇವೆ",
-    "available": "ಲಭ್ಯವಿದೆ"
+    "available": "ಲಭ್ಯವಿದೆ",
+    "revenueTrends": "Revenue Trends",
+    "last30Days": "Last 30 Days",
+    "topEarningVets": "Top Earning Vets",
+    "dailyRevenue": "Daily Revenue",
+    "totalTransactions": "Total Transactions",
+    "refundsIssued": "Refunds Issued"
+  },
+  "disputeManagement": {
+    "title": "Dispute Management",
+    "reportIssue": "Report Issue",
+    "subject": "Subject",
+    "description": "Describe the issue",
+    "type": "Issue Type",
+    "billing": "Billing",
+    "serviceQuality": "Service Quality",
+    "noShow": "No Show",
+    "dataPrivacy": "Data Privacy",
+    "other": "Other",
+    "status": "Status",
+    "open": "Open",
+    "underReview": "Under Review",
+    "resolved": "Resolved",
+    "dismissed": "Dismissed",
+    "escalated": "Escalated",
+    "resolve": "Resolve",
+    "resolution": "Resolution",
+    "resolvedAt": "Resolved At",
+    "submitDispute": "Submit Report",
+    "noDisputes": "No disputes found"
   },
   "auditLogs": {
     "title": "ಆಡಿಟ್ ಲಾಗ್‌ಗಳು",

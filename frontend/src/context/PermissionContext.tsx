@@ -91,6 +91,8 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   // Veterinary Certificates
   vet_certificates: ['/vet-certificates', '/doctor/certificates/new'],
   admin_certificates: ['/admin/certificate-settings'],
+  // Dispute Management
+  dispute_management: ['/admin/disputes'],
 }
 
 // Reverse map: route path → required permission
@@ -179,6 +181,8 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'vet-certificates': 'vet_certificates',
   'certificate-writer': 'vet_certificates',
   'admin-certificate-settings': 'admin_certificates',
+  // Dispute Management
+  'admin-disputes': 'dispute_management',
 }
 
 // ─── Context ────────────────────────────────────────────────

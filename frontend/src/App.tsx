@@ -98,6 +98,7 @@ const CertificateSettings = lazy(() => import('./pages/admin/CertificateSettings
 const HospitalNetworks = React.lazy(() => import('./pages/hospitalnetwork/HospitalNetworks'))
 const PatientConsent = React.lazy(() => import('./pages/petowner/PatientConsent'))
 const NetworkSubscriptions = React.lazy(() => import('./pages/admin/NetworkSubscriptions'))
+const DisputeManagement = React.lazy(() => import('./pages/admin/DisputeManagement'))
 const AcceptHospitalInvite = React.lazy(() => import('./pages/AcceptHospitalInvite'))
 const NetworkMemberships = React.lazy(() => import('./pages/petowner/NetworkMemberships'))
 
@@ -297,6 +298,7 @@ function AppRoutes() {
       {/* ── Hospital Network Module ── */}
       <Route path="/hospital-networks" element={<RoleRoute path="/hospital-networks"><AppLayout><HospitalNetworks /></AppLayout></RoleRoute>} />
       <Route path="/admin/network-subscriptions" element={<RoleRoute path="/admin/network-subscriptions"><AppLayout><NetworkSubscriptions /></AppLayout></RoleRoute>} />
+      <Route path="/admin/disputes" element={<RoleRoute path="/admin/disputes"><AppLayout><RoutedPage Component={DisputeManagement} /></AppLayout></RoleRoute>} />
       <Route path="/accept-hospital-invite" element={<AcceptHospitalInvite />} />
 
       {/* ── Patient Consent Module ── */}

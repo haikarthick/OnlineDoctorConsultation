@@ -68,6 +68,19 @@ export async function checkAnimalAccess(
       return { allowed: true, isPrivate: true, accessType: 'owner', networkId: ctx.network_id };
     }
 
+    // Step 3.5 — Vet with confirmed booking for this animal can access
+    if (userRole === 'veterinarian') {
+      const bookingAccess = await database.query(
+        `SELECT id FROM bookings 
+         WHERE veterinarian_id = $1 AND animal_id = $2 AND status IN ('confirmed', 'pending', 'in_progress', 'completed')
+         LIMIT 1`,
+        [userId, animalId]
+      );
+      if (bookingAccess.rows.length > 0) {
+        return { allowed: true, isPrivate: true, accessType: 'consent_user', networkId: ctx.network_id };
+      }
+    }
+
     // Step 4 — Network member check (any active member of the owning network)
     if (ctx.network_id) {
       const memberRes = await database.query(
