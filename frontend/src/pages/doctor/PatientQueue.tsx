@@ -51,6 +51,7 @@ const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
   const [actionLogBookingId, setActionLogBookingId] = useState<string | null>(null)
   const [actionLogs, setActionLogs] = useState<any[]>([])
   const [actionLogsLoading, setActionLogsLoading] = useState(false)
+  const [markingNoShow, setMarkingNoShow] = useState<string | null>(null)
 
   const actionLabel = (action: string): string => {
     const map: Record<string, string> = {
@@ -88,7 +89,21 @@ const PatientQueue: React.FC<PatientQueueProps> = ({ onNavigate }) => {
   }
   useAutoRefresh('queue', loadBookings)
 
-  const handleConfirm = async (bookingId: string) => {
+  const handleMarkNoShow = async (bookingId: string) => {
+    if (!window.confirm(t('bookings.noShowConfirm'))) return
+    setMarkingNoShow(bookingId)
+    try {
+      await (apiService as any).put(`/bookings/${bookingId}/no-show`, {})
+      setError('')
+      loadBookings()
+    } catch (err: any) {
+      setError(err?.response?.data?.error || err?.message || 'Failed to mark no-show')
+    } finally {
+      setMarkingNoShow(null)
+    }
+  }
+
+  const handleConfirm= async (bookingId: string) => {
     try {
       setProcessing(bookingId)
       await apiService.confirmBooking(bookingId)
@@ -335,6 +350,17 @@ setRescheduleSlots([])
                         onClick={() => openRescheduleModal(booking)}
                       >
                         🔄 {t('patientQueue.reschedule')}
+                      </button>
+                    )}
+                    {(booking.status === 'confirmed' || booking.status === 'pending') &&
+                      new Date((booking.scheduledDate || (booking as any).scheduled_date) + 'T23:59:59') < new Date() && (
+                      <button
+                        className="btn btn-sm"
+                        style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #f59e0b' }}
+                        disabled={markingNoShow === booking.id}
+                        onClick={() => handleMarkNoShow(booking.id)}
+                      >
+                        {markingNoShow === booking.id ? '...' : `⚠️ ${t('bookings.markNoShow')}`}
                       </button>
                     )}
                     <button

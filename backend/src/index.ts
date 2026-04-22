@@ -124,6 +124,50 @@ const startServer = async () => {
       );
     }, 24 * 60 * 60 * 1000);
 
+    // ── Vaccinations table reminders ─────────────────────────────
+    async function sendVaccinationsTableReminders() {
+      try {
+        const { default: db } = await import('./utils/database');
+        const { default: NSvc } = await import('./services/NotificationService');
+        const upcoming = await db.query(
+          `SELECT v.id, v.animal_id as "animalId", v.vaccine_name as "vaccineName",
+                  v.next_due_date as "nextDueDate",
+                  a.name as "animalName", a.owner_id as "ownerId"
+           FROM vaccinations v
+           JOIN animals a ON a.id = v.animal_id
+           WHERE v.next_due_date = CURRENT_DATE + INTERVAL '7 days'
+             AND v.status != 'cancelled'`,
+          []
+        );
+        for (const row of upcoming.rows) {
+          try {
+            const existing = await db.query(
+              `SELECT id FROM notifications WHERE user_id = $1 AND type = 'reminder'
+               AND metadata->>'vaccinationId' = $2 AND created_at > NOW() - INTERVAL '3 days'`,
+              [row.ownerId, row.id]
+            );
+            if (existing.rows.length > 0) continue;
+            await NSvc.createNotification(
+              row.ownerId, 'reminder',
+              `Vaccination Due in 7 Days`,
+              `${row.animalName}'s ${row.vaccineName} vaccination is due on ${new Date(row.nextDueDate).toLocaleDateString()}. Please schedule an appointment.`,
+              'all', { animalId: row.animalId, vaccinationId: row.id }
+            );
+          } catch { /* individual failures should not stop the loop */ }
+        }
+        if (upcoming.rows.length > 0) {
+          logger.info(`[VaccinationReminder] Sent ${upcoming.rows.length} vaccination reminders`);
+        }
+      } catch (err: any) {
+        logger.error('[VaccinationReminder] Job failed', { error: err.message });
+      }
+    }
+
+    sendVaccinationsTableReminders().catch((err: any) => logger.warn('[VaccinationReminder] Initial run failed', { error: err.message }));
+    setInterval(() => {
+      sendVaccinationsTableReminders().catch((err: any) => logger.warn('[VaccinationReminder] Scheduled run failed', { error: err.message }));
+    }, 24 * 60 * 60 * 1000);
+
     fixDemoPasswords().catch((err: any) => {
       logger.error('fixDemoPasswords failed on first attempt — will retry in 30s', { error: err.message || String(err) });
       setTimeout(() => {

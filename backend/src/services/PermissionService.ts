@@ -165,6 +165,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'health_analytics', 'alert_manage',
     // Innovation (vet-relevant modules)
     'disease_prediction', 'report_builder',
+    'vet_earnings',
     // Intelligence
     'ai_copilot', 'marketplace_access', 'wellness_portal',
     // Holiday management

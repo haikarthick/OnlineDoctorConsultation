@@ -90,6 +90,7 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   admin_vaccine_protocols: ['/admin/vaccine-protocols'],
   // Veterinary Certificates
   vet_certificates: ['/vet-certificates', '/doctor/certificates/new'],
+  vet_earnings: ['/doctor/earnings'],
   admin_certificates: ['/admin/certificate-settings'],
   // Dispute Management
   dispute_management: ['/admin/disputes'],
@@ -180,6 +181,7 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   // Veterinary Certificates
   'vet-certificates': 'vet_certificates',
   'certificate-writer': 'vet_certificates',
+  'vet-earnings': 'vet_earnings',
   'admin-certificate-settings': 'admin_certificates',
   // Dispute Management
   'admin-disputes': 'dispute_management',

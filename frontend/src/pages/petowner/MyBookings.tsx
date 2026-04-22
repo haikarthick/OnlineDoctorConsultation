@@ -5,6 +5,7 @@ import apiService from '../../services/api'
 import { Booking } from '../../types'
 import '../../styles/modules.css'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
+import './MyBookings.css'
 
 interface TimeSlot { startTime: string; endTime: string; isAvailable: boolean }
 
@@ -285,6 +286,15 @@ setCancelError(err?.response?.data?.error?.message || err?.message || t('myBooki
                   </button>
                   )
                 )}
+                {booking.status === 'confirmed' && (
+                  <button
+                    className="btn btn-warning btn-sm"
+                    style={{ background: '#f59e0b', color: 'white', border: 'none' }}
+                    onClick={() => openRescheduleModal(booking)}
+                  >
+                    🔄 {t('myBookings.reschedule')}
+                  </button>
+                )}
                 {booking.status === 'missed' && (
                   <button
                     className="btn btn-warning btn-sm"
@@ -338,6 +348,22 @@ setCancelError(err?.response?.data?.error?.message || err?.message || t('myBooki
                   {cancelError}
                 </div>
               )}
+              {(() => {
+                const bookingData = bookings.find(b => b.id === cancelModal.bookingId)
+                if (!bookingData) return null
+                const apptDateTime = new Date(`${(bookingData as any).scheduledDate}T${(bookingData as any).timeSlotStart || '00:00'}:00`)
+                const freeCancelUntil = new Date(apptDateTime.getTime() - 2 * 60 * 60 * 1000)
+                const isLateCancellation = new Date() > freeCancelUntil
+                return (
+                  <div className={`cancellation-policy-notice ${isLateCancellation ? 'late' : 'free'}`}>
+                    {isLateCancellation ? (
+                      <><span>⚠️</span> <strong>{t('myBookings.lateCancelWarning')}</strong><br/><span className="policy-text">{t('myBookings.cancelPolicy')}</span></>
+                    ) : (
+                      <><span>✅</span> <strong>{t('myBookings.freeCancelUntil', { time: freeCancelUntil.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })}</strong></>
+                    )}
+                  </div>
+                )
+              })()}
               <div className="form-group">
                 <label className="form-label">{t('myBookings.cancelReason')}</label>
                 <textarea

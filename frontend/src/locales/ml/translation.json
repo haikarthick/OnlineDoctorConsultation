@@ -1069,7 +1069,10 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId"
+    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "healthPassport": "ആരോഗ്യ പാസ്‌പോർട്ട്",
+    "downloadPassport": "ആരോഗ്യ പാസ്‌പോർട്ട് ഡൗൺലോഡ്",
+    "generatingPassport": "ജനറേറ്റ് ചെയ്യുന്നു..."
   },
   "appointments": {
     "pageTitle": "📅 അപ്പോയിന്റ്മെന്റുകൾ",
@@ -2871,7 +2874,10 @@
     "actionCreated": "📅 ബുക്കിങ് സൃഷ്ടിച്ചു",
     "actionConfirmed": "✅ ഡോക്ടർ സ്ഥിരീകരിച്ചു",
     "actionCancelled": "❌ ബുക്കിങ് റദ്ദാക്കി",
-    "actionRescheduled": "🔄 പുനർ ഷെഡ്യൂൾ ചെയ്തു"
+    "actionRescheduled": "🔄 പുനർ ഷെഡ്യൂൾ ചെയ്തു",
+    "cancelPolicy": "അപ്പോയ്ന്റ്മെന്റിന് 2 മണിക്കൂർ മുമ്പ് റദ്ദാക്കൽ ഫീസ് ഈടാക്കിയേക്കാം",
+    "freeCancelUntil": "{{time}} വരെ സൗജന്യ റദ്ദാക്കൽ",
+    "lateCancelWarning": "വൈകിയ റദ്ദാക്കലിന് ഫീസ് ഈടാക്കിയേക്കാം"
   },
   "vetProfile": {
     "notSpecified": "വ്യക്തമാക്കിയിട്ടില്ല",
@@ -4351,6 +4357,56 @@
       "dismiss": "Got it, let's go!"
     },
     "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
-    "specializationsHint": "Click to add or remove specializations"
+    "specializationsHint": "Click to add or remove specializations",
+    "department": "വിഭാഗം",
+    "selectDepartment": "വിഭാഗം തിരഞ്ഞെടുക്കുക",
+    "customDepartment": "കസ്റ്റം വിഭാഗം",
+    "noDepartment": "വിഭാഗം ഇല്ല"
+  },
+  "emailTemplates": {
+    "title": "ഇമെയിൽ ടെംപ്ലേറ്റുകൾ",
+    "edit": "ടെംപ്ലേറ്റ് എഡിറ്റ് ചെയ്യുക",
+    "save": "ടെംപ്ലേറ്റ് സേവ് ചെയ്യുക",
+    "subject": "ഇമെയിൽ വിഷയം",
+    "body": "ഇമെയിൽ ഉള്ളടക്കം",
+    "variables": "ലഭ്യമായ വേരിയബിളുകൾ",
+    "bookingConfirmation": "ബുക്കിംഗ് സ്ഥിരീകരണം",
+    "bookingCancellation": "ബുക്കിംഗ് റദ്ദാക്കൽ",
+    "bookingReminder": "ബുക്കിംഗ് ഓർമ്മപ്പെടുത്തൽ",
+    "passwordReset": "പാസ്‌വേഡ് റീസെറ്റ്",
+    "staffInvite": "സ്റ്റാഫ് ക്ഷണം",
+    "saved": "ടെംപ്ലേറ്റ് വിജയകരമായി സേവ് ചെയ്തു"
+  },
+  "vetEarnings": {
+    "title": "എന്റെ വരുമാനം",
+    "totalEarned": "ആകെ സമ്പാദിച്ചത്",
+    "totalConsultations": "ആകെ കൺസൾട്ടേഷനുകൾ",
+    "cancelledByMe": "ഞാൻ റദ്ദാക്കിയത്",
+    "missedAppointments": "നഷ്ടമായ അപ്പോയ്ന്റ്മെന്റുകൾ",
+    "recentConsultations": "സമീപകാല കൺസൾട്ടേഷനുകൾ",
+    "dailyEarnings": "ദൈനംദിന വരുമാനം",
+    "last30Days": "കഴിഞ്ഞ 30 ദിവസം",
+    "noEarnings": "വരുമാന ഡാറ്റ ലഭ്യമല്ല"
+  },
+  "certificates": {
+    "title": "ആരോഗ്യ സർട്ടിഫിക്കറ്റുകൾ",
+    "issue": "സർട്ടിഫിക്കറ്റ് നൽകുക",
+    "certificateNumber": "സർട്ടിഫിക്കറ്റ് നം.",
+    "type": "സർട്ടിഫിക്കറ്റ് തരം",
+    "health": "ആരോഗ്യ സർട്ടിഫിക്കറ്റ്",
+    "travel": "യാത്രാ സർട്ടിഫിക്കറ്റ്",
+    "vaccination": "വാക്സിനേഷൻ സർട്ടിഫിക്കറ്റ്",
+    "fitness": "ശസ്ത്രക്രിയക്ക് ഫിറ്റ്നസ്",
+    "purpose": "ഉദ്ദേശ്യം",
+    "validUntil": "ആകും വരെ",
+    "issuedBy": "നൽകിയത്",
+    "issuedOn": "നൽകിയ തീയതി",
+    "download": "സർട്ടിഫിക്കറ്റ് ഡൗൺലോഡ്",
+    "noCertificates": "സർട്ടിഫിക്കറ്റുകൾ ഒന്നും നൽകിയിട്ടില്ല"
+  },
+  "bookings": {
+    "markNoShow": "നോ-ഷോ അടയാളപ്പെടുത്തുക",
+    "noShowConfirm": "ഈ രോഗിയെ നോ-ഷോ ആയി അടയാളപ്പെടുത്തണോ? ഇത് പഴയതാക്കാൻ കഴിയില്ല.",
+    "noShowMarked": "രോഗിയെ നോ-ഷോ ആയി അടയാളപ്പെടുത്തി"
   }
 }

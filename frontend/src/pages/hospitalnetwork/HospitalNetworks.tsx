@@ -804,8 +804,9 @@ const HospitalNetworks: React.FC = () => {
   const [deletingBranch, setDeletingBranch] = useState<NetworkHospital | null>(null)
   const [showAddMember, setShowAddMember] = useState(false)
   const [editingMember, setEditingMember] = useState<NetworkMember | null>(null)
-  const [editMemberForm, setEditMemberForm] = useState({ networkRole: '', hospitalId: '' })
+  const [editMemberForm, setEditMemberForm] = useState({ networkRole: '', hospitalId: '', department: '' })
   const [editMemberLoading, setEditMemberLoading] = useState(false)
+  const [departments, setDepartments] = useState<string[]>([])
   const [showInviteStaff, setShowInviteStaff] = useState(false)
   const [inviteStaffForm, setInviteStaffForm] = useState({ email: '', name: '', position: 'receptionist', hospitalId: '' })
   const [inviteStaffLoading, setInviteStaffLoading] = useState(false)
@@ -1313,7 +1314,12 @@ const HospitalNetworks: React.FC = () => {
 
   const handleEditMember = (member: NetworkMember) => {
     setEditingMember(member)
-    setEditMemberForm({ networkRole: member.networkRole, hospitalId: member.hospitalId || '' })
+    setEditMemberForm({ networkRole: member.networkRole, hospitalId: member.hospitalId || '', department: (member as any).department || '' })
+    if (selectedNetwork) {
+      (apiService as any).get(`/hospital-networks/${selectedNetwork.id}/departments`)
+        .then((res: any) => setDepartments(res.data?.data || []))
+        .catch(() => setDepartments([]))
+    }
   }
 
   const handleUpdateMember = async () => {
@@ -1323,6 +1329,7 @@ const HospitalNetworks: React.FC = () => {
       await apiService.updateNetworkMember(selectedNetwork.id, editingMember.userId, {
         networkRole: editMemberForm.networkRole,
         hospitalId: editMemberForm.hospitalId || undefined,
+        department: editMemberForm.department || undefined,
       })
       setSuccessMsg('Member updated successfully.')
       setEditingMember(null)
@@ -2514,6 +2521,13 @@ const HospitalNetworks: React.FC = () => {
                 <select className="module-input" value={editMemberForm.hospitalId} onChange={e => setEditMemberForm(p => ({ ...p, hospitalId: e.target.value }))}>
                   <option value="">{t('common.none', '— None (Corporate Level) —')}</option>
                   {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+                </select>
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">{t('hospitalNetworks.department', 'Department')}</label>
+                <select className="module-input" value={editMemberForm.department} onChange={e => setEditMemberForm(p => ({ ...p, department: e.target.value }))}>
+                  <option value="">{t('hospitalNetworks.noDepartment', '— No Department —')}</option>
+                  {departments.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
             </div>

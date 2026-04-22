@@ -131,6 +131,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer'], section: 'Animals & Health' },
     { id: 'my-reviews', label: t('nav.myReviews'), icon: '⭐', path: '/doctor/reviews',
       roles: ['veterinarian'], section: 'Animals & Health' },
+    { id: 'vet-earnings', label: t('vetEarnings.title'), icon: '💰', path: '/doctor/earnings', roles: ['veterinarian'], section: 'Consultations' },
 
     // ── Farm / Enterprise Module ──
     { id: 'enterprises', label: t('nav.farmEnterprise'), icon: '🏢', path: '/enterprises',

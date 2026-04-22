@@ -1213,7 +1213,10 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId"
+    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "healthPassport": "சுகாதார பாஸ்போர்ட்",
+    "downloadPassport": "சுகாதார பாஸ்போர்ட் பதிவிறக்கு",
+    "generatingPassport": "உருவாக்கப்படுகிறது..."
   },
   "appointments": {
     "pageTitle": "📅 சந்திப்புகள்",
@@ -3735,7 +3738,10 @@
     "typePhone": "தொலைபேசி",
     "typeInPerson": "நேரில்",
     "typeChat": "சாட்",
-    "failedToLoad": "Failed to load veterinarians"
+    "failedToLoad": "Failed to load veterinarians",
+    "cancelPolicy": "சந்திப்பு நேரத்திற்கு 2 மணி நேரத்திற்குள் ரத்து கட்டணம் விதிக்கப்படலாம்",
+    "freeCancelUntil": "{{time}} வரை இலவச ரத்து",
+    "lateCancelWarning": "தாமதமான ரத்துக்கு கட்டணம் விதிக்கப்படலாம்"
   },
   "vetProfile": {
     "notSpecified": "குறிப்பிடப்படவில்லை",
@@ -5941,7 +5947,11 @@
       "dismiss": "Got it, let's go!"
     },
     "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
-    "specializationsHint": "Click to add or remove specializations"
+    "specializationsHint": "Click to add or remove specializations",
+    "department": "துறை",
+    "selectDepartment": "துறை தேர்ந்தெடு",
+    "customDepartment": "தனிப்பயன் துறை",
+    "noDepartment": "துறை இல்லை"
   },
   "networkReferrals": {
     "title": "நெட்வொர்க் பரிந்துரைகள்",
@@ -6228,5 +6238,51 @@
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
     "preferenceSaved": "Notification preferences saved"
+  },
+  "emailTemplates": {
+    "title": "மின்னஞ்சல் வார்ப்புருக்கள்",
+    "edit": "வார்ப்புரு திருத்து",
+    "save": "வார்ப்புரு சேமி",
+    "subject": "மின்னஞ்சல் தலைப்பு",
+    "body": "மின்னஞ்சல் உள்ளடக்கம்",
+    "variables": "கிடைக்கும் மாறிகள்",
+    "bookingConfirmation": "முன்பதிவு உறுதிப்படுத்தல்",
+    "bookingCancellation": "முன்பதிவு ரத்து",
+    "bookingReminder": "முன்பதிவு நினைவூட்டல்",
+    "passwordReset": "கடவுச்சொல் மீட்டமைப்பு",
+    "staffInvite": "பணியாளர் அழைப்பு",
+    "saved": "வார்ப்புரு வெற்றிகரமாக சேமிக்கப்பட்டது"
+  },
+  "vetEarnings": {
+    "title": "என் வருமானம்",
+    "totalEarned": "மொத்த வருமானம்",
+    "totalConsultations": "மொத்த ஆலோசனைகள்",
+    "cancelledByMe": "என்னால் ரத்து",
+    "missedAppointments": "தவறவிட்ட சந்திப்புகள்",
+    "recentConsultations": "சமீபத்திய ஆலோசனைகள்",
+    "dailyEarnings": "தினசரி வருமானம்",
+    "last30Days": "கடந்த 30 நாட்கள்",
+    "noEarnings": "வருமான தரவு இல்லை"
+  },
+  "certificates": {
+    "title": "சுகாதார சான்றிதழ்கள்",
+    "issue": "சான்றிதழ் வழங்கு",
+    "certificateNumber": "சான்றிதழ் எண்.",
+    "type": "சான்றிதழ் வகை",
+    "health": "சுகாதார சான்றிதழ்",
+    "travel": "பயண சான்றிதழ்",
+    "vaccination": "தடுப்பூசி சான்றிதழ்",
+    "fitness": "அறுவை சிகிச்சைக்கான தகுதி",
+    "purpose": "நோக்கம்",
+    "validUntil": "வரை செல்லுபடியாகும்",
+    "issuedBy": "வழங்கியவர்",
+    "issuedOn": "வழங்கிய தேதி",
+    "download": "சான்றிதழ் பதிவிறக்கு",
+    "noCertificates": "சான்றிதழ்கள் இல்லை"
+  },
+  "bookings": {
+    "markNoShow": "நோ-ஷோ குறி",
+    "noShowConfirm": "இந்த நோயாளியை நோ-ஷோ என்று குறிக்கவும்? இதை மீட்டெடுக்க முடியாது.",
+    "noShowMarked": "நோயாளி நோ-ஷோ என்று குறிக்கப்பட்டது"
   }
 }

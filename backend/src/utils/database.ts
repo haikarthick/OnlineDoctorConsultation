@@ -1264,6 +1264,9 @@ class PostgresDatabase {
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )`).catch(() => {});
 
+    // Ensure department column exists on hospital_network_members
+    await this.pool.query(`ALTER TABLE hospital_network_members ADD COLUMN IF NOT EXISTS department VARCHAR(100)`).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

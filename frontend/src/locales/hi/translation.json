@@ -1215,7 +1215,10 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId"
+    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "healthPassport": "स्वास्थ्य पासपोर्ट",
+    "downloadPassport": "स्वास्थ्य पासपोर्ट डाउनलोड करें",
+    "generatingPassport": "उत्पन्न हो रहा है..."
   },
   "appointments": {
     "pageTitle": "📅 अपॉइंटमेंट",
@@ -3746,7 +3749,10 @@
     "typePhone": "फ़ोन",
     "typeInPerson": "व्यक्तिगत रूप से",
     "typeChat": "चैट",
-    "failedToLoad": "पशु चिकित्सकों को लोड करने में विफल"
+    "failedToLoad": "पशु चिकित्सकों को लोड करने में विफल",
+    "cancelPolicy": "अपॉइंटमेंट के 2 घंटे के भीतर रद्दीकरण पर शुल्क लग सकता है",
+    "freeCancelUntil": "{{time}} तक निःशुल्क रद्दीकरण",
+    "lateCancelWarning": "देर से रद्दीकरण पर शुल्क लग सकता है"
   },
   "vetProfile": {
     "notSpecified": "निर्दिष्ट नहीं",
@@ -5952,7 +5958,11 @@
       "dismiss": "Got it, let's go!"
     },
     "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
-    "specializationsHint": "Click to add or remove specializations"
+    "specializationsHint": "Click to add or remove specializations",
+    "department": "विभाग",
+    "selectDepartment": "विभाग चुनें",
+    "customDepartment": "कस्टम विभाग",
+    "noDepartment": "कोई विभाग नहीं"
   },
   "networkReferrals": {
     "title": "नेटवर्क रेफरल",
@@ -6239,5 +6249,51 @@
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
     "preferenceSaved": "Notification preferences saved"
+  },
+  "emailTemplates": {
+    "title": "ईमेल टेम्पलेट",
+    "edit": "टेम्पलेट संपादित करें",
+    "save": "टेम्पलेट सहेजें",
+    "subject": "ईमेल विषय",
+    "body": "ईमेल सामग्री",
+    "variables": "उपलब्ध चर",
+    "bookingConfirmation": "बुकिंग पुष्टि",
+    "bookingCancellation": "बुकिंग रद्दीकरण",
+    "bookingReminder": "बुकिंग अनुस्मारक",
+    "passwordReset": "पासवर्ड रीसेट",
+    "staffInvite": "स्टाफ आमंत्रण",
+    "saved": "टेम्पलेट सफलतापूर्वक सहेजा गया"
+  },
+  "vetEarnings": {
+    "title": "मेरी कमाई",
+    "totalEarned": "कुल कमाई",
+    "totalConsultations": "कुल परामर्श",
+    "cancelledByMe": "मेरे द्वारा रद्द",
+    "missedAppointments": "छूटी अपॉइंटमेंट",
+    "recentConsultations": "हाल के परामर्श",
+    "dailyEarnings": "दैनिक कमाई",
+    "last30Days": "पिछले 30 दिन",
+    "noEarnings": "कोई कमाई डेटा उपलब्ध नहीं"
+  },
+  "certificates": {
+    "title": "स्वास्थ्य प्रमाण पत्र",
+    "issue": "प्रमाण पत्र जारी करें",
+    "certificateNumber": "प्रमाण पत्र नं.",
+    "type": "प्रमाण पत्र प्रकार",
+    "health": "स्वास्थ्य प्रमाण पत्र",
+    "travel": "यात्रा प्रमाण पत्र",
+    "vaccination": "टीकाकरण प्रमाण पत्र",
+    "fitness": "सर्जरी के लिए फिटनेस",
+    "purpose": "उद्देश्य",
+    "validUntil": "वैध तक",
+    "issuedBy": "जारीकर्ता",
+    "issuedOn": "जारी तिथि",
+    "download": "प्रमाण पत्र डाउनलोड करें",
+    "noCertificates": "कोई प्रमाण पत्र जारी नहीं"
+  },
+  "bookings": {
+    "markNoShow": "नो-शो चिह्नित करें",
+    "noShowConfirm": "इस मरीज को नो-शो के रूप में चिह्नित करें? यह पूर्ववत नहीं किया जा सकता।",
+    "noShowMarked": "मरीज को नो-शो के रूप में चिह्नित किया गया"
   }
 }

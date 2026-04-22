@@ -191,6 +191,32 @@ router.put('/bookings/:id/reschedule', authMiddleware, validateBody(rescheduleBo
 }));
 router.get('/bookings/:id/action-logs', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getBookingActionLogs(req, res)));
 router.get('/action-logs/my', authMiddleware, asyncHandler((req: Request, res: Response) => BookingController.getMyActionLogs(req, res)));
+router.put('/bookings/:id/no-show', authMiddleware, roleMiddleware(['veterinarian', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const booking = await database.query(
+    `SELECT id, pet_owner_id as "petOwnerId", veterinarian_id as "veterinarianId", status FROM bookings WHERE id = $1`,
+    [req.params.id]
+  );
+  if (booking.rows.length === 0) return res.status(404).json({ success: false, error: 'Booking not found' });
+  const b = booking.rows[0];
+  if (authReq.userRole === 'veterinarian' && b.veterinarianId !== authReq.userId) {
+    return res.status(403).json({ success: false, error: 'Not your booking' });
+  }
+  if (!['confirmed', 'pending'].includes(b.status)) {
+    return res.status(400).json({ success: false, error: 'Only confirmed or pending bookings can be marked as no-show' });
+  }
+  await database.query(
+    `UPDATE bookings SET status = 'missed', missed_by = 'patient', updated_at = NOW() WHERE id = $1`,
+    [req.params.id]
+  );
+  try {
+    const NSvc = (await import('../services/NotificationService')).default;
+    await NSvc.createNotification(b.petOwnerId, 'booking', 'No-Show Recorded', 
+      'You were marked as no-show for your appointment. This may affect future bookings.', 
+      'all', { bookingId: req.params.id });
+  } catch { /* non-fatal */ }
+  res.json({ success: true, message: 'Booking marked as no-show' });
+}));
 
 // ─── Video Session routes ────────────────────────────────────
 router.post('/video-sessions', authMiddleware, validateBody(createVideoSessionSchema), asyncHandler((req: Request, res: Response) => VideoSessionController.createSession(req, res)));
@@ -295,6 +321,55 @@ router.get('/vet-profiles/me', authMiddleware, asyncHandler((req: Request, res: 
 router.get('/vet-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.listVets(req, res)));
 router.get('/vet-profiles/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.getProfile(req, res)));
 router.put('/vet-profiles', authMiddleware, validateBody(updateVetProfileSchema), asyncHandler((req: Request, res: Response) => VetProfileController.updateProfile(req, res)));
+
+// ─── Vet Earnings ─────────────────────────────────────────────
+router.get('/vet/earnings', authMiddleware, roleMiddleware(['veterinarian', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const vetId = authReq.userRole === 'admin' ? ((req.query.vetId as string) || authReq.userId!) : authReq.userId!;
+  const daysInput = parseInt(req.query.days as string) || 30;
+  const days = Math.min(Math.max(daysInput, 1), 365);
+  
+  const summary = await database.query(
+    `SELECT 
+       COUNT(CASE WHEN b.status = 'completed' THEN 1 END)::int as "totalConsultations",
+       COALESCE(SUM(CASE WHEN p.status = 'completed' THEN p.amount ELSE 0 END), 0) as "totalEarned",
+       COUNT(CASE WHEN b.status = 'cancelled' AND b.cancelled_by = $1::uuid THEN 1 END)::int as "cancelledByMe",
+       COUNT(CASE WHEN b.status = 'missed' AND b.missed_by = 'doctor' THEN 1 END)::int as "missed"
+     FROM bookings b
+     LEFT JOIN payments p ON p.booking_id = b.id
+     WHERE b.veterinarian_id = $1
+       AND b.created_at >= NOW() - make_interval(days => $2)`,
+    [vetId, days]
+  );
+  
+  const daily = await database.query(
+    `SELECT DATE_TRUNC('day', p.created_at)::DATE as date,
+            SUM(p.amount)::numeric as earned,
+            COUNT(*)::int as consultations
+     FROM payments p
+     JOIN bookings b ON b.id = p.booking_id
+     WHERE b.veterinarian_id = $1 AND p.status = 'completed'
+       AND p.created_at >= NOW() - make_interval(days => $2)
+     GROUP BY DATE_TRUNC('day', p.created_at)
+     ORDER BY date ASC`,
+    [vetId, days]
+  );
+  
+  const recent = await database.query(
+    `SELECT b.id, b.scheduled_date as "date", b.time_slot_start as "time",
+            CONCAT(u.first_name, ' ', u.last_name) as "patientOwnerName",
+            a.name as "animalName", p.amount, p.status as "paymentStatus", b.status as "bookingStatus"
+     FROM bookings b
+     LEFT JOIN users u ON u.id = b.pet_owner_id
+     LEFT JOIN animals a ON a.id = b.animal_id
+     LEFT JOIN payments p ON p.booking_id = b.id
+     WHERE b.veterinarian_id = $1
+     ORDER BY b.scheduled_date DESC LIMIT 20`,
+    [vetId]
+  );
+  
+  res.json({ success: true, data: { summary: summary.rows[0], daily: daily.rows, recent: recent.rows } });
+}));
 
 // ─── Enterprise / Farm routes ────────────────────────────────
 router.post('/enterprises', authMiddleware, validateBody(createEnterpriseSchema), asyncHandler((req: Request, res: Response) => EnterpriseController.createEnterprise(req, res)));
@@ -574,11 +649,23 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
   let idx = 3;
   if (networkRole) { updates.push(`network_role = $${idx++}`); params.push(networkRole); }
   if (hospitalId !== undefined) { updates.push(`hospital_id = $${idx++}`); params.push(hospitalId || null); }
+  if (req.body.department !== undefined) { updates.push(`department = $${idx++}`); params.push(req.body.department || null); }
   if (updates.length === 0) return res.status(400).json({ success: false, message: 'No fields to update' });
   await database.query(`UPDATE hospital_network_members SET ${updates.join(', ')} WHERE network_id = $1 AND user_id = $2`, params);
   res.json({ success: true, message: 'Member updated successfully' });
 }));
 router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.removeNetworkMember(req, res)));
+router.get('/hospital-networks/:id/departments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const custom = await database.query(
+    `SELECT DISTINCT department FROM hospital_network_members 
+     WHERE network_id = $1 AND department IS NOT NULL`,
+    [req.params.id]
+  );
+  const predefined = ['Reception', 'Emergency', 'Surgery', 'Pharmacy', 'Laboratory', 'Radiology', 'ICU', 'General Practice', 'Cardiology', 'Orthopedics'];
+  const existing = custom.rows.map((r: any) => r.department);
+  const all = [...new Set([...predefined, ...existing])].sort();
+  res.json({ success: true, data: all });
+}));
 router.get('/hospital-networks/:id/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getNetworkDashboard(req, res)));
 router.get('/hospital-networks/:id/audit-logs', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getAuditLogs(req, res)));
 
@@ -1298,6 +1385,31 @@ router.post('/admin/settings/test-email', authMiddleware, roleMiddleware(['admin
     res.status(500).json({ success: false, message: `Email failed: ${err.message}`, mode: emailService.getMode() });
   }
 }));
+router.get('/admin/email-templates', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT key, value FROM system_settings WHERE key LIKE 'email_template.%'`
+  );
+  const templates: Record<string, string> = {};
+  result.rows.forEach((row: any) => {
+    templates[row.key.replace('email_template.', '')] = row.value;
+  });
+  res.json({ success: true, data: templates });
+}));
+
+router.put('/admin/email-templates/:templateName', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const { subject, body } = req.body;
+  if (!subject || !body) {
+    return res.status(400).json({ success: false, error: 'subject and body are required' });
+  }
+  const templateKey = `email_template.${req.params.templateName}`;
+  await database.query(
+    `INSERT INTO system_settings (key, value, updated_at) VALUES ($1, $2, NOW())
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+    [templateKey, JSON.stringify({ subject, body })]
+  );
+  res.json({ success: true, message: 'Template saved' });
+}));
+
 router.get('/admin/audit-logs', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getAuditLogs(req, res)));
 router.get('/admin/compliance/dashboard', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getComplianceDashboard(req, res)));
 router.get('/admin/compliance/phi-access', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getPhiAccessLog(req, res)));

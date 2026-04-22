@@ -107,6 +107,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const [savingMaintenance, setSavingMaintenance] = useState(false)
   const [maintenanceSaved, setMaintenanceSaved] = useState(false)
 
+  // Email Templates state
+  const [emailTemplates, setEmailTemplates] = useState<Record<string, {subject: string, body: string}>>({})
+  const [editingTemplate, setEditingTemplate] = useState<string | null>(null)
+  const [templateDraft, setTemplateDraft] = useState({ subject: '', body: '' })
+  const [savingTemplate, setSavingTemplate] = useState(false)
+  const [templateSaved, setTemplatesSaved] = useState(false)
+
   useEffect(() => {
     loadSettings()
     loadGatewaySettings()
@@ -131,9 +138,53 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       if (find('email.fromAddress')) setEmailFromAddress(find('email.fromAddress')!)
       if (find('maintenance.enabled')) setMaintenanceEnabled(find('maintenance.enabled') === 'true')
       if (find('maintenance.message')) setMaintenanceMessage(find('maintenance.message')!)
+      // Load email templates
+      try {
+        const tmplRes = await fetch('/api/v1/admin/email-templates', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+        const tmplData = await tmplRes.json()
+        if (tmplData.success) {
+          const defaults: Record<string, {subject: string, body: string}> = {
+            booking_confirmation: { subject: 'Booking Confirmed', body: 'Your appointment has been confirmed for {{date}} at {{time}} with {{vetName}}' },
+            booking_cancellation: { subject: 'Booking Cancelled', body: 'Your appointment on {{date}} has been cancelled. Reason: {{reason}}' },
+            booking_reminder: { subject: 'Appointment Reminder', body: 'Reminder: You have an appointment tomorrow at {{time}} with {{vetName}}' },
+            password_reset: { subject: 'Password Reset', body: 'Use this link to reset your password: {{resetLink}}' },
+            staff_invite: { subject: 'Staff Invitation', body: 'You have been invited to join {{networkName}} as {{role}}' },
+          }
+          const loaded: Record<string, {subject: string, body: string}> = {}
+          const rawTemplates = tmplData.data || {}
+          Object.keys(defaults).forEach(k => {
+            try { loaded[k] = rawTemplates[k] ? JSON.parse(rawTemplates[k]) : defaults[k] }
+            catch { loaded[k] = defaults[k] }
+          })
+          setEmailTemplates(loaded)
+        }
+      } catch { /* non-fatal */ }
     } catch {
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSaveTemplate = async () => {
+    if (!editingTemplate) return
+    try {
+      setSavingTemplate(true)
+      await fetch(`/api/v1/admin/email-templates/${editingTemplate}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify(templateDraft)
+      })
+      setEmailTemplates(prev => ({ ...prev, [editingTemplate]: templateDraft }))
+      setEditingTemplate(null)
+      setTemplatesSaved(true)
+      setTimeout(() => setTemplatesSaved(false), 3000)
+    } catch { /* non-fatal */ } finally {
+      setSavingTemplate(false)
     }
   }
 
@@ -1226,6 +1277,91 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
           ))
         )}
       </div>
+
+      {/* ─── Email Templates Card ─────────────────────────────────── */}
+      <div className="module-card" style={{ marginBottom: 24 }}>
+        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>📧 {t('emailTemplates.title')}</h2>
+        </div>
+        <div className="card-body">
+          {templateSaved && <div className="module-alert success">{t('emailTemplates.saved')}</div>}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+            {(['booking_confirmation', 'booking_cancellation', 'booking_reminder', 'password_reset', 'staff_invite'] as const).map(key => {
+              const labelMap: Record<string, string> = {
+                booking_confirmation: t('emailTemplates.bookingConfirmation'),
+                booking_cancellation: t('emailTemplates.bookingCancellation'),
+                booking_reminder: t('emailTemplates.bookingReminder'),
+                password_reset: t('emailTemplates.passwordReset'),
+                staff_invite: t('emailTemplates.staffInvite'),
+              }
+              const tmpl = emailTemplates[key]
+              return (
+                <div key={key} className="module-card" style={{ margin: 0 }}>
+                  <div className="card-header">
+                    <strong>{labelMap[key]}</strong>
+                  </div>
+                  <div className="card-body" style={{ fontSize: 13 }}>
+                    {tmpl ? (
+                      <p style={{ color: '#666', marginBottom: 8 }}>{t('emailTemplates.subject')}: {tmpl.subject}</p>
+                    ) : null}
+                    <button
+                      className="module-btn primary small"
+                      onClick={() => {
+                        setEditingTemplate(key)
+                        setTemplateDraft(tmpl || { subject: '', body: '' })
+                      }}
+                    >
+                      ✏️ {t('emailTemplates.edit')}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Email Template Edit Modal */}
+      {editingTemplate && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <div className="module-card" style={{ width: '100%', maxWidth: 560, margin: 16 }}>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3>✏️ {t('emailTemplates.edit')}</h3>
+              <button className="module-btn" onClick={() => setEditingTemplate(null)}>✕</button>
+            </div>
+            <div className="card-body">
+              <div className="module-form-group">
+                <label className="module-label">{t('emailTemplates.subject')} *</label>
+                <input
+                  className="module-input"
+                  value={templateDraft.subject}
+                  onChange={e => setTemplateDraft(prev => ({ ...prev, subject: e.target.value }))}
+                />
+              </div>
+              <div className="module-form-group">
+                <label className="module-label">{t('emailTemplates.body')} *</label>
+                <textarea
+                  className="module-input"
+                  rows={6}
+                  value={templateDraft.body}
+                  onChange={e => setTemplateDraft(prev => ({ ...prev, body: e.target.value }))}
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+                <button className="module-btn" onClick={() => setEditingTemplate(null)}>{t('common.cancel')}</button>
+                <button
+                  className="module-btn primary"
+                  disabled={savingTemplate || !templateDraft.subject || !templateDraft.body}
+                  onClick={handleSaveTemplate}
+                >
+                  {savingTemplate ? '⏳' : t('emailTemplates.save')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,0 +1,15 @@
+.cancellation-policy-notice {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.cancellation-policy-notice.free {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+}
+.cancellation-policy-notice.late {
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+}
+.policy-text { color: #92400e; }

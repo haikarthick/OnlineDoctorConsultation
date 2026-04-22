@@ -162,6 +162,7 @@ const Animals: React.FC = () => {
   const [importPreview, setImportPreview] = useState<any[]>([])
   const [importResults, setImportResults] = useState<{ created: number; failed: number; errors: string[] } | null>(null)
   const [importLoading, setImportLoading] = useState(false)
+  const [passportLoading, setPassportLoading] = useState<string | null>(null)
   const [importError, setImportError] = useState('')
   const csvInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -388,6 +389,88 @@ const Animals: React.FC = () => {
 
   const fieldStyle = { padding: '9px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, width: '100%', boxSizing: 'border-box' as const }
   const labelStyle = { fontSize: 12, fontWeight: 600 as const, color: '#4b5563', marginBottom: 4, display: 'block' }
+
+  const handleDownloadPassport= async (animal: AnimalData) => {
+    setPassportLoading(animal.id)
+    try {
+      const [vaccRes, medRes] = await Promise.all([
+        (apiService as any).get(`/vaccinations/animal/${animal.id}`).catch(() => ({ data: { vaccinations: [] } })),
+        (apiService as any).get(`/medical-records/animal/${animal.id}`).catch(() => ({ data: { records: [] } }))
+      ])
+      const vaccinations: any[] = vaccRes?.data?.vaccinations || vaccRes?.data?.data || []
+      const records: any[] = medRes?.data?.records || medRes?.data?.data || []
+
+      const microchipHtml = animal.microchipId
+        ? '<div class="info-item"><span class="label">Microchip:</span> ' + animal.microchipId + '</div>'
+        : ''
+      const vaccRowsHtml = vaccinations.map((v: any) =>
+        '<tr><td>' + (v.vaccineName || v.vaccine_name || '') + '</td>' +
+        '<td>' + ((v.dateAdministered || v.date_administered || '').split('T')[0] || 'N/A') + '</td>' +
+        '<td>' + ((v.nextDueDate || v.next_due_date || '').split('T')[0] || 'N/A') + '</td>' +
+        '<td>' + (v.batchNumber || v.batch_number || 'N/A') + '</td></tr>'
+      ).join('')
+      const vaccHtml = vaccinations.length === 0
+        ? '<p style="color:#999">No vaccination records found</p>'
+        : '<table><thead><tr><th>Vaccine</th><th>Date Administered</th><th>Next Due</th><th>Batch</th></tr></thead><tbody>' + vaccRowsHtml + '</tbody></table>'
+      const medRowsHtml = records.map((r: any) =>
+        '<tr><td>' + ((r.createdAt || r.created_at || '').split('T')[0] || 'N/A') + '</td>' +
+        '<td>' + (r.recordType || r.record_type || r.type || '') + '</td>' +
+        '<td>' + (r.title || '') + '</td>' +
+        '<td>' + (r.vetName || r.vet_name || 'N/A') + '</td></tr>'
+      ).join('')
+      const medHtml = records.length === 0
+        ? '<p style="color:#999">No medical records found</p>'
+        : '<table><thead><tr><th>Date</th><th>Type</th><th>Title</th><th>Veterinarian</th></tr></thead><tbody>' + medRowsHtml + '</tbody></table>'
+
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Health Passport - ${animal.name}</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    h1 { color: #1a5276; border-bottom: 2px solid #1a5276; padding-bottom: 10px; }
+    h2 { color: #2e4057; margin-top: 24px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { background: #1a5276; color: white; padding: 8px 12px; text-align: left; }
+    td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+    tr:nth-child(even) { background: #f8f9fa; }
+    .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
+    .info-item { display: flex; gap: 8px; } .label { font-weight: bold; color: #555; }
+    @media print { button { display: none; } }
+  </style>
+</head>
+<body>
+  <h1>&#x1F43E; VetCare Health Passport</h1>
+  <p style="color:#666; margin:0;">Generated on ${new Date().toLocaleDateString()}</p>
+  <h2>Animal Information</h2>
+  <div class="info-grid">
+    <div class="info-item"><span class="label">Name:</span> ${animal.name}</div>
+    <div class="info-item"><span class="label">Species:</span> ${animal.species}</div>
+    <div class="info-item"><span class="label">Breed:</span> ${animal.breed || 'N/A'}</div>
+    <div class="info-item"><span class="label">Gender:</span> ${animal.gender || 'N/A'}</div>
+    <div class="info-item"><span class="label">DOB:</span> ${animal.dateOfBirth ? animal.dateOfBirth.split('T')[0] : 'N/A'}</div>
+    <div class="info-item"><span class="label">Weight:</span> ${animal.weight ? String(animal.weight) + ' kg' : 'N/A'}</div>
+    ${microchipHtml}
+  </div>
+  <h2>Vaccination History (${vaccinations.length} records)</h2>
+  ${vaccHtml}
+  <h2>Medical Records (${records.length} records)</h2>
+  ${medHtml}
+  <script>window.onload = function() { window.print(); };<\/script>
+</body>
+</html>`
+
+      const win = window.open('', '_blank')
+      if (win) {
+        win.document.write(html)
+        win.document.close()
+      }
+    } catch (err) {
+      console.error('Failed to generate health passport', err)
+    } finally {
+      setPassportLoading(null)
+    }
+  }
 
   return (
     <div className="module-page">
@@ -741,6 +824,14 @@ const Animals: React.FC = () => {
                       <button className="btn-small" style={{ marginLeft: 'auto', background: '#667eea', color: 'white', border: 'none' }}
                         onClick={() => navigate(`/book-consultation?animalId=${animal.id}`)}>{t('animals.actions.bookConsultation')}</button>
                     )}
+                    <button
+                      className="btn-small"
+                      style={{ background: '#e0f2fe', color: '#0369a1', border: '1px solid #7dd3fc' }}
+                      onClick={() => handleDownloadPassport(animal)}
+                      disabled={passportLoading === animal.id}
+                    >
+                      {passportLoading === animal.id ? t('animals.generatingPassport') : `\u{1F6C2} ${t('animals.healthPassport')}`}
+                    </button>
                   </div>
                 </div>
               )

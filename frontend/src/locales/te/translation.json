@@ -1215,7 +1215,10 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId"
+    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "healthPassport": "ఆరోగ్య పాస్‌పోర్ట్",
+    "downloadPassport": "ఆరోగ్య పాస్‌పోర్ట్ డౌన్‌లోడ్",
+    "generatingPassport": "రూపొందిస్తోంది..."
   },
   "appointments": {
     "pageTitle": "📅 అపాయింట్‌మెంట్లు",
@@ -3737,7 +3740,10 @@
     "typePhone": "ఫోన్",
     "typeInPerson": "వ్యక్తిగతంగా",
     "typeChat": "చాట్",
-    "failedToLoad": "Failed to load veterinarians"
+    "failedToLoad": "Failed to load veterinarians",
+    "cancelPolicy": "అపాయింట్‌మెంట్‌కు 2 గంటల లోపు రద్దుకు రుసుము వసూలు చేయవచ్చు",
+    "freeCancelUntil": "{{time}} వరకు ఉచిత రద్దు",
+    "lateCancelWarning": "ఆలస్య రద్దుకు రుసుము వసూలు చేయవచ్చు"
   },
   "vetProfile": {
     "notSpecified": "పేర్కొనబడలేదు",
@@ -5884,7 +5890,11 @@
       "dismiss": "Got it, let's go!"
     },
     "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
-    "specializationsHint": "Click to add or remove specializations"
+    "specializationsHint": "Click to add or remove specializations",
+    "department": "విభాగం",
+    "selectDepartment": "విభాగం ఎంచుకోండి",
+    "customDepartment": "కస్టమ్ విభాగం",
+    "noDepartment": "విభాగం లేదు"
   },
   "networkReferrals": {
     "title": "నెట్‌వర్క్ రెఫరల్స్",
@@ -6171,5 +6181,51 @@
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
     "preferenceSaved": "Notification preferences saved"
+  },
+  "emailTemplates": {
+    "title": "ఇమెయిల్ టెంప్లేట్‌లు",
+    "edit": "టెంప్లేట్ సవరించు",
+    "save": "టెంప్లేట్ సేవ్ చేయి",
+    "subject": "ఇమెయిల్ విషయం",
+    "body": "ఇమెయిల్ విషయం",
+    "variables": "అందుబాటులో ఉన్న వేరియబుల్స్",
+    "bookingConfirmation": "బుకింగ్ నిర్ధారణ",
+    "bookingCancellation": "బుకింగ్ రద్దు",
+    "bookingReminder": "బుకింగ్ రిమైండర్",
+    "passwordReset": "పాస్‌వర్డ్ రీసెట్",
+    "staffInvite": "సిబ్బంది ఆహ్వానం",
+    "saved": "టెంప్లేట్ విజయవంతంగా సేవ్ చేయబడింది"
+  },
+  "vetEarnings": {
+    "title": "నా ఆదాయం",
+    "totalEarned": "మొత్తం ఆదాయం",
+    "totalConsultations": "మొత్తం సంప్రదింపులు",
+    "cancelledByMe": "నా చేత రద్దు",
+    "missedAppointments": "చేజారిన అపాయింట్‌మెంట్‌లు",
+    "recentConsultations": "ఇటీవలి సంప్రదింపులు",
+    "dailyEarnings": "రోజువారీ ఆదాయం",
+    "last30Days": "గత 30 రోజులు",
+    "noEarnings": "ఆదాయ డేటా అందుబాటులో లేదు"
+  },
+  "certificates": {
+    "title": "ఆరోగ్య సర్టిఫికేట్‌లు",
+    "issue": "సర్టిఫికేట్ జారీ చేయి",
+    "certificateNumber": "సర్టిఫికేట్ నం.",
+    "type": "సర్టిఫికేట్ రకం",
+    "health": "ఆరోగ్య సర్టిఫికేట్",
+    "travel": "ప్రయాణ సర్టిఫికేట్",
+    "vaccination": "టీకా సర్టిఫికేట్",
+    "fitness": "శస్త్రచికిత్సకు అర్హత",
+    "purpose": "ఉద్దేశం",
+    "validUntil": "వరకు చెల్లుబాటు",
+    "issuedBy": "జారీచేసినవారు",
+    "issuedOn": "జారీ తేదీ",
+    "download": "సర్టిఫికేట్ డౌన్‌లోడ్",
+    "noCertificates": "సర్టిఫికేట్‌లు జారీ చేయబడలేదు"
+  },
+  "bookings": {
+    "markNoShow": "నో-షో గుర్తించు",
+    "noShowConfirm": "ఈ రోగిని నో-షోగా గుర్తించాలా? దీన్ని రద్దు చేయలేరు.",
+    "noShowMarked": "రోగి నో-షోగా గుర్తించబడ్డారు"
   }
 }

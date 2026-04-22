@@ -2582,3 +2582,23 @@
 </details>
 
 ---
+
+## 2026-04-22 10:25 · `98ede56` · 🐛 FIX
+
+**Commit:** fix: M1,M3,M4,M6,M7 — audit user filter, maintenance mode, leave management, onboarding checklist, branch specializations  
+**Author:** haikarthick  
+**Categories:** SERVICE · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - backend/src/services/AdminService.ts
+  - frontend/src/pages/admin/AuditLogs.tsx
+  - frontend/src/pages/admin/SystemSettings.tsx
+  - frontend/src/types/index.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

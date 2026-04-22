@@ -1256,7 +1256,10 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId"
+    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "healthPassport": "Health Passport",
+    "downloadPassport": "Download Health Passport",
+    "generatingPassport": "Generating..."
   },
   "appointments": {
     "pageTitle": "📅 Appointments",
@@ -3805,7 +3808,10 @@
     "typePhone": "Phone",
     "typeInPerson": "In Person",
     "typeChat": "Chat",
-    "failedToLoad": "Failed to load veterinarians"
+    "failedToLoad": "Failed to load veterinarians",
+    "cancelPolicy": "Cancellations within 2 hours of appointment may incur a fee",
+    "freeCancelUntil": "Free cancellation until {{time}}",
+    "lateCancelWarning": "Late cancellation may incur a fee"
   },
   "vetProfile": {
     "notSpecified": "Not specified",
@@ -6004,7 +6010,11 @@
       "dismiss": "Got it, let's go!"
     },
     "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
-    "specializationsHint": "Click to add or remove specializations"
+    "specializationsHint": "Click to add or remove specializations",
+    "department": "Department",
+    "selectDepartment": "Select Department",
+    "customDepartment": "Custom Department",
+    "noDepartment": "No Department"
   },
   "networkReferrals": {
     "title": "Network Referrals",
@@ -6291,5 +6301,51 @@
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
     "preferenceSaved": "Notification preferences saved"
+  },
+  "emailTemplates": {
+    "title": "Email Templates",
+    "edit": "Edit Template",
+    "save": "Save Template",
+    "subject": "Email Subject",
+    "body": "Email Body",
+    "variables": "Available variables",
+    "bookingConfirmation": "Booking Confirmation",
+    "bookingCancellation": "Booking Cancellation",
+    "bookingReminder": "Booking Reminder",
+    "passwordReset": "Password Reset",
+    "staffInvite": "Staff Invite",
+    "saved": "Template saved successfully"
+  },
+  "vetEarnings": {
+    "title": "My Earnings",
+    "totalEarned": "Total Earned",
+    "totalConsultations": "Total Consultations",
+    "cancelledByMe": "Cancelled by Me",
+    "missedAppointments": "Missed Appointments",
+    "recentConsultations": "Recent Consultations",
+    "dailyEarnings": "Daily Earnings",
+    "last30Days": "Last 30 Days",
+    "noEarnings": "No earnings data available"
+  },
+  "certificates": {
+    "title": "Health Certificates",
+    "issue": "Issue Certificate",
+    "certificateNumber": "Certificate No.",
+    "type": "Certificate Type",
+    "health": "Health Certificate",
+    "travel": "Travel Certificate",
+    "vaccination": "Vaccination Certificate",
+    "fitness": "Fitness for Surgery",
+    "purpose": "Purpose",
+    "validUntil": "Valid Until",
+    "issuedBy": "Issued By",
+    "issuedOn": "Issued On",
+    "download": "Download Certificate",
+    "noCertificates": "No certificates issued"
+  },
+  "bookings": {
+    "markNoShow": "Mark No-Show",
+    "noShowConfirm": "Mark this patient as no-show? This cannot be undone.",
+    "noShowMarked": "Patient marked as no-show"
   }
 }

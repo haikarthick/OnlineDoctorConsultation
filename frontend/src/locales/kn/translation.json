@@ -1215,7 +1215,10 @@
     "animalsFailed": "Failed",
     "importErrors": "Errors",
     "maxAnimals": "Maximum 500 animals per import",
-    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId"
+    "csvHeaders": "Required: name, species. Optional: breed, gender, dateOfBirth, weight, color, microchipId",
+    "healthPassport": "ಆರೋಗ್ಯ ಪಾಸ್‌ಪೋರ್ಟ್",
+    "downloadPassport": "ಆರೋಗ್ಯ ಪಾಸ್‌ಪೋರ್ಟ್ ಡೌನ್‌ಲೋಡ್",
+    "generatingPassport": "ರಚಿಸಲಾಗುತ್ತಿದೆ..."
   },
   "appointments": {
     "pageTitle": "📅 ನೇಮಕಾತಿಗಳು",
@@ -3737,7 +3740,10 @@
     "typePhone": "ಫೋನ್",
     "typeInPerson": "ನೇರವಾಗಿ",
     "typeChat": "ಚಾಟ್",
-    "failedToLoad": "Failed to load veterinarians"
+    "failedToLoad": "Failed to load veterinarians",
+    "cancelPolicy": "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ನ 2 ಗಂಟೆಯ ಒಳಗೆ ರದ್ದಿಗೆ ಶುಲ್ಕ ವಿಧಿಸಬಹುದು",
+    "freeCancelUntil": "{{time}} ವರೆಗೆ ಉಚಿತ ರದ್ದು",
+    "lateCancelWarning": "ತಡ ರದ್ದಿಗೆ ಶುಲ್ಕ ವಿಧಿಸಬಹುದು"
   },
   "vetProfile": {
     "notSpecified": "ನಿರ್ದಿಷ್ಟಪಡಿಸಲಾಗಿಲ್ಲ",
@@ -5895,7 +5901,11 @@
       "dismiss": "Got it, let's go!"
     },
     "operatingHoursPlaceholder": "e.g. Mon-Fri: 9am-6pm, Sat: 9am-1pm",
-    "specializationsHint": "Click to add or remove specializations"
+    "specializationsHint": "Click to add or remove specializations",
+    "department": "ವಿಭಾಗ",
+    "selectDepartment": "ವಿಭಾಗ ಆಯ್ಕೆಮಾಡಿ",
+    "customDepartment": "ಕಸ್ಟಮ್ ವಿಭಾಗ",
+    "noDepartment": "ಯಾವುದೇ ವಿಭಾಗ ಇಲ್ಲ"
   },
   "networkReferrals": {
     "title": "ನೆಟ್‌ವರ್ಕ್ ರೆಫರಲ್‌ಗಳು",
@@ -6182,5 +6192,51 @@
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
     "preferenceSaved": "Notification preferences saved"
+  },
+  "emailTemplates": {
+    "title": "ಇಮೇಲ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳು",
+    "edit": "ಟೆಂಪ್ಲೇಟ್ ಸಂಪಾದಿಸಿ",
+    "save": "ಟೆಂಪ್ಲೇಟ್ ಉಳಿಸಿ",
+    "subject": "ಇಮೇಲ್ ವಿಷಯ",
+    "body": "ಇಮೇಲ್ ವಿಷಯ",
+    "variables": "ಲಭ್ಯವಿರುವ ಅಸ್ಥಿರಗಳು",
+    "bookingConfirmation": "ಬುಕಿಂಗ್ ದೃಢೀಕರಣ",
+    "bookingCancellation": "ಬುಕಿಂಗ್ ರದ್ದು",
+    "bookingReminder": "ಬುಕಿಂಗ್ ಜ್ಞಾಪನ",
+    "passwordReset": "ಪಾಸ್‌ವರ್ಡ್ ರೀಸೆಟ್",
+    "staffInvite": "ಸಿಬ್ಬಂದಿ ಆಹ್ವಾನ",
+    "saved": "ಟೆಂಪ್ಲೇಟ್ ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ"
+  },
+  "vetEarnings": {
+    "title": "ನನ್ನ ಗಳಿಕೆ",
+    "totalEarned": "ಒಟ್ಟು ಗಳಿಕೆ",
+    "totalConsultations": "ಒಟ್ಟು ಸಮಾಲೋಚನೆಗಳು",
+    "cancelledByMe": "ನನ್ನಿಂದ ರದ್ದು",
+    "missedAppointments": "ತಪ್ಪಿದ ನೇಮಕಗಳು",
+    "recentConsultations": "ಇತ್ತೀಚಿನ ಸಮಾಲೋಚನೆಗಳು",
+    "dailyEarnings": "ದೈನಂದಿನ ಗಳಿಕೆ",
+    "last30Days": "ಕಳೆದ 30 ದಿನಗಳು",
+    "noEarnings": "ಗಳಿಕೆ ಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ"
+  },
+  "certificates": {
+    "title": "ಆರೋಗ್ಯ ಪ್ರಮಾಣಪತ್ರಗಳು",
+    "issue": "ಪ್ರಮಾಣಪತ್ರ ನೀಡಿ",
+    "certificateNumber": "ಪ್ರಮಾಣಪತ್ರ ಸಂಖ್ಯೆ.",
+    "type": "ಪ್ರಮಾಣಪತ್ರ ಪ್ರಕಾರ",
+    "health": "ಆರೋಗ್ಯ ಪ್ರಮಾಣಪತ್ರ",
+    "travel": "ಪ್ರಯಾಣ ಪ್ರಮಾಣಪತ್ರ",
+    "vaccination": "ಲಸಿಕೆ ಪ್ರಮಾಣಪತ್ರ",
+    "fitness": "ಶಸ್ತ್ರಚಿಕಿತ್ಸೆಗೆ ಸಿದ್ಧತೆ",
+    "purpose": "ಉದ್ದೇಶ",
+    "validUntil": "ವರೆಗೆ ಮಾನ್ಯ",
+    "issuedBy": "ನೀಡಿದವರು",
+    "issuedOn": "ನೀಡಿದ ದಿನಾಂಕ",
+    "download": "ಪ್ರಮಾಣಪತ್ರ ಡೌನ್‌ಲೋಡ್",
+    "noCertificates": "ಯಾವುದೇ ಪ್ರಮಾಣಪತ್ರ ನೀಡಲಾಗಿಲ್ಲ"
+  },
+  "bookings": {
+    "markNoShow": "ನೋ-ಶೋ ಗುರುತಿಸಿ",
+    "noShowConfirm": "ಈ ರೋಗಿಯನ್ನು ನೋ-ಶೋ ಎಂದು ಗುರುತಿಸಬೇಕೆ? ಇದನ್ನು ರದ್ದು ಮಾಡಲಾಗುವುದಿಲ್ಲ.",
+    "noShowMarked": "ರೋಗಿಯನ್ನು ನೋ-ಶೋ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ"
   }
 }

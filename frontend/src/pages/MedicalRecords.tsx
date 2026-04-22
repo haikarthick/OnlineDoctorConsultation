@@ -7,7 +7,7 @@ import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
-type Tab = 'overview' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline' | 'hospital_visits' | 'records'
+type Tab = 'overview' | 'consultations' | 'prescriptions' | 'vaccinations' | 'lab_results' | 'allergies' | 'weight' | 'timeline' | 'hospital_visits' | 'records' | 'certificates'
 
 const RECORD_TYPES = [
   { value: 'diagnosis', label: 'Diagnosis', icon: '🩺', color: '#667eea' },
@@ -69,6 +69,8 @@ const MedicalRecords: React.FC = () => {
   const [medRecords, setMedRecords] = useState<any[]>([])
   const [recordTypeFilter, setRecordTypeFilter] = useState('')
   const [enterpriseFilter, setEnterpriseFilter] = useState('')
+  const [certificates, setCertificates] = useState<any[]>([])
+  const [certsLoading, setCertsLoading] = useState(false)
   // Modal states
   const [showModal, setShowModal] = useState<string | null>(null)
   const [modalData, setModalData] = useState<any>({})
@@ -204,6 +206,15 @@ const MedicalRecords: React.FC = () => {
     } catch { setMedRecords([]) }
   }, [selectedAnimal])
 
+  const loadCertificates = useCallback(async () => {
+    if (!selectedAnimal) { setCertificates([]); return }
+    setCertsLoading(true)
+    try {
+      const res = await (apiService as any).get(`/vet-certificates?animalId=${selectedAnimal}`)
+      setCertificates(res.data?.certificates || res.data?.items || res.data || [])
+    } catch { setCertificates([]) } finally { setCertsLoading(false) }
+  }, [selectedAnimal])
+
   const loadAllData = useCallback(async () => {
     setLoading(true)
     setError('')
@@ -229,6 +240,7 @@ const MedicalRecords: React.FC = () => {
       if (activeTab === 'timeline') loadTimeline()
       if (activeTab === 'hospital_visits') loadHospitalVisits()
       if (activeTab === 'records') loadMedRecords(recordTypeFilter)
+      if (activeTab === 'certificates') loadCertificates()
     } else {
       loadPrescriptions()
       loadStats()
@@ -391,6 +403,7 @@ const MedicalRecords: React.FC = () => {
     { key: 'records', icon: '📋', label: t('medicalRecords.tabs.records'), count: stats?.totalRecords || undefined },
     { key: 'timeline', icon: '📅', label: t('medicalRecords.tabs.timeline') },
     { key: 'hospital_visits', icon: '🏥', label: t('medicalRecords.tabs.hospitalVisits'), count: (hospitalVisits.queueVisits.length + hospitalVisits.inpatientAdmissions.length) || undefined },
+    { key: 'certificates', icon: '📜', label: t('certificates.title'), count: certificates.length || undefined },
   ]
 
   // ═══ RENDER ═══════════════════════════════════════════════
@@ -1098,6 +1111,59 @@ const MedicalRecords: React.FC = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ═══ CERTIFICATES TAB ══════════════════════════════════ */}
+        {activeTab === 'certificates' && (
+          <div>
+            {certsLoading ? (
+              <div style={{ textAlign: 'center', padding: 40 }}><div className="loading-spinner" style={{ margin: '0 auto' }} /></div>
+            ) : certificates.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>📜</div>
+                <p>{t('certificates.noCertificates')}</p>
+                {(isVet || isAdmin) && (
+                  <button className="module-btn primary" onClick={() => window.location.href = '/doctor/certificates/new'}>
+                    + {t('certificates.issue')}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div>
+                {(isVet || isAdmin) && (
+                  <div style={{ marginBottom: 12 }}>
+                    <button className="module-btn primary" onClick={() => window.location.href = '/doctor/certificates/new'}>
+                      + {t('certificates.issue')}
+                    </button>
+                  </div>
+                )}
+                <div className="data-table-container">
+                  <table className="module-table">
+                    <thead>
+                      <tr>
+                        <th>{t('certificates.certificateNumber')}</th>
+                        <th>{t('certificates.type')}</th>
+                        <th>{t('certificates.issuedOn')}</th>
+                        <th>{t('certificates.validUntil')}</th>
+                        <th>{t('common.status')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {certificates.map((cert: any) => (
+                        <tr key={cert.id}>
+                          <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{cert.certificateNumber || cert.certificate_number}</td>
+                          <td>{cert.certificateType || cert.certificate_type}</td>
+                          <td>{formatDate(cert.issuedDate || cert.issued_date || cert.createdAt || cert.created_at)}</td>
+                          <td>{cert.validUntil || cert.valid_until ? formatDate(cert.validUntil || cert.valid_until) : '—'}</td>
+                          <td><span className={`module-badge badge-${cert.status}`}>{cert.status}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>

@@ -94,6 +94,7 @@ const VaccinationPassport = lazy(() => import('./pages/VaccinationPassport'))
 const VaccineProtocolAdmin = lazy(() => import('./pages/admin/VaccineProtocolAdmin'))
 const VetCertificates = lazy(() => import('./pages/VetCertificates'))
 const CertificateWriter = lazy(() => import('./pages/doctor/CertificateWriter'))
+const VetEarnings = lazy(() => import('./pages/doctor/VetEarnings'))
 const CertificateSettings = lazy(() => import('./pages/admin/CertificateSettings'))
 // Hospital Network & Patient Consent
 const HospitalNetworks = React.lazy(() => import('./pages/hospitalnetwork/HospitalNetworks'))
@@ -265,6 +266,7 @@ function AppRoutes() {
       <Route path="/vaccination-passport" element={<RoleRoute path="/vaccination-passport"><AppLayout><RoutedPage Component={VaccinationPassport} /></AppLayout></RoleRoute>} />
       <Route path="/vet-certificates" element={<RoleRoute path="/vet-certificates"><AppLayout><RoutedPage Component={VetCertificates} /></AppLayout></RoleRoute>} />
       <Route path="/doctor/certificates/new" element={<RoleRoute path="/doctor/certificates/new"><AppLayout><RoutedPage Component={CertificateWriter} /></AppLayout></RoleRoute>} />
+      <Route path="/doctor/earnings" element={<RoleRoute path="/doctor/earnings"><AppLayout><VetEarnings /></AppLayout></RoleRoute>} />
       <Route path="/settings" element={<RoleRoute path="/settings"><AppLayout><Settings /></AppLayout></RoleRoute>} />
 
       {/* ── Pet Owner Module ── */}

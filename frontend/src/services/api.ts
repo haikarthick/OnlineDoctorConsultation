@@ -2325,7 +2325,7 @@ class ApiService {
     const response = await this.client.delete(`/hospital-networks/${networkId}/members/${userId}`)
     return response.data
   }
-  async updateNetworkMember(networkId: string, userId: string, data: { networkRole?: string; hospitalId?: string }) {
+  async updateNetworkMember(networkId: string, userId: string, data: { networkRole?: string; hospitalId?: string; department?: string }) {
     const response = await this.client.put(`/hospital-networks/${networkId}/members/${userId}`, data)
     return response.data
   }
