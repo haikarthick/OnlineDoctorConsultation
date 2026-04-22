@@ -80,6 +80,7 @@ const Consultations: React.FC = () => {
   const [consultations, setConsultations] = useState<ConsultRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'bookings' | 'consultations'>('bookings')
   const [statusFilter, setStatusFilter] = useState('')
 
@@ -190,8 +191,10 @@ const Consultations: React.FC = () => {
   useAutoRefresh(['bookings', 'consultations'], loadData)
 
   const handleConfirmBooking= async (id: string) => {
+    setActionLoading(id)
     try { await apiService.confirmBooking(id); loadData() }
     catch (err: any) { setError(err?.response?.data?.error?.message || t('consultations.failedToConfirm')) }
+    finally { setActionLoading(null) }
   }
 
   const handleCancelBooking = async (id?: string) => {
@@ -603,7 +606,7 @@ const Consultations: React.FC = () => {
                   {/* Card Actions */}
                   <div className="appt-card-actions">
                     {isVet && b.status === 'pending' && !isExpiredPending(b) && (
-                      <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>{t('consultations.actions.confirm')}</button>
+                      <button className="btn-small" disabled={actionLoading === b.id} style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
                     )}
                     {(isVet || isAdmin) && b.status === 'confirmed' && b.bookingType === 'video_call' && (
                       isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
@@ -628,7 +631,7 @@ const Consultations: React.FC = () => {
                       <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #dc2626', background: 'white' }} onClick={() => handleCancelBooking(b.id)}>{t('consultations.actions.cancelBooking')}</button>
                     )}
                     {isAdmin && b.status === 'pending' && !isExpiredPending(b) && (
-                      <button className="btn-small" style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>{t('consultations.actions.confirm')}</button>
+                      <button className="btn-small" disabled={actionLoading === b.id} style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
                     )}
                     <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title={t('consultations.viewActionHistory')}>{t('consultations.actions.log')}</button>
                   </div>

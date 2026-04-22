@@ -150,6 +150,7 @@ const Animals: React.FC = () => {
   })
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [speciesFilter, setSpeciesFilter] = useState('')
   const [enterpriseFilter, setEnterpriseFilter] = useState('')
@@ -250,6 +251,8 @@ const Animals: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSubmitting) return
+    setIsSubmitting(true)
     setError('')
     const finalBreed = formData.breed === 'Other' ? formData.customBreed : formData.breed
     const payload: any = {
@@ -279,6 +282,8 @@ const Animals: React.FC = () => {
       setTimeout(() => setSuccessMsg(''), 3000)
     } catch (err: any) {
       setError(err?.response?.data?.error?.message || err.message || t('animals.toasts.failedSave'))
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -544,8 +549,8 @@ const Animals: React.FC = () => {
             )}
 
             <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-              <button type="submit" className="btn-primary" style={{ padding: '10px 28px', fontSize: 14, fontWeight: 600 }}>
-                {editingAnimal ? t('animals.registerModal.updateBtn') : t('animals.registerModal.registerBtn')}
+              <button type="submit" className="btn-primary" disabled={isSubmitting} style={{ padding: '10px 28px', fontSize: 14, fontWeight: 600 }}>
+                {isSubmitting ? '⏳ ' + (editingAnimal ? t('animals.registerModal.updateBtn') : t('animals.registerModal.registerBtn')) + '...' : (editingAnimal ? t('animals.registerModal.updateBtn') : t('animals.registerModal.registerBtn'))}
               </button>
               <button type="button" onClick={() => { setShowForm(false); resetForm() }}
                 style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontSize: 14 }}>

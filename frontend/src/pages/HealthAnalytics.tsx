@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { useScrollToForm } from '../hooks/useScrollToForm'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { Enterprise, HealthObservation, HealthDashboard } from '../types'
 import { useTranslation } from 'react-i18next'
 import SearchSelect, { SearchSelectOption } from '../components/SearchSelect'
@@ -52,11 +53,15 @@ const HealthAnalytics: React.FC = () => {
       ])
       setDashboard(dashRes.data || null)
       setObservations(obsRes.data?.items || [])
-    } catch { /* silently fail */ }
+    } catch (err: any) {
+      console.error('Failed to load health analytics data:', err?.message)
+      setError(err?.response?.data?.error || err?.message || 'Failed to load data')
+    }
     finally { setLoading(false) }
   }
 
   useEffect(() => { fetchData() }, [selectedEnterpriseId])
+  useAutoRefresh('health-analytics', fetchData)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

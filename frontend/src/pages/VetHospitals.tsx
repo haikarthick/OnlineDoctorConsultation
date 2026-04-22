@@ -6,6 +6,7 @@ import type { VetHospital } from '../types'
 import './ModulePage.css'
 import './VetHospitals.css'
 import { useTranslation } from 'react-i18next'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const HOSPITAL_TYPE_LABELS: Record<string, string> = {
   clinic:           'General Practice',
@@ -121,6 +122,7 @@ const VetHospitals: React.FC = () => {
   }, [search, city, typeFilter, onlyEmergency, only24h, onlyVerified, page])
 
   useEffect(() => { fetchHospitals() }, [fetchHospitals])
+  useAutoRefresh('vet-hospitals', fetchHospitals)
 
   const handleSearch = (e: React.FormEvent) => { e.preventDefault(); setPage(0); fetchHospitals() }
 

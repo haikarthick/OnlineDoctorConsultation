@@ -6,6 +6,7 @@ import { WellnessScorecard, WellnessReminder } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const SCORE_COLORS = (score: number) => score >= 80 ? '#22c55e' : score >= 60 ? '#eab308' : score >= 40 ? '#f97316' : '#ef4444'
 const PRIORITY_COLORS: Record<string, string> = { low: '#94a3b8', medium: '#3b82f6', high: '#f97316', urgent: '#ef4444' }
@@ -59,6 +60,7 @@ const WellnessPortal: React.FC = () => {
     } catch (e: any) { setError(e.message) }
     setLoading(false)
   }
+  useAutoRefresh('wellness', fetchAll)
 
   const createScorecard = async () => {
     if (!scorecardForm.animalId) return

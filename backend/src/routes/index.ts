@@ -469,6 +469,7 @@ router.get('/hospital-networks/:id/approval-history', authMiddleware, asyncHandl
 
 // P6-BRANDING
 router.put('/hospital-networks/:id/branding', authMiddleware, roleMiddleware(['corporate_admin', 'admin']), asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'hospital-networks') } })
   const { logoUrl, contactEmail, contactPhone, websiteUrl, operatingHours, specializations, emergencyServices } = req.body;
   const updated = await updateNetworkBranding(req.params.id, { logoUrl, contactEmail, contactPhone, websiteUrl, operatingHours, specializations, emergencyServices });
   res.json({ success: true, data: updated });
@@ -512,6 +513,7 @@ router.delete('/hospital-networks/:id/branch-hospitals/:hospitalId', authMiddlew
 router.get('/hospital-networks/:id/members', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworkMembers(req, res)));
 router.post('/hospital-networks/:id/members', authMiddleware, validateBody(addNetworkMemberSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.addNetworkMember(req, res)));
 router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { emitRoleRefresh('admin', 'hospital-networks'); emitRoleRefresh('corporate_admin', 'hospital-networks') } })
   const networkId = req.params.id;
   const targetUserId = req.params.userId;
   const userId = (req as any).userId;
@@ -640,7 +642,7 @@ router.get('/animals/:animalId/care-contexts', authMiddleware, asyncHandler(asyn
      ORDER BY acc.enrolled_at DESC`,
     [req.params.animalId]
   );
-  res.json(result.rows);
+  res.json({ success: true, data: result.rows });
 }));
 
 // P4-MED2: Unified referral history for an animal (merges platform referrals + network referrals)
@@ -688,24 +690,11 @@ router.get('/animals/:animalId/referrals', authMiddleware, asyncHandler(async (r
 
     res.json({ success: true, data: { referrals, total: referrals.length } });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 }));
 
-// Get all care contexts (network enrollments) for an animal
-router.get('/animals/:animalId/care-contexts', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const result = await database.query(
-    `SELECT acc.id, acc.network_id AS "networkId", acc.corporate_patient_id AS "networkPatientId",
-            acc.platform_unique_id AS "platformUniqueId", acc.enrolled_at AS "enrolledAt",
-            acc.visibility, hn.name AS "networkName", hn.id_prefix AS "networkPrefix"
-     FROM animal_care_contexts acc
-     JOIN hospital_networks hn ON acc.network_id = hn.id
-     WHERE acc.animal_id = $1 AND acc.is_active = true
-     ORDER BY acc.enrolled_at DESC`,
-    [req.params.animalId]
-  );
-  res.json(result.rows);
-}));
+// Get all care contexts
 
 // Patient consent routes
 router.post('/patient-consent', authMiddleware, validateBody(createPatientConsentSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createConsent(req, res)));
@@ -1496,7 +1485,10 @@ router.post('/hospitals/:hospitalId/inpatient/admit', authMiddleware, asyncHandl
   if (!await checkInpatientNetworkAccess(req, res)) return;
   return StaffWorkflowController.admitPatient(req, res);
 }));
-router.patch('/inpatient/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateInpatientStatus(req, res)));
+router.patch('/inpatient/:id/status', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  res.on('finish', () => { if (res.statusCode < 300) { emitRoleRefresh('veterinarian', 'inpatients'); emitRoleRefresh('hospital_staff', 'inpatients') } })
+  return StaffWorkflowController.updateInpatientStatus(req, res)
+}));
 router.post('/inpatient/:id/vitals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.addVitalsLog(req, res)));
 router.put('/inpatient/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   res.on('finish', () => { if (res.statusCode < 300) { emitRoleRefresh('veterinarian', 'inpatients'); emitRoleRefresh('hospital_staff', 'inpatients') } })

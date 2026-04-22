@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { useScrollToForm } from '../hooks/useScrollToForm'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { Enterprise, WorkforceTask, ShiftSchedule } from '../types'
 import { useTranslation } from 'react-i18next'
 
@@ -57,11 +58,15 @@ const WorkforcePage: React.FC = () => {
       setDashboard(dashRes.data || null)
       setTasks(taskRes.data?.items || [])
       setShifts(shiftRes.data?.items || [])
-    } catch { /* silently fail */ }
+    } catch (err: any) {
+      console.error('Failed to load workforce data:', err?.message)
+      setError(err?.response?.data?.error || err?.message || 'Failed to load data')
+    }
     finally { setLoading(false) }
   }
 
   useEffect(() => { fetchData() }, [selectedEnterpriseId])
+  useAutoRefresh('workforce', fetchData)
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault()

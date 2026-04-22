@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { Enterprise, FeedItem, FeedAnalytics } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const FeedInventory: React.FC = () => {
   const { t } = useTranslation()
@@ -53,11 +54,15 @@ const FeedInventory: React.FC = () => {
       ])
       setFeeds(feedRes.data?.items || [])
       setAnalytics(analyticsRes.data || null)
-    } catch { /* silently fail */ }
+    } catch (err: any) {
+      console.error('Failed to load feed inventory data:', err?.message)
+      setError(err?.response?.data?.error || err?.message || 'Failed to load data')
+    }
     finally { setLoading(false) }
   }
 
   useEffect(() => { fetchData() }, [selectedEnterpriseId])
+  useAutoRefresh('feed-inventory', fetchData)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

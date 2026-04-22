@@ -4,6 +4,7 @@ import './ModulePage.css'
 import { Enterprise, BreedingRecord, BreedingStats } from '../types'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const STATUS_COLORS: Record<string, string> = {
   bred: '#3b82f6', confirmed_pregnant: '#22c55e', not_pregnant: '#94a3b8',
@@ -54,11 +55,15 @@ const BreedingManager: React.FC = () => {
       setRecords(recRes.data?.items || [])
       setStats(statsRes.data || null)
       setUpcomingDue(dueRes.data || [])
-    } catch { /* silently fail */ }
+    } catch (err: any) {
+      console.error('Failed to load breeding data:', err?.message)
+      setError(err?.response?.data?.error || err?.message || 'Failed to load data')
+    }
     finally { setLoading(false) }
   }
 
   useEffect(() => { fetchData() }, [selectedEnterpriseId])
+  useAutoRefresh('breeding', fetchData)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

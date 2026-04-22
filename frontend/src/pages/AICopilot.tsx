@@ -4,6 +4,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { AIChatSession, AIChatMessage } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 // Render AI markdown responses nicely
 const AIMessage: React.FC<{ content: string; confidence?: number; sources?: string[] }> = ({ content, confidence, sources }) => (
@@ -88,8 +89,9 @@ const AICopilot: React.FC = () => {
     try {
       const res = await apiService.listChatSessions()
       setSessions(res.data?.items || [])
-    } catch { setSessions([]) }
+    } catch (err: any) { console.error('Failed to load sessions:', err?.message); setSessions([]) }
   }
+  useAutoRefresh('ai-copilot', fetchSessions)
 
   const selectSession = async (session: AIChatSession) => {
     setSelectedSession(session)
@@ -97,7 +99,7 @@ const AICopilot: React.FC = () => {
     try {
       const res = await apiService.listChatMessages(session.id)
       setMessages(res.data || [])
-    } catch { setMessages([]) }
+    } catch (err: any) { console.error('Failed to load messages:', err?.message); setMessages([]) }
     setLoading(false)
   }
 

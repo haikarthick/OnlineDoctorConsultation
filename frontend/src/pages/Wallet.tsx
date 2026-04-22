@@ -31,8 +31,9 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
     try {
       const result = await apiService.getWallet()
       setWallet(result.data)
-    } catch {
-      // Wallet may not exist yet
+    } catch (err: any) {
+      console.error('Wallet load error:', err?.message)
+      // Wallet may not exist yet - non-fatal
     } finally {
       setLoading(false)
     }
@@ -51,7 +52,8 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
       }
       setHasMore(data.hasMore || false)
       setOffset(newOffset)
-    } catch {
+    } catch (err: any) {
+      console.error('Wallet transactions load error:', err?.message)
       // silent
     } finally {
       setTxLoading(false)

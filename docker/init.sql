@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS network_patient_id_sequences (
 CREATE TABLE IF NOT EXISTS consultations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   animal_type VARCHAR(100) NOT NULL DEFAULT '',
   symptom_description TEXT NOT NULL DEFAULT '',
@@ -309,7 +309,7 @@ CREATE TABLE IF NOT EXISTS treatment_campaigns (
 CREATE TABLE IF NOT EXISTS bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   pet_owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
   enterprise_id UUID REFERENCES enterprises(id) ON DELETE SET NULL,
@@ -398,7 +398,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 CREATE TABLE IF NOT EXISTS prescriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
-  veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   pet_owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   medications JSONB DEFAULT '[]',
@@ -994,7 +994,7 @@ CREATE TABLE IF NOT EXISTS workflow_transitions (
   case_id UUID NOT NULL REFERENCES workflow_cases(id) ON DELETE CASCADE,
   from_stage VARCHAR(30),
   to_stage VARCHAR(30) NOT NULL,
-  transitioned_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  transitioned_by UUID REFERENCES users(id) ON DELETE SET NULL,
   staff_position VARCHAR(50),
   notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -1007,8 +1007,8 @@ CREATE TABLE IF NOT EXISTS referrals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   case_id UUID REFERENCES workflow_cases(id) ON DELETE SET NULL,
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
-  from_vet_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  to_vet_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  from_vet_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  to_vet_id UUID REFERENCES users(id) ON DELETE SET NULL,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   reason TEXT NOT NULL,
   specialty_needed VARCHAR(100),
@@ -2048,6 +2048,20 @@ CREATE TABLE IF NOT EXISTS user_roles (
   UNIQUE(user_id, role)
 );
 CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles(user_id);
+
+-- Missing FK indexes added by code scan
+CREATE INDEX IF NOT EXISTS idx_animals_current_location_id ON animals(current_location_id);
+CREATE INDEX IF NOT EXISTS idx_animals_dam_id ON animals(dam_id);
+CREATE INDEX IF NOT EXISTS idx_animals_sire_id ON animals(sire_id);
+CREATE INDEX IF NOT EXISTS idx_workflow_cases_queue_entry_id ON workflow_cases(queue_entry_id);
+CREATE INDEX IF NOT EXISTS idx_inpatient_admissions_case_id ON inpatient_admissions(case_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_case_id ON referrals(case_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_from_vet_id ON referrals(from_vet_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_to_vet_id ON referrals(to_vet_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_animal_id ON referrals(animal_id);
+CREATE INDEX IF NOT EXISTS idx_network_referrals_from_vet ON network_referrals(from_vet_id);
+CREATE INDEX IF NOT EXISTS idx_network_referrals_to_vet ON network_referrals(to_vet_id);
+CREATE INDEX IF NOT EXISTS idx_workflow_transitions_transitioned_by ON workflow_transitions(transitioned_by);
 
 -- Link platform referrals ↔ network referrals (P4-MED2)
 ALTER TABLE referrals ADD COLUMN IF NOT EXISTS network_referral_id UUID REFERENCES network_referrals(id) ON DELETE SET NULL;

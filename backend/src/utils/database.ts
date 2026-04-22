@@ -1178,6 +1178,62 @@ class PostgresDatabase {
     // P6-NOTIFICATIONS: digest preference column on users
     await this.pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS digest_emails_enabled BOOLEAN DEFAULT true`).catch(() => {});
 
+    // Fix dangerous CASCADE deletes (existing DB migration)
+    await this.pool.query(`
+      DO $$ BEGIN
+        -- consultations.veterinarian_id: CASCADE → RESTRICT
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'consultations_veterinarian_id_fkey') THEN
+          ALTER TABLE consultations DROP CONSTRAINT consultations_veterinarian_id_fkey;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'consultations_veterinarian_id_fkey') THEN
+          ALTER TABLE consultations ADD CONSTRAINT consultations_veterinarian_id_fkey
+            FOREIGN KEY (veterinarian_id) REFERENCES users(id) ON DELETE RESTRICT;
+        END IF;
+        -- bookings.veterinarian_id: CASCADE → RESTRICT
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_veterinarian_id_fkey') THEN
+          ALTER TABLE bookings DROP CONSTRAINT bookings_veterinarian_id_fkey;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_veterinarian_id_fkey') THEN
+          ALTER TABLE bookings ADD CONSTRAINT bookings_veterinarian_id_fkey
+            FOREIGN KEY (veterinarian_id) REFERENCES users(id) ON DELETE RESTRICT;
+        END IF;
+        -- prescriptions.veterinarian_id: CASCADE → RESTRICT
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'prescriptions_veterinarian_id_fkey') THEN
+          ALTER TABLE prescriptions DROP CONSTRAINT prescriptions_veterinarian_id_fkey;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'prescriptions_veterinarian_id_fkey') THEN
+          ALTER TABLE prescriptions ADD CONSTRAINT prescriptions_veterinarian_id_fkey
+            FOREIGN KEY (veterinarian_id) REFERENCES users(id) ON DELETE RESTRICT;
+        END IF;
+        -- workflow_transitions.transitioned_by: CASCADE → SET NULL (preserve audit trail)
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'workflow_transitions_transitioned_by_fkey') THEN
+          ALTER TABLE workflow_transitions DROP CONSTRAINT workflow_transitions_transitioned_by_fkey;
+        END IF;
+        ALTER TABLE workflow_transitions ALTER COLUMN transitioned_by DROP NOT NULL;
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'workflow_transitions_transitioned_by_fkey') THEN
+          ALTER TABLE workflow_transitions ADD CONSTRAINT workflow_transitions_transitioned_by_fkey
+            FOREIGN KEY (transitioned_by) REFERENCES users(id) ON DELETE SET NULL;
+        END IF;
+        -- referrals.from_vet_id and to_vet_id: CASCADE → SET NULL
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'referrals_from_vet_id_fkey') THEN
+          ALTER TABLE referrals DROP CONSTRAINT referrals_from_vet_id_fkey;
+        END IF;
+        ALTER TABLE referrals ALTER COLUMN from_vet_id DROP NOT NULL;
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'referrals_from_vet_id_fkey') THEN
+          ALTER TABLE referrals ADD CONSTRAINT referrals_from_vet_id_fkey
+            FOREIGN KEY (from_vet_id) REFERENCES users(id) ON DELETE SET NULL;
+        END IF;
+        IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'referrals_to_vet_id_fkey') THEN
+          ALTER TABLE referrals DROP CONSTRAINT referrals_to_vet_id_fkey;
+        END IF;
+        ALTER TABLE referrals ALTER COLUMN to_vet_id DROP NOT NULL;
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'referrals_to_vet_id_fkey') THEN
+          ALTER TABLE referrals ADD CONSTRAINT referrals_to_vet_id_fkey
+            FOREIGN KEY (to_vet_id) REFERENCES users(id) ON DELETE SET NULL;
+        END IF;
+      END $$;
+    `).catch((e: any) => logger.warn('FK migration warning:', e.message));
+
     logger.info('Default system settings seeded');
   }
 

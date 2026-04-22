@@ -89,7 +89,7 @@ const Dashboard: React.FC = () => {
         apiService.listConsultations({ limit: 50 })
       ])
       let aRes: any = { data: [] }
-      try { aRes = await apiService.listAnimals({ limit: 50 }) } catch {}
+      try { aRes = await apiService.listAnimals({ limit: 50 }) } catch (err: any) { console.error('Dashboard data load error:', err?.message) }
 
       let eCount = 0
       if (isFarmer || isAdmin) {
@@ -114,9 +114,9 @@ const Dashboard: React.FC = () => {
                 pendingMovements: movements.filter((m: any) => (m.status || 'pending') === 'pending').length,
                 activeCampaigns: campaigns.filter((c: any) => c.status === 'in_progress' || c.status === 'planned').length
               })
-            } catch { /* non-fatal */ }
+            } catch (err: any) { console.error('Dashboard enterprise data load error:', err?.message) }
           }
-        } catch {}
+        } catch (err: any) { console.error('Dashboard data load error:', err?.message) }
       }
 
       const bookings = bRes.data?.items || (Array.isArray(bRes.data) ? bRes.data : [])
