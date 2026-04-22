@@ -680,3 +680,45 @@
 - **Status:** done
 - **Description:** New certificates tab in MedicalRecords.tsx using /vet-certificates?animalId= endpoint
 
+
+### ✅ Dispute Resolution
+- **Logged:** 2026-04-22 11:24
+- **Status:** done
+- **Description:** Full dispute workflow: report, admin queue, resolve + Report Issue in MyBookings
+
+
+### ✅ Vet Earnings Dashboard
+- **Logged:** 2026-04-22 11:24
+- **Status:** done
+- **Description:** GET /vet/earnings + VetEarnings.tsx + 4-file permission sync
+
+
+### ✅ Health Certificates
+- **Logged:** 2026-04-22 11:24
+- **Status:** done
+- **Description:** certificates table + endpoints + MedicalRecords tab + printable HTML
+
+
+### ✅ Leave Management
+- **Logged:** 2026-04-22 11:24
+- **Status:** done
+- **Description:** network_leave_requests table + CRUD + HospitalNetworks Leave tab
+
+
+### ✅ Vaccination Reminders
+- **Logged:** 2026-04-22 11:24
+- **Status:** done
+- **Description:** Daily scheduler sends 7-day advance notifications for due vaccinations
+
+
+### ✅ Admin Password Reset
+- **Logged:** 2026-04-22 11:24
+- **Status:** done
+- **Description:** POST /admin/users/:id/reset-password + UI in UserManagement
+
+
+### ✅ Admin Wallet Summary
+- **Logged:** 2026-04-22 11:24
+- **Status:** done
+- **Description:** GET /admin/wallet-summary + Wallet Overview tab in PaymentManagement
+

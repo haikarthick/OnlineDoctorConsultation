@@ -1018,3 +1018,27 @@ render-start.sh
 - **Fix:** Always use req.params.id for :id params; never destructure with a different key name
 - **Rule:** Not specified
 
+
+### BOOKING-001 — Double-booking race condition
+- **Logged:** 2026-04-22 11:24
+- **Symptom:** Two pet owners could grab same vet slot simultaneously
+- **Root Cause:** Added UNIQUE partial index on vet+date+slot WHERE NOT cancelled; INSERT catches 23505
+- **Fix:** Always use DB-level unique constraints for booking slots
+- **Rule:** Not specified
+
+
+### BOOKING-002 — confirmBooking no status check
+- **Logged:** 2026-04-22 11:24
+- **Symptom:** vet could confirm cancelled booking
+- **Root Cause:** Added status !== pending guard
+- **Fix:** All status transitions must validate current state
+- **Rule:** Not specified
+
+
+### NETWORK-008 — Network creation no role guard
+- **Logged:** 2026-04-22 11:24
+- **Symptom:** Any user could create a network
+- **Root Cause:** Added roleMiddleware admin/corporate_admin to POST /hospital-networks
+- **Fix:** Always add roleMiddleware to sensitive creation endpoints
+- **Rule:** Not specified
+
