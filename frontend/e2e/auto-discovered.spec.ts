@@ -214,4 +214,13 @@ test.describe('Auto-Discovered — /network-memberships', () => {
     expect(content!.length).toBeGreaterThan(0)
     await context.close()
   })
+  test('should load /doctor/earnings without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await page.goto('/doctor/earnings')
+    await page.waitForLoadState('domcontentloaded')
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
 })
