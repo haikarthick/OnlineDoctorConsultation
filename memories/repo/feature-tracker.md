@@ -608,3 +608,27 @@
 - **Status:** done
 - **Description:** Added /animals/bulk-import (POST) and /compliance/report (GET) endpoints; Animals.tsx CSV import UI with preview table + results modal
 
+
+### ✅ M3 Maintenance Amber Banner
+- **Logged:** 2026-04-22 10:19
+- **Status:** done
+- **Description:** Replace full-page maintenance block with dismissable amber banner in App.tsx. Non-admin users see amber banner; admin sees yellow bypass warning. Both are dismissable.
+
+
+### ✅ M4 Leave Form i18n
+- **Logged:** 2026-04-22 10:19
+- **Status:** done
+- **Description:** Leave form select options now use t() keys (annualLeave/sickLeave/personalLeave/emergencyLeave) instead of hardcoded English text.
+
+
+### ✅ M6 Onboarding Locale Keys
+- **Logged:** 2026-04-22 10:19
+- **Status:** done
+- **Description:** Added hospitalNetworks.onboarding and extended leave/auditLogs/systemSettings keys to all 6 locale files including ml which was missing the entire hospitalNetworks section.
+
+
+### ✅ M7 Branch Hospital operatingHours and specializations
+- **Logged:** 2026-04-22 10:19
+- **Status:** done
+- **Description:** BranchHospitalFormData interface, state, and form UI updated with chip-style specialization picker and operatingHours input. HospitalNetworkService.createBranchHospital INSERT updated to include operating_hours column.
+
