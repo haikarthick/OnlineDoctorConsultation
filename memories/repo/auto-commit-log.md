@@ -2602,3 +2602,55 @@
 </details>
 
 ---
+
+## 2026-04-22 11:15 · `7b00a35` · 🐛 FIX
+
+**Commit:** fix: M2,M5,M8-M13 — email templates, departments, vaccination reminders, passport export, cancel UI, earnings, no-show, certificates  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · UI · AUTH/PERM · i18n · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (24)</summary>
+
+  - backend/src/index.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/PermissionService.ts
+  - backend/src/utils/database.ts
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/MedicalRecords.tsx
+  - frontend/src/pages/admin/SystemSettings.tsx
+  - frontend/src/pages/doctor/PatientQueue.tsx
+  - frontend/src/pages/doctor/VetEarnings.css
+  - frontend/src/pages/doctor/VetEarnings.tsx
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - ... and 4 more
+
+</details>
+
+---
+
+## 2026-04-22 11:17 · `b33a438` · 🧪 TEST
+
+**Commit:** test: add E2E stub for /doctor/earnings route  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---

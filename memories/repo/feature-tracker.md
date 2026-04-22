@@ -632,3 +632,51 @@
 - **Status:** done
 - **Description:** BranchHospitalFormData interface, state, and form UI updated with chip-style specialization picker and operatingHours input. HospitalNetworkService.createBranchHospital INSERT updated to include operating_hours column.
 
+
+### ✅ M11 Vet Earnings Dashboard
+- **Logged:** 2026-04-22 11:18
+- **Status:** done
+- **Description:** VetEarnings.tsx + VetEarnings.css, /vet/earnings API, 4-file permission sync (vet_earnings permission), nav item in Consultations section
+
+
+### ✅ M2 Email Templates UI
+- **Logged:** 2026-04-22 11:18
+- **Status:** done
+- **Description:** Email template config in SystemSettings.tsx + GET/PUT /admin/email-templates routes backed by system_settings table
+
+
+### ✅ M5 Department Assignment
+- **Logged:** 2026-04-22 11:18
+- **Status:** done
+- **Description:** hospital_network_members.department column via ALTER TABLE IF NOT EXISTS, PUT route update, GET /departments endpoint, HospitalNetworks.tsx UI select
+
+
+### ✅ M8 Vaccination Reminders
+- **Logged:** 2026-04-22 11:18
+- **Status:** done
+- **Description:** Daily job in index.ts — queries vaccinations with next_due_date = TODAY+7, sends notifications via NotificationService with dedup check
+
+
+### ✅ M9 Animal Health Passport PDF
+- **Logged:** 2026-04-22 11:18
+- **Status:** done
+- **Description:** handleDownloadPassport in Animals.tsx — fetches vaccinations + medical records, generates HTML, opens print dialog
+
+
+### ✅ M10 Cancel/Reschedule UI Clarity
+- **Logged:** 2026-04-22 11:18
+- **Status:** done
+- **Description:** Reschedule btn for confirmed bookings in MyBookings.tsx, late-cancel policy notice, MyBookings.css
+
+
+### ✅ M12 No-Show Marking
+- **Logged:** 2026-04-22 11:18
+- **Status:** done
+- **Description:** PUT /bookings/:id/no-show route, PatientQueue no-show button for past confirmed/pending bookings
+
+
+### ✅ M13 Certificates in MedicalRecords
+- **Logged:** 2026-04-22 11:18
+- **Status:** done
+- **Description:** New certificates tab in MedicalRecords.tsx using /vet-certificates?animalId= endpoint
+
