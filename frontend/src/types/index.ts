@@ -661,6 +661,7 @@ export interface AuditLog {
   id: string
   userId: string
   userEmail?: string
+  userName?: string
   action: string
   resource: string
   resourceType?: string

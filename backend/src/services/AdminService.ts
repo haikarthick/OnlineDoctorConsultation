@@ -258,10 +258,10 @@ class AdminService {
 
   // System settings
   async getPublicSettings(): Promise<SystemSetting[]> {
-    // Return display.*, consultation.*, booking.*, cancellation.*, payment.*, prescription.*, cert.* settings — safe for all authenticated users
+    // Return display.*, consultation.*, booking.*, cancellation.*, payment.*, prescription.*, cert.*, maintenance.* settings — safe for all authenticated users
     const result = await database.query(
       `SELECT key, value, description FROM system_settings
-       WHERE key LIKE 'display.%' OR key LIKE 'consultation.%' OR key LIKE 'booking.%' OR key LIKE 'cancellation.%' OR key LIKE 'payment.%' OR key LIKE 'prescription.%' OR key LIKE 'cert.%' ORDER BY key`,
+       WHERE key LIKE 'display.%' OR key LIKE 'consultation.%' OR key LIKE 'booking.%' OR key LIKE 'cancellation.%' OR key LIKE 'payment.%' OR key LIKE 'prescription.%' OR key LIKE 'cert.%' OR key LIKE 'maintenance.%' ORDER BY key`,
       []
     );
     return result.rows;
@@ -309,24 +309,27 @@ class AdminService {
 
     if (params.userId) {
       queryParams.push(params.userId);
-      conditions.push(`user_id = $${queryParams.length}`);
+      conditions.push(`al.user_id = $${queryParams.length}`);
     }
     if (params.action) {
       queryParams.push(params.action);
-      conditions.push(`action = $${queryParams.length}`);
+      conditions.push(`al.action = $${queryParams.length}`);
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
     const result = await database.query(
-      `SELECT id, user_id as "userId", user_email as "userEmail", action, resource,
-       resource_id as "resourceId", details, ip_address as "ipAddress",
-       user_agent as "userAgent", timestamp
-       FROM audit_logs ${whereClause} ORDER BY timestamp DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
+      `SELECT al.id, al.user_id as "userId", al.user_email as "userEmail",
+       COALESCE(u.first_name || ' ' || u.last_name, al.user_email, 'System') as "userName",
+       al.action, al.resource, al.resource_id as "resourceId",
+       al.details, al.ip_address as "ipAddress", al.user_agent as "userAgent", al.timestamp
+       FROM audit_logs al
+       LEFT JOIN users u ON u.id = al.user_id
+       ${whereClause} ORDER BY al.timestamp DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
       [...queryParams, limit, offset]
     );
 
     const countResult2 = await database.query(
-      `SELECT COUNT(*) as count FROM audit_logs ${whereClause}`,
+      `SELECT COUNT(*) as count FROM audit_logs al ${whereClause}`,
       [...queryParams]
     );
 

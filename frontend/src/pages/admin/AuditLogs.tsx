@@ -15,22 +15,34 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
   const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
   const [actionFilter, setActionFilter] = useState('')
+  const [userSearch, setUserSearch] = useState('')
+  const [userIdFilter, setUserIdFilter] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
     loadLogs()
-  }, [actionFilter])
+  }, [actionFilter, userIdFilter])
 
   const loadLogs = async () => {
     try {
       setLoading(true)
-      const result = await apiService.adminGetAuditLogs({ action: actionFilter || undefined })
+      const result = await apiService.adminGetAuditLogs({
+        action: actionFilter || undefined,
+        userId: userIdFilter || undefined,
+      })
       setLogs(result.data?.items || (Array.isArray(result.data) ? result.data : []))
     } catch (err) {
-} finally {
+    } finally {
       setLoading(false)
     }
   }
+
+  const filteredLogs = userSearch.trim()
+    ? logs.filter(log =>
+        (log.userName || '').toLowerCase().includes(userSearch.toLowerCase()) ||
+        (log.userEmail || '').toLowerCase().includes(userSearch.toLowerCase())
+      )
+    : logs
 
   const getActionColor = (action: string) => {
     if (action.includes('create') || action.includes('add')) return '#059669'
@@ -55,7 +67,7 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
       <div className="page-header">
         <div>
           <h1>{t('auditLogs.title')}</h1>
-          <p className="page-subtitle">{t('auditLogs.subtitle')} • {logs.length} {t('auditLogs.entries')}</p>
+          <p className="page-subtitle">{t('auditLogs.subtitle')} • {filteredLogs.length} {t('auditLogs.entries')}</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-outline" onClick={loadLogs}>🔄 {t('auditLogs.refresh')}</button>
@@ -64,7 +76,22 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
       </div>
 
       {/* Filters */}
-      <div className="search-filter-bar" style={{ marginBottom: 24 }}>
+      <div className="search-filter-bar" style={{ marginBottom: 24, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 200 }}>
+          <input
+            type="text"
+            className="form-input"
+            placeholder={t('auditLogs.searchUser')}
+            value={userSearch}
+            onChange={e => { setUserSearch(e.target.value); setUserIdFilter('') }}
+            style={{ flex: 1 }}
+          />
+          {(userSearch || userIdFilter) && (
+            <button className="btn btn-outline btn-sm" onClick={() => { setUserSearch(''); setUserIdFilter('') }}>
+              {t('auditLogs.allUsers')}
+            </button>
+          )}
+        </div>
         <select className="form-input" value={actionFilter} onChange={e => setActionFilter(e.target.value)} style={{ width: 200 }}>
           <option value="">{t('auditLogs.allActions')}</option>
           <option value="user.status_change">{t('auditLogs.userStatusChange')}</option>
@@ -77,7 +104,7 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
 
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /></div>
-      ) : logs.length === 0 ? (
+      ) : filteredLogs.length === 0 ? (
         <div className="empty-state">
           <div style={{ fontSize: 48 }}>📋</div>
           <h3>{t('auditLogs.noLogsFound')}</h3>
@@ -86,12 +113,12 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
       ) : (
         <div className="card">
           <div className="card-body" style={{ padding: 0 }}>
-            {logs.map((log, i) => (
+            {filteredLogs.map((log, i) => (
               <div
                 key={log.id}
                 style={{
                   padding: '14px 20px',
-                  borderBottom: i < logs.length - 1 ? '1px solid #f3f4f6' : 'none',
+                  borderBottom: i < filteredLogs.length - 1 ? '1px solid #f3f4f6' : 'none',
                   cursor: 'pointer',
                   background: expandedId === log.id ? '#f9fafb' : 'transparent'
                 }}
@@ -132,13 +159,21 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
                     )}
                   </div>
 
-                  {/* Timestamp */}
+                  {/* Timestamp + user */}
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>
                       {formatDateTime(log.timestamp)}
                     </p>
-                    <p style={{ margin: 0, fontSize: 11, color: '#9ca3af' }}>
-                      User: {log.userId?.slice(0, 8) || 'system'}
+                    <p
+                      style={{ margin: 0, fontSize: 11, color: '#1d4ed8', cursor: 'pointer', textDecoration: 'underline' }}
+                      onClick={e => {
+                        e.stopPropagation()
+                        setUserIdFilter(log.userId)
+                        setUserSearch(log.userName || log.userEmail || log.userId?.slice(0, 8) || '')
+                      }}
+                      title={t('auditLogs.filterByUser')}
+                    >
+                      {log.userName || log.userEmail || `User: ${log.userId?.slice(0, 8) || 'system'}`}
                     </p>
                   </div>
                 </div>
@@ -148,6 +183,7 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
                   <div style={{ marginTop: 12, padding: 12, background: '#f3f4f6', borderRadius: 8, fontSize: 13 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                       <div><strong>{t('auditLogs.logId')}:</strong> {log.id}</div>
+                      <div><strong>{t('auditLogs.user')}:</strong> {log.userName || log.userEmail || '—'}</div>
                       <div><strong>{t('auditLogs.userId')}:</strong> {log.userId || '—'}</div>
                       <div><strong>{t('auditLogs.resourceId')}:</strong> {log.resourceId || '—'}</div>
                       <div><strong>{t('auditLogs.resourceType')}:</strong> {log.resourceType || '—'}</div>

@@ -36,6 +36,8 @@ const MANAGED_KEYS = new Set([
   'email.devRedirect',
   'email.fromName',
   'email.fromAddress',
+  'maintenance.enabled',
+  'maintenance.message',
 ])
 
 const inputStyle: React.CSSProperties = { color: '#111827', WebkitTextFillColor: '#111827' }
@@ -99,6 +101,12 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const [testEmailSending, setTestEmailSending] = useState(false)
   const [testEmailResult, setTestEmailResult] = useState<{ success: boolean; message: string; previewUrl?: string | null } | null>(null)
 
+  // Maintenance mode state
+  const [maintenanceEnabled, setMaintenanceEnabled] = useState(false)
+  const [maintenanceMessage, setMaintenanceMessage] = useState('System is temporarily unavailable for maintenance. Please try again later.')
+  const [savingMaintenance, setSavingMaintenance] = useState(false)
+  const [maintenanceSaved, setMaintenanceSaved] = useState(false)
+
   useEffect(() => {
     loadSettings()
     loadGatewaySettings()
@@ -121,6 +129,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       if (find('email.devRedirect') !== undefined) setEmailDevRedirect(find('email.devRedirect') || '')
       if (find('email.fromName')) setEmailFromName(find('email.fromName')!)
       if (find('email.fromAddress')) setEmailFromAddress(find('email.fromAddress')!)
+      if (find('maintenance.enabled')) setMaintenanceEnabled(find('maintenance.enabled') === 'true')
+      if (find('maintenance.message')) setMaintenanceMessage(find('maintenance.message')!)
     } catch {
     } finally {
       setLoading(false)
@@ -302,6 +312,22 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     }
   }
 
+  const handleSaveMaintenance = async () => {
+    try {
+      setSavingMaintenance(true)
+      setMaintenanceSaved(false)
+      await Promise.all([
+        apiService.adminUpdateSetting('maintenance.enabled', String(maintenanceEnabled)),
+        apiService.adminUpdateSetting('maintenance.message', maintenanceMessage),
+      ])
+      setMaintenanceSaved(true)
+      setTimeout(() => setMaintenanceSaved(false), 3000)
+    } catch {
+    } finally {
+      setSavingMaintenance(false)
+    }
+  }
+
   // Generic inline-save helper for card-managed settings
   const [savingInline, setSavingInline] = useState<string | null>(null)
   const [savedInline, setSavedInline] = useState<string | null>(null)
@@ -347,6 +373,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
   // Section nav labels for quick jump
   const sections = [
+    { id: 'maintenance', label: '🚧 Maintenance', icon: '🚧' },
     { id: 'display', label: '🕐 Display', icon: '🕐' },
     { id: 'consultation', label: '🩺 Consultation', icon: '🩺' },
     { id: 'booking', label: '📅 Booking', icon: '📅' },
@@ -361,6 +388,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     return text.toLowerCase().includes(searchQuery.toLowerCase())
   }
 
+  const showMaintenanceCard = matchesSearch('maintenance mode enabled message')
   const showDisplayCard = matchesSearch('display time format 12h 24h date format')
   const showConsultationCard = matchesSearch('consultation join window minutes duration max')
   const showBookingCard = matchesSearch('booking no-show reschedule patient doctor limit advance days cancellation window hours')
@@ -492,6 +520,61 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   {saving ? t('systemSettings.saving') : t('systemSettings.addSetting')}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Maintenance Mode ─── */}
+      {showMaintenanceCard && (
+        <div id="settings-section-maintenance" className="card" style={{ marginBottom: 20 }}>
+          <div className="card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h2 style={{ color: '#111827' }}>🚧 {t('systemSettings.maintenanceMode')}</h2>
+            {maintenanceEnabled && (
+              <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5', padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>
+                🔴 ACTIVE
+              </span>
+            )}
+          </div>
+          <div className="card-body">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.maintenanceEnabled')}</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+                  {t('systemSettings.maintenanceActive')}
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  className={`btn btn-sm ${maintenanceEnabled ? 'btn-primary' : 'btn-outline'}`}
+                  style={maintenanceEnabled ? { background: '#dc2626', borderColor: '#dc2626' } : {}}
+                  onClick={() => setMaintenanceEnabled(true)}>🔴 Enabled</button>
+                <button
+                  className={`btn btn-sm ${!maintenanceEnabled ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => setMaintenanceEnabled(false)}>✅ Disabled</button>
+              </div>
+            </div>
+            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+              <label className="module-label">{t('systemSettings.maintenanceMessage')}</label>
+              <textarea
+                className="module-input"
+                rows={3}
+                value={maintenanceMessage}
+                onChange={e => setMaintenanceMessage(e.target.value)}
+                placeholder="Message shown to users during maintenance..."
+                style={{ marginTop: 8, ...inputStyle }}
+              />
+            </div>
+            {maintenanceEnabled && (
+              <div style={{ padding: '8px 12px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, fontSize: 13, color: '#991b1b', marginBottom: 12 }}>
+                ⚠️ <strong>Maintenance mode is ON.</strong> Non-admin users will see a maintenance page. {t('systemSettings.maintenanceBypass')}
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6' }}>
+              {maintenanceSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ Saved!</span>}
+              <button className="btn btn-primary" disabled={savingMaintenance} onClick={handleSaveMaintenance}>
+                {savingMaintenance ? t('systemSettings.saving') : '🚧 Save Maintenance Settings'}
+              </button>
             </div>
           </div>
         </div>
