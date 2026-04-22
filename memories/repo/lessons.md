@@ -495,3 +495,10 @@
 - **Lesson:** All locale file edits
 - **Apply to:** All future work
 
+
+### LESSON-045 — Duplicate route registrations are silently ignored by Express
+- **Logged:** 2026-04-22 05:21
+- **Context:** Two identical GET /animals/:animalId/care-contexts routes existed. Express uses the first one registered and silently ignores the second.
+- **Lesson:** The second definition is dead code but creates confusion and maintenance risk. Always grep for duplicate route patterns before adding new routes.
+- **Apply to:** All future route additions
+

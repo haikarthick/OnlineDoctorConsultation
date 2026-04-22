@@ -986,3 +986,11 @@ render-start.sh
 - **Fix:** Standardized all hospital-networks route parameters to :id in routes/index.ts
 - **Rule:** Express routes MUST use consistent parameter names across all related endpoints; place specific routes before generic catch-all routes
 
+
+### SCHEMA-003 — Dangerous CASCADE DELETE on veterinarian FKs
+- **Logged:** 2026-04-22 05:21
+- **Symptom:** Deleting a vet user would cascade-delete ALL their consultations, bookings, prescriptions, referrals, and workflow audit trail
+- **Root Cause:** consultations/bookings/prescriptions.veterinarian_id had ON DELETE CASCADE — should be RESTRICT. referrals.from/to_vet_id and workflow_transitions.transitioned_by had CASCADE — should be SET NULL to preserve history
+- **Fix:** Changed to RESTRICT in init.sql; added DO block migration in database.ts seedDefaultSettings() for existing DBs
+- **Rule:** NEVER use ON DELETE CASCADE for FK to users(id) on business data tables. Use RESTRICT for critical records, SET NULL for audit/history tables
+
