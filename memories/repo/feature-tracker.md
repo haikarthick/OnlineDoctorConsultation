@@ -584,3 +584,27 @@
 - **Status:** done
 - **Description:** Verified patient transfer routes (POST/complete/GET) are fully implemented using network_referrals table with referral_type=transfer. No new table needed. createPatientTransfer validates both hospitals in network. completePatientTransfer updates animal_care_contexts.hospital_id.
 
+
+### ✅ H8 Dispute Resolution
+- **Logged:** 2026-04-22 07:50
+- **Status:** done
+- **Description:** Full dispute workflow: disputes table, CRUD API routes, DisputeManagement admin page with resolve modal, 4-file permission sync
+
+
+### ✅ H9 Revenue Dashboard Charts
+- **Logged:** 2026-04-22 07:50
+- **Status:** done
+- **Description:** Added /admin/revenue-trends endpoint with daily + top-vets data; AdminDashboard shows CSS bar chart + vet leaderboard
+
+
+### ✅ H11 Vet Patient History Access
+- **Logged:** 2026-04-22 07:50
+- **Status:** done
+- **Description:** Added Step 3.5 in checkAnimalAccess: vets with confirmed/pending/in_progress/completed booking for animal bypass hospital data isolation
+
+
+### ✅ H12 Farmer Bulk Import
+- **Logged:** 2026-04-22 07:50
+- **Status:** done
+- **Description:** Added /animals/bulk-import (POST) and /compliance/report (GET) endpoints; Animals.tsx CSV import UI with preview table + results modal
+
