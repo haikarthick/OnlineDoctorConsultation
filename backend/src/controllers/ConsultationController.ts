@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import { AuthRequest } from '../middleware/auth';
 import ConsultationService from '../services/ConsultationService';
 import database from '../utils/database';
@@ -166,6 +167,45 @@ export class ConsultationController {
           logger.info('Linked booking(s) marked as completed', { consultationId: id });
         } catch (err) {
           logger.warn('Failed to update linked booking status', { consultationId: id, error: (err as Error).message });
+        }
+
+        // H2: Auto-create medical record summary when consultation completes
+        try {
+          const consultResult = await database.query(
+            `SELECT c.animal_id, c.user_id, c.veterinarian_id, c.diagnosis, c.notes, c.symptom_description
+             FROM consultations c WHERE c.id = $1`,
+            [id]
+          );
+          if (consultResult.rows.length > 0) {
+            const c = consultResult.rows[0];
+            if (c.animal_id) {
+              const existingMR = await database.query(
+                `SELECT id FROM medical_records WHERE consultation_id = $1 LIMIT 1`,
+                [id]
+              );
+              if (existingMR.rows.length === 0) {
+                const mrId = uuidv4();
+                const contentParts: string[] = [];
+                if (c.symptom_description) contentParts.push(`Symptoms: ${c.symptom_description}`);
+                if (c.diagnosis) contentParts.push(`Diagnosis: ${c.diagnosis}`);
+                if (c.notes) contentParts.push(`Notes: ${c.notes}`);
+                const content = contentParts.length > 0
+                  ? contentParts.join('\n')
+                  : `Consultation completed on ${new Date().toLocaleDateString()}`;
+                await database.query(
+                  `INSERT INTO medical_records
+                   (id, user_id, animal_id, veterinarian_id, consultation_id, record_type, title, content, created_at, updated_at)
+                   VALUES ($1, $2, $3, $4, $5, 'other', $6, $7, NOW(), NOW())`,
+                  [mrId, c.user_id, c.animal_id, c.veterinarian_id, id,
+                   `Consultation Summary — ${new Date().toLocaleDateString()}`,
+                   content]
+                );
+                logger.info('Auto-created medical record for completed consultation', { consultationId: id, mrId });
+              }
+            }
+          }
+        } catch (mrErr) {
+          logger.warn('Auto medical record creation failed (non-blocking)', { consultationId: id, error: mrErr });
         }
       }
 

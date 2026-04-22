@@ -554,3 +554,33 @@
 - **Status:** done
 - **Description:** GET /admin/wallet-summary aggregates wallet stats + top-10 balances; Wallet Overview tab in PaymentManagement.tsx
 
+
+### ✅ H2 Auto Medical Record on Consultation Complete
+- **Logged:** 2026-04-22 07:29
+- **Status:** done
+- **Description:** When consultation status changes to completed, ConsultationController auto-creates an 'other' type medical record with consultation summary. Uses actual DB columns (user_id, content, animal_id, veterinarian_id, consultation_id). Added safety-net ALTER TABLE migration in database.ts.
+
+
+### ✅ H3 Walk-in Patient Duplicate Detection
+- **Logged:** 2026-04-22 07:29
+- **Status:** done
+- **Description:** Added microchip_id exact match and name+species+phone fuzzy duplicate checks before registerWalkInPatientDirect(). Returns 409 with existing record info and isDuplicateWarning flag.
+
+
+### ✅ H5 hospital_director Member Edit Scope
+- **Logged:** 2026-04-22 07:29
+- **Status:** done
+- **Description:** PUT /hospital-networks/:id/members/:userId now restricts hospital_director to only edit members in their own branch hospital. Also blocks hospital_director from assigning corporate_admin role.
+
+
+### ✅ H6 Staff Invite In-App Notifications
+- **Logged:** 2026-04-22 07:29
+- **Status:** done
+- **Description:** Added in-app notification via NotificationService to both invite-staff and staff-invites routes when invitee already has an account. Added invite_status VARCHAR(20) migration to hospital_network_members. Fixed code order in invite-staff route so networkName is defined before notification.
+
+
+### ✅ H7 Patient Transfer Verification
+- **Logged:** 2026-04-22 07:29
+- **Status:** done
+- **Description:** Verified patient transfer routes (POST/complete/GET) are fully implemented using network_referrals table with referral_type=transfer. No new table needed. createPatientTransfer validates both hospitals in network. completePatientTransfer updates animal_care_contexts.hospital_id.
+

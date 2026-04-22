@@ -544,6 +544,26 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
     if (!memberCheck.rows.length || !['corporate_admin', 'hospital_director'].includes(memberCheck.rows[0].network_role)) {
       return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can update members' });
     }
+    // H5: hospital_director scope — can only edit members in their own branch hospital
+    if (memberCheck.rows[0].network_role === 'hospital_director') {
+      const directorHospitalId = memberCheck.rows[0]?.hospital_id as string | undefined;
+      const hospitalIdCheck = directorHospitalId || (await database.query(
+        `SELECT hospital_id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        [networkId, userId]
+      )).rows[0]?.hospital_id;
+      if (hospitalIdCheck) {
+        const targetMember = await database.query(
+          `SELECT hospital_id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2`,
+          [networkId, targetUserId]
+        );
+        if (targetMember.rows[0]?.hospital_id !== hospitalIdCheck) {
+          return res.status(403).json({ success: false, message: 'Hospital directors can only edit members within their own branch hospital.' });
+        }
+      }
+      if (networkRole === 'corporate_admin') {
+        return res.status(403).json({ success: false, message: 'Hospital directors cannot assign corporate_admin role.' });
+      }
+    }
   }
   const allowedRoles = ['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor', 'hospital_staff'];
   if (networkRole && !allowedRoles.includes(networkRole)) {
@@ -912,6 +932,46 @@ router.post('/hospital-networks/:id/register-walkin', authMiddleware, asyncHandl
     if (!patientName || !animalName || !animalSpecies || !hospitalId) {
       res.status(400).json({ success: false, message: 'patientName, animalName, animalSpecies, and hospitalId are required' }); return;
     }
+
+    // H3: Duplicate detection — microchip ID
+    if (animalMicrochipId) {
+      const existing = await database.query(
+        `SELECT a.id, a.name, a.species, u.email as "ownerEmail"
+         FROM animals a
+         JOIN users u ON u.id = a.owner_id
+         WHERE a.microchip_id = $1`,
+        [animalMicrochipId]
+      );
+      if (existing.rows.length > 0) {
+        return res.status(409).json({
+          success: false,
+          error: 'Duplicate detected',
+          existing: existing.rows[0],
+          message: `An animal with microchip ID '${animalMicrochipId}' already exists. Please search for existing patient or update their record.`,
+        });
+      }
+    }
+
+    // H3: Duplicate detection — name + species + owner phone (fuzzy match)
+    if (animalName && patientPhone) {
+      const fuzzy = await database.query(
+        `SELECT a.id, a.name, a.species, u.first_name || ' ' || u.last_name as "ownerName", u.email as "ownerEmail"
+         FROM animals a
+         JOIN users u ON u.id = a.owner_id
+         WHERE LOWER(a.name) = LOWER($1) AND LOWER(a.species) = LOWER($2) AND u.phone = $3`,
+        [animalName, animalSpecies || '', patientPhone]
+      );
+      if (fuzzy.rows.length > 0) {
+        return res.status(409).json({
+          success: false,
+          error: 'Possible duplicate detected',
+          existing: fuzzy.rows[0],
+          message: `An animal with the same name, species, and owner phone number already exists. Please confirm this is a different animal or search for existing patient.`,
+          isDuplicateWarning: true,
+        });
+      }
+    }
+
     const result = await HospitalNetworkService.registerWalkInPatientDirect({
       networkId: req.params.id, hospitalId, registeredBy: (req as any).userId,
       patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
@@ -2345,6 +2405,22 @@ router.post('/hospital-networks/:id/invite-staff', authMiddleware, roleMiddlewar
     data: { inviteeName: invitee_name, networkName, hospitalName, position: staff_position, inviteUrl },
   }).catch((err: any) => logger.error('Staff invite email failed', { error: err.message }));
 
+  // H6: In-app notification if invitee already has an account
+  try {
+    const inviteeUser = await db.query(`SELECT id FROM users WHERE LOWER(email) = LOWER($1)`, [invitee_email]);
+    if (inviteeUser.rows.length > 0) {
+      const NotificationService = (await import('../services/NotificationService')).default;
+      await NotificationService.createNotification(
+        inviteeUser.rows[0].id, 'system',
+        `Invitation to join ${networkName}`,
+        `You have been invited to join ${networkName}. Check your network invitations.`,
+        'in_app', { networkId, type: 'staff_invite' }
+      );
+    }
+  } catch (notifErr: any) {
+    logger.warn('Staff invite in-app notification failed (non-blocking)', { networkId, error: notifErr.message });
+  }
+
   res.status(201).json({ success: true, message: 'Invite created. Email sent if configured.', data: { token, inviteUrl } });
 }));
 
@@ -2470,6 +2546,24 @@ router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewa
     }).catch((err: any) => logger.warn('Staff invite email failed to send', { error: err.message }));
   } catch (emailErr: any) {
     logger.warn('Staff invite email setup failed', { error: emailErr.message });
+  }
+
+  // H6: In-app notification if invitee already has an account
+  try {
+    const inviteeUser = await db.query(`SELECT id FROM users WHERE LOWER(email) = LOWER($1)`, [inviteeEmail]);
+    if (inviteeUser.rows.length > 0) {
+      const NotificationService = (await import('../services/NotificationService')).default;
+      const networkRes = await db.query(`SELECT name FROM hospital_networks WHERE id = $1`, [req.params.id]);
+      const netName = networkRes.rows[0]?.name ?? 'a hospital network';
+      await NotificationService.createNotification(
+        inviteeUser.rows[0].id, 'system',
+        `Invitation to join ${netName}`,
+        `You have been invited to join ${netName} as ${staffPosition}. Check your network invitations.`,
+        'in_app', { networkId: req.params.id, type: 'staff_invite' }
+      );
+    }
+  } catch (notifErr: any) {
+    logger.warn('Staff invite in-app notification failed (non-blocking)', { networkId: req.params.id, error: notifErr.message });
   }
 
   res.status(201).json({ success: true, data: invite, message: 'Invitation sent successfully' });

@@ -1185,6 +1185,12 @@ class PostgresDatabase {
     // P6-NOTIFICATIONS: digest preference column on users
     await this.pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS digest_emails_enabled BOOLEAN DEFAULT true`).catch(() => {});
 
+    // H2: Safety-net — medical_records.consultation_id (already in init.sql but may be missing on older DBs)
+    await this.pool.query(`ALTER TABLE medical_records ADD COLUMN IF NOT EXISTS consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL`).catch(() => {});
+
+    // H6: invite_status on hospital_network_members for pending/active invite flow
+    await this.pool.query(`ALTER TABLE hospital_network_members ADD COLUMN IF NOT EXISTS invite_status VARCHAR(20) DEFAULT 'active'`).catch(() => {});
+
     // Fix dangerous CASCADE deletes (existing DB migration)
     await this.pool.query(`
       DO $$ BEGIN
