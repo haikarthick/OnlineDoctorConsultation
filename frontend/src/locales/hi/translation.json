@@ -4543,7 +4543,12 @@
     "status": "स्थिति",
     "date": "तारीख",
     "actions": "कार्रवाई",
-    "refund": "वापसी"
+    "refund": "वापसी",
+    "walletOverview": "Wallet Overview",
+    "totalPlatformBalance": "Total Platform Balance",
+    "usersWithBalance": "Users with Balance",
+    "topBalances": "Top Wallet Balances",
+    "avgBalance": "Average Balance"
   },
   "permissionManagement": {
     "title": "अनुमति प्रबंधन",
@@ -4791,7 +4796,12 @@
     "secondaryRoles": "Secondary Roles",
     "roleGranted": "Role granted successfully",
     "roleRemoved": "Role removed successfully",
-    "cannotRemovePrimary": "Cannot remove the primary role"
+    "cannotRemovePrimary": "Cannot remove the primary role",
+    "resetPasswordTitle": "Reset User Password",
+    "resetPasswordLabel": "New Password",
+    "resetPasswordBtn": "Reset Password",
+    "resetPasswordSuccess": "Password reset successfully",
+    "resetPasswordMin": "Minimum 8 characters required"
   },
   "vetHospitalAdmin": {
     "title": "पशु अस्पताल प्रशासन",
@@ -6094,8 +6104,7 @@
     "approve": "स्वीकृत करें",
     "reject": "अस्वीकार करें",
     "approvalRequired": "स्थानांतरण के लिए प्रबंधक की मंजूरी आवश्यक है"
-  }
-,
+  },
   "networkAnalytics": {
     "title": "नेटवर्क विश्लेषण",
     "totalMembers": "कुल सदस्य",
@@ -6116,8 +6125,7 @@
     "exportTo": "अंतिम तिथि",
     "generating": "रिपोर्ट तैयार हो रही है...",
     "downloadReport": "रिपोर्ट डाउनलोड करें"
-  }
-,
+  },
   "networkApproval": {
     "title": "Approval History",
     "requestInfo": "Request More Info",

@@ -4532,7 +4532,12 @@
     "status": "நிலை",
     "date": "தேதி",
     "actions": "செயல்கள்",
-    "refund": "திரும்பப்பெறுதல்"
+    "refund": "திரும்பப்பெறுதல்",
+    "walletOverview": "Wallet Overview",
+    "totalPlatformBalance": "Total Platform Balance",
+    "usersWithBalance": "Users with Balance",
+    "topBalances": "Top Wallet Balances",
+    "avgBalance": "Average Balance"
   },
   "permissionManagement": {
     "title": "அனுமதி மேலாண்மை",
@@ -4780,7 +4785,12 @@
     "secondaryRoles": "Secondary Roles",
     "roleGranted": "Role granted successfully",
     "roleRemoved": "Role removed successfully",
-    "cannotRemovePrimary": "Cannot remove the primary role"
+    "cannotRemovePrimary": "Cannot remove the primary role",
+    "resetPasswordTitle": "Reset User Password",
+    "resetPasswordLabel": "New Password",
+    "resetPasswordBtn": "Reset Password",
+    "resetPasswordSuccess": "Password reset successfully",
+    "resetPasswordMin": "Minimum 8 characters required"
   },
   "vetHospitalAdmin": {
     "title": "கால்நடை மருத்துவமனை நிர்வாகம்",
@@ -6083,8 +6093,7 @@
     "approve": "அங்கீகரிக்கவும்",
     "reject": "நிராகரிக்கவும்",
     "approvalRequired": "நகர்வுக்கு மேலாளர் ஒப்புதல் தேவை"
-  }
-,
+  },
   "networkAnalytics": {
     "title": "நெட்வொர்க் பகுப்பாய்வு",
     "totalMembers": "மொத்த உறுப்பினர்கள்",
@@ -6105,8 +6114,7 @@
     "exportTo": "முடிவு தேதி",
     "generating": "அறிக்கை உருவாக்கப்படுகிறது...",
     "downloadReport": "அறிக்கை பதிவிறக்கம்"
-  }
-,
+  },
   "networkApproval": {
     "title": "Approval History",
     "requestInfo": "Request More Info",

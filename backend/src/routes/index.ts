@@ -144,6 +144,22 @@ router.put('/auth/profile', authMiddleware, asyncHandler(async (req: Request, re
 // ─── Consultation routes ─────────────────────────────────────
 router.post('/consultations', authMiddleware, validateBody(createConsultationSchema), asyncHandler(async (req: Request, res: Response) => {
   res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'consultations'); emitRoleRefresh('admin', 'consultations') } })
+
+  // C4: If booking_id provided, check payment is not failed before allowing consultation
+  if (req.body.bookingId) {
+    try {
+      const paymentCheck = await database.query(
+        `SELECT id, status FROM payments WHERE booking_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        [req.body.bookingId]
+      );
+      if (paymentCheck.rows.length > 0 && paymentCheck.rows[0].status === 'failed') {
+        return res.status(402).json({ success: false, error: 'Payment for this booking has failed. Please complete payment before starting the consultation.' });
+      }
+    } catch (payErr) {
+      logger.warn('Payment check failed (non-blocking)', { bookingId: req.body.bookingId, error: payErr });
+    }
+  }
+
   await ConsultationController.createConsultation(req, res)
 }));
 router.get('/consultations', authMiddleware, asyncHandler((req: Request, res: Response) => ConsultationController.listConsultations(req, res)));
@@ -408,7 +424,7 @@ router.delete('/campaigns/:id', authMiddleware, asyncHandler((req: Request, res:
 router.get('/enterprises/:enterpriseId/campaigns', authMiddleware, asyncHandler((req: Request, res: Response) => EnterpriseController.listCampaigns(req, res)));
 
 // ─── Hospital Network routes ──────────────────────────────────
-router.post('/hospital-networks', authMiddleware, validateBody(createHospitalNetworkSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createNetwork(req, res)));
+router.post('/hospital-networks', authMiddleware, roleMiddleware(['admin', 'corporate_admin']), validateBody(createHospitalNetworkSchema), asyncHandler((req: Request, res: Response) => HospitalNetworkController.createNetwork(req, res)));
 router.get('/hospital-networks', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.listNetworks(req, res)));
 router.get('/hospital-networks/:id', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.getNetwork(req, res)));
 router.put('/hospital-networks/:id', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.updateNetwork(req, res)));
@@ -776,15 +792,27 @@ router.patch('/network-referrals/:id/status', authMiddleware, asyncHandler((req:
 // Search existing platform patients (for hospital staff)
 router.get('/hospital-networks/:id/search-patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
-    const userRole = (req as any).userRole;
-    if (!['admin', 'veterinarian', 'hospital_staff', 'corporate_admin', 'compliance_officer'].includes(userRole)) {
+    const userRole = (req as AuthRequest).userRole;
+    if (!['admin', 'veterinarian', 'hospital_staff', 'corporate_admin', 'compliance_officer'].includes(userRole || '')) {
       res.status(403).json({ success: false, message: 'Access denied' });
       return;
     }
-    const { networkId } = req.params;
+    const networkId = req.params.id;
     const q = (req.query.q as string) ?? '';
     if (!q || q.length < 2) { res.json([]); return; }
-    const results = await HospitalNetworkService.searchNetworkPatients(networkId, q, 20);
+
+    // C5: scope results to user's assigned hospital for non-admin roles
+    let userHospitalId: string | null = null;
+    if (!['admin', 'corporate_admin'].includes(userRole || '')) {
+      const memberCheck = await database.query(
+        `SELECT hospital_id FROM hospital_network_members 
+         WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+        [networkId, (req as AuthRequest).userId]
+      );
+      userHospitalId = memberCheck.rows[0]?.hospital_id || null;
+    }
+
+    const results = await HospitalNetworkService.searchNetworkPatients(networkId, q, 20, userHospitalId);
     res.json(results);
   } catch (err: any) {
     logger.error('Route error', { path: req.path, error: err.message });
@@ -1066,6 +1094,37 @@ router.get('/admin/users', authMiddleware, roleMiddleware(['admin']), asyncHandl
 router.put('/admin/users/:id/status', authMiddleware, roleMiddleware(['admin']), validateBody(toggleUserStatusSchema), asyncHandler((req: Request, res: Response) => AdminController.toggleUserStatus(req, res)));
 router.put('/admin/users/:id/role', authMiddleware, roleMiddleware(['admin']), validateBody(changeUserRoleSchema), asyncHandler((req: Request, res: Response) => AdminController.changeUserRole(req, res)));
 
+// C7: Admin password reset
+router.post('/admin/users/:id/reset-password', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 8) {
+    return res.status(400).json({ success: false, error: 'New password must be at least 8 characters' });
+  }
+  const bcrypt = require('bcryptjs');
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  const userCheck = await database.query(`SELECT id FROM users WHERE id = $1`, [req.params.id]);
+  if (userCheck.rows.length === 0) {
+    return res.status(404).json({ success: false, error: 'User not found' });
+  }
+
+  await database.query(
+    `UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2`,
+    [hashedPassword, req.params.id]
+  );
+
+  const { v4: uuidv4 } = require('uuid');
+  const auditId = uuidv4();
+  await database.query(
+    `INSERT INTO audit_logs (id, user_id, action, entity_type, entity_id, details, created_at)
+     VALUES ($1, $2, 'user.password_reset', 'user', $3, $4, NOW())`,
+    [auditId, authReq.userId, req.params.id, JSON.stringify({ resetBy: authReq.userId })]
+  );
+
+  res.json({ success: true, message: 'Password reset successfully' });
+}));
+
 // P4-HIGH1: Secondary role management (admin only)
 router.get('/users/:id/roles', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
   const rows = await database.query(
@@ -1119,6 +1178,40 @@ router.delete('/users/:id/roles/:role', authMiddleware, roleMiddleware(['admin']
 router.get('/admin/consultations', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listConsultations(req, res)));
 router.get('/admin/payments', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listPayments(req, res)));
 router.post('/admin/payments/:id/refund', authMiddleware, roleMiddleware(['admin']), validateBody(processRefundSchema), asyncHandler((req: Request, res: Response) => AdminController.processRefund(req, res)));
+
+// C8: Admin wallet summary
+router.get('/admin/wallet-summary', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT 
+      COUNT(DISTINCT user_id)::int as "totalUsersWithBalance",
+      COALESCE(SUM(balance), 0) as "totalPlatformBalance",
+      COALESCE(SUM(CASE WHEN balance > 0 THEN balance ELSE 0 END), 0) as "totalPositiveBalance",
+      COALESCE(SUM(CASE WHEN balance < 0 THEN balance ELSE 0 END), 0) as "totalNegativeBalance",
+      COALESCE(MAX(balance), 0) as "maxBalance",
+      COALESCE(AVG(balance), 0) as "avgBalance",
+      COUNT(CASE WHEN balance > 0 THEN 1 END)::int as "usersWithPositiveBalance"
+     FROM wallets`
+  );
+
+  const topBalances = await database.query(
+    `SELECT w.user_id as "userId", w.balance,
+            CONCAT(u.first_name, ' ', u.last_name) as "userName",
+            u.email, u.role
+     FROM wallets w
+     JOIN users u ON u.id = w.user_id
+     WHERE w.balance > 0
+     ORDER BY w.balance DESC
+     LIMIT 10`
+  );
+
+  res.json({
+    success: true,
+    data: {
+      summary: result.rows[0],
+      topBalances: topBalances.rows
+    }
+  });
+}));
 router.get('/admin/reviews', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listReviews(req, res)));
 router.put('/admin/reviews/:id/moderate', authMiddleware, roleMiddleware(['admin']), validateBody(moderateReviewSchema), asyncHandler((req: Request, res: Response) => AdminController.moderateReview(req, res)));
 router.get('/admin/settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.getSystemSettings(req, res)));

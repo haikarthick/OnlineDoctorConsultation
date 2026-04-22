@@ -1935,7 +1935,7 @@ export class HospitalNetworkService {
   }
 
   // ─── P5-PATIENT-SEARCH ────────────────────────────────────────────────────
-  async searchNetworkPatients(networkId: string, query: string, limit = 20): Promise<any[]> {
+  async searchNetworkPatients(networkId: string, query: string, limit = 20, userHospitalId: string | null = null): Promise<any[]> {
     try {
       const q = `%${query}%`;
       const result = await database.query(
@@ -1958,9 +1958,10 @@ export class HospitalNetworkService {
            AND acc.enrollment_status = 'active'
            AND ($2 = '' OR a.name ILIKE $3 OR u.name ILIKE $3
                 OR a.unique_id ILIKE $3 OR acc.corporate_patient_id ILIKE $3)
+           AND ($4::uuid IS NULL OR acc.hospital_id = $4)
          ORDER BY a.name
-         LIMIT $4`,
-        [networkId, query, q, limit]
+         LIMIT $5`,
+        [networkId, query, q, userHospitalId, limit]
       );
       return result.rows;
     } catch (err: any) {

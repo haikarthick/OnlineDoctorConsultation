@@ -340,6 +340,13 @@ class PostgresDatabase {
       ON hospital_networks(id_prefix)
     `).catch(() => {});
 
+    // C1: Prevent double-booking race condition via unique partial index
+    await this.pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_vet_slot_unique
+        ON bookings(veterinarian_id, scheduled_date, time_slot_start)
+        WHERE status NOT IN ('cancelled', 'missed')
+    `).catch(() => {});
+
     // Ensure network_patient_id_sequences table exists (race-safe per-network patient ID generation)
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS network_patient_id_sequences (

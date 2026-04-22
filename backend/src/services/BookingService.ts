@@ -165,9 +165,27 @@ class BookingService {
        data.timeSlotStart, data.timeSlotEnd, 'pending', data.bookingType,
        data.priority || 'normal', data.reasonForVisit, data.symptoms || null,
        data.notes || null, now, now]
-    );
+    ).catch((err: any) => {
+      if (err.code === '23505' && err.constraint?.includes('idx_bookings_vet_slot_unique')) {
+        throw new ConflictError('This time slot was just booked by another user. Please choose a different time.');
+      }
+      throw err;
+    });
 
     logger.info('Booking created', { bookingId: id, petOwnerId, vetId: data.veterinarianId, hospitalId: data.hospitalId });
+
+    // Notify vet of new booking (non-blocking)
+    try {
+      await NotificationService.createNotification(
+        data.veterinarianId, 'booking',
+        'New Booking Request',
+        `You have a new consultation request for ${data.scheduledDate} at ${data.timeSlotStart}. Please confirm or decline.`,
+        'all', { bookingId: id }
+      );
+    } catch (err) {
+      logger.error('New booking vet notification failed (non-blocking)', { bookingId: id, error: err });
+    }
+
     return result.rows[0];
   }
 
@@ -298,6 +316,12 @@ class BookingService {
   async confirmBooking(id: string): Promise<Booking> {
     // Prevent confirming a booking whose time has already passed
     const booking = await this.getBooking(id);
+
+    // Only pending bookings can be confirmed
+    if (booking.status !== 'pending') {
+      throw new ValidationError(`Cannot confirm a booking with status '${booking.status}'. Only pending bookings can be confirmed.`);
+    }
+
     // Use local date methods to avoid timezone shift (pg returns DATE as local midnight)
     const d = new Date(booking.scheduledDate);
     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

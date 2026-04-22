@@ -733,6 +733,16 @@ class ApiService {
     return response.data
   }
 
+  async adminResetUserPassword(userId: string, newPassword: string) {
+    const response = await this.client.post(`/admin/users/${userId}/reset-password`, { newPassword })
+    return response.data
+  }
+
+  async adminGetWalletSummary() {
+    const response = await this.client.get('/admin/wallet-summary')
+    return response.data
+  }
+
   // P4-HIGH1: Secondary role management
   async getUserRoles(userId: string) {
     const response = await this.client.get(`/users/${userId}/roles`)

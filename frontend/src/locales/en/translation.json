@@ -4602,7 +4602,12 @@
     "status": "Status",
     "date": "Date",
     "actions": "Actions",
-    "refund": "Refund"
+    "refund": "Refund",
+    "walletOverview": "Wallet Overview",
+    "totalPlatformBalance": "Total Platform Balance",
+    "usersWithBalance": "Users with Balance",
+    "topBalances": "Top Wallet Balances",
+    "avgBalance": "Average Balance"
   },
   "permissionManagement": {
     "title": "Permission Management",
@@ -4842,7 +4847,12 @@
     "secondaryRoles": "Secondary Roles",
     "roleGranted": "Role granted successfully",
     "roleRemoved": "Role removed successfully",
-    "cannotRemovePrimary": "Cannot remove the primary role"
+    "cannotRemovePrimary": "Cannot remove the primary role",
+    "resetPasswordTitle": "Reset User Password",
+    "resetPasswordLabel": "New Password",
+    "resetPasswordBtn": "Reset Password",
+    "resetPasswordSuccess": "Password reset successfully",
+    "resetPasswordMin": "Minimum 8 characters required"
   },
   "vetHospitalAdmin": {
     "title": "Vet Hospital Admin",
@@ -6146,8 +6156,7 @@
     "approve": "Approve",
     "reject": "Reject",
     "approvalRequired": "This movement requires manager approval"
-  }
-,
+  },
   "networkAnalytics": {
     "title": "Network Analytics",
     "totalMembers": "Total Members",

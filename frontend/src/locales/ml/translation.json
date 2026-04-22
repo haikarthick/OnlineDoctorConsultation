@@ -3510,7 +3510,12 @@
     "status": "സ്റ്റാറ്റസ്",
     "date": "തീയതി",
     "actions": "നടപടികൾ",
-    "refund": "റീഫണ്ട്"
+    "refund": "റീഫണ്ട്",
+    "walletOverview": "Wallet Overview",
+    "totalPlatformBalance": "Total Platform Balance",
+    "usersWithBalance": "Users with Balance",
+    "topBalances": "Top Wallet Balances",
+    "avgBalance": "Average Balance"
   },
   "permissionManagement": {
     "title": "അനുമതി മാനേജ്‌മെന്റ്",
@@ -3752,7 +3757,12 @@
     "secondaryRoles": "Secondary Roles",
     "roleGranted": "Role granted successfully",
     "roleRemoved": "Role removed successfully",
-    "cannotRemovePrimary": "Cannot remove the primary role"
+    "cannotRemovePrimary": "Cannot remove the primary role",
+    "resetPasswordTitle": "Reset User Password",
+    "resetPasswordLabel": "New Password",
+    "resetPasswordBtn": "Reset Password",
+    "resetPasswordSuccess": "Password reset successfully",
+    "resetPasswordMin": "Minimum 8 characters required"
   },
   "vetHospitalAdmin": {
     "title": "വെറ്റ് ആശുപത്രി അഡ്മിൻ",
@@ -4030,8 +4040,7 @@
     "allBranches": "All Branches",
     "specificBranch": "Specific Branch",
     "branchConsent": "Branch-Specific Consent"
-  }
-,
+  },
   "networkAnalytics": {
     "title": "നെറ്റ്‌വർക്ക് അനലിറ്റിക്സ്",
     "totalMembers": "ആകെ അംഗങ്ങൾ",
@@ -4052,8 +4061,7 @@
     "exportTo": "അവസാന തീയതി",
     "generating": "റിപ്പോർട്ട് തയ്യാറാക്കുന്നു...",
     "downloadReport": "റിപ്പോർട്ട് ഡൗൺലോഡ്"
-  }
-,
+  },
   "networkApproval": {
     "title": "Approval History",
     "requestInfo": "Request More Info",

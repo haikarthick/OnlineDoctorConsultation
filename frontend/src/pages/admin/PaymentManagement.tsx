@@ -19,10 +19,29 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
   const [refundAmount, setRefundAmount] = useState('')
   const [refundReason, setRefundReason] = useState('')
   const [processing, setProcessing] = useState(false)
+  const [activeTab, setActiveTab] = useState<'payments' | 'wallets'>('payments')
+  const [walletSummary, setWalletSummary] = useState<any>(null)
+  const [walletLoading, setWalletLoading] = useState(false)
 
   useEffect(() => {
     loadPayments()
   }, [statusFilter])
+
+  useEffect(() => {
+    if (activeTab === 'wallets') loadWalletSummary()
+  }, [activeTab])
+
+  const loadWalletSummary = async () => {
+    try {
+      setWalletLoading(true)
+      const result = await apiService.adminGetWalletSummary()
+      setWalletSummary(result.data)
+    } catch (err) {
+      console.error('Failed to load wallet summary:', err)
+    } finally {
+      setWalletLoading(false)
+    }
+  }
 
   const loadPayments = async () => {
     try {
@@ -71,6 +90,77 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
           <button className="btn btn-outline" onClick={() => onNavigate('/admin/dashboard')}>← {t('paymentManagement.dashboard')}</button>
         </div>
       </div>
+
+      {/* Tabs */}
+      <div className="module-tabs" style={{ marginBottom: 24 }}>
+        <button className={`module-tab${activeTab === 'payments' ? ' active' : ''}`} onClick={() => setActiveTab('payments')}>
+          💳 {t('paymentManagement.title')}
+        </button>
+        <button className={`module-tab${activeTab === 'wallets' ? ' active' : ''}`} onClick={() => setActiveTab('wallets')}>
+          👛 {t('paymentManagement.walletOverview')}
+        </button>
+      </div>
+
+      {/* Wallet Overview Tab */}
+      {activeTab === 'wallets' && (
+        <div>
+          {walletLoading ? (
+            <div className="loading-container"><div className="loading-spinner" /></div>
+          ) : walletSummary ? (
+            <>
+              <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 24 }}>
+                <div className="stat-card">
+                  <div className="stat-icon">💰</div>
+                  <div className="stat-value">{formatCurrency((walletSummary.summary?.totalPlatformBalance || 0) / 100)}</div>
+                  <div className="stat-label">{t('paymentManagement.totalPlatformBalance')}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">👥</div>
+                  <div className="stat-value">{walletSummary.summary?.usersWithPositiveBalance || 0}</div>
+                  <div className="stat-label">{t('paymentManagement.usersWithBalance')}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">📊</div>
+                  <div className="stat-value">{formatCurrency((walletSummary.summary?.avgBalance || 0) / 100)}</div>
+                  <div className="stat-label">{t('paymentManagement.avgBalance')}</div>
+                </div>
+              </div>
+              <h3 style={{ marginBottom: 12 }}>{t('paymentManagement.topBalances')}</h3>
+              {walletSummary.topBalances?.length === 0 ? (
+                <div className="empty-state"><p>No wallet balances found.</p></div>
+              ) : (
+                <div className="data-table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>{t('userManagement.user')}</th>
+                        <th>{t('userManagement.email')}</th>
+                        <th>{t('userManagement.role')}</th>
+                        <th>{t('paymentManagement.amount')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(walletSummary.topBalances || []).map((w: any) => (
+                        <tr key={w.userId}>
+                          <td>{w.userName}</td>
+                          <td>{w.email}</td>
+                          <td>{w.role}</td>
+                          <td><strong>{formatCurrency((w.balance || 0) / 100)}</strong></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="empty-state"><p>Failed to load wallet data.</p></div>
+          )}
+        </div>
+      )}
+
+      {/* Payments Tab */}
+      {activeTab === 'payments' && (<>
 
       {/* Summary */}
       <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 24 }}>
@@ -172,6 +262,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
           </table>
         </div>
       )}
+      </>)}
     </div>
   )
 }

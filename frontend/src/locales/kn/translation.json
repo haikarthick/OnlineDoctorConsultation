@@ -4534,7 +4534,12 @@
     "status": "ಸ್ಥಿತಿ",
     "date": "ದಿನಾಂಕ",
     "actions": "ಕ್ರಿಯೆಗಳು",
-    "refund": "ಮರುಪಾವತಿ"
+    "refund": "ಮರುಪಾವತಿ",
+    "walletOverview": "Wallet Overview",
+    "totalPlatformBalance": "Total Platform Balance",
+    "usersWithBalance": "Users with Balance",
+    "topBalances": "Top Wallet Balances",
+    "avgBalance": "Average Balance"
   },
   "permissionManagement": {
     "title": "ಅನುಮತಿ ನಿರ್ವಹಣೆ",
@@ -4782,7 +4787,12 @@
     "secondaryRoles": "Secondary Roles",
     "roleGranted": "Role granted successfully",
     "roleRemoved": "Role removed successfully",
-    "cannotRemovePrimary": "Cannot remove the primary role"
+    "cannotRemovePrimary": "Cannot remove the primary role",
+    "resetPasswordTitle": "Reset User Password",
+    "resetPasswordLabel": "New Password",
+    "resetPasswordBtn": "Reset Password",
+    "resetPasswordSuccess": "Password reset successfully",
+    "resetPasswordMin": "Minimum 8 characters required"
   },
   "vetHospitalAdmin": {
     "title": "ಪಶು ಆಸ್ಪತ್ರೆ ನಿರ್ವಹಣೆ",
@@ -6037,8 +6047,7 @@
     "approve": "ಅನುಮೋದಿಸಿ",
     "reject": "ತಿರಸ್ಕರಿಸಿ",
     "approvalRequired": "ಈ ಚಲನೆಗೆ ವ್ಯವಸ್ಥಾಪಕರ ಅನುಮೋದನೆ ಅಗತ್ಯ"
-  }
-,
+  },
   "networkAnalytics": {
     "title": "ನೆಟ್‌ವರ್ಕ್ ವಿಶ್ಲೇಷಣೆ",
     "totalMembers": "ಒಟ್ಟು ಸದಸ್ಯರು",
@@ -6059,8 +6068,7 @@
     "exportTo": "ಅಂತ್ಯ ದಿನಾಂಕ",
     "generating": "ವರದಿ ರಚಿಸಲಾಗುತ್ತಿದೆ...",
     "downloadReport": "ವರದಿ ಡೌನ್‌ಲೋಡ್"
-  }
-,
+  },
   "networkApproval": {
     "title": "Approval History",
     "requestInfo": "Request More Info",

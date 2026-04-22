@@ -78,6 +78,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   const [secondaryRoles, setSecondaryRoles] = useState<any[]>([])
   const [secondaryRolesLoading, setSecondaryRolesLoading] = useState(false)
   const [addRoleValue, setAddRoleValue] = useState('')
+
+  // Reset password modal (C7)
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState<User | null>(null)
+  const [resetPasswordValue, setResetPasswordValue] = useState('')
+  const [resetPasswordSaving, setResetPasswordSaving] = useState(false)
+  const [resetPasswordMsg, setResetPasswordMsg] = useState('')
   const [addRoleNotes, setAddRoleNotes] = useState('')
   const [rolesActionMsg, setRolesActionMsg] = useState('')
   const [rolesActionErr, setRolesActionErr] = useState('')
@@ -224,6 +230,29 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       setSecondaryRoles(result.data || [])
     } catch (err: any) {
       setRolesActionErr(err?.response?.data?.error || err?.message || 'Failed to remove role')
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!showResetPasswordModal || !resetPasswordValue) return
+    if (resetPasswordValue.length < 8) {
+      setActionError(t('userManagement.resetPasswordMin'))
+      return
+    }
+    try {
+      setResetPasswordSaving(true)
+      setActionError('')
+      await apiService.adminResetUserPassword(showResetPasswordModal.id, resetPasswordValue)
+      setResetPasswordMsg(t('userManagement.resetPasswordSuccess'))
+      setResetPasswordValue('')
+      setTimeout(() => {
+        setShowResetPasswordModal(null)
+        setResetPasswordMsg('')
+      }, 2000)
+    } catch (err: any) {
+      setActionError(err?.response?.data?.error || err?.message || 'Failed to reset password')
+    } finally {
+      setResetPasswordSaving(false)
     }
   }
 
@@ -571,6 +600,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       >
                         🔑 {t('userManagement.roles')}
                       </button>
+                      <button
+                        className="btn btn-sm btn-outline"
+                        onClick={() => { setShowResetPasswordModal(u); setResetPasswordValue(''); setResetPasswordMsg('') }}
+                      >
+                        🔒 {t('userManagement.resetPasswordBtn')}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -732,6 +767,44 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                   </div>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Reset Password Modal (C7) */}
+      {showResetPasswordModal && (
+        <div className="modal-overlay" onClick={() => setShowResetPasswordModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
+            <div className="modal-header">
+              <h2>🔒 {t('userManagement.resetPasswordTitle')} — {showResetPasswordModal.firstName} {showResetPasswordModal.lastName}</h2>
+              <button className="modal-close" onClick={() => setShowResetPasswordModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              {resetPasswordMsg && <div className="module-alert success" style={{ marginBottom: 12 }}>{resetPasswordMsg}</div>}
+              <div className="form-group">
+                <label className="form-label">{t('userManagement.resetPasswordLabel')} *</label>
+                <input
+                  className="form-input"
+                  type="password"
+                  value={resetPasswordValue}
+                  onChange={e => setResetPasswordValue(e.target.value)}
+                  placeholder={t('userManagement.resetPasswordMin')}
+                  minLength={8}
+                />
+                {resetPasswordValue && resetPasswordValue.length < 8 && (
+                  <p style={{ color: '#f59e0b', fontSize: 12, marginTop: 4 }}>⚠️ {t('userManagement.resetPasswordMin')}</p>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+                <button className="btn btn-outline" onClick={() => setShowResetPasswordModal(null)}>{t('userManagement.cancel')}</button>
+                <button
+                  className="btn btn-primary"
+                  disabled={resetPasswordSaving || !resetPasswordValue || resetPasswordValue.length < 8}
+                  onClick={handleResetPassword}
+                >
+                  {resetPasswordSaving ? t('userManagement.saving') : t('userManagement.resetPasswordBtn')}
+                </button>
+              </div>
             </div>
           </div>
         </div>

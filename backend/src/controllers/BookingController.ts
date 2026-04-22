@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import BookingService from '../services/BookingService';
+import NotificationService from '../services/NotificationService';
 import { ForbiddenError, ValidationError } from '../utils/errors';
 import logger from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
@@ -83,6 +84,18 @@ class BookingController {
     await logBookingAction(authReq.userId!, authReq.userRole || 'veterinarian', 'BOOKING_CONFIRMED', req.params.id, {
       confirmedBy: authReq.userId
     });
+
+    // Notify pet owner (non-blocking)
+    try {
+      await NotificationService.createNotification(
+        updated.petOwnerId, 'booking',
+        'Booking Confirmed',
+        `Your appointment on ${updated.scheduledDate} at ${updated.timeSlotStart} has been confirmed by the doctor.`,
+        'all', { bookingId: req.params.id }
+      );
+    } catch (err) {
+      logger.error('Booking confirm pet owner notification failed (non-blocking)', { error: err });
+    }
 
     res.json({ success: true, data: updated });
   }

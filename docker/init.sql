@@ -767,6 +767,9 @@ CREATE INDEX IF NOT EXISTS idx_bookings_pet_owner_id ON bookings(pet_owner_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_veterinarian_id ON bookings(veterinarian_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
 CREATE INDEX IF NOT EXISTS idx_bookings_scheduled_date ON bookings(scheduled_date);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_vet_slot_unique
+  ON bookings(veterinarian_id, scheduled_date, time_slot_start)
+  WHERE status NOT IN ('cancelled', 'missed');
 
 CREATE INDEX IF NOT EXISTS idx_vet_schedules_vet_id ON vet_schedules(veterinarian_id);
 

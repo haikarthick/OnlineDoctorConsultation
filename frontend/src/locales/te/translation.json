@@ -4523,7 +4523,12 @@
     "status": "స్థితి",
     "date": "తేదీ",
     "actions": "చర్యలు",
-    "refund": "రిఫండ్"
+    "refund": "రిఫండ్",
+    "walletOverview": "Wallet Overview",
+    "totalPlatformBalance": "Total Platform Balance",
+    "usersWithBalance": "Users with Balance",
+    "topBalances": "Top Wallet Balances",
+    "avgBalance": "Average Balance"
   },
   "permissionManagement": {
     "title": "అనుమతి నిర్వహణ",
@@ -4771,7 +4776,12 @@
     "secondaryRoles": "Secondary Roles",
     "roleGranted": "Role granted successfully",
     "roleRemoved": "Role removed successfully",
-    "cannotRemovePrimary": "Cannot remove the primary role"
+    "cannotRemovePrimary": "Cannot remove the primary role",
+    "resetPasswordTitle": "Reset User Password",
+    "resetPasswordLabel": "New Password",
+    "resetPasswordBtn": "Reset Password",
+    "resetPasswordSuccess": "Password reset successfully",
+    "resetPasswordMin": "Minimum 8 characters required"
   },
   "vetHospitalAdmin": {
     "title": "పశు ఆసుపత్రి నిర్వహణ",
@@ -6026,8 +6036,7 @@
     "approve": "ఆమోదించు",
     "reject": "తిరస్కరించు",
     "approvalRequired": "ఈ కదలికకు మేనేజర్ ఆమోదం అవసరం"
-  }
-,
+  },
   "networkAnalytics": {
     "title": "నెట్‌వర్క్ విశ్లేషణలు",
     "totalMembers": "మొత్తం సభ్యులు",
@@ -6048,8 +6057,7 @@
     "exportTo": "ముగింపు తేదీ",
     "generating": "నివేదిక రూపొందిస్తోంది...",
     "downloadReport": "నివేదిక డౌన్‌లోడ్"
-  }
-,
+  },
   "networkApproval": {
     "title": "Approval History",
     "requestInfo": "Request More Info",
