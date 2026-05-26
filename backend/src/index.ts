@@ -168,14 +168,21 @@ const startServer = async () => {
       sendVaccinationsTableReminders().catch((err: any) => logger.warn('[VaccinationReminder] Scheduled run failed', { error: err.message }));
     }, 24 * 60 * 60 * 1000);
 
-    fixDemoPasswords().catch((err: any) => {
-      logger.error('fixDemoPasswords failed on first attempt — will retry in 30s', { error: err.message || String(err) });
+    // Await fixDemoPasswords so admin/demo users have correct passwords
+    // BEFORE the first login request arrives. Previously this fired async
+    // causing "Invalid email or password" on fresh-DB deploys if login
+    // was attempted before bcrypt hashes were corrected.
+    try {
+      await fixDemoPasswords();
+      logger.info('fixDemoPasswords completed successfully');
+    } catch (err: any) {
+      logger.error('fixDemoPasswords failed on first attempt — retrying in 30s', { error: err.message || String(err) });
       setTimeout(() => {
         fixDemoPasswords().catch((err2: any) =>
           logger.error('fixDemoPasswords retry also failed', { error: err2.message || String(err2) })
         );
       }, 30000);
-    });
+    }
 
     // Keep Render free-tier awake — self-ping every 10 min via external URL
     startSelfPing();

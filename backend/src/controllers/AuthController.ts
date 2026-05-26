@@ -78,21 +78,21 @@ export class AuthController {
         throw new ValidationError('Email and password are required');
       }
 
-      // Retry login query up to 4 times with escalating delays.
+      // Retry login query up to 6 times with escalating delays.
       // Neon free-tier + Render free-tier both spin down on inactivity;
       // the first request after wake-up can hit a cold-start window where
       // the pool hasn't established a connection yet.
       let user;
       let loginAttemptError: any;
-      for (let attempt = 1; attempt <= 4; attempt++) {
+      for (let attempt = 1; attempt <= 6; attempt++) {
         try {
           user = await UserService.getUserByEmail(email);
           loginAttemptError = null;
           break; // success — exit retry loop
         } catch (dbErr: any) {
           loginAttemptError = dbErr;
-          logger.warn(`Login: getUserByEmail attempt ${attempt}/4 failed`, { error: dbErr.message });
-          if (attempt < 4) {
+          logger.warn(`Login: getUserByEmail attempt ${attempt}/6 failed`, { error: dbErr.message });
+          if (attempt < 6) {
             // On first failure trigger schema + demo user repair so tables exist on retry
             if (attempt === 1) {
               try {
@@ -102,13 +102,13 @@ export class AuthController {
                 logger.warn('Login: self-heal step failed — will retry query anyway', { error: healErr.message });
               }
             }
-            // Wait before retrying (3s, 6s, 9s) to give Neon time to fully wake
-            await new Promise(r => setTimeout(r, 3000 * attempt));
+            // Wait before retrying (5s, 10s, 15s, 20s, 25s) to give DB time to fully wake
+            await new Promise(r => setTimeout(r, 5000 * attempt));
           }
         }
       }
       if (loginAttemptError) {
-        logger.error('Login: all 4 attempts failed', { error: loginAttemptError.message });
+        logger.error('Login: all 6 attempts failed', { error: loginAttemptError.message });
         throw new DatabaseError('Database is not ready yet. Please retry in a few seconds.');
       }
 

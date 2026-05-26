@@ -65,7 +65,7 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
       if (msg.toLowerCase().includes('database is not ready') || msg.toLowerCase().includes('not ready yet')) {
         setDbWaking(true)
         setMessage('')
-        scheduleAutoRetry(email, password, 8)
+        scheduleAutoRetry(email, password, 30)
       } else {
         setDbWaking(false)
         setMessage(msg)

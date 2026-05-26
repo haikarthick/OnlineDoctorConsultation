@@ -17,7 +17,7 @@ INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash,
 VALUES (
   'a0000000-0000-0000-0000-000000000001',
   'admin@vetcare.com', 'System', 'Admin', 'admin', '+1-555-0100',
-  '$2a$10$FDap/eOYFgBCzs2HfWCZ2Or6s54BdHzr1N.RGsNhnx09o3PYWjzma',
+  '$2a$10$RlWrPlmVC6hPxDMki3mX3.u98NgKNMfOH4/uPH2zaRIlYsvkL7LmK',
   true
 ) ON CONFLICT (email) DO NOTHING;
 
