@@ -8,6 +8,44 @@ import NetworkRolePermissionService from '../services/NetworkRolePermissionServi
 import RefreshTokenService from '../services/RefreshTokenService';
 import VetHospitalService from '../services/VetHospitalService';
 
+/** Split multi-statement SQL respecting dollar-quoted function bodies ($$...$$) */
+function splitSqlStatements(sql: string): string[] {
+  const statements: string[] = [];
+  let current = '';
+  let inDollarQuote = false;
+  let dollarTag = '';
+
+  for (let i = 0; i < sql.length; i++) {
+    const ch = sql[i];
+    current += ch;
+
+    // Detect start/end of dollar-quoting
+    if (ch === '$' && !inDollarQuote) {
+      const match = sql.slice(i).match(/^\$([^$]*)\$/);
+      if (match) {
+        inDollarQuote = true;
+        dollarTag = match[0];
+        current += match[0].slice(1);
+        i += match[0].length - 1;
+      }
+    } else if (inDollarQuote && sql.slice(i).startsWith(dollarTag)) {
+      current += dollarTag.slice(1);
+      i += dollarTag.length - 1;
+      inDollarQuote = false;
+      dollarTag = '';
+    } else if (!inDollarQuote && ch === ';') {
+      const stmt = current.trim();
+      if (stmt && stmt !== ';') {
+        statements.push(stmt);
+      }
+      current = '';
+    }
+  }
+  const remaining = current.trim();
+  if (remaining && remaining !== ';') statements.push(remaining);
+  return statements;
+}
+
 // ── Fix node-postgres: NUMERIC/DECIMAL columns return as strings by default ──
 // OID 1700 = NUMERIC/DECIMAL → parse to float
 types.setTypeParser(1700, (val: string) => parseFloat(val));
@@ -156,14 +194,19 @@ class PostgresDatabase {
     return this.ensureSchemaPublic();
   }
   async ensureSchemaPublic(): Promise<void> {
+    const schemaName = config.database.schema || 'public';
+    const client = await this.pool.connect();
     try {
-      const schemaName = config.database.schema || 'public';
-      // 1. Ensure the schema itself exists first
+      // 1. Ensure the schema itself exists (use public search_path for this DDL)
       if (schemaName !== 'public') {
-        await this.pool.query(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
+        await client.query(`SET search_path TO public`);
+        await client.query(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
       }
-      // 2. Check if users table exists
-      const check = await this.pool.query(
+      // 2. Set search_path so subsequent DDL lands in the correct schema
+      await client.query(`SET search_path TO "${schemaName}", public`);
+
+      // 3. Check if users table exists
+      const check = await client.query(
         `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'users')`,
         [schemaName]
       );
@@ -172,7 +215,8 @@ class PostgresDatabase {
         const initSqlPath = path.join(__dirname, '../../../docker/init.sql');
         if (fs.existsSync(initSqlPath)) {
           const sql = fs.readFileSync(initSqlPath, 'utf8');
-          await this.pool.query(sql);
+          // Use client.query (simple query protocol) — supports multi-statement SQL
+          await client.query(sql);
           logger.info('Schema created successfully from init.sql');
         } else {
           logger.warn('init.sql not found at ' + initSqlPath + ' — skipping schema creation');
@@ -181,8 +225,60 @@ class PostgresDatabase {
         logger.info('Database schema already exists');
       }
     } catch (error: any) {
-      logger.error('Error ensuring schema', { error: error.message });
+      logger.error('Error ensuring schema', { error: error.message, schema: schemaName });
       throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Run init.sql statement-by-statement for diagnostics; returns detailed results */
+  async repairSchema(): Promise<{ success: boolean; created: boolean; statements: number; errors: string[] }> {
+    const schemaName = config.database.schema || 'public';
+    const errors: string[] = [];
+    let statementsRun = 0;
+    let created = false;
+
+    const client = await this.pool.connect();
+    try {
+      // Always set search_path with public first so CREATE SCHEMA works
+      await client.query(`SET search_path TO public`);
+      if (schemaName !== 'public') {
+        await client.query(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
+      }
+      await client.query(`SET search_path TO "${schemaName}", public`);
+
+      const initSqlPath = path.join(__dirname, '../../../docker/init.sql');
+      if (!fs.existsSync(initSqlPath)) {
+        errors.push('init.sql not found at: ' + initSqlPath);
+        return { success: false, created: false, statements: 0, errors };
+      }
+
+      const sql = fs.readFileSync(initSqlPath, 'utf8');
+      // Split statements respecting dollar-quoted function bodies
+      const stmts = splitSqlStatements(sql);
+      for (const stmt of stmts) {
+        try {
+          await client.query(stmt);
+          statementsRun++;
+        } catch (e: any) {
+          // Ignore "already exists" errors — those are fine for IF NOT EXISTS statements
+          if (!e.message?.includes('already exists') && !e.message?.includes('duplicate')) {
+            errors.push(`[stmt ${statementsRun + 1}] ${e.message}`);
+          }
+          statementsRun++;
+        }
+      }
+
+      // Verify users table was created
+      const check = await client.query(
+        `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'users')`,
+        [schemaName]
+      );
+      created = check.rows[0].exists === true;
+      return { success: created, created, statements: statementsRun, errors };
+    } finally {
+      client.release();
     }
   }
 

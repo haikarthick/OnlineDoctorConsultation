@@ -1946,6 +1946,59 @@ router.get('/features', (_req, res) => {
   res.json({ success: true, data: getAllFeatureFlags() });
 });
 
+// ─── Emergency diagnostics (public — no auth required) ───────
+router.get('/debug/db-state', async (_req, res) => {
+  try {
+    const schema = process.env.DB_SCHEMA || 'public';
+    const rows: Record<string, any> = {};
+
+    // current search_path
+    const spResult = await database.query('SHOW search_path');
+    rows.searchPath = spResult.rows[0]?.search_path;
+
+    // list all non-system schemas
+    const schemas = await database.query(`SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ('pg_catalog','information_schema','pg_toast') ORDER BY schema_name`);
+    rows.schemas = schemas.rows.map((r: any) => r.schema_name);
+
+    // tables in target schema
+    const tables = await database.query(`SELECT table_name FROM information_schema.tables WHERE table_schema = $1 ORDER BY table_name`, [schema]);
+    rows.tablesInSchema = tables.rows.map((r: any) => r.table_name);
+
+    // tables in public schema
+    const publicTables = await database.query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name`);
+    rows.tablesInPublic = publicTables.rows.map((r: any) => r.table_name);
+
+    // user count (try both schemas)
+    try {
+      const uc = await database.query(`SELECT COUNT(*)::int AS cnt FROM "${schema}".users`);
+      rows.userCountInSchema = uc.rows[0]?.cnt;
+    } catch { rows.userCountInSchema = 'error — table likely missing'; }
+
+    res.json({ status: 'ok', targetSchema: schema, ...rows });
+  } catch (e: any) {
+    res.status(500).json({ status: 'error', error: e.message });
+  }
+});
+
+router.post('/repair-schema', async (_req, res) => {
+  try {
+    const result = await database.repairSchema();
+    if (result.success) {
+      // Also seed demo users
+      try {
+        const { fixDemoPasswords } = await import('../utils/fixDemoPasswords');
+        await fixDemoPasswords();
+        (result as any).demoUsers = 'seeded';
+      } catch (se: any) {
+        (result as any).demoUsers = 'error: ' + se.message;
+      }
+    }
+    res.status(result.success ? 200 : 500).json(result);
+  } catch (e: any) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 // ─── File Uploads ────────────────────────────────────────────
 router.post('/files/upload', authMiddleware, uploadAny.single('file'), asyncHandler((req: Request, res: Response) => FileController.upload(req, res)));
 router.post('/files/upload-multiple', authMiddleware, uploadAny.array('files', 10), asyncHandler((req: Request, res: Response) => FileController.uploadMultiple(req, res)));
