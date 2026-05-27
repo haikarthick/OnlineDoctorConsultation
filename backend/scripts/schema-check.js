@@ -266,7 +266,61 @@ function scanUpdateStatements(dir, tables) {
   return problems;
 }
 
-// ── Main ────────────────────────────────────────────────────
+// ── Step 7: Check for forward FK references in init.sql ─────
+
+function checkFkOrder(filePath) {
+  const sql = fs.readFileSync(filePath, 'utf-8');
+  const lines = sql.split('\n');
+
+  // Track table definition order (line number each table is first defined)
+  const tableDefinedAtLine = {};
+  const forwardFkErrors = [];
+
+  // First pass: find line number of each CREATE TABLE
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+(\w+)/i);
+    if (m) {
+      const tbl = m[1].toLowerCase();
+      if (!tableDefinedAtLine[tbl]) {
+        tableDefinedAtLine[tbl] = i + 1; // 1-based
+      }
+    }
+  }
+
+  // Second pass: find REFERENCES inside each CREATE TABLE block,
+  // check that the referenced table was already defined before the current table
+  let currentTable = null;
+  let currentTableLine = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const createMatch = lines[i].match(/CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+(\w+)/i);
+    if (createMatch) {
+      currentTable = createMatch[1].toLowerCase();
+      currentTableLine = i + 1;
+    }
+    if (!currentTable) continue;
+
+    // Look for REFERENCES <table>
+    const refMatch = lines[i].match(/REFERENCES\s+(\w+)\s*\(/i);
+    if (refMatch) {
+      const refTable = refMatch[1].toLowerCase();
+      if (refTable === currentTable) continue; // self-ref OK
+      const refDefinedAt = tableDefinedAtLine[refTable];
+      if (refDefinedAt !== undefined && refDefinedAt > currentTableLine) {
+        forwardFkErrors.push({
+          table: currentTable,
+          tableDefinedAt: currentTableLine,
+          referencesTable: refTable,
+          referencesDefinedAt: refDefinedAt,
+          onLine: i + 1,
+        });
+      }
+    }
+  }
+
+  return forwardFkErrors;
+}
+
+
 
 function main() {
   console.log(`\n${CYAN}🔍 Running pre-deployment schema validation...${RESET}`);
@@ -303,8 +357,21 @@ function main() {
     }
   }
 
+  // Check for forward FK references (table defined after the table that references it)
+  const fkErrors = checkFkOrder(INIT_SQL);
+  if (fkErrors.length > 0) {
+    console.log(`\n${RED}✗ Found ${fkErrors.length} forward FK reference(s) in init.sql:${RESET}\n`);
+    for (const e of fkErrors) {
+      console.log(`  ${RED}Line ${e.onLine}:${RESET} Table "${e.table}" (defined line ${e.tableDefinedAtLine}) REFERENCES "${e.referencesTable}" (defined line ${e.referencesDefinedAt})`);
+      console.log(`  ${DIM}  Fix: Move "${e.referencesTable}" CREATE TABLE to BEFORE line ${e.tableDefinedAtLine} in init.sql${RESET}`);
+    }
+    console.log('');
+  } else {
+    console.log(`${GREEN}✓ No forward FK references in init.sql${RESET}\n`);
+  }
+
   // Summary
-  const totalErrors = insertErrors + updateProblems.length;
+  const totalErrors = insertErrors + updateProblems.length + fkErrors.length;
   if (totalErrors > 0) {
     console.log(`${RED}━━━ FAILED: ${totalErrors} schema error(s) found ━━━${RESET}`);
     console.log(`${DIM}Fix all errors before deploying. Every column in an INSERT/UPDATE must exist in docker/init.sql or a migration.${RESET}\n`);

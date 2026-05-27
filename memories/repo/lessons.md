@@ -502,3 +502,10 @@
 - **Lesson:** The second definition is dead code but creates confusion and maintenance risk. Always grep for duplicate route patterns before adding new routes.
 - **Apply to:** All future route additions
 
+
+### LESSON-044 — Forward FK in init.sql only breaks on FRESH DB, not existing
+- **Logged:** 2026-05-27 10:17
+- **Context:** Adding hospital_networks table late in init.sql worked on existing DBs (CREATE TABLE IF NOT EXISTS skips) but broke on fresh Render DB because consultations at line 131 referenced hospital_networks at line 1534
+- **Lesson:** Always define referenced tables BEFORE tables that reference them in init.sql. schema-check.js now validates FK order on every pre-push.
+- **Apply to:** All future init.sql edits
+
