@@ -3777,3 +3777,32 @@ VALUES
    'DEX-2024-0042', 45, 'vial',
    CURRENT_DATE + INTERVAL '15 months', 'VetMed Distributors', true)
 ON CONFLICT (id) DO NOTHING;
+
+-- Demo Pharmacist User
+INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active, employee_id)
+VALUES (
+  'ph000000-0000-0000-0000-000000000099',
+  'pharmacist@vetcare.com',
+  'Priya',
+  'Mehta',
+  'pharmacist',
+  '+91-98765-00099',
+  '$2a$10$gSdD95PyV8lmsQnsYQyL2ea0.pRa05fUxhFNv5w/aBNr6Tv.BsD/K',
+  true,
+  'PHM-001'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Link demo pharmacist to demo network
+INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by)
+VALUES (
+  'hn000000-0000-0000-0000-000000000001',
+  'ph000000-0000-0000-0000-000000000099',
+  'pharmacist',
+  'h0000000-0000-0000-0000-000000000001',
+  'd0000000-0000-0000-0000-000000000001'
+) ON CONFLICT (network_id, user_id) DO NOTHING;
+
+-- Link demo pharmacist to demo pharmacy as staff
+INSERT INTO staff_positions (hospital_id, user_id, position)
+VALUES ('h0000000-0000-0000-0000-000000000001', 'ph000000-0000-0000-0000-000000000099', 'pharmacist')
+ON CONFLICT DO NOTHING;
