@@ -103,6 +103,8 @@ const NetworkSubscriptions = React.lazy(() => import('./pages/admin/NetworkSubsc
 const DisputeManagement = React.lazy(() => import('./pages/admin/DisputeManagement'))
 const AcceptHospitalInvite = React.lazy(() => import('./pages/AcceptHospitalInvite'))
 const NetworkMemberships = React.lazy(() => import('./pages/petowner/NetworkMemberships'))
+// Pharmacy
+const PharmacyDashboard = React.lazy(() => import('./pages/pharmacy/PharmacyDashboard'))
 
 /** Suspense fallback spinner shown while lazy chunks load */
 function PageLoader() {
@@ -362,6 +364,9 @@ function AppRoutes() {
 
       {/* ── Network Memberships Module ── */}
       <Route path="/network-memberships" element={<RoleRoute path="/network-memberships"><AppLayout><NetworkMemberships /></AppLayout></RoleRoute>} />
+
+      {/* ── Pharmacy Module ── */}
+      <Route path="/pharmacy" element={<RoleRoute path="/pharmacy"><AppLayout><PharmacyDashboard /></AppLayout></RoleRoute>} />
 
       {/* Catch-all → home */}
       <Route path="*" element={<Navigate to="/" replace />} />

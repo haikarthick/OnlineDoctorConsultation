@@ -94,6 +94,8 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   admin_certificates: ['/admin/certificate-settings'],
   // Dispute Management
   dispute_management: ['/admin/disputes'],
+  // Pharmacy
+  pharmacy_view_dashboard: ['/pharmacy'],
 }
 
 // Reverse map: route path → required permission
@@ -185,6 +187,8 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   'admin-certificate-settings': 'admin_certificates',
   // Dispute Management
   'admin-disputes': 'dispute_management',
+  // Pharmacy
+  'pharmacy': 'pharmacy_view_dashboard',
 }
 
 // ─── Context ────────────────────────────────────────────────

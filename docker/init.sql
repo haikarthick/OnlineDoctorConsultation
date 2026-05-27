@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
-  role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff')),
+  role VARCHAR(50) NOT NULL CHECK (role IN ('farmer', 'pet_owner', 'veterinarian', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist')),
   phone VARCHAR(20) DEFAULT '',
   password_hash VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT true,
@@ -2046,7 +2046,7 @@ CREATE TABLE IF NOT EXISTS marketplace_transactions (
 CREATE TABLE IF NOT EXISTS user_roles (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  role VARCHAR(50) NOT NULL CHECK (role IN ('pet_owner','farmer','veterinarian','admin','corporate_admin','hospital_staff')),
+  role VARCHAR(50) NOT NULL CHECK (role IN ('pet_owner','farmer','veterinarian','admin','corporate_admin','hospital_staff','pharmacist')),
   is_primary BOOLEAN DEFAULT false,
   granted_by UUID REFERENCES users(id),
   granted_at TIMESTAMPTZ DEFAULT NOW(),
@@ -2092,3 +2092,223 @@ CREATE TABLE IF NOT EXISTS disputes (
 );
 CREATE INDEX IF NOT EXISTS idx_disputes_reported_by ON disputes(reported_by);
 CREATE INDEX IF NOT EXISTS idx_disputes_status ON disputes(status);
+
+-- ============================================================
+-- 45. PHARMACY MODULE
+-- ============================================================
+
+-- 45.1 Hospital Pharmacies (per-hospital pharmacy entity)
+CREATE TABLE IF NOT EXISTS hospital_pharmacies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+  pharmacy_name VARCHAR(255) NOT NULL,
+  address TEXT,
+  phone VARCHAR(50),
+  email VARCHAR(255),
+  license_number VARCHAR(100),
+  operating_hours JSONB DEFAULT '{}',
+  is_primary_pharmacy BOOLEAN DEFAULT false,
+  is_accepting_requests BOOLEAN DEFAULT true,
+  is_active BOOLEAN DEFAULT true,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_hospital_pharmacies_network ON hospital_pharmacies(network_id);
+CREATE INDEX IF NOT EXISTS idx_hospital_pharmacies_hospital ON hospital_pharmacies(hospital_id);
+
+-- 45.2 Pharmacy Suppliers
+CREATE TABLE IF NOT EXISTS pharmacy_suppliers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  contact_name VARCHAR(200),
+  email VARCHAR(255),
+  phone VARCHAR(50),
+  address TEXT,
+  is_approved BOOLEAN DEFAULT true,
+  payment_terms VARCHAR(100),
+  lead_time_days INTEGER DEFAULT 7,
+  notes TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_pharmacy_suppliers_network ON pharmacy_suppliers(network_id);
+
+-- 45.3 Pharmacy Medications (master catalog per network)
+CREATE TABLE IF NOT EXISTS pharmacy_medications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  generic_name VARCHAR(255),
+  form VARCHAR(50) DEFAULT 'tablet' CHECK (form IN ('tablet','capsule','syrup','injection','ointment','drops','powder','spray','other')),
+  strength VARCHAR(100),
+  unit VARCHAR(50) DEFAULT 'unit',
+  supplier_id UUID REFERENCES pharmacy_suppliers(id) ON DELETE SET NULL,
+  unit_cost DECIMAL(10,2) DEFAULT 0,
+  selling_price DECIMAL(10,2) DEFAULT 0,
+  min_stock_level INTEGER DEFAULT 10,
+  max_stock_level INTEGER DEFAULT 500,
+  reorder_point INTEGER DEFAULT 20,
+  reorder_quantity INTEGER DEFAULT 100,
+  contraindications TEXT[],
+  side_effects TEXT[],
+  common_interactions TEXT[],
+  manufacturer VARCHAR(255),
+  registration_number VARCHAR(100),
+  is_controlled BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_pharmacy_medications_network ON pharmacy_medications(network_id);
+CREATE INDEX IF NOT EXISTS idx_pharmacy_medications_supplier ON pharmacy_medications(supplier_id);
+
+-- 45.4 Pharmacy Reorder Requests (before inventory due to FK)
+CREATE TABLE IF NOT EXISTS pharmacy_reorder_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  pharmacy_id UUID NOT NULL REFERENCES hospital_pharmacies(id) ON DELETE CASCADE,
+  med_id UUID NOT NULL REFERENCES pharmacy_medications(id) ON DELETE CASCADE,
+  supplier_id UUID REFERENCES pharmacy_suppliers(id) ON DELETE SET NULL,
+  requested_qty INTEGER NOT NULL DEFAULT 0,
+  requested_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  triggered_by VARCHAR(20) DEFAULT 'manual' CHECK (triggered_by IN ('manual','auto_threshold')),
+  status VARCHAR(30) DEFAULT 'pending' CHECK (status IN ('pending','sent_to_supplier','confirmed','shipped','received','cancelled')),
+  requested_at TIMESTAMPTZ DEFAULT NOW(),
+  confirmed_at TIMESTAMPTZ,
+  shipped_at TIMESTAMPTZ,
+  received_at TIMESTAMPTZ,
+  tracking_number VARCHAR(200),
+  expected_delivery_date DATE,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_reorder_requests_pharmacy ON pharmacy_reorder_requests(pharmacy_id);
+CREATE INDEX IF NOT EXISTS idx_reorder_requests_med ON pharmacy_reorder_requests(med_id);
+CREATE INDEX IF NOT EXISTS idx_reorder_requests_status ON pharmacy_reorder_requests(status);
+
+-- 45.5 Pharmacy Inventory (batch-level stock tracking)
+CREATE TABLE IF NOT EXISTS pharmacy_inventory (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  pharmacy_id UUID NOT NULL REFERENCES hospital_pharmacies(id) ON DELETE CASCADE,
+  med_id UUID NOT NULL REFERENCES pharmacy_medications(id) ON DELETE CASCADE,
+  batch_number VARCHAR(100),
+  quantity INTEGER NOT NULL DEFAULT 0,
+  unit VARCHAR(50) DEFAULT 'unit',
+  expiry_date DATE,
+  received_at TIMESTAMPTZ DEFAULT NOW(),
+  received_from VARCHAR(255),
+  received_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  location_code VARCHAR(50),
+  shipment_request_id UUID REFERENCES pharmacy_reorder_requests(id) ON DELETE SET NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_pharmacy_inventory_pharmacy ON pharmacy_inventory(pharmacy_id);
+CREATE INDEX IF NOT EXISTS idx_pharmacy_inventory_med ON pharmacy_inventory(med_id);
+CREATE INDEX IF NOT EXISTS idx_pharmacy_inventory_expiry ON pharmacy_inventory(expiry_date);
+
+-- 45.6 Stock Adjustments (audit trail)
+CREATE TABLE IF NOT EXISTS pharmacy_stock_adjustments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  pharmacy_id UUID NOT NULL REFERENCES hospital_pharmacies(id) ON DELETE CASCADE,
+  med_id UUID NOT NULL REFERENCES pharmacy_medications(id) ON DELETE CASCADE,
+  inventory_id UUID REFERENCES pharmacy_inventory(id) ON DELETE SET NULL,
+  batch_number VARCHAR(100),
+  adjustment_qty INTEGER NOT NULL,
+  adjustment_type VARCHAR(20) NOT NULL CHECK (adjustment_type IN ('add','remove','dispense','correct','expire','damage','return')),
+  reason TEXT,
+  evidence_url TEXT,
+  adjusted_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  adjusted_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_stock_adjustments_pharmacy ON pharmacy_stock_adjustments(pharmacy_id);
+CREATE INDEX IF NOT EXISTS idx_stock_adjustments_med ON pharmacy_stock_adjustments(med_id);
+
+-- 45.7 Prescription Reviews
+CREATE TABLE IF NOT EXISTS prescription_reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  prescription_id UUID NOT NULL REFERENCES prescriptions(id) ON DELETE CASCADE,
+  pharmacist_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  review_status VARCHAR(30) NOT NULL CHECK (review_status IN ('approved','rejected','needs_clarification')),
+  validation_checks JSONB DEFAULT '{"dosage_ok":false,"allergy_ok":false,"interaction_ok":false,"stock_ok":false}',
+  findings TEXT[],
+  suggested_modifications TEXT,
+  rejection_reason TEXT,
+  reviewed_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_prescription_reviews_prescription ON prescription_reviews(prescription_id);
+CREATE INDEX IF NOT EXISTS idx_prescription_reviews_pharmacist ON prescription_reviews(pharmacist_id);
+
+-- 45.8 Dispensing Records
+CREATE TABLE IF NOT EXISTS dispensing_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  prescription_id UUID NOT NULL REFERENCES prescriptions(id) ON DELETE CASCADE,
+  pharmacy_id UUID NOT NULL REFERENCES hospital_pharmacies(id) ON DELETE RESTRICT,
+  pharmacist_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  dispensing_method VARCHAR(30) DEFAULT 'walk_in_pickup' CHECK (dispensing_method IN ('walk_in_pickup','home_delivery','courier','hospital_pickup')),
+  dispensing_status VARCHAR(20) DEFAULT 'pending' CHECK (dispensing_status IN ('pending','prepared','handed_over','delivered','cancelled')),
+  total_cost DECIMAL(10,2) DEFAULT 0,
+  prepared_at TIMESTAMPTZ,
+  handed_over_at TIMESTAMPTZ,
+  received_by VARCHAR(200),
+  signature_url TEXT,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_dispensing_records_prescription ON dispensing_records(prescription_id);
+CREATE INDEX IF NOT EXISTS idx_dispensing_records_pharmacy ON dispensing_records(pharmacy_id);
+CREATE INDEX IF NOT EXISTS idx_dispensing_records_status ON dispensing_records(dispensing_status);
+
+-- 45.9 Dispensing Line Items
+CREATE TABLE IF NOT EXISTS dispensing_line_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  dispensing_record_id UUID NOT NULL REFERENCES dispensing_records(id) ON DELETE CASCADE,
+  med_id UUID NOT NULL REFERENCES pharmacy_medications(id) ON DELETE RESTRICT,
+  inventory_id UUID REFERENCES pharmacy_inventory(id) ON DELETE SET NULL,
+  batch_number VARCHAR(100),
+  quantity_dispensed INTEGER NOT NULL DEFAULT 0,
+  unit VARCHAR(50) DEFAULT 'unit',
+  unit_price DECIMAL(10,2) DEFAULT 0,
+  line_total DECIMAL(10,2) DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_dispensing_line_items_record ON dispensing_line_items(dispensing_record_id);
+CREATE INDEX IF NOT EXISTS idx_dispensing_line_items_med ON dispensing_line_items(med_id);
+
+-- 45.10 Pharmacy Medication Requests (inter-hospital transfers)
+CREATE TABLE IF NOT EXISTS pharmacy_medication_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  source_network_id UUID NOT NULL REFERENCES hospital_networks(id) ON DELETE CASCADE,
+  source_hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+  destination_hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE SET NULL,
+  prescription_id UUID REFERENCES prescriptions(id) ON DELETE SET NULL,
+  requested_medications JSONB NOT NULL DEFAULT '[]',
+  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending','accepted','preparing','shipped','received','fulfilled','declined')),
+  tracking_number VARCHAR(200),
+  fulfilled_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  decline_reason TEXT,
+  notes TEXT,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_med_requests_network ON pharmacy_medication_requests(source_network_id);
+CREATE INDEX IF NOT EXISTS idx_med_requests_status ON pharmacy_medication_requests(status);
+
+-- 45.11 ALTER prescriptions: add pharmacy workflow fields
+ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_status VARCHAR(30) DEFAULT 'pending_review' CHECK (review_status IN ('pending_review','reviewed','rejected','approved_for_dispensing','dispensed'));
+ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
+ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_notes TEXT;
+ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS is_network_coordinated BOOLEAN DEFAULT false;
+ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS target_pharmacy_id UUID REFERENCES hospital_pharmacies(id) ON DELETE SET NULL;

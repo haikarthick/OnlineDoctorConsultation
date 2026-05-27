@@ -78,6 +78,10 @@
     "select": "Select",
     "selectOption": "Select an option",
     "average": "Average",
+    "viewAll": "View All",
+    "requiredField": "Required field",
+    "saveChanges": "Save Changes",
+    "action": "Action",
     "species": {
       "dog": "Dog",
       "cat": "Cat",
@@ -6355,5 +6359,165 @@
     "markNoShow": "Mark No-Show",
     "noShowConfirm": "Mark this patient as no-show? This cannot be undone.",
     "noShowMarked": "Patient marked as no-show"
+  },
+  "pharmacy": {
+    "title": "Pharmacy",
+    "noNetwork": "No network associated with your account. Please contact your administrator.",
+    "selectPharmacy": "Select a pharmacy",
+    "noPendingReviews": "No prescriptions pending review",
+    "noReadyDispense": "No prescriptions ready to dispense",
+    "pendingReview": "Pending Review",
+    "readyToDispense": "Ready to Dispense",
+    "nav": { "title": "Pharmacy" },
+    "tabs": {
+      "overview": "Overview",
+      "review": "Review",
+      "dispense": "Dispense",
+      "inventory": "Inventory",
+      "suppliers": "Suppliers",
+      "settings": "Settings"
+    },
+    "stats": {
+      "pendingReviews": "Pending Reviews",
+      "readyToDispense": "Ready to Dispense",
+      "lowStock": "Low Stock Alerts",
+      "expiringSoon": "Expiring Soon",
+      "pendingReorders": "Pending Reorders",
+      "todaysRevenue": "Today's Revenue"
+    },
+    "table": {
+      "patient": "Patient",
+      "owner": "Owner",
+      "vet": "Veterinarian",
+      "medications": "Medications",
+      "date": "Date",
+      "status": "Status",
+      "medication": "Medication",
+      "batch": "Batch #",
+      "quantity": "Quantity",
+      "minStock": "Min Stock",
+      "expiry": "Expiry",
+      "unitCost": "Unit Cost",
+      "name": "Name",
+      "contact": "Contact",
+      "email": "Email",
+      "phone": "Phone",
+      "leadTime": "Lead Time"
+    },
+    "actions": {
+      "review": "Review",
+      "dispense": "Dispense",
+      "adjust": "Adjust",
+      "reorder": "Reorder"
+    },
+    "filter": {
+      "all": "All",
+      "lowStock": "Low Stock",
+      "expiringSoon": "Expiring Soon (30d)",
+      "expired": "Expired"
+    },
+    "stock": {
+      "expired": "Expired",
+      "expiring": "Expiring Soon",
+      "low": "Low Stock",
+      "ok": "OK",
+      "currentQty": "Current Qty",
+      "adjustTitle": "Adjust Stock",
+      "adjustmentType": "Adjustment Type",
+      "quantity": "Quantity",
+      "reason": "Reason",
+      "reasonPlaceholder": "Describe the reason for adjustment",
+      "reasonRequired": "Please provide a reason for the adjustment",
+      "qtyPositive": "Quantity must be greater than 0",
+      "submit": "Submit Adjustment",
+      "types": {
+        "add": "Add Stock",
+        "remove": "Remove Stock",
+        "correct": "Correction",
+        "expire": "Mark Expired",
+        "damage": "Damage / Loss",
+        "return": "Return to Supplier"
+      }
+    },
+    "inventory": {
+      "title": "Medication Inventory",
+      "searchPlaceholder": "Search by medication or batch...",
+      "empty": "No inventory records found"
+    },
+    "suppliers": {
+      "title": "Suppliers",
+      "addSupplier": "Add Supplier",
+      "addTitle": "Add Supplier",
+      "editTitle": "Edit Supplier",
+      "empty": "No suppliers registered yet",
+      "nameLabel": "Supplier Name",
+      "namePlaceholder": "Enter supplier name",
+      "nameRequired": "Supplier name is required",
+      "contactName": "Contact Name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "paymentTerms": "Payment Terms",
+      "leadTimeDays": "Lead Time (days)",
+      "approvedLabel": "Approved Supplier",
+      "approved": "Approved",
+      "unapproved": "Unapproved"
+    },
+    "reorder": {
+      "title": "Request Reorder",
+      "supplier": "Supplier",
+      "selectSupplier": "Select a supplier",
+      "supplierRequired": "Please select a supplier",
+      "quantity": "Quantity to Order",
+      "qtyPositive": "Quantity must be greater than 0",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional instructions...",
+      "submit": "Submit Reorder"
+    },
+    "review": {
+      "title": "Review Prescription",
+      "queueTitle": "Prescription Review Queue",
+      "validationChecks": "Validation Checks",
+      "decision": "Decision",
+      "approved": "Approve",
+      "rejected": "Reject",
+      "needsClarification": "Needs Clarification",
+      "rejectionReason": "Rejection Reason",
+      "notes": "Review Notes",
+      "notesPlaceholder": "Enter any findings or notes...",
+      "submit": "Submit Review",
+      "completeChecksFirst": "Please complete all validation checks before approving",
+      "checks": {
+        "dosage_ok": "Dosage is appropriate",
+        "allergy_ok": "No allergy conflicts",
+        "interaction_ok": "No drug interactions",
+        "stock_ok": "Stock is available"
+      }
+    },
+    "dispense": {
+      "title": "Dispense Medication",
+      "queueTitle": "Dispensing Queue",
+      "method": "Dispensing Method",
+      "methods": {
+        "walk_in_pickup": "Walk-in Pickup",
+        "home_delivery": "Home Delivery",
+        "courier": "Courier",
+        "hospital_pickup": "Hospital Pickup"
+      },
+      "notes": "Notes",
+      "notesPlaceholder": "Additional dispensing instructions...",
+      "confirm": "Confirm Dispensing"
+    },
+    "settings": {
+      "title": "Pharmacy Settings",
+      "nameLabel": "Pharmacy Name",
+      "nameRequired": "Pharmacy name is required",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "licenseNumber": "License Number",
+      "acceptingRequests": "Currently accepting medication requests",
+      "saved": "Pharmacy settings saved successfully"
+    }
   }
 }

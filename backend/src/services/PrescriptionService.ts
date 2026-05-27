@@ -35,16 +35,38 @@ class PrescriptionService {
     // Default validUntil to 30 days from now if not provided
     const validUntil = data.validUntil || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
+    // Auto-assign primary pharmacy if network prescription
+    let targetPharmacyId: string | null = null;
+    let isNetworkCoordinated = false;
+    const networkId: string | null = (data as any).networkId || null;
+    if (networkId) {
+      try {
+        const pharmaResult = await database.query(
+          `SELECT id FROM hospital_pharmacies WHERE network_id = $1 AND is_primary_pharmacy = true AND is_active = true LIMIT 1`,
+          [networkId]
+        );
+        if (pharmaResult.rows[0]) {
+          targetPharmacyId = pharmaResult.rows[0].id;
+          isNetworkCoordinated = true;
+        }
+      } catch (err) {
+        logger.warn('Could not auto-assign pharmacy for network prescription', { networkId, error: err });
+      }
+    }
+
     const result = await database.query(
       `INSERT INTO prescriptions (id, consultation_id, veterinarian_id, pet_owner_id, animal_id,
-       medications, instructions, valid_until, is_active, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       medications, instructions, valid_until, is_active, network_id, is_network_coordinated, target_pharmacy_id, review_status, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        RETURNING id, consultation_id as "consultationId", veterinarian_id as "veterinarianId",
        pet_owner_id as "petOwnerId", animal_id as "animalId", medications, instructions,
        valid_until as "validUntil", is_active as "isActive",
        created_at as "createdAt", updated_at as "updatedAt"`,
       [id, data.consultationId, veterinarianId, petOwnerId, animalId,
-       JSON.stringify(data.medications), data.instructions, validUntil, true, now, now]
+       JSON.stringify(data.medications), data.instructions, validUntil, true,
+       networkId, isNetworkCoordinated, targetPharmacyId,
+       isNetworkCoordinated ? 'pending_review' : null,
+       now, now]
     );
 
     logger.info('Prescription created', { prescriptionId: id, consultationId: data.consultationId });

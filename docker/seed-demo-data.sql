@@ -3674,3 +3674,106 @@ VALUES
    'Pain management: meloxicam 0.1mg/kg PO q24h x 5d. Activity restriction 14d. E-collar.',
    'Post ovariohysterectomy — routine spay')
 ON CONFLICT (id) DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- PHARMACY MODULE — demo pharmacies, suppliers, medications
+-- ═══════════════════════════════════════════════════════════
+
+-- Demo Pharmacy (primary for DemoVetGroup network)
+INSERT INTO hospital_pharmacies (id, network_id, hospital_id, pharmacy_name, address, phone, email, license_number, is_primary_pharmacy, is_accepting_requests, is_active, created_by)
+VALUES (
+  'ph000000-0000-0000-0000-000000000001',
+  'hn000000-0000-0000-0000-000000000001',
+  'h0000000-0000-0000-0000-000000000001',
+  'DemoVetGroup Central Pharmacy',
+  '42 Anna Salai, Guindy, Chennai, Tamil Nadu 600032',
+  '+91-44-1234-5678',
+  'pharmacy@demovetgroup.com',
+  'PHARMA-TN-2024-001',
+  true,
+  true,
+  true,
+  'a0000000-0000-0000-0000-000000000001'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Demo Supplier
+INSERT INTO pharmacy_suppliers (id, network_id, name, contact_name, email, phone, address, is_approved, payment_terms, lead_time_days, is_active, created_by)
+VALUES (
+  'ps000000-0000-0000-0000-000000000001',
+  'hn000000-0000-0000-0000-000000000001',
+  'VetMed Distributors Pvt. Ltd.',
+  'Rajan Kumar',
+  'orders@vetmeddist.com',
+  '+91-44-2345-6789',
+  '15 Industrial Estate, Guindy, Chennai',
+  true,
+  'Net 30',
+  7,
+  true,
+  'a0000000-0000-0000-0000-000000000001'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Demo Medications
+INSERT INTO pharmacy_medications (id, network_id, name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, is_controlled, is_active, created_by)
+VALUES
+  ('pm000000-0000-0000-0000-000000000001',
+   'hn000000-0000-0000-0000-000000000001',
+   'Meloxicam 0.5mg Tablets', 'Meloxicam', 'tablet', '0.5mg', 'tablet',
+   'ps000000-0000-0000-0000-000000000001',
+   5.00, 8.00, 50, 1000, 100, 200, false, true,
+   'a0000000-0000-0000-0000-000000000001'),
+  ('pm000000-0000-0000-0000-000000000002',
+   'hn000000-0000-0000-0000-000000000001',
+   'Amoxicillin 250mg Capsules', 'Amoxicillin', 'capsule', '250mg', 'capsule',
+   'ps000000-0000-0000-0000-000000000001',
+   8.00, 12.00, 100, 2000, 200, 500, false, true,
+   'a0000000-0000-0000-0000-000000000001'),
+  ('pm000000-0000-0000-0000-000000000003',
+   'hn000000-0000-0000-0000-000000000001',
+   'Maropitant 60mg Tablets', 'Maropitant Citrate', 'tablet', '60mg', 'tablet',
+   'ps000000-0000-0000-0000-000000000001',
+   95.00, 140.00, 20, 200, 30, 60, false, true,
+   'a0000000-0000-0000-0000-000000000001'),
+  ('pm000000-0000-0000-0000-000000000004',
+   'hn000000-0000-0000-0000-000000000001',
+   'Tramadol 50mg Tablets', 'Tramadol HCl', 'tablet', '50mg', 'tablet',
+   'ps000000-0000-0000-0000-000000000001',
+   12.00, 18.00, 30, 500, 60, 150, true, true,
+   'a0000000-0000-0000-0000-000000000001'),
+  ('pm000000-0000-0000-0000-000000000005',
+   'hn000000-0000-0000-0000-000000000001',
+   'Dexamethasone 4mg/ml Injection', 'Dexamethasone Sodium Phosphate', 'injection', '4mg/ml', 'vial',
+   'ps000000-0000-0000-0000-000000000001',
+   45.00, 70.00, 15, 150, 25, 50, false, true,
+   'a0000000-0000-0000-0000-000000000001')
+ON CONFLICT (id) DO NOTHING;
+
+-- Demo Inventory batches
+INSERT INTO pharmacy_inventory (id, pharmacy_id, med_id, batch_number, quantity, unit, expiry_date, received_from, is_active)
+VALUES
+  ('pi000000-0000-0000-0000-000000000001',
+   'ph000000-0000-0000-0000-000000000001',
+   'pm000000-0000-0000-0000-000000000001',
+   'MLX-2024-0111', 500, 'tablet',
+   CURRENT_DATE + INTERVAL '18 months', 'VetMed Distributors', true),
+  ('pi000000-0000-0000-0000-000000000002',
+   'ph000000-0000-0000-0000-000000000001',
+   'pm000000-0000-0000-0000-000000000002',
+   'AMX-2024-0287', 800, 'capsule',
+   CURRENT_DATE + INTERVAL '24 months', 'VetMed Distributors', true),
+  ('pi000000-0000-0000-0000-000000000003',
+   'ph000000-0000-0000-0000-000000000001',
+   'pm000000-0000-0000-0000-000000000003',
+   'MRP-2024-0055', 80, 'tablet',
+   CURRENT_DATE + INTERVAL '12 months', 'VetMed Distributors', true),
+  ('pi000000-0000-0000-0000-000000000004',
+   'ph000000-0000-0000-0000-000000000001',
+   'pm000000-0000-0000-0000-000000000004',
+   'TRM-2024-0183', 120, 'tablet',
+   CURRENT_DATE + INTERVAL '20 months', 'VetMed Distributors', true),
+  ('pi000000-0000-0000-0000-000000000005',
+   'ph000000-0000-0000-0000-000000000001',
+   'pm000000-0000-0000-0000-000000000005',
+   'DEX-2024-0042', 45, 'vial',
+   CURRENT_DATE + INTERVAL '15 months', 'VetMed Distributors', true)
+ON CONFLICT (id) DO NOTHING;

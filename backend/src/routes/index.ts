@@ -3086,4 +3086,620 @@ router.put('/disputes/:id/resolve', authMiddleware, roleMiddleware(['admin']), a
   }
 }));
 
+// ============================================================
+// PHARMACY MODULE ROUTES
+// ============================================================
+
+// ── Pharmacy Setup ──────────────────────────────────────────
+
+// List pharmacies for a network
+router.get('/networks/:networkId/pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { networkId } = req.params;
+  const result = await database.query(
+    `SELECT hp.*, vh.name AS hospital_name, u.first_name || ' ' || u.last_name AS created_by_name
+     FROM hospital_pharmacies hp
+     LEFT JOIN vet_hospitals vh ON hp.hospital_id = vh.id
+     LEFT JOIN users u ON hp.created_by = u.id
+     WHERE hp.network_id = $1
+     ORDER BY hp.is_primary_pharmacy DESC, hp.pharmacy_name ASC`,
+    [networkId]
+  );
+  res.json(result.rows);
+}));
+
+// Create pharmacy
+router.post('/networks/:networkId/pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { networkId } = req.params;
+  const { pharmacy_name, hospital_id, address, phone, email, license_number, operating_hours, is_primary_pharmacy } = req.body;
+  if (!pharmacy_name) return res.status(400).json({ error: 'pharmacy_name is required' });
+  // If setting as primary, unset others
+  if (is_primary_pharmacy) {
+    await database.query(`UPDATE hospital_pharmacies SET is_primary_pharmacy = false WHERE network_id = $1`, [networkId]);
+  }
+  const result = await database.query(
+    `INSERT INTO hospital_pharmacies (network_id, hospital_id, pharmacy_name, address, phone, email, license_number, operating_hours, is_primary_pharmacy, created_by)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+     RETURNING *`,
+    [networkId, hospital_id || null, pharmacy_name, address || null, phone || null, email || null, license_number || null, operating_hours ? JSON.stringify(operating_hours) : '{}', is_primary_pharmacy || false, authReq.userId]
+  );
+  res.status(201).json(result.rows[0]);
+}));
+
+// Get / Update pharmacy
+router.get('/pharmacies/:pharmacyId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT hp.*, vh.name AS hospital_name FROM hospital_pharmacies hp
+     LEFT JOIN vet_hospitals vh ON hp.hospital_id = vh.id
+     WHERE hp.id = $1`,
+    [req.params.pharmacyId]
+  );
+  if (!result.rows[0]) return res.status(404).json({ error: 'Pharmacy not found' });
+  res.json(result.rows[0]);
+}));
+
+router.patch('/pharmacies/:pharmacyId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { pharmacy_name, address, phone, email, license_number, operating_hours, is_primary_pharmacy, is_accepting_requests, is_active } = req.body;
+  const existing = await database.query(`SELECT * FROM hospital_pharmacies WHERE id = $1`, [req.params.pharmacyId]);
+  if (!existing.rows[0]) return res.status(404).json({ error: 'Pharmacy not found' });
+  if (is_primary_pharmacy) {
+    await database.query(`UPDATE hospital_pharmacies SET is_primary_pharmacy = false WHERE network_id = $1`, [existing.rows[0].network_id]);
+  }
+  const result = await database.query(
+    `UPDATE hospital_pharmacies SET
+       pharmacy_name = COALESCE($1, pharmacy_name),
+       address = COALESCE($2, address),
+       phone = COALESCE($3, phone),
+       email = COALESCE($4, email),
+       license_number = COALESCE($5, license_number),
+       operating_hours = COALESCE($6::jsonb, operating_hours),
+       is_primary_pharmacy = COALESCE($7, is_primary_pharmacy),
+       is_accepting_requests = COALESCE($8, is_accepting_requests),
+       is_active = COALESCE($9, is_active),
+       updated_at = NOW()
+     WHERE id = $10 RETURNING *`,
+    [pharmacy_name, address, phone, email, license_number, operating_hours ? JSON.stringify(operating_hours) : null, is_primary_pharmacy, is_accepting_requests, is_active, req.params.pharmacyId]
+  );
+  res.json(result.rows[0]);
+}));
+
+// ── Suppliers ──────────────────────────────────────────────
+
+router.get('/networks/:networkId/suppliers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT ps.*, (SELECT COUNT(*) FROM pharmacy_medications WHERE supplier_id = ps.id) AS medication_count
+     FROM pharmacy_suppliers ps
+     WHERE ps.network_id = $1 ORDER BY ps.name ASC`,
+    [req.params.networkId]
+  );
+  res.json(result.rows);
+}));
+
+router.post('/networks/:networkId/suppliers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { name, contact_name, email, phone, address, payment_terms, lead_time_days, notes } = req.body;
+  if (!name) return res.status(400).json({ error: 'name is required' });
+  const result = await database.query(
+    `INSERT INTO pharmacy_suppliers (network_id, name, contact_name, email, phone, address, payment_terms, lead_time_days, notes, created_by)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+    [req.params.networkId, name, contact_name || null, email || null, phone || null, address || null, payment_terms || null, lead_time_days || 7, notes || null, authReq.userId]
+  );
+  res.status(201).json(result.rows[0]);
+}));
+
+router.patch('/networks/:networkId/suppliers/:supplierId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { name, contact_name, email, phone, address, payment_terms, lead_time_days, notes, is_approved, is_active } = req.body;
+  const result = await database.query(
+    `UPDATE pharmacy_suppliers SET
+       name = COALESCE($1, name), contact_name = COALESCE($2, contact_name),
+       email = COALESCE($3, email), phone = COALESCE($4, phone),
+       address = COALESCE($5, address), payment_terms = COALESCE($6, payment_terms),
+       lead_time_days = COALESCE($7, lead_time_days), notes = COALESCE($8, notes),
+       is_approved = COALESCE($9, is_approved), is_active = COALESCE($10, is_active),
+       updated_at = NOW()
+     WHERE id = $11 AND network_id = $12 RETURNING *`,
+    [name, contact_name, email, phone, address, payment_terms, lead_time_days, notes, is_approved, is_active, req.params.supplierId, req.params.networkId]
+  );
+  if (!result.rows[0]) return res.status(404).json({ error: 'Supplier not found' });
+  res.json(result.rows[0]);
+}));
+
+// ── Medications ─────────────────────────────────────────────
+
+router.get('/networks/:networkId/medications', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT pm.*, ps.name AS supplier_name FROM pharmacy_medications pm
+     LEFT JOIN pharmacy_suppliers ps ON pm.supplier_id = ps.id
+     WHERE pm.network_id = $1
+     ORDER BY pm.name ASC`,
+    [req.params.networkId]
+  );
+  res.json(result.rows);
+}));
+
+router.post('/networks/:networkId/medications', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, contraindications, side_effects, common_interactions } = req.body;
+  if (!name) return res.status(400).json({ error: 'name is required' });
+  const result = await database.query(
+    `INSERT INTO pharmacy_medications (network_id, name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, contraindications, side_effects, common_interactions, created_by)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) RETURNING *`,
+    [req.params.networkId, name, generic_name || null, form || 'tablet', strength || null, unit || 'unit', supplier_id || null, unit_cost || 0, selling_price || 0, min_stock_level || 10, max_stock_level || 500, reorder_point || 20, reorder_quantity || 100, manufacturer || null, registration_number || null, is_controlled || false, contraindications || [], side_effects || [], common_interactions || [], authReq.userId]
+  );
+  res.status(201).json(result.rows[0]);
+}));
+
+router.patch('/networks/:networkId/medications/:medId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, is_active } = req.body;
+  const result = await database.query(
+    `UPDATE pharmacy_medications SET
+       name = COALESCE($1, name), generic_name = COALESCE($2, generic_name),
+       form = COALESCE($3, form), strength = COALESCE($4, strength),
+       unit = COALESCE($5, unit), supplier_id = COALESCE($6, supplier_id),
+       unit_cost = COALESCE($7, unit_cost), selling_price = COALESCE($8, selling_price),
+       min_stock_level = COALESCE($9, min_stock_level), max_stock_level = COALESCE($10, max_stock_level),
+       reorder_point = COALESCE($11, reorder_point), reorder_quantity = COALESCE($12, reorder_quantity),
+       manufacturer = COALESCE($13, manufacturer), registration_number = COALESCE($14, registration_number),
+       is_controlled = COALESCE($15, is_controlled), is_active = COALESCE($16, is_active),
+       updated_at = NOW()
+     WHERE id = $17 AND network_id = $18 RETURNING *`,
+    [name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, is_active, req.params.medId, req.params.networkId]
+  );
+  if (!result.rows[0]) return res.status(404).json({ error: 'Medication not found' });
+  res.json(result.rows[0]);
+}));
+
+// ── Inventory ───────────────────────────────────────────────
+
+router.get('/pharmacies/:pharmacyId/inventory', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT pi.*, pm.name AS med_name, pm.generic_name, pm.form, pm.strength, pm.unit AS med_unit,
+            pm.reorder_point, pm.min_stock_level,
+            (pi.expiry_date - CURRENT_DATE) AS days_until_expiry
+     FROM pharmacy_inventory pi
+     JOIN pharmacy_medications pm ON pi.med_id = pm.id
+     WHERE pi.pharmacy_id = $1 AND pi.is_active = true
+     ORDER BY pi.expiry_date ASC NULLS LAST`,
+    [req.params.pharmacyId]
+  );
+  res.json(result.rows);
+}));
+
+router.post('/pharmacies/:pharmacyId/inventory', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { med_id, batch_number, quantity, unit, expiry_date, received_from, location_code, shipment_request_id } = req.body;
+  if (!med_id || !quantity) return res.status(400).json({ error: 'med_id and quantity are required' });
+  const result = await database.query(
+    `INSERT INTO pharmacy_inventory (pharmacy_id, med_id, batch_number, quantity, unit, expiry_date, received_from, received_by, location_code, shipment_request_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+    [req.params.pharmacyId, med_id, batch_number || null, quantity, unit || 'unit', expiry_date || null, received_from || null, authReq.userId, location_code || null, shipment_request_id || null]
+  );
+  // Log adjustment
+  await database.query(
+    `INSERT INTO pharmacy_stock_adjustments (pharmacy_id, med_id, inventory_id, batch_number, adjustment_qty, adjustment_type, reason, adjusted_by)
+     VALUES ($1,$2,$3,$4,$5,'add','Batch received',$6)`,
+    [req.params.pharmacyId, med_id, result.rows[0].id, batch_number || null, quantity, authReq.userId]
+  ).catch(() => {});
+  res.status(201).json(result.rows[0]);
+}));
+
+// Expiry alerts
+router.get('/pharmacies/:pharmacyId/expiry-alerts', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT pi.*, pm.name AS med_name, pm.form, pm.strength,
+            (pi.expiry_date - CURRENT_DATE) AS days_until_expiry
+     FROM pharmacy_inventory pi
+     JOIN pharmacy_medications pm ON pi.med_id = pm.id
+     WHERE pi.pharmacy_id = $1 AND pi.is_active = true
+       AND pi.expiry_date IS NOT NULL AND pi.expiry_date <= CURRENT_DATE + INTERVAL '90 days'
+     ORDER BY pi.expiry_date ASC`,
+    [req.params.pharmacyId]
+  );
+  res.json(result.rows);
+}));
+
+// Low stock alerts
+router.get('/pharmacies/:pharmacyId/low-stock-alerts', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT pm.id AS med_id, pm.name AS med_name, pm.form, pm.strength, pm.reorder_point, pm.min_stock_level,
+            COALESCE(SUM(pi.quantity), 0) AS current_stock
+     FROM pharmacy_medications pm
+     LEFT JOIN pharmacy_inventory pi ON pi.med_id = pm.id AND pi.pharmacy_id = $1 AND pi.is_active = true
+     WHERE pm.network_id = (SELECT network_id FROM hospital_pharmacies WHERE id = $1)
+       AND pm.is_active = true
+     GROUP BY pm.id
+     HAVING COALESCE(SUM(pi.quantity), 0) <= pm.reorder_point
+     ORDER BY current_stock ASC`,
+    [req.params.pharmacyId]
+  );
+  res.json(result.rows);
+}));
+
+// Stock adjustments
+router.post('/pharmacies/:pharmacyId/stock-adjustments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { med_id, inventory_id, batch_number, adjustment_qty, adjustment_type, reason, evidence_url } = req.body;
+  if (!med_id || !adjustment_qty || !adjustment_type) return res.status(400).json({ error: 'med_id, adjustment_qty, adjustment_type are required' });
+  await database.query(
+    `INSERT INTO pharmacy_stock_adjustments (pharmacy_id, med_id, inventory_id, batch_number, adjustment_qty, adjustment_type, reason, evidence_url, adjusted_by)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+    [req.params.pharmacyId, med_id, inventory_id || null, batch_number || null, adjustment_qty, adjustment_type, reason || null, evidence_url || null, authReq.userId]
+  );
+  // Update inventory quantity if inventory_id provided
+  if (inventory_id) {
+    const sign = ['add','return'].includes(adjustment_type) ? '+' : '-';
+    await database.query(
+      `UPDATE pharmacy_inventory SET quantity = quantity ${sign} $1, updated_at = NOW() WHERE id = $2`,
+      [Math.abs(adjustment_qty), inventory_id]
+    );
+  }
+  res.status(201).json({ success: true });
+}));
+
+router.get('/pharmacies/:pharmacyId/stock-adjustments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT psa.*, pm.name AS med_name, u.first_name || ' ' || u.last_name AS adjusted_by_name
+     FROM pharmacy_stock_adjustments psa
+     JOIN pharmacy_medications pm ON psa.med_id = pm.id
+     LEFT JOIN users u ON psa.adjusted_by = u.id
+     WHERE psa.pharmacy_id = $1
+     ORDER BY psa.adjusted_at DESC LIMIT 200`,
+    [req.params.pharmacyId]
+  );
+  res.json(result.rows);
+}));
+
+// ── Reorder Requests ─────────────────────────────────────────
+
+router.get('/pharmacies/:pharmacyId/reorders', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT pr.*, pm.name AS med_name, pm.form, pm.strength, ps.name AS supplier_name,
+            u.first_name || ' ' || u.last_name AS requested_by_name
+     FROM pharmacy_reorder_requests pr
+     JOIN pharmacy_medications pm ON pr.med_id = pm.id
+     LEFT JOIN pharmacy_suppliers ps ON pr.supplier_id = ps.id
+     LEFT JOIN users u ON pr.requested_by = u.id
+     WHERE pr.pharmacy_id = $1
+     ORDER BY pr.created_at DESC`,
+    [req.params.pharmacyId]
+  );
+  res.json(result.rows);
+}));
+
+router.post('/pharmacies/:pharmacyId/reorders', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { med_id, supplier_id, requested_qty, notes, triggered_by } = req.body;
+  if (!med_id || !requested_qty) return res.status(400).json({ error: 'med_id and requested_qty are required' });
+  const result = await database.query(
+    `INSERT INTO pharmacy_reorder_requests (pharmacy_id, med_id, supplier_id, requested_qty, requested_by, triggered_by, notes)
+     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+    [req.params.pharmacyId, med_id, supplier_id || null, requested_qty, authReq.userId, triggered_by || 'manual', notes || null]
+  );
+  res.status(201).json(result.rows[0]);
+}));
+
+router.patch('/pharmacies/:pharmacyId/reorders/:reorderId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { status, tracking_number, expected_delivery_date, notes } = req.body;
+  const now = new Date().toISOString();
+  const extra: Record<string, string> = {};
+  if (status === 'shipped') extra['shipped_at'] = now;
+  if (status === 'confirmed') extra['confirmed_at'] = now;
+  if (status === 'received') extra['received_at'] = now;
+  const extraSql = Object.keys(extra).map((k, i) => `, ${k} = $${i + 6}`).join('');
+  const extraVals = Object.values(extra);
+  const result = await database.query(
+    `UPDATE pharmacy_reorder_requests SET
+       status = COALESCE($1, status),
+       tracking_number = COALESCE($2, tracking_number),
+       expected_delivery_date = COALESCE($3, expected_delivery_date),
+       notes = COALESCE($4, notes),
+       updated_at = NOW()${extraSql}
+     WHERE id = $5 AND pharmacy_id = $6 RETURNING *`,
+    [status, tracking_number, expected_delivery_date || null, notes, req.params.reorderId, req.params.pharmacyId, ...extraVals]
+  );
+  if (!result.rows[0]) return res.status(404).json({ error: 'Reorder request not found' });
+  res.json(result.rows[0]);
+}));
+
+// ── Prescription Review ──────────────────────────────────────
+
+// Pending prescriptions queue for a pharmacy
+router.get('/pharmacies/:pharmacyId/pending-prescriptions', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const pharmacyRow = await database.query(`SELECT network_id FROM hospital_pharmacies WHERE id = $1`, [req.params.pharmacyId]);
+  if (!pharmacyRow.rows[0]) return res.status(404).json({ error: 'Pharmacy not found' });
+  const networkId = pharmacyRow.rows[0].network_id;
+  const result = await database.query(
+    `SELECT p.*, a.name AS animal_name, a.species AS animal_species,
+            u.first_name || ' ' || u.last_name AS vet_name,
+            po.first_name || ' ' || po.last_name AS owner_name
+     FROM prescriptions p
+     JOIN animals a ON p.animal_id = a.id
+     JOIN users u ON p.veterinarian_id = u.id
+     LEFT JOIN users po ON p.pet_owner_id = po.id
+     WHERE p.network_id = $1
+       AND (p.review_status = 'pending_review' OR p.review_status IS NULL)
+       AND p.is_active = true
+     ORDER BY p.created_at DESC`,
+    [networkId]
+  );
+  res.json(result.rows);
+}));
+
+// Submit prescription review
+router.post('/prescriptions/:prescriptionId/review', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { review_status, validation_checks, findings, suggested_modifications, rejection_reason } = req.body;
+  if (!review_status) return res.status(400).json({ error: 'review_status is required' });
+  const validStatuses = ['approved', 'rejected', 'needs_clarification'];
+  if (!validStatuses.includes(review_status)) return res.status(400).json({ error: 'Invalid review_status' });
+  // Insert review record
+  await database.query(
+    `INSERT INTO prescription_reviews (prescription_id, pharmacist_id, review_status, validation_checks, findings, suggested_modifications, rejection_reason)
+     VALUES ($1,$2,$3,$4::jsonb,$5,$6,$7)`,
+    [req.params.prescriptionId, authReq.userId, review_status, JSON.stringify(validation_checks || {}), findings || [], suggested_modifications || null, rejection_reason || null]
+  );
+  // Map to prescription review_status
+  const prescriptionStatus = review_status === 'approved' ? 'approved_for_dispensing' : review_status === 'rejected' ? 'rejected' : 'pending_review';
+  await database.query(
+    `UPDATE prescriptions SET review_status = $1, reviewed_by = $2, reviewed_at = NOW(), review_notes = $3, updated_at = NOW() WHERE id = $4`,
+    [prescriptionStatus, authReq.userId, rejection_reason || suggested_modifications || null, req.params.prescriptionId]
+  );
+  res.json({ success: true, review_status: prescriptionStatus });
+}));
+
+// Get review history for a prescription
+router.get('/prescriptions/:prescriptionId/reviews', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT pr.*, u.first_name || ' ' || u.last_name AS pharmacist_name
+     FROM prescription_reviews pr
+     JOIN users u ON pr.pharmacist_id = u.id
+     WHERE pr.prescription_id = $1
+     ORDER BY pr.reviewed_at DESC`,
+    [req.params.prescriptionId]
+  );
+  res.json(result.rows);
+}));
+
+// ── Dispensing ──────────────────────────────────────────────
+
+// Ready-for-dispensing queue
+router.get('/pharmacies/:pharmacyId/ready-for-dispensing', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const pharmacyRow = await database.query(`SELECT network_id FROM hospital_pharmacies WHERE id = $1`, [req.params.pharmacyId]);
+  if (!pharmacyRow.rows[0]) return res.status(404).json({ error: 'Pharmacy not found' });
+  const result = await database.query(
+    `SELECT p.*, a.name AS animal_name, a.species AS animal_species,
+            u.first_name || ' ' || u.last_name AS vet_name,
+            po.first_name || ' ' || po.last_name AS owner_name,
+            dr.id AS dispensing_record_id, dr.dispensing_status
+     FROM prescriptions p
+     JOIN animals a ON p.animal_id = a.id
+     JOIN users u ON p.veterinarian_id = u.id
+     LEFT JOIN users po ON p.pet_owner_id = po.id
+     LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.pharmacy_id = $1
+     WHERE p.network_id = (SELECT network_id FROM hospital_pharmacies WHERE id = $1)
+       AND p.review_status = 'approved_for_dispensing'
+       AND (dr.id IS NULL OR dr.dispensing_status NOT IN ('handed_over','delivered'))
+       AND p.is_active = true
+     ORDER BY p.created_at ASC`,
+    [req.params.pharmacyId]
+  );
+  res.json(result.rows);
+}));
+
+// Create dispensing record
+router.post('/dispensing', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { prescription_id, pharmacy_id, dispensing_method, line_items, received_by, notes } = req.body;
+  if (!prescription_id || !pharmacy_id) return res.status(400).json({ error: 'prescription_id and pharmacy_id are required' });
+  // Calculate total cost
+  const total_cost = (line_items || []).reduce((sum: number, item: any) => sum + (item.line_total || 0), 0);
+  const record = await database.query(
+    `INSERT INTO dispensing_records (prescription_id, pharmacy_id, pharmacist_id, dispensing_method, total_cost, received_by, notes)
+     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+    [prescription_id, pharmacy_id, authReq.userId, dispensing_method || 'walk_in_pickup', total_cost, received_by || null, notes || null]
+  );
+  const recordId = record.rows[0].id;
+  // Insert line items
+  for (const item of (line_items || [])) {
+    await database.query(
+      `INSERT INTO dispensing_line_items (dispensing_record_id, med_id, inventory_id, batch_number, quantity_dispensed, unit, unit_price, line_total)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [recordId, item.med_id, item.inventory_id || null, item.batch_number || null, item.quantity_dispensed, item.unit || 'unit', item.unit_price || 0, item.line_total || 0]
+    );
+    // Decrement inventory
+    if (item.inventory_id) {
+      await database.query(`UPDATE pharmacy_inventory SET quantity = quantity - $1, updated_at = NOW() WHERE id = $2`, [item.quantity_dispensed, item.inventory_id]).catch(() => {});
+      await database.query(
+        `INSERT INTO pharmacy_stock_adjustments (pharmacy_id, med_id, inventory_id, batch_number, adjustment_qty, adjustment_type, reason, adjusted_by)
+         VALUES ($1,$2,$3,$4,$5,'dispense','Prescription dispensed',$6)`,
+        [pharmacy_id, item.med_id, item.inventory_id, item.batch_number || null, item.quantity_dispensed, authReq.userId]
+      ).catch(() => {});
+    }
+  }
+  // Update prescription to dispensed
+  await database.query(`UPDATE prescriptions SET review_status = 'dispensed', updated_at = NOW() WHERE id = $1`, [prescription_id]);
+  res.status(201).json(record.rows[0]);
+}));
+
+// Update dispensing status
+router.patch('/dispensing/:dispensingId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const { dispensing_status, received_by, signature_url, notes } = req.body;
+  const now = new Date().toISOString();
+  const result = await database.query(
+    `UPDATE dispensing_records SET
+       dispensing_status = COALESCE($1, dispensing_status),
+       received_by = COALESCE($2, received_by),
+       signature_url = COALESCE($3, signature_url),
+       notes = COALESCE($4, notes),
+       handed_over_at = CASE WHEN $1 = 'handed_over' THEN $5::timestamptz ELSE handed_over_at END,
+       updated_at = NOW()
+     WHERE id = $6 RETURNING *`,
+    [dispensing_status, received_by, signature_url, notes, now, req.params.dispensingId]
+  );
+  if (!result.rows[0]) return res.status(404).json({ error: 'Dispensing record not found' });
+  res.json(result.rows[0]);
+}));
+
+// Dispensing history
+router.get('/pharmacies/:pharmacyId/dispensing-history', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+  const result = await database.query(
+    `SELECT dr.*, p.medications AS prescription_medications,
+            a.name AS animal_name, a.species AS animal_species,
+            u.first_name || ' ' || u.last_name AS pharmacist_name,
+            po.first_name || ' ' || po.last_name AS owner_name
+     FROM dispensing_records dr
+     JOIN prescriptions p ON dr.prescription_id = p.id
+     JOIN animals a ON p.animal_id = a.id
+     LEFT JOIN users po ON p.pet_owner_id = po.id
+     JOIN users u ON dr.pharmacist_id = u.id
+     WHERE dr.pharmacy_id = $1
+     ORDER BY dr.created_at DESC LIMIT $2`,
+    [req.params.pharmacyId, limit]
+  );
+  res.json(result.rows);
+}));
+
+// ── Analytics ────────────────────────────────────────────────
+
+router.get('/pharmacies/:pharmacyId/analytics', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const days = parseInt(req.query.days as string) || 30;
+  const [revenue, volume, topMeds, lowStock, expiring] = await Promise.all([
+    database.query(
+      `SELECT COALESCE(SUM(total_cost), 0) AS total_revenue, COUNT(*) AS dispensing_count
+       FROM dispensing_records WHERE pharmacy_id = $1 AND created_at >= NOW() - INTERVAL '${days} days'`,
+      [req.params.pharmacyId]
+    ),
+    database.query(
+      `SELECT COUNT(*) AS pending_reviews FROM prescriptions p
+       WHERE p.network_id = (SELECT network_id FROM hospital_pharmacies WHERE id = $1)
+         AND p.review_status = 'pending_review'`,
+      [req.params.pharmacyId]
+    ),
+    database.query(
+      `SELECT pm.name AS med_name, SUM(dli.quantity_dispensed) AS total_dispensed, SUM(dli.line_total) AS total_revenue
+       FROM dispensing_line_items dli
+       JOIN dispensing_records dr ON dli.dispensing_record_id = dr.id
+       JOIN pharmacy_medications pm ON dli.med_id = pm.id
+       WHERE dr.pharmacy_id = $1 AND dr.created_at >= NOW() - INTERVAL '${days} days'
+       GROUP BY pm.name ORDER BY total_dispensed DESC LIMIT 5`,
+      [req.params.pharmacyId]
+    ),
+    database.query(
+      `SELECT COUNT(*) AS low_stock_count FROM (
+         SELECT pm.id FROM pharmacy_medications pm
+         LEFT JOIN pharmacy_inventory pi ON pi.med_id = pm.id AND pi.pharmacy_id = $1 AND pi.is_active = true
+         WHERE pm.network_id = (SELECT network_id FROM hospital_pharmacies WHERE id = $1) AND pm.is_active = true
+         GROUP BY pm.id, pm.reorder_point HAVING COALESCE(SUM(pi.quantity), 0) <= pm.reorder_point
+       ) t`,
+      [req.params.pharmacyId]
+    ),
+    database.query(
+      `SELECT COUNT(*) AS expiring_count FROM pharmacy_inventory
+       WHERE pharmacy_id = $1 AND is_active = true AND expiry_date IS NOT NULL
+         AND expiry_date <= CURRENT_DATE + INTERVAL '90 days'`,
+      [req.params.pharmacyId]
+    ),
+  ]);
+  res.json({
+    period_days: days,
+    total_revenue: revenue.rows[0]?.total_revenue || 0,
+    dispensing_count: revenue.rows[0]?.dispensing_count || 0,
+    pending_reviews: volume.rows[0]?.pending_reviews || 0,
+    top_medications: topMeds.rows,
+    low_stock_count: lowStock.rows[0]?.low_stock_count || 0,
+    expiring_count: expiring.rows[0]?.expiring_count || 0,
+  });
+}));
+
+// Network-wide pharmacy report
+router.get('/networks/:networkId/pharmacy-reports', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const days = parseInt(req.query.days as string) || 30;
+  const result = await database.query(
+    `SELECT hp.pharmacy_name, hp.id AS pharmacy_id,
+            COALESCE(SUM(dr.total_cost), 0) AS revenue,
+            COUNT(dr.id) AS dispensing_count
+     FROM hospital_pharmacies hp
+     LEFT JOIN dispensing_records dr ON dr.pharmacy_id = hp.id AND dr.created_at >= NOW() - INTERVAL '${days} days'
+     WHERE hp.network_id = $1 AND hp.is_active = true
+     GROUP BY hp.id, hp.pharmacy_name ORDER BY revenue DESC`,
+    [req.params.networkId]
+  );
+  res.json({ period_days: days, pharmacies: result.rows });
+}));
+
+// ── Inter-hospital Medication Requests ───────────────────────
+
+router.get('/networks/:networkId/med-requests', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT pmr.*, vh_s.name AS source_hospital_name, vh_d.name AS destination_hospital_name,
+            u.first_name || ' ' || u.last_name AS created_by_name
+     FROM pharmacy_medication_requests pmr
+     LEFT JOIN vet_hospitals vh_s ON pmr.source_hospital_id = vh_s.id
+     LEFT JOIN vet_hospitals vh_d ON pmr.destination_hospital_id = vh_d.id
+     LEFT JOIN users u ON pmr.created_by = u.id
+     WHERE pmr.source_network_id = $1
+     ORDER BY pmr.created_at DESC`,
+    [req.params.networkId]
+  );
+  res.json(result.rows);
+}));
+
+router.post('/networks/:networkId/med-requests', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { source_hospital_id, destination_hospital_id, prescription_id, requested_medications, notes } = req.body;
+  if (!requested_medications || !Array.isArray(requested_medications)) return res.status(400).json({ error: 'requested_medications array is required' });
+  const result = await database.query(
+    `INSERT INTO pharmacy_medication_requests (source_network_id, source_hospital_id, destination_hospital_id, prescription_id, requested_medications, notes, created_by)
+     VALUES ($1,$2,$3,$4,$5::jsonb,$6,$7) RETURNING *`,
+    [req.params.networkId, source_hospital_id || null, destination_hospital_id || null, prescription_id || null, JSON.stringify(requested_medications), notes || null, authReq.userId]
+  );
+  res.status(201).json(result.rows[0]);
+}));
+
+router.patch('/networks/:networkId/med-requests/:requestId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const { status, tracking_number, decline_reason, notes } = req.body;
+  const result = await database.query(
+    `UPDATE pharmacy_medication_requests SET
+       status = COALESCE($1, status),
+       tracking_number = COALESCE($2, tracking_number),
+       decline_reason = COALESCE($3, decline_reason),
+       notes = COALESCE($4, notes),
+       fulfilled_by = CASE WHEN $1 IN ('fulfilled','shipped') THEN $5 ELSE fulfilled_by END,
+       updated_at = NOW()
+     WHERE id = $6 AND source_network_id = $7 RETURNING *`,
+    [status, tracking_number, decline_reason, notes, authReq.userId, req.params.requestId, req.params.networkId]
+  );
+  if (!result.rows[0]) return res.status(404).json({ error: 'Medication request not found' });
+  res.json(result.rows[0]);
+}));
+
+// Pharmacy dashboard summary (tiles)
+router.get('/pharmacies/:pharmacyId/dashboard', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const pid = req.params.pharmacyId;
+  const pharmacyRow = await database.query(`SELECT network_id FROM hospital_pharmacies WHERE id = $1`, [pid]);
+  if (!pharmacyRow.rows[0]) return res.status(404).json({ error: 'Pharmacy not found' });
+  const networkId = pharmacyRow.rows[0].network_id;
+  const [pending, approved, lowStock, expiring, pendingReorders] = await Promise.all([
+    database.query(`SELECT COUNT(*) FROM prescriptions WHERE network_id = $1 AND (review_status = 'pending_review' OR review_status IS NULL) AND is_active = true`, [networkId]),
+    database.query(`SELECT COUNT(*) FROM prescriptions WHERE network_id = $1 AND review_status = 'approved_for_dispensing' AND is_active = true`, [networkId]),
+    database.query(
+      `SELECT COUNT(*) FROM (SELECT pm.id FROM pharmacy_medications pm LEFT JOIN pharmacy_inventory pi ON pi.med_id = pm.id AND pi.pharmacy_id = $1 AND pi.is_active = true WHERE pm.network_id = $2 AND pm.is_active = true GROUP BY pm.id, pm.reorder_point HAVING COALESCE(SUM(pi.quantity), 0) <= pm.reorder_point) t`,
+      [pid, networkId]
+    ),
+    database.query(`SELECT COUNT(*) FROM pharmacy_inventory WHERE pharmacy_id = $1 AND is_active = true AND expiry_date IS NOT NULL AND expiry_date <= CURRENT_DATE + INTERVAL '90 days'`, [pid]),
+    database.query(`SELECT COUNT(*) FROM pharmacy_reorder_requests WHERE pharmacy_id = $1 AND status IN ('pending','sent_to_supplier')`, [pid]),
+  ]);
+  res.json({
+    pending_reviews: parseInt(pending.rows[0].count),
+    ready_for_dispensing: parseInt(approved.rows[0].count),
+    low_stock_alerts: parseInt(lowStock.rows[0].count),
+    expiring_soon: parseInt(expiring.rows[0].count),
+    pending_reorders: parseInt(pendingReorders.rows[0].count),
+  });
+}));
+
 export default router;

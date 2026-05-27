@@ -1,4 +1,4 @@
-{
+﻿{
   "common": {
     "loading": "लोड हो रहा है...",
     "cancel": "रद्द करें",
@@ -6303,5 +6303,28 @@
     "markNoShow": "नो-शो चिह्नित करें",
     "noShowConfirm": "इस मरीज को नो-शो के रूप में चिह्नित करें? यह पूर्ववत नहीं किया जा सकता।",
     "noShowMarked": "मरीज को नो-शो के रूप में चिह्नित किया गया"
+  }
+,
+  "pharmacy": {
+    "title": "फार्मेसी",
+    "noNetwork": "आपके खाते से कोई नेटवर्क संबद्ध नहीं है।",
+    "selectPharmacy": "फार्मेसी चुनें",
+    "noPendingReviews": "समीक्षा के लिए कोई नुस्खे नहीं",
+    "noReadyDispense": "वितरण के लिए तैयार कोई नुस्खे नहीं",
+    "pendingReview": "समीक्षा लंबित",
+    "readyToDispense": "वितरण के लिए तैयार",
+    "nav": { "title": "फार्मेसी" },
+    "tabs": { "overview": "अवलोकन", "review": "समीक्षा", "dispense": "वितरण", "inventory": "इन्वेंटरी", "suppliers": "आपूर्तिकर्ता", "settings": "सेटिंग्स" },
+    "stats": { "pendingReviews": "लंबित समीक्षाएं", "readyToDispense": "वितरण तैयार", "lowStock": "कम स्टॉक", "expiringSoon": "जल्द समाप्त", "pendingReorders": "लंबित पुनर्ऑर्डर", "todaysRevenue": "आज का राजस्व" },
+    "table": { "patient": "मरीज", "owner": "स्वामी", "vet": "पशु चिकित्सक", "medications": "दवाएं", "date": "तारीख", "status": "स्थिति", "medication": "दवा", "batch": "बैच", "quantity": "मात्रा", "minStock": "न्यूनतम स्टॉक", "expiry": "समाप्ति", "unitCost": "इकाई लागत", "name": "नाम", "contact": "संपर्क", "email": "ईमेल", "phone": "फोन", "leadTime": "लीड टाइम" },
+    "actions": { "review": "समीक्षा", "dispense": "वितरण", "adjust": "समायोजन", "reorder": "पुनर्ऑर्डर" },
+    "filter": { "all": "सभी", "lowStock": "कम स्टॉक", "expiringSoon": "जल्द समाप्त", "expired": "समाप्त" },
+    "stock": { "expired": "समाप्त", "expiring": "जल्द समाप्त", "low": "कम", "ok": "ठीक", "currentQty": "वर्तमान मात्रा", "adjustTitle": "स्टॉक समायोजन", "adjustmentType": "प्रकार", "quantity": "मात्रा", "reason": "कारण", "reasonPlaceholder": "कारण बताएं", "reasonRequired": "कारण आवश्यक", "qtyPositive": "मात्रा > 0", "submit": "सबमिट", "types": { "add": "जोड़ें", "remove": "हटाएं", "correct": "सुधार", "expire": "समाप्त", "damage": "क्षति", "return": "वापसी" } },
+    "inventory": { "title": "दवा इन्वेंटरी", "searchPlaceholder": "खोजें...", "empty": "कोई इन्वेंटरी नहीं" },
+    "suppliers": { "title": "आपूर्तिकर्ता", "addSupplier": "जोड़ें", "addTitle": "आपूर्तिकर्ता जोड़ें", "editTitle": "संपादित करें", "empty": "कोई आपूर्तिकर्ता नहीं", "nameLabel": "नाम", "namePlaceholder": "नाम", "nameRequired": "नाम आवश्यक", "contactName": "संपर्क", "email": "ईमेल", "phone": "फोन", "address": "पता", "paymentTerms": "भुगतान शर्तें", "leadTimeDays": "लीड दिन", "approvedLabel": "स्वीकृत", "approved": "स्वीकृत", "unapproved": "अस्वीकृत" },
+    "reorder": { "title": "पुनर्ऑर्डर", "supplier": "आपूर्तिकर्ता", "selectSupplier": "चुनें", "supplierRequired": "आपूर्तिकर्ता चुनें", "quantity": "मात्रा", "qtyPositive": "मात्रा > 0", "notes": "नोट्स", "notesPlaceholder": "निर्देश...", "submit": "सबमिट" },
+    "review": { "title": "नुस्खा समीक्षा", "queueTitle": "समीक्षा कतार", "validationChecks": "जांच", "decision": "निर्णय", "approved": "स्वीकृत", "rejected": "अस्वीकृत", "needsClarification": "स्पष्टीकरण", "rejectionReason": "कारण", "notes": "नोट्स", "notesPlaceholder": "नोट्स...", "submit": "सबमिट", "completeChecksFirst": "पहले सभी जांच पूरी करें", "checks": { "dosage_ok": "खुराक ठीक", "allergy_ok": "कोई एलर्जी नहीं", "interaction_ok": "कोई इंटरैक्शन नहीं", "stock_ok": "स्टॉक उपलब्ध" } },
+    "dispense": { "title": "वितरण", "queueTitle": "वितरण कतार", "method": "विधि", "methods": { "walk_in_pickup": "वॉक-इन", "home_delivery": "होम डिलीवरी", "courier": "कूरियर", "hospital_pickup": "अस्पताल" }, "notes": "नोट्स", "notesPlaceholder": "निर्देश...", "confirm": "पुष्टि करें" },
+    "settings": { "title": "सेटिंग्स", "nameLabel": "नाम", "nameRequired": "नाम आवश्यक", "phone": "फोन", "email": "ईमेल", "address": "पता", "licenseNumber": "लाइसेंस", "acceptingRequests": "अनुरोध स्वीकार कर रहे हैं", "saved": "सहेजा गया" }
   }
 }

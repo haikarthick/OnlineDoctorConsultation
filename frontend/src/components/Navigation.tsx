@@ -196,6 +196,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['veterinarian', 'admin', 'hospital_staff'], section: 'Vet Network' },
     { id: 'inpatient', label: 'Inpatient & Boarding', icon: '🛏️', path: '/inpatient',
       roles: ['veterinarian', 'admin', 'hospital_staff'], section: 'Vet Network' },
+    { id: 'pharmacy', label: t('pharmacy.nav.title'), icon: '💊', path: '/pharmacy',
+      roles: ['pharmacist', 'corporate_admin', 'admin'], section: 'Vet Network' },
 
     // ── Wallet ──
     { id: 'wallet', label: t('nav.myWallet'), icon: '💰', path: '/wallet',
@@ -245,7 +247,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
 
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff'], section: 'Preferences' }
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'corporate_admin', 'hospital_staff', 'pharmacist'], section: 'Preferences' }
   ]
 
   // Filter by role AND permission — supports multi-role users (P4-HIGH1)

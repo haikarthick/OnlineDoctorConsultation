@@ -6246,5 +6246,27 @@
     "markNoShow": "ನೋ-ಶೋ ಗುರುತಿಸಿ",
     "noShowConfirm": "ಈ ರೋಗಿಯನ್ನು ನೋ-ಶೋ ಎಂದು ಗುರುತಿಸಬೇಕೆ? ಇದನ್ನು ರದ್ದು ಮಾಡಲಾಗುವುದಿಲ್ಲ.",
     "noShowMarked": "ರೋಗಿಯನ್ನು ನೋ-ಶೋ ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ"
-  }
+  },
+  "pharmacy": {
+  "title": "Pharmacy",
+  "noNetwork": "No network associated with your account.",
+  "selectPharmacy": "Select a pharmacy",
+  "noPendingReviews": "No prescriptions pending review",
+  "noReadyDispense": "No prescriptions ready to dispense",
+  "pendingReview": "Pending Review",
+  "readyToDispense": "Ready to Dispense",
+  "nav": { "title": "Pharmacy" },
+  "tabs": { "overview": "Overview", "review": "Review", "dispense": "Dispense", "inventory": "Inventory", "suppliers": "Suppliers", "settings": "Settings" },
+  "stats": { "pendingReviews": "Pending Reviews", "readyToDispense": "Ready to Dispense", "lowStock": "Low Stock", "expiringSoon": "Expiring Soon", "pendingReorders": "Pending Reorders", "todaysRevenue": "Today Revenue" },
+  "table": { "patient": "Patient", "owner": "Owner", "vet": "Vet", "medications": "Medications", "date": "Date", "status": "Status", "medication": "Medication", "batch": "Batch", "quantity": "Qty", "minStock": "Min Stock", "expiry": "Expiry", "unitCost": "Unit Cost", "name": "Name", "contact": "Contact", "email": "Email", "phone": "Phone", "leadTime": "Lead Time" },
+  "actions": { "review": "Review", "dispense": "Dispense", "adjust": "Adjust", "reorder": "Reorder" },
+  "filter": { "all": "All", "lowStock": "Low Stock", "expiringSoon": "Expiring Soon", "expired": "Expired" },
+  "stock": { "expired": "Expired", "expiring": "Expiring", "low": "Low", "ok": "OK", "currentQty": "Current Qty", "adjustTitle": "Adjust Stock", "adjustmentType": "Type", "quantity": "Qty", "reason": "Reason", "reasonPlaceholder": "Reason for adjustment", "reasonRequired": "Reason required", "qtyPositive": "Qty must be > 0", "submit": "Submit", "types": { "add": "Add", "remove": "Remove", "correct": "Correct", "expire": "Expire", "damage": "Damage", "return": "Return" } },
+  "inventory": { "title": "Inventory", "searchPlaceholder": "Search...", "empty": "No inventory" },
+  "suppliers": { "title": "Suppliers", "addSupplier": "Add", "addTitle": "Add Supplier", "editTitle": "Edit Supplier", "empty": "No suppliers", "nameLabel": "Name", "namePlaceholder": "Supplier name", "nameRequired": "Name required", "contactName": "Contact", "email": "Email", "phone": "Phone", "address": "Address", "paymentTerms": "Payment Terms", "leadTimeDays": "Lead Days", "approvedLabel": "Approved", "approved": "Approved", "unapproved": "Unapproved" },
+  "reorder": { "title": "Reorder", "supplier": "Supplier", "selectSupplier": "Select supplier", "supplierRequired": "Select a supplier", "quantity": "Qty", "qtyPositive": "Qty > 0", "notes": "Notes", "notesPlaceholder": "Notes...", "submit": "Submit" },
+  "review": { "title": "Review Prescription", "queueTitle": "Review Queue", "validationChecks": "Checks", "decision": "Decision", "approved": "Approve", "rejected": "Reject", "needsClarification": "Clarify", "rejectionReason": "Reason", "notes": "Notes", "notesPlaceholder": "Notes...", "submit": "Submit", "completeChecksFirst": "Complete all checks first", "checks": { "dosage_ok": "Dosage OK", "allergy_ok": "No allergies", "interaction_ok": "No interactions", "stock_ok": "Stock available" } },
+  "dispense": { "title": "Dispense", "queueTitle": "Dispense Queue", "method": "Method", "methods": { "walk_in_pickup": "Walk-in", "home_delivery": "Home Delivery", "courier": "Courier", "hospital_pickup": "Hospital" }, "notes": "Notes", "notesPlaceholder": "Notes...", "confirm": "Confirm" },
+  "settings": { "title": "Settings", "nameLabel": "Name", "nameRequired": "Name required", "phone": "Phone", "email": "Email", "address": "Address", "licenseNumber": "License", "acceptingRequests": "Accepting requests", "saved": "Saved" }
+}
 }

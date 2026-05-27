@@ -139,6 +139,19 @@ export const PERMISSION_CATEGORIES = {
       'hospital_network_audit',
       'patient_consent_manage',
     ]
+  },
+  pharmacy: {
+    label: 'Pharmacy Management',
+    permissions: [
+      'pharmacy_view_dashboard',
+      'pharmacy_review_prescriptions',
+      'pharmacy_dispense_medications',
+      'pharmacy_manage_inventory',
+      'pharmacy_manage_stock',
+      'pharmacy_request_medications',
+      'pharmacy_view_reports',
+      'pharmacy_settings_manage',
+    ]
   }
 };
 
@@ -261,6 +274,11 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'ai_copilot',
     // Wallet
     'wallet',
+    // Pharmacy — full access for corporate admin
+    'pharmacy_view_dashboard', 'pharmacy_review_prescriptions',
+    'pharmacy_dispense_medications', 'pharmacy_manage_inventory',
+    'pharmacy_manage_stock', 'pharmacy_request_medications',
+    'pharmacy_view_reports', 'pharmacy_settings_manage',
     // Dashboard widgets
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
     'dashboard_tips',
@@ -274,6 +292,22 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'hospital_browse', 'hospital_manage',
     // Hospital Network — view access for their assigned network
     'hospital_network_view',
+    // Dashboard widgets
+    'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
+  ],
+  pharmacist: [
+    // Core
+    'dashboard', 'settings',
+    // Hospital access
+    'hospital_browse', 'hospital_network_view',
+    // Pharmacy — full working permissions
+    'pharmacy_view_dashboard',
+    'pharmacy_review_prescriptions',
+    'pharmacy_dispense_medications',
+    'pharmacy_manage_inventory',
+    'pharmacy_manage_stock',
+    'pharmacy_request_medications',
+    'pharmacy_view_reports',
     // Dashboard widgets
     'dashboard_stats', 'dashboard_quick_actions', 'dashboard_recent_activity',
   ],
@@ -309,6 +343,11 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'hospital_network_manage', 'hospital_network_view', 'hospital_network_audit',
     // Patient consent (admin oversight)
     'patient_consent_manage',
+    // Pharmacy (full access)
+    'pharmacy_view_dashboard', 'pharmacy_review_prescriptions',
+    'pharmacy_dispense_medications', 'pharmacy_manage_inventory',
+    'pharmacy_manage_stock', 'pharmacy_request_medications',
+    'pharmacy_view_reports', 'pharmacy_settings_manage',
     // Wallet & Cancellation
     'wallet', 'admin_cancellation_dashboard',
     // Holiday management
@@ -406,6 +445,15 @@ export const PERMISSION_LABELS: Record<string, string> = {
   hospital_network_audit: 'Hospital Network Audit',
   patient_consent_manage: 'Patient Data Consent',
   network_membership_manage: 'Network Membership Management',
+  // Pharmacy
+  pharmacy_view_dashboard: 'Pharmacy Dashboard',
+  pharmacy_review_prescriptions: 'Review Prescriptions',
+  pharmacy_dispense_medications: 'Dispense Medications',
+  pharmacy_manage_inventory: 'Manage Inventory',
+  pharmacy_manage_stock: 'Manage Stock',
+  pharmacy_request_medications: 'Request Medications',
+  pharmacy_view_reports: 'Pharmacy Reports',
+  pharmacy_settings_manage: 'Pharmacy Settings',
   // Timeline
   animal_timeline: 'Animal Life Timeline',
   // Dispute Management

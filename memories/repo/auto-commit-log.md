@@ -2784,3 +2784,21 @@
 </details>
 
 ---
+
+## 2026-05-27 10:17 · `19a0454` · ✨ FEAT
+
+**Commit:** feat: add forward-FK order check to schema-check.js pre-push validation  
+**Author:** haikarthick  
+**Categories:** TOOLING · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/scripts/schema-check.js
+  - memories/repo/auto-commit-log.md
+  - memories/repo/lessons.md
+
+</details>
+
+---
