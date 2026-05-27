@@ -722,3 +722,9 @@
 - **Status:** done
 - **Description:** GET /admin/wallet-summary + Wallet Overview tab in PaymentManagement
 
+
+### ✅ Pharmacy Module
+- **Logged:** 2026-05-27 12:39
+- **Status:** done
+- **Description:** Complete pharmacy module for network hospitals: 10 DB tables, 25 API endpoints, pharmacist role, prescription review workflow, inventory management, supplier management, dispensing audit trail, cost analytics. Network-scoped data isolation. Auto-routes prescriptions to primary pharmacy. Full i18n (6 locales), 4-tier responsive CSS, auto-refresh every 30s.
+

@@ -2802,3 +2802,55 @@
 </details>
 
 ---
+
+## 2026-05-27 12:34 · `8785f05` · ✨ FEAT
+
+**Commit:** feat: Add complete Pharmacy Module (P3-P5)  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · UI · AUTH/PERM · i18n · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (27)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/PermissionService.ts
+  - backend/src/services/PrescriptionService.ts
+  - backend/src/utils/database.ts
+  - docker/init.sql
+  - docker/seed-demo-data.sql
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/pharmacy/DispensingModal.tsx
+  - frontend/src/pages/pharmacy/DispensingWorkflow.tsx
+  - frontend/src/pages/pharmacy/PharmacyDashboard.css
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+  - frontend/src/pages/pharmacy/PharmacyInventory.tsx
+  - ... and 7 more
+
+</details>
+
+---
+
+## 2026-05-27 12:38 · `240ad19` · 🧪 TEST
+
+**Commit:** test: Add E2E stub for /pharmacy route  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---
