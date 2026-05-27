@@ -235,4 +235,14 @@ test.describe('Auto-Discovered — /network-memberships', () => {
     expect(content!.length).toBeGreaterThan(0)
     await context.close()
   })
+
+  test('should load /accept-staff-invite without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await page.goto('/accept-staff-invite?token=test-token')
+    await page.waitForLoadState('domcontentloaded')
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
 })
