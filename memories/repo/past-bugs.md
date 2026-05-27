@@ -1050,3 +1050,11 @@ render-start.sh
 - **Fix:** Moved hospital_networks def to line 37 (after users). Fixed ensureSchemaPublic to use client.query+SET search_path. Added partial schema detection (checks both users AND bookings). Added public /api/v1/debug/db-state and /api/v1/repair-schema emergency endpoints.
 - **Rule:** NEVER place a table that is referenced by many others (especially hospital_networks) AFTER the tables that reference it. Always define referenced tables BEFORE referencing tables in init.sql
 
+
+### PHARMACY-001 — Pharmacist invite accept assigns wrong role
+- **Logged:** 2026-05-27 12:54
+- **Symptom:** Invited pharmacist gets hospital_staff role instead of pharmacist role after accepting invite
+- **Root Cause:** POST /hospital-staff-invites/accept hardcoded role=hospital_staff regardless of staff_position in invite
+- **Fix:** Fixed: derive assignedRole from staff_position map; pharmacist->pharmacist, others->hospital_staff. Applied to both users.role and hospital_network_members.network_role
+- **Rule:** NEVER hardcode role in invite-accept handler — always derive from staff_position
+

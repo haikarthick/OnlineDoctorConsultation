@@ -2854,3 +2854,38 @@
 </details>
 
 ---
+
+## 2026-05-27 12:39 · `e3ff030` · 🔧 CHORE
+
+**Commit:** chore: Update memory files — pharmacy module complete  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/feature-tracker.md
+
+</details>
+
+---
+
+## 2026-05-27 12:48 · `178b9ee` · 🐛 FIX
+
+**Commit:** fix: Pharmacist invite accept now assigns 'pharmacist' role correctly  
+**Author:** haikarthick  
+**Categories:** API · UTILS · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/utils/fixDemoPasswords.ts
+  - docker/seed-demo-data.sql
+
+</details>
+
+---
