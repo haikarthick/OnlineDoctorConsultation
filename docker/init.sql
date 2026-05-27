@@ -35,6 +35,43 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- ============================================================
+-- 1b. HOSPITAL NETWORKS (defined early — referenced by many tables below)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS hospital_networks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  legal_name VARCHAR(255),
+  registration_number VARCHAR(100),
+  tax_id VARCHAR(100),
+  network_type VARCHAR(50) NOT NULL DEFAULT 'private'
+    CHECK (network_type IN ('private', 'government', 'ngo', 'cooperative', 'franchise')),
+  country VARCHAR(100) DEFAULT 'IN',
+  headquarters_address TEXT,
+  headquarters_city VARCHAR(100),
+  headquarters_state VARCHAR(100),
+  contact_email VARCHAR(255),
+  contact_phone VARCHAR(50),
+  website TEXT,
+  logo_url TEXT,
+  website_url TEXT,
+  id_prefix VARCHAR(10),
+  dpo_name VARCHAR(200),
+  dpo_email VARCHAR(255),
+  data_residency_region VARCHAR(100),
+  is_active BOOLEAN DEFAULT true,
+  is_approved BOOLEAN DEFAULT false,
+  approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  approved_at TIMESTAMP,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  metadata JSONB DEFAULT '{}',
+  operating_hours JSONB,
+  specializations TEXT[],
+  emergency_services BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
 -- 2. VET PROFILES
 -- ============================================================
 CREATE TABLE IF NOT EXISTS vet_profiles (
@@ -1531,40 +1568,6 @@ CREATE INDEX IF NOT EXISTS idx_animals_status ON animals(status);
 -- ============================================================
 
 -- 36. HOSPITAL NETWORKS (corporate umbrella entities)
-CREATE TABLE IF NOT EXISTS hospital_networks (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  legal_name VARCHAR(255),
-  registration_number VARCHAR(100),
-  tax_id VARCHAR(100),
-  network_type VARCHAR(50) NOT NULL DEFAULT 'private'
-    CHECK (network_type IN ('private', 'government', 'ngo', 'cooperative', 'franchise')),
-  country VARCHAR(100) DEFAULT 'IN',
-  headquarters_address TEXT,
-  headquarters_city VARCHAR(100),
-  headquarters_state VARCHAR(100),
-  contact_email VARCHAR(255),
-  contact_phone VARCHAR(50),
-  website TEXT,
-  logo_url TEXT,
-  website_url TEXT,
-  id_prefix VARCHAR(10),
-  dpo_name VARCHAR(200),
-  dpo_email VARCHAR(255),
-  data_residency_region VARCHAR(100),
-  is_active BOOLEAN DEFAULT true,
-  is_approved BOOLEAN DEFAULT false,
-  approved_by UUID REFERENCES users(id) ON DELETE SET NULL,
-  approved_at TIMESTAMP,
-  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
-  metadata JSONB DEFAULT '{}',
-  operating_hours JSONB,
-  specializations TEXT[],
-  emergency_services BOOLEAN DEFAULT false,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 -- 37. HOSPITAL NETWORK MEMBERS(corporate staff: corporate_admin, hospital_director, auditor)
 CREATE TABLE IF NOT EXISTS hospital_network_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

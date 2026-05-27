@@ -205,24 +205,27 @@ class PostgresDatabase {
       // 2. Set search_path so subsequent DDL lands in the correct schema
       await client.query(`SET search_path TO "${schemaName}", public`);
 
-      // 3. Check if users table exists
+      // 3. Check if core tables exist (users + bookings = healthy schema)
       const check = await client.query(
-        `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'users')`,
+        `SELECT
+          EXISTS (SELECT FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'users') AS has_users,
+          EXISTS (SELECT FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'bookings') AS has_bookings`,
         [schemaName]
       );
-      if (!check.rows[0].exists) {
-        logger.info('Tables not found — running init.sql schema...');
+      const { has_users, has_bookings } = check.rows[0];
+      if (!has_users || !has_bookings) {
+        logger.info(`Partial or missing schema (users=${has_users}, bookings=${has_bookings}) — running init.sql...`);
         const initSqlPath = path.join(__dirname, '../../../docker/init.sql');
         if (fs.existsSync(initSqlPath)) {
           const sql = fs.readFileSync(initSqlPath, 'utf8');
           // Use client.query (simple query protocol) — supports multi-statement SQL
           await client.query(sql);
-          logger.info('Schema created successfully from init.sql');
+          logger.info('Schema created/repaired successfully from init.sql');
         } else {
           logger.warn('init.sql not found at ' + initSqlPath + ' — skipping schema creation');
         }
       } else {
-        logger.info('Database schema already exists');
+        logger.info('Database schema healthy (users + bookings found)');
       }
     } catch (error: any) {
       logger.error('Error ensuring schema', { error: error.message, schema: schemaName });
