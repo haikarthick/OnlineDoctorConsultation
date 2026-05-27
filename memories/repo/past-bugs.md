@@ -1042,3 +1042,11 @@ render-start.sh
 - **Fix:** Always add roleMiddleware to sensitive creation endpoints
 - **Rule:** Not specified
 
+
+### DB-011 — Forward FK in init.sql broke fresh DB schema creation
+- **Logged:** 2026-05-27 09:23
+- **Symptom:** All CREATE TABLE statements for bookings, consultations, video_sessions, prescriptions, medical_records, etc. silently failed on fresh Render DB
+- **Root Cause:** hospital_networks table (line 1534) was referenced by tables at lines 120, 131, 376, 408+. Statement-by-statement execution failed; client.query(entireSql) also silently swallowed errors. DB showed usersTable:missing with 0 tables
+- **Fix:** Moved hospital_networks def to line 37 (after users). Fixed ensureSchemaPublic to use client.query+SET search_path. Added partial schema detection (checks both users AND bookings). Added public /api/v1/debug/db-state and /api/v1/repair-schema emergency endpoints.
+- **Rule:** NEVER place a table that is referenced by many others (especially hospital_networks) AFTER the tables that reference it. Always define referenced tables BEFORE referencing tables in init.sql
+

@@ -2689,3 +2689,57 @@
 </details>
 
 ---
+
+## 2026-05-26 16:07 · `2ba2c60` · 🐛 FIX
+
+**Commit:** fix: login failure on fresh Render DB - 3 root causes fixed  
+**Author:** haikarthick  
+**Categories:** DB-SCHEMA · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - backend/src/controllers/AuthController.ts
+  - backend/src/index.ts
+  - docker/seeds/01_platform_required.sql
+  - frontend/src/pages/Login.tsx
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-05-27 09:03 · `d0f10f0` · 🐛 FIX
+
+**Commit:** fix: robust schema creation + repair/debug endpoints  
+**Author:** haikarthick  
+**Categories:** API · UTILS · DB  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/utils/database.ts
+
+</details>
+
+---
+
+## 2026-05-27 09:16 · `bbca900` · 🐛 FIX
+
+**Commit:** fix: move hospital_networks table early in init.sql to break forward-FK chain  
+**Author:** haikarthick  
+**Categories:** UTILS · DB · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/utils/database.ts
+  - docker/init.sql
+
+</details>
+
+---
