@@ -204,8 +204,14 @@
       "vets": "Licensed Veterinarians",
       "response": "Quick Response Time",
       "security": "Enterprise-Grade Security",
-      "records": "Complete Health Records"
+      "records": "Complete Health Records",
+      "hospitalNetwork": "Vet Hospital Network"
     },
+    "trust": "Trusted by 3,000+ enterprises & 500+ hospitals",
+    "hospitalStaffTitle": "Hospital or Clinic Staff?",
+    "hospitalStaffDesc": "Login with your Veterinarian account — your hospital dashboard is inside.",
+    "dbWakingUp": "Database is waking up — retrying automatically in {{countdown}}s…",
+    "dbWakingUpNote": "This is normal on first visit. Please wait.",
     "success": "✓ Login successful! Redirecting...",
     "error": "Login failed"
   },
@@ -4677,7 +4683,9 @@
     "failedToLoad": "Failed to load permissions",
     "failedToUpdate": "Failed to update permission",
     "failedToReset": "Failed to reset permissions",
-    "resetConfirm": "Reset all permissions to defaults? This cannot be undone."
+    "resetConfirm": "Reset all permissions to defaults? This cannot be undone.",
+    "tabSystemRoles": "System Role Permissions",
+    "tabNetworkRoles": "Network Role Matrix"
   },
   "networkRoleMatrix": {
     "title": "Network Role Access Matrix",

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import apiService from '../../services/api'
+import NetworkRoleMatrix from '../hospitalnetwork/NetworkRoleMatrix'
 import '../../styles/modules.css'
 
 interface PermissionManagementProps {
@@ -26,6 +27,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
   const [selectedRole, setSelectedRole] = useState<string>('veterinarian')
   const [searchQuery, setSearchQuery] = useState('')
   const [resetting, setResetting] = useState(false)
+  const [viewMode, setViewMode] = useState<'systemRoles' | 'networkRoles'>('systemRoles')
 
   useEffect(() => { loadPermissions() }, [])
 
@@ -181,6 +183,37 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
         </div>
       )}
 
+      {/* View Mode Tabs */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 24, background: '#f3f4f6', borderRadius: 10, padding: 4, width: 'fit-content' }}>
+        <button
+          onClick={() => setViewMode('systemRoles')}
+          style={{
+            padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500,
+            background: viewMode === 'systemRoles' ? 'white' : 'transparent',
+            color: viewMode === 'systemRoles' ? '#667eea' : '#6b7280',
+            boxShadow: viewMode === 'systemRoles' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+          }}
+        >
+          🔐 {t('permissionManagement.tabSystemRoles')}
+        </button>
+        <button
+          onClick={() => setViewMode('networkRoles')}
+          style={{
+            padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500,
+            background: viewMode === 'networkRoles' ? 'white' : 'transparent',
+            color: viewMode === 'networkRoles' ? '#667eea' : '#6b7280',
+            boxShadow: viewMode === 'networkRoles' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+          }}
+        >
+          🏥 {t('permissionManagement.tabNetworkRoles')}
+        </button>
+      </div>
+
+      {viewMode === 'networkRoles' && (
+        <NetworkRoleMatrix networkId="" adminMode={false} />
+      )}
+
+      {viewMode === 'systemRoles' && (<>
       {/* Role Selector Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
         {metadata.roles.map(role => (
@@ -384,6 +417,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
           </table>
         </div>
       </div>
+      </>)}
       
     </div>
   )

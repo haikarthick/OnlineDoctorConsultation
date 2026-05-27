@@ -90,10 +90,10 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
               <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.response')}</span></div>
               <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.security')}</span></div>
               <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.records')}</span></div>
-              <div className="login-feat"><span className="login-feat-check">✓</span><span>Vet Hospital Network</span></div>
+              <div className="login-feat"><span className="login-feat-check">✓</span><span>{t('login.features.hospitalNetwork')}</span></div>
             </div>
             <div className="login-trust">
-              <span>Trusted by <strong>3,000+</strong> enterprises &amp; <strong>500+</strong> hospitals</span>
+              <span>{t('login.trust')}</span>
             </div>
           </div>
         </div>
@@ -115,17 +115,17 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
             <div className="hospital-callout" role="note" style={{ marginBottom: '1rem' }}>
               <span className="hospital-callout-icon">🏥</span>
               <div className="hospital-callout-body">
-                <strong>Hospital or Clinic Staff?</strong>
-                <p>Login with your <em>Veterinarian</em> account — your hospital dashboard is inside.</p>
+                <strong>{t('login.hospitalStaffTitle')}</strong>
+                <p>{t('login.hospitalStaffDesc')}</p>
               </div>
             </div>
 
             {dbWaking && (
               <div className="message db-waking" role="status" aria-live="polite">
                 <span className="spinner" aria-hidden="true" style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid #bbb', borderTopColor: '#2563eb', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginRight: 8 }} />
-                Database is waking up — retrying automatically in {retryCountdown}s…
+                {t('login.dbWakingUp', { countdown: retryCountdown })}
                 <br />
-                <small style={{ opacity: 0.75 }}>This is normal on first visit. Please wait.</small>
+                <small style={{ opacity: 0.75 }}>{t('login.dbWakingUpNote')}</small>
               </div>
             )}
 
