@@ -2889,3 +2889,69 @@
 </details>
 
 ---
+
+## 2026-05-27 12:54 · `90e3164` · 🔧 CHORE
+
+**Commit:** chore: Log pharmacy bug fix to memory  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/notes.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-05-27 14:44 · `28f6153` · 🐛 FIX
+
+**Commit:** fix: Add /accept-staff-invite route alias — invite link no longer redirects home  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/App.tsx
+
+</details>
+
+---
+
+## 2026-05-27 14:46 · `c118d3d` · 🧪 TEST
+
+**Commit:** test: Add E2E stub for /accept-staff-invite route  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---
+
+## 2026-05-27 14:49 · `5977cb9` · 🧪 TEST
+
+**Commit:** test: Fix /accept-staff-invite E2E stub — remove query string from goto  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---

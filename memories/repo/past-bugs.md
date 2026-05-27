@@ -1058,3 +1058,11 @@ render-start.sh
 - **Fix:** Fixed: derive assignedRole from staff_position map; pharmacist->pharmacist, others->hospital_staff. Applied to both users.role and hospital_network_members.network_role
 - **Rule:** NEVER hardcode role in invite-accept handler — always derive from staff_position
 
+
+### ROUTE-001 — Invite link redirects to home page
+- **Logged:** 2026-05-27 14:51
+- **Symptom:** Clicking /accept-staff-invite link from invite email goes to home page
+- **Root Cause:** POST /hospital-networks/:id/staff-invites generates URL with /accept-staff-invite but App.tsx only had /accept-hospital-invite route. Catch-all * redirected to /
+- **Fix:** Added /accept-staff-invite as alias route in App.tsx pointing to AcceptHospitalInvite component
+- **Rule:** WHENEVER adding a new backend invite URL path, ALWAYS add matching route in App.tsx before deploying. Check: grep accept.*invite App.tsx must match every URL pattern in routes/index.ts
+
