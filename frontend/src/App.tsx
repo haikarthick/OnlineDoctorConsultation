@@ -358,6 +358,8 @@ function AppRoutes() {
       <Route path="/admin/network-subscriptions" element={<RoleRoute path="/admin/network-subscriptions"><AppLayout><NetworkSubscriptions /></AppLayout></RoleRoute>} />
       <Route path="/admin/disputes" element={<RoleRoute path="/admin/disputes"><AppLayout><RoutedPage Component={DisputeManagement} /></AppLayout></RoleRoute>} />
       <Route path="/accept-hospital-invite" element={<AcceptHospitalInvite />} />
+      {/* Alias: staff-invites endpoint sends this URL — must match /accept-hospital-invite behaviour */}
+      <Route path="/accept-staff-invite" element={<AcceptHospitalInvite />} />
 
       {/* ── Patient Consent Module ── */}
       <Route path="/patient-consent" element={<RoleRoute path="/patient-consent"><AppLayout><PatientConsent /></AppLayout></RoleRoute>} />
