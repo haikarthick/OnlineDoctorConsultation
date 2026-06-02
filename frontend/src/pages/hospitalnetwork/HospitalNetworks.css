@@ -407,25 +407,44 @@
 
 .hn-pending-invite-item {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
   padding: 10px 14px;
   background: #fffbeb;
   border: 1px solid #fde68a;
   border-radius: 8px;
   margin-bottom: 6px;
+}
+
+.hn-pending-invite-row1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hn-pending-invite-row2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
+}
+
+.hn-pending-invite-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
 }
 
 .hn-pending-invite-email {
   flex: 1;
-  min-width: 160px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.88rem;
   color: #374151;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .hn-pending-invite-position {

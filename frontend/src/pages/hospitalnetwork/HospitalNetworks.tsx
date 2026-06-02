@@ -2030,35 +2030,41 @@ const HospitalNetworks: React.FC = () => {
                         </div>
                         {pendingInvites.map((inv: any) => (
                           <div key={inv.id} className="hn-pending-invite-item">
-                            <span className="hn-pending-invite-email">{inv.inviteeEmail ?? inv.invitee_email}</span>
-                            <span className="hn-pending-invite-position">{inv.staffPosition ?? inv.staff_position}</span>
-                            <span className="hn-pending-invite-expiry">
-                              {t('hospitalNetworks.detail.expires')} {new Date(inv.expiresAt ?? inv.expires_at).toLocaleDateString()}
-                            </span>
-                            <span className="hn-pending-badge">PENDING</span>
-                            <button
-                              className="hn-pending-invite-action copy"
-                              title={t('hospitalNetworks.detail.copyInviteLink')}
-                              onClick={() => {
-                                const token = inv.inviteToken ?? inv.invite_token
-                                const link = `${window.location.origin}/accept-staff-invite?token=${token}`
-                                navigator.clipboard.writeText(link)
-                                alert(t('hospitalNetworks.detail.inviteLinkCopied'))
-                              }}
-                            >📋 {t('common.copyLink')}</button>
-                            <button
-                              className="hn-pending-invite-action revoke"
-                              title={t('hospitalNetworks.detail.revokeInvite')}
-                              onClick={async () => {
-                                if (!window.confirm(t('hospitalNetworks.detail.revokeConfirm'))) return
-                                try {
-                                  await apiService.revokeStaffInvite(selectedNetwork.id, inv.id)
-                                  setPendingInvites(prev => prev.filter(i => i.id !== inv.id))
-                                } catch {
-                                  alert(t('hospitalNetworks.detail.revokeFailed'))
-                                }
-                              }}
-                            >✕ {t('common.revoke')}</button>
+                            <div className="hn-pending-invite-row1">
+                              <span className="hn-pending-invite-email">{inv.inviteeEmail ?? inv.invitee_email}</span>
+                              <span className="hn-pending-badge">PENDING</span>
+                            </div>
+                            <div className="hn-pending-invite-row2">
+                              <span className="hn-pending-invite-position">{inv.staffPosition ?? inv.staff_position}</span>
+                              <span className="hn-pending-invite-expiry">
+                                {t('hospitalNetworks.detail.expires')} {new Date(inv.expiresAt ?? inv.expires_at).toLocaleDateString()}
+                              </span>
+                              <div className="hn-pending-invite-actions">
+                                <button
+                                  className="hn-pending-invite-action copy"
+                                  title={t('hospitalNetworks.detail.copyInviteLink')}
+                                  onClick={() => {
+                                    const token = inv.inviteToken ?? inv.invite_token
+                                    const link = `${window.location.origin}/accept-staff-invite?token=${token}`
+                                    navigator.clipboard.writeText(link)
+                                    alert(t('hospitalNetworks.detail.inviteLinkCopied'))
+                                  }}
+                                >📋 {t('common.copyLink')}</button>
+                                <button
+                                  className="hn-pending-invite-action revoke"
+                                  title={t('hospitalNetworks.detail.revokeInvite')}
+                                  onClick={async () => {
+                                    if (!window.confirm(t('hospitalNetworks.detail.revokeConfirm'))) return
+                                    try {
+                                      await apiService.revokeStaffInvite(selectedNetwork.id, inv.id)
+                                      setPendingInvites(prev => prev.filter(i => i.id !== inv.id))
+                                    } catch {
+                                      alert(t('hospitalNetworks.detail.revokeFailed'))
+                                    }
+                                  }}
+                                >✕ {t('common.revoke')}</button>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
