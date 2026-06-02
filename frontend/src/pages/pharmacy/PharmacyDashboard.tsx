@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
-import axios from 'axios'
+import client from '../../services/api/client'
 import './PharmacyDashboard.css'
 
 // ── Sub-components ──────────────────────────────────────────────
@@ -70,7 +70,7 @@ export default function PharmacyDashboard() {
 
   const loadPharmacies = useCallback(async () => {
     try {
-      const res = await axios.get('/api/v1/pharmacy/my-pharmacies')
+      const res = await client.get('/pharmacy/my-pharmacies')
       const { data: list, networkId: nid } = res.data as { data: Pharmacy[]; networkId: string | null }
       setNetworkId(nid)
       setPharmacies(list || [])
@@ -89,9 +89,9 @@ export default function PharmacyDashboard() {
     if (!selectedPharmacy) return
     try {
       const [sumRes, rxRes, dispRes] = await Promise.all([
-        axios.get(`/api/v1/pharmacies/${selectedPharmacy.id}/dashboard-summary`),
-        axios.get(`/api/v1/pharmacies/${selectedPharmacy.id}/pending-prescriptions`),
-        axios.get(`/api/v1/pharmacies/${selectedPharmacy.id}/ready-for-dispensing`),
+        client.get(`/pharmacies/${selectedPharmacy.id}/dashboard`),
+        client.get(`/pharmacies/${selectedPharmacy.id}/pending-prescriptions`),
+        client.get(`/pharmacies/${selectedPharmacy.id}/ready-for-dispensing`),
       ])
       setSummary(sumRes.data)
       setPendingRx(rxRes.data || [])
