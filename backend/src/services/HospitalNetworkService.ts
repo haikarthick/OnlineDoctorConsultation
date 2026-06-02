@@ -255,10 +255,21 @@ export class HospitalNetworkService {
     }
   }
 
-  async listNetworks(filters: { isApproved?: boolean; isActive?: boolean } = {}): Promise<HospitalNetwork[]> {
+  async listNetworks(filters: { isApproved?: boolean; isActive?: boolean; userId?: string; userRole?: string } = {}): Promise<HospitalNetwork[]> {
     const conditions: string[] = [];
     const params: any[] = [];
     let idx = 1;
+
+    // Data scoping: corporate_admin only sees networks they own or are a member of
+    if (filters.userId && filters.userRole === 'corporate_admin') {
+      params.push(filters.userId);
+      conditions.push(`(hn.created_by = $${idx} OR EXISTS (
+        SELECT 1 FROM hospital_network_members hnm
+        WHERE hnm.network_id = hn.id AND hnm.user_id = $${idx} AND hnm.is_active = true
+      ))`);
+      idx++;
+    }
+    // admin sees all networks — no additional filter
 
     if (filters.isApproved !== undefined) {
       conditions.push(`hn.is_approved = $${idx++}`);

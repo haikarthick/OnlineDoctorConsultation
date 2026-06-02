@@ -18,7 +18,10 @@ class HospitalNetworkController {
   }
 
   async listNetworks(req: AuthRequest, res: Response): Promise<void> {
-    const filters: { isApproved?: boolean; isActive?: boolean } = {};
+    const filters: { isApproved?: boolean; isActive?: boolean; userId?: string; userRole?: string } = {
+      userId: req.userId,
+      userRole: req.userRole,
+    };
     if (req.query.isApproved !== undefined) filters.isApproved = req.query.isApproved === 'true';
     if (req.query.isActive !== undefined) filters.isActive = req.query.isActive === 'true';
     const networks = await HospitalNetworkService.listNetworks(filters);
@@ -26,6 +29,7 @@ class HospitalNetworkController {
   }
 
   async getNetwork(req: AuthRequest, res: Response): Promise<void> {
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!);
     const network = await HospitalNetworkService.getNetworkById(req.params.id);
     res.json({ success: true, data: network });
   }
