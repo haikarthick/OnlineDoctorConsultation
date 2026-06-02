@@ -2761,7 +2761,14 @@ router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewar
     }
   }
   const result = await db.query(
-    `SELECT hsi.*, u.first_name AS "inviterFirstName", u.last_name AS "inviterLastName", vh.name AS "hospitalName" FROM hospital_staff_invites hsi JOIN users u ON u.id=hsi.invited_by LEFT JOIN vet_hospitals vh ON vh.id=hsi.hospital_id WHERE hsi.network_id=$1 ORDER BY hsi.created_at DESC`,
+    `SELECT hsi.*, u.first_name AS "inviterFirstName", u.last_name AS "inviterLastName", vh.name AS "hospitalName"
+     FROM hospital_staff_invites hsi
+     JOIN users u ON u.id = hsi.invited_by
+     LEFT JOIN vet_hospitals vh ON vh.id = hsi.hospital_id
+     WHERE hsi.network_id = $1
+       AND hsi.status = 'pending'
+       AND hsi.expires_at > NOW()
+     ORDER BY hsi.created_at DESC`,
     [req.params.id]
   );
   res.json({ success: true, data: result.rows });
@@ -3102,6 +3109,31 @@ router.put('/disputes/:id/resolve', authMiddleware, roleMiddleware(['admin']), a
 // ============================================================
 // PHARMACY MODULE ROUTES
 // ============================================================
+
+// Auto-discover pharmacies for the current user based on network membership
+router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const userId = authReq.userId;
+  // Find network(s) this user belongs to
+  const memberRes = await database.query(
+    `SELECT DISTINCT hnm.network_id FROM hospital_network_members hnm WHERE hnm.user_id = $1 AND hnm.is_active = true`,
+    [userId]
+  );
+  if (memberRes.rows.length === 0) {
+    return res.json({ success: true, data: [], networkId: null });
+  }
+  // Use first network (pharmacist typically belongs to one network)
+  const networkId = memberRes.rows[0].network_id;
+  const pharmaRes = await database.query(
+    `SELECT hp.*, vh.name AS hospital_name FROM hospital_pharmacies hp
+     LEFT JOIN vet_hospitals vh ON hp.hospital_id = vh.id
+     WHERE hp.network_id = $1
+     ORDER BY hp.is_primary_pharmacy DESC, hp.pharmacy_name ASC`,
+    [networkId]
+  );
+  res.json({ success: true, data: pharmaRes.rows, networkId });
+}));
+
 
 // ── Pharmacy Setup ──────────────────────────────────────────
 

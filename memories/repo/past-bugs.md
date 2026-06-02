@@ -1074,3 +1074,11 @@ render-start.sh
 - **Fix:** Added userId+userRole params to listNetworks(); corporate_admin filter: created_by=userId OR EXISTS in hospital_network_members; also added ensureNetworkAccess() to getNetwork() by ID
 - **Rule:** ALWAYS scope multi-tenant list queries by userId for non-admin roles. Never return all rows from a shared table without a tenant/owner filter.
 
+
+### INVITE-001 — network_role_check constraint violation on staff invite accept
+- **Logged:** 2026-06-02 14:27
+- **Symptom:** new row violates check constraint hospital_network_members_network_role_check when pharmacist accepts invite
+- **Root Cause:** hospital_network_members.network_role only allows 5 values; backend was inserting assignedRole (pharmacist) directly
+- **Fix:** Always insert hospital_staff as network_role for position-based invites; users.role captures the real position
+- **Rule:** routes/index.ts accept invite handler
+

@@ -2025,41 +2025,41 @@ const HospitalNetworks: React.FC = () => {
                     )}
                     {/* Pending Invites Section */}
                     {pendingInvites.length > 0 && (
-                      <div style={{ marginTop: 24 }}>
-                        <div style={{ fontWeight: 600, color: '#92400e', background: '#fef3c7', borderRadius: 8, padding: '8px 14px', marginBottom: 10, fontSize: '0.88rem' }}>
-                          ⏳ Pending Invitations ({pendingInvites.length})
+                      <div>
+                        <div className="hn-pending-invites-header">
+                          ⏳ {t('hospitalNetworks.detail.pendingInvitations', { count: pendingInvites.length })}
                         </div>
                         {pendingInvites.map((inv: any) => (
-                          <div key={inv.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', background: '#fffbeb', borderRadius: 8, marginBottom: 6, border: '1px solid #fde68a' }}>
-                            <span style={{ flex: 1, fontWeight: 500, fontSize: '0.88rem' }}>{inv.inviteeEmail ?? inv.invitee_email}</span>
-                            <span style={{ fontSize: '0.78rem', color: '#6b7280', background: '#f3f4f6', borderRadius: 4, padding: '2px 8px' }}>{inv.staffPosition ?? inv.staff_position}</span>
-                            <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-                              Expires {new Date(inv.expiresAt ?? inv.expires_at).toLocaleDateString()}
+                          <div key={inv.id} className="hn-pending-invite-item">
+                            <span className="hn-pending-invite-email">{inv.inviteeEmail ?? inv.invitee_email}</span>
+                            <span className="hn-pending-invite-position">{inv.staffPosition ?? inv.staff_position}</span>
+                            <span className="hn-pending-invite-expiry">
+                              {t('hospitalNetworks.detail.expires')} {new Date(inv.expiresAt ?? inv.expires_at).toLocaleDateString()}
                             </span>
-                            <span style={{ background: '#fde68a', color: '#92400e', fontSize: '0.72rem', padding: '2px 8px', borderRadius: 12, fontWeight: 600 }}>PENDING</span>
+                            <span className="hn-pending-badge">PENDING</span>
                             <button
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6366f1', fontSize: 13, fontWeight: 600 }}
-                              title="Copy invite link"
+                              className="hn-pending-invite-action copy"
+                              title={t('hospitalNetworks.detail.copyInviteLink')}
                               onClick={() => {
                                 const token = inv.inviteToken ?? inv.invite_token
                                 const link = `${window.location.origin}/accept-staff-invite?token=${token}`
                                 navigator.clipboard.writeText(link)
-                                alert('Invite link copied to clipboard!')
+                                alert(t('hospitalNetworks.detail.inviteLinkCopied'))
                               }}
-                            >📋 Copy Link</button>
+                            >📋 {t('common.copyLink')}</button>
                             <button
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: 13, fontWeight: 600 }}
-                              title="Revoke invite"
+                              className="hn-pending-invite-action revoke"
+                              title={t('hospitalNetworks.detail.revokeInvite')}
                               onClick={async () => {
-                                if (!window.confirm('Revoke this invitation?')) return
+                                if (!window.confirm(t('hospitalNetworks.detail.revokeConfirm'))) return
                                 try {
                                   await apiService.revokeStaffInvite(selectedNetwork.id, inv.id)
                                   setPendingInvites(prev => prev.filter(i => i.id !== inv.id))
                                 } catch {
-                                  alert('Failed to revoke invite')
+                                  alert(t('hospitalNetworks.detail.revokeFailed'))
                                 }
                               }}
-                            >✕ Revoke</button>
+                            >✕ {t('common.revoke')}</button>
                           </div>
                         ))}
                       </div>

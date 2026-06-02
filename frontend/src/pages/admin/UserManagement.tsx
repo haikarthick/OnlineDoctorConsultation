@@ -572,7 +572,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                   </td>
                   <td>{formatDate(u.createdAt)}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: 6 }}>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                       <button
                         className={`btn btn-sm ${u.isActive ? 'btn-warning' : 'btn-success'}`}
                         disabled={processing === u.id}

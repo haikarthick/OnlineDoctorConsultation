@@ -382,6 +382,101 @@
   color: #dc2626;
 }
 
+/* ─── Pending Invites Section ───────────────────────── */
+.hn-pending-invites-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin: 20px 0 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.hn-pending-invite-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.hn-pending-invite-email {
+  flex: 1;
+  min-width: 160px;
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hn-pending-invite-position {
+  font-size: 0.78rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hn-pending-invite-expiry {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hn-pending-badge {
+  background: #fde68a;
+  color: #92400e;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.hn-pending-invite-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.hn-pending-invite-action.copy {
+  color: #6366f1;
+}
+
+.hn-pending-invite-action.copy:hover {
+  background: #ede9fe;
+}
+
+.hn-pending-invite-action.revoke {
+  color: #dc2626;
+}
+
+.hn-pending-invite-action.revoke:hover {
+  background: #fee2e2;
+}
+
+
+
 /* ─── Role Badges ───────────────────────────────────── */
 .hn-role-badge {
   display: inline-flex;

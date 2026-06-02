@@ -3006,3 +3006,21 @@
 </details>
 
 ---
+
+## 2026-06-02 14:26 · `ec1f789` · 🐛 FIX
+
+**Commit:** fix: staff invite issues 1-4 — pending list, 409 error message, network_role constraint, custom roles dropdown  
+**Author:** haikarthick  
+**Categories:** API · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/routes/index.ts
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

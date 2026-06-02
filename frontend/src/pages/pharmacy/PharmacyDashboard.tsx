@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../../context/AuthContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import axios from 'axios'
 import './PharmacyDashboard.css'
@@ -55,7 +54,6 @@ type Tab = typeof TABS[number]
 
 export default function PharmacyDashboard() {
   const { t } = useTranslation()
-  const { user } = useAuth()
 
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([])
   const [selectedPharmacy, setSelectedPharmacy] = useState<Pharmacy | null>(null)
@@ -68,22 +66,24 @@ export default function PharmacyDashboard() {
   const [reviewTarget, setReviewTarget] = useState<PendingPrescription | null>(null)
   const [dispenseTarget, setDispenseTarget] = useState<ReadyDispensing | null>(null)
 
-  const networkId = (user as any)?.network_id
+  const [networkId, setNetworkId] = useState<string | null>(null)
 
   const loadPharmacies = useCallback(async () => {
-    if (!networkId) return
     try {
-      const res = await axios.get(`/api/v1/networks/${networkId}/pharmacies`)
-      const list: Pharmacy[] = res.data || []
-      setPharmacies(list)
-      if (!selectedPharmacy && list.length > 0) {
+      const res = await axios.get('/api/v1/pharmacy/my-pharmacies')
+      const { data: list, networkId: nid } = res.data as { data: Pharmacy[]; networkId: string | null }
+      setNetworkId(nid)
+      setPharmacies(list || [])
+      if (list && list.length > 0) {
         const primary = list.find(p => p.is_primary_pharmacy) || list[0]
-        setSelectedPharmacy(primary)
+        setSelectedPharmacy(prev => prev ?? primary)
       }
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || t('common.error'))
+    } finally {
+      setLoading(false)
     }
-  }, [networkId, selectedPharmacy, t])
+  }, [t])
 
   const loadDashboard = useCallback(async () => {
     if (!selectedPharmacy) return
@@ -98,12 +98,10 @@ export default function PharmacyDashboard() {
       setReadyDispense(dispRes.data || [])
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || t('common.error'))
-    } finally {
-      setLoading(false)
     }
   }, [selectedPharmacy, t])
 
-  useEffect(() => { loadPharmacies() }, [loadPharmacies])
+  useEffect(() => { loadPharmacies() }, [])
   useEffect(() => { if (selectedPharmacy) loadDashboard() }, [selectedPharmacy, loadDashboard])
 
   // Auto-refresh every 30 seconds
@@ -120,7 +118,7 @@ export default function PharmacyDashboard() {
     loadDashboard()
   }
 
-  if (!networkId) {
+  if (!loading && networkId === null) {
     return (
       <div className="pharmacy-page">
         <div className="pharmacy-empty">
@@ -312,19 +310,19 @@ export default function PharmacyDashboard() {
       {tab === 'inventory' && selectedPharmacy && (
         <PharmacyInventory
           pharmacyId={selectedPharmacy.id}
-          networkId={networkId}
+          networkId={networkId ?? ''}
           onRefresh={loadDashboard}
         />
       )}
 
       {tab === 'suppliers' && (
-        <PharmacySuppliers networkId={networkId} />
+        <PharmacySuppliers networkId={networkId ?? ''} />
       )}
 
       {tab === 'settings' && selectedPharmacy && (
         <PharmacySettings
           pharmacy={selectedPharmacy}
-          networkId={networkId}
+          networkId={networkId ?? undefined}
           onRefresh={loadPharmacies}
         />
       )}
