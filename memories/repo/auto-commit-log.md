@@ -2955,3 +2955,37 @@
 </details>
 
 ---
+
+## 2026-05-27 14:51 · `c4a7f39` · 🔧 CHORE
+
+**Commit:** chore: Log invite route bug to memory  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-06-02 13:28 · `570a1a8` · 🐛 FIX
+
+**Commit:** fix: scope hospital-networks list by owner/membership for corporate_admin  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/services/HospitalNetworkService.ts
+
+</details>
+
+---

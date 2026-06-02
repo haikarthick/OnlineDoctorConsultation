@@ -1066,3 +1066,11 @@ render-start.sh
 - **Fix:** Added /accept-staff-invite as alias route in App.tsx pointing to AcceptHospitalInvite component
 - **Rule:** WHENEVER adding a new backend invite URL path, ALWAYS add matching route in App.tsx before deploying. Check: grep accept.*invite App.tsx must match every URL pattern in routes/index.ts
 
+
+### SCOPE-001 — Hospital networks not scoped by owner
+- **Logged:** 2026-06-02 13:30
+- **Symptom:** New corporate_admin saw ALL networks including other users' demo data
+- **Root Cause:** listNetworks() had no WHERE filter for userId — returned every row in hospital_networks table
+- **Fix:** Added userId+userRole params to listNetworks(); corporate_admin filter: created_by=userId OR EXISTS in hospital_network_members; also added ensureNetworkAccess() to getNetwork() by ID
+- **Rule:** ALWAYS scope multi-tenant list queries by userId for non-admin roles. Never return all rows from a shared table without a tenant/owner filter.
+
