@@ -813,6 +813,8 @@ const HospitalNetworks: React.FC = () => {
   const [inviteStaffSuccess, setInviteStaffSuccess] = useState('')
   const [inviteStaffError, setInviteStaffError] = useState('')
   const [inviteLink, setInviteLink] = useState('')
+  const [pendingInvites, setPendingInvites] = useState<any[]>([])
+  const [customNetworkRoles, setCustomNetworkRoles] = useState<{ role_key: string; display_name: string }[]>([])
 
   // ─── Audit State ──────────────────────────────────────────────────────────
   const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([])
@@ -914,6 +916,14 @@ const HospitalNetworks: React.FC = () => {
       const rawHospitals = hospRes?.data?.hospitals ?? hospRes?.hospitals ?? hospRes?.data ?? hospRes ?? []
       setNetworkHospitals(Array.isArray(rawHospitals) ? rawHospitals : [])
       setNetworkMembers(memRes.data ?? memRes ?? [])
+      // Load pending invites and custom roles (non-fatal)
+      apiService.listStaffInvites(network.id).then((res: any) => {
+        setPendingInvites(res.data ?? res ?? [])
+      }).catch(() => setPendingInvites([]))
+      apiService.getNetworkRoles(network.id).then((res: any) => {
+        const roles = res.data ?? res ?? []
+        setCustomNetworkRoles(Array.isArray(roles) ? roles.filter((r: any) => r.is_active !== false) : [])
+      }).catch(() => setCustomNetworkRoles([]))
       // Load financial summary
       apiService.getNetworkFinancialSummary(network.id).then((res: any) => {
         setFinancialData(res.data?.data || res.data || null)
@@ -2013,6 +2023,47 @@ const HospitalNetworks: React.FC = () => {
                         ))}
                       </div>
                     )}
+                    {/* Pending Invites Section */}
+                    {pendingInvites.length > 0 && (
+                      <div style={{ marginTop: 24 }}>
+                        <div style={{ fontWeight: 600, color: '#92400e', background: '#fef3c7', borderRadius: 8, padding: '8px 14px', marginBottom: 10, fontSize: '0.88rem' }}>
+                          ⏳ Pending Invitations ({pendingInvites.length})
+                        </div>
+                        {pendingInvites.map((inv: any) => (
+                          <div key={inv.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', background: '#fffbeb', borderRadius: 8, marginBottom: 6, border: '1px solid #fde68a' }}>
+                            <span style={{ flex: 1, fontWeight: 500, fontSize: '0.88rem' }}>{inv.inviteeEmail ?? inv.invitee_email}</span>
+                            <span style={{ fontSize: '0.78rem', color: '#6b7280', background: '#f3f4f6', borderRadius: 4, padding: '2px 8px' }}>{inv.staffPosition ?? inv.staff_position}</span>
+                            <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                              Expires {new Date(inv.expiresAt ?? inv.expires_at).toLocaleDateString()}
+                            </span>
+                            <span style={{ background: '#fde68a', color: '#92400e', fontSize: '0.72rem', padding: '2px 8px', borderRadius: 12, fontWeight: 600 }}>PENDING</span>
+                            <button
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6366f1', fontSize: 13, fontWeight: 600 }}
+                              title="Copy invite link"
+                              onClick={() => {
+                                const token = inv.inviteToken ?? inv.invite_token
+                                const link = `${window.location.origin}/accept-staff-invite?token=${token}`
+                                navigator.clipboard.writeText(link)
+                                alert('Invite link copied to clipboard!')
+                              }}
+                            >📋 Copy Link</button>
+                            <button
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: 13, fontWeight: 600 }}
+                              title="Revoke invite"
+                              onClick={async () => {
+                                if (!window.confirm('Revoke this invitation?')) return
+                                try {
+                                  await apiService.revokeStaffInvite(selectedNetwork.id, inv.id)
+                                  setPendingInvites(prev => prev.filter(i => i.id !== inv.id))
+                                } catch {
+                                  alert('Failed to revoke invite')
+                                }
+                              }}
+                            >✕ Revoke</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2620,6 +2671,13 @@ const HospitalNetworks: React.FC = () => {
                         <option value="pharmacist">Pharmacist</option>
                         <option value="intern">Intern</option>
                         <option value="admin_staff">Admin Staff</option>
+                        {customNetworkRoles.length > 0 && (
+                          <optgroup label="── Custom Roles ──">
+                            {customNetworkRoles.map(r => (
+                              <option key={r.role_key} value={r.role_key}>{r.display_name}</option>
+                            ))}
+                          </optgroup>
+                        )}
                       </select>
                     </div>
                     <div className="module-form-group">
@@ -2646,11 +2704,18 @@ const HospitalNetworks: React.FC = () => {
                           const token = res.data?.inviteToken || res.data?.token
                           setInviteLink(res.data?.inviteUrl || (token ? `${window.location.origin}/accept-staff-invite?token=${token}` : ''))
                           setInviteStaffForm({ email: '', name: '', position: 'receptionist', hospitalId: '' })
+                          // Refresh pending invites list
+                          apiService.listStaffInvites(selectedNetwork.id).then((r: any) => setPendingInvites(r.data ?? r ?? [])).catch(() => {})
                         } else {
-                          setInviteStaffError(res.message || 'Failed to send invite')
+                          setInviteStaffError(res.message || res.error || 'Failed to send invite')
                         }
                       } catch (e: any) {
-                        setInviteStaffError(e.response?.data?.message || e.message)
+                        const errMsg = e.response?.data?.error || e.response?.data?.message || e.message || 'Failed to send invite'
+                        setInviteStaffError(
+                          e.response?.status === 409
+                            ? (errMsg.includes('already a member') ? 'This email is already a member of this network.' : 'A pending invitation already exists for this email. Check the pending invites list below.')
+                            : errMsg
+                        )
                       } finally {
                         setInviteStaffLoading(false)
                       }

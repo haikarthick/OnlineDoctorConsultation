@@ -2621,13 +2621,16 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
     // Derive system role from invited staff_position — pharmacist gets dedicated role
     const staffPositionRoleMap: Record<string, string> = { pharmacist: 'pharmacist' };
     const assignedRole = staffPositionRoleMap[invite.staff_position] || 'hospital_staff';
+    // network_role must satisfy the DB check constraint — always 'hospital_staff' for position-based invites
+    // The actual differentiation is captured in users.role and staff_positions.position
+    const networkRole = 'hospital_staff';
     const userResult = await db.query(
       `INSERT INTO users (email, first_name, last_name, phone, role, password_hash) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, email, first_name, last_name, role`,
       [invite.invitee_email, first_name, last_name, phone || '', assignedRole, password_hash]
     );
     const newUser = userResult.rows[0];
     await db.query(`INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (network_id, user_id) DO NOTHING`,
-      [invite.network_id, newUser.id, assignedRole, invite.hospital_id, invite.invited_by]);
+      [invite.network_id, newUser.id, networkRole, invite.hospital_id, invite.invited_by]);
     // staff_positions may not have a unique constraint — use INSERT only if not exists
     const existingPos = await db.query(`SELECT id FROM staff_positions WHERE hospital_id=$1 AND user_id=$2`, [invite.hospital_id, newUser.id]);
     if (existingPos.rows.length === 0 && invite.hospital_id) {
@@ -2662,9 +2665,16 @@ router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewa
     return res.status(400).json({ success: false, error: 'inviteeEmail and staffPosition are required' });
   }
 
-  const allowedPositions = ['nurse','technician','receptionist','lab_tech','radiologist','anesthesiologist','pharmacist','intern','admin_staff'];
-  if (!allowedPositions.includes(staffPosition)) {
-    return res.status(400).json({ success: false, error: `staffPosition must be one of: ${allowedPositions.join(', ')}` });
+  const builtInPositions = ['nurse','technician','receptionist','lab_tech','radiologist','anesthesiologist','pharmacist','intern','admin_staff'];
+  if (!builtInPositions.includes(staffPosition)) {
+    // Allow custom roles defined for this network
+    const customRoleRes = await db.query(
+      `SELECT role_key FROM network_custom_roles WHERE network_id = $1 AND role_key = $2 AND is_active = true`,
+      [req.params.id, staffPosition]
+    );
+    if (customRoleRes.rows.length === 0) {
+      return res.status(400).json({ success: false, error: `staffPosition must be one of: ${builtInPositions.join(', ')}, or a custom role defined for this network` });
+    }
   }
 
   // Check if email is already an active member
