@@ -2012,7 +2012,6 @@ const HospitalNetworks: React.FC = () => {
                               className="hn-edit-btn"
                               title="Edit member"
                               onClick={() => handleEditMember(m)}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#6366f1', padding: '2px 6px' }}
                             >✏️</button>
                             <button
                               className="hn-remove-btn"

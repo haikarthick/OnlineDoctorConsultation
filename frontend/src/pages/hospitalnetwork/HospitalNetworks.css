@@ -382,6 +382,14 @@
   color: #dc2626;
 }
 
+.hn-edit-btn {
+  background: none;
+  color: #6366f1;
+  border: none;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
 /* ─── Pending Invites Section ───────────────────────── */
 .hn-pending-invites-header {
   display: flex;

@@ -3134,6 +3134,14 @@ router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: R
   res.json({ success: true, data: pharmaRes.rows, networkId });
 }));
 
+router.get('/debug/my-network-members', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const membersRes = await database.query(
+    `SELECT * FROM hospital_network_members WHERE user_id = $1`,
+    [authReq.userId]
+  );
+  res.json({ success: true, data: membersRes.rows });
+}));
 
 // ── Pharmacy Setup ──────────────────────────────────────────
 
