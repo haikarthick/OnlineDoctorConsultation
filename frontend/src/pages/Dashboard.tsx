@@ -43,10 +43,21 @@ const Dashboard: React.FC = () => {
   const isAdmin = user?.role === 'admin'
   const isHospitalStaff = user?.role === 'hospital_staff'
   const isCorporateAdmin = user?.role === 'corporate_admin'
+  const isPharmacist = user?.role === 'pharmacist'
+
+  // Pharmacist's home is the Pharmacy module — redirect immediately so they never see the generic dashboard
+  useEffect(() => {
+    if (isPharmacist) {
+      navigate('/pharmacy', { replace: true })
+    }
+  }, [isPharmacist, navigate])
 
   useEffect(() => { loadDashboardData() }, [])
 
   const loadDashboardData = async () => {
+    // Pharmacist is redirected to /pharmacy — skip all data loading
+    if (isPharmacist) return
+
     // Corporate admin loads network stats instead of booking/consultation data
     if (isCorporateAdmin) {
       try {
@@ -227,6 +238,15 @@ const Dashboard: React.FC = () => {
       ]
     }
 
+    // Pharmacist — redirected to /pharmacy, but guard against any fallthrough
+    if (isPharmacist) {
+      return [
+        { label: t('pharmacy.stats.pendingReviews'), value: 0, icon: '📋', color: '#3949ab', path: '/pharmacy' },
+        { label: t('pharmacy.stats.readyToDispense'), value: 0, icon: '✅', color: '#4caf50', path: '/pharmacy' },
+        { label: t('pharmacy.stats.lowStock'), value: 0, icon: '⚠️', color: '#f44336', path: '/pharmacy' },
+      ]
+    }
+
     // Admin
     return [
       { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
@@ -234,7 +254,7 @@ const Dashboard: React.FC = () => {
       { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
       { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
     ]
-  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isCorporateAdmin, corpStats, t])
+  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isCorporateAdmin, isPharmacist, corpStats, t])
 
   // Quick actions — role-specific
   const quickActions: QuickAction[] = useMemo(() => {
@@ -295,6 +315,16 @@ const Dashboard: React.FC = () => {
       ]
     }
 
+    // Pharmacist — home is /pharmacy, redirect handles it but provide fallback actions
+    if (isPharmacist) {
+      return [
+        { icon: '💊', label: t('pharmacy.tabs.overview'), path: '/pharmacy', color: '#3949ab', description: t('pharmacy.pendingReview') },
+        { icon: '📋', label: t('pharmacy.tabs.review'), path: '/pharmacy', color: '#f57f17', description: t('pharmacy.noPendingReviews') },
+        { icon: '📦', label: t('pharmacy.tabs.inventory'), path: '/pharmacy', color: '#388e3c', description: t('pharmacy.inventory.title') },
+        { icon: '⚙️', label: t('dashboard.quickActions.settings'), path: '/settings', color: '#8b5cf6', description: t('dashboard.quickActions.desc.manageSettings') },
+      ]
+    }
+
     // Admin
     return [
       { icon: '🛡️', label: t('dashboard.quickActions.adminPanel'), path: '/admin/dashboard', color: '#667eea', description: t('dashboard.quickActions.desc.systemOverview') },
@@ -305,7 +335,7 @@ const Dashboard: React.FC = () => {
       { icon: '📜', label: t('dashboard.quickActions.auditLogs'), path: '/admin/audit-logs', color: '#ef4444', description: t('dashboard.quickActions.desc.systemActivity') },
       { icon: '🏥', label: t('dashboard.quickActions.hospitalMgmt'), path: '/admin/vet-hospitals', color: '#0ea5e9', description: t('dashboard.quickActions.desc.hospitalOversight') },
     ]
-  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, t])
+  }, [isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, t])
 
   // Subtitle per role
   const subtitle = useMemo(() => {
@@ -315,8 +345,9 @@ const Dashboard: React.FC = () => {
     if (isAdmin) return t('dashboard.subtitles.admin')
     if (isHospitalStaff) return t('dashboard.subtitles.hospitalStaff')
     if (isCorporateAdmin) return t('dashboard.subtitles.corporateAdmin')
+    if (isPharmacist) return t('dashboard.subtitles.pharmacist')
     return t('dashboard.greeting', { name: user?.firstName })
-  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, isCorporateAdmin, t, user?.firstName])
+  }, [isVeterinarian, isPetOwner, isFarmer, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, t, user?.firstName])
 
   return (
     <div className="dashboard-container">

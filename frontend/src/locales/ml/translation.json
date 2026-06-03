@@ -764,7 +764,8 @@
       "admin": "സിസ്റ്റം അഡ്മിനിസ്ട്രേഷൻ അവലോകനം",
       "farmer": "നിങ്ങളുടെ ഫാം മാനേജ്മെന്റ് അവലോകനം ഇതാ",
       "hospitalStaff": "Here's your hospital workflow overview",
-      "corporateAdmin": "Hospital network administration overview"
+      "corporateAdmin": "Hospital network administration overview",
+      "pharmacist": "Redirecting to your Pharmacy module..."
     },
     "pendingBookings": "🔔 തീർപ്പാക്കാത്ത ബുക്കിംഗ് സ്ഥിരീകരണങ്ങൾ",
     "recentActivity": "സമീപകാല പ്രവർത്തനങ്ങൾ",

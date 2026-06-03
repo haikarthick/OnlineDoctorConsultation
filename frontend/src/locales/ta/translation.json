@@ -764,7 +764,8 @@
       "admin": "கணினி நிர்வாக மேலோட்டம்",
       "farmer": "உங்கள் பண்ணை மேலாண்மை மேலோட்டம் இதோ",
       "corporateAdmin": "Hospital network administration overview",
-      "hospitalStaff": "இங்கே உங்கள் மருத்துவமனை பணிப்பாய்வு கண்ணோட்டம் உள்ளது"
+      "hospitalStaff": "இங்கே உங்கள் மருத்துவமனை பணிப்பாய்வு கண்ணோட்டம் உள்ளது",
+      "pharmacist": "Redirecting to your Pharmacy module..."
     },
     "pendingBookings": "🔔 நிலுவை முன்பதிவு உறுதிப்படுத்தல்கள்",
     "recentActivity": "சமீபத்திய செயல்பாடு",

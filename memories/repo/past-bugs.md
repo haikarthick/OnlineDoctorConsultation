@@ -1118,6 +1118,13 @@ render-start.sh
 - **Fix:** Built MedicationCatalog.tsx component — CRUD for pharmacy_medications table including form, withdrawal period, controlled substance flag. Added as 'catalog' tab in PharmacyDashboard.
 - **Rule:** Always build catalog management before inventory management — FK dependency must be satisfied.
 
+### DASH-PHARM-001 — pharmacist role had no dashboard branch — fell through to admin dashboard
+- **Logged:** 2026-06-03
+- **Symptom:** Pharmacist user logged in and saw admin stat tiles (Appointments, Consultations, Animals) plus admin quick-action cards (Admin Panel, Users, Payments, Audit Logs). Pharmacy user also had unnecessary API calls to listBookings/listConsultations/listAnimals (all returning empty/error).
+- **Root Cause:** Dashboard.tsx had role variables for vet/petOwner/farmer/admin/hospitalStaff/corporateAdmin but NOT pharmacist. The `statCards` and `quickActions` useMemo fell through to the admin fallback. The `loadDashboardData` function tried to load booking/consultation/animal data for pharmacist.
+- **Fix:** Added `isPharmacist = user?.role === 'pharmacist'`. Added early return redirect `useEffect(() => { if(isPharmacist) navigate('/pharmacy', {replace:true}) })`. Added early return guard in `loadDashboardData`. Added pharmacist fallback branches in `statCards`, `quickActions`, and `subtitle`.
+- **Rule:** EVERY role MUST have an explicit branch in Dashboard.tsx statCards, quickActions, subtitle, and loadDashboardData. Never let a new role fall through to admin fallback.
+
 ### PHARM-SETTINGS-001 — PharmacySettings always showed blank form — never loaded existing values
 - **Logged:** 2026-06-03
 - **Symptom:** Pharmacist opened Settings tab, all fields blank. Saving the form would clear existing phone/email/address.

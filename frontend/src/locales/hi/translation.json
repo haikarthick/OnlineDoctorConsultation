@@ -764,7 +764,8 @@
       "admin": "सिस्टम प्रशासन अवलोकन",
       "farmer": "आपकी कृषि प्रबंधन अवलोकन",
       "corporateAdmin": "Hospital network administration overview",
-      "hospitalStaff": "यहाँ आपके अस्पताल का कार्यप्रवाह अवलोकन है"
+      "hospitalStaff": "यहाँ आपके अस्पताल का कार्यप्रवाह अवलोकन है",
+      "pharmacist": "Redirecting to your Pharmacy module..."
     },
     "pendingBookings": "🔔 लंबित बुकिंग पुष्टिकरण",
     "recentActivity": "हाल की गतिविधि",

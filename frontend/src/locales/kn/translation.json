@@ -764,7 +764,8 @@
       "admin": "ವ್ಯವಸ್ಥೆ ನಿರ್ವಹಣೆ ಅವಲೋಕನ",
       "farmer": "ನಿಮ್ಮ ಕೃಷಿ ನಿರ್ವಹಣೆ ಅವಲೋಕನ ಇಲ್ಲಿದೆ",
       "corporateAdmin": "Hospital network administration overview",
-      "hospitalStaff": "ಇಲ್ಲಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ವರ್ಕ್‌ಫ್ಲೋ ಅವಲೋಕನ ಇದೆ"
+      "hospitalStaff": "ಇಲ್ಲಿ ನಿಮ್ಮ ಆಸ್ಪತ್ರೆ ವರ್ಕ್‌ಫ್ಲೋ ಅವಲೋಕನ ಇದೆ",
+      "pharmacist": "Redirecting to your Pharmacy module..."
     },
     "pendingBookings": "🔔 ಬಾಕಿ ಬುಕಿಂಗ್ ಖಚಿತೀಕರಣಗಳು",
     "recentActivity": "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ",

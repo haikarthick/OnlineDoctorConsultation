@@ -3104,3 +3104,39 @@
 </details>
 
 ---
+
+## 2026-06-03 16:00 · `7a0755f` · OTHER
+
+**Commit:** feat(pharmacy): full implementation v2 — security, billing, print, routing, cross-role visibility  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · UI · i18n · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (28)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/PrescriptionService.ts
+  - backend/src/utils/database.ts
+  - frontend/src/components/PharmacyReceiptView.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/doctor/PrescriptionWriter.tsx
+  - frontend/src/pages/doctor/Prescriptions.tsx
+  - frontend/src/pages/pharmacy/DispensingHistory.tsx
+  - frontend/src/pages/pharmacy/DispensingModal.tsx
+  - frontend/src/pages/pharmacy/DispensingWorkflow.tsx
+  - frontend/src/pages/pharmacy/MedicationCatalog.tsx
+  - frontend/src/pages/pharmacy/PharmacyDashboard.css
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+  - frontend/src/pages/pharmacy/PharmacyInventory.tsx
+  - frontend/src/pages/pharmacy/PharmacySettings.tsx
+  - ... and 8 more
+
+</details>
+
+---

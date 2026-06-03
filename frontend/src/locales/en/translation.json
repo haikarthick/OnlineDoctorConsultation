@@ -763,7 +763,8 @@
       "admin": "System administration overview",
       "farmer": "Here's your farm management overview",
       "hospitalStaff": "Here's your hospital workflow overview",
-      "corporateAdmin": "Hospital network administration overview"
+      "corporateAdmin": "Hospital network administration overview",
+      "pharmacist": "Redirecting to your Pharmacy module..."
     },
     "pendingBookings": "🔔 Pending Booking Confirmations",
     "recentActivity": "Recent Activity",
