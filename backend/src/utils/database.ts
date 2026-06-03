@@ -1537,6 +1537,30 @@ class PostgresDatabase {
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_dispensing_records_pharmacy ON dispensing_records(pharmacy_id)`).catch(() => {});
     await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_prescription_reviews_prescription ON prescription_reviews(prescription_id)`).catch(() => {});
 
+    // ── Phase 4: Pharmacy billing integration ─────────────────
+    // Add dispensing_id and payment_source to payments (link dispensing to payment system)
+    await this.pool.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS dispensing_id UUID REFERENCES dispensing_records(id) ON DELETE SET NULL`).catch(() => {});
+    await this.pool.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS payment_source VARCHAR(30) DEFAULT 'consultation'`).catch(() => {});
+    await this.pool.query(`
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='payments_payment_source_check') THEN
+          ALTER TABLE payments ADD CONSTRAINT payments_payment_source_check
+            CHECK (payment_source IN ('consultation','pharmacy','subscription','other'));
+        END IF;
+      END $$
+    `).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_payments_dispensing_id ON payments(dispensing_id)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_payments_payment_source ON payments(payment_source)`).catch(() => {});
+
+    // Add reviewed_by / reviewed_at / review_notes to prescriptions (safety net)
+    await this.pool.query(`ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL`).catch(() => {});
+    await this.pool.query(`ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ`).catch(() => {});
+    await this.pool.query(`ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_notes TEXT`).catch(() => {});
+
+    // Add withdrawal_period_days to pharmacy_medications (for livestock)
+    await this.pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS withdrawal_period_days INTEGER DEFAULT 0`).catch(() => {});
+    await this.pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS is_refrigerated BOOLEAN DEFAULT false`).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

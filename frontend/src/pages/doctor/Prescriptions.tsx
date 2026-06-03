@@ -28,6 +28,15 @@ interface PrescriptionItem {
   petOwnerName?: string
   vetName?: string
   diagnosis?: string
+  // Pharmacy fields
+  reviewStatus?: string
+  isNetworkCoordinated?: boolean
+  pharmacyName?: string
+  reviewedAt?: string
+  reviewNotes?: string
+  dispensingStatus?: string
+  dispensedAt?: string
+  dispensingMethod?: string
 }
 
 const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
@@ -270,6 +279,32 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                     }}>
                       {rx.isActive ? t('prescriptions.active') : t('prescriptions.inactive')}
                     </span>
+                    {/* Pharmacy status badge */}
+                    {rx.isNetworkCoordinated && rx.reviewStatus && (() => {
+                      // Simplified labels for pet owner, full labels for vet/admin
+                      const isOwner = !isVet && !isAdmin
+                      const statusMap: Record<string, { label: string; bg: string; color: string }> = {
+                        pending_review:          { label: isOwner ? t('prescriptions.pharmacy.sentToPharmacy') : `⏳ ${t('prescriptions.pharmacy.pendingReview')}`, bg: '#fff3e0', color: '#e65100' },
+                        approved_for_dispensing: { label: isOwner ? t('prescriptions.pharmacy.readyForPickup') : `✅ ${t('prescriptions.pharmacy.approvedForDispensing')}`, bg: '#e8f5e9', color: '#2e7d32' },
+                        dispensed:               { label: isOwner ? (rx.dispensingMethod === 'home_delivery' ? `🚚 ${t('prescriptions.pharmacy.outForDelivery')}` : `✓ ${t('prescriptions.pharmacy.dispensed')}`) : `💊 ${t('prescriptions.pharmacy.dispensed')}`, bg: '#e3f2fd', color: '#1565c0' },
+                        rejected:                { label: isOwner ? `⚠️ ${t('prescriptions.pharmacy.issueContactVet')}` : `❌ ${t('prescriptions.pharmacy.rejected')}`, bg: '#ffebee', color: '#c62828' },
+                        needs_clarification:     { label: isOwner ? `⏳ ${t('prescriptions.pharmacy.pendingUpdate')}` : `❓ ${t('prescriptions.pharmacy.needsClarification')}`, bg: '#fff8e1', color: '#f57f17' },
+                      }
+                      const statusInfo = statusMap[rx.reviewStatus]
+                      if (!statusInfo) return null
+                      return (
+                        <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: statusInfo.bg, color: statusInfo.color }}>
+                          {statusInfo.label}
+                          {rx.pharmacyName && <small style={{ fontWeight: 400, opacity: 0.8 }}> · {rx.pharmacyName}</small>}
+                        </span>
+                      )
+                    })()}
+                    {/* Rejection reason for vet */}
+                    {(isVet || isAdmin) && rx.reviewStatus === 'rejected' && rx.reviewNotes && (
+                      <span style={{ fontSize: 11, color: '#c62828', background: '#fff5f5', padding: '3px 8px', borderRadius: 8, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={rx.reviewNotes}>
+                        Reason: {rx.reviewNotes}
+                      </span>
+                    )}
                     <button
                       className="btn btn-outline"
                       style={{ fontSize: 12, padding: '4px 10px', color: '#2b6cb0', borderColor: '#2b6cb0' }}

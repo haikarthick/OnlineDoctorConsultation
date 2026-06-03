@@ -728,3 +728,9 @@
 - **Status:** done
 - **Description:** Complete pharmacy module for network hospitals: 10 DB tables, 25 API endpoints, pharmacist role, prescription review workflow, inventory management, supplier management, dispensing audit trail, cost analytics. Network-scoped data isolation. Auto-routes prescriptions to primary pharmacy. Full i18n (6 locales), 4-tier responsive CSS, auto-refresh every 30s.
 
+
+### ✅ Pharmacy Module — Full Implementation v2
+- **Logged:** 2026-06-03
+- **Status:** done
+- **Description:** Complete pharmacy module rebuild with full billing, print, security, routing, and cross-role visibility. Phase 1: guardPharmacy/guardNetworkPharmacy security on all routes, fixed broken prescription queue SQL (removed prescription_items JOIN, now jsonb_array_elements), rewrote DispensingModal with real inventory line items + stock checking, built MedicationCatalog.tsx. Phase 2: PharmacyInventory Add Stock modal, DispensingHistory with lifecycle status, ReordersManagement with tracking, PharmacySettings pre-populate, PrescriptionReviewModal shows full medication detail with radio decisions, PharmacyReceiptView print component, PharmacyDashboard 10 tabs (overview/review/dispense/inventory/catalog/suppliers/history/reorders/analytics/settings). Phase 3: PrescriptionService returns pharmacy fields, prescription list shows review_status badges (vet detailed / pet owner simplified), PrescriptionWriter auto-detects animal network enrollment and passes networkId for auto-routing, vet notification on rejection. Phase 4: payments.dispensing_id + payment_source columns, pharmacy payment record created on dispensing, prescription reviewed_by/at/notes columns, withdrawal_period_days on medications. Phase 5: All 6 locale files updated with 80+ new keys. TypeScript: 0 errors frontend + backend.
+

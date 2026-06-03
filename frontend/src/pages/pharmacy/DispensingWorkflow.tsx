@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import axios from 'axios'
+import client from '../../services/api/client'
 import PrescriptionReviewModal from './PrescriptionReviewModal'
 import DispensingModal from './DispensingModal'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
@@ -30,11 +30,11 @@ export default function DispensingWorkflow({ pharmacyId, mode, onRefresh }: Prop
   const [target, setTarget] = useState<Prescription | null>(null)
 
   const load = useCallback(async () => {
-    const url = mode === 'review'
-      ? `/api/v1/pharmacies/${pharmacyId}/pending-prescriptions`
-      : `/api/v1/pharmacies/${pharmacyId}/ready-for-dispensing`
+    const path = mode === 'review'
+      ? `/pharmacies/${pharmacyId}/pending-prescriptions`
+      : `/pharmacies/${pharmacyId}/ready-for-dispensing`
     try {
-      const res = await axios.get(url)
+      const res = await client.get(path)
       setItems(res.data || [])
     } catch (err: any) {
       setError(err?.response?.data?.error || err?.message || t('common.error'))

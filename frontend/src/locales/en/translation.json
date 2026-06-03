@@ -4032,7 +4032,23 @@
     "showing": "Showing {{count}} of {{total}} prescriptions",
     "print": "Print",
     "printPrescription": "Print this prescription",
-    "failedToPrint": "Failed to load prescription for printing"
+    "failedToPrint": "Failed to load prescription for printing",
+    "pharmacy": {
+      "pendingReview": "Awaiting Review",
+      "approvedForDispensing": "Approved for Dispensing",
+      "dispensed": "Dispensed",
+      "rejected": "Rejected",
+      "needsClarification": "Clarification Needed",
+      "sentToPharmacy": "Sent to Pharmacy",
+      "readyForPickup": "Ready for Pickup",
+      "outForDelivery": "Out for Delivery",
+      "issueContactVet": "Issue — Contact Your Vet",
+      "pendingUpdate": "Pending Vet Update",
+      "autoRouted": "Will be sent to",
+      "selectNetwork": "Route prescription to which pharmacy network?",
+      "noRouting": "No pharmacy routing (standalone)",
+      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review."
+    }
   },
   "prescriptionWriter": {
     "title": "Prescription Writer",
@@ -6378,12 +6394,17 @@
     "pendingReview": "Pending Review",
     "readyToDispense": "Ready to Dispense",
     "nav": { "title": "Pharmacy" },
+    "noNetworkHint": "You must be invited as a pharmacist to a hospital network to access the pharmacy module.",
     "tabs": {
       "overview": "Overview",
       "review": "Review",
       "dispense": "Dispense",
       "inventory": "Inventory",
+      "catalog": "Catalog",
       "suppliers": "Suppliers",
+      "history": "History",
+      "reorders": "Reorders",
+      "analytics": "Analytics",
       "settings": "Settings"
     },
     "stats": {
@@ -6411,7 +6432,10 @@
       "contact": "Contact",
       "email": "Email",
       "phone": "Phone",
-      "leadTime": "Lead Time"
+      "leadTime": "Lead Time",
+      "method": "Method",
+      "cost": "Cost",
+      "pharmacist": "Pharmacist"
     },
     "actions": {
       "review": "Review",
@@ -6423,7 +6447,9 @@
       "all": "All",
       "lowStock": "Low Stock",
       "expiringSoon": "Expiring Soon (30d)",
-      "expired": "Expired"
+      "expired": "Expired",
+      "show": "Show",
+      "clear": "Clear filter"
     },
     "stock": {
       "expired": "Expired",
@@ -6451,7 +6477,27 @@
     "inventory": {
       "title": "Medication Inventory",
       "searchPlaceholder": "Search by medication or batch...",
-      "empty": "No inventory records found"
+      "empty": "No inventory yet. Add stock to get started.",
+      "noResults": "No items match your search or filter",
+      "addStock": "Add Stock",
+      "addStockTitle": "Add Stock / Receive Inventory",
+      "addFirst": "Add First Stock Item",
+      "addStockBtn": "Add to Inventory",
+      "lowStockAlert": "medications below reorder point",
+      "expiringAlert": "items expiring within 30 days",
+      "medicationLabel": "Medication",
+      "selectMedication": "Select a medication from catalog",
+      "medRequired": "Please select a medication",
+      "qtyPositive": "Quantity must be at least 1",
+      "batchNumber": "Batch / Lot Number",
+      "quantity": "Quantity",
+      "expiryDate": "Expiry Date",
+      "locationCode": "Storage Location",
+      "receivedFrom": "Received From / Supplier",
+      "receivedFromPlaceholder": "Supplier name or delivery ID",
+      "noCatalogMeds": "No medications in the catalog yet.",
+      "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
+      "showing": "Showing {{count}} of {{total}} items"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6486,21 +6532,35 @@
     "review": {
       "title": "Review Prescription",
       "queueTitle": "Prescription Review Queue",
-      "validationChecks": "Validation Checks",
+      "validationChecks": "Validation Checklist",
+      "prescribedMedications": "Prescribed Medications",
       "decision": "Decision",
       "approved": "Approve",
       "rejected": "Reject",
+      "needs_clarification": "Needs Clarification",
       "needsClarification": "Needs Clarification",
       "rejectionReason": "Rejection Reason",
+      "rejectionReasonPlaceholder": "Explain why this prescription cannot be filled...",
+      "suggestedModifications": "Suggested Modifications",
+      "suggestionsPlaceholder": "Describe what the vet should change or clarify...",
+      "findings": "Pharmacist Notes (Optional)",
+      "findingsPlaceholder": "Any observations or notes for this dispensing...",
       "notes": "Review Notes",
       "notesPlaceholder": "Enter any findings or notes...",
+      "provideReason": "Please provide a reason",
       "submit": "Submit Review",
-      "completeChecksFirst": "Please complete all validation checks before approving",
+      "completeChecksFirst": "Complete all 4 validation checks before approving",
       "checks": {
-        "dosage_ok": "Dosage is appropriate",
-        "allergy_ok": "No allergy conflicts",
-        "interaction_ok": "No drug interactions",
-        "stock_ok": "Stock is available"
+        "dosage_ok": "Dosage is appropriate for species & weight",
+        "allergy_ok": "No known allergy conflicts",
+        "interaction_ok": "No drug interactions identified",
+        "stock_ok": "Stock is available in inventory"
+      },
+      "checksNote": {
+        "dosage_ok": "Verify against patient weight and species",
+        "allergy_ok": "Check patient allergy records",
+        "interaction_ok": "Check for concurrent medications",
+        "stock_ok": "Sufficient inventory for all line items"
       }
     },
     "dispense": {
@@ -6515,7 +6575,21 @@
       },
       "notes": "Notes",
       "notesPlaceholder": "Additional dispensing instructions...",
-      "confirm": "Confirm Dispensing"
+      "confirm": "Confirm & Dispense",
+      "medications": "Medications to Dispense",
+      "noMedications": "No medication details found in prescription",
+      "inventoryBatch": "Inventory / Batch",
+      "selectInventory": "Select batch...",
+      "qty": "Qty",
+      "unitPrice": "Unit Price",
+      "lineTotal": "Line Total",
+      "totalCost": "Total Cost",
+      "available": "Available",
+      "loadingInventory": "Loading pharmacy inventory...",
+      "inventoryLoadError": "Could not load pharmacy inventory",
+      "stockWarningError": "Cannot dispense — one or more quantities exceed available stock",
+      "unmatchedWarning": "Some medications are not matched to inventory items",
+      "selectInventoryWarning": "Select a batch for this medication"
     },
     "settings": {
       "title": "Pharmacy Settings",
@@ -6524,9 +6598,98 @@
       "phone": "Phone",
       "email": "Email",
       "address": "Address",
+      "addressPlaceholder": "Street, City, State, PIN",
       "licenseNumber": "License Number",
-      "acceptingRequests": "Currently accepting medication requests",
+      "acceptingRequests": "Currently accepting prescription requests",
+      "acceptingRequestsNote": "When off, vets cannot route new prescriptions here",
+      "primaryPharmacy": "Set as Primary Pharmacy",
+      "primaryPharmacyNote": "Prescriptions from this network auto-route to the primary pharmacy",
       "saved": "Pharmacy settings saved successfully"
+    },
+    "catalog": {
+      "title": "Medication Catalog",
+      "addMedication": "Add Medication",
+      "addTitle": "Add Medication to Catalog",
+      "editTitle": "Edit Medication",
+      "addFirst": "Add First Medication",
+      "nameLabel": "Medication Name",
+      "nameRequired": "Medication name is required",
+      "genericName": "Generic Name",
+      "form": "Dosage Form",
+      "strength": "Strength",
+      "unit": "Unit",
+      "supplier": "Supplier",
+      "noSupplier": "No supplier (direct purchase)",
+      "unitCost": "Unit Cost",
+      "sellingPrice": "Selling Price",
+      "minStockLevel": "Minimum Stock Level",
+      "reorderPoint": "Reorder Point",
+      "reorderQty": "Reorder Quantity",
+      "manufacturer": "Manufacturer",
+      "registrationNumber": "Reg / License Number",
+      "withdrawalDays": "Withdrawal Period (days)",
+      "withdrawalNote": "For livestock: days before animal can be slaughtered / milk used. Set 0 if not applicable.",
+      "isControlled": "Controlled Substance / Scheduled Drug",
+      "medications": "medications",
+      "searchPlaceholder": "Search by name, generic, manufacturer...",
+      "empty": "No medications in catalog yet",
+      "noResults": "No medications match your search",
+      "controlled": "Controlled",
+      "confirmDeactivate": "Deactivate {{name}}?"
+    },
+    "history": {
+      "title": "Dispensing History",
+      "records": "records",
+      "empty": "No dispensing records yet",
+      "status": {
+        "pending": "Pending",
+        "prepared": "Prepared",
+        "handed_over": "Handed Over",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "markPrepared": "Mark Prepared",
+      "markHandedOver": "✓ Hand Over",
+      "markDelivered": "✓ Delivered"
+    },
+    "reorders": {
+      "title": "Reorder Requests",
+      "orders": "orders",
+      "activeOrders": "Active Orders",
+      "noActive": "No active reorder requests",
+      "empty": "No reorder history",
+      "qty": "Qty",
+      "supplier": "Supplier",
+      "requestedBy": "Requested By",
+      "tracking": "Tracking",
+      "auto": "Auto",
+      "markSent": "Mark Sent",
+      "addTracking": "Add Tracking",
+      "markReceived": "Mark Received",
+      "trackingNumber": "Tracking Number",
+      "expectedDelivery": "Expected Delivery Date",
+      "status": {
+        "pending": "Pending",
+        "sent_to_supplier": "Sent to Supplier",
+        "confirmed": "Confirmed",
+        "shipped": "Shipped",
+        "received": "Received",
+        "cancelled": "Cancelled"
+      }
+    },
+    "analytics": {
+      "title": "Pharmacy Analytics",
+      "days": "days",
+      "totalRevenue": "Total Revenue",
+      "dispensingCount": "Total Dispensings",
+      "pendingReviews": "Pending Reviews",
+      "lowStock": "Low Stock Items",
+      "expiringSoon": "Expiring Soon",
+      "topMedications": "Top Medications by Volume"
+    },
+    "receipt": {
+      "preview": "Dispensing Receipt",
+      "print": "Print Receipt"
     }
   }
 }

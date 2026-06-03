@@ -167,16 +167,25 @@ class PrescriptionService {
       `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
        p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
+       p.review_status as "reviewStatus",
+       p.is_network_coordinated as "isNetworkCoordinated",
+       p.reviewed_at as "reviewedAt", p.review_notes as "reviewNotes",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "vetName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.unique_id as "animalUniqueId",
        a.gender as "animalGender",
-       c.diagnosis
+       c.diagnosis,
+       hp.pharmacy_name as "pharmacyName",
+       dr.dispensing_status as "dispensingStatus",
+       dr.created_at as "dispensedAt",
+       dr.dispensing_method as "dispensingMethod"
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.veterinarian_id
        LEFT JOIN animals a ON a.id = p.animal_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
+       LEFT JOIN hospital_pharmacies hp ON hp.id = p.target_pharmacy_id
+       LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.dispensing_status != 'cancelled'
        WHERE p.pet_owner_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
       [petOwnerId, limit, offset]
     );
@@ -194,16 +203,24 @@ class PrescriptionService {
       `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
        p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
+       p.review_status as "reviewStatus",
+       p.is_network_coordinated as "isNetworkCoordinated",
+       p.reviewed_at as "reviewedAt", p.review_notes as "reviewNotes",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "petOwnerName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.unique_id as "animalUniqueId",
        a.gender as "animalGender",
-       c.diagnosis
+       c.diagnosis,
+       hp.pharmacy_name as "pharmacyName",
+       dr.dispensing_status as "dispensingStatus",
+       dr.created_at as "dispensedAt"
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.pet_owner_id
        LEFT JOIN animals a ON a.id = p.animal_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
+       LEFT JOIN hospital_pharmacies hp ON hp.id = p.target_pharmacy_id
+       LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.dispensing_status != 'cancelled'
        WHERE p.veterinarian_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
       [veterinarianId, limit, offset]
     );

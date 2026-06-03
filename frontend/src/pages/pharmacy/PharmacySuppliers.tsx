@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import axios from 'axios'
+import client from '../../services/api/client'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 interface Supplier {
@@ -34,10 +34,11 @@ export default function PharmacySuppliers({ networkId }: Props) {
 
   const load = useCallback(async () => {
     try {
-      const res = await axios.get(`/api/v1/networks/${networkId}/suppliers`)
+      if (!networkId) { setSuppliers([]); setLoading(false); return }
+      const res = await client.get(`/networks/${networkId}/suppliers`)
       setSuppliers(res.data || [])
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || t('common.error'))
+      setError(err?.response?.data?.message || err?.response?.data?.error || err?.message || t('common.error'))
     } finally {
       setLoading(false)
     }
@@ -70,14 +71,14 @@ export default function PharmacySuppliers({ networkId }: Props) {
     setError('')
     try {
       if (editing) {
-        await axios.patch(`/api/v1/networks/${networkId}/suppliers/${editing.id}`, form)
+        await client.patch(`/networks/${networkId}/suppliers/${editing.id}`, form)
       } else {
-        await axios.post(`/api/v1/networks/${networkId}/suppliers`, form)
+        await client.post(`/networks/${networkId}/suppliers`, form)
       }
       setShowModal(false)
       load()
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.message || t('common.error'))
+      setError(err?.response?.data?.message || err?.response?.data?.error || err?.message || t('common.error'))
     } finally {
       setSaving(false)
     }

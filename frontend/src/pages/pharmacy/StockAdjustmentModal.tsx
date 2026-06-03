@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import axios from 'axios'
+import client from '../../services/api/client'
+
 
 interface InventoryItem {
   id: string
   med_id: string
-  medication_name: string
+  medication_name?: string
+  med_name?: string
   batch_number: string
   quantity: number
   unit: string
@@ -38,7 +40,7 @@ export default function StockAdjustmentModal({ pharmacyId, item, onClose, onDone
     setSaving(true)
     setError('')
     try {
-      await axios.post(`/api/v1/pharmacies/${pharmacyId}/stock-adjustments`, {
+      await client.post(`/pharmacies/${pharmacyId}/stock-adjustments`, {
         med_id: item.med_id,
         ...form,
       })
@@ -59,7 +61,7 @@ export default function StockAdjustmentModal({ pharmacyId, item, onClose, onDone
         </div>
 
         <div style={{ background: '#f5f7fa', borderRadius: 8, padding: '10px 14px', marginBottom: 14, fontSize: '0.88rem' }}>
-          <strong>{item.medication_name}</strong> — {t('pharmacy.table.batch')}: {item.batch_number}
+          <strong>{item.medication_name || item.med_name}</strong> — {t('pharmacy.table.batch')}: {item.batch_number}
           <br />
           <span style={{ color: '#666' }}>{t('pharmacy.stock.currentQty')}: {item.quantity} {item.unit}</span>
         </div>

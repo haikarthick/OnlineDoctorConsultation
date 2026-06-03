@@ -3110,6 +3110,34 @@ router.put('/disputes/:id/resolve', authMiddleware, roleMiddleware(['admin']), a
 // PHARMACY MODULE ROUTES
 // ============================================================
 
+// ── Access Guards ────────────────────────────────────────────
+// Returns networkId or sends 403/404 and returns null. All pharmacy routes MUST call this first.
+async function guardPharmacy(req: Request, res: Response, pharmacyId: string): Promise<string | null> {
+  const authReq = req as any;
+  if (!pharmacyId) { res.status(400).json({ success: false, message: 'pharmacyId is required' }); return null; }
+  const p = await database.query('SELECT network_id, is_active FROM hospital_pharmacies WHERE id=$1', [pharmacyId]);
+  if (!p.rows[0]) { res.status(404).json({ success: false, message: 'Pharmacy not found' }); return null; }
+  if (authReq.userRole === 'admin') return p.rows[0].network_id;
+  const m = await database.query(
+    'SELECT 1 FROM hospital_network_members WHERE network_id=$1 AND user_id=$2 AND is_active=true',
+    [p.rows[0].network_id, authReq.userId]
+  );
+  if (!m.rows[0]) { res.status(403).json({ success: false, message: 'You are not a member of this pharmacy\'s network' }); return null; }
+  return p.rows[0].network_id;
+}
+
+// Network-level pharmacy guard (for /networks/:networkId/suppliers, /medications etc.)
+async function guardNetworkPharmacy(req: Request, res: Response, networkId: string): Promise<boolean> {
+  const authReq = req as any;
+  if (authReq.userRole === 'admin') return true;
+  const m = await database.query(
+    'SELECT 1 FROM hospital_network_members WHERE network_id=$1 AND user_id=$2 AND is_active=true',
+    [networkId, authReq.userId]
+  );
+  if (!m.rows[0]) { res.status(403).json({ success: false, message: 'You are not a member of this network' }); return false; }
+  return true;
+}
+
 // Auto-discover pharmacies for the current user based on network membership
 router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
@@ -3182,6 +3210,7 @@ router.post('/networks/:networkId/pharmacies', authMiddleware, asyncHandler(asyn
 
 // Get / Update pharmacy
 router.get('/pharmacies/:pharmacyId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const result = await database.query(
     `SELECT hp.*, vh.name AS hospital_name FROM hospital_pharmacies hp
      LEFT JOIN vet_hospitals vh ON hp.hospital_id = vh.id
@@ -3193,6 +3222,7 @@ router.get('/pharmacies/:pharmacyId', authMiddleware, asyncHandler(async (req: R
 }));
 
 router.patch('/pharmacies/:pharmacyId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const authReq = req as any;
   const { pharmacy_name, address, phone, email, license_number, operating_hours, is_primary_pharmacy, is_accepting_requests, is_active } = req.body;
   const existing = await database.query(`SELECT * FROM hospital_pharmacies WHERE id = $1`, [req.params.pharmacyId]);
@@ -3221,6 +3251,7 @@ router.patch('/pharmacies/:pharmacyId', authMiddleware, asyncHandler(async (req:
 // ── Suppliers ──────────────────────────────────────────────
 
 router.get('/networks/:networkId/suppliers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const result = await database.query(
     `SELECT ps.*, (SELECT COUNT(*) FROM pharmacy_medications WHERE supplier_id = ps.id) AS medication_count
      FROM pharmacy_suppliers ps
@@ -3231,6 +3262,7 @@ router.get('/networks/:networkId/suppliers', authMiddleware, asyncHandler(async 
 }));
 
 router.post('/networks/:networkId/suppliers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const authReq = req as any;
   const { name, contact_name, email, phone, address, payment_terms, lead_time_days, notes } = req.body;
   if (!name) return res.status(400).json({ error: 'name is required' });
@@ -3243,6 +3275,7 @@ router.post('/networks/:networkId/suppliers', authMiddleware, asyncHandler(async
 }));
 
 router.patch('/networks/:networkId/suppliers/:supplierId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const { name, contact_name, email, phone, address, payment_terms, lead_time_days, notes, is_approved, is_active } = req.body;
   const result = await database.query(
     `UPDATE pharmacy_suppliers SET
@@ -3262,6 +3295,7 @@ router.patch('/networks/:networkId/suppliers/:supplierId', authMiddleware, async
 // ── Medications ─────────────────────────────────────────────
 
 router.get('/networks/:networkId/medications', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const result = await database.query(
     `SELECT pm.*, ps.name AS supplier_name FROM pharmacy_medications pm
      LEFT JOIN pharmacy_suppliers ps ON pm.supplier_id = ps.id
@@ -3273,6 +3307,7 @@ router.get('/networks/:networkId/medications', authMiddleware, asyncHandler(asyn
 }));
 
 router.post('/networks/:networkId/medications', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const authReq = req as any;
   const { name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, contraindications, side_effects, common_interactions } = req.body;
   if (!name) return res.status(400).json({ error: 'name is required' });
@@ -3285,6 +3320,7 @@ router.post('/networks/:networkId/medications', authMiddleware, asyncHandler(asy
 }));
 
 router.patch('/networks/:networkId/medications/:medId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const { name, generic_name, form, strength, unit, supplier_id, unit_cost, selling_price, min_stock_level, max_stock_level, reorder_point, reorder_quantity, manufacturer, registration_number, is_controlled, is_active } = req.body;
   const result = await database.query(
     `UPDATE pharmacy_medications SET
@@ -3307,6 +3343,7 @@ router.patch('/networks/:networkId/medications/:medId', authMiddleware, asyncHan
 // ── Inventory ───────────────────────────────────────────────
 
 router.get('/pharmacies/:pharmacyId/inventory', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const result = await database.query(
     `SELECT pi.*, pm.name AS med_name, pm.generic_name, pm.form, pm.strength, pm.unit AS med_unit,
             pm.reorder_point, pm.min_stock_level,
@@ -3321,6 +3358,7 @@ router.get('/pharmacies/:pharmacyId/inventory', authMiddleware, asyncHandler(asy
 }));
 
 router.post('/pharmacies/:pharmacyId/inventory', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const authReq = req as any;
   const { med_id, batch_number, quantity, unit, expiry_date, received_from, location_code, shipment_request_id } = req.body;
   if (!med_id || !quantity) return res.status(400).json({ error: 'med_id and quantity are required' });
@@ -3340,6 +3378,7 @@ router.post('/pharmacies/:pharmacyId/inventory', authMiddleware, asyncHandler(as
 
 // Expiry alerts
 router.get('/pharmacies/:pharmacyId/expiry-alerts', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const result = await database.query(
     `SELECT pi.*, pm.name AS med_name, pm.form, pm.strength,
             (pi.expiry_date - CURRENT_DATE) AS days_until_expiry
@@ -3355,6 +3394,7 @@ router.get('/pharmacies/:pharmacyId/expiry-alerts', authMiddleware, asyncHandler
 
 // Low stock alerts
 router.get('/pharmacies/:pharmacyId/low-stock-alerts', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const result = await database.query(
     `SELECT pm.id AS med_id, pm.name AS med_name, pm.form, pm.strength, pm.reorder_point, pm.min_stock_level,
             COALESCE(SUM(pi.quantity), 0) AS current_stock
@@ -3372,6 +3412,7 @@ router.get('/pharmacies/:pharmacyId/low-stock-alerts', authMiddleware, asyncHand
 
 // Stock adjustments
 router.post('/pharmacies/:pharmacyId/stock-adjustments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const authReq = req as any;
   const { med_id, inventory_id, batch_number, adjustment_qty, adjustment_type, reason, evidence_url } = req.body;
   if (!med_id || !adjustment_qty || !adjustment_type) return res.status(400).json({ error: 'med_id, adjustment_qty, adjustment_type are required' });
@@ -3392,6 +3433,7 @@ router.post('/pharmacies/:pharmacyId/stock-adjustments', authMiddleware, asyncHa
 }));
 
 router.get('/pharmacies/:pharmacyId/stock-adjustments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const result = await database.query(
     `SELECT psa.*, pm.name AS med_name, u.first_name || ' ' || u.last_name AS adjusted_by_name
      FROM pharmacy_stock_adjustments psa
@@ -3407,6 +3449,7 @@ router.get('/pharmacies/:pharmacyId/stock-adjustments', authMiddleware, asyncHan
 // ── Reorder Requests ─────────────────────────────────────────
 
 router.get('/pharmacies/:pharmacyId/reorders', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const result = await database.query(
     `SELECT pr.*, pm.name AS med_name, pm.form, pm.strength, ps.name AS supplier_name,
             u.first_name || ' ' || u.last_name AS requested_by_name
@@ -3422,6 +3465,7 @@ router.get('/pharmacies/:pharmacyId/reorders', authMiddleware, asyncHandler(asyn
 }));
 
 router.post('/pharmacies/:pharmacyId/reorders', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const authReq = req as any;
   const { med_id, supplier_id, requested_qty, notes, triggered_by } = req.body;
   if (!med_id || !requested_qty) return res.status(400).json({ error: 'med_id and requested_qty are required' });
@@ -3434,6 +3478,7 @@ router.post('/pharmacies/:pharmacyId/reorders', authMiddleware, asyncHandler(asy
 }));
 
 router.patch('/pharmacies/:pharmacyId/reorders/:reorderId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const { status, tracking_number, expected_delivery_date, notes } = req.body;
   const now = new Date().toISOString();
   const extra: Record<string, string> = {};
@@ -3460,13 +3505,17 @@ router.patch('/pharmacies/:pharmacyId/reorders/:reorderId', authMiddleware, asyn
 
 // Pending prescriptions queue for a pharmacy
 router.get('/pharmacies/:pharmacyId/pending-prescriptions', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const pharmacyRow = await database.query(`SELECT network_id FROM hospital_pharmacies WHERE id = $1`, [req.params.pharmacyId]);
-  if (!pharmacyRow.rows[0]) return res.status(404).json({ error: 'Pharmacy not found' });
-  const networkId = pharmacyRow.rows[0].network_id;
+  const networkId = await guardPharmacy(req, res, req.params.pharmacyId);
+  if (!networkId) return;
   const result = await database.query(
-    `SELECT p.*, a.name AS animal_name, a.species AS animal_species,
+    `SELECT p.id, p.created_at, p.valid_until, p.instructions, p.medications, p.review_status,
+            p.animal_id, p.veterinarian_id, p.pet_owner_id, p.consultation_id,
+            a.name AS pet_name, a.species AS animal_species, a.breed AS animal_breed,
             u.first_name || ' ' || u.last_name AS vet_name,
-            po.first_name || ' ' || po.last_name AS owner_name
+            po.first_name || ' ' || po.last_name AS owner_name,
+            (SELECT STRING_AGG(med->>'name', ', ')
+             FROM jsonb_array_elements(COALESCE(p.medications, '[]'::jsonb)) AS med
+            ) AS medication_names
      FROM prescriptions p
      JOIN animals a ON p.animal_id = a.id
      JOIN users u ON p.veterinarian_id = u.id
@@ -3474,7 +3523,7 @@ router.get('/pharmacies/:pharmacyId/pending-prescriptions', authMiddleware, asyn
      WHERE p.network_id = $1
        AND (p.review_status = 'pending_review' OR p.review_status IS NULL)
        AND p.is_active = true
-     ORDER BY p.created_at DESC`,
+     ORDER BY p.created_at ASC`,
     [networkId]
   );
   res.json(result.rows);
@@ -3483,15 +3532,20 @@ router.get('/pharmacies/:pharmacyId/pending-prescriptions', authMiddleware, asyn
 // Submit prescription review
 router.post('/prescriptions/:prescriptionId/review', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
-  const { review_status, validation_checks, findings, suggested_modifications, rejection_reason } = req.body;
-  if (!review_status) return res.status(400).json({ error: 'review_status is required' });
+  // Accept both field naming conventions (frontend sends review_notes; canonical is rejection_reason/findings)
+  const review_status = req.body.review_status;
+  const validation_checks = req.body.validation_checks || {};
+  const rejection_reason = req.body.rejection_reason || req.body.review_notes || null;
+  const findings = req.body.findings || null;
+  const suggested_modifications = req.body.suggested_modifications || null;
+  if (!review_status) return res.status(400).json({ success: false, message: 'review_status is required' });
   const validStatuses = ['approved', 'rejected', 'needs_clarification'];
-  if (!validStatuses.includes(review_status)) return res.status(400).json({ error: 'Invalid review_status' });
+  if (!validStatuses.includes(review_status)) return res.status(400).json({ success: false, message: 'Invalid review_status' });
   // Insert review record
   await database.query(
     `INSERT INTO prescription_reviews (prescription_id, pharmacist_id, review_status, validation_checks, findings, suggested_modifications, rejection_reason)
      VALUES ($1,$2,$3,$4::jsonb,$5,$6,$7)`,
-    [req.params.prescriptionId, authReq.userId, review_status, JSON.stringify(validation_checks || {}), findings || [], suggested_modifications || null, rejection_reason || null]
+    [req.params.prescriptionId, authReq.userId, review_status, JSON.stringify(validation_checks), findings || '', suggested_modifications, rejection_reason]
   );
   // Map to prescription review_status
   const prescriptionStatus = review_status === 'approved' ? 'approved_for_dispensing' : review_status === 'rejected' ? 'rejected' : 'pending_review';
@@ -3499,6 +3553,24 @@ router.post('/prescriptions/:prescriptionId/review', authMiddleware, asyncHandle
     `UPDATE prescriptions SET review_status = $1, reviewed_by = $2, reviewed_at = NOW(), review_notes = $3, updated_at = NOW() WHERE id = $4`,
     [prescriptionStatus, authReq.userId, rejection_reason || suggested_modifications || null, req.params.prescriptionId]
   );
+  // Notify vet on rejection or clarification request
+  if (review_status === 'rejected' || review_status === 'needs_clarification') {
+    try {
+      const rxRow = await database.query(
+        `SELECT p.veterinarian_id, a.name AS animal_name FROM prescriptions p LEFT JOIN animals a ON a.id=p.animal_id WHERE p.id=$1`,
+        [req.params.prescriptionId]
+      );
+      if (rxRow.rows[0]) {
+        const msg = review_status === 'rejected'
+          ? `Your prescription for ${rxRow.rows[0].animal_name || 'your patient'} was rejected by the pharmacist.${rejection_reason ? ' Reason: ' + rejection_reason : ''}`
+          : `Pharmacist needs clarification on your prescription for ${rxRow.rows[0].animal_name || 'your patient'}.${suggested_modifications ? ' Note: ' + suggested_modifications : ''}`;
+        const NSvc = (await import('../services/NotificationService')).default;
+        await NSvc.createNotification(rxRow.rows[0].veterinarian_id, 'prescription',
+          review_status === 'rejected' ? 'Prescription Rejected' : 'Prescription — Clarification Needed',
+          msg, 'all', { prescriptionId: req.params.prescriptionId });
+      }
+    } catch { /* non-fatal */ }
+  }
   res.json({ success: true, review_status: prescriptionStatus });
 }));
 
@@ -3519,33 +3591,39 @@ router.get('/prescriptions/:prescriptionId/reviews', authMiddleware, asyncHandle
 
 // Ready-for-dispensing queue
 router.get('/pharmacies/:pharmacyId/ready-for-dispensing', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const pharmacyRow = await database.query(`SELECT network_id FROM hospital_pharmacies WHERE id = $1`, [req.params.pharmacyId]);
-  if (!pharmacyRow.rows[0]) return res.status(404).json({ error: 'Pharmacy not found' });
+  const networkId = await guardPharmacy(req, res, req.params.pharmacyId);
+  if (!networkId) return;
   const result = await database.query(
-    `SELECT p.*, a.name AS animal_name, a.species AS animal_species,
+    `SELECT p.id, p.created_at, p.valid_until, p.instructions, p.medications, p.review_status,
+            p.animal_id, p.veterinarian_id, p.pet_owner_id, p.consultation_id,
+            a.name AS pet_name, a.species AS animal_species, a.breed AS animal_breed,
             u.first_name || ' ' || u.last_name AS vet_name,
             po.first_name || ' ' || po.last_name AS owner_name,
-            dr.id AS dispensing_record_id, dr.dispensing_status
+            dr.id AS dispensing_record_id, dr.dispensing_status,
+            (SELECT STRING_AGG(med->>'name', ', ')
+             FROM jsonb_array_elements(COALESCE(p.medications, '[]'::jsonb)) AS med
+            ) AS medication_names
      FROM prescriptions p
      JOIN animals a ON p.animal_id = a.id
      JOIN users u ON p.veterinarian_id = u.id
      LEFT JOIN users po ON p.pet_owner_id = po.id
      LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.pharmacy_id = $1
-     WHERE p.network_id = (SELECT network_id FROM hospital_pharmacies WHERE id = $1)
+     WHERE p.network_id = $2
        AND p.review_status = 'approved_for_dispensing'
        AND (dr.id IS NULL OR dr.dispensing_status NOT IN ('handed_over','delivered'))
        AND p.is_active = true
      ORDER BY p.created_at ASC`,
-    [req.params.pharmacyId]
+    [req.params.pharmacyId, networkId]
   );
   res.json(result.rows);
 }));
 
 // Create dispensing record
 router.post('/dispensing', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.body.pharmacy_id)) return;
   const authReq = req as any;
   const { prescription_id, pharmacy_id, dispensing_method, line_items, received_by, notes } = req.body;
-  if (!prescription_id || !pharmacy_id) return res.status(400).json({ error: 'prescription_id and pharmacy_id are required' });
+  if (!prescription_id || !pharmacy_id) return res.status(400).json({ success: false, message: 'prescription_id and pharmacy_id are required' });
   // Calculate total cost
   const total_cost = (line_items || []).reduce((sum: number, item: any) => sum + (item.line_total || 0), 0);
   const record = await database.query(
@@ -3573,6 +3651,41 @@ router.post('/dispensing', authMiddleware, asyncHandler(async (req: Request, res
   }
   // Update prescription to dispensed
   await database.query(`UPDATE prescriptions SET review_status = 'dispensed', updated_at = NOW() WHERE id = $1`, [prescription_id]);
+  // Create pharmacy payment record (pending — patient pays at counter or later)
+  if (total_cost > 0) {
+    try {
+      const rxForBilling = await database.query(
+        `SELECT pet_owner_id, consultation_id FROM prescriptions WHERE id=$1`, [prescription_id]
+      );
+      if (rxForBilling.rows[0]) {
+        const invoiceNum = `PHARM-${recordId.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+        const payStatus = (dispensing_method === 'walk_in_pickup' || dispensing_method === 'hospital_pickup') ? 'completed' : 'pending';
+        await database.query(
+          `INSERT INTO payments (consultation_id, dispensing_id, user_id, payer_id, amount, currency, status, payment_method, payment_source, invoice_number, paid_at, created_at, updated_at)
+           VALUES ($1,$2,$3,$3,$4,'INR',$5,'cash','pharmacy',$6,
+             CASE WHEN $5='completed' THEN NOW() ELSE NULL END, NOW(), NOW())`,
+          [rxForBilling.rows[0].consultation_id || null, recordId, rxForBilling.rows[0].pet_owner_id, total_cost, payStatus, invoiceNum]
+        );
+      }
+    } catch (billErr: any) {
+      logger.warn('Pharmacy billing record creation failed (non-fatal)', { error: billErr.message });
+    }
+  }
+  // Notify pet owner that medication is ready/dispensed
+  try {
+    const rxRow = await database.query(
+      `SELECT p.pet_owner_id, a.name AS animal_name FROM prescriptions p LEFT JOIN animals a ON a.id=p.animal_id WHERE p.id=$1`,
+      [prescription_id]
+    );
+    if (rxRow.rows[0]?.pet_owner_id) {
+      const method = dispensing_method || 'walk_in_pickup';
+      const msg = method === 'home_delivery'
+        ? `${rxRow.rows[0].animal_name || 'Your pet'}'s medication has been dispatched for home delivery.`
+        : `${rxRow.rows[0].animal_name || 'Your pet'}'s medication is ready for ${method === 'courier' ? 'courier pickup' : 'collection'} at the pharmacy.`;
+      const NSvc = (await import('../services/NotificationService')).default;
+      await NSvc.createNotification(rxRow.rows[0].pet_owner_id, 'prescription', 'Medication Ready', msg, 'all', { prescriptionId: prescription_id, dispensingId: recordId });
+    }
+  } catch { /* non-fatal */ }
   res.status(201).json(record.rows[0]);
 }));
 
@@ -3597,6 +3710,7 @@ router.patch('/dispensing/:dispensingId', authMiddleware, asyncHandler(async (re
 
 // Dispensing history
 router.get('/pharmacies/:pharmacyId/dispensing-history', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
   const result = await database.query(
     `SELECT dr.*, p.medications AS prescription_medications,
@@ -3618,6 +3732,7 @@ router.get('/pharmacies/:pharmacyId/dispensing-history', authMiddleware, asyncHa
 // ── Analytics ────────────────────────────────────────────────
 
 router.get('/pharmacies/:pharmacyId/analytics', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
   const days = parseInt(req.query.days as string) || 30;
   const [revenue, volume, topMeds, lowStock, expiring] = await Promise.all([
     database.query(
@@ -3733,10 +3848,9 @@ router.patch('/networks/:networkId/med-requests/:requestId', authMiddleware, asy
 // Pharmacy dashboard summary (tiles)
 router.get('/pharmacies/:pharmacyId/dashboard', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const pid = req.params.pharmacyId;
-  const pharmacyRow = await database.query(`SELECT network_id FROM hospital_pharmacies WHERE id = $1`, [pid]);
-  if (!pharmacyRow.rows[0]) return res.status(404).json({ error: 'Pharmacy not found' });
-  const networkId = pharmacyRow.rows[0].network_id;
-  const [pending, approved, lowStock, expiring, pendingReorders] = await Promise.all([
+  const networkId = await guardPharmacy(req, res, pid);
+  if (!networkId) return;
+  const [pending, approved, lowStock, expiring, pendingReorders, todayRevenue] = await Promise.all([
     database.query(`SELECT COUNT(*) FROM prescriptions WHERE network_id = $1 AND (review_status = 'pending_review' OR review_status IS NULL) AND is_active = true`, [networkId]),
     database.query(`SELECT COUNT(*) FROM prescriptions WHERE network_id = $1 AND review_status = 'approved_for_dispensing' AND is_active = true`, [networkId]),
     database.query(
@@ -3745,13 +3859,16 @@ router.get('/pharmacies/:pharmacyId/dashboard', authMiddleware, asyncHandler(asy
     ),
     database.query(`SELECT COUNT(*) FROM pharmacy_inventory WHERE pharmacy_id = $1 AND is_active = true AND expiry_date IS NOT NULL AND expiry_date <= CURRENT_DATE + INTERVAL '90 days'`, [pid]),
     database.query(`SELECT COUNT(*) FROM pharmacy_reorder_requests WHERE pharmacy_id = $1 AND status IN ('pending','sent_to_supplier')`, [pid]),
+    database.query(`SELECT COALESCE(SUM(total_cost),0) AS revenue, COUNT(*) AS dispensed FROM dispensing_records WHERE pharmacy_id = $1 AND DATE(created_at) = CURRENT_DATE`, [pid]),
   ]);
   res.json({
     pending_reviews: parseInt(pending.rows[0].count),
-    ready_for_dispensing: parseInt(approved.rows[0].count),
-    low_stock_alerts: parseInt(lowStock.rows[0].count),
-    expiring_soon: parseInt(expiring.rows[0].count),
+    ready_to_dispense: parseInt(approved.rows[0].count),
+    low_stock_count: parseInt(lowStock.rows[0].count),
+    expiring_soon_count: parseInt(expiring.rows[0].count),
     pending_reorders: parseInt(pendingReorders.rows[0].count),
+    todays_revenue: parseFloat(todayRevenue.rows[0]?.revenue ?? '0'),
+    todays_dispensed: parseInt(todayRevenue.rows[0]?.dispensed ?? '0'),
   });
 }));
 

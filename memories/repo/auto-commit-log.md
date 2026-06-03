@@ -3024,3 +3024,83 @@
 </details>
 
 ---
+
+## 2026-06-02 15:13 · `b6bb89a` · 🐛 FIX
+
+**Commit:** fix: pharmacy dashboard TS errors + 4 staff invite UI bugs  
+**Author:** haikarthick  
+**Categories:** API · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - backend/src/routes/index.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.css
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+  - frontend/src/styles/modules.css
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-06-02 16:24 · `e537608` · OTHER
+
+**Commit:** fix(hospital-network): align pending-invites UI, use CSS class for edit button; add debug route /debug/my-network-members  
+**Author:** haikarthick  
+**Categories:** API · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/routes/index.ts
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.css
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+
+</details>
+
+---
+
+## 2026-06-02 16:30 · `42519c5` · OTHER
+
+**Commit:** fix(pending-invites): restructure invite item to 2-row layout — no more overflow in narrow panel  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.css
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+
+</details>
+
+---
+
+## 2026-06-02 16:42 · `52967ff` · OTHER
+
+**Commit:** fix(pharmacy): send auth via client instance (attach token) and call correct pharmacy endpoints  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/pharmacy/PharmacyDashboard.tsx
+
+</details>
+
+---

@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import apiService from '../../services/api'
+import client from '../../services/api/client'
 import { Medication } from '../../types'
 import '../../styles/modules.css'
 
@@ -41,6 +42,9 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
   const [selectedAnimalId, setSelectedAnimalId] = useState(urlAnimalId)
   const [loadingPatients, setLoadingPatients] = useState(false)
   const [loadingAnimals, setLoadingAnimals] = useState(false)
+  // Network pharmacy routing — auto-detected from animal's care contexts
+  const [networkOptions, setNetworkOptions] = useState<{ id: string; name: string }[]>([])
+  const [selectedNetworkId, setSelectedNetworkId] = useState<string | null>(null)
 
   const isVet = user?.role === 'veterinarian'
   const isAdmin = user?.role === 'admin'
@@ -73,13 +77,33 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
         const res = await apiService.listAnimals(queryParams)
         const list = res.data?.animals || res.data?.items || (Array.isArray(res.data) ? res.data : [])
         setAnimals(list.map((a: any) => ({ id: a.id, name: a.name, species: a.species })))
-        // Auto-select if only one animal for the owner
         if (list.length === 1 && !selectedAnimalId) setSelectedAnimalId(list[0].id)
       } catch { setAnimals([]) }
       finally { setLoadingAnimals(false) }
     }
     loadAnimals()
   }, [selectedPetOwnerId, urlAnimalId, isStandalone])
+
+  // Auto-detect network enrollment for selected animal → pharmacy routing
+  useEffect(() => {
+    const animalId = selectedAnimalId || urlAnimalId
+    if (!animalId) {
+      setNetworkOptions([]); setSelectedNetworkId(null)
+      return
+    }
+    client.get(`/animals/${animalId}/care-contexts`)
+      .then(res => {
+        const contexts: any[] = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []
+        const activeContexts = contexts.filter(c => c.enrollmentStatus === 'active' || !c.enrollmentStatus)
+        setNetworkOptions(activeContexts.map((c: any) => ({ id: c.networkId, name: c.networkName })))
+        if (activeContexts.length === 1) {
+          setSelectedNetworkId(activeContexts[0].networkId)
+        } else {
+          setSelectedNetworkId(null)
+        }
+      })
+      .catch(() => { setNetworkOptions([]); setSelectedNetworkId(null) })
+  }, [selectedAnimalId, urlAnimalId])
 
   // New med form
   const [newMed, setNewMed] = useState<Medication>({
@@ -120,8 +144,9 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
         diagnosis,
         medications,
         instructions: instructions || '',
-        followUpDate: followUpDate || undefined
-      })
+        followUpDate: followUpDate || undefined,
+        networkId: selectedNetworkId || undefined,
+      } as any)
       setSubmitted(true)
     } catch (err: any) {
       setError(err.response?.data?.error?.message || err.response?.data?.message || t('prescriptionWriter.failedToCreate'))
@@ -246,6 +271,34 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                   )}
                 </div>
               </div>
+              {/* Network pharmacy routing indicator */}
+              {networkOptions.length > 0 && (
+                <div style={{ marginTop: 12, padding: '10px 14px', background: '#e8f5e9', borderRadius: 8, border: '1px solid #a5d6a7' }}>
+                  <div style={{ fontSize: '0.87rem', fontWeight: 600, color: '#2e7d32', marginBottom: networkOptions.length > 1 ? 8 : 0 }}>
+                    💊 {networkOptions.length === 1
+                      ? `${t('prescriptions.pharmacy.autoRouted')} ${networkOptions[0].name}`
+                      : t('prescriptions.pharmacy.selectNetwork')}
+                  </div>
+                  {networkOptions.length > 1 && (
+                    <select
+                      className="module-input"
+                      style={{ marginTop: 4 }}
+                      value={selectedNetworkId || ''}
+                      onChange={e => setSelectedNetworkId(e.target.value || null)}
+                    >
+                      <option value="">{t('prescriptions.pharmacy.noRouting')}</option>
+                      {networkOptions.map(n => (
+                        <option key={n.id} value={n.id}>{n.name}</option>
+                      ))}
+                    </select>
+                  )}
+                  {networkOptions.length === 1 && (
+                    <div style={{ fontSize: '0.8rem', color: '#388e3c', marginTop: 2 }}>
+                      {t('prescriptions.pharmacy.routingNote')}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

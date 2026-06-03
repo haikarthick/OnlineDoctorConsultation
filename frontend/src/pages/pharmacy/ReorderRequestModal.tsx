@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import axios from 'axios'
+import client from '../../services/api/client'
+import { useSettings } from '../../context/SettingsContext'
 
 interface InventoryItem {
   id: string
   med_id: string
-  medication_name: string
+  medication_name?: string
+  med_name?: string
   quantity: number
   unit: string
   min_stock_level: number
@@ -26,6 +28,7 @@ interface Props {
 
 export default function ReorderRequestModal({ pharmacyId, networkId, item, onClose, onDone }: Props) {
   const { t } = useTranslation()
+  useSettings() // load settings context for currency consistency
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [form, setForm] = useState({
     supplier_id: '',
@@ -36,7 +39,7 @@ export default function ReorderRequestModal({ pharmacyId, networkId, item, onClo
   const [error, setError] = useState('')
 
   useEffect(() => {
-    axios.get(`/api/v1/networks/${networkId}/suppliers`).then(res => {
+    client.get(`/networks/${networkId}/suppliers`).then(res => {
       setSuppliers(res.data || [])
       if (res.data?.length > 0) setForm(f => ({ ...f, supplier_id: res.data[0].id }))
     }).catch(() => {})
@@ -49,7 +52,7 @@ export default function ReorderRequestModal({ pharmacyId, networkId, item, onClo
     setSaving(true)
     setError('')
     try {
-      await axios.post(`/api/v1/pharmacies/${pharmacyId}/reorders`, {
+      await client.post(`/pharmacies/${pharmacyId}/reorders`, {
         med_id: item.med_id,
         supplier_id: form.supplier_id,
         requested_qty: form.requested_qty,
@@ -73,7 +76,7 @@ export default function ReorderRequestModal({ pharmacyId, networkId, item, onClo
         </div>
 
         <div style={{ background: '#f5f7fa', borderRadius: 8, padding: '10px 14px', marginBottom: 14, fontSize: '0.88rem' }}>
-          <strong>{item.medication_name}</strong>
+          <strong>{item.medication_name || item.med_name}</strong>
           <br />
           <span style={{ color: '#666' }}>{t('pharmacy.stock.currentQty')}: {item.quantity} {item.unit} · {t('pharmacy.table.minStock')}: {item.min_stock_level}</span>
         </div>

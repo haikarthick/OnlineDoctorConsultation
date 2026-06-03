@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "loading": "लोड हो रहा है...",
     "cancel": "रद्द करें",
@@ -64,7 +64,38 @@
       "sheep": "भेड़",
       "pig": "सुअर",
       "other": "अन्य"
-    }
+    },
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled",
+    "missed": "Missed",
+    "scheduled": "Scheduled",
+    "rescheduled": "Rescheduled",
+    "inProgress": "In Progress",
+    "booking": "Booking",
+    "consultation": "Consultation",
+    "video": "Video",
+    "inPerson": "In-person",
+    "chat": "Chat",
+    "with": "with",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "animal": "Animal",
+    "generalConsultation": "General consultation",
+    "normal": "Normal",
+    "urgent": "Urgent",
+    "emergency": "Emergency",
+    "at": "at",
+    "view": "View",
+    "remove": "Remove",
+    "apply": "Apply",
+    "failedToLoad": "Failed to load data",
+    "failedToSave": "Failed to save",
+    "failedToDelete": "Failed to delete",
+    "failedToUpdate": "Failed to update",
+    "viewAll": "View All",
+    "requiredField": "Required field",
+    "saveChanges": "Save Changes",
+    "action": "Action"
   },
   "nav": {
     "brand": "VetCare",
@@ -149,6 +180,15 @@
       "petOwner": "पालतू जानवर मालिक",
       "farmer": "किसान",
       "admin": "प्रशासक"
+    },
+    "movements": {
+      "pendingApproval": "Pending Approval",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "completed": "Completed",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approvalRequired": "This movement requires manager approval"
     }
   },
   "login": {
@@ -971,7 +1011,12 @@
       "approvalNote": "ℹ️ आपकी पुनर्निर्धारित अपॉइंटमेंट को डॉक्टर की मंजूरी की आवश्यकता होगी।",
       "confirming": "पुनर्निर्धारित हो रहा है...",
       "confirmBtn": "✓ पुनर्निर्धारण की पुष्टि करें",
-      "rescheduleCount": "📊 पुनर्निर्धारण {{current}} में से {{max}} अनुमत"
+      "rescheduleCount": "📊 पुनर्निर्धारण {{current}} में से {{max}} अनुमत",
+      "doctorConfirmedNoShow": "🩺 Doctor confirmed but did not attend — you may reschedule with any available doctor. No reschedule limit applies.",
+      "doctorNoConfirm": "🩺 Doctor did not confirm in time — you may reschedule with any available doctor. No reschedule limit applies.",
+      "patientNoShowNoLimit": "🙋 Patient no-show — you may reschedule (no limit configured).",
+      "patientNoShowLimit": "🙋 Patient no-show — reschedule {{current}} of {{max}} allowed.",
+      "expiredPendingNotice": "⚠️ The original appointment time has passed without doctor confirmation. You may select a different doctor for faster availability."
     },
     "noMatchAppointments": "इस फ़िल्टर से कोई अपॉइंटमेंट मेल नहीं खाती",
     "cancelledByYou": "🙋 आपके द्वारा रद्द",
@@ -1086,7 +1131,8 @@
       "policyExpiry": "पॉलिसी समाप्ति तिथि",
       "policyExpired": "⚠️ पॉलिसी समाप्त",
       "updateBtn": "💾 पशु अपडेट करें",
-      "registerBtn": "✅ पशु पंजीकृत करें"
+      "registerBtn": "✅ पशु पंजीकृत करें",
+      "editingMode": "✏️ Editing Mode"
     },
     "emptySearch": "आपकी खोज से कोई पशु मेल नहीं खाता",
     "emptyAnimals": "अभी कोई पशु पंजीकृत नहीं",
@@ -1702,7 +1748,11 @@
       "errAlreadyPending": "आपका एक अनुरोध पहले से लंबित है।",
       "successSubmit": "अनुरोध सबमिट हुआ! एडमिन जल्द समीक्षा करेगा।",
       "successCancel": "अनुरोध रद्द किया गया।"
-    }
+    },
+    "certificateServices": "Certificate Services I Offer",
+    "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
+    "saveCertificateTypes": "Save Certificate Preferences",
+    "certificateTypesSaved": "Certificate preferences saved"
   },
   "enterpriseManagement": {
     "pageTitle": "🏢 उद्यम प्रबंधन",
@@ -3709,7 +3759,9 @@
     "browseAll": "सभी डॉक्टर ब्राउज़ करें",
     "clearFiltersBtn": "फ़िल्टर हटाएं",
     "previous": "पिछला",
-    "next": "अगला"
+    "next": "अगला",
+    "certificateFilter": "Certificate Services",
+    "allCertificates": "All Certificate Types"
   },
   "myBookings": {
     "title": "मेरी बुकिंग",
@@ -3760,7 +3812,23 @@
     "failedToLoad": "पशु चिकित्सकों को लोड करने में विफल",
     "cancelPolicy": "अपॉइंटमेंट के 2 घंटे के भीतर रद्दीकरण पर शुल्क लग सकता है",
     "freeCancelUntil": "{{time}} तक निःशुल्क रद्दीकरण",
-    "lateCancelWarning": "देर से रद्दीकरण पर शुल्क लग सकता है"
+    "lateCancelWarning": "देर से रद्दीकरण पर शुल्क लग सकता है",
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "missed": "Missed",
+      "rescheduled": "Rescheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "actionLogNewSlot": "New slot:",
+    "actionLogApproved": "(approved ✓)",
+    "actionLogAwaiting": "(awaiting doctor approval)",
+    "actionLogAutoConfirmed": "(auto-confirmed)",
+    "actionLogReason": "Reason: {{reason}}",
+    "actionLogBy": "by",
+    "actionLogSystem": "System"
   },
   "vetProfile": {
     "notSpecified": "निर्दिष्ट नहीं",
@@ -3969,7 +4037,23 @@
     "showing": "{{total}} में से {{count}} नुस्खे दिखाए जा रहे हैं",
     "print": "Print",
     "printPrescription": "Print this prescription",
-    "failedToPrint": "Failed to load prescription for printing"
+    "failedToPrint": "Failed to load prescription for printing",
+    "pharmacy": {
+      "pendingReview": "Awaiting Review",
+      "approvedForDispensing": "Approved for Dispensing",
+      "dispensed": "Dispensed",
+      "rejected": "Rejected",
+      "needsClarification": "Clarification Needed",
+      "sentToPharmacy": "Sent to Pharmacy",
+      "readyForPickup": "Ready for Pickup",
+      "outForDelivery": "Out for Delivery",
+      "issueContactVet": "Issue — Contact Your Vet",
+      "pendingUpdate": "Pending Vet Update",
+      "autoRouted": "Will be sent to",
+      "selectNetwork": "Route prescription to which pharmacy network?",
+      "noRouting": "No pharmacy routing (standalone)",
+      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review."
+    }
   },
   "prescriptionWriter": {
     "title": "नुस्खा लेखक",
@@ -4802,7 +4886,8 @@
     "maintenanceEnabled": "Enable Maintenance Mode",
     "maintenanceMessage": "Maintenance Message for Users",
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
-    "maintenanceAdminBypass": "Admin access - maintenance mode active"
+    "maintenanceAdminBypass": "Admin access - maintenance mode active",
+    "certificateTemplate": "Certificate Template"
   },
   "userManagement": {
     "title": "उपयोगकर्ता प्रबंधन",
@@ -5839,7 +5924,8 @@
       "editMember": "Edit Member",
       "networkRole": "Role",
       "memberName": "Member",
-      "memberEmail": "ईमेल"
+      "memberEmail": "ईमेल",
+      "inviteStaff": "Invite Staff Member"
     },
     "patients": {
       "tab": "मरीज़",
@@ -6312,8 +6398,7 @@
     "markNoShow": "नो-शो चिह्नित करें",
     "noShowConfirm": "इस मरीज को नो-शो के रूप में चिह्नित करें? यह पूर्ववत नहीं किया जा सकता।",
     "noShowMarked": "मरीज को नो-शो के रूप में चिह्नित किया गया"
-  }
-,
+  },
   "pharmacy": {
     "title": "फार्मेसी",
     "noNetwork": "आपके खाते से कोई नेटवर्क संबद्ध नहीं है।",
@@ -6322,18 +6407,305 @@
     "noReadyDispense": "वितरण के लिए तैयार कोई नुस्खे नहीं",
     "pendingReview": "समीक्षा लंबित",
     "readyToDispense": "वितरण के लिए तैयार",
-    "nav": { "title": "फार्मेसी" },
-    "tabs": { "overview": "अवलोकन", "review": "समीक्षा", "dispense": "वितरण", "inventory": "इन्वेंटरी", "suppliers": "आपूर्तिकर्ता", "settings": "सेटिंग्स" },
-    "stats": { "pendingReviews": "लंबित समीक्षाएं", "readyToDispense": "वितरण तैयार", "lowStock": "कम स्टॉक", "expiringSoon": "जल्द समाप्त", "pendingReorders": "लंबित पुनर्ऑर्डर", "todaysRevenue": "आज का राजस्व" },
-    "table": { "patient": "मरीज", "owner": "स्वामी", "vet": "पशु चिकित्सक", "medications": "दवाएं", "date": "तारीख", "status": "स्थिति", "medication": "दवा", "batch": "बैच", "quantity": "मात्रा", "minStock": "न्यूनतम स्टॉक", "expiry": "समाप्ति", "unitCost": "इकाई लागत", "name": "नाम", "contact": "संपर्क", "email": "ईमेल", "phone": "फोन", "leadTime": "लीड टाइम" },
-    "actions": { "review": "समीक्षा", "dispense": "वितरण", "adjust": "समायोजन", "reorder": "पुनर्ऑर्डर" },
-    "filter": { "all": "सभी", "lowStock": "कम स्टॉक", "expiringSoon": "जल्द समाप्त", "expired": "समाप्त" },
-    "stock": { "expired": "समाप्त", "expiring": "जल्द समाप्त", "low": "कम", "ok": "ठीक", "currentQty": "वर्तमान मात्रा", "adjustTitle": "स्टॉक समायोजन", "adjustmentType": "प्रकार", "quantity": "मात्रा", "reason": "कारण", "reasonPlaceholder": "कारण बताएं", "reasonRequired": "कारण आवश्यक", "qtyPositive": "मात्रा > 0", "submit": "सबमिट", "types": { "add": "जोड़ें", "remove": "हटाएं", "correct": "सुधार", "expire": "समाप्त", "damage": "क्षति", "return": "वापसी" } },
-    "inventory": { "title": "दवा इन्वेंटरी", "searchPlaceholder": "खोजें...", "empty": "कोई इन्वेंटरी नहीं" },
-    "suppliers": { "title": "आपूर्तिकर्ता", "addSupplier": "जोड़ें", "addTitle": "आपूर्तिकर्ता जोड़ें", "editTitle": "संपादित करें", "empty": "कोई आपूर्तिकर्ता नहीं", "nameLabel": "नाम", "namePlaceholder": "नाम", "nameRequired": "नाम आवश्यक", "contactName": "संपर्क", "email": "ईमेल", "phone": "फोन", "address": "पता", "paymentTerms": "भुगतान शर्तें", "leadTimeDays": "लीड दिन", "approvedLabel": "स्वीकृत", "approved": "स्वीकृत", "unapproved": "अस्वीकृत" },
-    "reorder": { "title": "पुनर्ऑर्डर", "supplier": "आपूर्तिकर्ता", "selectSupplier": "चुनें", "supplierRequired": "आपूर्तिकर्ता चुनें", "quantity": "मात्रा", "qtyPositive": "मात्रा > 0", "notes": "नोट्स", "notesPlaceholder": "निर्देश...", "submit": "सबमिट" },
-    "review": { "title": "नुस्खा समीक्षा", "queueTitle": "समीक्षा कतार", "validationChecks": "जांच", "decision": "निर्णय", "approved": "स्वीकृत", "rejected": "अस्वीकृत", "needsClarification": "स्पष्टीकरण", "rejectionReason": "कारण", "notes": "नोट्स", "notesPlaceholder": "नोट्स...", "submit": "सबमिट", "completeChecksFirst": "पहले सभी जांच पूरी करें", "checks": { "dosage_ok": "खुराक ठीक", "allergy_ok": "कोई एलर्जी नहीं", "interaction_ok": "कोई इंटरैक्शन नहीं", "stock_ok": "स्टॉक उपलब्ध" } },
-    "dispense": { "title": "वितरण", "queueTitle": "वितरण कतार", "method": "विधि", "methods": { "walk_in_pickup": "वॉक-इन", "home_delivery": "होम डिलीवरी", "courier": "कूरियर", "hospital_pickup": "अस्पताल" }, "notes": "नोट्स", "notesPlaceholder": "निर्देश...", "confirm": "पुष्टि करें" },
-    "settings": { "title": "सेटिंग्स", "nameLabel": "नाम", "nameRequired": "नाम आवश्यक", "phone": "फोन", "email": "ईमेल", "address": "पता", "licenseNumber": "लाइसेंस", "acceptingRequests": "अनुरोध स्वीकार कर रहे हैं", "saved": "सहेजा गया" }
+    "nav": {
+      "title": "फार्मेसी"
+    },
+    "tabs": {
+      "overview": "अवलोकन",
+      "review": "समीक्षा",
+      "dispense": "वितरण",
+      "inventory": "इन्वेंटरी",
+      "suppliers": "आपूर्तिकर्ता",
+      "settings": "सेटिंग्स",
+      "catalog": "Catalog",
+      "history": "History",
+      "reorders": "Reorders",
+      "analytics": "Analytics"
+    },
+    "stats": {
+      "pendingReviews": "लंबित समीक्षाएं",
+      "readyToDispense": "वितरण तैयार",
+      "lowStock": "कम स्टॉक",
+      "expiringSoon": "जल्द समाप्त",
+      "pendingReorders": "लंबित पुनर्ऑर्डर",
+      "todaysRevenue": "आज का राजस्व"
+    },
+    "table": {
+      "patient": "मरीज",
+      "owner": "स्वामी",
+      "vet": "पशु चिकित्सक",
+      "medications": "दवाएं",
+      "date": "तारीख",
+      "status": "स्थिति",
+      "medication": "दवा",
+      "batch": "बैच",
+      "quantity": "मात्रा",
+      "minStock": "न्यूनतम स्टॉक",
+      "expiry": "समाप्ति",
+      "unitCost": "इकाई लागत",
+      "name": "नाम",
+      "contact": "संपर्क",
+      "email": "ईमेल",
+      "phone": "फोन",
+      "leadTime": "लीड टाइम",
+      "method": "Method",
+      "cost": "Cost",
+      "pharmacist": "Pharmacist"
+    },
+    "actions": {
+      "review": "समीक्षा",
+      "dispense": "वितरण",
+      "adjust": "समायोजन",
+      "reorder": "पुनर्ऑर्डर"
+    },
+    "filter": {
+      "all": "सभी",
+      "lowStock": "कम स्टॉक",
+      "expiringSoon": "जल्द समाप्त",
+      "expired": "समाप्त",
+      "show": "Show",
+      "clear": "Clear filter"
+    },
+    "stock": {
+      "expired": "समाप्त",
+      "expiring": "जल्द समाप्त",
+      "low": "कम",
+      "ok": "ठीक",
+      "currentQty": "वर्तमान मात्रा",
+      "adjustTitle": "स्टॉक समायोजन",
+      "adjustmentType": "प्रकार",
+      "quantity": "मात्रा",
+      "reason": "कारण",
+      "reasonPlaceholder": "कारण बताएं",
+      "reasonRequired": "कारण आवश्यक",
+      "qtyPositive": "मात्रा > 0",
+      "submit": "सबमिट",
+      "types": {
+        "add": "जोड़ें",
+        "remove": "हटाएं",
+        "correct": "सुधार",
+        "expire": "समाप्त",
+        "damage": "क्षति",
+        "return": "वापसी"
+      }
+    },
+    "inventory": {
+      "title": "दवा इन्वेंटरी",
+      "searchPlaceholder": "खोजें...",
+      "empty": "कोई इन्वेंटरी नहीं",
+      "noResults": "No items match your search or filter",
+      "addStock": "Add Stock",
+      "addStockTitle": "Add Stock / Receive Inventory",
+      "addFirst": "Add First Stock Item",
+      "addStockBtn": "Add to Inventory",
+      "lowStockAlert": "medications below reorder point",
+      "expiringAlert": "items expiring within 30 days",
+      "medicationLabel": "Medication",
+      "selectMedication": "Select a medication from catalog",
+      "medRequired": "Please select a medication",
+      "qtyPositive": "Quantity must be at least 1",
+      "batchNumber": "Batch / Lot Number",
+      "quantity": "Quantity",
+      "expiryDate": "Expiry Date",
+      "locationCode": "Storage Location",
+      "receivedFrom": "Received From / Supplier",
+      "receivedFromPlaceholder": "Supplier name or delivery ID",
+      "noCatalogMeds": "No medications in the catalog yet.",
+      "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
+      "showing": "Showing {{count}} of {{total}} items"
+    },
+    "suppliers": {
+      "title": "आपूर्तिकर्ता",
+      "addSupplier": "जोड़ें",
+      "addTitle": "आपूर्तिकर्ता जोड़ें",
+      "editTitle": "संपादित करें",
+      "empty": "कोई आपूर्तिकर्ता नहीं",
+      "nameLabel": "नाम",
+      "namePlaceholder": "नाम",
+      "nameRequired": "नाम आवश्यक",
+      "contactName": "संपर्क",
+      "email": "ईमेल",
+      "phone": "फोन",
+      "address": "पता",
+      "paymentTerms": "भुगतान शर्तें",
+      "leadTimeDays": "लीड दिन",
+      "approvedLabel": "स्वीकृत",
+      "approved": "स्वीकृत",
+      "unapproved": "अस्वीकृत"
+    },
+    "reorder": {
+      "title": "पुनर्ऑर्डर",
+      "supplier": "आपूर्तिकर्ता",
+      "selectSupplier": "चुनें",
+      "supplierRequired": "आपूर्तिकर्ता चुनें",
+      "quantity": "मात्रा",
+      "qtyPositive": "मात्रा > 0",
+      "notes": "नोट्स",
+      "notesPlaceholder": "निर्देश...",
+      "submit": "सबमिट"
+    },
+    "review": {
+      "title": "नुस्खा समीक्षा",
+      "queueTitle": "समीक्षा कतार",
+      "validationChecks": "जांच",
+      "decision": "निर्णय",
+      "approved": "स्वीकृत",
+      "rejected": "अस्वीकृत",
+      "needsClarification": "स्पष्टीकरण",
+      "rejectionReason": "कारण",
+      "notes": "नोट्स",
+      "notesPlaceholder": "नोट्स...",
+      "submit": "सबमिट",
+      "completeChecksFirst": "पहले सभी जांच पूरी करें",
+      "checks": {
+        "dosage_ok": "खुराक ठीक",
+        "allergy_ok": "कोई एलर्जी नहीं",
+        "interaction_ok": "कोई इंटरैक्शन नहीं",
+        "stock_ok": "स्टॉक उपलब्ध"
+      },
+      "prescribedMedications": "Prescribed Medications",
+      "needs_clarification": "Needs Clarification",
+      "rejectionReasonPlaceholder": "Explain why this prescription cannot be filled...",
+      "suggestedModifications": "Suggested Modifications",
+      "suggestionsPlaceholder": "Describe what the vet should change or clarify...",
+      "findings": "Pharmacist Notes (Optional)",
+      "findingsPlaceholder": "Any observations or notes for this dispensing...",
+      "provideReason": "Please provide a reason",
+      "checksNote": {
+        "dosage_ok": "Verify against patient weight and species",
+        "allergy_ok": "Check patient allergy records",
+        "interaction_ok": "Check for concurrent medications",
+        "stock_ok": "Sufficient inventory for all line items"
+      }
+    },
+    "dispense": {
+      "title": "वितरण",
+      "queueTitle": "वितरण कतार",
+      "method": "विधि",
+      "methods": {
+        "walk_in_pickup": "वॉक-इन",
+        "home_delivery": "होम डिलीवरी",
+        "courier": "कूरियर",
+        "hospital_pickup": "अस्पताल"
+      },
+      "notes": "नोट्स",
+      "notesPlaceholder": "निर्देश...",
+      "confirm": "पुष्टि करें",
+      "medications": "Medications to Dispense",
+      "noMedications": "No medication details found in prescription",
+      "inventoryBatch": "Inventory / Batch",
+      "selectInventory": "Select batch...",
+      "qty": "Qty",
+      "unitPrice": "Unit Price",
+      "lineTotal": "Line Total",
+      "totalCost": "Total Cost",
+      "available": "Available",
+      "loadingInventory": "Loading pharmacy inventory...",
+      "inventoryLoadError": "Could not load pharmacy inventory",
+      "stockWarningError": "Cannot dispense — one or more quantities exceed available stock",
+      "unmatchedWarning": "Some medications are not matched to inventory items",
+      "selectInventoryWarning": "Select a batch for this medication"
+    },
+    "settings": {
+      "title": "सेटिंग्स",
+      "nameLabel": "नाम",
+      "nameRequired": "नाम आवश्यक",
+      "phone": "फोन",
+      "email": "ईमेल",
+      "address": "पता",
+      "licenseNumber": "लाइसेंस",
+      "acceptingRequests": "अनुरोध स्वीकार कर रहे हैं",
+      "saved": "सहेजा गया",
+      "addressPlaceholder": "Street, City, State, PIN",
+      "acceptingRequestsNote": "When off, vets cannot route new prescriptions here",
+      "primaryPharmacy": "Set as Primary Pharmacy",
+      "primaryPharmacyNote": "Prescriptions from this network auto-route to the primary pharmacy"
+    },
+    "noNetworkHint": "You must be invited as a pharmacist to a hospital network to access the pharmacy module.",
+    "catalog": {
+      "title": "Medication Catalog",
+      "addMedication": "Add Medication",
+      "addTitle": "Add Medication to Catalog",
+      "editTitle": "Edit Medication",
+      "addFirst": "Add First Medication",
+      "nameLabel": "Medication Name",
+      "nameRequired": "Medication name is required",
+      "genericName": "Generic Name",
+      "form": "Dosage Form",
+      "strength": "Strength",
+      "unit": "Unit",
+      "supplier": "Supplier",
+      "noSupplier": "No supplier (direct purchase)",
+      "unitCost": "Unit Cost",
+      "sellingPrice": "Selling Price",
+      "minStockLevel": "Minimum Stock Level",
+      "reorderPoint": "Reorder Point",
+      "reorderQty": "Reorder Quantity",
+      "manufacturer": "Manufacturer",
+      "registrationNumber": "Reg / License Number",
+      "withdrawalDays": "Withdrawal Period (days)",
+      "withdrawalNote": "For livestock: days before animal can be slaughtered / milk used. Set 0 if not applicable.",
+      "isControlled": "Controlled Substance / Scheduled Drug",
+      "medications": "medications",
+      "searchPlaceholder": "Search by name, generic, manufacturer...",
+      "empty": "No medications in catalog yet",
+      "noResults": "No medications match your search",
+      "controlled": "Controlled",
+      "confirmDeactivate": "Deactivate {{name}}?"
+    },
+    "history": {
+      "title": "Dispensing History",
+      "records": "records",
+      "empty": "No dispensing records yet",
+      "status": {
+        "pending": "Pending",
+        "prepared": "Prepared",
+        "handed_over": "Handed Over",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "markPrepared": "Mark Prepared",
+      "markHandedOver": "✓ Hand Over",
+      "markDelivered": "✓ Delivered"
+    },
+    "reorders": {
+      "title": "Reorder Requests",
+      "orders": "orders",
+      "activeOrders": "Active Orders",
+      "noActive": "No active reorder requests",
+      "empty": "No reorder history",
+      "qty": "Qty",
+      "supplier": "Supplier",
+      "requestedBy": "Requested By",
+      "tracking": "Tracking",
+      "auto": "Auto",
+      "markSent": "Mark Sent",
+      "addTracking": "Add Tracking",
+      "markReceived": "Mark Received",
+      "trackingNumber": "Tracking Number",
+      "expectedDelivery": "Expected Delivery Date",
+      "status": {
+        "pending": "Pending",
+        "sent_to_supplier": "Sent to Supplier",
+        "confirmed": "Confirmed",
+        "shipped": "Shipped",
+        "received": "Received",
+        "cancelled": "Cancelled"
+      }
+    },
+    "analytics": {
+      "title": "Pharmacy Analytics",
+      "days": "days",
+      "totalRevenue": "Total Revenue",
+      "dispensingCount": "Total Dispensings",
+      "pendingReviews": "Pending Reviews",
+      "lowStock": "Low Stock Items",
+      "expiringSoon": "Expiring Soon",
+      "topMedications": "Top Medications by Volume"
+    },
+    "receipt": {
+      "preview": "Dispensing Receipt",
+      "print": "Print Receipt"
+    }
   }
 }

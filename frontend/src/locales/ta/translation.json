@@ -64,7 +64,38 @@
       "sheep": "செம்மறி",
       "pig": "பன்றி",
       "other": "மற்றவை"
-    }
+    },
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled",
+    "missed": "Missed",
+    "scheduled": "Scheduled",
+    "rescheduled": "Rescheduled",
+    "inProgress": "In Progress",
+    "booking": "Booking",
+    "consultation": "Consultation",
+    "video": "Video",
+    "inPerson": "In-person",
+    "chat": "Chat",
+    "with": "with",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "animal": "Animal",
+    "generalConsultation": "General consultation",
+    "normal": "Normal",
+    "urgent": "Urgent",
+    "emergency": "Emergency",
+    "at": "at",
+    "view": "View",
+    "remove": "Remove",
+    "apply": "Apply",
+    "failedToLoad": "Failed to load data",
+    "failedToSave": "Failed to save",
+    "failedToDelete": "Failed to delete",
+    "failedToUpdate": "Failed to update",
+    "viewAll": "View All",
+    "requiredField": "Required field",
+    "saveChanges": "Save Changes",
+    "action": "Action"
   },
   "nav": {
     "brand": "VetCare",
@@ -147,7 +178,18 @@
       "petOwner": "செல்லப்பிராணி உரிமையாளர்",
       "farmer": "விவசாயி",
       "admin": "நிர்வாகி"
-    }
+    },
+    "movements": {
+      "pendingApproval": "Pending Approval",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "completed": "Completed",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approvalRequired": "This movement requires manager approval"
+    },
+    "prescriptionSettings": "Prescription Template",
+    "hospitalMgmt": "Hospital Mgmt"
   },
   "login": {
     "welcome": "மீண்டும் வரவேற்கிறோம்",
@@ -969,7 +1011,12 @@
       "approvalNote": "ℹ️ உங்கள் மீள்திட்டமிடப்பட்ட சந்திப்புக்கு மருத்துவர் ஒப்புதல் தேவை.",
       "confirming": "மீள்திட்டமிடப்படுகிறது...",
       "confirmBtn": "✓ மீள்திட்டமிடலை உறுதிசெய்",
-      "rescheduleCount": "📊 மீள்திட்டமிடல் {{current}} / {{max}} அனுமதிக்கப்பட்டவை"
+      "rescheduleCount": "📊 மீள்திட்டமிடல் {{current}} / {{max}} அனுமதிக்கப்பட்டவை",
+      "doctorConfirmedNoShow": "🩺 Doctor confirmed but did not attend — you may reschedule with any available doctor. No reschedule limit applies.",
+      "doctorNoConfirm": "🩺 Doctor did not confirm in time — you may reschedule with any available doctor. No reschedule limit applies.",
+      "patientNoShowNoLimit": "🙋 Patient no-show — you may reschedule (no limit configured).",
+      "patientNoShowLimit": "🙋 Patient no-show — reschedule {{current}} of {{max}} allowed.",
+      "expiredPendingNotice": "⚠️ The original appointment time has passed without doctor confirmation. You may select a different doctor for faster availability."
     },
     "noMatchAppointments": "இந்த வடிப்பிற்கு சந்திப்புகள் பொருந்தவில்லை",
     "cancelledByYou": "🙋 நீங்கள் ரத்துசெய்தீர்கள்",
@@ -1084,7 +1131,8 @@
       "policyExpiry": "பாலிசி காலாவதி தேதி",
       "policyExpired": "⚠️ பாலிசி காலாவதியானது",
       "updateBtn": "💾 விலங்கைப் புதுப்பி",
-      "registerBtn": "✅ விலங்கைப் பதிவுசெய்"
+      "registerBtn": "✅ விலங்கைப் பதிவுசெய்",
+      "editingMode": "✏️ Editing Mode"
     },
     "emptySearch": "உங்கள் தேடலுக்கு விலங்குகள் பொருந்தவில்லை",
     "emptyAnimals": "இன்னும் விலங்குகள் பதிவுசெய்யப்படவில்லை",
@@ -1700,7 +1748,11 @@
       "errAlreadyPending": "ஏற்கனவே ஒரு நிலுவை கோரிக்கை உள்ளது.",
       "successSubmit": "கோரிக்கை சமர்ப்பிக்கப்பட்டது!",
       "successCancel": "கோரிக்கை ரத்து செய்யப்பட்டது."
-    }
+    },
+    "certificateServices": "Certificate Services I Offer",
+    "certificateServicesDesc": "Select which veterinary certificates you are qualified to issue",
+    "saveCertificateTypes": "Save Certificate Preferences",
+    "certificateTypesSaved": "Certificate preferences saved"
   },
   "enterpriseManagement": {
     "pageTitle": "🏢 நிறுவன மேலாண்மை",
@@ -2436,7 +2488,16 @@
     "addRecord": "+ பதிவு சேர்",
     "form": {
       "editTitle": "பதிவைத் திருத்து",
-      "createTitle": "பதிவு சேர்"
+      "createTitle": "பதிவு சேர்",
+      "type": "Type *",
+      "income": "💚 Income",
+      "expense": "🔴 Expense",
+      "category": "Category *",
+      "amount": "Amount *",
+      "date": "Transaction Date *",
+      "description": "Description",
+      "reference": "Reference #",
+      "notes": "Notes"
     },
     "dashboard": {
       "totalIncome": "மொத்த வருமானம்",
@@ -3698,7 +3759,9 @@
     "browseAll": "அனைத்து மருத்துவர்களையும் பார்க்கவும்",
     "clearFiltersBtn": "வடிகட்டிகளை அழிக்கவும்",
     "previous": "முந்தையது",
-    "next": "அடுத்து"
+    "next": "அடுத்து",
+    "certificateFilter": "Certificate Services",
+    "allCertificates": "All Certificate Types"
   },
   "myBookings": {
     "title": "எனது முன்பதிவுகள்",
@@ -3749,7 +3812,23 @@
     "failedToLoad": "Failed to load veterinarians",
     "cancelPolicy": "சந்திப்பு நேரத்திற்கு 2 மணி நேரத்திற்குள் ரத்து கட்டணம் விதிக்கப்படலாம்",
     "freeCancelUntil": "{{time}} வரை இலவச ரத்து",
-    "lateCancelWarning": "தாமதமான ரத்துக்கு கட்டணம் விதிக்கப்படலாம்"
+    "lateCancelWarning": "தாமதமான ரத்துக்கு கட்டணம் விதிக்கப்படலாம்",
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "missed": "Missed",
+      "rescheduled": "Rescheduled",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "actionLogNewSlot": "New slot:",
+    "actionLogApproved": "(approved ✓)",
+    "actionLogAwaiting": "(awaiting doctor approval)",
+    "actionLogAutoConfirmed": "(auto-confirmed)",
+    "actionLogReason": "Reason: {{reason}}",
+    "actionLogBy": "by",
+    "actionLogSystem": "System"
   },
   "vetProfile": {
     "notSpecified": "குறிப்பிடப்படவில்லை",
@@ -3958,7 +4037,23 @@
     "showing": "{{total}} இல் இருந்து {{count}} மருந்து சீட்டுகள் காட்டப்படுகின்றன",
     "print": "Print",
     "printPrescription": "Print this prescription",
-    "failedToPrint": "Failed to load prescription for printing"
+    "failedToPrint": "Failed to load prescription for printing",
+    "pharmacy": {
+      "pendingReview": "Awaiting Review",
+      "approvedForDispensing": "Approved for Dispensing",
+      "dispensed": "Dispensed",
+      "rejected": "Rejected",
+      "needsClarification": "Clarification Needed",
+      "sentToPharmacy": "Sent to Pharmacy",
+      "readyForPickup": "Ready for Pickup",
+      "outForDelivery": "Out for Delivery",
+      "issueContactVet": "Issue — Contact Your Vet",
+      "pendingUpdate": "Pending Vet Update",
+      "autoRouted": "Will be sent to",
+      "selectNetwork": "Route prescription to which pharmacy network?",
+      "noRouting": "No pharmacy routing (standalone)",
+      "routingNote": "Prescription will be automatically sent to this network's pharmacy for review."
+    }
   },
   "prescriptionWriter": {
     "title": "மருந்து சீட்டு எழுதுபவர்",
@@ -4791,7 +4886,8 @@
     "maintenanceEnabled": "Enable Maintenance Mode",
     "maintenanceMessage": "Maintenance Message for Users",
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
-    "maintenanceAdminBypass": "Admin access - maintenance mode active"
+    "maintenanceAdminBypass": "Admin access - maintenance mode active",
+    "certificateTemplate": "Certificate Template"
   },
   "userManagement": {
     "title": "பயனர் மேலாண்மை",
@@ -5828,7 +5924,8 @@
       "editMember": "Edit Member",
       "networkRole": "Role",
       "memberName": "Member",
-      "memberEmail": "மின்னஞ்சல்"
+      "memberEmail": "மின்னஞ்சல்",
+      "inviteStaff": "Invite Staff Member"
     },
     "patients": {
       "tab": "நோயாளிகள்",
@@ -6303,25 +6400,312 @@
     "noShowMarked": "நோயாளி நோ-ஷோ என்று குறிக்கப்பட்டது"
   },
   "pharmacy": {
-  "title": "Pharmacy",
-  "noNetwork": "No network associated with your account.",
-  "selectPharmacy": "Select a pharmacy",
-  "noPendingReviews": "No prescriptions pending review",
-  "noReadyDispense": "No prescriptions ready to dispense",
-  "pendingReview": "Pending Review",
-  "readyToDispense": "Ready to Dispense",
-  "nav": { "title": "Pharmacy" },
-  "tabs": { "overview": "Overview", "review": "Review", "dispense": "Dispense", "inventory": "Inventory", "suppliers": "Suppliers", "settings": "Settings" },
-  "stats": { "pendingReviews": "Pending Reviews", "readyToDispense": "Ready to Dispense", "lowStock": "Low Stock", "expiringSoon": "Expiring Soon", "pendingReorders": "Pending Reorders", "todaysRevenue": "Today Revenue" },
-  "table": { "patient": "Patient", "owner": "Owner", "vet": "Vet", "medications": "Medications", "date": "Date", "status": "Status", "medication": "Medication", "batch": "Batch", "quantity": "Qty", "minStock": "Min Stock", "expiry": "Expiry", "unitCost": "Unit Cost", "name": "Name", "contact": "Contact", "email": "Email", "phone": "Phone", "leadTime": "Lead Time" },
-  "actions": { "review": "Review", "dispense": "Dispense", "adjust": "Adjust", "reorder": "Reorder" },
-  "filter": { "all": "All", "lowStock": "Low Stock", "expiringSoon": "Expiring Soon", "expired": "Expired" },
-  "stock": { "expired": "Expired", "expiring": "Expiring", "low": "Low", "ok": "OK", "currentQty": "Current Qty", "adjustTitle": "Adjust Stock", "adjustmentType": "Type", "quantity": "Qty", "reason": "Reason", "reasonPlaceholder": "Reason for adjustment", "reasonRequired": "Reason required", "qtyPositive": "Qty must be > 0", "submit": "Submit", "types": { "add": "Add", "remove": "Remove", "correct": "Correct", "expire": "Expire", "damage": "Damage", "return": "Return" } },
-  "inventory": { "title": "Inventory", "searchPlaceholder": "Search...", "empty": "No inventory" },
-  "suppliers": { "title": "Suppliers", "addSupplier": "Add", "addTitle": "Add Supplier", "editTitle": "Edit Supplier", "empty": "No suppliers", "nameLabel": "Name", "namePlaceholder": "Supplier name", "nameRequired": "Name required", "contactName": "Contact", "email": "Email", "phone": "Phone", "address": "Address", "paymentTerms": "Payment Terms", "leadTimeDays": "Lead Days", "approvedLabel": "Approved", "approved": "Approved", "unapproved": "Unapproved" },
-  "reorder": { "title": "Reorder", "supplier": "Supplier", "selectSupplier": "Select supplier", "supplierRequired": "Select a supplier", "quantity": "Qty", "qtyPositive": "Qty > 0", "notes": "Notes", "notesPlaceholder": "Notes...", "submit": "Submit" },
-  "review": { "title": "Review Prescription", "queueTitle": "Review Queue", "validationChecks": "Checks", "decision": "Decision", "approved": "Approve", "rejected": "Reject", "needsClarification": "Clarify", "rejectionReason": "Reason", "notes": "Notes", "notesPlaceholder": "Notes...", "submit": "Submit", "completeChecksFirst": "Complete all checks first", "checks": { "dosage_ok": "Dosage OK", "allergy_ok": "No allergies", "interaction_ok": "No interactions", "stock_ok": "Stock available" } },
-  "dispense": { "title": "Dispense", "queueTitle": "Dispense Queue", "method": "Method", "methods": { "walk_in_pickup": "Walk-in", "home_delivery": "Home Delivery", "courier": "Courier", "hospital_pickup": "Hospital" }, "notes": "Notes", "notesPlaceholder": "Notes...", "confirm": "Confirm" },
-  "settings": { "title": "Settings", "nameLabel": "Name", "nameRequired": "Name required", "phone": "Phone", "email": "Email", "address": "Address", "licenseNumber": "License", "acceptingRequests": "Accepting requests", "saved": "Saved" }
-}
+    "title": "Pharmacy",
+    "noNetwork": "No network associated with your account.",
+    "selectPharmacy": "Select a pharmacy",
+    "noPendingReviews": "No prescriptions pending review",
+    "noReadyDispense": "No prescriptions ready to dispense",
+    "pendingReview": "Pending Review",
+    "readyToDispense": "Ready to Dispense",
+    "nav": {
+      "title": "Pharmacy"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "review": "Review",
+      "dispense": "Dispense",
+      "inventory": "Inventory",
+      "suppliers": "Suppliers",
+      "settings": "Settings",
+      "catalog": "Catalog",
+      "history": "History",
+      "reorders": "Reorders",
+      "analytics": "Analytics"
+    },
+    "stats": {
+      "pendingReviews": "Pending Reviews",
+      "readyToDispense": "Ready to Dispense",
+      "lowStock": "Low Stock",
+      "expiringSoon": "Expiring Soon",
+      "pendingReorders": "Pending Reorders",
+      "todaysRevenue": "Today Revenue"
+    },
+    "table": {
+      "patient": "Patient",
+      "owner": "Owner",
+      "vet": "Vet",
+      "medications": "Medications",
+      "date": "Date",
+      "status": "Status",
+      "medication": "Medication",
+      "batch": "Batch",
+      "quantity": "Qty",
+      "minStock": "Min Stock",
+      "expiry": "Expiry",
+      "unitCost": "Unit Cost",
+      "name": "Name",
+      "contact": "Contact",
+      "email": "Email",
+      "phone": "Phone",
+      "leadTime": "Lead Time",
+      "method": "Method",
+      "cost": "Cost",
+      "pharmacist": "Pharmacist"
+    },
+    "actions": {
+      "review": "Review",
+      "dispense": "Dispense",
+      "adjust": "Adjust",
+      "reorder": "Reorder"
+    },
+    "filter": {
+      "all": "All",
+      "lowStock": "Low Stock",
+      "expiringSoon": "Expiring Soon",
+      "expired": "Expired",
+      "show": "Show",
+      "clear": "Clear filter"
+    },
+    "stock": {
+      "expired": "Expired",
+      "expiring": "Expiring",
+      "low": "Low",
+      "ok": "OK",
+      "currentQty": "Current Qty",
+      "adjustTitle": "Adjust Stock",
+      "adjustmentType": "Type",
+      "quantity": "Qty",
+      "reason": "Reason",
+      "reasonPlaceholder": "Reason for adjustment",
+      "reasonRequired": "Reason required",
+      "qtyPositive": "Qty must be > 0",
+      "submit": "Submit",
+      "types": {
+        "add": "Add",
+        "remove": "Remove",
+        "correct": "Correct",
+        "expire": "Expire",
+        "damage": "Damage",
+        "return": "Return"
+      }
+    },
+    "inventory": {
+      "title": "Inventory",
+      "searchPlaceholder": "Search...",
+      "empty": "No inventory",
+      "noResults": "No items match your search or filter",
+      "addStock": "Add Stock",
+      "addStockTitle": "Add Stock / Receive Inventory",
+      "addFirst": "Add First Stock Item",
+      "addStockBtn": "Add to Inventory",
+      "lowStockAlert": "medications below reorder point",
+      "expiringAlert": "items expiring within 30 days",
+      "medicationLabel": "Medication",
+      "selectMedication": "Select a medication from catalog",
+      "medRequired": "Please select a medication",
+      "qtyPositive": "Quantity must be at least 1",
+      "batchNumber": "Batch / Lot Number",
+      "quantity": "Quantity",
+      "expiryDate": "Expiry Date",
+      "locationCode": "Storage Location",
+      "receivedFrom": "Received From / Supplier",
+      "receivedFromPlaceholder": "Supplier name or delivery ID",
+      "noCatalogMeds": "No medications in the catalog yet.",
+      "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
+      "showing": "Showing {{count}} of {{total}} items"
+    },
+    "suppliers": {
+      "title": "Suppliers",
+      "addSupplier": "Add",
+      "addTitle": "Add Supplier",
+      "editTitle": "Edit Supplier",
+      "empty": "No suppliers",
+      "nameLabel": "Name",
+      "namePlaceholder": "Supplier name",
+      "nameRequired": "Name required",
+      "contactName": "Contact",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "paymentTerms": "Payment Terms",
+      "leadTimeDays": "Lead Days",
+      "approvedLabel": "Approved",
+      "approved": "Approved",
+      "unapproved": "Unapproved"
+    },
+    "reorder": {
+      "title": "Reorder",
+      "supplier": "Supplier",
+      "selectSupplier": "Select supplier",
+      "supplierRequired": "Select a supplier",
+      "quantity": "Qty",
+      "qtyPositive": "Qty > 0",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes...",
+      "submit": "Submit"
+    },
+    "review": {
+      "title": "Review Prescription",
+      "queueTitle": "Review Queue",
+      "validationChecks": "Checks",
+      "decision": "Decision",
+      "approved": "Approve",
+      "rejected": "Reject",
+      "needsClarification": "Clarify",
+      "rejectionReason": "Reason",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes...",
+      "submit": "Submit",
+      "completeChecksFirst": "Complete all checks first",
+      "checks": {
+        "dosage_ok": "Dosage OK",
+        "allergy_ok": "No allergies",
+        "interaction_ok": "No interactions",
+        "stock_ok": "Stock available"
+      },
+      "prescribedMedications": "Prescribed Medications",
+      "needs_clarification": "Needs Clarification",
+      "rejectionReasonPlaceholder": "Explain why this prescription cannot be filled...",
+      "suggestedModifications": "Suggested Modifications",
+      "suggestionsPlaceholder": "Describe what the vet should change or clarify...",
+      "findings": "Pharmacist Notes (Optional)",
+      "findingsPlaceholder": "Any observations or notes for this dispensing...",
+      "provideReason": "Please provide a reason",
+      "checksNote": {
+        "dosage_ok": "Verify against patient weight and species",
+        "allergy_ok": "Check patient allergy records",
+        "interaction_ok": "Check for concurrent medications",
+        "stock_ok": "Sufficient inventory for all line items"
+      }
+    },
+    "dispense": {
+      "title": "Dispense",
+      "queueTitle": "Dispense Queue",
+      "method": "Method",
+      "methods": {
+        "walk_in_pickup": "Walk-in",
+        "home_delivery": "Home Delivery",
+        "courier": "Courier",
+        "hospital_pickup": "Hospital"
+      },
+      "notes": "Notes",
+      "notesPlaceholder": "Notes...",
+      "confirm": "Confirm",
+      "medications": "Medications to Dispense",
+      "noMedications": "No medication details found in prescription",
+      "inventoryBatch": "Inventory / Batch",
+      "selectInventory": "Select batch...",
+      "qty": "Qty",
+      "unitPrice": "Unit Price",
+      "lineTotal": "Line Total",
+      "totalCost": "Total Cost",
+      "available": "Available",
+      "loadingInventory": "Loading pharmacy inventory...",
+      "inventoryLoadError": "Could not load pharmacy inventory",
+      "stockWarningError": "Cannot dispense — one or more quantities exceed available stock",
+      "unmatchedWarning": "Some medications are not matched to inventory items",
+      "selectInventoryWarning": "Select a batch for this medication"
+    },
+    "settings": {
+      "title": "Settings",
+      "nameLabel": "Name",
+      "nameRequired": "Name required",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "licenseNumber": "License",
+      "acceptingRequests": "Accepting requests",
+      "saved": "Saved",
+      "addressPlaceholder": "Street, City, State, PIN",
+      "acceptingRequestsNote": "When off, vets cannot route new prescriptions here",
+      "primaryPharmacy": "Set as Primary Pharmacy",
+      "primaryPharmacyNote": "Prescriptions from this network auto-route to the primary pharmacy"
+    },
+    "noNetworkHint": "You must be invited as a pharmacist to a hospital network to access the pharmacy module.",
+    "catalog": {
+      "title": "Medication Catalog",
+      "addMedication": "Add Medication",
+      "addTitle": "Add Medication to Catalog",
+      "editTitle": "Edit Medication",
+      "addFirst": "Add First Medication",
+      "nameLabel": "Medication Name",
+      "nameRequired": "Medication name is required",
+      "genericName": "Generic Name",
+      "form": "Dosage Form",
+      "strength": "Strength",
+      "unit": "Unit",
+      "supplier": "Supplier",
+      "noSupplier": "No supplier (direct purchase)",
+      "unitCost": "Unit Cost",
+      "sellingPrice": "Selling Price",
+      "minStockLevel": "Minimum Stock Level",
+      "reorderPoint": "Reorder Point",
+      "reorderQty": "Reorder Quantity",
+      "manufacturer": "Manufacturer",
+      "registrationNumber": "Reg / License Number",
+      "withdrawalDays": "Withdrawal Period (days)",
+      "withdrawalNote": "For livestock: days before animal can be slaughtered / milk used. Set 0 if not applicable.",
+      "isControlled": "Controlled Substance / Scheduled Drug",
+      "medications": "medications",
+      "searchPlaceholder": "Search by name, generic, manufacturer...",
+      "empty": "No medications in catalog yet",
+      "noResults": "No medications match your search",
+      "controlled": "Controlled",
+      "confirmDeactivate": "Deactivate {{name}}?"
+    },
+    "history": {
+      "title": "Dispensing History",
+      "records": "records",
+      "empty": "No dispensing records yet",
+      "status": {
+        "pending": "Pending",
+        "prepared": "Prepared",
+        "handed_over": "Handed Over",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "markPrepared": "Mark Prepared",
+      "markHandedOver": "✓ Hand Over",
+      "markDelivered": "✓ Delivered"
+    },
+    "reorders": {
+      "title": "Reorder Requests",
+      "orders": "orders",
+      "activeOrders": "Active Orders",
+      "noActive": "No active reorder requests",
+      "empty": "No reorder history",
+      "qty": "Qty",
+      "supplier": "Supplier",
+      "requestedBy": "Requested By",
+      "tracking": "Tracking",
+      "auto": "Auto",
+      "markSent": "Mark Sent",
+      "addTracking": "Add Tracking",
+      "markReceived": "Mark Received",
+      "trackingNumber": "Tracking Number",
+      "expectedDelivery": "Expected Delivery Date",
+      "status": {
+        "pending": "Pending",
+        "sent_to_supplier": "Sent to Supplier",
+        "confirmed": "Confirmed",
+        "shipped": "Shipped",
+        "received": "Received",
+        "cancelled": "Cancelled"
+      }
+    },
+    "analytics": {
+      "title": "Pharmacy Analytics",
+      "days": "days",
+      "totalRevenue": "Total Revenue",
+      "dispensingCount": "Total Dispensings",
+      "pendingReviews": "Pending Reviews",
+      "lowStock": "Low Stock Items",
+      "expiringSoon": "Expiring Soon",
+      "topMedications": "Top Medications by Volume"
+    },
+    "receipt": {
+      "preview": "Dispensing Receipt",
+      "print": "Print Receipt"
+    }
+  }
 }

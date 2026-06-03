@@ -1082,3 +1082,46 @@ render-start.sh
 - **Fix:** Always insert hospital_staff as network_role for position-based invites; users.role captures the real position
 - **Rule:** routes/index.ts accept invite handler
 
+
+### NETPHARM-001 — Network pharmacy invites and membership inconsistencies
+- **Logged:** 2026-06-03 05:20
+- **Symptom:** Invites not persisted in staff list, invite-accept caused DB constraint failures, pharmacy UI 401s due to raw axios usage; data inconsistencies after reseed
+- **Root Cause:** Mapped invite roles correctly, added safety-net DDL, updated frontend to use authenticated client, added debug endpoints and fixed pharmacy routes
+- **Fix:** Ensure invite accept maps to allowed network_role; add DB audits and pre-push checks
+- **Rule:** Not specified
+
+
+### PHARM-SEC-001 — ALL pharmacy routes had zero access control — any user could read any network's data
+- **Logged:** 2026-06-03
+- **Symptom:** A pet_owner could call GET /pharmacies/:id/pending-prescriptions and read prescriptions. A pharmacist from Apollo Network could access NH1's pharmacy data. Any user could dispense medications.
+- **Root Cause:** All 20+ pharmacy routes used only `authMiddleware` — no role check, no network membership check.
+- **Fix:** Added `guardPharmacy(req, res, pharmacyId)` and `guardNetworkPharmacy(req, res, networkId)` helper functions. Applied `guardPharmacy` to every `/pharmacies/:pharmacyId/*` route, `guardNetworkPharmacy` to supplier/medication catalog routes.
+- **Rule:** Every pharmacy route MUST start with `await guardPharmacy(...)` or `await guardNetworkPharmacy(...)`. Never add a pharmacy route with only `authMiddleware`.
+
+### PHARM-SQL-001 — Prescription queue showed blank medication names — joined non-existent table
+- **Logged:** 2026-06-03
+- **Symptom:** Pharmacist queue showed "—" for every prescription's medication column.
+- **Root Cause:** `pending-prescriptions` and `ready-for-dispensing` queries used `LEFT JOIN prescription_items pi_item` — table does not exist. Prescriptions use a JSONB `medications` column.
+- **Fix:** Replaced with `(SELECT STRING_AGG(med->>'name', ', ') FROM jsonb_array_elements(COALESCE(p.medications, '[]'::jsonb)) AS med) AS medication_names`.
+- **Rule:** There is NO `prescription_items` table. ALWAYS use `jsonb_array_elements(p.medications::jsonb)` to extract medication names from prescriptions.
+
+### PHARM-DISPENSE-001 — Dispensing was a fake no-op — hardcoded empty line_items
+- **Logged:** 2026-06-03
+- **Symptom:** Dispensing created records with total_cost=0, inventory never decremented, financial records meaningless.
+- **Root Cause:** DispensingModal.tsx hardcoded `line_items: []` — never loaded pharmacy inventory or prescription medication details.
+- **Fix:** Rewrote DispensingModal to: (1) load pharmacy inventory via GET /pharmacies/:id/inventory, (2) parse prescription.medications JSONB, (3) match medications to inventory items, (4) show per-line quantity inputs with stock availability checks, (5) calculate total cost, (6) submit real line_items array.
+- **Rule:** DispensingModal MUST load inventory before rendering. `line_items: []` MUST never be hardcoded.
+
+### PHARM-CATALOG-001 — Inventory FK required medication from catalog — no UI to add catalog items
+- **Logged:** 2026-06-03
+- **Symptom:** pharmacy_inventory requires valid med_id FK to pharmacy_medications. No frontend existed to add medications to catalog. Entire inventory system was inert on fresh setup.
+- **Fix:** Built MedicationCatalog.tsx component — CRUD for pharmacy_medications table including form, withdrawal period, controlled substance flag. Added as 'catalog' tab in PharmacyDashboard.
+- **Rule:** Always build catalog management before inventory management — FK dependency must be satisfied.
+
+### PHARM-SETTINGS-001 — PharmacySettings always showed blank form — never loaded existing values
+- **Logged:** 2026-06-03
+- **Symptom:** Pharmacist opened Settings tab, all fields blank. Saving the form would clear existing phone/email/address.
+- **Root Cause:** PharmacySettings.tsx only pre-populated pharmacy_name from props; phone/email/address started as empty strings.
+- **Fix:** Added useEffect to call GET /pharmacies/:id on mount and populate all form fields from the response.
+- **Rule:** Any settings/profile form MUST load existing values from API on mount before allowing edits.
+

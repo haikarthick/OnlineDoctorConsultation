@@ -264,27 +264,54 @@
 .pharmacy-empty .empty-icon { font-size: 3rem; margin-bottom: 10px; }
 .pharmacy-empty p { font-size: 0.95rem; margin: 0; }
 
+/* ── Badge variants ── */
+.pharm-badge.needs_clarification { background: #fff8e1; color: #f57f17; }
+.pharm-badge.sent_to_supplier    { background: #e8eaf6; color: #3949ab; }
+.pharm-badge.received            { background: #f1f8e9; color: #33691e; }
+.pharm-badge.shipped             { background: #e3f2fd; color: #1565c0; }
+
+/* ── Wide modal ── */
+.pharm-modal-wide { max-width: 720px; }
+
+/* ── Dispensing line items ── */
+.dispense-line-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fafafa;
+  margin-bottom: 8px;
+}
+.dispense-line-item.has-warning { border-color: #f44336; background: #fff5f5; }
+
+/* ── Catalog table ── */
+.pharm-badge.controlled { background: #fce4ec; color: #c62828; }
+
 /* ── Responsive ── */
 @media (max-width: 1200px) {
   .pharmacy-stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .pharmacy-tabs { flex-wrap: wrap; }
 }
 @media (max-width: 768px) {
   .pharmacy-page { padding: 16px; }
   .pharmacy-header { padding: 18px 20px; }
   .pharmacy-header h1 { font-size: 1.3rem; }
-  .pharmacy-card { padding: 16px; }
-  .pharmacy-table-wrap { overflow-x: auto; }
+  .pharmacy-card { padding: 14px 16px; }
+  .pharmacy-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .pharm-form-row { grid-template-columns: 1fr; }
+  .pharm-modal { padding: 18px 16px; }
 }
 @media (max-width: 640px) {
   .pharmacy-stats { grid-template-columns: repeat(2, 1fr); }
   .pharmacy-tabs { gap: 2px; }
-  .pharmacy-tab { padding: 7px 12px; font-size: 0.8rem; }
+  .pharmacy-tab { padding: 6px 10px; font-size: 0.78rem; }
+  .analytics-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 480px) {
   .pharmacy-stats { grid-template-columns: 1fr; }
   .pharmacy-header-actions { width: 100%; }
-  .pharm-modal { padding: 18px 16px; }
+  .pharm-modal { padding: 16px 12px; }
   .pharmacy-select { width: 100%; }
   .pharmacy-filter-bar { flex-direction: column; align-items: stretch; }
+  .analytics-grid { grid-template-columns: 1fr; }
+  .pharm-form-row { grid-template-columns: 1fr; }
 }
