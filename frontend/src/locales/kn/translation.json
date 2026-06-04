@@ -6528,7 +6528,9 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items"
+      "showing": "Showing {{count}} of {{total}} items",
+      "selectSupplier": "— Select supplier —",
+      "noSuppliersHint": "No approved suppliers registered. Add suppliers in the Suppliers tab first."
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6547,7 +6549,8 @@
       "leadTimeDays": "Lead Days",
       "approvedLabel": "Approved",
       "approved": "Approved",
-      "unapproved": "Unapproved"
+      "unapproved": "Unapproved",
+      "selectPaymentTerms": "— Select payment terms —"
     },
     "reorder": {
       "title": "Reorder",

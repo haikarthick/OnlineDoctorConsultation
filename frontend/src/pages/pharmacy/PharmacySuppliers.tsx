@@ -172,7 +172,17 @@ export default function PharmacySuppliers({ networkId }: Props) {
               <div className="pharm-form-row">
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.suppliers.paymentTerms')}</label>
-                  <input value={form.payment_terms} onChange={e => setForm(f => ({ ...f, payment_terms: e.target.value }))} placeholder="net30" />
+                  <select value={form.payment_terms} onChange={e => setForm(f => ({ ...f, payment_terms: e.target.value }))}>
+                    <option value="">{t('pharmacy.suppliers.selectPaymentTerms')}</option>
+                    <option value="immediate">Immediate / COD</option>
+                    <option value="net15">Net 15 Days</option>
+                    <option value="net30">Net 30 Days</option>
+                    <option value="net45">Net 45 Days</option>
+                    <option value="net60">Net 60 Days</option>
+                    <option value="net90">Net 90 Days</option>
+                    <option value="advance">Advance Payment</option>
+                    <option value="consignment">Consignment</option>
+                  </select>
                 </div>
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.suppliers.leadTimeDays')}</label>

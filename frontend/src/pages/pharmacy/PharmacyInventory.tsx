@@ -25,6 +25,7 @@ interface InventoryItem {
 }
 
 interface Medication { id: string; name: string; generic_name: string; form: string; strength: string; unit: string }
+interface Supplier { id: string; name: string; is_approved: boolean }
 
 interface Props {
   pharmacyId: string
@@ -57,6 +58,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
   const [filterMode, setFilterMode] = useState('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [adjustTarget, setAdjustTarget] = useState<InventoryItem | null>(null)
   const [reorderTarget, setReorderTarget] = useState<InventoryItem | null>(null)
   const [showAddStock, setShowAddStock] = useState(false)
@@ -66,12 +68,14 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
 
   const load = useCallback(async () => {
     try {
-      const [invRes, medRes] = await Promise.all([
+      const [invRes, medRes, suppRes] = await Promise.all([
         client.get(`/pharmacies/${pharmacyId}/inventory`),
         client.get(`/networks/${networkId}/medications`),
+        client.get(`/networks/${networkId}/suppliers`),
       ])
       setItems(Array.isArray(invRes.data) ? invRes.data : [])
       setMedications(Array.isArray(medRes.data) ? medRes.data : [])
+      setSuppliers((Array.isArray(suppRes.data) ? suppRes.data : []).filter((s: Supplier) => s.is_approved !== false))
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
     } finally {
@@ -334,8 +338,21 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
                 </div>
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.inventory.receivedFrom')}</label>
-                  <input value={addForm.received_from} onChange={e => setAddForm(f => ({ ...f, received_from: e.target.value }))}
-                    placeholder={t('pharmacy.inventory.receivedFromPlaceholder')} />
+                  {suppliers.length > 0 ? (
+                    <select
+                      value={addForm.received_from}
+                      onChange={e => setAddForm(f => ({ ...f, received_from: e.target.value }))}
+                    >
+                      <option value="">{t('pharmacy.inventory.selectSupplier')}</option>
+                      {suppliers.map(s => (
+                        <option key={s.id} value={s.name}>{s.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div style={{ padding: '9px 12px', background: '#fff8e1', border: '1px solid #ffe082', borderRadius: 8, fontSize: '0.85rem', color: '#f57f17' }}>
+                      ⚠️ {t('pharmacy.inventory.noSuppliersHint')}
+                    </div>
+                  )}
                 </div>
                 <p className="req-legend">* {t('common.requiredField')}</p>
                 <div className="pharm-modal-actions">

@@ -3140,3 +3140,27 @@
 </details>
 
 ---
+
+## 2026-06-03 16:19 · `9aec6c1` · OTHER
+
+**Commit:** fix(dashboard): pharmacist role now redirects to /pharmacy instead of showing admin dashboard  
+**Author:** haikarthick  
+**Categories:** i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Dashboard.tsx
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
