@@ -238,6 +238,9 @@ const Dashboard: React.FC = () => {
       ]
     }
 
+    // Hospital staff: dedicated stat section renders separately below — no generic tiles
+    if (isHospitalStaff) return []
+
     // Pharmacist — redirected to /pharmacy, but guard against any fallthrough
     if (isPharmacist) {
       return [
@@ -254,7 +257,7 @@ const Dashboard: React.FC = () => {
       { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
       { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
     ]
-  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isCorporateAdmin, isPharmacist, corpStats, t])
+  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, corpStats, t])
 
   // Quick actions — role-specific
   const quickActions: QuickAction[] = useMemo(() => {
@@ -474,7 +477,7 @@ const Dashboard: React.FC = () => {
         {hasPermission('dashboard_quick_actions') && (
           <section className="dashboard-section quick-actions-section">
             <div className="section-header">
-              <h2 className="section-title">{t('dashboard.pageTitle')}</h2>
+              <h2 className="section-title">{t('dashboard.quickActionsTitle')}</h2>
             </div>
             <div className="quick-actions-grid">
               {quickActions.map((action, i) => (

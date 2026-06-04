@@ -871,10 +871,14 @@
         "hospitalOversight": "ಆಸ್ಪತ್ರೆ ಮೇಲ್ವಿಚಾರಣೆ",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Hospital stays & boarding"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "ರೋಗಿ",
@@ -906,7 +910,8 @@
       "aiCopilotDesc": "AI-ಚಾಲಿತ ಕ್ಲಿನಿಕಲ್ ನಿರ್ಧಾರ ಬೆಂಬಲ ಪಡೆಯಿರಿ"
     },
     "findDoctor": "ವೈದ್ಯರನ್ನು ಹುಡುಕಿ →",
-    "manageSchedule": "ವೇಳಾಪಟ್ಟಿ ನಿರ್ವಹಿಸಿ →"
+    "manageSchedule": "ವೇಳಾಪಟ್ಟಿ ನಿರ್ವಹಿಸಿ →",
+    "quickActionsTitle": "Quick Actions"
   },
   "consultations": {
     "pageTitle": "🏥 Consultations & Appointments",

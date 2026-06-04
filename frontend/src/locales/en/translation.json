@@ -790,6 +790,7 @@
     "cancelBooking": "Cancel this booking?",
     "declinedByDoctor": "Declined by doctor",
     "pageTitle": "Recent Consultations",
+    "quickActionsTitle": "Quick Actions",
     "noHospital": "Not Assigned",
     "stats": {
       "appointments": "Appointments",
@@ -870,9 +871,13 @@
         "hospitalOversight": "Hospital oversight",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Hospital stays & boarding"
       },
       "hospitalNetworks": "Hospital Networks",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding",
       "settings": "Settings"
     },
     "pending": {

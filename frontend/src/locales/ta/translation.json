@@ -871,10 +871,14 @@
         "hospitalOversight": "மருத்துவமனை மேற்பார்வை",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Hospital stays & boarding"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "நோயாளி",
@@ -906,7 +910,8 @@
       "aiCopilotDesc": "AI-இயங்கும் மருத்துவ முடிவு ஆதரவைப் பெறுக"
     },
     "findDoctor": "மருத்துவர் கண்டுபிடி →",
-    "manageSchedule": "அட்டவணையை நிர்வகி →"
+    "manageSchedule": "அட்டவணையை நிர்வகி →",
+    "quickActionsTitle": "Quick Actions"
   },
   "consultations": {
     "pageTitle": "🏥 ஆலோசனைகள் & சந்திப்புகள்",

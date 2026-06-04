@@ -3188,3 +3188,21 @@
 </details>
 
 ---
+
+## 2026-06-04 04:49 · `d5bc3c3` · OTHER
+
+**Commit:** fix(pharmacy): Mark Received 500 — dynamic SQL parameter index collision on reorder PATCH  
+**Author:** haikarthick  
+**Categories:** API · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/routes/index.ts
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---

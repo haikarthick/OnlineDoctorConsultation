@@ -871,10 +871,14 @@
         "hospitalOversight": "अस्पताल निरीक्षण",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Hospital stays & boarding"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "मरीज़",
@@ -906,7 +910,8 @@
       "aiCopilotDesc": "AI-संचालित नैदानिक निर्णय सहायता प्राप्त करें"
     },
     "findDoctor": "डॉक्टर खोजें →",
-    "manageSchedule": "शेड्यूल प्रबंधित करें →"
+    "manageSchedule": "शेड्यूल प्रबंधित करें →",
+    "quickActionsTitle": "Quick Actions"
   },
   "consultations": {
     "pageTitle": "🏥 परामर्श और अपॉइंटमेंट",

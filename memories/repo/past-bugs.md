@@ -1118,6 +1118,15 @@ render-start.sh
 - **Fix:** Built MedicationCatalog.tsx component — CRUD for pharmacy_medications table including form, withdrawal period, controlled substance flag. Added as 'catalog' tab in PharmacyDashboard.
 - **Rule:** Always build catalog management before inventory management — FK dependency must be satisfied.
 
+### I18N-003 — hospital_staff quick action labels rendered as raw key strings
+- **Logged:** 2026-06-04
+- **Symptom:** Dashboard "Recent Consultations" section showed `dashboard.quickActions.hospitalWorkflow` and `dashboard.quickActions.desc.patientQueue` as plain text instead of translated labels
+- **Root Cause 1:** Keys `hospitalWorkflow`, `inpatient`, `desc.patientQueue`, `desc.inpatientBoarding` were used in Dashboard.tsx `quickActions` for `isHospitalStaff` branch but never added to any locale file
+- **Root Cause 2:** Section title used `t('dashboard.pageTitle')` = "Recent Consultations" — wrong key for a Quick Actions section
+- **Root Cause 3:** `statCards` had no `isHospitalStaff` branch → showed 0-value appointment/consultation/animal tiles from admin fallback
+- **Fix:** Added missing keys to EN locale + merged to all 6; added `quickActionsTitle`; fixed section title key; added `if (isHospitalStaff) return []` to statCards
+- **Rule:** After writing any `t('key')` call, verify the key exists in ALL 6 locale files. Every Dashboard role MUST have an explicit statCards branch.
+
 ### SQL-PARAM-001 — Dynamic SQL extraSql used hardcoded offset i+6 — UUID assigned to TIMESTAMPTZ → 500
 - **Logged:** 2026-06-04
 - **Symptom:** Clicking "Mark Received" in Reorders tab returned Internal Server Error

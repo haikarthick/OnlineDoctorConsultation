@@ -870,10 +870,14 @@
         "hospitalOversight": "ആശുപത്രി മേൽനോട്ടം",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Hospital stays & boarding"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "രോഗി",
@@ -906,7 +910,8 @@
     },
     "noHospital": "Not Assigned",
     "findDoctor": "Find a Doctor →",
-    "manageSchedule": "Manage Schedule →"
+    "manageSchedule": "Manage Schedule →",
+    "quickActionsTitle": "Quick Actions"
   },
   "consultations": {
     "pageTitle": "🏥 കൺസൾട്ടേഷനുകൾ & അപ്പോയിന്റ്മെന്റുകൾ",
