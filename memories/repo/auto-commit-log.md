@@ -3164,3 +3164,27 @@
 </details>
 
 ---
+
+## 2026-06-04 04:39 · `32a8344` · OTHER
+
+**Commit:** fix(pharmacy): replace free-text supplier/payment-terms inputs with master data selects  
+**Author:** haikarthick  
+**Categories:** i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/pharmacy/PharmacyInventory.tsx
+  - frontend/src/pages/pharmacy/PharmacySuppliers.tsx
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

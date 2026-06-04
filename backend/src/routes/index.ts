@@ -3479,26 +3479,48 @@ router.post('/pharmacies/:pharmacyId/reorders', authMiddleware, asyncHandler(asy
 
 router.patch('/pharmacies/:pharmacyId/reorders/:reorderId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
+  const authReq = req as any;
   const { status, tracking_number, expected_delivery_date, notes } = req.body;
   const now = new Date().toISOString();
-  const extra: Record<string, string> = {};
-  if (status === 'shipped') extra['shipped_at'] = now;
-  if (status === 'confirmed') extra['confirmed_at'] = now;
-  if (status === 'received') extra['received_at'] = now;
-  const extraSql = Object.keys(extra).map((k, i) => `, ${k} = $${i + 6}`).join('');
-  const extraVals = Object.values(extra);
+
+  // Build SET clause with correctly indexed parameters — never hardcode index offsets
+  const setParts: string[] = [];
+  const params: any[] = [];
+
+  if (status !== undefined)                { setParts.push(`status = $${params.push(status)}`); }
+  if (tracking_number !== undefined)       { setParts.push(`tracking_number = $${params.push(tracking_number || null)}`); }
+  if (expected_delivery_date !== undefined){ setParts.push(`expected_delivery_date = $${params.push(expected_delivery_date || null)}`); }
+  if (notes !== undefined)                 { setParts.push(`notes = $${params.push(notes || null)}`); }
+
+  // Status-specific timestamp columns — use correct column names from pharmacy_reorder_requests schema
+  if (status === 'received')  { setParts.push(`received_at = $${params.push(now)}`); }
+  if (status === 'shipped')   { setParts.push(`shipped_at = $${params.push(now)}`); }
+  if (status === 'confirmed') { setParts.push(`confirmed_at = $${params.push(now)}`); }
+
+  setParts.push('updated_at = NOW()');
+
+  // WHERE clause params added last
+  const reorderIdx = params.push(req.params.reorderId);
+  const pharmacyIdx = params.push(req.params.pharmacyId);
+
   const result = await database.query(
-    `UPDATE pharmacy_reorder_requests SET
-       status = COALESCE($1, status),
-       tracking_number = COALESCE($2, tracking_number),
-       expected_delivery_date = COALESCE($3, expected_delivery_date),
-       notes = COALESCE($4, notes),
-       updated_at = NOW()${extraSql}
-     WHERE id = $5 AND pharmacy_id = $6 RETURNING *`,
-    [status, tracking_number, expected_delivery_date || null, notes, req.params.reorderId, req.params.pharmacyId, ...extraVals]
+    `UPDATE pharmacy_reorder_requests SET ${setParts.join(', ')}
+     WHERE id = $${reorderIdx} AND pharmacy_id = $${pharmacyIdx} RETURNING *`,
+    params
   );
-  if (!result.rows[0]) return res.status(404).json({ error: 'Reorder request not found' });
-  res.json(result.rows[0]);
+  if (!result.rows[0]) return res.status(404).json({ success: false, message: 'Reorder request not found' });
+
+  // When marked received: log a stock audit event (non-fatal)
+  if (status === 'received') {
+    const r = result.rows[0];
+    database.query(
+      `INSERT INTO pharmacy_stock_adjustments (pharmacy_id, med_id, adjustment_qty, adjustment_type, reason, adjusted_by)
+       VALUES ($1, $2, $3, 'add', 'Reorder received — add stock via Inventory tab', $4)`,
+      [req.params.pharmacyId, r.med_id, r.requested_qty, authReq.userId]
+    ).catch(() => {});
+  }
+
+  res.json({ success: true, data: result.rows[0] });
 }));
 
 // ── Prescription Review ──────────────────────────────────────

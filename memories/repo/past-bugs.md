@@ -1118,6 +1118,13 @@ render-start.sh
 - **Fix:** Built MedicationCatalog.tsx component — CRUD for pharmacy_medications table including form, withdrawal period, controlled substance flag. Added as 'catalog' tab in PharmacyDashboard.
 - **Rule:** Always build catalog management before inventory management — FK dependency must be satisfied.
 
+### SQL-PARAM-001 — Dynamic SQL extraSql used hardcoded offset i+6 — UUID assigned to TIMESTAMPTZ → 500
+- **Logged:** 2026-06-04
+- **Symptom:** Clicking "Mark Received" in Reorders tab returned Internal Server Error
+- **Root Cause:** `extraSql = keys.map((k, i) => \`, ${k} = $${i + 6}\`)` built `received_at = $6` but `$6` in the params array was `pharmacyId` (a UUID). PostgreSQL rejected assigning a UUID to a TIMESTAMPTZ column.
+- **Fix:** Replaced hardcoded offset with `params.push(value)` return-value pattern: `setParts.push(\`col = $\${params.push(val)}\`)` — `Array.push` returns the new length which is always the correct `$N` index.
+- **Rule:** NEVER use hardcoded offset `i + N` in dynamic SQL. Always use `params.push(value)` whose return value is the correct parameter index. Verify every column name against `docker/init.sql` before writing UPDATE SQL.
+
 ### DASH-PHARM-001 — pharmacist role had no dashboard branch — fell through to admin dashboard
 - **Logged:** 2026-06-03
 - **Symptom:** Pharmacist user logged in and saw admin stat tiles (Appointments, Consultations, Animals) plus admin quick-action cards (Admin Panel, Users, Payments, Audit Logs). Pharmacy user also had unnecessary API calls to listBookings/listConsultations/listAnimals (all returning empty/error).
