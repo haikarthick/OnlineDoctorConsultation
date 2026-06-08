@@ -221,7 +221,8 @@ export const createMedicalRecordSchema = Joi.object({
   animalId: uuid.optional(),
   consultationId: uuid.optional(),
   veterinarianId: uuid.optional(),
-  recordType: shortText(50).required(),
+  // MEDIUM FIX-7: Validate recordType against DB CHECK constraint
+  recordType: Joi.string().valid('diagnosis', 'prescription', 'lab_report', 'vaccination', 'surgery', 'imaging', 'follow_up', 'other').required(),
   title: shortText().required(),
   content: longText(10000).required(),
   severity: Joi.string().valid('low', 'normal', 'high', 'critical').optional(),
@@ -282,7 +283,8 @@ export const createAllergySchema = Joi.object({
   animalId: requiredUuid,
   allergen: shortText().required(),
   reaction: shortText(500).optional().allow('', null),
-  severity: Joi.string().valid('mild', 'moderate', 'severe', 'life-threatening').optional(),
+  // MEDIUM FIX-7: Sync allergy severity with DB CHECK constraint (removed 'life-threatening')
+  severity: Joi.string().valid('mild', 'moderate', 'severe').optional(),
   identifiedDate: Joi.string().optional().allow('', null),
   isActive: Joi.boolean().optional().default(true),
   notes: longText(2000).optional().allow('', null),
@@ -301,7 +303,8 @@ export const createLabResultSchema = Joi.object({
   resultValue: shortText(500).optional().allow('', null),
   normalRange: shortText(100).optional().allow('', null),
   unit: shortText(50).optional().allow('', null),
-  status: Joi.string().valid('pending', 'completed', 'cancelled').optional(),
+  // MEDIUM FIX-7: Sync lab status with DB CHECK constraint (removed 'cancelled', added 'in_progress')
+  status: Joi.string().valid('pending', 'in_progress', 'completed').optional(),
   interpretation: longText(2000).optional().allow('', null),
   labName: shortText().optional().allow('', null),
   orderedBy: shortText().optional().allow('', null),

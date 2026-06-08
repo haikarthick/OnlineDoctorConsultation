@@ -156,11 +156,15 @@ export interface MedicalTimeline {
 }
 
 // ─── Helpers ────────────────────────────────────────────────
+// MEDIUM FIX-8: Atomic record_number generation using UUID instead of COUNT(*)+1
+// Previous implementation was race-prone: two concurrent creates could generate same MR-000001
 async function generateRecordNumber(): Promise<string> {
   try {
-    const result = await database.query(`SELECT COUNT(*) as count FROM medical_records`);
-    const count = parseInt(result.rows[0]?.count || '0', 10) + 1;
-    return `MR-${count.toString().padStart(6, '0')}`;
+    // Use UUID-based number: faster, atomic, no race conditions
+    // Format: MR-<first 8 chars of UUID upper case>
+    // Examples: MR-A1B2C3D4, MR-F7E8D9CA
+    const uuid = uuidv4().substring(0, 8).toUpperCase();
+    return `MR-${uuid}`;
   } catch {
     return `MR-${Date.now().toString(36).toUpperCase()}`;
   }
@@ -548,9 +552,14 @@ export class MedicalRecordService {
 
   async deleteVaccination(id: string, deletedBy?: string, deletedByName?: string): Promise<void> {
     try {
-      await database.query(`UPDATE vaccination_records SET is_valid = false, updated_at = NOW() WHERE id = $1`, [id]);
+      // MEDIUM FIX-9: Check rowCount to return 404 instead of 500 for missing records
+      const result = await database.query(`UPDATE vaccination_records SET is_valid = false, updated_at = NOW() WHERE id = $1`, [id]);
+      if (result.rowCount === 0) {
+        throw new NotFoundError(`Vaccination record ${id} not found`);
+      }
       await logMedicalAudit(id, 'vaccination', 'INVALIDATE', deletedBy, deletedByName);
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new DatabaseError('Error invalidating vaccination record', { originalError: error });
     }
   }
@@ -657,10 +666,15 @@ export class MedicalRecordService {
       if (entries.length === 0) return this.getAllergy(id);
       const sets = entries.map(([k], i) => `${fieldMap[k]} = $${i + 2}`);
       const vals = entries.map(([_, v]) => v);
-      await database.query(`UPDATE allergy_records SET ${sets.join(', ')}, updated_at = NOW() WHERE id = $1`, [id, ...vals]);
+      // MEDIUM FIX-9: Check rowCount to return 404 instead of 500 for missing records
+      const result = await database.query(`UPDATE allergy_records SET ${sets.join(', ')}, updated_at = NOW() WHERE id = $1`, [id, ...vals]);
+      if (result.rowCount === 0) {
+        throw new NotFoundError(`Allergy record ${id} not found`);
+      }
       await logMedicalAudit(id, 'allergy', 'UPDATE', updatedBy, updatedByName, null, updates);
       return this.getAllergy(id);
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new DatabaseError('Error updating allergy record', { originalError: error });
     }
   }
@@ -757,10 +771,15 @@ export class MedicalRecordService {
       if (entries.length === 0) return this.getLabResult(id);
       const sets = entries.map(([k], i) => `${fieldMap[k]} = $${i + 2}`);
       const vals = entries.map(([_, v]) => v);
-      await database.query(`UPDATE lab_results SET ${sets.join(', ')}, updated_at = NOW() WHERE id = $1`, [id, ...vals]);
+      // MEDIUM FIX-9: Check rowCount to return 404 instead of 500 for missing records
+      const result = await database.query(`UPDATE lab_results SET ${sets.join(', ')}, updated_at = NOW() WHERE id = $1`, [id, ...vals]);
+      if (result.rowCount === 0) {
+        throw new NotFoundError(`Lab result ${id} not found`);
+      }
       await logMedicalAudit(id, 'lab_result', 'UPDATE', updatedBy, updatedByName, null, updates);
       return this.getLabResult(id);
     } catch (error) {
+      if (error instanceof NotFoundError) throw error;
       throw new DatabaseError('Error updating lab result', { originalError: error });
     }
   }
