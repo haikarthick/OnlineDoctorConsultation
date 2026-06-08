@@ -2611,18 +2611,42 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
   const inviteResult = await db.query(`SELECT * FROM hospital_staff_invites WHERE invite_token=$1 AND status='pending' AND expires_at>NOW()`, [token]);
   if (inviteResult.rows.length === 0) return res.status(400).json({ success: false, message: 'Invalid, expired, or already used invite' });
   const invite = inviteResult.rows[0];
-  const seat = await checkSeatLimit(invite.network_id, db);
-  if (!seat.allowed) return res.status(403).json({ success: false, message: 'Seat limit reached. Contact your network administrator.', code: 'seat_limit_exceeded' });
   const existing = await db.query(`SELECT id FROM users WHERE email=$1`, [invite.invitee_email]);
   if (existing.rows.length > 0) return res.status(409).json({ success: false, message: 'An account with this email already exists. Please log in.' });
+
+  // CRITICAL: Wrap the entire accept flow in a transaction to prevent seat limit race conditions
+  // Without this, two parallel accepts could both pass the seat check but exceed the limit when committed
+  const client = await db.getClient?.() || db;
   try {
+    if (client.query === db.query) {
+      // Direct db usage — transactions need explicit BEGIN/COMMIT
+      await db.query('BEGIN ISOLATION LEVEL SERIALIZABLE');
+    }
+
+    // Re-check seat limit INSIDE the transaction (row-level lock prevents other accepts from executing in parallel)
+    const seat = await db.query(`
+      SELECT (SELECT COUNT(*) FROM users u
+              INNER JOIN hospital_network_members hnm ON u.id = hnm.user_id
+              WHERE hnm.network_id = $1 AND hnm.is_active = true) as used_seats,
+             hn.seat_limit
+      FROM hospital_network_subscriptions hn
+      WHERE hn.network_id = $1
+    `, [invite.network_id]);
+
+    if (seat.rows.length > 0) {
+      const { used_seats, seat_limit } = seat.rows[0];
+      if (parseInt(used_seats) >= parseInt(seat_limit)) {
+        if (client.query === db.query) await db.query('ROLLBACK');
+        return res.status(403).json({ success: false, message: 'Seat limit reached. Contact your network administrator.', code: 'seat_limit_exceeded' });
+      }
+    }
+
     const bcrypt = require('bcryptjs');
     const password_hash = await bcrypt.hash(password, 12);
     // Derive system role from invited staff_position — pharmacist gets dedicated role
     const staffPositionRoleMap: Record<string, string> = { pharmacist: 'pharmacist' };
     const assignedRole = staffPositionRoleMap[invite.staff_position] || 'hospital_staff';
     // network_role must satisfy the DB check constraint — always 'hospital_staff' for position-based invites
-    // The actual differentiation is captured in users.role and staff_positions.position
     const networkRole = 'hospital_staff';
     const userResult = await db.query(
       `INSERT INTO users (email, first_name, last_name, phone, role, password_hash) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, email, first_name, last_name, role`,
@@ -2638,8 +2662,13 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
         [invite.hospital_id, newUser.id, invite.staff_position]).catch((err: any) => logger.error('Staff position insert failed', { error: err.message }));
     }
     await db.query(`UPDATE hospital_staff_invites SET status='accepted', accepted_at=NOW(), accepted_user_id=$1 WHERE invite_token=$2`, [newUser.id, token]);
+
+    if (client.query === db.query) await db.query('COMMIT');
     res.status(201).json({ success: true, message: 'Account created successfully. You can now log in.' });
   } catch (err: any) {
+    if (client.query === db.query) {
+      try { await db.query('ROLLBACK'); } catch (rollbackErr: any) { logger.error('Rollback failed', { error: rollbackErr.message }); }
+    }
     logger.error('Accept invite failed', { error: err.message, stack: err.stack });
     res.status(500).json({ success: false, message: err.message || 'Failed to create account' });
   }

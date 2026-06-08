@@ -1118,6 +1118,30 @@ render-start.sh
 - **Fix:** Built MedicationCatalog.tsx component — CRUD for pharmacy_medications table including form, withdrawal period, controlled substance flag. Added as 'catalog' tab in PharmacyDashboard.
 - **Rule:** Always build catalog management before inventory management — FK dependency must be satisfied.
 
+### SEC-RACE-001 — Seat limit check outside transaction allows race condition bypass
+- **Logged:** 2026-06-04
+- **Symptom:** If 5 people invited for 2 available seats all click accept simultaneously, all 5 could be added (exceeding quota)
+- **Root Cause:** `POST /hospital-staff-invites/accept` checked seat limit at line 2614 but NOT inside a database transaction. Another thread could sneak in between the check and the INSERT, exceeding the limit.
+- **Fix:** Wrapped acceptance flow in `BEGIN ISOLATION LEVEL SERIALIZABLE` transaction. Seat limit re-checked INSIDE the transaction (with row lock). If used >= limit during COMMIT phase, transaction ROLLBACK and reject.
+- **Rule:** All quota/limit checks for multi-user systems MUST be inside DB transactions with SERIALIZABLE isolation. Use `FOR UPDATE` row locks to serialize access.
+
+### SEC-CASCADE-001 — Cascade deletes on clinical records wipe audit trails (HIPAA violation)
+- **Logged:** 2026-06-04
+- **Symptom:** If a pet owner user is deleted, their booking/consultation records CASCADE-delete, destroying audit trail and violating HIPAA/regulatory compliance
+- **Root Cause:** `bookings.pet_owner_id`, `consultations.user_id`, `medical_records.user_id` had `ON DELETE CASCADE` FKs instead of `SET NULL`
+- **Fix:** Changed cascade policy to `ON DELETE SET NULL` for:
+  - consultations.user_id (line 170)
+  - medical_records.user_id (line 455)
+  - bookings.pet_owner_id (line 348)
+- **Rule:** Clinical records, audit trails, financial transactions MUST use `ON DELETE SET NULL` or `ON DELETE RESTRICT`, never CASCADE.
+
+### FE-CRASH-001 — API response shape mismatch causes `.map is not a function` crashes (29+ files)
+- **Logged:** 2026-06-04
+- **Symptom:** Some API endpoints return bare arrays `[...]`, others return `{ data: [...] }`, others `{ data: { items: [...] } }`. Frontend code assumes `.data` is always an array → crash when it's an object.
+- **Root Cause:** Backend endpoints return inconsistent response shapes. Frontend uses unsafe pattern `res.data?.map()` which fails when `res.data` is an object.
+- **Fix:** Added `extractArrayFromResponse()` helper in api.ts that safely handles all response shapes. Components should use: `const items = extractArrayFromResponse(res, ['items', 'animals'])` instead of `res.data || []`.
+- **Rule:** Standardize all API responses to `{ success, data, error, total }`. Use helper for safe array extraction.
+
 ### I18N-003 — hospital_staff quick action labels rendered as raw key strings
 - **Logged:** 2026-06-04
 - **Symptom:** Dashboard "Recent Consultations" section showed `dashboard.quickActions.hospitalWorkflow` and `dashboard.quickActions.desc.patientQueue` as plain text instead of translated labels

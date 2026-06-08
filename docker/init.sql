@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS network_patient_id_sequences (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS consultations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   animal_type VARCHAR(100) NOT NULL DEFAULT '',
@@ -345,7 +345,7 @@ CREATE TABLE IF NOT EXISTS treatment_campaigns (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  pet_owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  pet_owner_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
   veterinarian_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
@@ -452,7 +452,7 @@ CREATE TABLE IF NOT EXISTS prescriptions (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS medical_records (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
   consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
   veterinarian_id UUID REFERENCES users(id) ON DELETE SET NULL,

@@ -3206,3 +3206,28 @@
 </details>
 
 ---
+
+## 2026-06-04 16:16 · `51fa9c2` · OTHER
+
+**Commit:** fix(dashboard): hospital staff UI — missing i18n keys, wrong section title, raw key strings visible  
+**Author:** haikarthick  
+**Categories:** i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Dashboard.css
+  - frontend/src/pages/Dashboard.tsx
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
