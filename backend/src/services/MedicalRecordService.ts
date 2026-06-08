@@ -380,8 +380,11 @@ export class MedicalRecordService {
         animalId: 'animal_id', consultationId: 'consultation_id',
         veterinarianId: 'veterinarian_id', isConfidential: 'is_confidential',
         followUpDate: 'follow_up_date',
+        // Add any other fields that are explicitly allowed to be updated
       };
-      const entries = Object.entries(updates).filter(([k, v]) => v !== undefined && k !== 'userId' && k !== 'medications' && k !== 'attachments' && k !== 'tags');
+      // Strictly whitelist allowed fields to prevent arbitrary column updates
+      const allowedUpdateFields = Object.keys(fieldMap);
+      const entries = Object.entries(updates).filter(([k, v]) => v !== undefined && allowedUpdateFields.includes(k));
       const sets: string[] = [];
       const values: any[] = [recordId];
       let paramIdx = 1;
@@ -1033,23 +1036,34 @@ export class MedicalRecordService {
         };
       }
 
-      // Global stats (no animal filter)
-      const userFilter = userId && !isAdmin ? `WHERE mr.user_id = '${userId}' OR mr.created_by = '${userId}' OR mr.veterinarian_id = '${userId}'` : '';
-      // Vets: include animals from their consultations
-      const vetAnimalFilter = userId && !isAdmin ?
-        `WHERE (a.owner_id = '${userId}' OR a.id IN (SELECT animal_id FROM consultations WHERE veterinarian_id = '${userId}' AND animal_id IS NOT NULL) OR a.id IN (SELECT animal_id FROM bookings WHERE veterinarian_id = '${userId}' AND animal_id IS NOT NULL))` :
-        '';
-      const prescriptionFilter = userId && !isAdmin ? `WHERE p.veterinarian_id = '${userId}' OR p.pet_owner_id = '${userId}'` : '';
-      const consultationFilter = userId && !isAdmin ? `WHERE c.veterinarian_id = '${userId}' OR c.user_id = '${userId}'` : '';
+      // CRITICAL FIX: Parameterize all userId filters to prevent SQL injection
+      // Previously used string interpolation which allowed SQL injection via userId = "'1' OR '1'='1'"
+      const params: any[] = [];
+      let paramIdx = 1;
+
+      // Build WHERE clause with parameterized userId
+      let userFilter = '';
+      let vetAnimalFilter = '';
+      let prescriptionFilter = '';
+      let consultationFilter = '';
+
+      if (userId && !isAdmin) {
+        userFilter = `WHERE mr.user_id = $${paramIdx} OR mr.created_by = $${paramIdx} OR mr.veterinarian_id = $${paramIdx}`;
+        vetAnimalFilter = `WHERE (a.owner_id = $${paramIdx} OR a.id IN (SELECT animal_id FROM consultations WHERE veterinarian_id = $${paramIdx} AND animal_id IS NOT NULL) OR a.id IN (SELECT animal_id FROM bookings WHERE veterinarian_id = $${paramIdx} AND animal_id IS NOT NULL))`;
+        prescriptionFilter = `WHERE p.veterinarian_id = $${paramIdx} OR p.pet_owner_id = $${paramIdx}`;
+        consultationFilter = `WHERE c.veterinarian_id = $${paramIdx} OR c.user_id = $${paramIdx}`;
+        params.push(userId, userId, userId); // Push userId 3 times (used in multiple places in vetAnimalFilter)
+        paramIdx += 3;
+      }
 
       const [records, vaccinations, allergies, labs, upcoming, prescriptions, consultations] = await Promise.all([
-        database.query(`SELECT COUNT(*) as count, record_type as type FROM medical_records mr ${userFilter} GROUP BY record_type`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records vr LEFT JOIN animals a ON a.id = vr.animal_id ${vetAnimalFilter}`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active FROM allergy_records ar LEFT JOIN animals a ON a.id = ar.animal_id ${vetAnimalFilter}`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN lr.status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${vetAnimalFilter}`),
-        database.query(`SELECT COUNT(*) as count FROM medical_records mr ${userFilter ? userFilter + ' AND' : 'WHERE'} follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN p.is_active THEN 1 END) as active FROM prescriptions p ${prescriptionFilter}`),
-        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN c.status = 'completed' THEN 1 END) as completed FROM consultations c ${consultationFilter}`),
+        database.query(`SELECT COUNT(*) as count, record_type as type FROM medical_records mr ${userFilter} GROUP BY record_type`, params.slice(0, userFilter ? 3 : 0)),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN next_due_date <= CURRENT_DATE + INTERVAL '30 days' AND next_due_date >= CURRENT_DATE THEN 1 END) as upcoming FROM vaccination_records vr LEFT JOIN animals a ON a.id = vr.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 3) : []),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN ar.is_active THEN 1 END) as active FROM allergy_records ar LEFT JOIN animals a ON a.id = ar.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 3) : []),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN lr.status = 'pending' THEN 1 END) as pending FROM lab_results lr LEFT JOIN animals a ON a.id = lr.animal_id ${vetAnimalFilter}`, vetAnimalFilter ? params.slice(0, 3) : []),
+        database.query(`SELECT COUNT(*) as count FROM medical_records mr ${userFilter ? userFilter + ' AND' : 'WHERE'} follow_up_date IS NOT NULL AND follow_up_date >= CURRENT_DATE AND follow_up_date <= CURRENT_DATE + INTERVAL '7 days'`, params.slice(0, userFilter ? 3 : 0)),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN p.is_active THEN 1 END) as active FROM prescriptions p ${prescriptionFilter}`, prescriptionFilter ? params.slice(0, 3) : []),
+        database.query(`SELECT COUNT(*) as total, COUNT(CASE WHEN c.status = 'completed' THEN 1 END) as completed FROM consultations c ${consultationFilter}`, consultationFilter ? params.slice(0, 3) : []),
       ]);
 
       const recordsByType: Record<string, number> = {};

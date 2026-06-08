@@ -265,3 +265,43 @@ export function requireAnimalAccess(
     next();
   };
 }
+
+/**
+ * CRITICAL FIX: Middleware to verify user is a member of the specified enterprise.
+ * Applied to: GET /enterprises/:enterpriseId/medical-records, /stats, /vaccinations
+ * Prevents: Any logged-in user from querying arbitrary enterprise data by guessing UUID
+ */
+export function requireEnterpriseAccess() {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const enterpriseId = req.params.enterpriseId;
+    if (!enterpriseId) {
+      return res.status(400).json({ success: false, error: 'enterpriseId parameter required' });
+    }
+
+    const isAdmin = req.userRole === 'admin';
+    if (isAdmin) {
+      return next(); // Admins can access all enterprises
+    }
+
+    // Check if user is a member of this enterprise
+    const membershipRes = await database.query(
+      `SELECT id FROM enterprise_members WHERE enterprise_id = $1 AND user_id = $2 AND is_active = true`,
+      [enterpriseId, req.userId]
+    );
+
+    if (membershipRes.rows.length === 0) {
+      logger.warn('Enterprise access denied', {
+        userId: req.userId,
+        enterpriseId,
+        path: req.path,
+      });
+      return res.status(403).json({
+        success: false,
+        error: 'You do not have access to this enterprise',
+        code: 'ENTERPRISE_ACCESS_DENIED',
+      });
+    }
+
+    next();
+  };
+}

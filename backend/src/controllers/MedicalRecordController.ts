@@ -24,7 +24,19 @@ export class MedicalRecordController {
   async getRecord(req: AuthRequest, res: Response): Promise<void> {
     const record = await MedicalRecordService.getRecord(req.params.id);
     const isOwner = record.userId === (req as any).userId || record.createdBy === (req as any).userId;
-    const isPrivileged = (req as any).userRole === 'admin' || (req as any).userRole === 'veterinarian';
+    const isAdmin = (req as any).userRole === 'admin';
+
+    // Vets must have explicit booking/consultation with this animal — no blanket access
+    let isVetWithAccess = false;
+    if ((req as any).userRole === 'veterinarian' && record.animalId) {
+      const vetResult = await database.query(
+        `SELECT id FROM bookings WHERE veterinarian_id = $1 AND animal_id = $2
+         UNION
+         SELECT id FROM consultations WHERE veterinarian_id = $1 AND animal_id = $2`,
+        [(req as any).userId, record.animalId]
+      );
+      isVetWithAccess = vetResult.rows.length > 0;
+    }
 
     let isFarmerWithAccess = false;
     if ((req as any).userRole === 'farmer' && record.animalId) {
@@ -37,7 +49,7 @@ export class MedicalRecordController {
       isFarmerWithAccess = animalResult.rows.length > 0;
     }
 
-    if (!isOwner && !isPrivileged && !isFarmerWithAccess) {
+    if (!isOwner && !isAdmin && !isVetWithAccess && !isFarmerWithAccess) {
       throw new ForbiddenError('Access denied to this medical record');
     }
     res.json({ success: true, data: record });
@@ -75,7 +87,22 @@ export class MedicalRecordController {
 
   async updateRecord(req: AuthRequest, res: Response): Promise<void> {
     const record = await MedicalRecordService.getRecord(req.params.id);
-    if (record.createdBy !== req.userId && req.userRole !== 'admin' && req.userRole !== 'veterinarian') {
+    const isCreator = record.createdBy === req.userId;
+    const isAdmin = req.userRole === 'admin';
+
+    // Vets must have booking/consultation with this animal
+    let isVetWithAccess = false;
+    if (req.userRole === 'veterinarian' && record.animalId) {
+      const vetResult = await database.query(
+        `SELECT id FROM bookings WHERE veterinarian_id = $1 AND animal_id = $2
+         UNION
+         SELECT id FROM consultations WHERE veterinarian_id = $1 AND animal_id = $2`,
+        [req.userId, record.animalId]
+      );
+      isVetWithAccess = vetResult.rows.length > 0;
+    }
+
+    if (!isCreator && !isAdmin && !isVetWithAccess) {
       throw new ForbiddenError('You do not have permission to update this record');
     }
     const updated = await MedicalRecordService.updateRecord(

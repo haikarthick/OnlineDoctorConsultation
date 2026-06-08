@@ -114,7 +114,7 @@ import VaccineProtocolService from '../services/VaccineProtocolService';
 import VaccineScheduleService from '../services/VaccineScheduleService';
 import { asyncHandler } from '../utils/errorHandler';
 import { AuthRequest } from '../middleware/auth';
-import { checkAnimalAccess, requireAnimalAccess } from '../middleware/hospitalDataIsolation';
+import { checkAnimalAccess, requireAnimalAccess, requireEnterpriseAccess } from '../middleware/hospitalDataIsolation';
 import emailService from '../services/EmailService';
 import { emitDataRefresh, emitRoleRefresh, emitBroadcastRefresh } from '../utils/socketIO'
 
@@ -1161,21 +1161,25 @@ router.put('/vaccinations/:id', authMiddleware, validateBody(updateVaccinationSc
 router.delete('/vaccinations/:id', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.deleteVaccination(req, res)));
 
 // ─── Weight History routes ───────────────────────────────────
-router.post('/weight-history', authMiddleware, validateBody(addWeightSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.addWeight(req, res)));
-router.get('/weight-history/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listWeightHistory(req, res)));
+// CRITICAL FIX: Added requireAnimalAccess for body:animalId (POST) and params:animalId (GET)
+router.post('/weight-history', authMiddleware, requireAnimalAccess('body:animalId', 'weight'), validateBody(addWeightSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.addWeight(req, res)));
+router.get('/weight-history/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'weight'), asyncHandler((req: Request, res: Response) => MedicalRecordController.listWeightHistory(req, res)));
 
 // ─── Allergy routes ─────────────────────────────────────────
-router.post('/allergies', authMiddleware, validateBody(createAllergySchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createAllergy(req, res)));
-router.get('/allergies/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listAllergies(req, res)));
-router.put('/allergies/:id', authMiddleware, validateBody(updateAllergySchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.updateAllergy(req, res)));
+// CRITICAL FIX: Added requireAnimalAccess for all allergy routes
+router.post('/allergies', authMiddleware, requireAnimalAccess('body:animalId', 'allergies'), validateBody(createAllergySchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createAllergy(req, res)));
+router.get('/allergies/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'allergies'), asyncHandler((req: Request, res: Response) => MedicalRecordController.listAllergies(req, res)));
+router.put('/allergies/:id', authMiddleware, requireAnimalAccess('body:animalId', 'allergies'), validateBody(updateAllergySchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.updateAllergy(req, res)));
 
 // ─── Lab Result routes ──────────────────────────────────────
-router.post('/lab-results', authMiddleware, validateBody(createLabResultSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createLabResult(req, res)));
-router.get('/lab-results/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listLabResults(req, res)));
-router.put('/lab-results/:id', authMiddleware, validateBody(updateLabResultSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.updateLabResult(req, res)));
+// CRITICAL FIX: Added requireAnimalAccess for all lab result routes
+router.post('/lab-results', authMiddleware, requireAnimalAccess('body:animalId', 'lab_results'), validateBody(createLabResultSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createLabResult(req, res)));
+router.get('/lab-results/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'lab_results'), asyncHandler((req: Request, res: Response) => MedicalRecordController.listLabResults(req, res)));
+router.put('/lab-results/:id', authMiddleware, requireAnimalAccess('body:animalId', 'lab_results'), validateBody(updateLabResultSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.updateLabResult(req, res)));
 
 // ─── Medical Timeline route ─────────────────────────────────
-router.get('/timeline/animal/:animalId', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getTimeline(req, res)));
+// CRITICAL FIX: Added requireAnimalAccess for timeline
+router.get('/timeline/animal/:animalId', authMiddleware, requireAnimalAccess('params:animalId', 'timeline'), asyncHandler((req: Request, res: Response) => MedicalRecordController.getTimeline(req, res)));
 
 // ─── Notification routes ─────────────────────────────────────
 router.get('/notifications', authMiddleware, asyncHandler((req: Request, res: Response) => NotificationController.listNotifications(req, res)));
@@ -1587,9 +1591,10 @@ router.post('/enterprises/:enterpriseId/health/observations', authMiddleware, va
 router.patch('/health/observations/:id/resolve', authMiddleware, validateBody(resolveObservationSchema), asyncHandler((req: Request, res: Response) => Tier2Controller.resolveObservation(req, res)));
 
 // ─── Enterprise / Herd Medical Management ────────────
-router.get('/enterprises/:enterpriseId/medical-records', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseRecords(req, res)));
-router.get('/enterprises/:enterpriseId/medical-records/stats', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getEnterpriseMedicalStats(req, res)));
-router.get('/enterprises/:enterpriseId/vaccinations', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseVaccinations(req, res)));
+// CRITICAL FIX: Added requireEnterpriseAccess to prevent data exposure by arbitrary enterpriseId
+router.get('/enterprises/:enterpriseId/medical-records', authMiddleware, requireEnterpriseAccess(), asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseRecords(req, res)));
+router.get('/enterprises/:enterpriseId/medical-records/stats', authMiddleware, requireEnterpriseAccess(), asyncHandler((req: Request, res: Response) => MedicalRecordController.getEnterpriseMedicalStats(req, res)));
+router.get('/enterprises/:enterpriseId/vaccinations', authMiddleware, requireEnterpriseAccess(), asyncHandler((req: Request, res: Response) => MedicalRecordController.listEnterpriseVaccinations(req, res)));
 
 // ─── Breeding & Genetics ────────────────────────────
 router.get('/enterprises/:enterpriseId/breeding', authMiddleware, asyncHandler((req: Request, res: Response) => Tier2Controller.listBreedingRecords(req, res)));
