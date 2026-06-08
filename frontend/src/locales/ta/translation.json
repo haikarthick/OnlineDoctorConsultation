@@ -871,14 +871,10 @@
         "hospitalOversight": "மருத்துவமனை மேற்பார்வை",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings",
-        "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Hospital stays & boarding"
+        "manageSettings": "Manage settings"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings",
-      "hospitalWorkflow": "Hospital Workflow",
-      "inpatient": "Inpatient & Boarding"
+      "settings": "Settings"
     },
     "pending": {
       "patient": "நோயாளி",
@@ -910,8 +906,7 @@
       "aiCopilotDesc": "AI-இயங்கும் மருத்துவ முடிவு ஆதரவைப் பெறுக"
     },
     "findDoctor": "மருத்துவர் கண்டுபிடி →",
-    "manageSchedule": "அட்டவணையை நிர்வகி →",
-    "quickActionsTitle": "Quick Actions"
+    "manageSchedule": "அட்டவணையை நிர்வகி →"
   },
   "consultations": {
     "pageTitle": "🏥 ஆலோசனைகள் & சந்திப்புகள்",
@@ -6518,9 +6513,7 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items",
-      "selectSupplier": "— Select supplier —",
-      "noSuppliersHint": "No approved suppliers registered. Add suppliers in the Suppliers tab first."
+      "showing": "Showing {{count}} of {{total}} items"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6539,8 +6532,7 @@
       "leadTimeDays": "Lead Days",
       "approvedLabel": "Approved",
       "approved": "Approved",
-      "unapproved": "Unapproved",
-      "selectPaymentTerms": "— Select payment terms —"
+      "unapproved": "Unapproved"
     },
     "reorder": {
       "title": "Reorder",

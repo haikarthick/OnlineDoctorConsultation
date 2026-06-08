@@ -3231,3 +3231,93 @@
 </details>
 
 ---
+
+## 2026-06-08 04:40 · `a04f960` · OTHER
+
+**Commit:** fix(security): 5 critical vulnerabilities — race conditions, cascade deletes, API response shape mismatch  
+**Author:** haikarthick  
+**Categories:** API · DB-SCHEMA · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - backend/src/routes/index.ts
+  - docker/init.sql
+  - frontend/src/services/api.ts
+  - memories/repo/auto-commit-log.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-06-08 04:48 · `55db95e` · 🐛 FIX
+
+**Commit:** fix: remove undefined db.getClient() call in transaction logic  
+**Author:** haikarthick  
+**Categories:** API  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/routes/index.ts
+
+</details>
+
+---
+
+## 2026-06-08 15:42 · `8b0b024` · OTHER
+
+**Commit:** fix(security-critical): 4 access control vulnerabilities in medical records  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/controllers/MedicalRecordController.ts
+  - backend/src/middleware/hospitalDataIsolation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/MedicalRecordService.ts
+
+</details>
+
+---
+
+## 2026-06-08 15:45 · `83da27b` · OTHER
+
+**Commit:** fix(security-high): 2 access validation vulnerabilities in medical records  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/controllers/MedicalRecordController.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/MedicalRecordService.ts
+
+</details>
+
+---
+
+## 2026-06-08 15:48 · `587d034` · OTHER
+
+**Commit:** fix(security-medium): 3 data consistency and error handling issues in medical records  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/services/MedicalRecordService.ts
+
+</details>
+
+---

@@ -871,14 +871,10 @@
         "hospitalOversight": "ಆಸ್ಪತ್ರೆ ಮೇಲ್ವಿಚಾರಣೆ",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings",
-        "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Hospital stays & boarding"
+        "manageSettings": "Manage settings"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings",
-      "hospitalWorkflow": "Hospital Workflow",
-      "inpatient": "Inpatient & Boarding"
+      "settings": "Settings"
     },
     "pending": {
       "patient": "ರೋಗಿ",
@@ -910,8 +906,7 @@
       "aiCopilotDesc": "AI-ಚಾಲಿತ ಕ್ಲಿನಿಕಲ್ ನಿರ್ಧಾರ ಬೆಂಬಲ ಪಡೆಯಿರಿ"
     },
     "findDoctor": "ವೈದ್ಯರನ್ನು ಹುಡುಕಿ →",
-    "manageSchedule": "ವೇಳಾಪಟ್ಟಿ ನಿರ್ವಹಿಸಿ →",
-    "quickActionsTitle": "Quick Actions"
+    "manageSchedule": "ವೇಳಾಪಟ್ಟಿ ನಿರ್ವಹಿಸಿ →"
   },
   "consultations": {
     "pageTitle": "🏥 Consultations & Appointments",
@@ -6533,9 +6528,7 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items",
-      "selectSupplier": "— Select supplier —",
-      "noSuppliersHint": "No approved suppliers registered. Add suppliers in the Suppliers tab first."
+      "showing": "Showing {{count}} of {{total}} items"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6554,8 +6547,7 @@
       "leadTimeDays": "Lead Days",
       "approvedLabel": "Approved",
       "approved": "Approved",
-      "unapproved": "Unapproved",
-      "selectPaymentTerms": "— Select payment terms —"
+      "unapproved": "Unapproved"
     },
     "reorder": {
       "title": "Reorder",

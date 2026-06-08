@@ -790,7 +790,6 @@
     "cancelBooking": "Cancel this booking?",
     "declinedByDoctor": "Declined by doctor",
     "pageTitle": "Recent Consultations",
-    "quickActionsTitle": "Quick Actions",
     "noHospital": "Not Assigned",
     "stats": {
       "appointments": "Appointments",
@@ -871,13 +870,9 @@
         "hospitalOversight": "Hospital oversight",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings",
-        "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Hospital stays & boarding"
+        "manageSettings": "Manage settings"
       },
       "hospitalNetworks": "Hospital Networks",
-      "hospitalWorkflow": "Hospital Workflow",
-      "inpatient": "Inpatient & Boarding",
       "settings": "Settings"
     },
     "pending": {
@@ -6499,9 +6494,8 @@
       "quantity": "Quantity",
       "expiryDate": "Expiry Date",
       "locationCode": "Storage Location",
-      "receivedFrom": "Received From (Supplier)",
-      "selectSupplier": "— Select supplier —",
-      "noSuppliersHint": "No approved suppliers registered. Add suppliers in the Suppliers tab first.",
+      "receivedFrom": "Received From / Supplier",
+      "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
       "showing": "Showing {{count}} of {{total}} items"
@@ -6520,7 +6514,6 @@
       "phone": "Phone",
       "address": "Address",
       "paymentTerms": "Payment Terms",
-      "selectPaymentTerms": "— Select payment terms —",
       "leadTimeDays": "Lead Time (days)",
       "approvedLabel": "Approved Supplier",
       "approved": "Approved",

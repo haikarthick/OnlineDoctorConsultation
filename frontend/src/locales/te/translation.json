@@ -871,14 +871,10 @@
         "hospitalOversight": "ఆసుపత్రి పర్యవేక్షణ",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings",
-        "patientQueue": "Manage patient queue",
-        "inpatientBoarding": "Hospital stays & boarding"
+        "manageSettings": "Manage settings"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings",
-      "hospitalWorkflow": "Hospital Workflow",
-      "inpatient": "Inpatient & Boarding"
+      "settings": "Settings"
     },
     "pending": {
       "patient": "రోగి",
@@ -910,8 +906,7 @@
       "aiCopilotDesc": "AI-ఆధారిత క్లినికల్ నిర్ణయ మద్దతు పొందండి"
     },
     "findDoctor": "వైద్యుడిని కనుగొనండి →",
-    "manageSchedule": "షెడ్యూల్ నిర్వహించండి →",
-    "quickActionsTitle": "Quick Actions"
+    "manageSchedule": "షెడ్యూల్ నిర్వహించండి →"
   },
   "consultations": {
     "pageTitle": "🏥 సంప్రదింపులు & అపాయింట్‌మెంట్లు",
@@ -6531,9 +6526,7 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items",
-      "selectSupplier": "— Select supplier —",
-      "noSuppliersHint": "No approved suppliers registered. Add suppliers in the Suppliers tab first."
+      "showing": "Showing {{count}} of {{total}} items"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6552,8 +6545,7 @@
       "leadTimeDays": "Lead Days",
       "approvedLabel": "Approved",
       "approved": "Approved",
-      "unapproved": "Unapproved",
-      "selectPaymentTerms": "— Select payment terms —"
+      "unapproved": "Unapproved"
     },
     "reorder": {
       "title": "Reorder",
