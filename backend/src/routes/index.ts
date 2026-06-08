@@ -2616,12 +2616,9 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
 
   // CRITICAL: Wrap the entire accept flow in a transaction to prevent seat limit race conditions
   // Without this, two parallel accepts could both pass the seat check but exceed the limit when committed
-  const client = await db.getClient?.() || db;
   try {
-    if (client.query === db.query) {
-      // Direct db usage — transactions need explicit BEGIN/COMMIT
-      await db.query('BEGIN ISOLATION LEVEL SERIALIZABLE');
-    }
+    // Direct db usage — transactions need explicit BEGIN/COMMIT
+    await db.query('BEGIN ISOLATION LEVEL SERIALIZABLE');
 
     // Re-check seat limit INSIDE the transaction (row-level lock prevents other accepts from executing in parallel)
     const seat = await db.query(`
@@ -2636,7 +2633,7 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
     if (seat.rows.length > 0) {
       const { used_seats, seat_limit } = seat.rows[0];
       if (parseInt(used_seats) >= parseInt(seat_limit)) {
-        if (client.query === db.query) await db.query('ROLLBACK');
+        await db.query('ROLLBACK');
         return res.status(403).json({ success: false, message: 'Seat limit reached. Contact your network administrator.', code: 'seat_limit_exceeded' });
       }
     }
@@ -2663,12 +2660,10 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
     }
     await db.query(`UPDATE hospital_staff_invites SET status='accepted', accepted_at=NOW(), accepted_user_id=$1 WHERE invite_token=$2`, [newUser.id, token]);
 
-    if (client.query === db.query) await db.query('COMMIT');
+    await db.query('COMMIT');
     res.status(201).json({ success: true, message: 'Account created successfully. You can now log in.' });
   } catch (err: any) {
-    if (client.query === db.query) {
-      try { await db.query('ROLLBACK'); } catch (rollbackErr: any) { logger.error('Rollback failed', { error: rollbackErr.message }); }
-    }
+    try { await db.query('ROLLBACK'); } catch (rollbackErr: any) { logger.error('Rollback failed', { error: rollbackErr.message }); }
     logger.error('Accept invite failed', { error: err.message, stack: err.stack });
     res.status(500).json({ success: false, message: err.message || 'Failed to create account' });
   }
