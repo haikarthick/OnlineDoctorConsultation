@@ -229,7 +229,9 @@ export class MedicalRecordService {
     try {
       const id = uuidv4();
       const recordNumber = await generateRecordNumber();
-      const targetUserId = data.userId || userId;
+      // HIGH FIX-6: CRITICAL — never use caller-provided userId, always use authenticated userId
+      // Even if controller passes it, service enforces: record belongs to authenticated user
+      const targetUserId = userId; // FORCE to authenticated user, ignore data.userId
       const query = `
         INSERT INTO medical_records (
           id, user_id, animal_id, consultation_id, veterinarian_id,

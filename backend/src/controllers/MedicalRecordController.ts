@@ -13,9 +13,15 @@ export class MedicalRecordController {
       throw new ValidationError('recordType, title, and content are required');
     }
     const userName = req.body._userName || '';
+
+    // HIGH FIX-6: CRITICAL — force userId to authenticated user
+    // Prevents attacker from passing ?userId=victim in request body
+    const safeData = { ...req.body };
+    delete safeData.userId; // Strip any caller-provided userId
+
     const record = await MedicalRecordService.createRecord(
       req.userId!,
-      { ...req.body, veterinarianId: req.userRole === 'veterinarian' ? req.userId : req.body.veterinarianId },
+      { ...safeData, veterinarianId: req.userRole === 'veterinarian' ? req.userId : req.body.veterinarianId },
       req.userId!, userName
     );
     res.status(201).json({ success: true, data: record });

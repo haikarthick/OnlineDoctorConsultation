@@ -1146,7 +1146,8 @@ router.get('/my-network-enrollments', authMiddleware, asyncHandler(async (req: R
 
 
 // ─── Medical Record routes ───────────────────────────────────
-router.get('/medical-records/stats', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getStats(req, res)));
+// HIGH FIX-5: Added requireAnimalAccess for stats endpoint to prevent leaking per-animal counts
+router.get('/medical-records/stats', authMiddleware, requireAnimalAccess('query:animalId', 'stats'), asyncHandler((req: Request, res: Response) => MedicalRecordController.getStats(req, res)));
 router.get('/medical-records/audit', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.getAuditLog(req, res)));
 router.post('/medical-records', authMiddleware, roleMiddleware(['veterinarian', 'farmer', 'admin']), validateBody(createMedicalRecordSchema), asyncHandler((req: Request, res: Response) => MedicalRecordController.createRecord(req, res)));
 router.get('/medical-records', authMiddleware, asyncHandler((req: Request, res: Response) => MedicalRecordController.listRecords(req, res)));
