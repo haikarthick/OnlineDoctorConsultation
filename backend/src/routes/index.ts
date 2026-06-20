@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import logger from '../utils/logger';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
+import { requireNetworkAccess, NetworkAccessRequest } from '../middleware/networkAccess';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
 import {
@@ -613,11 +614,16 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
   const userRole = (req as any).userRole;
   if (userRole !== 'admin') {
     const memberCheck = await database.query(
-      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+      `SELECT network_role, hospital_id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
       [networkId, userId]
     );
-    if (!memberCheck.rows.length || !['corporate_admin', 'hospital_director'].includes(memberCheck.rows[0].network_role)) {
-      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can update members' });
+    const callerNetworkRole = memberCheck.rows[0]?.network_role;
+    // I-8: honor the admin-configurable editMemberRoles action instead of a hardcoded role list
+    const canEditMembers = callerNetworkRole
+      ? await NetworkRolePermissionService.checkAccess(networkId, callerNetworkRole, 'editMemberRoles')
+      : false;
+    if (!canEditMembers) {
+      return res.status(403).json({ success: false, message: 'You do not have permission to update members in this network' });
     }
     // H5: hospital_director scope — can only edit members in their own branch hospital
     if (memberCheck.rows[0].network_role === 'hospital_director') {
@@ -655,7 +661,7 @@ router.put('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandle
   res.json({ success: true, message: 'Member updated successfully' });
 }));
 router.delete('/hospital-networks/:id/members/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => HospitalNetworkController.removeNetworkMember(req, res)));
-router.get('/hospital-networks/:id/departments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/hospital-networks/:id/departments', authMiddleware, requireNetworkAccess('viewNetworkDetails'), asyncHandler(async (req: Request, res: Response) => {
   const custom = await database.query(
     `SELECT DISTINCT department FROM hospital_network_members 
      WHERE network_id = $1 AND department IS NOT NULL`,
@@ -732,7 +738,7 @@ router.get('/network-user-search', authMiddleware, roleMiddleware(['admin', 'cor
 }));
 
 // Enroll animal into a network (generates per-network patient ID)
-router.post('/hospital-networks/:id/enroll-animal', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/hospital-networks/:id/enroll-animal', authMiddleware, requireNetworkAccess('enrollPatient'), asyncHandler(async (req: Request, res: Response) => {
   const { animalId, hospitalId, notes } = req.body;
   if (!animalId) { res.status(400).json({ success: false, message: 'animalId is required' }); return; }
   const result = await HospitalNetworkService.enrollAnimal({
@@ -746,10 +752,12 @@ router.post('/hospital-networks/:id/enroll-animal', authMiddleware, asyncHandler
 }));
 
 // List patients enrolled in a network
-router.get('/hospital-networks/:id/patients', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+// I-1: now gated by membership + viewEnrolledPatients action, with branch-level row scoping
+router.get('/hospital-networks/:id/patients', authMiddleware, requireNetworkAccess('viewEnrolledPatients'), asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
-  const result = await HospitalNetworkService.getNetworkPatients(req.params.id, limit, offset);
+  const branchScopeHospitalId = (req as NetworkAccessRequest).branchScopeHospitalId ?? null;
+  const result = await HospitalNetworkService.getNetworkPatients(req.params.id, limit, offset, branchScopeHospitalId);
   res.json(result);
 }));
 
@@ -976,7 +984,8 @@ router.get('/hospital-networks/:id/compliance-report', authMiddleware, asyncHand
 }));
 
 // Get all enrollments for a network (pending + active + declined)
-router.get('/hospital-networks/:id/all-enrollments', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+// I-2: now gated by membership + viewEnrolledPatients action
+router.get('/hospital-networks/:id/all-enrollments', authMiddleware, requireNetworkAccess('viewEnrolledPatients'), asyncHandler(async (req: Request, res: Response) => {
   try {
     const results = await HospitalNetworkService.getPendingEnrollments(req.params.id);
     res.json(results);
@@ -987,18 +996,9 @@ router.get('/hospital-networks/:id/all-enrollments', authMiddleware, asyncHandle
 }));
 
 // Invite a walk-in patient (no platform account)
-router.post('/hospital-networks/:id/invite-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/hospital-networks/:id/invite-walkin', authMiddleware, requireNetworkAccess('walkInRegistration'), asyncHandler(async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
-    // Verify the caller is an active member of this network
-    const memberRes = await database.query(
-      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [req.params.id, userId]
-    );
-    if (memberRes.rows.length === 0) {
-      res.status(403).json({ success: false, error: 'You must be a network member to invite patients' });
-      return;
-    }
     const { patientName, patientEmail, patientPhone, animalName, animalSpecies, hospitalId, message } = req.body;
     if (!patientName || !patientEmail) { res.status(400).json({ success: false, error: 'patientName and patientEmail are required' }); return; }
     const result = await HospitalNetworkService.inviteWalkInPatient({
@@ -1013,7 +1013,7 @@ router.post('/hospital-networks/:id/invite-walkin', authMiddleware, asyncHandler
 }));
 
 // Direct walk-in patient registration — no invite needed, treatment starts immediately
-router.post('/hospital-networks/:id/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNetworkAccess('walkInRegistration'), asyncHandler(async (req: Request, res: Response) => {
   try {
     const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit, consentCollected, consentMethod } = req.body;
     if (!patientName || !animalName || !animalSpecies || !hospitalId) {
@@ -1438,7 +1438,15 @@ router.get('/permissions/my', authMiddleware, asyncHandler(async (req: Request, 
   const permSets = await Promise.all(rolesToCheck.map(r => PermissionService.getPermissionsForRole(r)));
   const permissions = [...new Set(permSets.flat())];
   const metadata = PermissionService.getPermissionMetadata();
-  res.json({ success: true, data: { permissions, metadata } });
+  // §7 reconciliation: include the caller's network memberships + effective action matrix so the
+  // frontend can drive network-role-aware navigation/visibility (hospital_director, etc.).
+  let networks: any[] = [];
+  try {
+    networks = await HospitalNetworkService.getMyNetworkAccess(authReq.userId!);
+  } catch (err: any) {
+    logger.warn('getMyNetworkAccess failed; returning permissions without network context', { error: err.message });
+  }
+  res.json({ success: true, data: { permissions, metadata, networks } });
 }));
 
 router.get('/admin/permissions', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {

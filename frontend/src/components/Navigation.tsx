@@ -16,7 +16,7 @@ const NAV_SCROLL_KEY = 'vetcare_nav_scroll'
 
 export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath }) => {
   const { user, logout } = useAuth()
-  const { hasPermission } = usePermission()
+  const { hasPermission, networks } = usePermission()
   const { t } = useTranslation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -93,7 +93,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   const menuItems: MenuItem[] = [
     // ── Dashboard (always first, ungrouped) ──
     { id: 'dashboard', label: t('nav.dashboard'), icon: '📊', path: '/dashboard',
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'], section: 'Main' },
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'], section: 'Main' },
     { id: 'marketplace', label: t('nav.marketplace'), icon: '🏪', path: '/marketplace',
       roles: ['farmer', 'admin', 'pet_owner', 'veterinarian'], section: 'Main' },
 
@@ -157,7 +157,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'compliance', label: t('nav.complianceDocs'), icon: '📜', path: '/compliance',
       roles: ['farmer', 'admin'], section: 'Analytics & Tools' },
     { id: 'financial', label: t('nav.financialAnalytics'), icon: '💰', path: '/financial',
-      roles: ['farmer', 'admin'], section: 'Analytics & Tools' },
+      roles: ['farmer', 'admin', 'corporate_admin'], section: 'Analytics & Tools' },
     { id: 'alerts', label: t('nav.smartAlerts'), icon: '🔔', path: '/alerts',
       roles: ['farmer', 'admin', 'veterinarian'], section: 'Analytics & Tools' },
 
@@ -193,9 +193,9 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'vet-hospitals-manage', label: t('nav.myHospital'), icon: '🏨', path: '/vet-hospitals/manage',
       roles: ['veterinarian'], section: 'Vet Network' },
     { id: 'hospital-workflow', label: 'Hospital Workflow', icon: '🔄', path: '/hospital-workflow',
-      roles: ['veterinarian', 'admin', 'hospital_staff'], section: 'Vet Network' },
+      roles: ['veterinarian', 'admin', 'hospital_staff', 'corporate_admin'], section: 'Vet Network' },
     { id: 'inpatient', label: 'Inpatient & Boarding', icon: '🛏️', path: '/inpatient',
-      roles: ['veterinarian', 'admin', 'hospital_staff'], section: 'Vet Network' },
+      roles: ['veterinarian', 'admin', 'hospital_staff', 'corporate_admin'], section: 'Vet Network' },
     { id: 'pharmacy', label: t('pharmacy.nav.title'), icon: '💊', path: '/pharmacy',
       roles: ['pharmacist', 'corporate_admin', 'admin'], section: 'Vet Network' },
 
@@ -256,6 +256,14 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     if (!item.roles.some(r => userRoles.includes(r as UserRole))) return false
     const permKey = NAV_PERMISSION_MAP[item.id]
     if (permKey && !hasPermission(permKey)) return false
+    // §7 hierarchy visibility: vets/staff only see Hospital Networks if they actually belong to a
+    // network (admins & corporate_admins always manage networks). Avoids a misleading global entry.
+    if (item.id === 'hospital-networks'
+        && !userRoles.includes('admin' as UserRole)
+        && !userRoles.includes('corporate_admin' as UserRole)
+        && networks.length === 0) {
+      return false
+    }
     return true
   })
 

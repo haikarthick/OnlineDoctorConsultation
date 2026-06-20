@@ -75,7 +75,8 @@ class HospitalNetworkController {
 
   // ─── Members ──────────────────────────────────────────────────
   async listNetworkMembers(req: AuthRequest, res: Response): Promise<void> {
-    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!);
+    // I-9: honor the configurable viewNetworkMembers action (hospital_staff is excluded by default)
+    await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'viewNetworkMembers');
     const members = await HospitalNetworkService.listNetworkMembers(req.params.id);
     res.json({ success: true, data: members });
   }

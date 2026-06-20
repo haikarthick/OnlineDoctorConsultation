@@ -2,6 +2,7 @@ import database from '../utils/database';
 import { DatabaseError, NotFoundError, ForbiddenError, ValidationError, ConflictError } from '../utils/errors';
 import logger from '../utils/logger';
 import NotificationService from './NotificationService';
+import NetworkRolePermissionService from './NetworkRolePermissionService';
 
 // ─── Interfaces ──────────────────────────────────────────────
 export interface HospitalNetwork {
@@ -260,8 +261,9 @@ export class HospitalNetworkService {
     const params: any[] = [];
     let idx = 1;
 
-    // Data scoping: corporate_admin only sees networks they own or are a member of
-    if (filters.userId && filters.userRole === 'corporate_admin') {
+    // I-3: Data scoping — every non-admin role only sees networks they own or are an active member of.
+    // (Previously only corporate_admin was scoped, leaking the full network directory to vets/staff.)
+    if (filters.userId && filters.userRole && filters.userRole !== 'admin') {
       params.push(filters.userId);
       conditions.push(`(hn.created_by = $${idx} OR EXISTS (
         SELECT 1 FROM hospital_network_members hnm
@@ -416,6 +418,49 @@ export class HospitalNetworkService {
     );
     if (result.rows.length === 0) return null;
     return this.mapMemberRow(result.rows[0]);
+  }
+
+  /**
+   * §7 reconciliation: resolve the caller's active network memberships together with the
+   * effective (admin-configurable) action matrix for each. Consumed by GET /permissions/my so
+   * the frontend can surface network-role-driven nav, dashboard branches and action gating.
+   */
+  async getMyNetworkAccess(userId: string): Promise<Array<{
+    networkId: string;
+    networkName: string;
+    networkRole: string;
+    hospitalId: string | null;
+    hospitalName: string | null;
+    isBranchScoped: boolean;
+    actions: Record<string, boolean>;
+  }>> {
+    const memberships = await database.query(
+      `SELECT hnm.network_id AS "networkId", hnm.network_role AS "networkRole",
+              hnm.hospital_id AS "hospitalId",
+              hn.name AS "networkName", vh.name AS "hospitalName"
+         FROM hospital_network_members hnm
+         JOIN hospital_networks hn ON hn.id = hnm.network_id
+         LEFT JOIN vet_hospitals vh ON vh.id = hnm.hospital_id
+        WHERE hnm.user_id = $1 AND hnm.is_active = true
+          AND (hnm.valid_until IS NULL OR hnm.valid_until > NOW())`,
+      [userId]
+    );
+
+    const result = [];
+    for (const m of memberships.rows) {
+      const matrix = await NetworkRolePermissionService.getMatrix(m.networkId);
+      const actions = matrix[m.networkRole] || {};
+      result.push({
+        networkId: m.networkId,
+        networkName: m.networkName,
+        networkRole: m.networkRole,
+        hospitalId: m.hospitalId ?? null,
+        hospitalName: m.hospitalName ?? null,
+        isBranchScoped: ['hospital_director', 'hospital_staff'].includes(m.networkRole),
+        actions,
+      });
+    }
+    return result;
   }
 
   async listNetworkMembers(networkId: string): Promise<NetworkMember[]> {
@@ -906,8 +951,9 @@ export class HospitalNetworkService {
         [data.animalId, data.enrolledBy]
       );
       const consentCheck = await database.query(
-        `SELECT 1 FROM patient_data_consent 
-         WHERE animal_id = $1 AND granted_to_network_id = $2 AND status = 'active'`,
+        `SELECT 1 FROM patient_data_consent
+         WHERE animal_id = $1 AND granted_to_network_id = $2 AND is_active = true
+           AND (valid_until IS NULL OR valid_until > NOW())`,
         [data.animalId, data.networkId]
       );
       const userRoleRes = await database.query(
@@ -965,11 +1011,19 @@ export class HospitalNetworkService {
     }
   }
 
-  async getNetworkPatients(networkId: string, limit = 50, offset = 0): Promise<{ total: number; patients: any[] }> {
+  async getNetworkPatients(networkId: string, limit = 50, offset = 0, branchScopeHospitalId: string | null = null): Promise<{ total: number; patients: any[] }> {
     try {
+      // Branch-scoped roles (hospital_director / hospital_staff) only see patients in their own branch.
+      const branchClause = branchScopeHospitalId ? ` AND acc.hospital_id = $2` : '';
+      const countParams: any[] = branchScopeHospitalId ? [networkId, branchScopeHospitalId] : [networkId];
       const countRes = await database.query(
-        `SELECT COUNT(*) AS total FROM animal_care_contexts WHERE network_id = $1 AND is_active = true`, [networkId]
+        `SELECT COUNT(*) AS total FROM animal_care_contexts acc WHERE acc.network_id = $1 AND acc.is_active = true${branchClause}`,
+        countParams
       );
+      const limitIdx = branchScopeHospitalId ? 3 : 2;
+      const rowParams: any[] = branchScopeHospitalId
+        ? [networkId, branchScopeHospitalId, limit, offset]
+        : [networkId, limit, offset];
       const rows = await database.query(
         `SELECT acc.id, acc.animal_id AS "animalId", acc.corporate_patient_id AS "networkPatientId",
                 acc.platform_unique_id AS "platformUniqueId", acc.enrolled_at AS "enrolledAt",
@@ -979,10 +1033,10 @@ export class HospitalNetworkService {
          FROM animal_care_contexts acc
          JOIN animals a ON acc.animal_id = a.id
          JOIN users u ON a.owner_id = u.id
-         WHERE acc.network_id = $1 AND acc.is_active = true
+         WHERE acc.network_id = $1 AND acc.is_active = true${branchClause}
          ORDER BY acc.enrolled_at DESC
-         LIMIT $2 OFFSET $3`,
-        [networkId, limit, offset]
+         LIMIT $${limitIdx} OFFSET $${limitIdx + 1}`,
+        rowParams
       );
       return { total: parseInt(countRes.rows[0].total), patients: rows.rows };
     } catch (err: any) {

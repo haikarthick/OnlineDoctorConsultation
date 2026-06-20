@@ -5,58 +5,86 @@ export const NETWORK_ROLES = ['corporate_admin', 'hospital_director', 'complianc
 export type NetworkRole = typeof NETWORK_ROLES[number];
 
 export const NETWORK_ACTIONS = [
-  'viewNetworkDetails', 'editNetworkSettings', 'deactivateNetwork',
-  'viewBranchHospitals', 'addHospitalToNetwork',
-  'viewNetworkMembers', 'addRemoveMembers', 'editMemberRoles',
-  'viewAuditLogs', 'patientConsentManagement',
-  'hospitalWorkflowQueue', 'walkInRegistration', 'inpatientManagement',
-  'networkDashboardStats', 'healthAnalytics', 'financialAnalytics', 'interHospitalReferrals',
+  // Governance
+  'viewNetworkDetails', 'editNetworkSettings', 'manageBranding', 'deactivateNetwork', 'manageSubscription',
+  // Branches
+  'viewBranchHospitals', 'createBranchHospital', 'addHospitalToNetwork', 'editBranchHospital',
+  // Members & roles
+  'viewNetworkMembers', 'inviteStaff', 'addRemoveMembers', 'editMemberRoles', 'manageRolePermissions',
+  // Patients & clinical data
+  'viewEnrolledPatients', 'enrollPatient', 'walkInRegistration', 'viewPatientClinicalData',
+  'patientConsentManagement', 'interHospitalReferrals', 'patientTransfers',
+  // Operations
+  'hospitalWorkflowQueue', 'inpatientManagement',
+  // Analytics & audit
+  'networkDashboardStats', 'healthAnalytics', 'financialAnalytics',
+  'viewAuditLogs', 'exportComplianceReport',
 ] as const;
 
-/** Platform-only actions — never configurable */
-export const PLATFORM_ONLY_ACTIONS = ['deactivateNetwork'];
+/** Platform-only actions — never configurable, enforced at route level (admin only) */
+export const PLATFORM_ONLY_ACTIONS = ['deactivateNetwork', 'manageSubscription'];
+
+/**
+ * Network roles whose access is restricted to their OWN branch hospital. When a member with
+ * one of these roles passes an action check, requireNetworkAccess attaches their hospital_id as
+ * req.branchScopeHospitalId so downstream queries filter rows to that branch.
+ */
+export const BRANCH_SCOPED_ROLES = ['hospital_director', 'hospital_staff'];
 
 /** Code defaults — used as fallback when no DB row exists for a network */
+// NOTE: matrix values are booleans (capability granted yes/no). Branch-scoping for
+// hospital_director / hospital_staff (🔵 in the target spec) is NOT expressed here — it is
+// enforced at the SQL row level via requireNetworkAccess() attaching req.branchScopeHospitalId.
 export const DEFAULTS: Record<string, Record<string, boolean>> = {
   corporate_admin: {
-    viewNetworkDetails: true, editNetworkSettings: true, deactivateNetwork: true,
-    viewBranchHospitals: true, addHospitalToNetwork: true,
-    viewNetworkMembers: true, addRemoveMembers: true, editMemberRoles: true,
-    viewAuditLogs: true, patientConsentManagement: true,
-    hospitalWorkflowQueue: true, walkInRegistration: true, inpatientManagement: true,
-    networkDashboardStats: true, healthAnalytics: true, financialAnalytics: true, interHospitalReferrals: true,
+    viewNetworkDetails: true, editNetworkSettings: true, manageBranding: true, deactivateNetwork: true, manageSubscription: false,
+    viewBranchHospitals: true, createBranchHospital: true, addHospitalToNetwork: true, editBranchHospital: true,
+    viewNetworkMembers: true, inviteStaff: true, addRemoveMembers: true, editMemberRoles: true, manageRolePermissions: true,
+    viewEnrolledPatients: true, enrollPatient: true, walkInRegistration: true, viewPatientClinicalData: true,
+    patientConsentManagement: true, interHospitalReferrals: true, patientTransfers: true,
+    hospitalWorkflowQueue: true, inpatientManagement: true,
+    networkDashboardStats: true, healthAnalytics: true, financialAnalytics: true,
+    viewAuditLogs: true, exportComplianceReport: true,
   },
   hospital_director: {
-    viewNetworkDetails: true, editNetworkSettings: false, deactivateNetwork: false,
-    viewBranchHospitals: true, addHospitalToNetwork: false,
-    viewNetworkMembers: true, addRemoveMembers: true, editMemberRoles: true,
-    viewAuditLogs: true, patientConsentManagement: true,
-    hospitalWorkflowQueue: true, walkInRegistration: true, inpatientManagement: true,
-    networkDashboardStats: true, healthAnalytics: true, financialAnalytics: false, interHospitalReferrals: true,
+    viewNetworkDetails: true, editNetworkSettings: false, manageBranding: false, deactivateNetwork: false, manageSubscription: false,
+    viewBranchHospitals: true, createBranchHospital: false, addHospitalToNetwork: false, editBranchHospital: true,
+    viewNetworkMembers: true, inviteStaff: true, addRemoveMembers: true, editMemberRoles: true, manageRolePermissions: false,
+    viewEnrolledPatients: true, enrollPatient: true, walkInRegistration: true, viewPatientClinicalData: true,
+    patientConsentManagement: true, interHospitalReferrals: true, patientTransfers: true,
+    hospitalWorkflowQueue: true, inpatientManagement: true,
+    networkDashboardStats: true, healthAnalytics: true, financialAnalytics: false,
+    viewAuditLogs: true, exportComplianceReport: false,
   },
   compliance_officer: {
-    viewNetworkDetails: true, editNetworkSettings: false, deactivateNetwork: false,
-    viewBranchHospitals: true, addHospitalToNetwork: false,
-    viewNetworkMembers: true, addRemoveMembers: false, editMemberRoles: false,
-    viewAuditLogs: true, patientConsentManagement: true,
-    hospitalWorkflowQueue: false, walkInRegistration: false, inpatientManagement: false,
-    networkDashboardStats: true, healthAnalytics: false, financialAnalytics: false, interHospitalReferrals: false,
+    viewNetworkDetails: true, editNetworkSettings: false, manageBranding: false, deactivateNetwork: false, manageSubscription: false,
+    viewBranchHospitals: true, createBranchHospital: false, addHospitalToNetwork: false, editBranchHospital: false,
+    viewNetworkMembers: true, inviteStaff: false, addRemoveMembers: false, editMemberRoles: false, manageRolePermissions: false,
+    viewEnrolledPatients: true, enrollPatient: false, walkInRegistration: false, viewPatientClinicalData: true,
+    patientConsentManagement: true, interHospitalReferrals: false, patientTransfers: false,
+    hospitalWorkflowQueue: false, inpatientManagement: false,
+    networkDashboardStats: true, healthAnalytics: false, financialAnalytics: false,
+    viewAuditLogs: true, exportComplianceReport: true,
   },
   auditor: {
-    viewNetworkDetails: true, editNetworkSettings: false, deactivateNetwork: false,
-    viewBranchHospitals: true, addHospitalToNetwork: false,
-    viewNetworkMembers: true, addRemoveMembers: false, editMemberRoles: false,
-    viewAuditLogs: true, patientConsentManagement: false,
-    hospitalWorkflowQueue: false, walkInRegistration: false, inpatientManagement: false,
-    networkDashboardStats: false, healthAnalytics: false, financialAnalytics: false, interHospitalReferrals: false,
+    viewNetworkDetails: true, editNetworkSettings: false, manageBranding: false, deactivateNetwork: false, manageSubscription: false,
+    viewBranchHospitals: true, createBranchHospital: false, addHospitalToNetwork: false, editBranchHospital: false,
+    viewNetworkMembers: true, inviteStaff: false, addRemoveMembers: false, editMemberRoles: false, manageRolePermissions: false,
+    viewEnrolledPatients: true, enrollPatient: false, walkInRegistration: false, viewPatientClinicalData: true,
+    patientConsentManagement: false, interHospitalReferrals: false, patientTransfers: false,
+    hospitalWorkflowQueue: false, inpatientManagement: false,
+    networkDashboardStats: false, healthAnalytics: false, financialAnalytics: false,
+    viewAuditLogs: true, exportComplianceReport: true,
   },
   hospital_staff: {
-    viewNetworkDetails: true, editNetworkSettings: false, deactivateNetwork: false,
-    viewBranchHospitals: false, addHospitalToNetwork: false,
-    viewNetworkMembers: false, addRemoveMembers: false, editMemberRoles: false,
-    viewAuditLogs: false, patientConsentManagement: false,
-    hospitalWorkflowQueue: true, walkInRegistration: true, inpatientManagement: true,
-    networkDashboardStats: false, healthAnalytics: false, financialAnalytics: false, interHospitalReferrals: false,
+    viewNetworkDetails: true, editNetworkSettings: false, manageBranding: false, deactivateNetwork: false, manageSubscription: false,
+    viewBranchHospitals: false, createBranchHospital: false, addHospitalToNetwork: false, editBranchHospital: false,
+    viewNetworkMembers: false, inviteStaff: false, addRemoveMembers: false, editMemberRoles: false, manageRolePermissions: false,
+    viewEnrolledPatients: true, enrollPatient: true, walkInRegistration: true, viewPatientClinicalData: true,
+    patientConsentManagement: false, interHospitalReferrals: true, patientTransfers: true,
+    hospitalWorkflowQueue: true, inpatientManagement: true,
+    networkDashboardStats: false, healthAnalytics: false, financialAnalytics: false,
+    viewAuditLogs: false, exportComplianceReport: false,
   },
 };
 
