@@ -281,18 +281,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   }
   useAutoRefresh('users', loadUsers)
 
-  const handleToggleStatus = async (userId: string) => {
-    try {
-      setProcessing(userId)
-      await apiService.adminToggleUserStatus(userId, !users.find(u => u.id === userId)?.isActive)
-      setUsers(users.map(u => u.id === userId ? { ...u, isActive: !u.isActive } : u))
-    } catch (err: any) {
-      console.error('Failed to toggle user status:', err?.message)
-      setActionError(err?.response?.data?.message || err?.message || 'Failed to update user status')
-    } finally {
-      setProcessing(null)
-    }
-  }
 
   const handleChangeRole = async () => {
     if (!showRoleModal || !newRole) return
