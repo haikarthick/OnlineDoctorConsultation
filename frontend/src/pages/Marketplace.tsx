@@ -1487,9 +1487,9 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
           {hasCert && <span className="mp-metric cert">{t('marketplace.card.certified')}</span>}
           {welfareAtt && <span className="mp-metric welfare">🛡️ {t('marketplace.card.welfareAttested')}</span>}
           {sellerType === 'registered_breeder' && <span className={`mp-metric breeder ${breederVerified ? 'verified' : ''}`}>{breederVerified ? '✅' : '📋'} {t('marketplace.card.registeredBreeder')}</span>}
-          {hasHealthPassport && <span className="mp-metric cert" title="Vaccination records verified in VetCare system">🏥 {t('marketplace.card.healthPassport', 'Health Passport')}</span>}
-          {isFairDeal && <span className="mp-metric" style={{ background: '#dcfce7', color: '#16a34a', fontWeight: 600 }}>💚 {t('marketplace.card.fairDeal', 'Fair Deal')} ({fairDealPct}%)</span>}
-          {isPremiumPriced && <span className="mp-metric" style={{ background: '#fef3c7', color: '#92400e' }}>⭐ {t('marketplace.card.premiumPriced', 'Premium')}</span>}
+          {hasHealthPassport && <span className="mp-metric cert" title="Vaccination records verified in VetCare system">🏥 {t('marketplace.card.healthPassport')}</span>}
+          {isFairDeal && <span className="mp-metric" style={{ background: '#dcfce7', color: '#16a34a', fontWeight: 600 }}>💚 {t('marketplace.card.fairDeal')} ({fairDealPct}%)</span>}
+          {isPremiumPriced && <span className="mp-metric" style={{ background: '#fef3c7', color: '#92400e' }}>⭐ {t('marketplace.card.premiumPriced')}</span>}
         </div>
 
         {/* Price */}
@@ -1517,12 +1517,12 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
 }
 
 // ─── Auction Countdown Timer ───
-const AuctionCountdown: React.FC<{ endTime: string; t: (key: string, fallback?: string) => string }> = ({ endTime, t }) => {
+const AuctionCountdown: React.FC<{ endTime: string; t: (key: string) => string }> = ({ endTime, t }) => {
   const [remaining, setRemaining] = React.useState('')
   React.useEffect(() => {
     const update = () => {
       const diff = new Date(endTime).getTime() - Date.now()
-      if (diff <= 0) { setRemaining(t('marketplace.detail.auctionEnded', 'Ended')); return }
+      if (diff <= 0) { setRemaining(t('marketplace.detail.auctionEnded')); return }
       const d = Math.floor(diff / 86400000)
       const h = Math.floor((diff % 86400000) / 3600000)
       const m = Math.floor((diff % 3600000) / 60000)
@@ -1544,7 +1544,7 @@ const ListingDetail: React.FC<{
   onPlaceBid: () => void; onBuyNow: () => void; onBack: () => void;
   isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
   userId?: string; onRequestContact?: () => void;
-  t: (key: string, fallback?: string) => string;
+  t: (key: string) => string;
 }> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, t }) => {
   const species = l.species
   const breed = l.breed
@@ -1636,15 +1636,15 @@ const ListingDetail: React.FC<{
                         💬 WhatsApp
                       </a>
                       <a href={`tel:${contact}`} className="mp-contact-btn call" onClick={e => e.stopPropagation()}>
-                        📞 {t('marketplace.detail.call', 'Call')}
+                        📞 {t('marketplace.detail.call')}
                       </a>
                     </div>
                   ) : userId && l.seller_id !== userId ? (
                     <div>
-                      <span style={{ color: '#9ca3af', fontSize: 13 }}>{t('marketplace.detail.contactHidden', 'Contact hidden — send inquiry to request')}</span>
+                      <span style={{ color: '#9ca3af', fontSize: 13 }}>{t('marketplace.detail.contactHidden')}</span>
                       {onRequestContact && (
                         <button className="module-btn small" style={{ marginTop: 6 }} onClick={onRequestContact}>
-                          📩 {t('marketplace.detail.requestContact', 'Send Inquiry')}
+                          📩 {t('marketplace.detail.requestContact')}
                         </button>
                       )}
                     </div>
