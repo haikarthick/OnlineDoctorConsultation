@@ -13,12 +13,15 @@
 import HospitalDocumentService from '../services/HospitalDocumentService';
 import BookingService from '../services/BookingService';
 import NotificationService from '../services/NotificationService';
+import MarketplaceService from '../services/MarketplaceService';
 import database from './database';
 import logger from './logger';
 
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const ONE_HOUR = 60 * 60 * 1000;
+const SIX_HOURS = 6 * 60 * 60 * 1000;
+const FIVE_MINUTES = 5 * 60 * 1000;
 
 export function startScheduler(): void {
   logger.info('Scheduler starting...');
@@ -37,7 +40,12 @@ export function startScheduler(): void {
   scheduleWeeklyDigest();
   setInterval(scheduleWeeklyDigest, ONE_HOUR);
 
-  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h');
+  // Marketplace maintenance jobs
+  setInterval(runMarketplaceBoostExpiry, ONE_HOUR);
+  setInterval(runMarketplaceListingExpiry, SIX_HOURS);
+  setInterval(runMarketplaceAuctionClose, FIVE_MINUTES);
+
+  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min');
 }
 
 async function runExpiryCheck(): Promise<void> {
@@ -56,6 +64,33 @@ async function runMissedBookingsCheck(): Promise<void> {
     }
   } catch (err: any) {
     logger.error('Scheduled missed bookings check threw an unhandled error', { error: err.message });
+  }
+}
+
+async function runMarketplaceBoostExpiry(): Promise<void> {
+  try {
+    const expired = await MarketplaceService.expireBoosts();
+    if (expired > 0) logger.info(`[Marketplace] Expired ${expired} listing boost(s)`);
+  } catch (err: any) {
+    logger.error('[Marketplace] Boost expiry job failed', { error: err.message });
+  }
+}
+
+async function runMarketplaceListingExpiry(): Promise<void> {
+  try {
+    const expired = await MarketplaceService.expireListings();
+    if (expired > 0) logger.info(`[Marketplace] Expired ${expired} listing(s) past their end date`);
+  } catch (err: any) {
+    logger.error('[Marketplace] Listing expiry job failed', { error: err.message });
+  }
+}
+
+async function runMarketplaceAuctionClose(): Promise<void> {
+  try {
+    const closed = await MarketplaceService.closeExpiredAuctions();
+    if (closed > 0) logger.info(`[Marketplace] Closed ${closed} expired auction(s)`);
+  } catch (err: any) {
+    logger.error('[Marketplace] Auction close job failed', { error: err.message });
   }
 }
 

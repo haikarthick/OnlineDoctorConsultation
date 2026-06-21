@@ -459,6 +459,16 @@ class PostgresDatabase {
        WHERE is_active = false AND account_status = 'active'`
     ).catch(() => {});
 
+    // Geospatial extensions for marketplace proximity search
+    await this.pool.query('CREATE EXTENSION IF NOT EXISTS cube CASCADE').catch(() => {});
+    await this.pool.query('CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE').catch(() => {});
+    // Seed auction_enabled feature flag (disabled by default)
+    await this.pool.query(
+      `INSERT INTO marketplace_monetization_settings (setting_key, is_enabled, description, category)
+       VALUES ('auction_enabled', false, 'Enable or disable the auction feature platform-wide', 'feature')
+       ON CONFLICT (setting_key) DO NOTHING`
+    ).catch(() => {});
+
     // Fix 2: Ensure id_prefix is unique across all networks
     await this.pool.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_hospital_networks_id_prefix 

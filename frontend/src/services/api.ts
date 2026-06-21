@@ -2067,6 +2067,16 @@ class ApiService {
     return response.data
   }
 
+  async getAuctionEnabled() {
+    const response = await this.client.get('/marketplace/auction-enabled')
+    return response.data
+  }
+
+  async setAuctionEnabled(enabled: boolean) {
+    const response = await this.client.put('/marketplace/admin/auction-enabled', { enabled })
+    return response.data
+  }
+
   // ─── Sustainability & Carbon ────────────────────────────────
   async getSustainabilityDashboard(enterpriseId: string) {
     const response = await this.client.get(`/enterprises/${enterpriseId}/sustainability/dashboard`)
