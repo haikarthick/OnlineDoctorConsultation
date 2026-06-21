@@ -27,6 +27,11 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR(20) DEFAULT '',
   password_hash VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT true,
+  account_status VARCHAR(20) NOT NULL DEFAULT 'active'
+    CHECK (account_status IN ('active', 'pending_approval', 'frozen', 'suspended')),
+  freeze_reason TEXT,
+  frozen_at TIMESTAMP,
+  frozen_by UUID,
   avatar_url TEXT,
   unique_id VARCHAR(20) UNIQUE,
   default_enterprise_id UUID,

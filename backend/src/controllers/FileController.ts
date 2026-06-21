@@ -22,7 +22,10 @@ export class FileController {
       return res.status(400).json({ error: 'No file provided. Use field name "file".' });
     }
 
-    const folder = (req.body.folder as string) || 'general';
+    const folder = String(req.body.folder || 'general');
+    if (!/^[a-z0-9_/-]{1,80}$/i.test(folder) || folder.includes('..')) {
+      return res.status(400).json({ error: 'Invalid folder name' });
+    }
     const storedFile = await storage.save(req.file, folder);
 
     // Track in registry
@@ -47,7 +50,10 @@ export class FileController {
       return res.status(400).json({ error: 'No files provided. Use field name "files".' });
     }
 
-    const folder = (req.body.folder as string) || 'general';
+    const folder = String(req.body.folder || 'general');
+    if (!/^[a-z0-9_/-]{1,80}$/i.test(folder) || folder.includes('..')) {
+      return res.status(400).json({ error: 'Invalid folder name' });
+    }
     const results: StoredFile[] = [];
 
     for (const file of files) {

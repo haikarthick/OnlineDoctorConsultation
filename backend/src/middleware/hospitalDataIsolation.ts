@@ -140,9 +140,11 @@ export async function checkAnimalAccess(
       accessType: 'public',
     };
   } catch (error: any) {
-    // On DB error, fail open with a warning (do NOT block access on infra failure)
-    logger.error('hospitalDataIsolation: access check failed — failing open', { error: error.message, animalId, userId });
-    return { allowed: true, isPrivate: false, accessType: 'public' };
+    // Fail CLOSED on DB error — a check failure must not grant access to private clinical data.
+    // Legitimate users experience a temporary block during DB outages; that is the correct
+    // trade-off for clinical record privacy.
+    logger.error('hospitalDataIsolation: access check failed — failing closed', { error: error.message, animalId, userId });
+    return { allowed: false, isPrivate: true, reason: 'Access check failed — please retry shortly', accessType: 'public' };
   }
 }
 

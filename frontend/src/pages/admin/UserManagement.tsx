@@ -12,7 +12,24 @@ interface User {
   lastName: string
   role: string
   isActive: boolean
+  accountStatus: 'active' | 'pending_approval' | 'frozen' | 'suspended'
+  freezeReason?: string
   createdAt: string
+}
+
+interface PendingUser {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  role: string
+  createdAt: string
+  licenseNumber?: string
+  yearsOfExperience?: number
+  specializations?: string[]
+  qualifications?: string[]
+  clinicName?: string
+  consultationFee?: number
 }
 
 interface VetProfileData {
@@ -62,8 +79,20 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
   const [vetSaving, setVetSaving] = useState(false)
   const [vetSaved, setVetSaved] = useState(false)
 
+  // Pending approvals tab
+  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([])
+  const [pendingLoading, setPendingLoading] = useState(false)
+  const [pendingMsg, setPendingMsg] = useState('')
+
+  // Freeze / suspend modals
+  const [showFreezeModal, setShowFreezeModal] = useState<User | null>(null)
+  const [showSuspendModal, setShowSuspendModal] = useState<User | null>(null)
+  const [actionReason, setActionReason] = useState('')
+  const [showRejectRegistrationModal, setShowRejectRegistrationModal] = useState<PendingUser | null>(null)
+  const [rejectRegistrationReason, setRejectRegistrationReason] = useState('')
+
   // Role Change Requests tab
-  const [activeTab, setActiveTab] = useState<'users' | 'requests'>('users')
+  const [activeTab, setActiveTab] = useState<'users' | 'pending' | 'requests'>('users')
   const [roleRequests, setRoleRequests] = useState<any[]>([])
   const [requestsFilter, setRequestsFilter] = useState<'pending' | 'approved' | 'rejected'>('pending')
   const [requestsLoading, setRequestsLoading] = useState(false)
@@ -94,7 +123,104 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
 
   useEffect(() => {
     if (activeTab === 'requests') loadRoleRequests()
+    if (activeTab === 'pending') loadPendingUsers()
   }, [activeTab, requestsFilter])
+
+  const loadPendingUsers = async () => {
+    try {
+      setPendingLoading(true)
+      setPendingMsg('')
+      const result = await apiService.adminListPendingUsers()
+      setPendingUsers(result.data || [])
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to load pending registrations')
+    } finally {
+      setPendingLoading(false)
+    }
+  }
+
+  const handleApproveRegistration = async (userId: string) => {
+    try {
+      setProcessing(userId)
+      await apiService.adminApproveUser(userId)
+      setPendingMsg('Account approved and user notified.')
+      loadPendingUsers()
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to approve user')
+    } finally {
+      setProcessing(null)
+    }
+  }
+
+  const handleRejectRegistration = async () => {
+    if (!showRejectRegistrationModal || !rejectRegistrationReason.trim()) return
+    try {
+      setProcessing(showRejectRegistrationModal.id)
+      await apiService.adminRejectUser(showRejectRegistrationModal.id, rejectRegistrationReason)
+      setPendingMsg('Registration rejected and user notified.')
+      setShowRejectRegistrationModal(null)
+      setRejectRegistrationReason('')
+      loadPendingUsers()
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to reject user')
+    } finally {
+      setProcessing(null)
+    }
+  }
+
+  const handleFreezeUser = async () => {
+    if (!showFreezeModal || !actionReason.trim()) return
+    try {
+      setProcessing(showFreezeModal.id)
+      await apiService.adminFreezeUser(showFreezeModal.id, actionReason)
+      setUsers(prev => prev.map(u => u.id === showFreezeModal.id ? { ...u, accountStatus: 'frozen', isActive: false, freezeReason: actionReason } : u))
+      setShowFreezeModal(null)
+      setActionReason('')
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to freeze account')
+    } finally {
+      setProcessing(null)
+    }
+  }
+
+  const handleUnfreezeUser = async (u: User) => {
+    try {
+      setProcessing(u.id)
+      await apiService.adminUnfreezeUser(u.id)
+      setUsers(prev => prev.map(x => x.id === u.id ? { ...x, accountStatus: 'active', isActive: true, freezeReason: undefined } : x))
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to unfreeze account')
+    } finally {
+      setProcessing(null)
+    }
+  }
+
+  const handleSuspendUser = async () => {
+    if (!showSuspendModal || !actionReason.trim()) return
+    try {
+      setProcessing(showSuspendModal.id)
+      await apiService.adminSuspendUser(showSuspendModal.id, actionReason)
+      setUsers(prev => prev.map(u => u.id === showSuspendModal.id ? { ...u, accountStatus: 'suspended', isActive: false } : u))
+      setShowSuspendModal(null)
+      setActionReason('')
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to suspend account')
+    } finally {
+      setProcessing(null)
+    }
+  }
+
+  const handleReactivateUser = async (u: User) => {
+    try {
+      setProcessing(u.id)
+      await apiService.adminReactivateUser(u.id)
+      setUsers(prev => prev.map(x => x.id === u.id ? { ...x, accountStatus: 'active', isActive: true } : x))
+    } catch (err: any) {
+      setActionError(err?.response?.data?.message || err?.message || 'Failed to reactivate account')
+    } finally {
+      setProcessing(null)
+    }
+  }
 
   const loadRoleRequests = async () => {
     try {
@@ -352,10 +478,124 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         <button className={`module-tab${activeTab === 'users' ? ' active' : ''}`} onClick={() => setActiveTab('users')}>
           👥 Users
         </button>
+        <button className={`module-tab${activeTab === 'pending' ? ' active' : ''}`} onClick={() => setActiveTab('pending')}>
+          ⏳ Pending Approvals
+        </button>
         <button className={`module-tab${activeTab === 'requests' ? ' active' : ''}`} onClick={() => setActiveTab('requests')}>
           🔄 {t('adminRoleRequests.title')}
         </button>
       </div>
+
+      {/* ── Pending Approvals Tab ── */}
+      {activeTab === 'pending' && (
+        <div>
+          {pendingMsg && <div className="module-alert success" style={{ marginBottom: 16 }}>{pendingMsg}</div>}
+          {pendingLoading ? (
+            <div className="loading-container"><div className="loading-spinner" /></div>
+          ) : pendingUsers.length === 0 ? (
+            <div className="empty-state">
+              <div style={{ fontSize: 48 }}>✅</div>
+              <h3>No Pending Registrations</h3>
+              <p>All veterinarian and corporate admin registrations have been reviewed.</p>
+            </div>
+          ) : (
+            <div className="data-table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Applicant</th>
+                    <th>Role</th>
+                    <th>License / Details</th>
+                    <th>Submitted</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingUsers.map((pu) => (
+                    <tr key={pu.id}>
+                      <td>
+                        <div>
+                          <strong>{pu.firstName} {pu.lastName}</strong>
+                          <div style={{ fontSize: 12, color: '#6b7280' }}>{pu.email}</div>
+                        </div>
+                      </td>
+                      <td>{getRoleBadge(pu.role)}</td>
+                      <td style={{ fontSize: 13 }}>
+                        {pu.role === 'veterinarian' ? (
+                          <div>
+                            {pu.licenseNumber && <div><strong>License:</strong> {pu.licenseNumber}</div>}
+                            {pu.clinicName && <div><strong>Clinic:</strong> {pu.clinicName}</div>}
+                            {pu.yearsOfExperience != null && <div><strong>Experience:</strong> {pu.yearsOfExperience} yrs</div>}
+                            {pu.specializations?.length ? <div><strong>Specializations:</strong> {pu.specializations.join(', ')}</div> : null}
+                            {pu.qualifications?.length ? <div><strong>Qualifications:</strong> {pu.qualifications.join(', ')}</div> : null}
+                          </div>
+                        ) : (
+                          <span style={{ color: '#9ca3af' }}>Corporate Admin account</span>
+                        )}
+                      </td>
+                      <td style={{ fontSize: 13 }}>{new Date(pu.createdAt).toLocaleDateString()}</td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            className="btn btn-sm btn-success"
+                            disabled={processing === pu.id}
+                            onClick={() => handleApproveRegistration(pu.id)}
+                          >
+                            {processing === pu.id ? '...' : '✓ Approve'}
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline"
+                            disabled={processing === pu.id}
+                            onClick={() => { setShowRejectRegistrationModal(pu); setRejectRegistrationReason('') }}
+                          >
+                            ✕ Reject
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Reject Registration Modal */}
+          {showRejectRegistrationModal && (
+            <div className="modal-overlay" onClick={() => setShowRejectRegistrationModal(null)}>
+              <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+                <div className="modal-header">
+                  <h2>Reject Registration</h2>
+                  <button className="modal-close" onClick={() => setShowRejectRegistrationModal(null)}>✕</button>
+                </div>
+                <div className="modal-body">
+                  <p>Rejecting <strong>{showRejectRegistrationModal.firstName} {showRejectRegistrationModal.lastName}</strong>'s application.</p>
+                  <p style={{ fontSize: 13, color: '#6b7280' }}>The applicant will be notified by email. This action will suspend their account.</p>
+                  <div className="form-group" style={{ marginTop: 12 }}>
+                    <label className="form-label">Reason for Rejection *</label>
+                    <textarea
+                      className="form-input"
+                      rows={3}
+                      value={rejectRegistrationReason}
+                      onChange={e => setRejectRegistrationReason(e.target.value)}
+                      placeholder="e.g. License could not be verified. Please re-apply with a valid license number."
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+                    <button className="btn btn-outline" onClick={() => setShowRejectRegistrationModal(null)}>Cancel</button>
+                    <button
+                      className="btn btn-primary"
+                      disabled={!rejectRegistrationReason.trim() || processing === showRejectRegistrationModal.id}
+                      onClick={handleRejectRegistration}
+                    >
+                      {processing === showRejectRegistrationModal.id ? 'Rejecting...' : 'Reject Registration'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Role Change Requests Tab ── */}
       {activeTab === 'requests' && (
@@ -566,46 +806,46 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                   <td>{u.email}</td>
                   <td>{getRoleBadge(u.role)}</td>
                   <td>
-                    <span className={`badge badge-${u.isActive ? 'active' : 'danger'}`}>
-                      {u.isActive ? t('userManagement.activeStatus') : t('userManagement.inactiveStatus')}
-                    </span>
+                    {(() => {
+                      const s = u.accountStatus || (u.isActive ? 'active' : 'suspended')
+                      const map: Record<string, string> = { active: 'active', pending_approval: 'pending', frozen: 'warning', suspended: 'danger' }
+                      const label: Record<string, string> = { active: 'Active', pending_approval: 'Pending', frozen: 'Frozen', suspended: 'Suspended' }
+                      return <span className={`badge badge-${map[s] || 'inactive'}`}>{label[s] || s}</span>
+                    })()}
+                    {u.freezeReason && <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 2 }} title={u.freezeReason}>⚠ {u.freezeReason.substring(0, 40)}</div>}
                   </td>
                   <td>{formatDate(u.createdAt)}</td>
                   <td>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      <button
-                        className={`btn btn-sm ${u.isActive ? 'btn-warning' : 'btn-success'}`}
-                        disabled={processing === u.id}
-                        onClick={() => handleToggleStatus(u.id)}
-                      >
-                        {u.isActive ? t('userManagement.deactivate') : t('userManagement.activate')}
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline"
-                        onClick={() => { setShowRoleModal(u); setNewRole('') }}
-                      >
+                      {/* Role button */}
+                      <button className="btn btn-sm btn-outline" onClick={() => { setShowRoleModal(u); setNewRole('') }}>
                         {t('userManagement.role')}
                       </button>
-                      {(u.role === 'veterinarian') && (
-                        <button
-                          className="btn btn-sm btn-primary"
-                          onClick={() => openVetProfile(u)}
-                        >
-                          🩺 Profile
-                        </button>
+                      {/* Vet profile button */}
+                      {u.role === 'veterinarian' && (
+                        <button className="btn btn-sm btn-primary" onClick={() => openVetProfile(u)}>🩺 Profile</button>
                       )}
-                      <button
-                        className="btn btn-sm btn-outline"
-                        onClick={() => openSecondaryRoles(u)}
-                      >
-                        🔑 {t('userManagement.roles')}
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline"
-                        onClick={() => { setShowResetPasswordModal(u); setResetPasswordValue(''); setResetPasswordMsg('') }}
-                      >
+                      {/* Secondary roles */}
+                      <button className="btn btn-sm btn-outline" onClick={() => openSecondaryRoles(u)}>🔑 {t('userManagement.roles')}</button>
+                      {/* Reset password */}
+                      <button className="btn btn-sm btn-outline" onClick={() => { setShowResetPasswordModal(u); setResetPasswordValue(''); setResetPasswordMsg('') }}>
                         🔒 {t('userManagement.resetPasswordBtn')}
                       </button>
+                      {/* Account status actions — context-sensitive */}
+                      {(u.accountStatus === 'frozen') ? (
+                        <button className="btn btn-sm btn-success" disabled={processing === u.id} onClick={() => handleUnfreezeUser(u)}>
+                          {processing === u.id ? '...' : '❄ Unfreeze'}
+                        </button>
+                      ) : (u.accountStatus === 'suspended') ? (
+                        <button className="btn btn-sm btn-success" disabled={processing === u.id} onClick={() => handleReactivateUser(u)}>
+                          {processing === u.id ? '...' : '↩ Reactivate'}
+                        </button>
+                      ) : u.accountStatus === 'active' ? (
+                        <>
+                          <button className="btn btn-sm btn-warning" disabled={processing === u.id} onClick={() => { setShowFreezeModal(u); setActionReason('') }}>❄ Freeze</button>
+                          <button className="btn btn-sm btn-danger" disabled={processing === u.id} onClick={() => { setShowSuspendModal(u); setActionReason('') }}>⛔ Suspend</button>
+                        </>
+                      ) : null}
                     </div>
                   </td>
                 </tr>
@@ -771,6 +1011,58 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
           </div>
         </div>
       )}
+      {/* Freeze Account Modal */}
+      {showFreezeModal && (
+        <div className="modal-overlay" onClick={() => setShowFreezeModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <div className="modal-header">
+              <h2>❄ Freeze Account</h2>
+              <button className="modal-close" onClick={() => setShowFreezeModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p>Temporarily freeze <strong>{showFreezeModal.firstName} {showFreezeModal.lastName}</strong>'s account.</p>
+              <p style={{ fontSize: 13, color: '#6b7280' }}>The user will not be able to log in while frozen. They will see a polite notice to contact the platform team.</p>
+              <div className="form-group" style={{ marginTop: 12 }}>
+                <label className="form-label">Reason (shown to support team) *</label>
+                <textarea className="form-input" rows={3} value={actionReason} onChange={e => setActionReason(e.target.value)} placeholder="e.g. Pending investigation into activity" />
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+                <button className="btn btn-outline" onClick={() => setShowFreezeModal(null)}>Cancel</button>
+                <button className="btn btn-warning" disabled={!actionReason.trim() || processing === showFreezeModal.id} onClick={handleFreezeUser}>
+                  {processing === showFreezeModal.id ? 'Freezing...' : '❄ Freeze Account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Suspend Account Modal */}
+      {showSuspendModal && (
+        <div className="modal-overlay" onClick={() => setShowSuspendModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <div className="modal-header">
+              <h2>⛔ Suspend Account</h2>
+              <button className="modal-close" onClick={() => setShowSuspendModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p>Permanently suspend <strong>{showSuspendModal.firstName} {showSuspendModal.lastName}</strong>'s account.</p>
+              <p style={{ fontSize: 13, color: '#ef4444' }}>The account will be disabled. The reason is stored for audit purposes. Use Reactivate to re-enable.</p>
+              <div className="form-group" style={{ marginTop: 12 }}>
+                <label className="form-label">Reason for Suspension *</label>
+                <textarea className="form-input" rows={3} value={actionReason} onChange={e => setActionReason(e.target.value)} placeholder="e.g. Repeated policy violations" />
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+                <button className="btn btn-outline" onClick={() => setShowSuspendModal(null)}>Cancel</button>
+                <button className="btn btn-danger" disabled={!actionReason.trim() || processing === showSuspendModal.id} onClick={handleSuspendUser}>
+                  {processing === showSuspendModal.id ? 'Suspending...' : '⛔ Suspend Account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reset Password Modal (C7) */}
       {showResetPasswordModal && (
         <div className="modal-overlay" onClick={() => setShowResetPasswordModal(null)}>

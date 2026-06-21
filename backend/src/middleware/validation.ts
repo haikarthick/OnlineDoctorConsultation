@@ -36,6 +36,40 @@ export const registerSchema = Joi.object({
     'any.only': 'Role must be one of: pet_owner, farmer, veterinarian, corporate_admin',
   }),
   confirmPassword: Joi.string().optional().strip(),
+  // Veterinarian-specific fields (required when role = 'veterinarian')
+  licenseNumber: Joi.when('role', {
+    is: 'veterinarian',
+    then: Joi.string().min(3).max(100).required().messages({
+      'any.required': 'License number is required for veterinarian registration',
+      'string.min': 'License number must be at least 3 characters',
+    }),
+    otherwise: Joi.string().optional().allow('').strip(),
+  }),
+  yearsOfExperience: Joi.when('role', {
+    is: 'veterinarian',
+    then: Joi.number().integer().min(0).max(60).optional(),
+    otherwise: Joi.any().strip(),
+  }),
+  specializations: Joi.when('role', {
+    is: 'veterinarian',
+    then: Joi.array().items(Joi.string().max(100)).max(10).optional().default([]),
+    otherwise: Joi.any().strip(),
+  }),
+  qualifications: Joi.when('role', {
+    is: 'veterinarian',
+    then: Joi.array().items(Joi.string().max(100)).max(10).optional().default([]),
+    otherwise: Joi.any().strip(),
+  }),
+  clinicName: Joi.when('role', {
+    is: 'veterinarian',
+    then: Joi.string().max(255).optional().allow(''),
+    otherwise: Joi.any().strip(),
+  }),
+  consultationFee: Joi.when('role', {
+    is: 'veterinarian',
+    then: Joi.number().min(0).optional().default(0),
+    otherwise: Joi.any().strip(),
+  }),
 });
 
 export const loginSchema = Joi.object({

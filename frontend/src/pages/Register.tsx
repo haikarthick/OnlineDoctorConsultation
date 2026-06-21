@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import './Auth.css'
@@ -12,7 +11,6 @@ interface RegisterProps {
 export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const { register } = useAuth()
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,17 +18,27 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'pet_owner'
+    role: 'pet_owner',
+    // Vet-specific
+    licenseNumber: '',
+    yearsOfExperience: '',
+    specializations: '',
+    qualifications: '',
+    clinicName: '',
+    consultationFee: '',
   })
   const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState<'success' | 'error' | 'pending'>('error')
   const [loading, setLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const isVet = formData.role === 'veterinarian'
+  const isCorporate = formData.role === 'corporate_admin'
+  const isPendingRole = isVet || isCorporate
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,43 +46,72 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
     setLoading(true)
     setMessage('')
 
-    // Validation
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
       setMessage(t('register.validation.allRequired'))
+      setMessageType('error')
       setLoading(false)
       return
     }
-
     if (formData.password !== formData.confirmPassword) {
       setMessage(t('register.validation.passwordMismatch'))
+      setMessageType('error')
       setLoading(false)
       return
     }
-
     if (formData.password.length < 8) {
       setMessage(t('register.validation.passwordLength'))
+      setMessageType('error')
       setLoading(false)
       return
     }
-
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
       setMessage(t('register.validation.passwordComplexity'))
+      setMessageType('error')
+      setLoading(false)
+      return
+    }
+    if (isVet && !formData.licenseNumber.trim()) {
+      setMessage('License number is required for veterinarian registration.')
+      setMessageType('error')
       setLoading(false)
       return
     }
 
     try {
-      await register({
+      const payload: any = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
-        role: formData.role as 'pet_owner' | 'farmer' | 'veterinarian' | 'corporate_admin'
-      })
-      setMessage(t('register.success'))
+        role: formData.role,
+      }
+      if (isVet) {
+        payload.licenseNumber = formData.licenseNumber.trim()
+        if (formData.yearsOfExperience) payload.yearsOfExperience = Number(formData.yearsOfExperience)
+        if (formData.specializations) payload.specializations = formData.specializations.split(',').map((s: string) => s.trim()).filter(Boolean)
+        if (formData.qualifications) payload.qualifications = formData.qualifications.split(',').map((s: string) => s.trim()).filter(Boolean)
+        if (formData.clinicName) payload.clinicName = formData.clinicName.trim()
+        if (formData.consultationFee) payload.consultationFee = Number(formData.consultationFee)
+      }
+
+      const result = await register(payload)
+
+      // Backend returns { pending: true } for roles needing admin approval
+      if ((result as any)?.pending) {
+        setSubmitted(true)
+        setMessageType('pending')
+        setMessage(
+          (result as any).message ||
+          'Your registration has been submitted and is currently under review. You will be notified by email once your credentials have been verified.'
+        )
+      } else {
+        setMessageType('success')
+        setMessage(t('register.success'))
+      }
     } catch (error) {
+      setMessageType('error')
       setMessage(error instanceof Error ? error.message : t('register.error'))
     } finally {
       setLoading(false)
@@ -87,6 +124,24 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
     { value: 'veterinarian', label: t('register.roleVet'), icon: '👨‍⚕️', desc: t('register.roleVetDesc') },
     { value: 'corporate_admin', label: t('register.roleCorporateAdmin'), icon: '🏥', desc: t('register.roleCorporateAdminDesc') },
   ]
+
+  // After a pending-role submits successfully, show confirmation screen only
+  if (submitted && isPendingRole) {
+    return (
+      <div className="auth-page register-page">
+        <div className="register-wrapper" style={{ justifyContent: 'center' }}>
+          <div className="register-form-panel" style={{ maxWidth: 520 }}>
+            <div style={{ textAlign: 'center', padding: '3rem 2rem' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
+              <h2 style={{ color: '#1e3a5f', marginBottom: '1rem' }}>Registration Submitted</h2>
+              <p style={{ color: '#475569', lineHeight: 1.7, marginBottom: '2rem' }}>{message}</p>
+              <button className="btn btn-primary" onClick={onSwitchToLogin}>Back to Login</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="auth-page register-page">
@@ -114,7 +169,6 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
         <div className="register-form-panel">
           <div className="register-form-topbar">
             {onGoHome && <button className="back-home-btn" onClick={onGoHome} title={t('login.backHome')}>{t('login.backHome')}</button>}
-            <button className="browse-marketplace-link" onClick={() => navigate('/browse-marketplace')}>🏪 {t('publicMarketplace.homeCta.browseNow')}</button>
             <span className="register-topbar-login">{t('register.alreadyMember')} <button className="link-btn" onClick={onSwitchToLogin}>{t('register.signIn')}</button></span>
           </div>
           <div className="register-form-header">
@@ -124,7 +178,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
 
           {message && (
             <div
-              className={`message ${message.includes('✓') ? 'success' : 'error'}`}
+              className={`message ${messageType === 'pending' ? 'info' : messageType === 'success' ? 'success' : 'error'}`}
               role="status"
               aria-live="polite"
             >
@@ -137,48 +191,88 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="reg-firstName">{t('register.firstName')}</label>
-                <input id="reg-firstName" type="text" name="firstName" placeholder="John" value={formData.firstName} onChange={handleChange} required autoComplete="given-name" aria-required="true" />
+                <input id="reg-firstName" type="text" name="firstName" placeholder="John" value={formData.firstName} onChange={handleChange} required autoComplete="given-name" />
               </div>
               <div className="form-group">
                 <label htmlFor="reg-lastName">{t('register.lastName')}</label>
-                <input id="reg-lastName" type="text" name="lastName" placeholder="Doe" value={formData.lastName} onChange={handleChange} required autoComplete="family-name" aria-required="true" />
+                <input id="reg-lastName" type="text" name="lastName" placeholder="Doe" value={formData.lastName} onChange={handleChange} required autoComplete="family-name" />
               </div>
             </div>
 
-            {/* Email + Phone row */}
+            {/* Email + Phone */}
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="reg-email">{t('register.email')}</label>
-                <input id="reg-email" type="email" name="email" placeholder="you@email.com" value={formData.email} onChange={handleChange} required autoComplete="email" aria-required="true" />
+                <input id="reg-email" type="email" name="email" placeholder="you@email.com" value={formData.email} onChange={handleChange} required autoComplete="email" />
               </div>
               <div className="form-group">
                 <label htmlFor="reg-phone">{t('register.phone')}</label>
-                <input id="reg-phone" type="tel" name="phone" placeholder="+1 (555) 000-0000" value={formData.phone} onChange={handleChange} required autoComplete="tel" aria-required="true" />
+                <input id="reg-phone" type="tel" name="phone" placeholder="+1 (555) 000-0000" value={formData.phone} onChange={handleChange} required autoComplete="tel" />
               </div>
             </div>
 
-            {/* Role selector cards */}
+            {/* Role selector */}
             <fieldset className="form-group" style={{ border: 'none', margin: 0, padding: 0 }}>
               <legend style={{ fontWeight: 600, marginBottom: '8px' }}>{t('register.roleTitle')}</legend>
               <div className="role-selector" role="radiogroup" aria-label="Select your role">
                 {roleOptions.map(opt => (
                   <label key={opt.value} className={`role-option ${formData.role === opt.value ? 'selected' : ''}`}>
-                    <input type="radio" name="role" value={opt.value} checked={formData.role === opt.value} onChange={handleChange} aria-describedby={`role-desc-${opt.value}`} />
+                    <input type="radio" name="role" value={opt.value} checked={formData.role === opt.value} onChange={handleChange} />
                     <span className="role-icon" aria-hidden="true">{opt.icon}</span>
                     <span className="role-label">{opt.label}</span>
-                    <span className="role-desc" id={`role-desc-${opt.value}`}>{opt.desc}</span>
+                    <span className="role-desc">{opt.desc}</span>
                   </label>
                 ))}
               </div>
             </fieldset>
 
-            {/* Contextual callout for corporate_admin role */}
-            {formData.role === 'corporate_admin' && (
+            {/* Pending-approval notice banner */}
+            {isPendingRole && (
               <div className="hospital-callout" role="note">
-                <span className="hospital-callout-icon">🏥</span>
+                <span className="hospital-callout-icon">ℹ️</span>
                 <div className="hospital-callout-body">
-                  <strong>{t('register.corporateAdminCalloutTitle')}</strong>
-                  <p>{t('register.corporateAdminCalloutBody')}</p>
+                  <strong>Account Review Required</strong>
+                  <p>
+                    {isVet
+                      ? 'Veterinarian registrations are reviewed by our platform team to verify your license. You will receive an email confirmation once approved.'
+                      : 'Corporate admin accounts are reviewed before activation. You will be notified by email once your account has been approved.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Vet-specific fields (shown only when role = veterinarian) */}
+            {isVet && (
+              <div className="vet-fields">
+                <div className="form-group">
+                  <label htmlFor="reg-license">License Number <span style={{ color: '#e53e3e' }}>*</span></label>
+                  <input
+                    id="reg-license" type="text" name="licenseNumber"
+                    placeholder="e.g. VET-MH-2024-00123"
+                    value={formData.licenseNumber} onChange={handleChange} required
+                  />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="reg-experience">Years of Experience</label>
+                    <input id="reg-experience" type="number" name="yearsOfExperience" min="0" max="60" placeholder="5" value={formData.yearsOfExperience} onChange={handleChange} />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="reg-fee">Consultation Fee (₹)</label>
+                    <input id="reg-fee" type="number" name="consultationFee" min="0" placeholder="500" value={formData.consultationFee} onChange={handleChange} />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reg-clinic">Clinic / Practice Name</label>
+                  <input id="reg-clinic" type="text" name="clinicName" placeholder="City Animal Clinic" value={formData.clinicName} onChange={handleChange} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reg-specializations">Specializations <span style={{ color: '#718096', fontWeight: 400 }}>(comma separated)</span></label>
+                  <input id="reg-specializations" type="text" name="specializations" placeholder="Small Animals, Surgery, Dentistry" value={formData.specializations} onChange={handleChange} />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reg-qualifications">Qualifications <span style={{ color: '#718096', fontWeight: 400 }}>(comma separated)</span></label>
+                  <input id="reg-qualifications" type="text" name="qualifications" placeholder="BVSc, MVSc, PhD" value={formData.qualifications} onChange={handleChange} />
                 </div>
               </div>
             )}
@@ -187,21 +281,19 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="reg-password">{t('register.password')}</label>
-                <input id="reg-password" type="password" name="password" placeholder="Min 8 chars, A-Z, a-z, 0-9" value={formData.password} onChange={handleChange} required autoComplete="new-password" aria-required="true" aria-describedby="password-hint" />
-                <span id="password-hint" className="sr-only">Must be at least 8 characters with uppercase, lowercase, and number</span>
+                <input id="reg-password" type="password" name="password" placeholder="Min 8 chars, A-Z, a-z, 0-9" value={formData.password} onChange={handleChange} required autoComplete="new-password" />
               </div>
               <div className="form-group">
                 <label htmlFor="reg-confirmPassword">{t('register.confirmPassword')}</label>
-                <input id="reg-confirmPassword" type="password" name="confirmPassword" placeholder="Re-enter password" value={formData.confirmPassword} onChange={handleChange} required autoComplete="new-password" aria-required="true" />
+                <input id="reg-confirmPassword" type="password" name="confirmPassword" placeholder="Re-enter password" value={formData.confirmPassword} onChange={handleChange} required autoComplete="new-password" />
               </div>
             </div>
 
             <button type="submit" className="btn btn-primary register-submit" disabled={loading} aria-busy={loading}>
-              {loading ? (
-                <span className="btn-loading"><span className="spinner" aria-hidden="true" /> {t('register.creatingAccount')}</span>
-              ) : (
-                t('register.createAccountBtn')
-              )}
+              {loading
+                ? <span className="btn-loading"><span className="spinner" aria-hidden="true" /> {t('register.creatingAccount')}</span>
+                : isPendingRole ? 'Submit for Review' : t('register.createAccountBtn')
+              }
             </button>
           </form>
 

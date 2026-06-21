@@ -18,6 +18,10 @@ class AdminService {
       []
     );
     const pendingNetworkApprovals = parseInt(pendingNetworksResult.rows[0]?.count || '0');
+    const pendingUsersResult = await database.query(
+      `SELECT COUNT(*) as count FROM users WHERE account_status = 'pending_approval'`
+    );
+    const pendingUserApprovals = parseInt(pendingUsersResult.rows[0]?.count || '0');
 
     const userCounts: Record<string, number> = {};
     (usersResult.rows || []).forEach((r: any) => { userCounts[r.role] = parseInt(r.count || '0'); });
@@ -56,7 +60,8 @@ class AdminService {
       todayBookings: 0,
       activeVideoSessions: parseInt(videoResult.rows[0]?.count || '0'),
       pendingNetworkApprovals,
-      pendingActions: pendingNetworkApprovals,
+      pendingUserApprovals,
+      pendingActions: pendingNetworkApprovals + pendingUserApprovals,
       systemHealth: {
         uptime: process.uptime(),
         memoryUsage: process.memoryUsage().heapUsed / 1024 / 1024,
@@ -66,7 +71,13 @@ class AdminService {
     };
   }
 
-  async listAllUsers(params: { limit?: number; offset?: number; role?: string; search?: string; isActive?: boolean }): Promise<PaginatedResponse<any>> {
+  private userReturnCols = `
+    id, email, first_name as "firstName", last_name as "lastName", role, phone,
+    is_active as "isActive", account_status as "accountStatus",
+    freeze_reason as "freezeReason", frozen_at as "frozenAt",
+    created_at as "createdAt", updated_at as "updatedAt"`;
+
+  async listAllUsers(params: { limit?: number; offset?: number; role?: string; search?: string; isActive?: boolean; accountStatus?: string }): Promise<PaginatedResponse<any>> {
     const limit = params.limit || 20;
     const offset = params.offset || 0;
     const conditions: string[] = [];
@@ -76,7 +87,10 @@ class AdminService {
       queryParams.push(params.role);
       conditions.push(`role = $${queryParams.length}`);
     }
-    if (params.isActive !== undefined) {
+    if (params.accountStatus) {
+      queryParams.push(params.accountStatus);
+      conditions.push(`account_status = $${queryParams.length}`);
+    } else if (params.isActive !== undefined) {
       queryParams.push(params.isActive);
       conditions.push(`is_active = $${queryParams.length}`);
     }
@@ -86,44 +100,138 @@ class AdminService {
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    const countResult = await database.query(
-      `SELECT COUNT(*) as count FROM users ${whereClause}`,
-      [...queryParams]
-    );
+    const countResult = await database.query(`SELECT COUNT(*) as count FROM users ${whereClause}`, [...queryParams]);
     const result = await database.query(
-      `SELECT id, email, first_name as "firstName", last_name as "lastName", role, phone,
-       is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
-       FROM users ${whereClause} ORDER BY created_at DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
+      `SELECT ${this.userReturnCols} FROM users ${whereClause}
+       ORDER BY created_at DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
       [...queryParams, limit, offset]
     );
+    return { items: result.rows, total: parseInt(countResult.rows[0]?.count || '0', 10), limit, offset, hasMore: result.rows.length === limit };
+  }
 
-    return {
-      items: result.rows,
-      total: parseInt(countResult.rows[0]?.count || '0', 10),
-      limit, offset,
-      hasMore: result.rows.length === limit
-    };
+  async listPendingUsers(): Promise<any[]> {
+    const result = await database.query(
+      `SELECT u.${this.userReturnCols.trim()},
+              vp.license_number as "licenseNumber",
+              vp.years_of_experience as "yearsOfExperience",
+              vp.specializations, vp.qualifications, vp.clinic_name as "clinicName"
+       FROM users u
+       LEFT JOIN vet_profiles vp ON vp.user_id = u.id
+       WHERE u.account_status = 'pending_approval'
+       ORDER BY u.created_at ASC`
+    );
+    return result.rows;
+  }
+
+  async approveUser(userId: string, adminId: string): Promise<any> {
+    const result = await database.query(
+      `UPDATE users SET account_status = 'active', is_active = true, updated_at = NOW()
+       WHERE id = $1 AND account_status = 'pending_approval'
+       RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
+                 account_status as "accountStatus"`,
+      [userId]
+    );
+    if (result.rows.length === 0) throw new NotFoundError('User', userId);
+    // Mark vet as verified on approval
+    await database.query(
+      `UPDATE vet_profiles SET is_verified = true, is_available = true, updated_at = NOW() WHERE user_id = $1`,
+      [userId]
+    ).catch(() => {});
+    logger.info('User approved', { userId, adminId });
+    return result.rows[0];
+  }
+
+  async rejectUser(userId: string, adminId: string, reason: string): Promise<any> {
+    if (!reason?.trim()) throw new Error('Rejection reason is required');
+    const result = await database.query(
+      `UPDATE users SET account_status = 'suspended', is_active = false,
+              freeze_reason = $2, frozen_by = $3, frozen_at = NOW(), updated_at = NOW()
+       WHERE id = $1 AND account_status = 'pending_approval'
+       RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
+                 account_status as "accountStatus"`,
+      [userId, reason.trim(), adminId]
+    );
+    if (result.rows.length === 0) throw new NotFoundError('User', userId);
+    logger.info('User registration rejected', { userId, adminId, reason });
+    return result.rows[0];
+  }
+
+  async freezeUser(userId: string, adminId: string, reason: string): Promise<any> {
+    if (!reason?.trim()) throw new Error('Freeze reason is required');
+    const result = await database.query(
+      `UPDATE users SET account_status = 'frozen', is_active = false,
+              freeze_reason = $2, frozen_by = $3, frozen_at = NOW(), updated_at = NOW()
+       WHERE id = $1 AND account_status IN ('active', 'pending_approval')
+       RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
+                 account_status as "accountStatus", freeze_reason as "freezeReason"`,
+      [userId, reason.trim(), adminId]
+    );
+    if (result.rows.length === 0) throw new NotFoundError('User', userId);
+    logger.info('User account frozen', { userId, adminId, reason });
+    return result.rows[0];
+  }
+
+  async unfreezeUser(userId: string, adminId: string): Promise<any> {
+    const result = await database.query(
+      `UPDATE users SET account_status = 'active', is_active = true,
+              freeze_reason = NULL, frozen_by = NULL, frozen_at = NULL, updated_at = NOW()
+       WHERE id = $1 AND account_status = 'frozen'
+       RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
+                 account_status as "accountStatus"`,
+      [userId]
+    );
+    if (result.rows.length === 0) throw new NotFoundError('User', userId);
+    logger.info('User account unfrozen', { userId, adminId });
+    return result.rows[0];
+  }
+
+  async suspendUser(userId: string, adminId: string, reason?: string): Promise<any> {
+    const result = await database.query(
+      `UPDATE users SET account_status = 'suspended', is_active = false,
+              freeze_reason = $2, frozen_by = $3, frozen_at = NOW(), updated_at = NOW()
+       WHERE id = $1
+       RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
+                 account_status as "accountStatus"`,
+      [userId, reason?.trim() || null, adminId]
+    );
+    if (result.rows.length === 0) throw new NotFoundError('User', userId);
+    logger.info('User suspended', { userId, adminId });
+    return result.rows[0];
+  }
+
+  async reactivateUser(userId: string, adminId: string): Promise<any> {
+    const result = await database.query(
+      `UPDATE users SET account_status = 'active', is_active = true,
+              freeze_reason = NULL, frozen_by = NULL, frozen_at = NULL, updated_at = NOW()
+       WHERE id = $1 AND account_status = 'suspended'
+       RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
+                 account_status as "accountStatus"`,
+      [userId]
+    );
+    if (result.rows.length === 0) throw new NotFoundError('User', userId);
+    logger.info('User reactivated', { userId, adminId });
+    return result.rows[0];
   }
 
   async toggleUserStatus(userId: string, isActive: boolean): Promise<any> {
+    const newStatus = isActive ? 'active' : 'suspended';
     const result = await database.query(
-      `UPDATE users SET is_active = $1, updated_at = $2 WHERE id = $3
+      `UPDATE users SET is_active = $1, account_status = $2, updated_at = NOW() WHERE id = $3
        RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
-       is_active as "isActive", updated_at as "updatedAt"`,
-      [isActive, new Date(), userId]
+       is_active as "isActive", account_status as "accountStatus", updated_at as "updatedAt"`,
+      [isActive, newStatus, userId]
     );
     if (result.rows.length === 0) throw new NotFoundError('User', userId);
-    logger.info('User status toggled', { userId, isActive });
+    logger.info('User status toggled', { userId, isActive, newStatus });
     return result.rows[0];
   }
 
   async changeUserRole(userId: string, newRole: string): Promise<any> {
     const result = await database.query(
-      `UPDATE users SET role = $1, updated_at = $2 WHERE id = $3
+      `UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2
        RETURNING id, email, first_name as "firstName", last_name as "lastName", role,
-       is_active as "isActive", updated_at as "updatedAt"`,
-      [newRole, new Date(), userId]
+       is_active as "isActive", account_status as "accountStatus", updated_at as "updatedAt"`,
+      [newRole, userId]
     );
     if (result.rows.length === 0) throw new NotFoundError('User', userId);
     logger.info('User role changed', { userId, newRole });

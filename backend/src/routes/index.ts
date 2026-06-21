@@ -1243,8 +1243,15 @@ router.get('/admin/users/search', authMiddleware, roleMiddleware(['admin']), asy
   }
 }));
 router.get('/admin/users', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listUsers(req, res)));
+router.get('/admin/users/pending', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.listPendingUsers(req, res)));
 router.put('/admin/users/:id/status', authMiddleware, roleMiddleware(['admin']), validateBody(toggleUserStatusSchema), asyncHandler((req: Request, res: Response) => AdminController.toggleUserStatus(req, res)));
 router.put('/admin/users/:id/role', authMiddleware, roleMiddleware(['admin']), validateBody(changeUserRoleSchema), asyncHandler((req: Request, res: Response) => AdminController.changeUserRole(req, res)));
+router.post('/admin/users/:id/approve', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.approveUser(req, res)));
+router.post('/admin/users/:id/reject', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.rejectUser(req, res)));
+router.post('/admin/users/:id/freeze', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.freezeUser(req, res)));
+router.post('/admin/users/:id/unfreeze', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.unfreezeUser(req, res)));
+router.post('/admin/users/:id/suspend', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.suspendUser(req, res)));
+router.post('/admin/users/:id/reactivate', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => AdminController.reactivateUser(req, res)));
 
 // C7: Admin password reset
 router.post('/admin/users/:id/reset-password', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
@@ -3589,9 +3596,18 @@ router.get('/pharmacies/:pharmacyId/pending-prescriptions', authMiddleware, asyn
   res.json(result.rows);
 }));
 
-// Submit prescription review
-router.post('/prescriptions/:prescriptionId/review', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+// Submit prescription review — pharmacist or admin only, scoped to their network
+router.post('/prescriptions/:prescriptionId/review', authMiddleware, roleMiddleware(['pharmacist', 'admin']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
+  // Verify prescription exists and belongs to the pharmacist's network
+  const rxRow = await database.query(
+    `SELECT id, network_id FROM prescriptions WHERE id = $1 AND is_active = true`,
+    [req.params.prescriptionId]
+  );
+  if (!rxRow.rows[0]) return res.status(404).json({ success: false, message: 'Prescription not found' });
+  if (authReq.userRole !== 'admin') {
+    if (!await guardNetworkPharmacy(req, res, rxRow.rows[0].network_id)) return;
+  }
   // Accept both field naming conventions (frontend sends review_notes; canonical is rejection_reason/findings)
   const review_status = req.body.review_status;
   const validation_checks = req.body.validation_checks || {};
@@ -3749,8 +3765,14 @@ router.post('/dispensing', authMiddleware, asyncHandler(async (req: Request, res
   res.status(201).json(record.rows[0]);
 }));
 
-// Update dispensing status
+// Update dispensing status — requires pharmacy membership
 router.patch('/dispensing/:dispensingId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const row = await database.query(
+    `SELECT pharmacy_id FROM dispensing_records WHERE id = $1`,
+    [req.params.dispensingId]
+  );
+  if (!row.rows[0]) return res.status(404).json({ error: 'Dispensing record not found' });
+  if (!await guardPharmacy(req, res, row.rows[0].pharmacy_id)) return;
   const { dispensing_status, received_by, signature_url, notes } = req.body;
   const now = new Date().toISOString();
   const result = await database.query(
@@ -3793,12 +3815,12 @@ router.get('/pharmacies/:pharmacyId/dispensing-history', authMiddleware, asyncHa
 
 router.get('/pharmacies/:pharmacyId/analytics', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   if (!await guardPharmacy(req, res, req.params.pharmacyId)) return;
-  const days = parseInt(req.query.days as string) || 30;
+  const days = Math.min(Math.max(Number.parseInt(String(req.query.days), 10) || 30, 1), 365);
   const [revenue, volume, topMeds, lowStock, expiring] = await Promise.all([
     database.query(
       `SELECT COALESCE(SUM(total_cost), 0) AS total_revenue, COUNT(*) AS dispensing_count
-       FROM dispensing_records WHERE pharmacy_id = $1 AND created_at >= NOW() - INTERVAL '${days} days'`,
-      [req.params.pharmacyId]
+       FROM dispensing_records WHERE pharmacy_id = $1 AND created_at >= NOW() - ($2::int * INTERVAL '1 day')`,
+      [req.params.pharmacyId, days]
     ),
     database.query(
       `SELECT COUNT(*) AS pending_reviews FROM prescriptions p
@@ -3842,18 +3864,20 @@ router.get('/pharmacies/:pharmacyId/analytics', authMiddleware, asyncHandler(asy
   });
 }));
 
-// Network-wide pharmacy report
+// Network-wide pharmacy report — network members only
 router.get('/networks/:networkId/pharmacy-reports', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const days = parseInt(req.query.days as string) || 30;
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
+  const days = Math.min(Math.max(Number.parseInt(String(req.query.days), 10) || 30, 1), 365);
   const result = await database.query(
     `SELECT hp.pharmacy_name, hp.id AS pharmacy_id,
             COALESCE(SUM(dr.total_cost), 0) AS revenue,
             COUNT(dr.id) AS dispensing_count
      FROM hospital_pharmacies hp
-     LEFT JOIN dispensing_records dr ON dr.pharmacy_id = hp.id AND dr.created_at >= NOW() - INTERVAL '${days} days'
+     LEFT JOIN dispensing_records dr ON dr.pharmacy_id = hp.id
+       AND dr.created_at >= NOW() - ($2::int * INTERVAL '1 day')
      WHERE hp.network_id = $1 AND hp.is_active = true
      GROUP BY hp.id, hp.pharmacy_name ORDER BY revenue DESC`,
-    [req.params.networkId]
+    [req.params.networkId, days]
   );
   res.json({ period_days: days, pharmacies: result.rows });
 }));

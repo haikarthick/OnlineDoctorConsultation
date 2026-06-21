@@ -738,6 +738,41 @@ class ApiService {
     return response.data
   }
 
+  async adminListPendingUsers() {
+    const response = await this.client.get('/admin/users/pending')
+    return response.data
+  }
+
+  async adminApproveUser(userId: string) {
+    const response = await this.client.post(`/admin/users/${userId}/approve`)
+    return response.data
+  }
+
+  async adminRejectUser(userId: string, reason: string) {
+    const response = await this.client.post(`/admin/users/${userId}/reject`, { reason })
+    return response.data
+  }
+
+  async adminFreezeUser(userId: string, reason: string) {
+    const response = await this.client.post(`/admin/users/${userId}/freeze`, { reason })
+    return response.data
+  }
+
+  async adminUnfreezeUser(userId: string) {
+    const response = await this.client.post(`/admin/users/${userId}/unfreeze`)
+    return response.data
+  }
+
+  async adminSuspendUser(userId: string, reason: string) {
+    const response = await this.client.post(`/admin/users/${userId}/suspend`, { reason })
+    return response.data
+  }
+
+  async adminReactivateUser(userId: string) {
+    const response = await this.client.post(`/admin/users/${userId}/reactivate`)
+    return response.data
+  }
+
   async adminGetWalletSummary() {
     const response = await this.client.get('/admin/wallet-summary')
     return response.data
