@@ -96,4 +96,20 @@ export function getFrontendUrl(): string {
   return envUrl || 'http://localhost:5173';
 }
 
+/**
+ * Resolve the backend's own public URL at runtime.
+ * Used to build absolute file URLs for uploaded assets.
+ * In production: BACKEND_URL → RENDER_EXTERNAL_URL → localhost fallback
+ */
+export function getBackendUrl(): string {
+  const envUrl = process.env.BACKEND_URL;
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+  if (isProd) {
+    return process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 3000}`;
+  }
+  return `http://localhost:${process.env.PORT || 3000}`;
+}
+
 export default config;

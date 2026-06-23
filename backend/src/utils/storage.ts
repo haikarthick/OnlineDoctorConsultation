@@ -11,7 +11,7 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import config from '../config';
+import config, { getBackendUrl } from '../config';
 import logger from './logger';
 
 // ── Types ─────────────────────────────────────────────────────
@@ -79,7 +79,7 @@ class LocalStorage implements StorageDriver {
       fileName: uniqueName,
       mimeType: file.mimetype,
       size: file.size,
-      url: `/uploads/${key}`,
+      url: `${getBackendUrl()}/uploads/${key}`,
       key,
     };
   }
@@ -92,7 +92,7 @@ class LocalStorage implements StorageDriver {
   }
 
   getUrl(key: string): string {
-    return `/uploads/${key}`;
+    return `${getBackendUrl()}/uploads/${key}`;
   }
 }
 
