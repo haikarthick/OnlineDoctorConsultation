@@ -95,7 +95,13 @@
     "viewAll": "View All",
     "requiredField": "Required field",
     "saveChanges": "Save Changes",
-    "action": "Action"
+    "action": "Action",
+    "errorLoading": "Error loading data",
+    "errorSaving": "Error saving data",
+    "fillRequired": "Please fill all required fields",
+    "none": "None",
+    "error": "Error",
+    "deactivate": "Deactivate"
   },
   "nav": {
     "brand": "VetCare",
@@ -911,10 +917,14 @@
         "hospitalOversight": "ఆసుపత్రి పర్యవేక్షణ",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Manage inpatient cases"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "రోగి",
@@ -943,10 +953,18 @@
       "reportBuilderTitle": "రిపోర్ట్ బిల్డర్",
       "reportBuilderDesc": "కస్టమ్ వైద్య మరియు విశ్లేషణ నివేదికలను రూపొందించండి",
       "aiCopilotTitle": "AI కోపైలట్",
-      "aiCopilotDesc": "AI-ఆధారిత క్లినికల్ నిర్ణయ మద్దతు పొందండి"
+      "aiCopilotDesc": "AI-ఆధారిత క్లినికల్ నిర్ణయ మద్దతు పొందండి",
+      "treatmentCampaigns": "Treatment Campaigns"
     },
     "findDoctor": "వైద్యుడిని కనుగొనండి →",
-    "manageSchedule": "షెడ్యూల్ నిర్వహించండి →"
+    "manageSchedule": "షెడ్యూల్ నిర్వహించండి →",
+    "quickActionsTitle": "Quick Actions",
+    "enterpriseOverview": "Enterprise Overview",
+    "enterpriseStats": {
+      "activeCampaigns": "Active Campaigns",
+      "pendingApprovals": "Pending Approvals",
+      "groups": "Groups"
+    }
   },
   "consultations": {
     "pageTitle": "🏥 సంప్రదింపులు & అపాయింట్‌మెంట్లు",
@@ -1392,7 +1410,10 @@
       "status": "స్థితి",
       "severity": "తీవ్రత",
       "recordedBy": "నమోదు చేసినవారు"
-    }
+    },
+    "noAnimalsTitle": "No Animals Found",
+    "noAnimalsHint": "Add an animal to view its health timeline",
+    "addAnimal": "Add Animal"
   },
   "medicalRecords": {
     "pageTitle": "📋 వైద్య రికార్డులు",
@@ -2790,7 +2811,8 @@
     "viewReadings": "View Readings",
     "noSensors": "No sensors registered yet",
     "recordedAt": "Recorded At",
-    "noReadings": "No readings recorded yet"
+    "noReadings": "No readings recorded yet",
+    "selectEnterprise": "Select Enterprise"
   },
   "supplyChain": {
     "pageTitle": "🔗 సరఫరా గొలుసు & ట్రేసబిలిటీ (ఫారం-టు-ఫోర్క్)",
@@ -2885,8 +2907,41 @@
     "checkIn": "చెక్ ఇన్",
     "checkOut": "చెక్ అవుట్",
     "form": {
-      "title": "Title"
-    }
+      "title": "Title",
+      "taskType": "Task Type",
+      "dueDate": "Due Date",
+      "estimatedHours": "Estimated Hours",
+      "userId": "Worker",
+      "shiftDate": "Shift Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "roleOnShift": "Role on Shift"
+    },
+    "taskUpdated": "Task updated",
+    "checkedIn": "Checked in successfully",
+    "failedCheckIn": "Failed to check in",
+    "checkedOut": "Checked out successfully",
+    "failedCheckOut": "Failed to check out",
+    "openTasksByPriority": "Open Tasks by Priority",
+    "avgHours": "Avg. Hours",
+    "task": "Task",
+    "assignedTo": "Assigned To",
+    "due": "Due",
+    "priority": "Priority",
+    "worker": "Worker",
+    "time": "Time",
+    "role": "Role",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityCritical": "Critical",
+    "assigned": "Assigned",
+    "est": "Est.",
+    "start": "Start",
+    "complete": "Complete",
+    "noTasks": "No tasks found",
+    "scheduleShift": "Schedule Shift",
+    "noShifts": "No shifts scheduled"
   },
   "reportBuilder": {
     "pageTitle": "📊 నివేదిక బిల్డర్ & ఎగుమతి కేంద్రం",
@@ -3253,7 +3308,11 @@
       "feature": "☆ ఫీచర్",
       "leading": "★ ముందంజ",
       "yourListing": "📋 మీ లిస్టింగ్",
-      "yourListingDesc": "ఇది మీ లిస్టింగ్. ఇతర వినియోగదారులు ఈ జంతువు గురించి విచారించవచ్చు."
+      "yourListingDesc": "ఇది మీ లిస్టింగ్. ఇతర వినియోగదారులు ఈ జంతువు గురించి విచారించవచ్చు.",
+      "auctionEnded": "Auction ended",
+      "call": "Call",
+      "contactHidden": "Contact details hidden",
+      "requestContact": "Request Contact"
     },
     "card": {
       "hotDeal": "🔥 హాట్ డీల్",
@@ -3265,7 +3324,10 @@
       "certified": "📋 ధృవీకరించబడిన",
       "contact": "సంప్రదింపు",
       "welfareAttested": "🛡️ సంక్షేమం ధృవీకరించబడింది",
-      "registeredBreeder": "✅ నోందిత బ్రీడర్"
+      "registeredBreeder": "✅ నోందిత బ్రీడర్",
+      "healthPassport": "Health Passport",
+      "fairDeal": "Fair Deal",
+      "premiumPriced": "Premium Priced"
     },
     "orders": {
       "asBuyer": "🔍 అన్వేషకుడిగా",
@@ -3311,7 +3373,14 @@
       "noListings": "నిర్వహించడానికి జాబితాలు లేవు",
       "listingApproved": "జాబితా ఆమోదించబడింది",
       "listingRejected": "జాబితా తిరస్కరించబడింది",
-      "rejectionRequired": "తిరస్కరణ కారణం అవసరం"
+      "rejectionRequired": "తిరస్కరణ కారణం అవసరం",
+      "auctionFeature": "Auction Feature",
+      "auctionTitle": "Marketplace Auctions",
+      "auctionEnabled": "Auctions Enabled",
+      "auctionDisabled": "Auctions Disabled",
+      "auctionEnabledDesc": "Live auctions are currently active on the marketplace",
+      "auctionDisabledDesc": "Auctions are currently disabled for all listings",
+      "auctionLegalNote": "Enabling auctions allows timed bidding on animal listings. Ensure compliance with local livestock trading regulations."
     },
     "units": {
       "listings": "జాబితాలు",
@@ -3444,7 +3513,15 @@
           "desc": "శోధన ఫలితాలలో ప్రాధాన్యత"
         }
       }
-    }
+    },
+    "proximity": {
+      "notSupported": "Location not supported on this device",
+      "denied": "Location access denied. Please enable location permissions.",
+      "nearMeOn": "Near Me (On)",
+      "nearMe": "Near Me",
+      "searching": "Searching nearby..."
+    },
+    "inquirySent": "Inquiry sent successfully"
   },
   "sustainability": {
     "pageTitle": "🌱 సుస్థిరత & కార్బన్",
@@ -3537,7 +3614,12 @@
     "noGoals": "No sustainability goals created yet",
     "carbonBySpecies": "Carbon Footprint by Species",
     "species": "Species",
-    "headCount": "Head Count"
+    "headCount": "Head Count",
+    "emissionFactor": "Emission Factor",
+    "annualCO2kg": "Annual CO2 (kg)",
+    "annualCO2tons": "Annual CO2 (tons)",
+    "calculatingCarbon": "Calculating carbon footprint...",
+    "selectForCarbon": "Select an animal group to calculate its carbon footprint"
   },
   "wellnessPortal": {
     "pageTitle": "💚 ఆరోగ్య పోర్టల్",
@@ -3802,7 +3884,8 @@
     "previous": "మునుపటి",
     "next": "తదుపరి",
     "certificateFilter": "Certificate Services",
-    "allCertificates": "All Certificate Types"
+    "allCertificates": "All Certificate Types",
+    "failedToLoad": "Failed to load veterinarians. Please try again."
   },
   "myBookings": {
     "title": "నా బుకింగ్‌లు",
@@ -4448,7 +4531,9 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
-    "refundsIssued": "Refunds Issued"
+    "refundsIssued": "Refunds Issued",
+    "liveVideoSessions": "Live Video Sessions",
+    "totalBookings": "Total Bookings"
   },
   "disputeManagement": {
     "title": "Dispute Management",
@@ -4730,7 +4815,8 @@
     "totalPlatformBalance": "Total Platform Balance",
     "usersWithBalance": "Users with Balance",
     "topBalances": "Top Wallet Balances",
-    "avgBalance": "Average Balance"
+    "avgBalance": "Average Balance",
+    "reasonPlaceholder": "Enter reason..."
   },
   "permissionManagement": {
     "title": "అనుమతి నిర్వహణ",
@@ -4928,7 +5014,8 @@
     "maintenanceMessage": "Maintenance Message for Users",
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
     "maintenanceAdminBypass": "Admin access - maintenance mode active",
-    "certificateTemplate": "Certificate Template"
+    "certificateTemplate": "Certificate Template",
+    "maintenanceBypass": "Maintenance Bypass"
   },
   "userManagement": {
     "title": "వినియోగదారు నిర్వహణ",
@@ -5169,7 +5256,9 @@
       "animalEarTagId": "చెవి ట్యాగ్ ID",
       "animalEarTagPlaceholder": "ఉదా., ET-2024-001"
     },
-    "noAnimalsFound": "జంతువులు కనుగొనబడలేదు"
+    "noAnimalsFound": "జంతువులు కనుగొనబడలేదు",
+    "noHospitals": "No hospitals assigned",
+    "noHospitalsDesc": "You are not assigned to any hospital in this network yet"
   },
   "inpatientManagement": {
     "title": "ఇన్‌పేషంట్ & బోర్డింగ్",
@@ -6024,7 +6113,10 @@
       "noPending": "పెండింగ్ నమోదులు లేవు",
       "noActive": "చురుకుగా ఉన్న నమోదులు లేవు",
       "noEnrollments": "ఇంకా నమోదులు లేవు",
-      "searchHelper": "ప్లాట్‌ఫారమ్ వాడుకరులను వెతికి నమోదు అభ్యర్థన పంపండి. రోగి ఆమోదించాలి."
+      "searchHelper": "ప్లాట్‌ఫారమ్ వాడుకరులను వెతికి నమోదు అభ్యర్థన పంపండి. రోగి ఆమోదించాలి.",
+      "consentCollected": "Consent Collected",
+      "consentCollectedHint": "Patient has given consent for this network",
+      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
     },
     "audit": {
       "title": "ఆడిట్ & సమ్మతి",
@@ -6119,7 +6211,8 @@
     "department": "విభాగం",
     "selectDepartment": "విభాగం ఎంచుకోండి",
     "customDepartment": "కస్టమ్ విభాగం",
-    "noDepartment": "విభాగం లేదు"
+    "noDepartment": "విభాగం లేదు",
+    "memberName": "Member Name"
   },
   "networkReferrals": {
     "title": "నెట్‌వర్క్ రెఫరల్స్",
@@ -6566,7 +6659,9 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items"
+      "showing": "Showing {{count}} of {{total}} items",
+      "selectSupplier": "Select supplier...",
+      "noSuppliersHint": "Add a supplier first to create purchase orders"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6585,7 +6680,8 @@
       "leadTimeDays": "Lead Days",
       "approvedLabel": "Approved",
       "approved": "Approved",
-      "unapproved": "Unapproved"
+      "unapproved": "Unapproved",
+      "selectPaymentTerms": "Select payment terms..."
     },
     "reorder": {
       "title": "Reorder",
@@ -6761,5 +6857,22 @@
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
     }
+  },
+  "chat": {
+    "couldNotStartSession": "Could not start chat session",
+    "failedToSendMessage": "Failed to send message",
+    "couldNotCreateSession": "Could not create chat session",
+    "aiBuddyHelper": "VetCare AI",
+    "thinking": "Thinking...",
+    "userAssistant": "Your Assistant",
+    "yourAssistant": "Your Assistant",
+    "newChat": "New Chat",
+    "startingUp": "Starting up...",
+    "hiUser": "Hi, {{name}}!",
+    "hiGuest": "Hi there!",
+    "iKnowAbout": "I can help with",
+    "askMeAnything": "Ask me anything about your pets and their health",
+    "askMeAnythingGeneral": "Ask me anything",
+    "askAiBuddy": "Ask VetCare AI..."
   }
 }

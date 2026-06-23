@@ -95,7 +95,13 @@
       "sheep": "Sheep",
       "pig": "Pig",
       "other": "Other"
-    }
+    },
+    "errorLoading": "Error loading data",
+    "errorSaving": "Error saving data",
+    "fillRequired": "Please fill all required fields",
+    "none": "None",
+    "error": "Error",
+    "deactivate": "Deactivate"
   },
   "nav": {
     "brand": "VetCare",
@@ -188,7 +194,8 @@
       "petOwner": "Pet Owner",
       "farmer": "Farmer",
       "admin": "Administrator"
-    }
+    },
+    "permissions": "Permissions"
   },
   "login": {
     "welcome": "Welcome back",
@@ -910,10 +917,14 @@
         "hospitalOversight": "Hospital oversight",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Manage inpatient cases"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "Patient",
@@ -942,10 +953,18 @@
       "reportBuilderTitle": "Report Builder",
       "reportBuilderDesc": "Create custom medical and analytics reports",
       "aiCopilotTitle": "AI Copilot",
-      "aiCopilotDesc": "Get AI-powered clinical decision support"
+      "aiCopilotDesc": "Get AI-powered clinical decision support",
+      "treatmentCampaigns": "Treatment Campaigns"
     },
     "findDoctor": "Find a Doctor →",
-    "manageSchedule": "Manage Schedule →"
+    "manageSchedule": "Manage Schedule →",
+    "quickActionsTitle": "Quick Actions",
+    "enterpriseOverview": "Enterprise Overview",
+    "enterpriseStats": {
+      "activeCampaigns": "Active Campaigns",
+      "pendingApprovals": "Pending Approvals",
+      "groups": "Groups"
+    }
   },
   "consultations": {
     "pageTitle": "🏥 Consultations & Appointments",
@@ -1391,7 +1410,10 @@
       "status": "Status",
       "severity": "Severity",
       "recordedBy": "Recorded By"
-    }
+    },
+    "noAnimalsTitle": "No Animals Found",
+    "noAnimalsHint": "Add an animal to view its health timeline",
+    "addAnimal": "Add Animal"
   },
   "medicalRecords": {
     "pageTitle": "📋 Medical Records",
@@ -2789,7 +2811,8 @@
     "viewReadings": "View Readings",
     "noSensors": "No sensors registered yet",
     "recordedAt": "Recorded At",
-    "noReadings": "No readings recorded yet"
+    "noReadings": "No readings recorded yet",
+    "selectEnterprise": "Select Enterprise"
   },
   "supplyChain": {
     "pageTitle": "🔗 Supply Chain & Traceability (Farm-to-Fork)",
@@ -2884,8 +2907,41 @@
     "checkIn": "Check In",
     "checkOut": "Check Out",
     "form": {
-      "title": "Title"
-    }
+      "title": "Title",
+      "taskType": "Task Type",
+      "dueDate": "Due Date",
+      "estimatedHours": "Estimated Hours",
+      "userId": "Worker",
+      "shiftDate": "Shift Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "roleOnShift": "Role on Shift"
+    },
+    "taskUpdated": "Task updated",
+    "checkedIn": "Checked in successfully",
+    "failedCheckIn": "Failed to check in",
+    "checkedOut": "Checked out successfully",
+    "failedCheckOut": "Failed to check out",
+    "openTasksByPriority": "Open Tasks by Priority",
+    "avgHours": "Avg. Hours",
+    "task": "Task",
+    "assignedTo": "Assigned To",
+    "due": "Due",
+    "priority": "Priority",
+    "worker": "Worker",
+    "time": "Time",
+    "role": "Role",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityCritical": "Critical",
+    "assigned": "Assigned",
+    "est": "Est.",
+    "start": "Start",
+    "complete": "Complete",
+    "noTasks": "No tasks found",
+    "scheduleShift": "Schedule Shift",
+    "noShifts": "No shifts scheduled"
   },
   "reportBuilder": {
     "pageTitle": "📊 Report Builder & Export Center",
@@ -3252,7 +3308,11 @@
       "feature": "☆ Feature",
       "leading": "★ Leading",
       "yourListing": "📋 Your Listing",
-      "yourListingDesc": "This is your listing. Other users can inquire or contact you about this animal."
+      "yourListingDesc": "This is your listing. Other users can inquire or contact you about this animal.",
+      "auctionEnded": "Auction ended",
+      "call": "Call",
+      "contactHidden": "Contact details hidden",
+      "requestContact": "Request Contact"
     },
     "card": {
       "hotDeal": "🔥 HOT DEAL",
@@ -3264,7 +3324,10 @@
       "certified": "📋 Certified",
       "contact": "Contact",
       "welfareAttested": "🛡️ Welfare Attested",
-      "registeredBreeder": "✅ Registered Breeder"
+      "registeredBreeder": "✅ Registered Breeder",
+      "healthPassport": "Health Passport",
+      "fairDeal": "Fair Deal",
+      "premiumPriced": "Premium Priced"
     },
     "orders": {
       "asBuyer": "� As Seeker",
@@ -3310,7 +3373,14 @@
       "noListings": "No listings to manage",
       "listingApproved": "Listing approved",
       "listingRejected": "Listing rejected",
-      "rejectionRequired": "Rejection reason is required"
+      "rejectionRequired": "Rejection reason is required",
+      "auctionFeature": "Auction Feature",
+      "auctionTitle": "Marketplace Auctions",
+      "auctionEnabled": "Auctions Enabled",
+      "auctionDisabled": "Auctions Disabled",
+      "auctionEnabledDesc": "Live auctions are currently active on the marketplace",
+      "auctionDisabledDesc": "Auctions are currently disabled for all listings",
+      "auctionLegalNote": "Enabling auctions allows timed bidding on animal listings. Ensure compliance with local livestock trading regulations."
     },
     "units": {
       "listings": "listings",
@@ -3443,7 +3513,15 @@
           "desc": "Priority position in search results"
         }
       }
-    }
+    },
+    "proximity": {
+      "notSupported": "Location not supported on this device",
+      "denied": "Location access denied. Please enable location permissions.",
+      "nearMeOn": "Near Me (On)",
+      "nearMe": "Near Me",
+      "searching": "Searching nearby..."
+    },
+    "inquirySent": "Inquiry sent successfully"
   },
   "sustainability": {
     "pageTitle": "🌱 Sustainability & Carbon",
@@ -3536,7 +3614,12 @@
     "noGoals": "No sustainability goals created yet",
     "carbonBySpecies": "Carbon Footprint by Species",
     "species": "Species",
-    "headCount": "Head Count"
+    "headCount": "Head Count",
+    "emissionFactor": "Emission Factor",
+    "annualCO2kg": "Annual CO2 (kg)",
+    "annualCO2tons": "Annual CO2 (tons)",
+    "calculatingCarbon": "Calculating carbon footprint...",
+    "selectForCarbon": "Select an animal group to calculate its carbon footprint"
   },
   "wellnessPortal": {
     "pageTitle": "💚 Wellness Portal",
@@ -3797,7 +3880,8 @@
     "previous": "Previous",
     "next": "Next",
     "certificateFilter": "Certificate Services",
-    "allCertificates": "All Certificate Types"
+    "allCertificates": "All Certificate Types",
+    "failedToLoad": "Failed to load veterinarians. Please try again."
   },
   "myBookings": {
     "title": "My Bookings",
@@ -4443,7 +4527,9 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
-    "refundsIssued": "Refunds Issued"
+    "refundsIssued": "Refunds Issued",
+    "liveVideoSessions": "Live Video Sessions",
+    "totalBookings": "Total Bookings"
   },
   "disputeManagement": {
     "title": "Dispute Management",
@@ -4725,7 +4811,8 @@
     "totalPlatformBalance": "Total Platform Balance",
     "usersWithBalance": "Users with Balance",
     "topBalances": "Top Wallet Balances",
-    "avgBalance": "Average Balance"
+    "avgBalance": "Average Balance",
+    "reasonPlaceholder": "Enter reason..."
   },
   "permissionManagement": {
     "title": "Permission Management",
@@ -4818,7 +4905,15 @@
     "flag": "Flag",
     "unflag": "Unflag",
     "flagged": "Flagged",
-    "consultationDate": "Consultation Date"
+    "consultationDate": "Consultation Date",
+    "subtitle": "Review submitted feedback and enforce content policies",
+    "dashboard": "Dashboard",
+    "allStatuses": "All Statuses",
+    "approved": "Approved",
+    "hidden": "Hidden",
+    "removed": "Removed",
+    "refresh": "Refresh",
+    "noReviews": "No reviews found"
   },
   "staffSettings": {
     "title": "Staff Management",
@@ -4914,7 +5009,8 @@
     "maintenanceEnabled": "Enable Maintenance Mode",
     "maintenanceMessage": "Maintenance Message for Users",
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
-    "maintenanceAdminBypass": "Admin access - maintenance mode active"
+    "maintenanceAdminBypass": "Admin access - maintenance mode active",
+    "maintenanceBypass": "Maintenance Bypass"
   },
   "userManagement": {
     "title": "User Management",
@@ -5155,7 +5251,9 @@
       "animalEarTagId": "Ear Tag ID",
       "animalEarTagPlaceholder": "e.g., ET-2024-001"
     },
-    "noAnimalsFound": "No animals found"
+    "noAnimalsFound": "No animals found",
+    "noHospitals": "No hospitals assigned",
+    "noHospitalsDesc": "You are not assigned to any hospital in this network yet"
   },
   "inpatientManagement": {
     "title": "Inpatient & Boarding",
@@ -5997,7 +6095,10 @@
       "noPending": "No pending enrollments",
       "noActive": "No active enrollments",
       "noEnrollments": "No enrollments yet",
-      "searchHelper": "Search for existing platform users to send enrollment requests. Patients must accept before their data becomes visible to network staff."
+      "searchHelper": "Search for existing platform users to send enrollment requests. Patients must accept before their data becomes visible to network staff.",
+      "consentCollected": "Consent Collected",
+      "consentCollectedHint": "Patient has given consent for this network",
+      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
     },
     "audit": {
       "title": "Audit & Compliance",
@@ -6092,7 +6193,8 @@
     "department": "Department",
     "selectDepartment": "Select Department",
     "customDepartment": "Custom Department",
-    "noDepartment": "No Department"
+    "noDepartment": "No Department",
+    "memberName": "Member Name"
   },
   "networkReferrals": {
     "title": "Network Referrals",
@@ -6434,7 +6536,9 @@
     "noReadyDispense": "No prescriptions ready to dispense",
     "pendingReview": "Pending Review",
     "readyToDispense": "Ready to Dispense",
-    "nav": { "title": "Pharmacy" },
+    "nav": {
+      "title": "Pharmacy"
+    },
     "noNetworkHint": "You must be invited as a pharmacist to a hospital network to access the pharmacy module.",
     "tabs": {
       "overview": "Overview",
@@ -6538,7 +6642,9 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items"
+      "showing": "Showing {{count}} of {{total}} items",
+      "selectSupplier": "Select supplier...",
+      "noSuppliersHint": "Add a supplier first to create purchase orders"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6557,7 +6663,8 @@
       "leadTimeDays": "Lead Time (days)",
       "approvedLabel": "Approved Supplier",
       "approved": "Approved",
-      "unapproved": "Unapproved"
+      "unapproved": "Unapproved",
+      "selectPaymentTerms": "Select payment terms..."
     },
     "reorder": {
       "title": "Request Reorder",
@@ -6732,5 +6839,22 @@
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
     }
+  },
+  "chat": {
+    "couldNotStartSession": "Could not start chat session",
+    "failedToSendMessage": "Failed to send message",
+    "couldNotCreateSession": "Could not create chat session",
+    "aiBuddyHelper": "VetCare AI",
+    "thinking": "Thinking...",
+    "userAssistant": "Your Assistant",
+    "yourAssistant": "Your Assistant",
+    "newChat": "New Chat",
+    "startingUp": "Starting up...",
+    "hiUser": "Hi, {{name}}!",
+    "hiGuest": "Hi there!",
+    "iKnowAbout": "I can help with",
+    "askMeAnything": "Ask me anything about your pets and their health",
+    "askMeAnythingGeneral": "Ask me anything",
+    "askAiBuddy": "Ask VetCare AI..."
   }
 }
