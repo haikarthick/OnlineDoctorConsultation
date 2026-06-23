@@ -36,7 +36,7 @@ class HospitalNetworkController {
 
   async updateNetwork(req: AuthRequest, res: Response): Promise<void> {
     await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'editNetworkSettings');
-    const updated = await HospitalNetworkService.updateNetwork(req.params.id, req.body, req.userId!);
+    const updated = await HospitalNetworkService.updateNetwork(req.params.id, req.body, req.userId!, req.userRole!);
     await HospitalNetworkService.logAudit({
       networkId: req.params.id,
       actorId: req.userId!,

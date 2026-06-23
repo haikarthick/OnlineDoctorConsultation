@@ -313,7 +313,19 @@ export class HospitalNetworkService {
     return this.mapNetworkRow(result.rows[0]);
   }
 
-  async updateNetwork(id: string, data: Partial<HospitalNetworkCreateDTO>, userId: string): Promise<HospitalNetwork> {
+  async updateNetwork(id: string, data: Partial<HospitalNetworkCreateDTO>, userId: string, userRole?: string): Promise<HospitalNetwork> {
+    // Authorization: platform admin or the corporate_admin of this network
+    if (userRole !== 'admin') {
+      const authCheck = await database.query(
+        `SELECT id FROM hospital_network_members
+         WHERE network_id = $1 AND user_id = $2 AND network_role = 'corporate_admin' AND is_active = true`,
+        [id, userId]
+      );
+      if (authCheck.rows.length === 0) {
+        throw new ForbiddenError('Only the network corporate admin or platform admin can edit network settings.');
+      }
+    }
+
     const fieldMap: Record<string, string> = {
       name: 'name',
       legalName: 'legal_name',
