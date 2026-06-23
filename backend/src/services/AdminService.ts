@@ -111,7 +111,12 @@ class AdminService {
 
   async listPendingUsers(): Promise<any[]> {
     const result = await database.query(
-      `SELECT u.${this.userReturnCols.trim()},
+      `SELECT u.id, u.email,
+              u.first_name as "firstName", u.last_name as "lastName",
+              u.role, u.phone,
+              u.is_active as "isActive", u.account_status as "accountStatus",
+              u.freeze_reason as "freezeReason", u.frozen_at as "frozenAt",
+              u.created_at as "createdAt", u.updated_at as "updatedAt",
               vp.license_number as "licenseNumber",
               vp.years_of_experience as "yearsOfExperience",
               vp.specializations, vp.qualifications, vp.clinic_name as "clinicName"
