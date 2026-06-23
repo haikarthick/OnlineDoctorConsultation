@@ -1494,7 +1494,8 @@ CREATE TABLE IF NOT EXISTS vet_certificates (
     'health_certificate','fitness_to_travel','rabies_vaccination','vaccination_record',
     'pre_travel','sterilization','treatment','animal_injury','post_mortem',
     'breeding_soundness','pregnancy_diagnosis','infertility_evaluation',
-    'fitness_for_sale','animal_valuation'
+    'fitness_for_sale','animal_valuation',
+    'movement_permit','herd_health_certificate','slaughter_fitness','export_health_certificate'
   )),
   status VARCHAR(20) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','active','revoked','expired')),
   veterinarian_id UUID NOT NULL REFERENCES users(id),

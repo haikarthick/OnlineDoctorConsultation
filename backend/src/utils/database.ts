@@ -359,6 +359,26 @@ class PostgresDatabase {
       this.pool.query(`ALTER TABLE vet_certificates ADD COLUMN IF NOT EXISTS herd_details JSONB`).catch(() => {}),
     ]);
 
+    // Expand vet_certificates CHECK constraint to include 4 farm/enterprise certificate types
+    // added after initial deployment. Postgres cannot ALTER a CHECK inline — must drop+recreate.
+    await this.pool.query(`
+      ALTER TABLE vet_certificates
+        DROP CONSTRAINT IF EXISTS vet_certificates_certificate_type_check
+    `).catch(() => {});
+    await this.pool.query(`
+      ALTER TABLE vet_certificates
+        ADD CONSTRAINT vet_certificates_certificate_type_check
+        CHECK (certificate_type IN (
+          'health_certificate','fitness_to_travel','rabies_vaccination','vaccination_record',
+          'pre_travel','sterilization','treatment','animal_injury','post_mortem',
+          'breeding_soundness','pregnancy_diagnosis','infertility_evaluation',
+          'fitness_for_sale','animal_valuation',
+          'movement_permit','herd_health_certificate','slaughter_fitness','export_health_certificate'
+        ))
+    `).catch((e: any) => {
+      logger.warn('Could not update vet_certificates_certificate_type_check constraint', { error: e.message });
+    });
+
     // Ensure enterprise-related tables exist FIRST (vet_certificates has a FK to enterprises)
     await this.pool.query(
       `CREATE TABLE IF NOT EXISTS enterprises (
