@@ -433,6 +433,42 @@ class PostgresDatabase {
       `ALTER TABLE hospital_networks ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES users(id) ON DELETE SET NULL`
     ).catch(() => {});
 
+    // Account status system — account_status replaces is_active as the primary login gate
+    await this.pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS account_status VARCHAR(20) NOT NULL DEFAULT 'active'`
+    ).catch(() => {});
+    await this.pool.query(
+      `ALTER TABLE users DROP CONSTRAINT IF EXISTS users_account_status_check`
+    ).catch(() => {});
+    await this.pool.query(
+      `ALTER TABLE users ADD CONSTRAINT users_account_status_check
+       CHECK (account_status IN ('active','pending_approval','frozen','suspended'))`
+    ).catch(() => {});
+    await this.pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS freeze_reason TEXT`
+    ).catch(() => {});
+    await this.pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS frozen_at TIMESTAMP`
+    ).catch(() => {});
+    await this.pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS frozen_by UUID`
+    ).catch(() => {});
+    // Sync existing records: is_active=false → suspended; is_active=true → stays active
+    await this.pool.query(
+      `UPDATE users SET account_status = 'suspended'
+       WHERE is_active = false AND account_status = 'active'`
+    ).catch(() => {});
+
+    // Geospatial extensions for marketplace proximity search
+    await this.pool.query('CREATE EXTENSION IF NOT EXISTS cube CASCADE').catch(() => {});
+    await this.pool.query('CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE').catch(() => {});
+    // Seed auction_enabled feature flag (disabled by default)
+    await this.pool.query(
+      `INSERT INTO marketplace_monetization_settings (setting_key, is_enabled, description, category)
+       VALUES ('auction_enabled', false, 'Enable or disable the auction feature platform-wide', 'feature')
+       ON CONFLICT (setting_key) DO NOTHING`
+    ).catch(() => {});
+
     // Fix 2: Ensure id_prefix is unique across all networks
     await this.pool.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS idx_hospital_networks_id_prefix 

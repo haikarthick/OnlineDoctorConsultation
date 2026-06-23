@@ -19,6 +19,7 @@ import { Server, Socket } from 'socket.io'
 import jwt from 'jsonwebtoken'
 import config from '../config'
 import logger from '../utils/logger'
+import database from './database'
 
 let io: Server | null = null
 
@@ -52,10 +53,27 @@ export function initSocketIO(httpServer: HTTPServer): Server {
     })
 
     // ── Join a consultation-specific room ────────────────────────────
-    socket.on('join:consultation', (consultationId: string) => {
+    socket.on('join:consultation', async (consultationId: string) => {
       if (!socket.data.userId) {
         socket.emit('auth_error', { message: 'Authenticate first' })
         return
+      }
+      // Verify the socket user is a participant in this consultation (or admin)
+      if (socket.data.role !== 'admin') {
+        try {
+          const check = await database.query(
+            `SELECT 1 FROM consultations
+             WHERE id = $1 AND (pet_owner_id = $2 OR veterinarian_id = $2)`,
+            [consultationId, socket.data.userId]
+          )
+          if (!check.rows[0]) {
+            socket.emit('auth_error', { message: 'You are not a participant in this consultation' })
+            return
+          }
+        } catch {
+          socket.emit('auth_error', { message: 'Unable to verify consultation access' })
+          return
+        }
       }
       socket.join(`consultation:${consultationId}`)
       logger.info('Socket joined consultation', { socketId: socket.id, consultationId })

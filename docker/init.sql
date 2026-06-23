@@ -6,6 +6,10 @@
 
 -- gen_random_uuid() is built into PostgreSQL 13+ — no extension required
 
+-- Extensions for geospatial proximity search (earthdistance requires cube)
+CREATE EXTENSION IF NOT EXISTS cube CASCADE;
+CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;
+
 -- Utility: auto-update updated_at on every UPDATE
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -27,6 +31,11 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR(20) DEFAULT '',
   password_hash VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT true,
+  account_status VARCHAR(20) NOT NULL DEFAULT 'active'
+    CHECK (account_status IN ('active', 'pending_approval', 'frozen', 'suspended')),
+  freeze_reason TEXT,
+  frozen_at TIMESTAMP,
+  frozen_by UUID,
   avatar_url TEXT,
   unique_id VARCHAR(20) UNIQUE,
   default_enterprise_id UUID,
@@ -2312,3 +2321,8 @@ ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_notes TEXT;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS is_network_coordinated BOOLEAN DEFAULT false;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS target_pharmacy_id UUID REFERENCES hospital_pharmacies(id) ON DELETE SET NULL;
+
+-- Seed auction_enabled feature flag (disabled by default — legal review pending)
+INSERT INTO marketplace_monetization_settings (setting_key, is_enabled, description, category)
+VALUES ('auction_enabled', false, 'Enable or disable the auction feature platform-wide', 'feature')
+ON CONFLICT (setting_key) DO NOTHING;

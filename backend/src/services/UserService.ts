@@ -6,33 +6,56 @@ import { DatabaseError, ConflictError, AppError } from '../utils/errors';
 import logger from '../utils/logger';
 
 export class UserService {
-  async createUser(userData: UserCreateDTO): Promise<User> {
+  async createUser(userData: UserCreateDTO & {
+    licenseNumber?: string;
+    yearsOfExperience?: number;
+    specializations?: string[];
+    qualifications?: string[];
+    clinicName?: string;
+    consultationFee?: number;
+  }): Promise<User> {
     try {
       const userId = uuidv4();
       const passwordHash = await SecurityUtils.hashPassword(userData.password);
 
-      const query = `
-        INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
-        RETURNING id, email, first_name as "firstName", last_name as "lastName", role, phone, is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
-      `;
+      // Roles that require admin approval before they can access the platform
+      const pendingRoles = ['veterinarian', 'corporate_admin'];
+      const accountStatus = pendingRoles.includes(userData.role) ? 'pending_approval' : 'active';
+      const isActive = accountStatus === 'active';
 
-      const result = await database.query(query, [
-        userId,
-        userData.email,
-        userData.firstName,
-        userData.lastName,
-        userData.role,
-        userData.phone,
-        passwordHash,
-        true
-      ]);
+      const result = await database.query(
+        `INSERT INTO users (id, email, first_name, last_name, role, phone, password_hash, is_active, account_status, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+         RETURNING id, email, first_name as "firstName", last_name as "lastName", role, phone,
+                   is_active as "isActive", account_status as "accountStatus",
+                   created_at as "createdAt", updated_at as "updatedAt"`,
+        [userId, userData.email, userData.firstName, userData.lastName,
+         userData.role, userData.phone, passwordHash, isActive, accountStatus]
+      );
 
       if (result.rows.length === 0) {
         throw new DatabaseError('Failed to create user');
       }
 
-      logger.info('User created successfully', { userId, email: userData.email });
+      // For vets: create vet_profile immediately so admin can review license details
+      if (userData.role === 'veterinarian' && userData.licenseNumber) {
+        await database.query(
+          `INSERT INTO vet_profiles (user_id, license_number, years_of_experience, specializations, qualifications, clinic_name, consultation_fee, is_verified, is_available)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, false, false)
+           ON CONFLICT (user_id) DO NOTHING`,
+          [
+            userId,
+            userData.licenseNumber,
+            userData.yearsOfExperience || 0,
+            userData.specializations || [],
+            userData.qualifications || [],
+            userData.clinicName || '',
+            userData.consultationFee || 0,
+          ]
+        ).catch((e: any) => logger.warn('vet_profile create failed (non-fatal)', { error: e.message }));
+      }
+
+      logger.info('User created', { userId, email: userData.email, role: userData.role, accountStatus });
       return result.rows[0];
     } catch (error: any) {
       if (error.code === '23505') {
@@ -44,13 +67,13 @@ export class UserService {
 
   async getUserById(userId: string): Promise<User | null> {
     try {
-      const query = `
-        SELECT id, email, first_name as "firstName", last_name as "lastName", role, phone, 
-               is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
-        FROM users WHERE id = $1
-      `;
-
-      const result = await database.query(query, [userId]);
+      const result = await database.query(
+        `SELECT id, email, first_name as "firstName", last_name as "lastName", role, phone,
+                is_active as "isActive", account_status as "accountStatus",
+                created_at as "createdAt", updated_at as "updatedAt"
+         FROM users WHERE id = $1`,
+        [userId]
+      );
       return result.rows[0] || null;
     } catch (error) {
       throw new DatabaseError('Error fetching user', { originalError: error });
@@ -60,8 +83,9 @@ export class UserService {
   async getUserByEmail(email: string): Promise<User | null> {
     try {
       const query = `
-        SELECT id, email, first_name as "firstName", last_name as "lastName", role, phone, 
-               password_hash as "passwordHash", is_active as "isActive", 
+        SELECT id, email, first_name as "firstName", last_name as "lastName", role, phone,
+               password_hash as "passwordHash", is_active as "isActive",
+               account_status as "accountStatus",
                created_at as "createdAt", updated_at as "updatedAt"
         FROM users WHERE email = $1
       `;

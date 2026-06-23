@@ -11,12 +11,13 @@ import path from 'path';
 
 // ── Allowed MIME types ────────────────────────────────────────
 
+// SVG intentionally excluded — served via /uploads without content-type override,
+// making it a stored XSS vector when opened directly in the browser.
 const IMAGE_MIMES = [
   'image/jpeg',
   'image/png',
   'image/gif',
   'image/webp',
-  'image/svg+xml',
 ];
 
 const DOCUMENT_MIMES = [

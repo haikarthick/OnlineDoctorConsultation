@@ -8,13 +8,43 @@ import logger from '../utils/logger';
 import database from '../utils/database';
 import { fixDemoPasswords } from '../utils/fixDemoPasswords';
 
+// Polite legal-tone messages for each blocked account state
+const ACCOUNT_STATUS_MESSAGES: Record<string, string> = {
+  pending_approval:
+    'Your registration is currently under review by our platform team. ' +
+    'You will be notified by email once your credentials have been verified. ' +
+    'Thank you for your patience.',
+  frozen:
+    'Your account has been temporarily restricted pending further review by our platform team. ' +
+    'This measure has been taken to ensure the safety and integrity of the platform. ' +
+    'If you believe this is an error or would like clarification, please contact us at ' +
+    'support@vetcare.com — we will be happy to assist you and aim to resolve this at the earliest. ' +
+    'Please quote your registered email address when contacting support.',
+  suspended:
+    'Your account has been deactivated. Please contact support@vetcare.com for further information.',
+};
+
+async function runDemoSeedIfEnabled(): Promise<void> {
+  if (process.env.NODE_ENV !== 'production' && process.env.DEMO_SEED_ENABLED === 'true') {
+    await fixDemoPasswords();
+  }
+}
+
 export class AuthController {
   async register(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const { email, firstName, lastName, phone, password, role } = req.body;
+      const {
+        email, firstName, lastName, phone, password, role,
+        licenseNumber, yearsOfExperience, specializations,
+        qualifications, clinicName, consultationFee,
+      } = req.body;
 
       if (!email || !password || !firstName || !lastName || !phone) {
         throw new ValidationError('Missing required fields');
+      }
+
+      if (role === 'veterinarian' && !licenseNumber) {
+        throw new ValidationError('License number is required for veterinarian registration');
       }
 
       // Self-heal: if DB query fails (missing table), repair schema then retry
@@ -25,7 +55,7 @@ export class AuthController {
         logger.error('Register: getUserByEmail failed — triggering self-heal', { error: dbErr.message });
         try {
           await database.ensureSchemaPublic();
-          await fixDemoPasswords();
+          await runDemoSeedIfEnabled();
           existingUser = await UserService.getUserByEmail(email);
         } catch (healErr: any) {
           logger.error('Register: self-heal also failed', { error: healErr.message });
@@ -43,13 +73,35 @@ export class AuthController {
         lastName,
         phone,
         password,
-        role: role || 'pet_owner'
+        role: role || 'pet_owner',
+        licenseNumber,
+        yearsOfExperience: yearsOfExperience ? Number(yearsOfExperience) : undefined,
+        specializations: Array.isArray(specializations)
+          ? specializations
+          : specializations ? [specializations] : [],
+        qualifications: Array.isArray(qualifications)
+          ? qualifications
+          : qualifications ? [qualifications] : [],
+        clinicName,
+        consultationFee: consultationFee ? Number(consultationFee) : undefined,
       });
+
+      const isPending = (user as any).accountStatus === 'pending_approval';
+
+      // Pending users: do NOT issue tokens — they cannot use the app until approved
+      if (isPending) {
+        res.status(201).json({
+          success: true,
+          pending: true,
+          message: ACCOUNT_STATUS_MESSAGES.pending_approval,
+        });
+        return;
+      }
 
       const accessToken = SecurityUtils.generateToken({
         userId: user.id,
         email: user.email,
-        role: user.role
+        role: user.role,
       });
 
       const { rawToken: refreshToken } = await RefreshTokenService.createToken(user.id, undefined, {
@@ -62,8 +114,8 @@ export class AuthController {
         data: {
           user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName },
           token: accessToken,
-          refreshToken
-        }
+          refreshToken,
+        },
       });
     } catch (error) {
       throw error;
@@ -88,21 +140,19 @@ export class AuthController {
         try {
           user = await UserService.getUserByEmail(email);
           loginAttemptError = null;
-          break; // success — exit retry loop
+          break;
         } catch (dbErr: any) {
           loginAttemptError = dbErr;
           logger.warn(`Login: getUserByEmail attempt ${attempt}/6 failed`, { error: dbErr.message });
           if (attempt < 6) {
-            // On first failure trigger schema + demo user repair so tables exist on retry
             if (attempt === 1) {
               try {
                 await database.ensureSchemaPublic();
-                await fixDemoPasswords();
+                await runDemoSeedIfEnabled();
               } catch (healErr: any) {
                 logger.warn('Login: self-heal step failed — will retry query anyway', { error: healErr.message });
               }
             }
-            // Wait before retrying (5s, 10s, 15s, 20s, 25s) to give DB time to fully wake
             await new Promise(r => setTimeout(r, 5000 * attempt));
           }
         }
@@ -121,10 +171,18 @@ export class AuthController {
         throw new UnauthorizedError('Invalid email or password');
       }
 
+      // Account status gate — checked AFTER password so we don't reveal account existence
+      const accountStatus = (user as any).accountStatus || 'active';
+      if (accountStatus !== 'active') {
+        const msg = ACCOUNT_STATUS_MESSAGES[accountStatus] || 'Your account is currently unavailable.';
+        res.status(403).json({ success: false, accountStatus, message: msg });
+        return;
+      }
+
       const accessToken = SecurityUtils.generateToken({
         userId: user.id,
         email: user.email,
-        role: user.role
+        role: user.role,
       });
 
       const { rawToken: refreshToken } = await RefreshTokenService.createToken(user.id, undefined, {
@@ -139,7 +197,6 @@ export class AuthController {
         if (rolesRes.rows.length > 0) {
           userRoles = rolesRes.rows.map((r: any) => r.role);
         } else {
-          // Backfill primary role if user_roles table is empty for this user
           await database.query(
             `INSERT INTO user_roles (user_id, role, is_primary) VALUES ($1, $2, true) ON CONFLICT (user_id, role) DO NOTHING`,
             [user.id, user.role]
@@ -154,8 +211,8 @@ export class AuthController {
         data: {
           user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, roles: userRoles },
           token: accessToken,
-          refreshToken
-        }
+          refreshToken,
+        },
       });
     } catch (error) {
       throw error;
@@ -179,8 +236,9 @@ export class AuthController {
     }
 
     const user = await UserService.getUserById(result.userId);
-    if (!user || !user.isActive) {
-      throw new UnauthorizedError('User account is inactive');
+    const accountStatus = (user as any)?.accountStatus || 'active';
+    if (!user || accountStatus !== 'active') {
+      throw new UnauthorizedError('User account is not active');
     }
 
     const accessToken = SecurityUtils.generateToken({
@@ -223,14 +281,8 @@ export class AuthController {
       if (!user) {
         throw new UnauthorizedError('User not found');
       }
-
-      // Never expose password hash
-      const { passwordHash, ...safeUser } = user;
-
-      res.json({
-        success: true,
-        data: safeUser
-      });
+      const { passwordHash, ...safeUser } = user as any;
+      res.json({ success: true, data: safeUser });
     } catch (error) {
       throw error;
     }

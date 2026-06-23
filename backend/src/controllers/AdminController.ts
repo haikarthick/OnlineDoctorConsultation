@@ -28,27 +28,151 @@ class AdminController {
       offset: parseInt(req.query.offset as string) || 0,
       role: req.query.role as string,
       search: req.query.search as string,
-      isActive: req.query.isActive !== undefined ? req.query.isActive === 'true' : undefined
+      accountStatus: req.query.accountStatus as string | undefined,
+      isActive: req.query.isActive !== undefined ? req.query.isActive === 'true' : undefined,
     };
     const result = await AdminService.listAllUsers(params);
     res.json({ success: true, data: result });
+  }
+
+  async listPendingUsers(req: Request, res: Response) {
+    this.assertAdmin(req);
+    const users = await AdminService.listPendingUsers();
+    res.json({ success: true, data: users });
+  }
+
+  async approveUser(req: Request, res: Response) {
+    const authReq = this.assertAdmin(req);
+    const user = await AdminService.approveUser(req.params.id, authReq.userId!);
+    await AdminService.createAuditLog({
+      userId: authReq.userId!, action: 'APPROVE_USER', resource: 'users',
+      resourceId: req.params.id, ipAddress: req.ip,
+    });
+    // Best-effort approval email
+    try {
+      const EmailService = (await import('../services/EmailService')).default;
+      await EmailService.send({
+        to: user.email,
+        subject: 'Your VetCare registration has been approved',
+        html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
+          <h2 style="color:#1e3a5f;">Welcome to VetCare!</h2>
+          <p>Dear ${user.firstName},</p>
+          <p>We are pleased to inform you that your registration as a <strong>${user.role.replace('_', ' ')}</strong> has been reviewed and approved by our platform team.</p>
+          <p>You may now log in and access the platform.</p>
+          <p style="color:#888;font-size:.85rem;">If you have any questions, contact us at support@vetcare.com.</p>
+        </div>`,
+      });
+    } catch { /* non-fatal */ }
+    res.json({ success: true, data: user });
+  }
+
+  async rejectUser(req: Request, res: Response) {
+    const authReq = this.assertAdmin(req);
+    const { reason } = req.body;
+    if (!reason?.trim()) throw new ValidationError('reason is required');
+    const user = await AdminService.rejectUser(req.params.id, authReq.userId!, reason);
+    await AdminService.createAuditLog({
+      userId: authReq.userId!, action: 'REJECT_USER', resource: 'users',
+      resourceId: req.params.id, details: { reason }, ipAddress: req.ip,
+    });
+    try {
+      const EmailService = (await import('../services/EmailService')).default;
+      await EmailService.send({
+        to: user.email,
+        subject: 'Update regarding your VetCare registration',
+        html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
+          <h2 style="color:#1e3a5f;">Registration Update</h2>
+          <p>Dear ${user.firstName},</p>
+          <p>Thank you for your interest in joining VetCare. After reviewing your registration, we are unable to approve your account at this time.</p>
+          ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+          <p>If you believe this decision was made in error or wish to provide additional information, please contact us at support@vetcare.com.</p>
+        </div>`,
+      });
+    } catch { /* non-fatal */ }
+    res.json({ success: true, data: user });
+  }
+
+  async freezeUser(req: Request, res: Response) {
+    const authReq = this.assertAdmin(req);
+    const { reason } = req.body;
+    if (!reason?.trim()) throw new ValidationError('reason is required');
+    const user = await AdminService.freezeUser(req.params.id, authReq.userId!, reason);
+    await AdminService.createAuditLog({
+      userId: authReq.userId!, action: 'FREEZE_USER', resource: 'users',
+      resourceId: req.params.id, details: { reason }, ipAddress: req.ip,
+    });
+    try {
+      const EmailService = (await import('../services/EmailService')).default;
+      await EmailService.send({
+        to: user.email,
+        subject: 'Important notice regarding your VetCare account',
+        html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
+          <h2 style="color:#1e3a5f;">Account Notice</h2>
+          <p>Dear ${user.firstName},</p>
+          <p>Your account has been temporarily restricted pending further review by our platform team. This measure has been taken to ensure the safety and integrity of the platform.</p>
+          <p>If you believe this is an error or would like clarification, please contact us at <a href="mailto:support@vetcare.com">support@vetcare.com</a> — we will be happy to assist you and aim to resolve this at the earliest.</p>
+          <p>Please quote your registered email address when contacting support.</p>
+          <p style="color:#888;font-size:.85rem;">We apologise for any inconvenience caused.</p>
+        </div>`,
+      });
+    } catch { /* non-fatal */ }
+    res.json({ success: true, data: user });
+  }
+
+  async unfreezeUser(req: Request, res: Response) {
+    const authReq = this.assertAdmin(req);
+    const user = await AdminService.unfreezeUser(req.params.id, authReq.userId!);
+    await AdminService.createAuditLog({
+      userId: authReq.userId!, action: 'UNFREEZE_USER', resource: 'users',
+      resourceId: req.params.id, ipAddress: req.ip,
+    });
+    try {
+      const EmailService = (await import('../services/EmailService')).default;
+      await EmailService.send({
+        to: user.email,
+        subject: 'Your VetCare account has been restored',
+        html: `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:2rem;">
+          <h2 style="color:#1e3a5f;">Account Restored</h2>
+          <p>Dear ${user.firstName},</p>
+          <p>We are pleased to inform you that the temporary restriction on your account has been lifted. You may now log in and access the platform as usual.</p>
+          <p>If you have any questions, contact us at support@vetcare.com.</p>
+        </div>`,
+      });
+    } catch { /* non-fatal */ }
+    res.json({ success: true, data: user });
+  }
+
+  async suspendUser(req: Request, res: Response) {
+    const authReq = this.assertAdmin(req);
+    const { reason } = req.body;
+    const user = await AdminService.suspendUser(req.params.id, authReq.userId!, reason);
+    await AdminService.createAuditLog({
+      userId: authReq.userId!, action: 'SUSPEND_USER', resource: 'users',
+      resourceId: req.params.id, details: { reason }, ipAddress: req.ip,
+    });
+    res.json({ success: true, data: user });
+  }
+
+  async reactivateUser(req: Request, res: Response) {
+    const authReq = this.assertAdmin(req);
+    const user = await AdminService.reactivateUser(req.params.id, authReq.userId!);
+    await AdminService.createAuditLog({
+      userId: authReq.userId!, action: 'REACTIVATE_USER', resource: 'users',
+      resourceId: req.params.id, ipAddress: req.ip,
+    });
+    res.json({ success: true, data: user });
   }
 
   async toggleUserStatus(req: Request, res: Response) {
     const authReq = this.assertAdmin(req);
     const { isActive } = req.body;
     if (isActive === undefined) throw new ValidationError('isActive field is required');
-
     const user = await AdminService.toggleUserStatus(req.params.id, isActive);
-
     await AdminService.createAuditLog({
       userId: authReq.userId!,
       action: isActive ? 'ACTIVATE_USER' : 'DEACTIVATE_USER',
-      resource: 'users',
-      resourceId: req.params.id,
-      ipAddress: req.ip
+      resource: 'users', resourceId: req.params.id, ipAddress: req.ip,
     });
-
     res.json({ success: true, data: user });
   }
 

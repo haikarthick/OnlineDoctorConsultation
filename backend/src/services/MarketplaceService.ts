@@ -18,9 +18,14 @@ class MarketplaceService {
       species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender,
       listingTier, isHotDeal, vaccinationStatus, healthCertificate, sortBy,
     } = filters;
+    const {
+      userLat, userLng, radiusKm,
+    } = filters;
     // Use aggregated LEFT JOIN instead of correlated subqueries (avoids N+1 per row)
     let query = `SELECT l.*, u.first_name || ' ' || u.last_name as seller_name, e.name as enterprise_name,
-                 COALESCE(b.bid_count, 0) as bid_count, b.highest_bid
+                 COALESCE(b.bid_count, 0) as bid_count, b.highest_bid,
+                 AVG(l.price) OVER (PARTITION BY l.species, l.breed) as breed_avg_price,
+                 EXISTS(SELECT 1 FROM vaccinations v WHERE v.animal_id = l.linked_animal_id AND v.is_active = true) as has_health_passport
                  FROM marketplace_listings l
                  LEFT JOIN users u ON l.seller_id = u.id
                  LEFT JOIN enterprises e ON l.enterprise_id = e.id
@@ -52,6 +57,12 @@ class MarketplaceService {
     if (healthCertificate === 'true' || healthCertificate === true) { query += ` AND l.health_certificate = true`; }
     // Non-admin users only see approved listings
     if (!filters.includeUnapproved) { query += ` AND (l.admin_approved = true OR l.admin_approved IS NULL)`; }
+    // Proximity filter (requires earthdistance extension)
+    if (userLat && userLng && radiusKm) {
+      query += ` AND l.latitude IS NOT NULL AND l.longitude IS NOT NULL AND earth_distance(ll_to_earth($${idx}::float8, $${idx+1}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) <= $${idx+2}::float8 * 1000`;
+      params.push(+userLat, +userLng, +radiusKm);
+      idx += 3;
+    }
 
     // Sorting
     let orderBy = 'l.is_hot_deal DESC NULLS LAST, l.listing_tier DESC NULLS LAST, l.featured DESC, l.created_at DESC';
@@ -60,6 +71,7 @@ class MarketplaceService {
     else if (sortBy === 'newest') orderBy = 'l.created_at DESC';
     else if (sortBy === 'milk_yield') orderBy = 'l.daily_milk_yield DESC NULLS LAST';
     else if (sortBy === 'views') orderBy = 'l.views_count DESC';
+    else if (sortBy === 'distance' && userLat && userLng) orderBy = `earth_distance(ll_to_earth(${userLat}::float8, ${userLng}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) ASC NULLS LAST`;
 
     query += ` ORDER BY ${orderBy} LIMIT $${idx++} OFFSET $${idx}`;
     params.push(Math.min(+limit, 100), offset);
@@ -77,16 +89,45 @@ class MarketplaceService {
     return { items: result.rows, total: +(countResult.rows[0]?.count || 0) };
   }
 
-  async getListing(id: string) {
+  async getListing(id: string, requestingUserId?: string) {
     await pool.query('UPDATE marketplace_listings SET views_count = views_count + 1 WHERE id = $1', [id]);
     const result = await pool.query(
       `SELECT l.*, u.first_name || ' ' || u.last_name as seller_name, e.name as enterprise_name
        FROM marketplace_listings l LEFT JOIN users u ON l.seller_id = u.id LEFT JOIN enterprises e ON l.enterprise_id = e.id WHERE l.id = $1`, [id]
     );
-    return result.rows[0] || null;
+    const listing = result.rows[0];
+    if (!listing) return null;
+    // Gate contact_phone: only reveal for seller or when inquiry contact_revealed=true
+    if (requestingUserId && listing.seller_id !== requestingUserId) {
+      const revealCheck = await pool.query(
+        `SELECT 1 FROM marketplace_inquiries WHERE listing_id = $1 AND buyer_id = $2 AND contact_revealed = true LIMIT 1`,
+        [id, requestingUserId]
+      );
+      if (!revealCheck.rows[0]) listing.contact_phone = null;
+    } else if (!requestingUserId) {
+      listing.contact_phone = null;
+    }
+    return listing;
   }
 
   async createListing(data: any) {
+    // Quota check: enforce plan max_listings
+    const sub = await pool.query(
+      `SELECT mp.max_listings FROM marketplace_subscriptions ms
+       JOIN marketplace_plans mp ON ms.plan_id = mp.id
+       WHERE ms.user_id = $1 AND ms.status = 'active' AND ms.expires_at > NOW()
+       ORDER BY mp.max_listings DESC LIMIT 1`,
+      [data.sellerId]
+    );
+    if (sub.rows[0]?.max_listings && sub.rows[0].max_listings > 0) {
+      const cnt = await pool.query(
+        `SELECT COUNT(*) FROM marketplace_listings WHERE seller_id = $1 AND status NOT IN ('deleted','rejected','rehomed')`,
+        [data.sellerId]
+      );
+      if (+cnt.rows[0].count >= sub.rows[0].max_listings) {
+        throw new Error(`Listing limit (${sub.rows[0].max_listings}) reached for your current plan. Please upgrade to add more listings.`);
+      }
+    }
     const id = uuidv4();
     await pool.query(
       `INSERT INTO marketplace_listings (
@@ -185,6 +226,10 @@ class MarketplaceService {
   }
 
   async placeBid(data: any) {
+    // Check auction feature is enabled platform-wide
+    const auctionEnabled = await this.getAuctionEnabled();
+    if (!auctionEnabled) throw new Error('Auction feature is currently disabled. Contact the platform admin for more information.');
+
     const id = uuidv4();
     // Check listing is auction type & active
     const listing = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [data.listingId]);
@@ -246,6 +291,13 @@ class MarketplaceService {
 
     if (listing.rows[0].listing_type === 'fixed_price') {
       await pool.query('UPDATE marketplace_listings SET status = $1 WHERE id = $2', ['rehomed', data.listingId]);
+      // Transfer animal ownership to buyer when a linked animal is sold
+      if (listing.rows[0].linked_animal_id) {
+        await pool.query(
+          `UPDATE animals SET owner_id = $1, updated_at = NOW() WHERE id = $2 AND owner_id = $3`,
+          [data.buyerId, listing.rows[0].linked_animal_id, listing.rows[0].seller_id]
+        );
+      }
     }
 
     const result = await pool.query('SELECT * FROM marketplace_orders WHERE id = $1', [id]);
@@ -386,6 +438,7 @@ class MarketplaceService {
       limit = 24, offset = 0,
       species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender,
       vaccinationStatus, healthCertificate, sortBy,
+      userLat, userLng, radiusKm,
     } = filters;
     // Only select safe public columns — no seller email/phone/id
     let query = `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
@@ -398,7 +451,9 @@ class MarketplaceService {
                  u.first_name as seller_name, l.location as seller_location,
                  a.unique_id as animal_unique_id,
                  (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count,
-                 (SELECT MAX(amount) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as highest_bid
+                 (SELECT MAX(amount) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as highest_bid,
+                 AVG(l.price) OVER (PARTITION BY l.species, l.breed) as breed_avg_price,
+                 EXISTS(SELECT 1 FROM vaccinations v WHERE v.animal_id = l.linked_animal_id AND v.is_active = true) as has_health_passport
                  FROM marketplace_listings l
                  LEFT JOIN users u ON l.seller_id = u.id
                  LEFT JOIN animals a ON a.id = l.linked_animal_id
@@ -418,12 +473,19 @@ class MarketplaceService {
     if (gender) { query += ` AND l.gender = $${idx++}`; params.push(gender); }
     if (vaccinationStatus) { query += ` AND l.vaccination_status = $${idx++}`; params.push(vaccinationStatus); }
     if (healthCertificate === 'true' || healthCertificate === true) { query += ` AND l.health_certificate = true`; }
+    // Proximity filter (requires earthdistance extension)
+    if (userLat && userLng && radiusKm) {
+      query += ` AND l.latitude IS NOT NULL AND l.longitude IS NOT NULL AND earth_distance(ll_to_earth($${idx}::float8, $${idx+1}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) <= $${idx+2}::float8 * 1000`;
+      params.push(+userLat, +userLng, +radiusKm);
+      idx += 3;
+    }
 
     let orderBy = 'l.is_hot_deal DESC NULLS LAST, l.listing_tier DESC NULLS LAST, l.featured DESC, l.created_at DESC';
     if (sortBy === 'price_asc') orderBy = 'l.price ASC NULLS LAST';
     else if (sortBy === 'price_desc') orderBy = 'l.price DESC NULLS LAST';
     else if (sortBy === 'newest') orderBy = 'l.created_at DESC';
     else if (sortBy === 'milk_yield') orderBy = 'l.daily_milk_yield DESC NULLS LAST';
+    else if (sortBy === 'distance' && userLat && userLng) orderBy = `earth_distance(ll_to_earth(${+userLat}::float8, ${+userLng}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) ASC NULLS LAST`;
 
     query += ` ORDER BY ${orderBy} LIMIT $${idx++} OFFSET $${idx}`;
     params.push(Math.min(+limit, 50), offset);
@@ -476,6 +538,87 @@ class MarketplaceService {
        FROM marketplace_listings WHERE (admin_approved = true OR admin_approved IS NULL)`
     );
     return result.rows[0] || {};
+  }
+
+  // ── Auction Feature Flag ──
+  async getAuctionEnabled(): Promise<boolean> {
+    try {
+      const res = await pool.query(
+        `SELECT is_enabled FROM marketplace_monetization_settings WHERE setting_key = 'auction_enabled' LIMIT 1`
+      );
+      return res.rows[0]?.is_enabled === true;
+    } catch { return false; }
+  }
+
+  async setAuctionEnabled(enabled: boolean): Promise<void> {
+    await pool.query(
+      `INSERT INTO marketplace_monetization_settings (setting_key, is_enabled, description, category)
+       VALUES ('auction_enabled', $1, 'Enable or disable the auction feature platform-wide', 'feature')
+       ON CONFLICT (setting_key) DO UPDATE SET is_enabled = $1, updated_at = NOW()`,
+      [enabled]
+    );
+  }
+
+  // ── Scheduled Maintenance Jobs ──
+  async closeExpiredAuctions(): Promise<number> {
+    const enabled = await this.getAuctionEnabled();
+    if (!enabled) return 0;
+
+    const expired = await pool.query(
+      `UPDATE marketplace_listings SET status = 'pending_closure', updated_at = NOW()
+       WHERE listing_type = 'auction' AND auction_end_time < NOW() AND status = 'active'
+       RETURNING id, seller_id, linked_animal_id`
+    );
+
+    for (const listing of expired.rows) {
+      try {
+        const winBid = await pool.query(
+          `SELECT * FROM marketplace_bids WHERE listing_id = $1 AND is_winning = true AND status = 'active' ORDER BY amount DESC LIMIT 1`,
+          [listing.id]
+        );
+        if (winBid.rows[0]) {
+          await this.createOrder({
+            listingId: listing.id,
+            buyerId: winBid.rows[0].bidder_id,
+            unitPrice: winBid.rows[0].amount,
+            quantity: 1,
+          });
+        } else {
+          await pool.query(`UPDATE marketplace_listings SET status = 'deleted', updated_at = NOW() WHERE id = $1`, [listing.id]);
+        }
+      } catch (err: any) {
+        await pool.query(`UPDATE marketplace_listings SET status = 'deleted', updated_at = NOW() WHERE id = $1`, [listing.id]);
+      }
+    }
+    return expired.rows.length;
+  }
+
+  async expireListings(): Promise<number> {
+    const result = await pool.query(
+      `UPDATE marketplace_listings SET status = 'deleted', updated_at = NOW()
+       WHERE expires_at IS NOT NULL AND expires_at < NOW() AND status = 'active'
+       RETURNING id`
+    );
+    return result.rows.length;
+  }
+
+  async expireBoosts(): Promise<number> {
+    const result = await pool.query(
+      `UPDATE listing_boosts SET is_active = false WHERE expires_at < NOW() AND is_active = true RETURNING listing_id`
+    );
+    // Reset featured/tier flags for listings whose boosts expired and have no active boost
+    for (const row of result.rows) {
+      const stillBoosted = await pool.query(
+        `SELECT 1 FROM listing_boosts WHERE listing_id = $1 AND is_active = true LIMIT 1`, [row.listing_id]
+      );
+      if (!stillBoosted.rows[0]) {
+        await pool.query(
+          `UPDATE marketplace_listings SET featured = false, updated_at = NOW() WHERE id = $1 AND listing_tier = 'standard'`,
+          [row.listing_id]
+        );
+      }
+    }
+    return result.rows.length;
   }
 
   // ── Market Intelligence ──

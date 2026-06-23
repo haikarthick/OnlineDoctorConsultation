@@ -217,7 +217,8 @@ class Tier4Controller {
 
   async getMarketplaceListing(req: Request, res: Response) {
     try {
-      const data = await marketplaceService.getListing(req.params.id);
+      const userId = (req as any).userId;
+      const data = await marketplaceService.getListing(req.params.id, userId);
       if (!data) return res.status(404).json({ error: { message: 'Listing not found' } });
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -690,6 +691,23 @@ class Tier4Controller {
       const userId = (req as any).userId;
       const data = await monetizationService.getUserMonetizationStatus(userId);
       res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  // ── Auction Feature Toggle ──
+
+  async getAuctionEnabled(req: Request, res: Response) {
+    try {
+      const enabled = await marketplaceService.getAuctionEnabled();
+      res.json({ data: { enabled } });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async setAuctionEnabled(req: Request, res: Response) {
+    try {
+      const enabled = req.body.enabled === true;
+      await marketplaceService.setAuctionEnabled(enabled);
+      res.json({ data: { enabled } });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 }

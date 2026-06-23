@@ -90,10 +90,26 @@ const Marketplace: React.FC = () => {
   const [editingPlan, setEditingPlan] = useState<any>(null)
   const [planForm, setPlanForm] = useState<Record<string, any>>({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
 
+  // Auction feature flag
+  const [auctionEnabled, setAuctionEnabledState] = useState(false)
+
+  // Proximity filter
+  const [nearMeActive, setNearMeActive] = useState(false)
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [radiusKm, setRadiusKm] = useState('25')
+  const [locationError, setLocationError] = useState('')
+
   // Animal list for auto-populate
   const [userAnimals, setUserAnimals] = useState<any[]>([])
   const [selectedAnimalId, setSelectedAnimalId] = useState('')
   const [uploadingImages, setUploadingImages] = useState(false)
+
+  // Load auction enabled state on mount
+  useEffect(() => {
+    apiService.getAuctionEnabled().then((res: any) => {
+      setAuctionEnabledState(res?.data?.enabled === true)
+    }).catch(() => setAuctionEnabledState(false))
+  }, [])
 
   const fetchDashboard = useCallback(async () => {
     try { const res = await apiService.getMarketplaceDashboard(); setDashboard(res.data) } catch {}
@@ -116,11 +132,17 @@ const Marketplace: React.FC = () => {
     try {
       const params: any = { status: 'active', ...filters }
       if (sortBy) params.sortBy = sortBy
+      if (nearMeActive && userLocation) {
+        params.userLat = userLocation.lat
+        params.userLng = userLocation.lng
+        params.radiusKm = radiusKm
+        if (!params.sortBy) params.sortBy = 'distance'
+      }
       const res = await apiService.listMarketplaceListings(params)
       setListings(res.data?.items || [])
     } catch { setListings([]) }
     setLoading(false)
-  }, [filters, sortBy])
+  }, [filters, sortBy, nearMeActive, userLocation, radiusKm])
 
   useEffect(() => { fetchDashboard(); fetchListings() }, [])
   useAutoRefresh('marketplace', fetchListings)
@@ -359,10 +381,40 @@ const Marketplace: React.FC = () => {
   const updateFilter = (key: string, value: string) => setFilters(f => value ? { ...f, [key]: value } : (() => { const n = { ...f }; delete n[key]; return n })())
   const sf = (key: string, value: any) => setSellForm(f => ({ ...f, [key]: value }))
 
+  const handleNearMeToggle = () => {
+    if (nearMeActive) {
+      setNearMeActive(false)
+      setLocationError('')
+      return
+    }
+    if (!navigator.geolocation) {
+      setLocationError(t('marketplace.proximity.notSupported', 'Geolocation not supported by your browser'))
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        setNearMeActive(true)
+        setLocationError('')
+      },
+      () => setLocationError(t('marketplace.proximity.denied', 'Location access denied. Please enable it in browser settings.'))
+    )
+  }
+
+  const handleAdminAuctionToggle = async () => {
+    try {
+      await apiService.setAuctionEnabled(!auctionEnabled)
+      setAuctionEnabledState(!auctionEnabled)
+      setSuccessMsg(auctionEnabled ? t('marketplace.admin.auctionDisabled', 'Auction feature disabled') : t('marketplace.admin.auctionEnabled', 'Auction feature enabled'))
+    } catch (e: any) { setError(e.message) }
+  }
+
   // ─── Tab definitions ───
   const tabs: Array<[TabKey, string]> = [
     ['dashboard', t('marketplace.tabs.dashboard')], ['browse', t('marketplace.tabs.browse')], ['sell', t('marketplace.tabs.sell')],
-    ['auctions', t('marketplace.tabs.auctions')], ['orders', t('marketplace.tabs.orders')], ['prices', t('marketplace.tabs.prices')],
+    // Auctions tab: always show to admin (to manage the toggle), hide from others when disabled
+    ...(auctionEnabled || isAdmin ? [['auctions', t('marketplace.tabs.auctions')] as [TabKey, string]] : []),
+    ['orders', t('marketplace.tabs.orders')], ['prices', t('marketplace.tabs.prices')],
   ]
   if (isAdmin) tabs.push(['admin', t('marketplace.tabs.admin')])
 
@@ -469,6 +521,13 @@ const Marketplace: React.FC = () => {
               onPlaceBid={placeBid} onBuyNow={() => buyNow(selectedListing)} onBack={() => setSelectedListing(null)}
               isAdmin={isAdmin} onToggleHotDeal={(id, v) => handleToggleHotDeal(id, v)} onToggleFeatured={(id, v) => handleToggleFeatured(id, v)}
               userId={user?.id}
+              onRequestContact={async () => {
+                try {
+                  await apiService.createInquiry(selectedListing.id, '')
+                  setSuccessMsg(t('marketplace.inquirySent', 'Inquiry sent! The seller will be notified.'))
+                  viewListing(selectedListing)
+                } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+              }}
               t={t}
             />
           ) : (
@@ -498,6 +557,31 @@ const Marketplace: React.FC = () => {
                 <button className="module-btn primary" onClick={fetchListings}>🔍</button>
               </div>
 
+              {/* Proximity filter row */}
+              <div className="mp-proximity-bar">
+                <button
+                  className={`mp-chip ${nearMeActive ? 'active' : ''}`}
+                  onClick={handleNearMeToggle}
+                >
+                  📍 {nearMeActive ? t('marketplace.proximity.nearMeOn', 'Near Me ON') : t('marketplace.proximity.nearMe', 'Near Me')}
+                </button>
+                {nearMeActive && (
+                  <select className="module-input" value={radiusKm} onChange={e => setRadiusKm(e.target.value)} style={{ width: 120 }}>
+                    <option value="5">5 km</option>
+                    <option value="10">10 km</option>
+                    <option value="25">25 km</option>
+                    <option value="50">50 km</option>
+                    <option value="100">100 km</option>
+                  </select>
+                )}
+                {nearMeActive && userLocation && (
+                  <span className="mp-location-hint" style={{ fontSize: 12, color: '#6b7280' }}>
+                    {t('marketplace.proximity.searching', 'Searching within')} {radiusKm} km
+                  </span>
+                )}
+                {locationError && <span style={{ fontSize: 12, color: '#ef4444' }}>{locationError}</span>}
+              </div>
+
               {/* Quick filter chips */}
               <div className="mp-chip-bar">
                 <button className={`mp-chip ${filters.isHotDeal === 'true' ? 'active' : ''}`} onClick={() => updateFilter('isHotDeal', filters.isHotDeal === 'true' ? '' : 'true')}>{t('marketplace.chips.hotDeals')}</button>
@@ -505,7 +589,7 @@ const Marketplace: React.FC = () => {
                 <button className={`mp-chip ${filters.vaccinationStatus === 'fully_vaccinated' ? 'active' : ''}`} onClick={() => updateFilter('vaccinationStatus', filters.vaccinationStatus === 'fully_vaccinated' ? '' : 'fully_vaccinated')}>{t('marketplace.chips.vaccinated')}</button>
                 <button className={`mp-chip ${filters.pregnancyStatus === 'pregnant' ? 'active' : ''}`} onClick={() => updateFilter('pregnancyStatus', filters.pregnancyStatus === 'pregnant' ? '' : 'pregnant')}>{t('marketplace.chips.pregnant')}</button>
                 <button className={`mp-chip ${filters.listingTier === 'premium' ? 'active' : ''}`} onClick={() => updateFilter('listingTier', filters.listingTier === 'premium' ? '' : 'premium')}>{t('marketplace.chips.premium')}</button>
-                {Object.keys(filters).length > 0 && <button className="mp-chip clear" onClick={() => { setFilters({}); setSortBy('') }}>{t('marketplace.chips.clearAll')}</button>}
+                {Object.keys(filters).length > 0 && <button className="mp-chip clear" onClick={() => { setFilters({}); setSortBy(''); setNearMeActive(false) }}>{t('marketplace.chips.clearAll')}</button>}
               </div>
 
               {loading ? <div className="mp-loading">{t('marketplace.loadingListings')}</div> : (
@@ -586,7 +670,7 @@ const Marketplace: React.FC = () => {
                       <label className="module-label">{t('marketplace.sell.listingType')}</label>
                       <select className="module-input" value={sellForm.listingType} onChange={e => sf('listingType', e.target.value)}>
                         <option value="fixed_price">{t('marketplace.listingType.fixedPrice')}</option>
-                        <option value="auction">{t('marketplace.listingType.auctionType')}</option>
+                        {(auctionEnabled || isAdmin) && <option value="auction">{t('marketplace.listingType.auctionType')}{!auctionEnabled ? ' (Admin preview)' : ''}</option>}
                         <option value="wanted">{t('marketplace.listingType.wanted')}</option>
                       </select>
                     </div>
@@ -1092,11 +1176,40 @@ const Marketplace: React.FC = () => {
           {/* ── Monetization Settings Sub-tab ── */}
           {adminSubTab === 'settings' && (
             <div>
+              {/* Auction Feature Toggle — prominent card */}
+              <div className="mp-section">
+                <h3 className="mp-section-title">🔨 {t('marketplace.admin.auctionFeature', 'Auction Feature')}</h3>
+                <div className={`mp-setting-card ${auctionEnabled ? 'enabled' : ''}`} style={{ maxWidth: 480 }}>
+                  <div className="mp-setting-header">
+                    <span className="mp-setting-icon">🔨</span>
+                    <div className="mp-setting-info">
+                      <h4>{t('marketplace.admin.auctionTitle', 'Live Auction Bidding')}</h4>
+                      <p style={{ fontSize: 12, color: '#6b7280' }}>
+                        {auctionEnabled
+                          ? t('marketplace.admin.auctionEnabledDesc', 'Auctions are LIVE. Users can create auction listings and place bids.')
+                          : t('marketplace.admin.auctionDisabledDesc', 'Auctions are DISABLED platform-wide. Legal review pending. Enable only after legal clearance.')}
+                      </p>
+                    </div>
+                    <label className="mp-toggle-switch">
+                      <input type="checkbox" checked={auctionEnabled} onChange={handleAdminAuctionToggle} />
+                      <span className="mp-toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div className="mp-setting-status">
+                    <span className={`module-badge ${auctionEnabled ? 'success' : 'error'}`}>
+                      {auctionEnabled ? t('marketplace.monetization.active') : t('marketplace.monetization.inactive')}
+                    </span>
+                    <span className="mp-setting-category" style={{ fontSize: 11, color: '#6b7280' }}>
+                      {t('marketplace.admin.auctionLegalNote', 'Consult legal before enabling in India')}
+                    </span>
+                  </div>
+                </div>
+              </div>
               <div className="mp-section">
                 <h3 className="mp-section-title">{t('marketplace.monetization.featureToggles')}</h3>
                 <p className="mp-monetization-note">{t('marketplace.monetization.allFreeNote')}</p>
                 <div className="mp-settings-grid">
-                  {monetizationSettings.map(s => {
+                  {monetizationSettings.filter((s: any) => s.settingKey !== 'auction_enabled').map(s => {
                     const SETTING_ICONS: Record<string, string> = {
                       listing_fee: '📝', listing_boost: '🚀', subscription_plans: '💎',
                       inquiry_fee: '📩', featured_seller: '⭐', transaction_fee: '💰',
@@ -1323,6 +1436,12 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
   const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
+  const breedAvgPrice = g(l, 'breedAvgPrice', 'breed_avg_price')
+  const hasHealthPassport = g(l, 'hasHealthPassport', 'has_health_passport')
+  // Fair Deal badge: price is ≥15% below breed average → good deal; ≥15% above → premium priced
+  const fairDealPct = breedAvgPrice && l.price ? Math.round(100 * l.price / breedAvgPrice) : null
+  const isFairDeal = fairDealPct !== null && fairDealPct < 85
+  const isPremiumPriced = fairDealPct !== null && fairDealPct > 115
 
   return (
     <div className={`mp-listing-card ${tier === 'spotlight' ? 'spotlight' : tier === 'premium' ? 'premium' : ''}`} onClick={onView}>
@@ -1368,6 +1487,9 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
           {hasCert && <span className="mp-metric cert">{t('marketplace.card.certified')}</span>}
           {welfareAtt && <span className="mp-metric welfare">🛡️ {t('marketplace.card.welfareAttested')}</span>}
           {sellerType === 'registered_breeder' && <span className={`mp-metric breeder ${breederVerified ? 'verified' : ''}`}>{breederVerified ? '✅' : '📋'} {t('marketplace.card.registeredBreeder')}</span>}
+          {hasHealthPassport && <span className="mp-metric cert" title="Vaccination records verified in VetCare system">🏥 {t('marketplace.card.healthPassport')}</span>}
+          {isFairDeal && <span className="mp-metric" style={{ background: '#dcfce7', color: '#16a34a', fontWeight: 600 }}>💚 {t('marketplace.card.fairDeal')} ({fairDealPct}%)</span>}
+          {isPremiumPriced && <span className="mp-metric" style={{ background: '#fef3c7', color: '#92400e' }}>⭐ {t('marketplace.card.premiumPriced')}</span>}
         </div>
 
         {/* Price */}
@@ -1394,15 +1516,36 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
   )
 }
 
+// ─── Auction Countdown Timer ───
+const AuctionCountdown: React.FC<{ endTime: string; t: (key: string) => string }> = ({ endTime, t }) => {
+  const [remaining, setRemaining] = React.useState('')
+  React.useEffect(() => {
+    const update = () => {
+      const diff = new Date(endTime).getTime() - Date.now()
+      if (diff <= 0) { setRemaining(t('marketplace.detail.auctionEnded')); return }
+      const d = Math.floor(diff / 86400000)
+      const h = Math.floor((diff % 86400000) / 3600000)
+      const m = Math.floor((diff % 3600000) / 60000)
+      const s = Math.floor((diff % 60000) / 1000)
+      setRemaining(d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`)
+    }
+    update()
+    const id = setInterval(update, 1000)
+    return () => clearInterval(id)
+  }, [endTime])
+  const isUrgent = new Date(endTime).getTime() - Date.now() < 3600000
+  return <span className={`mp-countdown ${isUrgent ? 'urgent' : ''}`}>{remaining}</span>
+}
+
 // ─── Listing Detail Component ───
 const ListingDetail: React.FC<{
   listing: MarketplaceListing; bids: MarketplaceBid[]; formatCurrency: (n: number) => string;
   bidAmount: string; bidMessage: string; onBidAmountChange: (v: string) => void; onBidMessageChange: (v: string) => void;
   onPlaceBid: () => void; onBuyNow: () => void; onBack: () => void;
   isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
-  userId?: string;
+  userId?: string; onRequestContact?: () => void;
   t: (key: string) => string;
-}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, t }) => {
+}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, t }) => {
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -1481,7 +1624,33 @@ const ListingDetail: React.FC<{
             <div className="mp-detail-grid">
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.seller')}</span><span className="mp-detail-value">{sellerName || t('marketplace.genderLabel.unknown')}</span></div>
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.location')}</span><span className="mp-detail-value">{l.location || t('marketplace.detail.notSpecified')}</span></div>
-              {contact && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.contact')}</span><span className="mp-detail-value">{contact}</span></div>}
+              <div className="mp-detail-item">
+                <span className="mp-detail-label">{t('marketplace.livestock.contact')}</span>
+                <span className="mp-detail-value">
+                  {contact ? (
+                    <div className="mp-contact-actions">
+                      <span>{contact}</span>
+                      <a href={`https://wa.me/${contact.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi, I'm interested in your listing: ${l.title}`)}`}
+                        target="_blank" rel="noopener noreferrer" className="mp-contact-btn whatsapp"
+                        onClick={e => e.stopPropagation()}>
+                        💬 WhatsApp
+                      </a>
+                      <a href={`tel:${contact}`} className="mp-contact-btn call" onClick={e => e.stopPropagation()}>
+                        📞 {t('marketplace.detail.call')}
+                      </a>
+                    </div>
+                  ) : userId && l.seller_id !== userId ? (
+                    <div>
+                      <span style={{ color: '#9ca3af', fontSize: 13 }}>{t('marketplace.detail.contactHidden')}</span>
+                      {onRequestContact && (
+                        <button className="module-btn small" style={{ marginTop: 6 }} onClick={onRequestContact}>
+                          📩 {t('marketplace.detail.requestContact')}
+                        </button>
+                      )}
+                    </div>
+                  ) : <span style={{ color: '#9ca3af' }}>—</span>}
+                </span>
+              </div>
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.views')}</span><span className="mp-detail-value">{viewsCount || 0}</span></div>
               {sellerType === 'registered_breeder' && (
                 <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.compliance.sellerType')}</span><span className="mp-detail-value">{breederVerified ? '✅ ' : '📋 '}{t('marketplace.compliance.registeredBreeder')}{breederVerified ? ` (${t('marketplace.compliance.verified')})` : ''}</span></div>
@@ -1543,7 +1712,9 @@ const ListingDetail: React.FC<{
               </div>
               {auctionEnd && (
                 <div className="mp-auction-end">
-                  <span>{t('marketplace.detail.ends')} {new Date(auctionEnd).toLocaleString()}</span>
+                  <span>{t('marketplace.detail.ends')} </span>
+                  <AuctionCountdown endTime={auctionEnd} t={t} />
+                  <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{new Date(auctionEnd).toLocaleString()}</div>
                 </div>
               )}
               <input className="module-input" type="number" placeholder={t('marketplace.detail.yourBidAmount')} value={bidAmount} onChange={e => onBidAmountChange(e.target.value)} />

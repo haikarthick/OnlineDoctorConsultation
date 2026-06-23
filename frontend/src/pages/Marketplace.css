@@ -691,3 +691,50 @@
   .mp-plan-price { font-size: 18px; }
   .mp-monetization-note { font-size: 12px; padding: 10px; }
 }
+
+/* ═══════ PROXIMITY SEARCH ═══════ */
+.mp-proximity-bar {
+  display: flex; align-items: center; gap: 10px; padding: 8px 0;
+  flex-wrap: wrap;
+}
+.mp-location-hint { font-size: 12px; color: #6b7280; }
+
+/* ═══════ CONTACT ACTIONS ═══════ */
+.mp-contact-actions {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.mp-contact-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 500;
+  text-decoration: none; transition: opacity 0.15s;
+}
+.mp-contact-btn:hover { opacity: 0.85; }
+.mp-contact-btn.whatsapp { background: #25d366; color: #fff; }
+.mp-contact-btn.call { background: #3b82f6; color: #fff; }
+
+/* ═══════ AUCTION COUNTDOWN ═══════ */
+.mp-countdown {
+  display: inline-block; font-weight: 700; font-size: 15px;
+  color: #4f46e5; background: #eef2ff; padding: 2px 8px; border-radius: 6px;
+}
+.mp-countdown.urgent {
+  color: #dc2626; background: #fee2e2; animation: mp-pulse 1s infinite;
+}
+@keyframes mp-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ═══════ MOBILE CARD IMPROVEMENTS ═══════ */
+@media (max-width: 480px) {
+  .mp-listing-card { border-radius: 10px; }
+  .mp-card-img { height: 160px; }
+  .mp-card-title { font-size: 14px; }
+  .mp-card-metrics { gap: 4px; }
+  .mp-metric { font-size: 11px; padding: 2px 6px; }
+  .mp-contact-actions { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .mp-contact-btn { width: 100%; justify-content: center; padding: 8px 12px; }
+  .mp-proximity-bar { gap: 6px; }
+  .mp-detail-layout { flex-direction: column; }
+  .mp-detail-sidebar { width: 100%; min-width: unset; }
+}

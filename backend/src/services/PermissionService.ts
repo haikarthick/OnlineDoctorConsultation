@@ -25,6 +25,7 @@ export const PERMISSION_CATEGORIES = {
       'wallet',
       'vaccination_passport',
       'vet_certificates',
+      'vet_earnings',
     ]
   },
   admin_pages: {
@@ -46,6 +47,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_vaccine_protocols',
       'admin_certificates',
       'dispute_management',
+      'hospital_network_subscription',
     ]
   },
   actions: {
@@ -138,6 +140,7 @@ export const PERMISSION_CATEGORIES = {
       'hospital_network_view',
       'hospital_network_audit',
       'patient_consent_manage',
+      'network_membership_manage',
     ]
   },
   pharmacy: {
@@ -341,6 +344,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'admin_certificates',
     // Hospital Network (full access)
     'hospital_network_manage', 'hospital_network_view', 'hospital_network_audit',
+    'hospital_network_subscription', 'network_membership_manage', 'vet_earnings',
     // Patient consent (admin oversight)
     'patient_consent_manage',
     // Pharmacy (full access)
@@ -445,6 +449,8 @@ export const PERMISSION_LABELS: Record<string, string> = {
   hospital_network_audit: 'Hospital Network Audit',
   patient_consent_manage: 'Patient Data Consent',
   network_membership_manage: 'Network Membership Management',
+  hospital_network_subscription: 'Network Subscriptions (Platform)',
+  vet_earnings: 'Vet Earnings Dashboard',
   // Pharmacy
   pharmacy_view_dashboard: 'Pharmacy Dashboard',
   pharmacy_review_prescriptions: 'Review Prescriptions',
@@ -544,7 +550,7 @@ class PermissionService {
     );
 
     const matrix: Record<string, Record<string, boolean>> = {};
-    const roles = ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'];
+    const roles = ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'];
 
     // Initialize with defaults
     for (const role of roles) {
@@ -573,14 +579,14 @@ class PermissionService {
     if (!ALL_PERMISSIONS.includes(permission)) {
       throw new Error(`Unknown permission: ${permission}`);
     }
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
     await database.query(
       `INSERT INTO role_permissions (role, permission, is_enabled, updated_by, updated_at)
        VALUES ($1, $2, $3, $4, NOW())
-       ON CONFLICT (role, permission) 
+       ON CONFLICT (role, permission)
        DO UPDATE SET is_enabled = $3, updated_by = $4, updated_at = NOW()`,
       [role, permission, isEnabled, updatedBy || null]
     );
@@ -594,7 +600,7 @@ class PermissionService {
     permissions: Record<string, boolean>,
     updatedBy?: string
   ): Promise<void> {
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -614,7 +620,7 @@ class PermissionService {
 
   /** Reset a role's permissions to defaults */
   async resetToDefaults(role: string): Promise<void> {
-    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'].includes(role)) {
+    if (!['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'].includes(role)) {
       throw new Error(`Unknown role: ${role}`);
     }
 
@@ -653,14 +659,15 @@ class PermissionService {
       categories: PERMISSION_CATEGORIES,
       labels: PERMISSION_LABELS,
       allPermissions: ALL_PERMISSIONS,
-      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff'],
+      roles: ['veterinarian', 'pet_owner', 'farmer', 'admin', 'corporate_admin', 'hospital_staff', 'pharmacist'],
       roleLabels: {
         veterinarian: 'Veterinarian',
         pet_owner: 'Pet Owner',
         farmer: 'Farmer',
         admin: 'Admin',
         corporate_admin: 'Hospital Network Admin',
-        hospital_staff: 'Hospital Staff'
+        hospital_staff: 'Hospital Staff',
+        pharmacist: 'Pharmacist'
       }
     };
   }

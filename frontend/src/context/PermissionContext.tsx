@@ -3,6 +3,19 @@ import { useAuth } from './AuthContext'
 import apiService from '../services/api'
 
 // ─── Types ──────────────────────────────────────────────────
+// §7 reconciliation: the caller's network membership + effective action matrix, returned by
+// GET /permissions/my. Drives network-role-aware navigation / visibility / action gating so the
+// hospital hierarchy (corporate_admin → hospital_director → staff) is enforced on the frontend.
+export interface NetworkAccess {
+  networkId: string
+  networkName: string
+  networkRole: string
+  hospitalId: string | null
+  hospitalName: string | null
+  isBranchScoped: boolean
+  actions: Record<string, boolean>
+}
+
 interface PermissionContextType {
   permissions: string[]
   loading: boolean
@@ -10,6 +23,14 @@ interface PermissionContextType {
   hasAnyPermission: (permissions: string[]) => boolean
   hasAllPermissions: (permissions: string[]) => boolean
   reloadPermissions: () => Promise<void>
+  // Network-role layer
+  networks: NetworkAccess[]
+  /** True if the caller's role in the given network grants the action (admin always true). */
+  hasNetworkAction: (networkId: string, action: string) => boolean
+  /** The caller's network role in a network, or null if not a member. */
+  networkRoleFor: (networkId: string) => string | null
+  /** True if the caller holds any of the given network roles in ANY network (e.g. director/corp admin). */
+  hasAnyNetworkRole: (roles: string[]) => boolean
 }
 
 // ─── Permission-to-Route mapping ────────────────────────────
@@ -197,11 +218,13 @@ const PermissionContext = createContext<PermissionContextType | undefined>(undef
 export const PermissionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { isAuthenticated, user } = useAuth()
   const [permissions, setPermissions] = useState<string[]>([])
+  const [networks, setNetworks] = useState<NetworkAccess[]>([])
   const [loading, setLoading] = useState(true)
 
   const loadPermissions = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setPermissions([])
+      setNetworks([])
       setLoading(false)
       return
     }
@@ -211,8 +234,10 @@ export const PermissionProvider: React.FC<{ children: ReactNode }> = ({ children
       const result = await apiService.getMyPermissions()
       const perms = result.data?.permissions || []
       setPermissions(perms)
+      setNetworks(Array.isArray(result.data?.networks) ? result.data.networks : [])
     } catch (err) {
-setPermissions([])
+      setPermissions([])
+      setNetworks([])
     } finally {
       setLoading(false)
     }
@@ -238,6 +263,22 @@ setPermissions([])
     return perms.every(p => permissions.includes(p))
   }, [permissions, user?.role])
 
+  const networkRoleFor = useCallback((networkId: string): string | null => {
+    const n = networks.find(x => x.networkId === networkId)
+    return n ? n.networkRole : null
+  }, [networks])
+
+  const hasNetworkAction = useCallback((networkId: string, action: string): boolean => {
+    if (user?.role === 'admin') return true
+    const n = networks.find(x => x.networkId === networkId)
+    return !!n && n.actions?.[action] === true
+  }, [networks, user?.role])
+
+  const hasAnyNetworkRole = useCallback((roles: string[]): boolean => {
+    if (user?.role === 'admin') return true
+    return networks.some(n => roles.includes(n.networkRole))
+  }, [networks, user?.role])
+
   return (
     <PermissionContext.Provider value={{
       permissions,
@@ -246,6 +287,10 @@ setPermissions([])
       hasAnyPermission,
       hasAllPermissions,
       reloadPermissions: loadPermissions,
+      networks,
+      hasNetworkAction,
+      networkRoleFor,
+      hasAnyNetworkRole,
     }}>
       {children}
     </PermissionContext.Provider>

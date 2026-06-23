@@ -52,7 +52,11 @@ class LocalStorage implements StorageDriver {
   }
 
   async save(file: Express.Multer.File, folder: string): Promise<StoredFile> {
-    const dir = path.join(UPLOAD_ROOT, folder);
+    const dir = path.resolve(UPLOAD_ROOT, folder);
+    // Guard against path traversal — resolved dir must stay inside UPLOAD_ROOT
+    if (!dir.startsWith(UPLOAD_ROOT + path.sep) && dir !== UPLOAD_ROOT) {
+      throw new Error('Invalid upload path');
+    }
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
