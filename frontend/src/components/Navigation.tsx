@@ -203,7 +203,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'wallet', label: t('nav.myWallet'), icon: '💰', path: '/wallet',
       roles: ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin'], section: 'Account' },
 
-    // ── Administration (admin only) ──
+    // ── Administration (platform-level admin only) ──
     { id: 'admin-dashboard', label: t('nav.adminPanel'), icon: '🛡️', path: '/admin/dashboard',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-users', label: t('nav.userManagement'), icon: '👥', path: '/admin/users',
@@ -214,23 +214,21 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-reviews', label: t('nav.reviewModeration'), icon: '⚖️', path: '/admin/reviews',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-settings', label: t('nav.systemSettings'), icon: '⚙️', path: '/admin/settings',
+    { id: 'admin-disputes', label: t('disputeManagement.title'), icon: '⚖️', path: '/admin/disputes',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-prescription-settings', label: t('nav.prescriptionSettings'), icon: '📄', path: '/admin/prescription-settings',
-      roles: ['admin'], section: 'Administration' },
-    { id: 'admin-permissions', label: t('nav.permissions'), icon: '🔐', path: '/admin/permissions',
+    { id: 'admin-cancellation-dashboard', label: t('nav.cancellations'), icon: '📊', path: '/admin/cancellation-dashboard',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-medical-records', label: t('nav.medicalRecords'), icon: '📋', path: '/admin/medical-records',
-      roles: ['admin'], section: 'Administration' },
-    { id: 'admin-hospitals', label: t('nav.hospitalMgmt'), icon: '🏥', path: '/admin/vet-hospitals',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-audit', label: t('nav.auditLogs'), icon: '📜', path: '/admin/audit-logs',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-compliance', label: 'HIPAA Compliance', icon: '🛡️', path: '/admin/compliance',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-staff-settings', label: 'Staff & Positions', icon: '👥', path: '/admin/staff-settings',
+    { id: 'admin-settings', label: t('nav.systemSettings'), icon: '⚙️', path: '/admin/settings',
       roles: ['admin'], section: 'Administration' },
-    { id: 'admin-cancellation-dashboard', label: t('nav.cancellations'), icon: '📊', path: '/admin/cancellation-dashboard',
+    { id: 'admin-prescription-settings', label: t('nav.prescriptionSettings'), icon: '📄', path: '/admin/prescription-settings',
+      roles: ['admin'], section: 'Administration' },
+    { id: 'admin-permissions', label: t('nav.permissions'), icon: '🔐', path: '/admin/permissions',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-vaccine-protocols', label: t('nav.vaccineProtocols'), icon: '🧬', path: '/admin/vaccine-protocols',
       roles: ['admin'], section: 'Administration' },
@@ -238,12 +236,16 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-holidays', label: 'Holiday Management', icon: '🎉', path: '/admin/holidays',
       roles: ['admin', 'veterinarian'], section: 'Administration' },
+
+    // ── Hospital Network Management (admin + corporate_admin) ──
     { id: 'hospital-networks', label: 'Hospital Networks', icon: '🌐', path: '/hospital-networks',
-      roles: ['admin', 'corporate_admin', 'hospital_staff', 'veterinarian'], section: 'Administration' },
+      roles: ['admin', 'corporate_admin', 'hospital_staff', 'veterinarian'], section: 'Hospital Networks' },
+    { id: 'admin-hospitals', label: t('nav.hospitalMgmt'), icon: '🏥', path: '/admin/vet-hospitals',
+      roles: ['admin'], section: 'Hospital Networks' },
+    { id: 'admin-staff-settings', label: 'Staff & Positions', icon: '👥', path: '/admin/staff-settings',
+      roles: ['admin'], section: 'Hospital Networks' },
     { id: 'admin-network-subscriptions', label: 'Network Subscriptions', icon: '💳', path: '/admin/network-subscriptions',
-      roles: ['admin'], section: 'Administration' },
-    { id: 'admin-disputes', label: t('disputeManagement.title'), icon: '⚖️', path: '/admin/disputes',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin'], section: 'Hospital Networks' },
 
     // ── Preferences (bottom) ──
     { id: 'settings', label: t('nav.settings'), icon: '⚙️', path: '/settings',
@@ -323,7 +325,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
   const sectionIcons: Record<string, string> = {
     'Main': '🏠', 'Consultations': '🏥', 'Animals & Health': '🐾',
     'Farm Management': '🌾', 'Analytics & Tools': '📈', 'Innovation': '🚀',
-    'Intelligence': '🤖', 'Veterinarian': '🩺', 'Administration': '🛡️', 'Preferences': '⚙️',
+    'Intelligence': '🤖', 'Veterinarian': '🩺', 'Administration': '🛡️',
+    'Hospital Networks': '🌐', 'Preferences': '⚙️',
   }
 
   // Section name translation map
@@ -338,6 +341,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     'Vet Network': t('nav.sections.vetNetwork'),
     'Account': t('nav.sections.account'),
     'Administration': t('nav.sections.administration'),
+    'Hospital Networks': 'Hospital Networks',
     'Preferences': t('nav.sections.preferences'),
   }
 

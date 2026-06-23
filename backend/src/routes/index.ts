@@ -2423,7 +2423,7 @@ router.get('/admin/network-subscriptions', authMiddleware, roleMiddleware(['admi
       ns.suspension_reason AS "suspensionReason", ns.admin_notes AS "adminNotes",
       nsp.name AS "planName", nsp.id AS "planId",
       (SELECT COUNT(*) FROM hospital_network_members m WHERE m.network_id = hn.id AND m.is_active = true) AS "seatsUsed",
-      (SELECT COUNT(*) FROM vet_hospitals vh WHERE vh.network_id = hn.id) AS "hospitalsCount"
+      (SELECT COUNT(*) FROM hospital_network_hospitals hnh WHERE hnh.network_id = hn.id AND hnh.is_active = true) AS "hospitalsCount"
     FROM hospital_networks hn
     LEFT JOIN network_subscriptions ns ON ns.network_id = hn.id
     LEFT JOIN network_subscription_plans nsp ON nsp.id = ns.plan_id
@@ -2650,7 +2650,7 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
               INNER JOIN hospital_network_members hnm ON u.id = hnm.user_id
               WHERE hnm.network_id = $1 AND hnm.is_active = true) as used_seats,
              hn.seat_limit
-      FROM hospital_network_subscriptions hn
+      FROM network_subscriptions hn
       WHERE hn.network_id = $1
     `, [invite.network_id]);
 

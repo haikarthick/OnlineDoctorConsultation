@@ -996,8 +996,8 @@ class PostgresDatabase {
     ];
     for (const [key, value] of pricingKeys) {
       await this.pool.query(
-        `INSERT INTO system_settings (key, value, description, is_public)
-         VALUES ($1, $2, $3, false)
+        `INSERT INTO system_settings (key, value, description)
+         VALUES ($1, $2, $3)
          ON CONFLICT (key) DO NOTHING`,
         [key, value, `Pricing visibility control: ${key}`]
       ).catch(() => {});
