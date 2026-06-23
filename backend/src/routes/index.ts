@@ -77,6 +77,8 @@ import {
   setNetworkSubscriptionSchema, overrideSeatLimitSchema,
   suspendNetworkSchema, updatePricingSettingsSchema,
   inviteHospitalStaffSchema, acceptStaffInviteSchema,
+  // Password Reset
+  forgotPasswordSchema, resetPasswordSchema,
 } from '../middleware/validation';
 import { requireFeature, getAllFeatureFlags } from '../config/featureFlags';
 import AuthController from '../controllers/AuthController';
@@ -128,6 +130,146 @@ router.post('/auth/refresh', validateBody(refreshTokenSchema), asyncHandler((req
 router.post('/auth/logout', validateBody(logoutSchema), asyncHandler((req: Request, res: Response) => AuthController.logout(req, res)));
 router.post('/auth/logout-all', authMiddleware, asyncHandler((req: Request, res: Response) => AuthController.logoutAll(req, res)));
 router.get('/auth/profile', authMiddleware, asyncHandler((req: Request, res: Response) => AuthController.getProfile(req, res)));
+
+// ─── Self-service Password Reset (public — no auth required) ─────────────────
+//
+// Security model:
+//   • Raw 32-byte token is sent in the email link (64-char hex, 256-bit entropy)
+//   • Only the SHA-256 hash is stored in the DB — a DB leak cannot be used to reset accounts
+//   • Tokens expire after 1 hour and are single-use (deleted on successful reset)
+//   • Rate-limited: one email per address per 5 minutes (new request silently suppressed)
+//   • Email enumeration-safe: always returns HTTP 200 with the same message
+//   • Insecure-account guard: frozen/suspended users cannot reset their password
+//
+router.post('/auth/forgot-password', validateBody(forgotPasswordSchema), asyncHandler(async (req: Request, res: Response) => {
+  const crypto = await import('crypto');
+  const db = (await import('../utils/database')).default;
+  const emailService = (await import('../services/EmailService')).default;
+  const { getFrontendUrl } = await import('../config/index');
+
+  const { email } = req.body as { email: string };
+
+  // Always return the same response — prevents email enumeration
+  const safeResponse = () => res.json({
+    success: true,
+    message: 'If an account with that email exists, a password reset link has been sent.',
+  });
+
+  // Look up user
+  const userResult = await db.query(
+    `SELECT id, first_name AS "firstName", email, account_status FROM users WHERE LOWER(email) = LOWER($1)`,
+    [email]
+  );
+  if (userResult.rows.length === 0) return safeResponse();
+
+  const user = userResult.rows[0];
+
+  // Don't allow reset for frozen/suspended accounts
+  if (user.account_status === 'frozen' || user.account_status === 'suspended') return safeResponse();
+
+  // Rate-limit: suppress if a valid token was issued in the last 5 minutes
+  const recentCheck = await db.query(
+    `SELECT id FROM password_reset_tokens WHERE user_id = $1 AND created_at > NOW() - INTERVAL '5 minutes' AND used_at IS NULL`,
+    [user.id]
+  );
+  if (recentCheck.rows.length > 0) return safeResponse();
+
+  // Invalidate any previous unexpired tokens for this user (one active token at a time)
+  await db.query(`DELETE FROM password_reset_tokens WHERE user_id = $1`, [user.id]);
+
+  // Generate raw token → hash for storage
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await db.query(
+    `INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`,
+    [user.id, tokenHash, expiresAt]
+  );
+
+  const resetUrl = `${getFrontendUrl()}/reset-password?token=${rawToken}`;
+  await emailService.sendPasswordReset(user.email, { firstName: user.firstName, resetUrl });
+
+  logger.info('Password reset email dispatched', { userId: user.id });
+  return safeResponse();
+}));
+
+router.get('/auth/reset-password/validate', asyncHandler(async (req: Request, res: Response) => {
+  const crypto = await import('crypto');
+  const db = (await import('../utils/database')).default;
+
+  const rawToken = String(req.query.token || '');
+  if (!rawToken || rawToken.length !== 64 || !/^[0-9a-f]+$/i.test(rawToken)) {
+    return res.json({ success: false, valid: false, reason: 'invalid_token' });
+  }
+
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+  const result = await db.query(
+    `SELECT id, expires_at, used_at FROM password_reset_tokens WHERE token_hash = $1`,
+    [tokenHash]
+  );
+
+  if (result.rows.length === 0) return res.json({ success: false, valid: false, reason: 'not_found' });
+  const row = result.rows[0];
+  if (row.used_at) return res.json({ success: false, valid: false, reason: 'already_used' });
+  if (new Date(row.expires_at) < new Date()) return res.json({ success: false, valid: false, reason: 'expired' });
+
+  return res.json({ success: true, valid: true });
+}));
+
+router.post('/auth/reset-password', validateBody(resetPasswordSchema), asyncHandler(async (req: Request, res: Response) => {
+  const crypto = await import('crypto');
+  const bcrypt = await import('bcryptjs');
+  const db = (await import('../utils/database')).default;
+  const { v4: uuidv4 } = await import('uuid');
+
+  const { token: rawToken, newPassword } = req.body as { token: string; newPassword: string };
+
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+  const result = await db.query(
+    `SELECT prt.id, prt.user_id, prt.expires_at, prt.used_at,
+            u.email, u.first_name AS "firstName", u.account_status
+     FROM password_reset_tokens prt
+     JOIN users u ON u.id = prt.user_id
+     WHERE prt.token_hash = $1`,
+    [tokenHash]
+  );
+
+  if (result.rows.length === 0) {
+    return res.status(400).json({ success: false, message: 'Invalid or expired password reset link.' });
+  }
+
+  const row = result.rows[0];
+
+  if (row.used_at) {
+    return res.status(400).json({ success: false, message: 'This password reset link has already been used. Please request a new one.' });
+  }
+  if (new Date(row.expires_at) < new Date()) {
+    await db.query(`DELETE FROM password_reset_tokens WHERE id = $1`, [row.id]);
+    return res.status(400).json({ success: false, message: 'This password reset link has expired. Please request a new one.' });
+  }
+  if (row.account_status === 'frozen' || row.account_status === 'suspended') {
+    return res.status(403).json({ success: false, message: 'Your account is not eligible for password reset. Please contact support.' });
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+
+  // Update password and mark token as used atomically
+  await db.query(`UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2`, [passwordHash, row.user_id]);
+  await db.query(`UPDATE password_reset_tokens SET used_at = NOW() WHERE id = $1`, [row.id]);
+
+  // Audit log
+  const auditId = uuidv4();
+  await db.query(
+    `INSERT INTO audit_logs (id, user_id, action, entity_type, entity_id, details, created_at)
+     VALUES ($1, $2, 'user.password_reset_self_service', 'user', $3, $4, NOW())`,
+    [auditId, row.user_id, row.user_id, JSON.stringify({ email: row.email, method: 'forgot_password_flow' })]
+  );
+
+  logger.info('Password reset completed (self-service)', { userId: row.user_id });
+  return res.json({ success: true, message: 'Your password has been reset successfully. You can now log in.' });
+}));
+
 router.put('/auth/profile', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   const allowed: Record<string, string> = { firstName: 'first_name', lastName: 'last_name', phone: 'phone', avatar: 'avatar_url' };

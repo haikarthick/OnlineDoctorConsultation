@@ -88,6 +88,28 @@ export const logoutSchema = Joi.object({
   refreshToken: Joi.string().required().messages({ 'any.required': 'Refresh token is required' }),
 });
 
+export const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required().max(255).lowercase().trim().messages({
+    'string.email': 'Please provide a valid email address',
+    'any.required': 'Email is required',
+  }),
+});
+
+export const resetPasswordSchema = Joi.object({
+  token: Joi.string().length(64).hex().required().messages({
+    'string.length': 'Invalid or malformed reset token',
+    'string.hex': 'Invalid or malformed reset token',
+    'any.required': 'Reset token is required',
+  }),
+  newPassword: Joi.string().min(8).max(128).required()
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .messages({
+      'string.min': 'Password must be at least 8 characters',
+      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
+      'any.required': 'New password is required',
+    }),
+});
+
 // ─── Consultation ────────────────────────────────────────────
 export const createConsultationSchema = Joi.object({
   veterinarianId: requiredUuid.messages({ 'string.guid': 'Veterinarian ID must be a valid UUID', 'any.required': 'Veterinarian ID is required' }),

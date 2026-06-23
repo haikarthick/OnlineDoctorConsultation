@@ -1597,6 +1597,22 @@ class PostgresDatabase {
     await this.pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS withdrawal_period_days INTEGER DEFAULT 0`).catch(() => {});
     await this.pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS is_refrigerated BOOLEAN DEFAULT false`).catch(() => {});
 
+    // ── Password Reset Tokens (self-service forgot-password flow) ──────────
+    // token_hash: SHA-256 of the raw token sent in the email link.
+    // Storing only the hash means a DB leak cannot be used to reset accounts.
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id      UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token_hash   VARCHAR(64) NOT NULL UNIQUE,
+        expires_at   TIMESTAMPTZ NOT NULL,
+        used_at      TIMESTAMPTZ,
+        created_at   TIMESTAMPTZ DEFAULT NOW()
+      )
+    `).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_prt_token_hash ON password_reset_tokens(token_hash)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_prt_user_id   ON password_reset_tokens(user_id)`).catch(() => {});
+
     logger.info('Default system settings seeded');
   }
 

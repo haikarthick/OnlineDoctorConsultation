@@ -127,6 +127,21 @@ class ApiService {
     return response.data
   }
 
+  async forgotPassword(email: string) {
+    const response = await this.client.post('/auth/forgot-password', { email })
+    return response.data
+  }
+
+  async validateResetToken(token: string) {
+    const response = await this.client.get('/auth/reset-password/validate', { params: { token } })
+    return response.data
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const response = await this.client.post('/auth/reset-password', { token, newPassword })
+    return response.data
+  }
+
   /** Generic HTTP GET — use for ad-hoc endpoints without a typed wrapper */
   async get(url: string, config?: { params?: Record<string, any> }) {
     return this.client.get(url, config)

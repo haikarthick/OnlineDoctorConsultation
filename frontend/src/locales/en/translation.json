@@ -219,7 +219,47 @@
     "dbWakingUp": "Database is waking up — retrying automatically in {{countdown}}s…",
     "dbWakingUpNote": "This is normal on first visit. Please wait.",
     "success": "✓ Login successful! Redirecting...",
-    "error": "Login failed"
+    "error": "Login failed",
+    "forgotPassword": "Forgot password?"
+  },
+  "forgotPassword": {
+    "title": "Forgot your password?",
+    "subtitle": "Enter your email and we'll send you a reset link.",
+    "emailLabel": "Email Address",
+    "sendLink": "Send Reset Link",
+    "sending": "Sending...",
+    "backToLogin": "Back to Login",
+    "successTitle": "Check your inbox",
+    "successBody": "If an account exists for this email, a password reset link has been sent. The link is valid for 1 hour.",
+    "spamHint": "Didn't receive it? Check your spam folder."
+  },
+  "resetPassword": {
+    "title": "Set a new password",
+    "subtitle": "Your new password must be at least 8 characters.",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "resetBtn": "Reset Password",
+    "resetting": "Resetting...",
+    "backToLogin": "Back to Login",
+    "successTitle": "Password reset successfully!",
+    "successBody": "Your password has been updated. You can now log in with your new password.",
+    "goToLogin": "Go to Login",
+    "validating": "Verifying reset link...",
+    "linkInvalidTitle": "Link not valid",
+    "invalidToken": "This reset link is malformed or invalid.",
+    "reasonExpired": "This reset link has expired. Please request a new one.",
+    "reasonUsed": "This reset link has already been used. Please request a new one.",
+    "reasonInvalid": "This reset link is invalid or does not exist.",
+    "requestNewLink": "Request a new link",
+    "passwordsMismatch": "Passwords do not match.",
+    "passwordWeak": "Password must contain at least one uppercase letter, one lowercase letter, and one number.",
+    "genericError": "Something went wrong. Please try again.",
+    "hint": {
+      "length": "At least 8 characters",
+      "upper": "Uppercase letter",
+      "lower": "Lowercase letter",
+      "number": "Number"
+    }
   },
   "register": {
     "title": "Create your account",

@@ -14,6 +14,8 @@ import ErrorAutoScroll from './components/ErrorAutoScroll'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import './App.css'
 import './styles/modules.css'
 
@@ -248,13 +250,21 @@ function AppRoutes() {
       } />
       <Route path="/login" element={
         <PublicOnlyRoute>
-          <Login onSwitchToRegister={() => navigate('/register')} onGoHome={() => navigate('/')} />
+          <Login onSwitchToRegister={() => navigate('/register')} onGoHome={() => navigate('/')} onForgotPassword={() => navigate('/forgot-password')} />
         </PublicOnlyRoute>
       } />
       <Route path="/register" element={
         <PublicOnlyRoute>
           <Register onSwitchToLogin={() => navigate('/login')} onGoHome={() => navigate('/')} />
         </PublicOnlyRoute>
+      } />
+      <Route path="/forgot-password" element={
+        <PublicOnlyRoute>
+          <ForgotPassword onGoToLogin={() => navigate('/login')} />
+        </PublicOnlyRoute>
+      } />
+      <Route path="/reset-password" element={
+        <ResetPassword onGoToLogin={() => navigate('/login')} />
       } />
       <Route path="/accept-invite" element={<AcceptInvite />} />
       <Route path="/browse-marketplace" element={<PublicMarketplace />} />
