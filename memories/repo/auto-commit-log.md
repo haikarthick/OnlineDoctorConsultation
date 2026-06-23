@@ -3360,3 +3360,228 @@
 </details>
 
 ---
+
+## 2026-06-09 05:41 · `034a4c4` · OTHER
+
+**Commit:** update: VetCare changes - 09-06-Tue 11:11  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-06-20 14:25 · `68a8b87` · OTHER
+
+**Commit:** fix(network-hospital): close permission/visibility holes + reconcile role hierarchy  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UI · AUTH/PERM  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/middleware/networkAccess.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/HospitalNetworkService.ts
+  - backend/src/services/NetworkRolePermissionService.ts
+  - backend/src/services/PermissionService.ts
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+
+</details>
+
+---
+
+## 2026-06-21 09:54 · `1652f3f` · OTHER
+
+**Commit:** feat(security+auth): 11-finding security audit, account_status system, admin approval flow  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (17)</summary>
+
+  - backend/src/controllers/AdminController.ts
+  - backend/src/controllers/AuthController.ts
+  - backend/src/controllers/FileController.ts
+  - backend/src/middleware/hospitalDataIsolation.ts
+  - backend/src/middleware/upload.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/models/types.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/AdminService.ts
+  - backend/src/services/UserService.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/socketIO.ts
+  - backend/src/utils/storage.ts
+  - docker/init.sql
+  - frontend/src/pages/Register.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-06-21 12:30 · `75b7b20` · OTHER
+
+**Commit:** fix(userManagement): remove unused handleToggleStatus — replaced by freeze/suspend actions  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/admin/UserManagement.tsx
+
+</details>
+
+---
+
+## 2026-06-21 15:54 · `309fdb0` · OTHER
+
+**Commit:** feat(marketplace): auction disable flag, proximity search, fair deal badge, health passport, ownership transfer, quota enforcement, scheduler jobs  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - backend/src/controllers/Tier4Controller.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/MarketplaceService.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/scheduler.ts
+  - docker/init.sql
+  - frontend/src/pages/Marketplace.css
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-06-21 15:59 · `afa1024` · OTHER
+
+**Commit:** fix(marketplace): fix TypeScript errors in ListingCard, ListingDetail, AuctionCountdown t() prop types  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/Marketplace.tsx
+
+</details>
+
+---
+
+## 2026-06-23 07:07 · `85c6fb7` · OTHER
+
+**Commit:** fix(admin): repair approval workflow — SQL error, missing approve button, dashboard alert  
+**Author:** haikarthick  
+**Categories:** SERVICE · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/services/AdminService.ts
+  - frontend/src/pages/admin/AdminDashboard.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/types/index.ts
+
+</details>
+
+---
+
+## 2026-06-23 07:34 · `78588ca` · OTHER
+
+**Commit:** fix(network-hospital): fix 3 subscription bugs + regroup admin sidebar  
+**Author:** haikarthick  
+**Categories:** API · UTILS · DB · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/utils/database.ts
+  - frontend/src/components/Navigation.tsx
+
+</details>
+
+---
+
+## 2026-06-23 10:16 · `2409edd` · OTHER
+
+**Commit:** feat(auth): complete self-service forgot/reset password flow  
+**Author:** haikarthick  
+**Categories:** API · UTILS · DB · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/utils/database.ts
+  - frontend/src/App.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/ForgotPassword.tsx
+  - frontend/src/pages/Login.tsx
+  - frontend/src/pages/ResetPassword.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-06-23 10:22 · `d657c08` · OTHER
+
+**Commit:** test(e2e): add auto-discovered stubs for forgot-password and reset-password routes  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---
+
+## 2026-06-23 10:36 · `573d440` · OTHER
+
+**Commit:** test(e2e): restore all previous stubs + add forgot/reset-password stubs  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---
