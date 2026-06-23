@@ -391,6 +391,16 @@ const Animals: React.FC = () => {
   const labelStyle = { fontSize: 12, fontWeight: 600 as const, color: '#4b5563', marginBottom: 4, display: 'block' }
 
   const handleDownloadPassport= async (animal: AnimalData) => {
+    // Open the window SYNCHRONOUSLY before any await — browsers block popups
+    // opened after an async gap because they're no longer tied to the user gesture.
+    const win = window.open('', '_blank')
+    if (!win) {
+      alert('Pop-up blocked. Please allow pop-ups for this site to generate the Health Passport.')
+      return
+    }
+    // Show a loading placeholder immediately so the window isn't blank
+    win.document.write('<html><body style="font-family:Arial;padding:40px;text-align:center"><p>⏳ Generating Health Passport...</p></body></html>')
+
     setPassportLoading(animal.id)
     try {
       const [vaccRes, medRes] = await Promise.all([
@@ -460,13 +470,13 @@ const Animals: React.FC = () => {
 </body>
 </html>`
 
-      const win = window.open('', '_blank')
-      if (win) {
-        win.document.write(html)
-        win.document.close()
-      }
+      win.document.open()
+      win.document.write(html)
+      win.document.close()
     } catch (err) {
       console.error('Failed to generate health passport', err)
+      win.document.write('<html><body style="font-family:Arial;padding:40px"><p style="color:red">Failed to generate Health Passport. Please close this tab and try again.</p></body></html>')
+      win.document.close()
     } finally {
       setPassportLoading(null)
     }
