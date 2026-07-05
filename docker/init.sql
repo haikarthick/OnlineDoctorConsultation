@@ -1973,6 +1973,68 @@ CREATE INDEX IF NOT EXISTS idx_leave_requests_network ON staff_leave_requests(ne
 CREATE INDEX IF NOT EXISTS idx_leave_requests_user ON staff_leave_requests(user_id);
 CREATE INDEX IF NOT EXISTS idx_leave_requests_hospital ON staff_leave_requests(hospital_id);
 
+-- ─── Marketplace core tables ─────────────────────────────────────────────
+-- FIX: these were only ever defined in backend/migrations/008_tier4_features.sql
+-- and never backported here, so listing_boosts/marketplace_inquiries/
+-- marketplace_transactions below (which FK-reference marketplace_listings)
+-- made init.sql fail on any truly fresh database — rolling back the ENTIRE
+-- script (incl. users/bookings/payments) since it runs as one implicit
+-- transaction. Mirrors migration 008 lines 81-134 exactly (idempotent).
+CREATE TABLE IF NOT EXISTS marketplace_listings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID REFERENCES enterprises(id),
+  seller_id UUID NOT NULL REFERENCES users(id),
+  title VARCHAR(300) NOT NULL,
+  description TEXT,
+  category VARCHAR(60) NOT NULL DEFAULT 'animal',
+  listing_type VARCHAR(30) DEFAULT 'fixed_price',
+  price NUMERIC(12,2),
+  currency VARCHAR(10) DEFAULT 'USD',
+  quantity INT DEFAULT 1,
+  unit VARCHAR(30),
+  condition VARCHAR(30) DEFAULT 'new',
+  images JSONB DEFAULT '[]',
+  location VARCHAR(200),
+  shipping_options JSONB DEFAULT '[]',
+  tags JSONB DEFAULT '[]',
+  status VARCHAR(30) DEFAULT 'active',
+  featured BOOLEAN DEFAULT false,
+  views_count INT DEFAULT 0,
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS marketplace_bids (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
+  bidder_id UUID NOT NULL REFERENCES users(id),
+  amount NUMERIC(12,2) NOT NULL,
+  message TEXT,
+  status VARCHAR(30) DEFAULT 'active',
+  is_winning BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS marketplace_orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID NOT NULL REFERENCES marketplace_listings(id),
+  buyer_id UUID NOT NULL REFERENCES users(id),
+  seller_id UUID NOT NULL REFERENCES users(id),
+  quantity INT DEFAULT 1,
+  unit_price NUMERIC(12,2) NOT NULL,
+  total_price NUMERIC(12,2) NOT NULL,
+  status VARCHAR(30) DEFAULT 'pending',
+  payment_status VARCHAR(30) DEFAULT 'unpaid',
+  shipping_address JSONB DEFAULT '{}',
+  tracking_number VARCHAR(100),
+  notes TEXT,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ─── Marketplace monetization tables (canonical schema) ─────────────────────
 CREATE TABLE IF NOT EXISTS marketplace_monetization_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -2361,7 +2423,8 @@ END $$;
 ALTER TABLE payments ALTER COLUMN currency SET DEFAULT 'INR';
 ALTER TABLE payments ALTER COLUMN gateway SET DEFAULT 'demo';
 CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
-CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+-- (idx_payments_status already created earlier in this file — see the
+-- "FIX: bookings status CHECK" era section above)
 
 -- 46.2 bookings: payment lifecycle statuses + booking_type fix
 DO $$
