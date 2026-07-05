@@ -711,6 +711,32 @@ class ApiService {
     return response.data
   }
 
+  // ─── Platform referrals ─────────────────────────────────────
+  async createPlatformReferral(data: { toVetId?: string | null; reason: string; bookingId?: string; consultationId?: string }) {
+    const response = await this.client.post('/referrals/platform', data)
+    return response.data
+  }
+
+  async listMyPlatformReferrals() {
+    const response = await this.client.get('/referrals/platform/my')
+    return response.data
+  }
+
+  async getReferableItems() {
+    const response = await this.client.get('/referrals/platform/referable')
+    return response.data
+  }
+
+  async acceptPlatformReferral(id: string, data: { veterinarianId?: string; scheduledDate: string; timeSlotStart: string; timeSlotEnd: string; bookingType?: string; reasonForVisit?: string }) {
+    const response = await this.client.post(`/referrals/platform/${id}/accept`, data)
+    return response.data
+  }
+
+  async declinePlatformReferral(id: string, refundDestination?: 'wallet' | 'gateway') {
+    const response = await this.client.post(`/referrals/platform/${id}/decline`, { refundDestination })
+    return response.data
+  }
+
   async requestWithdrawal() {
     const response = await this.client.post('/withdrawals/request', {})
     return response.data

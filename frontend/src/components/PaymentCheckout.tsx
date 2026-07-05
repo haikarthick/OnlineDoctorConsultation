@@ -9,6 +9,8 @@ interface PaymentCheckoutProps {
   expiresAt?: string | null
   onSuccess: () => void
   onCancel: () => void
+  /** Preselect the wallet toggle (referral transfers arrive as wallet credit) */
+  defaultUseWallet?: boolean
 }
 
 interface Breakdown {
@@ -44,11 +46,11 @@ function loadRazorpayScript(): Promise<boolean> {
  * (docs/PAYMENT_MODULE_PLAN.md §10). Demo gateway renders a simulated
  * checkout dialog; P2 swaps in the Razorpay checkout for razorpay modes.
  */
-export default function PaymentCheckout({ bookingId, amount, expiresAt, onSuccess, onCancel }: PaymentCheckoutProps) {
+export default function PaymentCheckout({ bookingId, amount, expiresAt, onSuccess, onCancel, defaultUseWallet = false }: PaymentCheckoutProps) {
   const { t } = useTranslation()
   const { formatCurrency } = useSettings()
   const [walletBalance, setWalletBalance] = useState(0)
-  const [useWallet, setUseWallet] = useState(false)
+  const [useWallet, setUseWallet] = useState(defaultUseWallet)
   const [breakdown, setBreakdown] = useState<Breakdown | null>(null)
   const [showDemoDialog, setShowDemoDialog] = useState(false)
   const [processing, setProcessing] = useState(false)

@@ -199,7 +199,8 @@
     "myPayments": "My Payments",
     "legalPolicies": "Legal & Policies",
     "commissionSettings": "Commission Rules",
-    "settlements": "Settlements"
+    "settlements": "Settlements",
+    "referrals": "Referrals"
   },
   "login": {
     "welcome": "Welcome back",
@@ -7050,5 +7051,52 @@
     "doctorIdPlaceholder": "Doctor user ID",
     "discretionaryNotePlaceholder": "Why this payout is being made…",
     "payNow": "Pay now"
+  },
+  "referrals": {
+    "title": "Referrals",
+    "subtitlePatient": "Referrals from your doctors — accept, choose another doctor, or take a refund",
+    "subtitleVet": "Refer patients to other doctors and track referral outcomes",
+    "referButton": "Refer a patient",
+    "empty": "No referrals yet.",
+    "anyDoctor": "Any doctor (your choice)",
+    "paidAmount": "Paid amount",
+    "informational": "Specialist referral",
+    "accept": "Accept",
+    "chooseAnother": "Choose another doctor",
+    "refund": "Refund",
+    "acceptTitle": "Accept referral",
+    "acceptHint": "Pick a slot with the doctor. What you already paid moves with you automatically — you only pay any difference.",
+    "selectDoctor": "Select a doctor…",
+    "noSlots": "No slots available on this date. Try another date.",
+    "confirmAccept": "Continue",
+    "refundTitle": "Take a refund instead",
+    "refundHint": "You get a full refund plus a goodwill bonus because the doctor was unavailable.",
+    "refundToWallet": "Instant refund to wallet",
+    "refundToSource": "Refund to original payment method (5–7 days)",
+    "refunded": "Refund processed.",
+    "accepted": "Referral completed — your new booking is in place.",
+    "created": "Referral sent. The patient has been notified.",
+    "actionFailed": "Action failed.",
+    "deadlineIn": "Act within {{hours}}h",
+    "deadlinePassed": "Deadline passed",
+    "walletHopNotice": "Your earlier payment was moved to your wallet and will be applied automatically at checkout.",
+    "referTitle": "Refer a patient",
+    "referHint": "Pre-consultation referrals move the patient’s payment to the new doctor. Post-consultation referrals let the patient book a specialist normally.",
+    "upcomingBookings": "Upcoming paid bookings (payment transfers)",
+    "recentConsultations": "Recently completed consultations (specialist referral)",
+    "none": "None",
+    "targetDoctor": "Refer to",
+    "patientChooses": "Let the patient choose the doctor",
+    "reasonPlaceholder": "Reason for the referral (shown to the patient and the receiving doctor)…",
+    "referCostNotice": "If the patient chooses a refund instead, the refund costs are charged to your earnings ledger.",
+    "submitReferral": "Send referral",
+    "transferStatuses": {
+      "offered": "Awaiting your action",
+      "accepted": "Accepted",
+      "rechosen": "Doctor re-chosen",
+      "refunded": "Refunded",
+      "expired": "Expired",
+      "completed": "Completed"
+    }
   }
 }

@@ -413,6 +413,27 @@ export const verifyPaymentSchema = Joi.object({
   gatewaySignature: Joi.string().max(512).optional().allow('', null),
 });
 
+// ── Platform referrals (§4.4) ────────────────────────────────
+export const createPlatformReferralSchema = Joi.object({
+  toVetId: Joi.string().uuid().optional().allow(null),
+  reason: Joi.string().min(3).max(1000).required(),
+  bookingId: Joi.string().uuid().optional(),
+  consultationId: Joi.string().uuid().optional(),
+}).or('bookingId', 'consultationId');
+
+export const acceptReferralSchema = Joi.object({
+  veterinarianId: Joi.string().uuid().optional().allow(null),
+  scheduledDate: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required(),
+  timeSlotStart: Joi.string().pattern(/^\d{2}:\d{2}/).required(),
+  timeSlotEnd: Joi.string().pattern(/^\d{2}:\d{2}/).required(),
+  bookingType: Joi.string().valid('video_call', 'in_person', 'phone', 'chat', 'farm_visit', 'herd_consultation').optional(),
+  reasonForVisit: Joi.string().max(1000).optional().allow('', null),
+});
+
+export const declineReferralSchema = Joi.object({
+  refundDestination: Joi.string().valid('wallet', 'gateway').optional().default('wallet'),
+});
+
 // ── Legal & consent (§17) ────────────────────────────────────
 export const legalAcceptSchema = Joi.object({
   docTypes: Joi.array().items(

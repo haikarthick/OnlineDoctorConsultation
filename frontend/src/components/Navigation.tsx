@@ -204,6 +204,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin'], section: 'Account' },
     { id: 'payments-history', label: t('nav.myPayments'), icon: '🧾', path: '/payments',
       roles: ['pet_owner', 'farmer'], section: 'Account' },
+    { id: 'referrals', label: t('nav.referrals'), icon: '🔀', path: '/referrals',
+      roles: ['pet_owner', 'farmer', 'veterinarian'], section: 'Account' },
 
     // ── Administration (platform-level admin only) ──
     { id: 'admin-dashboard', label: t('nav.adminPanel'), icon: '🛡️', path: '/admin/dashboard',

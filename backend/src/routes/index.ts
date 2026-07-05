@@ -30,6 +30,7 @@ import {
   // Payment / Review
   createPaymentSchema, createReviewSchema,
   checkoutPaymentSchema, verifyPaymentSchema, legalAcceptSchema, adminLegalDocSchema,
+  createPlatformReferralSchema, acceptReferralSchema, declineReferralSchema,
   // Admin
   toggleUserStatusSchema, changeUserRoleSchema, processRefundSchema, moderateReviewSchema, updateSystemSettingSchema,
   updatePermissionSchema, bulkUpdatePermissionsSchema, resetPermissionsSchema,
@@ -1486,6 +1487,77 @@ router.get('/earnings/statement', authMiddleware, roleMiddleware(['veterinarian'
   const offset = parseInt(req.query.offset as string) || 0;
   const result = await EarningsService.getStatement(authReq.userId!, limit, offset);
   res.json({ success: true, data: result });
+}));
+
+// ─── Platform referrals (docs/PAYMENT_MODULE_PLAN.md §4.4) ─────────────────
+router.post('/referrals/platform', authMiddleware, roleMiddleware(['veterinarian']), validateBody(createPlatformReferralSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const ReferralService = (await import('../services/payment/ReferralService')).default;
+  const result = await ReferralService.createReferral(authReq.userId!, {
+    toVetId: req.body.toVetId || null,
+    reason: req.body.reason,
+    bookingId: req.body.bookingId,
+    consultationId: req.body.consultationId,
+  });
+  res.status(201).json({ success: true, data: result });
+}));
+
+router.get('/referrals/platform/my', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const ReferralService = (await import('../services/payment/ReferralService')).default;
+  res.json({ success: true, data: await ReferralService.listForUser(authReq.userId!, authReq.userRole || '') });
+}));
+
+// Doctor: items that can be referred (paid upcoming bookings + recent completed consultations)
+router.get('/referrals/platform/referable', authMiddleware, roleMiddleware(['veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const bookings = await database.query(
+    `SELECT b.id, b.scheduled_date as "scheduledDate", b.time_slot_start as "timeSlotStart",
+            b.status, b.priority, a.name as "animalName",
+            CONCAT(po.first_name, ' ', po.last_name) as "patientName"
+     FROM bookings b
+     JOIN payments p ON p.booking_id = b.id AND p.status = 'completed'
+     LEFT JOIN animals a ON a.id = b.animal_id
+     LEFT JOIN users po ON po.id = b.pet_owner_id
+     WHERE b.veterinarian_id = $1 AND b.status IN ('pending', 'confirmed')
+       AND NOT EXISTS (SELECT 1 FROM referrals r WHERE r.booking_id = b.id AND r.transfer_status IN ('offered', 'accepted', 'rechosen'))
+     ORDER BY b.scheduled_date ASC LIMIT 50`,
+    [authReq.userId]
+  );
+  const consultations = await database.query(
+    `SELECT c.id, c.completed_at as "completedAt", c.diagnosis, a.name as "animalName",
+            CONCAT(po.first_name, ' ', po.last_name) as "patientName"
+     FROM consultations c
+     LEFT JOIN animals a ON a.id = c.animal_id
+     LEFT JOIN users po ON po.id = c.user_id
+     WHERE c.veterinarian_id = $1 AND c.status = 'completed'
+       AND c.completed_at > NOW() - INTERVAL '30 days'
+     ORDER BY c.completed_at DESC LIMIT 50`,
+    [authReq.userId]
+  );
+  res.json({ success: true, data: { bookings: bookings.rows, consultations: consultations.rows } });
+}));
+
+router.post('/referrals/platform/:id/accept', authMiddleware, roleMiddleware(['pet_owner', 'farmer']), validateBody(acceptReferralSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const ReferralService = (await import('../services/payment/ReferralService')).default;
+  const booking = await ReferralService.acceptReferral(authReq.userId!, req.params.id, {
+    veterinarianId: req.body.veterinarianId || undefined,
+    scheduledDate: req.body.scheduledDate,
+    timeSlotStart: req.body.timeSlotStart,
+    timeSlotEnd: req.body.timeSlotEnd,
+    bookingType: req.body.bookingType,
+    reasonForVisit: req.body.reasonForVisit,
+  });
+  res.on('finish', () => { if (res.statusCode < 300 && authReq.userId) { emitDataRefresh(authReq.userId, 'bookings'); } });
+  res.status(201).json({ success: true, data: booking });
+}));
+
+router.post('/referrals/platform/:id/decline', authMiddleware, roleMiddleware(['pet_owner', 'farmer']), validateBody(declineReferralSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const ReferralService = (await import('../services/payment/ReferralService')).default;
+  const outcome = await ReferralService.declineReferral(authReq.userId!, req.params.id, req.body.refundDestination || 'wallet');
+  res.json({ success: true, data: outcome });
 }));
 
 // ─── Withdrawals / settlements (docs/PAYMENT_MODULE_PLAN.md §6.3) ──────────

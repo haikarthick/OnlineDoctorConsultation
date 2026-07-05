@@ -330,3 +330,18 @@ test.describe('Auto-Discovered — /admin/settlements', () => {
     await context.close()
   })
 })
+
+
+test.describe('Auto-Discovered — /referrals', () => {
+  test('should load /referrals without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'petOwner1')
+    await page.goto('/referrals')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})

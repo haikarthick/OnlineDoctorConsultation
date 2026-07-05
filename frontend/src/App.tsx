@@ -56,6 +56,7 @@ const SettlementsAdmin = lazy(() => import('./pages/admin/Settlements'))
 // Payment module
 const PolicyPage = lazy(() => import('./pages/PolicyPage'))
 const PaymentsHistory = lazy(() => import('./pages/PaymentsHistory'))
+const Referrals = lazy(() => import('./pages/Referrals'))
 const PendingPolicyModal = lazy(() => import('./components/PendingPolicyModal'))
 // Enterprise Module
 const EnterpriseManagement = lazy(() => import('./pages/EnterpriseManagement'))
@@ -297,6 +298,7 @@ function AppRoutes() {
       <Route path="/book-consultation" element={<RoleRoute path="/book-consultation"><AppLayout><RoutedPage Component={BookConsultation} /></AppLayout></RoleRoute>} />
       <Route path="/my-bookings" element={<Navigate to="/consultations" replace />} />
       <Route path="/payments" element={<ProtectedRoute><AppLayout><PaymentsHistory /></AppLayout></ProtectedRoute>} />
+      <Route path="/referrals" element={<ProtectedRoute><AppLayout><RoutedPage Component={Referrals} /></AppLayout></ProtectedRoute>} />
       <Route path="/video-consultation/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VideoConsultation} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />
       <Route path="/write-review" element={<RoleRoute path="/write-review"><AppLayout><RoutedPage Component={WriteReview} /></AppLayout></RoleRoute>} />
       <Route path="/vet-profile/:userId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VetProfilePage} paramKey="userId" /></AppLayout></ProtectedRoute>} />
