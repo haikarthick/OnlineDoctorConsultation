@@ -195,7 +195,9 @@
       "farmer": "Farmer",
       "admin": "Administrator"
     },
-    "permissions": "Permissions"
+    "permissions": "Permissions",
+    "myPayments": "My Payments",
+    "legalPolicies": "Legal & Policies"
   },
   "login": {
     "welcome": "Welcome back",
@@ -319,8 +321,14 @@
       "allRequired": "All fields are required",
       "passwordMismatch": "Passwords do not match",
       "passwordLength": "Password must be at least 8 characters",
-      "passwordComplexity": "Password must contain uppercase, lowercase, and a number"
-    }
+      "passwordComplexity": "Password must contain uppercase, lowercase, and a number",
+      "acceptTermsRequired": "Please accept the Terms of Service and Privacy Policy to continue."
+    },
+    "acceptPrefix": "I agree to the",
+    "termsLink": "Terms of Service",
+    "acceptAnd": "and",
+    "privacyLink": "Privacy Policy",
+    "doctorAgreementLink": "Doctor Service-Provider Agreement"
   },
   "home": {
     "signIn": "Sign In",
@@ -6856,5 +6864,90 @@
     "askMeAnything": "Ask me anything about your pets and their health",
     "askMeAnythingGeneral": "Ask me anything",
     "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "Complete Your Payment",
+    "slotHeldFor": "Slot held for",
+    "consultationFee": "Consultation fee",
+    "useWallet": "Use wallet balance",
+    "walletBalance": "Wallet balance",
+    "walletApplied": "Wallet applied",
+    "payableNow": "Payable now",
+    "payButton": "Pay",
+    "payLater": "Pay later",
+    "refundPolicyNotice": "By paying you agree to the Refund & Cancellation Policy.",
+    "gatewayUnavailable": "The payment gateway is not available right now. Please try again later.",
+    "checkoutFailed": "Could not start the payment. Please try again.",
+    "demoFailed": "The simulated payment failed. You can try again.",
+    "verificationFailed": "Payment verification failed. If money was deducted it will be reconciled automatically.",
+    "expiredTitle": "Payment window expired",
+    "expiredMessage": "The slot was released because payment was not completed in time.",
+    "bookAgain": "Book again",
+    "demoGatewayTitle": "Demo Payment Gateway",
+    "demoGatewayMessage": "This is a simulated checkout for testing. No real money moves.",
+    "demoFail": "Simulate failure",
+    "demoPay": "Pay now",
+    "status": {
+      "completed": "Paid",
+      "partially_refunded": "Partially refunded",
+      "refunded": "Refunded",
+      "pending": "Pending",
+      "created": "Awaiting payment",
+      "expired": "Expired",
+      "failed": "Failed",
+      "transferred": "Transferred"
+    }
+  },
+  "paymentsPage": {
+    "title": "Payments & Receipts",
+    "subtitle": "Your consultation payments, refunds and receipts",
+    "empty": "No payments yet. Payments appear here after you book a consultation.",
+    "refunded": "Refunded",
+    "viewReceipt": "View receipt",
+    "receiptTitle": "Payment Receipt",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "animal": "Animal",
+    "date": "Date",
+    "totalPaid": "Total paid",
+    "print": "Print"
+  },
+  "policy": {
+    "backToHome": "Back to home",
+    "notFoundTitle": "Document not found",
+    "notFoundMessage": "This policy document is not published yet.",
+    "version": "Version",
+    "effectiveFrom": "Effective from"
+  },
+  "policyModal": {
+    "title": "Updated Policies",
+    "message": "Our policies have been updated. Please review and accept to continue using the platform.",
+    "agreeCheckbox": "I have read and agree to the updated policies listed above",
+    "agreeButton": "Agree & Continue"
+  },
+  "legalAdmin": {
+    "title": "Legal & Policies",
+    "subtitle": "Manage versioned platform policies and consent coverage",
+    "published": "New version published successfully.",
+    "publishFailed": "Failed to publish the new version.",
+    "usersAccepted": "users accepted",
+    "notPublished": "Not published yet",
+    "view": "View",
+    "newVersion": "New version",
+    "publishTitle": "Publish new version",
+    "publishHint": "Publishing creates a new immutable version. Tick re-acceptance only for material changes — users will be blocked at next login until they accept.",
+    "docTitle": "Title",
+    "docContent": "Content",
+    "requireReacceptance": "Require all affected users to re-accept this version",
+    "publishButton": "Publish",
+    "docTypes": {
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "refund_policy": "Refund & Cancellation Policy",
+      "wallet_terms": "Wallet Terms",
+      "doctor_agreement": "Doctor Agreement",
+      "grievance_policy": "Grievance Redressal Policy",
+      "disclaimer": "Service Disclaimer"
+    }
   }
 }

@@ -45,7 +45,10 @@ export function startScheduler(): void {
   setInterval(runMarketplaceListingExpiry, SIX_HOURS);
   setInterval(runMarketplaceAuctionClose, FIVE_MINUTES);
 
-  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min');
+  // Payment module: expire unpaid slot holds (no-op while payment.enabled=false)
+  setInterval(runPaymentHoldExpiry, FIVE_MINUTES);
+
+  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min');
 }
 
 async function runExpiryCheck(): Promise<void> {
@@ -64,6 +67,15 @@ async function runMissedBookingsCheck(): Promise<void> {
     }
   } catch (err: any) {
     logger.error('Scheduled missed bookings check threw an unhandled error', { error: err.message });
+  }
+}
+
+async function runPaymentHoldExpiry(): Promise<void> {
+  try {
+    const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+    await PaymentOrchestrator.expireStalePaymentHolds();
+  } catch (err: any) {
+    logger.error('[Payments] Hold expiry job failed', { error: err.message });
   }
 }
 

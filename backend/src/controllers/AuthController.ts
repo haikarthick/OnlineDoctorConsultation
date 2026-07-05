@@ -86,6 +86,23 @@ export class AuthController {
         consultationFee: consultationFee ? Number(consultationFee) : undefined,
       });
 
+      // §17.2: record provable policy consent (checkbox is enforced by the
+      // registration schema; the server-side acceptance row is the legal proof)
+      try {
+        const LegalService = (await import('../services/LegalService')).default;
+        const { registrationDocTypesForRole } = await import('../services/LegalService');
+        await LegalService.recordAcceptances({
+          userId: user.id,
+          userEmail: user.email,
+          docTypes: registrationDocTypesForRole(user.role),
+          context: 'registration',
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'],
+        });
+      } catch (consentErr) {
+        logger.error('Policy acceptance recording failed at registration', { userId: user.id, error: consentErr });
+      }
+
       const isPending = (user as any).accountStatus === 'pending_approval';
 
       // Pending users: do NOT issue tokens — they cannot use the app until approved
@@ -206,12 +223,20 @@ export class AuthController {
 
       logger.info('User logged in', { userId: user.id, email: user.email });
 
+      // §17.3: pending policy re-acceptances drive the blocking consent modal
+      let pendingPolicyAcceptances: any[] = [];
+      try {
+        const LegalService = (await import('../services/LegalService')).default;
+        pendingPolicyAcceptances = await LegalService.getPendingReacceptances(user.id, user.role);
+      } catch { /* consent lookup must never block login */ }
+
       res.json({
         success: true,
         data: {
           user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, roles: userRoles },
           token: accessToken,
           refreshToken,
+          pendingPolicyAcceptances,
         },
       });
     } catch (error) {

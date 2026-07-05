@@ -6,6 +6,8 @@ import logger from '../utils/logger';
 import PaymentService from './PaymentService';
 import WalletService from './WalletService';
 import NotificationService from './NotificationService';
+import PaymentModuleConfig from './payment/PaymentModuleConfig';
+import PaymentOrchestrator from './payment/PaymentOrchestrator';
 
 class BookingService {
   /**
@@ -138,16 +140,29 @@ class BookingService {
       }
     }
 
-    // Check for conflicting bookings
+    // Check for conflicting bookings (payment_pending holds the slot; released
+    // statuses — cancelled/rescheduled/payment_expired/referred — do not block)
     const conflicts = await database.query(
-      `SELECT id FROM bookings WHERE veterinarian_id = $1 AND scheduled_date = $2 
-       AND time_slot_start = $3 AND status NOT IN ('cancelled')`,
+      `SELECT id FROM bookings WHERE veterinarian_id = $1 AND scheduled_date = $2
+       AND time_slot_start = $3 AND status NOT IN ('cancelled', 'rescheduled', 'payment_expired', 'referred')`,
       [data.veterinarianId, data.scheduledDate, data.timeSlotStart]
     );
 
     if (conflicts.rows.length > 0) {
       throw new ConflictError('This time slot is already booked');
     }
+
+    // Payment module (§4.2): when enabled, bookings start in payment_pending and
+    // the fee is derived server-side up-front so missing-fee doctors fail fast.
+    const paymentsOn = await PaymentModuleConfig.isEnabled();
+    if (paymentsOn) {
+      await PaymentOrchestrator.deriveBookingAmount({
+        veterinarianId: data.veterinarianId,
+        hospitalId: data.hospitalId || null,
+        priority: data.priority || 'normal',
+      });
+    }
+    const initialStatus = paymentsOn ? 'payment_pending' : 'pending';
 
     const result = await database.query(
       `INSERT INTO bookings (id, pet_owner_id, veterinarian_id, animal_id, enterprise_id, group_id, hospital_id, scheduled_date, 
@@ -162,7 +177,7 @@ class BookingService {
        status, booking_type as "bookingType", priority, reason_for_visit as "reasonForVisit",
        symptoms, notes, created_at as "createdAt", updated_at as "updatedAt"`,
       [id, petOwnerId, data.veterinarianId, data.animalId || null, data.enterpriseId || null, data.groupId || null, data.hospitalId || null, data.scheduledDate,
-       data.timeSlotStart, data.timeSlotEnd, 'pending', data.bookingType,
+       data.timeSlotStart, data.timeSlotEnd, initialStatus, data.bookingType,
        data.priority || 'normal', data.reasonForVisit, data.symptoms || null,
        data.notes || null, now, now]
     ).catch((err: any) => {
@@ -172,7 +187,26 @@ class BookingService {
       throw err;
     });
 
-    logger.info('Booking created', { bookingId: id, petOwnerId, vetId: data.veterinarianId, hospitalId: data.hospitalId });
+    logger.info('Booking created', { bookingId: id, petOwnerId, vetId: data.veterinarianId, hospitalId: data.hospitalId, initialStatus });
+
+    if (paymentsOn) {
+      // Create the payment hold that owns the slot-hold window. If it fails,
+      // roll the booking back so no unpayable booking blocks the slot.
+      try {
+        const hold = await PaymentOrchestrator.createPaymentHold({
+          id, petOwnerId, veterinarianId: data.veterinarianId,
+          hospitalId: data.hospitalId || null, priority: data.priority || 'normal',
+        });
+        (result.rows[0] as any).paymentId = hold.paymentId;
+        (result.rows[0] as any).paymentAmount = hold.amount;
+        (result.rows[0] as any).paymentExpiresAt = hold.expiresAt;
+      } catch (err) {
+        await database.query(`DELETE FROM bookings WHERE id = $1`, [id]).catch(() => {});
+        throw err;
+      }
+      // Vet is notified AFTER payment completes (PaymentOrchestrator), not here.
+      return result.rows[0];
+    }
 
     // Notify vet of new booking (non-blocking)
     try {
@@ -363,32 +397,46 @@ class BookingService {
 
     // ─── Auto-refund logic ──────────────────────────────────
     try {
-      const payment = await PaymentService.getPaymentByBooking(id);
-      if (payment) {
-        const paymentAmount = parseFloat(String(payment.amount));
+      // Void any unpaid payment holds so abandoned checkouts don't linger
+      await database.query(
+        `UPDATE payments SET status = 'expired', updated_at = NOW()
+         WHERE booking_id = $1 AND status IN ('created', 'pending')`,
+        [id]
+      ).catch(() => {});
 
-        if (isByDoctor || isByAdmin) {
-          // Doctor/admin cancellation: full refund + goodwill bonus
-          const autoRefund = await this.getSetting('cancellation.autoRefundOnDoctorCancel', 'true');
-          if (autoRefund === 'true') {
-            await PaymentService.processRefund(payment.id, paymentAmount, `Auto-refund: ${isByDoctor ? 'Doctor' : 'Admin'} cancelled booking`);
-            await WalletService.refund(booking.petOwnerId, paymentAmount, `Refund for cancelled booking`, id, 'booking');
+      const paymentsOn = await PaymentModuleConfig.isEnabled();
+      if (paymentsOn) {
+        // Payment module refund engine (D12 matrix; wallet destination in P1)
+        await PaymentOrchestrator.refundForCancellation(id, booking.petOwnerId, cancellerRole || 'admin', reason);
+      } else {
+        // Legacy path (flag off — kept for exact pre-module behavior)
+        const payment = await PaymentService.getPaymentByBooking(id);
+        if (payment) {
+          const paymentAmount = parseFloat(String(payment.amount));
 
-            // Goodwill bonus for doctor cancellation
-            if (isByDoctor) {
-              const bonusPercent = parseInt(await this.getSetting('cancellation.goodwillBonusPercent', '10'), 10);
-              if (bonusPercent > 0) {
-                const bonusAmount = Math.round(paymentAmount * bonusPercent) / 100;
-                await WalletService.addBonus(booking.petOwnerId, bonusAmount, `Goodwill bonus — doctor cancelled your appointment`, id, 'booking');
+          if (isByDoctor || isByAdmin) {
+            // Doctor/admin cancellation: full refund + goodwill bonus
+            const autoRefund = await this.getSetting('cancellation.autoRefundOnDoctorCancel', 'true');
+            if (autoRefund === 'true') {
+              await PaymentService.processRefund(payment.id, paymentAmount, `Auto-refund: ${isByDoctor ? 'Doctor' : 'Admin'} cancelled booking`);
+              await WalletService.refund(booking.petOwnerId, paymentAmount, `Refund for cancelled booking`, id, 'booking');
+
+              // Goodwill bonus for doctor cancellation
+              if (isByDoctor) {
+                const bonusPercent = parseInt(await this.getSetting('cancellation.goodwillBonusPercent', '10'), 10);
+                if (bonusPercent > 0) {
+                  const bonusAmount = Math.round(paymentAmount * bonusPercent) / 100;
+                  await WalletService.addBonus(booking.petOwnerId, bonusAmount, `Goodwill bonus — doctor cancelled your appointment`, id, 'booking');
+                }
               }
             }
-          }
-        } else if (isByPatient) {
-          // Patient cancellation: time-based refund policy
-          const refundResult = await this.calculatePatientRefund(booking, paymentAmount);
-          if (refundResult.refundAmount > 0) {
-            await PaymentService.processRefund(payment.id, refundResult.refundAmount, refundResult.reason);
-            await WalletService.refund(booking.petOwnerId, refundResult.refundAmount, refundResult.reason, id, 'booking');
+          } else if (isByPatient) {
+            // Patient cancellation: time-based refund policy
+            const refundResult = await this.calculatePatientRefund(booking, paymentAmount);
+            if (refundResult.refundAmount > 0) {
+              await PaymentService.processRefund(payment.id, refundResult.refundAmount, refundResult.reason);
+              await WalletService.refund(booking.petOwnerId, refundResult.refundAmount, refundResult.reason, id, 'booking');
+            }
           }
         }
       }
@@ -520,7 +568,7 @@ class BookingService {
     // Check for conflicting bookings on the new slot
     const conflicts = await database.query(
       `SELECT id FROM bookings WHERE veterinarian_id = $1 AND scheduled_date = $2
-       AND time_slot_start = $3 AND status NOT IN ('cancelled', 'rescheduled')`,
+       AND time_slot_start = $3 AND status NOT IN ('cancelled', 'rescheduled', 'payment_expired', 'referred')`,
       [vetId, newDate, newStart]
     );
     if (conflicts.rows.length > 0) {
@@ -564,6 +612,26 @@ class BookingService {
        oldBooking.priority || 'normal', oldBooking.reasonForVisit || null,
        oldBooking.symptoms || null, oldBooking.notes || null, id, newRescheduleCount, confirmedAt, now, now]
     );
+
+    // Payment module (§4.2 rule 5): a completed payment follows the booking —
+    // re-link it to the new row so no second charge happens on reschedule.
+    try {
+      const relinked = await database.query(
+        `UPDATE payments SET booking_id = $1, updated_at = NOW()
+         WHERE booking_id = $2 AND status IN ('completed', 'partially_refunded')
+         RETURNING id`,
+        [newId, id]
+      );
+      for (const p of relinked.rows) {
+        await database.query(
+          `INSERT INTO payment_events (id, payment_id, event_type, payload, created_at)
+           VALUES (gen_random_uuid(), $1, 'relinked_on_reschedule', $2, NOW())`,
+          [p.id, JSON.stringify({ fromBookingId: id, toBookingId: newId })]
+        ).catch(() => {});
+      }
+    } catch (err) {
+      logger.error('Payment re-link on reschedule failed (non-blocking)', { oldBookingId: id, newBookingId: newId, error: err });
+    }
 
     logger.info('Booking rescheduled', { oldBookingId: id, newBookingId: newId, newStatus, initiatorRole, vetChanged: vetId !== oldBooking.veterinarianId });
     return result.rows[0];

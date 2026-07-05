@@ -19,7 +19,7 @@ export class WalletService {
       const id = uuidv4();
       const result = await database.query(
         `INSERT INTO wallets (id, user_id, balance, bonus_credits, currency, created_at, updated_at)
-         VALUES ($1, $2, 0, 0, 'USD', NOW(), NOW())
+         VALUES ($1, $2, 0, 0, 'INR', NOW(), NOW())
          ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()
          RETURNING id, user_id as "userId", balance, bonus_credits as "bonusCredits",
                    currency, created_at as "createdAt", updated_at as "updatedAt"`,

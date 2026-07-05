@@ -70,6 +70,11 @@ export const registerSchema = Joi.object({
     then: Joi.number().min(0).optional().default(0),
     otherwise: Joi.any().strip(),
   }),
+  // §17.2: registration is blocked until policies are acknowledged
+  acceptTerms: Joi.boolean().valid(true).required().messages({
+    'any.only': 'You must accept the Terms of Service and Privacy Policy to register',
+    'any.required': 'You must accept the Terms of Service and Privacy Policy to register',
+  }),
 });
 
 export const loginSchema = Joi.object({
@@ -383,6 +388,35 @@ export const createPaymentSchema = Joi.object({
   amount: Joi.number().positive().required(),
   currency: Joi.string().max(3).optional().default('USD'),
   paymentMethod: Joi.string().valid('credit_card', 'debit_card', 'bank_transfer', 'e_wallet', 'cash').optional(),
+});
+
+// ── Payment module (docs/PAYMENT_MODULE_PLAN.md §9) ──────────
+// NOTE: no client-supplied amounts anywhere — prices are server-derived.
+export const checkoutPaymentSchema = Joi.object({
+  useWallet: Joi.boolean().optional().default(false),
+});
+
+export const verifyPaymentSchema = Joi.object({
+  paymentId: requiredUuid,
+  // Razorpay fields (P2) — optional in demo mode
+  gatewayOrderId: Joi.string().max(255).optional().allow('', null),
+  gatewayPaymentId: Joi.string().max(255).optional().allow('', null),
+  gatewaySignature: Joi.string().max(512).optional().allow('', null),
+});
+
+// ── Legal & consent (§17) ────────────────────────────────────
+export const legalAcceptSchema = Joi.object({
+  docTypes: Joi.array().items(
+    Joi.string().valid('terms', 'privacy', 'refund_policy', 'wallet_terms', 'doctor_agreement', 'grievance_policy', 'disclaimer')
+  ).min(1).max(7).required(),
+  context: Joi.string().valid('login_reacceptance', 'payout_setup').optional().default('login_reacceptance'),
+});
+
+export const adminLegalDocSchema = Joi.object({
+  docType: Joi.string().valid('terms', 'privacy', 'refund_policy', 'wallet_terms', 'doctor_agreement', 'grievance_policy', 'disclaimer').required(),
+  title: Joi.string().min(3).max(255).required(),
+  content: Joi.string().min(1).max(500000).required(),
+  requiresReacceptance: Joi.boolean().optional().default(false),
 });
 
 // ─── Review ──────────────────────────────────────────────────
@@ -1536,6 +1570,11 @@ export const acceptStaffInviteSchema = Joi.object({
   last_name: Joi.string().max(100).required(),
   phone: Joi.string().max(20).allow('', null).optional(),
   password: Joi.string().min(8).required(),
+  // §17.2: invited users must consent personally
+  acceptTerms: Joi.boolean().valid(true).required().messages({
+    'any.only': 'You must accept the Terms of Service and Privacy Policy to create your account',
+    'any.required': 'You must accept the Terms of Service and Privacy Policy to create your account',
+  }),
 });
 
 // ─── Network Referrals ───────────────────────────────────────

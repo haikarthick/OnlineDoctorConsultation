@@ -202,6 +202,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     // ── Wallet ──
     { id: 'wallet', label: t('nav.myWallet'), icon: '💰', path: '/wallet',
       roles: ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin'], section: 'Account' },
+    { id: 'payments-history', label: t('nav.myPayments'), icon: '🧾', path: '/payments',
+      roles: ['pet_owner', 'farmer'], section: 'Account' },
 
     // ── Administration (platform-level admin only) ──
     { id: 'admin-dashboard', label: t('nav.adminPanel'), icon: '🛡️', path: '/admin/dashboard',
@@ -211,6 +213,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'admin-consultations', label: t('nav.consultations'), icon: '🩺', path: '/admin/consultations',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-payments', label: t('nav.payments'), icon: '💳', path: '/admin/payments',
+      roles: ['admin'], section: 'Administration' },
+    { id: 'admin-legal-policies', label: t('nav.legalPolicies'), icon: '📜', path: '/admin/legal-policies',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-reviews', label: t('nav.reviewModeration'), icon: '⚖️', path: '/admin/reviews',
       roles: ['admin'], section: 'Administration' },

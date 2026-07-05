@@ -31,6 +31,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   const [messageType, setMessageType] = useState<'success' | 'error' | 'pending'>('error')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [acceptTerms, setAcceptTerms] = useState(false)
 
   const isVet = formData.role === 'veterinarian'
   const isCorporate = formData.role === 'corporate_admin'
@@ -76,6 +77,12 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
       setLoading(false)
       return
     }
+    if (!acceptTerms) {
+      setMessage(t('register.validation.acceptTermsRequired'))
+      setMessageType('error')
+      setLoading(false)
+      return
+    }
 
     try {
       const payload: any = {
@@ -86,6 +93,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
         password: formData.password,
         confirmPassword: formData.confirmPassword,
         role: formData.role,
+        acceptTerms: true,
       }
       if (isVet) {
         payload.licenseNumber = formData.licenseNumber.trim()
@@ -289,7 +297,30 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary register-submit" disabled={loading} aria-busy={loading}>
+            {/* §17.2: policy acknowledgement — required before account creation */}
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, margin: '4px 0 16px', cursor: 'pointer', fontSize: 14, lineHeight: 1.5 }}>
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                style={{ marginTop: 3 }}
+                aria-required="true"
+              />
+              <span>
+                {t('register.acceptPrefix')}{' '}
+                <a href="/policies/terms" target="_blank" rel="noopener noreferrer">{t('register.termsLink')}</a>
+                {' '}{t('register.acceptAnd')}{' '}
+                <a href="/policies/privacy" target="_blank" rel="noopener noreferrer">{t('register.privacyLink')}</a>
+                {isVet && (
+                  <>
+                    {' '}{t('register.acceptAnd')}{' '}
+                    <a href="/policies/doctor_agreement" target="_blank" rel="noopener noreferrer">{t('register.doctorAgreementLink')}</a>
+                  </>
+                )}
+              </span>
+            </label>
+
+            <button type="submit" className="btn btn-primary register-submit" disabled={loading || !acceptTerms} aria-busy={loading}>
               {loading
                 ? <span className="btn-loading"><span className="spinner" aria-hidden="true" /> {t('register.creatingAccount')}</span>
                 : isPendingRole ? 'Submit for Review' : t('register.createAccountBtn')

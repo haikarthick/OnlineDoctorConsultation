@@ -29,6 +29,7 @@ import {
   addWeightSchema, createAllergySchema, updateAllergySchema, createLabResultSchema, updateLabResultSchema,
   // Payment / Review
   createPaymentSchema, createReviewSchema,
+  checkoutPaymentSchema, verifyPaymentSchema, legalAcceptSchema, adminLegalDocSchema,
   // Admin
   toggleUserStatusSchema, changeUserRoleSchema, processRefundSchema, moderateReviewSchema, updateSystemSettingSchema,
   updatePermissionSchema, bulkUpdatePermissionsSchema, resetPermissionsSchema,
@@ -288,15 +289,26 @@ router.put('/auth/profile', authMiddleware, asyncHandler(async (req: Request, re
 router.post('/consultations', authMiddleware, validateBody(createConsultationSchema), asyncHandler(async (req: Request, res: Response) => {
   res.on('finish', () => { if (res.statusCode < 300) { const r = req as AuthRequest; if (r.userId) emitDataRefresh(r.userId, 'consultations'); emitRoleRefresh('admin', 'consultations') } })
 
-  // C4: If booking_id provided, check payment is not failed before allowing consultation
+  // Payment enforcement (§4.2 rule 4): booking-linked consultations require a
+  // completed payment when the payment module is enabled. Replaces the old
+  // fail-open 'failed'-only check.
   if (req.body.bookingId) {
     try {
-      const paymentCheck = await database.query(
-        `SELECT id, status FROM payments WHERE booking_id = $1 ORDER BY created_at DESC LIMIT 1`,
-        [req.body.bookingId]
-      );
-      if (paymentCheck.rows.length > 0 && paymentCheck.rows[0].status === 'failed') {
-        return res.status(402).json({ success: false, error: 'Payment for this booking has failed. Please complete payment before starting the consultation.' });
+      const PaymentModuleConfig = (await import('../services/payment/PaymentModuleConfig')).default;
+      if (await PaymentModuleConfig.isEnabled()) {
+        const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+        const paid = await PaymentOrchestrator.isBookingPaid(req.body.bookingId);
+        if (!paid) {
+          return res.status(402).json({ success: false, error: 'Payment for this booking has not been completed. Please complete payment before starting the consultation.' });
+        }
+      } else {
+        const paymentCheck = await database.query(
+          `SELECT id, status FROM payments WHERE booking_id = $1 ORDER BY created_at DESC LIMIT 1`,
+          [req.body.bookingId]
+        );
+        if (paymentCheck.rows.length > 0 && paymentCheck.rows[0].status === 'failed') {
+          return res.status(402).json({ success: false, error: 'Payment for this booking has failed. Please complete payment before starting the consultation.' });
+        }
       }
     } catch (payErr) {
       logger.warn('Payment check failed (non-blocking)', { bookingId: req.body.bookingId, error: payErr });
@@ -362,13 +374,43 @@ router.put('/bookings/:id/no-show', authMiddleware, roleMiddleware(['veterinaria
 }));
 
 // ─── Video Session routes ────────────────────────────────────
-router.post('/video-sessions', authMiddleware, validateBody(createVideoSessionSchema), asyncHandler((req: Request, res: Response) => VideoSessionController.createSession(req, res)));
+
+/** §4.2 rule 4: booking-linked consultations need a completed payment before video (flag-gated). */
+async function assertConsultationPaymentOk(consultationId: string | null | undefined, res: Response): Promise<boolean> {
+  if (!consultationId) return true;
+  try {
+    const PaymentModuleConfig = (await import('../services/payment/PaymentModuleConfig')).default;
+    if (!(await PaymentModuleConfig.isEnabled())) return true;
+    const cRes = await database.query(`SELECT booking_id FROM consultations WHERE id = $1`, [consultationId]);
+    const bookingId = cRes.rows[0]?.booking_id;
+    if (!bookingId) return true; // direct consultations stay allowed (§4.2)
+    const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+    if (await PaymentOrchestrator.isBookingPaid(bookingId)) return true;
+    res.status(402).json({ success: false, error: 'Payment for this booking has not been completed. The video session cannot start until payment is done.' });
+    return false;
+  } catch (err) {
+    logger.warn('Video session payment check failed (non-blocking)', { consultationId, error: err });
+    return true;
+  }
+}
+
+router.post('/video-sessions', authMiddleware, validateBody(createVideoSessionSchema), asyncHandler(async (req: Request, res: Response) => {
+  if (!(await assertConsultationPaymentOk(req.body.consultationId, res))) return;
+  await VideoSessionController.createSession(req, res);
+}));
 router.get('/video-sessions/active', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.listActiveSessions(req, res)));
 router.get('/video-sessions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getSession(req, res)));
 router.get('/video-sessions/consultation/:consultationId', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getSessionByConsultation(req, res)));
 router.put('/video-sessions/:id/start', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.startSession(req, res)));
 router.put('/video-sessions/:id/end', authMiddleware, validateBody(endVideoSessionSchema), asyncHandler((req: Request, res: Response) => VideoSessionController.endSession(req, res)));
-router.post('/video-sessions/join/:roomId', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.joinSession(req, res)));
+router.post('/video-sessions/join/:roomId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const VideoSessionService = (await import('../services/VideoSessionService')).default;
+    const session = await VideoSessionService.getSessionByRoom(req.params.roomId);
+    if (session && !(await assertConsultationPaymentOk(session.consultationId, res))) return;
+  } catch { /* session lookup errors fall through to the controller's own handling */ }
+  await VideoSessionController.joinSession(req, res);
+}));
 router.post('/video-sessions/:id/messages', authMiddleware, validateBody(sendVideoMessageSchema), asyncHandler((req: Request, res: Response) => VideoSessionController.sendMessage(req, res)));
 router.get('/video-sessions/:id/messages', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.getMessages(req, res)));
 router.post('/video-sessions/:id/signal', authMiddleware, asyncHandler((req: Request, res: Response) => VideoSessionController.sendSignal(req, res)));
@@ -1330,6 +1372,110 @@ router.put('/notifications/:id/read', authMiddleware, asyncHandler((req: Request
 router.put('/notifications/read-all', authMiddleware, asyncHandler((req: Request, res: Response) => NotificationController.markAllAsRead(req, res)));
 
 // ─── Payment routes ──────────────────────────────────────────
+// ─── Payment module: checkout lifecycle (docs/PAYMENT_MODULE_PLAN.md §9) ───
+router.post('/payments/checkout/:bookingId', authMiddleware, validateBody(checkoutPaymentSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+  const breakdown = await PaymentOrchestrator.initiateCheckout(authReq.userId!, req.params.bookingId, req.body.useWallet === true);
+  res.on('finish', () => { if (res.statusCode < 300 && authReq.userId) { emitDataRefresh(authReq.userId, 'bookings'); } });
+  res.json({ success: true, data: breakdown });
+}));
+
+router.post('/payments/verify', authMiddleware, validateBody(verifyPaymentSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+  // Demo mode: server-side capture. P2 adds Razorpay checkout-signature verification here.
+  await PaymentOrchestrator.completeDemoCheckout(authReq.userId!, req.body.paymentId);
+  res.on('finish', () => { if (res.statusCode < 300 && authReq.userId) { emitDataRefresh(authReq.userId, 'bookings'); emitRoleRefresh('admin', 'payments'); } });
+  res.json({ success: true, message: 'Payment completed' });
+}));
+
+router.get('/payments/refund-preview/:bookingId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const booking = await database.query(
+    `SELECT pet_owner_id, veterinarian_id FROM bookings WHERE id = $1`, [req.params.bookingId]
+  );
+  if (booking.rows.length === 0) return res.status(404).json({ success: false, error: 'Booking not found' });
+  const b = booking.rows[0];
+  if (b.pet_owner_id !== authReq.userId && b.veterinarian_id !== authReq.userId && authReq.userRole !== 'admin') {
+    return res.status(403).json({ success: false, error: 'Not your booking' });
+  }
+  // Preview is computed for the role of the requester (patient sees patient policy, vet sees vet policy)
+  const role = authReq.userId === b.pet_owner_id ? 'pet_owner' : (authReq.userId === b.veterinarian_id ? 'veterinarian' : 'admin');
+  const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+  const preview = await PaymentOrchestrator.computeRefundPreview(req.params.bookingId, role);
+  res.json({ success: true, data: preview });
+}));
+
+router.get('/payments/receipt/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+  const receipt = await PaymentOrchestrator.getReceipt(req.params.id, authReq.userId!, authReq.userRole || '');
+  res.json({ success: true, data: receipt });
+}));
+
+// ─── Legal documents & consent (docs/PAYMENT_MODULE_PLAN.md §17) ───────────
+router.get('/legal/documents', asyncHandler(async (_req: Request, res: Response) => {
+  const LegalService = (await import('../services/LegalService')).default;
+  res.json({ success: true, data: await LegalService.listActiveDocuments() });
+}));
+
+router.get('/legal/documents/:docType', asyncHandler(async (req: Request, res: Response) => {
+  const LegalService = (await import('../services/LegalService')).default;
+  res.json({ success: true, data: await LegalService.getActiveDocument(req.params.docType) });
+}));
+
+router.get('/legal/acceptances/pending', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const LegalService = (await import('../services/LegalService')).default;
+  const pending = await LegalService.getPendingReacceptances(authReq.userId!, authReq.userRole || '');
+  res.json({ success: true, data: pending });
+}));
+
+router.post('/legal/acceptances', authMiddleware, validateBody(legalAcceptSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const LegalService = (await import('../services/LegalService')).default;
+  const userRes = await database.query(`SELECT email FROM users WHERE id = $1`, [authReq.userId]);
+  await LegalService.recordAcceptances({
+    userId: authReq.userId!,
+    userEmail: userRes.rows[0]?.email || '',
+    docTypes: req.body.docTypes,
+    context: req.body.context || 'login_reacceptance',
+    ipAddress: req.ip,
+    userAgent: req.headers['user-agent'],
+  });
+  res.json({ success: true, message: 'Acceptance recorded' });
+}));
+
+// Admin: Legal & Policies manager (§10 item 8)
+router.get('/admin/legal-documents', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  const LegalService = (await import('../services/LegalService')).default;
+  res.json({ success: true, data: await LegalService.listAllDocuments() });
+}));
+
+router.post('/admin/legal-documents', authMiddleware, roleMiddleware(['admin']), validateBody(adminLegalDocSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const LegalService = (await import('../services/LegalService')).default;
+  const doc = await LegalService.publishNewVersion({
+    docType: req.body.docType,
+    title: req.body.title,
+    content: req.body.content,
+    requiresReacceptance: req.body.requiresReacceptance === true,
+    createdBy: authReq.userId!,
+  });
+  res.status(201).json({ success: true, data: doc });
+}));
+
+router.get('/admin/legal-documents/acceptance-stats', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  const LegalService = (await import('../services/LegalService')).default;
+  res.json({ success: true, data: await LegalService.getAcceptanceStats() });
+}));
+
+router.get('/admin/legal-documents/user/:userId', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const LegalService = (await import('../services/LegalService')).default;
+  res.json({ success: true, data: await LegalService.getUserAcceptances(req.params.userId) });
+}));
+
 router.post('/payments', authMiddleware, validateBody(createPaymentSchema), asyncHandler((req: Request, res: Response) => PaymentController.createPayment(req, res)));
 router.get('/payments', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.listPayments(req, res)));
 router.get('/payments/booking/:bookingId', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.getPaymentByBooking(req, res)));
@@ -2827,6 +2973,22 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
     await db.query(`UPDATE hospital_staff_invites SET status='accepted', accepted_at=NOW(), accepted_user_id=$1 WHERE invite_token=$2`, [newUser.id, token]);
 
     await db.query('COMMIT');
+
+    // §17.2: record provable policy consent for the invited user (context 'invite')
+    try {
+      const LegalService = (await import('../services/LegalService')).default;
+      await LegalService.recordAcceptances({
+        userId: newUser.id,
+        userEmail: newUser.email,
+        docTypes: ['terms', 'privacy'],
+        context: 'invite',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      });
+    } catch (consentErr: any) {
+      logger.error('Policy acceptance recording failed at invite accept', { userId: newUser.id, error: consentErr.message });
+    }
+
     res.status(201).json({ success: true, message: 'Account created successfully. You can now log in.' });
   } catch (err: any) {
     try { await db.query('ROLLBACK'); } catch (rollbackErr: any) { logger.error('Rollback failed', { error: rollbackErr.message }); }

@@ -122,7 +122,7 @@ class ApiService {
     return response.data
   }
 
-  async register(data: { firstName: string; lastName: string; email: string; phone: string; password: string; role: string }) {
+  async register(data: { firstName: string; lastName: string; email: string; phone: string; password: string; role: string; acceptTerms?: boolean; [key: string]: any }) {
     const response = await this.client.post('/auth/register', data)
     return response.data
   }
@@ -676,6 +676,63 @@ class ApiService {
 
   async getPaymentByBooking(bookingId: string) {
     const response = await this.client.get(`/payments/booking/${bookingId}`)
+    return response.data
+  }
+
+  // ─── Payment module: checkout lifecycle ────────────────────
+  async initiatePaymentCheckout(bookingId: string, useWallet: boolean) {
+    const response = await this.client.post(`/payments/checkout/${bookingId}`, { useWallet })
+    return response.data
+  }
+
+  async verifyPayment(data: { paymentId: string; gatewayOrderId?: string; gatewayPaymentId?: string; gatewaySignature?: string }) {
+    const response = await this.client.post('/payments/verify', data)
+    return response.data
+  }
+
+  async getRefundPreview(bookingId: string) {
+    const response = await this.client.get(`/payments/refund-preview/${bookingId}`)
+    return response.data
+  }
+
+  async getPaymentReceipt(paymentId: string) {
+    const response = await this.client.get(`/payments/receipt/${paymentId}`)
+    return response.data
+  }
+
+  // ─── Legal documents & consent ──────────────────────────────
+  async getLegalDocuments() {
+    const response = await this.client.get('/legal/documents')
+    return response.data
+  }
+
+  async getLegalDocument(docType: string) {
+    const response = await this.client.get(`/legal/documents/${docType}`)
+    return response.data
+  }
+
+  async getPendingPolicyAcceptances() {
+    const response = await this.client.get('/legal/acceptances/pending')
+    return response.data
+  }
+
+  async acceptPolicies(docTypes: string[], context?: string) {
+    const response = await this.client.post('/legal/acceptances', { docTypes, context })
+    return response.data
+  }
+
+  async adminListLegalDocuments() {
+    const response = await this.client.get('/admin/legal-documents')
+    return response.data
+  }
+
+  async adminPublishLegalDocument(data: { docType: string; title: string; content: string; requiresReacceptance?: boolean }) {
+    const response = await this.client.post('/admin/legal-documents', data)
+    return response.data
+  }
+
+  async adminGetAcceptanceStats() {
+    const response = await this.client.get('/admin/legal-documents/acceptance-stats')
     return response.data
   }
 
@@ -2596,7 +2653,7 @@ class ApiService {
     const response = await this.client.get(`/hospital-staff-invites/token/${token}`)
     return response.data
   }
-  async acceptStaffInvite(data: { token: string; first_name: string; last_name: string; phone?: string; password: string }) {
+  async acceptStaffInvite(data: { token: string; first_name: string; last_name: string; phone?: string; password: string; acceptTerms?: boolean }) {
     const response = await this.client.post('/hospital-staff-invites/accept', data)
     return response.data
   }

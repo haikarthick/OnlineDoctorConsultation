@@ -50,6 +50,11 @@ const PermissionManagement = lazy(() => import('./pages/admin/PermissionManageme
 const MedicalRecordManagement = lazy(() => import('./pages/admin/MedicalRecordManagement'))
 const ComplianceDashboardAdmin = lazy(() => import('./pages/admin/ComplianceDashboard'))
 const HolidayManagementAdmin = lazy(() => import('./pages/admin/HolidayManagement'))
+const LegalPoliciesAdmin = lazy(() => import('./pages/admin/LegalPolicies'))
+// Payment module
+const PolicyPage = lazy(() => import('./pages/PolicyPage'))
+const PaymentsHistory = lazy(() => import('./pages/PaymentsHistory'))
+const PendingPolicyModal = lazy(() => import('./components/PendingPolicyModal'))
 // Enterprise Module
 const EnterpriseManagement = lazy(() => import('./pages/EnterpriseManagement'))
 const AnimalGroups = lazy(() => import('./pages/AnimalGroups'))
@@ -165,6 +170,9 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <Layout currentPath={location.pathname} onNavigate={handleNavigate}>
       <ErrorAutoScroll />
+      <Suspense fallback={null}>
+        <PendingPolicyModal />
+      </Suspense>
       <div className="layout-content">
         {children}
       </div>
@@ -268,6 +276,7 @@ function AppRoutes() {
       } />
       <Route path="/accept-invite" element={<AcceptInvite />} />
       <Route path="/browse-marketplace" element={<PublicMarketplace />} />
+      <Route path="/policies/:docType" element={<PolicyPage />} />
 
       {/* Protected pages (inside AppLayout) */}
       <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
@@ -285,6 +294,7 @@ function AppRoutes() {
       <Route path="/find-doctor" element={<RoleRoute path="/find-doctor"><AppLayout><RoutedPage Component={FindDoctor} /></AppLayout></RoleRoute>} />
       <Route path="/book-consultation" element={<RoleRoute path="/book-consultation"><AppLayout><RoutedPage Component={BookConsultation} /></AppLayout></RoleRoute>} />
       <Route path="/my-bookings" element={<Navigate to="/consultations" replace />} />
+      <Route path="/payments" element={<ProtectedRoute><AppLayout><PaymentsHistory /></AppLayout></ProtectedRoute>} />
       <Route path="/video-consultation/:consultationId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VideoConsultation} paramKey="consultationId" /></AppLayout></ProtectedRoute>} />
       <Route path="/write-review" element={<RoleRoute path="/write-review"><AppLayout><RoutedPage Component={WriteReview} /></AppLayout></RoleRoute>} />
       <Route path="/vet-profile/:userId" element={<ProtectedRoute><AppLayout><RoutedPage Component={VetProfilePage} paramKey="userId" /></AppLayout></ProtectedRoute>} />
@@ -356,6 +366,7 @@ function AppRoutes() {
       <Route path="/admin/cancellation-dashboard" element={<RoleRoute path="/admin/cancellation-dashboard"><AppLayout><RoutedPage Component={CancellationDashboard} /></AppLayout></RoleRoute>} />
       <Route path="/admin/staff-settings" element={<RoleRoute path="/admin/staff-settings"><AppLayout><RoutedPage Component={StaffSettingsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/holidays" element={<RoleRoute path="/admin/holidays"><AppLayout><RoutedPage Component={HolidayManagementAdmin} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/legal-policies" element={<RoleRoute path="/admin/legal-policies"><AppLayout><RoutedPage Component={LegalPoliciesAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/vaccine-protocols" element={<RoleRoute path="/admin/vaccine-protocols"><AppLayout><RoutedPage Component={VaccineProtocolAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/certificate-settings" element={<RoleRoute path="/admin/certificate-settings"><AppLayout><RoutedPage Component={CertificateSettings} /></AppLayout></RoleRoute>} />
 

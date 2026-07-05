@@ -195,7 +195,9 @@
     "vetCertificates": "Vet Certificates",
     "certificateSettings": "Certificate Template",
     "dataConsent": "Data Consent",
-    "networkMemberships": "Network Memberships"
+    "networkMemberships": "Network Memberships",
+    "myPayments": "എന്റെ പേയ്മെന്റുകൾ",
+    "legalPolicies": "നിയമവും നയങ്ങളും"
   },
   "login": {
     "welcome": "തിരികെ സ്വാഗതം",
@@ -315,12 +317,18 @@
       "allRequired": "എല്ലാ ഫീൽഡുകളും ആവശ്യമാണ്",
       "passwordMismatch": "പാസ്‌വേഡുകൾ പൊരുത്തപ്പെടുന്നില്ല",
       "passwordLength": "പാസ്‌വേഡ് കുറഞ്ഞത് 6 അക്ഷരങ്ങൾ ഉണ്ടായിരിക്കണം",
-      "passwordComplexity": "Password must contain uppercase, lowercase, and a number"
+      "passwordComplexity": "Password must contain uppercase, lowercase, and a number",
+      "acceptTermsRequired": "തുടരാൻ സേവന നിബന്ധനകളും സ്വകാര്യതാ നയവും അംഗീകരിക്കുക."
     },
     "roleCorporateAdmin": "Hospital Network",
     "roleCorporateAdminDesc": "Manage multi-hospital networks & staff",
     "corporateAdminCalloutTitle": "Setting up a Hospital Network?",
-    "corporateAdminCalloutBody": "As a Hospital Network Admin, you can create and manage multiple hospital branches, onboard doctors and staff, monitor performance, and manage network-wide patient care — all from your dedicated dashboard."
+    "corporateAdminCalloutBody": "As a Hospital Network Admin, you can create and manage multiple hospital branches, onboard doctors and staff, monitor performance, and manage network-wide patient care — all from your dedicated dashboard.",
+    "acceptPrefix": "ഞാൻ അംഗീകരിക്കുന്നു",
+    "termsLink": "സേവന നിബന്ധനകൾ",
+    "acceptAnd": "ഒപ്പം",
+    "privacyLink": "സ്വകാര്യതാ നയം",
+    "doctorAgreementLink": "ഡോക്ടർ സേവന കരാർ"
   },
   "home": {
     "signIn": "ലോഗിൻ ചെയ്യുക",
@@ -6857,5 +6865,90 @@
     "askMeAnything": "Ask me anything about your pets and their health",
     "askMeAnythingGeneral": "Ask me anything",
     "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "നിങ്ങളുടെ പേയ്മെന്റ് പൂർത്തിയാക്കുക",
+    "slotHeldFor": "സ്ലോട്ട് നിലനിർത്തിയിരിക്കുന്നു",
+    "consultationFee": "കൺസൾട്ടേഷൻ ഫീസ്",
+    "useWallet": "വാലറ്റ് ബാലൻസ് ഉപയോഗിക്കുക",
+    "walletBalance": "വാലറ്റ് ബാലൻസ്",
+    "walletApplied": "വാലറ്റിൽ നിന്ന് അടച്ചത്",
+    "payableNow": "ഇപ്പോൾ അടയ്ക്കേണ്ടത്",
+    "payButton": "പണമടയ്ക്കുക",
+    "payLater": "പിന്നീട് അടയ്ക്കുക",
+    "refundPolicyNotice": "പണമടയ്ക്കുന്നതിലൂടെ റീഫണ്ട് & റദ്ദാക്കൽ നയം അംഗീകരിക്കുന്നു.",
+    "gatewayUnavailable": "പേയ്മെന്റ് ഗേറ്റ്‌വേ ഇപ്പോൾ ലഭ്യമല്ല. ദയവായി പിന്നീട് ശ്രമിക്കുക.",
+    "checkoutFailed": "പേയ്മെന്റ് ആരംഭിക്കാനായില്ല. വീണ്ടും ശ്രമിക്കുക.",
+    "demoFailed": "സിമുലേറ്റഡ് പേയ്മെന്റ് പരാജയപ്പെട്ടു. വീണ്ടും ശ്രമിക്കാം.",
+    "verificationFailed": "പേയ്മെന്റ് പരിശോധന പരാജയപ്പെട്ടു. പണം പിടിച്ചിട്ടുണ്ടെങ്കിൽ സ്വയമേവ ക്രമീകരിക്കും.",
+    "expiredTitle": "പേയ്മെന്റ് സമയം കഴിഞ്ഞു",
+    "expiredMessage": "സമയത്തിന് പണമടയ്ക്കാത്തതിനാൽ സ്ലോട്ട് വിട്ടയച്ചു.",
+    "bookAgain": "വീണ്ടും ബുക്ക് ചെയ്യുക",
+    "demoGatewayTitle": "ഡെമോ പേയ്മെന്റ് ഗേറ്റ്‌വേ",
+    "demoGatewayMessage": "ഇത് ടെസ്റ്റിനുള്ള സിമുലേറ്റഡ് ചെക്ക്ഔട്ടാണ്. യഥാർത്ഥ പണം ഈടാക്കില്ല.",
+    "demoFail": "പരാജയം സിമുലേറ്റ് ചെയ്യുക",
+    "demoPay": "ഇപ്പോൾ അടയ്ക്കുക",
+    "status": {
+      "completed": "അടച്ചു",
+      "partially_refunded": "ഭാഗിക റീഫണ്ട്",
+      "refunded": "റീഫണ്ട് ചെയ്തു",
+      "pending": "തീർപ്പാക്കാത്തത്",
+      "created": "പേയ്മെന്റിനായി കാത്തിരിക്കുന്നു",
+      "expired": "കാലഹരണപ്പെട്ടു",
+      "failed": "പരാജയപ്പെട്ടു",
+      "transferred": "കൈമാറ്റം ചെയ്തു"
+    }
+  },
+  "paymentsPage": {
+    "title": "പേയ്മെന്റുകളും രസീതുകളും",
+    "subtitle": "നിങ്ങളുടെ കൺസൾട്ടേഷൻ പേയ്മെന്റുകൾ, റീഫണ്ടുകൾ, രസീതുകൾ",
+    "empty": "ഇതുവരെ പേയ്മെന്റുകളില്ല. കൺസൾട്ടേഷൻ ബുക്ക് ചെയ്ത ശേഷം ഇവിടെ കാണാം.",
+    "refunded": "റീഫണ്ട്",
+    "viewReceipt": "രസീത് കാണുക",
+    "receiptTitle": "പേയ്മെന്റ് രസീത്",
+    "patient": "രോഗി",
+    "doctor": "ഡോക്ടർ",
+    "animal": "മൃഗം",
+    "date": "തീയതി",
+    "totalPaid": "ആകെ അടച്ചത്",
+    "print": "പ്രിന്റ്"
+  },
+  "policy": {
+    "backToHome": "ഹോമിലേക്ക് മടങ്ങുക",
+    "notFoundTitle": "രേഖ കണ്ടെത്തിയില്ല",
+    "notFoundMessage": "ഈ നയരേഖ ഇതുവരെ പ്രസിദ്ധീകരിച്ചിട്ടില്ല.",
+    "version": "പതിപ്പ്",
+    "effectiveFrom": "പ്രാബല്യ തീയതി"
+  },
+  "policyModal": {
+    "title": "പുതുക്കിയ നയങ്ങൾ",
+    "message": "ഞങ്ങളുടെ നയങ്ങൾ പുതുക്കിയിരിക്കുന്നു. തുടരാൻ അവലോകനം ചെയ്ത് അംഗീകരിക്കുക.",
+    "agreeCheckbox": "മുകളിൽ പറഞ്ഞ പുതുക്കിയ നയങ്ങൾ വായിച്ച് അംഗീകരിക്കുന്നു",
+    "agreeButton": "അംഗീകരിച്ച് തുടരുക"
+  },
+  "legalAdmin": {
+    "title": "നിയമവും നയങ്ങളും",
+    "subtitle": "പതിപ്പ് അടിസ്ഥാനമാക്കിയ നയങ്ങളും സമ്മത കവറേജും കൈകാര്യം ചെയ്യുക",
+    "published": "പുതിയ പതിപ്പ് വിജയകരമായി പ്രസിദ്ധീകരിച്ചു.",
+    "publishFailed": "പുതിയ പതിപ്പ് പ്രസിദ്ധീകരിക്കാനായില്ല.",
+    "usersAccepted": "ഉപയോക്താക്കൾ അംഗീകരിച്ചു",
+    "notPublished": "ഇതുവരെ പ്രസിദ്ധീകരിച്ചിട്ടില്ല",
+    "view": "കാണുക",
+    "newVersion": "പുതിയ പതിപ്പ്",
+    "publishTitle": "പുതിയ പതിപ്പ് പ്രസിദ്ധീകരിക്കുക",
+    "publishHint": "പ്രസിദ്ധീകരണം മാറ്റാനാവാത്ത പുതിയ പതിപ്പ് സൃഷ്ടിക്കുന്നു. പ്രധാന മാറ്റങ്ങൾക്ക് മാത്രം വീണ്ടും-അംഗീകാരം തിരഞ്ഞെടുക്കുക.",
+    "docTitle": "തലക്കെട്ട്",
+    "docContent": "ഉള്ളടക്കം",
+    "requireReacceptance": "ബാധിതരായ എല്ലാ ഉപയോക്താക്കളും ഈ പതിപ്പ് വീണ്ടും അംഗീകരിക്കണം",
+    "publishButton": "പ്രസിദ്ധീകരിക്കുക",
+    "docTypes": {
+      "terms": "സേവന നിബന്ധനകൾ",
+      "privacy": "സ്വകാര്യതാ നയം",
+      "refund_policy": "റീഫണ്ട് & റദ്ദാക്കൽ നയം",
+      "wallet_terms": "വാലറ്റ് നിബന്ധനകൾ",
+      "doctor_agreement": "ഡോക്ടർ കരാർ",
+      "grievance_policy": "പരാതി പരിഹാര നയം",
+      "disclaimer": "സേവന നിരാകരണം"
+    }
   }
 }

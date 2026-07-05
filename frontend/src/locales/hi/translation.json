@@ -195,7 +195,9 @@
       "approve": "Approve",
       "reject": "Reject",
       "approvalRequired": "This movement requires manager approval"
-    }
+    },
+    "myPayments": "मेरे भुगतान",
+    "legalPolicies": "कानूनी और नीतियाँ"
   },
   "login": {
     "welcome": "वापस स्वागत है",
@@ -319,8 +321,14 @@
       "allRequired": "सभी फ़ील्ड आवश्यक हैं",
       "passwordMismatch": "पासवर्ड मेल नहीं खाते",
       "passwordLength": "पासवर्ड कम से कम 8 अक्षर का होना चाहिए",
-      "passwordComplexity": "पासवर्ड में बड़े, छोटे अक्षर और संख्या होनी चाहिए"
-    }
+      "passwordComplexity": "पासवर्ड में बड़े, छोटे अक्षर और संख्या होनी चाहिए",
+      "acceptTermsRequired": "जारी रखने के लिए कृपया सेवा की शर्तें और गोपनीयता नीति स्वीकार करें।"
+    },
+    "acceptPrefix": "मैं सहमत हूँ",
+    "termsLink": "सेवा की शर्तें",
+    "acceptAnd": "और",
+    "privacyLink": "गोपनीयता नीति",
+    "doctorAgreementLink": "डॉक्टर सेवा-प्रदाता अनुबंध"
   },
   "home": {
     "signIn": "साइन इन करें",
@@ -6861,5 +6869,90 @@
     "askMeAnything": "Ask me anything about your pets and their health",
     "askMeAnythingGeneral": "Ask me anything",
     "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "अपना भुगतान पूरा करें",
+    "slotHeldFor": "स्लॉट आरक्षित है",
+    "consultationFee": "परामर्श शुल्क",
+    "useWallet": "वॉलेट बैलेंस का उपयोग करें",
+    "walletBalance": "वॉलेट बैलेंस",
+    "walletApplied": "वॉलेट से भुगतान",
+    "payableNow": "अभी देय राशि",
+    "payButton": "भुगतान करें",
+    "payLater": "बाद में भुगतान करें",
+    "refundPolicyNotice": "भुगतान करके आप रिफंड और रद्दीकरण नीति से सहमत होते हैं।",
+    "gatewayUnavailable": "भुगतान गेटवे अभी उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
+    "checkoutFailed": "भुगतान शुरू नहीं हो सका। कृपया पुनः प्रयास करें।",
+    "demoFailed": "सिम्युलेटेड भुगतान विफल रहा। आप पुनः प्रयास कर सकते हैं।",
+    "verificationFailed": "भुगतान सत्यापन विफल रहा। यदि राशि कटी है तो स्वतः समायोजित हो जाएगी।",
+    "expiredTitle": "भुगतान समय समाप्त",
+    "expiredMessage": "समय पर भुगतान न होने के कारण स्लॉट छोड़ दिया गया।",
+    "bookAgain": "फिर से बुक करें",
+    "demoGatewayTitle": "डेमो भुगतान गेटवे",
+    "demoGatewayMessage": "यह परीक्षण के लिए सिम्युलेटेड चेकआउट है। कोई वास्तविक धन नहीं कटेगा।",
+    "demoFail": "विफलता सिमुलेट करें",
+    "demoPay": "अभी भुगतान करें",
+    "status": {
+      "completed": "भुगतान हुआ",
+      "partially_refunded": "आंशिक रिफंड",
+      "refunded": "रिफंड हुआ",
+      "pending": "लंबित",
+      "created": "भुगतान प्रतीक्षित",
+      "expired": "समाप्त",
+      "failed": "विफल",
+      "transferred": "स्थानांतरित"
+    }
+  },
+  "paymentsPage": {
+    "title": "भुगतान और रसीदें",
+    "subtitle": "आपके परामर्श भुगतान, रिफंड और रसीदें",
+    "empty": "अभी कोई भुगतान नहीं। परामर्श बुक करने के बाद भुगतान यहाँ दिखेंगे।",
+    "refunded": "रिफंड",
+    "viewReceipt": "रसीद देखें",
+    "receiptTitle": "भुगतान रसीद",
+    "patient": "मरीज़",
+    "doctor": "डॉक्टर",
+    "animal": "पशु",
+    "date": "तारीख",
+    "totalPaid": "कुल भुगतान",
+    "print": "प्रिंट करें"
+  },
+  "policy": {
+    "backToHome": "होम पर वापस जाएँ",
+    "notFoundTitle": "दस्तावेज़ नहीं मिला",
+    "notFoundMessage": "यह नीति दस्तावेज़ अभी प्रकाशित नहीं हुआ है।",
+    "version": "संस्करण",
+    "effectiveFrom": "प्रभावी तिथि"
+  },
+  "policyModal": {
+    "title": "अद्यतन नीतियाँ",
+    "message": "हमारी नीतियाँ अद्यतन की गई हैं। प्लेटफ़ॉर्म का उपयोग जारी रखने के लिए कृपया समीक्षा करके स्वीकार करें।",
+    "agreeCheckbox": "मैंने ऊपर सूचीबद्ध अद्यतन नीतियाँ पढ़ी हैं और उनसे सहमत हूँ",
+    "agreeButton": "सहमत हों और जारी रखें"
+  },
+  "legalAdmin": {
+    "title": "कानूनी और नीतियाँ",
+    "subtitle": "संस्करणबद्ध प्लेटफ़ॉर्म नीतियाँ और सहमति कवरेज प्रबंधित करें",
+    "published": "नया संस्करण सफलतापूर्वक प्रकाशित हुआ।",
+    "publishFailed": "नया संस्करण प्रकाशित करने में विफल।",
+    "usersAccepted": "उपयोगकर्ताओं ने स्वीकार किया",
+    "notPublished": "अभी प्रकाशित नहीं",
+    "view": "देखें",
+    "newVersion": "नया संस्करण",
+    "publishTitle": "नया संस्करण प्रकाशित करें",
+    "publishHint": "प्रकाशन से नया अपरिवर्तनीय संस्करण बनता है। केवल महत्वपूर्ण बदलावों के लिए पुनः स्वीकृति चुनें — उपयोगकर्ता अगले लॉगिन पर स्वीकृति तक अवरुद्ध रहेंगे।",
+    "docTitle": "शीर्षक",
+    "docContent": "सामग्री",
+    "requireReacceptance": "सभी प्रभावित उपयोगकर्ताओं से इस संस्करण की पुनः स्वीकृति आवश्यक करें",
+    "publishButton": "प्रकाशित करें",
+    "docTypes": {
+      "terms": "सेवा की शर्तें",
+      "privacy": "गोपनीयता नीति",
+      "refund_policy": "रिफंड और रद्दीकरण नीति",
+      "wallet_terms": "वॉलेट शर्तें",
+      "doctor_agreement": "डॉक्टर अनुबंध",
+      "grievance_policy": "शिकायत निवारण नीति",
+      "disclaimer": "सेवा अस्वीकरण"
+    }
   }
 }

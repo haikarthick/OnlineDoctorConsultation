@@ -195,7 +195,9 @@
       "approve": "Approve",
       "reject": "Reject",
       "approvalRequired": "This movement requires manager approval"
-    }
+    },
+    "myPayments": "ನನ್ನ ಪಾವತಿಗಳು",
+    "legalPolicies": "ಕಾನೂನು & ನೀತಿಗಳು"
   },
   "login": {
     "welcome": "ಮತ್ತೆ ಸ್ವಾಗತ",
@@ -319,8 +321,14 @@
       "allRequired": "ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳು ಅಗತ್ಯ",
       "passwordMismatch": "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ",
       "passwordLength": "ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 8 ಅಕ್ಷರಗಳಿರಬೇಕು",
-      "passwordComplexity": "ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ದೊಡ್ಡ, ಸಣ್ಣ ಅಕ್ಷರಗಳು ಮತ್ತು ಸಂಖ್ಯೆ ಇರಬೇಕು"
-    }
+      "passwordComplexity": "ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ದೊಡ್ಡ, ಸಣ್ಣ ಅಕ್ಷರಗಳು ಮತ್ತು ಸಂಖ್ಯೆ ಇರಬೇಕು",
+      "acceptTermsRequired": "ಮುಂದುವರಿಯಲು ಸೇವಾ ನಿಯಮಗಳು ಮತ್ತು ಗೌಪ್ಯತಾ ನೀತಿಯನ್ನು ಒಪ್ಪಿಕೊಳ್ಳಿ."
+    },
+    "acceptPrefix": "ನಾನು ಒಪ್ಪುತ್ತೇನೆ",
+    "termsLink": "ಸೇವಾ ನಿಯಮಗಳು",
+    "acceptAnd": "ಮತ್ತು",
+    "privacyLink": "ಗೌಪ್ಯತಾ ನೀತಿ",
+    "doctorAgreementLink": "ವೈದ್ಯ ಸೇವಾ ಒಪ್ಪಂದ"
   },
   "home": {
     "signIn": "ಸೈನ್ ಇನ್",
@@ -6876,5 +6884,90 @@
     "askMeAnything": "Ask me anything about your pets and their health",
     "askMeAnythingGeneral": "Ask me anything",
     "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "ನಿಮ್ಮ ಪಾವತಿಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ",
+    "slotHeldFor": "ಸ್ಲಾಟ್ ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+    "consultationFee": "ಸಮಾಲೋಚನಾ ಶುಲ್ಕ",
+    "useWallet": "ವಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್ ಬಳಸಿ",
+    "walletBalance": "ವಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್",
+    "walletApplied": "ವಾಲೆಟ್‌ನಿಂದ ಪಾವತಿ",
+    "payableNow": "ಈಗ ಪಾವತಿಸಬೇಕಾದದ್ದು",
+    "payButton": "ಪಾವತಿಸಿ",
+    "payLater": "ನಂತರ ಪಾವತಿಸಿ",
+    "refundPolicyNotice": "ಪಾವತಿಸುವ ಮೂಲಕ ಮರುಪಾವತಿ & ರದ್ದತಿ ನೀತಿಗೆ ಒಪ್ಪುತ್ತೀರಿ.",
+    "gatewayUnavailable": "ಪಾವತಿ ಗೇಟ್‌ವೇ ಸದ್ಯ ಲಭ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ನಂತರ ಪ್ರಯತ್ನಿಸಿ.",
+    "checkoutFailed": "ಪಾವತಿ ಪ್ರಾರಂಭಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "demoFailed": "ಅನುಕರಣೆ ಪಾವತಿ ವಿಫಲವಾಯಿತು. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಬಹುದು.",
+    "verificationFailed": "ಪಾವತಿ ಪರಿಶೀಲನೆ ವಿಫಲವಾಯಿತು. ಹಣ ಕಡಿತವಾಗಿದ್ದರೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸರಿಹೊಂದಿಸಲಾಗುತ್ತದೆ.",
+    "expiredTitle": "ಪಾವತಿ ಅವಧಿ ಮುಗಿದಿದೆ",
+    "expiredMessage": "ಸಮಯಕ್ಕೆ ಪಾವತಿಯಾಗದ ಕಾರಣ ಸ್ಲಾಟ್ ಬಿಡುಗಡೆಯಾಗಿದೆ.",
+    "bookAgain": "ಮತ್ತೆ ಬುಕ್ ಮಾಡಿ",
+    "demoGatewayTitle": "ಡೆಮೊ ಪಾವತಿ ಗೇಟ್‌ವೇ",
+    "demoGatewayMessage": "ಇದು ಪರೀಕ್ಷೆಗಾಗಿ ಅನುಕರಣೆ ಚೆಕ್ಔಟ್. ನಿಜವಾದ ಹಣ ಕಡಿತವಾಗುವುದಿಲ್ಲ.",
+    "demoFail": "ವೈಫಲ್ಯವನ್ನು ಅನುಕರಿಸಿ",
+    "demoPay": "ಈಗ ಪಾವತಿಸಿ",
+    "status": {
+      "completed": "ಪಾವತಿಯಾಗಿದೆ",
+      "partially_refunded": "ಭಾಗಶಃ ಮರುಪಾವತಿ",
+      "refunded": "ಮರುಪಾವತಿಯಾಗಿದೆ",
+      "pending": "ಬಾಕಿ ಇದೆ",
+      "created": "ಪಾವತಿಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
+      "expired": "ಅವಧಿ ಮುಗಿದಿದೆ",
+      "failed": "ವಿಫಲವಾಗಿದೆ",
+      "transferred": "ವರ್ಗಾಯಿಸಲಾಗಿದೆ"
+    }
+  },
+  "paymentsPage": {
+    "title": "ಪಾವತಿಗಳು & ರಸೀದಿಗಳು",
+    "subtitle": "ನಿಮ್ಮ ಸಮಾಲೋಚನಾ ಪಾವತಿಗಳು, ಮರುಪಾವತಿಗಳು ಮತ್ತು ರಸೀದಿಗಳು",
+    "empty": "ಇನ್ನೂ ಪಾವತಿಗಳಿಲ್ಲ. ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿದ ನಂತರ ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.",
+    "refunded": "ಮರುಪಾವತಿ",
+    "viewReceipt": "ರಸೀದಿ ನೋಡಿ",
+    "receiptTitle": "ಪಾವತಿ ರಸೀದಿ",
+    "patient": "ರೋಗಿ",
+    "doctor": "ವೈದ್ಯರು",
+    "animal": "ಪ್ರಾಣಿ",
+    "date": "ದಿನಾಂಕ",
+    "totalPaid": "ಒಟ್ಟು ಪಾವತಿ",
+    "print": "ಮುದ್ರಿಸಿ"
+  },
+  "policy": {
+    "backToHome": "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ",
+    "notFoundTitle": "ದಾಖಲೆ ಸಿಗಲಿಲ್ಲ",
+    "notFoundMessage": "ಈ ನೀತಿ ದಾಖಲೆ ಇನ್ನೂ ಪ್ರಕಟವಾಗಿಲ್ಲ.",
+    "version": "ಆವೃತ್ತಿ",
+    "effectiveFrom": "ಜಾರಿ ದಿನಾಂಕ"
+  },
+  "policyModal": {
+    "title": "ನವೀಕರಿಸಿದ ನೀತಿಗಳು",
+    "message": "ನಮ್ಮ ನೀತಿಗಳು ನವೀಕರಿಸಲ್ಪಟ್ಟಿವೆ. ಮುಂದುವರಿಯಲು ಪರಿಶೀಲಿಸಿ ಸಮ್ಮತಿಸಿ.",
+    "agreeCheckbox": "ಮೇಲೆ ಪಟ್ಟಿ ಮಾಡಿದ ನವೀಕರಿಸಿದ ನೀತಿಗಳನ್ನು ಓದಿ ಒಪ್ಪುತ್ತೇನೆ",
+    "agreeButton": "ಒಪ್ಪಿ ಮುಂದುವರಿಯಿರಿ"
+  },
+  "legalAdmin": {
+    "title": "ಕಾನೂನು & ನೀತಿಗಳು",
+    "subtitle": "ಆವೃತ್ತಿ ಆಧಾರಿತ ನೀತಿಗಳು ಮತ್ತು ಸಮ್ಮತಿ ವ್ಯಾಪ್ತಿಯನ್ನು ನಿರ್ವಹಿಸಿ",
+    "published": "ಹೊಸ ಆವೃತ್ತಿ ಯಶಸ್ವಿಯಾಗಿ ಪ್ರಕಟವಾಗಿದೆ.",
+    "publishFailed": "ಹೊಸ ಆವೃತ್ತಿ ಪ್ರಕಟಣೆ ವಿಫಲವಾಯಿತು.",
+    "usersAccepted": "ಬಳಕೆದಾರರು ಒಪ್ಪಿದ್ದಾರೆ",
+    "notPublished": "ಇನ್ನೂ ಪ್ರಕಟವಾಗಿಲ್ಲ",
+    "view": "ನೋಡಿ",
+    "newVersion": "ಹೊಸ ಆವೃತ್ತಿ",
+    "publishTitle": "ಹೊಸ ಆವೃತ್ತಿ ಪ್ರಕಟಿಸಿ",
+    "publishHint": "ಪ್ರಕಟಣೆ ಬದಲಾಯಿಸಲಾಗದ ಹೊಸ ಆವೃತ್ತಿಯನ್ನು ರಚಿಸುತ್ತದೆ. ಪ್ರಮುಖ ಬದಲಾವಣೆಗಳಿಗೆ ಮಾತ್ರ ಮರು-ಸಮ್ಮತಿ ಆಯ್ಕೆಮಾಡಿ.",
+    "docTitle": "ಶೀರ್ಷಿಕೆ",
+    "docContent": "ವಿಷಯ",
+    "requireReacceptance": "ಪ್ರಭಾವಿತ ಎಲ್ಲ ಬಳಕೆದಾರರು ಈ ಆವೃತ್ತಿಯನ್ನು ಮರು-ಒಪ್ಪಬೇಕು",
+    "publishButton": "ಪ್ರಕಟಿಸಿ",
+    "docTypes": {
+      "terms": "ಸೇವಾ ನಿಯಮಗಳು",
+      "privacy": "ಗೌಪ್ಯತಾ ನೀತಿ",
+      "refund_policy": "ಮರುಪಾವತಿ & ರದ್ದತಿ ನೀತಿ",
+      "wallet_terms": "ವಾಲೆಟ್ ನಿಯಮಗಳು",
+      "doctor_agreement": "ವೈದ್ಯ ಒಪ್ಪಂದ",
+      "grievance_policy": "ದೂರು ಪರಿಹಾರ ನೀತಿ",
+      "disclaimer": "ಸೇವಾ ಹಕ್ಕುತ್ಯಾಗ"
+    }
   }
 }
