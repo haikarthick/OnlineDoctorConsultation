@@ -148,7 +148,7 @@ class AiCopilotService {
         pool.query(
           `SELECT v.vaccine_name, v.date_administered, v.next_due_date, v.batch_number,
                   a.name AS animal_name
-           FROM vaccinations v
+           FROM vaccination_records v
            JOIN animals a ON v.animal_id = a.id
            WHERE v.animal_id = ANY($1)
            ORDER BY v.date_administered DESC`,

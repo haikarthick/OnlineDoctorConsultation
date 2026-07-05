@@ -133,10 +133,10 @@ const startServer = async () => {
           `SELECT v.id, v.animal_id as "animalId", v.vaccine_name as "vaccineName",
                   v.next_due_date as "nextDueDate",
                   a.name as "animalName", a.owner_id as "ownerId"
-           FROM vaccinations v
+           FROM vaccination_records v
            JOIN animals a ON a.id = v.animal_id
            WHERE v.next_due_date = CURRENT_DATE + INTERVAL '7 days'
-             AND v.status != 'cancelled'`,
+             AND v.is_valid = true`,
           []
         );
         for (const row of upcoming.rows) {

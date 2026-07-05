@@ -25,7 +25,7 @@ class MarketplaceService {
     let query = `SELECT l.*, u.first_name || ' ' || u.last_name as seller_name, e.name as enterprise_name,
                  COALESCE(b.bid_count, 0) as bid_count, b.highest_bid,
                  AVG(l.price) OVER (PARTITION BY l.species, l.breed) as breed_avg_price,
-                 EXISTS(SELECT 1 FROM vaccinations v WHERE v.animal_id = l.linked_animal_id AND v.is_active = true) as has_health_passport
+                 EXISTS(SELECT 1 FROM vaccination_records v WHERE v.animal_id = l.linked_animal_id AND v.is_valid = true) as has_health_passport
                  FROM marketplace_listings l
                  LEFT JOIN users u ON l.seller_id = u.id
                  LEFT JOIN enterprises e ON l.enterprise_id = e.id
@@ -453,7 +453,7 @@ class MarketplaceService {
                  (SELECT COUNT(*) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as bid_count,
                  (SELECT MAX(amount) FROM marketplace_bids WHERE listing_id = l.id AND status = 'active') as highest_bid,
                  AVG(l.price) OVER (PARTITION BY l.species, l.breed) as breed_avg_price,
-                 EXISTS(SELECT 1 FROM vaccinations v WHERE v.animal_id = l.linked_animal_id AND v.is_active = true) as has_health_passport
+                 EXISTS(SELECT 1 FROM vaccination_records v WHERE v.animal_id = l.linked_animal_id AND v.is_valid = true) as has_health_passport
                  FROM marketplace_listings l
                  LEFT JOIN users u ON l.seller_id = u.id
                  LEFT JOIN animals a ON a.id = l.linked_animal_id
