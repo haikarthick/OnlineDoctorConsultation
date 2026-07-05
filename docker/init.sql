@@ -2327,3 +2327,231 @@ ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS target_pharmacy_id UUID REFER
 INSERT INTO marketplace_monetization_settings (setting_key, is_enabled, description, category)
 VALUES ('auction_enabled', false, 'Enable or disable the auction feature platform-wide', 'feature')
 ON CONFLICT (setting_key) DO NOTHING;
+
+-- ============================================================
+-- 46. PAYMENT MODULE (docs/PAYMENT_MODULE_PLAN.md — Phase P0)
+-- Mirrors backend/migrations/012_payment_module.sql. Idempotent.
+-- ============================================================
+
+-- 46.1 payments: gateway + commission + fee-recovery columns
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS gateway_order_id VARCHAR(255);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS gateway_payment_id VARCHAR(255);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS gateway_fee_amount DECIMAL(10,2) DEFAULT 0;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS commission_percent DECIMAL(5,2);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS commission_flat DECIMAL(10,2);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS commission_amount DECIMAL(10,2);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS doctor_earning_amount DECIMAL(10,2);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS wallet_amount_used DECIMAL(10,2) DEFAULT 0;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS processing_charge_amount DECIMAL(10,2) DEFAULT 0;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS refund_destination VARCHAR(20)
+  CHECK (refund_destination IN ('wallet', 'gateway'));
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'payments_status_check') THEN
+    ALTER TABLE payments DROP CONSTRAINT payments_status_check;
+  END IF;
+  ALTER TABLE payments ADD CONSTRAINT payments_status_check
+    CHECK (status IN ('pending', 'processing', 'created', 'completed', 'failed',
+                      'refunded', 'partially_refunded', 'expired', 'transferred'));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+ALTER TABLE payments ALTER COLUMN currency SET DEFAULT 'INR';
+ALTER TABLE payments ALTER COLUMN gateway SET DEFAULT 'demo';
+CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+
+-- 46.2 bookings: payment lifecycle statuses + booking_type fix
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_status_check') THEN
+    ALTER TABLE bookings DROP CONSTRAINT bookings_status_check;
+  END IF;
+  ALTER TABLE bookings ADD CONSTRAINT bookings_status_check
+    CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rescheduled', 'completed',
+                      'missed', 'payment_pending', 'payment_expired', 'referred'));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'bookings_booking_type_check') THEN
+    ALTER TABLE bookings DROP CONSTRAINT bookings_booking_type_check;
+  END IF;
+  ALTER TABLE bookings ADD CONSTRAINT bookings_booking_type_check
+    CHECK (booking_type IN ('video_call', 'in_person', 'phone', 'chat',
+                            'farm_visit', 'herd_consultation'));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- 46.3 vet_profiles: commission overrides, emergency fee, GST + payout details
+ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS commission_percent_override DECIMAL(5,2);
+ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS commission_flat_override DECIMAL(10,2);
+ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS emergency_consultation_fee DECIMAL(10,2);
+ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS gstin VARCHAR(20);
+ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS payout_account_name VARCHAR(255);
+ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS payout_account_number VARCHAR(50);
+ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS payout_ifsc VARCHAR(20);
+ALTER TABLE vet_profiles ADD COLUMN IF NOT EXISTS payout_upi VARCHAR(100);
+ALTER TABLE vet_profiles ALTER COLUMN currency SET DEFAULT 'INR';
+
+-- 46.4 wallets: INR default
+ALTER TABLE wallets ALTER COLUMN currency SET DEFAULT 'INR';
+
+-- 46.5 referrals: platform referral + payment transfer support
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS referral_type VARCHAR(20) NOT NULL DEFAULT 'hospital'
+  CHECK (referral_type IN ('hospital', 'platform'));
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL;
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS payment_id UUID REFERENCES payments(id) ON DELETE SET NULL;
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS transfer_status VARCHAR(20)
+  CHECK (transfer_status IN ('offered', 'accepted', 'rechosen', 'refunded', 'expired', 'completed'));
+ALTER TABLE referrals ADD COLUMN IF NOT EXISTS action_deadline TIMESTAMP;
+CREATE INDEX IF NOT EXISTS idx_referrals_booking ON referrals(booking_id);
+
+-- 46.6 payment_events: append-only audit + webhook idempotency
+CREATE TABLE IF NOT EXISTS payment_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  payment_id UUID REFERENCES payments(id) ON DELETE CASCADE,
+  gateway_event_id VARCHAR(255) UNIQUE,
+  event_type VARCHAR(50) NOT NULL,
+  from_status VARCHAR(30),
+  to_status VARCHAR(30),
+  actor_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  payload JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_payment_events_payment ON payment_events(payment_id);
+
+-- 46.7 withdrawal_requests
+CREATE TABLE IF NOT EXISTS withdrawal_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  doctor_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  amount DECIMAL(10,2) NOT NULL,
+  tds_rate DECIMAL(5,2) DEFAULT 0,
+  tds_amount DECIMAL(10,2) DEFAULT 0,
+  net_paid_amount DECIMAL(10,2),
+  status VARCHAR(20) NOT NULL DEFAULT 'requested'
+    CHECK (status IN ('requested', 'approved', 'rejected', 'settled', 'cancelled')),
+  is_discretionary BOOLEAN NOT NULL DEFAULT false,
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMP,
+  settled_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  settled_at TIMESTAMP,
+  utr_reference VARCHAR(100),
+  admin_note TEXT,
+  rejection_reason TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_withdrawals_doctor ON withdrawal_requests(doctor_id);
+CREATE INDEX IF NOT EXISTS idx_withdrawals_status ON withdrawal_requests(status);
+
+-- 46.8 doctor_earnings ledger
+CREATE TABLE IF NOT EXISTS doctor_earnings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  doctor_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
+  booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
+  consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
+  gross_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  commission_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  net_amount DECIMAL(10,2) NOT NULL,
+  type VARCHAR(30) NOT NULL
+    CHECK (type IN ('consultation', 'cancel_compensation', 'no_show_compensation', 'penalty', 'adjustment')),
+  status VARCHAR(20) NOT NULL DEFAULT 'clearing'
+    CHECK (status IN ('clearing', 'available', 'locked', 'withdrawn', 'reversed')),
+  reason TEXT,
+  clear_at TIMESTAMP,
+  withdrawal_id UUID REFERENCES withdrawal_requests(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_doctor_earnings_doctor ON doctor_earnings(doctor_id, status);
+CREATE INDEX IF NOT EXISTS idx_doctor_earnings_clear ON doctor_earnings(status, clear_at);
+
+-- 46.9 tax_codes: SAC master (admin-editable rates)
+CREATE TABLE IF NOT EXISTS tax_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sac_code VARCHAR(20) UNIQUE NOT NULL,
+  label VARCHAR(255) NOT NULL,
+  rate_percent DECIMAL(5,2) NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO tax_codes (id, sac_code, label, rate_percent, is_active) VALUES
+  (gen_random_uuid(), '998351', 'Veterinary services for pet animals (GST-exempt healthcare)', 0, true),
+  (gen_random_uuid(), '998352', 'Veterinary services for livestock (GST-exempt healthcare)', 0, true),
+  (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true)
+ON CONFLICT (sac_code) DO NOTHING;
+
+-- 46.10 invoices: immutable snapshots
+CREATE TABLE IF NOT EXISTS invoices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  invoice_number VARCHAR(100) UNIQUE NOT NULL,
+  invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission')),
+  payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
+  withdrawal_id UUID REFERENCES withdrawal_requests(id) ON DELETE SET NULL,
+  issuer_details JSONB NOT NULL DEFAULT '{}',
+  recipient_details JSONB NOT NULL DEFAULT '{}',
+  line_items JSONB NOT NULL DEFAULT '[]',
+  subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+  tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  total DECIMAL(10,2) NOT NULL DEFAULT 0,
+  sac_code VARCHAR(20),
+  tax_rate DECIMAL(5,2) DEFAULT 0,
+  currency VARCHAR(10) DEFAULT 'INR',
+  issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_invoices_payment ON invoices(payment_id);
+
+-- 46.11 legal_documents: versioned policies
+CREATE TABLE IF NOT EXISTS legal_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  doc_type VARCHAR(30) NOT NULL
+    CHECK (doc_type IN ('terms', 'privacy', 'refund_policy', 'wallet_terms',
+                        'doctor_agreement', 'grievance_policy', 'disclaimer')),
+  version INTEGER NOT NULL DEFAULT 1,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL DEFAULT '',
+  effective_from TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  requires_reacceptance BOOLEAN NOT NULL DEFAULT false,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (doc_type, version)
+);
+CREATE INDEX IF NOT EXISTS idx_legal_docs_type ON legal_documents(doc_type, is_active);
+
+-- 46.12 user_policy_acceptances: provable consent
+CREATE TABLE IF NOT EXISTS user_policy_acceptances (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  user_email VARCHAR(255),
+  doc_type VARCHAR(30) NOT NULL,
+  version INTEGER NOT NULL DEFAULT 1,
+  context VARCHAR(30) NOT NULL DEFAULT 'registration'
+    CHECK (context IN ('registration', 'invite', 'login_reacceptance', 'payout_setup')),
+  ip_address VARCHAR(64),
+  user_agent TEXT,
+  accepted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_policy_accept_user ON user_policy_acceptances(user_id, doc_type);
+
+-- 46.13 updated_at triggers
+DROP TRIGGER IF EXISTS update_withdrawal_requests_updated_at ON withdrawal_requests;
+CREATE TRIGGER update_withdrawal_requests_updated_at BEFORE UPDATE ON withdrawal_requests
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_doctor_earnings_updated_at ON doctor_earnings;
+CREATE TRIGGER update_doctor_earnings_updated_at BEFORE UPDATE ON doctor_earnings
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_tax_codes_updated_at ON tax_codes;
+CREATE TRIGGER update_tax_codes_updated_at BEFORE UPDATE ON tax_codes
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
