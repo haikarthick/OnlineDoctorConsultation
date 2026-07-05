@@ -197,7 +197,8 @@
     "dataConsent": "Data Consent",
     "networkMemberships": "Network Memberships",
     "myPayments": "എന്റെ പേയ്മെന്റുകൾ",
-    "legalPolicies": "നിയമവും നയങ്ങളും"
+    "legalPolicies": "നിയമവും നയങ്ങളും",
+    "commissionSettings": "കമ്മീഷൻ നിയമങ്ങൾ"
   },
   "login": {
     "welcome": "തിരികെ സ്വാഗതം",
@@ -6950,5 +6951,53 @@
       "grievance_policy": "പരാതി പരിഹാര നയം",
       "disclaimer": "സേവന നിരാകരണം"
     }
+  },
+  "earningsLedger": {
+    "clearing": "ക്ലിയറിംഗിൽ",
+    "available": "ലഭ്യമാണ്",
+    "locked": "പിൻവലിക്കലിൽ",
+    "withdrawn": "പിൻവലിച്ചു",
+    "clearingHint": "കൺസൾട്ടേഷന് ശേഷം {{days}} ദിവസം കഴിഞ്ഞ് ലഭ്യമാകും",
+    "negativeHint": "നെഗറ്റീവ് ബാലൻസ് — അടുത്ത വരുമാനത്തിൽ നിന്ന് സ്വയമേവ ക്രമീകരിക്കും",
+    "withdrawalThreshold": "കുറഞ്ഞ പിൻവലിക്കലിലേക്കുള്ള പുരോഗതി",
+    "thresholdReached": "ഇപ്പോൾ പിൻവലിക്കൽ അഭ്യർത്ഥിക്കാം.",
+    "thresholdHint": "ലഭ്യമായ ബാലൻസ് കുറഞ്ഞ പരിധിയിലെത്തുമ്പോൾ പിൻവലിക്കൽ തുറക്കും.",
+    "statementTitle": "വരുമാന വിവരണം",
+    "colDate": "തീയതി",
+    "colType": "തരം",
+    "colPatient": "രോഗി",
+    "colGross": "മൊത്തം",
+    "colCommission": "കമ്മീഷൻ",
+    "colNet": "അറ്റം",
+    "colStatus": "നില",
+    "types": {
+      "consultation": "കൺസൾട്ടേഷൻ",
+      "cancel_compensation": "റദ്ദാക്കൽ നഷ്ടപരിഹാരം",
+      "no_show_compensation": "ഹാജരാകാത്ത നഷ്ടപരിഹാരം",
+      "penalty": "പിഴ",
+      "adjustment": "ക്രമീകരണം"
+    },
+    "statuses": {
+      "clearing": "ക്ലിയറിംഗിൽ",
+      "available": "ലഭ്യമാണ്",
+      "locked": "പിൻവലിക്കലിൽ",
+      "withdrawn": "പിൻവലിച്ചു",
+      "reversed": "തിരിച്ചെടുത്തു"
+    }
+  },
+  "commissionAdmin": {
+    "title": "കമ്മീഷൻ നിയമങ്ങൾ",
+    "subtitle": "ഡോക്ടർതല കമ്മീഷൻ ഓവർറൈഡുകൾ — ശൂന്യമായ ഫീൽഡുകൾ ഗ്ലോബൽ ഡിഫോൾട്ട് ഉപയോഗിക്കുന്നു",
+    "globalSettings": "ഗ്ലോബൽ ഡിഫോൾട്ടുകൾ",
+    "globalInfo": "ഗ്ലോബൽ ഡിഫോൾട്ട്: {{percent}}% + ഓരോ പെയ്ഡ് ബുക്കിംഗിനും {{flat}} ഫ്ലാറ്റ് ഫീസ്. System Settings ൽ മാറ്റുക.",
+    "saved": "ഓവർറൈഡ് സേവ് ചെയ്തു. പുതിയ പേയ്മെന്റുകൾക്ക് മാത്രം ബാധകം.",
+    "saveFailed": "ഓവർറൈഡ് സേവ് ചെയ്യാനായില്ല.",
+    "searchPlaceholder": "പേര് അല്ലെങ്കിൽ ഇമെയിൽ ഉപയോഗിച്ച് ഡോക്ടറെ തിരയുക…",
+    "noDoctors": "ഡോക്ടർമാരെ കണ്ടെത്തിയില്ല.",
+    "colDoctor": "ഡോക്ടർ",
+    "colFee": "ഫീസ്",
+    "colPercentOverride": "% ഓവർറൈഡ്",
+    "colFlatOverride": "ഫ്ലാറ്റ് ഓവർറൈഡ്",
+    "snapshotNote": "കമ്മീഷൻ പേയ്മെന്റ് സമയത്ത് സ്നാപ്പ്ഷോട്ട് ചെയ്യുന്നു — മാറ്റങ്ങൾ പഴയ പേയ്മെന്റുകളെ ബാധിക്കില്ല."
   }
 }

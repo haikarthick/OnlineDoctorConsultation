@@ -216,6 +216,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-legal-policies', label: t('nav.legalPolicies'), icon: '📜', path: '/admin/legal-policies',
       roles: ['admin'], section: 'Administration' },
+    { id: 'admin-commission', label: t('nav.commissionSettings'), icon: '🪙', path: '/admin/commission-settings',
+      roles: ['admin'], section: 'Administration' },
     { id: 'admin-reviews', label: t('nav.reviewModeration'), icon: '⚖️', path: '/admin/reviews',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-disputes', label: t('disputeManagement.title'), icon: '⚖️', path: '/admin/disputes',

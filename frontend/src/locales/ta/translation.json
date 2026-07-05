@@ -197,7 +197,8 @@
     "prescriptionSettings": "Prescription Template",
     "hospitalMgmt": "Hospital Mgmt",
     "myPayments": "எனது கட்டணங்கள்",
-    "legalPolicies": "சட்டம் & கொள்கைகள்"
+    "legalPolicies": "சட்டம் & கொள்கைகள்",
+    "commissionSettings": "கமிஷன் விதிகள்"
   },
   "login": {
     "welcome": "மீண்டும் வரவேற்கிறோம்",
@@ -6954,5 +6955,53 @@
       "grievance_policy": "குறைதீர்ப்புக் கொள்கை",
       "disclaimer": "சேவை மறுப்பு"
     }
+  },
+  "earningsLedger": {
+    "clearing": "தீர்வில்",
+    "available": "கிடைக்கிறது",
+    "locked": "திரும்பப்பெறுதலில்",
+    "withdrawn": "எடுக்கப்பட்டது",
+    "clearingHint": "ஆலோசனைக்கு {{days}} நாள்(கள்) பிறகு கிடைக்கும்",
+    "negativeHint": "எதிர்மறை இருப்பு — உங்கள் அடுத்த வருவாயிலிருந்து தானாக ஈடு செய்யப்படும்",
+    "withdrawalThreshold": "குறைந்தபட்ச திரும்பப்பெறுதலுக்கான முன்னேற்றம்",
+    "thresholdReached": "இப்போது திரும்பப்பெற கோரலாம்.",
+    "thresholdHint": "கிடைக்கும் இருப்பு குறைந்தபட்சத்தை அடைந்ததும் திரும்பப்பெறுதல் திறக்கும்.",
+    "statementTitle": "வருவாய் அறிக்கை",
+    "colDate": "தேதி",
+    "colType": "வகை",
+    "colPatient": "நோயாளி",
+    "colGross": "மொத்தம்",
+    "colCommission": "கமிஷன்",
+    "colNet": "நிகர",
+    "colStatus": "நிலை",
+    "types": {
+      "consultation": "ஆலோசனை",
+      "cancel_compensation": "ரத்து இழப்பீடு",
+      "no_show_compensation": "வராதது இழப்பீடு",
+      "penalty": "அபராதம்",
+      "adjustment": "சரிசெய்தல்"
+    },
+    "statuses": {
+      "clearing": "தீர்வில்",
+      "available": "கிடைக்கிறது",
+      "locked": "திரும்பப்பெறுதலில்",
+      "withdrawn": "எடுக்கப்பட்டது",
+      "reversed": "மாற்றப்பட்டது"
+    }
+  },
+  "commissionAdmin": {
+    "title": "கமிஷன் விதிகள்",
+    "subtitle": "மருத்துவர் அளவிலான கமிஷன் மேலெழுதல்கள் — காலி புலங்கள் இயல்புநிலையைப் பயன்படுத்தும்",
+    "globalSettings": "இயல்புநிலை அமைப்புகள்",
+    "globalInfo": "இயல்புநிலை: {{percent}}% + ஒரு கட்டண பதிவுக்கு {{flat}} நிலையான கட்டணம். System Settings-இல் மாற்றவும்.",
+    "saved": "மேலெழுதல் சேமிக்கப்பட்டது. புதிய கட்டணங்களுக்கு மட்டுமே பொருந்தும்.",
+    "saveFailed": "மேலெழுதலை சேமிக்க முடியவில்லை.",
+    "searchPlaceholder": "பெயர் அல்லது மின்னஞ்சலால் மருத்துவரைத் தேடு…",
+    "noDoctors": "மருத்துவர்கள் இல்லை.",
+    "colDoctor": "மருத்துவர்",
+    "colFee": "கட்டணம்",
+    "colPercentOverride": "% மேலெழுதல்",
+    "colFlatOverride": "நிலையான மேலெழுதல்",
+    "snapshotNote": "கமிஷன் கட்டண நேரத்தில் நிலைப்படுத்தப்படும் — மேலெழுதல் மாற்றம் பழைய கட்டணங்களை மாற்றாது."
   }
 }

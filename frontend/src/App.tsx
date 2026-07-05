@@ -51,6 +51,7 @@ const MedicalRecordManagement = lazy(() => import('./pages/admin/MedicalRecordMa
 const ComplianceDashboardAdmin = lazy(() => import('./pages/admin/ComplianceDashboard'))
 const HolidayManagementAdmin = lazy(() => import('./pages/admin/HolidayManagement'))
 const LegalPoliciesAdmin = lazy(() => import('./pages/admin/LegalPolicies'))
+const CommissionSettingsAdmin = lazy(() => import('./pages/admin/CommissionSettings'))
 // Payment module
 const PolicyPage = lazy(() => import('./pages/PolicyPage'))
 const PaymentsHistory = lazy(() => import('./pages/PaymentsHistory'))
@@ -367,6 +368,7 @@ function AppRoutes() {
       <Route path="/admin/staff-settings" element={<RoleRoute path="/admin/staff-settings"><AppLayout><RoutedPage Component={StaffSettingsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/holidays" element={<RoleRoute path="/admin/holidays"><AppLayout><RoutedPage Component={HolidayManagementAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/legal-policies" element={<RoleRoute path="/admin/legal-policies"><AppLayout><RoutedPage Component={LegalPoliciesAdmin} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/commission-settings" element={<RoleRoute path="/admin/commission-settings"><AppLayout><RoutedPage Component={CommissionSettingsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/vaccine-protocols" element={<RoleRoute path="/admin/vaccine-protocols"><AppLayout><RoutedPage Component={VaccineProtocolAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/certificate-settings" element={<RoleRoute path="/admin/certificate-settings"><AppLayout><RoutedPage Component={CertificateSettings} /></AppLayout></RoleRoute>} />
 

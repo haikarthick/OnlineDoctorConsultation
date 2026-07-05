@@ -169,6 +169,14 @@ export class ConsultationController {
           logger.warn('Failed to update linked booking status', { consultationId: id, error: (err as Error).message });
         }
 
+        // §6.1: create the doctor's earning ledger entry (clearing) — idempotent
+        try {
+          const EarningsService = (await import('../services/payment/EarningsService')).default;
+          await EarningsService.createEarningOnCompletion(id);
+        } catch (earnErr) {
+          logger.warn('Earning creation failed (non-blocking)', { consultationId: id, error: earnErr });
+        }
+
         // H2: Auto-create medical record summary when consultation completes
         try {
           const consultResult = await database.query(

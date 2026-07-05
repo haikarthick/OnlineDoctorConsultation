@@ -700,6 +700,27 @@ class ApiService {
     return response.data
   }
 
+  // ─── Doctor earnings ledger ─────────────────────────────────
+  async getEarningsSummary() {
+    const response = await this.client.get('/earnings/summary')
+    return response.data
+  }
+
+  async getEarningsStatement(params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get('/earnings/statement', { params })
+    return response.data
+  }
+
+  async adminListCommissionDoctors(search?: string) {
+    const response = await this.client.get('/admin/commission/doctors', { params: { search } })
+    return response.data
+  }
+
+  async adminUpdateCommissionOverride(userId: string, data: { commissionPercentOverride: number | null; commissionFlatOverride: number | null }) {
+    const response = await this.client.put(`/admin/commission/doctors/${userId}`, data)
+    return response.data
+  }
+
   // ─── Legal documents & consent ──────────────────────────────
   async getLegalDocuments() {
     const response = await this.client.get('/legal/documents')

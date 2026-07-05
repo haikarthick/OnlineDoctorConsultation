@@ -72,6 +72,17 @@ class BookingService {
     );
 
     const totalMarked = confirmedResult.rows.length + pendingResult.rows.length;
+
+    // §4.3: settle money outcomes for missed paid bookings (doctor missed →
+    // auto-refund + penalty; patient missed → doctor compensation)
+    for (const r of [...confirmedResult.rows, ...pendingResult.rows]) {
+      try {
+        await PaymentOrchestrator.settleMissedBooking(r.id, r.missed_by);
+      } catch (err) {
+        logger.error('Missed booking settlement failed (non-blocking)', { bookingId: r.id, error: err });
+      }
+    }
+
     if (totalMarked > 0) {
       logger.info(`Auto-marked ${totalMarked} booking(s) as missed`, {
         confirmedToMissed: confirmedResult.rows.length,

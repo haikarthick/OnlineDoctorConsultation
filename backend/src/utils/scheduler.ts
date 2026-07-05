@@ -52,6 +52,10 @@ export function startScheduler(): void {
   runPaymentReconciliation();
   setInterval(runPaymentReconciliation, TWENTY_FOUR_HOURS);
 
+  // Payment module: mature doctor earnings clearing → available (hourly + on boot)
+  runEarningsMaturity();
+  setInterval(runEarningsMaturity, ONE_HOUR);
+
   logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min');
 }
 
@@ -89,6 +93,15 @@ async function runPaymentReconciliation(): Promise<void> {
     await PaymentOrchestrator.reconcilePendingPayments();
   } catch (err: any) {
     logger.error('[Payments] Reconciliation job failed', { error: err.message });
+  }
+}
+
+async function runEarningsMaturity(): Promise<void> {
+  try {
+    const EarningsService = (await import('../services/payment/EarningsService')).default;
+    await EarningsService.matureClearedEarnings();
+  } catch (err: any) {
+    logger.error('[Payments] Earnings maturity job failed', { error: err.message });
   }
 }
 

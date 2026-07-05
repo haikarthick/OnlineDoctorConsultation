@@ -197,7 +197,8 @@
       "approvalRequired": "This movement requires manager approval"
     },
     "myPayments": "ನನ್ನ ಪಾವತಿಗಳು",
-    "legalPolicies": "ಕಾನೂನು & ನೀತಿಗಳು"
+    "legalPolicies": "ಕಾನೂನು & ನೀತಿಗಳು",
+    "commissionSettings": "ಕಮಿಷನ್ ನಿಯಮಗಳು"
   },
   "login": {
     "welcome": "ಮತ್ತೆ ಸ್ವಾಗತ",
@@ -6969,5 +6970,53 @@
       "grievance_policy": "ದೂರು ಪರಿಹಾರ ನೀತಿ",
       "disclaimer": "ಸೇವಾ ಹಕ್ಕುತ್ಯಾಗ"
     }
+  },
+  "earningsLedger": {
+    "clearing": "ಕ್ಲಿಯರಿಂಗ್‌ನಲ್ಲಿ",
+    "available": "ಲಭ್ಯವಿದೆ",
+    "locked": "ಹಿಂಪಡೆಯುವಿಕೆಯಲ್ಲಿ",
+    "withdrawn": "ಹಿಂಪಡೆದಿದೆ",
+    "clearingHint": "ಸಮಾಲೋಚನೆಯ {{days}} ದಿನ(ಗಳ) ನಂತರ ಲಭ್ಯವಾಗುತ್ತದೆ",
+    "negativeHint": "ಋಣಾತ್ಮಕ ಬ್ಯಾಲೆನ್ಸ್ — ನಿಮ್ಮ ಮುಂದಿನ ಗಳಿಕೆಯಿಂದ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸರಿದೂಗಿಸಲಾಗುತ್ತದೆ",
+    "withdrawalThreshold": "ಕನಿಷ್ಠ ಹಿಂಪಡೆಯುವಿಕೆಯ ಕಡೆಗೆ ಪ್ರಗತಿ",
+    "thresholdReached": "ನೀವು ಈಗ ಹಿಂಪಡೆಯುವಿಕೆ ಕೋರಬಹುದು.",
+    "thresholdHint": "ಲಭ್ಯ ಬ್ಯಾಲೆನ್ಸ್ ಕನಿಷ್ಠ ತಲುಪಿದಾಗ ಹಿಂಪಡೆಯುವಿಕೆ ತೆರೆಯುತ್ತದೆ.",
+    "statementTitle": "ಗಳಿಕೆ ವಿವರಣೆ",
+    "colDate": "ದಿನಾಂಕ",
+    "colType": "ಪ್ರಕಾರ",
+    "colPatient": "ರೋಗಿ",
+    "colGross": "ಒಟ್ಟು",
+    "colCommission": "ಕಮಿಷನ್",
+    "colNet": "ನಿವ್ವಳ",
+    "colStatus": "ಸ್ಥಿತಿ",
+    "types": {
+      "consultation": "ಸಮಾಲೋಚನೆ",
+      "cancel_compensation": "ರದ್ದತಿ ಪರಿಹಾರ",
+      "no_show_compensation": "ಹಾಜರಾಗದ ಪರಿಹಾರ",
+      "penalty": "ದಂಡ",
+      "adjustment": "ಹೊಂದಾಣಿಕೆ"
+    },
+    "statuses": {
+      "clearing": "ಕ್ಲಿಯರಿಂಗ್‌ನಲ್ಲಿ",
+      "available": "ಲಭ್ಯವಿದೆ",
+      "locked": "ಹಿಂಪಡೆಯುವಿಕೆಯಲ್ಲಿ",
+      "withdrawn": "ಹಿಂಪಡೆದಿದೆ",
+      "reversed": "ಹಿಂತಿರುಗಿಸಲಾಗಿದೆ"
+    }
+  },
+  "commissionAdmin": {
+    "title": "ಕಮಿಷನ್ ನಿಯಮಗಳು",
+    "subtitle": "ವೈದ್ಯ-ಮಟ್ಟದ ಕಮಿಷನ್ ಓವರ್‌ರೈಡ್‌ಗಳು — ಖಾಲಿ ಕ್ಷೇತ್ರಗಳು ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್ ಬಳಸುತ್ತವೆ",
+    "globalSettings": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್‌ಗಳು",
+    "globalInfo": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್: {{percent}}% + ಪ್ರತಿ ಪಾವತಿ ಬುಕಿಂಗ್‌ಗೆ {{flat}} ಫ್ಲಾಟ್ ಶುಲ್ಕ. System Settings ನಲ್ಲಿ ಬದಲಾಯಿಸಿ.",
+    "saved": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲಾಗಿದೆ. ಹೊಸ ಪಾವತಿಗಳಿಗೆ ಮಾತ್ರ ಅನ್ವಯ.",
+    "saveFailed": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ.",
+    "searchPlaceholder": "ಹೆಸರು ಅಥವಾ ಇಮೇಲ್ ಮೂಲಕ ವೈದ್ಯರನ್ನು ಹುಡುಕಿ…",
+    "noDoctors": "ವೈದ್ಯರು ಸಿಗಲಿಲ್ಲ.",
+    "colDoctor": "ವೈದ್ಯರು",
+    "colFee": "ಶುಲ್ಕ",
+    "colPercentOverride": "% ಓವರ್‌ರೈಡ್",
+    "colFlatOverride": "ಫ್ಲಾಟ್ ಓವರ್‌ರೈಡ್",
+    "snapshotNote": "ಕಮಿಷನ್ ಪಾವತಿ ಸಮಯದಲ್ಲಿ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ಆಗುತ್ತದೆ — ಬದಲಾವಣೆಗಳು ಹಳೆಯ ಪಾವತಿಗಳನ್ನು ಬದಲಾಯಿಸುವುದಿಲ್ಲ."
   }
 }

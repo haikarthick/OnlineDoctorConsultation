@@ -197,7 +197,8 @@
       "approvalRequired": "This movement requires manager approval"
     },
     "myPayments": "నా చెల్లింపులు",
-    "legalPolicies": "చట్టపరమైన & విధానాలు"
+    "legalPolicies": "చట్టపరమైన & విధానాలు",
+    "commissionSettings": "కమిషన్ నియమాలు"
   },
   "login": {
     "welcome": "తిరిగి స్వాగతం",
@@ -6967,5 +6968,53 @@
       "grievance_policy": "ఫిర్యాదు పరిష్కార విధానం",
       "disclaimer": "సేవా నిరాకరణ"
     }
+  },
+  "earningsLedger": {
+    "clearing": "క్లియరింగ్‌లో",
+    "available": "అందుబాటులో",
+    "locked": "ఉపసంహరణలో",
+    "withdrawn": "తీసుకున్నది",
+    "clearingHint": "సంప్రదింపు తర్వాత {{days}} రోజు(లు)కి అందుబాటులోకి వస్తుంది",
+    "negativeHint": "ప్రతికూల బ్యాలెన్స్ — మీ తదుపరి సంపాదన నుండి స్వయంచాలకంగా సర్దుబాటు అవుతుంది",
+    "withdrawalThreshold": "కనీస ఉపసంహరణ వైపు పురోగతి",
+    "thresholdReached": "మీరు ఇప్పుడు ఉపసంహరణ అభ్యర్థించవచ్చు.",
+    "thresholdHint": "అందుబాటు బ్యాలెన్స్ కనీసానికి చేరినప్పుడు ఉపసంహరణ తెరుచుకుంటుంది.",
+    "statementTitle": "సంపాదన నివేదిక",
+    "colDate": "తేదీ",
+    "colType": "రకం",
+    "colPatient": "రోగి",
+    "colGross": "స్థూలం",
+    "colCommission": "కమిషన్",
+    "colNet": "నికరం",
+    "colStatus": "స్థితి",
+    "types": {
+      "consultation": "సంప్రదింపు",
+      "cancel_compensation": "రద్దు పరిహారం",
+      "no_show_compensation": "నో-షో పరిహారం",
+      "penalty": "జరిమానా",
+      "adjustment": "సర్దుబాటు"
+    },
+    "statuses": {
+      "clearing": "క్లియరింగ్‌లో",
+      "available": "అందుబాటులో",
+      "locked": "ఉపసంహరణలో",
+      "withdrawn": "తీసుకున్నది",
+      "reversed": "వెనక్కి తీసుకున్నది"
+    }
+  },
+  "commissionAdmin": {
+    "title": "కమిషన్ నియమాలు",
+    "subtitle": "డాక్టర్ స్థాయి కమిషన్ ఓవర్‌రైడ్‌లు — ఖాళీ ఫీల్డ్‌లు గ్లోబల్ డిఫాల్ట్ వాడతాయి",
+    "globalSettings": "గ్లోబల్ డిఫాల్ట్‌లు",
+    "globalInfo": "గ్లోబల్ డిఫాల్ట్: {{percent}}% + చెల్లింపు బుకింగ్‌కు {{flat}} ఫ్లాట్ ఫీజు. System Settings లో మార్చండి.",
+    "saved": "ఓవర్‌రైడ్ సేవ్ అయింది. కొత్త చెల్లింపులకు మాత్రమే వర్తిస్తుంది.",
+    "saveFailed": "ఓవర్‌రైడ్ సేవ్ విఫలమైంది.",
+    "searchPlaceholder": "పేరు లేదా ఇమెయిల్‌తో డాక్టర్‌ను వెతకండి…",
+    "noDoctors": "డాక్టర్లు కనబడలేదు.",
+    "colDoctor": "డాక్టర్",
+    "colFee": "ఫీజు",
+    "colPercentOverride": "% ఓవర్‌రైడ్",
+    "colFlatOverride": "ఫ్లాట్ ఓవర్‌రైడ్",
+    "snapshotNote": "కమిషన్ చెల్లింపు సమయంలో స్నాప్‌షాట్ అవుతుంది — ఓవర్‌రైడ్ మార్పులు పాత చెల్లింపులను మార్చవు."
   }
 }

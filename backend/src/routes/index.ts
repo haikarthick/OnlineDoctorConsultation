@@ -364,10 +364,15 @@ router.put('/bookings/:id/no-show', authMiddleware, roleMiddleware(['veterinaria
     `UPDATE bookings SET status = 'missed', missed_by = 'patient', updated_at = NOW() WHERE id = $1`,
     [req.params.id]
   );
+  // §4.3: compensate the doctor for the patient no-show (paid bookings only)
+  try {
+    const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+    await PaymentOrchestrator.settleMissedBooking(req.params.id, 'patient');
+  } catch { /* non-fatal */ }
   try {
     const NSvc = (await import('../services/NotificationService')).default;
-    await NSvc.createNotification(b.petOwnerId, 'booking', 'No-Show Recorded', 
-      'You were marked as no-show for your appointment. This may affect future bookings.', 
+    await NSvc.createNotification(b.petOwnerId, 'booking', 'No-Show Recorded',
+      'You were marked as no-show for your appointment. This may affect future bookings.',
       'all', { bookingId: req.params.id });
   } catch { /* non-fatal */ }
   res.json({ success: true, message: 'Booking marked as no-show' });
@@ -1436,6 +1441,86 @@ router.get('/payments/receipt/:id', authMiddleware, asyncHandler(async (req: Req
   const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
   const receipt = await PaymentOrchestrator.getReceipt(req.params.id, authReq.userId!, authReq.userRole || '');
   res.json({ success: true, data: receipt });
+}));
+
+// ─── Doctor earnings ledger (docs/PAYMENT_MODULE_PLAN.md §6) ───────────────
+router.get('/earnings/summary', authMiddleware, roleMiddleware(['veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const EarningsService = (await import('../services/payment/EarningsService')).default;
+  const PaymentModuleConfig = (await import('../services/payment/PaymentModuleConfig')).default;
+  const [balance, minWithdrawal, clearanceDays, enabled] = await Promise.all([
+    EarningsService.getBalance(authReq.userId!),
+    PaymentModuleConfig.getMinWithdrawalAmount(),
+    PaymentModuleConfig.getClearanceDays(),
+    PaymentModuleConfig.isEnabled(),
+  ]);
+  res.json({ success: true, data: { ...balance, minWithdrawalAmount: minWithdrawal, clearanceDays, paymentsEnabled: enabled } });
+}));
+
+router.get('/earnings/statement', authMiddleware, roleMiddleware(['veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const EarningsService = (await import('../services/payment/EarningsService')).default;
+  const limit = Math.min(parseInt(req.query.limit as string) || 30, 100);
+  const offset = parseInt(req.query.offset as string) || 0;
+  const result = await EarningsService.getStatement(authReq.userId!, limit, offset);
+  res.json({ success: true, data: result });
+}));
+
+// Admin: per-doctor commission overrides (§5)
+router.get('/admin/commission/doctors', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const search = (req.query.search as string) || '';
+  const params: any[] = [];
+  let where = `u.role = 'veterinarian'`;
+  if (search) {
+    params.push(`%${search.toLowerCase()}%`);
+    where += ` AND (LOWER(u.first_name) LIKE $${params.length} OR LOWER(u.last_name) LIKE $${params.length} OR LOWER(u.email) LIKE $${params.length})`;
+  }
+  const result = await database.query(
+    `SELECT u.id, CONCAT(u.first_name, ' ', u.last_name) as "name", u.email,
+            vp.consultation_fee as "consultationFee", vp.emergency_consultation_fee as "emergencyFee",
+            vp.commission_percent_override as "commissionPercentOverride",
+            vp.commission_flat_override as "commissionFlatOverride"
+     FROM users u JOIN vet_profiles vp ON vp.user_id = u.id
+     WHERE ${where}
+     ORDER BY u.first_name, u.last_name LIMIT 100`,
+    params
+  );
+  res.json({ success: true, data: result.rows });
+}));
+
+router.put('/admin/commission/doctors/:userId', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { commissionPercentOverride, commissionFlatOverride } = req.body;
+  const pct = commissionPercentOverride === null || commissionPercentOverride === '' || commissionPercentOverride === undefined
+    ? null : parseFloat(commissionPercentOverride);
+  const flat = commissionFlatOverride === null || commissionFlatOverride === '' || commissionFlatOverride === undefined
+    ? null : parseFloat(commissionFlatOverride);
+  if (pct !== null && (!Number.isFinite(pct) || pct < 0 || pct > 100)) {
+    return res.status(400).json({ success: false, error: 'commissionPercentOverride must be between 0 and 100' });
+  }
+  if (flat !== null && (!Number.isFinite(flat) || flat < 0 || flat > 100000)) {
+    return res.status(400).json({ success: false, error: 'commissionFlatOverride must be a non-negative amount' });
+  }
+  const before = await database.query(
+    `SELECT commission_percent_override, commission_flat_override FROM vet_profiles WHERE user_id = $1`,
+    [req.params.userId]
+  );
+  if (before.rows.length === 0) return res.status(404).json({ success: false, error: 'Doctor profile not found' });
+  await database.query(
+    `UPDATE vet_profiles SET commission_percent_override = $1, commission_flat_override = $2, updated_at = NOW() WHERE user_id = $3`,
+    [pct, flat, req.params.userId]
+  );
+  // §5: commission config changes are audit-logged
+  await database.query(
+    `INSERT INTO payment_events (id, event_type, actor_user_id, payload, created_at)
+     VALUES (gen_random_uuid(), 'commission_override_changed', $1, $2, NOW())`,
+    [authReq.userId, JSON.stringify({
+      doctorUserId: req.params.userId,
+      before: before.rows[0],
+      after: { commission_percent_override: pct, commission_flat_override: flat },
+    })]
+  ).catch(() => {});
+  res.json({ success: true, message: 'Commission override updated' });
 }));
 
 // ─── Legal documents & consent (docs/PAYMENT_MODULE_PLAN.md §17) ───────────

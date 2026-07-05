@@ -574,13 +574,18 @@ class PaymentOrchestrator {
     if (!preview.hasPayment) return null;
 
     const payRes = await database.query(
-      `SELECT id, status, amount, wallet_amount_used, gateway_payment_id, gateway FROM payments
-       WHERE booking_id = $1 AND status = 'completed'
-       ORDER BY created_at DESC LIMIT 1`,
+      `SELECT p.id, p.status, p.amount, p.wallet_amount_used, p.gateway_payment_id, p.gateway,
+              p.gateway_fee_amount, p.doctor_earning_amount, b.veterinarian_id
+       FROM payments p JOIN bookings b ON b.id = p.booking_id
+       WHERE p.booking_id = $1 AND p.status = 'completed'
+       ORDER BY p.created_at DESC LIMIT 1`,
       [bookingId]
     );
     if (payRes.rows.length === 0) return null;
     const paymentId = payRes.rows[0].id;
+    const doctorId = payRes.rows[0].veterinarian_id;
+    const gatewayFeeAmount = parseFloat(String(payRes.rows[0].gateway_fee_amount || 0));
+    const doctorEarningSnapshot = parseFloat(String(payRes.rows[0].doctor_earning_amount || 0));
 
     // D7: gateway destination refunds only the gateway-paid portion via the
     // gateway; the wallet-paid portion always returns to the wallet.
@@ -681,6 +686,43 @@ class PaymentOrchestrator {
       client.release();
     }
 
+    // ── D9/D12/D6 compensation matrix — ledger entries after the money moved ──
+    try {
+      const EarningsService = (await import('./EarningsService')).default;
+      if (cancellerRole === 'veterinarian') {
+        // D9: doctor funds the goodwill bonus + the non-recoverable gateway fee
+        const penalty = round2(preview.bonusAmount + gatewayFeeAmount);
+        await EarningsService.applyPenalty({
+          doctorId, bookingId, paymentId,
+          amount: penalty,
+          reason: `Cancellation penalty: goodwill bonus ${preview.bonusAmount.toFixed(2)} + gateway fee ${gatewayFeeAmount.toFixed(2)}`,
+        });
+        // Any clearing earning for this payment can never mature now
+        await EarningsService.reverseEarningForPayment(paymentId, 'Doctor cancelled the booking');
+      } else if (preview.policy === 'patient_partial_window') {
+        // D6: doctor gets a share of the policy-retained amount
+        const retained = round2(preview.paymentAmount - preview.refundAmount - preview.processingCharge);
+        const sharePct = await PaymentModuleConfig.getDoctorShareOfRetainedPercent();
+        const comp = round2(Math.max(retained, 0) * sharePct / 100);
+        await EarningsService.createCompensation({
+          doctorId, bookingId, paymentId,
+          type: 'cancel_compensation', amount: comp,
+          reason: `Late patient cancellation — ${sharePct}% of retained amount`,
+        });
+      } else if (preview.policy === 'patient_no_refund_window') {
+        // D6: cancelled inside the no-refund window — doctor gets his net share
+        const sharePct = await PaymentModuleConfig.getDoctorShareOnPatientNoShowPercent();
+        const comp = round2(doctorEarningSnapshot * sharePct / 100);
+        await EarningsService.createCompensation({
+          doctorId, bookingId, paymentId,
+          type: 'no_show_compensation', amount: comp,
+          reason: `Very late patient cancellation — ${sharePct}% of net share`,
+        });
+      }
+    } catch (err: any) {
+      logger.error('Compensation ledger wiring failed (non-blocking)', { bookingId, error: err.message });
+    }
+
     logger.info('Refund processed', { bookingId, destination, gatewayRefundAmount, walletRefundAmount, ...preview });
     return {
       refunded: preview.refundAmount > 0,
@@ -690,6 +732,49 @@ class PaymentOrchestrator {
       destination,
       reason: preview.policy,
     };
+  }
+
+  /**
+   * Missed-booking settlement (§4.3 rows 1 & 5 of the matrix):
+   *  - patient missed → doctor compensated (his net share × configured %)
+   *  - doctor missed  → treated exactly like a doctor cancellation
+   *    (full refund + bonus to patient; penalty to doctor)
+   */
+  async settleMissedBooking(bookingId: string, missedBy: string | null): Promise<void> {
+    if (!(await PaymentModuleConfig.isEnabled())) return;
+    try {
+      const res = await database.query(
+        `SELECT p.id, p.doctor_earning_amount, b.veterinarian_id, b.pet_owner_id
+         FROM payments p JOIN bookings b ON b.id = p.booking_id
+         WHERE p.booking_id = $1 AND p.status = 'completed'
+         ORDER BY p.created_at DESC LIMIT 1`,
+        [bookingId]
+      );
+      if (res.rows.length === 0) return; // unpaid booking — nothing to settle
+      const row = res.rows[0];
+
+      if (missedBy === 'doctor') {
+        await this.refundForCancellation(bookingId, row.pet_owner_id, 'veterinarian', 'Doctor missed the appointment', 'wallet');
+        try {
+          await NotificationService.createNotification(
+            row.pet_owner_id, 'payment', 'Refund for Missed Appointment',
+            'The doctor missed your appointment. A full refund plus a goodwill bonus has been credited to your wallet.',
+            'all', { bookingId }
+          );
+        } catch { /* non-blocking */ }
+      } else if (missedBy === 'patient' || missedBy === 'both') {
+        const EarningsService = (await import('./EarningsService')).default;
+        const sharePct = await PaymentModuleConfig.getDoctorShareOnPatientNoShowPercent();
+        const comp = round2(parseFloat(String(row.doctor_earning_amount || 0)) * sharePct / 100);
+        await EarningsService.createCompensation({
+          doctorId: row.veterinarian_id, bookingId, paymentId: row.id,
+          type: 'no_show_compensation', amount: comp,
+          reason: `Patient no-show — ${sharePct}% of net share`,
+        });
+      }
+    } catch (err: any) {
+      logger.error('settleMissedBooking failed (non-blocking)', { bookingId, missedBy, error: err.message });
+    }
   }
 
   /**

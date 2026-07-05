@@ -197,7 +197,8 @@
     },
     "permissions": "Permissions",
     "myPayments": "My Payments",
-    "legalPolicies": "Legal & Policies"
+    "legalPolicies": "Legal & Policies",
+    "commissionSettings": "Commission Rules"
   },
   "login": {
     "welcome": "Welcome back",
@@ -6949,5 +6950,53 @@
       "grievance_policy": "Grievance Redressal Policy",
       "disclaimer": "Service Disclaimer"
     }
+  },
+  "earningsLedger": {
+    "clearing": "Clearing",
+    "available": "Available",
+    "locked": "In withdrawal",
+    "withdrawn": "Withdrawn",
+    "clearingHint": "Becomes available {{days}} day(s) after consultation",
+    "negativeHint": "Negative balance — recovered automatically from your next earnings",
+    "withdrawalThreshold": "Progress to minimum withdrawal",
+    "thresholdReached": "You can request a withdrawal now.",
+    "thresholdHint": "Withdrawal unlocks when your available balance reaches the minimum.",
+    "statementTitle": "Earnings Statement",
+    "colDate": "Date",
+    "colType": "Type",
+    "colPatient": "Patient",
+    "colGross": "Gross",
+    "colCommission": "Commission",
+    "colNet": "Net",
+    "colStatus": "Status",
+    "types": {
+      "consultation": "Consultation",
+      "cancel_compensation": "Cancellation compensation",
+      "no_show_compensation": "No-show compensation",
+      "penalty": "Penalty",
+      "adjustment": "Adjustment"
+    },
+    "statuses": {
+      "clearing": "Clearing",
+      "available": "Available",
+      "locked": "In withdrawal",
+      "withdrawn": "Withdrawn",
+      "reversed": "Reversed"
+    }
+  },
+  "commissionAdmin": {
+    "title": "Commission Rules",
+    "subtitle": "Per-doctor commission overrides — blank fields use the global default",
+    "globalSettings": "Global defaults",
+    "globalInfo": "Global default: {{percent}}% + {{flat}} flat fee per paid booking. Change it in System Settings (commission.defaultPercent / commission.flatFee).",
+    "saved": "Override saved. Applies to new payments only — past payments keep their snapshot.",
+    "saveFailed": "Failed to save the override.",
+    "searchPlaceholder": "Search doctor by name or email…",
+    "noDoctors": "No doctors found.",
+    "colDoctor": "Doctor",
+    "colFee": "Fee",
+    "colPercentOverride": "% override",
+    "colFlatOverride": "Flat override",
+    "snapshotNote": "Commission is snapshotted at payment time — changing overrides never rewrites past payments."
   }
 }

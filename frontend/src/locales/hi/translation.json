@@ -197,7 +197,8 @@
       "approvalRequired": "This movement requires manager approval"
     },
     "myPayments": "मेरे भुगतान",
-    "legalPolicies": "कानूनी और नीतियाँ"
+    "legalPolicies": "कानूनी और नीतियाँ",
+    "commissionSettings": "कमीशन नियम"
   },
   "login": {
     "welcome": "वापस स्वागत है",
@@ -6954,5 +6955,53 @@
       "grievance_policy": "शिकायत निवारण नीति",
       "disclaimer": "सेवा अस्वीकरण"
     }
+  },
+  "earningsLedger": {
+    "clearing": "क्लियरिंग में",
+    "available": "उपलब्ध",
+    "locked": "निकासी में",
+    "withdrawn": "निकाला गया",
+    "clearingHint": "परामर्श के {{days}} दिन बाद उपलब्ध होगा",
+    "negativeHint": "नकारात्मक बैलेंस — आपकी अगली कमाई से स्वतः वसूला जाएगा",
+    "withdrawalThreshold": "न्यूनतम निकासी की ओर प्रगति",
+    "thresholdReached": "आप अभी निकासी का अनुरोध कर सकते हैं।",
+    "thresholdHint": "उपलब्ध बैलेंस न्यूनतम तक पहुँचने पर निकासी खुलेगी।",
+    "statementTitle": "कमाई विवरण",
+    "colDate": "तारीख",
+    "colType": "प्रकार",
+    "colPatient": "मरीज़",
+    "colGross": "कुल",
+    "colCommission": "कमीशन",
+    "colNet": "शुद्ध",
+    "colStatus": "स्थिति",
+    "types": {
+      "consultation": "परामर्श",
+      "cancel_compensation": "रद्दीकरण मुआवज़ा",
+      "no_show_compensation": "नो-शो मुआवज़ा",
+      "penalty": "जुर्माना",
+      "adjustment": "समायोजन"
+    },
+    "statuses": {
+      "clearing": "क्लियरिंग में",
+      "available": "उपलब्ध",
+      "locked": "निकासी में",
+      "withdrawn": "निकाला गया",
+      "reversed": "वापस लिया गया"
+    }
+  },
+  "commissionAdmin": {
+    "title": "कमीशन नियम",
+    "subtitle": "डॉक्टर-स्तरीय कमीशन ओवरराइड — खाली फ़ील्ड वैश्विक डिफ़ॉल्ट उपयोग करते हैं",
+    "globalSettings": "वैश्विक डिफ़ॉल्ट",
+    "globalInfo": "वैश्विक डिफ़ॉल्ट: {{percent}}% + {{flat}} फ्लैट शुल्क प्रति भुगतान बुकिंग। इसे सिस्टम सेटिंग्स में बदलें।",
+    "saved": "ओवरराइड सहेजा गया। केवल नए भुगतानों पर लागू होगा — पुराने भुगतान अपना स्नैपशॉट रखते हैं।",
+    "saveFailed": "ओवरराइड सहेजने में विफल।",
+    "searchPlaceholder": "नाम या ईमेल से डॉक्टर खोजें…",
+    "noDoctors": "कोई डॉक्टर नहीं मिला।",
+    "colDoctor": "डॉक्टर",
+    "colFee": "शुल्क",
+    "colPercentOverride": "% ओवरराइड",
+    "colFlatOverride": "फ्लैट ओवरराइड",
+    "snapshotNote": "कमीशन भुगतान के समय स्नैपशॉट होता है — ओवरराइड बदलने से पुराने भुगतान नहीं बदलते।"
   }
 }
