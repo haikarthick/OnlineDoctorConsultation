@@ -41,6 +41,7 @@
 | D12 | Cost-bearing principle (confirmed 2026-07-05) | **The platform never funds anything from its own pocket — commission is its only revenue.** Every cost (gateway fees, refunds, bonuses) is borne by the party who caused it. Patient-cancel refunds deduct a **cancellation processing charge = actual gateway fee + admin-configured flat fee**, shown to customers as **one generic line item** (never broken down as "commission"/"gateway fee" in customer-facing UI) |
 | D13 | GST future-proofing (confirmed 2026-07-05) | Exemption assumed today, but **rate is 100% admin-configurable** (0% default). If the government changes the rule, admin edits the rate in settings — **zero code changes**. Rates snapshot into invoices at issue time, so changes apply prospectively only |
 | D14 | Go-live data policy (confirmed 2026-07-05) | **Clean start at production launch** — no grandfathering. Legacy/demo bookings, consultations and payments are cleaned by a launch-checklist script before the flag is switched on |
+| D15 | Legal & consent framework (confirmed 2026-07-05) | Patient wallet operated as **closed-system PPI** (no RBI license needed; merchant-of-record T&C required) with hard invariants — no cash-out, no expiry of refund credits, refund-to-source always offered, balance returned on account closure (§16). **Versioned platform policies + recorded acknowledgement at registration/invite for all personas**, Amazon-style (§17) |
 
 ---
 
@@ -211,6 +212,7 @@ doctor: request (amount ≤ available) ─► admin: approve / reject (reason)
 ```
 
 - Requesting **locks** the amount (moves `available → locked`) so a second request can't double-spend.
+- **TDS on payouts (§16):** each settlement records `tds_rate`/`tds_amount` (admin-configurable rate, default per Section 194-O — CA to confirm) and the net amount actually transferred; doctor's statement and annual summary show gross/TDS/net so certificates reconcile.
 - Doctor adds bank details (account/IFSC/UPI) in profile → payout details section; shown to admin on the settlement screen. v1 transfer happens outside the app (NEFT/UPI by admin); **Razorpay Route automated payouts are Phase-2+** and slot cleanly behind the same ledger.
 - Innovative ease-of-use additions:
   - **Auto-request opt-in:** doctor can enable "auto-request withdrawal every time available crosses ₹X" — removes the chore entirely.
@@ -245,7 +247,9 @@ Build items:
 **New tables:**
 - `payment_events` — append-only audit of every transition + raw webhook payloads (idempotency: unique on `gateway_event_id`).
 - `doctor_earnings` — `id, doctor_id, payment_id, booking_id, consultation_id, gross, commission_amount, net_amount, type (consultation|cancel_compensation|no_show_compensation|penalty|adjustment), status (clearing|available|locked|withdrawn|reversed), clear_at, withdrawal_id, created_at` — `penalty` rows carry negative `net_amount` (D9).
-- `withdrawal_requests` — `id, doctor_id, amount, status (requested|approved|rejected|settled|cancelled), requested_at, reviewed_by, reviewed_at, settled_by, settled_at, utr_reference, admin_note, rejection_reason`.
+- `withdrawal_requests` — `id, doctor_id, amount, tds_rate, tds_amount, net_paid_amount, status (requested|approved|rejected|settled|cancelled), requested_at, reviewed_by, reviewed_at, settled_by, settled_at, utr_reference, admin_note, rejection_reason` — TDS fields present from day one so tax deduction (§16) is never a retrofit.
+- `legal_documents` — `id, doc_type (terms|privacy|refund_policy|wallet_terms|doctor_agreement|grievance_policy|disclaimer), version, title, content, effective_from, requires_reacceptance, is_active, created_by` — versioned, immutable once published (§17).
+- `user_policy_acceptances` — `id, user_id, doc_type, version, accepted_at, ip_address, user_agent, context (registration|invite|login_reacceptance|payout_setup)` — append-only proof of consent (§17).
 - `invoices` — snapshot table per §7.
 - `tax_codes` — SAC master (per master-data rule: SAC on forms is always a picker, never free text).
 
@@ -300,7 +304,8 @@ Per `database-rules.md`: UUIDs via `gen_random_uuid()`, camelCase SELECT aliases
 5. **Transactions** — upgrade existing `PaymentManagement.tsx`: live status filters, stuck-payment flag, manual refund with destination choice.
 6. **Settlements** — withdrawal queue (aging indicators), approve/reject/settle with UTR, discretionary payout button.
 7. **Finance Reports** — see §11.
-8. **Dashboard widget:** payment health (today's collections, failed webhooks, stuck `pending` count, settlements due).
+8. **Legal & Policies** — versioned policy document manager (§17): edit/publish T&C, privacy, refund, wallet terms, doctor agreement; toggle "requires re-acceptance"; acceptance-coverage stats.
+9. **Dashboard widget:** payment health (today's collections, failed webhooks, stuck `pending` count, settlements due, wallet liability total).
 
 ### Hospital personas
 Hospital-booked consultations use `hospital_doctors.consultation_fee` as the price source; revenue attribution to hospitals (hospital commission layer) is **explicitly deferred — see Open Item O1.**
@@ -313,7 +318,7 @@ All screens: 6-locale i18n keys added up-front with the mandatory audit command;
 
 | Persona | Report |
 |---|---|
-| Admin | Revenue overview (GMV, commission earned, refunds out, processing charges collected, net platform revenue — daily/monthly trend), settlement liability (owed to doctors: clearing vs available, negative balances), GST/commission-invoice export (CSV), reconciliation report (gateway vs ledger mismatches), doctor-wise earnings & commission table, referral report (volume, conversion, refund rate per doctor) |
+| Admin | Revenue overview (GMV, commission earned, refunds out, processing charges collected, net platform revenue — daily/monthly trend), settlement liability (owed to doctors: clearing vs available, negative balances), **patient wallet liability** (total closed-wallet balances — money owed to customers, §16), GST/commission-invoice export (CSV), TDS deduction register, reconciliation report (gateway vs ledger mismatches), doctor-wise earnings & commission table, referral report (volume, conversion, refund rate per doctor), policy-acceptance coverage report (§17) |
 | Doctor | Earnings statement (filterable, CSV export), monthly summary, commission invoices received |
 | Patient/Farmer | Spend history + receipts; enterprise-level spend rollup for farm accounts |
 
@@ -336,14 +341,14 @@ All screens: 6-locale i18n keys added up-front with the mandatory audit command;
 
 | Phase | Contents | Outcome / verify gate |
 |---|---|---|
-| **P0 — Foundations** | Migration 004, settings seeds, INR migration, feature flag, gateway adapter interfaces + DemoGateway | tsc clean; app unchanged with flag off |
-| **P1 — Collect & enforce** | Booking `payment_pending` flow, demo checkout step in booking UI, hold/expiry job, payment enforcement, refund engine goes live (wallet destination only), receipts (basic) | Full cycle works end-to-end in demo mode incl. cancel/refund matrix |
-| **P2 — Razorpay** | RazorpayGateway (orders, checkout, webhook, refunds), reconciliation job, gateway refund destination, smart retry | Test-mode Razorpay round-trip verified incl. webhook replay + signature-failure alarms |
+| **P0 — Foundations** | Migration 004 (incl. legal/consent tables §17), settings seeds, INR migration, feature flag, gateway adapter interfaces + DemoGateway | tsc clean; app unchanged with flag off |
+| **P1 — Collect & enforce** | Booking `payment_pending` flow, demo checkout step in booking UI, hold/expiry job, payment enforcement, refund engine goes live (wallet destination only), receipts (basic), **consent framework** (§17: policy pages + placeholders, registration/invite acknowledgement for all personas, admin Legal & Policies manager, re-acceptance modal) | Full cycle works end-to-end in demo mode incl. cancel/refund matrix; every registration path records consent |
+| **P2 — Razorpay** | RazorpayGateway (orders, checkout, webhook, refunds), reconciliation job, gateway refund destination, smart retry. **Prerequisite: policy pages (§17.1) live with real content — Razorpay KYC reviews them** | Test-mode Razorpay round-trip verified incl. webhook replay + signature-failure alarms |
 | **P3 — Commission & earnings** | CommissionEngine, per-doctor overrides UI, earnings ledger + clearance job, doctor My Earnings page, compensation matrix wiring | Every completed/cancelled/missed scenario produces correct ledger rows |
 | **P4 — Settlements** | Withdrawal workflow (doctor + admin console), discretionary payout, payout details in profile, notifications | Money-out lifecycle audited end-to-end |
 | **P5 — Referrals & emergency** | Platform referral flows (§4.4: transfer, difference settlement, 3-option patient screen, history views), emergency fee + fast-track confirm (§4.5), related scheduler jobs | Every referral/emergency path produces correct payment + ledger outcomes |
 | **P6 — GST & invoicing** | Invoice snapshots, PDF receipts, SAC master with admin-editable rates (D13), commission invoices, GST exports | CA-reviewable invoice samples for both streams; rate change in admin UI reflects on next invoice with no code change |
-| **P7 — Reports, cleanup & launch** | Finance reports/dashboards, referral report, i18n audit (6 locales), unit tests (CommissionEngine, refund matrix incl. D12 fee recovery, ledger transitions, transfer flows), /verify pass, **go-live data-cleanup script (D14)**, deploy checklist | Flag flipped on in dev env; clean-start script rehearsed |
+| **P7 — Reports, cleanup & launch** | Finance reports/dashboards (incl. wallet-liability + TDS register), referral report, i18n audit (6 locales), unit tests (CommissionEngine, refund matrix incl. D12 fee recovery, ledger transitions, transfer flows, consent gating), /verify pass, **go-live data-cleanup script (D14)**, **pre-launch legal checklist (§16.5 — lawyer/CA sign-offs)**, deploy checklist | Flag flipped on in dev env; clean-start script rehearsed; legal checklist fully ticked |
 
 Each phase is independently committable/pushable to `origin/develop` (flag keeps prod behavior unchanged until switch-on).
 
@@ -363,3 +368,82 @@ Each phase is independently committable/pushable to `origin/develop` (flag keeps
 - **Promo/discount code module (owner-requested tracker, 2026-07-05):** dedicated module with code lifecycle (create/limit/expire), eligibility rules, redemption audit, and fee-breakdown integration. Hooks reserved: `payments.discount_amount`, fee-breakdown line slot, admin menu slot under Payments & Finance.
 - **Network-hospital subscription billing module (owner-stated direction, 2026-07-05):** network hospitals pay platform subscription fees instead of per-consultation commission — separate plan when taken up.
 - Multi-currency; automated bank payouts (Razorpay Route); patient wallet top-up (wallet fills via refunds only); pharmacy/marketplace payment convergence; EMI plans; GST filing integration.
+
+---
+
+## 16. Legal & compliance — wallet and fund flows (added 2026-07-05)
+
+### 16.1 What wallet money physically is
+
+Wallet balances are **ledger entries, not stored money**. Cash settles from Razorpay into the platform's current account and stays there; a wallet credit is a **current liability** (money owed to the customer), never platform revenue. The platform bank account therefore always holds three buckets — platform commission (yours), doctor earnings payable, and patient wallet liability — and the admin liability reports (§11) exist precisely so buckets 2 and 3 are never mistaken for spendable profit.
+
+### 16.2 Regulatory position: closed-system PPI (no RBI license needed)
+
+Under the **RBI Master Directions on Prepaid Payment Instruments (2021, as amended)**, a wallet that (a) is usable **only to purchase services on this platform**, (b) permits **no cash withdrawal**, and (c) makes **no third-party payments** is a **closed system PPI** — explicitly outside RBI's authorization regime. The patient wallet is designed to stay inside this definition permanently.
+
+**Structural requirement (legal, not code):** because wallet money ultimately compensates independent doctors, the Terms of Service must establish the **platform as merchant of record** — the patient contracts with and pays the *platform* for the consultation service; doctors are the platform's service providers paid under a separate doctor agreement. This keeps the wallet unambiguously closed-loop. → Lawyer/CA drafts this into T&C + doctor agreement before go-live (§17).
+
+### 16.3 Non-negotiable wallet invariants (enforced in code)
+
+1. **No cash withdrawal from the patient wallet, ever.** (Doctor earnings are accounts payable — a different legal object — and are paid out via §6.)
+2. **Wallet spendable only on this platform.**
+3. **Refund-to-original-method always remains an offered choice** (D7) — wallet-only forced refunds are a consumer-protection exposure.
+4. **Refund-sourced wallet credits never expire.** Promotional/bonus credits (`bonus_credits` column) may carry expiry; refund money may not.
+5. **Account closure ⇒ remaining refund-sourced balance is returned to source**, never confiscated.
+6. Adding wallet **top-up** in future changes the risk profile — requires fresh legal review before build (noted in §15).
+
+### 16.4 Adjacent obligations
+
+| Item | Treatment |
+|---|---|
+| **TDS on doctor payouts** | Platform acts as e-commerce operator; Section **194-O** (0.1% of gross, ₹5L/yr individual threshold) likely applies over 194J — **CA to confirm exact section/rate**. `withdrawal_requests` carries TDS fields from day one; admin-configurable rate; TDS register report |
+| **GST TCS (Sec 52)** | Applies to *taxable* supplies through an ECO — exempt veterinary consultations likely out of scope; commission invoicing already handled in §7 — **CA to confirm** |
+| **Payment aggregation** | Collection leg runs through Razorpay (a licensed PA) — compliant. Future Razorpay Route migration (§15) moves doctor funds into PA escrow, removing them from the platform account entirely — cleaner as volumes grow |
+| **Accounting** | Wallet liability + doctor payable disclosed as current liabilities; monthly liability report (§11) is the bookkeeping source |
+| **Grievance handling** | Consumer Protection (E-Commerce) Rules 2020 require a named grievance officer + published grievance policy → §17 |
+
+### 16.5 Pre-launch legal checklist (P7 gate, external to code)
+
+- [ ] T&C with merchant-of-record structure — lawyer
+- [ ] Doctor/Service-Provider agreement (commission schedule, penalties D9/D12, referral rules, professional-responsibility clause) — lawyer
+- [ ] Refund & Cancellation policy page matching §4.3 exactly (Razorpay KYC requires it published)
+- [ ] Privacy policy aligned to **DPDP Act 2023** (owner personal data + payment data)
+- [ ] Wallet terms (closed-loop, no-expiry, closure-refund rules of §16.3)
+- [ ] Grievance officer named + policy page
+- [ ] CA sign-off: 194-O/194J, GST TCS, commission GST rate, exemption treatment (D13)
+
+---
+
+## 17. Platform policies & user consent framework (added 2026-07-05)
+
+Platform-wide (not payment-gated) — standard-platform behavior (Amazon-style): every persona explicitly acknowledges the applicable policies, and the platform keeps **provable, versioned consent records**.
+
+### 17.1 Policy document set
+
+| Document | Applies to | Notes |
+|---|---|---|
+| Terms of Service | all personas | merchant-of-record structure (§16.2) |
+| Privacy Policy | all personas | DPDP Act 2023 aligned |
+| Refund & Cancellation Policy | patients/farmers | public page; mirrors §4.3; Razorpay KYC prerequisite |
+| Wallet Terms | patients/farmers | closed-loop rules of §16.3 |
+| Doctor / Service-Provider Agreement | veterinarians | commission, settlement, penalties, referrals, professional responsibility |
+| Grievance Redressal Policy | all personas | named grievance officer |
+| Service Disclaimer | patients/farmers | online consultation is not a substitute for physical emergency care |
+
+Content is drafted by lawyer/CA; the platform ships the **plumbing + placeholder drafts**: versioned `legal_documents` storage, public pages (`/terms`, `/privacy`, `/refund-policy`, `/grievance`, footer links on all public/auth pages), and the admin **Legal & Policies** manager (§10). Published versions are immutable; edits create a new version with `effective_from`.
+
+### 17.2 Consent capture — all personas
+
+| Touchpoint | Behavior |
+|---|---|
+| **Self-registration** (pet owner, farmer, veterinarian) | Registration blocked until the acknowledgement checkbox ("I agree to the Terms of Service and Privacy Policy", with links opening in-place) is ticked; vets additionally acknowledge the Doctor Agreement. Acceptance recorded server-side (doc type, version, timestamp, IP, user-agent) — a checkbox alone is not proof; the `user_policy_acceptances` row is |
+| **Invite flows** (hospital staff, network members, admin-created users) | Acceptance captured on the invite-acceptance / first-login screen — invited users must consent personally; the inviter cannot consent for them |
+| **Payout setup** (doctors) | Re-acknowledgement of the Doctor Agreement + commission schedule when saving bank/UPI details — consent recorded with `context='payout_setup'` |
+| **Policy updates** | Publishing a version flagged `requires_reacceptance` triggers a blocking modal on next login for affected personas; acceptance re-recorded. Non-material edits skip the modal |
+| **Booking checkout** | One-line notice "By paying you agree to the Refund & Cancellation Policy" (link) — informational, no extra click (checkout friction kills conversion); the registration-time ToS acceptance already binds |
+
+### 17.3 Enforcement & audit
+
+- Backend guard: login/refresh response includes `pendingPolicyAcceptances[]`; protected app routes surface the blocking modal until cleared (API remains usable for the acceptance endpoint only — mirrors the existing `account_status` gating pattern).
+- Admin: acceptance-coverage report (who's pending after a re-acceptance push), per-user consent history on the user detail page.
+- All 7 documents × 6 locales: policy *pages* render the admin-managed content (single canonical language with locale disclaimer acceptable at launch — translated legal text only if lawyer provides it; machine-translating legal documents is a liability, not a feature).
