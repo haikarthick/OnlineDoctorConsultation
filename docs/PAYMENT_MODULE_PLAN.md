@@ -35,7 +35,12 @@
 | D6 | Retained-money split | On late patient cancel / patient no-show, doctor receives a **configurable share of the retained amount** (compensation for the blocked slot) |
 | D7 | Wallet | **Both:** wallet balance usable to pay for bookings (Razorpay covers shortfall), and on refund the **patient chooses destination** — instant wallet credit or original payment method (5–7 days) |
 | D8 | Tax | **Full GST module** — per-doctor GSTIN, SAC codes, invoice generation, GST reports |
-| D9 | Goodwill bonus funding | **Doctor-funded** (confirmed 2026-07-05). The bonus credited to the patient on doctor-cancellation is deducted from the doctor's earnings ledger as a penalty entry. The doctor's balance **may go negative**; recovered automatically from future earnings. Platform funds nothing. |
+| D9 | Goodwill bonus funding | **Doctor-funded** (confirmed 2026-07-05). The bonus credited to the patient on doctor-cancellation is deducted from the doctor's earnings ledger as a penalty entry — **together with the non-recoverable gateway fee of the refund**. The doctor's balance **may go negative**; recovered automatically from future earnings. Platform funds nothing. |
+| D10 | Referrals (confirmed 2026-07-05) | Individual-doctor referrals are **in scope** (network hospitals are a separate subscription module — out of scope). **Pre-consultation referral = payment transfer** to the new doctor with difference settlement; **post-consultation referral = informational** — patient books & pays the specialist through the normal flow. Referral history visible to all personas. See §4.4 |
+| D11 | Emergency consultations (confirmed 2026-07-05) | **Doctor-defined emergency fee, opt-in.** Emergency option shown only for doctors who set the fee (existing `acceptsEmergency` flag + new fee field). Fast-track confirmation window; same commission rules. See §4.5 |
+| D12 | Cost-bearing principle (confirmed 2026-07-05) | **The platform never funds anything from its own pocket — commission is its only revenue.** Every cost (gateway fees, refunds, bonuses) is borne by the party who caused it. Patient-cancel refunds deduct a **cancellation processing charge = actual gateway fee + admin-configured flat fee**, shown to customers as **one generic line item** (never broken down as "commission"/"gateway fee" in customer-facing UI) |
+| D13 | GST future-proofing (confirmed 2026-07-05) | Exemption assumed today, but **rate is 100% admin-configurable** (0% default). If the government changes the rule, admin edits the rate in settings — **zero code changes**. Rates snapshot into invoices at issue time, so changes apply prospectively only |
+| D14 | Go-live data policy (confirmed 2026-07-05) | **Clean start at production launch** — no grandfathering. Legacy/demo bookings, consultations and payments are cleaned by a launch-checklist script before the flag is switched on |
 
 ---
 
@@ -107,18 +112,60 @@ Rules:
 
 ### 4.3 Refund & compensation matrix (single source of truth)
 
+**Governing rule (D12): the platform never bears a cost.** Every gateway fee and every bonus is charged to the party who caused the event. The **actual gateway fee paid on each payment is stored per-payment** (`gateway_fee_amount`) — wallet-paid amounts carry zero gateway fee, so fee recovery is always exact, never estimated.
+
+**Cancellation processing charge** (patient-caused cancellations) = actual gateway fee of the original payment **+** `cancellation.processingFlatFee` (admin-configured, e.g. ₹25). Customer-facing UI shows this as **one generic line item** — i18n key like "Cancellation processing charge" — never itemized into commission/gateway components (D12).
+
 | Scenario | Patient gets | Doctor gets | Platform keeps | Driven by |
 |---|---|---|---|---|
-| Vet declines / no-show / cancels | 100% + goodwill bonus % | **−(goodwill bonus)** — penalty entry on earnings ledger; balance may go negative (D9) | nothing (absorbs only the non-recoverable gateway transaction fee) | existing `cancellation.autoRefundOnDoctorCancel`, `goodwillBonusPercent` |
-| Patient cancels ≥ `patientFreeWindowHours` (24h) | 100% | nothing | nothing | existing keys |
-| Patient cancels in partial window (2–24h) | `partialRefundPercent` (50%) | `compensation.doctorShareOfRetainedPercent` (default 50%) of retained | remainder of retained | existing keys + **new** key |
-| Patient cancels < 2h / patient no-show | 0% | `compensation.doctorShareOnPatientNoShowPercent` (default: full net share — he showed up) | remainder | **new** keys |
-| Refund after completion (dispute, within clearance window) | per admin decision | earning **reversed** from `clearing` | — | admin refund console |
-| Payment hold expires | auto-void (nothing captured) | — | — | scheduler |
+| Vet declines / no-show / cancels (patient chooses refund) | 100% + goodwill bonus % | **−(goodwill bonus + gateway fee of the refunded payment)** — penalty entries; balance may go negative (D9/D12) | commission = 0; fully cost-covered | existing `cancellation.autoRefundOnDoctorCancel`, `goodwillBonusPercent` |
+| Pre-consultation referral (patient accepts / picks another doctor) | nothing to refund — payment **transfers** (no gateway refund, no fee incurred) | new doctor: full gross at his fee, commission at **his** rate; old doctor: nothing | normal commission on final amount | §4.4 |
+| Patient cancels ≥ `patientFreeWindowHours` (24h) | 100% **− cancellation processing charge** | nothing | flat-fee component of the charge (covers admin overhead); gateway component just covers cost | existing keys + `cancellation.processingFlatFee` |
+| Patient cancels in partial window (2–24h) | `partialRefundPercent` (50%) − cancellation processing charge | `compensation.doctorShareOfRetainedPercent` (default 50%) of retained | remainder of retained (gateway fee recovered from retained first) | existing keys + **new** keys |
+| Patient cancels < 2h / patient no-show | 0% | `compensation.doctorShareOnPatientNoShowPercent` (default: full net share — he showed up) | remainder (after gateway-fee recovery) | **new** keys |
+| Refund after completion (dispute, within clearance window) | per admin decision | earning **reversed** from `clearing`; fee borne per admin's fault ruling | — | admin refund console |
+| Payment hold expires | auto-void (nothing captured, no fee exists) | — | — | scheduler |
+
+Consistency check (D12): in every row, the platform's commission and the flat-fee component are its only inflows, and no row leaves a gateway fee unassigned. Wallet refunds bypass the gateway entirely — money stays inside the platform — so wallet-destination refunds never generate a *new* gateway cost (the original capture fee is still recovered per the rules above).
 
 All compensation entries post to the doctor-earnings ledger with a `reason` type, so the doctor's statement is self-explanatory.
 
 Refund destination (D7): patient picks **wallet (instant)** or **original method (gateway refund, 5–7 days)** at cancel time; wallet is preselected with an "instant" badge — a gentle nudge that also reduces gateway refund fees.
+
+### 4.4 Referral flows (D10)
+
+Scope note: **network-hospital referrals stay in the existing subscription-side staff-workflow module** (`referrals` table, `StaffWorkflowService`) and are untouched. This section adds **platform-level referrals between individual doctors**, reusing/extending that table (`referral_type = 'platform'`, nullable `hospital_id`, new `booking_id`, `payment_id`, `transfer_status` columns).
+
+**A. Pre-consultation referral — payment transfer.** The booked doctor is unavailable (or any reason) *before* the consultation happens and refers the patient onward. No consultation occurred, so the doctor earns nothing and the money follows the patient:
+
+```
+Doctor initiates referral (target doctor + reason, before consultation)
+        │  original booking → status 'referred'; patient notified
+        ▼
+Patient chooses within referral.actionWindowHours (default 72h):
+  1) ACCEPT referred doctor  ── picks a slot with the new doctor
+  2) PICK ANY OTHER doctor   ── same carry-over mechanics, patient's own choice
+  3) REFUND                  ── treated exactly as doctor-cancellation:
+                                100% + goodwill bonus; old doctor's ledger bears
+                                bonus + gateway fee (D9/D12)
+  (no action in window ⇒ auto-refund as option 3)
+```
+
+- **Difference settlement (confirmed):** new doctor's fee > paid amount ⇒ patient pays the difference at slot selection (normal checkout on the delta); fee < paid ⇒ excess **instantly refunded to wallet**. Final amount, not original, is the new booking's gross.
+- **Commission recomputed at the NEW doctor's rate** (his override or global) and snapshotted onto the transferred payment; the old snapshot is retained in `payment_events` for audit.
+- The new booking enters the normal lifecycle at `pending` (new doctor must confirm). If the new doctor declines or never confirms, the patient returns to the 3-option state above — the *original* referring doctor still bears refund costs if it ends in refund (his unavailability started the chain).
+- Elegant side-effect: transfers move money **without any gateway refund**, so options 1–2 incur zero extra gateway cost.
+
+**B. Post-consultation referral — informational + booking shortcut.** Consultation completed and paid normally (referring doctor's earning is untouched); doctor refers the patient to a specialist via the referral module. Patient books the specialist through the **regular booking + payment flow** (new payment, new lifecycle). The referral record links the two consultations.
+
+**Referral history (all personas):** patient sees their referral chain on the booking/consultation detail; both doctors see sent/received referrals with outcomes (accepted / re-chosen / refunded / completed); admin gets a referral report (volume, conversion, refund rate per doctor — a doctor whose referrals routinely end in refunds is a quality signal). Referral context (reason, originating consultation) is shown to the receiving doctor **with the existing consent/data-isolation rules respected**.
+
+### 4.5 Emergency consultations (D11)
+
+- `vet_profiles.emergency_consultation_fee` (nullable) alongside the existing `acceptsEmergency` flag. **Opt-in:** the emergency option appears to patients only for doctors with both the flag and a fee set (fee field is the master switch; per master-data rule the patient never types a price).
+- Emergency booking uses the emergency fee as the server-derived gross; **commission rules identical** to normal bookings (same %, flat, snapshot).
+- **Fast-track confirmation:** emergency bookings notify the doctor on all channels with a response window `booking.emergencyConfirmMinutes` (default 10). No response ⇒ patient is immediately shown alternative emergency-enabled doctors — payment **carries over via the same transfer mechanics as §4.4** (pick-another-doctor path) or refunds in full with costs on the non-responding doctor's ledger (he opted into emergencies and didn't respond).
+- Payment hold for emergency checkout uses a shorter window (`payment.emergencyHoldMinutes`, default 5) so slots aren't blocked during a live emergency.
 
 ---
 
@@ -129,6 +176,7 @@ Refund destination (D7): patient picks **wallet (instant)** or **original method
 - **Snapshot at payment time** into the payment row (`commission_percent`, `commission_flat`, `commission_amount`, `doctor_earning_amount`) so later config changes never rewrite history.
 - Every change to commission config (global or per-doctor) writes an **audit log** row (who, old → new, when) — visible in the admin payments console.
 - Computation: `commission = round2(gross × pct/100) + flat`; `doctorNet = gross − commission`. Validation: flat fee may never exceed gross (guard on config save and on booking of ultra-low fees).
+- **Referral transfers (§4.4):** commission is recomputed at the receiving doctor's effective rate on the final settled amount; the superseded snapshot is preserved in `payment_events`.
 
 ---
 
@@ -186,11 +234,13 @@ Build items:
 - GST reports: monthly taxable-value summary of commission invoices (CSV export for the accountant), exempt-supply register for consultations. No filing integration — data out, filing stays with the CA.
 - Enterprise/farmer bookings: invoice carries the enterprise legal name (farms often need books-of-account entries) — pulled from `enterprises`.
 
+**Future-proofing contract (D13):** every tax figure anywhere in the system is computed from the admin-configured rate table at transaction time and **snapshotted** into the payment/invoice rows — nothing is hardcoded, no code path assumes 0%. Today admin sets consultation SAC rate = 0 (exempt) and commission SAC rate = 18%. If the government changes either, admin edits the rate in **Admin → Payments & Finance → Tax & Invoicing** and it applies to all *future* transactions automatically; historical invoices are immutable snapshots. This section of code is designed to never need touching again.
+
 ---
 
 ## 8. Database changes (migration `004_payment_module.sql`)
 
-**`payments` (alter):** add `gateway_order_id`, `gateway_payment_id`, `commission_percent`, `commission_flat`, `commission_amount`, `doctor_earning_amount`, `wallet_amount_used`, `refund_destination` (`wallet|gateway`), `expires_at`; extend `status` CHECK with `created`, `expired`, `partially_refunded`; default `currency` → `'INR'`, default `gateway` → `'demo'`.
+**`payments` (alter):** add `gateway_order_id`, `gateway_payment_id`, `gateway_fee_amount` (actual fee paid — basis for all fee recovery, D12), `commission_percent`, `commission_flat`, `commission_amount`, `doctor_earning_amount`, `wallet_amount_used`, `refund_destination` (`wallet|gateway`), `processing_charge_amount` (deducted on patient-cancel refunds), `expires_at`; extend `status` CHECK with `created`, `expired`, `partially_refunded`, `transferred`; default `currency` → `'INR'`, default `gateway` → `'demo'`.
 
 **New tables:**
 - `payment_events` — append-only audit of every transition + raw webhook payloads (idempotency: unique on `gateway_event_id`).
@@ -199,11 +249,13 @@ Build items:
 - `invoices` — snapshot table per §7.
 - `tax_codes` — SAC master (per master-data rule: SAC on forms is always a picker, never free text).
 
-**`vet_profiles` (alter):** `commission_percent_override`, `commission_flat_override`, `gstin`, `payout_account_name`, `payout_account_number`, `payout_ifsc`, `payout_upi`.
+**`vet_profiles` (alter):** `commission_percent_override`, `commission_flat_override`, `emergency_consultation_fee` (D11), `gstin`, `payout_account_name`, `payout_account_number`, `payout_ifsc`, `payout_upi`.
 
-**`bookings` (alter):** extend status CHECK with `payment_pending`, `payment_expired`.
+**`bookings` (alter):** extend status CHECK with `payment_pending`, `payment_expired`, `referred`.
 
-**`system_settings` seeds:** `payment.gatewayMode`, `payment.holdMinutes=15`, `payment.enabled=false` (feature flag — module ships dark), `commission.defaultPercent=15`, `commission.flatFee=20`, `settlement.clearanceDays=2`, `settlement.minWithdrawalAmount=500`, `compensation.doctorShareOfRetainedPercent=50`, `compensation.doctorShareOnPatientNoShowPercent=100`, `compensation.negativeBalanceAlertAmount=2000`, `tax.*` (§7), plus existing `cancellation.*` keys unchanged.
+**`referrals` (alter, D10):** `referral_type ('hospital'|'platform')` default `'hospital'` (existing rows unchanged), `hospital_id` → nullable, add `booking_id`, `payment_id`, `transfer_status ('offered'|'accepted'|'rechosen'|'refunded'|'expired'|'completed')`, `action_deadline`.
+
+**`system_settings` seeds:** `payment.gatewayMode`, `payment.holdMinutes=15`, `payment.emergencyHoldMinutes=5`, `payment.enabled=false` (feature flag — module ships dark), `commission.defaultPercent=15`, `commission.flatFee=20`, `cancellation.processingFlatFee=25` (D12 — flat component of the customer-facing "cancellation processing charge"), `settlement.clearanceDays=2`, `settlement.minWithdrawalAmount=500`, `compensation.doctorShareOfRetainedPercent=50`, `compensation.doctorShareOnPatientNoShowPercent=100`, `compensation.negativeBalanceAlertAmount=2000`, `referral.actionWindowHours=72`, `booking.emergencyConfirmMinutes=10`, `tax.*` (§7), plus existing `cancellation.*` keys unchanged.
 
 Per `database-rules.md`: UUIDs via `gen_random_uuid()`, camelCase SELECT aliases, all ledger writes inside transactions, CHECK constraints mirrored in Joi schemas. Wallet/earnings mutations use `SELECT … FOR UPDATE` (seat-limit race-condition rule from `backend-security-audit.md`).
 
@@ -218,7 +270,7 @@ Per `database-rules.md`: UUIDs via `gen_random_uuid()`, camelCase SELECT aliases
 | `BookingService` | `payment_pending` creation path, slot-hold conflict rules, re-link on reschedule, wire compensation matrix into cancel/missed paths |
 | `WalletService` | `debit` for wallet-pay (transactional, `FOR UPDATE`), refund-destination handling |
 | Routes | `POST /payments/checkout/:bookingId` (creates order), `POST /payments/verify` (checkout signature), `POST /webhooks/razorpay` (**no auth middleware, signature-verified, raw-body parser**), `GET /payments/receipt/:id`, `/earnings/*` (doctor), `/withdrawals/*` (doctor + admin), `/admin/payment-settings/*`, `/admin/settlements/*`, `/admin/reports/finance/*` |
-| Scheduler (`utils/scheduler.ts`) | + expire unpaid holds (5 min), + mature `clearing → available` earnings (hourly), + reconciliation sweep (daily: `pending` payments > 1h old re-checked against gateway via `fetchPayment`) |
+| Scheduler (`utils/scheduler.ts`) | + expire unpaid holds (5 min), + mature `clearing → available` earnings (hourly), + reconciliation sweep (daily: `pending` payments > 1h old re-checked against gateway via `fetchPayment`), + expire referral action windows → auto-refund (hourly), + emergency confirm-window timeout → offer alternatives (every minute while any emergency booking is open) |
 | Validation | Joi schemas for every new route; **no client-supplied amounts anywhere** |
 | Notifications | payment received (both parties), payment expired + retry link, refund initiated/landed, earning available, withdrawal status changes, admin alert on webhook signature failures |
 
@@ -230,17 +282,20 @@ Per `database-rules.md`: UUIDs via `gen_random_uuid()`, camelCase SELECT aliases
 - **BookConsultation / HospitalBooking:** new payment step after slot selection — fee breakdown card (fee, tax if any, wallet applied, payable now), wallet-pay toggle, Razorpay checkout (demo mode: simulated checkout dialog), success/failure/retry states.
 - **Payments & Receipts page:** payment history (upgrade of existing list), invoice PDF download, refund status per cancelled booking.
 - **Wallet page (upgrade):** balance usable at checkout, transaction list already exists; add "instant refund" badge history.
-- **Cancel dialog:** shows the computed refund amount *before* confirming (policy transparency — patients see "you'll get ₹250 of ₹500 back") + refund destination choice.
+- **Cancel dialog:** shows the computed refund amount *before* confirming (policy transparency — patients see "you'll get ₹250 of ₹500 back") + refund destination choice. Any deduction appears as a **single "cancellation processing charge" line** (D12 — never itemized into commission/gateway components in customer-facing UI).
+- **Referral action screen (new):** when a doctor refers pre-consultation, the patient gets a guided 3-choice card — accept referred doctor (slot picker + difference settlement), choose another doctor, or refund — with a visible action deadline countdown.
+- **Emergency booking path:** emergency toggle (visible only for emergency-enabled doctors), emergency fee shown clearly, live "waiting for doctor to accept (10:00)" state, automatic alternatives screen on timeout.
 
 ### Veterinarian
-- **Profile:** consultation fee (exists — verify editability), GSTIN, payout bank/UPI details.
+- **Profile:** consultation fee (exists — verify editability), **emergency fee (opt-in switch for emergency availability)**, GSTIN, payout bank/UPI details.
+- **Refer patient action (new):** on a confirmed booking (pre-consultation) or from a completed consultation (specialist referral) — target-doctor picker (master-data rule: picker, not free text), reason, and for pre-consult referrals a clear notice of what happens to the payment (and that a resulting refund lands on his ledger).
 - **My Earnings (new page):** four stat tiles (clearing / available / locked / lifetime), threshold progress bar, per-consultation statement (gross, commission, net, type — including compensation entries), withdrawal request + history, auto-request opt-in.
 - **Booking cards:** paid badge; unpaid (`payment_pending`) requests visually distinct and *not confirmable*.
 
 ### Admin — new "Payments & Finance" menu group
 1. **Gateway Settings** — mode switch, webhook health indicator, env-key presence check (never shows secrets).
 2. **Commission Rules** — global % + flat; per-doctor override table with search; change-audit trail inline.
-3. **Settlement Policy** — clearance days, min withdrawal, compensation splits, hold minutes.
+3. **Settlement & Cancellation Policy** — clearance days, min withdrawal, compensation splits, hold minutes, cancellation processing flat fee, referral action window, emergency confirm/hold windows.
 4. **Tax & Invoicing** — GSTIN, SAC rates, invoice numbering.
 5. **Transactions** — upgrade existing `PaymentManagement.tsx`: live status filters, stuck-payment flag, manual refund with destination choice.
 6. **Settlements** — withdrawal queue (aging indicators), approve/reject/settle with UTR, discretionary payout button.
@@ -258,7 +313,7 @@ All screens: 6-locale i18n keys added up-front with the mandatory audit command;
 
 | Persona | Report |
 |---|---|
-| Admin | Revenue overview (GMV, commission earned, refunds out, net platform revenue — daily/monthly trend), settlement liability (owed to doctors: clearing vs available), GST/commission-invoice export (CSV), reconciliation report (gateway vs ledger mismatches), doctor-wise earnings & commission table |
+| Admin | Revenue overview (GMV, commission earned, refunds out, processing charges collected, net platform revenue — daily/monthly trend), settlement liability (owed to doctors: clearing vs available, negative balances), GST/commission-invoice export (CSV), reconciliation report (gateway vs ledger mismatches), doctor-wise earnings & commission table, referral report (volume, conversion, refund rate per doctor) |
 | Doctor | Earnings statement (filterable, CSV export), monthly summary, commission invoices received |
 | Patient/Farmer | Spend history + receipts; enterprise-level spend rollup for farm accounts |
 
@@ -286,22 +341,25 @@ All screens: 6-locale i18n keys added up-front with the mandatory audit command;
 | **P2 — Razorpay** | RazorpayGateway (orders, checkout, webhook, refunds), reconciliation job, gateway refund destination, smart retry | Test-mode Razorpay round-trip verified incl. webhook replay + signature-failure alarms |
 | **P3 — Commission & earnings** | CommissionEngine, per-doctor overrides UI, earnings ledger + clearance job, doctor My Earnings page, compensation matrix wiring | Every completed/cancelled/missed scenario produces correct ledger rows |
 | **P4 — Settlements** | Withdrawal workflow (doctor + admin console), discretionary payout, payout details in profile, notifications | Money-out lifecycle audited end-to-end |
-| **P5 — GST & invoicing** | Invoice snapshots, PDF receipts, SAC master, commission invoices, GST exports | CA-reviewable invoice samples for both streams |
-| **P6 — Reports & polish** | Finance reports/dashboards, i18n audit (6 locales), unit tests (CommissionEngine, refund matrix, ledger transitions), /verify pass, deploy checklist | Flag flipped on in dev env |
+| **P5 — Referrals & emergency** | Platform referral flows (§4.4: transfer, difference settlement, 3-option patient screen, history views), emergency fee + fast-track confirm (§4.5), related scheduler jobs | Every referral/emergency path produces correct payment + ledger outcomes |
+| **P6 — GST & invoicing** | Invoice snapshots, PDF receipts, SAC master with admin-editable rates (D13), commission invoices, GST exports | CA-reviewable invoice samples for both streams; rate change in admin UI reflects on next invoice with no code change |
+| **P7 — Reports, cleanup & launch** | Finance reports/dashboards, referral report, i18n audit (6 locales), unit tests (CommissionEngine, refund matrix incl. D12 fee recovery, ledger transitions, transfer flows), /verify pass, **go-live data-cleanup script (D14)**, deploy checklist | Flag flipped on in dev env; clean-start script rehearsed |
 
 Each phase is independently committable/pushable to `origin/develop` (flag keeps prod behavior unchanged until switch-on).
 
 ---
 
-## 14. Open items needing your confirmation
+## 14. Open items — ALL RESOLVED (2026-07-05)
 
-- **O1 — Hospital commission layer:** when a booking comes via a hospital, does the *hospital* take a cut of the doctor's earning (three-way split)? Deferred from v1 unless you say otherwise.
-- **O2 — Existing unpaid history:** bookings/consultations created before go-live stay payment-exempt (grandfathered). Confirm.
-- **O3 — Emergency-priority bookings:** same price, or allow a doctor-set emergency surcharge? (Priority field already exists.) v1 assumes same price.
-- **O4 — Promo/discount codes:** `discount_amount` column exists; module designed so codes can slot into the fee-breakdown later. Deferred from v1 unless wanted.
-- **O5 — GST exemption treatment** for consultation invoices to be confirmed by your CA (module defaults to exempt, rate configurable).
-- ~~**O6 — Goodwill bonus funding**~~ — **RESOLVED 2026-07-05 → D9:** doctor-funded via negative penalty entry on the earnings ledger; balance may go negative and is recovered from future earnings. See §6.2.
+- ~~**O1 — Hospital commission layer**~~ → **RESOLVED → D10:** network hospitals are a **separate subscription-based module** (future work — not this plan). This plan covers individual-doctor bookings only; individual doctors may have their own registered hospital, which changes nothing in the money flow. Referral flows added instead — see §4.4.
+- ~~**O2 — Existing unpaid history**~~ → **RESOLVED → D14:** no grandfathering. Clean start at prod launch; legacy data cleaned by launch script (P7).
+- ~~**O3 — Emergency bookings**~~ → **RESOLVED → D11:** doctor-defined emergency fee, opt-in, fast-track confirm — see §4.5.
+- ~~**O4 — Promo/discount codes**~~ → **RESOLVED:** dedicated future module with its own end-to-end workflow — tracked in §15. Fee-breakdown UI and `discount_amount` column keep the slot open.
+- ~~**O5 — GST exemption**~~ → **RESOLVED → D13:** exemption confirmed by owner for now; rates fully admin-configurable so future government changes need zero code — see §7.
+- ~~**O6 — Goodwill bonus funding**~~ → **RESOLVED → D9/D12:** doctor-funded (bonus + gateway fee) via negative penalty entries; balance may go negative and is recovered from future earnings. See §6.2.
 
-## 15. Explicitly out of scope (v1)
+## 15. Future scope (tracked, not in v1)
 
-Multi-currency; automated bank payouts (Razorpay Route); patient wallet top-up (wallet fills via refunds only); pharmacy/marketplace payment convergence; EMI/subscription plans; GST filing integration.
+- **Promo/discount code module (owner-requested tracker, 2026-07-05):** dedicated module with code lifecycle (create/limit/expire), eligibility rules, redemption audit, and fee-breakdown integration. Hooks reserved: `payments.discount_amount`, fee-breakdown line slot, admin menu slot under Payments & Finance.
+- **Network-hospital subscription billing module (owner-stated direction, 2026-07-05):** network hospitals pay platform subscription fees instead of per-consultation commission — separate plan when taken up.
+- Multi-currency; automated bank payouts (Razorpay Route); patient wallet top-up (wallet fills via refunds only); pharmacy/marketplace payment convergence; EMI plans; GST filing integration.
