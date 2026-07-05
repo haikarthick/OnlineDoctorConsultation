@@ -35,6 +35,7 @@
 | D6 | Retained-money split | On late patient cancel / patient no-show, doctor receives a **configurable share of the retained amount** (compensation for the blocked slot) |
 | D7 | Wallet | **Both:** wallet balance usable to pay for bookings (Razorpay covers shortfall), and on refund the **patient chooses destination** — instant wallet credit or original payment method (5–7 days) |
 | D8 | Tax | **Full GST module** — per-doctor GSTIN, SAC codes, invoice generation, GST reports |
+| D9 | Goodwill bonus funding | **Doctor-funded** (confirmed 2026-07-05). The bonus credited to the patient on doctor-cancellation is deducted from the doctor's earnings ledger as a penalty entry. The doctor's balance **may go negative**; recovered automatically from future earnings. Platform funds nothing. |
 
 ---
 
@@ -108,7 +109,7 @@ Rules:
 
 | Scenario | Patient gets | Doctor gets | Platform keeps | Driven by |
 |---|---|---|---|---|
-| Vet declines / no-show / cancels | 100% + goodwill bonus % | nothing | nothing (absorbs gateway fee) | existing `cancellation.autoRefundOnDoctorCancel`, `goodwillBonusPercent` |
+| Vet declines / no-show / cancels | 100% + goodwill bonus % | **−(goodwill bonus)** — penalty entry on earnings ledger; balance may go negative (D9) | nothing (absorbs only the non-recoverable gateway transaction fee) | existing `cancellation.autoRefundOnDoctorCancel`, `goodwillBonusPercent` |
 | Patient cancels ≥ `patientFreeWindowHours` (24h) | 100% | nothing | nothing | existing keys |
 | Patient cancels in partial window (2–24h) | `partialRefundPercent` (50%) | `compensation.doctorShareOfRetainedPercent` (default 50%) of retained | remainder of retained | existing keys + **new** key |
 | Patient cancels < 2h / patient no-show | 0% | `compensation.doctorShareOnPatientNoShowPercent` (default: full net share — he showed up) | remainder | **new** keys |
@@ -145,7 +146,16 @@ Refund destination (D7): patient picks **wallet (instant)** or **original method
 - `settlement.minWithdrawalAmount` (e.g. ₹500) — doctor can submit a withdrawal request only when `available ≥ min`. The UI shows a **progress bar toward the threshold** ("₹350 of ₹500 — about 1 consultation away") instead of a disabled button, so the rule feels motivating rather than restrictive.
 - **Admin discretionary payout:** admin can settle any amount for any doctor at any time (below threshold, even mid-clearing with an explicit "override clearance" confirmation). Every discretionary payout requires a note and is audit-logged.
 
-### 6.2 Withdrawal workflow
+### 6.2 Negative balance & penalty handling (D9)
+
+- Doctor-cancellation goodwill bonus posts a **negative `penalty` entry** to `doctor_earnings` (type `penalty`, negative `net_amount`, reason = booking reference). If the doctor has no available balance, the running balance goes **negative**.
+- **Recovery is automatic:** new earnings first offset the negative balance before anything becomes withdrawable — no separate collection step, no invoicing the doctor.
+- Withdrawal gate becomes: `available > 0 AND available ≥ settlement.minWithdrawalAmount` (a negative or zero balance simply shows the shortfall on the progress bar: "−₹150 — clears with your next consultation").
+- The doctor's statement shows each penalty with the cancelled booking it came from, so it is self-explanatory and disputable.
+- Admin visibility: settlement console flags doctors with negative balances and a **deep-negative alert threshold** (`compensation.negativeBalanceAlertAmount`, e.g. −₹2,000) — a doctor repeatedly cancelling into deep negative is a churn/abuse signal that ties into the existing doctor-reliability score.
+- Edge rule: penalties never touch `clearing` entries retroactively; they only affect the running balance, keeping the clearance ledger append-only and auditable.
+
+### 6.3 Withdrawal workflow
 
 ```
 doctor: request (amount ≤ available) ─► admin: approve / reject (reason)
@@ -184,7 +194,7 @@ Build items:
 
 **New tables:**
 - `payment_events` — append-only audit of every transition + raw webhook payloads (idempotency: unique on `gateway_event_id`).
-- `doctor_earnings` — `id, doctor_id, payment_id, booking_id, consultation_id, gross, commission_amount, net_amount, type (consultation|cancel_compensation|no_show_compensation|adjustment), status (clearing|available|locked|withdrawn|reversed), clear_at, withdrawal_id, created_at`.
+- `doctor_earnings` — `id, doctor_id, payment_id, booking_id, consultation_id, gross, commission_amount, net_amount, type (consultation|cancel_compensation|no_show_compensation|penalty|adjustment), status (clearing|available|locked|withdrawn|reversed), clear_at, withdrawal_id, created_at` — `penalty` rows carry negative `net_amount` (D9).
 - `withdrawal_requests` — `id, doctor_id, amount, status (requested|approved|rejected|settled|cancelled), requested_at, reviewed_by, reviewed_at, settled_by, settled_at, utr_reference, admin_note, rejection_reason`.
 - `invoices` — snapshot table per §7.
 - `tax_codes` — SAC master (per master-data rule: SAC on forms is always a picker, never free text).
@@ -193,7 +203,7 @@ Build items:
 
 **`bookings` (alter):** extend status CHECK with `payment_pending`, `payment_expired`.
 
-**`system_settings` seeds:** `payment.gatewayMode`, `payment.holdMinutes=15`, `payment.enabled=false` (feature flag — module ships dark), `commission.defaultPercent=15`, `commission.flatFee=20`, `settlement.clearanceDays=2`, `settlement.minWithdrawalAmount=500`, `compensation.doctorShareOfRetainedPercent=50`, `compensation.doctorShareOnPatientNoShowPercent=100`, `tax.*` (§7), plus existing `cancellation.*` keys unchanged.
+**`system_settings` seeds:** `payment.gatewayMode`, `payment.holdMinutes=15`, `payment.enabled=false` (feature flag — module ships dark), `commission.defaultPercent=15`, `commission.flatFee=20`, `settlement.clearanceDays=2`, `settlement.minWithdrawalAmount=500`, `compensation.doctorShareOfRetainedPercent=50`, `compensation.doctorShareOnPatientNoShowPercent=100`, `compensation.negativeBalanceAlertAmount=2000`, `tax.*` (§7), plus existing `cancellation.*` keys unchanged.
 
 Per `database-rules.md`: UUIDs via `gen_random_uuid()`, camelCase SELECT aliases, all ledger writes inside transactions, CHECK constraints mirrored in Joi schemas. Wallet/earnings mutations use `SELECT … FOR UPDATE` (seat-limit race-condition rule from `backend-security-audit.md`).
 
@@ -290,7 +300,7 @@ Each phase is independently committable/pushable to `origin/develop` (flag keeps
 - **O3 — Emergency-priority bookings:** same price, or allow a doctor-set emergency surcharge? (Priority field already exists.) v1 assumes same price.
 - **O4 — Promo/discount codes:** `discount_amount` column exists; module designed so codes can slot into the fee-breakdown later. Deferred from v1 unless wanted.
 - **O5 — GST exemption treatment** for consultation invoices to be confirmed by your CA (module defaults to exempt, rate configurable).
-- **O6 — Goodwill bonus funding:** currently the bonus (wallet credit on doctor cancel) is platform-funded. Alternatively it could be deducted from the *doctor's* future earnings as a reliability penalty. v1 assumes platform-funded. Confirm.
+- ~~**O6 — Goodwill bonus funding**~~ — **RESOLVED 2026-07-05 → D9:** doctor-funded via negative penalty entry on the earnings ledger; balance may go negative and is recovered from future earnings. See §6.2.
 
 ## 15. Explicitly out of scope (v1)
 
