@@ -711,6 +711,51 @@ class ApiService {
     return response.data
   }
 
+  async requestWithdrawal() {
+    const response = await this.client.post('/withdrawals/request', {})
+    return response.data
+  }
+
+  async cancelWithdrawal(id: string) {
+    const response = await this.client.post(`/withdrawals/${id}/cancel`, {})
+    return response.data
+  }
+
+  async listMyWithdrawals() {
+    const response = await this.client.get('/withdrawals/my')
+    return response.data
+  }
+
+  async adminListWithdrawals(status?: string) {
+    const response = await this.client.get('/admin/withdrawals', { params: { status } })
+    return response.data
+  }
+
+  async adminNegativeBalances() {
+    const response = await this.client.get('/admin/withdrawals/negative-balances')
+    return response.data
+  }
+
+  async adminApproveWithdrawal(id: string, note?: string) {
+    const response = await this.client.put(`/admin/withdrawals/${id}/approve`, { note })
+    return response.data
+  }
+
+  async adminRejectWithdrawal(id: string, reason: string) {
+    const response = await this.client.put(`/admin/withdrawals/${id}/reject`, { reason })
+    return response.data
+  }
+
+  async adminSettleWithdrawal(id: string, utrReference: string, note?: string) {
+    const response = await this.client.put(`/admin/withdrawals/${id}/settle`, { utrReference, note })
+    return response.data
+  }
+
+  async adminDiscretionaryPayout(doctorId: string, utrReference: string, note: string) {
+    const response = await this.client.post('/admin/withdrawals/discretionary', { doctorId, utrReference, note })
+    return response.data
+  }
+
   async adminListCommissionDoctors(search?: string) {
     const response = await this.client.get('/admin/commission/doctors', { params: { search } })
     return response.data

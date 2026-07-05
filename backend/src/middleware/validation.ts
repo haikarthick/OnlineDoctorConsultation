@@ -273,6 +273,13 @@ export const createVetProfileSchema = Joi.object({
   availableHoursEnd: Joi.string().pattern(/^\d{2}:\d{2}/).optional().allow('', null),
   languages: Joi.array().items(Joi.string().max(50)).optional(),
   profileImage: Joi.string().uri({ allowRelative: true }).max(500).optional().allow('', null),
+  // Payment module (P3/P4): emergency fee, GST + payout details
+  emergencyConsultationFee: positiveNumber.max(100000).optional().allow(null),
+  gstin: Joi.string().max(20).optional().allow('', null),
+  payoutAccountName: Joi.string().max(255).optional().allow('', null),
+  payoutAccountNumber: Joi.string().max(50).optional().allow('', null),
+  payoutIfsc: Joi.string().max(20).optional().allow('', null),
+  payoutUpi: Joi.string().max(100).optional().allow('', null),
 });
 
 export const updateVetProfileSchema = createVetProfileSchema.fork(

@@ -198,7 +198,8 @@
     "permissions": "Permissions",
     "myPayments": "My Payments",
     "legalPolicies": "Legal & Policies",
-    "commissionSettings": "Commission Rules"
+    "commissionSettings": "Commission Rules",
+    "settlements": "Settlements"
   },
   "login": {
     "welcome": "Welcome back",
@@ -6998,5 +6999,56 @@
     "colPercentOverride": "% override",
     "colFlatOverride": "Flat override",
     "snapshotNote": "Commission is snapshotted at payment time — changing overrides never rewrites past payments."
+  },
+  "withdrawals": {
+    "title": "Withdrawals",
+    "payoutOnFile": "Payout details on file — you can request a withdrawal of your full available balance.",
+    "payoutMissing": "Add your bank account or UPI details to enable withdrawals.",
+    "payoutDetails": "Payout details",
+    "requestButton": "Request withdrawal",
+    "requested": "Withdrawal requested. The platform team will settle it to your bank/UPI.",
+    "requestFailed": "Could not create the withdrawal request.",
+    "payoutSaved": "Payout details saved.",
+    "payoutSaveFailed": "Failed to save payout details.",
+    "accountName": "Account holder name",
+    "accountNumber": "Account number",
+    "ifsc": "IFSC code",
+    "upi": "UPI ID (optional)",
+    "netPaid": "Net paid",
+    "statuses": {
+      "requested": "Requested",
+      "approved": "Approved",
+      "settled": "Settled",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    }
+  },
+  "settlementsAdmin": {
+    "title": "Settlements",
+    "subtitle": "Doctor withdrawal requests, settlements and payouts",
+    "filterAll": "All",
+    "empty": "No withdrawal requests.",
+    "negativeTitle": "Doctors with negative balances",
+    "discretionary": "Discretionary",
+    "age": "Waiting {{days}} day(s)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "settle": "Settle",
+    "approved": "Request approved.",
+    "rejected": "Request rejected.",
+    "settled": "Settlement recorded.",
+    "actionFailed": "Action failed.",
+    "settleTitle": "Record settlement",
+    "settleHint": "Make the bank/UPI transfer first, then record the reference here.",
+    "utrPlaceholder": "UTR / transaction reference",
+    "notePlaceholder": "Note (optional)",
+    "rejectTitle": "Reject withdrawal",
+    "reasonPlaceholder": "Reason shown to the doctor…",
+    "discretionaryButton": "Discretionary payout",
+    "discretionaryTitle": "Discretionary payout",
+    "discretionaryHint": "Settles a doctor’s full available balance immediately, bypassing the minimum threshold. Requires a note (audit-logged).",
+    "doctorIdPlaceholder": "Doctor user ID",
+    "discretionaryNotePlaceholder": "Why this payout is being made…",
+    "payNow": "Pay now"
   }
 }

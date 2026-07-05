@@ -315,3 +315,18 @@ test.describe('Auto-Discovered — /admin/commission-settings', () => {
     await context.close()
   })
 })
+
+
+test.describe('Auto-Discovered — /admin/settlements', () => {
+  test('should load /admin/settlements without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'admin')
+    await page.goto('/admin/settlements')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})

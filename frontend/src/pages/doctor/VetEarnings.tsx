@@ -50,6 +50,71 @@ const VetEarnings: React.FC = () => {
   const [recent, setRecent] = useState<RecentConsultation[]>([])
   const [ledger, setLedger] = useState<LedgerSummary | null>(null)
   const [statement, setStatement] = useState<any[]>([])
+  const [withdrawals, setWithdrawals] = useState<any[]>([])
+  const [payout, setPayout] = useState({ accountName: '', accountNumber: '', ifsc: '', upi: '' })
+  const [payoutSaved, setPayoutSaved] = useState(false)
+  const [showPayoutForm, setShowPayoutForm] = useState(false)
+  const [actionMsg, setActionMsg] = useState('')
+  const [actionBusy, setActionBusy] = useState(false)
+
+  const loadWithdrawals = async () => {
+    try {
+      const resp: any = await apiService.listMyWithdrawals()
+      setWithdrawals(Array.isArray(resp?.data) ? resp.data : [])
+    } catch { setWithdrawals([]) }
+  }
+
+  const loadPayoutDetails = async () => {
+    try {
+      const resp: any = await apiService.getMyVetProfile()
+      const p = resp?.data || resp
+      setPayout({
+        accountName: p?.payoutAccountName || '',
+        accountNumber: p?.payoutAccountNumber || '',
+        ifsc: p?.payoutIfsc || '',
+        upi: p?.payoutUpi || '',
+      })
+      setPayoutSaved(!!((p?.payoutAccountNumber && p?.payoutIfsc) || p?.payoutUpi))
+    } catch { /* form stays blank */ }
+  }
+
+  const savePayoutDetails = async () => {
+    try {
+      setActionBusy(true)
+      setActionMsg('')
+      await apiService.updateVetProfile({
+        payoutAccountName: payout.accountName || null,
+        payoutAccountNumber: payout.accountNumber || null,
+        payoutIfsc: payout.ifsc || null,
+        payoutUpi: payout.upi || null,
+      })
+      setPayoutSaved(!!((payout.accountNumber && payout.ifsc) || payout.upi))
+      setShowPayoutForm(false)
+      setActionMsg(t('withdrawals.payoutSaved'))
+    } catch (err: any) {
+      setActionMsg(err?.response?.data?.error?.message || err?.response?.data?.error || t('withdrawals.payoutSaveFailed'))
+    } finally { setActionBusy(false) }
+  }
+
+  const requestWithdrawal = async () => {
+    try {
+      setActionBusy(true)
+      setActionMsg('')
+      await apiService.requestWithdrawal()
+      setActionMsg(t('withdrawals.requested'))
+      await Promise.all([loadWithdrawals(), loadLedger()])
+    } catch (err: any) {
+      setActionMsg(err?.response?.data?.error?.message || err?.response?.data?.error || t('withdrawals.requestFailed'))
+    } finally { setActionBusy(false) }
+  }
+
+  const cancelWithdrawal = async (id: string) => {
+    try {
+      setActionBusy(true)
+      await apiService.cancelWithdrawal(id)
+      await Promise.all([loadWithdrawals(), loadLedger()])
+    } catch { /* stays */ } finally { setActionBusy(false) }
+  }
 
   const loadLedger = async () => {
     try {
@@ -85,7 +150,7 @@ const VetEarnings: React.FC = () => {
   }
 
   useEffect(() => { loadEarnings() }, [days])
-  useEffect(() => { loadLedger() }, [])
+  useEffect(() => { loadLedger(); loadWithdrawals(); loadPayoutDetails() }, [])
 
   const thresholdProgress = ledger && ledger.minWithdrawalAmount > 0
     ? Math.max(0, Math.min(100, (ledger.available / ledger.minWithdrawalAmount) * 100))
@@ -150,6 +215,80 @@ const VetEarnings: React.FC = () => {
             <div style={{ color: '#9ca3af', fontSize: 12, marginTop: 6 }}>
               {thresholdProgress >= 100 ? t('earningsLedger.thresholdReached') : t('earningsLedger.thresholdHint')}
             </div>
+          </div>
+
+          {/* Withdrawal card (§6.3) */}
+          <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px', marginBottom: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+              <div>
+                <div style={{ fontWeight: 700 }}>{t('withdrawals.title')}</div>
+                <div style={{ color: '#6b7280', fontSize: 13 }}>
+                  {payoutSaved ? t('withdrawals.payoutOnFile') : t('withdrawals.payoutMissing')}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="module-btn" onClick={() => setShowPayoutForm(v => !v)}>
+                  {t('withdrawals.payoutDetails')}
+                </button>
+                <button
+                  className="module-btn primary"
+                  disabled={actionBusy || !payoutSaved || ledger.available <= 0 || ledger.available < ledger.minWithdrawalAmount || withdrawals.some(w => ['requested', 'approved'].includes(w.status))}
+                  onClick={requestWithdrawal}
+                >
+                  {t('withdrawals.requestButton')}
+                </button>
+              </div>
+            </div>
+
+            {actionMsg && (
+              <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', borderRadius: 8, padding: '8px 12px', marginTop: 10, fontSize: 13 }}>
+                {actionMsg}
+              </div>
+            )}
+
+            {showPayoutForm && (
+              <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
+                <input placeholder={t('withdrawals.accountName')} value={payout.accountName}
+                  onChange={e => setPayout(p => ({ ...p, accountName: e.target.value }))}
+                  style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px' }} />
+                <input placeholder={t('withdrawals.accountNumber')} value={payout.accountNumber}
+                  onChange={e => setPayout(p => ({ ...p, accountNumber: e.target.value }))}
+                  style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px' }} />
+                <input placeholder={t('withdrawals.ifsc')} value={payout.ifsc}
+                  onChange={e => setPayout(p => ({ ...p, ifsc: e.target.value }))}
+                  style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px' }} />
+                <input placeholder={t('withdrawals.upi')} value={payout.upi}
+                  onChange={e => setPayout(p => ({ ...p, upi: e.target.value }))}
+                  style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px' }} />
+                <button className="module-btn primary" disabled={actionBusy} onClick={savePayoutDetails}>
+                  {actionBusy ? t('common.loading') : t('common.save')}
+                </button>
+              </div>
+            )}
+
+            {withdrawals.length > 0 && (
+              <div style={{ marginTop: 12, borderTop: '1px solid #f1f5f9', paddingTop: 10 }}>
+                {withdrawals.slice(0, 5).map(w => (
+                  <div key={w.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, padding: '6px 0', gap: 8, flexWrap: 'wrap' }}>
+                    <span>
+                      <strong>{formatCurrency(parseFloat(String(w.amount)))}</strong>
+                      {parseFloat(String(w.tdsAmount || 0)) > 0 && (
+                        <span style={{ color: '#6b7280' }}> · TDS {formatCurrency(parseFloat(String(w.tdsAmount)))} · {t('withdrawals.netPaid')} {formatCurrency(parseFloat(String(w.netPaidAmount || 0)))}</span>
+                      )}
+                      {w.utrReference && <span style={{ color: '#6b7280' }}> · {w.utrReference}</span>}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontWeight: 600 }}>{String(t(`withdrawals.statuses.${w.status}`, w.status))}</span>
+                      {w.status === 'requested' && (
+                        <button className="module-btn" style={{ padding: '3px 10px', fontSize: 12 }} disabled={actionBusy} onClick={() => cancelWithdrawal(w.id)}>
+                          {t('common.cancel')}
+                        </button>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Statement */}

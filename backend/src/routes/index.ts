@@ -510,7 +510,29 @@ router.post('/vet-profiles', authMiddleware, validateBody(createVetProfileSchema
 router.get('/vet-profiles/me', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.getMyProfile(req, res)));
 router.get('/vet-profiles', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.listVets(req, res)));
 router.get('/vet-profiles/:userId', authMiddleware, asyncHandler((req: Request, res: Response) => VetProfileController.getProfile(req, res)));
-router.put('/vet-profiles', authMiddleware, validateBody(updateVetProfileSchema), asyncHandler((req: Request, res: Response) => VetProfileController.updateProfile(req, res)));
+router.put('/vet-profiles', authMiddleware, validateBody(updateVetProfileSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  // §17.2: saving payout details re-acknowledges the Doctor Agreement (context payout_setup)
+  const touchesPayout = ['payoutAccountNumber', 'payoutIfsc', 'payoutUpi', 'payoutAccountName']
+    .some((k) => req.body[k] !== undefined && req.body[k] !== null && String(req.body[k]).trim() !== '');
+  await VetProfileController.updateProfile(req, res);
+  if (touchesPayout && res.statusCode < 300 && authReq.userId) {
+    try {
+      const LegalService = (await import('../services/LegalService')).default;
+      const userRes = await database.query(`SELECT email FROM users WHERE id = $1`, [authReq.userId]);
+      await LegalService.recordAcceptances({
+        userId: authReq.userId,
+        userEmail: userRes.rows[0]?.email || '',
+        docTypes: ['doctor_agreement'],
+        context: 'payout_setup',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+      });
+    } catch (err) {
+      logger.warn('payout_setup consent recording failed (non-blocking)', { userId: authReq.userId, error: err });
+    }
+  }
+}));
 
 // ─── Vet Earnings ─────────────────────────────────────────────
 router.get('/vet/earnings', authMiddleware, roleMiddleware(['veterinarian', 'admin']), asyncHandler(async (req: Request, res: Response) => {
@@ -1464,6 +1486,75 @@ router.get('/earnings/statement', authMiddleware, roleMiddleware(['veterinarian'
   const offset = parseInt(req.query.offset as string) || 0;
   const result = await EarningsService.getStatement(authReq.userId!, limit, offset);
   res.json({ success: true, data: result });
+}));
+
+// ─── Withdrawals / settlements (docs/PAYMENT_MODULE_PLAN.md §6.3) ──────────
+router.post('/withdrawals/request', authMiddleware, roleMiddleware(['veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  const result = await WithdrawalService.requestWithdrawal(authReq.userId!);
+  res.status(201).json({ success: true, data: result });
+}));
+
+router.post('/withdrawals/:id/cancel', authMiddleware, roleMiddleware(['veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  await WithdrawalService.cancelRequest(authReq.userId!, req.params.id);
+  res.json({ success: true, message: 'Withdrawal request cancelled' });
+}));
+
+router.get('/withdrawals/my', authMiddleware, roleMiddleware(['veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  res.json({ success: true, data: await WithdrawalService.listMyWithdrawals(authReq.userId!) });
+}));
+
+router.get('/admin/withdrawals', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  res.json({ success: true, data: await WithdrawalService.adminList(req.query.status as string | undefined) });
+}));
+
+router.get('/admin/withdrawals/negative-balances', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  res.json({ success: true, data: await WithdrawalService.adminNegativeBalances() });
+}));
+
+router.put('/admin/withdrawals/:id/approve', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  await WithdrawalService.adminApprove(req.params.id, authReq.userId!, req.body.note);
+  res.json({ success: true, message: 'Withdrawal approved' });
+}));
+
+router.put('/admin/withdrawals/:id/reject', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  if (!req.body.reason || !String(req.body.reason).trim()) {
+    return res.status(400).json({ success: false, error: 'A rejection reason is required' });
+  }
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  await WithdrawalService.adminReject(req.params.id, authReq.userId!, String(req.body.reason).substring(0, 500));
+  res.json({ success: true, message: 'Withdrawal rejected' });
+}));
+
+router.put('/admin/withdrawals/:id/settle', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  if (!req.body.utrReference || !String(req.body.utrReference).trim()) {
+    return res.status(400).json({ success: false, error: 'utrReference (bank/UPI reference) is required' });
+  }
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  await WithdrawalService.adminSettle(req.params.id, authReq.userId!, String(req.body.utrReference).substring(0, 100), req.body.note);
+  res.json({ success: true, message: 'Withdrawal settled' });
+}));
+
+router.post('/admin/withdrawals/discretionary', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { doctorId, utrReference, note } = req.body;
+  if (!doctorId || !utrReference || !note) {
+    return res.status(400).json({ success: false, error: 'doctorId, utrReference and note are required' });
+  }
+  const WithdrawalService = (await import('../services/payment/WithdrawalService')).default;
+  const result = await WithdrawalService.adminDiscretionaryPayout(doctorId, authReq.userId!, String(utrReference).substring(0, 100), String(note).substring(0, 500));
+  res.status(201).json({ success: true, data: result });
 }));
 
 // Admin: per-doctor commission overrides (§5)

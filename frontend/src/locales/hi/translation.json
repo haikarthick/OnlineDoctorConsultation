@@ -198,7 +198,8 @@
     },
     "myPayments": "मेरे भुगतान",
     "legalPolicies": "कानूनी और नीतियाँ",
-    "commissionSettings": "कमीशन नियम"
+    "commissionSettings": "कमीशन नियम",
+    "settlements": "निपटान"
   },
   "login": {
     "welcome": "वापस स्वागत है",
@@ -7003,5 +7004,56 @@
     "colPercentOverride": "% ओवरराइड",
     "colFlatOverride": "फ्लैट ओवरराइड",
     "snapshotNote": "कमीशन भुगतान के समय स्नैपशॉट होता है — ओवरराइड बदलने से पुराने भुगतान नहीं बदलते।"
+  },
+  "withdrawals": {
+    "title": "निकासी",
+    "payoutOnFile": "भुगतान विवरण दर्ज हैं — आप अपनी पूरी उपलब्ध राशि की निकासी का अनुरोध कर सकते हैं।",
+    "payoutMissing": "निकासी सक्षम करने के लिए बैंक खाता या UPI विवरण जोड़ें।",
+    "payoutDetails": "भुगतान विवरण",
+    "requestButton": "निकासी का अनुरोध करें",
+    "requested": "निकासी का अनुरोध हो गया। प्लेटफ़ॉर्म टीम इसे आपके बैंक/UPI में निपटाएगी।",
+    "requestFailed": "निकासी अनुरोध नहीं बन सका।",
+    "payoutSaved": "भुगतान विवरण सहेजे गए।",
+    "payoutSaveFailed": "भुगतान विवरण सहेजने में विफल।",
+    "accountName": "खाताधारक का नाम",
+    "accountNumber": "खाता संख्या",
+    "ifsc": "IFSC कोड",
+    "upi": "UPI आईडी (वैकल्पिक)",
+    "netPaid": "शुद्ध भुगतान",
+    "statuses": {
+      "requested": "अनुरोधित",
+      "approved": "स्वीकृत",
+      "settled": "निपटाया गया",
+      "rejected": "अस्वीकृत",
+      "cancelled": "रद्द"
+    }
+  },
+  "settlementsAdmin": {
+    "title": "निपटान",
+    "subtitle": "डॉक्टर निकासी अनुरोध, निपटान और भुगतान",
+    "filterAll": "सभी",
+    "empty": "कोई निकासी अनुरोध नहीं।",
+    "negativeTitle": "नकारात्मक बैलेंस वाले डॉक्टर",
+    "discretionary": "विवेकाधीन",
+    "age": "{{days}} दिन से प्रतीक्षारत",
+    "approve": "स्वीकृत करें",
+    "reject": "अस्वीकार करें",
+    "settle": "निपटाएँ",
+    "approved": "अनुरोध स्वीकृत।",
+    "rejected": "अनुरोध अस्वीकृत।",
+    "settled": "निपटान दर्ज हुआ।",
+    "actionFailed": "कार्रवाई विफल।",
+    "settleTitle": "निपटान दर्ज करें",
+    "settleHint": "पहले बैंक/UPI ट्रांसफर करें, फिर संदर्भ यहाँ दर्ज करें।",
+    "utrPlaceholder": "UTR / लेनदेन संदर्भ",
+    "notePlaceholder": "टिप्पणी (वैकल्पिक)",
+    "rejectTitle": "निकासी अस्वीकार करें",
+    "reasonPlaceholder": "डॉक्टर को दिखाया जाने वाला कारण…",
+    "discretionaryButton": "विवेकाधीन भुगतान",
+    "discretionaryTitle": "विवेकाधीन भुगतान",
+    "discretionaryHint": "न्यूनतम सीमा को दरकिनार कर डॉक्टर की पूरी उपलब्ध राशि तुरंत निपटाता है। टिप्पणी आवश्यक (ऑडिट-लॉग्ड)।",
+    "doctorIdPlaceholder": "डॉक्टर यूज़र आईडी",
+    "discretionaryNotePlaceholder": "यह भुगतान क्यों किया जा रहा है…",
+    "payNow": "अभी भुगतान करें"
   }
 }
