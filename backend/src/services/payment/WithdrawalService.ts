@@ -190,6 +190,13 @@ class WithdrawalService {
     );
     await this.notifyDoctor(res.rows[0].doctor_id, 'Withdrawal Settled',
       `Your withdrawal has been settled (ref: ${utrReference}). Net amount paid: ${res.rows[0].net_paid_amount}.`);
+    // §7: commission invoice for this settlement (non-blocking, idempotent)
+    try {
+      const InvoiceService = (await import('./InvoiceService')).default;
+      await InvoiceService.createCommissionInvoice(withdrawalId);
+    } catch (err: any) {
+      logger.warn('Commission invoice creation failed (non-blocking)', { withdrawalId, error: err.message });
+    }
     logger.info('Withdrawal settled', { withdrawalId, adminId, utrReference });
   }
 
@@ -232,6 +239,13 @@ class WithdrawalService {
       logger.info('Discretionary payout settled', { withdrawalId, doctorId, adminId, amount: available });
       await this.notifyDoctor(doctorId, 'Payout Settled',
         `The platform has settled your earnings of ${available} (net ${netPaid} after TDS, ref: ${utrReference}).`);
+      // §7: commission invoice for this settlement (non-blocking, idempotent)
+      try {
+        const InvoiceService = (await import('./InvoiceService')).default;
+        await InvoiceService.createCommissionInvoice(withdrawalId);
+      } catch (invErr: any) {
+        logger.warn('Commission invoice creation failed (non-blocking)', { withdrawalId, error: invErr.message });
+      }
       return { id: withdrawalId, amount: available, tdsAmount, netPaidAmount: netPaid };
     } catch (err) {
       await client.query('ROLLBACK');

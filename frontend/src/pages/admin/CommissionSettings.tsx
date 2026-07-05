@@ -33,6 +33,46 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
   const [message, setMessage] = useState('')
   const [edits, setEdits] = useState<Record<string, { pct: string; flat: string }>>({})
   const [globals, setGlobals] = useState<{ percent: string; flat: string }>({ percent: '15', flat: '20' })
+  const [taxCodes, setTaxCodes] = useState<any[]>([])
+  const [taxEdits, setTaxEdits] = useState<Record<string, string>>({})
+  const [taxBusy, setTaxBusy] = useState<string | null>(null)
+  const [gstFrom, setGstFrom] = useState(() => new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0])
+  const [gstTo, setGstTo] = useState(() => new Date().toISOString().split('T')[0])
+
+  const loadTaxCodes = useCallback(async () => {
+    try {
+      const resp: any = await apiService.adminListTaxCodes()
+      const list = Array.isArray(resp?.data) ? resp.data : []
+      setTaxCodes(list)
+      const e: Record<string, string> = {}
+      for (const tc of list) e[tc.sacCode] = String(tc.ratePercent)
+      setTaxEdits(e)
+    } catch { setTaxCodes([]) }
+  }, [])
+
+  const saveTaxRate = useCallback(async (sacCode: string) => {
+    try {
+      setTaxBusy(sacCode)
+      setMessage('')
+      await apiService.adminUpdateTaxCode(sacCode, parseFloat(taxEdits[sacCode]))
+      setMessage(t('taxAdmin.rateSaved'))
+      await loadTaxCodes()
+    } catch (err: any) {
+      setMessage(err.response?.data?.error || t('taxAdmin.rateSaveFailed'))
+    } finally { setTaxBusy(null) }
+  }, [taxEdits, loadTaxCodes, t])
+
+  const downloadGst = useCallback(async () => {
+    try {
+      const blob = await apiService.adminDownloadGstExport(gstFrom, gstTo)
+      const url = URL.createObjectURL(new Blob([blob], { type: 'text/csv' }))
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `gst-export-${gstFrom}-to-${gstTo}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch { setMessage(t('taxAdmin.exportFailed')) }
+  }, [gstFrom, gstTo, t])
 
   const load = useCallback(async (q?: string) => {
     setLoading(true)
@@ -51,7 +91,7 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
     } catch { setDoctors([]) } finally { setLoading(false) }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load(); loadTaxCodes() }, [load, loadTaxCodes])
 
   useEffect(() => {
     // Show the current global defaults for context (read-only here; edited in System Settings)
@@ -184,6 +224,59 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
       )}
 
       <p style={{ color: '#9ca3af', fontSize: 12, marginTop: 12 }}>{t('commissionAdmin.snapshotNote')}</p>
+
+      {/* ── Tax & GST (D13 — rates fully admin-configurable) ── */}
+      <div style={{ marginTop: 28 }}>
+        <h2 style={{ marginBottom: 4 }}>{t('taxAdmin.title')}</h2>
+        <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 14 }}>{t('taxAdmin.subtitle')}</p>
+
+        <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: '#f9fafb', textAlign: 'left' }}>
+                  <th style={{ padding: '10px 14px' }}>SAC</th>
+                  <th style={{ padding: '10px 14px' }}>{t('taxAdmin.colLabel')}</th>
+                  <th style={{ padding: '10px 14px' }}>{t('taxAdmin.colRate')}</th>
+                  <th style={{ padding: '10px 14px' }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {taxCodes.map((tc) => (
+                  <tr key={tc.sacCode} style={{ borderTop: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '10px 14px', fontFamily: 'monospace' }}>{tc.sacCode}</td>
+                    <td style={{ padding: '10px 14px' }}>{tc.label}</td>
+                    <td style={{ padding: '10px 14px' }}>
+                      <input type="number" min={0} max={100} step={0.5}
+                        value={taxEdits[tc.sacCode] ?? ''}
+                        onChange={(e) => setTaxEdits((prev) => ({ ...prev, [tc.sacCode]: e.target.value }))}
+                        style={{ width: 80, border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }} />
+                      <span style={{ marginLeft: 4 }}>%</span>
+                    </td>
+                    <td style={{ padding: '10px 14px' }}>
+                      <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }}
+                        disabled={taxBusy === tc.sacCode} onClick={() => saveTaxRate(tc.sacCode)}>
+                        {taxBusy === tc.sacCode ? t('common.loading') : t('common.save')}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <strong style={{ fontSize: 13 }}>{t('taxAdmin.exportTitle')}</strong>
+          <input type="date" value={gstFrom} onChange={(e) => setGstFrom(e.target.value)}
+            style={{ border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }} />
+          <span>→</span>
+          <input type="date" value={gstTo} onChange={(e) => setGstTo(e.target.value)}
+            style={{ border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }} />
+          <button className="btn btn-outline" onClick={downloadGst}>{t('taxAdmin.exportButton')}</button>
+        </div>
+        <p style={{ color: '#9ca3af', fontSize: 12, marginTop: 10 }}>{t('taxAdmin.settingsHint')}</p>
+      </div>
     </div>
   )
 }

@@ -1489,6 +1489,63 @@ router.get('/earnings/statement', authMiddleware, roleMiddleware(['veterinarian'
   res.json({ success: true, data: result });
 }));
 
+// ─── Invoices & GST (docs/PAYMENT_MODULE_PLAN.md §7) ───────────────────────
+router.get('/invoices/payment/:paymentId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const InvoiceService = (await import('../services/payment/InvoiceService')).default;
+  const invoice = await InvoiceService.getInvoiceByPayment(req.params.paymentId, authReq.userId!, authReq.userRole || '');
+  res.json({ success: true, data: invoice });
+}));
+
+router.get('/invoices/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const InvoiceService = (await import('../services/payment/InvoiceService')).default;
+  const invoice = await InvoiceService.getInvoice(req.params.id, authReq.userId!, authReq.userRole || '');
+  res.json({ success: true, data: invoice });
+}));
+
+// Admin: SAC tax-code management (D13 — rate changes need zero code)
+router.get('/admin/tax-codes', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  const result = await database.query(
+    `SELECT id, sac_code as "sacCode", label, rate_percent as "ratePercent", is_active as "isActive"
+     FROM tax_codes ORDER BY sac_code`
+  );
+  res.json({ success: true, data: result.rows });
+}));
+
+router.put('/admin/tax-codes/:sacCode', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const rate = parseFloat(req.body.ratePercent);
+  if (!Number.isFinite(rate) || rate < 0 || rate > 100) {
+    return res.status(400).json({ success: false, error: 'ratePercent must be between 0 and 100' });
+  }
+  const result = await database.query(
+    `UPDATE tax_codes SET rate_percent = $1, updated_at = NOW() WHERE sac_code = $2
+     RETURNING sac_code as "sacCode", rate_percent as "ratePercent"`,
+    [rate, req.params.sacCode]
+  );
+  if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'SAC code not found' });
+  await database.query(
+    `INSERT INTO payment_events (id, event_type, actor_user_id, payload, created_at)
+     VALUES (gen_random_uuid(), 'tax_rate_changed', $1, $2, NOW())`,
+    [authReq.userId, JSON.stringify({ sacCode: req.params.sacCode, newRate: rate })]
+  ).catch(() => {});
+  res.json({ success: true, data: result.rows[0] });
+}));
+
+router.get('/admin/reports/gst-export', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const from = (req.query.from as string) || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+  const to = (req.query.to as string) || new Date().toISOString().split('T')[0];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) {
+    return res.status(400).json({ success: false, error: 'from/to must be YYYY-MM-DD' });
+  }
+  const InvoiceService = (await import('../services/payment/InvoiceService')).default;
+  const csv = await InvoiceService.gstExportCsv(from, to);
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="gst-export-${from}-to-${to}.csv"`);
+  res.send(csv);
+}));
+
 // ─── Platform referrals (docs/PAYMENT_MODULE_PLAN.md §4.4) ─────────────────
 router.post('/referrals/platform', authMiddleware, roleMiddleware(['veterinarian']), validateBody(createPlatformReferralSchema), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;

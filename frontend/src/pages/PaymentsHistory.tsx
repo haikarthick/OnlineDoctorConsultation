@@ -32,7 +32,14 @@ export default function PaymentsHistory() {
     try {
       setReceiptLoading(true)
       const resp: any = await apiService.getPaymentReceipt(paymentId)
-      setReceipt(resp?.data || resp)
+      const data = resp?.data || resp
+      // §7: attach the GST invoice snapshot when one exists
+      try {
+        const invResp: any = await apiService.getInvoiceByPayment(paymentId)
+        const inv = invResp?.data
+        if (inv) data.invoice = inv
+      } catch { /* invoice optional */ }
+      setReceipt(data)
     } catch { /* receipt unavailable */ } finally {
       setReceiptLoading(false)
     }
@@ -126,6 +133,29 @@ export default function PaymentsHistory() {
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#6b7280' }}>{t('paymentsPage.date')}</span><strong>{receipt.paidAt ? new Date(receipt.paidAt).toLocaleString() : '—'}</strong></div>
               {parseFloat(String(receipt.walletAmountUsed || 0)) > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#6b7280' }}>{t('payment.walletApplied')}</span><strong>{formatCurrency(parseFloat(String(receipt.walletAmountUsed)))}</strong></div>
+              )}
+              {receipt.invoice && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#6b7280' }}>{t('paymentsPage.invoiceNumber')}</span>
+                    <strong>{receipt.invoice.invoiceNumber}</strong>
+                  </div>
+                  {receipt.invoice.taxAmount > 0 && (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#6b7280' }}>{t('paymentsPage.taxableValue')}</span>
+                        <strong>{formatCurrency(receipt.invoice.subtotal)}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#6b7280' }}>GST ({receipt.invoice.taxRate}%)</span>
+                        <strong>{formatCurrency(receipt.invoice.taxAmount)}</strong>
+                      </div>
+                    </>
+                  )}
+                  {receipt.invoice.taxAmount === 0 && (
+                    <div style={{ color: '#9ca3af', fontSize: 11 }}>{t('paymentsPage.gstExempt')} · SAC {receipt.invoice.sacCode}</div>
+                  )}
+                </>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #e5e7eb', marginTop: 8, paddingTop: 8, fontSize: 17 }}>
                 <strong>{t('paymentsPage.totalPaid')}</strong>

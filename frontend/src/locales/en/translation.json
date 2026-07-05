@@ -6913,7 +6913,10 @@
     "animal": "Animal",
     "date": "Date",
     "totalPaid": "Total paid",
-    "print": "Print"
+    "print": "Print",
+    "invoiceNumber": "Invoice no.",
+    "taxableValue": "Taxable value",
+    "gstExempt": "GST-exempt veterinary healthcare service"
   },
   "policy": {
     "backToHome": "Back to home",
@@ -7098,5 +7101,17 @@
       "expired": "Expired",
       "completed": "Completed"
     }
+  },
+  "taxAdmin": {
+    "title": "Tax & GST",
+    "subtitle": "SAC rates apply to future invoices only — past invoices are immutable snapshots. Platform GSTIN, legal name and invoice prefix live in System Settings (tax.*).",
+    "colLabel": "Service",
+    "colRate": "GST rate",
+    "rateSaved": "Rate saved. Applies to invoices issued from now on.",
+    "rateSaveFailed": "Failed to save the rate.",
+    "exportTitle": "GST export (CSV)",
+    "exportButton": "Download CSV",
+    "exportFailed": "Export failed.",
+    "settingsHint": "The export contains taxable commission invoices and the exempt consultation register for your CA."
   }
 }

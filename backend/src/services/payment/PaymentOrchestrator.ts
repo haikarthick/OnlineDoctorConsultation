@@ -507,6 +507,14 @@ class PaymentOrchestrator {
         logger.error('Payment completion notifications failed (non-blocking)', { paymentId, error: err });
       }
     }
+    // §7: consultation invoice snapshot (non-blocking, idempotent)
+    try {
+      const InvoiceService = (await import('./InvoiceService')).default;
+      await InvoiceService.createConsultationInvoice(paymentId);
+    } catch (err: any) {
+      logger.warn('Consultation invoice creation failed (non-blocking)', { paymentId, error: err.message });
+    }
+
     logger.info('Payment completed', { paymentId, method: capture.method });
   }
 

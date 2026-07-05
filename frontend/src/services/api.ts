@@ -711,6 +711,27 @@ class ApiService {
     return response.data
   }
 
+  // ─── Invoices & GST ─────────────────────────────────────────
+  async getInvoiceByPayment(paymentId: string) {
+    const response = await this.client.get(`/invoices/payment/${paymentId}`)
+    return response.data
+  }
+
+  async adminListTaxCodes() {
+    const response = await this.client.get('/admin/tax-codes')
+    return response.data
+  }
+
+  async adminUpdateTaxCode(sacCode: string, ratePercent: number) {
+    const response = await this.client.put(`/admin/tax-codes/${sacCode}`, { ratePercent })
+    return response.data
+  }
+
+  async adminDownloadGstExport(from: string, to: string) {
+    const response = await this.client.get('/admin/reports/gst-export', { params: { from, to }, responseType: 'blob' })
+    return response.data
+  }
+
   // ─── Platform referrals ─────────────────────────────────────
   async createPlatformReferral(data: { toVetId?: string | null; reason: string; bookingId?: string; consultationId?: string }) {
     const response = await this.client.post('/referrals/platform', data)
