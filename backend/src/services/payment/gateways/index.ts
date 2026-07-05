@@ -1,22 +1,29 @@
 import { PaymentGateway, PaymentGatewayMode } from '../types';
 import demoGateway from './DemoGateway';
+import RazorpayGateway from './RazorpayGateway';
 import PaymentModuleConfig from '../PaymentModuleConfig';
+
+// Razorpay instances are cached per mode (constructor validates env keys loudly)
+const razorpayInstances = new Map<string, RazorpayGateway>();
 
 /**
  * Gateway factory — resolves the active adapter from `payment.gatewayMode`.
- * RazorpayGateway lands in Phase P2; until then non-demo modes fail loudly
- * so a misconfigured environment can't silently fake payments.
+ * A misconfigured razorpay mode (missing env keys) fails loudly rather than
+ * silently faking payments.
  */
 export function getGatewayForMode(mode: PaymentGatewayMode): PaymentGateway {
   switch (mode) {
     case 'demo':
       return demoGateway;
     case 'razorpay_test':
-    case 'razorpay_live':
-      throw new Error(
-        `Payment gateway mode '${mode}' is not available yet (Razorpay adapter ships in Phase P2). ` +
-        `Set system setting payment.gatewayMode to 'demo'.`
-      );
+    case 'razorpay_live': {
+      let inst = razorpayInstances.get(mode);
+      if (!inst) {
+        inst = new RazorpayGateway(mode);
+        razorpayInstances.set(mode, inst);
+      }
+      return inst;
+    }
     default:
       return demoGateway;
   }

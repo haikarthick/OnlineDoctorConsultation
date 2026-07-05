@@ -48,6 +48,10 @@ export function startScheduler(): void {
   // Payment module: expire unpaid slot holds (no-op while payment.enabled=false)
   setInterval(runPaymentHoldExpiry, FIVE_MINUTES);
 
+  // Payment module: reconcile stuck 'pending' payments against the gateway (daily + on boot)
+  runPaymentReconciliation();
+  setInterval(runPaymentReconciliation, TWENTY_FOUR_HOURS);
+
   logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min');
 }
 
@@ -76,6 +80,15 @@ async function runPaymentHoldExpiry(): Promise<void> {
     await PaymentOrchestrator.expireStalePaymentHolds();
   } catch (err: any) {
     logger.error('[Payments] Hold expiry job failed', { error: err.message });
+  }
+}
+
+async function runPaymentReconciliation(): Promise<void> {
+  try {
+    const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+    await PaymentOrchestrator.reconcilePendingPayments();
+  } catch (err: any) {
+    logger.error('[Payments] Reconciliation job failed', { error: err.message });
   }
 }
 

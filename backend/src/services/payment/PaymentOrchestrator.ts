@@ -39,7 +39,7 @@ export interface RefundOutcome {
   refundAmount: number;
   processingCharge: number;
   bonusAmount: number;
-  destination: 'wallet';
+  destination: 'wallet' | 'gateway';
   reason: string;
 }
 
@@ -253,6 +253,152 @@ class PaymentOrchestrator {
   }
 
   /**
+   * P2: Razorpay client-callback verification. Trust model: checkout signature
+   * verified server-side + payment fetched from the gateway to confirm capture
+   * and read the actual fee. The webhook independently confirms as well.
+   */
+  async completeRazorpayCheckout(userId: string, paymentId: string, gatewayOrderId: string, gatewayPaymentId: string, signature: string): Promise<void> {
+    const gateway = await getActiveGateway();
+    if (gateway.mode === 'demo') {
+      throw new ValidationError('Razorpay verification is not valid in demo gateway mode.');
+    }
+    const payRes = await database.query(
+      `SELECT id, user_id, gateway_order_id, status, amount, wallet_amount_used FROM payments WHERE id = $1`,
+      [paymentId]
+    );
+    if (payRes.rows.length === 0) throw new NotFoundError('Payment', paymentId);
+    const p = payRes.rows[0];
+    if (p.user_id !== userId) throw new ForbiddenError('Not your payment');
+    if (p.status === 'completed') return; // idempotent (webhook may have won the race)
+    if (p.gateway_order_id !== gatewayOrderId) {
+      throw new ValidationError('Order mismatch for this payment.');
+    }
+    if (!gateway.verifyCheckoutSignature(gatewayOrderId, gatewayPaymentId, signature)) {
+      await this.logEvent(paymentId, 'checkout_signature_invalid', p.status, null, userId, { gatewayOrderId, gatewayPaymentId });
+      throw new ValidationError('Payment signature verification failed.');
+    }
+    const gwPayment = await gateway.fetchPayment(gatewayPaymentId);
+    if (gwPayment.status !== 'captured' && gwPayment.status !== 'authorized') {
+      throw new ValidationError(`Payment is not captured at the gateway (status: ${gwPayment.status}).`);
+    }
+    const payable = round2(parseFloat(String(p.amount)) - parseFloat(String(p.wallet_amount_used || 0)));
+    if (Math.abs(gwPayment.amount - payable) > 0.01) {
+      await this.logEvent(paymentId, 'amount_mismatch', p.status, null, userId, { expected: payable, got: gwPayment.amount });
+      throw new ValidationError('Paid amount does not match the order amount. Please contact support.');
+    }
+    await this.completeCapturedPayment(paymentId, {
+      gatewayPaymentId,
+      gatewayFee: gwPayment.fee,
+      method: gwPayment.method || 'razorpay',
+      actorUserId: userId,
+    });
+  }
+
+  /**
+   * P2: Razorpay webhook (§12 rules 2–3). Signature verified against the raw
+   * body; idempotent via unique gateway_event_id on payment_events.
+   */
+  async handleRazorpayWebhook(rawBody: string, signature: string, eventId: string | null): Promise<{ handled: boolean; reason?: string }> {
+    const gateway = await getActiveGateway();
+    if (gateway.mode === 'demo') return { handled: false, reason: 'demo_mode' };
+    if (!gateway.verifyWebhookSignature(rawBody, signature)) {
+      logger.error('Razorpay webhook signature verification FAILED');
+      return { handled: false, reason: 'invalid_signature' };
+    }
+    let event: any;
+    try { event = JSON.parse(rawBody); } catch { return { handled: false, reason: 'invalid_json' }; }
+    const eventType = event?.event;
+    const entity = event?.payload?.payment?.entity;
+    const gatewayOrderId = entity?.order_id;
+    const gatewayPaymentId = entity?.id;
+
+    // Idempotency: claim the event id; a duplicate insert means already processed
+    if (eventId) {
+      const claim = await database.query(
+        `INSERT INTO payment_events (id, gateway_event_id, event_type, payload, created_at)
+         VALUES (gen_random_uuid(), $1, $2, $3, NOW())
+         ON CONFLICT (gateway_event_id) DO NOTHING RETURNING id`,
+        [eventId, `webhook:${eventType}`, JSON.stringify({ gatewayOrderId, gatewayPaymentId })]
+      );
+      if (claim.rows.length === 0) return { handled: true, reason: 'duplicate' };
+    }
+
+    if (!gatewayOrderId) return { handled: true, reason: 'no_order_ref' };
+    const payRes = await database.query(
+      `SELECT id, status, amount, wallet_amount_used FROM payments WHERE gateway_order_id = $1 ORDER BY created_at DESC LIMIT 1`,
+      [gatewayOrderId]
+    );
+    if (payRes.rows.length === 0) {
+      logger.warn('Razorpay webhook for unknown order', { gatewayOrderId, eventType });
+      return { handled: true, reason: 'unknown_order' };
+    }
+    const p = payRes.rows[0];
+
+    if (eventType === 'payment.captured' || eventType === 'order.paid') {
+      if (p.status !== 'completed') {
+        const fee = entity?.fee ? Math.round(entity.fee) / 100 : 0;
+        await this.completeCapturedPayment(p.id, {
+          gatewayPaymentId: gatewayPaymentId || 'unknown',
+          gatewayFee: fee,
+          method: entity?.method || 'razorpay',
+          actorUserId: null,
+        });
+      }
+      return { handled: true };
+    }
+    if (eventType === 'payment.failed') {
+      await database.query(
+        `UPDATE payments SET status = 'failed', updated_at = NOW() WHERE id = $1 AND status IN ('created', 'pending')`,
+        [p.id]
+      );
+      await this.logEvent(p.id, 'gateway_payment_failed', p.status, 'failed', null,
+        { gatewayPaymentId, description: entity?.error_description });
+      return { handled: true };
+    }
+    return { handled: true, reason: 'ignored_event' };
+  }
+
+  /**
+   * P2 reconciliation sweep (§9): payments stuck in 'pending' are re-checked
+   * against the gateway — captures that lost their webhook get completed,
+   * definitively failed ones get marked failed.
+   */
+  async reconcilePendingPayments(): Promise<number> {
+    if (!(await PaymentModuleConfig.isEnabled())) return 0;
+    const gateway = await getActiveGateway();
+    if (gateway.mode === 'demo') return 0;
+    const stuck = await database.query(
+      `SELECT id, gateway_order_id, amount, wallet_amount_used FROM payments
+       WHERE status = 'pending' AND gateway_order_id IS NOT NULL
+         AND updated_at < NOW() - INTERVAL '1 hour'
+       ORDER BY created_at ASC LIMIT 50`
+    );
+    let fixed = 0;
+    for (const p of stuck.rows) {
+      try {
+        const rzp = gateway as any;
+        if (typeof rzp.fetchOrderPayments !== 'function') break;
+        const attempts = await rzp.fetchOrderPayments(p.gateway_order_id);
+        const captured = attempts.find((a: any) => a.status === 'captured');
+        if (captured) {
+          await this.completeCapturedPayment(p.id, {
+            gatewayPaymentId: captured.gatewayPaymentId,
+            gatewayFee: captured.fee,
+            method: captured.method || 'razorpay',
+            actorUserId: null,
+          });
+          fixed++;
+          await this.logEvent(p.id, 'reconciled_captured', 'pending', 'completed', null, {});
+        }
+      } catch (err: any) {
+        logger.warn('Reconciliation check failed for payment', { paymentId: p.id, error: err.message });
+      }
+    }
+    if (fixed > 0) logger.info(`[Payments] Reconciliation completed ${fixed} stuck payment(s)`);
+    return fixed;
+  }
+
+  /**
    * Shared transactional completion: debits the wallet portion (row-locked),
    * snapshots commission, flips payment→completed and booking→pending,
    * then notifies both parties.
@@ -422,18 +568,41 @@ class PaymentOrchestrator {
    * Refund engine (P1: wallet destination). Called from BookingService.cancelBooking
    * when the payment flag is on. Doctor-side penalty ledger entries land in P3.
    */
-  async refundForCancellation(bookingId: string, petOwnerId: string, cancellerRole: string, reason: string): Promise<RefundOutcome | null> {
+  async refundForCancellation(bookingId: string, petOwnerId: string, cancellerRole: string, reason: string, destination: 'wallet' | 'gateway' = 'wallet'): Promise<RefundOutcome | null> {
     if (!(await PaymentModuleConfig.isEnabled())) return null;
     const preview = await this.computeRefundPreview(bookingId, cancellerRole);
     if (!preview.hasPayment) return null;
 
     const payRes = await database.query(
-      `SELECT id, status FROM payments WHERE booking_id = $1 AND status = 'completed'
+      `SELECT id, status, amount, wallet_amount_used, gateway_payment_id, gateway FROM payments
+       WHERE booking_id = $1 AND status = 'completed'
        ORDER BY created_at DESC LIMIT 1`,
       [bookingId]
     );
     if (payRes.rows.length === 0) return null;
     const paymentId = payRes.rows[0].id;
+
+    // D7: gateway destination refunds only the gateway-paid portion via the
+    // gateway; the wallet-paid portion always returns to the wallet.
+    let gatewayRefundAmount = 0;
+    let walletRefundAmount = preview.refundAmount;
+    if (destination === 'gateway' && preview.refundAmount > 0 && payRes.rows[0].gateway_payment_id) {
+      const gatewayPaid = round2(parseFloat(String(payRes.rows[0].amount)) - parseFloat(String(payRes.rows[0].wallet_amount_used || 0)));
+      gatewayRefundAmount = round2(Math.min(preview.refundAmount, Math.max(gatewayPaid, 0)));
+      walletRefundAmount = round2(preview.refundAmount - gatewayRefundAmount);
+      if (gatewayRefundAmount > 0) {
+        try {
+          const gateway = await getActiveGateway();
+          await gateway.refund(payRes.rows[0].gateway_payment_id, gatewayRefundAmount, { bookingId, reason });
+        } catch (err: any) {
+          // Gateway refund failed — fall back to wallet so the patient is never stranded
+          logger.error('Gateway refund failed — falling back to wallet destination', { paymentId, error: err.message });
+          walletRefundAmount = preview.refundAmount;
+          gatewayRefundAmount = 0;
+          destination = 'wallet';
+        }
+      }
+    }
 
     const client = await database.getPool().connect();
     try {
@@ -447,13 +616,13 @@ class PaymentOrchestrator {
       if (preview.refundAmount > 0 || preview.processingCharge > 0) {
         await client.query(
           `UPDATE payments SET status = $1, refund_amount = $2, refund_reason = $3,
-                  processing_charge_amount = $4, refund_destination = 'wallet', updated_at = NOW()
-           WHERE id = $5`,
-          [newStatus, preview.refundAmount, reason, preview.processingCharge, paymentId]
+                  processing_charge_amount = $4, refund_destination = $5, updated_at = NOW()
+           WHERE id = $6`,
+          [newStatus, preview.refundAmount, reason, preview.processingCharge, destination, paymentId]
         );
       }
 
-      if (preview.refundAmount > 0) {
+      if (walletRefundAmount > 0 || preview.bonusAmount > 0) {
         // wallet credit (refund) — inline, transactional
         const wRes = await client.query(
           `SELECT id FROM wallets WHERE user_id = $1 FOR UPDATE`, [petOwnerId]
@@ -469,15 +638,17 @@ class PaymentOrchestrator {
           const again = await client.query(`SELECT id FROM wallets WHERE user_id = $1`, [petOwnerId]);
           walletId = again.rows[0].id;
         }
-        await client.query(
-          `UPDATE wallets SET balance = balance + $1, updated_at = NOW() WHERE id = $2`,
-          [preview.refundAmount, walletId]
-        );
-        await client.query(
-          `INSERT INTO wallet_transactions (id, wallet_id, type, amount, description, reference_id, reference_type, created_at)
-           VALUES ($1, $2, 'refund', $3, $4, $5, 'booking', NOW())`,
-          [uuidv4(), walletId, preview.refundAmount, `Refund: ${reason}`, bookingId]
-        );
+        if (walletRefundAmount > 0) {
+          await client.query(
+            `UPDATE wallets SET balance = balance + $1, updated_at = NOW() WHERE id = $2`,
+            [walletRefundAmount, walletId]
+          );
+          await client.query(
+            `INSERT INTO wallet_transactions (id, wallet_id, type, amount, description, reference_id, reference_type, created_at)
+             VALUES ($1, $2, 'refund', $3, $4, $5, 'booking', NOW())`,
+            [uuidv4(), walletId, walletRefundAmount, `Refund: ${reason}`, bookingId]
+          );
+        }
         if (preview.bonusAmount > 0) {
           await client.query(
             `UPDATE wallets SET bonus_credits = bonus_credits + $1, updated_at = NOW() WHERE id = $2`,
@@ -495,24 +666,28 @@ class PaymentOrchestrator {
         `INSERT INTO payment_events (id, payment_id, event_type, from_status, to_status, payload, created_at)
          VALUES ($1, $2, 'refund_processed', 'completed', $3, $4, NOW())`,
         [uuidv4(), paymentId, newStatus,
-         JSON.stringify({ ...preview, cancellerRole, reason, destination: 'wallet' })]
+         JSON.stringify({ ...preview, cancellerRole, reason, destination, gatewayRefundAmount, walletRefundAmount })]
       );
       await client.query('COMMIT');
     } catch (err) {
       await client.query('ROLLBACK');
-      logger.error('refundForCancellation failed', { bookingId, error: err });
+      logger.error('refundForCancellation failed', { bookingId, gatewayRefundAmount, error: err });
+      if (gatewayRefundAmount > 0) {
+        // CRITICAL: gateway refund already went out but the ledger update failed
+        logger.error('CRITICAL: gateway refund issued but DB update failed — manual reconciliation needed', { paymentId, bookingId, gatewayRefundAmount });
+      }
       throw new DatabaseError('Refund processing failed', { originalError: err });
     } finally {
       client.release();
     }
 
-    logger.info('Refund processed (wallet)', { bookingId, ...preview });
+    logger.info('Refund processed', { bookingId, destination, gatewayRefundAmount, walletRefundAmount, ...preview });
     return {
       refunded: preview.refundAmount > 0,
       refundAmount: preview.refundAmount,
       processingCharge: preview.processingCharge,
       bonusAmount: preview.bonusAmount,
-      destination: 'wallet',
+      destination,
       reason: preview.policy,
     };
   }

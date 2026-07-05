@@ -166,6 +166,8 @@ export const rescheduleBookingSchema = Joi.object({
 
 export const cancelBookingSchema = Joi.object({
   reason: shortText(500).optional().allow('', null),
+  // D7: patient's refund destination choice (wallet = instant, gateway = 5-7 days)
+  refundDestination: Joi.string().valid('wallet', 'gateway').optional().default('wallet'),
 });
 
 // ─── Video Session ───────────────────────────────────────────

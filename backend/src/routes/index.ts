@@ -1384,10 +1384,34 @@ router.post('/payments/checkout/:bookingId', authMiddleware, validateBody(checko
 router.post('/payments/verify', authMiddleware, validateBody(verifyPaymentSchema), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
-  // Demo mode: server-side capture. P2 adds Razorpay checkout-signature verification here.
-  await PaymentOrchestrator.completeDemoCheckout(authReq.userId!, req.body.paymentId);
+  const PaymentModuleConfig = (await import('../services/payment/PaymentModuleConfig')).default;
+  const mode = await PaymentModuleConfig.getGatewayMode();
+  if (mode === 'demo') {
+    await PaymentOrchestrator.completeDemoCheckout(authReq.userId!, req.body.paymentId);
+  } else {
+    const { paymentId, gatewayOrderId, gatewayPaymentId, gatewaySignature } = req.body;
+    if (!gatewayOrderId || !gatewayPaymentId || !gatewaySignature) {
+      return res.status(400).json({ success: false, error: 'gatewayOrderId, gatewayPaymentId and gatewaySignature are required' });
+    }
+    await PaymentOrchestrator.completeRazorpayCheckout(authReq.userId!, paymentId, gatewayOrderId, gatewayPaymentId, gatewaySignature);
+  }
   res.on('finish', () => { if (res.statusCode < 300 && authReq.userId) { emitDataRefresh(authReq.userId, 'bookings'); emitRoleRefresh('admin', 'payments'); } });
   res.json({ success: true, message: 'Payment completed' });
+}));
+
+// Razorpay webhook (§12 rules 2–3): raw-body signature verification, no auth
+// middleware, idempotent on gateway event id. Always 200 for processed events
+// so Razorpay stops retrying; 400 only on signature failure.
+router.post('/webhooks/razorpay', asyncHandler(async (req: Request, res: Response) => {
+  const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+  const signature = (req.headers['x-razorpay-signature'] as string) || '';
+  const eventId = (req.headers['x-razorpay-event-id'] as string) || null;
+  const rawBody = Buffer.isBuffer(req.body) ? req.body.toString('utf-8') : JSON.stringify(req.body || {});
+  const result = await PaymentOrchestrator.handleRazorpayWebhook(rawBody, signature, eventId);
+  if (!result.handled && result.reason === 'invalid_signature') {
+    return res.status(400).json({ success: false, error: 'Invalid signature' });
+  }
+  res.json({ success: true });
 }));
 
 router.get('/payments/refund-preview/:bookingId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {

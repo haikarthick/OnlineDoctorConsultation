@@ -366,7 +366,7 @@ class BookingService {
     return this.updateBookingStatus(id, 'confirmed');
   }
 
-  async cancelBooking(id: string, reason: string, cancelledByUserId?: string, cancellerRole?: string): Promise<Booking> {
+  async cancelBooking(id: string, reason: string, cancelledByUserId?: string, cancellerRole?: string, refundDestination: 'wallet' | 'gateway' = 'wallet'): Promise<Booking> {
     const booking = await this.getBooking(id);
 
     // Determine cancellation details
@@ -406,8 +406,8 @@ class BookingService {
 
       const paymentsOn = await PaymentModuleConfig.isEnabled();
       if (paymentsOn) {
-        // Payment module refund engine (D12 matrix; wallet destination in P1)
-        await PaymentOrchestrator.refundForCancellation(id, booking.petOwnerId, cancellerRole || 'admin', reason);
+        // Payment module refund engine (D12 matrix; D7 destination choice)
+        await PaymentOrchestrator.refundForCancellation(id, booking.petOwnerId, cancellerRole || 'admin', reason, refundDestination);
       } else {
         // Legacy path (flag off — kept for exact pre-module behavior)
         const payment = await PaymentService.getPaymentByBooking(id);

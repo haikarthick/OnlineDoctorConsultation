@@ -18,6 +18,25 @@ interface Breakdown {
   payableNow: number
   gatewayMode: string
   paid: boolean
+  checkoutPayload?: { keyId?: string; orderId?: string; amountPaise?: number; currency?: string } | null
+}
+
+/** Loads Razorpay checkout.js once; resolves when window.Razorpay is available */
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if ((window as any).Razorpay) return resolve(true)
+    const existing = document.querySelector('script[src*="checkout.razorpay.com"]')
+    if (existing) {
+      existing.addEventListener('load', () => resolve(true))
+      existing.addEventListener('error', () => resolve(false))
+      return
+    }
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
+  })
 }
 
 /**
@@ -76,8 +95,39 @@ export default function PaymentCheckout({ bookingId, amount, expiresAt, onSucces
       if (data.gatewayMode === 'demo') {
         setShowDemoDialog(true)
       } else {
-        // Razorpay checkout opens here in P2
-        setError(t('payment.gatewayUnavailable'))
+        // Razorpay checkout (P2)
+        const loaded = await loadRazorpayScript()
+        if (!loaded || !(window as any).Razorpay || !data.checkoutPayload?.orderId) {
+          setError(t('payment.gatewayUnavailable'))
+          return
+        }
+        const rzp = new (window as any).Razorpay({
+          key: data.checkoutPayload.keyId,
+          amount: data.checkoutPayload.amountPaise,
+          currency: data.checkoutPayload.currency || 'INR',
+          order_id: data.checkoutPayload.orderId,
+          name: 'VetCare',
+          description: t('payment.consultationFee'),
+          handler: async (resp: any) => {
+            try {
+              setProcessing(true)
+              await apiService.verifyPayment({
+                paymentId: data.paymentId,
+                gatewayOrderId: resp.razorpay_order_id,
+                gatewayPaymentId: resp.razorpay_payment_id,
+                gatewaySignature: resp.razorpay_signature,
+              })
+              onSuccess()
+            } catch (err: any) {
+              setError(err.response?.data?.error?.message || err.response?.data?.error || t('payment.verificationFailed'))
+            } finally {
+              setProcessing(false)
+            }
+          },
+          modal: { ondismiss: () => setError(t('payment.checkoutFailed')) },
+          theme: { color: '#1e3a5f' },
+        })
+        rzp.open()
       }
     } catch (err: any) {
       setError(err.response?.data?.error?.message || err.response?.data?.error || err.response?.data?.message || t('payment.checkoutFailed'))

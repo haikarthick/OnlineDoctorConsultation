@@ -97,6 +97,9 @@ app.use(`/api/${config.app.apiVersion}/payments`, sensitiveLimiter)
 app.use('/api/', apiLimiter)
 
 // Body parser
+// Razorpay webhook needs the RAW body for signature verification — must be
+// registered BEFORE express.json (body-parser skips already-parsed bodies)
+app.use(`/api/${config.app.apiVersion}/webhooks/razorpay`, express.raw({ type: '*/*', limit: '1mb' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
