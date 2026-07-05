@@ -200,7 +200,8 @@
     "legalPolicies": "சட்டம் & கொள்கைகள்",
     "commissionSettings": "கமிஷன் விதிகள்",
     "settlements": "தீர்வுகள்",
-    "referrals": "பரிந்துரைகள்"
+    "referrals": "பரிந்துரைகள்",
+    "financeReports": "நிதி அறிக்கைகள்"
   },
   "login": {
     "welcome": "மீண்டும் வரவேற்கிறோம்",
@@ -7118,5 +7119,33 @@
     "exportButton": "CSV பதிவிறக்கு",
     "exportFailed": "ஏற்றுமதி தோல்வி.",
     "settingsHint": "ஏற்றுமதியில் வரிக்குரிய கமிஷன் இன்வாய்ஸ்களும் விலக்கு ஆலோசனை பதிவேடும் உள்ளன (உங்கள் CA-க்கு)."
+  },
+  "financeAdmin": {
+    "title": "நிதி அறிக்கைகள்",
+    "subtitle": "வருவாய், பொறுப்புகள், TDS மற்றும் கட்டண நிலை",
+    "noData": "இந்த காலத்திற்கு தரவு இல்லை.",
+    "revenueTitle": "வருவாய் (தேர்ந்த காலம்)",
+    "gmv": "மொத்த பதிவு மதிப்பு",
+    "paidCount": "{{count}} கட்டண பதிவுகள்",
+    "commission": "ஈட்டிய கமிஷன்",
+    "processingCharges": "செயலாக்க கட்டணங்கள்",
+    "gatewayFees": "கேட்வே கட்டணம் (செலவு)",
+    "refundsOut": "திரும்பங்கள்",
+    "netRevenue": "நிகர தள வருவாய்",
+    "netRevenueHint": "கமிஷன் + செயலாக்கம் − கேட்வே கட்டணம்",
+    "liabilitiesTitle": "பொறுப்புகள் (தற்போது)",
+    "doctorClearing": "மருத்துவர் வருவாய் தீர்வில்",
+    "doctorAvailable": "மருத்துவர் வருவாய் கிடைக்கிறது",
+    "doctorLocked": "திரும்பப்பெறுதலில்",
+    "walletLiability": "நோயாளி வாலட் பொறுப்பு",
+    "walletLiabilityHint": "வாடிக்கையாளர்களுக்கு உரியது — தள வருவாய் அல்ல",
+    "tdsTitle": "TDS பதிவேடு (தேர்ந்த காலம்)",
+    "tdsDeducted": "TDS கழிவு",
+    "tdsCount": "{{count}} தீர்வுகள்",
+    "netPaidToDoctors": "மருத்துவர்களுக்கு நிகர கட்டணம்",
+    "healthTitle": "கட்டண நிலை",
+    "stuckPending": "நிலுவையில் சிக்கியவை",
+    "stuckPendingHint": "1 மணி நேரத்திற்கும் மேல் — தினசரி சரிபார்ப்பு",
+    "openHolds": "திறந்த கட்டண ஹோல்டுகள்"
   }
 }

@@ -1,6 +1,10 @@
 # Payment Module — End-to-End Implementation Plan (v1)
 
-> **Status:** DRAFT — awaiting owner review and phase sign-off
+> **Status:** ✅ IMPLEMENTED (phases P0–P7 shipped to `develop`, 2026-07-05) — module ships **dark** behind `payment.enabled=false`
+> **Commits:** P0 458f01a · P1 d83223a · P2 235c309 · P3 f6b1520 · P4 050801e · P5 e03d0f5 · P6 4de9578 · P7 (final)
+> **Migration numbering note:** shipped as `012_payment_module.sql` + `013_legal_documents_seed.sql` (011 was already taken)
+> **Go-live remaining (external, §16.5):** lawyer-drafted policy content published via Admin → Legal & Policies; CA sign-off (194-O rate, GST treatment); Razorpay KYC + env keys (`RAZORPAY_KEY_ID/SECRET`, `RAZORPAY_WEBHOOK_SECRET`); run `backend/scripts/clean_start_launch.sql` (D14); flip `payment.enabled=true` + `payment.gatewayMode=razorpay_live`
+> **Deferred polish:** doctor auto-request withdrawals opt-in (§6.3 nicety); AdminDashboard payment-health widget (data lives in Finance Reports page)
 > **Date:** 2026-07-04
 > **Scope:** Consultation-booking payments only (marketplace/pharmacy monetization are separate modules)
 > **Verified against:** codebase audit of 2026-07-04 (payment stub, no gateway, no enforcement, dead refund logic, no earnings/settlement)

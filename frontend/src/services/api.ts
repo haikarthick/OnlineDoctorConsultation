@@ -727,6 +727,11 @@ class ApiService {
     return response.data
   }
 
+  async adminFinanceOverview(from: string, to: string) {
+    const response = await this.client.get('/admin/reports/finance/overview', { params: { from, to } })
+    return response.data
+  }
+
   async adminDownloadGstExport(from: string, to: string) {
     const response = await this.client.get('/admin/reports/gst-export', { params: { from, to }, responseType: 'blob' })
     return response.data

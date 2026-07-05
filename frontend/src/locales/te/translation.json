@@ -200,7 +200,8 @@
     "legalPolicies": "చట్టపరమైన & విధానాలు",
     "commissionSettings": "కమిషన్ నియమాలు",
     "settlements": "సెటిల్మెంట్లు",
-    "referrals": "రెఫరల్స్"
+    "referrals": "రెఫరల్స్",
+    "financeReports": "ఫైనాన్స్ నివేదికలు"
   },
   "login": {
     "welcome": "తిరిగి స్వాగతం",
@@ -7131,5 +7132,33 @@
     "exportButton": "CSV డౌన్‌లోడ్",
     "exportFailed": "ఎగుమతి విఫలమైంది.",
     "settingsHint": "ఎగుమతిలో పన్ను కమిషన్ ఇన్వాయిస్‌లు మరియు మినహాయింపు సంప్రదింపు రిజిస్టర్ ఉన్నాయి (మీ CA కోసం)."
+  },
+  "financeAdmin": {
+    "title": "ఫైనాన్స్ నివేదికలు",
+    "subtitle": "ఆదాయం, బాధ్యతలు, TDS మరియు చెల్లింపు ఆరోగ్యం",
+    "noData": "ఈ పరిధికి డేటా లేదు.",
+    "revenueTitle": "ఆదాయం (ఎంచుకున్న పరిధి)",
+    "gmv": "స్థూల బుకింగ్ విలువ",
+    "paidCount": "{{count}} చెల్లింపు బుకింగ్‌లు",
+    "commission": "సంపాదించిన కమిషన్",
+    "processingCharges": "ప్రాసెసింగ్ ఛార్జీలు",
+    "gatewayFees": "గేట్‌వే ఫీజులు (ఖర్చు)",
+    "refundsOut": "రీఫండ్లు",
+    "netRevenue": "నికర ప్లాట్‌ఫారమ్ ఆదాయం",
+    "netRevenueHint": "కమిషన్ + ప్రాసెసింగ్ − గేట్‌వే ఫీజులు",
+    "liabilitiesTitle": "బాధ్యతలు (ప్రస్తుతం)",
+    "doctorClearing": "డాక్టర్ సంపాదన క్లియరింగ్‌లో",
+    "doctorAvailable": "డాక్టర్ సంపాదన అందుబాటులో",
+    "doctorLocked": "ఉపసంహరణలో",
+    "walletLiability": "రోగి వాలెట్ బాధ్యత",
+    "walletLiabilityHint": "కస్టమర్లకు చెల్లించాల్సినది — ప్లాట్‌ఫారమ్ ఆదాయం కాదు",
+    "tdsTitle": "TDS రిజిస్టర్ (ఎంచుకున్న పరిధి)",
+    "tdsDeducted": "TDS మినహాయింపు",
+    "tdsCount": "{{count}} సెటిల్మెంట్లు",
+    "netPaidToDoctors": "డాక్టర్లకు నికర చెల్లింపు",
+    "healthTitle": "చెల్లింపు ఆరోగ్యం",
+    "stuckPending": "నిలిచిన పెండింగ్ చెల్లింపులు",
+    "stuckPendingHint": "1 గంటకు పైగా — రోజువారీ సరిదిద్దే ప్రయత్నం",
+    "openHolds": "తెరిచిన చెల్లింపు హోల్డ్‌లు"
   }
 }

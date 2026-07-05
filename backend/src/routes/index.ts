@@ -1533,6 +1533,80 @@ router.put('/admin/tax-codes/:sacCode', authMiddleware, roleMiddleware(['admin']
   res.json({ success: true, data: result.rows[0] });
 }));
 
+// Finance overview (§11): GMV, commission, refunds, liabilities, TDS, health
+router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const from = (req.query.from as string) || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+  const to = (req.query.to as string) || new Date().toISOString().split('T')[0];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) {
+    return res.status(400).json({ success: false, error: 'from/to must be YYYY-MM-DD' });
+  }
+  const [payments, earnings, wallets, tds, health] = await Promise.all([
+    database.query(
+      `SELECT
+         COALESCE(SUM(amount) FILTER (WHERE status IN ('completed', 'partially_refunded', 'refunded', 'transferred')), 0) as gmv,
+         COALESCE(SUM(commission_amount) FILTER (WHERE status IN ('completed', 'partially_refunded')), 0) as commission_earned,
+         COALESCE(SUM(refund_amount), 0) as refunds_out,
+         COALESCE(SUM(processing_charge_amount), 0) as processing_charges,
+         COALESCE(SUM(gateway_fee_amount) FILTER (WHERE status IN ('completed', 'partially_refunded', 'refunded', 'transferred')), 0) as gateway_fees,
+         COUNT(*) FILTER (WHERE status IN ('completed', 'partially_refunded')) as paid_count
+       FROM payments WHERE created_at >= $1::date AND created_at < ($2::date + INTERVAL '1 day')`,
+      [from, to]
+    ),
+    database.query(
+      `SELECT
+         COALESCE(SUM(net_amount) FILTER (WHERE status = 'clearing'), 0) as clearing,
+         COALESCE(SUM(net_amount) FILTER (WHERE status = 'available'), 0) as available,
+         COALESCE(SUM(net_amount) FILTER (WHERE status = 'locked'), 0) as locked,
+         COUNT(DISTINCT doctor_id) FILTER (WHERE status = 'available' AND net_amount < 0) as negative_doctor_rows
+       FROM doctor_earnings`
+    ),
+    database.query(
+      `SELECT COALESCE(SUM(balance), 0) as balance, COALESCE(SUM(bonus_credits), 0) as bonus FROM wallets`
+    ),
+    database.query(
+      `SELECT COALESCE(SUM(tds_amount), 0) as tds_total, COUNT(*) as settled_count,
+              COALESCE(SUM(net_paid_amount), 0) as net_paid_total
+       FROM withdrawal_requests
+       WHERE status = 'settled' AND settled_at >= $1::date AND settled_at < ($2::date + INTERVAL '1 day')`,
+      [from, to]
+    ),
+    database.query(
+      `SELECT
+         COUNT(*) FILTER (WHERE status = 'pending' AND updated_at < NOW() - INTERVAL '1 hour') as stuck_pending,
+         COUNT(*) FILTER (WHERE status IN ('created', 'pending')) as open_holds
+       FROM payments`
+    ),
+  ]);
+  const p = payments.rows[0]; const e = earnings.rows[0]; const w = wallets.rows[0];
+  const t = tds.rows[0]; const h = health.rows[0];
+  res.json({
+    success: true,
+    data: {
+      range: { from, to },
+      revenue: {
+        gmv: parseFloat(p.gmv), commissionEarned: parseFloat(p.commission_earned),
+        refundsOut: parseFloat(p.refunds_out), processingCharges: parseFloat(p.processing_charges),
+        gatewayFees: parseFloat(p.gateway_fees), paidCount: parseInt(p.paid_count, 10),
+        netPlatformRevenue: Math.round((parseFloat(p.commission_earned) + parseFloat(p.processing_charges) - parseFloat(p.gateway_fees)) * 100) / 100,
+      },
+      settlementLiability: {
+        clearing: parseFloat(e.clearing), available: parseFloat(e.available), locked: parseFloat(e.locked),
+      },
+      walletLiability: {
+        balance: parseFloat(w.balance), bonusCredits: parseFloat(w.bonus),
+        total: Math.round((parseFloat(w.balance) + parseFloat(w.bonus)) * 100) / 100,
+      },
+      tds: {
+        totalDeducted: parseFloat(t.tds_total), settledCount: parseInt(t.settled_count, 10),
+        netPaidTotal: parseFloat(t.net_paid_total),
+      },
+      health: {
+        stuckPending: parseInt(h.stuck_pending, 10), openHolds: parseInt(h.open_holds, 10),
+      },
+    },
+  });
+}));
+
 router.get('/admin/reports/gst-export', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
   const from = (req.query.from as string) || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
   const to = (req.query.to as string) || new Date().toISOString().split('T')[0];

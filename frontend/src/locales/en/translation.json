@@ -200,7 +200,8 @@
     "legalPolicies": "Legal & Policies",
     "commissionSettings": "Commission Rules",
     "settlements": "Settlements",
-    "referrals": "Referrals"
+    "referrals": "Referrals",
+    "financeReports": "Finance Reports"
   },
   "login": {
     "welcome": "Welcome back",
@@ -7113,5 +7114,33 @@
     "exportButton": "Download CSV",
     "exportFailed": "Export failed.",
     "settingsHint": "The export contains taxable commission invoices and the exempt consultation register for your CA."
+  },
+  "financeAdmin": {
+    "title": "Finance Reports",
+    "subtitle": "Revenue, liabilities, TDS and payment health",
+    "noData": "No data for this range.",
+    "revenueTitle": "Revenue (selected range)",
+    "gmv": "Gross bookings value",
+    "paidCount": "{{count}} paid booking(s)",
+    "commission": "Commission earned",
+    "processingCharges": "Processing charges",
+    "gatewayFees": "Gateway fees (cost)",
+    "refundsOut": "Refunds out",
+    "netRevenue": "Net platform revenue",
+    "netRevenueHint": "commission + processing charges − gateway fees",
+    "liabilitiesTitle": "Liabilities (current)",
+    "doctorClearing": "Doctor earnings clearing",
+    "doctorAvailable": "Doctor earnings available",
+    "doctorLocked": "In withdrawal",
+    "walletLiability": "Patient wallet liability",
+    "walletLiabilityHint": "money owed to customers — not platform revenue",
+    "tdsTitle": "TDS register (selected range)",
+    "tdsDeducted": "TDS deducted",
+    "tdsCount": "{{count}} settlement(s)",
+    "netPaidToDoctors": "Net paid to doctors",
+    "healthTitle": "Payment health",
+    "stuckPending": "Stuck pending payments",
+    "stuckPendingHint": "pending > 1h — reconciliation retries daily",
+    "openHolds": "Open payment holds"
   }
 }

@@ -200,7 +200,8 @@
     "legalPolicies": "ಕಾನೂನು & ನೀತಿಗಳು",
     "commissionSettings": "ಕಮಿಷನ್ ನಿಯಮಗಳು",
     "settlements": "ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು",
-    "referrals": "ರೆಫರಲ್‌ಗಳು"
+    "referrals": "ರೆಫರಲ್‌ಗಳು",
+    "financeReports": "ಹಣಕಾಸು ವರದಿಗಳು"
   },
   "login": {
     "welcome": "ಮತ್ತೆ ಸ್ವಾಗತ",
@@ -7133,5 +7134,33 @@
     "exportButton": "CSV ಡೌನ್‌ಲೋಡ್",
     "exportFailed": "ರಫ್ತು ವಿಫಲ.",
     "settingsHint": "ರಫ್ತಿನಲ್ಲಿ ತೆರಿಗೆ ಕಮಿಷನ್ ಸರಕುಪಟ್ಟಿಗಳು ಮತ್ತು ವಿನಾಯಿತಿ ಸಮಾಲೋಚನಾ ರಿಜಿಸ್ಟರ್ ಇವೆ (ನಿಮ್ಮ CA ಗಾಗಿ)."
+  },
+  "financeAdmin": {
+    "title": "ಹಣಕಾಸು ವರದಿಗಳು",
+    "subtitle": "ಆದಾಯ, ಹೊಣೆಗಾರಿಕೆಗಳು, TDS ಮತ್ತು ಪಾವತಿ ಆರೋಗ್ಯ",
+    "noData": "ಈ ವ್ಯಾಪ್ತಿಗೆ ಡೇಟಾ ಇಲ್ಲ.",
+    "revenueTitle": "ಆದಾಯ (ಆಯ್ದ ವ್ಯಾಪ್ತಿ)",
+    "gmv": "ಒಟ್ಟು ಬುಕಿಂಗ್ ಮೌಲ್ಯ",
+    "paidCount": "{{count}} ಪಾವತಿ ಬುಕಿಂಗ್‌ಗಳು",
+    "commission": "ಗಳಿಸಿದ ಕಮಿಷನ್",
+    "processingCharges": "ಪ್ರಕ್ರಿಯಾ ಶುಲ್ಕಗಳು",
+    "gatewayFees": "ಗೇಟ್‌ವೇ ಶುಲ್ಕ (ವೆಚ್ಚ)",
+    "refundsOut": "ಮರುಪಾವತಿಗಳು",
+    "netRevenue": "ನಿವ್ವಳ ವೇದಿಕೆ ಆದಾಯ",
+    "netRevenueHint": "ಕಮಿಷನ್ + ಪ್ರಕ್ರಿಯೆ − ಗೇಟ್‌ವೇ ಶುಲ್ಕ",
+    "liabilitiesTitle": "ಹೊಣೆಗಾರಿಕೆಗಳು (ಪ್ರಸ್ತುತ)",
+    "doctorClearing": "ವೈದ್ಯ ಗಳಿಕೆ ಕ್ಲಿಯರಿಂಗ್‌ನಲ್ಲಿ",
+    "doctorAvailable": "ವೈದ್ಯ ಗಳಿಕೆ ಲಭ್ಯ",
+    "doctorLocked": "ಹಿಂಪಡೆಯುವಿಕೆಯಲ್ಲಿ",
+    "walletLiability": "ರೋಗಿ ವಾಲೆಟ್ ಹೊಣೆ",
+    "walletLiabilityHint": "ಗ್ರಾಹಕರಿಗೆ ಸಲ್ಲಬೇಕಾದದ್ದು — ವೇದಿಕೆ ಆದಾಯವಲ್ಲ",
+    "tdsTitle": "TDS ರಿಜಿಸ್ಟರ್ (ಆಯ್ದ ವ್ಯಾಪ್ತಿ)",
+    "tdsDeducted": "TDS ಕಡಿತ",
+    "tdsCount": "{{count}} ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು",
+    "netPaidToDoctors": "ವೈದ್ಯರಿಗೆ ನಿವ್ವಳ ಪಾವತಿ",
+    "healthTitle": "ಪಾವತಿ ಆರೋಗ್ಯ",
+    "stuckPending": "ಸಿಲುಕಿದ ಬಾಕಿ ಪಾವತಿಗಳು",
+    "stuckPendingHint": "1 ಗಂಟೆಗಿಂತ ಹೆಚ್ಚು — ದೈನಂದಿನ ಹೊಂದಾಣಿಕೆ ಪ್ರಯತ್ನ",
+    "openHolds": "ತೆರೆದ ಪಾವತಿ ಹೋಲ್ಡ್‌ಗಳು"
   }
 }
