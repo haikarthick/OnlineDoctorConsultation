@@ -460,7 +460,7 @@ class PostgresDatabase {
         (gen_random_uuid(), '998352', 'Veterinary services for livestock (GST-exempt healthcare)', 0, true),
         (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true)
       ON CONFLICT (sac_code) DO NOTHING
-    `).catch(() => {});
+    `).catch((e: any) => logger.warn('tax_codes seed failed', { error: e.message }));
 
     await this.pool.query(`
       INSERT INTO system_settings (id, key, value, category, description) VALUES
@@ -482,7 +482,7 @@ class PostgresDatabase {
         (gen_random_uuid(), 'tax.platformLegalName', '', 'tax', 'Platform legal entity name shown on invoices'),
         (gen_random_uuid(), 'tax.invoicePrefix', 'VC', 'tax', 'Invoice number prefix (e.g. VC/2026-27/00001)')
       ON CONFLICT (key) DO NOTHING
-    `).catch(() => {});
+    `).catch((e: any) => logger.warn('payment module system_settings seed failed', { error: e.message }));
 
     // §17.1: placeholder v1 policy documents (admin replaces content with
     // lawyer-drafted text via Admin → Legal & Policies; publishing creates v2+)
@@ -496,7 +496,7 @@ class PostgresDatabase {
         (gen_random_uuid(), 'grievance_policy', 1, 'Grievance Redressal Policy', 'Placeholder Grievance Redressal Policy. A named grievance officer and escalation timelines are required under the Consumer Protection (E-Commerce) Rules 2020. Replace with the final policy and officer details before go-live.', false, true),
         (gen_random_uuid(), 'disclaimer', 1, 'Service Disclaimer', 'Placeholder Service Disclaimer. Online consultation is not a substitute for physical emergency veterinary care. In an emergency, visit the nearest veterinary clinic immediately. Replace with the final disclaimer before go-live.', false, true)
       ON CONFLICT (doc_type, version) DO NOTHING
-    `).catch(() => {});
+    `).catch((e: any) => logger.warn('legal_documents seed failed', { error: e.message }));
   }
 
   private async seedDefaultSettings(): Promise<void> {
