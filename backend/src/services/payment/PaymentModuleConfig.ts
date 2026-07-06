@@ -54,7 +54,8 @@ class PaymentModuleConfig {
   async getBoolean(key: string, defaultValue: boolean): Promise<boolean> {
     const v = await this.getRaw(key);
     if (v === null || v === '') return defaultValue;
-    return v === 'true' || v === '1';
+    const normalized = v.trim().toLowerCase();
+    return normalized === 'true' || normalized === '1';
   }
 
   // ── Typed accessors for the module's keys ──────────────────
