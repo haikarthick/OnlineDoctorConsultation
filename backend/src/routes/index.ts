@@ -3167,6 +3167,13 @@ router.post('/admin/networks/:id/unsuspend', authMiddleware, roleMiddleware(['ad
 // PRICING VISIBILITY (public endpoint + admin management)
 // ─────────────────────────────────────────────────────────────────────────────
 
+// system_settings values are free-text editable (generic admin settings table,
+// not just the dedicated Pricing Settings page) — normalize case/whitespace so
+// a typo like 'True' doesn't silently disable visibility. See payment.enabled
+// incident (2026-07-06) for why this must never be a strict '=== "true"'.
+const isSettingTrue = (value: string | undefined | null): boolean =>
+  typeof value === 'string' && ['true', '1'].includes(value.trim().toLowerCase());
+
 router.get('/pricing/plans', asyncHandler(async (req: Request, res: Response) => {
   const db = (await import('../utils/database')).default;
   const [plansResult, settingsResult] = await Promise.all([
@@ -3175,7 +3182,7 @@ router.get('/pricing/plans', asyncHandler(async (req: Request, res: Response) =>
   ]);
   const settings: Record<string, string> = {};
   for (const row of settingsResult.rows) settings[row.key] = row.value;
-  const globalVisible = settings['pricing.visibility.global'] === 'true';
+  const globalVisible = isSettingTrue(settings['pricing.visibility.global']);
   res.json({ success: true, data: {
     isVisible: globalVisible,
     plans: globalVisible ? plansResult.rows : [],
@@ -3184,10 +3191,10 @@ router.get('/pricing/plans', asyncHandler(async (req: Request, res: Response) =>
     ctaPhone: settings['pricing.cta_phone'] || '',
     visibility: {
       global: globalVisible,
-      landing_page: settings['pricing.visibility.landing_page'] === 'true',
-      registration: settings['pricing.visibility.registration'] === 'true',
-      corp_dashboard: settings['pricing.visibility.corp_dashboard'] === 'true',
-      upgrade_prompts: settings['pricing.visibility.upgrade_prompts'] === 'true',
+      landing_page: isSettingTrue(settings['pricing.visibility.landing_page']),
+      registration: isSettingTrue(settings['pricing.visibility.registration']),
+      corp_dashboard: isSettingTrue(settings['pricing.visibility.corp_dashboard']),
+      upgrade_prompts: isSettingTrue(settings['pricing.visibility.upgrade_prompts']),
     },
   }});
 }));
@@ -3227,7 +3234,7 @@ router.get('/my-network-subscription', authMiddleware, roleMiddleware(['corporat
     [networkId]
   );
   const vis = await db.query(`SELECT value FROM system_settings WHERE key='pricing.visibility.corp_dashboard'`);
-  const showPrice = vis.rows[0]?.value === 'true';
+  const showPrice = isSettingTrue(vis.rows[0]?.value);
   const sub = result.rows[0] || { network_id: networkId, seat_limit: 5, status: 'trial', seatsUsed: 0, planName: 'Trial' };
   if (!showPrice) { delete sub.priceMonthly; delete sub.priceAnnually; }
   res.json({ success: true, data: sub });

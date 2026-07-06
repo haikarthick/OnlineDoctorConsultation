@@ -211,7 +211,7 @@ function AppRoutes() {
       } else if (data.data && typeof data.data === 'object') {
         Object.assign(s, data.data)
       }
-      if (s['maintenance.enabled'] === 'true') {
+      if (String(s['maintenance.enabled'] || '').trim().toLowerCase() === 'true') {
         setMaintenanceMode(true)
         setMaintenanceMessage(s['maintenance.message'] || 'System maintenance in progress. Please try again later.')
       } else {

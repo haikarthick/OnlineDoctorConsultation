@@ -136,7 +136,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       if (find('email.devRedirect') !== undefined) setEmailDevRedirect(find('email.devRedirect') || '')
       if (find('email.fromName')) setEmailFromName(find('email.fromName')!)
       if (find('email.fromAddress')) setEmailFromAddress(find('email.fromAddress')!)
-      if (find('maintenance.enabled')) setMaintenanceEnabled(find('maintenance.enabled') === 'true')
+      if (find('maintenance.enabled')) setMaintenanceEnabled(find('maintenance.enabled')!.trim().toLowerCase() === 'true')
       if (find('maintenance.message')) setMaintenanceMessage(find('maintenance.message')!)
       // Load email templates
       try {
