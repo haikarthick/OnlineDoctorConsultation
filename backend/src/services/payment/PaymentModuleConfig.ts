@@ -66,8 +66,13 @@ class PaymentModuleConfig {
   }
 
   async getGatewayMode(): Promise<PaymentGatewayMode> {
-    const mode = await this.getString('payment.gatewayMode', 'demo');
-    if (mode === 'razorpay_test' || mode === 'razorpay_live') return mode;
+    const raw = await this.getString('payment.gatewayMode', 'demo');
+    const mode = raw.trim().toLowerCase();
+    // 'test'/'live' are aliases from the legacy Payment Gateway admin card
+    // (pre-dates this module, writes 'demo'/'test'/'live') — without this,
+    // clicking TEST/LIVE there silently no-ops for the payment module.
+    if (mode === 'razorpay_test' || mode === 'test') return 'razorpay_test';
+    if (mode === 'razorpay_live' || mode === 'live') return 'razorpay_live';
     return 'demo';
   }
 
