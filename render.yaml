@@ -42,6 +42,12 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
 
   # ── DEMO Environment ────────────────────────────────────
   # DATABASE_URL is Neon PostgreSQL — set via GitHub Actions setup-demo-env.yml
