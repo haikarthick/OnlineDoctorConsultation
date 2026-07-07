@@ -10,8 +10,10 @@ import {
  *
  * - Amounts cross this boundary in RUPEES; Razorpay's API works in PAISE —
  *   conversion happens ONLY here.
- * - Keys come from env vars (RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET /
- *   RAZORPAY_WEBHOOK_SECRET) — never from system_settings (§12 rule 6).
+ * - Credentials come from payment_gateway_credentials (AES-256-GCM
+ *   encrypted at rest, decrypted by PaymentCredentialsService) — the admin
+ *   UI never returns the plaintext secret via any GET response (§12 rule 6
+ *   still holds: secrets are never readable in plaintext from an API call).
  * - Signature checks use timing-safe comparison.
  */
 
@@ -30,15 +32,27 @@ function timingSafeEqualHex(expectedHex: string, actualHex: string): boolean {
   } catch { return false; }
 }
 
+export interface RazorpayCredentials {
+  keyId: string;
+  keySecret: string;
+  webhookSecret: string;
+}
+
 export class RazorpayGateway implements PaymentGateway {
   readonly mode: PaymentGatewayMode;
   private http: AxiosInstance;
+  private keyId: string;
+  private keySecret: string;
+  private webhookSecret: string;
 
-  constructor(mode: 'razorpay_test' | 'razorpay_live') {
+  constructor(mode: 'razorpay_test' | 'razorpay_live', credentials: RazorpayCredentials) {
     this.mode = mode;
+    this.keyId = credentials.keyId;
+    this.keySecret = credentials.keySecret;
+    this.webhookSecret = credentials.webhookSecret;
     if (!this.keyId || !this.keySecret) {
       throw new Error(
-        `Razorpay gateway mode '${mode}' selected but RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET env vars are not set.`
+        `Razorpay gateway mode '${mode}' selected but its credentials aren't configured. Set them in Admin → System Settings → Razorpay Credentials.`
       );
     }
     this.http = axios.create({
@@ -47,10 +61,6 @@ export class RazorpayGateway implements PaymentGateway {
       timeout: 20000,
     });
   }
-
-  private get keyId(): string { return process.env.RAZORPAY_KEY_ID || ''; }
-  private get keySecret(): string { return process.env.RAZORPAY_KEY_SECRET || ''; }
-  private get webhookSecret(): string { return process.env.RAZORPAY_WEBHOOK_SECRET || ''; }
 
   async createOrder(amount: number, currency: string, receipt: string, notes?: Record<string, string>): Promise<GatewayOrder> {
     const resp = await this.http.post('/orders', {

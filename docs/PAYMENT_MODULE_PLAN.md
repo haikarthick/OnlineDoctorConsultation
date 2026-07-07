@@ -335,7 +335,7 @@ All screens: 6-locale i18n keys added up-front with the mandatory audit command;
 3. Payment completion trusted **only** from webhook or server-verified checkout signature — never from a client "success" callback alone.
 4. All wallet/earnings mutations in DB transactions with row locks; no read-then-write balance math.
 5. `payment_events` append-only audit for every state change; commission/settings changes audit-logged.
-6. Secrets in env vars only; admin UI shows presence, never values.
+6. Secrets never readable in plaintext via any API response; admin UI shows presence/metadata only, never the value. **Updated 2026-07-06:** Razorpay Key Secret/Webhook Secret now stored AES-256-GCM encrypted in `payment_gateway_credentials` (test/live rows) rather than env vars, decrypted server-side only for building the gateway auth header (`PaymentCredentialsService`, `backend/src/utils/secretCrypto.ts`) — chosen so admins can rotate credentials from the UI across multiple deploy targets (Render + VPS) without server access. The master decryption key (`PAYMENT_CREDENTIALS_KEY`) is still env-vars-only — that one value cannot itself live in the DB it protects. Key Id is not treated as sensitive (Razorpay sends it to the browser anyway).
 7. Data isolation: doctors see only their earnings; patients only their payments; existing role middleware patterns reused.
 8. Feature flag `payment.enabled` — everything ships dark and is switched on per environment after verification.
 

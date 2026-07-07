@@ -1105,6 +1105,16 @@ class ApiService {
     return response.data
   }
 
+  async adminGetRazorpayCredentials() {
+    const response = await this.client.get('/admin/razorpay-credentials')
+    return response.data
+  }
+
+  async adminUpdateRazorpayCredentials(environment: 'test' | 'live', data: { keyId: string; keySecret?: string; webhookSecret?: string }) {
+    const response = await this.client.put(`/admin/razorpay-credentials/${environment}`, data)
+    return response.data
+  }
+
   // ─── Feature Flags ─────────────────────────────────────────
   async getFeatureFlags() {
     const response = await this.client.get('/features')

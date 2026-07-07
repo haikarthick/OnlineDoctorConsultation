@@ -48,7 +48,7 @@ function loadRazorpayScript(): Promise<boolean> {
  */
 export default function PaymentCheckout({ bookingId, amount, expiresAt, onSuccess, onCancel, defaultUseWallet = false }: PaymentCheckoutProps) {
   const { t } = useTranslation()
-  const { formatCurrency } = useSettings()
+  const { formatCurrency, settings } = useSettings()
   const [walletBalance, setWalletBalance] = useState(0)
   const [useWallet, setUseWallet] = useState(defaultUseWallet)
   const [breakdown, setBreakdown] = useState<Breakdown | null>(null)
@@ -173,6 +173,11 @@ export default function PaymentCheckout({ bookingId, amount, expiresAt, onSucces
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px' }}>
       <h2 style={{ textAlign: 'center', marginBottom: 4 }}>{t('payment.title')}</h2>
+      {settings.paymentGatewayMode !== 'live' && (
+        <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', color: '#92400e', borderRadius: 8, padding: '8px 14px', marginBottom: 16, fontSize: 13, textAlign: 'center', fontWeight: 600 }}>
+          🧪 {t('payment.testModeNotice')}
+        </div>
+      )}
       {secondsLeft !== null && (
         <p style={{ textAlign: 'center', color: secondsLeft < 120 ? '#dc2626' : '#6b7280', fontSize: 14, marginBottom: 20 }}>
           {t('payment.slotHeldFor')} {fmtCountdown(secondsLeft)}

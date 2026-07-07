@@ -79,6 +79,19 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   const [savingGateway, setSavingGateway] = useState(false)
   const [gatewaySaved, setGatewaySaved] = useState(false)
 
+  // Razorpay credentials state (payment module — stored encrypted in DB, never returned in plaintext)
+  const [razorpayWebhookUrl, setRazorpayWebhookUrl] = useState('')
+  const [razorpayStatus, setRazorpayStatus] = useState<Record<'test' | 'live', { configured: boolean; keyId: string | null; keySecretConfigured: boolean; webhookSecretConfigured: boolean; updatedAt: string | null }>>({
+    test: { configured: false, keyId: null, keySecretConfigured: false, webhookSecretConfigured: false, updatedAt: null },
+    live: { configured: false, keyId: null, keySecretConfigured: false, webhookSecretConfigured: false, updatedAt: null },
+  })
+  const [razorpayForm, setRazorpayForm] = useState<Record<'test' | 'live', { keyId: string; keySecret: string; webhookSecret: string }>>({
+    test: { keyId: '', keySecret: '', webhookSecret: '' },
+    live: { keyId: '', keySecret: '', webhookSecret: '' },
+  })
+  const [savingRazorpay, setSavingRazorpay] = useState<'test' | 'live' | null>(null)
+  const [razorpaySaved, setRazorpaySaved] = useState<'test' | 'live' | null>(null)
+
   // Cancellation Policy state
   const [cancellationPolicy, setCancellationPolicy] = useState(appSettings.cancellationPolicy)
   const [savingCancellation, setSavingCancellation] = useState(false)
@@ -117,7 +130,42 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   useEffect(() => {
     loadSettings()
     loadGatewaySettings()
+    loadRazorpayCredentials()
   }, [])
+
+  const loadRazorpayCredentials = async () => {
+    try {
+      const result = await apiService.adminGetRazorpayCredentials()
+      const data = result.data
+      if (data) {
+        setRazorpayStatus({ test: data.test, live: data.live })
+        setRazorpayWebhookUrl(data.webhookUrl || '')
+        setRazorpayForm({
+          test: { keyId: data.test?.keyId || '', keySecret: '', webhookSecret: '' },
+          live: { keyId: data.live?.keyId || '', keySecret: '', webhookSecret: '' },
+        })
+      }
+    } catch { /* ignore */ }
+  }
+
+  const handleSaveRazorpay = async (environment: 'test' | 'live') => {
+    try {
+      setSavingRazorpay(environment)
+      setRazorpaySaved(null)
+      const form = razorpayForm[environment]
+      await apiService.adminUpdateRazorpayCredentials(environment, {
+        keyId: form.keyId,
+        keySecret: form.keySecret || undefined,
+        webhookSecret: form.webhookSecret || undefined,
+      })
+      await loadRazorpayCredentials()
+      setRazorpaySaved(environment)
+      setTimeout(() => setRazorpaySaved(null), 3000)
+    } catch {
+    } finally {
+      setSavingRazorpay(null)
+    }
+  }
 
   const loadSettings = async () => {
     try {
@@ -998,6 +1046,62 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
               <button className="btn btn-primary" disabled={savingGateway} onClick={handleSaveGateway}>
                 {savingGateway ? t('systemSettings.saving') : t('systemSettings.saveGateway')}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Razorpay Credentials (payment module) ─── */}
+      {showPaymentCard && (
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div className="card-header"><h2 style={{ color: '#111827' }}>🔑 Razorpay Credentials</h2></div>
+          <div className="card-body">
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#6b7280' }}>
+              Used by the payment module when Gateway Mode above is <strong>Test</strong> or <strong>Live</strong>. Secrets are encrypted at rest and never shown again after saving — leave a secret field blank to keep its current value.
+            </p>
+            {(['test', 'live'] as const).map(env => {
+              const status = razorpayStatus[env]
+              const form = razorpayForm[env]
+              const isActive = (env === 'test' && gatewayMode === 'test') || (env === 'live' && gatewayMode === 'live')
+              return (
+                <div key={env} style={{ borderTop: env === 'live' ? '1px solid #f3f4f6' : undefined, paddingTop: env === 'live' ? 16 : 0, marginTop: env === 'live' ? 16 : 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{env === 'test' ? '🧪 Test Credentials' : '🟢 Live Credentials'}</h3>
+                    {isActive && <span style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 600 }}>ACTIVE</span>}
+                    {status.configured && <span style={{ fontSize: 12, color: '#059669' }}>✓ configured</span>}
+                  </div>
+                  <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                    <div style={{ flex: 2, minWidth: 220 }}>
+                      <label className="form-label" style={{ fontSize: 13 }}>Key Id</label>
+                      <input className="form-input" placeholder={`rzp_${env}_...`} value={form.keyId}
+                        onChange={e => setRazorpayForm(f => ({ ...f, [env]: { ...f[env], keyId: e.target.value } }))} style={inputStyle} />
+                    </div>
+                    <div style={{ flex: 2, minWidth: 220 }}>
+                      <label className="form-label" style={{ fontSize: 13 }}>Key Secret</label>
+                      <input className="form-input" type="password" placeholder={status.keySecretConfigured ? '•••••••• (unchanged if left blank)' : 'Not set'} value={form.keySecret}
+                        onChange={e => setRazorpayForm(f => ({ ...f, [env]: { ...f[env], keySecret: e.target.value } }))} style={inputStyle} />
+                    </div>
+                    <div style={{ flex: 2, minWidth: 220 }}>
+                      <label className="form-label" style={{ fontSize: 13 }}>Webhook Secret</label>
+                      <input className="form-input" type="password" placeholder={status.webhookSecretConfigured ? '•••••••• (unchanged if left blank)' : 'Not set'} value={form.webhookSecret}
+                        onChange={e => setRazorpayForm(f => ({ ...f, [env]: { ...f[env], webhookSecret: e.target.value } }))} style={inputStyle} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, marginTop: 10 }}>
+                    {razorpaySaved === env && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved</span>}
+                    <button className="btn btn-primary btn-sm" disabled={savingRazorpay === env} onClick={() => handleSaveRazorpay(env)}>
+                      {savingRazorpay === env ? t('systemSettings.saving') : `Save ${env === 'test' ? 'Test' : 'Live'} Credentials`}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+            <div style={{ borderTop: '1px solid #f3f4f6', marginTop: 16, paddingTop: 12 }}>
+              <label className="form-label" style={{ fontSize: 13 }}>Webhook URL (paste into Razorpay Dashboard → Webhooks)</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input className="form-input" readOnly value={razorpayWebhookUrl} style={{ ...inputStyle, background: '#f9fafb' }} />
+                <button className="btn btn-outline btn-sm" onClick={() => navigator.clipboard?.writeText(razorpayWebhookUrl)}>Copy</button>
+              </div>
             </div>
           </div>
         </div>

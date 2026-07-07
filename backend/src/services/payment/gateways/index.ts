@@ -2,28 +2,27 @@ import { PaymentGateway, PaymentGatewayMode } from '../types';
 import demoGateway from './DemoGateway';
 import RazorpayGateway from './RazorpayGateway';
 import PaymentModuleConfig from '../PaymentModuleConfig';
-
-// Razorpay instances are cached per mode (constructor validates env keys loudly)
-const razorpayInstances = new Map<string, RazorpayGateway>();
+import PaymentCredentialsService from '../PaymentCredentialsService';
 
 /**
  * Gateway factory — resolves the active adapter from `payment.gatewayMode`.
- * A misconfigured razorpay mode (missing env keys) fails loudly rather than
- * silently faking payments.
+ * Credentials are fetched fresh each call (PaymentCredentialsService has its
+ * own short TTL cache) rather than cached on a long-lived gateway instance,
+ * so an admin updating credentials takes effect within the cache window
+ * without needing a restart. A misconfigured razorpay mode (credentials not
+ * set) fails loudly rather than silently faking payments.
  */
-export function getGatewayForMode(mode: PaymentGatewayMode): PaymentGateway {
+export async function getGatewayForMode(mode: PaymentGatewayMode): Promise<PaymentGateway> {
   switch (mode) {
-    case 'demo':
-      return demoGateway;
-    case 'razorpay_test':
-    case 'razorpay_live': {
-      let inst = razorpayInstances.get(mode);
-      if (!inst) {
-        inst = new RazorpayGateway(mode);
-        razorpayInstances.set(mode, inst);
-      }
-      return inst;
+    case 'razorpay_test': {
+      const creds = await PaymentCredentialsService.getForGateway('test');
+      return new RazorpayGateway('razorpay_test', creds);
     }
+    case 'razorpay_live': {
+      const creds = await PaymentCredentialsService.getForGateway('live');
+      return new RazorpayGateway('razorpay_live', creds);
+    }
+    case 'demo':
     default:
       return demoGateway;
   }

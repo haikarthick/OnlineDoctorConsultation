@@ -446,6 +446,15 @@ class PostgresDatabase {
         accepted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
       `CREATE INDEX IF NOT EXISTS idx_policy_accept_user ON user_policy_acceptances(user_id, doc_type)`,
+      `CREATE TABLE IF NOT EXISTS payment_gateway_credentials (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        environment VARCHAR(10) NOT NULL UNIQUE CHECK (environment IN ('test', 'live')),
+        key_id VARCHAR(255),
+        key_secret_encrypted TEXT,
+        webhook_secret_encrypted TEXT,
+        updated_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
     ];
     for (const stmt of ddl) {
       await this.pool.query(stmt).catch((e: any) =>
@@ -497,6 +506,13 @@ class PostgresDatabase {
         (gen_random_uuid(), 'disclaimer', 1, 'Service Disclaimer', 'Placeholder Service Disclaimer. Online consultation is not a substitute for physical emergency veterinary care. In an emergency, visit the nearest veterinary clinic immediately. Replace with the final disclaimer before go-live.', false, true)
       ON CONFLICT (doc_type, version) DO NOTHING
     `).catch((e: any) => logger.warn('legal_documents seed failed', { error: e.message }));
+
+    await this.pool.query(`
+      INSERT INTO payment_gateway_credentials (id, environment) VALUES
+        (gen_random_uuid(), 'test'),
+        (gen_random_uuid(), 'live')
+      ON CONFLICT (environment) DO NOTHING
+    `).catch((e: any) => logger.warn('payment_gateway_credentials seed failed', { error: e.message }));
   }
 
   private async seedDefaultSettings(): Promise<void> {

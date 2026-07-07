@@ -42,11 +42,12 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
-      - key: RAZORPAY_KEY_ID
-        sync: false
-      - key: RAZORPAY_KEY_SECRET
-        sync: false
-      - key: RAZORPAY_WEBHOOK_SECRET
+      # Razorpay Key Id/Secret/Webhook Secret are stored encrypted in the DB
+      # (payment_gateway_credentials, set via Admin -> System Settings ->
+      # Razorpay Credentials) -- this is the only secret still needed from
+      # env, it decrypts them. One value, reusable if this DB is ever cloned
+      # to a new deploy target.
+      - key: PAYMENT_CREDENTIALS_KEY
         sync: false
 
   # ── DEMO Environment ────────────────────────────────────

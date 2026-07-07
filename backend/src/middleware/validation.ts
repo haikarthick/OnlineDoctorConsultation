@@ -449,6 +449,13 @@ export const adminLegalDocSchema = Joi.object({
   requiresReacceptance: Joi.boolean().optional().default(false),
 });
 
+export const razorpayCredentialsSchema = Joi.object({
+  keyId: Joi.string().max(255).required(),
+  // Blank/omitted = keep the existing stored secret unchanged
+  keySecret: Joi.string().max(255).optional().allow('', null),
+  webhookSecret: Joi.string().max(255).optional().allow('', null),
+});
+
 // ─── Review ──────────────────────────────────────────────────
 export const createReviewSchema = Joi.object({
   consultationId: requiredUuid,

@@ -29,7 +29,7 @@ import {
   addWeightSchema, createAllergySchema, updateAllergySchema, createLabResultSchema, updateLabResultSchema,
   // Payment / Review
   createPaymentSchema, createReviewSchema,
-  checkoutPaymentSchema, verifyPaymentSchema, legalAcceptSchema, adminLegalDocSchema,
+  checkoutPaymentSchema, verifyPaymentSchema, legalAcceptSchema, adminLegalDocSchema, razorpayCredentialsSchema,
   createPlatformReferralSchema, acceptReferralSchema, declineReferralSchema,
   // Admin
   toggleUserStatusSchema, changeUserRoleSchema, processRefundSchema, moderateReviewSchema, updateSystemSettingSchema,
@@ -1884,6 +1884,29 @@ router.get('/payments', authMiddleware, asyncHandler((req: Request, res: Respons
 router.get('/payments/booking/:bookingId', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.getPaymentByBooking(req, res)));
 router.get('/payments/gateway-settings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => PaymentController.getGatewaySettings(req, res)));
 router.get('/payments/:id', authMiddleware, asyncHandler((req: Request, res: Response) => PaymentController.getPayment(req, res)));
+
+// ─── Razorpay credentials (payment module — §12 rule 6: masked only, never plaintext) ───
+router.get('/admin/razorpay-credentials', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const PaymentCredentialsService = (await import('../services/payment/PaymentCredentialsService')).default;
+  const [test, live] = await Promise.all([
+    PaymentCredentialsService.getMaskedStatus('test'),
+    PaymentCredentialsService.getMaskedStatus('live'),
+  ]);
+  const webhookUrl = `${req.protocol}://${req.get('host')}/api/v1/webhooks/razorpay`;
+  res.json({ success: true, data: { test, live, webhookUrl } });
+}));
+
+router.put('/admin/razorpay-credentials/:environment', authMiddleware, roleMiddleware(['admin']), validateBody(razorpayCredentialsSchema), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { environment } = req.params;
+  if (environment !== 'test' && environment !== 'live') {
+    return res.status(400).json({ success: false, error: { message: "environment must be 'test' or 'live'" } });
+  }
+  const PaymentCredentialsService = (await import('../services/payment/PaymentCredentialsService')).default;
+  const { keyId, keySecret, webhookSecret } = req.body;
+  await PaymentCredentialsService.setCredentials(environment, keyId, keySecret || undefined, webhookSecret || undefined, authReq.userId!);
+  res.json({ success: true, data: await PaymentCredentialsService.getMaskedStatus(environment) });
+}));
 
 // ─── Wallet routes ───────────────────────────────────────────
 router.get('/wallet', authMiddleware, asyncHandler((req: Request, res: Response) => WalletController.getWallet(req, res)));
