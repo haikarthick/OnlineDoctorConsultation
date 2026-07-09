@@ -1,5 +1,6 @@
 import database from '../../utils/database';
 import logger from '../../utils/logger';
+import { ServiceError } from '../../utils/errors';
 import { encryptSecret, decryptSecret } from '../../utils/secretCrypto';
 
 export type GatewayEnvironment = 'test' | 'live';
@@ -54,15 +55,18 @@ class PaymentCredentialsService {
   async getForGateway(environment: GatewayEnvironment): Promise<{ keyId: string; keySecret: string; webhookSecret: string }> {
     const row = await this.getRow(environment);
     if (!row?.keyId || !row?.keySecretEncrypted) {
-      throw new Error(
-        `Razorpay ${environment} credentials are not configured. Set them in Admin → System Settings → Razorpay Credentials.`
-      );
+      throw new ServiceError('Razorpay', `${environment} credentials are not configured. Set them in Admin → System Settings → Razorpay Credentials.`);
     }
-    return {
-      keyId: row.keyId,
-      keySecret: decryptSecret(row.keySecretEncrypted),
-      webhookSecret: row.webhookSecretEncrypted ? decryptSecret(row.webhookSecretEncrypted) : '',
-    };
+    try {
+      return {
+        keyId: row.keyId,
+        keySecret: decryptSecret(row.keySecretEncrypted),
+        webhookSecret: row.webhookSecretEncrypted ? decryptSecret(row.webhookSecretEncrypted) : '',
+      };
+    } catch (err: any) {
+      logger.error('Failed to decrypt stored Razorpay credentials — PAYMENT_CREDENTIALS_KEY may be missing or changed since they were saved', { environment, error: err.message });
+      throw new ServiceError('Razorpay', `${environment} credentials could not be decrypted. Re-save them in Admin → System Settings → Razorpay Credentials.`);
+    }
   }
 
   /** For webhook signature verification — only the webhook secret, decrypted. */

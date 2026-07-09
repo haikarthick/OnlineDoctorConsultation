@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import crypto from 'crypto';
 import logger from '../../../utils/logger';
+import { ServiceError } from '../../../utils/errors';
 import {
   PaymentGateway, PaymentGatewayMode, GatewayOrder, GatewayRefund, GatewayPaymentStatus,
 } from '../types';
@@ -51,9 +52,7 @@ export class RazorpayGateway implements PaymentGateway {
     this.keySecret = credentials.keySecret;
     this.webhookSecret = credentials.webhookSecret;
     if (!this.keyId || !this.keySecret) {
-      throw new Error(
-        `Razorpay gateway mode '${mode}' selected but its credentials aren't configured. Set them in Admin → System Settings → Razorpay Credentials.`
-      );
+      throw new ServiceError('Razorpay', `Gateway mode '${mode}' selected but its credentials aren't configured. Set them in Admin → System Settings → Razorpay Credentials.`);
     }
     this.http = axios.create({
       baseURL: 'https://api.razorpay.com/v1',
@@ -63,12 +62,19 @@ export class RazorpayGateway implements PaymentGateway {
   }
 
   async createOrder(amount: number, currency: string, receipt: string, notes?: Record<string, string>): Promise<GatewayOrder> {
-    const resp = await this.http.post('/orders', {
-      amount: toPaise(amount),
-      currency: currency || 'INR',
-      receipt,
-      notes: notes || {},
-    });
+    let resp;
+    try {
+      resp = await this.http.post('/orders', {
+        amount: toPaise(amount),
+        currency: currency || 'INR',
+        receipt,
+        notes: notes || {},
+      });
+    } catch (err: any) {
+      const razorpayMessage = err?.response?.data?.error?.description;
+      logger.error('Razorpay createOrder failed', { mode: this.mode, error: razorpayMessage || err.message });
+      throw new ServiceError('Razorpay', razorpayMessage || 'Could not reach the payment gateway. Please try again.');
+    }
     const order = resp.data;
     return {
       gatewayOrderId: order.id,
