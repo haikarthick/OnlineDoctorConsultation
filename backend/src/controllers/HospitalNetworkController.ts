@@ -221,8 +221,10 @@ class HospitalNetworkController {
 
   async listNetworkReferrals(req: AuthRequest, res: Response): Promise<void> {
     const { networkId, hospitalId, direction, animalId, status, page, limit } = req.query;
+    if (!networkId) throw new ValidationError('networkId is required');
+    await this.ensureNetworkAccess(networkId as string, req.userId!, req.userRole!, 'interHospitalReferrals');
     const result = await HospitalNetworkService.listNetworkReferrals({
-      networkId: networkId as string | undefined,
+      networkId: networkId as string,
       hospitalId: hospitalId as string | undefined,
       direction: direction as 'incoming' | 'outgoing' | 'all' | undefined,
       animalId: animalId as string | undefined,

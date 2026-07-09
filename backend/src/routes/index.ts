@@ -974,7 +974,7 @@ router.get('/hospital-networks/:id/patients', authMiddleware, requireNetworkAcce
 }));
 
 // Get all care contexts (network enrollments) for an animal
-router.get('/animals/:animalId/care-contexts', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/animals/:animalId/care-contexts', authMiddleware, requireAnimalAccess('params:animalId', 'care_contexts'), asyncHandler(async (req: Request, res: Response) => {
   const result = await database.query(
     `SELECT acc.id, acc.network_id AS "networkId", acc.corporate_patient_id AS "networkPatientId",
             acc.platform_unique_id AS "platformUniqueId", acc.enrolled_at AS "enrolledAt",
@@ -989,7 +989,7 @@ router.get('/animals/:animalId/care-contexts', authMiddleware, asyncHandler(asyn
 }));
 
 // P4-MED2: Unified referral history for an animal (merges platform referrals + network referrals)
-router.get('/animals/:animalId/referrals', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+router.get('/animals/:animalId/referrals', authMiddleware, requireAnimalAccess('params:animalId', 'referrals'), asyncHandler(async (req: Request, res: Response) => {
   try {
     const animalId = req.params.animalId;
 
@@ -1292,6 +1292,15 @@ router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNet
 // Walk-in registration for standalone (non-network) hospitals
 router.post('/hospitals/:hospitalId/register-walkin', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   try {
+    const hospRes = await database.query(`SELECT is_network_branch FROM vet_hospitals WHERE id = $1`, [req.params.hospitalId]);
+    if (!hospRes.rows[0]) { res.status(404).json({ success: false, message: 'Hospital not found' }); return; }
+    if (hospRes.rows[0].is_network_branch) {
+      res.status(400).json({ success: false, message: 'Network hospitals register walk-ins through their own hospital-network workflow.' }); return;
+    }
+    if ((req as any).userRole !== 'admin') {
+      const memberRole = await VetHospitalService.getMemberRole(req.params.hospitalId, (req as any).userId);
+      if (!memberRole) { res.status(403).json({ success: false, message: 'You are not a member of this hospital' }); return; }
+    }
     const { patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId } = req.body;
     if (!patientName || !animalName || !animalSpecies) {
       res.status(400).json({ success: false, message: 'patientName, animalName, and animalSpecies are required' }); return;
@@ -1549,7 +1558,8 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
          COALESCE(SUM(processing_charge_amount), 0) as processing_charges,
          COALESCE(SUM(gateway_fee_amount) FILTER (WHERE status IN ('completed', 'partially_refunded', 'refunded', 'transferred')), 0) as gateway_fees,
          COUNT(*) FILTER (WHERE status IN ('completed', 'partially_refunded')) as paid_count
-       FROM payments WHERE created_at >= $1::date AND created_at < ($2::date + INTERVAL '1 day')`,
+       FROM payments WHERE payment_source = 'consultation'
+         AND created_at >= $1::date AND created_at < ($2::date + INTERVAL '1 day')`,
       [from, to]
     ),
     database.query(
@@ -1574,7 +1584,7 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
       `SELECT
          COUNT(*) FILTER (WHERE status = 'pending' AND updated_at < NOW() - INTERVAL '1 hour') as stuck_pending,
          COUNT(*) FILTER (WHERE status IN ('created', 'pending')) as open_holds
-       FROM payments`
+       FROM payments WHERE payment_source = 'consultation'`
     ),
   ]);
   const p = payments.rows[0]; const e = earnings.rows[0]; const w = wallets.rows[0];
@@ -2429,28 +2439,82 @@ router.delete('/workforce/shifts/:id', authMiddleware, asyncHandler((req: Reques
 router.get('/workflow/animals/search', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.searchAnimals(req, res)));
 router.get('/workflow/animals/:animalId/medical-summary', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalMedicalSummary(req, res)));
 // Staff Positions
-router.get('/hospitals/:hospitalId/staff', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listStaffPositions(req, res)));
-router.post('/hospitals/:hospitalId/staff', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.addStaffPosition(req, res)));
-router.put('/staff-positions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateStaffPosition(req, res)));
-router.delete('/staff-positions/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.removeStaffPosition(req, res)));
+router.get('/hospitals/:hospitalId/staff', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.listStaffPositions(req, res);
+}));
+router.post('/hospitals/:hospitalId/staff', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.addStaffPosition(req, res);
+}));
+router.put('/staff-positions/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkResourceNetworkAccess(req, res, 'staff_positions')) return;
+  return StaffWorkflowController.updateStaffPosition(req, res);
+}));
+router.delete('/staff-positions/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkResourceNetworkAccess(req, res, 'staff_positions')) return;
+  return StaffWorkflowController.removeStaffPosition(req, res);
+}));
 // Appointment Queue
-router.get('/hospitals/:hospitalId/queue', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getQueue(req, res)));
-router.post('/hospitals/:hospitalId/queue/check-in', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.checkInToQueue(req, res)));
-router.patch('/queue/:id/triage', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.triagePatient(req, res)));
-router.patch('/queue/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateQueueStatus(req, res)));
-router.get('/hospitals/:hospitalId/queue/stats', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getQueueStats(req, res)));
+router.get('/hospitals/:hospitalId/queue', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.getQueue(req, res);
+}));
+router.post('/hospitals/:hospitalId/queue/check-in', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.checkInToQueue(req, res);
+}));
+router.patch('/queue/:id/triage', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkResourceNetworkAccess(req, res, 'appointment_queue')) return;
+  return StaffWorkflowController.triagePatient(req, res);
+}));
+router.patch('/queue/:id/status', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkResourceNetworkAccess(req, res, 'appointment_queue')) return;
+  return StaffWorkflowController.updateQueueStatus(req, res);
+}));
+router.get('/hospitals/:hospitalId/queue/stats', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.getQueueStats(req, res);
+}));
 // Clinical Workflow
-router.get('/hospitals/:hospitalId/workflow/dashboard', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getWorkflowDashboard(req, res)));
-router.get('/hospitals/:hospitalId/workflow/cases', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listWorkflowCases(req, res)));
-router.post('/hospitals/:hospitalId/workflow/cases', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.createWorkflowCase(req, res)));
-router.get('/workflow/cases/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getWorkflowCaseDetail(req, res)));
-router.put('/workflow/cases/:id', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateWorkflowCase(req, res)));
-router.patch('/workflow/cases/:id/transition', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.transitionWorkflowStage(req, res)));
+router.get('/hospitals/:hospitalId/workflow/dashboard', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.getWorkflowDashboard(req, res);
+}));
+router.get('/hospitals/:hospitalId/workflow/cases', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.listWorkflowCases(req, res);
+}));
+router.post('/hospitals/:hospitalId/workflow/cases', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.createWorkflowCase(req, res);
+}));
+router.get('/workflow/cases/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkResourceNetworkAccess(req, res, 'workflow_cases')) return;
+  return StaffWorkflowController.getWorkflowCaseDetail(req, res);
+}));
+router.put('/workflow/cases/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkResourceNetworkAccess(req, res, 'workflow_cases')) return;
+  return StaffWorkflowController.updateWorkflowCase(req, res);
+}));
+router.patch('/workflow/cases/:id/transition', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkResourceNetworkAccess(req, res, 'workflow_cases')) return;
+  return StaffWorkflowController.transitionWorkflowStage(req, res);
+}));
 // Referrals
 router.get('/vets/search', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.searchVets(req, res)));
-router.get('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.listReferrals(req, res)));
-router.post('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.createReferral(req, res)));
-router.patch('/referrals/:id/status', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.updateReferralStatus(req, res)));
+router.get('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.listReferrals(req, res);
+}));
+router.post('/hospitals/:hospitalId/referrals', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkInpatientNetworkAccess(req, res)) return;
+  return StaffWorkflowController.createReferral(req, res);
+}));
+router.patch('/referrals/:id/status', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkResourceNetworkAccess(req, res, 'referrals')) return;
+  return StaffWorkflowController.updateReferralStatus(req, res);
+}));
 // Inpatient / Boarding
 // Network-aware inpatient access helper
 async function checkInpatientNetworkAccess(req: Request, res: Response): Promise<boolean> {
@@ -2472,6 +2536,36 @@ async function checkInpatientNetworkAccess(req: Request, res: Response): Promise
   return true;
 }
 
+/**
+ * Same network-membership check as checkInpatientNetworkAccess, but for
+ * routes keyed by a resource id (queue entry, workflow case, referral,
+ * staff position, inpatient admission) rather than :hospitalId directly —
+ * resolves the resource's hospital_id first, then checks membership if that
+ * hospital is a network branch. Prevents a staffer from one network reading
+ * or mutating another network's operational data by id.
+ */
+async function checkResourceNetworkAccess(req: Request, res: Response, table: string, idParam: string = 'id'): Promise<boolean> {
+  const userRole = (req as any).userRole;
+  if (userRole === 'admin') return true;
+  const userId = (req as any).userId;
+  const resourceId = req.params[idParam];
+  const resourceRes = await database.query(`SELECT hospital_id FROM ${table} WHERE id = $1`, [resourceId]);
+  const hospitalId = resourceRes.rows[0]?.hospital_id;
+  if (!hospitalId) return true; // not found here — let the controller 404 normally
+  const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
+  const networkId = hospitalRes.rows[0]?.branch_network_id;
+  if (!networkId) return true; // standalone hospital — no network check needed
+  const memberRes = await database.query(
+    `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
+    [networkId, userId]
+  );
+  if (memberRes.rows.length === 0) {
+    res.status(403).json({ success: false, error: 'You are not a member of the network that owns this resource' });
+    return false;
+  }
+  return true;
+}
+
 router.get('/hospitals/:hospitalId/inpatient/dashboard', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   if (!await checkInpatientNetworkAccess(req, res)) return;
   return StaffWorkflowController.getInpatientDashboard(req, res);
@@ -2487,14 +2581,19 @@ router.post('/hospitals/:hospitalId/inpatient/admit', authMiddleware, asyncHandl
 }));
 router.patch('/inpatient/:id/status', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   res.on('finish', () => { if (res.statusCode < 300) { emitRoleRefresh('veterinarian', 'inpatients'); emitRoleRefresh('hospital_staff', 'inpatients') } })
+  if (!await checkResourceNetworkAccess(req, res, 'inpatient_admissions')) return;
   return StaffWorkflowController.updateInpatientStatus(req, res)
 }));
-router.post('/inpatient/:id/vitals', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.addVitalsLog(req, res)));
+router.post('/inpatient/:id/vitals', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await checkResourceNetworkAccess(req, res, 'inpatient_admissions')) return;
+  return StaffWorkflowController.addVitalsLog(req, res);
+}));
 router.put('/inpatient/:id', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   res.on('finish', () => { if (res.statusCode < 300) { emitRoleRefresh('veterinarian', 'inpatients'); emitRoleRefresh('hospital_staff', 'inpatients') } })
+  if (!await checkResourceNetworkAccess(req, res, 'inpatient_admissions')) return;
   await StaffWorkflowController.updateInpatientDetails(req, res)
 }));
-router.get('/animals/:animalId/hospital-visits', authMiddleware, asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalHospitalVisits(req, res)));
+router.get('/animals/:animalId/hospital-visits', authMiddleware, requireAnimalAccess('params:animalId', 'hospital_visits'), asyncHandler((req: Request, res: Response) => StaffWorkflowController.getAnimalHospitalVisits(req, res)));
 
 // ─── Report Builder & Export Center ──────────────────
 router.get('/enterprises/:enterpriseId/reports/templates', authMiddleware, asyncHandler((req: Request, res: Response) => Tier3Controller.listReportTemplates(req, res)));
@@ -3962,6 +4061,7 @@ router.get('/debug/my-network-members', authMiddleware, asyncHandler(async (req:
 router.get('/networks/:networkId/pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const { networkId } = req.params;
+  if (!await guardNetworkPharmacy(req, res, networkId)) return;
   const result = await database.query(
     `SELECT hp.*, vh.name AS hospital_name, u.first_name || ' ' || u.last_name AS created_by_name
      FROM hospital_pharmacies hp
@@ -3978,6 +4078,7 @@ router.get('/networks/:networkId/pharmacies', authMiddleware, asyncHandler(async
 router.post('/networks/:networkId/pharmacies', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const { networkId } = req.params;
+  if (!await guardNetworkPharmacy(req, res, networkId)) return;
   const { pharmacy_name, hospital_id, address, phone, email, license_number, operating_hours, is_primary_pharmacy } = req.body;
   if (!pharmacy_name) return res.status(400).json({ error: 'pharmacy_name is required' });
   // If setting as primary, unset others
@@ -4625,6 +4726,7 @@ router.get('/networks/:networkId/pharmacy-reports', authMiddleware, asyncHandler
 // ── Inter-hospital Medication Requests ───────────────────────
 
 router.get('/networks/:networkId/med-requests', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const result = await database.query(
     `SELECT pmr.*, vh_s.name AS source_hospital_name, vh_d.name AS destination_hospital_name,
             u.first_name || ' ' || u.last_name AS created_by_name
@@ -4641,6 +4743,7 @@ router.get('/networks/:networkId/med-requests', authMiddleware, asyncHandler(asy
 
 router.post('/networks/:networkId/med-requests', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const { source_hospital_id, destination_hospital_id, prescription_id, requested_medications, notes } = req.body;
   if (!requested_medications || !Array.isArray(requested_medications)) return res.status(400).json({ error: 'requested_medications array is required' });
   const result = await database.query(
@@ -4653,6 +4756,7 @@ router.post('/networks/:networkId/med-requests', authMiddleware, asyncHandler(as
 
 router.patch('/networks/:networkId/med-requests/:requestId', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
+  if (!await guardNetworkPharmacy(req, res, req.params.networkId)) return;
   const { status, tracking_number, decline_reason, notes } = req.body;
   const result = await database.query(
     `UPDATE pharmacy_medication_requests SET
