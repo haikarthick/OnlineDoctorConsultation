@@ -20,7 +20,7 @@ class VetHospitalController {
   }
 
   async getHospital(req: AuthRequest, res: Response): Promise<void> {
-    const hospital = await VetHospitalService.getHospital(req.params.id);
+    const hospital = await VetHospitalService.getHospital(req.params.id, req.userId, req.userRole);
     res.json({ success: true, data: hospital });
   }
 
@@ -78,7 +78,7 @@ class VetHospitalController {
   // ─── Doctor Membership ─────────────────────────────────────
 
   async listDoctors(req: AuthRequest, res: Response): Promise<void> {
-    const doctors = await VetHospitalService.listDoctors(req.params.id);
+    const doctors = await VetHospitalService.listDoctors(req.params.id, req.userId, req.userRole);
     res.json({ success: true, data: doctors });
   }
 

@@ -151,6 +151,22 @@ class BookingService {
       }
     }
 
+    // Network-hospital branches are independent SaaS tenants with zero
+    // integration into this platform's booking/payment pipeline — their
+    // patients are handled entirely through the hospital's own internal
+    // workflow (walk-in registration, workflow_cases, inpatient admission),
+    // never through bookings/payments. An independent doctor's own
+    // registered clinic (is_network_branch = false) is unaffected.
+    if (data.hospitalId) {
+      const hospRes = await database.query(
+        `SELECT is_network_branch FROM vet_hospitals WHERE id = $1`,
+        [data.hospitalId]
+      );
+      if (hospRes.rows[0]?.is_network_branch) {
+        throw new ValidationError('This doctor\'s hospital manages its own bookings directly — please contact the hospital.');
+      }
+    }
+
     // Check for conflicting bookings (payment_pending holds the slot; released
     // statuses — cancelled/rescheduled/payment_expired/referred — do not block)
     const conflicts = await database.query(
