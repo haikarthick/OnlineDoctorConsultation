@@ -19,6 +19,8 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
   const [to, setTo] = useState(() => new Date().toISOString().split('T')[0])
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -29,6 +31,25 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
   }, [from, to])
 
   useEffect(() => { load() }, [load])
+
+  const exportGstCsv = async () => {
+    try {
+      setExporting(true)
+      setExportError('')
+      const csv = await apiService.adminDownloadGstExport(from, to)
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `gst-export-${from}-to-${to}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err: any) {
+      setExportError(err?.response?.data?.error?.message || err?.message || t('financeAdmin.gstExportFailed'))
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const tile = (label: string, value: string, color: string, hint?: string) => (
     <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px' }}>
@@ -51,8 +72,17 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
           <span>→</span>
           <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
             style={{ border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }} />
+          <button className="btn btn-outline btn-sm" disabled={exporting} onClick={exportGstCsv}>
+            {exporting ? t('common.loading') : t('financeAdmin.exportGst')}
+          </button>
         </div>
       </div>
+
+      {exportError && (
+        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 14 }}>
+          {exportError}
+        </div>
+      )}
 
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /><p>{t('common.loading')}</p></div>

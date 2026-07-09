@@ -186,6 +186,7 @@
       "intelligence": "Intelligence",
       "vetNetwork": "Vet Network",
       "account": "Account",
+      "finance": "Finance",
       "administration": "Administration",
       "preferences": "Preferences"
     },
@@ -196,7 +197,7 @@
       "admin": "Administrator"
     },
     "permissions": "Permissions",
-    "myPayments": "My Payments",
+    "myPayments": "Payments & Receipts",
     "legalPolicies": "Legal & Policies",
     "commissionSettings": "Commission Rules",
     "settlements": "Settlements",
@@ -7120,6 +7121,8 @@
     "title": "Finance Reports",
     "subtitle": "Revenue, liabilities, TDS and payment health",
     "noData": "No data for this range.",
+    "exportGst": "Export GST CSV",
+    "gstExportFailed": "Could not export GST report. Please try again.",
     "revenueTitle": "Revenue (selected range)",
     "gmv": "Gross bookings value",
     "paidCount": "{{count}} paid booking(s)",

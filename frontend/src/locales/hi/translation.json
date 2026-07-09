@@ -178,6 +178,7 @@
       "intelligence": "बुद्धिमत्ता",
       "vetNetwork": "पशुचिकित्सा नेटवर्क",
       "account": "खाता",
+      "finance": "वित्त",
       "administration": "प्रशासन",
       "preferences": "प्राथमिकताएं"
     },
@@ -196,7 +197,7 @@
       "reject": "Reject",
       "approvalRequired": "This movement requires manager approval"
     },
-    "myPayments": "मेरे भुगतान",
+    "myPayments": "भुगतान और रसीदें",
     "legalPolicies": "कानूनी और नीतियाँ",
     "commissionSettings": "कमीशन नियम",
     "settlements": "निपटान",
@@ -7125,6 +7126,8 @@
     "title": "वित्त रिपोर्ट",
     "subtitle": "राजस्व, देनदारियाँ, TDS और भुगतान स्वास्थ्य",
     "noData": "इस अवधि के लिए कोई डेटा नहीं।",
+    "exportGst": "GST CSV निर्यात करें",
+    "gstExportFailed": "GST रिपोर्ट निर्यात नहीं हो सकी। कृपया पुनः प्रयास करें।",
     "revenueTitle": "राजस्व (चयनित अवधि)",
     "gmv": "सकल बुकिंग मूल्य",
     "paidCount": "{{count}} भुगतान बुकिंग",

@@ -178,6 +178,7 @@
       "intelligence": "మేధస్సు",
       "vetNetwork": "పశువైద్య నెట్‌వర్క్",
       "account": "ఖాతా",
+      "finance": "ఫైనాన్స్",
       "administration": "పరిపాలన",
       "preferences": "ప్రాధాన్యతలు"
     },
@@ -196,7 +197,7 @@
       "reject": "Reject",
       "approvalRequired": "This movement requires manager approval"
     },
-    "myPayments": "నా చెల్లింపులు",
+    "myPayments": "చెల్లింపులు & రసీదులు",
     "legalPolicies": "చట్టపరమైన & విధానాలు",
     "commissionSettings": "కమిషన్ నియమాలు",
     "settlements": "సెటిల్మెంట్లు",
@@ -7138,6 +7139,8 @@
     "title": "ఫైనాన్స్ నివేదికలు",
     "subtitle": "ఆదాయం, బాధ్యతలు, TDS మరియు చెల్లింపు ఆరోగ్యం",
     "noData": "ఈ పరిధికి డేటా లేదు.",
+    "exportGst": "GST CSV ఎగుమతి చేయండి",
+    "gstExportFailed": "GST నివేదికను ఎగుమతి చేయలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.",
     "revenueTitle": "ఆదాయం (ఎంచుకున్న పరిధి)",
     "gmv": "స్థూల బుకింగ్ విలువ",
     "paidCount": "{{count}} చెల్లింపు బుకింగ్‌లు",

@@ -178,6 +178,7 @@
       "intelligence": "ಬುದ್ಧಿಮತ್ತೆ",
       "vetNetwork": "ಪಶುವೈದ್ಯ ನೆಟ್‌ವರ್ಕ್",
       "account": "ಖಾತೆ",
+      "finance": "ಹಣಕಾಸು",
       "administration": "ಆಡಳಿತ",
       "preferences": "ಆದ್ಯತೆಗಳು"
     },
@@ -196,7 +197,7 @@
       "reject": "Reject",
       "approvalRequired": "This movement requires manager approval"
     },
-    "myPayments": "ನನ್ನ ಪಾವತಿಗಳು",
+    "myPayments": "ಪಾವತಿಗಳು & ರಶೀದಿಗಳು",
     "legalPolicies": "ಕಾನೂನು & ನೀತಿಗಳು",
     "commissionSettings": "ಕಮಿಷನ್ ನಿಯಮಗಳು",
     "settlements": "ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು",
@@ -7140,6 +7141,8 @@
     "title": "ಹಣಕಾಸು ವರದಿಗಳು",
     "subtitle": "ಆದಾಯ, ಹೊಣೆಗಾರಿಕೆಗಳು, TDS ಮತ್ತು ಪಾವತಿ ಆರೋಗ್ಯ",
     "noData": "ಈ ವ್ಯಾಪ್ತಿಗೆ ಡೇಟಾ ಇಲ್ಲ.",
+    "exportGst": "GST CSV ರಫ್ತು ಮಾಡಿ",
+    "gstExportFailed": "GST ವರದಿಯನ್ನು ರಫ್ತು ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "revenueTitle": "ಆದಾಯ (ಆಯ್ದ ವ್ಯಾಪ್ತಿ)",
     "gmv": "ಒಟ್ಟು ಬುಕಿಂಗ್ ಮೌಲ್ಯ",
     "paidCount": "{{count}} ಪಾವತಿ ಬುಕಿಂಗ್‌ಗಳು",

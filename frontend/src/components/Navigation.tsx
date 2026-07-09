@@ -131,7 +131,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['pet_owner', 'farmer'], section: 'Animals & Health' },
     { id: 'my-reviews', label: t('nav.myReviews'), icon: '⭐', path: '/doctor/reviews',
       roles: ['veterinarian'], section: 'Animals & Health' },
-    { id: 'vet-earnings', label: t('vetEarnings.title'), icon: '💰', path: '/doctor/earnings', roles: ['veterinarian'], section: 'Consultations' },
+    { id: 'vet-earnings', label: t('vetEarnings.title'), icon: '💰', path: '/doctor/earnings', roles: ['veterinarian'], section: 'Finance' },
 
     // ── Farm / Enterprise Module ──
     { id: 'enterprises', label: t('nav.farmEnterprise'), icon: '🏢', path: '/enterprises',
@@ -199,13 +199,13 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'pharmacy', label: t('pharmacy.nav.title'), icon: '💊', path: '/pharmacy',
       roles: ['pharmacist', 'corporate_admin', 'admin'], section: 'Vet Network' },
 
-    // ── Wallet ──
+    // ── Finance (Wallet, Payments, Earnings, Referrals) ──
     { id: 'wallet', label: t('nav.myWallet'), icon: '💰', path: '/wallet',
-      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin'], section: 'Account' },
+      roles: ['pet_owner', 'farmer', 'veterinarian', 'admin', 'corporate_admin'], section: 'Finance' },
     { id: 'payments-history', label: t('nav.myPayments'), icon: '🧾', path: '/payments',
-      roles: ['pet_owner', 'farmer'], section: 'Account' },
+      roles: ['pet_owner', 'farmer'], section: 'Finance' },
     { id: 'referrals', label: t('nav.referrals'), icon: '🔀', path: '/referrals',
-      roles: ['pet_owner', 'farmer', 'veterinarian'], section: 'Account' },
+      roles: ['pet_owner', 'farmer', 'veterinarian'], section: 'Finance' },
 
     // ── Administration (platform-level admin only) ──
     { id: 'admin-dashboard', label: t('nav.adminPanel'), icon: '🛡️', path: '/admin/dashboard',
@@ -215,15 +215,15 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     { id: 'admin-consultations', label: t('nav.consultations'), icon: '🩺', path: '/admin/consultations',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-payments', label: t('nav.payments'), icon: '💳', path: '/admin/payments',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin'], section: 'Finance' },
     { id: 'admin-legal-policies', label: t('nav.legalPolicies'), icon: '📜', path: '/admin/legal-policies',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-commission', label: t('nav.commissionSettings'), icon: '🪙', path: '/admin/commission-settings',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin'], section: 'Finance' },
     { id: 'admin-settlements', label: t('nav.settlements'), icon: '🏦', path: '/admin/settlements',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin'], section: 'Finance' },
     { id: 'admin-finance-reports', label: t('nav.financeReports'), icon: '📈', path: '/admin/finance-reports',
-      roles: ['admin'], section: 'Administration' },
+      roles: ['admin'], section: 'Finance' },
     { id: 'admin-reviews', label: t('nav.reviewModeration'), icon: '⚖️', path: '/admin/reviews',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-disputes', label: t('disputeManagement.title'), icon: '⚖️', path: '/admin/disputes',
@@ -338,7 +338,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     'Main': '🏠', 'Consultations': '🏥', 'Animals & Health': '🐾',
     'Farm Management': '🌾', 'Analytics & Tools': '📈', 'Innovation': '🚀',
     'Intelligence': '🤖', 'Veterinarian': '🩺', 'Administration': '🛡️',
-    'Hospital Networks': '🌐', 'Preferences': '⚙️',
+    'Hospital Networks': '🌐', 'Preferences': '⚙️', 'Finance': '💰',
   }
 
   // Section name translation map
@@ -352,6 +352,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
     'Intelligence': t('nav.sections.intelligence'),
     'Vet Network': t('nav.sections.vetNetwork'),
     'Account': t('nav.sections.account'),
+    'Finance': t('nav.sections.finance'),
     'Administration': t('nav.sections.administration'),
     'Hospital Networks': 'Hospital Networks',
     'Preferences': t('nav.sections.preferences'),
