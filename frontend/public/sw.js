@@ -3,8 +3,8 @@
 // VetCare Service Worker
 // Provides offline caching, background sync, and push notification support
 
-const CACHE_NAME = 'vetcare-v1';
-const RUNTIME_CACHE = 'vetcare-runtime-v1';
+const CACHE_NAME = 'vetcare-v2';
+const RUNTIME_CACHE = 'vetcare-runtime-v2';
 
 // Static assets to cache on install (app shell)
 const PRECACHE_URLS = [
@@ -55,6 +55,14 @@ self.addEventListener('fetch', (event) => {
 
   // Skip WebSocket and chrome-extension requests
   if (url.protocol === 'ws:' || url.protocol === 'wss:' || url.protocol === 'chrome-extension:') return;
+
+  // Only handle same-origin requests. Cross-origin third-party resources
+  // (Razorpay checkout.js, CDN scripts, etc.) must go straight to the
+  // network — intercepting them here re-runs their fetch inside the worker,
+  // which can fail/produce a misleading synthetic response (e.g. cacheFirst's
+  // 503 fallback below) instead of the real browser-level result. There's
+  // also no benefit to offline-caching a third-party payment script.
+  if (url.origin !== self.location.origin) return;
 
   // API routes: Network-first with fallback to cache
   if (API_ROUTES.test(url.pathname)) {
