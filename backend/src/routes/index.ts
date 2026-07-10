@@ -922,8 +922,23 @@ router.get('/hospital-networks/:id/security-audit', authMiddleware, asyncHandler
   }
 }));
 
-// User search for network member invite (corporate_admin can search registered users by name/email)
-router.get('/network-user-search', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'hospital_staff', 'veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+// User search for network member invite (corporate_admin/hospital_director can search registered users by name/email)
+router.get('/network-user-search', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  if (authReq.userRole !== 'admin') {
+    // Same gate as the actual invite action (POST /hospital-networks/:id/invite-staff) --
+    // this search is only useful as a precursor to inviting, so it shouldn't be reachable
+    // by anyone who couldn't actually send an invite (was previously any veterinarian/
+    // hospital_staff system role, with zero network-membership check at all).
+    const membership = await database.query(
+      `SELECT 1 FROM hospital_network_members WHERE user_id = $1 AND is_active = true
+         AND network_role IN ('corporate_admin', 'hospital_director') LIMIT 1`,
+      [authReq.userId]
+    );
+    if (!membership.rows.length) {
+      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can search users to invite' });
+    }
+  }
   const search = ((req.query.q as string) || '').trim();
   if (!search || search.length < 2) { res.json({ success: true, data: [] }); return; }
   try {
