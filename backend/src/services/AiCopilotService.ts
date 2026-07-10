@@ -372,9 +372,12 @@ Rate your overall confidence (0-100%) and explain any limitations.
 IMPORTANT: Always include a disclaimer that this is AI-assisted analysis and should be confirmed by a licensed veterinarian.`;
 
     try {
-      // Try vision models in order — fallback chain so deprecations don't break the feature
+      // Try vision models in order — fallback chain so deprecations don't break the feature.
+      // qwen3.6-27b is Groq's current multimodal model (llama-4-scout is decommissioned
+      // 2026-07-17 for free tier, kept as a fallback only; llama-3.3-70b was removed from
+      // this chain — it is text-only and always rejects image payloads).
       const visionModels = ai.provider.includes('Groq')
-        ? ['meta-llama/llama-4-scout-17b-16e-instruct', 'llama-3.3-70b-versatile']
+        ? ['qwen/qwen3.6-27b', 'meta-llama/llama-4-scout-17b-16e-instruct']
         : [ai.model];
 
       let lastError: any = null;
