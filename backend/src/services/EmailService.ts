@@ -179,6 +179,16 @@ class EmailService {
 
   constructor() {
     this.from = process.env.SMTP_FROM || 'VetCare <noreply@vetcare.app>';
+    // HARD GUARD: under Jest, never touch a real provider even if the local
+    // .env has live SMTP/Resend credentials. A unit test once sent a REAL
+    // staff-invite email through the developer's Gmail account because a
+    // service test mocked the DB but not EmailService (2026-07-10 incident).
+    if (process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test') {
+      this.mode = 'log-only';
+      this.initialized = true;
+      logger.info('Email service in LOG-ONLY mode (test environment detected — real providers disabled)');
+      return;
+    }
     // Eagerly check for Resend API key
     if (process.env.RESEND_API_KEY) {
       this.resendClient = new Resend(process.env.RESEND_API_KEY);
