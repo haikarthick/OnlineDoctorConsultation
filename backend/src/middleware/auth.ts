@@ -20,7 +20,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, config.jwt.secret) as any;
+    const decoded = jwt.verify(token, config.jwt.secret, { algorithms: ['HS256'] }) as any;
 
     // Verify the user actually exists in the database and fetch all roles
     const userCheck = await database.query('SELECT id, role FROM users WHERE id = $1', [decoded.userId]);

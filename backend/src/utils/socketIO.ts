@@ -39,7 +39,7 @@ export function initSocketIO(httpServer: HTTPServer): Server {
     // ── Authenticate: client must send a JWT to join their user room ──
     socket.on('authenticate', (token: string) => {
       try {
-        const decoded = jwt.verify(token, config.jwt.secret) as any
+        const decoded = jwt.verify(token, config.jwt.secret, { algorithms: ['HS256'] }) as any
         const userId = decoded.userId
         socket.join(`user:${userId}`)
         socket.join(`role:${decoded.role}`)

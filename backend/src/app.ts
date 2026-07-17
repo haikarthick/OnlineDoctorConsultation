@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs';
 import 'express-async-errors';
@@ -32,7 +33,7 @@ app.use(helmet({
       // frame-src is required for the hosted payment iframe (was 'none' —
       // blocked the whole widget even with a working script), connect-src
       // for the widget's own API/analytics calls.
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.razorpay.com"],
       connectSrc: ["'self'", "https://*.tile.openstreetmap.org", "wss:", "ws:", "https://api.groq.com", "https://*.razorpay.com"],
@@ -54,10 +55,13 @@ function keyGenerator(req: express.Request): string {
   const authHeader = req.headers.authorization || ''
   if (authHeader.startsWith('Bearer ')) {
     try {
-      // Decode JWT payload without verifying (rate limiter runs before auth)
-      const payload = JSON.parse(Buffer.from(authHeader.split('.')[1], 'base64').toString())
+      // Verify the signature before trusting userId. An unverified payload can be
+      // forged to evade one's own limit or to exhaust another user's budget (DoS).
+      const payload = jwt.verify(authHeader.substring(7), config.jwt.secret as string, {
+        algorithms: ['HS256'],
+      }) as any
       if (payload.userId) return `user:${payload.userId}`
-    } catch { /* fall through to IP */ }
+    } catch { /* invalid/expired token — fall through to IP */ }
   }
   return req.ip || req.socket.remoteAddress || 'unknown'
 }
@@ -110,8 +114,18 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Logging
 app.use(requestLogger);
 
-// Serve uploaded files statically
-app.use('/uploads', express.static(path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '..', 'uploads'))));
+// Serve uploaded files statically.
+// Harden against stored-XSS via spoofed-MIME uploads: `nosniff` stops the
+// browser from re-interpreting a mislabelled file, and a locked-down CSP makes
+// any HTML served from here inert (scripts can't run, resource is sandboxed).
+// We intentionally do NOT force Content-Disposition: attachment — uploaded
+// images/avatars are displayed inline in the SPA and must keep rendering.
+app.use('/uploads', express.static(path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '..', 'uploads')), {
+  setHeaders: (res) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox; frame-ancestors 'none'");
+  },
+}));
 
 // CSRF token endpoint (must be before csrfProtection middleware)
 app.get(`/api/${config.app.apiVersion}/csrf-token`, csrfTokenRoute);
