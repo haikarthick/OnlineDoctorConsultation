@@ -7,6 +7,7 @@ import aiCopilotService from '../services/AiCopilotService';
 import digitalTwinService from '../services/DigitalTwinService';
 import marketplaceService from '../services/MarketplaceService';
 import monetizationService from '../services/MarketplaceMonetizationService';
+import engagementService from '../services/MarketplaceEngagementService';
 import sustainabilityService from '../services/SustainabilityService';
 import wellnessService from '../services/WellnessService';
 import geospatialService from '../services/GeospatialService';
@@ -383,6 +384,114 @@ class Tier4Controller {
   async getMarketPrices(req: Request, res: Response) {
     try {
       const data = await marketplaceService.getMarketPrices(req.query);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  // ═══════════════════ Marketplace Engagement (Phase 3) ═══════════════════
+
+  private static engagementErrorCode(msg: string): number {
+    if (/not part of this conversation|your own listing/i.test(msg)) return 403;
+    if (/not found/i.test(msg)) return 404;
+    return 400;
+  }
+
+  // ── Messaging ──
+  async startMarketplaceThread(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const thread = await engagementService.getOrCreateThread(req.params.listingId, userId);
+      // If a first message is supplied, send it in the same call
+      if (req.body.message && String(req.body.message).trim()) {
+        await engagementService.sendMessage(thread.id, userId, String(req.body.message));
+      }
+      res.status(201).json({ data: thread });
+    } catch (err: any) { res.status(Tier4Controller.engagementErrorCode(err.message)).json({ error: { message: err.message } }); }
+  }
+
+  async listMarketplaceThreads(req: Request, res: Response) {
+    try {
+      const data = await engagementService.listThreads((req as any).userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getMarketplaceThreadMessages(req: Request, res: Response) {
+    try {
+      const data = await engagementService.getMessages(req.params.id, (req as any).userId);
+      res.json({ data });
+    } catch (err: any) { res.status(Tier4Controller.engagementErrorCode(err.message)).json({ error: { message: err.message } }); }
+  }
+
+  async sendMarketplaceMessage(req: Request, res: Response) {
+    try {
+      const data = await engagementService.sendMessage(req.params.id, (req as any).userId, req.body.message);
+      res.status(201).json({ data });
+    } catch (err: any) { res.status(Tier4Controller.engagementErrorCode(err.message)).json({ error: { message: err.message } }); }
+  }
+
+  async getMarketplaceUnreadCount(req: Request, res: Response) {
+    try {
+      const unread = await engagementService.getUnreadCount((req as any).userId);
+      res.json({ data: { unread } });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  // ── Favorites ──
+  async addMarketplaceFavorite(req: Request, res: Response) {
+    try {
+      const data = await engagementService.addFavorite((req as any).userId, req.params.listingId);
+      res.status(201).json({ data });
+    } catch (err: any) { res.status(err.message.includes('not found') ? 404 : 400).json({ error: { message: err.message } }); }
+  }
+
+  async removeMarketplaceFavorite(req: Request, res: Response) {
+    try {
+      const data = await engagementService.removeFavorite((req as any).userId, req.params.listingId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async listMarketplaceFavorites(req: Request, res: Response) {
+    try {
+      const data = await engagementService.listFavorites((req as any).userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getMarketplaceFavoriteIds(req: Request, res: Response) {
+    try {
+      const ids = await engagementService.getFavoriteIds((req as any).userId);
+      res.json({ data: { ids } });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  // ── Saved searches ──
+  async listMarketplaceSavedSearches(req: Request, res: Response) {
+    try {
+      const data = await engagementService.listSavedSearches((req as any).userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async createMarketplaceSavedSearch(req: Request, res: Response) {
+    try {
+      const { name, filters, alertsEnabled } = req.body;
+      const data = await engagementService.createSavedSearch((req as any).userId, name, filters || {}, alertsEnabled ?? true);
+      res.status(201).json({ data });
+    } catch (err: any) { res.status(400).json({ error: { message: err.message } }); }
+  }
+
+  async updateMarketplaceSavedSearch(req: Request, res: Response) {
+    try {
+      const data = await engagementService.updateSavedSearch(req.params.id, (req as any).userId, req.body);
+      res.json({ data });
+    } catch (err: any) { res.status(err.message.includes('not found') ? 404 : 400).json({ error: { message: err.message } }); }
+  }
+
+  async deleteMarketplaceSavedSearch(req: Request, res: Response) {
+    try {
+      const data = await engagementService.deleteSavedSearch(req.params.id, (req as any).userId);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }

@@ -3128,7 +3128,10 @@
       "auctions": "🔨 Auctions",
       "orders": "📦 Inquiries",
       "prices": "📈 Prices",
-      "admin": "🛡️ Admin"
+      "admin": "🛡️ Admin",
+      "messages": "💬 Messages",
+      "favorites": "❤️ Favorites",
+      "saved": "🔔 Saved"
     },
     "categories": {
       "all": "All Categories",
@@ -3572,6 +3575,30 @@
         "cancelled": "Cancelled",
         "pending": "Pending"
       }
+    },
+    "engagement": {
+      "messageSeller": "Message Seller",
+      "addFavorite": "Add to favorites",
+      "removeFavorite": "Remove from favorites",
+      "noMessages": "No conversations yet. Message a seller from any listing to start one.",
+      "listing": "Listing",
+      "selectConversation": "Select a conversation to view messages",
+      "startConversation": "Say hello to start the conversation.",
+      "typeMessage": "Type a message…",
+      "send": "Send",
+      "chatSafety": "Keep chats on-platform. Never share bank details, OTPs or passwords. Meet and inspect before paying.",
+      "noFavorites": "No favorites yet. Tap the heart on any listing to save it here.",
+      "savedSearchesDesc": "Save a search and get notified when new matching listings are posted.",
+      "noSavedSearches": "No saved searches yet. Use the filters on Browse, then tap “Save this search”.",
+      "saveThisSearch": "Save this search",
+      "searchNamePlaceholder": "Name this search (e.g. Murrah buffalo near me)",
+      "save": "Save",
+      "searchSaved": "Search saved. You’ll be alerted about new matches.",
+      "mySearch": "My search",
+      "applySearch": "Apply",
+      "allListings": "All listings",
+      "alertsOn": "Alerts on — tap to mute",
+      "alertsOff": "Alerts off — tap to enable"
     }
   },
   "sustainability": {

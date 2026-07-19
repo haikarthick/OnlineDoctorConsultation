@@ -5,7 +5,7 @@ import './ModulePage.css'
 import './Marketplace.css'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
-import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData } from '../types'
+import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
@@ -22,7 +22,7 @@ const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', e
 const FARMER_SPECIES_LIST = ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Poultry', 'Dog', 'Cat', 'Other']
 const PET_OWNER_SPECIES_LIST = ['Dog', 'Cat', 'Horse', 'Rabbit', 'Cow', 'Buffalo', 'Goat', 'Sheep', 'Camel', 'Pig', 'Poultry', 'Other']
 
-type TabKey = 'dashboard' | 'browse' | 'sell' | 'auctions' | 'orders' | 'prices' | 'admin'
+type TabKey = 'dashboard' | 'browse' | 'sell' | 'auctions' | 'orders' | 'messages' | 'favorites' | 'saved' | 'prices' | 'admin'
 
 // ─── Helper to read snake_case or camelCase ───
 const g = (l: any, ...keys: string[]): any => { for (const k of keys) { if (l[k] !== undefined && l[k] !== null) return l[k]; } return undefined }
@@ -82,6 +82,18 @@ const Marketplace: React.FC = () => {
   const [inquiries, setInquiries] = useState<any[]>([])
   // Payment method chosen per deal before confirming (recorded for audit only)
   const [dealPaymentMethod, setDealPaymentMethod] = useState<Record<string, string>>({})
+
+  // ── Engagement (Phase 3): messaging, favorites, saved searches ──
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
+  const [favorites, setFavorites] = useState<MarketplaceListing[]>([])
+  const [threads, setThreads] = useState<MarketplaceThread[]>([])
+  const [activeThread, setActiveThread] = useState<MarketplaceThread | null>(null)
+  const [threadMessages, setThreadMessages] = useState<MarketplaceMessage[]>([])
+  const [messageDraft, setMessageDraft] = useState('')
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [savedSearches, setSavedSearches] = useState<MarketplaceSavedSearch[]>([])
+  const [saveSearchName, setSaveSearchName] = useState('')
+  const [showSaveSearch, setShowSaveSearch] = useState(false)
 
   // Monetization (admin)
   const [monetizationSettings, setMonetizationSettings] = useState<any[]>([])
@@ -145,8 +157,110 @@ const Marketplace: React.FC = () => {
     setLoading(false)
   }, [filters, sortBy, nearMeActive, userLocation, radiusKm])
 
-  useEffect(() => { fetchDashboard(); fetchListings() }, [])
+  // ── Engagement data loaders ──
+  const loadFavoriteIds = useCallback(async () => {
+    try { const res = await apiService.getMarketplaceFavoriteIds(); setFavoriteIds(new Set(res.data?.ids || [])) } catch {}
+  }, [])
+
+  const loadUnreadCount = useCallback(async () => {
+    try { const res = await apiService.getMarketplaceUnreadCount(); setUnreadCount(res.data?.unread || 0) } catch {}
+  }, [])
+
+  const fetchThreads = useCallback(async () => {
+    try { const res = await apiService.listMarketplaceThreads(); setThreads(res.data?.items || []) } catch { setThreads([]) }
+  }, [])
+
+  const fetchFavorites = useCallback(async () => {
+    try { const res = await apiService.listMarketplaceFavorites(); setFavorites(res.data?.items || []) } catch { setFavorites([]) }
+  }, [])
+
+  const fetchSavedSearches = useCallback(async () => {
+    try { const res = await apiService.listMarketplaceSavedSearches(); setSavedSearches(res.data?.items || []) } catch { setSavedSearches([]) }
+  }, [])
+
+  const openThread = useCallback(async (thread: MarketplaceThread) => {
+    setActiveThread(thread)
+    try {
+      const res = await apiService.getMarketplaceThreadMessages(thread.id)
+      setThreadMessages(res.data?.items || [])
+      loadUnreadCount(); fetchThreads()
+    } catch { setThreadMessages([]) }
+  }, [loadUnreadCount, fetchThreads])
+
+  const refreshActiveThread = useCallback(async () => {
+    if (activeThread) {
+      try { const res = await apiService.getMarketplaceThreadMessages(activeThread.id); setThreadMessages(res.data?.items || []) } catch {}
+    }
+    fetchThreads(); loadUnreadCount()
+  }, [activeThread, fetchThreads, loadUnreadCount])
+
+  const sendMessage = async () => {
+    if (!activeThread || !messageDraft.trim()) return
+    const body = messageDraft.trim()
+    setMessageDraft('')
+    try {
+      await apiService.sendMarketplaceMessage(activeThread.id, body)
+      const res = await apiService.getMarketplaceThreadMessages(activeThread.id)
+      setThreadMessages(res.data?.items || [])
+      fetchThreads()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message); setMessageDraft(body) }
+  }
+
+  const toggleFavorite = async (listingId: string) => {
+    const isFav = favoriteIds.has(listingId)
+    // Optimistic update
+    setFavoriteIds(prev => { const n = new Set(prev); isFav ? n.delete(listingId) : n.add(listingId); return n })
+    try {
+      if (isFav) await apiService.removeMarketplaceFavorite(listingId)
+      else await apiService.addMarketplaceFavorite(listingId)
+      if (tab === 'favorites') fetchFavorites()
+    } catch (e: any) {
+      // Revert on failure
+      setFavoriteIds(prev => { const n = new Set(prev); isFav ? n.add(listingId) : n.delete(listingId); return n })
+      setError(e?.response?.data?.error?.message || e.message)
+    }
+  }
+
+  const messageSeller = async (listing: MarketplaceListing) => {
+    try {
+      const res = await apiService.startMarketplaceThread(listing.id)
+      const thread: MarketplaceThread = { ...res.data, listing_title: listing.title }
+      setSelectedListing(null)
+      setTab('messages')
+      fetchThreads()
+      openThread(thread)
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  const saveCurrentSearch = async () => {
+    const name = saveSearchName.trim() || (filters.species || filters.category || t('marketplace.engagement.mySearch'))
+    try {
+      await apiService.createMarketplaceSavedSearch({ name, filters, alertsEnabled: true })
+      setSuccessMsg(t('marketplace.engagement.searchSaved'))
+      setShowSaveSearch(false); setSaveSearchName('')
+      fetchSavedSearches()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  const applySavedSearch = (s: MarketplaceSavedSearch) => {
+    setFilters((s.filters || {}) as Record<string, string>)
+    setTab('browse')
+  }
+
+  const toggleSearchAlerts = async (s: MarketplaceSavedSearch) => {
+    try { await apiService.updateMarketplaceSavedSearch(s.id, { alertsEnabled: !s.alertsEnabled }); fetchSavedSearches() }
+    catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  const deleteSavedSearch = async (id: string) => {
+    try { await apiService.deleteMarketplaceSavedSearch(id); fetchSavedSearches() }
+    catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  useEffect(() => { fetchDashboard(); fetchListings(); loadFavoriteIds(); loadUnreadCount() }, [])
   useAutoRefresh('marketplace', fetchListings)
+  useAutoRefresh('marketplace-messages', refreshActiveThread)
+  useAutoRefresh('marketplace-saved-searches', fetchSavedSearches)
   useEffect(() => { fetchListings() }, [filters, sortBy])
 
   const viewListing = async (listing: MarketplaceListing) => {
@@ -439,6 +553,9 @@ const Marketplace: React.FC = () => {
     ['dashboard', t('marketplace.tabs.dashboard')], ['browse', t('marketplace.tabs.browse')], ['sell', t('marketplace.tabs.sell')],
     // Auctions tab: always show to admin (to manage the toggle), hide from others when disabled
     ...(auctionEnabled || isAdmin ? [['auctions', t('marketplace.tabs.auctions')] as [TabKey, string]] : []),
+    ['messages', `${t('marketplace.tabs.messages')}${unreadCount > 0 ? ` (${unreadCount})` : ''}`],
+    ['favorites', t('marketplace.tabs.favorites')],
+    ['saved', t('marketplace.tabs.saved')],
     ['orders', t('marketplace.tabs.orders')], ['prices', t('marketplace.tabs.prices')],
   ]
   if (isAdmin) tabs.push(['admin', t('marketplace.tabs.admin')])
@@ -466,6 +583,9 @@ const Marketplace: React.FC = () => {
             if (key === 'prices') fetchMarketPrices()
             if (key === 'admin') { fetchAdminData(); fetchMonetizationSettings() }
             if (key === 'auctions') { setFilters({ listingType: 'auction' }); fetchListings() }
+            if (key === 'messages') { fetchThreads(); loadUnreadCount(); setActiveThread(null) }
+            if (key === 'favorites') { fetchFavorites(); loadFavoriteIds() }
+            if (key === 'saved') fetchSavedSearches()
           }}>{label}</button>
         ))}
       </div>
@@ -553,6 +673,9 @@ const Marketplace: React.FC = () => {
                   viewListing(selectedListing)
                 } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
               }}
+              isFavorite={favoriteIds.has(selectedListing.id)}
+              onToggleFavorite={user ? () => toggleFavorite(selectedListing.id) : undefined}
+              onMessageSeller={user ? () => messageSeller(selectedListing) : undefined}
               t={t}
             />
           ) : (
@@ -617,9 +740,23 @@ const Marketplace: React.FC = () => {
                 {Object.keys(filters).length > 0 && <button className="mp-chip clear" onClick={() => { setFilters({}); setSortBy(''); setNearMeActive(false) }}>{t('marketplace.chips.clearAll')}</button>}
               </div>
 
+              {/* Save this search */}
+              <div className="mp-save-search-bar">
+                {showSaveSearch ? (
+                  <div className="mp-save-search-form">
+                    <input className="module-input" value={saveSearchName} onChange={e => setSaveSearchName(e.target.value)}
+                      placeholder={t('marketplace.engagement.searchNamePlaceholder')} maxLength={120} />
+                    <button className="module-btn primary small" onClick={saveCurrentSearch}>{t('marketplace.engagement.save')}</button>
+                    <button className="module-btn small" onClick={() => setShowSaveSearch(false)}>{t('marketplace.sell.back')}</button>
+                  </div>
+                ) : (
+                  <button className="mp-chip" onClick={() => setShowSaveSearch(true)}>🔔 {t('marketplace.engagement.saveThisSearch')}</button>
+                )}
+              </div>
               {loading ? <div className="mp-loading">{t('marketplace.loadingListings')}</div> : (
                 <div className="mp-grid">
-                  {listings.map(l => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency} onView={() => viewListing(l)} t={t} />)}
+                  {listings.map(l => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency} onView={() => viewListing(l)}
+                    isFavorite={favoriteIds.has(l.id)} onToggleFavorite={user ? () => toggleFavorite(l.id) : undefined} t={t} />)}
                   {listings.length === 0 && <p className="mp-empty">{t('marketplace.emptyListings')}</p>}
                 </div>
               )}
@@ -1091,6 +1228,112 @@ const Marketplace: React.FC = () => {
         </div>
       )}
 
+      {/* ════════ MESSAGES ════════ */}
+      {tab === 'messages' && (
+        <div className="mp-messages-layout">
+          <div className={`mp-thread-list ${activeThread ? 'has-active' : ''}`}>
+            <h3 className="mp-section-title">💬 {t('marketplace.tabs.messages')}</h3>
+            {threads.length === 0 && <p className="mp-empty">{t('marketplace.engagement.noMessages')}</p>}
+            {threads.map(th => (
+              <div key={th.id} className={`mp-thread-item ${activeThread?.id === th.id ? 'active' : ''}`} onClick={() => openThread(th)}>
+                <div className="mp-thread-item-top">
+                  <span className="mp-thread-title">{th.listing_title || t('marketplace.engagement.listing')}</span>
+                  {(th.my_unread || 0) > 0 && <span className="mp-thread-unread">{th.my_unread}</span>}
+                </div>
+                <div className="mp-thread-sub">
+                  <span className="mp-thread-role">{th.my_role === 'buyer' ? `🛒 ${th.seller_name || ''}` : `🏠 ${th.buyer_name || ''}`}</span>
+                  {th.last_message_at && <span className="mp-thread-time">{new Date(th.last_message_at).toLocaleDateString()}</span>}
+                </div>
+                {th.last_message && <div className="mp-thread-preview">{th.last_message}</div>}
+              </div>
+            ))}
+          </div>
+          <div className={`mp-chat-panel ${activeThread ? 'open' : ''}`}>
+            {activeThread ? (
+              <>
+                <div className="mp-chat-header">
+                  <button className="mp-chat-back" onClick={() => setActiveThread(null)}>←</button>
+                  <div>
+                    <div className="mp-chat-title">{activeThread.listing_title || t('marketplace.engagement.listing')}</div>
+                    <div className="mp-chat-sub">{activeThread.my_role === 'buyer' ? activeThread.seller_name : activeThread.buyer_name}</div>
+                  </div>
+                </div>
+                <div className="mp-chat-safety">🔒 {t('marketplace.engagement.chatSafety')}</div>
+                <div className="mp-chat-messages">
+                  {threadMessages.length === 0 && <p className="mp-empty">{t('marketplace.engagement.startConversation')}</p>}
+                  {threadMessages.map(m => (
+                    <div key={m.id} className={`mp-chat-bubble ${m.sender_id === user?.id ? 'mine' : 'theirs'}`}>
+                      <div className="mp-chat-body">{m.body}</div>
+                      <div className="mp-chat-meta">{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mp-chat-input">
+                  <textarea className="module-input" value={messageDraft} onChange={e => setMessageDraft(e.target.value)}
+                    placeholder={t('marketplace.engagement.typeMessage')} rows={2}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }} />
+                  <button className="module-btn primary" onClick={sendMessage} disabled={!messageDraft.trim()}>{t('marketplace.engagement.send')}</button>
+                </div>
+              </>
+            ) : (
+              <div className="mp-chat-empty">{t('marketplace.engagement.selectConversation')}</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ════════ FAVORITES ════════ */}
+      {tab === 'favorites' && (
+        <div>
+          <h3 className="mp-section-title">❤️ {t('marketplace.tabs.favorites')}</h3>
+          {favorites.length === 0 ? (
+            <p className="mp-empty">{t('marketplace.engagement.noFavorites')}</p>
+          ) : (
+            <div className="mp-grid">
+              {favorites.map(l => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency}
+                onView={() => { setTab('browse'); viewListing(l) }}
+                isFavorite={favoriteIds.has(l.id)} onToggleFavorite={() => toggleFavorite(l.id)} t={t} />)}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ════════ SAVED SEARCHES ════════ */}
+      {tab === 'saved' && (
+        <div>
+          <h3 className="mp-section-title">🔔 {t('marketplace.tabs.saved')}</h3>
+          <p className="mp-sell-step-desc">{t('marketplace.engagement.savedSearchesDesc')}</p>
+          {savedSearches.length === 0 ? (
+            <p className="mp-empty">{t('marketplace.engagement.noSavedSearches')}</p>
+          ) : (
+            <div className="mp-saved-list">
+              {savedSearches.map(s => {
+                const chips = Object.entries(s.filters || {}).filter(([, v]) => v !== '' && v != null)
+                return (
+                  <div key={s.id} className="mp-saved-card">
+                    <div className="mp-saved-main">
+                      <div className="mp-saved-name">{s.name}</div>
+                      <div className="mp-saved-chips">
+                        {chips.length === 0 ? <span className="mp-saved-chip">{t('marketplace.engagement.allListings')}</span>
+                          : chips.map(([k, v]) => <span key={k} className="mp-saved-chip">{k}: {String(v)}</span>)}
+                      </div>
+                    </div>
+                    <div className="mp-saved-actions">
+                      <button className="module-btn small primary" onClick={() => applySavedSearch(s)}>{t('marketplace.engagement.applySearch')}</button>
+                      <button className={`module-btn small ${s.alertsEnabled ? '' : 'muted'}`} onClick={() => toggleSearchAlerts(s)}
+                        title={s.alertsEnabled ? t('marketplace.engagement.alertsOn') : t('marketplace.engagement.alertsOff')}>
+                        {s.alertsEnabled ? '🔔' : '🔕'}
+                      </button>
+                      <button className="module-btn small" onClick={() => deleteSavedSearch(s.id)}>🗑️</button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ════════ MARKET PRICES ════════ */}
       {tab === 'prices' && (
         <div className="mp-section">
@@ -1474,7 +1717,7 @@ const Marketplace: React.FC = () => {
 }
 
 // ─── Listing Card Component ───
-const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: (key: string) => string }> = ({ listing: l, formatCurrency, onView, t }) => {
+const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: (key: string) => string; isFavorite?: boolean; onToggleFavorite?: () => void }> = ({ listing: l, formatCurrency, onView, t, isFavorite, onToggleFavorite }) => {
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -1510,6 +1753,16 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
     <div className={`mp-listing-card ${tier === 'spotlight' ? 'spotlight' : tier === 'premium' ? 'premium' : ''}`} onClick={onView}>
       {isHot && <div className="mp-hot-ribbon">{t('marketplace.card.hotDeal')}</div>}
       {tier === 'spotlight' && !isHot && <div className="mp-hot-ribbon spotlight-ribbon">{t('marketplace.card.spotlightLabel')}</div>}
+
+      {/* Favorite heart */}
+      {onToggleFavorite && (
+        <button
+          className={`mp-fav-btn ${isFavorite ? 'active' : ''}`}
+          title={isFavorite ? t('marketplace.engagement.removeFavorite') : t('marketplace.engagement.addFavorite')}
+          aria-label={isFavorite ? t('marketplace.engagement.removeFavorite') : t('marketplace.engagement.addFavorite')}
+          onClick={e => { e.stopPropagation(); onToggleFavorite() }}
+        >{isFavorite ? '❤️' : '🤍'}</button>
+      )}
 
       {/* Image placeholder */}
       <div className="mp-card-img">
@@ -1610,8 +1863,9 @@ const ListingDetail: React.FC<{
   onPlaceBid: () => void; onBuyNow: () => void; onBack: () => void;
   isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
   userId?: string; onRequestContact?: () => void;
+  isFavorite?: boolean; onToggleFavorite?: () => void; onMessageSeller?: () => void;
   t: (key: string) => string;
-}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, t }) => {
+}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, t }) => {
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -1651,7 +1905,20 @@ const ListingDetail: React.FC<{
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
           </div>
 
-          <h2>{l.title}</h2>
+          <div className="mp-detail-title-row">
+            <h2>{l.title}</h2>
+            <div className="mp-detail-title-actions">
+              {onToggleFavorite && (
+                <button className={`mp-fav-btn inline ${isFavorite ? 'active' : ''}`} onClick={onToggleFavorite}
+                  title={isFavorite ? t('marketplace.engagement.removeFavorite') : t('marketplace.engagement.addFavorite')}>
+                  {isFavorite ? '❤️' : '🤍'}
+                </button>
+              )}
+              {onMessageSeller && userId && l.seller_id !== userId && (
+                <button className="module-btn small" onClick={onMessageSeller}>💬 {t('marketplace.engagement.messageSeller')}</button>
+              )}
+            </div>
+          </div>
           <p className="mp-sell-step-desc">{l.description || t('marketplace.detail.noDescription')}</p>
 
           {/* Price */}

@@ -59,6 +59,7 @@ import {
   createDigitalTwinSchema, updateDigitalTwinSchema, runSimulationSchema,
   createMarketplaceListingSchema, updateMarketplaceListingSchema, placeBidSchema, createMarketplaceOrderSchema, updateOrderStatusSchema,
   confirmDealSchema, cancelDealSchema,
+  startThreadSchema, sendMessageSchema, createSavedSearchSchema, updateSavedSearchSchema,
   updateMonetizationSettingSchema, createMarketplacePlanSchema as createMPlanSchema, updateMarketplacePlanSchema as updateMPlanSchema,
   boostListingSchema, createInquirySchema, respondInquirySchema, createSubscriptionSchema,
   createSustainabilityMetricSchema, updateSustainabilityMetricSchema, createSustainabilityGoalSchema, updateSustainabilityGoalSchema,
@@ -2667,6 +2668,20 @@ router.patch('/marketplace/orders/:id/status', authMiddleware, validateBody(upda
 router.post('/marketplace/orders/:id/confirm', authMiddleware, validateBody(confirmDealSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.confirmMarketplaceDeal(req, res)));
 router.post('/marketplace/orders/:id/cancel', authMiddleware, validateBody(cancelDealSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.cancelMarketplaceDeal(req, res)));
 router.get('/marketplace/prices', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketPrices(req, res)));
+// ─── Marketplace Engagement (Phase 3): messaging, favorites, saved searches ───
+router.get('/marketplace/threads', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceThreads(req, res)));
+router.get('/marketplace/threads/unread-count', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceUnreadCount(req, res)));
+router.post('/marketplace/listings/:listingId/threads', authMiddleware, validateBody(startThreadSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.startMarketplaceThread(req, res)));
+router.get('/marketplace/threads/:id/messages', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceThreadMessages(req, res)));
+router.post('/marketplace/threads/:id/messages', authMiddleware, validateBody(sendMessageSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.sendMarketplaceMessage(req, res)));
+router.get('/marketplace/favorites', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceFavorites(req, res)));
+router.get('/marketplace/favorites/ids', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceFavoriteIds(req, res)));
+router.post('/marketplace/listings/:listingId/favorite', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.addMarketplaceFavorite(req, res)));
+router.delete('/marketplace/listings/:listingId/favorite', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.removeMarketplaceFavorite(req, res)));
+router.get('/marketplace/saved-searches', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceSavedSearches(req, res)));
+router.post('/marketplace/saved-searches', authMiddleware, validateBody(createSavedSearchSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createMarketplaceSavedSearch(req, res)));
+router.put('/marketplace/saved-searches/:id', authMiddleware, validateBody(updateSavedSearchSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateMarketplaceSavedSearch(req, res)));
+router.delete('/marketplace/saved-searches/:id', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.deleteMarketplaceSavedSearch(req, res)));
 // Admin marketplace controls
 router.get('/marketplace/admin/listings', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.adminListMarketplaceListings(req, res)));
 router.get('/marketplace/admin/stats', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceStats(req, res)));

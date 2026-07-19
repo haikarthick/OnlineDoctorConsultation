@@ -14,6 +14,7 @@ import HospitalDocumentService from '../services/HospitalDocumentService';
 import BookingService from '../services/BookingService';
 import NotificationService from '../services/NotificationService';
 import MarketplaceService from '../services/MarketplaceService';
+import MarketplaceEngagementService from '../services/MarketplaceEngagementService';
 import database from './database';
 import logger from './logger';
 
@@ -45,6 +46,7 @@ export function startScheduler(): void {
   setInterval(runMarketplaceListingExpiry, SIX_HOURS);
   setInterval(runMarketplaceAuctionClose, FIVE_MINUTES);
   setInterval(runMarketplaceReservationExpiry, ONE_HOUR);
+  setInterval(runMarketplaceSavedSearchAlerts, ONE_HOUR);
 
   // Payment module: expire unpaid slot holds (no-op while payment.enabled=false)
   setInterval(runPaymentHoldExpiry, FIVE_MINUTES);
@@ -163,6 +165,15 @@ async function runMarketplaceReservationExpiry(): Promise<void> {
     if (released > 0) logger.info(`[Marketplace] Released ${released} expired reservation(s)`);
   } catch (err: any) {
     logger.error('[Marketplace] Reservation expiry job failed', { error: err.message });
+  }
+}
+
+async function runMarketplaceSavedSearchAlerts(): Promise<void> {
+  try {
+    const sent = await MarketplaceEngagementService.runSavedSearchAlerts();
+    if (sent > 0) logger.info(`[Marketplace] Sent ${sent} saved-search alert(s)`);
+  } catch (err: any) {
+    logger.error('[Marketplace] Saved-search alert job failed', { error: err.message });
   }
 }
 

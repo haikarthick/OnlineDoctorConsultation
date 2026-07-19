@@ -1189,6 +1189,39 @@ export const cancelDealSchema = Joi.object({
   reason: shortText(500).optional().allow('', null),
 });
 
+// ─── Marketplace engagement (Phase 3): messaging, saved searches ───
+export const startThreadSchema = Joi.object({
+  message: longText(2000).optional().allow('', null),
+});
+
+export const sendMessageSchema = Joi.object({
+  message: longText(2000).required(),
+});
+
+const savedSearchFilters = Joi.object({
+  category: shortText(60).optional().allow('', null),
+  species: shortText(60).optional().allow('', null),
+  breed: shortText(100).optional().allow('', null),
+  gender: Joi.string().valid('male', 'female', 'unknown').optional().allow('', null),
+  listingType: Joi.string().valid('fixed_price', 'sale', 'auction', 'wanted').optional().allow('', null),
+  vaccinationStatus: Joi.string().valid('fully_vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown').optional().allow('', null),
+  minPrice: Joi.number().min(0).optional().allow(null),
+  maxPrice: Joi.number().min(0).optional().allow(null),
+  search: shortText(200).optional().allow('', null),
+}).unknown(true); // extra keys are ignored server-side by the sanitizer
+
+export const createSavedSearchSchema = Joi.object({
+  name: shortText(120).required(),
+  filters: savedSearchFilters.optional(),
+  alertsEnabled: Joi.boolean().optional(),
+});
+
+export const updateSavedSearchSchema = Joi.object({
+  name: shortText(120).optional(),
+  filters: savedSearchFilters.optional(),
+  alertsEnabled: Joi.boolean().optional(),
+}).min(1);
+
 // ─── Tier 4: Marketplace Monetization ────────────────────────
 export const updateMonetizationSettingSchema = Joi.object({
   settingValue: Joi.object().optional(),

@@ -1447,6 +1447,44 @@ export interface MarketplaceOrder {
   images?: string[]
 }
 
+export interface MarketplaceThread {
+  id: string
+  listing_id: string
+  listing_title?: string
+  listing_images?: any
+  listing_status?: string
+  listing_price?: number
+  buyer_id: string
+  seller_id: string
+  my_role?: 'buyer' | 'seller'
+  my_unread?: number
+  buyer_name?: string
+  seller_name?: string
+  last_message?: string
+  last_message_at?: string
+  last_sender_id?: string
+  created_at?: string
+}
+
+export interface MarketplaceMessage {
+  id: string
+  thread_id: string
+  sender_id: string
+  sender_name?: string
+  body: string
+  read_at?: string
+  created_at: string
+}
+
+export interface MarketplaceSavedSearch {
+  id: string
+  name: string
+  filters: Record<string, any>
+  alertsEnabled: boolean
+  lastAlertedAt?: string
+  createdAt?: string
+}
+
 export interface MarketplaceStats {
   overview: {
     total_listings: number

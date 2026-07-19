@@ -2161,6 +2161,72 @@ class ApiService {
     return response.data
   }
 
+  // ── Marketplace engagement (Phase 3): messaging, favorites, saved searches ──
+  async listMarketplaceThreads() {
+    const response = await this.client.get('/marketplace/threads')
+    return response.data
+  }
+
+  async getMarketplaceUnreadCount() {
+    const response = await this.client.get('/marketplace/threads/unread-count')
+    return response.data
+  }
+
+  async startMarketplaceThread(listingId: string, message?: string) {
+    const response = await this.client.post(`/marketplace/listings/${listingId}/threads`, message ? { message } : {})
+    return response.data
+  }
+
+  async getMarketplaceThreadMessages(threadId: string) {
+    const response = await this.client.get(`/marketplace/threads/${threadId}/messages`)
+    return response.data
+  }
+
+  async sendMarketplaceMessage(threadId: string, message: string) {
+    const response = await this.client.post(`/marketplace/threads/${threadId}/messages`, { message })
+    return response.data
+  }
+
+  async listMarketplaceFavorites() {
+    const response = await this.client.get('/marketplace/favorites')
+    return response.data
+  }
+
+  async getMarketplaceFavoriteIds() {
+    const response = await this.client.get('/marketplace/favorites/ids')
+    return response.data
+  }
+
+  async addMarketplaceFavorite(listingId: string) {
+    const response = await this.client.post(`/marketplace/listings/${listingId}/favorite`, {})
+    return response.data
+  }
+
+  async removeMarketplaceFavorite(listingId: string) {
+    const response = await this.client.delete(`/marketplace/listings/${listingId}/favorite`)
+    return response.data
+  }
+
+  async listMarketplaceSavedSearches() {
+    const response = await this.client.get('/marketplace/saved-searches')
+    return response.data
+  }
+
+  async createMarketplaceSavedSearch(data: { name: string; filters?: any; alertsEnabled?: boolean }) {
+    const response = await this.client.post('/marketplace/saved-searches', data)
+    return response.data
+  }
+
+  async updateMarketplaceSavedSearch(id: string, data: { name?: string; filters?: any; alertsEnabled?: boolean }) {
+    const response = await this.client.put(`/marketplace/saved-searches/${id}`, data)
+    return response.data
+  }
+
+  async deleteMarketplaceSavedSearch(id: string) {
+    const response = await this.client.delete(`/marketplace/saved-searches/${id}`)
+    return response.data
+  }
+
   async updateOrderStatus(id: string, status: string) {
     const response = await this.client.patch(`/marketplace/orders/${id}/status`, { status })
     return response.data
