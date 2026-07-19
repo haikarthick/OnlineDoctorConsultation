@@ -135,6 +135,16 @@ describe('MarketplaceService', () => {
       await expect(marketplaceService.placeBid({ listingId: 'l1', bidderId: 's1', amount: 30 }))
         .rejects.toThrow(/cannot bid on your own/);
     });
+
+    it('should enforce the minimum bid increment', async () => {
+      // current max 10000 → min increment 1% = 100 → min acceptable 10100
+      (pool.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ is_enabled: true }] })
+        .mockResolvedValueOnce({ rows: [{ id: 'l1', listing_type: 'auction', status: 'active', seller_id: 's1', price: 5000 }] })
+        .mockResolvedValueOnce({ rows: [{ bidder_id: 'u2', amount: 10000 }] });
+      await expect(marketplaceService.placeBid({ listingId: 'l1', bidderId: 'u1', amount: 10050 }))
+        .rejects.toThrow(/at least 10100/);
+    });
   });
 
   describe('listBids', () => {

@@ -3297,7 +3297,24 @@
       "imagesTitle": "लिस्टिंग छवियाँ",
       "imagesLabel": "5 तक छवियाँ अपलोड करें",
       "uploading": "अपलोड हो रहा है...",
-      "uploadFailed": "छवि अपलोड विफल"
+      "uploadFailed": "छवि अपलोड विफल",
+      "selectBreed": "नस्ल चुनें",
+      "selectSpeciesFirst": "पहले प्रजाति चुनें",
+      "priceHintTitle": "सक्रिय लिस्टिंग से सुझाई गई कीमत",
+      "priceHintAvg": "औसत",
+      "priceHintBasis_one": "{{count}} लिस्टिंग पर आधारित",
+      "priceHintBasis_other": "{{count}} लिस्टिंग पर आधारित",
+      "priceHintFair": "उचित कीमत",
+      "useMyLocation": "मेरा वर्तमान स्थान उपयोग करें",
+      "locating": "स्थान प्राप्त हो रहा है…",
+      "locationSet": "निर्देशांक सेट — “मेरे पास” खोज सक्षम",
+      "locationCaptured": "इस लिस्टिंग के लिए स्थान कैप्चर किया गया",
+      "locationGeoHint": "निर्देशांक जोड़ने से आस-पास के खरीदार “मेरे पास” से आपकी लिस्टिंग ढूंढ सकते हैं।",
+      "videoLabel": "लिस्टिंग वीडियो (वैकल्पिक)",
+      "videoAdded": "वीडियो जोड़ा गया",
+      "removeVideo": "वीडियो हटाएं",
+      "videoUploaded": "वीडियो अपलोड किया गया",
+      "videoHint": "एक छोटा वीडियो विश्वास बनाता है और अधिक प्रतिक्रियाएं दिलाता है।"
     },
     "detail": {
       "backToListings": "← लिस्टिंग पर वापस",
@@ -3328,7 +3345,8 @@
       "auctionEnded": "Auction ended",
       "call": "Call",
       "contactHidden": "Contact details hidden",
-      "requestContact": "Request Contact"
+      "requestContact": "Request Contact",
+      "watchVideo": "वीडियो देखें"
     },
     "card": {
       "hotDeal": "🔥 हॉट डील",
@@ -3343,7 +3361,8 @@
       "registeredBreeder": "✅ पंजीकृत प्रजनक",
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
-      "premiumPriced": "Premium Priced"
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "वीडियो है"
     },
     "orders": {
       "asBuyer": "🔍 खोजकर्ता के रूप में",
@@ -3599,7 +3618,8 @@
       "allListings": "सभी लिस्टिंग",
       "alertsOn": "सूचनाएं चालू — म्यूट करने के लिए टैप करें",
       "alertsOff": "सूचनाएं बंद — सक्षम करने के लिए टैप करें"
-    }
+    },
+    "pageOf": "पृष्ठ {{current}} / {{total}}"
   },
   "sustainability": {
     "pageTitle": "🌱 स्थिरता और कार्बन",

@@ -3299,7 +3299,24 @@
       "imagesTitle": "ಪಟ್ಟಿ ಚಿತ್ರಗಳು",
       "imagesLabel": "5 ಚಿತ್ರಗಳವರೆಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
       "uploading": "ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
-      "uploadFailed": "ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಗಿದೆ"
+      "uploadFailed": "ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಗಿದೆ",
+      "selectBreed": "ತಳಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "selectSpeciesFirst": "ಮೊದಲು ಜಾತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "priceHintTitle": "ಸಕ್ರಿಯ ಪಟ್ಟಿಗಳಿಂದ ಸೂಚಿಸಿದ ಬೆಲೆ",
+      "priceHintAvg": "ಸರಾಸರಿ",
+      "priceHintBasis_one": "{{count}} ಪಟ್ಟಿಯ ಆಧಾರದ ಮೇಲೆ",
+      "priceHintBasis_other": "{{count}} ಪಟ್ಟಿಗಳ ಆಧಾರದ ಮೇಲೆ",
+      "priceHintFair": "ನ್ಯಾಯಯುತ ಬೆಲೆ",
+      "useMyLocation": "ನನ್ನ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಬಳಸಿ",
+      "locating": "ಸ್ಥಳ ಪಡೆಯಲಾಗುತ್ತಿದೆ…",
+      "locationSet": "ನಿರ್ದೇಶಾಂಕಗಳು ಸೆಟ್ — “ನನ್ನ ಹತ್ತಿರ” ಹುಡುಕಾಟ ಸಕ್ರಿಯ",
+      "locationCaptured": "ಈ ಪಟ್ಟಿಗೆ ಸ್ಥಳ ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ",
+      "locationGeoHint": "ನಿರ್ದೇಶಾಂಕಗಳನ್ನು ಸೇರಿಸುವುದರಿಂದ ಹತ್ತಿರದ ಖರೀದಿದಾರರು “ನನ್ನ ಹತ್ತಿರ” ಮೂಲಕ ನಿಮ್ಮ ಪಟ್ಟಿಯನ್ನು ಕಂಡುಹಿಡಿಯಬಹುದು.",
+      "videoLabel": "ಪಟ್ಟಿ ವೀಡಿಯೊ (ಐಚ್ಛಿಕ)",
+      "videoAdded": "ವೀಡಿಯೊ ಸೇರಿಸಲಾಗಿದೆ",
+      "removeVideo": "ವೀಡಿಯೊ ತೆಗೆದುಹಾಕಿ",
+      "videoUploaded": "ವೀಡಿಯೊ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ",
+      "videoHint": "ಸಣ್ಣ ವೀಡಿಯೊ ವಿಶ್ವಾಸ ಮೂಡಿಸಿ ಹೆಚ್ಚು ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ಪಡೆಯುತ್ತದೆ."
     },
     "detail": {
       "backToListings": "← ಪಟ್ಟಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
@@ -3330,7 +3347,8 @@
       "auctionEnded": "Auction ended",
       "call": "Call",
       "contactHidden": "Contact details hidden",
-      "requestContact": "Request Contact"
+      "requestContact": "Request Contact",
+      "watchVideo": "ವೀಡಿಯೊ ನೋಡಿ"
     },
     "card": {
       "hotDeal": "🔥 ಹಾಟ್ ಡೀಲ್",
@@ -3345,7 +3363,8 @@
       "registeredBreeder": "✅ ನೋಂದಿತ ಬ್ರೀಡರ್",
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
-      "premiumPriced": "Premium Priced"
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "ವೀಡಿಯೊ ಇದೆ"
     },
     "orders": {
       "asBuyer": "🔍 ಹುಡುಕುವವರಾಗಿ",
@@ -3601,7 +3620,8 @@
       "allListings": "ಎಲ್ಲಾ ಪಟ್ಟಿಗಳು",
       "alertsOn": "ಅಧಿಸೂಚನೆಗಳು ಆನ್ — ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
       "alertsOff": "ಅಧಿಸೂಚನೆಗಳು ಆಫ್ — ಸಕ್ರಿಯಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"
-    }
+    },
+    "pageOf": "ಪುಟ {{current}} / {{total}}"
   },
   "sustainability": {
     "pageTitle": "🌱 Sustainability & Carbon",

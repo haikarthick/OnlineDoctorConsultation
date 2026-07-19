@@ -3297,7 +3297,24 @@
       "imagesTitle": "பட்டியல் படங்கள்",
       "imagesLabel": "5 படங்கள் வரை பதிவேற்றவும்",
       "uploading": "பதிவேற்றுகிறது...",
-      "uploadFailed": "பட பதிவேற்றம் தோல்வி"
+      "uploadFailed": "பட பதிவேற்றம் தோல்வி",
+      "selectBreed": "இனத்தைத் தேர்ந்தெடுக்கவும்",
+      "selectSpeciesFirst": "முதலில் இனத்தைத் தேர்ந்தெடுக்கவும்",
+      "priceHintTitle": "செயலில் உள்ள விளம்பரங்களிலிருந்து பரிந்துரைக்கப்பட்ட விலை",
+      "priceHintAvg": "சராசரி",
+      "priceHintBasis_one": "{{count}} விளம்பரத்தை அடிப்படையாகக் கொண்டது",
+      "priceHintBasis_other": "{{count}} விளம்பரங்களை அடிப்படையாகக் கொண்டது",
+      "priceHintFair": "நியாயமான விலை",
+      "useMyLocation": "எனது தற்போதைய இருப்பிடத்தைப் பயன்படுத்து",
+      "locating": "இருப்பிடம் பெறப்படுகிறது…",
+      "locationSet": "ஆயத்தொலைவுகள் அமைக்கப்பட்டன — “எனக்கு அருகில்” தேடல் இயக்கம்",
+      "locationCaptured": "இந்த விளம்பரத்திற்கு இருப்பிடம் பதிவு செய்யப்பட்டது",
+      "locationGeoHint": "ஆயத்தொலைவுகளைச் சேர்ப்பது அருகிலுள்ள வாங்குபவர்கள் “எனக்கு அருகில்” மூலம் உங்கள் விளம்பரத்தைக் கண்டறிய உதவும்.",
+      "videoLabel": "விளம்பர வீடியோ (விருப்பம்)",
+      "videoAdded": "வீடியோ சேர்க்கப்பட்டது",
+      "removeVideo": "வீடியோவை அகற்று",
+      "videoUploaded": "வீடியோ பதிவேற்றப்பட்டது",
+      "videoHint": "ஒரு குறுகிய வீடியோ நம்பிக்கையை உருவாக்கி அதிக பதில்களைப் பெறுகிறது."
     },
     "detail": {
       "backToListings": "← பட்டியல்களுக்குத் திரும்பு",
@@ -3328,7 +3345,8 @@
       "auctionEnded": "Auction ended",
       "call": "Call",
       "contactHidden": "Contact details hidden",
-      "requestContact": "Request Contact"
+      "requestContact": "Request Contact",
+      "watchVideo": "வீடியோவைப் பார்"
     },
     "card": {
       "hotDeal": "🔥 ஹாட் டீல்",
@@ -3343,7 +3361,8 @@
       "registeredBreeder": "✅ பதிவு செய்த இனப்பெருக்காளர்",
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
-      "premiumPriced": "Premium Priced"
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "வீடியோ உள்ளது"
     },
     "orders": {
       "asBuyer": "🔍 தேடுபவராக",
@@ -3599,7 +3618,8 @@
       "allListings": "அனைத்து விளம்பரங்கள்",
       "alertsOn": "அறிவிப்புகள் இயக்கத்தில் — முடக்க தட்டவும்",
       "alertsOff": "அறிவிப்புகள் அணைக்கப்பட்டன — இயக்க தட்டவும்"
-    }
+    },
+    "pageOf": "பக்கம் {{current}} / {{total}}"
   },
   "sustainability": {
     "pageTitle": "🌱 நிலைத்தன்மை & கார்பன்",

@@ -7,6 +7,7 @@ import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
+import { SPECIES_CATEGORIES, breedsForSpecies } from '../constants/speciesBreeds'
 
 const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
   { value: '', labelKey: 'marketplace.categories.all' },
@@ -60,7 +61,7 @@ const Marketplace: React.FC = () => {
     species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
     pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
     auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
-    images: [], linkedAnimalId: '',
+    images: [], videoUrl: '', linkedAnimalId: '',
     sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false,
   })
 
@@ -94,6 +95,13 @@ const Marketplace: React.FC = () => {
   const [savedSearches, setSavedSearches] = useState<MarketplaceSavedSearch[]>([])
   const [saveSearchName, setSaveSearchName] = useState('')
   const [showSaveSearch, setShowSaveSearch] = useState(false)
+
+  // ── Phase 4: pagination, price suggestion ──
+  const [page, setPage] = useState(0)
+  const [totalListings, setTotalListings] = useState(0)
+  const PAGE_SIZE = 24
+  const [priceHint, setPriceHint] = useState<{ avg: number; min: number; max: number; count: number } | null>(null)
+  const [geoLocating, setGeoLocating] = useState(false)
 
   // Monetization (admin)
   const [monetizationSettings, setMonetizationSettings] = useState<any[]>([])
@@ -143,7 +151,7 @@ const Marketplace: React.FC = () => {
   const fetchListings = useCallback(async () => {
     setLoading(true)
     try {
-      const params: any = { status: 'active', ...filters }
+      const params: any = { status: 'active', ...filters, limit: PAGE_SIZE, offset: page * PAGE_SIZE }
       if (sortBy) params.sortBy = sortBy
       if (nearMeActive && userLocation) {
         params.userLat = userLocation.lat
@@ -153,9 +161,10 @@ const Marketplace: React.FC = () => {
       }
       const res = await apiService.listMarketplaceListings(params)
       setListings(res.data?.items || [])
-    } catch { setListings([]) }
+      setTotalListings(res.data?.total || 0)
+    } catch { setListings([]); setTotalListings(0) }
     setLoading(false)
-  }, [filters, sortBy, nearMeActive, userLocation, radiusKm])
+  }, [filters, sortBy, nearMeActive, userLocation, radiusKm, page])
 
   // ── Engagement data loaders ──
   const loadFavoriteIds = useCallback(async () => {
@@ -247,6 +256,55 @@ const Marketplace: React.FC = () => {
     setTab('browse')
   }
 
+  // ── Price suggestion from live market data (reuses getMarketPrices) ──
+  const fetchPriceHint = useCallback(async (species?: string, breed?: string) => {
+    if (!species) { setPriceHint(null); return }
+    try {
+      const res = await apiService.getMarketPrices({ species: species.toLowerCase() })
+      const rows: any[] = res.data || []
+      let matching = breed ? rows.filter(r => (r.breed || '').toLowerCase() === breed.toLowerCase()) : rows
+      if (matching.length === 0) matching = rows
+      const totalCount = matching.reduce((s, r) => s + (+r.total_listings || 0), 0)
+      if (totalCount === 0) { setPriceHint(null); return }
+      const avg = matching.reduce((s, r) => s + (+r.avg_price || 0) * (+r.total_listings || 0), 0) / totalCount
+      const min = Math.min(...matching.map(r => +r.min_price || Infinity))
+      const max = Math.max(...matching.map(r => +r.max_price || 0))
+      setPriceHint({ avg: Math.round(avg), min: isFinite(min) ? Math.round(min) : 0, max: Math.round(max), count: totalCount })
+    } catch { setPriceHint(null) }
+  }, [])
+
+  useEffect(() => {
+    if (tab === 'sell') fetchPriceHint(sellForm.species, sellForm.breed)
+  }, [sellForm.species, sellForm.breed, tab, fetchPriceHint])
+
+  // ── Geocoding-lite: fill listing coordinates from the device location ──
+  const useMyLocationForListing = () => {
+    if (!navigator.geolocation) { setError(t('marketplace.proximity.notSupported', 'Geolocation not supported by your browser')); return }
+    setGeoLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setSellForm(f => ({ ...f, latitude: String(pos.coords.latitude), longitude: String(pos.coords.longitude) }))
+        setGeoLocating(false)
+        setSuccessMsg(t('marketplace.sell.locationCaptured'))
+      },
+      () => { setGeoLocating(false); setError(t('marketplace.proximity.denied', 'Location access denied. Please enable it in browser settings.')) }
+    )
+  }
+
+  // Handle video upload for the sell form
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const res = await apiService.uploadFile(file, 'marketplace')
+      const url = res.url || res.fileUrl
+      if (url) { sf('videoUrl', url); setSuccessMsg(t('marketplace.sell.videoUploaded')) }
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message || t('marketplace.sell.uploadFailed', 'Upload failed'))
+    }
+    e.target.value = ''
+  }
+
   const toggleSearchAlerts = async (s: MarketplaceSavedSearch) => {
     try { await apiService.updateMarketplaceSavedSearch(s.id, { alertsEnabled: !s.alertsEnabled }); fetchSavedSearches() }
     catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
@@ -261,7 +319,9 @@ const Marketplace: React.FC = () => {
   useAutoRefresh('marketplace', fetchListings)
   useAutoRefresh('marketplace-messages', refreshActiveThread)
   useAutoRefresh('marketplace-saved-searches', fetchSavedSearches)
-  useEffect(() => { fetchListings() }, [filters, sortBy])
+  // Reset to first page whenever the query changes
+  useEffect(() => { setPage(0) }, [filters, sortBy, nearMeActive])
+  useEffect(() => { fetchListings() }, [filters, sortBy, page, nearMeActive, userLocation, radiusKm])
 
   const viewListing = async (listing: MarketplaceListing) => {
     try {
@@ -760,6 +820,14 @@ const Marketplace: React.FC = () => {
                   {listings.length === 0 && <p className="mp-empty">{t('marketplace.emptyListings')}</p>}
                 </div>
               )}
+              {/* Pagination */}
+              {totalListings > PAGE_SIZE && (
+                <div className="mp-pagination">
+                  <button className="module-btn small" disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))}>← {t('common.previous', 'Previous')}</button>
+                  <span className="mp-page-info">{t('marketplace.pageOf', { current: page + 1, total: Math.ceil(totalListings / PAGE_SIZE) })}</span>
+                  <button className="module-btn small" disabled={(page + 1) * PAGE_SIZE >= totalListings} onClick={() => setPage(p => p + 1)}>{t('common.next', 'Next')} →</button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -891,14 +959,29 @@ const Marketplace: React.FC = () => {
                     <div className="module-form-row">
                       <div className="module-form-group">
                         <label className="module-label">{t('marketplace.livestock.species')}</label>
-                        <select className="module-input" value={sellForm.species} onChange={e => sf('species', e.target.value)}>
+                        <select className="module-input" value={sellForm.species}
+                          onChange={e => setSellForm(f => ({ ...f, species: e.target.value, breed: '' }))}>
                           <option value="">{t('marketplace.livestock.selectSpecies')}</option>
-                          {SPECIES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+                          {SPECIES_CATEGORIES.map(cat => (
+                            <optgroup key={cat.label} label={cat.label}>
+                              {cat.species.map(s => <option key={s} value={s}>{s}</option>)}
+                            </optgroup>
+                          ))}
                         </select>
                       </div>
                       <div className="module-form-group">
                         <label className="module-label">{t('marketplace.livestock.breed')}</label>
-                        <input className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} placeholder={t('marketplace.sell.breedPlaceholder')} />
+                        {(() => {
+                          const breeds = breedsForSpecies(sellForm.species)
+                          return breeds.length > 0 ? (
+                            <select className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} disabled={!sellForm.species}>
+                              <option value="">{sellForm.species ? t('marketplace.sell.selectBreed') : t('marketplace.sell.selectSpeciesFirst')}</option>
+                              {breeds.map(b => <option key={b} value={b}>{b}</option>)}
+                            </select>
+                          ) : (
+                            <input className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} placeholder={t('marketplace.sell.breedPlaceholder')} disabled={!sellForm.species} />
+                          )
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -1034,6 +1117,21 @@ const Marketplace: React.FC = () => {
                         ))}
                       </div>
                     )}
+                    {/* Optional video */}
+                    <div className="module-form-group" style={{ marginTop: 10 }}>
+                      <label className="module-label">🎥 {t('marketplace.sell.videoLabel')}</label>
+                      {sellForm.videoUrl ? (
+                        <div className="mp-video-set">
+                          <span>✅ {t('marketplace.sell.videoAdded')}</span>
+                          <button type="button" className="module-btn small" onClick={() => sf('videoUrl', '')}>{t('marketplace.sell.removeVideo')}</button>
+                        </div>
+                      ) : (
+                        <>
+                          <input type="file" accept="video/*" className="module-input" onChange={handleVideoUpload} />
+                          <div className="mp-compliance-hint">{t('marketplace.sell.videoHint')}</div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="mp-step-actions">
@@ -1061,6 +1159,27 @@ const Marketplace: React.FC = () => {
                       </div>
                     )}
                   </div>
+                  {/* Price suggestion from live market data */}
+                  {priceHint && (
+                    <div className="mp-price-hint">
+                      <div className="mp-price-hint-title">💡 {t('marketplace.sell.priceHintTitle')}</div>
+                      <div className="mp-price-hint-body">
+                        <span>{t('marketplace.sell.priceHintAvg')}: <strong>{formatCurrency(priceHint.avg)}</strong></span>
+                        <span>{t('marketplace.prices.min')}–{t('marketplace.prices.max')}: {formatCurrency(priceHint.min)} – {formatCurrency(priceHint.max)}</span>
+                        <span className="mp-price-hint-count">{t('marketplace.sell.priceHintBasis', { count: priceHint.count })}</span>
+                      </div>
+                      {sellForm.price && (() => {
+                        const p = +sellForm.price
+                        if (p > 0 && priceHint.avg > 0) {
+                          const pct = Math.round((p / priceHint.avg) * 100)
+                          if (pct < 85) return <div className="mp-price-hint-tag good">💚 {t('marketplace.card.fairDeal')} ({pct}%)</div>
+                          if (pct > 115) return <div className="mp-price-hint-tag high">⭐ {t('marketplace.card.premiumPriced')} ({pct}%)</div>
+                          return <div className="mp-price-hint-tag ok">✅ {t('marketplace.sell.priceHintFair')}</div>
+                        }
+                        return null
+                      })()}
+                    </div>
+                  )}
                   {sellForm.listingType === 'auction' && (
                     <div className="module-form-group">
                       <label className="module-label">{t('marketplace.sell.auctionEndTime')}</label>
@@ -1070,6 +1189,15 @@ const Marketplace: React.FC = () => {
                   <div className="module-form-group">
                     <label className="module-label">{t('marketplace.sell.location')}</label>
                     <input className="module-input" value={sellForm.location} onChange={e => sf('location', e.target.value)} placeholder={t('marketplace.sell.locationPlaceholder')} />
+                    <div className="mp-geo-row">
+                      <button type="button" className="module-btn small" onClick={useMyLocationForListing} disabled={geoLocating}>
+                        📍 {geoLocating ? t('marketplace.sell.locating') : t('marketplace.sell.useMyLocation')}
+                      </button>
+                      {sellForm.latitude && sellForm.longitude && (
+                        <span className="mp-geo-set">✅ {t('marketplace.sell.locationSet')}</span>
+                      )}
+                    </div>
+                    <div className="mp-compliance-hint">{t('marketplace.sell.locationGeoHint')}</div>
                   </div>
                 </div>
                 <div className="mp-step-actions">
@@ -1767,6 +1895,7 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
       {/* Image placeholder */}
       <div className="mp-card-img">
         {images.length > 0 ? <img src={images[0]} alt={l.title} /> : <div className="mp-card-img-placeholder">{CATEGORY_ICONS[l.category] || '📦'}</div>}
+        {g(l, 'videoUrl', 'video_url') && <span className="mp-card-video-badge" title={t('marketplace.card.hasVideo')}>🎥</span>}
       </div>
 
       <div className="mp-card-body">
@@ -1923,6 +2052,22 @@ const ListingDetail: React.FC<{
 
           {/* Price */}
           <div className="mp-detail-price">{l.price ? formatCurrency(l.price) : t('marketplace.contactForPrice')}</div>
+
+          {/* Video */}
+          {(() => {
+            const videoUrl = g(l, 'videoUrl', 'video_url')
+            if (!videoUrl) return null
+            const isUploaded = String(videoUrl).startsWith('/uploads/') || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(videoUrl)
+            return (
+              <div className="mp-detail-video">
+                {isUploaded ? (
+                  <video controls preload="metadata" src={videoUrl} className="mp-detail-video-el" />
+                ) : (
+                  <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="module-btn small">▶ {t('marketplace.detail.watchVideo')}</a>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Animal Profile Section */}
           {(species || breed || milkYield || weight || age) && (

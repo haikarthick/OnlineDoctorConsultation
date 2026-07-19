@@ -2097,6 +2097,8 @@ CREATE TABLE IF NOT EXISTS marketplace_saved_searches (
 );
 CREATE INDEX IF NOT EXISTS idx_mp_saved_searches_user ON marketplace_saved_searches(user_id);
 CREATE INDEX IF NOT EXISTS idx_mp_saved_searches_alerts ON marketplace_saved_searches(alerts_enabled) WHERE alerts_enabled = true;
+-- Phase 4: optional listing video (mirrors backend/migrations/017_marketplace_video.sql)
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS video_url VARCHAR(2000);
 
 -- ─── Marketplace monetization tables (canonical schema) ─────────────────────
 CREATE TABLE IF NOT EXISTS marketplace_monetization_settings (

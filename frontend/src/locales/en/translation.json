@@ -3297,7 +3297,24 @@
       "imagesTitle": "Listing Images",
       "imagesLabel": "Upload up to 5 images",
       "uploading": "Uploading...",
-      "uploadFailed": "Image upload failed"
+      "uploadFailed": "Image upload failed",
+      "selectBreed": "Select breed",
+      "selectSpeciesFirst": "Select a species first",
+      "priceHintTitle": "Suggested price from live listings",
+      "priceHintAvg": "Average",
+      "priceHintBasis_one": "Based on {{count}} listing",
+      "priceHintBasis_other": "Based on {{count}} listings",
+      "priceHintFair": "Fairly priced",
+      "useMyLocation": "Use my current location",
+      "locating": "Getting location…",
+      "locationSet": "Coordinates set — enables Near Me search",
+      "locationCaptured": "Location captured for this listing",
+      "locationGeoHint": "Adding coordinates lets nearby buyers find your listing with “Near Me”.",
+      "videoLabel": "Listing video (optional)",
+      "videoAdded": "Video added",
+      "removeVideo": "Remove video",
+      "videoUploaded": "Video uploaded",
+      "videoHint": "A short video builds trust and gets more responses."
     },
     "detail": {
       "backToListings": "← Back to listings",
@@ -3328,7 +3345,8 @@
       "auctionEnded": "Auction ended",
       "call": "Call",
       "contactHidden": "Contact details hidden",
-      "requestContact": "Request Contact"
+      "requestContact": "Request Contact",
+      "watchVideo": "Watch video"
     },
     "card": {
       "hotDeal": "🔥 HOT DEAL",
@@ -3343,7 +3361,8 @@
       "registeredBreeder": "✅ Registered Breeder",
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
-      "premiumPriced": "Premium Priced"
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "Has video"
     },
     "orders": {
       "asBuyer": "� As Seeker",
@@ -3599,7 +3618,8 @@
       "allListings": "All listings",
       "alertsOn": "Alerts on — tap to mute",
       "alertsOff": "Alerts off — tap to enable"
-    }
+    },
+    "pageOf": "Page {{current}} of {{total}}"
   },
   "sustainability": {
     "pageTitle": "🌱 Sustainability & Carbon",

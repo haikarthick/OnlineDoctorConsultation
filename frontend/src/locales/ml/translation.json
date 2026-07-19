@@ -3096,7 +3096,24 @@
       "imagesTitle": "ലിസ്റ്റിംഗ് ചിത്രങ്ങൾ",
       "imagesLabel": "5 ചിത്രങ്ങൾ വരെ അപ്‌ലോഡ് ചെയ്യുക",
       "uploading": "അപ്‌ലോഡ് ചെയ്യുന്നു...",
-      "uploadFailed": "ചിത്ര അപ്‌ലോഡ് പരാജയപ്പെട്ടു"
+      "uploadFailed": "ചിത്ര അപ്‌ലോഡ് പരാജയപ്പെട്ടു",
+      "selectBreed": "ഇനം തിരഞ്ഞെടുക്കുക",
+      "selectSpeciesFirst": "ആദ്യം സ്പീഷീസ് തിരഞ്ഞെടുക്കുക",
+      "priceHintTitle": "സജീവ ലിസ്റ്റിംഗുകളിൽ നിന്ന് നിർദ്ദേശിച്ച വില",
+      "priceHintAvg": "ശരാശരി",
+      "priceHintBasis_one": "{{count}} ലിസ്റ്റിംഗ് അടിസ്ഥാനമാക്കി",
+      "priceHintBasis_other": "{{count}} ലിസ്റ്റിംഗുകൾ അടിസ്ഥാനമാക്കി",
+      "priceHintFair": "ന്യായമായ വില",
+      "useMyLocation": "എന്റെ നിലവിലെ സ്ഥാനം ഉപയോഗിക്കുക",
+      "locating": "സ്ഥാനം നേടുന്നു…",
+      "locationSet": "കോർഡിനേറ്റുകൾ സജ്ജീകരിച്ചു — “എന്റെ അടുത്ത്” തിരയൽ പ്രവർത്തനക്ഷമം",
+      "locationCaptured": "ഈ ലിസ്റ്റിംഗിനായി സ്ഥാനം ക്യാപ്ചർ ചെയ്തു",
+      "locationGeoHint": "കോർഡിനേറ്റുകൾ ചേർക്കുന്നത് അടുത്തുള്ള വാങ്ങുന്നവർക്ക് “എന്റെ അടുത്ത്” വഴി നിങ്ങളുടെ ലിസ്റ്റിംഗ് കണ്ടെത്താൻ സഹായിക്കും.",
+      "videoLabel": "ലിസ്റ്റിംഗ് വീഡിയോ (ഓപ്ഷണൽ)",
+      "videoAdded": "വീഡിയോ ചേർത്തു",
+      "removeVideo": "വീഡിയോ നീക്കുക",
+      "videoUploaded": "വീഡിയോ അപ്‌ലോഡ് ചെയ്തു",
+      "videoHint": "ഒരു ചെറിയ വീഡിയോ വിശ്വാസം വളർത്തുകയും കൂടുതൽ പ്രതികരണങ്ങൾ നേടുകയും ചെയ്യുന്നു."
     },
     "detail": {
       "backToListings": "← ലിസ്റ്റിംഗുകളിലേക്ക് മടങ്ങുക",
@@ -3127,7 +3144,8 @@
       "auctionEnded": "Auction ended",
       "call": "Call",
       "contactHidden": "Contact details hidden",
-      "requestContact": "Request Contact"
+      "requestContact": "Request Contact",
+      "watchVideo": "വീഡിയോ കാണുക"
     },
     "card": {
       "hotDeal": "🔥 ഹോട്ട് ഡീൽ",
@@ -3142,7 +3160,8 @@
       "registeredBreeder": "✅ രജിസ്റ്റേർഡ് ബ്രീഡർ",
       "healthPassport": "Health Passport",
       "fairDeal": "Fair Deal",
-      "premiumPriced": "Premium Priced"
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "വീഡിയോ ഉണ്ട്"
     },
     "orders": {
       "asBuyer": "🔍 തിരയുന്നയാളായി",
@@ -3398,7 +3417,8 @@
       "allListings": "എല്ലാ ലിസ്റ്റിംഗുകളും",
       "alertsOn": "അറിയിപ്പുകൾ ഓൺ — മ്യൂട്ട് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക",
       "alertsOff": "അറിയിപ്പുകൾ ഓഫ് — പ്രവർത്തനക്ഷമമാക്കാൻ ടാപ്പ് ചെയ്യുക"
-    }
+    },
+    "pageOf": "പേജ് {{current}} / {{total}}"
   },
   "sustainability": {
     "pageTitle": "🌱 സുസ്ഥിരത & കാർബൺ",

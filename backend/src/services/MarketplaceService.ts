@@ -203,8 +203,9 @@ class MarketplaceService {
         vaccination_status, health_certificate, listing_tier, is_hot_deal,
         linked_animal_id, auction_end_time, reserve_price, contact_phone,
         latitude, longitude, admin_approved,
-        seller_type, registration_number, welfare_attestation, terms_accepted, terms_accepted_at
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43)`,
+        seller_type, registration_number, welfare_attestation, terms_accepted, terms_accepted_at,
+        video_url
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44)`,
       [
         id, data.enterpriseId || null, data.sellerId, data.title, data.description || null,
         category, data.listingType || 'fixed_price', data.price || null,
@@ -225,6 +226,7 @@ class MarketplaceService {
         data.sellerType || 'individual', data.registrationNumber || null,
         data.welfareAttestation || false, data.termsAccepted || false,
         data.termsAccepted ? new Date().toISOString() : null,
+        data.videoUrl || null,
       ]
     );
     const result = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [id]);
@@ -284,6 +286,7 @@ class MarketplaceService {
     if (isAdmin && data.breederVerified !== undefined) { sets.push(`breeder_verified = $${idx++}`); vals.push(data.breederVerified); }
     if (data.images) { sets.push(`images = $${idx++}`); vals.push(JSON.stringify(data.images)); }
     if (data.tags) { sets.push(`tags = $${idx++}`); vals.push(JSON.stringify(data.tags)); }
+    if (data.videoUrl !== undefined) { sets.push(`video_url = $${idx++}`); vals.push(data.videoUrl || null); }
     if (sets.length === 0) return null;
     sets.push('updated_at = NOW()'); vals.push(id);
     await pool.query(`UPDATE marketplace_listings SET ${sets.join(', ')} WHERE id = $${idx}`, vals);
@@ -318,6 +321,11 @@ class MarketplaceService {
     let outbidUserId: string | null = null;
     let sellerId: string | null = null;
     let listingTitle = '';
+    let extended = false;
+    // Anti-snipe: a bid inside the final window pushes the end time out so
+    // last-second sniping can't win uncontested. Min increment stops 1-rupee
+    // nudge wars.
+    const ANTI_SNIPE_MS = 2 * 60 * 1000;
     // Serialize concurrent bids on the same listing via a row lock so the
     // max-bid check and insert are atomic
     await pool.transaction(async (client: any) => {
@@ -336,7 +344,10 @@ class MarketplaceService {
         [data.listingId]
       );
       const currentMax = +(maxBid.rows[0]?.amount || l.price || 0);
-      if (+data.amount <= currentMax) throw new Error(`Bid must be higher than current ${currentMax}`);
+      // Minimum increment: 1% of the current price, floored at 1
+      const minIncrement = Math.max(1, Math.round(currentMax * 0.01));
+      const minAcceptable = currentMax + (maxBid.rows[0] || l.price ? minIncrement : 0);
+      if (+data.amount < minAcceptable) throw new Error(`Bid must be at least ${minAcceptable}`);
       if (maxBid.rows[0] && maxBid.rows[0].bidder_id !== data.bidderId) outbidUserId = maxBid.rows[0].bidder_id;
 
       await client.query('UPDATE marketplace_bids SET is_winning = false WHERE listing_id = $1', [data.listingId]);
@@ -345,10 +356,23 @@ class MarketplaceService {
          VALUES ($1,$2,$3,$4,$5,true)`,
         [id, data.listingId, data.bidderId, data.amount, data.message || null]
       );
+
+      // Anti-snipe extension
+      if (l.auction_end_time) {
+        const remaining = new Date(l.auction_end_time).getTime() - Date.now();
+        if (remaining > 0 && remaining < ANTI_SNIPE_MS) {
+          await client.query(
+            `UPDATE marketplace_listings SET auction_end_time = NOW() + INTERVAL '2 minutes', updated_at = NOW() WHERE id = $1`,
+            [data.listingId]
+          );
+          extended = true;
+        }
+      }
     });
 
     if (sellerId) await notifySafe(sellerId, 'marketplace_bid', 'New bid received', `A bid of ${data.amount} was placed on "${listingTitle}"`, { listingId: data.listingId });
     if (outbidUserId) await notifySafe(outbidUserId, 'marketplace_outbid', 'You have been outbid', `Someone placed a higher bid on "${listingTitle}"`, { listingId: data.listingId });
+    if (extended && outbidUserId) await notifySafe(outbidUserId, 'marketplace_auction_extended', 'Auction extended', `The auction for "${listingTitle}" was extended by a late bid.`, { listingId: data.listingId });
 
     return (await pool.query('SELECT b.*, u.first_name || \' \' || u.last_name as bidder_name FROM marketplace_bids b JOIN users u ON b.bidder_id = u.id WHERE b.id = $1', [id])).rows[0];
   }
@@ -679,7 +703,7 @@ class MarketplaceService {
                  l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender,
                  l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
                  l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
-                 l.auction_end_time, l.views_count, l.created_at, l.status,
+                 l.video_url, l.auction_end_time, l.views_count, l.created_at, l.status,
                  l.seller_type, l.breeder_verified, l.welfare_attestation,
                  u.first_name as seller_name, l.location as seller_location,
                  a.unique_id as animal_unique_id,
@@ -745,7 +769,7 @@ class MarketplaceService {
               l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender,
               l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
               l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
-              l.auction_end_time, l.reserve_price, l.views_count, l.created_at, l.status,
+              l.video_url, l.auction_end_time, l.reserve_price, l.views_count, l.created_at, l.status,
               l.seller_type, l.breeder_verified, l.welfare_attestation,
               u.first_name as seller_name, l.location as seller_location,
               e.name as enterprise_name,
