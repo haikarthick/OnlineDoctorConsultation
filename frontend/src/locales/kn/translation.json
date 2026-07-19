@@ -3476,7 +3476,8 @@
         "listings": "ಪಟ್ಟಿಗಳು",
         "settings": "ನಗದೀಕರಣ",
         "plans": "ಯೋಜನೆಗಳು",
-        "revenue": "ಆದಾಯ"
+        "revenue": "ಆದಾಯ",
+        "reports": "ವರದಿಗಳು"
       },
       "featureToggles": "ಫೀಚರ್ ಟಾಗಲ್‌ಗಳು",
       "allFreeNote": "ಎಲ್ಲಾ ಫೀಚರ್‌ಗಳು ಪ್ರಸ್ತುತ ಎಲ್ಲಾ ಬಳಕೆದಾರರಿಗೆ ಉಚಿತ. ಶುಲ್ಕ ವಿಧಿಸಲು ಸಿದ್ಧವಾದಾಗ ಫೀಚರ್‌ಗಳನ್ನು ಆನ್ ಮಾಡಿ.",
@@ -3621,7 +3622,52 @@
       "alertsOn": "ಅಧಿಸೂಚನೆಗಳು ಆನ್ — ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
       "alertsOff": "ಅಧಿಸೂಚನೆಗಳು ಆಫ್ — ಸಕ್ರಿಯಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"
     },
-    "pageOf": "ಪುಟ {{current}} / {{total}}"
+    "pageOf": "ಪುಟ {{current}} / {{total}}",
+    "report": {
+      "reportListing": "ಪಟ್ಟಿಯನ್ನು ವರದಿ ಮಾಡಿ",
+      "reportingWhat": "ವರದಿ: {{title}}",
+      "reason": "ಕಾರಣ",
+      "selectReason": "ಕಾರಣ ಆಯ್ಕೆಮಾಡಿ…",
+      "details": "ವಿವರಗಳು (ಐಚ್ಛಿಕ)",
+      "detailsPlaceholder": "ಪರಿಶೀಲನೆಗೆ ಸಹಾಯ ಮಾಡುವ ಯಾವುದೇ…",
+      "submit": "ವರದಿ ಸಲ್ಲಿಸಿ",
+      "submitted": "ಧನ್ಯವಾದಗಳು — ನಿಮ್ಮ ವರದಿ ಪರಿಶೀಲನೆಗೆ ಸಲ್ಲಿಸಲಾಗಿದೆ.",
+      "resolved": "ವರದಿ ನವೀಕರಿಸಲಾಗಿದೆ.",
+      "adminTitle": "ವರದಿ ಮಾಡಿದ ಪಟ್ಟಿಗಳು",
+      "filterOpen": "ತೆರೆದ ವರದಿಗಳು",
+      "noReports": "ವರದಿಗಳಿಲ್ಲ.",
+      "by": "ಮೂಲಕ",
+      "markReviewing": "ಪರಿಶೀಲನೆ ಎಂದು ಗುರುತಿಸಿ",
+      "action": "ಕ್ರಮ ಕೈಗೊಳ್ಳಿ",
+      "dismiss": "ವಜಾಗೊಳಿಸಿ",
+      "resolutionPlaceholder": "ಪರಿಹಾರ ಟಿಪ್ಪಣಿ (ಐಚ್ಛಿಕ)",
+      "reasons": {
+        "scam": "ವಂಚನೆ",
+        "welfare_concern": "ಪ್ರಾಣಿ ಕಲ್ಯಾಣ ಕಳವಳ",
+        "prohibited": "ನಿಷೇಧಿತ / ಕಾನೂನುಬಾಹಿರ",
+        "miscategorized": "ತಪ್ಪು ವರ್ಗ",
+        "offensive": "ಆಕ್ಷೇಪಾರ್ಹ ವಿಷಯ",
+        "wrong_info": "ದಾರಿತಪ್ಪಿಸುವ ಮಾಹಿತಿ",
+        "other": "ಇತರೆ"
+      },
+      "status": {
+        "open": "ತೆರೆದಿದೆ",
+        "reviewing": "ಪರಿಶೀಲನೆಯಲ್ಲಿ",
+        "actioned": "ಕ್ರಮ ಕೈಗೊಳ್ಳಲಾಗಿದೆ",
+        "dismissed": "ವಜಾಗೊಳಿಸಲಾಗಿದೆ"
+      }
+    },
+    "services": {
+      "vetCheckTitle": "ಖರೀದಿ-ಪೂರ್ವ ಪಶುವೈದ್ಯ ತಪಾಸಣೆ",
+      "vetCheckDesc": "ಬದ್ಧರಾಗುವ ಮೊದಲು ಈ ಪ್ರಾಣಿಯನ್ನು ಪರೀಕ್ಷಿಸಲು ಪರವಾನಗಿ ಪಡೆದ ಪಶುವೈದ್ಯರನ್ನು ಬುಕ್ ಮಾಡಿ — ಆರೋಗ್ಯ, ವಯಸ್ಸು, ಸದೃಢತೆ ಪರಿಶೀಲಿಸಲಾಗಿದೆ.",
+      "bookVetCheck": "ಪಶುವೈದ್ಯ ತಪಾಸಣೆ ಬುಕ್ ಮಾಡಿ",
+      "transportDesc": "ಪ್ರಾಣಿಯನ್ನು ಸಾಗಿಸಲು ಸಹಾಯ ಬೇಕೇ?",
+      "arrangeTransport": "ಸಾರಿಗೆ ವ್ಯವಸ್ಥೆ"
+    },
+    "interlink": {
+      "treasureBanner": "ಉತ್ಪನ್ನಗಳು, ಆಹಾರ ಅಥವಾ ಸಲಕರಣೆ ಖರೀದಿ/ಮಾರಾಟ?",
+      "visitTreasure": "Treasure Mount ಗೆ ಭೇಟಿ ನೀಡಿ"
+    }
   },
   "sustainability": {
     "pageTitle": "🌱 Sustainability & Carbon",

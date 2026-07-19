@@ -270,6 +270,87 @@ class MarketplaceEngagementService {
     return clauses.length ? ' AND ' + clauses.join(' AND ') : '';
   }
 
+  // ══════════════════════════════════════════
+  // Listing reports (trust & safety)
+  // ══════════════════════════════════════════
+
+  async createReport(userId: string, listingId: string, reason: string, details?: string) {
+    const listing = (await pool.query('SELECT seller_id FROM marketplace_listings WHERE id = $1', [listingId])).rows[0];
+    if (!listing) throw new Error('Listing not found');
+    if (listing.seller_id === userId) throw new Error('You cannot report your own listing');
+    try {
+      const id = uuidv4();
+      await pool.query(
+        `INSERT INTO marketplace_reports (id, listing_id, reporter_id, reason, details) VALUES ($1, $2, $3, $4, $5)`,
+        [id, listingId, userId, reason, details || null]
+      );
+      return { reported: true, id };
+    } catch (err: any) {
+      // Partial unique index blocks a second open report from the same user
+      if (err.code === '23505') throw new Error('You have already reported this listing — it is under review.');
+      throw err;
+    }
+  }
+
+  async adminListReports(filters: any = {}) {
+    const { status } = filters;
+    const params: any[] = [];
+    let where = '';
+    if (status) { params.push(status); where = `WHERE r.status = $1`; }
+    const result = await pool.query(
+      `SELECT r.*, l.title AS listing_title, l.status AS listing_status, l.seller_id,
+              u.first_name || ' ' || u.last_name AS reporter_name
+       FROM marketplace_reports r
+       JOIN marketplace_listings l ON r.listing_id = l.id
+       JOIN users u ON r.reporter_id = u.id
+       ${where}
+       ORDER BY CASE r.status WHEN 'open' THEN 0 WHEN 'reviewing' THEN 1 ELSE 2 END, r.created_at DESC`,
+      params
+    );
+    const counts = await pool.query(`SELECT status, COUNT(*) AS count FROM marketplace_reports GROUP BY status`);
+    return { items: result.rows, total: result.rows.length, counts: counts.rows };
+  }
+
+  async adminResolveReport(id: string, adminId: string, status: string, resolution?: string) {
+    if (!['reviewing', 'actioned', 'dismissed'].includes(status)) throw new Error('Invalid status');
+    const report = (await pool.query('SELECT * FROM marketplace_reports WHERE id = $1', [id])).rows[0];
+    if (!report) throw new Error('Report not found');
+    const isFinal = status === 'actioned' || status === 'dismissed';
+    await pool.query(
+      `UPDATE marketplace_reports SET status = $1, resolution = $2,
+              resolved_by = $3, resolved_at = ${isFinal ? 'NOW()' : 'NULL'}, updated_at = NOW()
+       WHERE id = $4`,
+      [status, resolution || null, isFinal ? adminId : null, id]
+    );
+    if (isFinal) {
+      await notifySafe(report.reporter_id, 'marketplace_report_resolved', 'Your report was reviewed',
+        status === 'actioned'
+          ? 'Thanks — we reviewed the listing you reported and took action.'
+          : 'Thanks for your report. After review, no action was needed on that listing.',
+        { reportId: id });
+    }
+    return (await pool.query('SELECT * FROM marketplace_reports WHERE id = $1', [id])).rows[0];
+  }
+
+  // ══════════════════════════════════════════
+  // Interlink / referral config (marketplace is free — these are just links)
+  // ══════════════════════════════════════════
+
+  async getConfig() {
+    const res = await pool.query(
+      `SELECT setting_key, setting_value, is_enabled FROM marketplace_monetization_settings
+       WHERE setting_key IN ('treasure_mount', 'transport_referral')`
+    );
+    const map: Record<string, any> = {};
+    for (const r of res.rows) map[r.setting_key] = { enabled: r.is_enabled === true, value: r.setting_value || {} };
+    const tm = map['treasure_mount'] || {};
+    const tr = map['transport_referral'] || {};
+    return {
+      treasureMount: { enabled: tm.enabled ?? true, url: (tm.value?.url) || 'https://treasuremount.com' },
+      transport: { enabled: tr.enabled ?? false, url: (tr.value?.url) || '' },
+    };
+  }
+
   /**
    * Scheduler job: for each alert-enabled saved search, count new public
    * listings created since the last alert and notify the owner. Never alerts a

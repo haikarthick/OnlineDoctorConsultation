@@ -496,6 +496,41 @@ class Tier4Controller {
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
 
+  // ── Reports (trust & safety) ──
+  async reportMarketplaceListing(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await engagementService.createReport(userId, req.params.listingId, req.body.reason, req.body.details);
+      res.status(201).json({ data });
+    } catch (err: any) {
+      const code = /already reported|your own listing/i.test(err.message) ? 400 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
+  }
+
+  async adminListMarketplaceReports(req: Request, res: Response) {
+    try {
+      const data = await engagementService.adminListReports(req.query);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async adminResolveMarketplaceReport(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await engagementService.adminResolveReport(req.params.id, userId, req.body.status, req.body.resolution);
+      res.json({ data });
+    } catch (err: any) { res.status(err.message.includes('not found') ? 404 : 400).json({ error: { message: err.message } }); }
+  }
+
+  // ── Interlink / referral config ──
+  async getMarketplaceConfig(req: Request, res: Response) {
+    try {
+      const data = await engagementService.getConfig();
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
   // ═══════════════════ Sustainability & Carbon ═══════════════════
 
   async listSustainabilityMetrics(req: Request, res: Response) {

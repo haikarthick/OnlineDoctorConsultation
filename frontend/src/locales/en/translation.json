@@ -3474,7 +3474,8 @@
         "listings": "Listings",
         "settings": "Monetization",
         "plans": "Plans",
-        "revenue": "Revenue"
+        "revenue": "Revenue",
+        "reports": "Reports"
       },
       "featureToggles": "Feature Toggles",
       "allFreeNote": "All features are currently FREE for all users. Toggle features ON when you're ready to start charging.",
@@ -3619,7 +3620,52 @@
       "alertsOn": "Alerts on — tap to mute",
       "alertsOff": "Alerts off — tap to enable"
     },
-    "pageOf": "Page {{current}} of {{total}}"
+    "pageOf": "Page {{current}} of {{total}}",
+    "report": {
+      "reportListing": "Report listing",
+      "reportingWhat": "Reporting: {{title}}",
+      "reason": "Reason",
+      "selectReason": "Select a reason…",
+      "details": "Details (optional)",
+      "detailsPlaceholder": "Anything that helps us review this…",
+      "submit": "Submit report",
+      "submitted": "Thanks — your report was submitted for review.",
+      "resolved": "Report updated.",
+      "adminTitle": "Reported listings",
+      "filterOpen": "Open reports",
+      "noReports": "No reports.",
+      "by": "by",
+      "markReviewing": "Mark reviewing",
+      "action": "Take action",
+      "dismiss": "Dismiss",
+      "resolutionPlaceholder": "Resolution note (optional)",
+      "reasons": {
+        "scam": "Scam or fraud",
+        "welfare_concern": "Animal welfare concern",
+        "prohibited": "Prohibited / illegal",
+        "miscategorized": "Wrong category",
+        "offensive": "Offensive content",
+        "wrong_info": "Misleading information",
+        "other": "Other"
+      },
+      "status": {
+        "open": "Open",
+        "reviewing": "Reviewing",
+        "actioned": "Actioned",
+        "dismissed": "Dismissed"
+      }
+    },
+    "services": {
+      "vetCheckTitle": "Pre-purchase vet check",
+      "vetCheckDesc": "Book a licensed vet to examine this animal before you commit — health, age and soundness verified.",
+      "bookVetCheck": "Book a pre-purchase vet check",
+      "transportDesc": "Need help moving the animal?",
+      "arrangeTransport": "Arrange transport"
+    },
+    "interlink": {
+      "treasureBanner": "Buying or selling products, feed or equipment?",
+      "visitTreasure": "Visit Treasure Mount"
+    }
   },
   "sustainability": {
     "pageTitle": "🌱 Sustainability & Carbon",

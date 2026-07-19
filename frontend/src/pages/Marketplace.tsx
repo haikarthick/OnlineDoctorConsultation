@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
 import './ModulePage.css'
@@ -32,6 +33,7 @@ const Marketplace: React.FC = () => {
   const { formatCurrency, settings } = useSettings()
   const { user } = useAuth()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const isAdmin = user?.role === 'admin'
   const isFarmer = user?.role === 'farmer'
   const SPECIES_LIST = (isFarmer || isAdmin) ? FARMER_SPECIES_LIST : PET_OWNER_SPECIES_LIST
@@ -103,11 +105,20 @@ const Marketplace: React.FC = () => {
   const [priceHint, setPriceHint] = useState<{ avg: number; min: number; max: number; count: number } | null>(null)
   const [geoLocating, setGeoLocating] = useState(false)
 
+  // ── Phase 5: config (interlink/transport), reports ──
+  const [mpConfig, setMpConfig] = useState<{ treasureMount: { enabled: boolean; url: string }; transport: { enabled: boolean; url: string } } | null>(null)
+  const [reportModal, setReportModal] = useState<{ listingId: string; title: string } | null>(null)
+  const [reportReason, setReportReason] = useState('')
+  const [reportDetails, setReportDetails] = useState('')
+  const [adminReports, setAdminReports] = useState<any[]>([])
+  const [adminReportFilter, setAdminReportFilter] = useState('open')
+  const [adminReportResolution, setAdminReportResolution] = useState<Record<string, string>>({})
+
   // Monetization (admin)
   const [monetizationSettings, setMonetizationSettings] = useState<any[]>([])
   const [monetizationPlans, setMonetizationPlans] = useState<any[]>([])
   const [monetizationDashboard, setMonetizationDashboard] = useState<any>(null)
-  const [adminSubTab, setAdminSubTab] = useState<'listings' | 'settings' | 'plans' | 'revenue'>('listings')
+  const [adminSubTab, setAdminSubTab] = useState<'listings' | 'reports' | 'settings' | 'plans' | 'revenue'>('listings')
   const [editingPlan, setEditingPlan] = useState<any>(null)
   const [planForm, setPlanForm] = useState<Record<string, any>>({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
 
@@ -315,7 +326,40 @@ const Marketplace: React.FC = () => {
     catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
   }
 
-  useEffect(() => { fetchDashboard(); fetchListings(); loadFavoriteIds(); loadUnreadCount() }, [])
+  // ── Phase 5: config, reports, funnel ──
+  const loadConfig = useCallback(async () => {
+    try { const res = await apiService.getMarketplaceConfig(); setMpConfig(res.data) } catch {}
+  }, [])
+
+  const submitReport = async () => {
+    if (!reportModal || !reportReason) return
+    try {
+      await apiService.reportMarketplaceListing(reportModal.listingId, reportReason, reportDetails || undefined)
+      setSuccessMsg(t('marketplace.report.submitted'))
+      setReportModal(null); setReportReason(''); setReportDetails('')
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  // Pre-purchase vet check — funnel into a paid consultation (the revenue layer)
+  const bookVetCheck = (listing: MarketplaceListing) => {
+    const params = new URLSearchParams({ purpose: 'pre_purchase_check' })
+    if (listing.species) params.set('species', String(listing.species))
+    navigate(`/find-doctor?${params.toString()}`)
+  }
+
+  const fetchAdminReports = async (status = adminReportFilter) => {
+    try { const res = await apiService.adminListMarketplaceReports(status || undefined); setAdminReports(res.data?.items || []) } catch { setAdminReports([]) }
+  }
+
+  const resolveReport = async (id: string, status: string) => {
+    try {
+      await apiService.adminResolveMarketplaceReport(id, status, adminReportResolution[id] || undefined)
+      setSuccessMsg(t('marketplace.report.resolved'))
+      fetchAdminReports()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  useEffect(() => { fetchDashboard(); fetchListings(); loadFavoriteIds(); loadUnreadCount(); loadConfig() }, [])
   useAutoRefresh('marketplace', fetchListings)
   useAutoRefresh('marketplace-messages', refreshActiveThread)
   useAutoRefresh('marketplace-saved-searches', fetchSavedSearches)
@@ -635,6 +679,34 @@ const Marketplace: React.FC = () => {
       {error && <div className="module-alert error">{error} <button onClick={() => setError('')}>✕</button></div>}
       {successMsg && <div className="module-alert success">{successMsg} <button onClick={() => setSuccessMsg('')}>✕</button></div>}
 
+      {/* Report modal */}
+      {reportModal && (
+        <div className="mp-modal-overlay" onClick={() => setReportModal(null)}>
+          <div className="mp-modal" onClick={e => e.stopPropagation()}>
+            <h3>🚩 {t('marketplace.report.reportListing')}</h3>
+            <p className="mp-sell-step-desc">{t('marketplace.report.reportingWhat', { title: reportModal.title })}</p>
+            <div className="module-form-group">
+              <label className="module-label">{t('marketplace.report.reason')}</label>
+              <select className="module-input" value={reportReason} onChange={e => setReportReason(e.target.value)}>
+                <option value="">{t('marketplace.report.selectReason')}</option>
+                {['scam', 'welfare_concern', 'prohibited', 'miscategorized', 'offensive', 'wrong_info', 'other'].map(r => (
+                  <option key={r} value={r}>{t(`marketplace.report.reasons.${r}`)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="module-form-group">
+              <label className="module-label">{t('marketplace.report.details')}</label>
+              <textarea className="module-input" rows={3} value={reportDetails} onChange={e => setReportDetails(e.target.value)}
+                placeholder={t('marketplace.report.detailsPlaceholder')} maxLength={1000} />
+            </div>
+            <div className="mp-modal-actions">
+              <button className="module-btn" onClick={() => setReportModal(null)}>{t('marketplace.monetization.cancel')}</button>
+              <button className="module-btn primary" disabled={!reportReason} onClick={submitReport}>{t('marketplace.report.submit')}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="module-tabs">
         {tabs.map(([key, label]) => (
           <button key={key} className={`module-tab ${tab === key ? 'active' : ''}`} onClick={() => {
@@ -736,6 +808,9 @@ const Marketplace: React.FC = () => {
               isFavorite={favoriteIds.has(selectedListing.id)}
               onToggleFavorite={user ? () => toggleFavorite(selectedListing.id) : undefined}
               onMessageSeller={user ? () => messageSeller(selectedListing) : undefined}
+              onReport={user && selectedListing.seller_id !== user.id ? () => setReportModal({ listingId: selectedListing.id, title: selectedListing.title }) : undefined}
+              onBookVetCheck={() => bookVetCheck(selectedListing)}
+              transport={mpConfig?.transport?.enabled && mpConfig.transport.url ? mpConfig.transport : undefined}
               t={t}
             />
           ) : (
@@ -800,6 +875,12 @@ const Marketplace: React.FC = () => {
                 {Object.keys(filters).length > 0 && <button className="mp-chip clear" onClick={() => { setFilters({}); setSortBy(''); setNearMeActive(false) }}>{t('marketplace.chips.clearAll')}</button>}
               </div>
 
+              {/* Treasure Mount interlink — surfaced when browsing non-animal product categories */}
+              {mpConfig?.treasureMount?.enabled && ['feed', 'equipment', 'medicine', 'other'].includes(filters.category || '') && (
+                <a className="mp-treasure-banner" href={mpConfig.treasureMount.url} target="_blank" rel="noopener noreferrer">
+                  🛒 {t('marketplace.interlink.treasureBanner')} <span className="mp-treasure-cta">{t('marketplace.interlink.visitTreasure')} →</span>
+                </a>
+              )}
               {/* Save this search */}
               <div className="mp-save-search-bar">
                 {showSaveSearch ? (
@@ -1496,10 +1577,10 @@ const Marketplace: React.FC = () => {
         <div>
           {/* Admin Sub-tabs */}
           <div className="mp-admin-subtabs">
-            {(['listings', 'settings', 'plans', 'revenue'] as const).map(st => (
+            {(['listings', 'reports', 'settings', 'plans', 'revenue'] as const).map(st => (
               <button key={st} className={`mp-admin-subtab ${adminSubTab === st ? 'active' : ''}`}
-                onClick={() => setAdminSubTab(st)}>
-                {st === 'listings' && '📋'} {st === 'settings' && '⚙️'} {st === 'plans' && '💎'} {st === 'revenue' && '📊'}
+                onClick={() => { setAdminSubTab(st); if (st === 'reports') fetchAdminReports() }}>
+                {st === 'listings' && '📋'} {st === 'reports' && '🚩'} {st === 'settings' && '⚙️'} {st === 'plans' && '💎'} {st === 'revenue' && '📊'}
                 {' '}{t(`marketplace.monetization.subtabs.${st}`)}
               </button>
             ))}
@@ -1599,6 +1680,52 @@ const Marketplace: React.FC = () => {
                   }}>{t('marketplace.admin.reject')}</button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ── Reports Sub-tab ── */}
+          {adminSubTab === 'reports' && (
+            <div className="mp-section">
+              <div className="mp-admin-header">
+                <h3 className="mp-section-title">🚩 {t('marketplace.report.adminTitle')}</h3>
+                <select className="module-input" value={adminReportFilter} onChange={e => { setAdminReportFilter(e.target.value); fetchAdminReports(e.target.value) }}>
+                  <option value="open">{t('marketplace.report.filterOpen')}</option>
+                  <option value="reviewing">{t('marketplace.report.status.reviewing')}</option>
+                  <option value="actioned">{t('marketplace.report.status.actioned')}</option>
+                  <option value="dismissed">{t('marketplace.report.status.dismissed')}</option>
+                  <option value="">{t('marketplace.admin.allListings')}</option>
+                </select>
+              </div>
+              {adminReports.length === 0 ? (
+                <p className="mp-empty">{t('marketplace.report.noReports')}</p>
+              ) : (
+                <div className="mp-reports-list">
+                  {adminReports.map(r => (
+                    <div key={r.id} className="mp-report-card">
+                      <div className="mp-report-head">
+                        <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing({ id: r.listing_id, title: r.listing_title } as MarketplaceListing) }}>{r.listing_title || '—'}</span>
+                        <span className={`module-badge ${r.status === 'open' ? 'error' : r.status === 'actioned' ? 'success' : ''}`}>{t(`marketplace.report.status.${r.status}`)}</span>
+                      </div>
+                      <div className="mp-report-meta">
+                        <span className="mp-report-reason">{t(`marketplace.report.reasons.${r.reason}`)}</span>
+                        <span>· {t('marketplace.report.by')} {r.reporter_name}</span>
+                        <span>· {new Date(r.created_at).toLocaleDateString()}</span>
+                      </div>
+                      {r.details && <div className="mp-report-details">{r.details}</div>}
+                      {['open', 'reviewing'].includes(r.status) && (
+                        <div className="mp-report-actions">
+                          <input className="module-input" placeholder={t('marketplace.report.resolutionPlaceholder')}
+                            value={adminReportResolution[r.id] || ''} onChange={e => setAdminReportResolution(prev => ({ ...prev, [r.id]: e.target.value }))} />
+                          {r.status === 'open' && <button className="module-btn small" onClick={() => resolveReport(r.id, 'reviewing')}>{t('marketplace.report.markReviewing')}</button>}
+                          <button className="module-btn small primary" onClick={() => resolveReport(r.id, 'actioned')}>{t('marketplace.report.action')}</button>
+                          <button className="module-btn small" onClick={() => resolveReport(r.id, 'dismissed')}>{t('marketplace.report.dismiss')}</button>
+                        </div>
+                      )}
+                      {r.resolution && <div className="mp-report-resolution">💬 {r.resolution}</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -1993,8 +2120,9 @@ const ListingDetail: React.FC<{
   isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
   userId?: string; onRequestContact?: () => void;
   isFavorite?: boolean; onToggleFavorite?: () => void; onMessageSeller?: () => void;
+  onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
   t: (key: string) => string;
-}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, t }) => {
+}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -2221,6 +2349,28 @@ const ListingDetail: React.FC<{
                 </div>
               )}
             </div>
+          )}
+
+          {/* Paid-services funnel: pre-purchase vet check (only for animal listings, non-owners) */}
+          {onBookVetCheck && l.category === 'animal' && userId && l.seller_id !== userId && (
+            <div className="mp-vetcheck-panel">
+              <div className="mp-vetcheck-title">🩺 {t('marketplace.services.vetCheckTitle')}</div>
+              <p className="mp-vetcheck-desc">{t('marketplace.services.vetCheckDesc')}</p>
+              <button className="module-btn primary" onClick={onBookVetCheck}>{t('marketplace.services.bookVetCheck')}</button>
+            </div>
+          )}
+
+          {/* Transport referral (config-driven) */}
+          {transport && userId && l.seller_id !== userId && (
+            <div className="mp-transport-panel">
+              <span>🚚 {t('marketplace.services.transportDesc')}</span>
+              <a className="module-btn small" href={transport.url} target="_blank" rel="noopener noreferrer">{t('marketplace.services.arrangeTransport')}</a>
+            </div>
+          )}
+
+          {/* Report */}
+          {onReport && (
+            <button className="mp-report-link" onClick={onReport}>🚩 {t('marketplace.report.reportListing')}</button>
           )}
         </div>
       </div>

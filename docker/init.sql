@@ -2099,6 +2099,30 @@ CREATE INDEX IF NOT EXISTS idx_mp_saved_searches_user ON marketplace_saved_searc
 CREATE INDEX IF NOT EXISTS idx_mp_saved_searches_alerts ON marketplace_saved_searches(alerts_enabled) WHERE alerts_enabled = true;
 -- Phase 4: optional listing video (mirrors backend/migrations/017_marketplace_video.sql)
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS video_url VARCHAR(2000);
+-- Phase 5: reports + full-text index (mirrors backend/migrations/018_marketplace_trust_discovery.sql)
+CREATE TABLE IF NOT EXISTS marketplace_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id UUID NOT NULL REFERENCES marketplace_listings(id) ON DELETE CASCADE,
+  reporter_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reason VARCHAR(40) NOT NULL
+    CHECK (reason IN ('scam', 'welfare_concern', 'prohibited', 'miscategorized', 'offensive', 'wrong_info', 'other')),
+  details TEXT,
+  status VARCHAR(20) DEFAULT 'open'
+    CHECK (status IN ('open', 'reviewing', 'actioned', 'dismissed')),
+  resolution TEXT,
+  resolved_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_mp_reports_listing ON marketplace_reports(listing_id);
+CREATE INDEX IF NOT EXISTS idx_mp_reports_status ON marketplace_reports(status);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mp_reports_unique_open
+  ON marketplace_reports(listing_id, reporter_id) WHERE status IN ('open', 'reviewing');
+CREATE INDEX IF NOT EXISTS idx_mp_listings_fts ON marketplace_listings
+  USING GIN (to_tsvector('english',
+    coalesce(title,'') || ' ' || coalesce(description,'') || ' ' ||
+    coalesce(breed,'') || ' ' || coalesce(species,'')));
 
 -- ─── Marketplace monetization tables (canonical schema) ─────────────────────
 CREATE TABLE IF NOT EXISTS marketplace_monetization_settings (

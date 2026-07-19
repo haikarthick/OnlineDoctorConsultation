@@ -60,6 +60,7 @@ import {
   createMarketplaceListingSchema, updateMarketplaceListingSchema, placeBidSchema, createMarketplaceOrderSchema, updateOrderStatusSchema,
   confirmDealSchema, cancelDealSchema,
   startThreadSchema, sendMessageSchema, createSavedSearchSchema, updateSavedSearchSchema,
+  reportListingSchema, resolveReportSchema,
   updateMonetizationSettingSchema, createMarketplacePlanSchema as createMPlanSchema, updateMarketplacePlanSchema as updateMPlanSchema,
   boostListingSchema, createInquirySchema, respondInquirySchema, createSubscriptionSchema,
   createSustainabilityMetricSchema, updateSustainabilityMetricSchema, createSustainabilityGoalSchema, updateSustainabilityGoalSchema,
@@ -2678,6 +2679,10 @@ router.get('/marketplace/favorites', authMiddleware, asyncHandler((req: Request,
 router.get('/marketplace/favorites/ids', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceFavoriteIds(req, res)));
 router.post('/marketplace/listings/:listingId/favorite', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.addMarketplaceFavorite(req, res)));
 router.delete('/marketplace/listings/:listingId/favorite', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.removeMarketplaceFavorite(req, res)));
+router.get('/marketplace/config', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.getMarketplaceConfig(req, res)));
+router.post('/marketplace/listings/:listingId/report', authMiddleware, validateBody(reportListingSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.reportMarketplaceListing(req, res)));
+router.get('/marketplace/admin/reports', authMiddleware, roleMiddleware(['admin']), asyncHandler((req: Request, res: Response) => Tier4Controller.adminListMarketplaceReports(req, res)));
+router.patch('/marketplace/admin/reports/:id', authMiddleware, roleMiddleware(['admin']), validateBody(resolveReportSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.adminResolveMarketplaceReport(req, res)));
 router.get('/marketplace/saved-searches', authMiddleware, asyncHandler((req: Request, res: Response) => Tier4Controller.listMarketplaceSavedSearches(req, res)));
 router.post('/marketplace/saved-searches', authMiddleware, validateBody(createSavedSearchSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.createMarketplaceSavedSearch(req, res)));
 router.put('/marketplace/saved-searches/:id', authMiddleware, validateBody(updateSavedSearchSchema), asyncHandler((req: Request, res: Response) => Tier4Controller.updateMarketplaceSavedSearch(req, res)));

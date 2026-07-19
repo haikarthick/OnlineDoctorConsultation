@@ -2227,6 +2227,27 @@ class ApiService {
     return response.data
   }
 
+  // ── Phase 5: config, reports ──
+  async getMarketplaceConfig() {
+    const response = await this.client.get('/marketplace/config')
+    return response.data
+  }
+
+  async reportMarketplaceListing(listingId: string, reason: string, details?: string) {
+    const response = await this.client.post(`/marketplace/listings/${listingId}/report`, { reason, details })
+    return response.data
+  }
+
+  async adminListMarketplaceReports(status?: string) {
+    const response = await this.client.get('/marketplace/admin/reports', { params: status ? { status } : {} })
+    return response.data
+  }
+
+  async adminResolveMarketplaceReport(id: string, status: string, resolution?: string) {
+    const response = await this.client.patch(`/marketplace/admin/reports/${id}`, { status, resolution })
+    return response.data
+  }
+
   async updateOrderStatus(id: string, status: string) {
     const response = await this.client.patch(`/marketplace/orders/${id}/status`, { status })
     return response.data

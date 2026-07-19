@@ -1224,6 +1224,16 @@ export const updateSavedSearchSchema = Joi.object({
   alertsEnabled: Joi.boolean().optional(),
 }).min(1);
 
+export const reportListingSchema = Joi.object({
+  reason: Joi.string().valid('scam', 'welfare_concern', 'prohibited', 'miscategorized', 'offensive', 'wrong_info', 'other').required(),
+  details: longText(1000).optional().allow('', null),
+});
+
+export const resolveReportSchema = Joi.object({
+  status: Joi.string().valid('reviewing', 'actioned', 'dismissed').required(),
+  resolution: longText(1000).optional().allow('', null),
+});
+
 // ─── Tier 4: Marketplace Monetization ────────────────────────
 export const updateMonetizationSettingSchema = Joi.object({
   settingValue: Joi.object().optional(),

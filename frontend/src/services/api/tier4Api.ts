@@ -208,6 +208,24 @@ export async function deleteMarketplaceSavedSearch(id: string) {
   return response.data
 }
 
+// ── Phase 5: config, reports ──
+export async function getMarketplaceConfig() {
+  const response = await client.get('/marketplace/config')
+  return response.data
+}
+export async function reportMarketplaceListing(listingId: string, reason: string, details?: string) {
+  const response = await client.post(`/marketplace/listings/${listingId}/report`, { reason, details })
+  return response.data
+}
+export async function adminListMarketplaceReports(status?: string) {
+  const response = await client.get('/marketplace/admin/reports', { params: status ? { status } : {} })
+  return response.data
+}
+export async function adminResolveMarketplaceReport(id: string, status: string, resolution?: string) {
+  const response = await client.patch(`/marketplace/admin/reports/${id}`, { status, resolution })
+  return response.data
+}
+
 export async function getMarketPrices(filters: any = {}) {
   const response = await client.get('/marketplace/prices', { params: filters })
   return response.data

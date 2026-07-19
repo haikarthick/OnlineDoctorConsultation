@@ -68,7 +68,15 @@ class MarketplaceService {
     if (maxPrice) add('l.price <= $?', maxPrice);
     if (sellerId) add('l.seller_id = $?', sellerId);
     if (enterpriseId) add('l.enterprise_id = $?', enterpriseId);
-    if (search) { const p = `$${idx++}`; where.push(`(l.title ILIKE ${p} OR l.description ILIKE ${p} OR l.breed ILIKE ${p})`); params.push(`%${search}%`); }
+    // Full-text search with relevance ranking; ILIKE kept as a substring fallback
+    let ftsRankExpr = '';
+    if (search) {
+      const qIdx = idx++; params.push(search);
+      const likeIdx = idx++; params.push(`%${search}%`);
+      const tsvec = `to_tsvector('english', coalesce(l.title,'')||' '||coalesce(l.description,'')||' '||coalesce(l.breed,'')||' '||coalesce(l.species,''))`;
+      where.push(`(${tsvec} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx})`);
+      ftsRankExpr = `ts_rank(${tsvec}, plainto_tsquery('english', $${qIdx}))`;
+    }
     if (species) add('l.species = $?', species);
     if (breed) add('l.breed ILIKE $?', `%${breed}%`);
     if (minMilkYield) add('l.daily_milk_yield >= $?', minMilkYield);
@@ -94,7 +102,10 @@ class MarketplaceService {
     }
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
-    let orderBy = 'l.is_hot_deal DESC NULLS LAST, l.listing_tier DESC NULLS LAST, l.featured DESC, l.created_at DESC';
+    // Default: relevance when searching, else promoted-then-recent
+    let orderBy = ftsRankExpr
+      ? `${ftsRankExpr} DESC, l.is_hot_deal DESC NULLS LAST, l.created_at DESC`
+      : 'l.is_hot_deal DESC NULLS LAST, l.listing_tier DESC NULLS LAST, l.featured DESC, l.created_at DESC';
     if (sortBy === 'price_asc') orderBy = 'l.price ASC NULLS LAST';
     else if (sortBy === 'price_desc') orderBy = 'l.price DESC NULLS LAST';
     else if (sortBy === 'newest') orderBy = 'l.created_at DESC';
@@ -717,11 +728,18 @@ class MarketplaceService {
                  WHERE l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`;
     const params: any[] = []; let idx = 1;
 
+    const PUB_TSVEC = `to_tsvector('english', coalesce(l.title,'')||' '||coalesce(l.description,'')||' '||coalesce(l.breed,'')||' '||coalesce(l.species,''))`;
     if (category) { query += ` AND l.category = $${idx++}`; params.push(category); }
     if (listingType) { query += ` AND l.listing_type = $${idx++}`; params.push(listingType); }
     if (minPrice) { query += ` AND l.price >= $${idx++}`; params.push(minPrice); }
     if (maxPrice) { query += ` AND l.price <= $${idx++}`; params.push(maxPrice); }
-    if (search) { query += ` AND (l.title ILIKE $${idx} OR l.description ILIKE $${idx} OR l.breed ILIKE $${idx})`; params.push(`%${search}%`); idx++; }
+    let pubFtsRank = '';
+    if (search) {
+      const qIdx = idx++; params.push(search);
+      const likeIdx = idx++; params.push(`%${search}%`);
+      query += ` AND (${PUB_TSVEC} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx})`;
+      pubFtsRank = `ts_rank(${PUB_TSVEC}, plainto_tsquery('english', $${qIdx}))`;
+    }
     if (species) { query += ` AND l.species = $${idx++}`; params.push(species); }
     if (breed) { query += ` AND l.breed ILIKE $${idx++}`; params.push(`%${breed}%`); }
     if (minMilkYield) { query += ` AND l.daily_milk_yield >= $${idx++}`; params.push(minMilkYield); }
@@ -737,7 +755,9 @@ class MarketplaceService {
       idx += 3;
     }
 
-    let orderBy = 'l.is_hot_deal DESC NULLS LAST, l.listing_tier DESC NULLS LAST, l.featured DESC, l.created_at DESC';
+    let orderBy = pubFtsRank
+      ? `${pubFtsRank} DESC, l.is_hot_deal DESC NULLS LAST, l.created_at DESC`
+      : 'l.is_hot_deal DESC NULLS LAST, l.listing_tier DESC NULLS LAST, l.featured DESC, l.created_at DESC';
     if (sortBy === 'price_asc') orderBy = 'l.price ASC NULLS LAST';
     else if (sortBy === 'price_desc') orderBy = 'l.price DESC NULLS LAST';
     else if (sortBy === 'newest') orderBy = 'l.created_at DESC';
@@ -748,12 +768,16 @@ class MarketplaceService {
     params.push(Math.min(+limit, 50), offset);
     const result = await pool.query(query, params);
 
-    // Count
+    // Count (same filters)
     let countQuery = `SELECT COUNT(*) FROM marketplace_listings l WHERE l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`;
     const countParams: any[] = []; let cIdx = 1;
     if (category) { countQuery += ` AND l.category = $${cIdx++}`; countParams.push(category); }
     if (species) { countQuery += ` AND l.species = $${cIdx++}`; countParams.push(species); }
-    if (search) { countQuery += ` AND (l.title ILIKE $${cIdx} OR l.description ILIKE $${cIdx} OR l.breed ILIKE $${cIdx})`; countParams.push(`%${search}%`); cIdx++; }
+    if (search) {
+      const q = `$${cIdx++}`; const lk = `$${cIdx++}`;
+      countQuery += ` AND (${PUB_TSVEC} @@ plainto_tsquery('english', ${q}) OR l.title ILIKE ${lk} OR l.breed ILIKE ${lk})`;
+      countParams.push(search, `%${search}%`);
+    }
     const countResult = await pool.query(countQuery, countParams);
 
     return { items: result.rows, total: +(countResult.rows[0]?.count || 0) };

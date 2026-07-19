@@ -97,6 +97,57 @@ describe('MarketplaceEngagementService', () => {
     });
   });
 
+  describe('reports', () => {
+    it('rejects reporting your own listing', async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ seller_id: 'u1' }] });
+      await expect(engagementService.createReport('u1', 'l1', 'scam')).rejects.toThrow(/your own listing/);
+    });
+
+    it('creates a report for someone else\'s listing', async () => {
+      (pool.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ seller_id: 's1' }] }) // listing lookup
+        .mockResolvedValueOnce({ rows: [] });                   // insert
+      const res = await engagementService.createReport('b1', 'l1', 'welfare_concern', 'thin');
+      expect(res.reported).toBe(true);
+    });
+
+    it('surfaces the duplicate-open-report guard as a friendly error', async () => {
+      const dup: any = new Error('dup'); dup.code = '23505';
+      (pool.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ seller_id: 's1' }] })
+        .mockRejectedValueOnce(dup);
+      await expect(engagementService.createReport('b1', 'l1', 'scam')).rejects.toThrow(/already reported/);
+    });
+
+    it('notifies the reporter when a report is actioned', async () => {
+      (pool.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ id: 'r1', reporter_id: 'b1', status: 'open' }] }) // fetch
+        .mockResolvedValueOnce({ rows: [] })                                                // update
+        .mockResolvedValueOnce({ rows: [{ id: 'r1', status: 'actioned' }] });               // re-read
+      const res = await engagementService.adminResolveReport('r1', 'admin1', 'actioned', 'removed');
+      expect(res.status).toBe('actioned');
+    });
+  });
+
+  describe('getConfig', () => {
+    it('returns defaults when settings are missing', async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+      const cfg = await engagementService.getConfig();
+      expect(cfg.treasureMount.url).toBe('https://treasuremount.com');
+      expect(cfg.transport.enabled).toBe(false);
+    });
+
+    it('reflects stored settings', async () => {
+      (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [
+        { setting_key: 'treasure_mount', setting_value: { url: 'https://tm.example' }, is_enabled: true },
+        { setting_key: 'transport_referral', setting_value: { url: 'https://move.example' }, is_enabled: true },
+      ] });
+      const cfg = await engagementService.getConfig();
+      expect(cfg.treasureMount.url).toBe('https://tm.example');
+      expect(cfg.transport).toEqual({ enabled: true, url: 'https://move.example' });
+    });
+  });
+
   describe('runSavedSearchAlerts', () => {
     it('notifies on new matches and advances the watermark', async () => {
       (pool.query as jest.Mock)

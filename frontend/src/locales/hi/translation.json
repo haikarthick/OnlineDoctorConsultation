@@ -3474,7 +3474,8 @@
         "listings": "लिस्टिंग",
         "settings": "मुद्रीकरण",
         "plans": "प्लान",
-        "revenue": "राजस्व"
+        "revenue": "राजस्व",
+        "reports": "रिपोर्ट"
       },
       "featureToggles": "फीचर टॉगल",
       "allFreeNote": "सभी सुविधाएं वर्तमान में सभी उपयोगकर्ताओं के लिए मुफ्त हैं। चार्ज शुरू करने के लिए तैयार होने पर सुविधाएं चालू करें।",
@@ -3619,7 +3620,52 @@
       "alertsOn": "सूचनाएं चालू — म्यूट करने के लिए टैप करें",
       "alertsOff": "सूचनाएं बंद — सक्षम करने के लिए टैप करें"
     },
-    "pageOf": "पृष्ठ {{current}} / {{total}}"
+    "pageOf": "पृष्ठ {{current}} / {{total}}",
+    "report": {
+      "reportListing": "लिस्टिंग रिपोर्ट करें",
+      "reportingWhat": "रिपोर्ट: {{title}}",
+      "reason": "कारण",
+      "selectReason": "कारण चुनें…",
+      "details": "विवरण (वैकल्पिक)",
+      "detailsPlaceholder": "समीक्षा में मदद करने वाली कोई भी बात…",
+      "submit": "रिपोर्ट भेजें",
+      "submitted": "धन्यवाद — आपकी रिपोर्ट समीक्षा के लिए भेजी गई।",
+      "resolved": "रिपोर्ट अपडेट हुई।",
+      "adminTitle": "रिपोर्ट की गई लिस्टिंग",
+      "filterOpen": "खुली रिपोर्ट",
+      "noReports": "कोई रिपोर्ट नहीं।",
+      "by": "द्वारा",
+      "markReviewing": "समीक्षाधीन चिह्नित करें",
+      "action": "कार्रवाई करें",
+      "dismiss": "खारिज करें",
+      "resolutionPlaceholder": "समाधान टिप्पणी (वैकल्पिक)",
+      "reasons": {
+        "scam": "धोखाधड़ी या फ्रॉड",
+        "welfare_concern": "पशु कल्याण चिंता",
+        "prohibited": "निषिद्ध / अवैध",
+        "miscategorized": "गलत श्रेणी",
+        "offensive": "आपत्तिजनक सामग्री",
+        "wrong_info": "भ्रामक जानकारी",
+        "other": "अन्य"
+      },
+      "status": {
+        "open": "खुला",
+        "reviewing": "समीक्षाधीन",
+        "actioned": "कार्रवाई की गई",
+        "dismissed": "खारिज"
+      }
+    },
+    "services": {
+      "vetCheckTitle": "खरीद-पूर्व पशु जांच",
+      "vetCheckDesc": "प्रतिबद्ध होने से पहले इस पशु की जांच के लिए लाइसेंस प्राप्त पशु चिकित्सक बुक करें — स्वास्थ्य, आयु और स्वस्थता सत्यापित।",
+      "bookVetCheck": "खरीद-पूर्व पशु जांच बुक करें",
+      "transportDesc": "पशु ले जाने में मदद चाहिए?",
+      "arrangeTransport": "परिवहन व्यवस्था करें"
+    },
+    "interlink": {
+      "treasureBanner": "उत्पाद, चारा या उपकरण खरीद या बेच रहे हैं?",
+      "visitTreasure": "Treasure Mount पर जाएं"
+    }
   },
   "sustainability": {
     "pageTitle": "🌱 स्थिरता और कार्बन",
