@@ -2034,6 +2034,20 @@ CREATE TABLE IF NOT EXISTS marketplace_orders (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- Deal-workflow columns (mirrors backend/migrations/015_marketplace_deal_workflow.sql).
+-- Marketplace is a free classifieds board: money settles off-platform (PA rules
+-- prohibit live-animal payments), so orders act as reservations completed by a
+-- two-sided confirmation handshake.
+ALTER TABLE marketplace_orders ADD COLUMN IF NOT EXISTS buyer_confirmed_at TIMESTAMPTZ;
+ALTER TABLE marketplace_orders ADD COLUMN IF NOT EXISTS seller_confirmed_at TIMESTAMPTZ;
+ALTER TABLE marketplace_orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(30);
+ALTER TABLE marketplace_orders ADD COLUMN IF NOT EXISTS reserved_until TIMESTAMPTZ;
+ALTER TABLE marketplace_orders ADD COLUMN IF NOT EXISTS cancelled_by UUID;
+ALTER TABLE marketplace_orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT;
+CREATE INDEX IF NOT EXISTS idx_mp_orders_listing ON marketplace_orders(listing_id);
+CREATE INDEX IF NOT EXISTS idx_mp_orders_buyer ON marketplace_orders(buyer_id);
+CREATE INDEX IF NOT EXISTS idx_mp_orders_seller ON marketplace_orders(seller_id);
+CREATE INDEX IF NOT EXISTS idx_mp_orders_status ON marketplace_orders(status);
 
 -- ─── Marketplace monetization tables (canonical schema) ─────────────────────
 CREATE TABLE IF NOT EXISTS marketplace_monetization_settings (

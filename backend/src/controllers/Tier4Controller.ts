@@ -210,7 +210,11 @@ class Tier4Controller {
 
   async listMarketplaceListings(req: Request, res: Response) {
     try {
-      const data = await marketplaceService.listListings(req.query);
+      const userId = (req as any).userId;
+      const isAdmin = (req as any).userRole === 'admin';
+      // Approval visibility is derived from the caller's identity, never from query params
+      const { includeUnapproved: _ignored, ...filters } = req.query as any;
+      const data = await marketplaceService.listListings(filters, userId, isAdmin);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
@@ -218,7 +222,8 @@ class Tier4Controller {
   async getMarketplaceListing(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
-      const data = await marketplaceService.getListing(req.params.id, userId);
+      const isAdmin = (req as any).userRole === 'admin';
+      const data = await marketplaceService.getListing(req.params.id, userId, isAdmin);
       if (!data) return res.status(404).json({ error: { message: 'Listing not found' } });
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -234,16 +239,26 @@ class Tier4Controller {
 
   async updateMarketplaceListing(req: Request, res: Response) {
     try {
-      const data = await marketplaceService.updateListing(req.params.id, req.body);
+      const userId = (req as any).userId;
+      const isAdmin = (req as any).userRole === 'admin';
+      const data = await marketplaceService.updateListing(req.params.id, req.body, userId, isAdmin);
       res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      const code = /only edit your own|not found/i.test(err.message) ? (err.message.includes('not found') ? 404 : 403) : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
   }
 
   async deleteMarketplaceListing(req: Request, res: Response) {
     try {
-      await marketplaceService.deleteListing(req.params.id);
+      const userId = (req as any).userId;
+      const isAdmin = (req as any).userRole === 'admin';
+      await marketplaceService.deleteListing(req.params.id, userId, isAdmin);
       res.json({ data: { success: true } });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      const code = /only delete your own/i.test(err.message) ? 403 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
   }
 
   async listMarketplaceBids(req: Request, res: Response) {
@@ -280,9 +295,38 @@ class Tier4Controller {
 
   async updateOrderStatus(req: Request, res: Response) {
     try {
-      const data = await marketplaceService.updateOrderStatus(req.params.id, req.body.status);
+      const userId = (req as any).userId;
+      const isAdmin = (req as any).userRole === 'admin';
+      const data = await marketplaceService.updateOrderStatus(req.params.id, req.body.status, userId, isAdmin);
       res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      const code = /not part of this order/i.test(err.message) ? 403 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
+  }
+
+  // ── Deal handshake (free classifieds — settlement happens off-platform) ──
+
+  async confirmMarketplaceDeal(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await marketplaceService.confirmDeal(req.params.id, userId, req.body.paymentMethod);
+      res.json({ data });
+    } catch (err: any) {
+      const code = /not part of this deal/i.test(err.message) ? 403 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
+  }
+
+  async cancelMarketplaceDeal(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await marketplaceService.cancelDeal(req.params.id, userId, req.body.reason);
+      res.json({ data });
+    } catch (err: any) {
+      const code = /not part of this deal/i.test(err.message) ? 403 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
   }
 
   async getMarketplaceDashboard(req: Request, res: Response) {
@@ -632,6 +676,10 @@ class Tier4Controller {
 
   async createUserSubscription(req: Request, res: Response) {
     try {
+      // Marketplace is free for end users — paid plans stay dark unless the
+      // platform admin explicitly enables them
+      const enabled = await monetizationService.isFeatureEnabled('subscription_plans');
+      if (!enabled) return res.status(403).json({ error: { message: 'Subscription plans are not available — the marketplace is free to use.' } });
       const userId = (req as any).userId;
       const data = await monetizationService.createSubscription(userId, req.body.planId);
       res.status(201).json({ data });
@@ -648,7 +696,13 @@ class Tier4Controller {
 
   async boostMarketplaceListing(req: Request, res: Response) {
     try {
+      // Boosts stay dark while the marketplace is free for end users
+      const enabled = await monetizationService.isFeatureEnabled('listing_boost');
+      if (!enabled) return res.status(403).json({ error: { message: 'Listing boosts are not available — the marketplace is free to use.' } });
       const userId = (req as any).userId;
+      // Ownership guard: you can only boost your own listing
+      const listing = await marketplaceService.getListing(req.params.id, userId);
+      if (!listing || listing.seller_id !== userId) return res.status(403).json({ error: { message: 'You can only boost your own listings' } });
       const data = await monetizationService.boostListing(req.params.id, userId, req.body.boostType || 'standard');
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }

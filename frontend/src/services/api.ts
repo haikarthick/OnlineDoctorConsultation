@@ -2150,6 +2150,17 @@ class ApiService {
     return response.data
   }
 
+  // Deal handshake: both parties confirm the off-platform settlement
+  async confirmMarketplaceDeal(orderId: string, paymentMethod?: string) {
+    const response = await this.client.post(`/marketplace/orders/${orderId}/confirm`, paymentMethod ? { paymentMethod } : {})
+    return response.data
+  }
+
+  async cancelMarketplaceDeal(orderId: string, reason?: string) {
+    const response = await this.client.post(`/marketplace/orders/${orderId}/cancel`, reason ? { reason } : {})
+    return response.data
+  }
+
   async updateOrderStatus(id: string, status: string) {
     const response = await this.client.patch(`/marketplace/orders/${id}/status`, { status })
     return response.data

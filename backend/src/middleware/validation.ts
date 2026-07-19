@@ -1114,8 +1114,8 @@ const livestockFields = {
   pregnancyMonth: Joi.number().integer().min(0).max(12).optional().allow(null),
   vaccinationStatus: Joi.string().valid('fully_vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown').optional(),
   healthCertificate: Joi.boolean().optional(),
-  listingTier: Joi.string().valid('standard', 'premium', 'spotlight').optional(),
-  isHotDeal: Joi.boolean().optional(),
+  // listingTier / isHotDeal are admin-granted promotion flags — sellers cannot
+  // set them, so they are intentionally absent (stripUnknown drops them)
   linkedAnimalId: Joi.string().uuid().optional().allow('', null),
   auctionEndTime: Joi.string().optional().allow('', null),
   reservePrice: Joi.number().min(0).optional().allow(null),
@@ -1143,7 +1143,6 @@ export const createMarketplaceListingSchema = Joi.object({
   location: shortText(500).optional().allow('', null),
   shippingOptions: Joi.array().items(Joi.any()).optional(),
   tags: Joi.array().items(Joi.string().max(50)).optional(),
-  featured: Joi.boolean().optional(),
   expiresAt: Joi.string().optional().allow('', null),
   ...livestockFields,
 });
@@ -1179,6 +1178,15 @@ export const createMarketplaceOrderSchema = Joi.object({
 
 export const updateOrderStatusSchema = Joi.object({
   status: Joi.string().valid('pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded').required(),
+});
+
+// Deal handshake (free classifieds — money settles off-platform between the parties)
+export const confirmDealSchema = Joi.object({
+  paymentMethod: Joi.string().valid('cash', 'upi', 'bank_transfer', 'other').optional().allow('', null),
+});
+
+export const cancelDealSchema = Joi.object({
+  reason: shortText(500).optional().allow('', null),
 });
 
 // ─── Tier 4: Marketplace Monetization ────────────────────────

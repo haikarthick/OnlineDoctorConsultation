@@ -44,6 +44,7 @@ export function startScheduler(): void {
   setInterval(runMarketplaceBoostExpiry, ONE_HOUR);
   setInterval(runMarketplaceListingExpiry, SIX_HOURS);
   setInterval(runMarketplaceAuctionClose, FIVE_MINUTES);
+  setInterval(runMarketplaceReservationExpiry, ONE_HOUR);
 
   // Payment module: expire unpaid slot holds (no-op while payment.enabled=false)
   setInterval(runPaymentHoldExpiry, FIVE_MINUTES);
@@ -153,6 +154,15 @@ async function runMarketplaceAuctionClose(): Promise<void> {
     if (closed > 0) logger.info(`[Marketplace] Closed ${closed} expired auction(s)`);
   } catch (err: any) {
     logger.error('[Marketplace] Auction close job failed', { error: err.message });
+  }
+}
+
+async function runMarketplaceReservationExpiry(): Promise<void> {
+  try {
+    const released = await MarketplaceService.expireReservations();
+    if (released > 0) logger.info(`[Marketplace] Released ${released} expired reservation(s)`);
+  } catch (err: any) {
+    logger.error('[Marketplace] Reservation expiry job failed', { error: err.message });
   }
 }
 

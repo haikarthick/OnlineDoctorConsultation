@@ -35,7 +35,6 @@ const Marketplace: React.FC = () => {
   const isFarmer = user?.role === 'farmer'
   const SPECIES_LIST = (isFarmer || isAdmin) ? FARMER_SPECIES_LIST : PET_OWNER_SPECIES_LIST
 
-  const TIER_LABELS: Record<string, string> = { standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }
   const GENDER_LABELS: Record<string, string> = { male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') }
   const VAX_LABELS: Record<string, string> = { fully_vaccinated: t('marketplace.vaxLabel.fullyShort'), partially_vaccinated: t('marketplace.vaxLabel.partialShort'), not_vaccinated: t('marketplace.vaxLabel.noneShort'), unknown: t('marketplace.vaxLabel.unknown') }
 
@@ -60,7 +59,7 @@ const Marketplace: React.FC = () => {
     title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
     species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
     pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
-    listingTier: 'standard', isHotDeal: false, auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
+    auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
     images: [], linkedAnimalId: '',
     sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false,
   })
@@ -81,6 +80,8 @@ const Marketplace: React.FC = () => {
   // Order role
   const [orderRole, setOrderRole] = useState<'buyer' | 'seller'>('buyer')
   const [inquiries, setInquiries] = useState<any[]>([])
+  // Payment method chosen per deal before confirming (recorded for audit only)
+  const [dealPaymentMethod, setDealPaymentMethod] = useState<Record<string, string>>({})
 
   // Monetization (admin)
   const [monetizationSettings, setMonetizationSettings] = useState<any[]>([])
@@ -179,11 +180,13 @@ const Marketplace: React.FC = () => {
       if (payload.gender) payload.gender = (payload.gender as string).toLowerCase()
       if (payload.species) payload.species = (payload.species as string).toLowerCase()
       await apiService.createMarketplaceListing(payload)
-      setSuccessMsg(t('marketplace.listingCreated'))
+      // Animal-category listings go through admin review before appearing publicly
+      const needsReview = ['animal', 'semen_embryo'].includes(payload.category)
+      setSuccessMsg(needsReview ? t('marketplace.deal.submittedForReview') : t('marketplace.listingCreated'))
       setSellForm({ title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
         species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
         pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
-        listingTier: 'standard', isHotDeal: false, auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
+        auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
         images: [], linkedAnimalId: '',
         sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false })
       setSellStep(0); setTab('browse'); fetchListings(); fetchDashboard()
@@ -265,24 +268,46 @@ const Marketplace: React.FC = () => {
     } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
   }
 
-  const buyNow = async (listing: MarketplaceListing) => {
+  // Free classifieds: reserving holds the listing while buyer and seller
+  // connect and settle directly — no payment happens on the platform
+  const reserveListing = async (listing: MarketplaceListing) => {
     if (listing.price == null) {
-      // "Contact for fee" listing — send inquiry instead of purchase order
+      // "Contact for fee" listing — send inquiry instead of reserving
       try {
         await apiService.createInquiry(listing.id, '')
-        setSuccessMsg(t('marketplace.orderPlaced'))
+        setSuccessMsg(t('marketplace.inquirySent', 'Inquiry sent! The seller will be notified.'))
         setSelectedListing(null)
       } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
       return
     }
     try {
       await apiService.createMarketplaceOrder({ listingId: listing.id, quantity: 1 })
-      setSuccessMsg(t('marketplace.orderPlaced')); fetchListings(); fetchDashboard(); setSelectedListing(null)
+      setSuccessMsg(t('marketplace.deal.reserveSuccess'))
+      fetchListings(); fetchDashboard()
+      // Re-open the listing: the reservation reveals the seller's contact details
+      viewListing(listing)
     } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
   }
 
   const fetchOrders = async (role: 'buyer' | 'seller' = orderRole) => {
     try { const res = await apiService.listMarketplaceOrders(role); setOrders(res.data?.items || []) } catch { setOrders([]) }
+  }
+
+  // ── Deal handshake actions (settlement happens off-platform) ──
+  const confirmDeal = async (orderId: string) => {
+    try {
+      await apiService.confirmMarketplaceDeal(orderId, dealPaymentMethod[orderId] || undefined)
+      setSuccessMsg(t('marketplace.deal.confirmRecorded'))
+      fetchOrders(orderRole); fetchListings(); fetchDashboard()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  const cancelDeal = async (orderId: string) => {
+    try {
+      await apiService.cancelMarketplaceDeal(orderId)
+      setSuccessMsg(t('marketplace.deal.dealCancelled'))
+      fetchOrders(orderRole); fetchListings(); fetchDashboard()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
   }
 
   const fetchInquiries = async (role: 'buyer' | 'seller' = orderRole) => {
@@ -518,7 +543,7 @@ const Marketplace: React.FC = () => {
             <ListingDetail
               listing={selectedListing} bids={bids} formatCurrency={formatCurrency}
               bidAmount={bidAmount} bidMessage={bidMessage} onBidAmountChange={setBidAmount} onBidMessageChange={setBidMessage}
-              onPlaceBid={placeBid} onBuyNow={() => buyNow(selectedListing)} onBack={() => setSelectedListing(null)}
+              onPlaceBid={placeBid} onBuyNow={() => reserveListing(selectedListing)} onBack={() => setSelectedListing(null)}
               isAdmin={isAdmin} onToggleHotDeal={(id, v) => handleToggleHotDeal(id, v)} onToggleFeatured={(id, v) => handleToggleFeatured(id, v)}
               userId={user?.id}
               onRequestContact={async () => {
@@ -906,14 +931,6 @@ const Marketplace: React.FC = () => {
                     </div>
                   )}
                   <div className="module-form-group">
-                    <label className="module-label">{t('marketplace.sell.listingTier')}</label>
-                    <select className="module-input" value={sellForm.listingTier} onChange={e => sf('listingTier', e.target.value)}>
-                      <option value="standard">{t('marketplace.tier.standardFree')}</option>
-                      <option value="premium">{t('marketplace.tier.premium')}</option>
-                      <option value="spotlight">{t('marketplace.tier.spotlight')}</option>
-                    </select>
-                  </div>
-                  <div className="module-form-group">
                     <label className="module-label">{t('marketplace.sell.location')}</label>
                     <input className="module-input" value={sellForm.location} onChange={e => sf('location', e.target.value)} placeholder={t('marketplace.sell.locationPlaceholder')} />
                   </div>
@@ -945,7 +962,6 @@ const Marketplace: React.FC = () => {
                   <ReviewItem label={t('marketplace.reviewLabels.healthCert')} value={sellForm.healthCertificate ? t('marketplace.reviewLabels.yes') : t('marketplace.reviewLabels.no')} />
                   <ReviewItem label={t('marketplace.reviewLabels.price')} value={sellForm.price ? `${settings.currency} ${sellForm.price}` : t('marketplace.reviewLabels.contactForPrice')} />
                   <ReviewItem label={t('marketplace.sell.location')} value={sellForm.location || '—'} />
-                  <ReviewItem label={t('marketplace.reviewLabels.tier')} value={TIER_LABELS[sellForm.listingTier] || t('marketplace.tier.standard')} />
                   <ReviewItem label={t('marketplace.livestock.contact')} value={sellForm.contactPhone || '—'} />
                   <ReviewItem label={t('marketplace.compliance.sellerType')} value={sellForm.sellerType === 'registered_breeder' ? t('marketplace.compliance.registeredBreeder') : t('marketplace.compliance.individualOwner')} />
                   {sellForm.sellerType === 'registered_breeder' && <ReviewItem label={t('marketplace.compliance.registrationNumber')} value={sellForm.registrationNumber || '—'} />}
@@ -1011,21 +1027,63 @@ const Marketplace: React.FC = () => {
               </div>
             </div>
           )}
+          {/* Free-classifieds note: settlement is between the parties, off-platform */}
+          <div className="mp-deal-free-note mp-deal-tab-note">💡 {t('marketplace.deal.tabNote')}</div>
           <div className="data-table-container">
             <table className="module-table">
-              <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.livestock.species')}</th><th>{orderRole === 'buyer' ? t('marketplace.detail.seller') : t('marketplace.orders.asBuyer').replace('🛒 ', '')}</th><th>{t('marketplace.orders.qty')}</th><th>{t('marketplace.orders.total')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.orders.date')}</th></tr></thead>
+              <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.livestock.species')}</th><th>{orderRole === 'buyer' ? t('marketplace.detail.seller') : t('marketplace.orders.asBuyer').replace('🛒 ', '')}</th><th>{t('marketplace.orders.qty')}</th><th>{t('marketplace.orders.total')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.orders.date')}</th><th>{t('marketplace.deal.actionsCol')}</th></tr></thead>
               <tbody>
-                {orders.map(o => (
-                  <tr key={o.id}>
-                    <td>{g(o, 'listingTitle', 'listing_title') || '—'}</td>
-                    <td>{o.species || '—'}</td>
-                    <td>{orderRole === 'buyer' ? g(o, 'sellerName', 'seller_name') : g(o, 'buyerName', 'buyer_name')}</td>
-                    <td>{o.quantity}</td>
-                    <td className="mp-price-highlight">{formatCurrency(g(o, 'totalPrice', 'total_price') || 0)}</td>
-                    <td><span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{o.status}</span></td>
-                    <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '—'}</td>
-                  </tr>
-                ))}
+                {orders.map(o => {
+                  const myConfirm = orderRole === 'buyer' ? g(o, 'buyerConfirmedAt', 'buyer_confirmed_at') : g(o, 'sellerConfirmedAt', 'seller_confirmed_at')
+                  const otherConfirm = orderRole === 'buyer' ? g(o, 'sellerConfirmedAt', 'seller_confirmed_at') : g(o, 'buyerConfirmedAt', 'buyer_confirmed_at')
+                  const reservedUntil = g(o, 'reservedUntil', 'reserved_until')
+                  const statusKey = `marketplace.deal.status.${o.status}`
+                  const statusLabel = t(statusKey) === statusKey ? o.status : t(statusKey)
+                  return (
+                    <tr key={o.id}>
+                      <td>{g(o, 'listingTitle', 'listing_title') || '—'}</td>
+                      <td>{o.species || '—'}</td>
+                      <td>{orderRole === 'buyer' ? g(o, 'sellerName', 'seller_name') : g(o, 'buyerName', 'buyer_name')}</td>
+                      <td>{o.quantity}</td>
+                      <td className="mp-price-highlight">{formatCurrency(g(o, 'totalPrice', 'total_price') || 0)}</td>
+                      <td>
+                        <span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{statusLabel}</span>
+                        {o.status === 'reserved' && reservedUntil && (
+                          <div className="mp-deal-until">{t('marketplace.deal.reservedUntil')}: {new Date(reservedUntil).toLocaleDateString()}</div>
+                        )}
+                      </td>
+                      <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '—'}</td>
+                      <td>
+                        {o.status === 'reserved' ? (
+                          <div className="mp-deal-actions">
+                            {myConfirm ? (
+                              <span className="mp-deal-waiting">✓ {t('marketplace.deal.waitingOther')}</span>
+                            ) : (
+                              <>
+                                {orderRole === 'buyer' && (
+                                  <select className="module-input mp-deal-pm" value={dealPaymentMethod[o.id] || ''} onChange={e => setDealPaymentMethod(prev => ({ ...prev, [o.id]: e.target.value }))}>
+                                    <option value="">{t('marketplace.deal.paymentMethod')}</option>
+                                    <option value="cash">{t('marketplace.deal.pm.cash')}</option>
+                                    <option value="upi">{t('marketplace.deal.pm.upi')}</option>
+                                    <option value="bank_transfer">{t('marketplace.deal.pm.bankTransfer')}</option>
+                                    <option value="other">{t('marketplace.deal.pm.other')}</option>
+                                  </select>
+                                )}
+                                <button className="module-btn small primary" onClick={() => confirmDeal(o.id)}>
+                                  ✅ {orderRole === 'buyer' ? t('marketplace.deal.confirmReceipt') : t('marketplace.deal.confirmPayment')}
+                                </button>
+                              </>
+                            )}
+                            {otherConfirm && !myConfirm && <span className="mp-deal-other-done">👍 {t('marketplace.deal.otherConfirmed')}</span>}
+                            <button className="module-btn small" onClick={() => cancelDeal(o.id)}>✖ {t('marketplace.deal.cancelDeal')}</button>
+                          </div>
+                        ) : o.status === 'completed' ? (
+                          <span className="mp-deal-done">🎉 {t('marketplace.deal.dealDone')}</span>
+                        ) : '—'}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -1438,6 +1496,11 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
   const breedAvgPrice = g(l, 'breedAvgPrice', 'breed_avg_price')
   const hasHealthPassport = g(l, 'hasHealthPassport', 'has_health_passport')
+  // Moderation state — only ever present on the seller's own listings (and for admins)
+  const adminApproved = g(l, 'adminApproved', 'admin_approved')
+  const isRejected = adminApproved === false && l.status === 'rejected'
+  const isPendingReview = adminApproved === false && !isRejected
+  const isReserved = l.status === 'reserved'
   // Fair Deal badge: price is ≥15% below breed average → good deal; ≥15% above → premium priced
   const fairDealPct = breedAvgPrice && l.price ? Math.round(100 * l.price / breedAvgPrice) : null
   const isFairDeal = fairDealPct !== null && fairDealPct < 85
@@ -1459,6 +1522,9 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
           <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
           <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
           {tier === 'premium' && <span className="mp-badge premium">⭐</span>}
+          {isPendingReview && <span className="mp-badge pending-review">⏳ {t('marketplace.deal.pendingReview')}</span>}
+          {isRejected && <span className="mp-badge rejected">❌ {t('marketplace.deal.rejected')}</span>}
+          {isReserved && <span className="mp-badge reserved">🤝 {t('marketplace.deal.status.reserved')}</span>}
         </div>
 
         <h4 className="mp-card-title">{l.title}</h4>
@@ -1698,10 +1764,19 @@ const ListingDetail: React.FC<{
             </div>
           ) : listingType !== 'auction' ? (
             <div className="mp-buy-panel">
-              <h4>{t('marketplace.detail.buyNowTitle')}</h4>
+              <h4>🤝 {t('marketplace.deal.reserveTitle')}</h4>
               <div className="mp-buy-price">{l.price ? formatCurrency(l.price) : t('marketplace.detail.contactSeller')}</div>
               <div className="mp-sell-step-desc">{t('marketplace.orders.qty')}: {l.quantity} {l.unit || t('marketplace.units.head')}</div>
-              {l.status === 'active' && <button className="module-btn primary" onClick={onBuyNow}>{t('marketplace.detail.purchaseNow')}</button>}
+              {/* Free-classifieds deal: how it works */}
+              <div className="mp-deal-steps">
+                <div className="mp-deal-step"><span className="mp-deal-step-num">1</span>{t('marketplace.deal.howStep1')}</div>
+                <div className="mp-deal-step"><span className="mp-deal-step-num">2</span>{t('marketplace.deal.howStep2')}</div>
+                <div className="mp-deal-step"><span className="mp-deal-step-num">3</span>{t('marketplace.deal.howStep3')}</div>
+                <div className="mp-deal-step"><span className="mp-deal-step-num">4</span>{t('marketplace.deal.howStep4')}</div>
+              </div>
+              <div className="mp-deal-free-note">{t('marketplace.deal.freeNote')}</div>
+              {l.status === 'active' && <button className="module-btn primary" onClick={onBuyNow}>🤝 {t('marketplace.deal.reserveNow')}</button>}
+              {l.status === 'reserved' && <div className="mp-deal-reserved-badge">⏳ {t('marketplace.deal.currentlyReserved')}</div>}
             </div>
           ) : (
             <div className="mp-bid-panel">

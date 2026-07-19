@@ -3534,7 +3534,45 @@
       "nearMe": "Near Me",
       "searching": "Searching nearby..."
     },
-    "inquirySent": "Inquiry sent successfully"
+    "inquirySent": "Inquiry sent successfully",
+    "deal": {
+      "reserveTitle": "आरक्षित करें और सीधे सौदा करें",
+      "reserveNow": "यह लिस्टिंग आरक्षित करें",
+      "reserveSuccess": "आरक्षित! विक्रेता को सूचित कर दिया गया है — संपर्क करें, जांच करें और सीधे उनसे लेन-देन करें।",
+      "submittedForReview": "लिस्टिंग सबमिट हो गई! एडमिन समीक्षा के बाद यह सार्वजनिक रूप से दिखाई देगी।",
+      "howStep1": "लिस्टिंग आरक्षित करें — विक्रेता को सूचना मिलती है",
+      "howStep2": "संपर्क करें और पशु की स्वयं जांच करें",
+      "howStep3": "विक्रेता को सीधे भुगतान करें (नकद / अपना UPI)",
+      "howStep4": "सौदा पूरा करने के लिए दोनों यहां पुष्टि करें",
+      "freeNote": "यह मार्केटप्लेस 100% मुफ़्त है — VetCare कभी भुगतान नहीं संभालता। दूसरे पक्ष के साथ सीधे लेन-देन करें।",
+      "tabNote": "सौदे खरीदार और विक्रेता के बीच सीधे तय होते हैं। मिलने और लेन-देन के बाद, दोनों पक्ष यहां पुष्टि करें।",
+      "currentlyReserved": "फिलहाल एक खरीदार द्वारा आरक्षित",
+      "actionsCol": "सौदा कार्रवाइयां",
+      "reservedUntil": "तक आरक्षित",
+      "confirmReceipt": "प्राप्ति की पुष्टि करें",
+      "confirmPayment": "भुगतान प्राप्त हुआ",
+      "confirmRecorded": "आपकी पुष्टि दर्ज कर ली गई है।",
+      "waitingOther": "दूसरे पक्ष की प्रतीक्षा में",
+      "otherConfirmed": "दूसरे पक्ष ने पुष्टि की",
+      "cancelDeal": "रद्द करें",
+      "dealCancelled": "आरक्षण रद्द — लिस्टिंग फिर से सक्रिय है।",
+      "dealDone": "सौदा पूरा हुआ",
+      "paymentMethod": "भुगतान विधि…",
+      "pm": {
+        "cash": "नकद",
+        "upi": "UPI (सीधा)",
+        "bankTransfer": "बैंक ट्रांसफर",
+        "other": "अन्य"
+      },
+      "pendingReview": "समीक्षा लंबित",
+      "rejected": "अस्वीकृत",
+      "status": {
+        "reserved": "आरक्षित",
+        "completed": "पूर्ण",
+        "cancelled": "रद्द",
+        "pending": "लंबित"
+      }
+    }
   },
   "sustainability": {
     "pageTitle": "🌱 स्थिरता और कार्बन",

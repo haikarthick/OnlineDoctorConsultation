@@ -143,6 +143,17 @@ export async function updateOrderStatus(id: string, status: string) {
   return response.data
 }
 
+// Deal handshake: both parties confirm the off-platform settlement
+export async function confirmMarketplaceDeal(orderId: string, paymentMethod?: string) {
+  const response = await client.post(`/marketplace/orders/${orderId}/confirm`, paymentMethod ? { paymentMethod } : {})
+  return response.data
+}
+
+export async function cancelMarketplaceDeal(orderId: string, reason?: string) {
+  const response = await client.post(`/marketplace/orders/${orderId}/cancel`, reason ? { reason } : {})
+  return response.data
+}
+
 export async function getMarketPrices(filters: any = {}) {
   const response = await client.get('/marketplace/prices', { params: filters })
   return response.data

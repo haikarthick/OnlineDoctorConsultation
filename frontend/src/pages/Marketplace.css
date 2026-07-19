@@ -738,3 +738,48 @@
   .mp-detail-layout { flex-direction: column; }
   .mp-detail-sidebar { width: 100%; min-width: unset; }
 }
+
+/* ═══════ FREE-CLASSIFIEDS DEAL WORKFLOW ═══════ */
+.mp-deal-steps {
+  display: flex; flex-direction: column; gap: 6px;
+  margin: 10px 0; padding: 10px; background: #f8fafc;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+}
+.mp-deal-step {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12.5px; color: #475569; line-height: 1.45;
+}
+.mp-deal-step-num {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
+  background: #4f46e5; color: #fff; font-size: 11px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.mp-deal-free-note {
+  font-size: 12px; color: #166534; background: #f0fdf4;
+  border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 10px; margin: 8px 0;
+  line-height: 1.4;
+}
+.mp-deal-tab-note { margin: 0 0 12px 0; }
+.mp-deal-reserved-badge {
+  display: block; text-align: center; font-weight: 600; font-size: 13px;
+  color: #92400e; background: #fef3c7; border: 1px solid #fde68a;
+  border-radius: 8px; padding: 8px 10px; margin-top: 8px;
+}
+.mp-deal-actions {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  min-width: 170px;
+}
+.mp-deal-pm { width: 100%; max-width: 190px; font-size: 12px; padding: 4px 8px; }
+.mp-deal-waiting { font-size: 12px; color: #4f46e5; font-weight: 600; }
+.mp-deal-other-done { font-size: 12px; color: #16a34a; font-weight: 600; }
+.mp-deal-done { font-size: 12.5px; color: #16a34a; font-weight: 600; }
+.mp-deal-until { font-size: 11px; color: #6b7280; margin-top: 3px; }
+.mp-badge.pending-review { background: #fef3c7; color: #92400e; }
+.mp-badge.rejected { background: #fee2e2; color: #dc2626; }
+.mp-badge.reserved { background: #ede9fe; color: #6d28d9; }
+@media (max-width: 640px) {
+  .mp-deal-actions { min-width: unset; width: 100%; }
+  .mp-deal-actions .module-btn { width: 100%; }
+  .mp-deal-pm { max-width: 100%; }
+  .mp-deal-steps { padding: 8px; }
+}

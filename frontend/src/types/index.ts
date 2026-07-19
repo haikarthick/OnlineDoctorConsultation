@@ -1329,7 +1329,7 @@ export interface MarketplaceListing {
   location?: string
   shippingOptions: any[]
   tags: string[]
-  status: 'draft' | 'active' | 'sold' | 'expired' | 'deleted' | 'rejected' | 'pending'
+  status: 'draft' | 'active' | 'sold' | 'expired' | 'deleted' | 'rejected' | 'pending' | 'reserved' | 'rehomed' | 'pending_closure'
   featured: boolean
   viewsCount: number
   sellerName?: string
@@ -1414,10 +1414,21 @@ export interface MarketplaceOrder {
   quantity: number
   unitPrice: number
   totalPrice: number
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled' | 'disputed'
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled' | 'disputed' | 'reserved'
   shippingAddress: Record<string, any>
   trackingNumber?: string
   notes?: string
+  // Deal handshake (free classifieds — settlement happens off-platform)
+  buyerConfirmedAt?: string
+  buyer_confirmed_at?: string
+  sellerConfirmedAt?: string
+  seller_confirmed_at?: string
+  paymentMethod?: string
+  payment_method?: string
+  reservedUntil?: string
+  reserved_until?: string
+  cancelReason?: string
+  cancel_reason?: string
   listingTitle?: string
   listing_title?: string
   category?: string

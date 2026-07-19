@@ -3534,7 +3534,45 @@
       "nearMe": "Near Me",
       "searching": "Searching nearby..."
     },
-    "inquirySent": "Inquiry sent successfully"
+    "inquirySent": "Inquiry sent successfully",
+    "deal": {
+      "reserveTitle": "Reserve & Deal Directly",
+      "reserveNow": "Reserve This Listing",
+      "reserveSuccess": "Reserved! The seller has been notified — connect, inspect, and settle directly with them.",
+      "submittedForReview": "Listing submitted! It will appear publicly after admin review.",
+      "howStep1": "Reserve the listing — the seller is notified",
+      "howStep2": "Connect and inspect the animal in person",
+      "howStep3": "Pay the seller directly (cash / your own UPI)",
+      "howStep4": "Both confirm here to complete the deal",
+      "freeNote": "This marketplace is 100% free — VetCare never handles the payment. Settle directly with the other party.",
+      "tabNote": "Deals are settled directly between buyer and seller. After you meet and settle, both parties confirm here to complete the deal.",
+      "currentlyReserved": "Currently reserved by a buyer",
+      "actionsCol": "Deal Actions",
+      "reservedUntil": "Reserved until",
+      "confirmReceipt": "Confirm Received",
+      "confirmPayment": "Payment Received",
+      "confirmRecorded": "Your confirmation is recorded.",
+      "waitingOther": "Waiting for the other party",
+      "otherConfirmed": "Other party confirmed",
+      "cancelDeal": "Cancel",
+      "dealCancelled": "Reservation cancelled — the listing is live again.",
+      "dealDone": "Deal completed",
+      "paymentMethod": "Payment method…",
+      "pm": {
+        "cash": "Cash",
+        "upi": "UPI (direct)",
+        "bankTransfer": "Bank transfer",
+        "other": "Other"
+      },
+      "pendingReview": "Pending Review",
+      "rejected": "Rejected",
+      "status": {
+        "reserved": "Reserved",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "pending": "Pending"
+      }
+    }
   },
   "sustainability": {
     "pageTitle": "🌱 Sustainability & Carbon",
