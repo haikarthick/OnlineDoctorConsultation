@@ -11,6 +11,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import HospitalDocumentService from '../services/HospitalDocumentService';
+import VetHospitalService from '../services/VetHospitalService';
 import { ForbiddenError, ValidationError } from '../utils/errors';
 import type { DocType } from '../services/HospitalDocumentService';
 import { REQUIRED_DOC_TYPES } from '../services/HospitalDocumentService';
@@ -21,6 +22,9 @@ class HospitalDocumentController {
   // ── Upload document ──────────────────────────────────────
   async uploadDocument(req: AuthRequest, res: Response): Promise<void> {
     const { id: hospitalId } = req.params;
+    if (!(await VetHospitalService.isAdminOrOwner(hospitalId, req.userId!, req.userRole!))) {
+      throw new ForbiddenError('Only the hospital owner or medical director can upload compliance documents');
+    }
     const { docType, expiryDate } = req.body as { docType: DocType; expiryDate?: string };
 
     if (!docType || !REQUIRED_DOC_TYPES.includes(docType)) {
@@ -59,6 +63,10 @@ class HospitalDocumentController {
   // ── List documents for a hospital ───────────────────────
   async listDocuments(req: AuthRequest, res: Response): Promise<void> {
     const { id: hospitalId } = req.params;
+    if (req.userRole !== 'admin') {
+      const role = await VetHospitalService.getMemberRole(hospitalId, req.userId!);
+      if (!role) throw new ForbiddenError('You are not a member of this hospital');
+    }
     const docs = await HospitalDocumentService.getDocuments(hospitalId);
     res.json({ success: true, data: docs });
   }

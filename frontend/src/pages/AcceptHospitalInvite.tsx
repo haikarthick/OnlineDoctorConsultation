@@ -24,6 +24,7 @@ export default function AcceptHospitalInvite() {
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({ firstName: '', lastName: '', phone: '', password: '', confirmPassword: '' })
+  const [acceptTerms, setAcceptTerms] = useState(false)
 
   useEffect(() => {
     if (!token) {
@@ -58,6 +59,7 @@ export default function AcceptHospitalInvite() {
     setFormError('')
     if (form.password.length < 8) return setFormError('Password must be at least 8 characters')
     if (form.password !== form.confirmPassword) return setFormError('Passwords do not match')
+    if (!acceptTerms) return setFormError(t('register.validation.acceptTermsRequired'))
     setSubmitting(true)
     try {
       const res = await apiService.acceptStaffInvite({
@@ -66,6 +68,7 @@ export default function AcceptHospitalInvite() {
         last_name: form.lastName,
         phone: form.phone,
         password: form.password,
+        acceptTerms: true,
       })
       if (res.success) {
         setStep('success')
@@ -182,7 +185,17 @@ export default function AcceptHospitalInvite() {
             🔒 {t('hospitalStaff.privacyNote')}
           </div>
 
-          <button type="submit" className="invite-btn" disabled={submitting}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, margin: '10px 0 14px', cursor: 'pointer', fontSize: 14, lineHeight: 1.5 }}>
+            <input type="checkbox" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)} style={{ marginTop: 3 }} />
+            <span>
+              {t('register.acceptPrefix')}{' '}
+              <a href="/policies/terms" target="_blank" rel="noopener noreferrer">{t('register.termsLink')}</a>
+              {' '}{t('register.acceptAnd')}{' '}
+              <a href="/policies/privacy" target="_blank" rel="noopener noreferrer">{t('register.privacyLink')}</a>
+            </span>
+          </label>
+
+          <button type="submit" className="invite-btn" disabled={submitting || !acceptTerms}>
             {submitting ? t('hospitalStaff.creating') : t('hospitalStaff.createAccount')}
           </button>
         </form>

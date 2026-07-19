@@ -122,8 +122,23 @@ class ApiService {
     return response.data
   }
 
-  async register(data: { firstName: string; lastName: string; email: string; phone: string; password: string; role: string }) {
+  async register(data: { firstName: string; lastName: string; email: string; phone: string; password: string; role: string; acceptTerms?: boolean; [key: string]: any }) {
     const response = await this.client.post('/auth/register', data)
+    return response.data
+  }
+
+  async forgotPassword(email: string) {
+    const response = await this.client.post('/auth/forgot-password', { email })
+    return response.data
+  }
+
+  async validateResetToken(token: string) {
+    const response = await this.client.get('/auth/reset-password/validate', { params: { token } })
+    return response.data
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const response = await this.client.post('/auth/reset-password', { token, newPassword })
     return response.data
   }
 
@@ -664,6 +679,181 @@ class ApiService {
     return response.data
   }
 
+  // ─── Payment module: checkout lifecycle ────────────────────
+  async initiatePaymentCheckout(bookingId: string, useWallet: boolean) {
+    const response = await this.client.post(`/payments/checkout/${bookingId}`, { useWallet })
+    return response.data
+  }
+
+  async verifyPayment(data: { paymentId: string; gatewayOrderId?: string; gatewayPaymentId?: string; gatewaySignature?: string }) {
+    const response = await this.client.post('/payments/verify', data)
+    return response.data
+  }
+
+  async getRefundPreview(bookingId: string) {
+    const response = await this.client.get(`/payments/refund-preview/${bookingId}`)
+    return response.data
+  }
+
+  async getPaymentReceipt(paymentId: string) {
+    const response = await this.client.get(`/payments/receipt/${paymentId}`)
+    return response.data
+  }
+
+  // ─── Doctor earnings ledger ─────────────────────────────────
+  async getEarningsSummary() {
+    const response = await this.client.get('/earnings/summary')
+    return response.data
+  }
+
+  async getEarningsStatement(params?: { limit?: number; offset?: number }) {
+    const response = await this.client.get('/earnings/statement', { params })
+    return response.data
+  }
+
+  // ─── Invoices & GST ─────────────────────────────────────────
+  async getInvoiceByPayment(paymentId: string) {
+    const response = await this.client.get(`/invoices/payment/${paymentId}`)
+    return response.data
+  }
+
+  async adminListTaxCodes() {
+    const response = await this.client.get('/admin/tax-codes')
+    return response.data
+  }
+
+  async adminUpdateTaxCode(sacCode: string, ratePercent: number) {
+    const response = await this.client.put(`/admin/tax-codes/${sacCode}`, { ratePercent })
+    return response.data
+  }
+
+  async adminFinanceOverview(from: string, to: string) {
+    const response = await this.client.get('/admin/reports/finance/overview', { params: { from, to } })
+    return response.data
+  }
+
+  async adminDownloadGstExport(from: string, to: string) {
+    const response = await this.client.get('/admin/reports/gst-export', { params: { from, to }, responseType: 'blob' })
+    return response.data
+  }
+
+  // ─── Platform referrals ─────────────────────────────────────
+  async createPlatformReferral(data: { toVetId?: string | null; reason: string; bookingId?: string; consultationId?: string }) {
+    const response = await this.client.post('/referrals/platform', data)
+    return response.data
+  }
+
+  async listMyPlatformReferrals() {
+    const response = await this.client.get('/referrals/platform/my')
+    return response.data
+  }
+
+  async getReferableItems() {
+    const response = await this.client.get('/referrals/platform/referable')
+    return response.data
+  }
+
+  async acceptPlatformReferral(id: string, data: { veterinarianId?: string; scheduledDate: string; timeSlotStart: string; timeSlotEnd: string; bookingType?: string; reasonForVisit?: string }) {
+    const response = await this.client.post(`/referrals/platform/${id}/accept`, data)
+    return response.data
+  }
+
+  async declinePlatformReferral(id: string, refundDestination?: 'wallet' | 'gateway') {
+    const response = await this.client.post(`/referrals/platform/${id}/decline`, { refundDestination })
+    return response.data
+  }
+
+  async requestWithdrawal() {
+    const response = await this.client.post('/withdrawals/request', {})
+    return response.data
+  }
+
+  async cancelWithdrawal(id: string) {
+    const response = await this.client.post(`/withdrawals/${id}/cancel`, {})
+    return response.data
+  }
+
+  async listMyWithdrawals() {
+    const response = await this.client.get('/withdrawals/my')
+    return response.data
+  }
+
+  async adminListWithdrawals(status?: string) {
+    const response = await this.client.get('/admin/withdrawals', { params: { status } })
+    return response.data
+  }
+
+  async adminNegativeBalances() {
+    const response = await this.client.get('/admin/withdrawals/negative-balances')
+    return response.data
+  }
+
+  async adminApproveWithdrawal(id: string, note?: string) {
+    const response = await this.client.put(`/admin/withdrawals/${id}/approve`, { note })
+    return response.data
+  }
+
+  async adminRejectWithdrawal(id: string, reason: string) {
+    const response = await this.client.put(`/admin/withdrawals/${id}/reject`, { reason })
+    return response.data
+  }
+
+  async adminSettleWithdrawal(id: string, utrReference: string, note?: string) {
+    const response = await this.client.put(`/admin/withdrawals/${id}/settle`, { utrReference, note })
+    return response.data
+  }
+
+  async adminDiscretionaryPayout(doctorId: string, utrReference: string, note: string) {
+    const response = await this.client.post('/admin/withdrawals/discretionary', { doctorId, utrReference, note })
+    return response.data
+  }
+
+  async adminListCommissionDoctors(search?: string) {
+    const response = await this.client.get('/admin/commission/doctors', { params: { search } })
+    return response.data
+  }
+
+  async adminUpdateCommissionOverride(userId: string, data: { commissionPercentOverride: number | null; commissionFlatOverride: number | null }) {
+    const response = await this.client.put(`/admin/commission/doctors/${userId}`, data)
+    return response.data
+  }
+
+  // ─── Legal documents & consent ──────────────────────────────
+  async getLegalDocuments() {
+    const response = await this.client.get('/legal/documents')
+    return response.data
+  }
+
+  async getLegalDocument(docType: string) {
+    const response = await this.client.get(`/legal/documents/${docType}`)
+    return response.data
+  }
+
+  async getPendingPolicyAcceptances() {
+    const response = await this.client.get('/legal/acceptances/pending')
+    return response.data
+  }
+
+  async acceptPolicies(docTypes: string[], context?: string) {
+    const response = await this.client.post('/legal/acceptances', { docTypes, context })
+    return response.data
+  }
+
+  async adminListLegalDocuments() {
+    const response = await this.client.get('/admin/legal-documents')
+    return response.data
+  }
+
+  async adminPublishLegalDocument(data: { docType: string; title: string; content: string; requiresReacceptance?: boolean }) {
+    const response = await this.client.post('/admin/legal-documents', data)
+    return response.data
+  }
+
+  async adminGetAcceptanceStats() {
+    const response = await this.client.get('/admin/legal-documents/acceptance-stats')
+    return response.data
+  }
+
   // ─── Wallet ───────────────────────────────────────────────
   async getWallet() {
     const response = await this.client.get('/wallet')
@@ -912,6 +1102,16 @@ class ApiService {
 
   async adminGetGatewaySettings() {
     const response = await this.client.get('/payments/gateway-settings')
+    return response.data
+  }
+
+  async adminGetRazorpayCredentials() {
+    const response = await this.client.get('/admin/razorpay-credentials')
+    return response.data
+  }
+
+  async adminUpdateRazorpayCredentials(environment: 'test' | 'live', data: { keyId: string; keySecret?: string; webhookSecret?: string }) {
+    const response = await this.client.put(`/admin/razorpay-credentials/${environment}`, data)
     return response.data
   }
 
@@ -1950,6 +2150,104 @@ class ApiService {
     return response.data
   }
 
+  // Deal handshake: both parties confirm the off-platform settlement
+  async confirmMarketplaceDeal(orderId: string, paymentMethod?: string) {
+    const response = await this.client.post(`/marketplace/orders/${orderId}/confirm`, paymentMethod ? { paymentMethod } : {})
+    return response.data
+  }
+
+  async cancelMarketplaceDeal(orderId: string, reason?: string) {
+    const response = await this.client.post(`/marketplace/orders/${orderId}/cancel`, reason ? { reason } : {})
+    return response.data
+  }
+
+  // ── Marketplace engagement (Phase 3): messaging, favorites, saved searches ──
+  async listMarketplaceThreads() {
+    const response = await this.client.get('/marketplace/threads')
+    return response.data
+  }
+
+  async getMarketplaceUnreadCount() {
+    const response = await this.client.get('/marketplace/threads/unread-count')
+    return response.data
+  }
+
+  async startMarketplaceThread(listingId: string, message?: string) {
+    const response = await this.client.post(`/marketplace/listings/${listingId}/threads`, message ? { message } : {})
+    return response.data
+  }
+
+  async getMarketplaceThreadMessages(threadId: string) {
+    const response = await this.client.get(`/marketplace/threads/${threadId}/messages`)
+    return response.data
+  }
+
+  async sendMarketplaceMessage(threadId: string, message: string) {
+    const response = await this.client.post(`/marketplace/threads/${threadId}/messages`, { message })
+    return response.data
+  }
+
+  async listMarketplaceFavorites() {
+    const response = await this.client.get('/marketplace/favorites')
+    return response.data
+  }
+
+  async getMarketplaceFavoriteIds() {
+    const response = await this.client.get('/marketplace/favorites/ids')
+    return response.data
+  }
+
+  async addMarketplaceFavorite(listingId: string) {
+    const response = await this.client.post(`/marketplace/listings/${listingId}/favorite`, {})
+    return response.data
+  }
+
+  async removeMarketplaceFavorite(listingId: string) {
+    const response = await this.client.delete(`/marketplace/listings/${listingId}/favorite`)
+    return response.data
+  }
+
+  async listMarketplaceSavedSearches() {
+    const response = await this.client.get('/marketplace/saved-searches')
+    return response.data
+  }
+
+  async createMarketplaceSavedSearch(data: { name: string; filters?: any; alertsEnabled?: boolean }) {
+    const response = await this.client.post('/marketplace/saved-searches', data)
+    return response.data
+  }
+
+  async updateMarketplaceSavedSearch(id: string, data: { name?: string; filters?: any; alertsEnabled?: boolean }) {
+    const response = await this.client.put(`/marketplace/saved-searches/${id}`, data)
+    return response.data
+  }
+
+  async deleteMarketplaceSavedSearch(id: string) {
+    const response = await this.client.delete(`/marketplace/saved-searches/${id}`)
+    return response.data
+  }
+
+  // ── Phase 5: config, reports ──
+  async getMarketplaceConfig() {
+    const response = await this.client.get('/marketplace/config')
+    return response.data
+  }
+
+  async reportMarketplaceListing(listingId: string, reason: string, details?: string) {
+    const response = await this.client.post(`/marketplace/listings/${listingId}/report`, { reason, details })
+    return response.data
+  }
+
+  async adminListMarketplaceReports(status?: string) {
+    const response = await this.client.get('/marketplace/admin/reports', { params: status ? { status } : {} })
+    return response.data
+  }
+
+  async adminResolveMarketplaceReport(id: string, status: string, resolution?: string) {
+    const response = await this.client.patch(`/marketplace/admin/reports/${id}`, { status, resolution })
+    return response.data
+  }
+
   async updateOrderStatus(id: string, status: string) {
     const response = await this.client.patch(`/marketplace/orders/${id}/status`, { status })
     return response.data
@@ -2581,7 +2879,7 @@ class ApiService {
     const response = await this.client.get(`/hospital-staff-invites/token/${token}`)
     return response.data
   }
-  async acceptStaffInvite(data: { token: string; first_name: string; last_name: string; phone?: string; password: string }) {
+  async acceptStaffInvite(data: { token: string; first_name: string; last_name: string; phone?: string; password: string; acceptTerms?: boolean }) {
     const response = await this.client.post('/hospital-staff-invites/accept', data)
     return response.data
   }

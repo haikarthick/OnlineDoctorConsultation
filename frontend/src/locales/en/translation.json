@@ -95,7 +95,13 @@
       "sheep": "Sheep",
       "pig": "Pig",
       "other": "Other"
-    }
+    },
+    "errorLoading": "Error loading data",
+    "errorSaving": "Error saving data",
+    "fillRequired": "Please fill all required fields",
+    "none": "None",
+    "error": "Error",
+    "deactivate": "Deactivate"
   },
   "nav": {
     "brand": "VetCare",
@@ -180,6 +186,7 @@
       "intelligence": "Intelligence",
       "vetNetwork": "Vet Network",
       "account": "Account",
+      "finance": "Finance",
       "administration": "Administration",
       "preferences": "Preferences"
     },
@@ -188,7 +195,14 @@
       "petOwner": "Pet Owner",
       "farmer": "Farmer",
       "admin": "Administrator"
-    }
+    },
+    "permissions": "Permissions",
+    "myPayments": "Payments & Receipts",
+    "legalPolicies": "Legal & Policies",
+    "commissionSettings": "Commission Rules",
+    "settlements": "Settlements",
+    "referrals": "Referrals",
+    "financeReports": "Finance Reports"
   },
   "login": {
     "welcome": "Welcome back",
@@ -219,7 +233,47 @@
     "dbWakingUp": "Database is waking up — retrying automatically in {{countdown}}s…",
     "dbWakingUpNote": "This is normal on first visit. Please wait.",
     "success": "✓ Login successful! Redirecting...",
-    "error": "Login failed"
+    "error": "Login failed",
+    "forgotPassword": "Forgot password?"
+  },
+  "forgotPassword": {
+    "title": "Forgot your password?",
+    "subtitle": "Enter your email and we'll send you a reset link.",
+    "emailLabel": "Email Address",
+    "sendLink": "Send Reset Link",
+    "sending": "Sending...",
+    "backToLogin": "Back to Login",
+    "successTitle": "Check your inbox",
+    "successBody": "If an account exists for this email, a password reset link has been sent. The link is valid for 1 hour.",
+    "spamHint": "Didn't receive it? Check your spam folder."
+  },
+  "resetPassword": {
+    "title": "Set a new password",
+    "subtitle": "Your new password must be at least 8 characters.",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "resetBtn": "Reset Password",
+    "resetting": "Resetting...",
+    "backToLogin": "Back to Login",
+    "successTitle": "Password reset successfully!",
+    "successBody": "Your password has been updated. You can now log in with your new password.",
+    "goToLogin": "Go to Login",
+    "validating": "Verifying reset link...",
+    "linkInvalidTitle": "Link not valid",
+    "invalidToken": "This reset link is malformed or invalid.",
+    "reasonExpired": "This reset link has expired. Please request a new one.",
+    "reasonUsed": "This reset link has already been used. Please request a new one.",
+    "reasonInvalid": "This reset link is invalid or does not exist.",
+    "requestNewLink": "Request a new link",
+    "passwordsMismatch": "Passwords do not match.",
+    "passwordWeak": "Password must contain at least one uppercase letter, one lowercase letter, and one number.",
+    "genericError": "Something went wrong. Please try again.",
+    "hint": {
+      "length": "At least 8 characters",
+      "upper": "Uppercase letter",
+      "lower": "Lowercase letter",
+      "number": "Number"
+    }
   },
   "register": {
     "title": "Create your account",
@@ -272,8 +326,14 @@
       "allRequired": "All fields are required",
       "passwordMismatch": "Passwords do not match",
       "passwordLength": "Password must be at least 8 characters",
-      "passwordComplexity": "Password must contain uppercase, lowercase, and a number"
-    }
+      "passwordComplexity": "Password must contain uppercase, lowercase, and a number",
+      "acceptTermsRequired": "Please accept the Terms of Service and Privacy Policy to continue."
+    },
+    "acceptPrefix": "I agree to the",
+    "termsLink": "Terms of Service",
+    "acceptAnd": "and",
+    "privacyLink": "Privacy Policy",
+    "doctorAgreementLink": "Doctor Service-Provider Agreement"
   },
   "home": {
     "signIn": "Sign In",
@@ -870,10 +930,14 @@
         "hospitalOversight": "Hospital oversight",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Manage inpatient cases"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "Patient",
@@ -902,10 +966,18 @@
       "reportBuilderTitle": "Report Builder",
       "reportBuilderDesc": "Create custom medical and analytics reports",
       "aiCopilotTitle": "AI Copilot",
-      "aiCopilotDesc": "Get AI-powered clinical decision support"
+      "aiCopilotDesc": "Get AI-powered clinical decision support",
+      "treatmentCampaigns": "Treatment Campaigns"
     },
     "findDoctor": "Find a Doctor →",
-    "manageSchedule": "Manage Schedule →"
+    "manageSchedule": "Manage Schedule →",
+    "quickActionsTitle": "Quick Actions",
+    "enterpriseOverview": "Enterprise Overview",
+    "enterpriseStats": {
+      "activeCampaigns": "Active Campaigns",
+      "pendingApprovals": "Pending Approvals",
+      "groups": "Groups"
+    }
   },
   "consultations": {
     "pageTitle": "🏥 Consultations & Appointments",
@@ -1351,7 +1423,10 @@
       "status": "Status",
       "severity": "Severity",
       "recordedBy": "Recorded By"
-    }
+    },
+    "noAnimalsTitle": "No Animals Found",
+    "noAnimalsHint": "Add an animal to view its health timeline",
+    "addAnimal": "Add Animal"
   },
   "medicalRecords": {
     "pageTitle": "📋 Medical Records",
@@ -2749,7 +2824,8 @@
     "viewReadings": "View Readings",
     "noSensors": "No sensors registered yet",
     "recordedAt": "Recorded At",
-    "noReadings": "No readings recorded yet"
+    "noReadings": "No readings recorded yet",
+    "selectEnterprise": "Select Enterprise"
   },
   "supplyChain": {
     "pageTitle": "🔗 Supply Chain & Traceability (Farm-to-Fork)",
@@ -2844,8 +2920,41 @@
     "checkIn": "Check In",
     "checkOut": "Check Out",
     "form": {
-      "title": "Title"
-    }
+      "title": "Title",
+      "taskType": "Task Type",
+      "dueDate": "Due Date",
+      "estimatedHours": "Estimated Hours",
+      "userId": "Worker",
+      "shiftDate": "Shift Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "roleOnShift": "Role on Shift"
+    },
+    "taskUpdated": "Task updated",
+    "checkedIn": "Checked in successfully",
+    "failedCheckIn": "Failed to check in",
+    "checkedOut": "Checked out successfully",
+    "failedCheckOut": "Failed to check out",
+    "openTasksByPriority": "Open Tasks by Priority",
+    "avgHours": "Avg. Hours",
+    "task": "Task",
+    "assignedTo": "Assigned To",
+    "due": "Due",
+    "priority": "Priority",
+    "worker": "Worker",
+    "time": "Time",
+    "role": "Role",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityCritical": "Critical",
+    "assigned": "Assigned",
+    "est": "Est.",
+    "start": "Start",
+    "complete": "Complete",
+    "noTasks": "No tasks found",
+    "scheduleShift": "Schedule Shift",
+    "noShifts": "No shifts scheduled"
   },
   "reportBuilder": {
     "pageTitle": "📊 Report Builder & Export Center",
@@ -3019,7 +3128,10 @@
       "auctions": "🔨 Auctions",
       "orders": "📦 Inquiries",
       "prices": "📈 Prices",
-      "admin": "🛡️ Admin"
+      "admin": "🛡️ Admin",
+      "messages": "💬 Messages",
+      "favorites": "❤️ Favorites",
+      "saved": "🔔 Saved"
     },
     "categories": {
       "all": "All Categories",
@@ -3185,7 +3297,24 @@
       "imagesTitle": "Listing Images",
       "imagesLabel": "Upload up to 5 images",
       "uploading": "Uploading...",
-      "uploadFailed": "Image upload failed"
+      "uploadFailed": "Image upload failed",
+      "selectBreed": "Select breed",
+      "selectSpeciesFirst": "Select a species first",
+      "priceHintTitle": "Suggested price from live listings",
+      "priceHintAvg": "Average",
+      "priceHintBasis_one": "Based on {{count}} listing",
+      "priceHintBasis_other": "Based on {{count}} listings",
+      "priceHintFair": "Fairly priced",
+      "useMyLocation": "Use my current location",
+      "locating": "Getting location…",
+      "locationSet": "Coordinates set — enables Near Me search",
+      "locationCaptured": "Location captured for this listing",
+      "locationGeoHint": "Adding coordinates lets nearby buyers find your listing with “Near Me”.",
+      "videoLabel": "Listing video (optional)",
+      "videoAdded": "Video added",
+      "removeVideo": "Remove video",
+      "videoUploaded": "Video uploaded",
+      "videoHint": "A short video builds trust and gets more responses."
     },
     "detail": {
       "backToListings": "← Back to listings",
@@ -3212,7 +3341,12 @@
       "feature": "☆ Feature",
       "leading": "★ Leading",
       "yourListing": "📋 Your Listing",
-      "yourListingDesc": "This is your listing. Other users can inquire or contact you about this animal."
+      "yourListingDesc": "This is your listing. Other users can inquire or contact you about this animal.",
+      "auctionEnded": "Auction ended",
+      "call": "Call",
+      "contactHidden": "Contact details hidden",
+      "requestContact": "Request Contact",
+      "watchVideo": "Watch video"
     },
     "card": {
       "hotDeal": "🔥 HOT DEAL",
@@ -3224,7 +3358,11 @@
       "certified": "📋 Certified",
       "contact": "Contact",
       "welfareAttested": "🛡️ Welfare Attested",
-      "registeredBreeder": "✅ Registered Breeder"
+      "registeredBreeder": "✅ Registered Breeder",
+      "healthPassport": "Health Passport",
+      "fairDeal": "Fair Deal",
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "Has video"
     },
     "orders": {
       "asBuyer": "� As Seeker",
@@ -3270,7 +3408,14 @@
       "noListings": "No listings to manage",
       "listingApproved": "Listing approved",
       "listingRejected": "Listing rejected",
-      "rejectionRequired": "Rejection reason is required"
+      "rejectionRequired": "Rejection reason is required",
+      "auctionFeature": "Auction Feature",
+      "auctionTitle": "Marketplace Auctions",
+      "auctionEnabled": "Auctions Enabled",
+      "auctionDisabled": "Auctions Disabled",
+      "auctionEnabledDesc": "Live auctions are currently active on the marketplace",
+      "auctionDisabledDesc": "Auctions are currently disabled for all listings",
+      "auctionLegalNote": "Enabling auctions allows timed bidding on animal listings. Ensure compliance with local livestock trading regulations."
     },
     "units": {
       "listings": "listings",
@@ -3329,7 +3474,8 @@
         "listings": "Listings",
         "settings": "Monetization",
         "plans": "Plans",
-        "revenue": "Revenue"
+        "revenue": "Revenue",
+        "reports": "Reports"
       },
       "featureToggles": "Feature Toggles",
       "allFreeNote": "All features are currently FREE for all users. Toggle features ON when you're ready to start charging.",
@@ -3403,6 +3549,122 @@
           "desc": "Priority position in search results"
         }
       }
+    },
+    "proximity": {
+      "notSupported": "Location not supported on this device",
+      "denied": "Location access denied. Please enable location permissions.",
+      "nearMeOn": "Near Me (On)",
+      "nearMe": "Near Me",
+      "searching": "Searching nearby..."
+    },
+    "inquirySent": "Inquiry sent successfully",
+    "deal": {
+      "reserveTitle": "Reserve & Deal Directly",
+      "reserveNow": "Reserve This Listing",
+      "reserveSuccess": "Reserved! The seller has been notified — connect, inspect, and settle directly with them.",
+      "submittedForReview": "Listing submitted! It will appear publicly after admin review.",
+      "howStep1": "Reserve the listing — the seller is notified",
+      "howStep2": "Connect and inspect the animal in person",
+      "howStep3": "Pay the seller directly (cash / your own UPI)",
+      "howStep4": "Both confirm here to complete the deal",
+      "freeNote": "This marketplace is 100% free — VetCare never handles the payment. Settle directly with the other party.",
+      "tabNote": "Deals are settled directly between buyer and seller. After you meet and settle, both parties confirm here to complete the deal.",
+      "currentlyReserved": "Currently reserved by a buyer",
+      "actionsCol": "Deal Actions",
+      "reservedUntil": "Reserved until",
+      "confirmReceipt": "Confirm Received",
+      "confirmPayment": "Payment Received",
+      "confirmRecorded": "Your confirmation is recorded.",
+      "waitingOther": "Waiting for the other party",
+      "otherConfirmed": "Other party confirmed",
+      "cancelDeal": "Cancel",
+      "dealCancelled": "Reservation cancelled — the listing is live again.",
+      "dealDone": "Deal completed",
+      "paymentMethod": "Payment method…",
+      "pm": {
+        "cash": "Cash",
+        "upi": "UPI (direct)",
+        "bankTransfer": "Bank transfer",
+        "other": "Other"
+      },
+      "pendingReview": "Pending Review",
+      "rejected": "Rejected",
+      "status": {
+        "reserved": "Reserved",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "pending": "Pending"
+      }
+    },
+    "engagement": {
+      "messageSeller": "Message Seller",
+      "addFavorite": "Add to favorites",
+      "removeFavorite": "Remove from favorites",
+      "noMessages": "No conversations yet. Message a seller from any listing to start one.",
+      "listing": "Listing",
+      "selectConversation": "Select a conversation to view messages",
+      "startConversation": "Say hello to start the conversation.",
+      "typeMessage": "Type a message…",
+      "send": "Send",
+      "chatSafety": "Keep chats on-platform. Never share bank details, OTPs or passwords. Meet and inspect before paying.",
+      "noFavorites": "No favorites yet. Tap the heart on any listing to save it here.",
+      "savedSearchesDesc": "Save a search and get notified when new matching listings are posted.",
+      "noSavedSearches": "No saved searches yet. Use the filters on Browse, then tap “Save this search”.",
+      "saveThisSearch": "Save this search",
+      "searchNamePlaceholder": "Name this search (e.g. Murrah buffalo near me)",
+      "save": "Save",
+      "searchSaved": "Search saved. You’ll be alerted about new matches.",
+      "mySearch": "My search",
+      "applySearch": "Apply",
+      "allListings": "All listings",
+      "alertsOn": "Alerts on — tap to mute",
+      "alertsOff": "Alerts off — tap to enable"
+    },
+    "pageOf": "Page {{current}} of {{total}}",
+    "report": {
+      "reportListing": "Report listing",
+      "reportingWhat": "Reporting: {{title}}",
+      "reason": "Reason",
+      "selectReason": "Select a reason…",
+      "details": "Details (optional)",
+      "detailsPlaceholder": "Anything that helps us review this…",
+      "submit": "Submit report",
+      "submitted": "Thanks — your report was submitted for review.",
+      "resolved": "Report updated.",
+      "adminTitle": "Reported listings",
+      "filterOpen": "Open reports",
+      "noReports": "No reports.",
+      "by": "by",
+      "markReviewing": "Mark reviewing",
+      "action": "Take action",
+      "dismiss": "Dismiss",
+      "resolutionPlaceholder": "Resolution note (optional)",
+      "reasons": {
+        "scam": "Scam or fraud",
+        "welfare_concern": "Animal welfare concern",
+        "prohibited": "Prohibited / illegal",
+        "miscategorized": "Wrong category",
+        "offensive": "Offensive content",
+        "wrong_info": "Misleading information",
+        "other": "Other"
+      },
+      "status": {
+        "open": "Open",
+        "reviewing": "Reviewing",
+        "actioned": "Actioned",
+        "dismissed": "Dismissed"
+      }
+    },
+    "services": {
+      "vetCheckTitle": "Pre-purchase vet check",
+      "vetCheckDesc": "Book a licensed vet to examine this animal before you commit — health, age and soundness verified.",
+      "bookVetCheck": "Book a pre-purchase vet check",
+      "transportDesc": "Need help moving the animal?",
+      "arrangeTransport": "Arrange transport"
+    },
+    "interlink": {
+      "treasureBanner": "Buying or selling products, feed or equipment?",
+      "visitTreasure": "Visit Treasure Mount"
     }
   },
   "sustainability": {
@@ -3496,7 +3758,12 @@
     "noGoals": "No sustainability goals created yet",
     "carbonBySpecies": "Carbon Footprint by Species",
     "species": "Species",
-    "headCount": "Head Count"
+    "headCount": "Head Count",
+    "emissionFactor": "Emission Factor",
+    "annualCO2kg": "Annual CO2 (kg)",
+    "annualCO2tons": "Annual CO2 (tons)",
+    "calculatingCarbon": "Calculating carbon footprint...",
+    "selectForCarbon": "Select an animal group to calculate its carbon footprint"
   },
   "wellnessPortal": {
     "pageTitle": "💚 Wellness Portal",
@@ -3757,7 +4024,8 @@
     "previous": "Previous",
     "next": "Next",
     "certificateFilter": "Certificate Services",
-    "allCertificates": "All Certificate Types"
+    "allCertificates": "All Certificate Types",
+    "failedToLoad": "Failed to load veterinarians. Please try again."
   },
   "myBookings": {
     "title": "My Bookings",
@@ -4403,7 +4671,9 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
-    "refundsIssued": "Refunds Issued"
+    "refundsIssued": "Refunds Issued",
+    "liveVideoSessions": "Live Video Sessions",
+    "totalBookings": "Total Bookings"
   },
   "disputeManagement": {
     "title": "Dispute Management",
@@ -4685,7 +4955,8 @@
     "totalPlatformBalance": "Total Platform Balance",
     "usersWithBalance": "Users with Balance",
     "topBalances": "Top Wallet Balances",
-    "avgBalance": "Average Balance"
+    "avgBalance": "Average Balance",
+    "reasonPlaceholder": "Enter reason..."
   },
   "permissionManagement": {
     "title": "Permission Management",
@@ -4778,7 +5049,15 @@
     "flag": "Flag",
     "unflag": "Unflag",
     "flagged": "Flagged",
-    "consultationDate": "Consultation Date"
+    "consultationDate": "Consultation Date",
+    "subtitle": "Review submitted feedback and enforce content policies",
+    "dashboard": "Dashboard",
+    "allStatuses": "All Statuses",
+    "approved": "Approved",
+    "hidden": "Hidden",
+    "removed": "Removed",
+    "refresh": "Refresh",
+    "noReviews": "No reviews found"
   },
   "staffSettings": {
     "title": "Staff Management",
@@ -4874,7 +5153,8 @@
     "maintenanceEnabled": "Enable Maintenance Mode",
     "maintenanceMessage": "Maintenance Message for Users",
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
-    "maintenanceAdminBypass": "Admin access - maintenance mode active"
+    "maintenanceAdminBypass": "Admin access - maintenance mode active",
+    "maintenanceBypass": "Maintenance Bypass"
   },
   "userManagement": {
     "title": "User Management",
@@ -5115,7 +5395,9 @@
       "animalEarTagId": "Ear Tag ID",
       "animalEarTagPlaceholder": "e.g., ET-2024-001"
     },
-    "noAnimalsFound": "No animals found"
+    "noAnimalsFound": "No animals found",
+    "noHospitals": "No hospitals assigned",
+    "noHospitalsDesc": "You are not assigned to any hospital in this network yet"
   },
   "inpatientManagement": {
     "title": "Inpatient & Boarding",
@@ -5957,7 +6239,10 @@
       "noPending": "No pending enrollments",
       "noActive": "No active enrollments",
       "noEnrollments": "No enrollments yet",
-      "searchHelper": "Search for existing platform users to send enrollment requests. Patients must accept before their data becomes visible to network staff."
+      "searchHelper": "Search for existing platform users to send enrollment requests. Patients must accept before their data becomes visible to network staff.",
+      "consentCollected": "Consent Collected",
+      "consentCollectedHint": "Patient has given consent for this network",
+      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
     },
     "audit": {
       "title": "Audit & Compliance",
@@ -6052,7 +6337,8 @@
     "department": "Department",
     "selectDepartment": "Select Department",
     "customDepartment": "Custom Department",
-    "noDepartment": "No Department"
+    "noDepartment": "No Department",
+    "memberName": "Member Name"
   },
   "networkReferrals": {
     "title": "Network Referrals",
@@ -6394,7 +6680,9 @@
     "noReadyDispense": "No prescriptions ready to dispense",
     "pendingReview": "Pending Review",
     "readyToDispense": "Ready to Dispense",
-    "nav": { "title": "Pharmacy" },
+    "nav": {
+      "title": "Pharmacy"
+    },
     "noNetworkHint": "You must be invited as a pharmacist to a hospital network to access the pharmacy module.",
     "tabs": {
       "overview": "Overview",
@@ -6498,7 +6786,9 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items"
+      "showing": "Showing {{count}} of {{total}} items",
+      "selectSupplier": "Select supplier...",
+      "noSuppliersHint": "Add a supplier first to create purchase orders"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6517,7 +6807,8 @@
       "leadTimeDays": "Lead Time (days)",
       "approvedLabel": "Approved Supplier",
       "approved": "Approved",
-      "unapproved": "Unapproved"
+      "unapproved": "Unapproved",
+      "selectPaymentTerms": "Select payment terms..."
     },
     "reorder": {
       "title": "Request Reorder",
@@ -6692,5 +6983,299 @@
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
     }
+  },
+  "chat": {
+    "couldNotStartSession": "Could not start chat session",
+    "failedToSendMessage": "Failed to send message",
+    "couldNotCreateSession": "Could not create chat session",
+    "aiBuddyHelper": "VetCare AI",
+    "thinking": "Thinking...",
+    "userAssistant": "Your Assistant",
+    "yourAssistant": "Your Assistant",
+    "newChat": "New Chat",
+    "startingUp": "Starting up...",
+    "hiUser": "Hi, {{name}}!",
+    "hiGuest": "Hi there!",
+    "iKnowAbout": "I can help with",
+    "askMeAnything": "Ask me anything about your pets and their health",
+    "askMeAnythingGeneral": "Ask me anything",
+    "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "Complete Your Payment",
+    "testModeNotice": "Test mode — no real money will be charged.",
+    "slotHeldFor": "Slot held for",
+    "consultationFee": "Consultation fee",
+    "useWallet": "Use wallet balance",
+    "walletBalance": "Wallet balance",
+    "walletApplied": "Wallet applied",
+    "payableNow": "Payable now",
+    "payButton": "Pay",
+    "payLater": "Pay later",
+    "refundPolicyNotice": "By paying you agree to the Refund & Cancellation Policy.",
+    "gatewayUnavailable": "The payment gateway is not available right now. Please try again later.",
+    "checkoutFailed": "Could not start the payment. Please try again.",
+    "demoFailed": "The simulated payment failed. You can try again.",
+    "verificationFailed": "Payment verification failed. If money was deducted it will be reconciled automatically.",
+    "expiredTitle": "Payment window expired",
+    "expiredMessage": "The slot was released because payment was not completed in time.",
+    "bookAgain": "Book again",
+    "demoGatewayTitle": "Demo Payment Gateway",
+    "demoGatewayMessage": "This is a simulated checkout for testing. No real money moves.",
+    "demoFail": "Simulate failure",
+    "demoPay": "Pay now",
+    "status": {
+      "completed": "Paid",
+      "partially_refunded": "Partially refunded",
+      "refunded": "Refunded",
+      "pending": "Pending",
+      "created": "Awaiting payment",
+      "expired": "Expired",
+      "failed": "Failed",
+      "transferred": "Transferred"
+    }
+  },
+  "paymentsPage": {
+    "title": "Payments & Receipts",
+    "subtitle": "Your consultation payments, refunds and receipts",
+    "empty": "No payments yet. Payments appear here after you book a consultation.",
+    "refunded": "Refunded",
+    "viewReceipt": "View receipt",
+    "receiptTitle": "Payment Receipt",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "animal": "Animal",
+    "date": "Date",
+    "totalPaid": "Total paid",
+    "print": "Print",
+    "invoiceNumber": "Invoice no.",
+    "taxableValue": "Taxable value",
+    "gstExempt": "GST-exempt veterinary healthcare service"
+  },
+  "policy": {
+    "backToHome": "Back to home",
+    "notFoundTitle": "Document not found",
+    "notFoundMessage": "This policy document is not published yet.",
+    "version": "Version",
+    "effectiveFrom": "Effective from"
+  },
+  "policyModal": {
+    "title": "Updated Policies",
+    "message": "Our policies have been updated. Please review and accept to continue using the platform.",
+    "agreeCheckbox": "I have read and agree to the updated policies listed above",
+    "agreeButton": "Agree & Continue"
+  },
+  "legalAdmin": {
+    "title": "Legal & Policies",
+    "subtitle": "Manage versioned platform policies and consent coverage",
+    "published": "New version published successfully.",
+    "publishFailed": "Failed to publish the new version.",
+    "usersAccepted": "users accepted",
+    "notPublished": "Not published yet",
+    "view": "View",
+    "newVersion": "New version",
+    "publishTitle": "Publish new version",
+    "publishHint": "Publishing creates a new immutable version. Tick re-acceptance only for material changes — users will be blocked at next login until they accept.",
+    "docTitle": "Title",
+    "docContent": "Content",
+    "requireReacceptance": "Require all affected users to re-accept this version",
+    "publishButton": "Publish",
+    "docTypes": {
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "refund_policy": "Refund & Cancellation Policy",
+      "wallet_terms": "Wallet Terms",
+      "doctor_agreement": "Doctor Agreement",
+      "grievance_policy": "Grievance Redressal Policy",
+      "disclaimer": "Service Disclaimer"
+    }
+  },
+  "earningsLedger": {
+    "clearing": "Clearing",
+    "available": "Available",
+    "locked": "In withdrawal",
+    "withdrawn": "Withdrawn",
+    "clearingHint": "Becomes available {{days}} day(s) after consultation",
+    "negativeHint": "Negative balance — recovered automatically from your next earnings",
+    "withdrawalThreshold": "Progress to minimum withdrawal",
+    "thresholdReached": "You can request a withdrawal now.",
+    "thresholdHint": "Withdrawal unlocks when your available balance reaches the minimum.",
+    "statementTitle": "Earnings Statement",
+    "colDate": "Date",
+    "colType": "Type",
+    "colPatient": "Patient",
+    "colGross": "Gross",
+    "colCommission": "Commission",
+    "colNet": "Net",
+    "colStatus": "Status",
+    "types": {
+      "consultation": "Consultation",
+      "cancel_compensation": "Cancellation compensation",
+      "no_show_compensation": "No-show compensation",
+      "penalty": "Penalty",
+      "adjustment": "Adjustment"
+    },
+    "statuses": {
+      "clearing": "Clearing",
+      "available": "Available",
+      "locked": "In withdrawal",
+      "withdrawn": "Withdrawn",
+      "reversed": "Reversed"
+    }
+  },
+  "commissionAdmin": {
+    "title": "Commission Rules",
+    "subtitle": "Per-doctor commission overrides — blank fields use the global default",
+    "globalSettings": "Global defaults",
+    "globalInfo": "Global default: {{percent}}% + {{flat}} flat fee per paid booking. Change it in System Settings (commission.defaultPercent / commission.flatFee).",
+    "saved": "Override saved. Applies to new payments only — past payments keep their snapshot.",
+    "saveFailed": "Failed to save the override.",
+    "searchPlaceholder": "Search doctor by name or email…",
+    "noDoctors": "No doctors found.",
+    "colDoctor": "Doctor",
+    "colFee": "Fee",
+    "colPercentOverride": "% override",
+    "colFlatOverride": "Flat override",
+    "snapshotNote": "Commission is snapshotted at payment time — changing overrides never rewrites past payments."
+  },
+  "withdrawals": {
+    "title": "Withdrawals",
+    "payoutOnFile": "Payout details on file — you can request a withdrawal of your full available balance.",
+    "payoutMissing": "Add your bank account or UPI details to enable withdrawals.",
+    "payoutDetails": "Payout details",
+    "requestButton": "Request withdrawal",
+    "requested": "Withdrawal requested. The platform team will settle it to your bank/UPI.",
+    "requestFailed": "Could not create the withdrawal request.",
+    "payoutSaved": "Payout details saved.",
+    "payoutSaveFailed": "Failed to save payout details.",
+    "accountName": "Account holder name",
+    "accountNumber": "Account number",
+    "ifsc": "IFSC code",
+    "upi": "UPI ID (optional)",
+    "netPaid": "Net paid",
+    "statuses": {
+      "requested": "Requested",
+      "approved": "Approved",
+      "settled": "Settled",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    }
+  },
+  "settlementsAdmin": {
+    "title": "Settlements",
+    "subtitle": "Doctor withdrawal requests, settlements and payouts",
+    "filterAll": "All",
+    "empty": "No withdrawal requests.",
+    "negativeTitle": "Doctors with negative balances",
+    "discretionary": "Discretionary",
+    "age": "Waiting {{days}} day(s)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "settle": "Settle",
+    "approved": "Request approved.",
+    "rejected": "Request rejected.",
+    "settled": "Settlement recorded.",
+    "actionFailed": "Action failed.",
+    "settleTitle": "Record settlement",
+    "settleHint": "Make the bank/UPI transfer first, then record the reference here.",
+    "utrPlaceholder": "UTR / transaction reference",
+    "notePlaceholder": "Note (optional)",
+    "rejectTitle": "Reject withdrawal",
+    "reasonPlaceholder": "Reason shown to the doctor…",
+    "discretionaryButton": "Discretionary payout",
+    "discretionaryTitle": "Discretionary payout",
+    "discretionaryHint": "Settles a doctor’s full available balance immediately, bypassing the minimum threshold. Requires a note (audit-logged).",
+    "doctorIdPlaceholder": "Doctor user ID",
+    "discretionaryNotePlaceholder": "Why this payout is being made…",
+    "payNow": "Pay now"
+  },
+  "referrals": {
+    "title": "Referrals",
+    "subtitlePatient": "Referrals from your doctors — accept, choose another doctor, or take a refund",
+    "subtitleVet": "Refer patients to other doctors and track referral outcomes",
+    "referButton": "Refer a patient",
+    "empty": "No referrals yet.",
+    "anyDoctor": "Any doctor (your choice)",
+    "paidAmount": "Paid amount",
+    "informational": "Specialist referral",
+    "accept": "Accept",
+    "chooseAnother": "Choose another doctor",
+    "refund": "Refund",
+    "acceptTitle": "Accept referral",
+    "acceptHint": "Pick a slot with the doctor. What you already paid moves with you automatically — you only pay any difference.",
+    "selectDoctor": "Select a doctor…",
+    "noSlots": "No slots available on this date. Try another date.",
+    "confirmAccept": "Continue",
+    "refundTitle": "Take a refund instead",
+    "refundHint": "You get a full refund plus a goodwill bonus because the doctor was unavailable.",
+    "refundToWallet": "Instant refund to wallet",
+    "refundToSource": "Refund to original payment method (5–7 days)",
+    "refunded": "Refund processed.",
+    "accepted": "Referral completed — your new booking is in place.",
+    "created": "Referral sent. The patient has been notified.",
+    "actionFailed": "Action failed.",
+    "deadlineIn": "Act within {{hours}}h",
+    "deadlinePassed": "Deadline passed",
+    "walletHopNotice": "Your earlier payment was moved to your wallet and will be applied automatically at checkout.",
+    "referTitle": "Refer a patient",
+    "referHint": "Pre-consultation referrals move the patient’s payment to the new doctor. Post-consultation referrals let the patient book a specialist normally.",
+    "upcomingBookings": "Upcoming paid bookings (payment transfers)",
+    "recentConsultations": "Recently completed consultations (specialist referral)",
+    "none": "None",
+    "targetDoctor": "Refer to",
+    "patientChooses": "Let the patient choose the doctor",
+    "reasonPlaceholder": "Reason for the referral (shown to the patient and the receiving doctor)…",
+    "referCostNotice": "If the patient chooses a refund instead, the refund costs are charged to your earnings ledger.",
+    "submitReferral": "Send referral",
+    "transferStatuses": {
+      "offered": "Awaiting your action",
+      "accepted": "Accepted",
+      "rechosen": "Doctor re-chosen",
+      "refunded": "Refunded",
+      "expired": "Expired",
+      "completed": "Completed"
+    }
+  },
+  "taxAdmin": {
+    "title": "Tax & GST",
+    "subtitle": "SAC rates apply to future invoices only — past invoices are immutable snapshots. Platform GSTIN, legal name and invoice prefix live in System Settings (tax.*).",
+    "colLabel": "Service",
+    "colRate": "GST rate",
+    "rateSaved": "Rate saved. Applies to invoices issued from now on.",
+    "rateSaveFailed": "Failed to save the rate.",
+    "exportTitle": "GST export (CSV)",
+    "exportButton": "Download CSV",
+    "exportFailed": "Export failed.",
+    "settingsHint": "The export contains taxable commission invoices and the exempt consultation register for your CA."
+  },
+  "financeAdmin": {
+    "title": "Finance Reports",
+    "subtitle": "Revenue, liabilities, TDS and payment health",
+    "noData": "No data for this range.",
+    "exportGst": "Export GST CSV",
+    "gstExportFailed": "Could not export GST report. Please try again.",
+    "revenueTitle": "Revenue (selected range)",
+    "gmv": "Gross bookings value",
+    "paidCount": "{{count}} paid booking(s)",
+    "commission": "Commission earned",
+    "processingCharges": "Processing charges",
+    "gatewayFees": "Gateway fees (cost)",
+    "refundsOut": "Refunds out",
+    "netRevenue": "Net platform revenue",
+    "netRevenueHint": "commission + processing charges − gateway fees",
+    "liabilitiesTitle": "Liabilities (current)",
+    "doctorClearing": "Doctor earnings clearing",
+    "doctorAvailable": "Doctor earnings available",
+    "doctorLocked": "In withdrawal",
+    "walletLiability": "Patient wallet liability",
+    "walletLiabilityHint": "money owed to customers — not platform revenue",
+    "tdsTitle": "TDS register (selected range)",
+    "tdsDeducted": "TDS deducted",
+    "tdsCount": "{{count}} settlement(s)",
+    "netPaidToDoctors": "Net paid to doctors",
+    "healthTitle": "Payment health",
+    "stuckPending": "Stuck pending payments",
+    "stuckPendingHint": "pending > 1h — reconciliation retries daily",
+    "openHolds": "Open payment holds"
   }
 }

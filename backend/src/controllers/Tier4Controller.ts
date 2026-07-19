@@ -7,6 +7,7 @@ import aiCopilotService from '../services/AiCopilotService';
 import digitalTwinService from '../services/DigitalTwinService';
 import marketplaceService from '../services/MarketplaceService';
 import monetizationService from '../services/MarketplaceMonetizationService';
+import engagementService from '../services/MarketplaceEngagementService';
 import sustainabilityService from '../services/SustainabilityService';
 import wellnessService from '../services/WellnessService';
 import geospatialService from '../services/GeospatialService';
@@ -210,7 +211,11 @@ class Tier4Controller {
 
   async listMarketplaceListings(req: Request, res: Response) {
     try {
-      const data = await marketplaceService.listListings(req.query);
+      const userId = (req as any).userId;
+      const isAdmin = (req as any).userRole === 'admin';
+      // Approval visibility is derived from the caller's identity, never from query params
+      const { includeUnapproved: _ignored, ...filters } = req.query as any;
+      const data = await marketplaceService.listListings(filters, userId, isAdmin);
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
@@ -218,7 +223,8 @@ class Tier4Controller {
   async getMarketplaceListing(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
-      const data = await marketplaceService.getListing(req.params.id, userId);
+      const isAdmin = (req as any).userRole === 'admin';
+      const data = await marketplaceService.getListing(req.params.id, userId, isAdmin);
       if (!data) return res.status(404).json({ error: { message: 'Listing not found' } });
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
@@ -234,16 +240,26 @@ class Tier4Controller {
 
   async updateMarketplaceListing(req: Request, res: Response) {
     try {
-      const data = await marketplaceService.updateListing(req.params.id, req.body);
+      const userId = (req as any).userId;
+      const isAdmin = (req as any).userRole === 'admin';
+      const data = await marketplaceService.updateListing(req.params.id, req.body, userId, isAdmin);
       res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      const code = /only edit your own|not found/i.test(err.message) ? (err.message.includes('not found') ? 404 : 403) : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
   }
 
   async deleteMarketplaceListing(req: Request, res: Response) {
     try {
-      await marketplaceService.deleteListing(req.params.id);
+      const userId = (req as any).userId;
+      const isAdmin = (req as any).userRole === 'admin';
+      await marketplaceService.deleteListing(req.params.id, userId, isAdmin);
       res.json({ data: { success: true } });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      const code = /only delete your own/i.test(err.message) ? 403 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
   }
 
   async listMarketplaceBids(req: Request, res: Response) {
@@ -280,9 +296,38 @@ class Tier4Controller {
 
   async updateOrderStatus(req: Request, res: Response) {
     try {
-      const data = await marketplaceService.updateOrderStatus(req.params.id, req.body.status);
+      const userId = (req as any).userId;
+      const isAdmin = (req as any).userRole === 'admin';
+      const data = await marketplaceService.updateOrderStatus(req.params.id, req.body.status, userId, isAdmin);
       res.json({ data });
-    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+    } catch (err: any) {
+      const code = /not part of this order/i.test(err.message) ? 403 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
+  }
+
+  // ── Deal handshake (free classifieds — settlement happens off-platform) ──
+
+  async confirmMarketplaceDeal(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await marketplaceService.confirmDeal(req.params.id, userId, req.body.paymentMethod);
+      res.json({ data });
+    } catch (err: any) {
+      const code = /not part of this deal/i.test(err.message) ? 403 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
+  }
+
+  async cancelMarketplaceDeal(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await marketplaceService.cancelDeal(req.params.id, userId, req.body.reason);
+      res.json({ data });
+    } catch (err: any) {
+      const code = /not part of this deal/i.test(err.message) ? 403 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
   }
 
   async getMarketplaceDashboard(req: Request, res: Response) {
@@ -339,6 +384,149 @@ class Tier4Controller {
   async getMarketPrices(req: Request, res: Response) {
     try {
       const data = await marketplaceService.getMarketPrices(req.query);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  // ═══════════════════ Marketplace Engagement (Phase 3) ═══════════════════
+
+  private static engagementErrorCode(msg: string): number {
+    if (/not part of this conversation|your own listing/i.test(msg)) return 403;
+    if (/not found/i.test(msg)) return 404;
+    return 400;
+  }
+
+  // ── Messaging ──
+  async startMarketplaceThread(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const thread = await engagementService.getOrCreateThread(req.params.listingId, userId);
+      // If a first message is supplied, send it in the same call
+      if (req.body.message && String(req.body.message).trim()) {
+        await engagementService.sendMessage(thread.id, userId, String(req.body.message));
+      }
+      res.status(201).json({ data: thread });
+    } catch (err: any) { res.status(Tier4Controller.engagementErrorCode(err.message)).json({ error: { message: err.message } }); }
+  }
+
+  async listMarketplaceThreads(req: Request, res: Response) {
+    try {
+      const data = await engagementService.listThreads((req as any).userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getMarketplaceThreadMessages(req: Request, res: Response) {
+    try {
+      const data = await engagementService.getMessages(req.params.id, (req as any).userId);
+      res.json({ data });
+    } catch (err: any) { res.status(Tier4Controller.engagementErrorCode(err.message)).json({ error: { message: err.message } }); }
+  }
+
+  async sendMarketplaceMessage(req: Request, res: Response) {
+    try {
+      const data = await engagementService.sendMessage(req.params.id, (req as any).userId, req.body.message);
+      res.status(201).json({ data });
+    } catch (err: any) { res.status(Tier4Controller.engagementErrorCode(err.message)).json({ error: { message: err.message } }); }
+  }
+
+  async getMarketplaceUnreadCount(req: Request, res: Response) {
+    try {
+      const unread = await engagementService.getUnreadCount((req as any).userId);
+      res.json({ data: { unread } });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  // ── Favorites ──
+  async addMarketplaceFavorite(req: Request, res: Response) {
+    try {
+      const data = await engagementService.addFavorite((req as any).userId, req.params.listingId);
+      res.status(201).json({ data });
+    } catch (err: any) { res.status(err.message.includes('not found') ? 404 : 400).json({ error: { message: err.message } }); }
+  }
+
+  async removeMarketplaceFavorite(req: Request, res: Response) {
+    try {
+      const data = await engagementService.removeFavorite((req as any).userId, req.params.listingId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async listMarketplaceFavorites(req: Request, res: Response) {
+    try {
+      const data = await engagementService.listFavorites((req as any).userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async getMarketplaceFavoriteIds(req: Request, res: Response) {
+    try {
+      const ids = await engagementService.getFavoriteIds((req as any).userId);
+      res.json({ data: { ids } });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  // ── Saved searches ──
+  async listMarketplaceSavedSearches(req: Request, res: Response) {
+    try {
+      const data = await engagementService.listSavedSearches((req as any).userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async createMarketplaceSavedSearch(req: Request, res: Response) {
+    try {
+      const { name, filters, alertsEnabled } = req.body;
+      const data = await engagementService.createSavedSearch((req as any).userId, name, filters || {}, alertsEnabled ?? true);
+      res.status(201).json({ data });
+    } catch (err: any) { res.status(400).json({ error: { message: err.message } }); }
+  }
+
+  async updateMarketplaceSavedSearch(req: Request, res: Response) {
+    try {
+      const data = await engagementService.updateSavedSearch(req.params.id, (req as any).userId, req.body);
+      res.json({ data });
+    } catch (err: any) { res.status(err.message.includes('not found') ? 404 : 400).json({ error: { message: err.message } }); }
+  }
+
+  async deleteMarketplaceSavedSearch(req: Request, res: Response) {
+    try {
+      const data = await engagementService.deleteSavedSearch(req.params.id, (req as any).userId);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  // ── Reports (trust & safety) ──
+  async reportMarketplaceListing(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await engagementService.createReport(userId, req.params.listingId, req.body.reason, req.body.details);
+      res.status(201).json({ data });
+    } catch (err: any) {
+      const code = /already reported|your own listing/i.test(err.message) ? 400 : err.message.includes('not found') ? 404 : 400;
+      res.status(code).json({ error: { message: err.message } });
+    }
+  }
+
+  async adminListMarketplaceReports(req: Request, res: Response) {
+    try {
+      const data = await engagementService.adminListReports(req.query);
+      res.json({ data });
+    } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
+  }
+
+  async adminResolveMarketplaceReport(req: Request, res: Response) {
+    try {
+      const userId = (req as any).userId;
+      const data = await engagementService.adminResolveReport(req.params.id, userId, req.body.status, req.body.resolution);
+      res.json({ data });
+    } catch (err: any) { res.status(err.message.includes('not found') ? 404 : 400).json({ error: { message: err.message } }); }
+  }
+
+  // ── Interlink / referral config ──
+  async getMarketplaceConfig(req: Request, res: Response) {
+    try {
+      const data = await engagementService.getConfig();
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }
   }
@@ -632,6 +820,10 @@ class Tier4Controller {
 
   async createUserSubscription(req: Request, res: Response) {
     try {
+      // Marketplace is free for end users — paid plans stay dark unless the
+      // platform admin explicitly enables them
+      const enabled = await monetizationService.isFeatureEnabled('subscription_plans');
+      if (!enabled) return res.status(403).json({ error: { message: 'Subscription plans are not available — the marketplace is free to use.' } });
       const userId = (req as any).userId;
       const data = await monetizationService.createSubscription(userId, req.body.planId);
       res.status(201).json({ data });
@@ -648,7 +840,13 @@ class Tier4Controller {
 
   async boostMarketplaceListing(req: Request, res: Response) {
     try {
+      // Boosts stay dark while the marketplace is free for end users
+      const enabled = await monetizationService.isFeatureEnabled('listing_boost');
+      if (!enabled) return res.status(403).json({ error: { message: 'Listing boosts are not available — the marketplace is free to use.' } });
       const userId = (req as any).userId;
+      // Ownership guard: you can only boost your own listing
+      const listing = await marketplaceService.getListing(req.params.id, userId);
+      if (!listing || listing.seller_id !== userId) return res.status(403).json({ error: { message: 'You can only boost your own listings' } });
       const data = await monetizationService.boostListing(req.params.id, userId, req.body.boostType || 'standard');
       res.json({ data });
     } catch (err: any) { res.status(500).json({ error: { message: err.message } }); }

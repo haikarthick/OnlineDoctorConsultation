@@ -1430,7 +1430,7 @@ const HospitalNetworks: React.FC = () => {
           <p className="hn-subtitle">Manage enterprise hospital groups, members, and compliance.</p>
         </div>
         <div className="hn-header-actions">
-          {activeTab === 'networks' && (
+          {activeTab === 'networks' && (user?.role === 'admin' || user?.role === 'corporate_admin') && (
             <button className="module-btn primary" onClick={() => setShowCreateModal(true)}>
               + {t('hospitalNetworks.createNetwork')}
             </button>
@@ -1665,9 +1665,11 @@ const HospitalNetworks: React.FC = () => {
                       : <span className="badge badge-pending">{t('hospitalNetworks.status.pending')}</span>
                     }
                   </div>
-                  <button className="module-btn small" onClick={() => setEditingNetwork(selectedNetwork)}>
-                    ✏ {t('hospitalNetworks.actions.edit')}
-                  </button>
+                  {(userNetworkRole === 'corporate_admin' || user?.role === 'admin') && (
+                    <button className="module-btn small" onClick={() => setEditingNetwork(selectedNetwork)}>
+                      ✏ {t('hospitalNetworks.actions.edit')}
+                    </button>
+                  )}
                   {userNetworkRole === 'corporate_admin' && (
                     <button
                       className="module-btn small"
@@ -1986,14 +1988,16 @@ const HospitalNetworks: React.FC = () => {
                 <div className="module-card">
                   <div className="hn-panel-header">
                     <h3>{t('hospitalNetworks.detail.staff')}</h3>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="module-btn small" onClick={() => { setShowInviteStaff(true); setInviteStaffError('') }}>
-                        ✉️ {t('hospitalNetworks.detail.inviteStaff')}
-                      </button>
-                      <button className="module-btn small primary" onClick={() => setShowAddMember(true)}>
-                        + {t('hospitalNetworks.detail.addMember')}
-                      </button>
-                    </div>
+                    {(userNetworkRole === 'corporate_admin' || userNetworkRole === 'hospital_director' || user?.role === 'admin') && (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="module-btn small" onClick={() => { setShowInviteStaff(true); setInviteStaffError('') }}>
+                          ✉️ {t('hospitalNetworks.detail.inviteStaff')}
+                        </button>
+                        <button className="module-btn small primary" onClick={() => setShowAddMember(true)}>
+                          + {t('hospitalNetworks.detail.addMember')}
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="card-body">
                     {networkMembers.length === 0 ? (

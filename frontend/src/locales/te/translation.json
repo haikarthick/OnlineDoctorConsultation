@@ -95,7 +95,13 @@
     "viewAll": "View All",
     "requiredField": "Required field",
     "saveChanges": "Save Changes",
-    "action": "Action"
+    "action": "Action",
+    "errorLoading": "Error loading data",
+    "errorSaving": "Error saving data",
+    "fillRequired": "Please fill all required fields",
+    "none": "None",
+    "error": "Error",
+    "deactivate": "Deactivate"
   },
   "nav": {
     "brand": "VetCare",
@@ -172,6 +178,7 @@
       "intelligence": "మేధస్సు",
       "vetNetwork": "పశువైద్య నెట్‌వర్క్",
       "account": "ఖాతా",
+      "finance": "ఫైనాన్స్",
       "administration": "పరిపాలన",
       "preferences": "ప్రాధాన్యతలు"
     },
@@ -189,7 +196,13 @@
       "approve": "Approve",
       "reject": "Reject",
       "approvalRequired": "This movement requires manager approval"
-    }
+    },
+    "myPayments": "చెల్లింపులు & రసీదులు",
+    "legalPolicies": "చట్టపరమైన & విధానాలు",
+    "commissionSettings": "కమిషన్ నియమాలు",
+    "settlements": "సెటిల్మెంట్లు",
+    "referrals": "రెఫరల్స్",
+    "financeReports": "ఫైనాన్స్ నివేదికలు"
   },
   "login": {
     "welcome": "తిరిగి స్వాగతం",
@@ -220,7 +233,47 @@
     "dbWakingUp": "డేటాబేస్ మేల్కొంటోంది — {{countdown}}s లో స్వయంచాలకంగా మళ్లీ ప్రయత్నిస్తోంది…",
     "dbWakingUpNote": "మొదటి సందర్శనలో ఇది సాధారణం. దయచేసి వేచి ఉండండి.",
     "success": "✓ లాగిన్ విజయవంతం! దారి మళ్లిస్తోంది...",
-    "error": "లాగిన్ విఫలమైంది"
+    "error": "లాగిన్ విఫలమైంది",
+    "forgotPassword": "పాస్‌వర్డ్ మర్చిపోయారా?"
+  },
+  "forgotPassword": {
+    "title": "పాస్‌వర్డ్ మర్చిపోయారా?",
+    "subtitle": "మీ ఇమెయిల్ నమోదు చేయండి, మేము రీసెట్ లింక్ పంపుతాము.",
+    "emailLabel": "ఇమెయిల్ చిరునామా",
+    "sendLink": "రీసెట్ లింక్ పంపు",
+    "sending": "పంపుతోంది...",
+    "backToLogin": "లాగిన్‌కి తిరిగి వెళ్ళు",
+    "successTitle": "మీ inbox తనిఖీ చేయండి",
+    "successBody": "ఈ ఇమెయిల్‌కు ఖాతా ఉంటే, పాస్‌వర్డ్ రీసెట్ లింక్ పంపబడింది. లింక్ 1 గంట వరకు చెల్లుబాటు అవుతుంది.",
+    "spamHint": "అందుకోలేదా? మీ spam ఫోల్డర్ తనిఖీ చేయండి."
+  },
+  "resetPassword": {
+    "title": "కొత్త పాస్‌వర్డ్ సెట్ చేయండి",
+    "subtitle": "కొత్త పాస్‌వర్డ్ కనీసం 8 అక్షరాలు ఉండాలి.",
+    "newPasswordLabel": "కొత్త పాస్‌వర్డ్",
+    "confirmPasswordLabel": "పాస్‌వర్డ్ నిర్ధారించండి",
+    "resetBtn": "పాస్‌వర్డ్ రీసెట్ చేయండి",
+    "resetting": "రీసెట్ అవుతోంది...",
+    "backToLogin": "లాగిన్‌కి తిరిగి వెళ్ళు",
+    "successTitle": "పాస్‌వర్డ్ విజయవంతంగా రీసెట్ అయింది!",
+    "successBody": "మీ పాస్‌వర్డ్ అప్‌డేట్ చేయబడింది. ఇప్పుడు కొత్త పాస్‌వర్డ్‌తో లాగిన్ చేయవచ్చు.",
+    "goToLogin": "లాగిన్‌కి వెళ్ళు",
+    "validating": "రీసెట్ లింక్ ధృవీకరిస్తోంది...",
+    "linkInvalidTitle": "లింక్ చెల్లదు",
+    "invalidToken": "ఈ రీసెట్ లింక్ తప్పుగా లేదా చెల్లనిది.",
+    "reasonExpired": "ఈ రీసెట్ లింక్ గడువు ముగిసింది. కొత్తది అభ్యర్థించండి.",
+    "reasonUsed": "ఈ రీసెట్ లింక్ ఇప్పటికే ఉపయోగించబడింది. కొత్తది అభ్యర్థించండి.",
+    "reasonInvalid": "ఈ రీసెట్ లింక్ చెల్లదు లేదా లేదు.",
+    "requestNewLink": "కొత్త లింక్ అభ్యర్థించండి",
+    "passwordsMismatch": "పాస్‌వర్డ్‌లు సరిపోలలేదు.",
+    "passwordWeak": "పాస్‌వర్డ్‌లో కనీసం ఒక పెద్ద అక్షరం, ఒక చిన్న అక్షరం మరియు ఒక సంఖ్య ఉండాలి.",
+    "genericError": "ఏదో తప్పు జరిగింది. మళ్ళీ ప్రయత్నించండి.",
+    "hint": {
+      "length": "కనీసం 8 అక్షరాలు",
+      "upper": "పెద్ద అక్షరం",
+      "lower": "చిన్న అక్షరం",
+      "number": "సంఖ్య"
+    }
   },
   "register": {
     "title": "మీ ఖాతాను సృష్టించుకోండి",
@@ -273,8 +326,14 @@
       "allRequired": "అన్ని ఫీల్డ్‌లు అవసరం",
       "passwordMismatch": "పాస్‌వర్డ్‌లు సరిపోలడం లేదు",
       "passwordLength": "పాస్‌వర్డ్ కనీసం 8 అక్షరాలు ఉండాలి",
-      "passwordComplexity": "పాస్‌వర్డ్‌లో పెద్ద, చిన్న అక్షరాలు మరియు సంఖ్య ఉండాలి"
-    }
+      "passwordComplexity": "పాస్‌వర్డ్‌లో పెద్ద, చిన్న అక్షరాలు మరియు సంఖ్య ఉండాలి",
+      "acceptTermsRequired": "కొనసాగడానికి సేవా నిబంధనలు మరియు గోప్యతా విధానాన్ని అంగీకరించండి."
+    },
+    "acceptPrefix": "నేను అంగీకరిస్తున్నాను",
+    "termsLink": "సేవా నిబంధనలు",
+    "acceptAnd": "మరియు",
+    "privacyLink": "గోప్యతా విధానం",
+    "doctorAgreementLink": "డాక్టర్ సేవా ఒప్పందం"
   },
   "home": {
     "signIn": "సైన్ ఇన్",
@@ -871,10 +930,14 @@
         "hospitalOversight": "ఆసుపత్రి పర్యవేక్షణ",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Manage inpatient cases"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "రోగి",
@@ -903,10 +966,18 @@
       "reportBuilderTitle": "రిపోర్ట్ బిల్డర్",
       "reportBuilderDesc": "కస్టమ్ వైద్య మరియు విశ్లేషణ నివేదికలను రూపొందించండి",
       "aiCopilotTitle": "AI కోపైలట్",
-      "aiCopilotDesc": "AI-ఆధారిత క్లినికల్ నిర్ణయ మద్దతు పొందండి"
+      "aiCopilotDesc": "AI-ఆధారిత క్లినికల్ నిర్ణయ మద్దతు పొందండి",
+      "treatmentCampaigns": "Treatment Campaigns"
     },
     "findDoctor": "వైద్యుడిని కనుగొనండి →",
-    "manageSchedule": "షెడ్యూల్ నిర్వహించండి →"
+    "manageSchedule": "షెడ్యూల్ నిర్వహించండి →",
+    "quickActionsTitle": "Quick Actions",
+    "enterpriseOverview": "Enterprise Overview",
+    "enterpriseStats": {
+      "activeCampaigns": "Active Campaigns",
+      "pendingApprovals": "Pending Approvals",
+      "groups": "Groups"
+    }
   },
   "consultations": {
     "pageTitle": "🏥 సంప్రదింపులు & అపాయింట్‌మెంట్లు",
@@ -1352,7 +1423,10 @@
       "status": "స్థితి",
       "severity": "తీవ్రత",
       "recordedBy": "నమోదు చేసినవారు"
-    }
+    },
+    "noAnimalsTitle": "No Animals Found",
+    "noAnimalsHint": "Add an animal to view its health timeline",
+    "addAnimal": "Add Animal"
   },
   "medicalRecords": {
     "pageTitle": "📋 వైద్య రికార్డులు",
@@ -2750,7 +2824,8 @@
     "viewReadings": "View Readings",
     "noSensors": "No sensors registered yet",
     "recordedAt": "Recorded At",
-    "noReadings": "No readings recorded yet"
+    "noReadings": "No readings recorded yet",
+    "selectEnterprise": "Select Enterprise"
   },
   "supplyChain": {
     "pageTitle": "🔗 సరఫరా గొలుసు & ట్రేసబిలిటీ (ఫారం-టు-ఫోర్క్)",
@@ -2845,8 +2920,41 @@
     "checkIn": "చెక్ ఇన్",
     "checkOut": "చెక్ అవుట్",
     "form": {
-      "title": "Title"
-    }
+      "title": "Title",
+      "taskType": "Task Type",
+      "dueDate": "Due Date",
+      "estimatedHours": "Estimated Hours",
+      "userId": "Worker",
+      "shiftDate": "Shift Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "roleOnShift": "Role on Shift"
+    },
+    "taskUpdated": "Task updated",
+    "checkedIn": "Checked in successfully",
+    "failedCheckIn": "Failed to check in",
+    "checkedOut": "Checked out successfully",
+    "failedCheckOut": "Failed to check out",
+    "openTasksByPriority": "Open Tasks by Priority",
+    "avgHours": "Avg. Hours",
+    "task": "Task",
+    "assignedTo": "Assigned To",
+    "due": "Due",
+    "priority": "Priority",
+    "worker": "Worker",
+    "time": "Time",
+    "role": "Role",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityCritical": "Critical",
+    "assigned": "Assigned",
+    "est": "Est.",
+    "start": "Start",
+    "complete": "Complete",
+    "noTasks": "No tasks found",
+    "scheduleShift": "Schedule Shift",
+    "noShifts": "No shifts scheduled"
   },
   "reportBuilder": {
     "pageTitle": "📊 నివేదిక బిల్డర్ & ఎగుమతి కేంద్రం",
@@ -3020,7 +3128,10 @@
       "auctions": "🔨 వేలాలు",
       "orders": "📦 విచారణలు",
       "prices": "📈 ధరలు",
-      "admin": "🛡️ అడ్మిన్"
+      "admin": "🛡️ అడ్మిన్",
+      "messages": "💬 సందేశాలు",
+      "favorites": "❤️ ఇష్టమైనవి",
+      "saved": "🔔 సేవ్ చేసినవి"
     },
     "categories": {
       "all": "అన్ని వర్గాలు",
@@ -3186,7 +3297,24 @@
       "imagesTitle": "లిస్టింగ్ చిత్రాలు",
       "imagesLabel": "5 చిత్రాల వరకు అప్‌లోడ్ చేయండి",
       "uploading": "అప్‌లోడ్ అవుతోంది...",
-      "uploadFailed": "చిత్రం అప్‌లోడ్ విఫలమైంది"
+      "uploadFailed": "చిత్రం అప్‌లోడ్ విఫలమైంది",
+      "selectBreed": "జాతిని ఎంచుకోండి",
+      "selectSpeciesFirst": "ముందుగా జాతిని ఎంచుకోండి",
+      "priceHintTitle": "యాక్టివ్ లిస్టింగ్‌ల నుండి సూచించిన ధర",
+      "priceHintAvg": "సగటు",
+      "priceHintBasis_one": "{{count}} లిస్టింగ్ ఆధారంగా",
+      "priceHintBasis_other": "{{count}} లిస్టింగ్‌ల ఆధారంగా",
+      "priceHintFair": "సరైన ధర",
+      "useMyLocation": "నా ప్రస్తుత స్థానాన్ని ఉపయోగించు",
+      "locating": "స్థానం పొందుతోంది…",
+      "locationSet": "కోఆర్డినేట్‌లు సెట్ — “నా దగ్గర” శోధన ప్రారంభం",
+      "locationCaptured": "ఈ లిస్టింగ్ కోసం స్థానం క్యాప్చర్ చేయబడింది",
+      "locationGeoHint": "కోఆర్డినేట్‌లు జోడించడం వల్ల సమీపంలోని కొనుగోలుదారులు “నా దగ్గర”తో మీ లిస్టింగ్‌ను కనుగొనగలరు.",
+      "videoLabel": "లిస్టింగ్ వీడియో (ఐచ్ఛికం)",
+      "videoAdded": "వీడియో జోడించబడింది",
+      "removeVideo": "వీడియో తీసివేయి",
+      "videoUploaded": "వీడియో అప్‌లోడ్ చేయబడింది",
+      "videoHint": "చిన్న వీడియో నమ్మకాన్ని పెంచి ఎక్కువ ప్రతిస్పందనలు తెస్తుంది."
     },
     "detail": {
       "backToListings": "← జాబితాలకు తిరిగి",
@@ -3213,7 +3341,12 @@
       "feature": "☆ ఫీచర్",
       "leading": "★ ముందంజ",
       "yourListing": "📋 మీ లిస్టింగ్",
-      "yourListingDesc": "ఇది మీ లిస్టింగ్. ఇతర వినియోగదారులు ఈ జంతువు గురించి విచారించవచ్చు."
+      "yourListingDesc": "ఇది మీ లిస్టింగ్. ఇతర వినియోగదారులు ఈ జంతువు గురించి విచారించవచ్చు.",
+      "auctionEnded": "Auction ended",
+      "call": "Call",
+      "contactHidden": "Contact details hidden",
+      "requestContact": "Request Contact",
+      "watchVideo": "వీడియో చూడండి"
     },
     "card": {
       "hotDeal": "🔥 హాట్ డీల్",
@@ -3225,7 +3358,11 @@
       "certified": "📋 ధృవీకరించబడిన",
       "contact": "సంప్రదింపు",
       "welfareAttested": "🛡️ సంక్షేమం ధృవీకరించబడింది",
-      "registeredBreeder": "✅ నోందిత బ్రీడర్"
+      "registeredBreeder": "✅ నోందిత బ్రీడర్",
+      "healthPassport": "Health Passport",
+      "fairDeal": "Fair Deal",
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "వీడియో ఉంది"
     },
     "orders": {
       "asBuyer": "🔍 అన్వేషకుడిగా",
@@ -3271,7 +3408,14 @@
       "noListings": "నిర్వహించడానికి జాబితాలు లేవు",
       "listingApproved": "జాబితా ఆమోదించబడింది",
       "listingRejected": "జాబితా తిరస్కరించబడింది",
-      "rejectionRequired": "తిరస్కరణ కారణం అవసరం"
+      "rejectionRequired": "తిరస్కరణ కారణం అవసరం",
+      "auctionFeature": "Auction Feature",
+      "auctionTitle": "Marketplace Auctions",
+      "auctionEnabled": "Auctions Enabled",
+      "auctionDisabled": "Auctions Disabled",
+      "auctionEnabledDesc": "Live auctions are currently active on the marketplace",
+      "auctionDisabledDesc": "Auctions are currently disabled for all listings",
+      "auctionLegalNote": "Enabling auctions allows timed bidding on animal listings. Ensure compliance with local livestock trading regulations."
     },
     "units": {
       "listings": "జాబితాలు",
@@ -3330,7 +3474,8 @@
         "listings": "జాబితాలు",
         "settings": "ద్రవ్యీకరణ",
         "plans": "ప్లాన్‌లు",
-        "revenue": "ఆదాయం"
+        "revenue": "ఆదాయం",
+        "reports": "నివేదికలు"
       },
       "featureToggles": "ఫీచర్ టాగుల్‌లు",
       "allFreeNote": "అన్ని ఫీచర్లు ప్రస్తుతం అన్ని వినియోగదారులకు ఉచితం. చార్జ్ చేయడం ప్రారంభించడానికి సిద్ధమైనప్పుడు ఫీచర్లను ఆన్ చేయండి.",
@@ -3404,6 +3549,122 @@
           "desc": "శోధన ఫలితాలలో ప్రాధాన్యత"
         }
       }
+    },
+    "proximity": {
+      "notSupported": "Location not supported on this device",
+      "denied": "Location access denied. Please enable location permissions.",
+      "nearMeOn": "Near Me (On)",
+      "nearMe": "Near Me",
+      "searching": "Searching nearby..."
+    },
+    "inquirySent": "Inquiry sent successfully",
+    "deal": {
+      "reserveTitle": "రిజర్వ్ చేసి నేరుగా ఒప్పందం చేసుకోండి",
+      "reserveNow": "ఈ లిస్టింగ్‌ను రిజర్వ్ చేయండి",
+      "reserveSuccess": "రిజర్వ్ అయింది! విక్రేతకు తెలియజేయబడింది — సంప్రదించి, పరిశీలించి, నేరుగా చెల్లించండి.",
+      "submittedForReview": "లిస్టింగ్ సమర్పించబడింది! అడ్మిన్ సమీక్ష తర్వాత ఇది పబ్లిక్‌గా కనిపిస్తుంది.",
+      "howStep1": "లిస్టింగ్‌ను రిజర్వ్ చేయండి — విక్రేతకు నోటిఫికేషన్ వెళ్తుంది",
+      "howStep2": "సంప్రదించి జంతువును స్వయంగా పరిశీలించండి",
+      "howStep3": "విక్రేతకు నేరుగా చెల్లించండి (నగదు / మీ UPI)",
+      "howStep4": "ఒప్పందం పూర్తి చేయడానికి ఇద్దరూ ఇక్కడ నిర్ధారించండి",
+      "freeNote": "ఈ మార్కెట్‌ప్లేస్ 100% ఉచితం — VetCare చెల్లింపును ఎప్పుడూ నిర్వహించదు. అవతలి పక్షంతో నేరుగా చెల్లించండి.",
+      "tabNote": "ఒప్పందాలు కొనుగోలుదారు మరియు విక్రేత మధ్య నేరుగా జరుగుతాయి. కలిసి చెల్లించిన తర్వాత, ఇద్దరు పక్షాలు ఇక్కడ నిర్ధారించాలి.",
+      "currentlyReserved": "ప్రస్తుతం ఒక కొనుగోలుదారు రిజర్వ్ చేశారు",
+      "actionsCol": "ఒప్పంద చర్యలు",
+      "reservedUntil": "వరకు రిజర్వ్",
+      "confirmReceipt": "అందుకున్నట్లు నిర్ధారించండి",
+      "confirmPayment": "చెల్లింపు అందింది",
+      "confirmRecorded": "మీ నిర్ధారణ నమోదు చేయబడింది.",
+      "waitingOther": "అవతలి పక్షం కోసం వేచి ఉంది",
+      "otherConfirmed": "అవతలి పక్షం నిర్ధారించింది",
+      "cancelDeal": "రద్దు చేయండి",
+      "dealCancelled": "రిజర్వేషన్ రద్దు — లిస్టింగ్ మళ్లీ యాక్టివ్‌గా ఉంది.",
+      "dealDone": "ఒప్పందం పూర్తయింది",
+      "paymentMethod": "చెల్లింపు విధానం…",
+      "pm": {
+        "cash": "నగదు",
+        "upi": "UPI (నేరుగా)",
+        "bankTransfer": "బ్యాంక్ బదిలీ",
+        "other": "ఇతర"
+      },
+      "pendingReview": "సమీక్ష పెండింగ్",
+      "rejected": "తిరస్కరించబడింది",
+      "status": {
+        "reserved": "రిజర్వ్",
+        "completed": "పూర్తయింది",
+        "cancelled": "రద్దు",
+        "pending": "పెండింగ్"
+      }
+    },
+    "engagement": {
+      "messageSeller": "విక్రేతకు సందేశం",
+      "addFavorite": "ఇష్టమైనవాటికి జోడించు",
+      "removeFavorite": "ఇష్టమైనవాటి నుండి తీసివేయి",
+      "noMessages": "ఇంకా సంభాషణలు లేవు. ప్రారంభించడానికి ఏదైనా లిస్టింగ్ నుండి విక్రేతకు సందేశం పంపండి.",
+      "listing": "లిస్టింగ్",
+      "selectConversation": "సందేశాలను చూడటానికి సంభాషణను ఎంచుకోండి",
+      "startConversation": "సంభాషణ ప్రారంభించడానికి హలో చెప్పండి.",
+      "typeMessage": "సందేశం టైప్ చేయండి…",
+      "send": "పంపు",
+      "chatSafety": "చాట్‌ను ప్లాట్‌ఫారమ్‌లో ఉంచండి. బ్యాంక్ వివరాలు, OTP లేదా పాస్‌వర్డ్‌లను ఎప్పుడూ షేర్ చేయవద్దు. చెల్లించే ముందు కలిసి పరిశీలించండి.",
+      "noFavorites": "ఇంకా ఇష్టమైనవి లేవు. సేవ్ చేయడానికి ఏదైనా లిస్టింగ్‌పై హృదయాన్ని ట్యాప్ చేయండి.",
+      "savedSearchesDesc": "శోధనను సేవ్ చేసి కొత్త సరిపోలే లిస్టింగ్‌లు పోస్ట్ అయినప్పుడు నోటిఫికేషన్ పొందండి.",
+      "noSavedSearches": "ఇంకా సేవ్ చేసిన శోధనలు లేవు. బ్రౌజ్‌లో ఫిల్టర్‌లను ఉపయోగించి “ఈ శోధనను సేవ్ చేయి” ట్యాప్ చేయండి.",
+      "saveThisSearch": "ఈ శోధనను సేవ్ చేయి",
+      "searchNamePlaceholder": "ఈ శోధనకు పేరు పెట్టండి (ఉదా. నా దగ్గర ముర్రా గేదె)",
+      "save": "సేవ్",
+      "searchSaved": "శోధన సేవ్ అయింది. కొత్త సరిపోలికల గురించి మీకు తెలియజేయబడుతుంది.",
+      "mySearch": "నా శోధన",
+      "applySearch": "వర్తించు",
+      "allListings": "అన్ని లిస్టింగ్‌లు",
+      "alertsOn": "హెచ్చరికలు ఆన్ — మ్యూట్ చేయడానికి ట్యాప్ చేయండి",
+      "alertsOff": "హెచ్చరికలు ఆఫ్ — ప్రారంభించడానికి ట్యాప్ చేయండి"
+    },
+    "pageOf": "పేజీ {{current}} / {{total}}",
+    "report": {
+      "reportListing": "లిస్టింగ్‌ను నివేదించండి",
+      "reportingWhat": "నివేదిస్తోంది: {{title}}",
+      "reason": "కారణం",
+      "selectReason": "కారణాన్ని ఎంచుకోండి…",
+      "details": "వివరాలు (ఐచ్ఛికం)",
+      "detailsPlaceholder": "సమీక్షకు సహాయపడే ఏదైనా…",
+      "submit": "నివేదికను సమర్పించు",
+      "submitted": "ధన్యవాదాలు — మీ నివేదిక సమీక్ష కోసం సమర్పించబడింది.",
+      "resolved": "నివేదిక నవీకరించబడింది.",
+      "adminTitle": "నివేదించిన లిస్టింగ్‌లు",
+      "filterOpen": "ఓపెన్ నివేదికలు",
+      "noReports": "నివేదికలు లేవు.",
+      "by": "ద్వారా",
+      "markReviewing": "సమీక్షలో గుర్తించు",
+      "action": "చర్య తీసుకో",
+      "dismiss": "తిరస్కరించు",
+      "resolutionPlaceholder": "పరిష్కార గమనిక (ఐచ్ఛికం)",
+      "reasons": {
+        "scam": "మోసం",
+        "welfare_concern": "జంతు సంక్షేమ ఆందోళన",
+        "prohibited": "నిషేధిత / చట్టవిరుద్ధ",
+        "miscategorized": "తప్పు వర్గం",
+        "offensive": "అభ్యంతరకర కంటెంట్",
+        "wrong_info": "తప్పుదారి పట్టించే సమాచారం",
+        "other": "ఇతర"
+      },
+      "status": {
+        "open": "ఓపెన్",
+        "reviewing": "సమీక్షలో",
+        "actioned": "చర్య తీసుకోబడింది",
+        "dismissed": "తిరస్కరించబడింది"
+      }
+    },
+    "services": {
+      "vetCheckTitle": "కొనుగోలుకు ముందు పశువైద్య తనిఖీ",
+      "vetCheckDesc": "కట్టుబడే ముందు ఈ జంతువును పరీక్షించడానికి లైసెన్స్ ఉన్న పశువైద్యుడిని బుక్ చేయండి — ఆరోగ్యం, వయస్సు, దృఢత్వం ధృవీకరించబడ్డాయి.",
+      "bookVetCheck": "పశువైద్య తనిఖీని బుక్ చేయండి",
+      "transportDesc": "జంతువును తరలించడానికి సహాయం కావాలా?",
+      "arrangeTransport": "రవాణా ఏర్పాటు"
+    },
+    "interlink": {
+      "treasureBanner": "ఉత్పత్తులు, దాణా లేదా పరికరాలు కొనుగోలు/అమ్మకం?",
+      "visitTreasure": "Treasure Mount సందర్శించండి"
     }
   },
   "sustainability": {
@@ -3497,7 +3758,12 @@
     "noGoals": "No sustainability goals created yet",
     "carbonBySpecies": "Carbon Footprint by Species",
     "species": "Species",
-    "headCount": "Head Count"
+    "headCount": "Head Count",
+    "emissionFactor": "Emission Factor",
+    "annualCO2kg": "Annual CO2 (kg)",
+    "annualCO2tons": "Annual CO2 (tons)",
+    "calculatingCarbon": "Calculating carbon footprint...",
+    "selectForCarbon": "Select an animal group to calculate its carbon footprint"
   },
   "wellnessPortal": {
     "pageTitle": "💚 ఆరోగ్య పోర్టల్",
@@ -3762,7 +4028,8 @@
     "previous": "మునుపటి",
     "next": "తదుపరి",
     "certificateFilter": "Certificate Services",
-    "allCertificates": "All Certificate Types"
+    "allCertificates": "All Certificate Types",
+    "failedToLoad": "Failed to load veterinarians. Please try again."
   },
   "myBookings": {
     "title": "నా బుకింగ్‌లు",
@@ -4408,7 +4675,9 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
-    "refundsIssued": "Refunds Issued"
+    "refundsIssued": "Refunds Issued",
+    "liveVideoSessions": "Live Video Sessions",
+    "totalBookings": "Total Bookings"
   },
   "disputeManagement": {
     "title": "Dispute Management",
@@ -4690,7 +4959,8 @@
     "totalPlatformBalance": "Total Platform Balance",
     "usersWithBalance": "Users with Balance",
     "topBalances": "Top Wallet Balances",
-    "avgBalance": "Average Balance"
+    "avgBalance": "Average Balance",
+    "reasonPlaceholder": "Enter reason..."
   },
   "permissionManagement": {
     "title": "అనుమతి నిర్వహణ",
@@ -4888,7 +5158,8 @@
     "maintenanceMessage": "Maintenance Message for Users",
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
     "maintenanceAdminBypass": "Admin access - maintenance mode active",
-    "certificateTemplate": "Certificate Template"
+    "certificateTemplate": "Certificate Template",
+    "maintenanceBypass": "Maintenance Bypass"
   },
   "userManagement": {
     "title": "వినియోగదారు నిర్వహణ",
@@ -5129,7 +5400,9 @@
       "animalEarTagId": "చెవి ట్యాగ్ ID",
       "animalEarTagPlaceholder": "ఉదా., ET-2024-001"
     },
-    "noAnimalsFound": "జంతువులు కనుగొనబడలేదు"
+    "noAnimalsFound": "జంతువులు కనుగొనబడలేదు",
+    "noHospitals": "No hospitals assigned",
+    "noHospitalsDesc": "You are not assigned to any hospital in this network yet"
   },
   "inpatientManagement": {
     "title": "ఇన్‌పేషంట్ & బోర్డింగ్",
@@ -5984,7 +6257,10 @@
       "noPending": "పెండింగ్ నమోదులు లేవు",
       "noActive": "చురుకుగా ఉన్న నమోదులు లేవు",
       "noEnrollments": "ఇంకా నమోదులు లేవు",
-      "searchHelper": "ప్లాట్‌ఫారమ్ వాడుకరులను వెతికి నమోదు అభ్యర్థన పంపండి. రోగి ఆమోదించాలి."
+      "searchHelper": "ప్లాట్‌ఫారమ్ వాడుకరులను వెతికి నమోదు అభ్యర్థన పంపండి. రోగి ఆమోదించాలి.",
+      "consentCollected": "Consent Collected",
+      "consentCollectedHint": "Patient has given consent for this network",
+      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
     },
     "audit": {
       "title": "ఆడిట్ & సమ్మతి",
@@ -6079,7 +6355,8 @@
     "department": "విభాగం",
     "selectDepartment": "విభాగం ఎంచుకోండి",
     "customDepartment": "కస్టమ్ విభాగం",
-    "noDepartment": "విభాగం లేదు"
+    "noDepartment": "విభాగం లేదు",
+    "memberName": "Member Name"
   },
   "networkReferrals": {
     "title": "నెట్‌వర్క్ రెఫరల్స్",
@@ -6526,7 +6803,9 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items"
+      "showing": "Showing {{count}} of {{total}} items",
+      "selectSupplier": "Select supplier...",
+      "noSuppliersHint": "Add a supplier first to create purchase orders"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6545,7 +6824,8 @@
       "leadTimeDays": "Lead Days",
       "approvedLabel": "Approved",
       "approved": "Approved",
-      "unapproved": "Unapproved"
+      "unapproved": "Unapproved",
+      "selectPaymentTerms": "Select payment terms..."
     },
     "reorder": {
       "title": "Reorder",
@@ -6721,5 +7001,299 @@
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
     }
+  },
+  "chat": {
+    "couldNotStartSession": "Could not start chat session",
+    "failedToSendMessage": "Failed to send message",
+    "couldNotCreateSession": "Could not create chat session",
+    "aiBuddyHelper": "VetCare AI",
+    "thinking": "Thinking...",
+    "userAssistant": "Your Assistant",
+    "yourAssistant": "Your Assistant",
+    "newChat": "New Chat",
+    "startingUp": "Starting up...",
+    "hiUser": "Hi, {{name}}!",
+    "hiGuest": "Hi there!",
+    "iKnowAbout": "I can help with",
+    "askMeAnything": "Ask me anything about your pets and their health",
+    "askMeAnythingGeneral": "Ask me anything",
+    "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "మీ చెల్లింపును పూర్తి చేయండి",
+    "testModeNotice": "టెస్ట్ మోడ్ — నిజమైన డబ్బు ఎలాంటిదీ తీసుకోబడదు.",
+    "slotHeldFor": "స్లాట్ నిలిపి ఉంచబడింది",
+    "consultationFee": "సంప్రదింపు రుసుము",
+    "useWallet": "వాలెట్ బ్యాలెన్స్ ఉపయోగించండి",
+    "walletBalance": "వాలెట్ బ్యాలెన్స్",
+    "walletApplied": "వాలెట్ నుండి చెల్లింపు",
+    "payableNow": "ఇప్పుడు చెల్లించవలసినది",
+    "payButton": "చెల్లించండి",
+    "payLater": "తర్వాత చెల్లించండి",
+    "refundPolicyNotice": "చెల్లించడం ద్వారా రీఫండ్ & రద్దు విధానానికి అంగీకరిస్తున్నారు.",
+    "gatewayUnavailable": "చెల్లింపు గేట్‌వే ప్రస్తుతం అందుబాటులో లేదు. దయచేసి తర్వాత ప్రయత్నించండి.",
+    "checkoutFailed": "చెల్లింపును ప్రారంభించలేకపోయాము. మళ్లీ ప్రయత్నించండి.",
+    "demoFailed": "అనుకరణ చెల్లింపు విఫలమైంది. మళ్లీ ప్రయత్నించవచ్చు.",
+    "verificationFailed": "చెల్లింపు ధృవీకరణ విఫలమైంది. డబ్బు తీసివేయబడితే స్వయంచాలకంగా సర్దుబాటు అవుతుంది.",
+    "expiredTitle": "చెల్లింపు గడువు ముగిసింది",
+    "expiredMessage": "సమయానికి చెల్లింపు జరగనందున స్లాట్ విడుదల చేయబడింది.",
+    "bookAgain": "మళ్లీ బుక్ చేయండి",
+    "demoGatewayTitle": "డెమో చెల్లింపు గేట్‌వే",
+    "demoGatewayMessage": "ఇది పరీక్ష కోసం అనుకరణ చెక్అవుట్. నిజమైన డబ్బు తీసుకోబడదు.",
+    "demoFail": "వైఫల్యాన్ని అనుకరించండి",
+    "demoPay": "ఇప్పుడు చెల్లించండి",
+    "status": {
+      "completed": "చెల్లించబడింది",
+      "partially_refunded": "పాక్షిక రీఫండ్",
+      "refunded": "రీఫండ్ అయింది",
+      "pending": "పెండింగ్",
+      "created": "చెల్లింపు కోసం వేచి ఉంది",
+      "expired": "గడువు ముగిసింది",
+      "failed": "విఫలమైంది",
+      "transferred": "బదిలీ అయింది"
+    }
+  },
+  "paymentsPage": {
+    "title": "చెల్లింపులు & రసీదులు",
+    "subtitle": "మీ సంప్రదింపు చెల్లింపులు, రీఫండ్లు మరియు రసీదులు",
+    "empty": "ఇంకా చెల్లింపులు లేవు. సంప్రదింపు బుక్ చేసిన తర్వాత ఇక్కడ కనిపిస్తాయి.",
+    "refunded": "రీఫండ్",
+    "viewReceipt": "రసీదు చూడండి",
+    "receiptTitle": "చెల్లింపు రసీదు",
+    "patient": "రోగి",
+    "doctor": "డాక్టర్",
+    "animal": "జంతువు",
+    "date": "తేదీ",
+    "totalPaid": "మొత్తం చెల్లించినది",
+    "print": "ప్రింట్",
+    "invoiceNumber": "ఇన్వాయిస్ నం.",
+    "taxableValue": "పన్ను విలువ",
+    "gstExempt": "GST-మినహాయింపు పశువైద్య సేవ"
+  },
+  "policy": {
+    "backToHome": "హోమ్‌కు తిరిగి వెళ్ళండి",
+    "notFoundTitle": "పత్రం కనబడలేదు",
+    "notFoundMessage": "ఈ విధాన పత్రం ఇంకా ప్రచురించబడలేదు.",
+    "version": "వెర్షన్",
+    "effectiveFrom": "అమలు తేదీ"
+  },
+  "policyModal": {
+    "title": "నవీకరించిన విధానాలు",
+    "message": "మా విధానాలు నవీకరించబడ్డాయి. కొనసాగించడానికి సమీక్షించి అంగీకరించండి.",
+    "agreeCheckbox": "పైన పేర్కొన్న నవీకరించిన విధానాలను చదివి అంగీకరిస్తున్నాను",
+    "agreeButton": "అంగీకరించి కొనసాగండి"
+  },
+  "legalAdmin": {
+    "title": "చట్టపరమైన & విధానాలు",
+    "subtitle": "వెర్షన్ ఆధారిత విధానాలు మరియు సమ్మతి కవరేజీని నిర్వహించండి",
+    "published": "కొత్త వెర్షన్ విజయవంతంగా ప్రచురించబడింది.",
+    "publishFailed": "కొత్త వెర్షన్ ప్రచురణ విఫలమైంది.",
+    "usersAccepted": "వినియోగదారులు అంగీకరించారు",
+    "notPublished": "ఇంకా ప్రచురించలేదు",
+    "view": "చూడండి",
+    "newVersion": "కొత్త వెర్షన్",
+    "publishTitle": "కొత్త వెర్షన్ ప్రచురించండి",
+    "publishHint": "ప్రచురణ మార్చలేని కొత్త వెర్షన్‌ను సృష్టిస్తుంది. ముఖ్యమైన మార్పులకు మాత్రమే మళ్లీ-అంగీకారాన్ని ఎంచుకోండి.",
+    "docTitle": "శీర్షిక",
+    "docContent": "విషయం",
+    "requireReacceptance": "ప్రభావిత వినియోగదారులందరూ ఈ వెర్షన్‌ను మళ్లీ అంగీకరించాలి",
+    "publishButton": "ప్రచురించండి",
+    "docTypes": {
+      "terms": "సేవా నిబంధనలు",
+      "privacy": "గోప్యతా విధానం",
+      "refund_policy": "రీఫండ్ & రద్దు విధానం",
+      "wallet_terms": "వాలెట్ నిబంధనలు",
+      "doctor_agreement": "డాక్టర్ ఒప్పందం",
+      "grievance_policy": "ఫిర్యాదు పరిష్కార విధానం",
+      "disclaimer": "సేవా నిరాకరణ"
+    }
+  },
+  "earningsLedger": {
+    "clearing": "క్లియరింగ్‌లో",
+    "available": "అందుబాటులో",
+    "locked": "ఉపసంహరణలో",
+    "withdrawn": "తీసుకున్నది",
+    "clearingHint": "సంప్రదింపు తర్వాత {{days}} రోజు(లు)కి అందుబాటులోకి వస్తుంది",
+    "negativeHint": "ప్రతికూల బ్యాలెన్స్ — మీ తదుపరి సంపాదన నుండి స్వయంచాలకంగా సర్దుబాటు అవుతుంది",
+    "withdrawalThreshold": "కనీస ఉపసంహరణ వైపు పురోగతి",
+    "thresholdReached": "మీరు ఇప్పుడు ఉపసంహరణ అభ్యర్థించవచ్చు.",
+    "thresholdHint": "అందుబాటు బ్యాలెన్స్ కనీసానికి చేరినప్పుడు ఉపసంహరణ తెరుచుకుంటుంది.",
+    "statementTitle": "సంపాదన నివేదిక",
+    "colDate": "తేదీ",
+    "colType": "రకం",
+    "colPatient": "రోగి",
+    "colGross": "స్థూలం",
+    "colCommission": "కమిషన్",
+    "colNet": "నికరం",
+    "colStatus": "స్థితి",
+    "types": {
+      "consultation": "సంప్రదింపు",
+      "cancel_compensation": "రద్దు పరిహారం",
+      "no_show_compensation": "నో-షో పరిహారం",
+      "penalty": "జరిమానా",
+      "adjustment": "సర్దుబాటు"
+    },
+    "statuses": {
+      "clearing": "క్లియరింగ్‌లో",
+      "available": "అందుబాటులో",
+      "locked": "ఉపసంహరణలో",
+      "withdrawn": "తీసుకున్నది",
+      "reversed": "వెనక్కి తీసుకున్నది"
+    }
+  },
+  "commissionAdmin": {
+    "title": "కమిషన్ నియమాలు",
+    "subtitle": "డాక్టర్ స్థాయి కమిషన్ ఓవర్‌రైడ్‌లు — ఖాళీ ఫీల్డ్‌లు గ్లోబల్ డిఫాల్ట్ వాడతాయి",
+    "globalSettings": "గ్లోబల్ డిఫాల్ట్‌లు",
+    "globalInfo": "గ్లోబల్ డిఫాల్ట్: {{percent}}% + చెల్లింపు బుకింగ్‌కు {{flat}} ఫ్లాట్ ఫీజు. System Settings లో మార్చండి.",
+    "saved": "ఓవర్‌రైడ్ సేవ్ అయింది. కొత్త చెల్లింపులకు మాత్రమే వర్తిస్తుంది.",
+    "saveFailed": "ఓవర్‌రైడ్ సేవ్ విఫలమైంది.",
+    "searchPlaceholder": "పేరు లేదా ఇమెయిల్‌తో డాక్టర్‌ను వెతకండి…",
+    "noDoctors": "డాక్టర్లు కనబడలేదు.",
+    "colDoctor": "డాక్టర్",
+    "colFee": "ఫీజు",
+    "colPercentOverride": "% ఓవర్‌రైడ్",
+    "colFlatOverride": "ఫ్లాట్ ఓవర్‌రైడ్",
+    "snapshotNote": "కమిషన్ చెల్లింపు సమయంలో స్నాప్‌షాట్ అవుతుంది — ఓవర్‌రైడ్ మార్పులు పాత చెల్లింపులను మార్చవు."
+  },
+  "withdrawals": {
+    "title": "ఉపసంహరణలు",
+    "payoutOnFile": "చెల్లింపు వివరాలు నమోదైనవి — మీ మొత్తం అందుబాటు బ్యాలెన్స్ ఉపసంహరణ కోరవచ్చు.",
+    "payoutMissing": "ఉపసంహరణలు ప్రారంభించడానికి బ్యాంక్ ఖాతా లేదా UPI వివరాలు జోడించండి.",
+    "payoutDetails": "చెల్లింపు వివరాలు",
+    "requestButton": "ఉపసంహరణ అభ్యర్థించండి",
+    "requested": "ఉపసంహరణ అభ్యర్థించబడింది. ప్లాట్‌ఫారమ్ బృందం మీ బ్యాంక్/UPIకి సెటిల్ చేస్తుంది.",
+    "requestFailed": "ఉపసంహరణ అభ్యర్థన సృష్టించలేకపోయాం.",
+    "payoutSaved": "చెల్లింపు వివరాలు సేవ్ అయ్యాయి.",
+    "payoutSaveFailed": "చెల్లింపు వివరాలు సేవ్ కాలేదు.",
+    "accountName": "ఖాతాదారు పేరు",
+    "accountNumber": "ఖాతా సంఖ్య",
+    "ifsc": "IFSC కోడ్",
+    "upi": "UPI ఐడి (ఐచ్ఛికం)",
+    "netPaid": "నికర చెల్లింపు",
+    "statuses": {
+      "requested": "అభ్యర్థించబడింది",
+      "approved": "ఆమోదించబడింది",
+      "settled": "సెటిల్ అయింది",
+      "rejected": "తిరస్కరించబడింది",
+      "cancelled": "రద్దు"
+    }
+  },
+  "settlementsAdmin": {
+    "title": "సెటిల్మెంట్లు",
+    "subtitle": "డాక్టర్ ఉపసంహరణ అభ్యర్థనలు, సెటిల్మెంట్లు మరియు చెల్లింపులు",
+    "filterAll": "అన్నీ",
+    "empty": "ఉపసంహరణ అభ్యర్థనలు లేవు.",
+    "negativeTitle": "ప్రతికూల బ్యాలెన్స్ ఉన్న డాక్టర్లు",
+    "discretionary": "విచక్షణాధికారం",
+    "age": "{{days}} రోజు(లు)గా వేచి ఉంది",
+    "approve": "ఆమోదించండి",
+    "reject": "తిరస్కరించండి",
+    "settle": "సెటిల్ చేయండి",
+    "approved": "అభ్యర్థన ఆమోదించబడింది.",
+    "rejected": "అభ్యర్థన తిరస్కరించబడింది.",
+    "settled": "సెటిల్మెంట్ నమోదైంది.",
+    "actionFailed": "చర్య విఫలమైంది.",
+    "settleTitle": "సెటిల్మెంట్ నమోదు చేయండి",
+    "settleHint": "ముందు బ్యాంక్/UPI బదిలీ చేసి, తర్వాత సూచనను ఇక్కడ నమోదు చేయండి.",
+    "utrPlaceholder": "UTR / లావాదేవీ సూచన",
+    "notePlaceholder": "గమనిక (ఐచ్ఛికం)",
+    "rejectTitle": "ఉపసంహరణ తిరస్కరించండి",
+    "reasonPlaceholder": "డాక్టర్‌కు చూపించే కారణం…",
+    "discretionaryButton": "విచక్షణా చెల్లింపు",
+    "discretionaryTitle": "విచక్షణా చెల్లింపు",
+    "discretionaryHint": "కనీస పరిమితిని దాటవేసి డాక్టర్ మొత్తం బ్యాలెన్స్‌ను వెంటనే సెటిల్ చేస్తుంది. గమనిక తప్పనిసరి.",
+    "doctorIdPlaceholder": "డాక్టర్ యూజర్ ఐడి",
+    "discretionaryNotePlaceholder": "ఈ చెల్లింపు ఎందుకు చేస్తున్నారు…",
+    "payNow": "ఇప్పుడు చెల్లించండి"
+  },
+  "referrals": {
+    "title": "రెఫరల్స్",
+    "subtitlePatient": "మీ డాక్టర్ల రెఫరల్స్ — అంగీకరించండి, మరో డాక్టర్‌ను ఎంచుకోండి, లేదా రీఫండ్ తీసుకోండి",
+    "subtitleVet": "రోగులను ఇతర డాక్టర్లకు రెఫర్ చేసి ఫలితాలను చూడండి",
+    "referButton": "రోగిని రెఫర్ చేయండి",
+    "empty": "ఇంకా రెఫరల్స్ లేవు.",
+    "anyDoctor": "ఏ డాక్టర్ అయినా (మీ ఎంపిక)",
+    "paidAmount": "చెల్లించిన మొత్తం",
+    "informational": "స్పెషలిస్ట్ రెఫరల్",
+    "accept": "అంగీకరించండి",
+    "chooseAnother": "మరో డాక్టర్",
+    "refund": "రీఫండ్",
+    "acceptTitle": "రెఫరల్ అంగీకరించండి",
+    "acceptHint": "డాక్టర్‌తో స్లాట్ ఎంచుకోండి. ఇప్పటికే చెల్లించినది స్వయంచాలకంగా బదిలీ అవుతుంది — తేడా మాత్రమే చెల్లిస్తారు.",
+    "selectDoctor": "డాక్టర్‌ను ఎంచుకోండి…",
+    "noSlots": "ఈ తేదీన స్లాట్లు లేవు. మరో తేదీ ప్రయత్నించండి.",
+    "confirmAccept": "కొనసాగండి",
+    "refundTitle": "బదులుగా రీఫండ్ తీసుకోండి",
+    "refundHint": "డాక్టర్ అందుబాటులో లేనందున పూర్తి రీఫండ్ + గుడ్విల్ బోనస్ లభిస్తుంది.",
+    "refundToWallet": "వాలెట్‌కు తక్షణ రీఫండ్",
+    "refundToSource": "అసలు చెల్లింపు పద్ధతికి (5–7 రోజులు)",
+    "refunded": "రీఫండ్ పూర్తయింది.",
+    "accepted": "రెఫరల్ పూర్తయింది — మీ కొత్త బుకింగ్ సిద్ధం.",
+    "created": "రెఫరల్ పంపబడింది. రోగికి తెలియజేయబడింది.",
+    "actionFailed": "చర్య విఫలమైంది.",
+    "deadlineIn": "{{hours}} గంటల్లో చర్య తీసుకోండి",
+    "deadlinePassed": "గడువు ముగిసింది",
+    "walletHopNotice": "మీ మునుపటి చెల్లింపు వాలెట్‌కు తరలించబడింది; చెక్అవుట్‌లో స్వయంచాలకంగా వర్తిస్తుంది.",
+    "referTitle": "రోగిని రెఫర్ చేయండి",
+    "referHint": "సంప్రదింపుకు ముందు రెఫరల్ చెల్లింపును కొత్త డాక్టర్‌కు బదిలీ చేస్తుంది. తర్వాత రెఫరల్‌లో రోగి మామూలుగా బుక్ చేస్తారు.",
+    "upcomingBookings": "రాబోయే చెల్లింపు బుకింగ్‌లు (చెల్లింపు బదిలీ)",
+    "recentConsultations": "ఇటీవల పూర్తయిన సంప్రదింపులు (స్పెషలిస్ట్ రెఫరల్)",
+    "none": "ఏమీ లేవు",
+    "targetDoctor": "రెఫర్ చేయాల్సిన డాక్టర్",
+    "patientChooses": "రోగినే డాక్టర్‌ను ఎంచుకోనివ్వండి",
+    "reasonPlaceholder": "రెఫరల్ కారణం (రోగికి, స్వీకరించే డాక్టర్‌కు కనిపిస్తుంది)…",
+    "referCostNotice": "రోగి రీఫండ్ ఎంచుకుంటే, ఆ ఖర్చులు మీ సంపాదన నుండి తీసివేయబడతాయి.",
+    "submitReferral": "రెఫరల్ పంపండి",
+    "transferStatuses": {
+      "offered": "మీ చర్య కోసం వేచి ఉంది",
+      "accepted": "అంగీకరించబడింది",
+      "rechosen": "మరో డాక్టర్ ఎంపిక",
+      "refunded": "రీఫండ్ అయింది",
+      "expired": "గడువు ముగిసింది",
+      "completed": "పూర్తయింది"
+    }
+  },
+  "taxAdmin": {
+    "title": "పన్ను & GST",
+    "subtitle": "SAC రేట్లు భవిష్యత్ ఇన్వాయిస్‌లకే వర్తిస్తాయి — పాతవి మార్చలేని స్నాప్‌షాట్లు. GSTIN, చట్టపరమైన పేరు, ప్రిఫిక్స్ System Settings (tax.*) లో ఉన్నాయి.",
+    "colLabel": "సేవ",
+    "colRate": "GST రేటు",
+    "rateSaved": "రేటు సేవ్ అయింది. ఇకపై జారీ అయ్యే ఇన్వాయిస్‌లకు వర్తిస్తుంది.",
+    "rateSaveFailed": "రేటు సేవ్ కాలేదు.",
+    "exportTitle": "GST ఎగుమతి (CSV)",
+    "exportButton": "CSV డౌన్‌లోడ్",
+    "exportFailed": "ఎగుమతి విఫలమైంది.",
+    "settingsHint": "ఎగుమతిలో పన్ను కమిషన్ ఇన్వాయిస్‌లు మరియు మినహాయింపు సంప్రదింపు రిజిస్టర్ ఉన్నాయి (మీ CA కోసం)."
+  },
+  "financeAdmin": {
+    "title": "ఫైనాన్స్ నివేదికలు",
+    "subtitle": "ఆదాయం, బాధ్యతలు, TDS మరియు చెల్లింపు ఆరోగ్యం",
+    "noData": "ఈ పరిధికి డేటా లేదు.",
+    "exportGst": "GST CSV ఎగుమతి చేయండి",
+    "gstExportFailed": "GST నివేదికను ఎగుమతి చేయలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.",
+    "revenueTitle": "ఆదాయం (ఎంచుకున్న పరిధి)",
+    "gmv": "స్థూల బుకింగ్ విలువ",
+    "paidCount": "{{count}} చెల్లింపు బుకింగ్‌లు",
+    "commission": "సంపాదించిన కమిషన్",
+    "processingCharges": "ప్రాసెసింగ్ ఛార్జీలు",
+    "gatewayFees": "గేట్‌వే ఫీజులు (ఖర్చు)",
+    "refundsOut": "రీఫండ్లు",
+    "netRevenue": "నికర ప్లాట్‌ఫారమ్ ఆదాయం",
+    "netRevenueHint": "కమిషన్ + ప్రాసెసింగ్ − గేట్‌వే ఫీజులు",
+    "liabilitiesTitle": "బాధ్యతలు (ప్రస్తుతం)",
+    "doctorClearing": "డాక్టర్ సంపాదన క్లియరింగ్‌లో",
+    "doctorAvailable": "డాక్టర్ సంపాదన అందుబాటులో",
+    "doctorLocked": "ఉపసంహరణలో",
+    "walletLiability": "రోగి వాలెట్ బాధ్యత",
+    "walletLiabilityHint": "కస్టమర్లకు చెల్లించాల్సినది — ప్లాట్‌ఫారమ్ ఆదాయం కాదు",
+    "tdsTitle": "TDS రిజిస్టర్ (ఎంచుకున్న పరిధి)",
+    "tdsDeducted": "TDS మినహాయింపు",
+    "tdsCount": "{{count}} సెటిల్మెంట్లు",
+    "netPaidToDoctors": "డాక్టర్లకు నికర చెల్లింపు",
+    "healthTitle": "చెల్లింపు ఆరోగ్యం",
+    "stuckPending": "నిలిచిన పెండింగ్ చెల్లింపులు",
+    "stuckPendingHint": "1 గంటకు పైగా — రోజువారీ సరిదిద్దే ప్రయత్నం",
+    "openHolds": "తెరిచిన చెల్లింపు హోల్డ్‌లు"
   }
 }

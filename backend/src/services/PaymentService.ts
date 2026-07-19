@@ -69,7 +69,7 @@ export class PaymentService {
       `;
       const result = await database.query(query, [
         id, data.consultationId, data.bookingId || null, userId, data.amount,
-        data.currency || 'USD', status, data.paymentMethod || 'card',
+        data.currency || 'INR', status, data.paymentMethod || 'card',
         gateway, transactionId,
       ]);
       logger.info(`Payment created (${gatewayMode})`, { id, userId, amount: data.amount });

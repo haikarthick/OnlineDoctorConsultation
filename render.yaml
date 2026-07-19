@@ -42,6 +42,13 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
+      # Razorpay Key Id/Secret/Webhook Secret are stored encrypted in the DB
+      # (payment_gateway_credentials, set via Admin -> System Settings ->
+      # Razorpay Credentials) -- this is the only secret still needed from
+      # env, it decrypts them. One value, reusable if this DB is ever cloned
+      # to a new deploy target.
+      - key: PAYMENT_CREDENTIALS_KEY
+        sync: false
 
   # ── DEMO Environment ────────────────────────────────────
   # DATABASE_URL is Neon PostgreSQL — set via GitHub Actions setup-demo-env.yml

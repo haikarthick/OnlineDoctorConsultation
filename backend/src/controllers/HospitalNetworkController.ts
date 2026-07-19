@@ -36,7 +36,7 @@ class HospitalNetworkController {
 
   async updateNetwork(req: AuthRequest, res: Response): Promise<void> {
     await this.ensureNetworkAccess(req.params.id, req.userId!, req.userRole!, 'editNetworkSettings');
-    const updated = await HospitalNetworkService.updateNetwork(req.params.id, req.body, req.userId!);
+    const updated = await HospitalNetworkService.updateNetwork(req.params.id, req.body, req.userId!, req.userRole!);
     await HospitalNetworkService.logAudit({
       networkId: req.params.id,
       actorId: req.userId!,
@@ -221,8 +221,10 @@ class HospitalNetworkController {
 
   async listNetworkReferrals(req: AuthRequest, res: Response): Promise<void> {
     const { networkId, hospitalId, direction, animalId, status, page, limit } = req.query;
+    if (!networkId) throw new ValidationError('networkId is required');
+    await this.ensureNetworkAccess(networkId as string, req.userId!, req.userRole!, 'interHospitalReferrals');
     const result = await HospitalNetworkService.listNetworkReferrals({
-      networkId: networkId as string | undefined,
+      networkId: networkId as string,
       hospitalId: hospitalId as string | undefined,
       direction: direction as 'incoming' | 'outgoing' | 'all' | undefined,
       animalId: animalId as string | undefined,

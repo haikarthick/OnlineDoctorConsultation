@@ -20,7 +20,7 @@ const DEMO_USERS = [
   { id: 'd0000000-0000-0000-0000-000000000004', email: 'staff.reception@vetcare.com',   password: 'Demo@123',   firstName: 'Karthik',lastName: 'Rajan',         role: 'hospital_staff',  phone: '+91-98765-43213', uniqueId: 'USR-NET-004' },
   { id: 'd0000000-0000-0000-0000-000000000005', email: 'staff.labtech@vetcare.com',     password: 'Demo@123',   firstName: 'Meena',  lastName: 'Sundaram',      role: 'hospital_staff',  phone: '+91-98765-43214', uniqueId: 'USR-NET-005' },
   // Pharmacy demo user
-  { id: 'ph000000-0000-0000-0000-000000000099', email: 'pharmacist@vetcare.com',       password: 'Demo@123',   firstName: 'Priya',  lastName: 'Mehta',         role: 'pharmacist',      phone: '+91-98765-00099', uniqueId: 'PHM-001' },
+  { id: 'e0000000-0000-0000-0000-000000000099', email: 'pharmacist@vetcare.com',       password: 'Demo@123',   firstName: 'Priya',  lastName: 'Mehta',         role: 'pharmacist',      phone: '+91-98765-00099', uniqueId: 'PHM-001' },
 ];
 
 export async function fixDemoPasswords(): Promise<void> {
@@ -101,7 +101,7 @@ export async function fixDemoPasswords(): Promise<void> {
       ];
       for (const ownerId of petOwnerIds) {
         const { rows: testAnimals } = await database.query(
-          `SELECT id, name FROM animals WHERE owner_id = $1 AND id NOT LIKE 'aa000000-%'`,
+          `SELECT id, name FROM animals WHERE owner_id = $1 AND id::text NOT LIKE 'aa000000-%'`,
           [ownerId]
         );
         if (testAnimals.length > 0) {

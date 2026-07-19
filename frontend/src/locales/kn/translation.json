@@ -95,7 +95,13 @@
     "viewAll": "View All",
     "requiredField": "Required field",
     "saveChanges": "Save Changes",
-    "action": "Action"
+    "action": "Action",
+    "errorLoading": "Error loading data",
+    "errorSaving": "Error saving data",
+    "fillRequired": "Please fill all required fields",
+    "none": "None",
+    "error": "Error",
+    "deactivate": "Deactivate"
   },
   "nav": {
     "brand": "VetCare",
@@ -172,6 +178,7 @@
       "intelligence": "ಬುದ್ಧಿಮತ್ತೆ",
       "vetNetwork": "ಪಶುವೈದ್ಯ ನೆಟ್‌ವರ್ಕ್",
       "account": "ಖಾತೆ",
+      "finance": "ಹಣಕಾಸು",
       "administration": "ಆಡಳಿತ",
       "preferences": "ಆದ್ಯತೆಗಳು"
     },
@@ -189,7 +196,13 @@
       "approve": "Approve",
       "reject": "Reject",
       "approvalRequired": "This movement requires manager approval"
-    }
+    },
+    "myPayments": "ಪಾವತಿಗಳು & ರಶೀದಿಗಳು",
+    "legalPolicies": "ಕಾನೂನು & ನೀತಿಗಳು",
+    "commissionSettings": "ಕಮಿಷನ್ ನಿಯಮಗಳು",
+    "settlements": "ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು",
+    "referrals": "ರೆಫರಲ್‌ಗಳು",
+    "financeReports": "ಹಣಕಾಸು ವರದಿಗಳು"
   },
   "login": {
     "welcome": "ಮತ್ತೆ ಸ್ವಾಗತ",
@@ -220,7 +233,47 @@
     "dbWakingUp": "ಡೇಟಾಬೇಸ್ ಎಚ್ಚರಗೊಳ್ಳುತ್ತಿದೆ — {{countdown}}s ನಲ್ಲಿ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರು-ಪ್ರಯತ್ನಿಸಲಾಗುತ್ತಿದೆ…",
     "dbWakingUpNote": "ಮೊದಲ ಭೇಟಿಯಲ್ಲಿ ಇದು ಸಾಮಾನ್ಯ. ದಯವಿಟ್ಟು ಕಾಯಿರಿ.",
     "success": "✓ ಲಾಗಿನ್ ಯಶಸ್ವಿ! ಮರುನಿರ್ದೇಶಿಸಲಾಗುತ್ತಿದೆ...",
-    "error": "ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ"
+    "error": "ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ",
+    "forgotPassword": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?"
+  },
+  "forgotPassword": {
+    "title": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?",
+    "subtitle": "ನಿಮ್ಮ ಇಮೇಲ್ ನಮೂದಿಸಿ, ನಾವು ರೀಸೆಟ್ ಲಿಂಕ್ ಕಳುಹಿಸುತ್ತೇವೆ.",
+    "emailLabel": "ಇಮೇಲ್ ವಿಳಾಸ",
+    "sendLink": "ರೀಸೆಟ್ ಲಿಂಕ್ ಕಳುಹಿಸಿ",
+    "sending": "ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...",
+    "backToLogin": "ಲಾಗಿನ್‌ಗೆ ಹಿಂತಿರುಗಿ",
+    "successTitle": "ನಿಮ್ಮ inbox ಪರಿಶೀಲಿಸಿ",
+    "successBody": "ಈ ಇಮೇಲ್‌ಗೆ ಖಾತೆ ಇದ್ದರೆ, ಪಾಸ್‌ವರ್ಡ್ ರೀಸೆಟ್ ಲಿಂಕ್ ಕಳುಹಿಸಲಾಗಿದೆ. ಲಿಂಕ್ 1 ಗಂಟೆ ವರೆಗೆ ಮಾನ್ಯವಾಗಿರುತ್ತದೆ.",
+    "spamHint": "ಸ್ವೀಕರಿಸಲಿಲ್ಲವೇ? ನಿಮ್ಮ spam ಫೋಲ್ಡರ್ ಪರಿಶೀಲಿಸಿ."
+  },
+  "resetPassword": {
+    "title": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಹೊಂದಿಸಿ",
+    "subtitle": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಟ 8 ಅಕ್ಷರಗಳಾಗಿರಬೇಕು.",
+    "newPasswordLabel": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್",
+    "confirmPasswordLabel": "ಪಾಸ್‌ವರ್ಡ್ ದೃಢೀಕರಿಸಿ",
+    "resetBtn": "ಪಾಸ್‌ವರ್ಡ್ ರೀಸೆಟ್ ಮಾಡಿ",
+    "resetting": "ರೀಸೆಟ್ ಆಗುತ್ತಿದೆ...",
+    "backToLogin": "ಲಾಗಿನ್‌ಗೆ ಹಿಂತಿರುಗಿ",
+    "successTitle": "ಪಾಸ್‌ವರ್ಡ್ ಯಶಸ್ವಿಯಾಗಿ ರೀಸೆಟ್ ಆಯಿತು!",
+    "successBody": "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನವೀಕರಿಸಲಾಗಿದೆ. ಈಗ ಹೊಸ ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ಲಾಗಿನ್ ಮಾಡಬಹುದು.",
+    "goToLogin": "ಲಾಗಿನ್‌ಗೆ ಹೋಗಿ",
+    "validating": "ರೀಸೆಟ್ ಲಿಂಕ್ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ...",
+    "linkInvalidTitle": "ಲಿಂಕ್ ಮಾನ್ಯವಲ್ಲ",
+    "invalidToken": "ಈ ರೀಸೆಟ್ ಲಿಂಕ್ ದೋಷಪೂರಿತ ಅಥವಾ ಅಮಾನ್ಯ.",
+    "reasonExpired": "ಈ ರೀಸೆಟ್ ಲಿಂಕ್ ಅವಧಿ ಮೀರಿದೆ. ಹೊಸದು ವಿನಂತಿಸಿ.",
+    "reasonUsed": "ಈ ರೀಸೆಟ್ ಲಿಂಕ್ ಈಗಾಗಲೇ ಬಳಸಲಾಗಿದೆ. ಹೊಸದು ವಿನಂತಿಸಿ.",
+    "reasonInvalid": "ಈ ರೀಸೆಟ್ ಲಿಂಕ್ ಅಮಾನ್ಯ ಅಥವಾ ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ.",
+    "requestNewLink": "ಹೊಸ ಲಿಂಕ್ ವಿನಂತಿಸಿ",
+    "passwordsMismatch": "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ.",
+    "passwordWeak": "ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ಕನಿಷ್ಟ ಒಂದು ದೊಡ್ಡ ಅಕ್ಷರ, ಒಂದು ಸಣ್ಣ ಅಕ್ಷರ ಮತ್ತು ಒಂದು ಸಂಖ್ಯೆ ಇರಬೇಕು.",
+    "genericError": "ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "hint": {
+      "length": "ಕನಿಷ್ಟ 8 ಅಕ್ಷರಗಳು",
+      "upper": "ದೊಡ್ಡ ಅಕ್ಷರ",
+      "lower": "ಸಣ್ಣ ಅಕ್ಷರ",
+      "number": "ಸಂಖ್ಯೆ"
+    }
   },
   "register": {
     "title": "ನಿಮ್ಮ ಖಾತೆ ರಚಿಸಿ",
@@ -273,8 +326,14 @@
       "allRequired": "ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳು ಅಗತ್ಯ",
       "passwordMismatch": "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ",
       "passwordLength": "ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 8 ಅಕ್ಷರಗಳಿರಬೇಕು",
-      "passwordComplexity": "ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ದೊಡ್ಡ, ಸಣ್ಣ ಅಕ್ಷರಗಳು ಮತ್ತು ಸಂಖ್ಯೆ ಇರಬೇಕು"
-    }
+      "passwordComplexity": "ಪಾಸ್‌ವರ್ಡ್‌ನಲ್ಲಿ ದೊಡ್ಡ, ಸಣ್ಣ ಅಕ್ಷರಗಳು ಮತ್ತು ಸಂಖ್ಯೆ ಇರಬೇಕು",
+      "acceptTermsRequired": "ಮುಂದುವರಿಯಲು ಸೇವಾ ನಿಯಮಗಳು ಮತ್ತು ಗೌಪ್ಯತಾ ನೀತಿಯನ್ನು ಒಪ್ಪಿಕೊಳ್ಳಿ."
+    },
+    "acceptPrefix": "ನಾನು ಒಪ್ಪುತ್ತೇನೆ",
+    "termsLink": "ಸೇವಾ ನಿಯಮಗಳು",
+    "acceptAnd": "ಮತ್ತು",
+    "privacyLink": "ಗೌಪ್ಯತಾ ನೀತಿ",
+    "doctorAgreementLink": "ವೈದ್ಯ ಸೇವಾ ಒಪ್ಪಂದ"
   },
   "home": {
     "signIn": "ಸೈನ್ ಇನ್",
@@ -871,10 +930,14 @@
         "hospitalOversight": "ಆಸ್ಪತ್ರೆ ಮೇಲ್ವಿಚಾರಣೆ",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Manage inpatient cases"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "ರೋಗಿ",
@@ -903,10 +966,18 @@
       "reportBuilderTitle": "ವರದಿ ನಿರ್ಮಾಪಕ",
       "reportBuilderDesc": "ಕಸ್ಟಮ್ ವೈದ್ಯಕೀಯ ಮತ್ತು ವಿಶ್ಲೇಷಣೆ ವರದಿಗಳನ್ನು ರಚಿಸಿ",
       "aiCopilotTitle": "AI ಕೋಪೈಲಟ್",
-      "aiCopilotDesc": "AI-ಚಾಲಿತ ಕ್ಲಿನಿಕಲ್ ನಿರ್ಧಾರ ಬೆಂಬಲ ಪಡೆಯಿರಿ"
+      "aiCopilotDesc": "AI-ಚಾಲಿತ ಕ್ಲಿನಿಕಲ್ ನಿರ್ಧಾರ ಬೆಂಬಲ ಪಡೆಯಿರಿ",
+      "treatmentCampaigns": "Treatment Campaigns"
     },
     "findDoctor": "ವೈದ್ಯರನ್ನು ಹುಡುಕಿ →",
-    "manageSchedule": "ವೇಳಾಪಟ್ಟಿ ನಿರ್ವಹಿಸಿ →"
+    "manageSchedule": "ವೇಳಾಪಟ್ಟಿ ನಿರ್ವಹಿಸಿ →",
+    "quickActionsTitle": "Quick Actions",
+    "enterpriseOverview": "Enterprise Overview",
+    "enterpriseStats": {
+      "activeCampaigns": "Active Campaigns",
+      "pendingApprovals": "Pending Approvals",
+      "groups": "Groups"
+    }
   },
   "consultations": {
     "pageTitle": "🏥 Consultations & Appointments",
@@ -1352,7 +1423,10 @@
       "status": "ಸ್ಥಿತಿ",
       "severity": "ತೀವ್ರತೆ",
       "recordedBy": "ದಾಖಲಿಸಿದವರು"
-    }
+    },
+    "noAnimalsTitle": "No Animals Found",
+    "noAnimalsHint": "Add an animal to view its health timeline",
+    "addAnimal": "Add Animal"
   },
   "medicalRecords": {
     "pageTitle": "📋 ವೈದ್ಯಕೀಯ ದಾಖಲೆಗಳು",
@@ -2752,7 +2826,8 @@
     "viewReadings": "View Readings",
     "noSensors": "No sensors registered yet",
     "recordedAt": "Recorded At",
-    "noReadings": "No readings recorded yet"
+    "noReadings": "No readings recorded yet",
+    "selectEnterprise": "Select Enterprise"
   },
   "supplyChain": {
     "pageTitle": "🔗 Supply Chain & Traceability (Farm-to-Fork)",
@@ -2847,8 +2922,41 @@
     "checkIn": "Check In",
     "checkOut": "Check Out",
     "form": {
-      "title": "Title"
-    }
+      "title": "Title",
+      "taskType": "Task Type",
+      "dueDate": "Due Date",
+      "estimatedHours": "Estimated Hours",
+      "userId": "Worker",
+      "shiftDate": "Shift Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "roleOnShift": "Role on Shift"
+    },
+    "taskUpdated": "Task updated",
+    "checkedIn": "Checked in successfully",
+    "failedCheckIn": "Failed to check in",
+    "checkedOut": "Checked out successfully",
+    "failedCheckOut": "Failed to check out",
+    "openTasksByPriority": "Open Tasks by Priority",
+    "avgHours": "Avg. Hours",
+    "task": "Task",
+    "assignedTo": "Assigned To",
+    "due": "Due",
+    "priority": "Priority",
+    "worker": "Worker",
+    "time": "Time",
+    "role": "Role",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityCritical": "Critical",
+    "assigned": "Assigned",
+    "est": "Est.",
+    "start": "Start",
+    "complete": "Complete",
+    "noTasks": "No tasks found",
+    "scheduleShift": "Schedule Shift",
+    "noShifts": "No shifts scheduled"
   },
   "reportBuilder": {
     "pageTitle": "📊 Report Builder & Export Center",
@@ -3022,7 +3130,10 @@
       "auctions": "🔨 ಹರಾಜು",
       "orders": "📦 ವಿಚಾರಣೆಗಳು",
       "prices": "📈 ಬೆಲೆಗಳು",
-      "admin": "🛡️ ನಿರ್ವಾಹಕ"
+      "admin": "🛡️ ನಿರ್ವಾಹಕ",
+      "messages": "💬 ಸಂದೇಶಗಳು",
+      "favorites": "❤️ ಮೆಚ್ಚಿನವು",
+      "saved": "🔔 ಉಳಿಸಿದವು"
     },
     "categories": {
       "all": "ಎಲ್ಲಾ ವರ್ಗಗಳು",
@@ -3188,7 +3299,24 @@
       "imagesTitle": "ಪಟ್ಟಿ ಚಿತ್ರಗಳು",
       "imagesLabel": "5 ಚಿತ್ರಗಳವರೆಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
       "uploading": "ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
-      "uploadFailed": "ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಗಿದೆ"
+      "uploadFailed": "ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಗಿದೆ",
+      "selectBreed": "ತಳಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "selectSpeciesFirst": "ಮೊದಲು ಜಾತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "priceHintTitle": "ಸಕ್ರಿಯ ಪಟ್ಟಿಗಳಿಂದ ಸೂಚಿಸಿದ ಬೆಲೆ",
+      "priceHintAvg": "ಸರಾಸರಿ",
+      "priceHintBasis_one": "{{count}} ಪಟ್ಟಿಯ ಆಧಾರದ ಮೇಲೆ",
+      "priceHintBasis_other": "{{count}} ಪಟ್ಟಿಗಳ ಆಧಾರದ ಮೇಲೆ",
+      "priceHintFair": "ನ್ಯಾಯಯುತ ಬೆಲೆ",
+      "useMyLocation": "ನನ್ನ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಬಳಸಿ",
+      "locating": "ಸ್ಥಳ ಪಡೆಯಲಾಗುತ್ತಿದೆ…",
+      "locationSet": "ನಿರ್ದೇಶಾಂಕಗಳು ಸೆಟ್ — “ನನ್ನ ಹತ್ತಿರ” ಹುಡುಕಾಟ ಸಕ್ರಿಯ",
+      "locationCaptured": "ಈ ಪಟ್ಟಿಗೆ ಸ್ಥಳ ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ",
+      "locationGeoHint": "ನಿರ್ದೇಶಾಂಕಗಳನ್ನು ಸೇರಿಸುವುದರಿಂದ ಹತ್ತಿರದ ಖರೀದಿದಾರರು “ನನ್ನ ಹತ್ತಿರ” ಮೂಲಕ ನಿಮ್ಮ ಪಟ್ಟಿಯನ್ನು ಕಂಡುಹಿಡಿಯಬಹುದು.",
+      "videoLabel": "ಪಟ್ಟಿ ವೀಡಿಯೊ (ಐಚ್ಛಿಕ)",
+      "videoAdded": "ವೀಡಿಯೊ ಸೇರಿಸಲಾಗಿದೆ",
+      "removeVideo": "ವೀಡಿಯೊ ತೆಗೆದುಹಾಕಿ",
+      "videoUploaded": "ವೀಡಿಯೊ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ",
+      "videoHint": "ಸಣ್ಣ ವೀಡಿಯೊ ವಿಶ್ವಾಸ ಮೂಡಿಸಿ ಹೆಚ್ಚು ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ಪಡೆಯುತ್ತದೆ."
     },
     "detail": {
       "backToListings": "← ಪಟ್ಟಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
@@ -3215,7 +3343,12 @@
       "feature": "☆ ಫೀಚರ್",
       "leading": "★ ಮುಂದಿದೆ",
       "yourListing": "📋 ನಿಮ್ಮ ಪಟ್ಟಿ",
-      "yourListingDesc": "ಇದು ನಿಮ್ಮ ಪಟ್ಟಿ. ಇತರ ಬಳಕೆದಾರರು ಈ ಪ್ರಾಣಿಯ ಬಗ್ಗೆ ವಿಚಾರಿಸಬಹುದು."
+      "yourListingDesc": "ಇದು ನಿಮ್ಮ ಪಟ್ಟಿ. ಇತರ ಬಳಕೆದಾರರು ಈ ಪ್ರಾಣಿಯ ಬಗ್ಗೆ ವಿಚಾರಿಸಬಹುದು.",
+      "auctionEnded": "Auction ended",
+      "call": "Call",
+      "contactHidden": "Contact details hidden",
+      "requestContact": "Request Contact",
+      "watchVideo": "ವೀಡಿಯೊ ನೋಡಿ"
     },
     "card": {
       "hotDeal": "🔥 ಹಾಟ್ ಡೀಲ್",
@@ -3227,7 +3360,11 @@
       "certified": "📋 ಪ್ರಮಾಣಿತ",
       "contact": "ಸಂಪರ್ಕ",
       "welfareAttested": "🛡️ ಕಲ್ಯಾಣ ಧೃಡೀಕರಿಸಲಾಗಿದೆ",
-      "registeredBreeder": "✅ ನೋಂದಿತ ಬ್ರೀಡರ್"
+      "registeredBreeder": "✅ ನೋಂದಿತ ಬ್ರೀಡರ್",
+      "healthPassport": "Health Passport",
+      "fairDeal": "Fair Deal",
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "ವೀಡಿಯೊ ಇದೆ"
     },
     "orders": {
       "asBuyer": "🔍 ಹುಡುಕುವವರಾಗಿ",
@@ -3273,7 +3410,14 @@
       "noListings": "ನಿರ್ವಹಿಸಲು ಪಟ್ಟಿಗಳು ಇಲ್ಲ",
       "listingApproved": "ಪಟ್ಟಿ ಅನುಮೋದಿಸಲಾಗಿದೆ",
       "listingRejected": "ಪಟ್ಟಿ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
-      "rejectionRequired": "ತಿರಸ್ಕರಣೆ ಕಾರಣ ಅಗತ್ಯ"
+      "rejectionRequired": "ತಿರಸ್ಕರಣೆ ಕಾರಣ ಅಗತ್ಯ",
+      "auctionFeature": "Auction Feature",
+      "auctionTitle": "Marketplace Auctions",
+      "auctionEnabled": "Auctions Enabled",
+      "auctionDisabled": "Auctions Disabled",
+      "auctionEnabledDesc": "Live auctions are currently active on the marketplace",
+      "auctionDisabledDesc": "Auctions are currently disabled for all listings",
+      "auctionLegalNote": "Enabling auctions allows timed bidding on animal listings. Ensure compliance with local livestock trading regulations."
     },
     "units": {
       "listings": "ಪಟ್ಟಿಗಳು",
@@ -3332,7 +3476,8 @@
         "listings": "ಪಟ್ಟಿಗಳು",
         "settings": "ನಗದೀಕರಣ",
         "plans": "ಯೋಜನೆಗಳು",
-        "revenue": "ಆದಾಯ"
+        "revenue": "ಆದಾಯ",
+        "reports": "ವರದಿಗಳು"
       },
       "featureToggles": "ಫೀಚರ್ ಟಾಗಲ್‌ಗಳು",
       "allFreeNote": "ಎಲ್ಲಾ ಫೀಚರ್‌ಗಳು ಪ್ರಸ್ತುತ ಎಲ್ಲಾ ಬಳಕೆದಾರರಿಗೆ ಉಚಿತ. ಶುಲ್ಕ ವಿಧಿಸಲು ಸಿದ್ಧವಾದಾಗ ಫೀಚರ್‌ಗಳನ್ನು ಆನ್ ಮಾಡಿ.",
@@ -3406,6 +3551,122 @@
           "desc": "ಹುಡುಕಾಟ ಫಲಿತಾಂಶಗಳಲ್ಲಿ ಆದ್ಯತೆ"
         }
       }
+    },
+    "proximity": {
+      "notSupported": "Location not supported on this device",
+      "denied": "Location access denied. Please enable location permissions.",
+      "nearMeOn": "Near Me (On)",
+      "nearMe": "Near Me",
+      "searching": "Searching nearby..."
+    },
+    "inquirySent": "Inquiry sent successfully",
+    "deal": {
+      "reserveTitle": "ಕಾಯ್ದಿರಿಸಿ ಮತ್ತು ನೇರವಾಗಿ ವ್ಯವಹರಿಸಿ",
+      "reserveNow": "ಈ ಪಟ್ಟಿಯನ್ನು ಕಾಯ್ದಿರಿಸಿ",
+      "reserveSuccess": "ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ! ಮಾರಾಟಗಾರರಿಗೆ ತಿಳಿಸಲಾಗಿದೆ — ಸಂಪರ್ಕಿಸಿ, ಪರಿಶೀಲಿಸಿ, ನೇರವಾಗಿ ಪಾವತಿಸಿ.",
+      "submittedForReview": "ಪಟ್ಟಿ ಸಲ್ಲಿಸಲಾಗಿದೆ! ನಿರ್ವಾಹಕ ಪರಿಶೀಲನೆಯ ನಂತರ ಇದು ಸಾರ್ವಜನಿಕವಾಗಿ ಕಾಣಿಸುತ್ತದೆ.",
+      "howStep1": "ಪಟ್ಟಿಯನ್ನು ಕಾಯ್ದಿರಿಸಿ — ಮಾರಾಟಗಾರರಿಗೆ ಸೂಚನೆ ಹೋಗುತ್ತದೆ",
+      "howStep2": "ಸಂಪರ್ಕಿಸಿ ಮತ್ತು ಪ್ರಾಣಿಯನ್ನು ಖುದ್ದಾಗಿ ಪರಿಶೀಲಿಸಿ",
+      "howStep3": "ಮಾರಾಟಗಾರರಿಗೆ ನೇರವಾಗಿ ಪಾವತಿಸಿ (ನಗದು / ನಿಮ್ಮ UPI)",
+      "howStep4": "ವ್ಯವಹಾರ ಪೂರ್ಣಗೊಳಿಸಲು ಇಬ್ಬರೂ ಇಲ್ಲಿ ದೃಢೀಕರಿಸಿ",
+      "freeNote": "ಈ ಮಾರುಕಟ್ಟೆ 100% ಉಚಿತ — VetCare ಪಾವತಿಯನ್ನು ಎಂದಿಗೂ ನಿರ್ವಹಿಸುವುದಿಲ್ಲ. ಇನ್ನೊಂದು ಪಕ್ಷದೊಂದಿಗೆ ನೇರವಾಗಿ ಪಾವತಿಸಿ.",
+      "tabNote": "ವ್ಯವಹಾರಗಳು ಖರೀದಿದಾರ ಮತ್ತು ಮಾರಾಟಗಾರರ ನಡುವೆ ನೇರವಾಗಿ ನಡೆಯುತ್ತವೆ. ಭೇಟಿಯಾಗಿ ಪಾವತಿಸಿದ ನಂತರ, ಇಬ್ಬರೂ ಇಲ್ಲಿ ದೃಢೀಕರಿಸಿ.",
+      "currentlyReserved": "ಪ್ರಸ್ತುತ ಖರೀದಿದಾರರಿಂದ ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+      "actionsCol": "ವ್ಯವಹಾರ ಕ್ರಮಗಳು",
+      "reservedUntil": "ವರೆಗೆ ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+      "confirmReceipt": "ಸ್ವೀಕರಿಸಿದ್ದನ್ನು ದೃಢೀಕರಿಸಿ",
+      "confirmPayment": "ಪಾವತಿ ಸ್ವೀಕರಿಸಲಾಗಿದೆ",
+      "confirmRecorded": "ನಿಮ್ಮ ದೃಢೀಕರಣ ದಾಖಲಾಗಿದೆ.",
+      "waitingOther": "ಇನ್ನೊಂದು ಪಕ್ಷಕ್ಕಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ",
+      "otherConfirmed": "ಇನ್ನೊಂದು ಪಕ್ಷ ದೃಢೀಕರಿಸಿದೆ",
+      "cancelDeal": "ರದ್ದುಮಾಡಿ",
+      "dealCancelled": "ಕಾಯ್ದಿರಿಸುವಿಕೆ ರದ್ದು — ಪಟ್ಟಿ ಮತ್ತೆ ಸಕ್ರಿಯವಾಗಿದೆ.",
+      "dealDone": "ವ್ಯವಹಾರ ಪೂರ್ಣಗೊಂಡಿದೆ",
+      "paymentMethod": "ಪಾವತಿ ವಿಧಾನ…",
+      "pm": {
+        "cash": "ನಗದು",
+        "upi": "UPI (ನೇರ)",
+        "bankTransfer": "ಬ್ಯಾಂಕ್ ವರ್ಗಾವಣೆ",
+        "other": "ಇತರೆ"
+      },
+      "pendingReview": "ಪರಿಶೀಲನೆ ಬಾಕಿ",
+      "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+      "status": {
+        "reserved": "ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+        "completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+        "cancelled": "ರದ್ದಾಗಿದೆ",
+        "pending": "ಬಾಕಿ"
+      }
+    },
+    "engagement": {
+      "messageSeller": "ಮಾರಾಟಗಾರರಿಗೆ ಸಂದೇಶ",
+      "addFavorite": "ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿ",
+      "removeFavorite": "ಮೆಚ್ಚಿನವುಗಳಿಂದ ತೆಗೆದುಹಾಕಿ",
+      "noMessages": "ಇನ್ನೂ ಸಂಭಾಷಣೆಗಳಿಲ್ಲ. ಪ್ರಾರಂಭಿಸಲು ಯಾವುದೇ ಪಟ್ಟಿಯಿಂದ ಮಾರಾಟಗಾರರಿಗೆ ಸಂದೇಶ ಕಳುಹಿಸಿ.",
+      "listing": "ಪಟ್ಟಿ",
+      "selectConversation": "ಸಂದೇಶಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಸಂಭಾಷಣೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "startConversation": "ಸಂಭಾಷಣೆ ಪ್ರಾರಂಭಿಸಲು ನಮಸ್ಕಾರ ಹೇಳಿ.",
+      "typeMessage": "ಸಂದೇಶ ಟೈಪ್ ಮಾಡಿ…",
+      "send": "ಕಳುಹಿಸಿ",
+      "chatSafety": "ಚಾಟ್ ಅನ್ನು ವೇದಿಕೆಯಲ್ಲಿ ಇರಿಸಿ. ಬ್ಯಾಂಕ್ ವಿವರಗಳು, OTP ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಎಂದಿಗೂ ಹಂಚಿಕೊಳ್ಳಬೇಡಿ. ಪಾವತಿಸುವ ಮೊದಲು ಭೇಟಿಯಾಗಿ ಪರಿಶೀಲಿಸಿ.",
+      "noFavorites": "ಇನ್ನೂ ಮೆಚ್ಚಿನವುಗಳಿಲ್ಲ. ಉಳಿಸಲು ಯಾವುದೇ ಪಟ್ಟಿಯಲ್ಲಿ ಹೃದಯವನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ.",
+      "savedSearchesDesc": "ಹುಡುಕಾಟವನ್ನು ಉಳಿಸಿ ಮತ್ತು ಹೊಸ ಹೊಂದಾಣಿಕೆಯ ಪಟ್ಟಿಗಳು ಪೋಸ್ಟ್ ಆದಾಗ ಅಧಿಸೂಚನೆ ಪಡೆಯಿರಿ.",
+      "noSavedSearches": "ಇನ್ನೂ ಉಳಿಸಿದ ಹುಡುಕಾಟಗಳಿಲ್ಲ. ಬ್ರೌಸ್‌ನಲ್ಲಿ ಫಿಲ್ಟರ್‌ಗಳನ್ನು ಬಳಸಿ, ನಂತರ “ಈ ಹುಡುಕಾಟವನ್ನು ಉಳಿಸಿ” ಟ್ಯಾಪ್ ಮಾಡಿ.",
+      "saveThisSearch": "ಈ ಹುಡುಕಾಟವನ್ನು ಉಳಿಸಿ",
+      "searchNamePlaceholder": "ಈ ಹುಡುಕಾಟಕ್ಕೆ ಹೆಸರಿಡಿ (ಉದಾ. ನನ್ನ ಹತ್ತಿರ ಮುರ್ರಾ ಎಮ್ಮೆ)",
+      "save": "ಉಳಿಸಿ",
+      "searchSaved": "ಹುಡುಕಾಟ ಉಳಿಸಲಾಗಿದೆ. ಹೊಸ ಹೊಂದಾಣಿಕೆಗಳ ಬಗ್ಗೆ ನಿಮಗೆ ತಿಳಿಸಲಾಗುತ್ತದೆ.",
+      "mySearch": "ನನ್ನ ಹುಡುಕಾಟ",
+      "applySearch": "ಅನ್ವಯಿಸಿ",
+      "allListings": "ಎಲ್ಲಾ ಪಟ್ಟಿಗಳು",
+      "alertsOn": "ಅಧಿಸೂಚನೆಗಳು ಆನ್ — ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ",
+      "alertsOff": "ಅಧಿಸೂಚನೆಗಳು ಆಫ್ — ಸಕ್ರಿಯಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"
+    },
+    "pageOf": "ಪುಟ {{current}} / {{total}}",
+    "report": {
+      "reportListing": "ಪಟ್ಟಿಯನ್ನು ವರದಿ ಮಾಡಿ",
+      "reportingWhat": "ವರದಿ: {{title}}",
+      "reason": "ಕಾರಣ",
+      "selectReason": "ಕಾರಣ ಆಯ್ಕೆಮಾಡಿ…",
+      "details": "ವಿವರಗಳು (ಐಚ್ಛಿಕ)",
+      "detailsPlaceholder": "ಪರಿಶೀಲನೆಗೆ ಸಹಾಯ ಮಾಡುವ ಯಾವುದೇ…",
+      "submit": "ವರದಿ ಸಲ್ಲಿಸಿ",
+      "submitted": "ಧನ್ಯವಾದಗಳು — ನಿಮ್ಮ ವರದಿ ಪರಿಶೀಲನೆಗೆ ಸಲ್ಲಿಸಲಾಗಿದೆ.",
+      "resolved": "ವರದಿ ನವೀಕರಿಸಲಾಗಿದೆ.",
+      "adminTitle": "ವರದಿ ಮಾಡಿದ ಪಟ್ಟಿಗಳು",
+      "filterOpen": "ತೆರೆದ ವರದಿಗಳು",
+      "noReports": "ವರದಿಗಳಿಲ್ಲ.",
+      "by": "ಮೂಲಕ",
+      "markReviewing": "ಪರಿಶೀಲನೆ ಎಂದು ಗುರುತಿಸಿ",
+      "action": "ಕ್ರಮ ಕೈಗೊಳ್ಳಿ",
+      "dismiss": "ವಜಾಗೊಳಿಸಿ",
+      "resolutionPlaceholder": "ಪರಿಹಾರ ಟಿಪ್ಪಣಿ (ಐಚ್ಛಿಕ)",
+      "reasons": {
+        "scam": "ವಂಚನೆ",
+        "welfare_concern": "ಪ್ರಾಣಿ ಕಲ್ಯಾಣ ಕಳವಳ",
+        "prohibited": "ನಿಷೇಧಿತ / ಕಾನೂನುಬಾಹಿರ",
+        "miscategorized": "ತಪ್ಪು ವರ್ಗ",
+        "offensive": "ಆಕ್ಷೇಪಾರ್ಹ ವಿಷಯ",
+        "wrong_info": "ದಾರಿತಪ್ಪಿಸುವ ಮಾಹಿತಿ",
+        "other": "ಇತರೆ"
+      },
+      "status": {
+        "open": "ತೆರೆದಿದೆ",
+        "reviewing": "ಪರಿಶೀಲನೆಯಲ್ಲಿ",
+        "actioned": "ಕ್ರಮ ಕೈಗೊಳ್ಳಲಾಗಿದೆ",
+        "dismissed": "ವಜಾಗೊಳಿಸಲಾಗಿದೆ"
+      }
+    },
+    "services": {
+      "vetCheckTitle": "ಖರೀದಿ-ಪೂರ್ವ ಪಶುವೈದ್ಯ ತಪಾಸಣೆ",
+      "vetCheckDesc": "ಬದ್ಧರಾಗುವ ಮೊದಲು ಈ ಪ್ರಾಣಿಯನ್ನು ಪರೀಕ್ಷಿಸಲು ಪರವಾನಗಿ ಪಡೆದ ಪಶುವೈದ್ಯರನ್ನು ಬುಕ್ ಮಾಡಿ — ಆರೋಗ್ಯ, ವಯಸ್ಸು, ಸದೃಢತೆ ಪರಿಶೀಲಿಸಲಾಗಿದೆ.",
+      "bookVetCheck": "ಪಶುವೈದ್ಯ ತಪಾಸಣೆ ಬುಕ್ ಮಾಡಿ",
+      "transportDesc": "ಪ್ರಾಣಿಯನ್ನು ಸಾಗಿಸಲು ಸಹಾಯ ಬೇಕೇ?",
+      "arrangeTransport": "ಸಾರಿಗೆ ವ್ಯವಸ್ಥೆ"
+    },
+    "interlink": {
+      "treasureBanner": "ಉತ್ಪನ್ನಗಳು, ಆಹಾರ ಅಥವಾ ಸಲಕರಣೆ ಖರೀದಿ/ಮಾರಾಟ?",
+      "visitTreasure": "Treasure Mount ಗೆ ಭೇಟಿ ನೀಡಿ"
     }
   },
   "sustainability": {
@@ -3499,7 +3760,12 @@
     "noGoals": "No sustainability goals created yet",
     "carbonBySpecies": "Carbon Footprint by Species",
     "species": "Species",
-    "headCount": "Head Count"
+    "headCount": "Head Count",
+    "emissionFactor": "Emission Factor",
+    "annualCO2kg": "Annual CO2 (kg)",
+    "annualCO2tons": "Annual CO2 (tons)",
+    "calculatingCarbon": "Calculating carbon footprint...",
+    "selectForCarbon": "Select an animal group to calculate its carbon footprint"
   },
   "wellnessPortal": {
     "pageTitle": "💚 ಆರೋಗ್ಯ ಪೋರ್ಟಲ್",
@@ -3764,7 +4030,8 @@
     "previous": "ಹಿಂದಿನ",
     "next": "ಮುಂದಿನ",
     "certificateFilter": "Certificate Services",
-    "allCertificates": "All Certificate Types"
+    "allCertificates": "All Certificate Types",
+    "failedToLoad": "Failed to load veterinarians. Please try again."
   },
   "myBookings": {
     "title": "ನನ್ನ ಬುಕಿಂಗ್‌ಗಳು",
@@ -4410,7 +4677,9 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
-    "refundsIssued": "Refunds Issued"
+    "refundsIssued": "Refunds Issued",
+    "liveVideoSessions": "Live Video Sessions",
+    "totalBookings": "Total Bookings"
   },
   "disputeManagement": {
     "title": "Dispute Management",
@@ -4692,7 +4961,8 @@
     "totalPlatformBalance": "Total Platform Balance",
     "usersWithBalance": "Users with Balance",
     "topBalances": "Top Wallet Balances",
-    "avgBalance": "Average Balance"
+    "avgBalance": "Average Balance",
+    "reasonPlaceholder": "Enter reason..."
   },
   "permissionManagement": {
     "title": "ಅನುಮತಿ ನಿರ್ವಹಣೆ",
@@ -4890,7 +5160,8 @@
     "maintenanceMessage": "Maintenance Message for Users",
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
     "maintenanceAdminBypass": "Admin access - maintenance mode active",
-    "certificateTemplate": "Certificate Template"
+    "certificateTemplate": "Certificate Template",
+    "maintenanceBypass": "Maintenance Bypass"
   },
   "userManagement": {
     "title": "ಬಳಕೆದಾರ ನಿರ್ವಹಣೆ",
@@ -5131,7 +5402,9 @@
       "animalEarTagId": "ಕಿವಿ ಟ್ಯಾಗ್ ID",
       "animalEarTagPlaceholder": "ಉದಾ., ET-2024-001"
     },
-    "noAnimalsFound": "ಯಾವುದೇ ಪ್ರಾಣಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
+    "noAnimalsFound": "ಯಾವುದೇ ಪ್ರಾಣಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
+    "noHospitals": "No hospitals assigned",
+    "noHospitalsDesc": "You are not assigned to any hospital in this network yet"
   },
   "inpatientManagement": {
     "title": "ಒಳರೋಗಿ & ಬೋರ್ಡಿಂಗ್",
@@ -5986,7 +6259,10 @@
       "noPending": "ಬಾಕಿ ನೋಂದಣಿಗಳಿಲ್ಲ",
       "noActive": "ಸಕ್ರಿಯ ನೋಂದಣಿಗಳಿಲ್ಲ",
       "noEnrollments": "ಇನ್ನೂ ನೋಂದಣಿಗಳಿಲ್ಲ",
-      "searchHelper": "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬಳಕೆದಾರರನ್ನು ಹುಡುಕಿ ನೋಂದಣಿ ವಿನಂತಿ ಕಳುಹಿಸಿ. ರೋಗಿ ಒಪ್ಪಿಕೊಳ್ಳಬೇಕು."
+      "searchHelper": "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬಳಕೆದಾರರನ್ನು ಹುಡುಕಿ ನೋಂದಣಿ ವಿನಂತಿ ಕಳುಹಿಸಿ. ರೋಗಿ ಒಪ್ಪಿಕೊಳ್ಳಬೇಕು.",
+      "consentCollected": "Consent Collected",
+      "consentCollectedHint": "Patient has given consent for this network",
+      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
     },
     "audit": {
       "title": "ಆಡಿಟ್ ಮತ್ತು ಅನುಸರಣೆ",
@@ -6081,7 +6357,8 @@
     "department": "ವಿಭಾಗ",
     "selectDepartment": "ವಿಭಾಗ ಆಯ್ಕೆಮಾಡಿ",
     "customDepartment": "ಕಸ್ಟಮ್ ವಿಭಾಗ",
-    "noDepartment": "ಯಾವುದೇ ವಿಭಾಗ ಇಲ್ಲ"
+    "noDepartment": "ಯಾವುದೇ ವಿಭಾಗ ಇಲ್ಲ",
+    "memberName": "Member Name"
   },
   "networkReferrals": {
     "title": "ನೆಟ್‌ವರ್ಕ್ ರೆಫರಲ್‌ಗಳು",
@@ -6528,7 +6805,9 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items"
+      "showing": "Showing {{count}} of {{total}} items",
+      "selectSupplier": "Select supplier...",
+      "noSuppliersHint": "Add a supplier first to create purchase orders"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6547,7 +6826,8 @@
       "leadTimeDays": "Lead Days",
       "approvedLabel": "Approved",
       "approved": "Approved",
-      "unapproved": "Unapproved"
+      "unapproved": "Unapproved",
+      "selectPaymentTerms": "Select payment terms..."
     },
     "reorder": {
       "title": "Reorder",
@@ -6723,5 +7003,299 @@
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
     }
+  },
+  "chat": {
+    "couldNotStartSession": "Could not start chat session",
+    "failedToSendMessage": "Failed to send message",
+    "couldNotCreateSession": "Could not create chat session",
+    "aiBuddyHelper": "VetCare AI",
+    "thinking": "Thinking...",
+    "userAssistant": "Your Assistant",
+    "yourAssistant": "Your Assistant",
+    "newChat": "New Chat",
+    "startingUp": "Starting up...",
+    "hiUser": "Hi, {{name}}!",
+    "hiGuest": "Hi there!",
+    "iKnowAbout": "I can help with",
+    "askMeAnything": "Ask me anything about your pets and their health",
+    "askMeAnythingGeneral": "Ask me anything",
+    "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "ನಿಮ್ಮ ಪಾವತಿಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ",
+    "testModeNotice": "ಪರೀಕ್ಷಾ ಮೋಡ್ — ನಿಜವಾದ ಹಣ ಕಡಿತಗೊಳ್ಳುವುದಿಲ್ಲ.",
+    "slotHeldFor": "ಸ್ಲಾಟ್ ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+    "consultationFee": "ಸಮಾಲೋಚನಾ ಶುಲ್ಕ",
+    "useWallet": "ವಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್ ಬಳಸಿ",
+    "walletBalance": "ವಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್",
+    "walletApplied": "ವಾಲೆಟ್‌ನಿಂದ ಪಾವತಿ",
+    "payableNow": "ಈಗ ಪಾವತಿಸಬೇಕಾದದ್ದು",
+    "payButton": "ಪಾವತಿಸಿ",
+    "payLater": "ನಂತರ ಪಾವತಿಸಿ",
+    "refundPolicyNotice": "ಪಾವತಿಸುವ ಮೂಲಕ ಮರುಪಾವತಿ & ರದ್ದತಿ ನೀತಿಗೆ ಒಪ್ಪುತ್ತೀರಿ.",
+    "gatewayUnavailable": "ಪಾವತಿ ಗೇಟ್‌ವೇ ಸದ್ಯ ಲಭ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ನಂತರ ಪ್ರಯತ್ನಿಸಿ.",
+    "checkoutFailed": "ಪಾವತಿ ಪ್ರಾರಂಭಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "demoFailed": "ಅನುಕರಣೆ ಪಾವತಿ ವಿಫಲವಾಯಿತು. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಬಹುದು.",
+    "verificationFailed": "ಪಾವತಿ ಪರಿಶೀಲನೆ ವಿಫಲವಾಯಿತು. ಹಣ ಕಡಿತವಾಗಿದ್ದರೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸರಿಹೊಂದಿಸಲಾಗುತ್ತದೆ.",
+    "expiredTitle": "ಪಾವತಿ ಅವಧಿ ಮುಗಿದಿದೆ",
+    "expiredMessage": "ಸಮಯಕ್ಕೆ ಪಾವತಿಯಾಗದ ಕಾರಣ ಸ್ಲಾಟ್ ಬಿಡುಗಡೆಯಾಗಿದೆ.",
+    "bookAgain": "ಮತ್ತೆ ಬುಕ್ ಮಾಡಿ",
+    "demoGatewayTitle": "ಡೆಮೊ ಪಾವತಿ ಗೇಟ್‌ವೇ",
+    "demoGatewayMessage": "ಇದು ಪರೀಕ್ಷೆಗಾಗಿ ಅನುಕರಣೆ ಚೆಕ್ಔಟ್. ನಿಜವಾದ ಹಣ ಕಡಿತವಾಗುವುದಿಲ್ಲ.",
+    "demoFail": "ವೈಫಲ್ಯವನ್ನು ಅನುಕರಿಸಿ",
+    "demoPay": "ಈಗ ಪಾವತಿಸಿ",
+    "status": {
+      "completed": "ಪಾವತಿಯಾಗಿದೆ",
+      "partially_refunded": "ಭಾಗಶಃ ಮರುಪಾವತಿ",
+      "refunded": "ಮರುಪಾವತಿಯಾಗಿದೆ",
+      "pending": "ಬಾಕಿ ಇದೆ",
+      "created": "ಪಾವತಿಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
+      "expired": "ಅವಧಿ ಮುಗಿದಿದೆ",
+      "failed": "ವಿಫಲವಾಗಿದೆ",
+      "transferred": "ವರ್ಗಾಯಿಸಲಾಗಿದೆ"
+    }
+  },
+  "paymentsPage": {
+    "title": "ಪಾವತಿಗಳು & ರಸೀದಿಗಳು",
+    "subtitle": "ನಿಮ್ಮ ಸಮಾಲೋಚನಾ ಪಾವತಿಗಳು, ಮರುಪಾವತಿಗಳು ಮತ್ತು ರಸೀದಿಗಳು",
+    "empty": "ಇನ್ನೂ ಪಾವತಿಗಳಿಲ್ಲ. ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿದ ನಂತರ ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.",
+    "refunded": "ಮರುಪಾವತಿ",
+    "viewReceipt": "ರಸೀದಿ ನೋಡಿ",
+    "receiptTitle": "ಪಾವತಿ ರಸೀದಿ",
+    "patient": "ರೋಗಿ",
+    "doctor": "ವೈದ್ಯರು",
+    "animal": "ಪ್ರಾಣಿ",
+    "date": "ದಿನಾಂಕ",
+    "totalPaid": "ಒಟ್ಟು ಪಾವತಿ",
+    "print": "ಮುದ್ರಿಸಿ",
+    "invoiceNumber": "ಸರಕುಪಟ್ಟಿ ಸಂ.",
+    "taxableValue": "ತೆರಿಗೆಯೋಗ್ಯ ಮೌಲ್ಯ",
+    "gstExempt": "GST-ವಿನಾಯಿತಿ ಪಶುವೈದ್ಯ ಸೇವೆ"
+  },
+  "policy": {
+    "backToHome": "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ",
+    "notFoundTitle": "ದಾಖಲೆ ಸಿಗಲಿಲ್ಲ",
+    "notFoundMessage": "ಈ ನೀತಿ ದಾಖಲೆ ಇನ್ನೂ ಪ್ರಕಟವಾಗಿಲ್ಲ.",
+    "version": "ಆವೃತ್ತಿ",
+    "effectiveFrom": "ಜಾರಿ ದಿನಾಂಕ"
+  },
+  "policyModal": {
+    "title": "ನವೀಕರಿಸಿದ ನೀತಿಗಳು",
+    "message": "ನಮ್ಮ ನೀತಿಗಳು ನವೀಕರಿಸಲ್ಪಟ್ಟಿವೆ. ಮುಂದುವರಿಯಲು ಪರಿಶೀಲಿಸಿ ಸಮ್ಮತಿಸಿ.",
+    "agreeCheckbox": "ಮೇಲೆ ಪಟ್ಟಿ ಮಾಡಿದ ನವೀಕರಿಸಿದ ನೀತಿಗಳನ್ನು ಓದಿ ಒಪ್ಪುತ್ತೇನೆ",
+    "agreeButton": "ಒಪ್ಪಿ ಮುಂದುವರಿಯಿರಿ"
+  },
+  "legalAdmin": {
+    "title": "ಕಾನೂನು & ನೀತಿಗಳು",
+    "subtitle": "ಆವೃತ್ತಿ ಆಧಾರಿತ ನೀತಿಗಳು ಮತ್ತು ಸಮ್ಮತಿ ವ್ಯಾಪ್ತಿಯನ್ನು ನಿರ್ವಹಿಸಿ",
+    "published": "ಹೊಸ ಆವೃತ್ತಿ ಯಶಸ್ವಿಯಾಗಿ ಪ್ರಕಟವಾಗಿದೆ.",
+    "publishFailed": "ಹೊಸ ಆವೃತ್ತಿ ಪ್ರಕಟಣೆ ವಿಫಲವಾಯಿತು.",
+    "usersAccepted": "ಬಳಕೆದಾರರು ಒಪ್ಪಿದ್ದಾರೆ",
+    "notPublished": "ಇನ್ನೂ ಪ್ರಕಟವಾಗಿಲ್ಲ",
+    "view": "ನೋಡಿ",
+    "newVersion": "ಹೊಸ ಆವೃತ್ತಿ",
+    "publishTitle": "ಹೊಸ ಆವೃತ್ತಿ ಪ್ರಕಟಿಸಿ",
+    "publishHint": "ಪ್ರಕಟಣೆ ಬದಲಾಯಿಸಲಾಗದ ಹೊಸ ಆವೃತ್ತಿಯನ್ನು ರಚಿಸುತ್ತದೆ. ಪ್ರಮುಖ ಬದಲಾವಣೆಗಳಿಗೆ ಮಾತ್ರ ಮರು-ಸಮ್ಮತಿ ಆಯ್ಕೆಮಾಡಿ.",
+    "docTitle": "ಶೀರ್ಷಿಕೆ",
+    "docContent": "ವಿಷಯ",
+    "requireReacceptance": "ಪ್ರಭಾವಿತ ಎಲ್ಲ ಬಳಕೆದಾರರು ಈ ಆವೃತ್ತಿಯನ್ನು ಮರು-ಒಪ್ಪಬೇಕು",
+    "publishButton": "ಪ್ರಕಟಿಸಿ",
+    "docTypes": {
+      "terms": "ಸೇವಾ ನಿಯಮಗಳು",
+      "privacy": "ಗೌಪ್ಯತಾ ನೀತಿ",
+      "refund_policy": "ಮರುಪಾವತಿ & ರದ್ದತಿ ನೀತಿ",
+      "wallet_terms": "ವಾಲೆಟ್ ನಿಯಮಗಳು",
+      "doctor_agreement": "ವೈದ್ಯ ಒಪ್ಪಂದ",
+      "grievance_policy": "ದೂರು ಪರಿಹಾರ ನೀತಿ",
+      "disclaimer": "ಸೇವಾ ಹಕ್ಕುತ್ಯಾಗ"
+    }
+  },
+  "earningsLedger": {
+    "clearing": "ಕ್ಲಿಯರಿಂಗ್‌ನಲ್ಲಿ",
+    "available": "ಲಭ್ಯವಿದೆ",
+    "locked": "ಹಿಂಪಡೆಯುವಿಕೆಯಲ್ಲಿ",
+    "withdrawn": "ಹಿಂಪಡೆದಿದೆ",
+    "clearingHint": "ಸಮಾಲೋಚನೆಯ {{days}} ದಿನ(ಗಳ) ನಂತರ ಲಭ್ಯವಾಗುತ್ತದೆ",
+    "negativeHint": "ಋಣಾತ್ಮಕ ಬ್ಯಾಲೆನ್ಸ್ — ನಿಮ್ಮ ಮುಂದಿನ ಗಳಿಕೆಯಿಂದ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸರಿದೂಗಿಸಲಾಗುತ್ತದೆ",
+    "withdrawalThreshold": "ಕನಿಷ್ಠ ಹಿಂಪಡೆಯುವಿಕೆಯ ಕಡೆಗೆ ಪ್ರಗತಿ",
+    "thresholdReached": "ನೀವು ಈಗ ಹಿಂಪಡೆಯುವಿಕೆ ಕೋರಬಹುದು.",
+    "thresholdHint": "ಲಭ್ಯ ಬ್ಯಾಲೆನ್ಸ್ ಕನಿಷ್ಠ ತಲುಪಿದಾಗ ಹಿಂಪಡೆಯುವಿಕೆ ತೆರೆಯುತ್ತದೆ.",
+    "statementTitle": "ಗಳಿಕೆ ವಿವರಣೆ",
+    "colDate": "ದಿನಾಂಕ",
+    "colType": "ಪ್ರಕಾರ",
+    "colPatient": "ರೋಗಿ",
+    "colGross": "ಒಟ್ಟು",
+    "colCommission": "ಕಮಿಷನ್",
+    "colNet": "ನಿವ್ವಳ",
+    "colStatus": "ಸ್ಥಿತಿ",
+    "types": {
+      "consultation": "ಸಮಾಲೋಚನೆ",
+      "cancel_compensation": "ರದ್ದತಿ ಪರಿಹಾರ",
+      "no_show_compensation": "ಹಾಜರಾಗದ ಪರಿಹಾರ",
+      "penalty": "ದಂಡ",
+      "adjustment": "ಹೊಂದಾಣಿಕೆ"
+    },
+    "statuses": {
+      "clearing": "ಕ್ಲಿಯರಿಂಗ್‌ನಲ್ಲಿ",
+      "available": "ಲಭ್ಯವಿದೆ",
+      "locked": "ಹಿಂಪಡೆಯುವಿಕೆಯಲ್ಲಿ",
+      "withdrawn": "ಹಿಂಪಡೆದಿದೆ",
+      "reversed": "ಹಿಂತಿರುಗಿಸಲಾಗಿದೆ"
+    }
+  },
+  "commissionAdmin": {
+    "title": "ಕಮಿಷನ್ ನಿಯಮಗಳು",
+    "subtitle": "ವೈದ್ಯ-ಮಟ್ಟದ ಕಮಿಷನ್ ಓವರ್‌ರೈಡ್‌ಗಳು — ಖಾಲಿ ಕ್ಷೇತ್ರಗಳು ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್ ಬಳಸುತ್ತವೆ",
+    "globalSettings": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್‌ಗಳು",
+    "globalInfo": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್: {{percent}}% + ಪ್ರತಿ ಪಾವತಿ ಬುಕಿಂಗ್‌ಗೆ {{flat}} ಫ್ಲಾಟ್ ಶುಲ್ಕ. System Settings ನಲ್ಲಿ ಬದಲಾಯಿಸಿ.",
+    "saved": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲಾಗಿದೆ. ಹೊಸ ಪಾವತಿಗಳಿಗೆ ಮಾತ್ರ ಅನ್ವಯ.",
+    "saveFailed": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ.",
+    "searchPlaceholder": "ಹೆಸರು ಅಥವಾ ಇಮೇಲ್ ಮೂಲಕ ವೈದ್ಯರನ್ನು ಹುಡುಕಿ…",
+    "noDoctors": "ವೈದ್ಯರು ಸಿಗಲಿಲ್ಲ.",
+    "colDoctor": "ವೈದ್ಯರು",
+    "colFee": "ಶುಲ್ಕ",
+    "colPercentOverride": "% ಓವರ್‌ರೈಡ್",
+    "colFlatOverride": "ಫ್ಲಾಟ್ ಓವರ್‌ರೈಡ್",
+    "snapshotNote": "ಕಮಿಷನ್ ಪಾವತಿ ಸಮಯದಲ್ಲಿ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ಆಗುತ್ತದೆ — ಬದಲಾವಣೆಗಳು ಹಳೆಯ ಪಾವತಿಗಳನ್ನು ಬದಲಾಯಿಸುವುದಿಲ್ಲ."
+  },
+  "withdrawals": {
+    "title": "ಹಿಂಪಡೆಯುವಿಕೆಗಳು",
+    "payoutOnFile": "ಪಾವತಿ ವಿವರಗಳು ದಾಖಲಾಗಿವೆ — ನಿಮ್ಮ ಪೂರ್ಣ ಲಭ್ಯ ಬ್ಯಾಲೆನ್ಸ್ ಹಿಂಪಡೆಯಲು ಕೋರಬಹುದು.",
+    "payoutMissing": "ಹಿಂಪಡೆಯುವಿಕೆ ಸಕ್ರಿಯಗೊಳಿಸಲು ಬ್ಯಾಂಕ್ ಖಾತೆ ಅಥವಾ UPI ವಿವರ ಸೇರಿಸಿ.",
+    "payoutDetails": "ಪಾವತಿ ವಿವರಗಳು",
+    "requestButton": "ಹಿಂಪಡೆಯುವಿಕೆ ಕೋರಿ",
+    "requested": "ಹಿಂಪಡೆಯುವಿಕೆ ಕೋರಲಾಗಿದೆ. ವೇದಿಕೆ ತಂಡ ನಿಮ್ಮ ಬ್ಯಾಂಕ್/UPI ಗೆ ಸೆಟಲ್ ಮಾಡುತ್ತದೆ.",
+    "requestFailed": "ಹಿಂಪಡೆಯುವಿಕೆ ಕೋರಿಕೆ ರಚಿಸಲಾಗಲಿಲ್ಲ.",
+    "payoutSaved": "ಪಾವತಿ ವಿವರಗಳು ಉಳಿಸಲಾಗಿದೆ.",
+    "payoutSaveFailed": "ಪಾವತಿ ವಿವರ ಉಳಿಸಲು ವಿಫಲ.",
+    "accountName": "ಖಾತೆದಾರರ ಹೆಸರು",
+    "accountNumber": "ಖಾತೆ ಸಂಖ್ಯೆ",
+    "ifsc": "IFSC ಕೋಡ್",
+    "upi": "UPI ಐಡಿ (ಐಚ್ಛಿಕ)",
+    "netPaid": "ನಿವ್ವಳ ಪಾವತಿ",
+    "statuses": {
+      "requested": "ಕೋರಲಾಗಿದೆ",
+      "approved": "ಅನುಮೋದಿಸಲಾಗಿದೆ",
+      "settled": "ಸೆಟಲ್ ಆಗಿದೆ",
+      "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+      "cancelled": "ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"
+    }
+  },
+  "settlementsAdmin": {
+    "title": "ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು",
+    "subtitle": "ವೈದ್ಯರ ಹಿಂಪಡೆಯುವಿಕೆ ಕೋರಿಕೆಗಳು, ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು ಮತ್ತು ಪಾವತಿಗಳು",
+    "filterAll": "ಎಲ್ಲಾ",
+    "empty": "ಹಿಂಪಡೆಯುವಿಕೆ ಕೋರಿಕೆಗಳಿಲ್ಲ.",
+    "negativeTitle": "ಋಣಾತ್ಮಕ ಬ್ಯಾಲೆನ್ಸ್ ಇರುವ ವೈದ್ಯರು",
+    "discretionary": "ವಿವೇಚನಾ",
+    "age": "{{days}} ದಿನ(ಗಳಿಂದ) ಕಾಯುತ್ತಿದೆ",
+    "approve": "ಅನುಮೋದಿಸಿ",
+    "reject": "ತಿರಸ್ಕರಿಸಿ",
+    "settle": "ಸೆಟಲ್ ಮಾಡಿ",
+    "approved": "ಕೋರಿಕೆ ಅನುಮೋದಿಸಲಾಗಿದೆ.",
+    "rejected": "ಕೋರಿಕೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ.",
+    "settled": "ಸೆಟಲ್ಮೆಂಟ್ ದಾಖಲಾಗಿದೆ.",
+    "actionFailed": "ಕ್ರಿಯೆ ವಿಫಲವಾಗಿದೆ.",
+    "settleTitle": "ಸೆಟಲ್ಮೆಂಟ್ ದಾಖಲಿಸಿ",
+    "settleHint": "ಮೊದಲು ಬ್ಯಾಂಕ್/UPI ವರ್ಗಾವಣೆ ಮಾಡಿ, ನಂತರ ಉಲ್ಲೇಖ ಇಲ್ಲಿ ದಾಖಲಿಸಿ.",
+    "utrPlaceholder": "UTR / ವಹಿವಾಟು ಉಲ್ಲೇಖ",
+    "notePlaceholder": "ಟಿಪ್ಪಣಿ (ಐಚ್ಛಿಕ)",
+    "rejectTitle": "ಹಿಂಪಡೆಯುವಿಕೆ ತಿರಸ್ಕರಿಸಿ",
+    "reasonPlaceholder": "ವೈದ್ಯರಿಗೆ ತೋರಿಸುವ ಕಾರಣ…",
+    "discretionaryButton": "ವಿವೇಚನಾ ಪಾವತಿ",
+    "discretionaryTitle": "ವಿವೇಚನಾ ಪಾವತಿ",
+    "discretionaryHint": "ಕನಿಷ್ಠ ಮಿತಿಯನ್ನು ಬೈಪಾಸ್ ಮಾಡಿ ವೈದ್ಯರ ಪೂರ್ಣ ಬ್ಯಾಲೆನ್ಸ್ ತಕ್ಷಣ ಸೆಟಲ್ ಮಾಡುತ್ತದೆ. ಟಿಪ್ಪಣಿ ಕಡ್ಡಾಯ.",
+    "doctorIdPlaceholder": "ವೈದ್ಯರ ಬಳಕೆದಾರ ಐಡಿ",
+    "discretionaryNotePlaceholder": "ಈ ಪಾವತಿ ಏಕೆ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "payNow": "ಈಗ ಪಾವತಿಸಿ"
+  },
+  "referrals": {
+    "title": "ರೆಫರಲ್‌ಗಳು",
+    "subtitlePatient": "ನಿಮ್ಮ ವೈದ್ಯರ ರೆಫರಲ್‌ಗಳು — ಸ್ವೀಕರಿಸಿ, ಬೇರೆ ವೈದ್ಯರನ್ನು ಆರಿಸಿ, ಅಥವಾ ಮರುಪಾವತಿ ಪಡೆಯಿರಿ",
+    "subtitleVet": "ರೋಗಿಗಳನ್ನು ಇತರ ವೈದ್ಯರಿಗೆ ರೆಫರ್ ಮಾಡಿ ಫಲಿತಾಂಶ ನೋಡಿ",
+    "referButton": "ರೋಗಿಯನ್ನು ರೆಫರ್ ಮಾಡಿ",
+    "empty": "ಇನ್ನೂ ರೆಫರಲ್‌ಗಳಿಲ್ಲ.",
+    "anyDoctor": "ಯಾವುದೇ ವೈದ್ಯರು (ನಿಮ್ಮ ಆಯ್ಕೆ)",
+    "paidAmount": "ಪಾವತಿಸಿದ ಮೊತ್ತ",
+    "informational": "ತಜ್ಞ ರೆಫರಲ್",
+    "accept": "ಸ್ವೀಕರಿಸಿ",
+    "chooseAnother": "ಬೇರೆ ವೈದ್ಯರು",
+    "refund": "ಮರುಪಾವತಿ",
+    "acceptTitle": "ರೆಫರಲ್ ಸ್ವೀಕರಿಸಿ",
+    "acceptHint": "ವೈದ್ಯರೊಂದಿಗೆ ಸ್ಲಾಟ್ ಆರಿಸಿ. ಈಗಾಗಲೇ ಪಾವತಿಸಿದ್ದು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ವರ್ಗಾವಣೆಯಾಗುತ್ತದೆ — ವ್ಯತ್ಯಾಸ ಮಾತ್ರ ಪಾವತಿಸುತ್ತೀರಿ.",
+    "selectDoctor": "ವೈದ್ಯರನ್ನು ಆರಿಸಿ…",
+    "noSlots": "ಈ ದಿನಾಂಕಕ್ಕೆ ಸ್ಲಾಟ್‌ಗಳಿಲ್ಲ. ಬೇರೆ ದಿನಾಂಕ ಪ್ರಯತ್ನಿಸಿ.",
+    "confirmAccept": "ಮುಂದುವರಿಸಿ",
+    "refundTitle": "ಬದಲಿಗೆ ಮರುಪಾವತಿ ಪಡೆಯಿರಿ",
+    "refundHint": "ವೈದ್ಯರು ಲಭ್ಯವಿಲ್ಲದ ಕಾರಣ ಪೂರ್ಣ ಮರುಪಾವತಿ + ಗುಡ್‌ವಿಲ್ ಬೋನಸ್ ಸಿಗುತ್ತದೆ.",
+    "refundToWallet": "ವಾಲೆಟ್‌ಗೆ ತಕ್ಷಣ ಮರುಪಾವತಿ",
+    "refundToSource": "ಮೂಲ ಪಾವತಿ ವಿಧಾನಕ್ಕೆ (5–7 ದಿನ)",
+    "refunded": "ಮರುಪಾವತಿ ಪೂರ್ಣ.",
+    "accepted": "ರೆಫರಲ್ ಪೂರ್ಣ — ಹೊಸ ಬುಕಿಂಗ್ ಸಿದ್ಧ.",
+    "created": "ರೆಫರಲ್ ಕಳുಹಿಸಲಾಗಿದೆ. ರೋಗಿಗೆ ತಿಳಿಸಲಾಗಿದೆ.",
+    "actionFailed": "ಕ್ರಿಯೆ ವಿಫಲ.",
+    "deadlineIn": "{{hours}} ಗಂಟೆಯೊಳಗೆ ಕ್ರಮ ಕೈಗೊಳ್ಳಿ",
+    "deadlinePassed": "ಗಡುವು ಮೀರಿದೆ",
+    "walletHopNotice": "ನಿಮ್ಮ ಹಿಂದಿನ ಪಾವತಿ ವಾಲೆಟ್‌ಗೆ ಸ್ಥಳಾಂತರಿಸಲಾಗಿದೆ; ಚೆಕ್ಔಟ್‌ನಲ್ಲಿ ಸ್ವಯಂ ಅನ್ವಯವಾಗುತ್ತದೆ.",
+    "referTitle": "ರೋಗಿಯನ್ನು ರೆಫರ್ ಮಾಡಿ",
+    "referHint": "ಸಮಾಲೋಚನೆ ಮೊದಲು ರೆಫರಲ್ ಪಾವತಿಯನ್ನು ಹೊಸ ವೈದ್ಯರಿಗೆ ವರ್ಗಾಯಿಸುತ್ತದೆ. ನಂತರದ ರೆಫರಲ್‌ನಲ್ಲಿ ರೋಗಿ ಎಂದಿನಂತೆ ಬುಕ್ ಮಾಡುತ್ತಾರೆ.",
+    "upcomingBookings": "ಮುಂಬರುವ ಪಾವತಿ ಬುಕಿಂಗ್‌ಗಳು (ಪಾವತಿ ವರ್ಗಾವಣೆ)",
+    "recentConsultations": "ಇತ್ತೀಚೆಗೆ ಪೂರ್ಣಗೊಂಡ ಸಮಾಲೋಚನೆಗಳು (ತಜ್ಞ ರೆಫರಲ್)",
+    "none": "ಇಲ್ಲ",
+    "targetDoctor": "ರೆಫರ್ ಮಾಡಬೇಕಾದವರು",
+    "patientChooses": "ರೋಗಿಯೇ ವೈದ್ಯರನ್ನು ಆಯ್ಕೆ ಮಾಡಲಿ",
+    "reasonPlaceholder": "ರೆಫರಲ್ ಕಾರಣ (ರೋಗಿ ಮತ್ತು ಸ್ವೀಕರಿಸುವ ವೈದ್ಯರಿಗೆ ಕಾಣುತ್ತದೆ)…",
+    "referCostNotice": "ರೋಗಿ ಮರುಪಾವತಿ ಆರಿಸಿದರೆ, ಆ ವೆಚ್ಚಗಳು ನಿಮ್ಮ ಗಳಿಕೆಯಿಂದ ಕಡಿತವಾಗುತ್ತವೆ.",
+    "submitReferral": "ರೆಫರಲ್ ಕಳುಹಿಸಿ",
+    "transferStatuses": {
+      "offered": "ನಿಮ್ಮ ಕ್ರಮಕ್ಕೆ ಕಾಯುತ್ತಿದೆ",
+      "accepted": "ಸ್ವೀಕರಿಸಲಾಗಿದೆ",
+      "rechosen": "ಬೇರೆ ವೈದ್ಯರ ಆಯ್ಕೆ",
+      "refunded": "ಮರುಪಾವತಿಯಾಗಿದೆ",
+      "expired": "ಅವಧಿ ಮೀರಿದೆ",
+      "completed": "ಪೂರ್ಣ"
+    }
+  },
+  "taxAdmin": {
+    "title": "ತೆರಿಗೆ & GST",
+    "subtitle": "SAC ದರಗಳು ಮುಂದಿನ ಸರಕುಪಟ್ಟಿಗಳಿಗೆ ಮಾತ್ರ — ಹಳೆಯವು ಬದಲಾಗದ ದಾಖಲೆಗಳು. GSTIN, ಕಾನೂನು ಹೆಸರು, ಪ್ರಿಫಿಕ್ಸ್ System Settings (tax.*) ನಲ್ಲಿ.",
+    "colLabel": "ಸೇವೆ",
+    "colRate": "GST ದರ",
+    "rateSaved": "ದರ ಉಳಿಸಲಾಗಿದೆ. ಇನ್ನು ಮುಂದೆ ಜಾರಿಯಾಗುವ ಸರಕುಪಟ್ಟಿಗಳಿಗೆ ಅನ್ವಯ.",
+    "rateSaveFailed": "ದರ ಉಳಿಸಲು ವಿಫಲ.",
+    "exportTitle": "GST ರಫ್ತು (CSV)",
+    "exportButton": "CSV ಡೌನ್‌ಲೋಡ್",
+    "exportFailed": "ರಫ್ತು ವಿಫಲ.",
+    "settingsHint": "ರಫ್ತಿನಲ್ಲಿ ತೆರಿಗೆ ಕಮಿಷನ್ ಸರಕುಪಟ್ಟಿಗಳು ಮತ್ತು ವಿನಾಯಿತಿ ಸಮಾಲೋಚನಾ ರಿಜಿಸ್ಟರ್ ಇವೆ (ನಿಮ್ಮ CA ಗಾಗಿ)."
+  },
+  "financeAdmin": {
+    "title": "ಹಣಕಾಸು ವರದಿಗಳು",
+    "subtitle": "ಆದಾಯ, ಹೊಣೆಗಾರಿಕೆಗಳು, TDS ಮತ್ತು ಪಾವತಿ ಆರೋಗ್ಯ",
+    "noData": "ಈ ವ್ಯಾಪ್ತಿಗೆ ಡೇಟಾ ಇಲ್ಲ.",
+    "exportGst": "GST CSV ರಫ್ತು ಮಾಡಿ",
+    "gstExportFailed": "GST ವರದಿಯನ್ನು ರಫ್ತು ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "revenueTitle": "ಆದಾಯ (ಆಯ್ದ ವ್ಯಾಪ್ತಿ)",
+    "gmv": "ಒಟ್ಟು ಬುಕಿಂಗ್ ಮೌಲ್ಯ",
+    "paidCount": "{{count}} ಪಾವತಿ ಬುಕಿಂಗ್‌ಗಳು",
+    "commission": "ಗಳಿಸಿದ ಕಮಿಷನ್",
+    "processingCharges": "ಪ್ರಕ್ರಿಯಾ ಶುಲ್ಕಗಳು",
+    "gatewayFees": "ಗೇಟ್‌ವೇ ಶುಲ್ಕ (ವೆಚ್ಚ)",
+    "refundsOut": "ಮರುಪಾವತಿಗಳು",
+    "netRevenue": "ನಿವ್ವಳ ವೇದಿಕೆ ಆದಾಯ",
+    "netRevenueHint": "ಕಮಿಷನ್ + ಪ್ರಕ್ರಿಯೆ − ಗೇಟ್‌ವೇ ಶುಲ್ಕ",
+    "liabilitiesTitle": "ಹೊಣೆಗಾರಿಕೆಗಳು (ಪ್ರಸ್ತುತ)",
+    "doctorClearing": "ವೈದ್ಯ ಗಳಿಕೆ ಕ್ಲಿಯರಿಂಗ್‌ನಲ್ಲಿ",
+    "doctorAvailable": "ವೈದ್ಯ ಗಳಿಕೆ ಲಭ್ಯ",
+    "doctorLocked": "ಹಿಂಪಡೆಯುವಿಕೆಯಲ್ಲಿ",
+    "walletLiability": "ರೋಗಿ ವಾಲೆಟ್ ಹೊಣೆ",
+    "walletLiabilityHint": "ಗ್ರಾಹಕರಿಗೆ ಸಲ್ಲಬೇಕಾದದ್ದು — ವೇದಿಕೆ ಆದಾಯವಲ್ಲ",
+    "tdsTitle": "TDS ರಿಜಿಸ್ಟರ್ (ಆಯ್ದ ವ್ಯಾಪ್ತಿ)",
+    "tdsDeducted": "TDS ಕಡಿತ",
+    "tdsCount": "{{count}} ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು",
+    "netPaidToDoctors": "ವೈದ್ಯರಿಗೆ ನಿವ್ವಳ ಪಾವತಿ",
+    "healthTitle": "ಪಾವತಿ ಆರೋಗ್ಯ",
+    "stuckPending": "ಸಿಲುಕಿದ ಬಾಕಿ ಪಾವತಿಗಳು",
+    "stuckPendingHint": "1 ಗಂಟೆಗಿಂತ ಹೆಚ್ಚು — ದೈನಂದಿನ ಹೊಂದಾಣಿಕೆ ಪ್ರಯತ್ನ",
+    "openHolds": "ತೆರೆದ ಪಾವತಿ ಹೋಲ್ಡ್‌ಗಳು"
   }
 }

@@ -95,7 +95,13 @@
     "viewAll": "View All",
     "requiredField": "Required field",
     "saveChanges": "Save Changes",
-    "action": "Action"
+    "action": "Action",
+    "errorLoading": "Error loading data",
+    "errorSaving": "Error saving data",
+    "fillRequired": "Please fill all required fields",
+    "none": "None",
+    "error": "Error",
+    "deactivate": "Deactivate"
   },
   "nav": {
     "brand": "VetCare",
@@ -170,6 +176,7 @@
       "intelligence": "நுண்ணறிவு",
       "vetNetwork": "கால்நடை நெட்வொர்க்",
       "account": "கணக்கு",
+      "finance": "நிதி",
       "administration": "நிர்வாகம்",
       "preferences": "விருப்பத்தேர்வுகள்"
     },
@@ -189,7 +196,13 @@
       "approvalRequired": "This movement requires manager approval"
     },
     "prescriptionSettings": "Prescription Template",
-    "hospitalMgmt": "Hospital Mgmt"
+    "hospitalMgmt": "Hospital Mgmt",
+    "myPayments": "கட்டணங்கள் & ரசீதுகள்",
+    "legalPolicies": "சட்டம் & கொள்கைகள்",
+    "commissionSettings": "கமிஷன் விதிகள்",
+    "settlements": "தீர்வுகள்",
+    "referrals": "பரிந்துரைகள்",
+    "financeReports": "நிதி அறிக்கைகள்"
   },
   "login": {
     "welcome": "மீண்டும் வரவேற்கிறோம்",
@@ -220,7 +233,47 @@
     "dbWakingUp": "தரவுத்தளம் விழிக்கிறது — {{countdown}}s இல் தானாக மீண்டும் முயற்சிக்கிறது…",
     "dbWakingUpNote": "முதல் வருகையில் இது இயல்பானது. தயவுசெய்து காத்திருங்கள்.",
     "success": "✓ உள்நுழைவு வெற்றி! திருப்பி அனுப்புகிறது...",
-    "error": "உள்நுழைவு தோல்வி"
+    "error": "உள்நுழைவு தோல்வி",
+    "forgotPassword": "கடவுச்சொல் மறந்துவிட்டீர்களா?"
+  },
+  "forgotPassword": {
+    "title": "கடவுச்சொல் மறந்துவிட்டீர்களா?",
+    "subtitle": "உங்கள் மின்னஞ்சலை உள்ளிடுங்கள், நாங்கள் மீட்டமைப்பு இணைப்பை அனுப்புவோம்.",
+    "emailLabel": "மின்னஞ்சல் முகவரி",
+    "sendLink": "மீட்டமைப்பு இணைப்பு அனுப்பு",
+    "sending": "அனுப்புகிறது...",
+    "backToLogin": "உள்நுழைவுக்கு திரும்பு",
+    "successTitle": "உங்கள் inbox ஐ சரிபார்க்கவும்",
+    "successBody": "இந்த மின்னஞ்சலுக்கு கணக்கு இருந்தால், கடவுச்சொல் மீட்டமைப்பு இணைப்பு அனுப்பப்பட்டுள்ளது. இணைப்பு 1 மணி நேரம் செல்லுபடியாகும்.",
+    "spamHint": "கிடைக்கவில்லையா? உங்கள் spam கோப்புறையை சரிபார்க்கவும்."
+  },
+  "resetPassword": {
+    "title": "புதிய கடவுச்சொல் அமை",
+    "subtitle": "புதிய கடவுச்சொல் குறைந்தது 8 எழுத்துகளாக இருக்க வேண்டும்.",
+    "newPasswordLabel": "புதிய கடவுச்சொல்",
+    "confirmPasswordLabel": "கடவுச்சொல்லை உறுதிப்படுத்துங்கள்",
+    "resetBtn": "கடவுச்சொல்லை மீட்டமை",
+    "resetting": "மீட்டமைக்கிறது...",
+    "backToLogin": "உள்நுழைவுக்கு திரும்பு",
+    "successTitle": "கடவுச்சொல் வெற்றிகரமாக மீட்டமைக்கப்பட்டது!",
+    "successBody": "உங்கள் கடவுச்சொல் புதுப்பிக்கப்பட்டது. இப்போது புதிய கடவுச்சொல்லில் உள்நுழையலாம்.",
+    "goToLogin": "உள்நுழைவுக்கு செல்",
+    "validating": "மீட்டமைப்பு இணைப்பை சரிபார்க்கிறது...",
+    "linkInvalidTitle": "இணைப்பு செல்லாது",
+    "invalidToken": "இந்த மீட்டமைப்பு இணைப்பு தவறானது அல்லது செல்லாதது.",
+    "reasonExpired": "இந்த மீட்டமைப்பு இணைப்பு காலாவதியாகிவிட்டது. புதிய இணைப்பு கோருங்கள்.",
+    "reasonUsed": "இந்த மீட்டமைப்பு இணைப்பு ஏற்கனவே பயன்படுத்தப்பட்டுள்ளது. புதிய இணைப்பு கோருங்கள்.",
+    "reasonInvalid": "இந்த மீட்டமைப்பு இணைப்பு செல்லாதது அல்லது இல்லாதது.",
+    "requestNewLink": "புதிய இணைப்பு கோருங்கள்",
+    "passwordsMismatch": "கடவுச்சொற்கள் பொருந்தவில்லை.",
+    "passwordWeak": "கடவுச்சொல்லில் குறைந்தது ஒரு பெரிய எழுத்து, ஒரு சிறிய எழுத்து மற்றும் ஒரு எண் இருக்க வேண்டும்.",
+    "genericError": "ஏதோ தவறு நடந்தது. மீண்டும் முயற்சிக்கவும்.",
+    "hint": {
+      "length": "குறைந்தது 8 எழுத்துகள்",
+      "upper": "பெரிய எழுத்து",
+      "lower": "சிறிய எழுத்து",
+      "number": "எண்"
+    }
   },
   "register": {
     "title": "உங்கள் கணக்கை உருவாக்குங்கள்",
@@ -273,8 +326,14 @@
       "allRequired": "அனைத்து புலங்களும் தேவை",
       "passwordMismatch": "கடவுச்சொற்கள் பொருந்தவில்லை",
       "passwordLength": "கடவுச்சொல் குறைந்தது 8 எழுத்துகளாக இருக்க வேண்டும்",
-      "passwordComplexity": "கடவுச்சொல்லில் பெரிய, சிறிய எழுத்துகளும் எண்ணும் இருக்க வேண்டும்"
-    }
+      "passwordComplexity": "கடவுச்சொல்லில் பெரிய, சிறிய எழுத்துகளும் எண்ணும் இருக்க வேண்டும்",
+      "acceptTermsRequired": "தொடர சேவை விதிமுறைகள் மற்றும் தனியுரிமைக் கொள்கையை ஏற்கவும்."
+    },
+    "acceptPrefix": "நான் ஒப்புக்கொள்கிறேன்",
+    "termsLink": "சேவை விதிமுறைகள்",
+    "acceptAnd": "மற்றும்",
+    "privacyLink": "தனியுரிமைக் கொள்கை",
+    "doctorAgreementLink": "மருத்துவர் சேவை ஒப்பந்தம்"
   },
   "home": {
     "signIn": "உள்நுழை",
@@ -871,10 +930,14 @@
         "hospitalOversight": "மருத்துவமனை மேற்பார்வை",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Manage inpatient cases"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "நோயாளி",
@@ -903,10 +966,18 @@
       "reportBuilderTitle": "அறிக்கை உருவாக்கி",
       "reportBuilderDesc": "தனிப்பயன் மருத்துவ மற்றும் பகுப்பாய்வு அறிக்கைகளை உருவாக்குக",
       "aiCopilotTitle": "AI கோபைலட்",
-      "aiCopilotDesc": "AI-இயங்கும் மருத்துவ முடிவு ஆதரவைப் பெறுக"
+      "aiCopilotDesc": "AI-இயங்கும் மருத்துவ முடிவு ஆதரவைப் பெறுக",
+      "treatmentCampaigns": "Treatment Campaigns"
     },
     "findDoctor": "மருத்துவர் கண்டுபிடி →",
-    "manageSchedule": "அட்டவணையை நிர்வகி →"
+    "manageSchedule": "அட்டவணையை நிர்வகி →",
+    "quickActionsTitle": "Quick Actions",
+    "enterpriseOverview": "Enterprise Overview",
+    "enterpriseStats": {
+      "activeCampaigns": "Active Campaigns",
+      "pendingApprovals": "Pending Approvals",
+      "groups": "Groups"
+    }
   },
   "consultations": {
     "pageTitle": "🏥 ஆலோசனைகள் & சந்திப்புகள்",
@@ -1352,7 +1423,10 @@
       "status": "நிலை",
       "severity": "தீவிரம்",
       "recordedBy": "பதிவு செய்தவர்"
-    }
+    },
+    "noAnimalsTitle": "No Animals Found",
+    "noAnimalsHint": "Add an animal to view its health timeline",
+    "addAnimal": "Add Animal"
   },
   "medicalRecords": {
     "pageTitle": "📋 மருத்துவப் பதிவுகள்",
@@ -2750,7 +2824,8 @@
     "viewReadings": "View Readings",
     "noSensors": "No sensors registered yet",
     "recordedAt": "Recorded At",
-    "noReadings": "No readings recorded yet"
+    "noReadings": "No readings recorded yet",
+    "selectEnterprise": "Select Enterprise"
   },
   "supplyChain": {
     "pageTitle": "🔗 விநியோகச் சங்கிலி & கண்டறிதல் (பண்ணையிலிருந்து மேசை வரை)",
@@ -2845,8 +2920,41 @@
     "checkIn": "வருகை பதிவு",
     "checkOut": "புறப்பாடு பதிவு",
     "form": {
-      "title": "Title"
-    }
+      "title": "Title",
+      "taskType": "Task Type",
+      "dueDate": "Due Date",
+      "estimatedHours": "Estimated Hours",
+      "userId": "Worker",
+      "shiftDate": "Shift Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "roleOnShift": "Role on Shift"
+    },
+    "taskUpdated": "Task updated",
+    "checkedIn": "Checked in successfully",
+    "failedCheckIn": "Failed to check in",
+    "checkedOut": "Checked out successfully",
+    "failedCheckOut": "Failed to check out",
+    "openTasksByPriority": "Open Tasks by Priority",
+    "avgHours": "Avg. Hours",
+    "task": "Task",
+    "assignedTo": "Assigned To",
+    "due": "Due",
+    "priority": "Priority",
+    "worker": "Worker",
+    "time": "Time",
+    "role": "Role",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityCritical": "Critical",
+    "assigned": "Assigned",
+    "est": "Est.",
+    "start": "Start",
+    "complete": "Complete",
+    "noTasks": "No tasks found",
+    "scheduleShift": "Schedule Shift",
+    "noShifts": "No shifts scheduled"
   },
   "reportBuilder": {
     "pageTitle": "📊 அறிக்கை உருவாக்கி & ஏற்றுமதி மையம்",
@@ -3020,7 +3128,10 @@
       "auctions": "🔨 ஏலங்கள்",
       "orders": "📦 விசாரணைகள்",
       "prices": "📈 விலைகள்",
-      "admin": "🛡️ நிர்வாகி"
+      "admin": "🛡️ நிர்வாகி",
+      "messages": "💬 செய்திகள்",
+      "favorites": "❤️ பிடித்தவை",
+      "saved": "🔔 சேமித்தவை"
     },
     "categories": {
       "all": "அனைத்து பிரிவுகள்",
@@ -3186,7 +3297,24 @@
       "imagesTitle": "பட்டியல் படங்கள்",
       "imagesLabel": "5 படங்கள் வரை பதிவேற்றவும்",
       "uploading": "பதிவேற்றுகிறது...",
-      "uploadFailed": "பட பதிவேற்றம் தோல்வி"
+      "uploadFailed": "பட பதிவேற்றம் தோல்வி",
+      "selectBreed": "இனத்தைத் தேர்ந்தெடுக்கவும்",
+      "selectSpeciesFirst": "முதலில் இனத்தைத் தேர்ந்தெடுக்கவும்",
+      "priceHintTitle": "செயலில் உள்ள விளம்பரங்களிலிருந்து பரிந்துரைக்கப்பட்ட விலை",
+      "priceHintAvg": "சராசரி",
+      "priceHintBasis_one": "{{count}} விளம்பரத்தை அடிப்படையாகக் கொண்டது",
+      "priceHintBasis_other": "{{count}} விளம்பரங்களை அடிப்படையாகக் கொண்டது",
+      "priceHintFair": "நியாயமான விலை",
+      "useMyLocation": "எனது தற்போதைய இருப்பிடத்தைப் பயன்படுத்து",
+      "locating": "இருப்பிடம் பெறப்படுகிறது…",
+      "locationSet": "ஆயத்தொலைவுகள் அமைக்கப்பட்டன — “எனக்கு அருகில்” தேடல் இயக்கம்",
+      "locationCaptured": "இந்த விளம்பரத்திற்கு இருப்பிடம் பதிவு செய்யப்பட்டது",
+      "locationGeoHint": "ஆயத்தொலைவுகளைச் சேர்ப்பது அருகிலுள்ள வாங்குபவர்கள் “எனக்கு அருகில்” மூலம் உங்கள் விளம்பரத்தைக் கண்டறிய உதவும்.",
+      "videoLabel": "விளம்பர வீடியோ (விருப்பம்)",
+      "videoAdded": "வீடியோ சேர்க்கப்பட்டது",
+      "removeVideo": "வீடியோவை அகற்று",
+      "videoUploaded": "வீடியோ பதிவேற்றப்பட்டது",
+      "videoHint": "ஒரு குறுகிய வீடியோ நம்பிக்கையை உருவாக்கி அதிக பதில்களைப் பெறுகிறது."
     },
     "detail": {
       "backToListings": "← பட்டியல்களுக்குத் திரும்பு",
@@ -3213,7 +3341,12 @@
       "feature": "☆ ஃபீச்சர்",
       "leading": "★ முன்னணி",
       "yourListing": "📋 உங்கள் பட்டியல்",
-      "yourListingDesc": "இது உங்கள் பட்டியல். மற்றவர்கள் இந்த விலங்கு பற்றி விசாரிக்கலாம்."
+      "yourListingDesc": "இது உங்கள் பட்டியல். மற்றவர்கள் இந்த விலங்கு பற்றி விசாரிக்கலாம்.",
+      "auctionEnded": "Auction ended",
+      "call": "Call",
+      "contactHidden": "Contact details hidden",
+      "requestContact": "Request Contact",
+      "watchVideo": "வீடியோவைப் பார்"
     },
     "card": {
       "hotDeal": "🔥 ஹாட் டீல்",
@@ -3225,7 +3358,11 @@
       "certified": "📋 சான்றிதழ்",
       "contact": "தொடர்பு",
       "welfareAttested": "🛡️ நலன் சான்றிதழ்",
-      "registeredBreeder": "✅ பதிவு செய்த இனப்பெருக்காளர்"
+      "registeredBreeder": "✅ பதிவு செய்த இனப்பெருக்காளர்",
+      "healthPassport": "Health Passport",
+      "fairDeal": "Fair Deal",
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "வீடியோ உள்ளது"
     },
     "orders": {
       "asBuyer": "🔍 தேடுபவராக",
@@ -3271,7 +3408,14 @@
       "noListings": "நிர்வகிக்க பட்டியல்கள் இல்லை",
       "listingApproved": "பட்டியல் அனுமதிக்கப்பட்டது",
       "listingRejected": "பட்டியல் நிராகரிக்கப்பட்டது",
-      "rejectionRequired": "நிராகரிப்பு காரணம் அவசியம்"
+      "rejectionRequired": "நிராகரிப்பு காரணம் அவசியம்",
+      "auctionFeature": "Auction Feature",
+      "auctionTitle": "Marketplace Auctions",
+      "auctionEnabled": "Auctions Enabled",
+      "auctionDisabled": "Auctions Disabled",
+      "auctionEnabledDesc": "Live auctions are currently active on the marketplace",
+      "auctionDisabledDesc": "Auctions are currently disabled for all listings",
+      "auctionLegalNote": "Enabling auctions allows timed bidding on animal listings. Ensure compliance with local livestock trading regulations."
     },
     "units": {
       "listings": "பட்டியல்கள்",
@@ -3330,7 +3474,8 @@
         "listings": "பட்டியல்கள்",
         "settings": "நிதி மயமாக்கல்",
         "plans": "திட்டங்கள்",
-        "revenue": "வருவாய்"
+        "revenue": "வருவாய்",
+        "reports": "புகார்கள்"
       },
       "featureToggles": "அம்ச மாற்றிகள்",
       "allFreeNote": "அனைத்து அம்சங்களும் தற்போது அனைத்து பயனர்களுக்கும் இலவசம். கட்டணம் வசூலிக்க தயாரானதும் அம்சங்களை இயக்கவும்.",
@@ -3404,6 +3549,122 @@
           "desc": "தேடல் முடிவுகளில் முன்னுரிமை"
         }
       }
+    },
+    "proximity": {
+      "notSupported": "Location not supported on this device",
+      "denied": "Location access denied. Please enable location permissions.",
+      "nearMeOn": "Near Me (On)",
+      "nearMe": "Near Me",
+      "searching": "Searching nearby..."
+    },
+    "inquirySent": "Inquiry sent successfully",
+    "deal": {
+      "reserveTitle": "முன்பதிவு செய்து நேரடியாக பேரம் செய்யுங்கள்",
+      "reserveNow": "இந்த விளம்பரத்தை முன்பதிவு செய்யவும்",
+      "reserveSuccess": "முன்பதிவு செய்யப்பட்டது! விற்பனையாளருக்கு அறிவிக்கப்பட்டுள்ளது — தொடர்பு கொண்டு, பரிசோதித்து, நேரடியாக பணப்பரிமாற்றம் செய்யுங்கள்.",
+      "submittedForReview": "விளம்பரம் சமர்ப்பிக்கப்பட்டது! நிர்வாக மதிப்பாய்வுக்குப் பிறகு பொதுவில் தோன்றும்.",
+      "howStep1": "விளம்பரத்தை முன்பதிவு செய்யுங்கள் — விற்பனையாளருக்கு அறிவிப்பு செல்லும்",
+      "howStep2": "தொடர்பு கொண்டு விலங்கை நேரில் பரிசோதிக்கவும்",
+      "howStep3": "விற்பனையாளருக்கு நேரடியாக பணம் செலுத்துங்கள் (ரொக்கம் / உங்கள் UPI)",
+      "howStep4": "பேரத்தை முடிக்க இருவரும் இங்கே உறுதிப்படுத்தவும்",
+      "freeNote": "இந்த சந்தை 100% இலவசம் — VetCare பணப்பரிமாற்றத்தை ஒருபோதும் கையாளாது. மற்ற தரப்புடன் நேரடியாக பணப்பரிமாற்றம் செய்யுங்கள்.",
+      "tabNote": "பேரங்கள் வாங்குபவர் மற்றும் விற்பனையாளர் இடையே நேரடியாக முடிவாகும். சந்தித்து பணப்பரிமாற்றம் செய்த பிறகு, இரு தரப்பும் இங்கே உறுதிப்படுத்தவும்.",
+      "currentlyReserved": "தற்போது ஒரு வாங்குபவரால் முன்பதிவு செய்யப்பட்டுள்ளது",
+      "actionsCol": "பேர நடவடிக்கைகள்",
+      "reservedUntil": "வரை முன்பதிவு",
+      "confirmReceipt": "பெற்றதை உறுதிப்படுத்து",
+      "confirmPayment": "பணம் பெறப்பட்டது",
+      "confirmRecorded": "உங்கள் உறுதிப்படுத்தல் பதிவு செய்யப்பட்டது.",
+      "waitingOther": "மற்ற தரப்புக்காக காத்திருக்கிறது",
+      "otherConfirmed": "மற்ற தரப்பு உறுதிப்படுத்தியது",
+      "cancelDeal": "ரத்து செய்",
+      "dealCancelled": "முன்பதிவு ரத்து — விளம்பரம் மீண்டும் செயலில் உள்ளது.",
+      "dealDone": "பேரம் முடிந்தது",
+      "paymentMethod": "பணம் செலுத்தும் முறை…",
+      "pm": {
+        "cash": "ரொக்கம்",
+        "upi": "UPI (நேரடி)",
+        "bankTransfer": "வங்கி பரிமாற்றம்",
+        "other": "மற்றவை"
+      },
+      "pendingReview": "மதிப்பாய்வு நிலுவையில்",
+      "rejected": "நிராகரிக்கப்பட்டது",
+      "status": {
+        "reserved": "முன்பதிவு",
+        "completed": "முடிந்தது",
+        "cancelled": "ரத்து",
+        "pending": "நிலுவையில்"
+      }
+    },
+    "engagement": {
+      "messageSeller": "விற்பனையாளருக்கு செய்தி",
+      "addFavorite": "பிடித்தவைகளில் சேர்",
+      "removeFavorite": "பிடித்தவைகளிலிருந்து அகற்று",
+      "noMessages": "இதுவரை உரையாடல்கள் இல்லை. தொடங்க எந்த விளம்பரத்திலிருந்தும் விற்பனையாளருக்கு செய்தி அனுப்புங்கள்.",
+      "listing": "விளம்பரம்",
+      "selectConversation": "செய்திகளைப் பார்க்க உரையாடலைத் தேர்ந்தெடுக்கவும்",
+      "startConversation": "உரையாடலைத் தொடங்க வணக்கம் சொல்லுங்கள்.",
+      "typeMessage": "செய்தியை உள்ளிடவும்…",
+      "send": "அனுப்பு",
+      "chatSafety": "அரட்டையை தளத்தில் வைத்திருங்கள். வங்கி விவரங்கள், OTP அல்லது கடவுச்சொற்களை பகிர வேண்டாம். பணம் செலுத்தும் முன் சந்தித்து பரிசோதிக்கவும்.",
+      "noFavorites": "இதுவரை பிடித்தவை இல்லை. சேமிக்க எந்த விளம்பரத்திலும் இதயத்தைத் தட்டவும்.",
+      "savedSearchesDesc": "தேடலைச் சேமித்து புதிய பொருந்தும் விளம்பரங்கள் இடப்படும்போது அறிவிப்பு பெறுங்கள்.",
+      "noSavedSearches": "இதுவரை சேமித்த தேடல்கள் இல்லை. உலாவலில் வடிகட்டிகளைப் பயன்படுத்தி “இந்தத் தேடலைச் சேமி” தட்டவும்.",
+      "saveThisSearch": "இந்தத் தேடலைச் சேமி",
+      "searchNamePlaceholder": "இந்தத் தேடலுக்கு பெயரிடுங்கள் (எ.கா. என் அருகில் முர்ரா எருமை)",
+      "save": "சேமி",
+      "searchSaved": "தேடல் சேமிக்கப்பட்டது. புதிய பொருத்தங்கள் குறித்து உங்களுக்கு அறிவிக்கப்படும்.",
+      "mySearch": "என் தேடல்",
+      "applySearch": "பயன்படுத்து",
+      "allListings": "அனைத்து விளம்பரங்கள்",
+      "alertsOn": "அறிவிப்புகள் இயக்கத்தில் — முடக்க தட்டவும்",
+      "alertsOff": "அறிவிப்புகள் அணைக்கப்பட்டன — இயக்க தட்டவும்"
+    },
+    "pageOf": "பக்கம் {{current}} / {{total}}",
+    "report": {
+      "reportListing": "விளம்பரத்தைப் புகாரளி",
+      "reportingWhat": "புகார்: {{title}}",
+      "reason": "காரணம்",
+      "selectReason": "காரணத்தைத் தேர்ந்தெடுக்கவும்…",
+      "details": "விவரங்கள் (விருப்பம்)",
+      "detailsPlaceholder": "மதிப்பாய்வுக்கு உதவும் எதுவும்…",
+      "submit": "புகாரை சமர்ப்பி",
+      "submitted": "நன்றி — உங்கள் புகார் மதிப்பாய்வுக்கு சமர்ப்பிக்கப்பட்டது.",
+      "resolved": "புகார் புதுப்பிக்கப்பட்டது.",
+      "adminTitle": "புகாரளிக்கப்பட்ட விளம்பரங்கள்",
+      "filterOpen": "திறந்த புகார்கள்",
+      "noReports": "புகார்கள் இல்லை.",
+      "by": "மூலம்",
+      "markReviewing": "மதிப்பாய்வு எனக் குறி",
+      "action": "நடவடிக்கை எடு",
+      "dismiss": "நிராகரி",
+      "resolutionPlaceholder": "தீர்வு குறிப்பு (விருப்பம்)",
+      "reasons": {
+        "scam": "மோசடி",
+        "welfare_concern": "விலங்கு நல அக்கறை",
+        "prohibited": "தடைசெய்யப்பட்ட / சட்டவிரோத",
+        "miscategorized": "தவறான வகை",
+        "offensive": "தகாத உள்ளடக்கம்",
+        "wrong_info": "தவறான தகவல்",
+        "other": "மற்றவை"
+      },
+      "status": {
+        "open": "திறந்த",
+        "reviewing": "மதிப்பாய்வில்",
+        "actioned": "நடவடிக்கை எடுக்கப்பட்டது",
+        "dismissed": "நிராகரிக்கப்பட்டது"
+      }
+    },
+    "services": {
+      "vetCheckTitle": "வாங்குவதற்கு முந்தைய கால்நடை பரிசோதனை",
+      "vetCheckDesc": "உறுதி செய்வதற்கு முன் இந்த விலங்கைப் பரிசோதிக்க உரிமம் பெற்ற கால்நடை மருத்துவரை பதிவு செய்யுங்கள் — ஆரோக்கியம், வயது, தகுதி சரிபார்க்கப்பட்டது.",
+      "bookVetCheck": "கால்நடை பரிசோதனையை பதிவு செய்",
+      "transportDesc": "விலங்கை நகர்த்த உதவி வேண்டுமா?",
+      "arrangeTransport": "போக்குவரத்து ஏற்பாடு"
+    },
+    "interlink": {
+      "treasureBanner": "பொருட்கள், தீவனம் அல்லது உபகரணங்கள் வாங்க/விற்கவா?",
+      "visitTreasure": "Treasure Mount ஐப் பார்"
     }
   },
   "sustainability": {
@@ -3497,7 +3758,12 @@
     "noGoals": "No sustainability goals created yet",
     "carbonBySpecies": "Carbon Footprint by Species",
     "species": "Species",
-    "headCount": "Head Count"
+    "headCount": "Head Count",
+    "emissionFactor": "Emission Factor",
+    "annualCO2kg": "Annual CO2 (kg)",
+    "annualCO2tons": "Annual CO2 (tons)",
+    "calculatingCarbon": "Calculating carbon footprint...",
+    "selectForCarbon": "Select an animal group to calculate its carbon footprint"
   },
   "wellnessPortal": {
     "pageTitle": "💚 நலவாழ்வு போர்டல்",
@@ -3762,7 +4028,8 @@
     "previous": "முந்தையது",
     "next": "அடுத்து",
     "certificateFilter": "Certificate Services",
-    "allCertificates": "All Certificate Types"
+    "allCertificates": "All Certificate Types",
+    "failedToLoad": "Failed to load veterinarians. Please try again."
   },
   "myBookings": {
     "title": "எனது முன்பதிவுகள்",
@@ -4408,7 +4675,9 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
-    "refundsIssued": "Refunds Issued"
+    "refundsIssued": "Refunds Issued",
+    "liveVideoSessions": "Live Video Sessions",
+    "totalBookings": "Total Bookings"
   },
   "disputeManagement": {
     "title": "Dispute Management",
@@ -4690,7 +4959,8 @@
     "totalPlatformBalance": "Total Platform Balance",
     "usersWithBalance": "Users with Balance",
     "topBalances": "Top Wallet Balances",
-    "avgBalance": "Average Balance"
+    "avgBalance": "Average Balance",
+    "reasonPlaceholder": "Enter reason..."
   },
   "permissionManagement": {
     "title": "அனுமதி மேலாண்மை",
@@ -4888,7 +5158,8 @@
     "maintenanceMessage": "Maintenance Message for Users",
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
     "maintenanceAdminBypass": "Admin access - maintenance mode active",
-    "certificateTemplate": "Certificate Template"
+    "certificateTemplate": "Certificate Template",
+    "maintenanceBypass": "Maintenance Bypass"
   },
   "userManagement": {
     "title": "பயனர் மேலாண்மை",
@@ -5129,7 +5400,9 @@
       "animalEarTagId": "காது குறி ID",
       "animalEarTagPlaceholder": "எ.கா., ET-2024-001"
     },
-    "noAnimalsFound": "எந்த விலங்கும் கிடைக்கவில்லை"
+    "noAnimalsFound": "எந்த விலங்கும் கிடைக்கவில்லை",
+    "noHospitals": "No hospitals assigned",
+    "noHospitalsDesc": "You are not assigned to any hospital in this network yet"
   },
   "inpatientManagement": {
     "title": "உள்நோயாளி & தங்கும் வசதி",
@@ -5971,7 +6244,10 @@
       "noPending": "நிலுவையில் உள்ள சேர்க்கைகள் இல்லை",
       "noActive": "செயலில் உள்ள சேர்க்கைகள் இல்லை",
       "noEnrollments": "இன்னும் சேர்க்கைகள் இல்லை",
-      "searchHelper": "இருக்கும் பயனர்களை தேடி பதிவு கோரிக்கை அனுப்பவும். நோயாளி ஒப்புக்கொள்ள வேண்டும்."
+      "searchHelper": "இருக்கும் பயனர்களை தேடி பதிவு கோரிக்கை அனுப்பவும். நோயாளி ஒப்புக்கொள்ள வேண்டும்.",
+      "consentCollected": "Consent Collected",
+      "consentCollectedHint": "Patient has given consent for this network",
+      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
     },
     "audit": {
       "title": "தணிக்கை மற்றும் இணக்கம்",
@@ -6066,7 +6342,8 @@
     "department": "துறை",
     "selectDepartment": "துறை தேர்ந்தெடு",
     "customDepartment": "தனிப்பயன் துறை",
-    "noDepartment": "துறை இல்லை"
+    "noDepartment": "துறை இல்லை",
+    "memberName": "Member Name"
   },
   "networkReferrals": {
     "title": "நெட்வொர்க் பரிந்துரைகள்",
@@ -6513,7 +6790,9 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items"
+      "showing": "Showing {{count}} of {{total}} items",
+      "selectSupplier": "Select supplier...",
+      "noSuppliersHint": "Add a supplier first to create purchase orders"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -6532,7 +6811,8 @@
       "leadTimeDays": "Lead Days",
       "approvedLabel": "Approved",
       "approved": "Approved",
-      "unapproved": "Unapproved"
+      "unapproved": "Unapproved",
+      "selectPaymentTerms": "Select payment terms..."
     },
     "reorder": {
       "title": "Reorder",
@@ -6708,5 +6988,299 @@
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
     }
+  },
+  "chat": {
+    "couldNotStartSession": "Could not start chat session",
+    "failedToSendMessage": "Failed to send message",
+    "couldNotCreateSession": "Could not create chat session",
+    "aiBuddyHelper": "VetCare AI",
+    "thinking": "Thinking...",
+    "userAssistant": "Your Assistant",
+    "yourAssistant": "Your Assistant",
+    "newChat": "New Chat",
+    "startingUp": "Starting up...",
+    "hiUser": "Hi, {{name}}!",
+    "hiGuest": "Hi there!",
+    "iKnowAbout": "I can help with",
+    "askMeAnything": "Ask me anything about your pets and their health",
+    "askMeAnythingGeneral": "Ask me anything",
+    "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "உங்கள் கட்டணத்தை முடிக்கவும்",
+    "testModeNotice": "சோதனை பயன்முறை — உண்மையான தொகை பிடிக்கப்படாது.",
+    "slotHeldFor": "நேரம் ஒதுக்கப்பட்டுள்ளது",
+    "consultationFee": "ஆலோசனைக் கட்டணம்",
+    "useWallet": "வாலட் இருப்பைப் பயன்படுத்து",
+    "walletBalance": "வாலட் இருப்பு",
+    "walletApplied": "வாலட்டிலிருந்து செலுத்தியது",
+    "payableNow": "இப்போது செலுத்த வேண்டியது",
+    "payButton": "செலுத்து",
+    "payLater": "பின்னர் செலுத்து",
+    "refundPolicyNotice": "கட்டணம் செலுத்துவதன் மூலம் திரும்பப்பெறுதல் & ரத்து கொள்கையை ஏற்கிறீர்கள்.",
+    "gatewayUnavailable": "கட்டண நுழைவாயில் தற்போது கிடைக்கவில்லை. பின்னர் முயற்சிக்கவும்.",
+    "checkoutFailed": "கட்டணத்தைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+    "demoFailed": "மாதிரி கட்டணம் தோல்வியடைந்தது. மீண்டும் முயற்சிக்கலாம்.",
+    "verificationFailed": "கட்டண சரிபார்ப்பு தோல்வி. பணம் பிடித்திருந்தால் தானாக சரிசெய்யப்படும்.",
+    "expiredTitle": "கட்டண நேரம் முடிந்தது",
+    "expiredMessage": "நேரத்தில் கட்டணம் செலுத்தாததால் நேரம் விடுவிக்கப்பட்டது.",
+    "bookAgain": "மீண்டும் பதிவு செய்",
+    "demoGatewayTitle": "டெமோ கட்டண நுழைவாயில்",
+    "demoGatewayMessage": "இது சோதனைக்கான மாதிரி கட்டணமாகும். உண்மையான பணம் எடுக்கப்படாது.",
+    "demoFail": "தோல்வியை உருவகப்படுத்து",
+    "demoPay": "இப்போது செலுத்து",
+    "status": {
+      "completed": "செலுத்தப்பட்டது",
+      "partially_refunded": "பகுதி திருப்பம்",
+      "refunded": "திருப்பப்பட்டது",
+      "pending": "நிலுவையில்",
+      "created": "கட்டணத்திற்காக காத்திருக்கிறது",
+      "expired": "காலாவதி",
+      "failed": "தோல்வி",
+      "transferred": "மாற்றப்பட்டது"
+    }
+  },
+  "paymentsPage": {
+    "title": "கட்டணங்கள் & ரசீதுகள்",
+    "subtitle": "உங்கள் ஆலோசனை கட்டணங்கள், திருப்பங்கள் மற்றும் ரசீதுகள்",
+    "empty": "இன்னும் கட்டணங்கள் இல்லை. ஆலோசனை பதிவு செய்த பிறகு இங்கு தோன்றும்.",
+    "refunded": "திருப்பப்பட்டது",
+    "viewReceipt": "ரசீதைக் காண்க",
+    "receiptTitle": "கட்டண ரசீது",
+    "patient": "நோயாளி",
+    "doctor": "மருத்துவர்",
+    "animal": "விலங்கு",
+    "date": "தேதி",
+    "totalPaid": "மொத்தம் செலுத்தியது",
+    "print": "அச்சிடு",
+    "invoiceNumber": "இன்வாய்ஸ் எண்",
+    "taxableValue": "வரிக்குரிய மதிப்பு",
+    "gstExempt": "GST-விலக்கு பெற்ற கால்நடை மருத்துவ சேவை"
+  },
+  "policy": {
+    "backToHome": "முகப்புக்குத் திரும்பு",
+    "notFoundTitle": "ஆவணம் கிடைக்கவில்லை",
+    "notFoundMessage": "இந்தக் கொள்கை ஆவணம் இன்னும் வெளியிடப்படவில்லை.",
+    "version": "பதிப்பு",
+    "effectiveFrom": "நடைமுறை தேதி"
+  },
+  "policyModal": {
+    "title": "புதுப்பிக்கப்பட்ட கொள்கைகள்",
+    "message": "எங்கள் கொள்கைகள் புதுப்பிக்கப்பட்டுள்ளன. தொடர்ந்து பயன்படுத்த மதிப்பாய்வு செய்து ஏற்கவும்.",
+    "agreeCheckbox": "மேலே பட்டியலிடப்பட்ட புதுப்பிக்கப்பட்ட கொள்கைகளை படித்து ஒப்புக்கொள்கிறேன்",
+    "agreeButton": "ஒப்புக்கொண்டு தொடரவும்"
+  },
+  "legalAdmin": {
+    "title": "சட்டம் & கொள்கைகள்",
+    "subtitle": "பதிப்பு அடிப்படையிலான கொள்கைகள் மற்றும் ஒப்புதல் நிலையை நிர்வகிக்கவும்",
+    "published": "புதிய பதிப்பு வெற்றிகரமாக வெளியிடப்பட்டது.",
+    "publishFailed": "புதிய பதிப்பை வெளியிட முடியவில்லை.",
+    "usersAccepted": "பயனர்கள் ஏற்றுள்ளனர்",
+    "notPublished": "இன்னும் வெளியிடப்படவில்லை",
+    "view": "காண்க",
+    "newVersion": "புதிய பதிப்பு",
+    "publishTitle": "புதிய பதிப்பை வெளியிடு",
+    "publishHint": "வெளியீடு மாற்ற முடியாத புதிய பதிப்பை உருவாக்கும். முக்கிய மாற்றங்களுக்கு மட்டும் மறு-ஒப்புதலைத் தேர்ந்தெடுக்கவும்.",
+    "docTitle": "தலைப்பு",
+    "docContent": "உள்ளடக்கம்",
+    "requireReacceptance": "பாதிக்கப்பட்ட அனைத்து பயனர்களும் இந்தப் பதிப்பை மீண்டும் ஏற்க வேண்டும்",
+    "publishButton": "வெளியிடு",
+    "docTypes": {
+      "terms": "சேவை விதிமுறைகள்",
+      "privacy": "தனியுரிமைக் கொள்கை",
+      "refund_policy": "திருப்பம் & ரத்து கொள்கை",
+      "wallet_terms": "வாலட் விதிமுறைகள்",
+      "doctor_agreement": "மருத்துவர் ஒப்பந்தம்",
+      "grievance_policy": "குறைதீர்ப்புக் கொள்கை",
+      "disclaimer": "சேவை மறுப்பு"
+    }
+  },
+  "earningsLedger": {
+    "clearing": "தீர்வில்",
+    "available": "கிடைக்கிறது",
+    "locked": "திரும்பப்பெறுதலில்",
+    "withdrawn": "எடுக்கப்பட்டது",
+    "clearingHint": "ஆலோசனைக்கு {{days}} நாள்(கள்) பிறகு கிடைக்கும்",
+    "negativeHint": "எதிர்மறை இருப்பு — உங்கள் அடுத்த வருவாயிலிருந்து தானாக ஈடு செய்யப்படும்",
+    "withdrawalThreshold": "குறைந்தபட்ச திரும்பப்பெறுதலுக்கான முன்னேற்றம்",
+    "thresholdReached": "இப்போது திரும்பப்பெற கோரலாம்.",
+    "thresholdHint": "கிடைக்கும் இருப்பு குறைந்தபட்சத்தை அடைந்ததும் திரும்பப்பெறுதல் திறக்கும்.",
+    "statementTitle": "வருவாய் அறிக்கை",
+    "colDate": "தேதி",
+    "colType": "வகை",
+    "colPatient": "நோயாளி",
+    "colGross": "மொத்தம்",
+    "colCommission": "கமிஷன்",
+    "colNet": "நிகர",
+    "colStatus": "நிலை",
+    "types": {
+      "consultation": "ஆலோசனை",
+      "cancel_compensation": "ரத்து இழப்பீடு",
+      "no_show_compensation": "வராதது இழப்பீடு",
+      "penalty": "அபராதம்",
+      "adjustment": "சரிசெய்தல்"
+    },
+    "statuses": {
+      "clearing": "தீர்வில்",
+      "available": "கிடைக்கிறது",
+      "locked": "திரும்பப்பெறுதலில்",
+      "withdrawn": "எடுக்கப்பட்டது",
+      "reversed": "மாற்றப்பட்டது"
+    }
+  },
+  "commissionAdmin": {
+    "title": "கமிஷன் விதிகள்",
+    "subtitle": "மருத்துவர் அளவிலான கமிஷன் மேலெழுதல்கள் — காலி புலங்கள் இயல்புநிலையைப் பயன்படுத்தும்",
+    "globalSettings": "இயல்புநிலை அமைப்புகள்",
+    "globalInfo": "இயல்புநிலை: {{percent}}% + ஒரு கட்டண பதிவுக்கு {{flat}} நிலையான கட்டணம். System Settings-இல் மாற்றவும்.",
+    "saved": "மேலெழுதல் சேமிக்கப்பட்டது. புதிய கட்டணங்களுக்கு மட்டுமே பொருந்தும்.",
+    "saveFailed": "மேலெழுதலை சேமிக்க முடியவில்லை.",
+    "searchPlaceholder": "பெயர் அல்லது மின்னஞ்சலால் மருத்துவரைத் தேடு…",
+    "noDoctors": "மருத்துவர்கள் இல்லை.",
+    "colDoctor": "மருத்துவர்",
+    "colFee": "கட்டணம்",
+    "colPercentOverride": "% மேலெழுதல்",
+    "colFlatOverride": "நிலையான மேலெழுதல்",
+    "snapshotNote": "கமிஷன் கட்டண நேரத்தில் நிலைப்படுத்தப்படும் — மேலெழுதல் மாற்றம் பழைய கட்டணங்களை மாற்றாது."
+  },
+  "withdrawals": {
+    "title": "திரும்பப்பெறுதல்",
+    "payoutOnFile": "கட்டண விவரங்கள் பதிவில் உள்ளன — முழு கிடைக்கும் இருப்பையும் திரும்பப்பெற கோரலாம்.",
+    "payoutMissing": "திரும்பப்பெறுதலை இயக்க வங்கி கணக்கு அல்லது UPI விவரங்களைச் சேர்க்கவும்.",
+    "payoutDetails": "கட்டண விவரங்கள்",
+    "requestButton": "திரும்பப்பெற கோரு",
+    "requested": "திரும்பப்பெற கோரப்பட்டது. தளக் குழு உங்கள் வங்கி/UPI க்கு அனுப்பும்.",
+    "requestFailed": "திரும்பப்பெறுதல் கோரிக்கையை உருவாக்க முடியவில்லை.",
+    "payoutSaved": "கட்டண விவரங்கள் சேமிக்கப்பட்டன.",
+    "payoutSaveFailed": "கட்டண விவரங்களை சேமிக்க முடியவில்லை.",
+    "accountName": "கணக்கு வைத்திருப்பவர் பெயர்",
+    "accountNumber": "கணக்கு எண்",
+    "ifsc": "IFSC குறியீடு",
+    "upi": "UPI ஐடி (விருப்பம்)",
+    "netPaid": "நிகர கட்டணம்",
+    "statuses": {
+      "requested": "கோரப்பட்டது",
+      "approved": "அங்கீகரிக்கப்பட்டது",
+      "settled": "தீர்க்கப்பட்டது",
+      "rejected": "நிராகரிக்கப்பட்டது",
+      "cancelled": "ரத்து"
+    }
+  },
+  "settlementsAdmin": {
+    "title": "தீர்வுகள்",
+    "subtitle": "மருத்துவர் திரும்பப்பெறுதல் கோரிக்கைகள் மற்றும் கட்டணங்கள்",
+    "filterAll": "அனைத்தும்",
+    "empty": "திரும்பப்பெறுதல் கோரிக்கைகள் இல்லை.",
+    "negativeTitle": "எதிர்மறை இருப்பு உள்ள மருத்துவர்கள்",
+    "discretionary": "விருப்புரிமை",
+    "age": "{{days}} நாள்(கள்) காத்திருக்கிறது",
+    "approve": "அங்கீகரி",
+    "reject": "நிராகரி",
+    "settle": "தீர்வு செய்",
+    "approved": "கோரிக்கை அங்கீகரிக்கப்பட்டது.",
+    "rejected": "கோரிக்கை நிராகரிக்கப்பட்டது.",
+    "settled": "தீர்வு பதிவானது.",
+    "actionFailed": "செயல் தோல்வி.",
+    "settleTitle": "தீர்வைப் பதிவு செய்",
+    "settleHint": "முதலில் வங்கி/UPI பரிமாற்றம் செய்து, பிறகு குறிப்பை இங்கே பதிவு செய்யவும்.",
+    "utrPlaceholder": "UTR / பரிவர்த்தனை குறிப்பு",
+    "notePlaceholder": "குறிப்பு (விருப்பம்)",
+    "rejectTitle": "திரும்பப்பெறுதலை நிராகரி",
+    "reasonPlaceholder": "மருத்துவருக்கு காட்டப்படும் காரணம்…",
+    "discretionaryButton": "விருப்புரிமை கட்டணம்",
+    "discretionaryTitle": "விருப்புரிமை கட்டணம்",
+    "discretionaryHint": "குறைந்தபட்ச வரம்பை தவிர்த்து மருத்துவரின் முழு இருப்பையும் உடனே தீர்க்கிறது. குறிப்பு அவசியம்.",
+    "doctorIdPlaceholder": "மருத்துவர் பயனர் ஐடி",
+    "discretionaryNotePlaceholder": "இந்த கட்டணம் ஏன் செய்யப்படுகிறது…",
+    "payNow": "இப்போது செலுத்து"
+  },
+  "referrals": {
+    "title": "பரிந்துரைகள்",
+    "subtitlePatient": "உங்கள் மருத்துவர்களின் பரிந்துரைகள் — ஏற்கவும், வேறு மருத்துவரைத் தேர்வு செய்யவும் அல்லது பணத்தைத் திரும்பப்பெறவும்",
+    "subtitleVet": "நோயாளிகளை பிற மருத்துவர்களுக்கு பரிந்துரைத்து முடிவுகளைக் காணவும்",
+    "referButton": "நோயாளியை பரிந்துரை",
+    "empty": "இன்னும் பரிந்துரைகள் இல்லை.",
+    "anyDoctor": "எந்த மருத்துவரும் (உங்கள் விருப்பம்)",
+    "paidAmount": "செலுத்திய தொகை",
+    "informational": "சிறப்பு மருத்துவர் பரிந்துரை",
+    "accept": "ஏற்கவும்",
+    "chooseAnother": "வேறு மருத்துவர்",
+    "refund": "திரும்பப்பெறு",
+    "acceptTitle": "பரிந்துரையை ஏற்கவும்",
+    "acceptHint": "மருத்துவருடன் நேரத்தைத் தேர்வு செய்யவும். ஏற்கனவே செலுத்தியது தானாக நகரும் — வித்தியாசத்தை மட்டும் செலுத்துவீர்கள்.",
+    "selectDoctor": "மருத்துவரைத் தேர்ந்தெடு…",
+    "noSlots": "இந்த தேதியில் நேரம் இல்லை. வேறு தேதி முயற்சிக்கவும்.",
+    "confirmAccept": "தொடரவும்",
+    "refundTitle": "பதிலாக பணத்தைத் திரும்பப்பெறு",
+    "refundHint": "மருத்துவர் கிடைக்காததால் முழு தொகையும் நல்லெண்ண போனஸும் கிடைக்கும்.",
+    "refundToWallet": "வாலட்டுக்கு உடனடி திரும்பம்",
+    "refundToSource": "அசல் கட்டண முறைக்கு (5–7 நாட்கள்)",
+    "refunded": "திரும்பம் முடிந்தது.",
+    "accepted": "பரிந்துரை முடிந்தது — புதிய பதிவு தயார்.",
+    "created": "பரிந்துரை அனுப்பப்பட்டது. நோயாளிக்கு அறிவிக்கப்பட்டது.",
+    "actionFailed": "செயல் தோல்வி.",
+    "deadlineIn": "{{hours}} மணி நேரத்தில் செயல்படவும்",
+    "deadlinePassed": "காலக்கெடு முடிந்தது",
+    "walletHopNotice": "உங்கள் முந்தைய கட்டணம் வாலட்டுக்கு மாற்றப்பட்டது; செக்அவுட்டில் தானாக பயன்படுத்தப்படும்.",
+    "referTitle": "நோயாளியை பரிந்துரை",
+    "referHint": "ஆலோசனைக்கு முன் பரிந்துரை கட்டணத்தை புதிய மருத்துவருக்கு மாற்றும். ஆலோசனைக்குப் பின் பரிந்துரையில் நோயாளி வழக்கம் போல் பதிவு செய்வார்.",
+    "upcomingBookings": "வரவிருக்கும் கட்டண பதிவுகள் (கட்டண மாற்றம்)",
+    "recentConsultations": "சமீபத்தில் முடிந்த ஆலோசனைகள் (சிறப்பு பரிந்துரை)",
+    "none": "இல்லை",
+    "targetDoctor": "பரிந்துரைக்க",
+    "patientChooses": "நோயாளியே மருத்துவரைத் தேர்வு செய்யட்டும்",
+    "reasonPlaceholder": "பரிந்துரைக்கான காரணம் (நோயாளிக்கும் பெறும் மருத்துவருக்கும் காட்டப்படும்)…",
+    "referCostNotice": "நோயாளி திரும்பப்பெற தேர்ந்தால், அதன் செலவுகள் உங்கள் வருவாயிலிருந்து கழிக்கப்படும்.",
+    "submitReferral": "பரிந்துரை அனுப்பு",
+    "transferStatuses": {
+      "offered": "உங்கள் நடவடிக்கை தேவை",
+      "accepted": "ஏற்கப்பட்டது",
+      "rechosen": "வேறு மருத்துவர் தேர்வு",
+      "refunded": "திரும்பப்பட்டது",
+      "expired": "காலாவதி",
+      "completed": "முடிந்தது"
+    }
+  },
+  "taxAdmin": {
+    "title": "வரி & GST",
+    "subtitle": "SAC விகிதங்கள் எதிர்கால இன்வாய்ஸ்களுக்கு மட்டுமே — பழையவை மாறாத பதிவுகள். GSTIN, சட்டப் பெயர், முன்னொட்டு System Settings (tax.*) இல்.",
+    "colLabel": "சேவை",
+    "colRate": "GST விகிதம்",
+    "rateSaved": "விகிதம் சேமிக்கப்பட்டது. இனி வரும் இன்வாய்ஸ்களுக்கு பொருந்தும்.",
+    "rateSaveFailed": "விகிதத்தை சேமிக்க முடியவில்லை.",
+    "exportTitle": "GST ஏற்றுமதி (CSV)",
+    "exportButton": "CSV பதிவிறக்கு",
+    "exportFailed": "ஏற்றுமதி தோல்வி.",
+    "settingsHint": "ஏற்றுமதியில் வரிக்குரிய கமிஷன் இன்வாய்ஸ்களும் விலக்கு ஆலோசனை பதிவேடும் உள்ளன (உங்கள் CA-க்கு)."
+  },
+  "financeAdmin": {
+    "title": "நிதி அறிக்கைகள்",
+    "subtitle": "வருவாய், பொறுப்புகள், TDS மற்றும் கட்டண நிலை",
+    "noData": "இந்த காலத்திற்கு தரவு இல்லை.",
+    "exportGst": "GST CSV ஏற்றுமதி",
+    "gstExportFailed": "GST அறிக்கையை ஏற்றுமதி செய்ய முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+    "revenueTitle": "வருவாய் (தேர்ந்த காலம்)",
+    "gmv": "மொத்த பதிவு மதிப்பு",
+    "paidCount": "{{count}} கட்டண பதிவுகள்",
+    "commission": "ஈட்டிய கமிஷன்",
+    "processingCharges": "செயலாக்க கட்டணங்கள்",
+    "gatewayFees": "கேட்வே கட்டணம் (செலவு)",
+    "refundsOut": "திரும்பங்கள்",
+    "netRevenue": "நிகர தள வருவாய்",
+    "netRevenueHint": "கமிஷன் + செயலாக்கம் − கேட்வே கட்டணம்",
+    "liabilitiesTitle": "பொறுப்புகள் (தற்போது)",
+    "doctorClearing": "மருத்துவர் வருவாய் தீர்வில்",
+    "doctorAvailable": "மருத்துவர் வருவாய் கிடைக்கிறது",
+    "doctorLocked": "திரும்பப்பெறுதலில்",
+    "walletLiability": "நோயாளி வாலட் பொறுப்பு",
+    "walletLiabilityHint": "வாடிக்கையாளர்களுக்கு உரியது — தள வருவாய் அல்ல",
+    "tdsTitle": "TDS பதிவேடு (தேர்ந்த காலம்)",
+    "tdsDeducted": "TDS கழிவு",
+    "tdsCount": "{{count}} தீர்வுகள்",
+    "netPaidToDoctors": "மருத்துவர்களுக்கு நிகர கட்டணம்",
+    "healthTitle": "கட்டண நிலை",
+    "stuckPending": "நிலுவையில் சிக்கியவை",
+    "stuckPendingHint": "1 மணி நேரத்திற்கும் மேல் — தினசரி சரிபார்ப்பு",
+    "openHolds": "திறந்த கட்டண ஹோல்டுகள்"
   }
 }

@@ -5,6 +5,16 @@
  */
 import pool from '../utils/database';
 import { v4 as uuidv4 } from 'uuid';
+import NotificationService from './NotificationService';
+import logger from '../utils/logger';
+
+async function notifySafe(userId: string, type: string, title: string, message: string, metadata?: Record<string, any>) {
+  try {
+    await NotificationService.createNotification(userId, type, title, message, 'in_app', metadata);
+  } catch (err: any) {
+    logger.warn('[MarketplaceMonetization] notification failed', { userId, type, error: err.message });
+  }
+}
 
 class MarketplaceMonetizationService {
 
@@ -287,6 +297,10 @@ class MarketplaceMonetizationService {
       await this.logTransaction(buyerId, 'inquiry_fee', feeCharged, 'INR', id, 'inquiry');
     }
 
+    const listingTitle = (await pool.query(`SELECT title FROM marketplace_listings WHERE id = $1`, [listingId])).rows[0]?.title || '';
+    await notifySafe(sellerId, 'marketplace_inquiry', 'New inquiry on your listing',
+      `A buyer is interested in "${listingTitle}". Respond to share your contact details.`, { listingId, inquiryId: id });
+
     return result.rows[0];
   }
 
@@ -313,7 +327,16 @@ class MarketplaceMonetizationService {
        RETURNING *`,
       [revealContact, inquiryId, sellerId]
     );
-    return result.rows[0];
+    const inquiry = result.rows[0];
+    if (inquiry) {
+      const listingTitle = (await pool.query(`SELECT title FROM marketplace_listings WHERE id = $1`, [inquiry.listing_id])).rows[0]?.title || '';
+      await notifySafe(inquiry.buyer_id, 'marketplace_inquiry_response', 'Seller responded to your inquiry',
+        revealContact
+          ? `The seller of "${listingTitle}" shared their contact details — open the listing to connect.`
+          : `The seller of "${listingTitle}" responded to your inquiry.`,
+        { listingId: inquiry.listing_id, inquiryId });
+    }
+    return inquiry;
   }
 
   // ══════════════════════════════════════════

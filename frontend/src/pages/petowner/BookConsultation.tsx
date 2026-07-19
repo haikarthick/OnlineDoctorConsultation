@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
 import { VetProfile, TimeSlot, Animal } from '../../types'
+import PaymentCheckout from '../../components/PaymentCheckout'
 import '../../styles/modules.css'
 
 /** Filter out past time slots for today using browser local time + 15min buffer */
@@ -50,6 +51,9 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   const [error, setError] = useState('')
   const [step3Error, setStep3Error] = useState('')
   const [success, setSuccess] = useState(false)
+  const [paymentInfo, setPaymentInfo] = useState<{
+    bookingId: string; paymentId: string; amount: number; expiresAt: string | null
+  } | null>(null)
 
   // Enterprise / Herd / Group state (farmers)
   const isFarmer = user?.role === 'farmer'
@@ -329,7 +333,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       setLoading(true)
       setError('')
 
-      await apiService.createBooking({
+      const resp = await apiService.createBooking({
         veterinarianId: selectedVet.userId,
         animalId: selectedAnimal || undefined,
         enterpriseId: (selectionMode === 'enterprise' && selectedEnterprise) ? selectedEnterprise : undefined,
@@ -344,12 +348,37 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         notes: notes || undefined
       })
 
-      setSuccess(true)
+      // Payment module: booking created in payment_pending → show payment step
+      const created = resp?.data || resp
+      if (created?.paymentId && created?.id) {
+        setPaymentInfo({
+          bookingId: created.id,
+          paymentId: created.paymentId,
+          amount: parseFloat(String(created.paymentAmount || selectedVet.consultationFee || 0)),
+          expiresAt: created.paymentExpiresAt || null,
+        })
+      } else {
+        setSuccess(true)
+      }
     } catch (err: any) {
       setError(err.response?.data?.error?.message || err.response?.data?.message || t('bookConsultation.failedToCreate'))
     } finally {
       setLoading(false)
     }
+  }
+
+  if (paymentInfo && !success) {
+    return (
+      <div className="module-page">
+        <PaymentCheckout
+          bookingId={paymentInfo.bookingId}
+          amount={paymentInfo.amount}
+          expiresAt={paymentInfo.expiresAt}
+          onSuccess={() => { setPaymentInfo(null); setSuccess(true) }}
+          onCancel={() => onNavigate('/my-bookings')}
+        />
+      </div>
+    )
   }
 
   if (success) {

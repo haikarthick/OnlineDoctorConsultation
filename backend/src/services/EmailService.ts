@@ -14,6 +14,38 @@ import nodemailer, { Transporter } from 'nodemailer';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { Resend } from 'resend';
 import logger from '../utils/logger';
+import database from '../utils/database';
+
+/** Which deployment sent this email -- included in every outgoing email so a
+ * recipient (or the ops team) can tell dev/staging/prod apart at a glance,
+ * since multiple environments can send real email concurrently. */
+function getEnvironmentLabel(): string {
+  const url = process.env.RENDER_EXTERNAL_URL;
+  if (url) return url.replace(/^https?:\/\//, '');
+  return `${process.env.NODE_ENV || 'local'} (no RENDER_EXTERNAL_URL)`;
+}
+
+/** email.devRedirect (system_settings, admin-configurable at runtime) takes
+ * precedence over the EMAIL_DEV_REDIRECT env var (bootstrap-only, requires a
+ * redeploy to change) -- short TTL cache so this doesn't hit the DB on every
+ * send. Falls back to the env var if the DB is unreachable or unset. */
+let devRedirectCache: { value: string; fetchedAt: number } | null = null;
+const DEV_REDIRECT_CACHE_TTL_MS = 60 * 1000;
+async function getDevRedirect(): Promise<string> {
+  if (devRedirectCache && Date.now() - devRedirectCache.fetchedAt < DEV_REDIRECT_CACHE_TTL_MS) {
+    return devRedirectCache.value;
+  }
+  let value = process.env.EMAIL_DEV_REDIRECT || '';
+  try {
+    const result = await database.query(`SELECT value FROM system_settings WHERE key = 'email.devRedirect'`);
+    const dbValue = result.rows[0]?.value?.trim();
+    if (dbValue) value = dbValue;
+  } catch (err: any) {
+    logger.warn('Could not read email.devRedirect from system_settings, using env var only', { error: err.message });
+  }
+  devRedirectCache = { value, fetchedAt: Date.now() };
+  return value;
+}
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -147,6 +179,16 @@ class EmailService {
 
   constructor() {
     this.from = process.env.SMTP_FROM || 'VetCare <noreply@vetcare.app>';
+    // HARD GUARD: under Jest, never touch a real provider even if the local
+    // .env has live SMTP/Resend credentials. A unit test once sent a REAL
+    // staff-invite email through the developer's Gmail account because a
+    // service test mocked the DB but not EmailService (2026-07-10 incident).
+    if (process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test') {
+      this.mode = 'log-only';
+      this.initialized = true;
+      logger.info('Email service in LOG-ONLY mode (test environment detected — real providers disabled)');
+      return;
+    }
     // Eagerly check for Resend API key
     if (process.env.RESEND_API_KEY) {
       this.resendClient = new Resend(process.env.RESEND_API_KEY);
@@ -222,14 +264,20 @@ class EmailService {
       text = tpl.text(data);
     }
 
-    // Dev/demo email redirect
-    const devRedirect = process.env.EMAIL_DEV_REDIRECT;
+// Dev/demo email redirect (DB setting takes precedence over the env var -- see getDevRedirect)
+    const devRedirect = await getDevRedirect();
     let actualTo = Array.isArray(options.to) ? options.to.join(', ') : options.to;
     if (devRedirect) {
       subject = `[DEV→${actualTo}] ${subject}`;
       actualTo = devRedirect;
       logger.info(`Email redirected to dev address: ${devRedirect} (original: ${options.to})`);
     }
+
+    // Environment footer -- lets a recipient (or you) tell which deployment sent
+    // this, since dev/staging/prod can all send real email concurrently.
+    const envLabel = getEnvironmentLabel();
+    if (html) html += `<p style="color:#9ca3af;font-size:11px;margin-top:2rem;">Sent from: ${envLabel}</p>`;
+    if (text) text += `\n\n---\nSent from: ${envLabel}`;
 
     // ── Resend (HTTP API) ──
     if (this.mode === 'resend' && this.resendClient) {

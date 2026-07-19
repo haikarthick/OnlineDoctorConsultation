@@ -44,6 +44,7 @@
 .mp-card-img {
   height: 160px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   display: flex; align-items: center; justify-content: center; overflow: hidden;
+  position: relative;
 }
 .mp-card-img img { width: 100%; height: 100%; object-fit: cover; }
 .mp-card-img-placeholder { font-size: 48px; opacity: 0.6; }
@@ -737,4 +738,178 @@
   .mp-proximity-bar { gap: 6px; }
   .mp-detail-layout { flex-direction: column; }
   .mp-detail-sidebar { width: 100%; min-width: unset; }
+}
+
+/* ═══════ FREE-CLASSIFIEDS DEAL WORKFLOW ═══════ */
+.mp-deal-steps {
+  display: flex; flex-direction: column; gap: 6px;
+  margin: 10px 0; padding: 10px; background: #f8fafc;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+}
+.mp-deal-step {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12.5px; color: #475569; line-height: 1.45;
+}
+.mp-deal-step-num {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
+  background: #4f46e5; color: #fff; font-size: 11px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.mp-deal-free-note {
+  font-size: 12px; color: #166534; background: #f0fdf4;
+  border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 10px; margin: 8px 0;
+  line-height: 1.4;
+}
+.mp-deal-tab-note { margin: 0 0 12px 0; }
+.mp-deal-reserved-badge {
+  display: block; text-align: center; font-weight: 600; font-size: 13px;
+  color: #92400e; background: #fef3c7; border: 1px solid #fde68a;
+  border-radius: 8px; padding: 8px 10px; margin-top: 8px;
+}
+.mp-deal-actions {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  min-width: 170px;
+}
+.mp-deal-pm { width: 100%; max-width: 190px; font-size: 12px; padding: 4px 8px; }
+.mp-deal-waiting { font-size: 12px; color: #4f46e5; font-weight: 600; }
+.mp-deal-other-done { font-size: 12px; color: #16a34a; font-weight: 600; }
+.mp-deal-done { font-size: 12.5px; color: #16a34a; font-weight: 600; }
+.mp-deal-until { font-size: 11px; color: #6b7280; margin-top: 3px; }
+.mp-badge.pending-review { background: #fef3c7; color: #92400e; }
+.mp-badge.rejected { background: #fee2e2; color: #dc2626; }
+.mp-badge.reserved { background: #ede9fe; color: #6d28d9; }
+@media (max-width: 640px) {
+  .mp-deal-actions { min-width: unset; width: 100%; }
+  .mp-deal-actions .module-btn { width: 100%; }
+  .mp-deal-pm { max-width: 100%; }
+  .mp-deal-steps { padding: 8px; }
+}
+
+/* ═══════ ENGAGEMENT (Phase 3): favorites, messaging, saved searches ═══════ */
+.mp-fav-btn {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  background: rgba(255,255,255,0.9); border: none; border-radius: 50%;
+  width: 34px; height: 34px; font-size: 17px; cursor: pointer; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15); transition: transform 0.12s;
+}
+.mp-fav-btn:hover { transform: scale(1.12); }
+.mp-fav-btn.inline { position: static; width: 36px; height: 36px; box-shadow: none; background: #f1f5f9; }
+
+.mp-detail-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.mp-detail-title-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.mp-save-search-bar { margin: 4px 0 12px; }
+.mp-save-search-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mp-save-search-form .module-input { flex: 1; min-width: 180px; max-width: 320px; }
+
+/* Messaging */
+.mp-messages-layout { display: flex; gap: 16px; min-height: 520px; }
+.mp-thread-list { width: 320px; flex-shrink: 0; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; overflow-y: auto; max-height: 640px; }
+.mp-thread-item { padding: 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; margin-bottom: 4px; }
+.mp-thread-item:hover { background: #f8fafc; }
+.mp-thread-item.active { background: #eef2ff; border-color: #c7d2fe; }
+.mp-thread-item-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.mp-thread-title { font-weight: 600; font-size: 13.5px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mp-thread-unread { background: #4f46e5; color: #fff; border-radius: 10px; font-size: 11px; font-weight: 700; padding: 1px 7px; flex-shrink: 0; }
+.mp-thread-sub { display: flex; justify-content: space-between; font-size: 11.5px; color: #64748b; margin-top: 2px; }
+.mp-thread-preview { font-size: 12px; color: #94a3b8; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.mp-chat-panel { flex: 1; border: 1px solid #e2e8f0; border-radius: 10px; display: flex; flex-direction: column; min-height: 520px; max-height: 640px; }
+.mp-chat-empty { margin: auto; color: #94a3b8; font-size: 14px; padding: 40px; text-align: center; }
+.mp-chat-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #e2e8f0; }
+.mp-chat-back { display: none; background: none; border: none; font-size: 20px; cursor: pointer; color: #4f46e5; }
+.mp-chat-title { font-weight: 600; font-size: 14px; color: #1e293b; }
+.mp-chat-sub { font-size: 12px; color: #64748b; }
+.mp-chat-safety { font-size: 11.5px; color: #92400e; background: #fffbeb; padding: 6px 14px; border-bottom: 1px solid #fef3c7; }
+.mp-chat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.mp-chat-bubble { max-width: 76%; padding: 8px 12px; border-radius: 12px; font-size: 13.5px; line-height: 1.4; }
+.mp-chat-bubble.mine { align-self: flex-end; background: #4f46e5; color: #fff; border-bottom-right-radius: 4px; }
+.mp-chat-bubble.theirs { align-self: flex-start; background: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; }
+.mp-chat-body { white-space: pre-wrap; word-break: break-word; }
+.mp-chat-meta { font-size: 10px; opacity: 0.7; margin-top: 3px; text-align: right; }
+.mp-chat-input { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid #e2e8f0; align-items: flex-end; }
+.mp-chat-input .module-input { flex: 1; resize: none; }
+
+/* Saved searches */
+.mp-saved-list { display: flex; flex-direction: column; gap: 10px; }
+.mp-saved-card { display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; flex-wrap: wrap; }
+.mp-saved-name { font-weight: 600; font-size: 14px; color: #1e293b; margin-bottom: 4px; }
+.mp-saved-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.mp-saved-chip { background: #f1f5f9; color: #475569; border-radius: 6px; padding: 2px 8px; font-size: 11.5px; }
+.mp-saved-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.module-btn.muted { opacity: 0.55; }
+
+@media (max-width: 720px) {
+  .mp-messages-layout { position: relative; }
+  .mp-thread-list { width: 100%; }
+  .mp-thread-list.has-active { display: none; }
+  .mp-chat-panel { display: none; }
+  .mp-chat-panel.open { display: flex; position: absolute; inset: 0; background: #fff; z-index: 5; }
+  .mp-chat-back { display: block; }
+  .mp-saved-card { flex-direction: column; align-items: flex-start; }
+  .mp-saved-actions { width: 100%; }
+}
+
+/* ═══════ PHASE 4: pagination, price hint, video, geo ═══════ */
+.mp-pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 20px 0 8px; flex-wrap: wrap; }
+.mp-page-info { font-size: 13px; color: #475569; font-weight: 500; }
+
+.mp-price-hint { margin-top: 10px; padding: 12px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; }
+.mp-price-hint-title { font-weight: 600; font-size: 13px; color: #1e40af; margin-bottom: 6px; }
+.mp-price-hint-body { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: #334155; }
+.mp-price-hint-count { color: #64748b; }
+.mp-price-hint-tag { margin-top: 8px; display: inline-block; font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 6px; }
+.mp-price-hint-tag.good { background: #dcfce7; color: #16a34a; }
+.mp-price-hint-tag.high { background: #fef3c7; color: #92400e; }
+.mp-price-hint-tag.ok { background: #e0f2fe; color: #0369a1; }
+
+.mp-geo-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+.mp-geo-set { font-size: 12px; color: #16a34a; font-weight: 500; }
+
+.mp-video-set { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #16a34a; }
+.mp-detail-video { margin: 12px 0; }
+.mp-detail-video-el { width: 100%; max-height: 360px; border-radius: 10px; background: #000; }
+.mp-card-video-badge { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 13px; padding: 2px 7px; border-radius: 6px; }
+
+@media (max-width: 480px) {
+  .mp-price-hint-body { flex-direction: column; gap: 4px; }
+  .mp-pagination { gap: 8px; }
+}
+
+/* ═══════ PHASE 5: reports, funnel, interlink ═══════ */
+.mp-vetcheck-panel { margin-top: 14px; padding: 14px; border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 10px; }
+.mp-vetcheck-title { font-weight: 700; font-size: 14px; color: #1e40af; margin-bottom: 4px; }
+.mp-vetcheck-desc { font-size: 12.5px; color: #475569; margin: 0 0 10px; line-height: 1.45; }
+.mp-vetcheck-panel .module-btn { width: 100%; }
+
+.mp-transport-panel { margin-top: 10px; padding: 10px 12px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12.5px; color: #475569; flex-wrap: wrap; }
+
+.mp-report-link { margin-top: 14px; background: none; border: none; color: #94a3b8; font-size: 12.5px; cursor: pointer; padding: 4px 0; }
+.mp-report-link:hover { color: #dc2626; text-decoration: underline; }
+
+.mp-treasure-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 12px; padding: 12px 16px; border-radius: 10px; background: linear-gradient(90deg, #fef3c7, #fde68a); color: #92400e; font-weight: 600; font-size: 13.5px; text-decoration: none; flex-wrap: wrap; }
+.mp-treasure-banner:hover { filter: brightness(0.97); }
+.mp-treasure-cta { font-weight: 700; white-space: nowrap; }
+
+/* Modal */
+.mp-modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+.mp-modal { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 440px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
+.mp-modal h3 { margin: 0 0 6px; }
+.mp-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+/* Admin reports */
+.mp-reports-list { display: flex; flex-direction: column; gap: 10px; }
+.mp-report-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; }
+.mp-report-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 4px; }
+.mp-report-meta { font-size: 12px; color: #64748b; display: flex; gap: 6px; flex-wrap: wrap; }
+.mp-report-reason { font-weight: 600; color: #dc2626; }
+.mp-report-details { font-size: 13px; color: #334155; margin-top: 8px; background: #f8fafc; padding: 8px 10px; border-radius: 6px; }
+.mp-report-actions { display: flex; gap: 6px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.mp-report-actions .module-input { flex: 1; min-width: 160px; }
+.mp-report-resolution { font-size: 12.5px; color: #16a34a; margin-top: 8px; }
+
+@media (max-width: 560px) {
+  .mp-report-actions { flex-direction: column; align-items: stretch; }
+  .mp-report-actions .module-input { width: 100%; }
 }

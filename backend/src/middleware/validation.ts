@@ -70,6 +70,11 @@ export const registerSchema = Joi.object({
     then: Joi.number().min(0).optional().default(0),
     otherwise: Joi.any().strip(),
   }),
+  // §17.2: registration is blocked until policies are acknowledged
+  acceptTerms: Joi.boolean().valid(true).required().messages({
+    'any.only': 'You must accept the Terms of Service and Privacy Policy to register',
+    'any.required': 'You must accept the Terms of Service and Privacy Policy to register',
+  }),
 });
 
 export const loginSchema = Joi.object({
@@ -86,6 +91,28 @@ export const refreshTokenSchema = Joi.object({
 
 export const logoutSchema = Joi.object({
   refreshToken: Joi.string().required().messages({ 'any.required': 'Refresh token is required' }),
+});
+
+export const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required().max(255).lowercase().trim().messages({
+    'string.email': 'Please provide a valid email address',
+    'any.required': 'Email is required',
+  }),
+});
+
+export const resetPasswordSchema = Joi.object({
+  token: Joi.string().length(64).hex().required().messages({
+    'string.length': 'Invalid or malformed reset token',
+    'string.hex': 'Invalid or malformed reset token',
+    'any.required': 'Reset token is required',
+  }),
+  newPassword: Joi.string().min(8).max(128).required()
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .messages({
+      'string.min': 'Password must be at least 8 characters',
+      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
+      'any.required': 'New password is required',
+    }),
 });
 
 // ─── Consultation ────────────────────────────────────────────
@@ -139,6 +166,8 @@ export const rescheduleBookingSchema = Joi.object({
 
 export const cancelBookingSchema = Joi.object({
   reason: shortText(500).optional().allow('', null),
+  // D7: patient's refund destination choice (wallet = instant, gateway = 5-7 days)
+  refundDestination: Joi.string().valid('wallet', 'gateway').optional().default('wallet'),
 });
 
 // ─── Video Session ───────────────────────────────────────────
@@ -244,6 +273,13 @@ export const createVetProfileSchema = Joi.object({
   availableHoursEnd: Joi.string().pattern(/^\d{2}:\d{2}/).optional().allow('', null),
   languages: Joi.array().items(Joi.string().max(50)).optional(),
   profileImage: Joi.string().uri({ allowRelative: true }).max(500).optional().allow('', null),
+  // Payment module (P3/P4): emergency fee, GST + payout details
+  emergencyConsultationFee: positiveNumber.max(100000).optional().allow(null),
+  gstin: Joi.string().max(20).optional().allow('', null),
+  payoutAccountName: Joi.string().max(255).optional().allow('', null),
+  payoutAccountNumber: Joi.string().max(50).optional().allow('', null),
+  payoutIfsc: Joi.string().max(20).optional().allow('', null),
+  payoutUpi: Joi.string().max(100).optional().allow('', null),
 });
 
 export const updateVetProfileSchema = createVetProfileSchema.fork(
@@ -361,6 +397,63 @@ export const createPaymentSchema = Joi.object({
   amount: Joi.number().positive().required(),
   currency: Joi.string().max(3).optional().default('USD'),
   paymentMethod: Joi.string().valid('credit_card', 'debit_card', 'bank_transfer', 'e_wallet', 'cash').optional(),
+});
+
+// ── Payment module (docs/PAYMENT_MODULE_PLAN.md §9) ──────────
+// NOTE: no client-supplied amounts anywhere — prices are server-derived.
+export const checkoutPaymentSchema = Joi.object({
+  useWallet: Joi.boolean().optional().default(false),
+});
+
+export const verifyPaymentSchema = Joi.object({
+  paymentId: requiredUuid,
+  // Razorpay fields (P2) — optional in demo mode
+  gatewayOrderId: Joi.string().max(255).optional().allow('', null),
+  gatewayPaymentId: Joi.string().max(255).optional().allow('', null),
+  gatewaySignature: Joi.string().max(512).optional().allow('', null),
+});
+
+// ── Platform referrals (§4.4) ────────────────────────────────
+export const createPlatformReferralSchema = Joi.object({
+  toVetId: Joi.string().uuid().optional().allow(null),
+  reason: Joi.string().min(3).max(1000).required(),
+  bookingId: Joi.string().uuid().optional(),
+  consultationId: Joi.string().uuid().optional(),
+}).or('bookingId', 'consultationId');
+
+export const acceptReferralSchema = Joi.object({
+  veterinarianId: Joi.string().uuid().optional().allow(null),
+  scheduledDate: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required(),
+  timeSlotStart: Joi.string().pattern(/^\d{2}:\d{2}/).required(),
+  timeSlotEnd: Joi.string().pattern(/^\d{2}:\d{2}/).required(),
+  bookingType: Joi.string().valid('video_call', 'in_person', 'phone', 'chat', 'farm_visit', 'herd_consultation').optional(),
+  reasonForVisit: Joi.string().max(1000).optional().allow('', null),
+});
+
+export const declineReferralSchema = Joi.object({
+  refundDestination: Joi.string().valid('wallet', 'gateway').optional().default('wallet'),
+});
+
+// ── Legal & consent (§17) ────────────────────────────────────
+export const legalAcceptSchema = Joi.object({
+  docTypes: Joi.array().items(
+    Joi.string().valid('terms', 'privacy', 'refund_policy', 'wallet_terms', 'doctor_agreement', 'grievance_policy', 'disclaimer')
+  ).min(1).max(7).required(),
+  context: Joi.string().valid('login_reacceptance', 'payout_setup').optional().default('login_reacceptance'),
+});
+
+export const adminLegalDocSchema = Joi.object({
+  docType: Joi.string().valid('terms', 'privacy', 'refund_policy', 'wallet_terms', 'doctor_agreement', 'grievance_policy', 'disclaimer').required(),
+  title: Joi.string().min(3).max(255).required(),
+  content: Joi.string().min(1).max(500000).required(),
+  requiresReacceptance: Joi.boolean().optional().default(false),
+});
+
+export const razorpayCredentialsSchema = Joi.object({
+  keyId: Joi.string().max(255).required(),
+  // Blank/omitted = keep the existing stored secret unchanged
+  keySecret: Joi.string().max(255).optional().allow('', null),
+  webhookSecret: Joi.string().max(255).optional().allow('', null),
 });
 
 // ─── Review ──────────────────────────────────────────────────
@@ -1021,8 +1114,8 @@ const livestockFields = {
   pregnancyMonth: Joi.number().integer().min(0).max(12).optional().allow(null),
   vaccinationStatus: Joi.string().valid('fully_vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown').optional(),
   healthCertificate: Joi.boolean().optional(),
-  listingTier: Joi.string().valid('standard', 'premium', 'spotlight').optional(),
-  isHotDeal: Joi.boolean().optional(),
+  // listingTier / isHotDeal are admin-granted promotion flags — sellers cannot
+  // set them, so they are intentionally absent (stripUnknown drops them)
   linkedAnimalId: Joi.string().uuid().optional().allow('', null),
   auctionEndTime: Joi.string().optional().allow('', null),
   reservePrice: Joi.number().min(0).optional().allow(null),
@@ -1046,11 +1139,11 @@ export const createMarketplaceListingSchema = Joi.object({
   quantity: positiveInt.optional(),
   unit: shortText(20).optional(),
   condition: shortText(50).optional(),
-  images: Joi.array().items(Joi.string().uri().max(2000)).optional(),
+  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).optional(),
+  videoUrl: Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000)).optional().allow('', null),
   location: shortText(500).optional().allow('', null),
   shippingOptions: Joi.array().items(Joi.any()).optional(),
   tags: Joi.array().items(Joi.string().max(50)).optional(),
-  featured: Joi.boolean().optional(),
   expiresAt: Joi.string().optional().allow('', null),
   ...livestockFields,
 });
@@ -1064,7 +1157,8 @@ export const updateMarketplaceListingSchema = Joi.object({
   category: shortText(100).optional(),
   condition: shortText(50).optional(),
   location: shortText(500).optional().allow('', null),
-  images: Joi.array().items(Joi.string().uri().max(2000)).optional(),
+  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).optional(),
+  videoUrl: Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000)).optional().allow('', null),
   tags: Joi.array().items(Joi.string().max(50)).optional(),
   listingType: Joi.string().valid('sale', 'auction', 'wanted').optional(),
   featured: Joi.boolean().optional(),
@@ -1086,6 +1180,58 @@ export const createMarketplaceOrderSchema = Joi.object({
 
 export const updateOrderStatusSchema = Joi.object({
   status: Joi.string().valid('pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded').required(),
+});
+
+// Deal handshake (free classifieds — money settles off-platform between the parties)
+export const confirmDealSchema = Joi.object({
+  paymentMethod: Joi.string().valid('cash', 'upi', 'bank_transfer', 'other').optional().allow('', null),
+});
+
+export const cancelDealSchema = Joi.object({
+  reason: shortText(500).optional().allow('', null),
+});
+
+// ─── Marketplace engagement (Phase 3): messaging, saved searches ───
+export const startThreadSchema = Joi.object({
+  message: longText(2000).optional().allow('', null),
+});
+
+export const sendMessageSchema = Joi.object({
+  message: longText(2000).required(),
+});
+
+const savedSearchFilters = Joi.object({
+  category: shortText(60).optional().allow('', null),
+  species: shortText(60).optional().allow('', null),
+  breed: shortText(100).optional().allow('', null),
+  gender: Joi.string().valid('male', 'female', 'unknown').optional().allow('', null),
+  listingType: Joi.string().valid('fixed_price', 'sale', 'auction', 'wanted').optional().allow('', null),
+  vaccinationStatus: Joi.string().valid('fully_vaccinated', 'partially_vaccinated', 'not_vaccinated', 'unknown').optional().allow('', null),
+  minPrice: Joi.number().min(0).optional().allow(null),
+  maxPrice: Joi.number().min(0).optional().allow(null),
+  search: shortText(200).optional().allow('', null),
+}).unknown(true); // extra keys are ignored server-side by the sanitizer
+
+export const createSavedSearchSchema = Joi.object({
+  name: shortText(120).required(),
+  filters: savedSearchFilters.optional(),
+  alertsEnabled: Joi.boolean().optional(),
+});
+
+export const updateSavedSearchSchema = Joi.object({
+  name: shortText(120).optional(),
+  filters: savedSearchFilters.optional(),
+  alertsEnabled: Joi.boolean().optional(),
+}).min(1);
+
+export const reportListingSchema = Joi.object({
+  reason: Joi.string().valid('scam', 'welfare_concern', 'prohibited', 'miscategorized', 'offensive', 'wrong_info', 'other').required(),
+  details: longText(1000).optional().allow('', null),
+});
+
+export const resolveReportSchema = Joi.object({
+  status: Joi.string().valid('reviewing', 'actioned', 'dismissed').required(),
+  resolution: longText(1000).optional().allow('', null),
 });
 
 // ─── Tier 4: Marketplace Monetization ────────────────────────
@@ -1514,6 +1660,11 @@ export const acceptStaffInviteSchema = Joi.object({
   last_name: Joi.string().max(100).required(),
   phone: Joi.string().max(20).allow('', null).optional(),
   password: Joi.string().min(8).required(),
+  // §17.2: invited users must consent personally
+  acceptTerms: Joi.boolean().valid(true).required().messages({
+    'any.only': 'You must accept the Terms of Service and Privacy Policy to create your account',
+    'any.required': 'You must accept the Terms of Service and Privacy Policy to create your account',
+  }),
 });
 
 // ─── Network Referrals ───────────────────────────────────────

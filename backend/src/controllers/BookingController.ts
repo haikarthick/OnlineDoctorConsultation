@@ -111,8 +111,9 @@ class BookingController {
     }
 
     const reason = req.body.reason || 'No reason provided';
+    const refundDestination = req.body.refundDestination === 'gateway' ? 'gateway' as const : 'wallet' as const;
     const roleName = authReq.userRole === 'veterinarian' ? 'Doctor' : authReq.userRole === 'pet_owner' ? 'Pet Owner' : authReq.userRole === 'admin' ? 'Admin' : 'User';
-    const updated = await BookingService.cancelBooking(req.params.id, reason, authReq.userId!, authReq.userRole);
+    const updated = await BookingService.cancelBooking(req.params.id, reason, authReq.userId!, authReq.userRole, refundDestination);
 
     await logBookingAction(authReq.userId!, authReq.userRole || 'unknown', 'BOOKING_CANCELLED', req.params.id, {
       reason,

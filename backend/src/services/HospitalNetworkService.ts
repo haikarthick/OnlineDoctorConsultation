@@ -313,7 +313,19 @@ export class HospitalNetworkService {
     return this.mapNetworkRow(result.rows[0]);
   }
 
-  async updateNetwork(id: string, data: Partial<HospitalNetworkCreateDTO>, userId: string): Promise<HospitalNetwork> {
+  async updateNetwork(id: string, data: Partial<HospitalNetworkCreateDTO>, userId: string, userRole?: string): Promise<HospitalNetwork> {
+    // Authorization: platform admin or the corporate_admin of this network
+    if (userRole !== 'admin') {
+      const authCheck = await database.query(
+        `SELECT id FROM hospital_network_members
+         WHERE network_id = $1 AND user_id = $2 AND network_role = 'corporate_admin' AND is_active = true`,
+        [id, userId]
+      );
+      if (authCheck.rows.length === 0) {
+        throw new ForbiddenError('Only the network corporate admin or platform admin can edit network settings.');
+      }
+    }
+
     const fieldMap: Record<string, string> = {
       name: 'name',
       legalName: 'legal_name',
@@ -965,8 +977,33 @@ export class HospitalNetworkService {
       const hasConsent = consentCheck.rows.length > 0;
       const isNetworkAdmin = ['corporate_admin', 'hospital_director'].includes(userNetworkRole);
 
-      if (!isOwner && !hasConsent && !isNetworkAdmin) {
-        throw new ForbiddenError('You do not have permission to enroll this animal. Only the owner or a network admin can enroll animals.');
+      // A network admin may only request enrollment for a patient who already
+      // has SOME footprint with this network (referral, walk-in visit, or
+      // inpatient stay at one of its hospitals) -- prevents a corporate_admin
+      // from cold-enrolling an arbitrary platform animal they've never
+      // actually interacted with, just by guessing/knowing its id.
+      let hasNetworkFootprint = false;
+      if (isNetworkAdmin && !isOwner && !hasConsent) {
+        const footprintCheck = await database.query(
+          `SELECT 1 FROM referrals r WHERE r.animal_id = $1
+             AND r.hospital_id IN (SELECT hospital_id FROM hospital_network_hospitals WHERE network_id = $2)
+           UNION
+           SELECT 1 FROM appointment_queue q WHERE q.animal_id = $1
+             AND q.hospital_id IN (SELECT hospital_id FROM hospital_network_hospitals WHERE network_id = $2)
+           UNION
+           SELECT 1 FROM inpatient_admissions ia WHERE ia.animal_id = $1
+             AND ia.hospital_id IN (SELECT hospital_id FROM hospital_network_hospitals WHERE network_id = $2)
+           LIMIT 1`,
+          [data.animalId, data.networkId]
+        );
+        hasNetworkFootprint = footprintCheck.rows.length > 0;
+      }
+
+      if (!isOwner && !hasConsent && !(isNetworkAdmin && hasNetworkFootprint)) {
+        throw new ForbiddenError(
+          'This patient has no prior visit, referral, or admission with your network. ' +
+          'Use "Register Walk-In" for a new patient, or ask the owner to share their enrollment code.'
+        );
       }
 
       const networkPatientId = await this.generateNetworkPatientId(data.networkId, animal.species);
@@ -1041,38 +1078,6 @@ export class HospitalNetworkService {
       return { total: parseInt(countRes.rows[0].total), patients: rows.rows };
     } catch (err: any) {
       throw new DatabaseError(`Get network patients failed: ${err.message}`);
-    }
-  }
-
-  async searchPatients(query: string, limit = 10): Promise<Array<{
-    userId: string; userName: string; userEmail: string; userPhone?: string;
-    animals: Array<{ id: string; name: string; species: string; uniqueId?: string; }>
-  }>> {
-    try {
-      const q = `%${query.toLowerCase()}%`;
-      const result = await database.query(
-        `SELECT DISTINCT u.id AS "userId", u.name AS "userName", u.email AS "userEmail", u.phone AS "userPhone"
-         FROM users u
-         LEFT JOIN animals a ON a.owner_id = u.id AND a.is_active = true
-         WHERE u.role = 'pet_owner'
-           AND (LOWER(u.name) LIKE $1 OR LOWER(u.email) LIKE $1
-                OR u.phone LIKE $1 OR LOWER(a.unique_id) LIKE $1
-                OR LOWER(a.name) LIKE $1)
-         LIMIT $2`,
-        [q, limit]
-      );
-      const users = result.rows;
-      for (const user of users) {
-        const animalRes = await database.query(
-          `SELECT id, name, species, unique_id AS "uniqueId" FROM animals
-           WHERE owner_id = $1 AND is_active = true ORDER BY name`,
-          [user.userId]
-        );
-        user.animals = animalRes.rows;
-      }
-      return users;
-    } catch (err: any) {
-      throw new DatabaseError(`Search patients failed: ${err.message}`);
     }
   }
 
@@ -1771,36 +1776,48 @@ export class HospitalNetworkService {
       }
 
       const placeholders = hospitalIds.map((_: any, i: number) => `$${i + 1}`).join(',');
+      // A hospital's own pre-existing platform activity (from before it joined this
+      // network as a standalone practice) must never count toward the network's own
+      // financial summary -- it isn't this network's activity, and surfacing it here
+      // would leak a hospital's prior independent business volume to the network.
+      // hospital_network_hospitals.joined_at is the boundary.
+      const joinedAtIdx = hospitalIds.length + 1;
 
       const [consultations, bookings, monthly, perHospital, staffByRole] = await Promise.all([
         database.query(
           `SELECT COUNT(*) as count FROM consultations c
            JOIN bookings b ON b.consultation_id = c.id
-           WHERE b.hospital_id IN (${placeholders})`,
-          hospitalIds
+           JOIN hospital_network_hospitals hnh ON hnh.hospital_id = b.hospital_id AND hnh.network_id = $${joinedAtIdx}
+           WHERE b.hospital_id IN (${placeholders}) AND b.created_at >= hnh.joined_at`,
+          [...hospitalIds, networkId]
         ),
         database.query(
-          `SELECT COUNT(*) as count FROM bookings WHERE hospital_id IN (${placeholders})`,
-          hospitalIds
+          `SELECT COUNT(*) as count FROM bookings b
+           JOIN hospital_network_hospitals hnh ON hnh.hospital_id = b.hospital_id AND hnh.network_id = $${joinedAtIdx}
+           WHERE b.hospital_id IN (${placeholders}) AND b.created_at >= hnh.joined_at`,
+          [...hospitalIds, networkId]
         ),
         database.query(
           `SELECT DATE_TRUNC('month', c.created_at) as month, COUNT(*) as count
            FROM consultations c
            JOIN bookings b ON b.consultation_id = c.id
+           JOIN hospital_network_hospitals hnh ON hnh.hospital_id = b.hospital_id AND hnh.network_id = $${joinedAtIdx}
            WHERE b.hospital_id IN (${placeholders})
+             AND b.created_at >= hnh.joined_at
              AND c.created_at >= NOW() - INTERVAL '6 months'
            GROUP BY DATE_TRUNC('month', c.created_at)
            ORDER BY month DESC`,
-          hospitalIds
+          [...hospitalIds, networkId]
         ),
         database.query(
           `SELECT vh.id, vh.name,
-                  (SELECT COUNT(*) FROM bookings WHERE hospital_id = vh.id) as booking_count,
-                  (SELECT COUNT(*) FROM appointment_queue WHERE hospital_id = vh.id) as queue_count,
-                  (SELECT COUNT(*) FROM inpatient_admissions WHERE hospital_id = vh.id) as inpatient_count
+                  (SELECT COUNT(*) FROM bookings WHERE hospital_id = vh.id AND created_at >= hnh.joined_at) as booking_count,
+                  (SELECT COUNT(*) FROM appointment_queue WHERE hospital_id = vh.id AND created_at >= hnh.joined_at) as queue_count,
+                  (SELECT COUNT(*) FROM inpatient_admissions WHERE hospital_id = vh.id AND created_at >= hnh.joined_at) as inpatient_count
            FROM vet_hospitals vh
+           JOIN hospital_network_hospitals hnh ON hnh.hospital_id = vh.id AND hnh.network_id = $${joinedAtIdx}
            WHERE vh.id IN (${placeholders})`,
-          hospitalIds
+          [...hospitalIds, networkId]
         ),
         database.query(
           `SELECT network_role, COUNT(*) as count

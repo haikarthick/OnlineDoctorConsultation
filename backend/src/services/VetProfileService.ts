@@ -115,6 +115,10 @@ export class VetProfileService {
                vp.available_hours_end as "availableHoursEnd",
                vp.languages, vp.rating, vp.total_reviews as "totalReviews",
                vp.total_consultations as "totalConsultations",
+               vp.emergency_consultation_fee as "emergencyConsultationFee", vp.gstin,
+               vp.payout_account_name as "payoutAccountName",
+               vp.payout_account_number as "payoutAccountNumber",
+               vp.payout_ifsc as "payoutIfsc", vp.payout_upi as "payoutUpi",
                u.first_name as "firstName", u.last_name as "lastName", u.email, u.phone,
                vp.created_at as "createdAt", vp.updated_at as "updatedAt"
         FROM vet_profiles vp JOIN users u ON u.id = vp.user_id
@@ -287,12 +291,16 @@ export class VetProfileService {
         availableDays: 'available_days', availableHoursStart: 'available_hours_start',
         availableHoursEnd: 'available_hours_end', languages: 'languages',
         profileImage: 'profile_image', certificateTypes: 'certificate_types',
+        emergencyConsultationFee: 'emergency_consultation_fee', gstin: 'gstin',
+        payoutAccountName: 'payout_account_name', payoutAccountNumber: 'payout_account_number',
+        payoutIfsc: 'payout_ifsc', payoutUpi: 'payout_upi',
       };
 
-      const entries = Object.entries(updates).filter(([_, v]) => v !== undefined);
+      // Whitelist rule: only mapped keys may reach SQL (never raw request keys)
+      const entries = Object.entries(updates).filter(([k, v]) => v !== undefined && fieldMap[k]);
       if (entries.length === 0) return this.getProfileByUserId(userId);
 
-      const sets = entries.map(([key], i) => `${fieldMap[key] || key} = $${i + 2}`);
+      const sets = entries.map(([key], i) => `${fieldMap[key]} = $${i + 2}`);
       const values = entries.map(([_, v]) => v);
 
       const query = `
@@ -312,6 +320,10 @@ export class VetProfileService {
                   available_hours_start as "availableHoursStart",
                   available_hours_end as "availableHoursEnd",
                   COALESCE(certificate_types, '{}') as "certificateTypes",
+                  emergency_consultation_fee as "emergencyConsultationFee", gstin,
+                  payout_account_name as "payoutAccountName",
+                  payout_account_number as "payoutAccountNumber",
+                  payout_ifsc as "payoutIfsc", payout_upi as "payoutUpi",
                   created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [userId, ...values]);

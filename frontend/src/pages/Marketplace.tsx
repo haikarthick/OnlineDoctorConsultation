@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
 import './ModulePage.css'
 import './Marketplace.css'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
-import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData } from '../types'
+import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
+import { SPECIES_CATEGORIES, breedsForSpecies } from '../constants/speciesBreeds'
 
 const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
   { value: '', labelKey: 'marketplace.categories.all' },
@@ -22,7 +24,7 @@ const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', e
 const FARMER_SPECIES_LIST = ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Poultry', 'Dog', 'Cat', 'Other']
 const PET_OWNER_SPECIES_LIST = ['Dog', 'Cat', 'Horse', 'Rabbit', 'Cow', 'Buffalo', 'Goat', 'Sheep', 'Camel', 'Pig', 'Poultry', 'Other']
 
-type TabKey = 'dashboard' | 'browse' | 'sell' | 'auctions' | 'orders' | 'prices' | 'admin'
+type TabKey = 'dashboard' | 'browse' | 'sell' | 'auctions' | 'orders' | 'messages' | 'favorites' | 'saved' | 'prices' | 'admin'
 
 // ─── Helper to read snake_case or camelCase ───
 const g = (l: any, ...keys: string[]): any => { for (const k of keys) { if (l[k] !== undefined && l[k] !== null) return l[k]; } return undefined }
@@ -31,11 +33,11 @@ const Marketplace: React.FC = () => {
   const { formatCurrency, settings } = useSettings()
   const { user } = useAuth()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const isAdmin = user?.role === 'admin'
   const isFarmer = user?.role === 'farmer'
   const SPECIES_LIST = (isFarmer || isAdmin) ? FARMER_SPECIES_LIST : PET_OWNER_SPECIES_LIST
 
-  const TIER_LABELS: Record<string, string> = { standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }
   const GENDER_LABELS: Record<string, string> = { male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') }
   const VAX_LABELS: Record<string, string> = { fully_vaccinated: t('marketplace.vaxLabel.fullyShort'), partially_vaccinated: t('marketplace.vaxLabel.partialShort'), not_vaccinated: t('marketplace.vaxLabel.noneShort'), unknown: t('marketplace.vaxLabel.unknown') }
 
@@ -60,8 +62,8 @@ const Marketplace: React.FC = () => {
     title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
     species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
     pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
-    listingTier: 'standard', isHotDeal: false, auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
-    images: [], linkedAnimalId: '',
+    auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
+    images: [], videoUrl: '', linkedAnimalId: '',
     sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false,
   })
 
@@ -81,12 +83,42 @@ const Marketplace: React.FC = () => {
   // Order role
   const [orderRole, setOrderRole] = useState<'buyer' | 'seller'>('buyer')
   const [inquiries, setInquiries] = useState<any[]>([])
+  // Payment method chosen per deal before confirming (recorded for audit only)
+  const [dealPaymentMethod, setDealPaymentMethod] = useState<Record<string, string>>({})
+
+  // ── Engagement (Phase 3): messaging, favorites, saved searches ──
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
+  const [favorites, setFavorites] = useState<MarketplaceListing[]>([])
+  const [threads, setThreads] = useState<MarketplaceThread[]>([])
+  const [activeThread, setActiveThread] = useState<MarketplaceThread | null>(null)
+  const [threadMessages, setThreadMessages] = useState<MarketplaceMessage[]>([])
+  const [messageDraft, setMessageDraft] = useState('')
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [savedSearches, setSavedSearches] = useState<MarketplaceSavedSearch[]>([])
+  const [saveSearchName, setSaveSearchName] = useState('')
+  const [showSaveSearch, setShowSaveSearch] = useState(false)
+
+  // ── Phase 4: pagination, price suggestion ──
+  const [page, setPage] = useState(0)
+  const [totalListings, setTotalListings] = useState(0)
+  const PAGE_SIZE = 24
+  const [priceHint, setPriceHint] = useState<{ avg: number; min: number; max: number; count: number } | null>(null)
+  const [geoLocating, setGeoLocating] = useState(false)
+
+  // ── Phase 5: config (interlink/transport), reports ──
+  const [mpConfig, setMpConfig] = useState<{ treasureMount: { enabled: boolean; url: string }; transport: { enabled: boolean; url: string } } | null>(null)
+  const [reportModal, setReportModal] = useState<{ listingId: string; title: string } | null>(null)
+  const [reportReason, setReportReason] = useState('')
+  const [reportDetails, setReportDetails] = useState('')
+  const [adminReports, setAdminReports] = useState<any[]>([])
+  const [adminReportFilter, setAdminReportFilter] = useState('open')
+  const [adminReportResolution, setAdminReportResolution] = useState<Record<string, string>>({})
 
   // Monetization (admin)
   const [monetizationSettings, setMonetizationSettings] = useState<any[]>([])
   const [monetizationPlans, setMonetizationPlans] = useState<any[]>([])
   const [monetizationDashboard, setMonetizationDashboard] = useState<any>(null)
-  const [adminSubTab, setAdminSubTab] = useState<'listings' | 'settings' | 'plans' | 'revenue'>('listings')
+  const [adminSubTab, setAdminSubTab] = useState<'listings' | 'reports' | 'settings' | 'plans' | 'revenue'>('listings')
   const [editingPlan, setEditingPlan] = useState<any>(null)
   const [planForm, setPlanForm] = useState<Record<string, any>>({ name: '', description: '', price: '', durationDays: '30', maxListings: '', maxBoostsPerMonth: '0', isActive: false, sortOrder: '0' })
 
@@ -130,7 +162,7 @@ const Marketplace: React.FC = () => {
   const fetchListings = useCallback(async () => {
     setLoading(true)
     try {
-      const params: any = { status: 'active', ...filters }
+      const params: any = { status: 'active', ...filters, limit: PAGE_SIZE, offset: page * PAGE_SIZE }
       if (sortBy) params.sortBy = sortBy
       if (nearMeActive && userLocation) {
         params.userLat = userLocation.lat
@@ -140,13 +172,200 @@ const Marketplace: React.FC = () => {
       }
       const res = await apiService.listMarketplaceListings(params)
       setListings(res.data?.items || [])
-    } catch { setListings([]) }
+      setTotalListings(res.data?.total || 0)
+    } catch { setListings([]); setTotalListings(0) }
     setLoading(false)
-  }, [filters, sortBy, nearMeActive, userLocation, radiusKm])
+  }, [filters, sortBy, nearMeActive, userLocation, radiusKm, page])
 
-  useEffect(() => { fetchDashboard(); fetchListings() }, [])
+  // ── Engagement data loaders ──
+  const loadFavoriteIds = useCallback(async () => {
+    try { const res = await apiService.getMarketplaceFavoriteIds(); setFavoriteIds(new Set(res.data?.ids || [])) } catch {}
+  }, [])
+
+  const loadUnreadCount = useCallback(async () => {
+    try { const res = await apiService.getMarketplaceUnreadCount(); setUnreadCount(res.data?.unread || 0) } catch {}
+  }, [])
+
+  const fetchThreads = useCallback(async () => {
+    try { const res = await apiService.listMarketplaceThreads(); setThreads(res.data?.items || []) } catch { setThreads([]) }
+  }, [])
+
+  const fetchFavorites = useCallback(async () => {
+    try { const res = await apiService.listMarketplaceFavorites(); setFavorites(res.data?.items || []) } catch { setFavorites([]) }
+  }, [])
+
+  const fetchSavedSearches = useCallback(async () => {
+    try { const res = await apiService.listMarketplaceSavedSearches(); setSavedSearches(res.data?.items || []) } catch { setSavedSearches([]) }
+  }, [])
+
+  const openThread = useCallback(async (thread: MarketplaceThread) => {
+    setActiveThread(thread)
+    try {
+      const res = await apiService.getMarketplaceThreadMessages(thread.id)
+      setThreadMessages(res.data?.items || [])
+      loadUnreadCount(); fetchThreads()
+    } catch { setThreadMessages([]) }
+  }, [loadUnreadCount, fetchThreads])
+
+  const refreshActiveThread = useCallback(async () => {
+    if (activeThread) {
+      try { const res = await apiService.getMarketplaceThreadMessages(activeThread.id); setThreadMessages(res.data?.items || []) } catch {}
+    }
+    fetchThreads(); loadUnreadCount()
+  }, [activeThread, fetchThreads, loadUnreadCount])
+
+  const sendMessage = async () => {
+    if (!activeThread || !messageDraft.trim()) return
+    const body = messageDraft.trim()
+    setMessageDraft('')
+    try {
+      await apiService.sendMarketplaceMessage(activeThread.id, body)
+      const res = await apiService.getMarketplaceThreadMessages(activeThread.id)
+      setThreadMessages(res.data?.items || [])
+      fetchThreads()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message); setMessageDraft(body) }
+  }
+
+  const toggleFavorite = async (listingId: string) => {
+    const isFav = favoriteIds.has(listingId)
+    // Optimistic update
+    setFavoriteIds(prev => { const n = new Set(prev); isFav ? n.delete(listingId) : n.add(listingId); return n })
+    try {
+      if (isFav) await apiService.removeMarketplaceFavorite(listingId)
+      else await apiService.addMarketplaceFavorite(listingId)
+      if (tab === 'favorites') fetchFavorites()
+    } catch (e: any) {
+      // Revert on failure
+      setFavoriteIds(prev => { const n = new Set(prev); isFav ? n.add(listingId) : n.delete(listingId); return n })
+      setError(e?.response?.data?.error?.message || e.message)
+    }
+  }
+
+  const messageSeller = async (listing: MarketplaceListing) => {
+    try {
+      const res = await apiService.startMarketplaceThread(listing.id)
+      const thread: MarketplaceThread = { ...res.data, listing_title: listing.title }
+      setSelectedListing(null)
+      setTab('messages')
+      fetchThreads()
+      openThread(thread)
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  const saveCurrentSearch = async () => {
+    const name = saveSearchName.trim() || (filters.species || filters.category || t('marketplace.engagement.mySearch'))
+    try {
+      await apiService.createMarketplaceSavedSearch({ name, filters, alertsEnabled: true })
+      setSuccessMsg(t('marketplace.engagement.searchSaved'))
+      setShowSaveSearch(false); setSaveSearchName('')
+      fetchSavedSearches()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  const applySavedSearch = (s: MarketplaceSavedSearch) => {
+    setFilters((s.filters || {}) as Record<string, string>)
+    setTab('browse')
+  }
+
+  // ── Price suggestion from live market data (reuses getMarketPrices) ──
+  const fetchPriceHint = useCallback(async (species?: string, breed?: string) => {
+    if (!species) { setPriceHint(null); return }
+    try {
+      const res = await apiService.getMarketPrices({ species: species.toLowerCase() })
+      const rows: any[] = res.data || []
+      let matching = breed ? rows.filter(r => (r.breed || '').toLowerCase() === breed.toLowerCase()) : rows
+      if (matching.length === 0) matching = rows
+      const totalCount = matching.reduce((s, r) => s + (+r.total_listings || 0), 0)
+      if (totalCount === 0) { setPriceHint(null); return }
+      const avg = matching.reduce((s, r) => s + (+r.avg_price || 0) * (+r.total_listings || 0), 0) / totalCount
+      const min = Math.min(...matching.map(r => +r.min_price || Infinity))
+      const max = Math.max(...matching.map(r => +r.max_price || 0))
+      setPriceHint({ avg: Math.round(avg), min: isFinite(min) ? Math.round(min) : 0, max: Math.round(max), count: totalCount })
+    } catch { setPriceHint(null) }
+  }, [])
+
+  useEffect(() => {
+    if (tab === 'sell') fetchPriceHint(sellForm.species, sellForm.breed)
+  }, [sellForm.species, sellForm.breed, tab, fetchPriceHint])
+
+  // ── Geocoding-lite: fill listing coordinates from the device location ──
+  const useMyLocationForListing = () => {
+    if (!navigator.geolocation) { setError(t('marketplace.proximity.notSupported', 'Geolocation not supported by your browser')); return }
+    setGeoLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setSellForm(f => ({ ...f, latitude: String(pos.coords.latitude), longitude: String(pos.coords.longitude) }))
+        setGeoLocating(false)
+        setSuccessMsg(t('marketplace.sell.locationCaptured'))
+      },
+      () => { setGeoLocating(false); setError(t('marketplace.proximity.denied', 'Location access denied. Please enable it in browser settings.')) }
+    )
+  }
+
+  // Handle video upload for the sell form
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const res = await apiService.uploadFile(file, 'marketplace')
+      const url = res.url || res.fileUrl
+      if (url) { sf('videoUrl', url); setSuccessMsg(t('marketplace.sell.videoUploaded')) }
+    } catch (err: any) {
+      setError(err?.response?.data?.error?.message || t('marketplace.sell.uploadFailed', 'Upload failed'))
+    }
+    e.target.value = ''
+  }
+
+  const toggleSearchAlerts = async (s: MarketplaceSavedSearch) => {
+    try { await apiService.updateMarketplaceSavedSearch(s.id, { alertsEnabled: !s.alertsEnabled }); fetchSavedSearches() }
+    catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  const deleteSavedSearch = async (id: string) => {
+    try { await apiService.deleteMarketplaceSavedSearch(id); fetchSavedSearches() }
+    catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  // ── Phase 5: config, reports, funnel ──
+  const loadConfig = useCallback(async () => {
+    try { const res = await apiService.getMarketplaceConfig(); setMpConfig(res.data) } catch {}
+  }, [])
+
+  const submitReport = async () => {
+    if (!reportModal || !reportReason) return
+    try {
+      await apiService.reportMarketplaceListing(reportModal.listingId, reportReason, reportDetails || undefined)
+      setSuccessMsg(t('marketplace.report.submitted'))
+      setReportModal(null); setReportReason(''); setReportDetails('')
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  // Pre-purchase vet check — funnel into a paid consultation (the revenue layer)
+  const bookVetCheck = (listing: MarketplaceListing) => {
+    const params = new URLSearchParams({ purpose: 'pre_purchase_check' })
+    if (listing.species) params.set('species', String(listing.species))
+    navigate(`/find-doctor?${params.toString()}`)
+  }
+
+  const fetchAdminReports = async (status = adminReportFilter) => {
+    try { const res = await apiService.adminListMarketplaceReports(status || undefined); setAdminReports(res.data?.items || []) } catch { setAdminReports([]) }
+  }
+
+  const resolveReport = async (id: string, status: string) => {
+    try {
+      await apiService.adminResolveMarketplaceReport(id, status, adminReportResolution[id] || undefined)
+      setSuccessMsg(t('marketplace.report.resolved'))
+      fetchAdminReports()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  useEffect(() => { fetchDashboard(); fetchListings(); loadFavoriteIds(); loadUnreadCount(); loadConfig() }, [])
   useAutoRefresh('marketplace', fetchListings)
-  useEffect(() => { fetchListings() }, [filters, sortBy])
+  useAutoRefresh('marketplace-messages', refreshActiveThread)
+  useAutoRefresh('marketplace-saved-searches', fetchSavedSearches)
+  // Reset to first page whenever the query changes
+  useEffect(() => { setPage(0) }, [filters, sortBy, nearMeActive])
+  useEffect(() => { fetchListings() }, [filters, sortBy, page, nearMeActive, userLocation, radiusKm])
 
   const viewListing = async (listing: MarketplaceListing) => {
     try {
@@ -179,11 +398,13 @@ const Marketplace: React.FC = () => {
       if (payload.gender) payload.gender = (payload.gender as string).toLowerCase()
       if (payload.species) payload.species = (payload.species as string).toLowerCase()
       await apiService.createMarketplaceListing(payload)
-      setSuccessMsg(t('marketplace.listingCreated'))
+      // Animal-category listings go through admin review before appearing publicly
+      const needsReview = ['animal', 'semen_embryo'].includes(payload.category)
+      setSuccessMsg(needsReview ? t('marketplace.deal.submittedForReview') : t('marketplace.listingCreated'))
       setSellForm({ title: '', description: '', category: 'animal', listingType: 'fixed_price', price: '', quantity: '1', unit: 'head', condition: 'new', location: '', tags: '',
         species: '', breed: '', animalAgeMonths: '', animalWeightKg: '', gender: '', lactationNumber: '', dailyMilkYield: '',
         pregnancyStatus: '', pregnancyMonth: '', vaccinationStatus: 'unknown', healthCertificate: false,
-        listingTier: 'standard', isHotDeal: false, auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
+        auctionEndTime: '', reservePrice: '', contactPhone: '', latitude: '', longitude: '',
         images: [], linkedAnimalId: '',
         sellerType: 'individual', registrationNumber: '', welfareAttestation: false, termsAccepted: false })
       setSellStep(0); setTab('browse'); fetchListings(); fetchDashboard()
@@ -265,24 +486,46 @@ const Marketplace: React.FC = () => {
     } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
   }
 
-  const buyNow = async (listing: MarketplaceListing) => {
+  // Free classifieds: reserving holds the listing while buyer and seller
+  // connect and settle directly — no payment happens on the platform
+  const reserveListing = async (listing: MarketplaceListing) => {
     if (listing.price == null) {
-      // "Contact for fee" listing — send inquiry instead of purchase order
+      // "Contact for fee" listing — send inquiry instead of reserving
       try {
         await apiService.createInquiry(listing.id, '')
-        setSuccessMsg(t('marketplace.orderPlaced'))
+        setSuccessMsg(t('marketplace.inquirySent', 'Inquiry sent! The seller will be notified.'))
         setSelectedListing(null)
       } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
       return
     }
     try {
       await apiService.createMarketplaceOrder({ listingId: listing.id, quantity: 1 })
-      setSuccessMsg(t('marketplace.orderPlaced')); fetchListings(); fetchDashboard(); setSelectedListing(null)
+      setSuccessMsg(t('marketplace.deal.reserveSuccess'))
+      fetchListings(); fetchDashboard()
+      // Re-open the listing: the reservation reveals the seller's contact details
+      viewListing(listing)
     } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
   }
 
   const fetchOrders = async (role: 'buyer' | 'seller' = orderRole) => {
     try { const res = await apiService.listMarketplaceOrders(role); setOrders(res.data?.items || []) } catch { setOrders([]) }
+  }
+
+  // ── Deal handshake actions (settlement happens off-platform) ──
+  const confirmDeal = async (orderId: string) => {
+    try {
+      await apiService.confirmMarketplaceDeal(orderId, dealPaymentMethod[orderId] || undefined)
+      setSuccessMsg(t('marketplace.deal.confirmRecorded'))
+      fetchOrders(orderRole); fetchListings(); fetchDashboard()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
+  }
+
+  const cancelDeal = async (orderId: string) => {
+    try {
+      await apiService.cancelMarketplaceDeal(orderId)
+      setSuccessMsg(t('marketplace.deal.dealCancelled'))
+      fetchOrders(orderRole); fetchListings(); fetchDashboard()
+    } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
   }
 
   const fetchInquiries = async (role: 'buyer' | 'seller' = orderRole) => {
@@ -414,6 +657,9 @@ const Marketplace: React.FC = () => {
     ['dashboard', t('marketplace.tabs.dashboard')], ['browse', t('marketplace.tabs.browse')], ['sell', t('marketplace.tabs.sell')],
     // Auctions tab: always show to admin (to manage the toggle), hide from others when disabled
     ...(auctionEnabled || isAdmin ? [['auctions', t('marketplace.tabs.auctions')] as [TabKey, string]] : []),
+    ['messages', `${t('marketplace.tabs.messages')}${unreadCount > 0 ? ` (${unreadCount})` : ''}`],
+    ['favorites', t('marketplace.tabs.favorites')],
+    ['saved', t('marketplace.tabs.saved')],
     ['orders', t('marketplace.tabs.orders')], ['prices', t('marketplace.tabs.prices')],
   ]
   if (isAdmin) tabs.push(['admin', t('marketplace.tabs.admin')])
@@ -433,6 +679,34 @@ const Marketplace: React.FC = () => {
       {error && <div className="module-alert error">{error} <button onClick={() => setError('')}>✕</button></div>}
       {successMsg && <div className="module-alert success">{successMsg} <button onClick={() => setSuccessMsg('')}>✕</button></div>}
 
+      {/* Report modal */}
+      {reportModal && (
+        <div className="mp-modal-overlay" onClick={() => setReportModal(null)}>
+          <div className="mp-modal" onClick={e => e.stopPropagation()}>
+            <h3>🚩 {t('marketplace.report.reportListing')}</h3>
+            <p className="mp-sell-step-desc">{t('marketplace.report.reportingWhat', { title: reportModal.title })}</p>
+            <div className="module-form-group">
+              <label className="module-label">{t('marketplace.report.reason')}</label>
+              <select className="module-input" value={reportReason} onChange={e => setReportReason(e.target.value)}>
+                <option value="">{t('marketplace.report.selectReason')}</option>
+                {['scam', 'welfare_concern', 'prohibited', 'miscategorized', 'offensive', 'wrong_info', 'other'].map(r => (
+                  <option key={r} value={r}>{t(`marketplace.report.reasons.${r}`)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="module-form-group">
+              <label className="module-label">{t('marketplace.report.details')}</label>
+              <textarea className="module-input" rows={3} value={reportDetails} onChange={e => setReportDetails(e.target.value)}
+                placeholder={t('marketplace.report.detailsPlaceholder')} maxLength={1000} />
+            </div>
+            <div className="mp-modal-actions">
+              <button className="module-btn" onClick={() => setReportModal(null)}>{t('marketplace.monetization.cancel')}</button>
+              <button className="module-btn primary" disabled={!reportReason} onClick={submitReport}>{t('marketplace.report.submit')}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="module-tabs">
         {tabs.map(([key, label]) => (
           <button key={key} className={`module-tab ${tab === key ? 'active' : ''}`} onClick={() => {
@@ -441,6 +715,9 @@ const Marketplace: React.FC = () => {
             if (key === 'prices') fetchMarketPrices()
             if (key === 'admin') { fetchAdminData(); fetchMonetizationSettings() }
             if (key === 'auctions') { setFilters({ listingType: 'auction' }); fetchListings() }
+            if (key === 'messages') { fetchThreads(); loadUnreadCount(); setActiveThread(null) }
+            if (key === 'favorites') { fetchFavorites(); loadFavoriteIds() }
+            if (key === 'saved') fetchSavedSearches()
           }}>{label}</button>
         ))}
       </div>
@@ -518,7 +795,7 @@ const Marketplace: React.FC = () => {
             <ListingDetail
               listing={selectedListing} bids={bids} formatCurrency={formatCurrency}
               bidAmount={bidAmount} bidMessage={bidMessage} onBidAmountChange={setBidAmount} onBidMessageChange={setBidMessage}
-              onPlaceBid={placeBid} onBuyNow={() => buyNow(selectedListing)} onBack={() => setSelectedListing(null)}
+              onPlaceBid={placeBid} onBuyNow={() => reserveListing(selectedListing)} onBack={() => setSelectedListing(null)}
               isAdmin={isAdmin} onToggleHotDeal={(id, v) => handleToggleHotDeal(id, v)} onToggleFeatured={(id, v) => handleToggleFeatured(id, v)}
               userId={user?.id}
               onRequestContact={async () => {
@@ -528,6 +805,12 @@ const Marketplace: React.FC = () => {
                   viewListing(selectedListing)
                 } catch (e: any) { setError(e?.response?.data?.error?.message || e.message) }
               }}
+              isFavorite={favoriteIds.has(selectedListing.id)}
+              onToggleFavorite={user ? () => toggleFavorite(selectedListing.id) : undefined}
+              onMessageSeller={user ? () => messageSeller(selectedListing) : undefined}
+              onReport={user && selectedListing.seller_id !== user.id ? () => setReportModal({ listingId: selectedListing.id, title: selectedListing.title }) : undefined}
+              onBookVetCheck={() => bookVetCheck(selectedListing)}
+              transport={mpConfig?.transport?.enabled && mpConfig.transport.url ? mpConfig.transport : undefined}
               t={t}
             />
           ) : (
@@ -592,10 +875,38 @@ const Marketplace: React.FC = () => {
                 {Object.keys(filters).length > 0 && <button className="mp-chip clear" onClick={() => { setFilters({}); setSortBy(''); setNearMeActive(false) }}>{t('marketplace.chips.clearAll')}</button>}
               </div>
 
+              {/* Treasure Mount interlink — surfaced when browsing non-animal product categories */}
+              {mpConfig?.treasureMount?.enabled && ['feed', 'equipment', 'medicine', 'other'].includes(filters.category || '') && (
+                <a className="mp-treasure-banner" href={mpConfig.treasureMount.url} target="_blank" rel="noopener noreferrer">
+                  🛒 {t('marketplace.interlink.treasureBanner')} <span className="mp-treasure-cta">{t('marketplace.interlink.visitTreasure')} →</span>
+                </a>
+              )}
+              {/* Save this search */}
+              <div className="mp-save-search-bar">
+                {showSaveSearch ? (
+                  <div className="mp-save-search-form">
+                    <input className="module-input" value={saveSearchName} onChange={e => setSaveSearchName(e.target.value)}
+                      placeholder={t('marketplace.engagement.searchNamePlaceholder')} maxLength={120} />
+                    <button className="module-btn primary small" onClick={saveCurrentSearch}>{t('marketplace.engagement.save')}</button>
+                    <button className="module-btn small" onClick={() => setShowSaveSearch(false)}>{t('marketplace.sell.back')}</button>
+                  </div>
+                ) : (
+                  <button className="mp-chip" onClick={() => setShowSaveSearch(true)}>🔔 {t('marketplace.engagement.saveThisSearch')}</button>
+                )}
+              </div>
               {loading ? <div className="mp-loading">{t('marketplace.loadingListings')}</div> : (
                 <div className="mp-grid">
-                  {listings.map(l => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency} onView={() => viewListing(l)} t={t} />)}
+                  {listings.map(l => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency} onView={() => viewListing(l)}
+                    isFavorite={favoriteIds.has(l.id)} onToggleFavorite={user ? () => toggleFavorite(l.id) : undefined} t={t} />)}
                   {listings.length === 0 && <p className="mp-empty">{t('marketplace.emptyListings')}</p>}
+                </div>
+              )}
+              {/* Pagination */}
+              {totalListings > PAGE_SIZE && (
+                <div className="mp-pagination">
+                  <button className="module-btn small" disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))}>← {t('common.previous', 'Previous')}</button>
+                  <span className="mp-page-info">{t('marketplace.pageOf', { current: page + 1, total: Math.ceil(totalListings / PAGE_SIZE) })}</span>
+                  <button className="module-btn small" disabled={(page + 1) * PAGE_SIZE >= totalListings} onClick={() => setPage(p => p + 1)}>{t('common.next', 'Next')} →</button>
                 </div>
               )}
             </div>
@@ -729,14 +1040,29 @@ const Marketplace: React.FC = () => {
                     <div className="module-form-row">
                       <div className="module-form-group">
                         <label className="module-label">{t('marketplace.livestock.species')}</label>
-                        <select className="module-input" value={sellForm.species} onChange={e => sf('species', e.target.value)}>
+                        <select className="module-input" value={sellForm.species}
+                          onChange={e => setSellForm(f => ({ ...f, species: e.target.value, breed: '' }))}>
                           <option value="">{t('marketplace.livestock.selectSpecies')}</option>
-                          {SPECIES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+                          {SPECIES_CATEGORIES.map(cat => (
+                            <optgroup key={cat.label} label={cat.label}>
+                              {cat.species.map(s => <option key={s} value={s}>{s}</option>)}
+                            </optgroup>
+                          ))}
                         </select>
                       </div>
                       <div className="module-form-group">
                         <label className="module-label">{t('marketplace.livestock.breed')}</label>
-                        <input className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} placeholder={t('marketplace.sell.breedPlaceholder')} />
+                        {(() => {
+                          const breeds = breedsForSpecies(sellForm.species)
+                          return breeds.length > 0 ? (
+                            <select className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} disabled={!sellForm.species}>
+                              <option value="">{sellForm.species ? t('marketplace.sell.selectBreed') : t('marketplace.sell.selectSpeciesFirst')}</option>
+                              {breeds.map(b => <option key={b} value={b}>{b}</option>)}
+                            </select>
+                          ) : (
+                            <input className="module-input" value={sellForm.breed} onChange={e => sf('breed', e.target.value)} placeholder={t('marketplace.sell.breedPlaceholder')} disabled={!sellForm.species} />
+                          )
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -872,6 +1198,21 @@ const Marketplace: React.FC = () => {
                         ))}
                       </div>
                     )}
+                    {/* Optional video */}
+                    <div className="module-form-group" style={{ marginTop: 10 }}>
+                      <label className="module-label">🎥 {t('marketplace.sell.videoLabel')}</label>
+                      {sellForm.videoUrl ? (
+                        <div className="mp-video-set">
+                          <span>✅ {t('marketplace.sell.videoAdded')}</span>
+                          <button type="button" className="module-btn small" onClick={() => sf('videoUrl', '')}>{t('marketplace.sell.removeVideo')}</button>
+                        </div>
+                      ) : (
+                        <>
+                          <input type="file" accept="video/*" className="module-input" onChange={handleVideoUpload} />
+                          <div className="mp-compliance-hint">{t('marketplace.sell.videoHint')}</div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="mp-step-actions">
@@ -899,6 +1240,27 @@ const Marketplace: React.FC = () => {
                       </div>
                     )}
                   </div>
+                  {/* Price suggestion from live market data */}
+                  {priceHint && (
+                    <div className="mp-price-hint">
+                      <div className="mp-price-hint-title">💡 {t('marketplace.sell.priceHintTitle')}</div>
+                      <div className="mp-price-hint-body">
+                        <span>{t('marketplace.sell.priceHintAvg')}: <strong>{formatCurrency(priceHint.avg)}</strong></span>
+                        <span>{t('marketplace.prices.min')}–{t('marketplace.prices.max')}: {formatCurrency(priceHint.min)} – {formatCurrency(priceHint.max)}</span>
+                        <span className="mp-price-hint-count">{t('marketplace.sell.priceHintBasis', { count: priceHint.count })}</span>
+                      </div>
+                      {sellForm.price && (() => {
+                        const p = +sellForm.price
+                        if (p > 0 && priceHint.avg > 0) {
+                          const pct = Math.round((p / priceHint.avg) * 100)
+                          if (pct < 85) return <div className="mp-price-hint-tag good">💚 {t('marketplace.card.fairDeal')} ({pct}%)</div>
+                          if (pct > 115) return <div className="mp-price-hint-tag high">⭐ {t('marketplace.card.premiumPriced')} ({pct}%)</div>
+                          return <div className="mp-price-hint-tag ok">✅ {t('marketplace.sell.priceHintFair')}</div>
+                        }
+                        return null
+                      })()}
+                    </div>
+                  )}
                   {sellForm.listingType === 'auction' && (
                     <div className="module-form-group">
                       <label className="module-label">{t('marketplace.sell.auctionEndTime')}</label>
@@ -906,16 +1268,17 @@ const Marketplace: React.FC = () => {
                     </div>
                   )}
                   <div className="module-form-group">
-                    <label className="module-label">{t('marketplace.sell.listingTier')}</label>
-                    <select className="module-input" value={sellForm.listingTier} onChange={e => sf('listingTier', e.target.value)}>
-                      <option value="standard">{t('marketplace.tier.standardFree')}</option>
-                      <option value="premium">{t('marketplace.tier.premium')}</option>
-                      <option value="spotlight">{t('marketplace.tier.spotlight')}</option>
-                    </select>
-                  </div>
-                  <div className="module-form-group">
                     <label className="module-label">{t('marketplace.sell.location')}</label>
                     <input className="module-input" value={sellForm.location} onChange={e => sf('location', e.target.value)} placeholder={t('marketplace.sell.locationPlaceholder')} />
+                    <div className="mp-geo-row">
+                      <button type="button" className="module-btn small" onClick={useMyLocationForListing} disabled={geoLocating}>
+                        📍 {geoLocating ? t('marketplace.sell.locating') : t('marketplace.sell.useMyLocation')}
+                      </button>
+                      {sellForm.latitude && sellForm.longitude && (
+                        <span className="mp-geo-set">✅ {t('marketplace.sell.locationSet')}</span>
+                      )}
+                    </div>
+                    <div className="mp-compliance-hint">{t('marketplace.sell.locationGeoHint')}</div>
                   </div>
                 </div>
                 <div className="mp-step-actions">
@@ -945,7 +1308,6 @@ const Marketplace: React.FC = () => {
                   <ReviewItem label={t('marketplace.reviewLabels.healthCert')} value={sellForm.healthCertificate ? t('marketplace.reviewLabels.yes') : t('marketplace.reviewLabels.no')} />
                   <ReviewItem label={t('marketplace.reviewLabels.price')} value={sellForm.price ? `${settings.currency} ${sellForm.price}` : t('marketplace.reviewLabels.contactForPrice')} />
                   <ReviewItem label={t('marketplace.sell.location')} value={sellForm.location || '—'} />
-                  <ReviewItem label={t('marketplace.reviewLabels.tier')} value={TIER_LABELS[sellForm.listingTier] || t('marketplace.tier.standard')} />
                   <ReviewItem label={t('marketplace.livestock.contact')} value={sellForm.contactPhone || '—'} />
                   <ReviewItem label={t('marketplace.compliance.sellerType')} value={sellForm.sellerType === 'registered_breeder' ? t('marketplace.compliance.registeredBreeder') : t('marketplace.compliance.individualOwner')} />
                   {sellForm.sellerType === 'registered_breeder' && <ReviewItem label={t('marketplace.compliance.registrationNumber')} value={sellForm.registrationNumber || '—'} />}
@@ -1011,25 +1373,173 @@ const Marketplace: React.FC = () => {
               </div>
             </div>
           )}
+          {/* Free-classifieds note: settlement is between the parties, off-platform */}
+          <div className="mp-deal-free-note mp-deal-tab-note">💡 {t('marketplace.deal.tabNote')}</div>
           <div className="data-table-container">
             <table className="module-table">
-              <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.livestock.species')}</th><th>{orderRole === 'buyer' ? t('marketplace.detail.seller') : t('marketplace.orders.asBuyer').replace('🛒 ', '')}</th><th>{t('marketplace.orders.qty')}</th><th>{t('marketplace.orders.total')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.orders.date')}</th></tr></thead>
+              <thead><tr><th>{t('marketplace.orders.item')}</th><th>{t('marketplace.livestock.species')}</th><th>{orderRole === 'buyer' ? t('marketplace.detail.seller') : t('marketplace.orders.asBuyer').replace('🛒 ', '')}</th><th>{t('marketplace.orders.qty')}</th><th>{t('marketplace.orders.total')}</th><th>{t('marketplace.orders.status')}</th><th>{t('marketplace.orders.date')}</th><th>{t('marketplace.deal.actionsCol')}</th></tr></thead>
               <tbody>
-                {orders.map(o => (
-                  <tr key={o.id}>
-                    <td>{g(o, 'listingTitle', 'listing_title') || '—'}</td>
-                    <td>{o.species || '—'}</td>
-                    <td>{orderRole === 'buyer' ? g(o, 'sellerName', 'seller_name') : g(o, 'buyerName', 'buyer_name')}</td>
-                    <td>{o.quantity}</td>
-                    <td className="mp-price-highlight">{formatCurrency(g(o, 'totalPrice', 'total_price') || 0)}</td>
-                    <td><span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{o.status}</span></td>
-                    <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '—'}</td>
-                  </tr>
-                ))}
+                {orders.map(o => {
+                  const myConfirm = orderRole === 'buyer' ? g(o, 'buyerConfirmedAt', 'buyer_confirmed_at') : g(o, 'sellerConfirmedAt', 'seller_confirmed_at')
+                  const otherConfirm = orderRole === 'buyer' ? g(o, 'sellerConfirmedAt', 'seller_confirmed_at') : g(o, 'buyerConfirmedAt', 'buyer_confirmed_at')
+                  const reservedUntil = g(o, 'reservedUntil', 'reserved_until')
+                  const statusKey = `marketplace.deal.status.${o.status}`
+                  const statusLabel = t(statusKey) === statusKey ? o.status : t(statusKey)
+                  return (
+                    <tr key={o.id}>
+                      <td>{g(o, 'listingTitle', 'listing_title') || '—'}</td>
+                      <td>{o.species || '—'}</td>
+                      <td>{orderRole === 'buyer' ? g(o, 'sellerName', 'seller_name') : g(o, 'buyerName', 'buyer_name')}</td>
+                      <td>{o.quantity}</td>
+                      <td className="mp-price-highlight">{formatCurrency(g(o, 'totalPrice', 'total_price') || 0)}</td>
+                      <td>
+                        <span className={`module-badge ${o.status === 'completed' || o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'error' : ''}`}>{statusLabel}</span>
+                        {o.status === 'reserved' && reservedUntil && (
+                          <div className="mp-deal-until">{t('marketplace.deal.reservedUntil')}: {new Date(reservedUntil).toLocaleDateString()}</div>
+                        )}
+                      </td>
+                      <td>{(g(o, 'createdAt', 'created_at')) ? new Date(g(o, 'createdAt', 'created_at')).toLocaleDateString() : '—'}</td>
+                      <td>
+                        {o.status === 'reserved' ? (
+                          <div className="mp-deal-actions">
+                            {myConfirm ? (
+                              <span className="mp-deal-waiting">✓ {t('marketplace.deal.waitingOther')}</span>
+                            ) : (
+                              <>
+                                {orderRole === 'buyer' && (
+                                  <select className="module-input mp-deal-pm" value={dealPaymentMethod[o.id] || ''} onChange={e => setDealPaymentMethod(prev => ({ ...prev, [o.id]: e.target.value }))}>
+                                    <option value="">{t('marketplace.deal.paymentMethod')}</option>
+                                    <option value="cash">{t('marketplace.deal.pm.cash')}</option>
+                                    <option value="upi">{t('marketplace.deal.pm.upi')}</option>
+                                    <option value="bank_transfer">{t('marketplace.deal.pm.bankTransfer')}</option>
+                                    <option value="other">{t('marketplace.deal.pm.other')}</option>
+                                  </select>
+                                )}
+                                <button className="module-btn small primary" onClick={() => confirmDeal(o.id)}>
+                                  ✅ {orderRole === 'buyer' ? t('marketplace.deal.confirmReceipt') : t('marketplace.deal.confirmPayment')}
+                                </button>
+                              </>
+                            )}
+                            {otherConfirm && !myConfirm && <span className="mp-deal-other-done">👍 {t('marketplace.deal.otherConfirmed')}</span>}
+                            <button className="module-btn small" onClick={() => cancelDeal(o.id)}>✖ {t('marketplace.deal.cancelDeal')}</button>
+                          </div>
+                        ) : o.status === 'completed' ? (
+                          <span className="mp-deal-done">🎉 {t('marketplace.deal.dealDone')}</span>
+                        ) : '—'}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
           {orders.length === 0 && <p className="mp-empty">{t('marketplace.orders.noOrders')}</p>}
+        </div>
+      )}
+
+      {/* ════════ MESSAGES ════════ */}
+      {tab === 'messages' && (
+        <div className="mp-messages-layout">
+          <div className={`mp-thread-list ${activeThread ? 'has-active' : ''}`}>
+            <h3 className="mp-section-title">💬 {t('marketplace.tabs.messages')}</h3>
+            {threads.length === 0 && <p className="mp-empty">{t('marketplace.engagement.noMessages')}</p>}
+            {threads.map(th => (
+              <div key={th.id} className={`mp-thread-item ${activeThread?.id === th.id ? 'active' : ''}`} onClick={() => openThread(th)}>
+                <div className="mp-thread-item-top">
+                  <span className="mp-thread-title">{th.listing_title || t('marketplace.engagement.listing')}</span>
+                  {(th.my_unread || 0) > 0 && <span className="mp-thread-unread">{th.my_unread}</span>}
+                </div>
+                <div className="mp-thread-sub">
+                  <span className="mp-thread-role">{th.my_role === 'buyer' ? `🛒 ${th.seller_name || ''}` : `🏠 ${th.buyer_name || ''}`}</span>
+                  {th.last_message_at && <span className="mp-thread-time">{new Date(th.last_message_at).toLocaleDateString()}</span>}
+                </div>
+                {th.last_message && <div className="mp-thread-preview">{th.last_message}</div>}
+              </div>
+            ))}
+          </div>
+          <div className={`mp-chat-panel ${activeThread ? 'open' : ''}`}>
+            {activeThread ? (
+              <>
+                <div className="mp-chat-header">
+                  <button className="mp-chat-back" onClick={() => setActiveThread(null)}>←</button>
+                  <div>
+                    <div className="mp-chat-title">{activeThread.listing_title || t('marketplace.engagement.listing')}</div>
+                    <div className="mp-chat-sub">{activeThread.my_role === 'buyer' ? activeThread.seller_name : activeThread.buyer_name}</div>
+                  </div>
+                </div>
+                <div className="mp-chat-safety">🔒 {t('marketplace.engagement.chatSafety')}</div>
+                <div className="mp-chat-messages">
+                  {threadMessages.length === 0 && <p className="mp-empty">{t('marketplace.engagement.startConversation')}</p>}
+                  {threadMessages.map(m => (
+                    <div key={m.id} className={`mp-chat-bubble ${m.sender_id === user?.id ? 'mine' : 'theirs'}`}>
+                      <div className="mp-chat-body">{m.body}</div>
+                      <div className="mp-chat-meta">{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mp-chat-input">
+                  <textarea className="module-input" value={messageDraft} onChange={e => setMessageDraft(e.target.value)}
+                    placeholder={t('marketplace.engagement.typeMessage')} rows={2}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }} />
+                  <button className="module-btn primary" onClick={sendMessage} disabled={!messageDraft.trim()}>{t('marketplace.engagement.send')}</button>
+                </div>
+              </>
+            ) : (
+              <div className="mp-chat-empty">{t('marketplace.engagement.selectConversation')}</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ════════ FAVORITES ════════ */}
+      {tab === 'favorites' && (
+        <div>
+          <h3 className="mp-section-title">❤️ {t('marketplace.tabs.favorites')}</h3>
+          {favorites.length === 0 ? (
+            <p className="mp-empty">{t('marketplace.engagement.noFavorites')}</p>
+          ) : (
+            <div className="mp-grid">
+              {favorites.map(l => <ListingCard key={l.id} listing={l} formatCurrency={formatCurrency}
+                onView={() => { setTab('browse'); viewListing(l) }}
+                isFavorite={favoriteIds.has(l.id)} onToggleFavorite={() => toggleFavorite(l.id)} t={t} />)}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ════════ SAVED SEARCHES ════════ */}
+      {tab === 'saved' && (
+        <div>
+          <h3 className="mp-section-title">🔔 {t('marketplace.tabs.saved')}</h3>
+          <p className="mp-sell-step-desc">{t('marketplace.engagement.savedSearchesDesc')}</p>
+          {savedSearches.length === 0 ? (
+            <p className="mp-empty">{t('marketplace.engagement.noSavedSearches')}</p>
+          ) : (
+            <div className="mp-saved-list">
+              {savedSearches.map(s => {
+                const chips = Object.entries(s.filters || {}).filter(([, v]) => v !== '' && v != null)
+                return (
+                  <div key={s.id} className="mp-saved-card">
+                    <div className="mp-saved-main">
+                      <div className="mp-saved-name">{s.name}</div>
+                      <div className="mp-saved-chips">
+                        {chips.length === 0 ? <span className="mp-saved-chip">{t('marketplace.engagement.allListings')}</span>
+                          : chips.map(([k, v]) => <span key={k} className="mp-saved-chip">{k}: {String(v)}</span>)}
+                      </div>
+                    </div>
+                    <div className="mp-saved-actions">
+                      <button className="module-btn small primary" onClick={() => applySavedSearch(s)}>{t('marketplace.engagement.applySearch')}</button>
+                      <button className={`module-btn small ${s.alertsEnabled ? '' : 'muted'}`} onClick={() => toggleSearchAlerts(s)}
+                        title={s.alertsEnabled ? t('marketplace.engagement.alertsOn') : t('marketplace.engagement.alertsOff')}>
+                        {s.alertsEnabled ? '🔔' : '🔕'}
+                      </button>
+                      <button className="module-btn small" onClick={() => deleteSavedSearch(s.id)}>🗑️</button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -1067,10 +1577,10 @@ const Marketplace: React.FC = () => {
         <div>
           {/* Admin Sub-tabs */}
           <div className="mp-admin-subtabs">
-            {(['listings', 'settings', 'plans', 'revenue'] as const).map(st => (
+            {(['listings', 'reports', 'settings', 'plans', 'revenue'] as const).map(st => (
               <button key={st} className={`mp-admin-subtab ${adminSubTab === st ? 'active' : ''}`}
-                onClick={() => setAdminSubTab(st)}>
-                {st === 'listings' && '📋'} {st === 'settings' && '⚙️'} {st === 'plans' && '💎'} {st === 'revenue' && '📊'}
+                onClick={() => { setAdminSubTab(st); if (st === 'reports') fetchAdminReports() }}>
+                {st === 'listings' && '📋'} {st === 'reports' && '🚩'} {st === 'settings' && '⚙️'} {st === 'plans' && '💎'} {st === 'revenue' && '📊'}
                 {' '}{t(`marketplace.monetization.subtabs.${st}`)}
               </button>
             ))}
@@ -1170,6 +1680,52 @@ const Marketplace: React.FC = () => {
                   }}>{t('marketplace.admin.reject')}</button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ── Reports Sub-tab ── */}
+          {adminSubTab === 'reports' && (
+            <div className="mp-section">
+              <div className="mp-admin-header">
+                <h3 className="mp-section-title">🚩 {t('marketplace.report.adminTitle')}</h3>
+                <select className="module-input" value={adminReportFilter} onChange={e => { setAdminReportFilter(e.target.value); fetchAdminReports(e.target.value) }}>
+                  <option value="open">{t('marketplace.report.filterOpen')}</option>
+                  <option value="reviewing">{t('marketplace.report.status.reviewing')}</option>
+                  <option value="actioned">{t('marketplace.report.status.actioned')}</option>
+                  <option value="dismissed">{t('marketplace.report.status.dismissed')}</option>
+                  <option value="">{t('marketplace.admin.allListings')}</option>
+                </select>
+              </div>
+              {adminReports.length === 0 ? (
+                <p className="mp-empty">{t('marketplace.report.noReports')}</p>
+              ) : (
+                <div className="mp-reports-list">
+                  {adminReports.map(r => (
+                    <div key={r.id} className="mp-report-card">
+                      <div className="mp-report-head">
+                        <span className="mp-title-link" onClick={() => { setTab('browse'); viewListing({ id: r.listing_id, title: r.listing_title } as MarketplaceListing) }}>{r.listing_title || '—'}</span>
+                        <span className={`module-badge ${r.status === 'open' ? 'error' : r.status === 'actioned' ? 'success' : ''}`}>{t(`marketplace.report.status.${r.status}`)}</span>
+                      </div>
+                      <div className="mp-report-meta">
+                        <span className="mp-report-reason">{t(`marketplace.report.reasons.${r.reason}`)}</span>
+                        <span>· {t('marketplace.report.by')} {r.reporter_name}</span>
+                        <span>· {new Date(r.created_at).toLocaleDateString()}</span>
+                      </div>
+                      {r.details && <div className="mp-report-details">{r.details}</div>}
+                      {['open', 'reviewing'].includes(r.status) && (
+                        <div className="mp-report-actions">
+                          <input className="module-input" placeholder={t('marketplace.report.resolutionPlaceholder')}
+                            value={adminReportResolution[r.id] || ''} onChange={e => setAdminReportResolution(prev => ({ ...prev, [r.id]: e.target.value }))} />
+                          {r.status === 'open' && <button className="module-btn small" onClick={() => resolveReport(r.id, 'reviewing')}>{t('marketplace.report.markReviewing')}</button>}
+                          <button className="module-btn small primary" onClick={() => resolveReport(r.id, 'actioned')}>{t('marketplace.report.action')}</button>
+                          <button className="module-btn small" onClick={() => resolveReport(r.id, 'dismissed')}>{t('marketplace.report.dismiss')}</button>
+                        </div>
+                      )}
+                      {r.resolution && <div className="mp-report-resolution">💬 {r.resolution}</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -1416,7 +1972,7 @@ const Marketplace: React.FC = () => {
 }
 
 // ─── Listing Card Component ───
-const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: (key: string) => string }> = ({ listing: l, formatCurrency, onView, t }) => {
+const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: number) => string; onView: () => void; t: (key: string) => string; isFavorite?: boolean; onToggleFavorite?: () => void }> = ({ listing: l, formatCurrency, onView, t, isFavorite, onToggleFavorite }) => {
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -1438,6 +1994,11 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
   const breedAvgPrice = g(l, 'breedAvgPrice', 'breed_avg_price')
   const hasHealthPassport = g(l, 'hasHealthPassport', 'has_health_passport')
+  // Moderation state — only ever present on the seller's own listings (and for admins)
+  const adminApproved = g(l, 'adminApproved', 'admin_approved')
+  const isRejected = adminApproved === false && l.status === 'rejected'
+  const isPendingReview = adminApproved === false && !isRejected
+  const isReserved = l.status === 'reserved'
   // Fair Deal badge: price is ≥15% below breed average → good deal; ≥15% above → premium priced
   const fairDealPct = breedAvgPrice && l.price ? Math.round(100 * l.price / breedAvgPrice) : null
   const isFairDeal = fairDealPct !== null && fairDealPct < 85
@@ -1448,9 +2009,20 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
       {isHot && <div className="mp-hot-ribbon">{t('marketplace.card.hotDeal')}</div>}
       {tier === 'spotlight' && !isHot && <div className="mp-hot-ribbon spotlight-ribbon">{t('marketplace.card.spotlightLabel')}</div>}
 
+      {/* Favorite heart */}
+      {onToggleFavorite && (
+        <button
+          className={`mp-fav-btn ${isFavorite ? 'active' : ''}`}
+          title={isFavorite ? t('marketplace.engagement.removeFavorite') : t('marketplace.engagement.addFavorite')}
+          aria-label={isFavorite ? t('marketplace.engagement.removeFavorite') : t('marketplace.engagement.addFavorite')}
+          onClick={e => { e.stopPropagation(); onToggleFavorite() }}
+        >{isFavorite ? '❤️' : '🤍'}</button>
+      )}
+
       {/* Image placeholder */}
       <div className="mp-card-img">
         {images.length > 0 ? <img src={images[0]} alt={l.title} /> : <div className="mp-card-img-placeholder">{CATEGORY_ICONS[l.category] || '📦'}</div>}
+        {g(l, 'videoUrl', 'video_url') && <span className="mp-card-video-badge" title={t('marketplace.card.hasVideo')}>🎥</span>}
       </div>
 
       <div className="mp-card-body">
@@ -1459,6 +2031,9 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
           <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
           <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
           {tier === 'premium' && <span className="mp-badge premium">⭐</span>}
+          {isPendingReview && <span className="mp-badge pending-review">⏳ {t('marketplace.deal.pendingReview')}</span>}
+          {isRejected && <span className="mp-badge rejected">❌ {t('marketplace.deal.rejected')}</span>}
+          {isReserved && <span className="mp-badge reserved">🤝 {t('marketplace.deal.status.reserved')}</span>}
         </div>
 
         <h4 className="mp-card-title">{l.title}</h4>
@@ -1544,8 +2119,10 @@ const ListingDetail: React.FC<{
   onPlaceBid: () => void; onBuyNow: () => void; onBack: () => void;
   isAdmin: boolean; onToggleHotDeal: (id: string, v: boolean) => void; onToggleFeatured: (id: string, v: boolean) => void;
   userId?: string; onRequestContact?: () => void;
+  isFavorite?: boolean; onToggleFavorite?: () => void; onMessageSeller?: () => void;
+  onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
   t: (key: string) => string;
-}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, t }) => {
+}> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
@@ -1585,11 +2162,40 @@ const ListingDetail: React.FC<{
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
           </div>
 
-          <h2>{l.title}</h2>
+          <div className="mp-detail-title-row">
+            <h2>{l.title}</h2>
+            <div className="mp-detail-title-actions">
+              {onToggleFavorite && (
+                <button className={`mp-fav-btn inline ${isFavorite ? 'active' : ''}`} onClick={onToggleFavorite}
+                  title={isFavorite ? t('marketplace.engagement.removeFavorite') : t('marketplace.engagement.addFavorite')}>
+                  {isFavorite ? '❤️' : '🤍'}
+                </button>
+              )}
+              {onMessageSeller && userId && l.seller_id !== userId && (
+                <button className="module-btn small" onClick={onMessageSeller}>💬 {t('marketplace.engagement.messageSeller')}</button>
+              )}
+            </div>
+          </div>
           <p className="mp-sell-step-desc">{l.description || t('marketplace.detail.noDescription')}</p>
 
           {/* Price */}
           <div className="mp-detail-price">{l.price ? formatCurrency(l.price) : t('marketplace.contactForPrice')}</div>
+
+          {/* Video */}
+          {(() => {
+            const videoUrl = g(l, 'videoUrl', 'video_url')
+            if (!videoUrl) return null
+            const isUploaded = String(videoUrl).startsWith('/uploads/') || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(videoUrl)
+            return (
+              <div className="mp-detail-video">
+                {isUploaded ? (
+                  <video controls preload="metadata" src={videoUrl} className="mp-detail-video-el" />
+                ) : (
+                  <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="module-btn small">▶ {t('marketplace.detail.watchVideo')}</a>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Animal Profile Section */}
           {(species || breed || milkYield || weight || age) && (
@@ -1698,10 +2304,19 @@ const ListingDetail: React.FC<{
             </div>
           ) : listingType !== 'auction' ? (
             <div className="mp-buy-panel">
-              <h4>{t('marketplace.detail.buyNowTitle')}</h4>
+              <h4>🤝 {t('marketplace.deal.reserveTitle')}</h4>
               <div className="mp-buy-price">{l.price ? formatCurrency(l.price) : t('marketplace.detail.contactSeller')}</div>
               <div className="mp-sell-step-desc">{t('marketplace.orders.qty')}: {l.quantity} {l.unit || t('marketplace.units.head')}</div>
-              {l.status === 'active' && <button className="module-btn primary" onClick={onBuyNow}>{t('marketplace.detail.purchaseNow')}</button>}
+              {/* Free-classifieds deal: how it works */}
+              <div className="mp-deal-steps">
+                <div className="mp-deal-step"><span className="mp-deal-step-num">1</span>{t('marketplace.deal.howStep1')}</div>
+                <div className="mp-deal-step"><span className="mp-deal-step-num">2</span>{t('marketplace.deal.howStep2')}</div>
+                <div className="mp-deal-step"><span className="mp-deal-step-num">3</span>{t('marketplace.deal.howStep3')}</div>
+                <div className="mp-deal-step"><span className="mp-deal-step-num">4</span>{t('marketplace.deal.howStep4')}</div>
+              </div>
+              <div className="mp-deal-free-note">{t('marketplace.deal.freeNote')}</div>
+              {l.status === 'active' && <button className="module-btn primary" onClick={onBuyNow}>🤝 {t('marketplace.deal.reserveNow')}</button>}
+              {l.status === 'reserved' && <div className="mp-deal-reserved-badge">⏳ {t('marketplace.deal.currentlyReserved')}</div>}
             </div>
           ) : (
             <div className="mp-bid-panel">
@@ -1734,6 +2349,28 @@ const ListingDetail: React.FC<{
                 </div>
               )}
             </div>
+          )}
+
+          {/* Paid-services funnel: pre-purchase vet check (only for animal listings, non-owners) */}
+          {onBookVetCheck && l.category === 'animal' && userId && l.seller_id !== userId && (
+            <div className="mp-vetcheck-panel">
+              <div className="mp-vetcheck-title">🩺 {t('marketplace.services.vetCheckTitle')}</div>
+              <p className="mp-vetcheck-desc">{t('marketplace.services.vetCheckDesc')}</p>
+              <button className="module-btn primary" onClick={onBookVetCheck}>{t('marketplace.services.bookVetCheck')}</button>
+            </div>
+          )}
+
+          {/* Transport referral (config-driven) */}
+          {transport && userId && l.seller_id !== userId && (
+            <div className="mp-transport-panel">
+              <span>🚚 {t('marketplace.services.transportDesc')}</span>
+              <a className="module-btn small" href={transport.url} target="_blank" rel="noopener noreferrer">{t('marketplace.services.arrangeTransport')}</a>
+            </div>
+          )}
+
+          {/* Report */}
+          {onReport && (
+            <button className="mp-report-link" onClick={onReport}>🚩 {t('marketplace.report.reportListing')}</button>
           )}
         </div>
       </div>

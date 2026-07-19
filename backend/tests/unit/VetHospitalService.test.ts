@@ -2,6 +2,13 @@
 import vetHospitalService from '../../src/services/VetHospitalService';
 
 jest.mock('../../src/utils/database');
+// inviteDoctor sends a real invite email — without this mock (and before the
+// test-env guard in EmailService), running this suite locally sent an actual
+// email through the developer's Gmail SMTP credentials in .env.
+jest.mock('../../src/services/EmailService', () => ({
+  __esModule: true,
+  default: { send: jest.fn().mockResolvedValue({ messageId: 'test-msg', mode: 'mock' }) }
+}));
 
 describe('VetHospitalService', () => {
   beforeEach(() => { jest.clearAllMocks(); (database.query as jest.Mock).mockReset(); });

@@ -145,6 +145,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       await apiService.adminApproveUser(userId)
       setPendingMsg('Account approved and user notified.')
       loadPendingUsers()
+      loadUsers()
     } catch (err: any) {
       setActionError(err?.response?.data?.message || err?.message || 'Failed to approve user')
     } finally {
@@ -820,7 +821,16 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                         🔒 {t('userManagement.resetPasswordBtn')}
                       </button>
                       {/* Account status actions — context-sensitive */}
-                      {(u.accountStatus === 'frozen') ? (
+                      {u.accountStatus === 'pending_approval' ? (
+                        <>
+                          <button className="btn btn-sm btn-success" disabled={processing === u.id} onClick={() => handleApproveRegistration(u.id)}>
+                            {processing === u.id ? '...' : '✓ Approve'}
+                          </button>
+                          <button className="btn btn-sm btn-outline" disabled={processing === u.id} onClick={() => { setShowRejectRegistrationModal(u as any); setRejectRegistrationReason('') }}>
+                            ✕ Reject
+                          </button>
+                        </>
+                      ) : (u.accountStatus === 'frozen') ? (
                         <button className="btn btn-sm btn-success" disabled={processing === u.id} onClick={() => handleUnfreezeUser(u)}>
                           {processing === u.id ? '...' : '❄ Unfreeze'}
                         </button>

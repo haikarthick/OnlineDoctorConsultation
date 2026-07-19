@@ -63,12 +63,19 @@ export const config = {
       const isLocalhost = raw.includes('localhost') || raw.includes('127.0.0.1');
 
       // In production, if CORS_ORIGIN is still a localhost value (from .env default),
-      // auto-detect from Render's URL or allow same-origin
+      // auto-detect from Render's URL or a configured frontend URL.
       if (isProd && isLocalhost) {
         const renderUrl = process.env.RENDER_EXTERNAL_URL;
         if (renderUrl) return renderUrl;
-        // Fallback: reflect request origin (same-origin since backend serves frontend)
-        return true as any;
+        const frontendUrl = process.env.FRONTEND_URL;
+        if (frontendUrl && !frontendUrl.includes('localhost') && !frontendUrl.includes('127.0.0.1')) {
+          return frontendUrl;
+        }
+        // No trusted cross-origin is configured. Fail closed: never reflect an
+        // arbitrary request origin while credentials are enabled. Same-origin
+        // requests (the backend serves the frontend) are unaffected — browsers
+        // do not apply CORS to them.
+        return false as any;
       }
       // Support multiple origins: comma-separated list → array
       const origins = raw.split(',').map(o => o.trim()).filter(Boolean);
@@ -94,6 +101,22 @@ export function getFrontendUrl(): string {
     return process.env.RENDER_EXTERNAL_URL || envUrl || 'http://localhost:5173';
   }
   return envUrl || 'http://localhost:5173';
+}
+
+/**
+ * Resolve the backend's own public URL at runtime.
+ * Used to build absolute file URLs for uploaded assets.
+ * In production: BACKEND_URL → RENDER_EXTERNAL_URL → localhost fallback
+ */
+export function getBackendUrl(): string {
+  const envUrl = process.env.BACKEND_URL;
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+  if (isProd) {
+    return process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 3000}`;
+  }
+  return `http://localhost:${process.env.PORT || 3000}`;
 }
 
 export default config;

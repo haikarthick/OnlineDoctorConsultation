@@ -9,7 +9,9 @@ class AdminService {
     // Aggregate stats from all tables
     const usersResult = await database.query(`SELECT role, COUNT(*) as count FROM users WHERE is_active = $1 GROUP BY role`, [true]);
     const consultResult = await database.query(`SELECT status, COUNT(*) as count FROM consultations GROUP BY status`, []);
-    const paymentsResult = await database.query(`SELECT status, SUM(amount) as total, COUNT(*) as count FROM payments GROUP BY status`, []);
+    // payment_source = 'consultation' excludes network-hospital pharmacy dispensing revenue
+    // (that's the hospital's own revenue, not platform marketplace revenue)
+    const paymentsResult = await database.query(`SELECT status, SUM(amount) as total, COUNT(*) as count FROM payments WHERE payment_source = 'consultation' GROUP BY status`, []);
     const reviewsResult = await database.query(`SELECT COUNT(*) as count, COALESCE(AVG(rating), 0) as "avgRating" FROM reviews`, []);
     const bookingsResult = await database.query(`SELECT COUNT(*) as count FROM bookings`, []);
     const videoResult = await database.query(`SELECT COUNT(*) as count FROM video_sessions WHERE status IN ('waiting', 'active')`, []);
@@ -111,7 +113,12 @@ class AdminService {
 
   async listPendingUsers(): Promise<any[]> {
     const result = await database.query(
-      `SELECT u.${this.userReturnCols.trim()},
+      `SELECT u.id, u.email,
+              u.first_name as "firstName", u.last_name as "lastName",
+              u.role, u.phone,
+              u.is_active as "isActive", u.account_status as "accountStatus",
+              u.freeze_reason as "freezeReason", u.frozen_at as "frozenAt",
+              u.created_at as "createdAt", u.updated_at as "updatedAt",
               vp.license_number as "licenseNumber",
               vp.years_of_experience as "yearsOfExperience",
               vp.specializations, vp.qualifications, vp.clinic_name as "clinicName"
@@ -275,7 +282,9 @@ class AdminService {
   async listAllPayments(params: { limit?: number; offset?: number; status?: string }): Promise<PaginatedResponse<any>> {
     const limit = params.limit || 20;
     const offset = params.offset || 0;
-    const conditions: string[] = [];
+    // Marketplace consultation payments only -- excludes network-hospital pharmacy
+    // dispensing revenue, which is the hospital's own, not the platform's.
+    const conditions: string[] = [`payment_source = 'consultation'`];
     const queryParams: any[] = [];
 
     if (params.status) {
@@ -283,7 +292,7 @@ class AdminService {
       conditions.push(`status = $${queryParams.length}`);
     }
 
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const whereClause = `WHERE ${conditions.join(' AND ')}`;
     const countResult = await database.query(
       `SELECT COUNT(*) as count FROM payments ${whereClause}`,
       [...queryParams]

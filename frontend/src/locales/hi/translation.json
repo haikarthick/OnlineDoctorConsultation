@@ -95,7 +95,13 @@
     "viewAll": "View All",
     "requiredField": "Required field",
     "saveChanges": "Save Changes",
-    "action": "Action"
+    "action": "Action",
+    "errorLoading": "Error loading data",
+    "errorSaving": "Error saving data",
+    "fillRequired": "Please fill all required fields",
+    "none": "None",
+    "error": "Error",
+    "deactivate": "Deactivate"
   },
   "nav": {
     "brand": "VetCare",
@@ -172,6 +178,7 @@
       "intelligence": "बुद्धिमत्ता",
       "vetNetwork": "पशुचिकित्सा नेटवर्क",
       "account": "खाता",
+      "finance": "वित्त",
       "administration": "प्रशासन",
       "preferences": "प्राथमिकताएं"
     },
@@ -189,7 +196,13 @@
       "approve": "Approve",
       "reject": "Reject",
       "approvalRequired": "This movement requires manager approval"
-    }
+    },
+    "myPayments": "भुगतान और रसीदें",
+    "legalPolicies": "कानूनी और नीतियाँ",
+    "commissionSettings": "कमीशन नियम",
+    "settlements": "निपटान",
+    "referrals": "रेफ़रल",
+    "financeReports": "वित्त रिपोर्ट"
   },
   "login": {
     "welcome": "वापस स्वागत है",
@@ -220,7 +233,47 @@
     "dbWakingUp": "डेटाबेस जाग रहा है — {{countdown}}s में स्वतः पुनः प्रयास हो रहा है…",
     "dbWakingUpNote": "यह पहली बार जाने पर सामान्य है। कृपया प्रतीक्षा करें।",
     "success": "✓ लॉगिन सफल! रीडायरेक्ट हो रहा है...",
-    "error": "लॉगिन विफल"
+    "error": "लॉगिन विफल",
+    "forgotPassword": "पासवर्ड भूल गए?"
+  },
+  "forgotPassword": {
+    "title": "पासवर्ड भूल गए?",
+    "subtitle": "अपना ईमेल दर्ज करें और हम आपको एक रीसेट लिंक भेजेंगे।",
+    "emailLabel": "ईमेल पता",
+    "sendLink": "रीसेट लिंक भेजें",
+    "sending": "भेजा जा रहा है...",
+    "backToLogin": "लॉगिन पर वापस जाएं",
+    "successTitle": "अपना इनबॉक्स देखें",
+    "successBody": "यदि इस ईमेल के लिए कोई खाता मौजूद है, तो एक पासवर्ड रीसेट लिंक भेजा गया है। लिंक 1 घंटे के लिए वैध है।",
+    "spamHint": "नहीं मिला? अपना स्पैम फ़ोल्डर देखें।"
+  },
+  "resetPassword": {
+    "title": "नया पासवर्ड सेट करें",
+    "subtitle": "आपका नया पासवर्ड कम से कम 8 अक्षरों का होना चाहिए।",
+    "newPasswordLabel": "नया पासवर्ड",
+    "confirmPasswordLabel": "पासवर्ड की पुष्टि करें",
+    "resetBtn": "पासवर्ड रीसेट करें",
+    "resetting": "रीसेट हो रहा है...",
+    "backToLogin": "लॉगिन पर वापस जाएं",
+    "successTitle": "पासवर्ड सफलतापूर्वक रीसेट हो गया!",
+    "successBody": "आपका पासवर्ड अपडेट हो गया है। अब आप अपने नए पासवर्ड से लॉगिन कर सकते हैं।",
+    "goToLogin": "लॉगिन पर जाएं",
+    "validating": "रीसेट लिंक की जाँच हो रही है...",
+    "linkInvalidTitle": "लिंक मान्य नहीं है",
+    "invalidToken": "यह रीसेट लिंक गलत या अमान्य है।",
+    "reasonExpired": "यह रीसेट लिंक समाप्त हो गया है। कृपया नया अनुरोध करें।",
+    "reasonUsed": "यह रीसेट लिंक पहले ही उपयोग किया जा चुका है। कृपया नया अनुरोध करें।",
+    "reasonInvalid": "यह रीसेट लिंक अमान्य है या मौजूद नहीं है।",
+    "requestNewLink": "नया लिंक अनुरोध करें",
+    "passwordsMismatch": "पासवर्ड मेल नहीं खाते।",
+    "passwordWeak": "पासवर्ड में कम से कम एक अपरकेस अक्षर, एक लोअरकेस अक्षर और एक अंक होना चाहिए।",
+    "genericError": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
+    "hint": {
+      "length": "कम से कम 8 अक्षर",
+      "upper": "अपरकेस अक्षर",
+      "lower": "लोअरकेस अक्षर",
+      "number": "अंक"
+    }
   },
   "register": {
     "title": "अपना खाता बनाएं",
@@ -273,8 +326,14 @@
       "allRequired": "सभी फ़ील्ड आवश्यक हैं",
       "passwordMismatch": "पासवर्ड मेल नहीं खाते",
       "passwordLength": "पासवर्ड कम से कम 8 अक्षर का होना चाहिए",
-      "passwordComplexity": "पासवर्ड में बड़े, छोटे अक्षर और संख्या होनी चाहिए"
-    }
+      "passwordComplexity": "पासवर्ड में बड़े, छोटे अक्षर और संख्या होनी चाहिए",
+      "acceptTermsRequired": "जारी रखने के लिए कृपया सेवा की शर्तें और गोपनीयता नीति स्वीकार करें।"
+    },
+    "acceptPrefix": "मैं सहमत हूँ",
+    "termsLink": "सेवा की शर्तें",
+    "acceptAnd": "और",
+    "privacyLink": "गोपनीयता नीति",
+    "doctorAgreementLink": "डॉक्टर सेवा-प्रदाता अनुबंध"
   },
   "home": {
     "signIn": "साइन इन करें",
@@ -871,10 +930,14 @@
         "hospitalOversight": "अस्पताल निरीक्षण",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Manage inpatient cases"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "मरीज़",
@@ -903,10 +966,18 @@
       "reportBuilderTitle": "रिपोर्ट बिल्डर",
       "reportBuilderDesc": "कस्टम चिकित्सा और विश्लेषण रिपोर्ट बनाएं",
       "aiCopilotTitle": "AI कोपायलट",
-      "aiCopilotDesc": "AI-संचालित नैदानिक निर्णय सहायता प्राप्त करें"
+      "aiCopilotDesc": "AI-संचालित नैदानिक निर्णय सहायता प्राप्त करें",
+      "treatmentCampaigns": "Treatment Campaigns"
     },
     "findDoctor": "डॉक्टर खोजें →",
-    "manageSchedule": "शेड्यूल प्रबंधित करें →"
+    "manageSchedule": "शेड्यूल प्रबंधित करें →",
+    "quickActionsTitle": "Quick Actions",
+    "enterpriseOverview": "Enterprise Overview",
+    "enterpriseStats": {
+      "activeCampaigns": "Active Campaigns",
+      "pendingApprovals": "Pending Approvals",
+      "groups": "Groups"
+    }
   },
   "consultations": {
     "pageTitle": "🏥 परामर्श और अपॉइंटमेंट",
@@ -1352,7 +1423,10 @@
       "status": "स्थिति",
       "severity": "गंभीरता",
       "recordedBy": "द्वारा दर्ज"
-    }
+    },
+    "noAnimalsTitle": "No Animals Found",
+    "noAnimalsHint": "Add an animal to view its health timeline",
+    "addAnimal": "Add Animal"
   },
   "medicalRecords": {
     "pageTitle": "📋 चिकित्सा रिकॉर्ड",
@@ -2750,7 +2824,8 @@
     "viewReadings": "View Readings",
     "noSensors": "No sensors registered yet",
     "recordedAt": "Recorded At",
-    "noReadings": "No readings recorded yet"
+    "noReadings": "No readings recorded yet",
+    "selectEnterprise": "Select Enterprise"
   },
   "supplyChain": {
     "pageTitle": "🔗 आपूर्ति श्रृंखला और पता लगाना (फ़ार्म-टू-फोर्क)",
@@ -2845,8 +2920,41 @@
     "checkIn": "चेक इन",
     "checkOut": "चेक आउट",
     "form": {
-      "title": "Title"
-    }
+      "title": "Title",
+      "taskType": "Task Type",
+      "dueDate": "Due Date",
+      "estimatedHours": "Estimated Hours",
+      "userId": "Worker",
+      "shiftDate": "Shift Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "roleOnShift": "Role on Shift"
+    },
+    "taskUpdated": "Task updated",
+    "checkedIn": "Checked in successfully",
+    "failedCheckIn": "Failed to check in",
+    "checkedOut": "Checked out successfully",
+    "failedCheckOut": "Failed to check out",
+    "openTasksByPriority": "Open Tasks by Priority",
+    "avgHours": "Avg. Hours",
+    "task": "Task",
+    "assignedTo": "Assigned To",
+    "due": "Due",
+    "priority": "Priority",
+    "worker": "Worker",
+    "time": "Time",
+    "role": "Role",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityCritical": "Critical",
+    "assigned": "Assigned",
+    "est": "Est.",
+    "start": "Start",
+    "complete": "Complete",
+    "noTasks": "No tasks found",
+    "scheduleShift": "Schedule Shift",
+    "noShifts": "No shifts scheduled"
   },
   "reportBuilder": {
     "pageTitle": "📊 रिपोर्ट बिल्डर और निर्यात केंद्र",
@@ -3020,7 +3128,10 @@
       "auctions": "🔨 नीलामी",
       "orders": "📦 पूछताछ",
       "prices": "📈 कीमतें",
-      "admin": "🛡️ एडमिन"
+      "admin": "🛡️ एडमिन",
+      "messages": "💬 संदेश",
+      "favorites": "❤️ पसंदीदा",
+      "saved": "🔔 सहेजे गए"
     },
     "categories": {
       "all": "सभी श्रेणियाँ",
@@ -3186,7 +3297,24 @@
       "imagesTitle": "लिस्टिंग छवियाँ",
       "imagesLabel": "5 तक छवियाँ अपलोड करें",
       "uploading": "अपलोड हो रहा है...",
-      "uploadFailed": "छवि अपलोड विफल"
+      "uploadFailed": "छवि अपलोड विफल",
+      "selectBreed": "नस्ल चुनें",
+      "selectSpeciesFirst": "पहले प्रजाति चुनें",
+      "priceHintTitle": "सक्रिय लिस्टिंग से सुझाई गई कीमत",
+      "priceHintAvg": "औसत",
+      "priceHintBasis_one": "{{count}} लिस्टिंग पर आधारित",
+      "priceHintBasis_other": "{{count}} लिस्टिंग पर आधारित",
+      "priceHintFair": "उचित कीमत",
+      "useMyLocation": "मेरा वर्तमान स्थान उपयोग करें",
+      "locating": "स्थान प्राप्त हो रहा है…",
+      "locationSet": "निर्देशांक सेट — “मेरे पास” खोज सक्षम",
+      "locationCaptured": "इस लिस्टिंग के लिए स्थान कैप्चर किया गया",
+      "locationGeoHint": "निर्देशांक जोड़ने से आस-पास के खरीदार “मेरे पास” से आपकी लिस्टिंग ढूंढ सकते हैं।",
+      "videoLabel": "लिस्टिंग वीडियो (वैकल्पिक)",
+      "videoAdded": "वीडियो जोड़ा गया",
+      "removeVideo": "वीडियो हटाएं",
+      "videoUploaded": "वीडियो अपलोड किया गया",
+      "videoHint": "एक छोटा वीडियो विश्वास बनाता है और अधिक प्रतिक्रियाएं दिलाता है।"
     },
     "detail": {
       "backToListings": "← लिस्टिंग पर वापस",
@@ -3213,7 +3341,12 @@
       "feature": "☆ फीचर",
       "leading": "★ अग्रणी",
       "yourListing": "📋 आपकी लिस्टिंग",
-      "yourListingDesc": "यह आपकी लिस्टिंग है। अन्य उपयोगकर्ता इस पशु के बारे में पूछताछ कर सकते हैं।"
+      "yourListingDesc": "यह आपकी लिस्टिंग है। अन्य उपयोगकर्ता इस पशु के बारे में पूछताछ कर सकते हैं।",
+      "auctionEnded": "Auction ended",
+      "call": "Call",
+      "contactHidden": "Contact details hidden",
+      "requestContact": "Request Contact",
+      "watchVideo": "वीडियो देखें"
     },
     "card": {
       "hotDeal": "🔥 हॉट डील",
@@ -3225,7 +3358,11 @@
       "certified": "📋 प्रमाणित",
       "contact": "संपर्क",
       "welfareAttested": "🛡️ कल्याण प्रमाणित",
-      "registeredBreeder": "✅ पंजीकृत प्रजनक"
+      "registeredBreeder": "✅ पंजीकृत प्रजनक",
+      "healthPassport": "Health Passport",
+      "fairDeal": "Fair Deal",
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "वीडियो है"
     },
     "orders": {
       "asBuyer": "🔍 खोजकर्ता के रूप में",
@@ -3271,7 +3408,14 @@
       "noListings": "प्रबंधन के लिए कोई लिस्टिंग नहीं",
       "listingApproved": "लिस्टिंग अनुमोदित",
       "listingRejected": "लिस्टिंग अस्वीकृत",
-      "rejectionRequired": "अस्वीकृति कारण आवश्यक है"
+      "rejectionRequired": "अस्वीकृति कारण आवश्यक है",
+      "auctionFeature": "Auction Feature",
+      "auctionTitle": "Marketplace Auctions",
+      "auctionEnabled": "Auctions Enabled",
+      "auctionDisabled": "Auctions Disabled",
+      "auctionEnabledDesc": "Live auctions are currently active on the marketplace",
+      "auctionDisabledDesc": "Auctions are currently disabled for all listings",
+      "auctionLegalNote": "Enabling auctions allows timed bidding on animal listings. Ensure compliance with local livestock trading regulations."
     },
     "units": {
       "listings": "लिस्टिंग",
@@ -3330,7 +3474,8 @@
         "listings": "लिस्टिंग",
         "settings": "मुद्रीकरण",
         "plans": "प्लान",
-        "revenue": "राजस्व"
+        "revenue": "राजस्व",
+        "reports": "रिपोर्ट"
       },
       "featureToggles": "फीचर टॉगल",
       "allFreeNote": "सभी सुविधाएं वर्तमान में सभी उपयोगकर्ताओं के लिए मुफ्त हैं। चार्ज शुरू करने के लिए तैयार होने पर सुविधाएं चालू करें।",
@@ -3404,6 +3549,122 @@
           "desc": "खोज परिणामों में प्राथमिकता"
         }
       }
+    },
+    "proximity": {
+      "notSupported": "Location not supported on this device",
+      "denied": "Location access denied. Please enable location permissions.",
+      "nearMeOn": "Near Me (On)",
+      "nearMe": "Near Me",
+      "searching": "Searching nearby..."
+    },
+    "inquirySent": "Inquiry sent successfully",
+    "deal": {
+      "reserveTitle": "आरक्षित करें और सीधे सौदा करें",
+      "reserveNow": "यह लिस्टिंग आरक्षित करें",
+      "reserveSuccess": "आरक्षित! विक्रेता को सूचित कर दिया गया है — संपर्क करें, जांच करें और सीधे उनसे लेन-देन करें।",
+      "submittedForReview": "लिस्टिंग सबमिट हो गई! एडमिन समीक्षा के बाद यह सार्वजनिक रूप से दिखाई देगी।",
+      "howStep1": "लिस्टिंग आरक्षित करें — विक्रेता को सूचना मिलती है",
+      "howStep2": "संपर्क करें और पशु की स्वयं जांच करें",
+      "howStep3": "विक्रेता को सीधे भुगतान करें (नकद / अपना UPI)",
+      "howStep4": "सौदा पूरा करने के लिए दोनों यहां पुष्टि करें",
+      "freeNote": "यह मार्केटप्लेस 100% मुफ़्त है — VetCare कभी भुगतान नहीं संभालता। दूसरे पक्ष के साथ सीधे लेन-देन करें।",
+      "tabNote": "सौदे खरीदार और विक्रेता के बीच सीधे तय होते हैं। मिलने और लेन-देन के बाद, दोनों पक्ष यहां पुष्टि करें।",
+      "currentlyReserved": "फिलहाल एक खरीदार द्वारा आरक्षित",
+      "actionsCol": "सौदा कार्रवाइयां",
+      "reservedUntil": "तक आरक्षित",
+      "confirmReceipt": "प्राप्ति की पुष्टि करें",
+      "confirmPayment": "भुगतान प्राप्त हुआ",
+      "confirmRecorded": "आपकी पुष्टि दर्ज कर ली गई है।",
+      "waitingOther": "दूसरे पक्ष की प्रतीक्षा में",
+      "otherConfirmed": "दूसरे पक्ष ने पुष्टि की",
+      "cancelDeal": "रद्द करें",
+      "dealCancelled": "आरक्षण रद्द — लिस्टिंग फिर से सक्रिय है।",
+      "dealDone": "सौदा पूरा हुआ",
+      "paymentMethod": "भुगतान विधि…",
+      "pm": {
+        "cash": "नकद",
+        "upi": "UPI (सीधा)",
+        "bankTransfer": "बैंक ट्रांसफर",
+        "other": "अन्य"
+      },
+      "pendingReview": "समीक्षा लंबित",
+      "rejected": "अस्वीकृत",
+      "status": {
+        "reserved": "आरक्षित",
+        "completed": "पूर्ण",
+        "cancelled": "रद्द",
+        "pending": "लंबित"
+      }
+    },
+    "engagement": {
+      "messageSeller": "विक्रेता को संदेश भेजें",
+      "addFavorite": "पसंदीदा में जोड़ें",
+      "removeFavorite": "पसंदीदा से हटाएं",
+      "noMessages": "अभी तक कोई बातचीत नहीं। शुरू करने के लिए किसी लिस्टिंग से विक्रेता को संदेश भेजें।",
+      "listing": "लिस्टिंग",
+      "selectConversation": "संदेश देखने के लिए बातचीत चुनें",
+      "startConversation": "बातचीत शुरू करने के लिए नमस्ते कहें।",
+      "typeMessage": "संदेश लिखें…",
+      "send": "भेजें",
+      "chatSafety": "चैट प्लेटफ़ॉर्म पर रखें। बैंक विवरण, OTP या पासवर्ड कभी साझा न करें। भुगतान से पहले मिलें और जांचें।",
+      "noFavorites": "अभी तक कोई पसंदीदा नहीं। सहेजने के लिए किसी लिस्टिंग पर दिल टैप करें।",
+      "savedSearchesDesc": "खोज सहेजें और नई मिलती-जुलती लिस्टिंग पोस्ट होने पर सूचना पाएं।",
+      "noSavedSearches": "अभी तक कोई सहेजी गई खोज नहीं। ब्राउज़ पर फ़िल्टर का उपयोग करें, फिर “इस खोज को सहेजें” टैप करें।",
+      "saveThisSearch": "इस खोज को सहेजें",
+      "searchNamePlaceholder": "इस खोज को नाम दें (जैसे मेरे पास मुर्रा भैंस)",
+      "save": "सहेजें",
+      "searchSaved": "खोज सहेजी गई। नई मिलानों के बारे में आपको सूचित किया जाएगा।",
+      "mySearch": "मेरी खोज",
+      "applySearch": "लागू करें",
+      "allListings": "सभी लिस्टिंग",
+      "alertsOn": "सूचनाएं चालू — म्यूट करने के लिए टैप करें",
+      "alertsOff": "सूचनाएं बंद — सक्षम करने के लिए टैप करें"
+    },
+    "pageOf": "पृष्ठ {{current}} / {{total}}",
+    "report": {
+      "reportListing": "लिस्टिंग रिपोर्ट करें",
+      "reportingWhat": "रिपोर्ट: {{title}}",
+      "reason": "कारण",
+      "selectReason": "कारण चुनें…",
+      "details": "विवरण (वैकल्पिक)",
+      "detailsPlaceholder": "समीक्षा में मदद करने वाली कोई भी बात…",
+      "submit": "रिपोर्ट भेजें",
+      "submitted": "धन्यवाद — आपकी रिपोर्ट समीक्षा के लिए भेजी गई।",
+      "resolved": "रिपोर्ट अपडेट हुई।",
+      "adminTitle": "रिपोर्ट की गई लिस्टिंग",
+      "filterOpen": "खुली रिपोर्ट",
+      "noReports": "कोई रिपोर्ट नहीं।",
+      "by": "द्वारा",
+      "markReviewing": "समीक्षाधीन चिह्नित करें",
+      "action": "कार्रवाई करें",
+      "dismiss": "खारिज करें",
+      "resolutionPlaceholder": "समाधान टिप्पणी (वैकल्पिक)",
+      "reasons": {
+        "scam": "धोखाधड़ी या फ्रॉड",
+        "welfare_concern": "पशु कल्याण चिंता",
+        "prohibited": "निषिद्ध / अवैध",
+        "miscategorized": "गलत श्रेणी",
+        "offensive": "आपत्तिजनक सामग्री",
+        "wrong_info": "भ्रामक जानकारी",
+        "other": "अन्य"
+      },
+      "status": {
+        "open": "खुला",
+        "reviewing": "समीक्षाधीन",
+        "actioned": "कार्रवाई की गई",
+        "dismissed": "खारिज"
+      }
+    },
+    "services": {
+      "vetCheckTitle": "खरीद-पूर्व पशु जांच",
+      "vetCheckDesc": "प्रतिबद्ध होने से पहले इस पशु की जांच के लिए लाइसेंस प्राप्त पशु चिकित्सक बुक करें — स्वास्थ्य, आयु और स्वस्थता सत्यापित।",
+      "bookVetCheck": "खरीद-पूर्व पशु जांच बुक करें",
+      "transportDesc": "पशु ले जाने में मदद चाहिए?",
+      "arrangeTransport": "परिवहन व्यवस्था करें"
+    },
+    "interlink": {
+      "treasureBanner": "उत्पाद, चारा या उपकरण खरीद या बेच रहे हैं?",
+      "visitTreasure": "Treasure Mount पर जाएं"
     }
   },
   "sustainability": {
@@ -3497,7 +3758,12 @@
     "noGoals": "No sustainability goals created yet",
     "carbonBySpecies": "Carbon Footprint by Species",
     "species": "Species",
-    "headCount": "Head Count"
+    "headCount": "Head Count",
+    "emissionFactor": "Emission Factor",
+    "annualCO2kg": "Annual CO2 (kg)",
+    "annualCO2tons": "Annual CO2 (tons)",
+    "calculatingCarbon": "Calculating carbon footprint...",
+    "selectForCarbon": "Select an animal group to calculate its carbon footprint"
   },
   "wellnessPortal": {
     "pageTitle": "💚 कल्याण पोर्टल",
@@ -3762,7 +4028,8 @@
     "previous": "पिछला",
     "next": "अगला",
     "certificateFilter": "Certificate Services",
-    "allCertificates": "All Certificate Types"
+    "allCertificates": "All Certificate Types",
+    "failedToLoad": "Failed to load veterinarians. Please try again."
   },
   "myBookings": {
     "title": "मेरी बुकिंग",
@@ -4408,7 +4675,9 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
-    "refundsIssued": "Refunds Issued"
+    "refundsIssued": "Refunds Issued",
+    "liveVideoSessions": "Live Video Sessions",
+    "totalBookings": "Total Bookings"
   },
   "disputeManagement": {
     "title": "Dispute Management",
@@ -4690,7 +4959,8 @@
     "totalPlatformBalance": "Total Platform Balance",
     "usersWithBalance": "Users with Balance",
     "topBalances": "Top Wallet Balances",
-    "avgBalance": "Average Balance"
+    "avgBalance": "Average Balance",
+    "reasonPlaceholder": "Enter reason..."
   },
   "permissionManagement": {
     "title": "अनुमति प्रबंधन",
@@ -4888,7 +5158,8 @@
     "maintenanceMessage": "Maintenance Message for Users",
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
     "maintenanceAdminBypass": "Admin access - maintenance mode active",
-    "certificateTemplate": "Certificate Template"
+    "certificateTemplate": "Certificate Template",
+    "maintenanceBypass": "Maintenance Bypass"
   },
   "userManagement": {
     "title": "उपयोगकर्ता प्रबंधन",
@@ -5129,7 +5400,9 @@
       "animalEarTagId": "कान का टैग ID",
       "animalEarTagPlaceholder": "उदा., ET-2024-001"
     },
-    "noAnimalsFound": "कोई पशु नहीं मिला"
+    "noAnimalsFound": "कोई पशु नहीं मिला",
+    "noHospitals": "No hospitals assigned",
+    "noHospitalsDesc": "You are not assigned to any hospital in this network yet"
   },
   "inpatientManagement": {
     "title": "इनपेशेंट और बोर्डिंग",
@@ -5971,7 +6244,10 @@
       "noPending": "कोई प्रतीक्षित नामांकन नहीं",
       "noActive": "कोई सक्रिय नामांकन नहीं",
       "noEnrollments": "अभी कोई नामांकन नहीं",
-      "searchHelper": "मौजूदा प्लेटफ़ॉर्म उपयोगकर्ताओं को खोजें और नामांकन अनुरोध भेजें। मरीज़ को स्वीकृति देनी होगी।"
+      "searchHelper": "मौजूदा प्लेटफ़ॉर्म उपयोगकर्ताओं को खोजें और नामांकन अनुरोध भेजें। मरीज़ को स्वीकृति देनी होगी।",
+      "consentCollected": "Consent Collected",
+      "consentCollectedHint": "Patient has given consent for this network",
+      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
     },
     "audit": {
       "title": "ऑडिट और अनुपालन",
@@ -6066,7 +6342,8 @@
     "department": "विभाग",
     "selectDepartment": "विभाग चुनें",
     "customDepartment": "कस्टम विभाग",
-    "noDepartment": "कोई विभाग नहीं"
+    "noDepartment": "कोई विभाग नहीं",
+    "memberName": "Member Name"
   },
   "networkReferrals": {
     "title": "नेटवर्क रेफरल",
@@ -6513,7 +6790,9 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items"
+      "showing": "Showing {{count}} of {{total}} items",
+      "selectSupplier": "Select supplier...",
+      "noSuppliersHint": "Add a supplier first to create purchase orders"
     },
     "suppliers": {
       "title": "आपूर्तिकर्ता",
@@ -6532,7 +6811,8 @@
       "leadTimeDays": "लीड दिन",
       "approvedLabel": "स्वीकृत",
       "approved": "स्वीकृत",
-      "unapproved": "अस्वीकृत"
+      "unapproved": "अस्वीकृत",
+      "selectPaymentTerms": "Select payment terms..."
     },
     "reorder": {
       "title": "पुनर्ऑर्डर",
@@ -6708,5 +6988,299 @@
       "preview": "Dispensing Receipt",
       "print": "Print Receipt"
     }
+  },
+  "chat": {
+    "couldNotStartSession": "Could not start chat session",
+    "failedToSendMessage": "Failed to send message",
+    "couldNotCreateSession": "Could not create chat session",
+    "aiBuddyHelper": "VetCare AI",
+    "thinking": "Thinking...",
+    "userAssistant": "Your Assistant",
+    "yourAssistant": "Your Assistant",
+    "newChat": "New Chat",
+    "startingUp": "Starting up...",
+    "hiUser": "Hi, {{name}}!",
+    "hiGuest": "Hi there!",
+    "iKnowAbout": "I can help with",
+    "askMeAnything": "Ask me anything about your pets and their health",
+    "askMeAnythingGeneral": "Ask me anything",
+    "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "अपना भुगतान पूरा करें",
+    "testModeNotice": "टेस्ट मोड — कोई वास्तविक राशि नहीं कटेगी।",
+    "slotHeldFor": "स्लॉट आरक्षित है",
+    "consultationFee": "परामर्श शुल्क",
+    "useWallet": "वॉलेट बैलेंस का उपयोग करें",
+    "walletBalance": "वॉलेट बैलेंस",
+    "walletApplied": "वॉलेट से भुगतान",
+    "payableNow": "अभी देय राशि",
+    "payButton": "भुगतान करें",
+    "payLater": "बाद में भुगतान करें",
+    "refundPolicyNotice": "भुगतान करके आप रिफंड और रद्दीकरण नीति से सहमत होते हैं।",
+    "gatewayUnavailable": "भुगतान गेटवे अभी उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
+    "checkoutFailed": "भुगतान शुरू नहीं हो सका। कृपया पुनः प्रयास करें।",
+    "demoFailed": "सिम्युलेटेड भुगतान विफल रहा। आप पुनः प्रयास कर सकते हैं।",
+    "verificationFailed": "भुगतान सत्यापन विफल रहा। यदि राशि कटी है तो स्वतः समायोजित हो जाएगी।",
+    "expiredTitle": "भुगतान समय समाप्त",
+    "expiredMessage": "समय पर भुगतान न होने के कारण स्लॉट छोड़ दिया गया।",
+    "bookAgain": "फिर से बुक करें",
+    "demoGatewayTitle": "डेमो भुगतान गेटवे",
+    "demoGatewayMessage": "यह परीक्षण के लिए सिम्युलेटेड चेकआउट है। कोई वास्तविक धन नहीं कटेगा।",
+    "demoFail": "विफलता सिमुलेट करें",
+    "demoPay": "अभी भुगतान करें",
+    "status": {
+      "completed": "भुगतान हुआ",
+      "partially_refunded": "आंशिक रिफंड",
+      "refunded": "रिफंड हुआ",
+      "pending": "लंबित",
+      "created": "भुगतान प्रतीक्षित",
+      "expired": "समाप्त",
+      "failed": "विफल",
+      "transferred": "स्थानांतरित"
+    }
+  },
+  "paymentsPage": {
+    "title": "भुगतान और रसीदें",
+    "subtitle": "आपके परामर्श भुगतान, रिफंड और रसीदें",
+    "empty": "अभी कोई भुगतान नहीं। परामर्श बुक करने के बाद भुगतान यहाँ दिखेंगे।",
+    "refunded": "रिफंड",
+    "viewReceipt": "रसीद देखें",
+    "receiptTitle": "भुगतान रसीद",
+    "patient": "मरीज़",
+    "doctor": "डॉक्टर",
+    "animal": "पशु",
+    "date": "तारीख",
+    "totalPaid": "कुल भुगतान",
+    "print": "प्रिंट करें",
+    "invoiceNumber": "चालान सं.",
+    "taxableValue": "कर योग्य मूल्य",
+    "gstExempt": "GST-छूट प्राप्त पशु चिकित्सा सेवा"
+  },
+  "policy": {
+    "backToHome": "होम पर वापस जाएँ",
+    "notFoundTitle": "दस्तावेज़ नहीं मिला",
+    "notFoundMessage": "यह नीति दस्तावेज़ अभी प्रकाशित नहीं हुआ है।",
+    "version": "संस्करण",
+    "effectiveFrom": "प्रभावी तिथि"
+  },
+  "policyModal": {
+    "title": "अद्यतन नीतियाँ",
+    "message": "हमारी नीतियाँ अद्यतन की गई हैं। प्लेटफ़ॉर्म का उपयोग जारी रखने के लिए कृपया समीक्षा करके स्वीकार करें।",
+    "agreeCheckbox": "मैंने ऊपर सूचीबद्ध अद्यतन नीतियाँ पढ़ी हैं और उनसे सहमत हूँ",
+    "agreeButton": "सहमत हों और जारी रखें"
+  },
+  "legalAdmin": {
+    "title": "कानूनी और नीतियाँ",
+    "subtitle": "संस्करणबद्ध प्लेटफ़ॉर्म नीतियाँ और सहमति कवरेज प्रबंधित करें",
+    "published": "नया संस्करण सफलतापूर्वक प्रकाशित हुआ।",
+    "publishFailed": "नया संस्करण प्रकाशित करने में विफल।",
+    "usersAccepted": "उपयोगकर्ताओं ने स्वीकार किया",
+    "notPublished": "अभी प्रकाशित नहीं",
+    "view": "देखें",
+    "newVersion": "नया संस्करण",
+    "publishTitle": "नया संस्करण प्रकाशित करें",
+    "publishHint": "प्रकाशन से नया अपरिवर्तनीय संस्करण बनता है। केवल महत्वपूर्ण बदलावों के लिए पुनः स्वीकृति चुनें — उपयोगकर्ता अगले लॉगिन पर स्वीकृति तक अवरुद्ध रहेंगे।",
+    "docTitle": "शीर्षक",
+    "docContent": "सामग्री",
+    "requireReacceptance": "सभी प्रभावित उपयोगकर्ताओं से इस संस्करण की पुनः स्वीकृति आवश्यक करें",
+    "publishButton": "प्रकाशित करें",
+    "docTypes": {
+      "terms": "सेवा की शर्तें",
+      "privacy": "गोपनीयता नीति",
+      "refund_policy": "रिफंड और रद्दीकरण नीति",
+      "wallet_terms": "वॉलेट शर्तें",
+      "doctor_agreement": "डॉक्टर अनुबंध",
+      "grievance_policy": "शिकायत निवारण नीति",
+      "disclaimer": "सेवा अस्वीकरण"
+    }
+  },
+  "earningsLedger": {
+    "clearing": "क्लियरिंग में",
+    "available": "उपलब्ध",
+    "locked": "निकासी में",
+    "withdrawn": "निकाला गया",
+    "clearingHint": "परामर्श के {{days}} दिन बाद उपलब्ध होगा",
+    "negativeHint": "नकारात्मक बैलेंस — आपकी अगली कमाई से स्वतः वसूला जाएगा",
+    "withdrawalThreshold": "न्यूनतम निकासी की ओर प्रगति",
+    "thresholdReached": "आप अभी निकासी का अनुरोध कर सकते हैं।",
+    "thresholdHint": "उपलब्ध बैलेंस न्यूनतम तक पहुँचने पर निकासी खुलेगी।",
+    "statementTitle": "कमाई विवरण",
+    "colDate": "तारीख",
+    "colType": "प्रकार",
+    "colPatient": "मरीज़",
+    "colGross": "कुल",
+    "colCommission": "कमीशन",
+    "colNet": "शुद्ध",
+    "colStatus": "स्थिति",
+    "types": {
+      "consultation": "परामर्श",
+      "cancel_compensation": "रद्दीकरण मुआवज़ा",
+      "no_show_compensation": "नो-शो मुआवज़ा",
+      "penalty": "जुर्माना",
+      "adjustment": "समायोजन"
+    },
+    "statuses": {
+      "clearing": "क्लियरिंग में",
+      "available": "उपलब्ध",
+      "locked": "निकासी में",
+      "withdrawn": "निकाला गया",
+      "reversed": "वापस लिया गया"
+    }
+  },
+  "commissionAdmin": {
+    "title": "कमीशन नियम",
+    "subtitle": "डॉक्टर-स्तरीय कमीशन ओवरराइड — खाली फ़ील्ड वैश्विक डिफ़ॉल्ट उपयोग करते हैं",
+    "globalSettings": "वैश्विक डिफ़ॉल्ट",
+    "globalInfo": "वैश्विक डिफ़ॉल्ट: {{percent}}% + {{flat}} फ्लैट शुल्क प्रति भुगतान बुकिंग। इसे सिस्टम सेटिंग्स में बदलें।",
+    "saved": "ओवरराइड सहेजा गया। केवल नए भुगतानों पर लागू होगा — पुराने भुगतान अपना स्नैपशॉट रखते हैं।",
+    "saveFailed": "ओवरराइड सहेजने में विफल।",
+    "searchPlaceholder": "नाम या ईमेल से डॉक्टर खोजें…",
+    "noDoctors": "कोई डॉक्टर नहीं मिला।",
+    "colDoctor": "डॉक्टर",
+    "colFee": "शुल्क",
+    "colPercentOverride": "% ओवरराइड",
+    "colFlatOverride": "फ्लैट ओवरराइड",
+    "snapshotNote": "कमीशन भुगतान के समय स्नैपशॉट होता है — ओवरराइड बदलने से पुराने भुगतान नहीं बदलते।"
+  },
+  "withdrawals": {
+    "title": "निकासी",
+    "payoutOnFile": "भुगतान विवरण दर्ज हैं — आप अपनी पूरी उपलब्ध राशि की निकासी का अनुरोध कर सकते हैं।",
+    "payoutMissing": "निकासी सक्षम करने के लिए बैंक खाता या UPI विवरण जोड़ें।",
+    "payoutDetails": "भुगतान विवरण",
+    "requestButton": "निकासी का अनुरोध करें",
+    "requested": "निकासी का अनुरोध हो गया। प्लेटफ़ॉर्म टीम इसे आपके बैंक/UPI में निपटाएगी।",
+    "requestFailed": "निकासी अनुरोध नहीं बन सका।",
+    "payoutSaved": "भुगतान विवरण सहेजे गए।",
+    "payoutSaveFailed": "भुगतान विवरण सहेजने में विफल।",
+    "accountName": "खाताधारक का नाम",
+    "accountNumber": "खाता संख्या",
+    "ifsc": "IFSC कोड",
+    "upi": "UPI आईडी (वैकल्पिक)",
+    "netPaid": "शुद्ध भुगतान",
+    "statuses": {
+      "requested": "अनुरोधित",
+      "approved": "स्वीकृत",
+      "settled": "निपटाया गया",
+      "rejected": "अस्वीकृत",
+      "cancelled": "रद्द"
+    }
+  },
+  "settlementsAdmin": {
+    "title": "निपटान",
+    "subtitle": "डॉक्टर निकासी अनुरोध, निपटान और भुगतान",
+    "filterAll": "सभी",
+    "empty": "कोई निकासी अनुरोध नहीं।",
+    "negativeTitle": "नकारात्मक बैलेंस वाले डॉक्टर",
+    "discretionary": "विवेकाधीन",
+    "age": "{{days}} दिन से प्रतीक्षारत",
+    "approve": "स्वीकृत करें",
+    "reject": "अस्वीकार करें",
+    "settle": "निपटाएँ",
+    "approved": "अनुरोध स्वीकृत।",
+    "rejected": "अनुरोध अस्वीकृत।",
+    "settled": "निपटान दर्ज हुआ।",
+    "actionFailed": "कार्रवाई विफल।",
+    "settleTitle": "निपटान दर्ज करें",
+    "settleHint": "पहले बैंक/UPI ट्रांसफर करें, फिर संदर्भ यहाँ दर्ज करें।",
+    "utrPlaceholder": "UTR / लेनदेन संदर्भ",
+    "notePlaceholder": "टिप्पणी (वैकल्पिक)",
+    "rejectTitle": "निकासी अस्वीकार करें",
+    "reasonPlaceholder": "डॉक्टर को दिखाया जाने वाला कारण…",
+    "discretionaryButton": "विवेकाधीन भुगतान",
+    "discretionaryTitle": "विवेकाधीन भुगतान",
+    "discretionaryHint": "न्यूनतम सीमा को दरकिनार कर डॉक्टर की पूरी उपलब्ध राशि तुरंत निपटाता है। टिप्पणी आवश्यक (ऑडिट-लॉग्ड)।",
+    "doctorIdPlaceholder": "डॉक्टर यूज़र आईडी",
+    "discretionaryNotePlaceholder": "यह भुगतान क्यों किया जा रहा है…",
+    "payNow": "अभी भुगतान करें"
+  },
+  "referrals": {
+    "title": "रेफ़रल",
+    "subtitlePatient": "आपके डॉक्टरों के रेफ़रल — स्वीकारें, दूसरा डॉक्टर चुनें, या रिफंड लें",
+    "subtitleVet": "मरीज़ों को अन्य डॉक्टरों के पास रेफ़र करें और परिणाम देखें",
+    "referButton": "मरीज़ रेफ़र करें",
+    "empty": "अभी कोई रेफ़रल नहीं।",
+    "anyDoctor": "कोई भी डॉक्टर (आपकी पसंद)",
+    "paidAmount": "भुगतान राशि",
+    "informational": "विशेषज्ञ रेफ़रल",
+    "accept": "स्वीकारें",
+    "chooseAnother": "दूसरा डॉक्टर चुनें",
+    "refund": "रिफंड",
+    "acceptTitle": "रेफ़रल स्वीकारें",
+    "acceptHint": "डॉक्टर के साथ स्लॉट चुनें। आपका पिछला भुगतान अपने आप साथ चलेगा — केवल अंतर देना होगा।",
+    "selectDoctor": "डॉक्टर चुनें…",
+    "noSlots": "इस तारीख को कोई स्लॉट नहीं। दूसरी तारीख आज़माएँ।",
+    "confirmAccept": "जारी रखें",
+    "refundTitle": "इसके बजाय रिफंड लें",
+    "refundHint": "डॉक्टर अनुपलब्ध थे इसलिए आपको पूरा रिफंड और गुडविल बोनस मिलेगा।",
+    "refundToWallet": "वॉलेट में तुरंत रिफंड",
+    "refundToSource": "मूल भुगतान माध्यम में रिफंड (5–7 दिन)",
+    "refunded": "रिफंड हो गया।",
+    "accepted": "रेफ़रल पूरा — आपकी नई बुकिंग तैयार है।",
+    "created": "रेफ़रल भेजा गया। मरीज़ को सूचित किया गया है।",
+    "actionFailed": "कार्रवाई विफल।",
+    "deadlineIn": "{{hours}} घंटे में कार्रवाई करें",
+    "deadlinePassed": "समय सीमा समाप्त",
+    "walletHopNotice": "आपका पिछला भुगतान वॉलेट में चला गया है और चेकआउट पर अपने आप लागू होगा।",
+    "referTitle": "मरीज़ रेफ़र करें",
+    "referHint": "परामर्श-पूर्व रेफ़रल मरीज़ का भुगतान नए डॉक्टर को स्थानांतरित करता है। परामर्श-पश्चात रेफ़रल में मरीज़ सामान्य रूप से विशेषज्ञ बुक करता है।",
+    "upcomingBookings": "आगामी भुगतान बुकिंग (भुगतान स्थानांतरण)",
+    "recentConsultations": "हाल ही में पूर्ण परामर्श (विशेषज्ञ रेफ़रल)",
+    "none": "कोई नहीं",
+    "targetDoctor": "रेफ़र करें",
+    "patientChooses": "मरीज़ को डॉक्टर चुनने दें",
+    "reasonPlaceholder": "रेफ़रल का कारण (मरीज़ और प्राप्तकर्ता डॉक्टर को दिखेगा)…",
+    "referCostNotice": "यदि मरीज़ रिफंड चुनता है, तो रिफंड लागत आपकी कमाई से काटी जाएगी।",
+    "submitReferral": "रेफ़रल भेजें",
+    "transferStatuses": {
+      "offered": "आपकी कार्रवाई प्रतीक्षित",
+      "accepted": "स्वीकृत",
+      "rechosen": "दूसरा डॉक्टर चुना",
+      "refunded": "रिफंड हुआ",
+      "expired": "समाप्त",
+      "completed": "पूर्ण"
+    }
+  },
+  "taxAdmin": {
+    "title": "कर और GST",
+    "subtitle": "SAC दरें केवल भविष्य के चालानों पर लागू होती हैं — पुराने चालान अपरिवर्तनीय हैं। प्लेटफ़ॉर्म GSTIN, कानूनी नाम और चालान प्रीफ़िक्स System Settings (tax.*) में हैं।",
+    "colLabel": "सेवा",
+    "colRate": "GST दर",
+    "rateSaved": "दर सहेजी गई। अब से जारी चालानों पर लागू।",
+    "rateSaveFailed": "दर सहेजने में विफल।",
+    "exportTitle": "GST निर्यात (CSV)",
+    "exportButton": "CSV डाउनलोड करें",
+    "exportFailed": "निर्यात विफल।",
+    "settingsHint": "निर्यात में कर योग्य कमीशन चालान और छूट प्राप्त परामर्श रजिस्टर शामिल हैं (आपके CA के लिए)।"
+  },
+  "financeAdmin": {
+    "title": "वित्त रिपोर्ट",
+    "subtitle": "राजस्व, देनदारियाँ, TDS और भुगतान स्वास्थ्य",
+    "noData": "इस अवधि के लिए कोई डेटा नहीं।",
+    "exportGst": "GST CSV निर्यात करें",
+    "gstExportFailed": "GST रिपोर्ट निर्यात नहीं हो सकी। कृपया पुनः प्रयास करें।",
+    "revenueTitle": "राजस्व (चयनित अवधि)",
+    "gmv": "सकल बुकिंग मूल्य",
+    "paidCount": "{{count}} भुगतान बुकिंग",
+    "commission": "अर्जित कमीशन",
+    "processingCharges": "प्रोसेसिंग शुल्क",
+    "gatewayFees": "गेटवे शुल्क (लागत)",
+    "refundsOut": "रिफंड",
+    "netRevenue": "शुद्ध प्लेटफ़ॉर्म राजस्व",
+    "netRevenueHint": "कमीशन + प्रोसेसिंग शुल्क − गेटवे शुल्क",
+    "liabilitiesTitle": "देनदारियाँ (वर्तमान)",
+    "doctorClearing": "डॉक्टर कमाई क्लियरिंग में",
+    "doctorAvailable": "डॉक्टर कमाई उपलब्ध",
+    "doctorLocked": "निकासी में",
+    "walletLiability": "मरीज़ वॉलेट देनदारी",
+    "walletLiabilityHint": "ग्राहकों का बकाया — प्लेटफ़ॉर्म राजस्व नहीं",
+    "tdsTitle": "TDS रजिस्टर (चयनित अवधि)",
+    "tdsDeducted": "TDS कटौती",
+    "tdsCount": "{{count}} निपटान",
+    "netPaidToDoctors": "डॉक्टरों को शुद्ध भुगतान",
+    "healthTitle": "भुगतान स्वास्थ्य",
+    "stuckPending": "अटके लंबित भुगतान",
+    "stuckPendingHint": "1 घंटे से लंबित — दैनिक समाधान प्रयास",
+    "openHolds": "खुले भुगतान होल्ड"
   }
 }

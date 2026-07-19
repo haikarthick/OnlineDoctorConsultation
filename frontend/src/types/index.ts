@@ -648,6 +648,7 @@ export interface AdminDashboardStats {
   todayBookings: number
   activeVideoSessions: number
   pendingNetworkApprovals: number
+  pendingUserApprovals: number
   pendingActions: number
   systemHealth: {
     uptime: number
@@ -1328,7 +1329,7 @@ export interface MarketplaceListing {
   location?: string
   shippingOptions: any[]
   tags: string[]
-  status: 'draft' | 'active' | 'sold' | 'expired' | 'deleted' | 'rejected' | 'pending'
+  status: 'draft' | 'active' | 'sold' | 'expired' | 'deleted' | 'rejected' | 'pending' | 'reserved' | 'rehomed' | 'pending_closure'
   featured: boolean
   viewsCount: number
   sellerName?: string
@@ -1413,10 +1414,21 @@ export interface MarketplaceOrder {
   quantity: number
   unitPrice: number
   totalPrice: number
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled' | 'disputed'
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled' | 'disputed' | 'reserved'
   shippingAddress: Record<string, any>
   trackingNumber?: string
   notes?: string
+  // Deal handshake (free classifieds — settlement happens off-platform)
+  buyerConfirmedAt?: string
+  buyer_confirmed_at?: string
+  sellerConfirmedAt?: string
+  seller_confirmed_at?: string
+  paymentMethod?: string
+  payment_method?: string
+  reservedUntil?: string
+  reserved_until?: string
+  cancelReason?: string
+  cancel_reason?: string
   listingTitle?: string
   listing_title?: string
   category?: string
@@ -1433,6 +1445,44 @@ export interface MarketplaceOrder {
   unit_price?: number
   total_price?: number
   images?: string[]
+}
+
+export interface MarketplaceThread {
+  id: string
+  listing_id: string
+  listing_title?: string
+  listing_images?: any
+  listing_status?: string
+  listing_price?: number
+  buyer_id: string
+  seller_id: string
+  my_role?: 'buyer' | 'seller'
+  my_unread?: number
+  buyer_name?: string
+  seller_name?: string
+  last_message?: string
+  last_message_at?: string
+  last_sender_id?: string
+  created_at?: string
+}
+
+export interface MarketplaceMessage {
+  id: string
+  thread_id: string
+  sender_id: string
+  sender_name?: string
+  body: string
+  read_at?: string
+  created_at: string
+}
+
+export interface MarketplaceSavedSearch {
+  id: string
+  name: string
+  filters: Record<string, any>
+  alertsEnabled: boolean
+  lastAlertedAt?: string
+  createdAt?: string
 }
 
 export interface MarketplaceStats {

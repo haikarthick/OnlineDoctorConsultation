@@ -3360,3 +3360,1139 @@
 </details>
 
 ---
+
+## 2026-06-09 05:41 · `034a4c4` · OTHER
+
+**Commit:** update: VetCare changes - 09-06-Tue 11:11  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-06-20 14:25 · `68a8b87` · OTHER
+
+**Commit:** fix(network-hospital): close permission/visibility holes + reconcile role hierarchy  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UI · AUTH/PERM  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/middleware/networkAccess.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/HospitalNetworkService.ts
+  - backend/src/services/NetworkRolePermissionService.ts
+  - backend/src/services/PermissionService.ts
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/context/PermissionContext.tsx
+
+</details>
+
+---
+
+## 2026-06-21 09:54 · `1652f3f` · OTHER
+
+**Commit:** feat(security+auth): 11-finding security audit, account_status system, admin approval flow  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (17)</summary>
+
+  - backend/src/controllers/AdminController.ts
+  - backend/src/controllers/AuthController.ts
+  - backend/src/controllers/FileController.ts
+  - backend/src/middleware/hospitalDataIsolation.ts
+  - backend/src/middleware/upload.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/models/types.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/AdminService.ts
+  - backend/src/services/UserService.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/socketIO.ts
+  - backend/src/utils/storage.ts
+  - docker/init.sql
+  - frontend/src/pages/Register.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-06-21 12:30 · `75b7b20` · OTHER
+
+**Commit:** fix(userManagement): remove unused handleToggleStatus — replaced by freeze/suspend actions  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/admin/UserManagement.tsx
+
+</details>
+
+---
+
+## 2026-06-21 15:54 · `309fdb0` · OTHER
+
+**Commit:** feat(marketplace): auction disable flag, proximity search, fair deal badge, health passport, ownership transfer, quota enforcement, scheduler jobs  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - backend/src/controllers/Tier4Controller.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/MarketplaceService.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/scheduler.ts
+  - docker/init.sql
+  - frontend/src/pages/Marketplace.css
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-06-21 15:59 · `afa1024` · OTHER
+
+**Commit:** fix(marketplace): fix TypeScript errors in ListingCard, ListingDetail, AuctionCountdown t() prop types  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/Marketplace.tsx
+
+</details>
+
+---
+
+## 2026-06-23 07:07 · `85c6fb7` · OTHER
+
+**Commit:** fix(admin): repair approval workflow — SQL error, missing approve button, dashboard alert  
+**Author:** haikarthick  
+**Categories:** SERVICE · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/services/AdminService.ts
+  - frontend/src/pages/admin/AdminDashboard.tsx
+  - frontend/src/pages/admin/UserManagement.tsx
+  - frontend/src/types/index.ts
+
+</details>
+
+---
+
+## 2026-06-23 07:34 · `78588ca` · OTHER
+
+**Commit:** fix(network-hospital): fix 3 subscription bugs + regroup admin sidebar  
+**Author:** haikarthick  
+**Categories:** API · UTILS · DB · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/utils/database.ts
+  - frontend/src/components/Navigation.tsx
+
+</details>
+
+---
+
+## 2026-06-23 10:16 · `2409edd` · OTHER
+
+**Commit:** feat(auth): complete self-service forgot/reset password flow  
+**Author:** haikarthick  
+**Categories:** API · UTILS · DB · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (14)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/utils/database.ts
+  - frontend/src/App.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/ForgotPassword.tsx
+  - frontend/src/pages/Login.tsx
+  - frontend/src/pages/ResetPassword.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-06-23 10:22 · `d657c08` · OTHER
+
+**Commit:** test(e2e): add auto-discovered stubs for forgot-password and reset-password routes  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---
+
+## 2026-06-23 10:36 · `573d440` · OTHER
+
+**Commit:** test(e2e): restore all previous stubs + add forgot/reset-password stubs  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---
+
+## 2026-06-23 10:38 · `e9de687` · OTHER
+
+**Commit:** chore(memory): add forgot-password-flow memory entry  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-06-23 10:49 · `435f8f5` · OTHER
+
+**Commit:** fix(hospitalNetworks): enforce role-based visibility for Create/Edit/Invite/AddMember actions  
+**Author:** haikarthick  
+**Categories:** SERVICE · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/services/HospitalNetworkService.ts
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+
+</details>
+
+---
+
+## 2026-06-23 12:18 · `cdd3017` · OTHER
+
+**Commit:** fix(i18n): resolve 116 missing translation keys across entire application  
+**Author:** haikarthick  
+**Categories:** i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+
+</details>
+
+---
+
+## 2026-06-23 12:21 · `40c304c` · OTHER
+
+**Commit:** chore(memory): update i18n rule with mandatory audit command and 2026-06-23 incident  
+**Author:** haikarthick  
+**Categories:** MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-06-23 13:48 · `9ffb439` · OTHER
+
+**Commit:** fix(animals): fix Health Passport popup blocked by browser popup blocker  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/src/pages/Animals.tsx
+
+</details>
+
+---
+
+## 2026-06-23 13:59 · `117310c` · OTHER
+
+**Commit:** fix(certificates): expand vet_certificates CHECK constraint for 4 farm cert types  
+**Author:** haikarthick  
+**Categories:** UTILS · DB · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/utils/database.ts
+  - docker/init.sql
+
+</details>
+
+---
+
+## 2026-06-23 14:09 · `262ab71` · OTHER
+
+**Commit:** fix(marketplace): fix image URI validation error when uploading listing images  
+**Author:** haikarthick  
+**Categories:** UTILS  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/config/index.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/utils/storage.ts
+
+</details>
+
+---
+
+## 2026-07-04 16:12 · `fdbb445` · OTHER
+
+**Commit:** docs(payments): add end-to-end payment module implementation plan (draft for review)  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docs/PAYMENT_MODULE_PLAN.md
+
+</details>
+
+---
+
+## 2026-07-05 03:20 · `9868ae4` · OTHER
+
+**Commit:** docs(payments): resolve O6 - goodwill bonus is doctor-funded with negative balance support  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docs/PAYMENT_MODULE_PLAN.md
+
+</details>
+
+---
+
+## 2026-07-05 04:43 · `b593b6e` · OTHER
+
+**Commit:** docs(payments): resolve all open items - referrals, emergency fees, zero-platform-cost rule, GST config, clean start  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docs/PAYMENT_MODULE_PLAN.md
+
+</details>
+
+---
+
+## 2026-07-05 05:10 · `f6a6f95` · OTHER
+
+**Commit:** docs(payments): add legal/compliance (closed-PPI wallet, TDS) and platform policy + consent framework  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docs/PAYMENT_MODULE_PLAN.md
+
+</details>
+
+---
+
+## 2026-07-05 05:45 · `458f01a` · OTHER
+
+**Commit:** feat(payments): P0 foundations - schema, settings, INR defaults, gateway adapter + demo gateway  
+**Author:** haikarthick  
+**Categories:** MIGRATION · SERVICE · UTILS · DB · DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - backend/migrations/012_payment_module.sql
+  - backend/src/services/PaymentService.ts
+  - backend/src/services/payment/PaymentModuleConfig.ts
+  - backend/src/services/payment/gateways/DemoGateway.ts
+  - backend/src/services/payment/gateways/index.ts
+  - backend/src/services/payment/types.ts
+  - backend/src/utils/database.ts
+  - docker/init.sql
+
+</details>
+
+---
+
+## 2026-07-05 09:10 · `d83223a` · OTHER
+
+**Commit:** feat(payments): P1 - collect & enforce (demo gateway) + platform consent framework  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · UTILS · DB · DB-SCHEMA · UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (28)</summary>
+
+  - backend/migrations/013_legal_documents_seed.sql
+  - backend/src/controllers/AuthController.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/BookingService.ts
+  - backend/src/services/LegalService.ts
+  - backend/src/services/WalletService.ts
+  - backend/src/services/payment/PaymentOrchestrator.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/scheduler.ts
+  - docker/init.sql
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/components/PaymentCheckout.tsx
+  - frontend/src/components/PendingPolicyModal.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - ... and 8 more
+
+</details>
+
+---
+
+## 2026-07-05 09:26 · `5329669` · OTHER
+
+**Commit:** test(e2e): add auto-discovered route coverage for /payments and /admin/legal-policies  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---
+
+## 2026-07-05 09:38 · `06db9a0` · OTHER
+
+**Commit:** test(e2e): restore full auto-discovered coverage and append payments + legal-policies stubs  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---
+
+## 2026-07-05 10:00 · `235c309` · OTHER
+
+**Commit:** feat(payments): P2 - Razorpay gateway adapter, webhook, refund destination choice, reconciliation  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - backend/src/app.ts
+  - backend/src/controllers/BookingController.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/BookingService.ts
+  - backend/src/services/payment/PaymentOrchestrator.ts
+  - backend/src/services/payment/gateways/RazorpayGateway.ts
+  - backend/src/services/payment/gateways/index.ts
+  - backend/src/utils/scheduler.ts
+  - frontend/src/components/PaymentCheckout.tsx
+
+</details>
+
+---
+
+## 2026-07-05 10:52 · `f6b1520` · OTHER
+
+**Commit:** feat(payments): P3 - earnings ledger, compensation matrix wiring, doctor dashboard, commission overrides  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (19)</summary>
+
+  - backend/src/controllers/ConsultationController.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/BookingService.ts
+  - backend/src/services/VideoSessionService.ts
+  - backend/src/services/payment/EarningsService.ts
+  - backend/src/services/payment/PaymentOrchestrator.ts
+  - backend/src/utils/scheduler.ts
+  - frontend/e2e/auto-discovered.spec.ts
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/CommissionSettings.tsx
+  - frontend/src/pages/doctor/VetEarnings.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-05 13:33 · `050801e` · OTHER
+
+**Commit:** feat(payments): P4 - withdrawal & settlement workflow with TDS, discretionary payout, admin console  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (16)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/VetProfileService.ts
+  - backend/src/services/payment/WithdrawalService.ts
+  - frontend/e2e/auto-discovered.spec.ts
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/Settlements.tsx
+  - frontend/src/pages/doctor/VetEarnings.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-05 13:56 · `e03d0f5` · OTHER
+
+**Commit:** feat(payments): P5 - platform referrals with payment transfer + emergency fast-track  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (16)</summary>
+
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/payment/ReferralService.ts
+  - backend/src/utils/scheduler.ts
+  - frontend/e2e/auto-discovered.spec.ts
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/components/PaymentCheckout.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Referrals.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-05 14:07 · `4de9578` · OTHER
+
+**Commit:** feat(payments): P6 - GST & invoicing (dual streams, FY numbering, admin-editable rates, GST export)  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (13)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/payment/InvoiceService.ts
+  - backend/src/services/payment/PaymentOrchestrator.ts
+  - backend/src/services/payment/WithdrawalService.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/PaymentsHistory.tsx
+  - frontend/src/pages/admin/CommissionSettings.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-05 14:19 · `c491c3f` · OTHER
+
+**Commit:** feat(payments): P7 - finance reports, payment health, clean-start script, unit tests; plan marked implemented  
+**Author:** haikarthick  
+**Categories:** TOOLING · API · UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (15)</summary>
+
+  - backend/scripts/clean_start_launch.sql
+  - backend/src/routes/index.ts
+  - backend/tests/unit/PaymentModule.test.ts
+  - docs/PAYMENT_MODULE_PLAN.md
+  - frontend/e2e/auto-discovered.spec.ts
+  - frontend/src/App.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/FinanceReports.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-05 16:02 · `c339f2c` · OTHER
+
+**Commit:** fix(schema): add missing marketplace_listings/bids/orders tables to init.sql  
+**Author:** haikarthick  
+**Categories:** DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docker/init.sql
+
+</details>
+
+---
+
+## 2026-07-05 16:28 · `2aaee2c` · OTHER
+
+**Commit:** fix(db): correct vaccinations table name and invalid demo UUID/LIKE bugs  
+**Author:** haikarthick  
+**Categories:** SERVICE · UTILS  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - backend/src/index.ts
+  - backend/src/services/AiCopilotService.ts
+  - backend/src/services/MarketplaceService.ts
+  - backend/src/utils/fixDemoPasswords.ts
+
+</details>
+
+---
+
+## 2026-07-06 16:05 · `9d8f8c8` · OTHER
+
+**Commit:** fix(db): log payment-module seed failures instead of swallowing silently  
+**Author:** haikarthick  
+**Categories:** UTILS · DB  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/utils/database.ts
+
+</details>
+
+---
+
+## 2026-07-06 16:25 · `1c22b4c` · OTHER
+
+**Commit:** fix(payment): make PaymentModuleConfig.getBoolean case-insensitive  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/services/payment/PaymentModuleConfig.ts
+
+</details>
+
+---
+
+## 2026-07-06 16:35 · `257b1f4` · OTHER
+
+**Commit:** fix(settings): normalize boolean parsing for free-text admin settings  
+**Author:** haikarthick  
+**Categories:** API · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/routes/index.ts
+  - frontend/src/App.tsx
+  - frontend/src/pages/admin/SystemSettings.tsx
+
+</details>
+
+---
+
+## 2026-07-07 06:43 · `1e517d3` · OTHER
+
+**Commit:** fix(payment): accept legacy test/live gatewayMode values as aliases  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/services/payment/PaymentModuleConfig.ts
+
+</details>
+
+---
+
+## 2026-07-07 08:19 · `04121bc` · OTHER
+
+**Commit:** chore(payment): document Razorpay env vars + add credential verify script  
+**Author:** haikarthick  
+**Categories:** TOOLING · DEPLOY  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/.env.example
+  - backend/scripts/verify-razorpay.ts
+  - render.yaml
+
+</details>
+
+---
+
+## 2026-07-07 13:45 · `73be70a` · OTHER
+
+**Commit:** feat(payment): store Razorpay credentials encrypted in DB instead of env vars  
+**Author:** haikarthick  
+**Categories:** MIGRATION · TOOLING · API · SERVICE · UTILS · DB · DB-SCHEMA · UI · i18n · DEPLOY  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (22)</summary>
+
+  - backend/.env.example
+  - backend/migrations/014_payment_gateway_credentials.sql
+  - backend/scripts/verify-razorpay.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/payment/PaymentCredentialsService.ts
+  - backend/src/services/payment/gateways/RazorpayGateway.ts
+  - backend/src/services/payment/gateways/index.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/secretCrypto.ts
+  - docker/init.sql
+  - docs/PAYMENT_MODULE_PLAN.md
+  - frontend/src/components/PaymentCheckout.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/SystemSettings.tsx
+  - ... and 2 more
+
+</details>
+
+---
+
+## 2026-07-09 05:39 · `871cdcb` · OTHER
+
+**Commit:** fix(payment): surface real Razorpay/credentials errors instead of generic 500  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/services/payment/PaymentCredentialsService.ts
+  - backend/src/services/payment/gateways/RazorpayGateway.ts
+
+</details>
+
+---
+
+## 2026-07-09 06:07 · `d986600` · OTHER
+
+**Commit:** fix(payment): whitelist Razorpay domains in Content-Security-Policy  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/app.ts
+
+</details>
+
+---
+
+## 2026-07-09 06:24 · `34132d9` · OTHER
+
+**Commit:** fix(pwa): service worker must not intercept cross-origin requests  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/public/sw.js
+
+</details>
+
+---
+
+## 2026-07-09 10:37 · `86d6b8f` · OTHER
+
+**Commit:** fix(security): wall off network-hospital bookings from the platform marketplace  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/controllers/VetHospitalController.ts
+  - backend/src/services/BookingService.ts
+  - backend/src/services/VetHospitalService.ts
+
+</details>
+
+---
+
+## 2026-07-09 10:37 · `4ea0927` · OTHER
+
+**Commit:** feat(nav): regroup payment/earnings/finance pages under one Finance section  
+**Author:** haikarthick  
+**Categories:** UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/FinanceReports.tsx
+
+</details>
+
+---
+
+## 2026-07-09 13:09 · `66c51cc` · OTHER
+
+**Commit:** fix(security): close remaining network-hospital data-isolation gaps  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (7)</summary>
+
+  - backend/src/controllers/HospitalDocumentController.ts
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/controllers/VetHospitalController.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/AdminService.ts
+  - backend/src/services/StaffWorkflowService.ts
+  - backend/src/services/VetHospitalService.ts
+
+</details>
+
+---
+
+## 2026-07-10 05:27 · `e34398c` · OTHER
+
+**Commit:** fix(security): close the 4 deferred judgment-call gaps  
+**Author:** haikarthick  
+**Categories:** API · SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/HospitalNetworkService.ts
+
+</details>
+
+---
+
+## 2026-07-10 06:02 · `57125bf` · OTHER
+
+**Commit:** fix(email): wire up email.devRedirect DB setting + add environment label  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/services/EmailService.ts
+
+</details>
+
+---
+
+## 2026-07-10 06:12 · `3f711e1` · OTHER
+
+**Commit:** fix(ai): migrate vision analysis off deprecated llama-4-scout before decommission  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/services/AiCopilotService.ts
+
+</details>
+
+---
+
+## 2026-07-10 06:29 · `32cbabd` · OTHER
+
+**Commit:** fix(email): unit tests must never send real email  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/src/services/EmailService.ts
+  - backend/tests/unit/VetHospitalService.test.ts
+
+</details>
+
+---
+
+## 2026-07-17 16:07 · `e3f7994` · OTHER
+
+**Commit:** fix(security): close 5 pentest findings (rate-limit spoof, CORS, upload/CSP, XSS, JWT alg)  
+**Author:** haikarthick  
+**Categories:** UTILS · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (6)</summary>
+
+  - backend/src/app.ts
+  - backend/src/config/index.ts
+  - backend/src/middleware/auth.ts
+  - backend/src/utils/security.ts
+  - backend/src/utils/socketIO.ts
+  - frontend/src/components/AutocompleteInput.tsx
+
+</details>
+
+---
+
+## 2026-07-19 08:22 · `e2a36be` · OTHER
+
+**Commit:** feat(marketplace): free classifieds deal workflow + close P0 security gaps  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · UTILS · DB-SCHEMA · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (21)</summary>
+
+  - backend/migrations/015_marketplace_deal_workflow.sql
+  - backend/src/controllers/Tier4Controller.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/MarketplaceMonetizationService.ts
+  - backend/src/services/MarketplaceService.ts
+  - backend/src/utils/scheduler.ts
+  - backend/tests/unit/MarketplaceService.test.ts
+  - docker/init.sql
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Marketplace.css
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/services/api.ts
+  - frontend/src/services/api/tier4Api.ts
+  - frontend/src/types/index.ts
+  - ... and 1 more
+
+</details>
+
+---
+
+## 2026-07-19 13:30 · `a22a5e9` · OTHER
+
+**Commit:** feat(marketplace): Phase 3 engagement — messaging, favorites, saved searches  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · UTILS · DB-SCHEMA · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (20)</summary>
+
+  - backend/migrations/016_marketplace_engagement.sql
+  - backend/src/controllers/Tier4Controller.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/MarketplaceEngagementService.ts
+  - backend/src/utils/scheduler.ts
+  - backend/tests/unit/MarketplaceEngagementService.test.ts
+  - docker/init.sql
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Marketplace.css
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/services/api.ts
+  - frontend/src/services/api/tier4Api.ts
+  - frontend/src/types/index.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-07-19 13:53 · `1fab0ff` · OTHER
+
+**Commit:** feat(marketplace): Phase 4 polish — pagination, price hints, video, breed pickers, geo, auction anti-snipe  
+**Author:** haikarthick  
+**Categories:** MIGRATION · SERVICE · DB-SCHEMA · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (15)</summary>
+
+  - backend/migrations/017_marketplace_video.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/services/MarketplaceService.ts
+  - backend/tests/unit/MarketplaceService.test.ts
+  - docker/init.sql
+  - frontend/src/constants/speciesBreeds.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Marketplace.css
+  - frontend/src/pages/Marketplace.tsx
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

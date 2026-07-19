@@ -14,6 +14,7 @@ import HospitalDocumentService from '../services/HospitalDocumentService';
 import BookingService from '../services/BookingService';
 import NotificationService from '../services/NotificationService';
 import MarketplaceService from '../services/MarketplaceService';
+import MarketplaceEngagementService from '../services/MarketplaceEngagementService';
 import database from './database';
 import logger from './logger';
 
@@ -44,8 +45,27 @@ export function startScheduler(): void {
   setInterval(runMarketplaceBoostExpiry, ONE_HOUR);
   setInterval(runMarketplaceListingExpiry, SIX_HOURS);
   setInterval(runMarketplaceAuctionClose, FIVE_MINUTES);
+  setInterval(runMarketplaceReservationExpiry, ONE_HOUR);
+  setInterval(runMarketplaceSavedSearchAlerts, ONE_HOUR);
 
-  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min');
+  // Payment module: expire unpaid slot holds (no-op while payment.enabled=false)
+  setInterval(runPaymentHoldExpiry, FIVE_MINUTES);
+
+  // Payment module: reconcile stuck 'pending' payments against the gateway (daily + on boot)
+  runPaymentReconciliation();
+  setInterval(runPaymentReconciliation, TWENTY_FOUR_HOURS);
+
+  // Payment module: mature doctor earnings clearing → available (hourly + on boot)
+  runEarningsMaturity();
+  setInterval(runEarningsMaturity, ONE_HOUR);
+
+  // Payment module: expire un-actioned referral offers → auto refund (hourly)
+  setInterval(runReferralExpiry, ONE_HOUR);
+
+  // Payment module: emergency confirm-window fast-track (every minute; cheap no-op query)
+  setInterval(runEmergencyFastTrack, 60 * 1000);
+
+  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min');
 }
 
 async function runExpiryCheck(): Promise<void> {
@@ -64,6 +84,51 @@ async function runMissedBookingsCheck(): Promise<void> {
     }
   } catch (err: any) {
     logger.error('Scheduled missed bookings check threw an unhandled error', { error: err.message });
+  }
+}
+
+async function runPaymentHoldExpiry(): Promise<void> {
+  try {
+    const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+    await PaymentOrchestrator.expireStalePaymentHolds();
+  } catch (err: any) {
+    logger.error('[Payments] Hold expiry job failed', { error: err.message });
+  }
+}
+
+async function runPaymentReconciliation(): Promise<void> {
+  try {
+    const PaymentOrchestrator = (await import('../services/payment/PaymentOrchestrator')).default;
+    await PaymentOrchestrator.reconcilePendingPayments();
+  } catch (err: any) {
+    logger.error('[Payments] Reconciliation job failed', { error: err.message });
+  }
+}
+
+async function runEarningsMaturity(): Promise<void> {
+  try {
+    const EarningsService = (await import('../services/payment/EarningsService')).default;
+    await EarningsService.matureClearedEarnings();
+  } catch (err: any) {
+    logger.error('[Payments] Earnings maturity job failed', { error: err.message });
+  }
+}
+
+async function runReferralExpiry(): Promise<void> {
+  try {
+    const ReferralService = (await import('../services/payment/ReferralService')).default;
+    await ReferralService.expireStaleReferrals();
+  } catch (err: any) {
+    logger.error('[Payments] Referral expiry job failed', { error: err.message });
+  }
+}
+
+async function runEmergencyFastTrack(): Promise<void> {
+  try {
+    const ReferralService = (await import('../services/payment/ReferralService')).default;
+    await ReferralService.expireEmergencyConfirmations();
+  } catch (err: any) {
+    logger.error('[Payments] Emergency fast-track job failed', { error: err.message });
   }
 }
 
@@ -91,6 +156,24 @@ async function runMarketplaceAuctionClose(): Promise<void> {
     if (closed > 0) logger.info(`[Marketplace] Closed ${closed} expired auction(s)`);
   } catch (err: any) {
     logger.error('[Marketplace] Auction close job failed', { error: err.message });
+  }
+}
+
+async function runMarketplaceReservationExpiry(): Promise<void> {
+  try {
+    const released = await MarketplaceService.expireReservations();
+    if (released > 0) logger.info(`[Marketplace] Released ${released} expired reservation(s)`);
+  } catch (err: any) {
+    logger.error('[Marketplace] Reservation expiry job failed', { error: err.message });
+  }
+}
+
+async function runMarketplaceSavedSearchAlerts(): Promise<void> {
+  try {
+    const sent = await MarketplaceEngagementService.runSavedSearchAlerts();
+    if (sent > 0) logger.info(`[Marketplace] Sent ${sent} saved-search alert(s)`);
+  } catch (err: any) {
+    logger.error('[Marketplace] Saved-search alert job failed', { error: err.message });
   }
 }
 

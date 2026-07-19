@@ -7,9 +7,10 @@ import './Auth.css'
 interface LoginProps {
   onSwitchToRegister: () => void
   onGoHome?: () => void
+  onForgotPassword?: () => void
 }
 
-export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
+export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }: LoginProps) {
   const { login } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -155,7 +156,20 @@ export default function Login({ onSwitchToRegister, onGoHome }: LoginProps) {
               </div>
 
               <div className="form-group">
-                <label htmlFor="login-password">{t('login.password')}</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                  <label htmlFor="login-password">{t('login.password')}</label>
+                  {onForgotPassword && (
+                    <button
+                      type="button"
+                      className="link-btn"
+                      style={{ fontSize: 13, color: '#667eea', fontWeight: 500 }}
+                      onClick={onForgotPassword}
+                      tabIndex={0}
+                    >
+                      {t('login.forgotPassword')}
+                    </button>
+                  )}
+                </div>
                 <input
                   id="login-password"
                   type="password"

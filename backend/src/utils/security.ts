@@ -21,7 +21,7 @@ export class SecurityUtils {
   }
 
   static verifyToken(token: string): Record<string, any> {
-    return jwt.verify(token, config.jwt.secret as string) as Record<string, any>;
+    return jwt.verify(token, config.jwt.secret as string, { algorithms: ['HS256'] }) as Record<string, any>;
   }
 
   static generateRefreshToken(userId: string): string {

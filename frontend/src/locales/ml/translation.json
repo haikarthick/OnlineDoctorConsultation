@@ -95,7 +95,13 @@
     "saveChanges": "Save Changes",
     "action": "Action",
     "copyLink": "Copy Link",
-    "revoke": "Revoke"
+    "revoke": "Revoke",
+    "errorLoading": "Error loading data",
+    "errorSaving": "Error saving data",
+    "fillRequired": "Please fill all required fields",
+    "none": "None",
+    "error": "Error",
+    "deactivate": "Deactivate"
   },
   "nav": {
     "brand": "VetCare",
@@ -165,6 +171,7 @@
       "intelligence": "ഇന്റലിജൻസ്",
       "vetNetwork": "വെറ്റ് നെറ്റ്‌വർക്ക്",
       "account": "അക്കൗണ്ട്",
+      "finance": "ധനകാര്യം",
       "administration": "അഡ്മിനിസ്ട്രേഷൻ",
       "preferences": "മുൻഗണനകൾ"
     },
@@ -189,7 +196,13 @@
     "vetCertificates": "Vet Certificates",
     "certificateSettings": "Certificate Template",
     "dataConsent": "Data Consent",
-    "networkMemberships": "Network Memberships"
+    "networkMemberships": "Network Memberships",
+    "myPayments": "പേയ്മെന്റുകളും രസീതുകളും",
+    "legalPolicies": "നിയമവും നയങ്ങളും",
+    "commissionSettings": "കമ്മീഷൻ നിയമങ്ങൾ",
+    "settlements": "സെറ്റിൽമെന്റുകൾ",
+    "referrals": "റഫറലുകൾ",
+    "financeReports": "ഫിനാൻസ് റിപ്പോർട്ടുകൾ"
   },
   "login": {
     "welcome": "തിരികെ സ്വാഗതം",
@@ -220,7 +233,47 @@
     "dbWakingUp": "ഡാറ്റാബേസ് ഉണരുന്നു — {{countdown}}s-ൽ സ്വയമേവ വീണ്ടും ശ്രമിക്കുന്നു…",
     "dbWakingUpNote": "ആദ്യ സന്ദർശനത്തിൽ ഇത് സാധാരണമാണ്. ദയവായി കാത്തിരിക്കൂ.",
     "success": "✓ ലോഗിൻ വിജയകരം! റീഡയറക്ട് ചെയ്യുന്നു...",
-    "error": "ലോഗിൻ പരാജയപ്പെട്ടു"
+    "error": "ലോഗിൻ പരാജയപ്പെട്ടു",
+    "forgotPassword": "പാസ്‌വേഡ് മറന്നോ?"
+  },
+  "forgotPassword": {
+    "title": "പാസ്‌വേഡ് മറന്നോ?",
+    "subtitle": "നിങ്ങളുടെ ഇ-മെയിൽ നൽകൂ, ഞങ്ങൾ ഒരു റീസെറ്റ് ലിങ്ക് അയയ്ക്കും.",
+    "emailLabel": "ഇ-മെയിൽ വിലാസം",
+    "sendLink": "റീസെറ്റ് ലിങ്ക് അയയ്ക്കുക",
+    "sending": "അയയ്ക്കുന്നു...",
+    "backToLogin": "ലോഗിനിലേക്ക് മടങ്ങുക",
+    "successTitle": "നിങ്ങളുടെ inbox പരിശോധിക്കുക",
+    "successBody": "ഈ ഇ-മെയിലിൽ ഒരു അക്കൗണ്ട് ഉണ്ടെങ്കിൽ, ഒരു പാസ്‌വേഡ് റീസെറ്റ് ലിങ്ക് അയച്ചിട്ടുണ്ട്. ലിങ്ക് 1 മണിക്കൂർ വരെ സാധുതയുള്ളതാണ്.",
+    "spamHint": "കിട്ടിയില്ലേ? നിങ്ങളുടെ spam ഫോൾഡർ പരിശോധിക്കുക."
+  },
+  "resetPassword": {
+    "title": "പുതിയ പാസ്‌വേഡ് സജ്ജമാക്കുക",
+    "subtitle": "പുതിയ പാസ്‌വേഡ് കുറഞ്ഞത് 8 അക്ഷരങ്ങൾ ഉണ്ടായിരിക്കണം.",
+    "newPasswordLabel": "പുതിയ പാസ്‌വേഡ്",
+    "confirmPasswordLabel": "പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക",
+    "resetBtn": "പാസ്‌വേഡ് റീസെറ്റ് ചെയ്യുക",
+    "resetting": "റീസെറ്റ് ചെയ്യുന്നു...",
+    "backToLogin": "ലോഗിനിലേക്ക് മടങ്ങുക",
+    "successTitle": "പാസ്‌വേഡ് വിജയകരമായി റീസെറ്റ് ചെയ്തു!",
+    "successBody": "നിങ്ങളുടെ പാസ്‌വേഡ് അപ്ഡേറ്റ് ചെയ്തിരിക്കുന്നു. ഇനി പുതിയ പാസ്‌വേഡ് ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യാം.",
+    "goToLogin": "ലോഗിനിലേക്ക് പോകുക",
+    "validating": "റീസെറ്റ് ലിങ്ക് പരിശോധിക്കുന്നു...",
+    "linkInvalidTitle": "ലിങ്ക് സാധുവല്ല",
+    "invalidToken": "ഈ റീസെറ്റ് ലിങ്ക് തെറ്റായതോ അസാധുവായതോ ആണ്.",
+    "reasonExpired": "ഈ റീസെറ്റ് ലിങ്കിന്റെ കാലാവധി കഴിഞ്ഞു. ഒരു പുതിയ ലിങ്ക് അഭ്യർത്ഥിക്കുക.",
+    "reasonUsed": "ഈ റീസെറ്റ് ലിങ്ക് ഇതിനകം ഉപയോഗിച്ചു. ഒരു പുതിയ ലിങ്ക് അഭ്യർത്ഥിക്കുക.",
+    "reasonInvalid": "ഈ റീസെറ്റ് ലിങ്ക് അസാധുവാണ് അല്ലെങ്കിൽ നിലവിലില്ല.",
+    "requestNewLink": "ഒരു പുതിയ ലിങ്ക് അഭ്യർത്ഥിക്കുക",
+    "passwordsMismatch": "പാസ്‌വേഡുകൾ പൊരുത്തപ്പെടുന്നില്ല.",
+    "passwordWeak": "പാസ്‌വേഡിൽ കുറഞ്ഞത് ഒരു വലിയ അക്ഷരം, ഒരു ചെറിയ അക്ഷരം, ഒരു അക്കം എന്നിവ ഉണ്ടായിരിക്കണം.",
+    "genericError": "എന്തോ തകരാർ സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
+    "hint": {
+      "length": "കുറഞ്ഞത് 8 അക്ഷരങ്ങൾ",
+      "upper": "വലിയ അക്ഷരം",
+      "lower": "ചെറിയ അക്ഷരം",
+      "number": "അക്കം"
+    }
   },
   "register": {
     "title": "നിങ്ങളുടെ അക്കൗണ്ട് സൃഷ്ടിക്കുക",
@@ -269,12 +322,18 @@
       "allRequired": "എല്ലാ ഫീൽഡുകളും ആവശ്യമാണ്",
       "passwordMismatch": "പാസ്‌വേഡുകൾ പൊരുത്തപ്പെടുന്നില്ല",
       "passwordLength": "പാസ്‌വേഡ് കുറഞ്ഞത് 6 അക്ഷരങ്ങൾ ഉണ്ടായിരിക്കണം",
-      "passwordComplexity": "Password must contain uppercase, lowercase, and a number"
+      "passwordComplexity": "Password must contain uppercase, lowercase, and a number",
+      "acceptTermsRequired": "തുടരാൻ സേവന നിബന്ധനകളും സ്വകാര്യതാ നയവും അംഗീകരിക്കുക."
     },
     "roleCorporateAdmin": "Hospital Network",
     "roleCorporateAdminDesc": "Manage multi-hospital networks & staff",
     "corporateAdminCalloutTitle": "Setting up a Hospital Network?",
-    "corporateAdminCalloutBody": "As a Hospital Network Admin, you can create and manage multiple hospital branches, onboard doctors and staff, monitor performance, and manage network-wide patient care — all from your dedicated dashboard."
+    "corporateAdminCalloutBody": "As a Hospital Network Admin, you can create and manage multiple hospital branches, onboard doctors and staff, monitor performance, and manage network-wide patient care — all from your dedicated dashboard.",
+    "acceptPrefix": "ഞാൻ അംഗീകരിക്കുന്നു",
+    "termsLink": "സേവന നിബന്ധനകൾ",
+    "acceptAnd": "ഒപ്പം",
+    "privacyLink": "സ്വകാര്യതാ നയം",
+    "doctorAgreementLink": "ഡോക്ടർ സേവന കരാർ"
   },
   "home": {
     "signIn": "ലോഗിൻ ചെയ്യുക",
@@ -870,10 +929,14 @@
         "hospitalOversight": "ആശുപത്രി മേൽനോട്ടം",
         "manageYourNetworks": "Manage your hospital network",
         "networkHealthInsights": "Network health analytics",
-        "manageSettings": "Manage settings"
+        "manageSettings": "Manage settings",
+        "patientQueue": "Manage patient queue",
+        "inpatientBoarding": "Manage inpatient cases"
       },
       "hospitalNetworks": "Hospital Networks",
-      "settings": "Settings"
+      "settings": "Settings",
+      "hospitalWorkflow": "Hospital Workflow",
+      "inpatient": "Inpatient & Boarding"
     },
     "pending": {
       "patient": "രോഗി",
@@ -902,11 +965,19 @@
       "reportBuilderTitle": "റിപ്പോർട്ട് ബിൽഡർ",
       "reportBuilderDesc": "ഇഷ്ടാനുസൃത മെഡിക്കൽ, അനലിറ്റിക്സ് റിപ്പോർട്ടുകൾ സൃഷ്ടിക്കുക",
       "aiCopilotTitle": "AI കോപൈലറ്റ്",
-      "aiCopilotDesc": "AI-അധിഷ്ഠിത ക്ലിനിക്കൽ തീരുമാന പിന്തുണ നേടുക"
+      "aiCopilotDesc": "AI-അധിഷ്ഠിത ക്ലിനിക്കൽ തീരുമാന പിന്തുണ നേടുക",
+      "treatmentCampaigns": "Treatment Campaigns"
     },
     "noHospital": "Not Assigned",
     "findDoctor": "Find a Doctor →",
-    "manageSchedule": "Manage Schedule →"
+    "manageSchedule": "Manage Schedule →",
+    "quickActionsTitle": "Quick Actions",
+    "enterpriseOverview": "Enterprise Overview",
+    "enterpriseStats": {
+      "activeCampaigns": "Active Campaigns",
+      "pendingApprovals": "Pending Approvals",
+      "groups": "Groups"
+    }
   },
   "consultations": {
     "pageTitle": "🏥 കൺസൾട്ടേഷനുകൾ & അപ്പോയിന്റ്മെന്റുകൾ",
@@ -1352,7 +1423,10 @@
       "clearAll": "Clear All",
       "apply": "Apply",
       "clearFilters": "Clear Filters"
-    }
+    },
+    "noAnimalsTitle": "No Animals Found",
+    "noAnimalsHint": "Add an animal to view its health timeline",
+    "addAnimal": "Add Animal"
   },
   "medicalRecords": {
     "pageTitle": "📋 മെഡിക്കൽ രേഖകൾ",
@@ -2549,7 +2623,8 @@
     "viewReadings": "View Readings",
     "noSensors": "No sensors registered yet",
     "recordedAt": "Recorded At",
-    "noReadings": "No readings recorded yet"
+    "noReadings": "No readings recorded yet",
+    "selectEnterprise": "Select Enterprise"
   },
   "supplyChain": {
     "pageTitle": "🔗 വിതരണ ശൃംഖല & ലഭ്യത ട്രാക്കിംഗ് (ഫാം-ടു-ഫോർക്ക്)",
@@ -2644,8 +2719,41 @@
     "checkIn": "ചെക്ക് ഇൻ",
     "checkOut": "ചെക്ക് ഔട്ട്",
     "form": {
-      "title": "Title"
-    }
+      "title": "Title",
+      "taskType": "Task Type",
+      "dueDate": "Due Date",
+      "estimatedHours": "Estimated Hours",
+      "userId": "Worker",
+      "shiftDate": "Shift Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "roleOnShift": "Role on Shift"
+    },
+    "taskUpdated": "Task updated",
+    "checkedIn": "Checked in successfully",
+    "failedCheckIn": "Failed to check in",
+    "checkedOut": "Checked out successfully",
+    "failedCheckOut": "Failed to check out",
+    "openTasksByPriority": "Open Tasks by Priority",
+    "avgHours": "Avg. Hours",
+    "task": "Task",
+    "assignedTo": "Assigned To",
+    "due": "Due",
+    "priority": "Priority",
+    "worker": "Worker",
+    "time": "Time",
+    "role": "Role",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityCritical": "Critical",
+    "assigned": "Assigned",
+    "est": "Est.",
+    "start": "Start",
+    "complete": "Complete",
+    "noTasks": "No tasks found",
+    "scheduleShift": "Schedule Shift",
+    "noShifts": "No shifts scheduled"
   },
   "reportBuilder": {
     "pageTitle": "📊 റിപ്പോർട്ട് ബിൽഡർ & എക്സ്‌പോർട്ട് സെന്റർ",
@@ -2819,7 +2927,10 @@
       "auctions": "🔨 ലേലങ്ങൾ",
       "orders": "📦 അന്വേഷണങ്ങൾ",
       "prices": "📈 വിലകൾ",
-      "admin": "🛡️ അഡ്മിൻ"
+      "admin": "🛡️ അഡ്മിൻ",
+      "messages": "💬 സന്ദേശങ്ങൾ",
+      "favorites": "❤️ പ്രിയപ്പെട്ടവ",
+      "saved": "🔔 സേവ് ചെയ്തവ"
     },
     "categories": {
       "all": "എല്ലാ വിഭാഗങ്ങളും",
@@ -2985,7 +3096,24 @@
       "imagesTitle": "ലിസ്റ്റിംഗ് ചിത്രങ്ങൾ",
       "imagesLabel": "5 ചിത്രങ്ങൾ വരെ അപ്‌ലോഡ് ചെയ്യുക",
       "uploading": "അപ്‌ലോഡ് ചെയ്യുന്നു...",
-      "uploadFailed": "ചിത്ര അപ്‌ലോഡ് പരാജയപ്പെട്ടു"
+      "uploadFailed": "ചിത്ര അപ്‌ലോഡ് പരാജയപ്പെട്ടു",
+      "selectBreed": "ഇനം തിരഞ്ഞെടുക്കുക",
+      "selectSpeciesFirst": "ആദ്യം സ്പീഷീസ് തിരഞ്ഞെടുക്കുക",
+      "priceHintTitle": "സജീവ ലിസ്റ്റിംഗുകളിൽ നിന്ന് നിർദ്ദേശിച്ച വില",
+      "priceHintAvg": "ശരാശരി",
+      "priceHintBasis_one": "{{count}} ലിസ്റ്റിംഗ് അടിസ്ഥാനമാക്കി",
+      "priceHintBasis_other": "{{count}} ലിസ്റ്റിംഗുകൾ അടിസ്ഥാനമാക്കി",
+      "priceHintFair": "ന്യായമായ വില",
+      "useMyLocation": "എന്റെ നിലവിലെ സ്ഥാനം ഉപയോഗിക്കുക",
+      "locating": "സ്ഥാനം നേടുന്നു…",
+      "locationSet": "കോർഡിനേറ്റുകൾ സജ്ജീകരിച്ചു — “എന്റെ അടുത്ത്” തിരയൽ പ്രവർത്തനക്ഷമം",
+      "locationCaptured": "ഈ ലിസ്റ്റിംഗിനായി സ്ഥാനം ക്യാപ്ചർ ചെയ്തു",
+      "locationGeoHint": "കോർഡിനേറ്റുകൾ ചേർക്കുന്നത് അടുത്തുള്ള വാങ്ങുന്നവർക്ക് “എന്റെ അടുത്ത്” വഴി നിങ്ങളുടെ ലിസ്റ്റിംഗ് കണ്ടെത്താൻ സഹായിക്കും.",
+      "videoLabel": "ലിസ്റ്റിംഗ് വീഡിയോ (ഓപ്ഷണൽ)",
+      "videoAdded": "വീഡിയോ ചേർത്തു",
+      "removeVideo": "വീഡിയോ നീക്കുക",
+      "videoUploaded": "വീഡിയോ അപ്‌ലോഡ് ചെയ്തു",
+      "videoHint": "ഒരു ചെറിയ വീഡിയോ വിശ്വാസം വളർത്തുകയും കൂടുതൽ പ്രതികരണങ്ങൾ നേടുകയും ചെയ്യുന്നു."
     },
     "detail": {
       "backToListings": "← ലിസ്റ്റിംഗുകളിലേക്ക് മടങ്ങുക",
@@ -3012,7 +3140,12 @@
       "feature": "☆ ഫീച്ചർ ചെയ്യുക",
       "leading": "★ ലീഡിംഗ്",
       "yourListing": "📋 Your Listing",
-      "yourListingDesc": "This is your listing. Other users can inquire or contact you about this animal."
+      "yourListingDesc": "This is your listing. Other users can inquire or contact you about this animal.",
+      "auctionEnded": "Auction ended",
+      "call": "Call",
+      "contactHidden": "Contact details hidden",
+      "requestContact": "Request Contact",
+      "watchVideo": "വീഡിയോ കാണുക"
     },
     "card": {
       "hotDeal": "🔥 ഹോട്ട് ഡീൽ",
@@ -3024,7 +3157,11 @@
       "certified": "📋 സർട്ടിഫൈഡ്",
       "contact": "ബന്ധപ്പെടുക",
       "welfareAttested": "🛡️ ക്ഷേമം സാക്ഷ്യപ്പെടുത്തിയത്",
-      "registeredBreeder": "✅ രജിസ്റ്റേർഡ് ബ്രീഡർ"
+      "registeredBreeder": "✅ രജിസ്റ്റേർഡ് ബ്രീഡർ",
+      "healthPassport": "Health Passport",
+      "fairDeal": "Fair Deal",
+      "premiumPriced": "Premium Priced",
+      "hasVideo": "വീഡിയോ ഉണ്ട്"
     },
     "orders": {
       "asBuyer": "🔍 തിരയുന്നയാളായി",
@@ -3070,7 +3207,14 @@
       "noListings": "മാനേജ് ചെയ്യാൻ ലിസ്റ്റിംഗുകൾ ഇല്ല",
       "listingApproved": "ലിസ്റ്റിംഗ് അംഗീകരിച്ചു",
       "listingRejected": "ലിസ്റ്റിംഗ് നിരസിച്ചു",
-      "rejectionRequired": "നിരസിക്കാനുള്ള കാരണം ആവശ്യമാണ്"
+      "rejectionRequired": "നിരസിക്കാനുള്ള കാരണം ആവശ്യമാണ്",
+      "auctionFeature": "Auction Feature",
+      "auctionTitle": "Marketplace Auctions",
+      "auctionEnabled": "Auctions Enabled",
+      "auctionDisabled": "Auctions Disabled",
+      "auctionEnabledDesc": "Live auctions are currently active on the marketplace",
+      "auctionDisabledDesc": "Auctions are currently disabled for all listings",
+      "auctionLegalNote": "Enabling auctions allows timed bidding on animal listings. Ensure compliance with local livestock trading regulations."
     },
     "units": {
       "listings": "ലിസ്റ്റിംഗുകൾ",
@@ -3129,7 +3273,8 @@
         "listings": "ലിസ്റ്റിംഗുകൾ",
         "settings": "മോണിറ്റൈസേഷൻ",
         "plans": "പ്ലാനുകൾ",
-        "revenue": "വരുമാനം"
+        "revenue": "വരുമാനം",
+        "reports": "റിപ്പോർട്ടുകൾ"
       },
       "featureToggles": "ഫീച്ചർ ടോഗിളുകൾ",
       "allFreeNote": "എല്ലാ ഫീച്ചറുകളും നിലവിൽ എല്ലാ ഉപയോക്താക്കൾക്കും സൗജന്യമാണ്. ചാർജ് ചെയ്യാൻ തയ്യാറാകുമ്പോൾ ഫീച്ചറുകൾ ഓൺ ടോഗിൾ ചെയ്യുക.",
@@ -3203,6 +3348,122 @@
           "desc": "തിരയൽ ഫലങ്ങളിൽ മുൻഗണനാ സ്ഥാനം"
         }
       }
+    },
+    "proximity": {
+      "notSupported": "Location not supported on this device",
+      "denied": "Location access denied. Please enable location permissions.",
+      "nearMeOn": "Near Me (On)",
+      "nearMe": "Near Me",
+      "searching": "Searching nearby..."
+    },
+    "inquirySent": "Inquiry sent successfully",
+    "deal": {
+      "reserveTitle": "റിസർവ് ചെയ്ത് നേരിട്ട് ഇടപാട് നടത്തുക",
+      "reserveNow": "ഈ ലിസ്റ്റിംഗ് റിസർവ് ചെയ്യുക",
+      "reserveSuccess": "റിസർവ് ചെയ്തു! വിൽപ്പനക്കാരനെ അറിയിച്ചിട്ടുണ്ട് — ബന്ധപ്പെട്ട്, പരിശോധിച്ച്, നേരിട്ട് പണം നൽകുക.",
+      "submittedForReview": "ലിസ്റ്റിംഗ് സമർപ്പിച്ചു! അഡ്മിൻ അവലോകനത്തിന് ശേഷം ഇത് പൊതുവായി കാണാം.",
+      "howStep1": "ലിസ്റ്റിംഗ് റിസർവ് ചെയ്യുക — വിൽപ്പനക്കാരന് അറിയിപ്പ് ലഭിക്കും",
+      "howStep2": "ബന്ധപ്പെട്ട് മൃഗത്തെ നേരിട്ട് പരിശോധിക്കുക",
+      "howStep3": "വിൽപ്പനക്കാരന് നേരിട്ട് പണം നൽകുക (പണം / നിങ്ങളുടെ UPI)",
+      "howStep4": "ഇടപാട് പൂർത്തിയാക്കാൻ ഇരുവരും ഇവിടെ സ്ഥിരീകരിക്കുക",
+      "freeNote": "ഈ മാർക്കറ്റ്പ്ലേസ് 100% സൗജന്യമാണ് — VetCare ഒരിക്കലും പേയ്മെന്റ് കൈകാര്യം ചെയ്യില്ല. മറുകക്ഷിയുമായി നേരിട്ട് പണമിടപാട് നടത്തുക.",
+      "tabNote": "ഇടപാടുകൾ വാങ്ങുന്നയാളും വിൽക്കുന്നയാളും തമ്മിൽ നേരിട്ടാണ്. കണ്ടുമുട്ടി പണമിടപാട് നടത്തിയ ശേഷം, ഇരുകക്ഷികളും ഇവിടെ സ്ഥിരീകരിക്കുക.",
+      "currentlyReserved": "നിലവിൽ ഒരു വാങ്ങുന്നയാൾ റിസർവ് ചെയ്തിരിക്കുന്നു",
+      "actionsCol": "ഇടപാട് നടപടികൾ",
+      "reservedUntil": "വരെ റിസർവ്",
+      "confirmReceipt": "ലഭിച്ചതായി സ്ഥിരീകരിക്കുക",
+      "confirmPayment": "പേയ്മെന്റ് ലഭിച്ചു",
+      "confirmRecorded": "നിങ്ങളുടെ സ്ഥിരീകരണം രേഖപ്പെടുത്തി.",
+      "waitingOther": "മറുകക്ഷിക്കായി കാത്തിരിക്കുന്നു",
+      "otherConfirmed": "മറുകക്ഷി സ്ഥിരീകരിച്ചു",
+      "cancelDeal": "റദ്ദാക്കുക",
+      "dealCancelled": "റിസർവേഷൻ റദ്ദാക്കി — ലിസ്റ്റിംഗ് വീണ്ടും സജീവമാണ്.",
+      "dealDone": "ഇടപാട് പൂർത്തിയായി",
+      "paymentMethod": "പേയ്മെന്റ് രീതി…",
+      "pm": {
+        "cash": "പണം",
+        "upi": "UPI (നേരിട്ട്)",
+        "bankTransfer": "ബാങ്ക് ട്രാൻസ്ഫർ",
+        "other": "മറ്റുള്ളവ"
+      },
+      "pendingReview": "അവലോകനം ബാക്കി",
+      "rejected": "നിരസിച്ചു",
+      "status": {
+        "reserved": "റിസർവ്ഡ്",
+        "completed": "പൂർത്തിയായി",
+        "cancelled": "റദ്ദാക്കി",
+        "pending": "ബാക്കി"
+      }
+    },
+    "engagement": {
+      "messageSeller": "വിൽപ്പനക്കാരന് സന്ദേശം",
+      "addFavorite": "പ്രിയപ്പെട്ടവയിലേക്ക് ചേർക്കുക",
+      "removeFavorite": "പ്രിയപ്പെട്ടവയിൽ നിന്ന് നീക്കുക",
+      "noMessages": "ഇതുവരെ സംഭാഷണങ്ങളില്ല. ആരംഭിക്കാൻ ഏതെങ്കിലും ലിസ്റ്റിംഗിൽ നിന്ന് വിൽപ്പനക്കാരന് സന്ദേശം അയയ്ക്കുക.",
+      "listing": "ലിസ്റ്റിംഗ്",
+      "selectConversation": "സന്ദേശങ്ങൾ കാണാൻ ഒരു സംഭാഷണം തിരഞ്ഞെടുക്കുക",
+      "startConversation": "സംഭാഷണം ആരംഭിക്കാൻ ഹലോ പറയുക.",
+      "typeMessage": "സന്ദേശം ടൈപ്പ് ചെയ്യുക…",
+      "send": "അയയ്ക്കുക",
+      "chatSafety": "ചാറ്റ് പ്ലാറ്റ്‌ഫോമിൽ സൂക്ഷിക്കുക. ബാങ്ക് വിവരങ്ങൾ, OTP അല്ലെങ്കിൽ പാസ്‌വേഡുകൾ ഒരിക്കലും പങ്കിടരുത്. പണം നൽകുന്നതിന് മുമ്പ് കണ്ട് പരിശോധിക്കുക.",
+      "noFavorites": "ഇതുവരെ പ്രിയപ്പെട്ടവയില്ല. സേവ് ചെയ്യാൻ ഏതെങ്കിലും ലിസ്റ്റിംഗിൽ ഹൃദയം ടാപ്പ് ചെയ്യുക.",
+      "savedSearchesDesc": "തിരയൽ സേവ് ചെയ്ത് പുതിയ പൊരുത്തപ്പെടുന്ന ലിസ്റ്റിംഗുകൾ പോസ്റ്റ് ചെയ്യുമ്പോൾ അറിയിപ്പ് നേടുക.",
+      "noSavedSearches": "ഇതുവരെ സേവ് ചെയ്ത തിരയലുകളില്ല. ബ്രൗസിൽ ഫിൽട്ടറുകൾ ഉപയോഗിച്ച് “ഈ തിരയൽ സേവ് ചെയ്യുക” ടാപ്പ് ചെയ്യുക.",
+      "saveThisSearch": "ഈ തിരയൽ സേവ് ചെയ്യുക",
+      "searchNamePlaceholder": "ഈ തിരയലിന് പേര് നൽകുക (ഉദാ. എന്റെ അടുത്ത് മുറ എരുമ)",
+      "save": "സേവ്",
+      "searchSaved": "തിരയൽ സേവ് ചെയ്തു. പുതിയ പൊരുത്തങ്ങളെക്കുറിച്ച് നിങ്ങളെ അറിയിക്കും.",
+      "mySearch": "എന്റെ തിരയൽ",
+      "applySearch": "പ്രയോഗിക്കുക",
+      "allListings": "എല്ലാ ലിസ്റ്റിംഗുകളും",
+      "alertsOn": "അറിയിപ്പുകൾ ഓൺ — മ്യൂട്ട് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക",
+      "alertsOff": "അറിയിപ്പുകൾ ഓഫ് — പ്രവർത്തനക്ഷമമാക്കാൻ ടാപ്പ് ചെയ്യുക"
+    },
+    "pageOf": "പേജ് {{current}} / {{total}}",
+    "report": {
+      "reportListing": "ലിസ്റ്റിംഗ് റിപ്പോർട്ട് ചെയ്യുക",
+      "reportingWhat": "റിപ്പോർട്ട്: {{title}}",
+      "reason": "കാരണം",
+      "selectReason": "ഒരു കാരണം തിരഞ്ഞെടുക്കുക…",
+      "details": "വിശദാംശങ്ങൾ (ഓപ്ഷണൽ)",
+      "detailsPlaceholder": "അവലോകനത്തിന് സഹായിക്കുന്ന എന്തും…",
+      "submit": "റിപ്പോർട്ട് സമർപ്പിക്കുക",
+      "submitted": "നന്ദി — നിങ്ങളുടെ റിപ്പോർട്ട് അവലോകനത്തിനായി സമർപ്പിച്ചു.",
+      "resolved": "റിപ്പോർട്ട് അപ്‌ഡേറ്റ് ചെയ്തു.",
+      "adminTitle": "റിപ്പോർട്ട് ചെയ്ത ലിസ്റ്റിംഗുകൾ",
+      "filterOpen": "തുറന്ന റിപ്പോർട്ടുകൾ",
+      "noReports": "റിപ്പോർട്ടുകളില്ല.",
+      "by": "വഴി",
+      "markReviewing": "അവലോകനമായി അടയാളപ്പെടുത്തുക",
+      "action": "നടപടിയെടുക്കുക",
+      "dismiss": "തള്ളിക്കളയുക",
+      "resolutionPlaceholder": "പരിഹാര കുറിപ്പ് (ഓപ്ഷണൽ)",
+      "reasons": {
+        "scam": "തട്ടിപ്പ്",
+        "welfare_concern": "മൃഗക്ഷേമ ആശങ്ക",
+        "prohibited": "നിരോധിത / നിയമവിരുദ്ധം",
+        "miscategorized": "തെറ്റായ വിഭാഗം",
+        "offensive": "അപകീർത്തികരമായ ഉള്ളടക്കം",
+        "wrong_info": "തെറ്റിദ്ധരിപ്പിക്കുന്ന വിവരം",
+        "other": "മറ്റുള്ളവ"
+      },
+      "status": {
+        "open": "തുറന്നത്",
+        "reviewing": "അവലോകനത്തിൽ",
+        "actioned": "നടപടിയെടുത്തു",
+        "dismissed": "തള്ളിക്കളഞ്ഞു"
+      }
+    },
+    "services": {
+      "vetCheckTitle": "വാങ്ങുന്നതിന് മുമ്പുള്ള വെറ്റ് പരിശോധന",
+      "vetCheckDesc": "പ്രതിബദ്ധത കാണിക്കുന്നതിന് മുമ്പ് ഈ മൃഗത്തെ പരിശോധിക്കാൻ ലൈസൻസുള്ള വെറ്ററിനറിയെ ബുക്ക് ചെയ്യുക — ആരോഗ്യം, പ്രായം, ആരോഗ്യസ്ഥിതി പരിശോധിച്ചു.",
+      "bookVetCheck": "വെറ്റ് പരിശോധന ബുക്ക് ചെയ്യുക",
+      "transportDesc": "മൃഗത്തെ കൊണ്ടുപോകാൻ സഹായം വേണോ?",
+      "arrangeTransport": "ഗതാഗതം ക്രമീകരിക്കുക"
+    },
+    "interlink": {
+      "treasureBanner": "ഉൽപ്പന്നങ്ങൾ, തീറ്റ അല്ലെങ്കിൽ ഉപകരണങ്ങൾ വാങ്ങുന്നു/വിൽക്കുന്നു?",
+      "visitTreasure": "Treasure Mount സന്ദർശിക്കുക"
     }
   },
   "sustainability": {
@@ -3296,7 +3557,12 @@
     "noGoals": "No sustainability goals created yet",
     "carbonBySpecies": "Carbon Footprint by Species",
     "species": "Species",
-    "headCount": "Head Count"
+    "headCount": "Head Count",
+    "emissionFactor": "Emission Factor",
+    "annualCO2kg": "Annual CO2 (kg)",
+    "annualCO2tons": "Annual CO2 (tons)",
+    "calculatingCarbon": "Calculating carbon footprint...",
+    "selectForCarbon": "Select an animal group to calculate its carbon footprint"
   },
   "wellnessPortal": {
     "pageTitle": "💚 വെൽനസ് പോർട്ടൽ",
@@ -3557,7 +3823,8 @@
     "previous": "മുമ്പത്തേത്",
     "next": "അടുത്തത്",
     "certificateFilter": "Certificate Services",
-    "allCertificates": "All Certificate Types"
+    "allCertificates": "All Certificate Types",
+    "failedToLoad": "Failed to load veterinarians. Please try again."
   },
   "myBookings": {
     "title": "എന്റെ ബുക്കിങ്ങുകൾ",
@@ -4170,7 +4437,9 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
-    "refundsIssued": "Refunds Issued"
+    "refundsIssued": "Refunds Issued",
+    "liveVideoSessions": "Live Video Sessions",
+    "totalBookings": "Total Bookings"
   },
   "disputeManagement": {
     "title": "Dispute Management",
@@ -4452,7 +4721,8 @@
     "totalPlatformBalance": "Total Platform Balance",
     "usersWithBalance": "Users with Balance",
     "topBalances": "Top Wallet Balances",
-    "avgBalance": "Average Balance"
+    "avgBalance": "Average Balance",
+    "reasonPlaceholder": "Enter reason..."
   },
   "permissionManagement": {
     "title": "അനുമതി മാനേജ്‌മെന്റ്",
@@ -4650,7 +4920,8 @@
     "maintenanceActive": "System maintenance in progress. Some features may be unavailable.",
     "maintenanceAdminBypass": "Admin access - maintenance mode active",
     "prescriptionTemplate": "Prescription Template",
-    "certificateTemplate": "Certificate Template"
+    "certificateTemplate": "Certificate Template",
+    "maintenanceBypass": "Maintenance Bypass"
   },
   "userManagement": {
     "title": "ഉപയോക്തൃ മാനേജ്‌മെന്റ്",
@@ -4891,7 +5162,9 @@
       "animalEarTagId": "ചെവി ടാഗ് ID",
       "animalEarTagPlaceholder": "ഉദാ., ET-2024-001"
     },
-    "noAnimalsFound": "മൃഗങ്ങളൊന്നും കണ്ടെത്തിയില്ല"
+    "noAnimalsFound": "മൃഗങ്ങളൊന്നും കണ്ടെത്തിയില്ല",
+    "noHospitals": "No hospitals assigned",
+    "noHospitalsDesc": "You are not assigned to any hospital in this network yet"
   },
   "inpatientManagement": {
     "title": "ഇൻപേഷ്യന്റ് & ബോർഡിംഗ്",
@@ -5217,7 +5490,10 @@
       "noPending": "No pending enrollments",
       "noActive": "No active enrollments",
       "noEnrollments": "No enrollments yet",
-      "searchHelper": "Search for existing platform users to send enrollment requests. Patients must accept before their data becomes visible to network staff."
+      "searchHelper": "Search for existing platform users to send enrollment requests. Patients must accept before their data becomes visible to network staff.",
+      "consentCollected": "Consent Collected",
+      "consentCollectedHint": "Patient has given consent for this network",
+      "consentPendingWarning": "Consent pending — limited data access until patient grants consent"
     },
     "audit": {
       "title": "Audit & Compliance",
@@ -5312,7 +5588,8 @@
     "department": "വിഭാഗം",
     "selectDepartment": "വിഭാഗം തിരഞ്ഞെടുക്കുക",
     "customDepartment": "കസ്റ്റം വിഭാഗം",
-    "noDepartment": "വിഭാഗം ഇല്ല"
+    "noDepartment": "വിഭാഗം ഇല്ല",
+    "memberName": "Member Name"
   },
   "emailTemplates": {
     "title": "ഇമെയിൽ ടെംപ്ലേറ്റുകൾ",
@@ -5473,7 +5750,9 @@
       "receivedFromPlaceholder": "Supplier name or delivery ID",
       "noCatalogMeds": "No medications in the catalog yet.",
       "goToCatalogHint": "Please go to the Catalog tab to add medications first.",
-      "showing": "Showing {{count}} of {{total}} items"
+      "showing": "Showing {{count}} of {{total}} items",
+      "selectSupplier": "Select supplier...",
+      "noSuppliersHint": "Add a supplier first to create purchase orders"
     },
     "suppliers": {
       "title": "Suppliers",
@@ -5492,7 +5771,8 @@
       "leadTimeDays": "Lead Days",
       "approvedLabel": "Approved",
       "approved": "Approved",
-      "unapproved": "Unapproved"
+      "unapproved": "Unapproved",
+      "selectPaymentTerms": "Select payment terms..."
     },
     "reorder": {
       "title": "Reorder",
@@ -6704,5 +6984,299 @@
     "approve": "Approve",
     "reject": "Reject",
     "approvalRequired": "This movement requires manager approval"
+  },
+  "chat": {
+    "couldNotStartSession": "Could not start chat session",
+    "failedToSendMessage": "Failed to send message",
+    "couldNotCreateSession": "Could not create chat session",
+    "aiBuddyHelper": "VetCare AI",
+    "thinking": "Thinking...",
+    "userAssistant": "Your Assistant",
+    "yourAssistant": "Your Assistant",
+    "newChat": "New Chat",
+    "startingUp": "Starting up...",
+    "hiUser": "Hi, {{name}}!",
+    "hiGuest": "Hi there!",
+    "iKnowAbout": "I can help with",
+    "askMeAnything": "Ask me anything about your pets and their health",
+    "askMeAnythingGeneral": "Ask me anything",
+    "askAiBuddy": "Ask VetCare AI..."
+  },
+  "payment": {
+    "title": "നിങ്ങളുടെ പേയ്മെന്റ് പൂർത്തിയാക്കുക",
+    "testModeNotice": "ടെസ്റ്റ് മോഡ് — യഥാർത്ഥ പണം ഈടാക്കില്ല.",
+    "slotHeldFor": "സ്ലോട്ട് നിലനിർത്തിയിരിക്കുന്നു",
+    "consultationFee": "കൺസൾട്ടേഷൻ ഫീസ്",
+    "useWallet": "വാലറ്റ് ബാലൻസ് ഉപയോഗിക്കുക",
+    "walletBalance": "വാലറ്റ് ബാലൻസ്",
+    "walletApplied": "വാലറ്റിൽ നിന്ന് അടച്ചത്",
+    "payableNow": "ഇപ്പോൾ അടയ്ക്കേണ്ടത്",
+    "payButton": "പണമടയ്ക്കുക",
+    "payLater": "പിന്നീട് അടയ്ക്കുക",
+    "refundPolicyNotice": "പണമടയ്ക്കുന്നതിലൂടെ റീഫണ്ട് & റദ്ദാക്കൽ നയം അംഗീകരിക്കുന്നു.",
+    "gatewayUnavailable": "പേയ്മെന്റ് ഗേറ്റ്‌വേ ഇപ്പോൾ ലഭ്യമല്ല. ദയവായി പിന്നീട് ശ്രമിക്കുക.",
+    "checkoutFailed": "പേയ്മെന്റ് ആരംഭിക്കാനായില്ല. വീണ്ടും ശ്രമിക്കുക.",
+    "demoFailed": "സിമുലേറ്റഡ് പേയ്മെന്റ് പരാജയപ്പെട്ടു. വീണ്ടും ശ്രമിക്കാം.",
+    "verificationFailed": "പേയ്മെന്റ് പരിശോധന പരാജയപ്പെട്ടു. പണം പിടിച്ചിട്ടുണ്ടെങ്കിൽ സ്വയമേവ ക്രമീകരിക്കും.",
+    "expiredTitle": "പേയ്മെന്റ് സമയം കഴിഞ്ഞു",
+    "expiredMessage": "സമയത്തിന് പണമടയ്ക്കാത്തതിനാൽ സ്ലോട്ട് വിട്ടയച്ചു.",
+    "bookAgain": "വീണ്ടും ബുക്ക് ചെയ്യുക",
+    "demoGatewayTitle": "ഡെമോ പേയ്മെന്റ് ഗേറ്റ്‌വേ",
+    "demoGatewayMessage": "ഇത് ടെസ്റ്റിനുള്ള സിമുലേറ്റഡ് ചെക്ക്ഔട്ടാണ്. യഥാർത്ഥ പണം ഈടാക്കില്ല.",
+    "demoFail": "പരാജയം സിമുലേറ്റ് ചെയ്യുക",
+    "demoPay": "ഇപ്പോൾ അടയ്ക്കുക",
+    "status": {
+      "completed": "അടച്ചു",
+      "partially_refunded": "ഭാഗിക റീഫണ്ട്",
+      "refunded": "റീഫണ്ട് ചെയ്തു",
+      "pending": "തീർപ്പാക്കാത്തത്",
+      "created": "പേയ്മെന്റിനായി കാത്തിരിക്കുന്നു",
+      "expired": "കാലഹരണപ്പെട്ടു",
+      "failed": "പരാജയപ്പെട്ടു",
+      "transferred": "കൈമാറ്റം ചെയ്തു"
+    }
+  },
+  "paymentsPage": {
+    "title": "പേയ്മെന്റുകളും രസീതുകളും",
+    "subtitle": "നിങ്ങളുടെ കൺസൾട്ടേഷൻ പേയ്മെന്റുകൾ, റീഫണ്ടുകൾ, രസീതുകൾ",
+    "empty": "ഇതുവരെ പേയ്മെന്റുകളില്ല. കൺസൾട്ടേഷൻ ബുക്ക് ചെയ്ത ശേഷം ഇവിടെ കാണാം.",
+    "refunded": "റീഫണ്ട്",
+    "viewReceipt": "രസീത് കാണുക",
+    "receiptTitle": "പേയ്മെന്റ് രസീത്",
+    "patient": "രോഗി",
+    "doctor": "ഡോക്ടർ",
+    "animal": "മൃഗം",
+    "date": "തീയതി",
+    "totalPaid": "ആകെ അടച്ചത്",
+    "print": "പ്രിന്റ്",
+    "invoiceNumber": "ഇൻവോയ്സ് നം.",
+    "taxableValue": "നികുതി മൂല്യം",
+    "gstExempt": "GST-ഒഴിവാക്കിയ മൃഗവൈദ്യ സേവനം"
+  },
+  "policy": {
+    "backToHome": "ഹോമിലേക്ക് മടങ്ങുക",
+    "notFoundTitle": "രേഖ കണ്ടെത്തിയില്ല",
+    "notFoundMessage": "ഈ നയരേഖ ഇതുവരെ പ്രസിദ്ധീകരിച്ചിട്ടില്ല.",
+    "version": "പതിപ്പ്",
+    "effectiveFrom": "പ്രാബല്യ തീയതി"
+  },
+  "policyModal": {
+    "title": "പുതുക്കിയ നയങ്ങൾ",
+    "message": "ഞങ്ങളുടെ നയങ്ങൾ പുതുക്കിയിരിക്കുന്നു. തുടരാൻ അവലോകനം ചെയ്ത് അംഗീകരിക്കുക.",
+    "agreeCheckbox": "മുകളിൽ പറഞ്ഞ പുതുക്കിയ നയങ്ങൾ വായിച്ച് അംഗീകരിക്കുന്നു",
+    "agreeButton": "അംഗീകരിച്ച് തുടരുക"
+  },
+  "legalAdmin": {
+    "title": "നിയമവും നയങ്ങളും",
+    "subtitle": "പതിപ്പ് അടിസ്ഥാനമാക്കിയ നയങ്ങളും സമ്മത കവറേജും കൈകാര്യം ചെയ്യുക",
+    "published": "പുതിയ പതിപ്പ് വിജയകരമായി പ്രസിദ്ധീകരിച്ചു.",
+    "publishFailed": "പുതിയ പതിപ്പ് പ്രസിദ്ധീകരിക്കാനായില്ല.",
+    "usersAccepted": "ഉപയോക്താക്കൾ അംഗീകരിച്ചു",
+    "notPublished": "ഇതുവരെ പ്രസിദ്ധീകരിച്ചിട്ടില്ല",
+    "view": "കാണുക",
+    "newVersion": "പുതിയ പതിപ്പ്",
+    "publishTitle": "പുതിയ പതിപ്പ് പ്രസിദ്ധീകരിക്കുക",
+    "publishHint": "പ്രസിദ്ധീകരണം മാറ്റാനാവാത്ത പുതിയ പതിപ്പ് സൃഷ്ടിക്കുന്നു. പ്രധാന മാറ്റങ്ങൾക്ക് മാത്രം വീണ്ടും-അംഗീകാരം തിരഞ്ഞെടുക്കുക.",
+    "docTitle": "തലക്കെട്ട്",
+    "docContent": "ഉള്ളടക്കം",
+    "requireReacceptance": "ബാധിതരായ എല്ലാ ഉപയോക്താക്കളും ഈ പതിപ്പ് വീണ്ടും അംഗീകരിക്കണം",
+    "publishButton": "പ്രസിദ്ധീകരിക്കുക",
+    "docTypes": {
+      "terms": "സേവന നിബന്ധനകൾ",
+      "privacy": "സ്വകാര്യതാ നയം",
+      "refund_policy": "റീഫണ്ട് & റദ്ദാക്കൽ നയം",
+      "wallet_terms": "വാലറ്റ് നിബന്ധനകൾ",
+      "doctor_agreement": "ഡോക്ടർ കരാർ",
+      "grievance_policy": "പരാതി പരിഹാര നയം",
+      "disclaimer": "സേവന നിരാകരണം"
+    }
+  },
+  "earningsLedger": {
+    "clearing": "ക്ലിയറിംഗിൽ",
+    "available": "ലഭ്യമാണ്",
+    "locked": "പിൻവലിക്കലിൽ",
+    "withdrawn": "പിൻവലിച്ചു",
+    "clearingHint": "കൺസൾട്ടേഷന് ശേഷം {{days}} ദിവസം കഴിഞ്ഞ് ലഭ്യമാകും",
+    "negativeHint": "നെഗറ്റീവ് ബാലൻസ് — അടുത്ത വരുമാനത്തിൽ നിന്ന് സ്വയമേവ ക്രമീകരിക്കും",
+    "withdrawalThreshold": "കുറഞ്ഞ പിൻവലിക്കലിലേക്കുള്ള പുരോഗതി",
+    "thresholdReached": "ഇപ്പോൾ പിൻവലിക്കൽ അഭ്യർത്ഥിക്കാം.",
+    "thresholdHint": "ലഭ്യമായ ബാലൻസ് കുറഞ്ഞ പരിധിയിലെത്തുമ്പോൾ പിൻവലിക്കൽ തുറക്കും.",
+    "statementTitle": "വരുമാന വിവരണം",
+    "colDate": "തീയതി",
+    "colType": "തരം",
+    "colPatient": "രോഗി",
+    "colGross": "മൊത്തം",
+    "colCommission": "കമ്മീഷൻ",
+    "colNet": "അറ്റം",
+    "colStatus": "നില",
+    "types": {
+      "consultation": "കൺസൾട്ടേഷൻ",
+      "cancel_compensation": "റദ്ദാക്കൽ നഷ്ടപരിഹാരം",
+      "no_show_compensation": "ഹാജരാകാത്ത നഷ്ടപരിഹാരം",
+      "penalty": "പിഴ",
+      "adjustment": "ക്രമീകരണം"
+    },
+    "statuses": {
+      "clearing": "ക്ലിയറിംഗിൽ",
+      "available": "ലഭ്യമാണ്",
+      "locked": "പിൻവലിക്കലിൽ",
+      "withdrawn": "പിൻവലിച്ചു",
+      "reversed": "തിരിച്ചെടുത്തു"
+    }
+  },
+  "commissionAdmin": {
+    "title": "കമ്മീഷൻ നിയമങ്ങൾ",
+    "subtitle": "ഡോക്ടർതല കമ്മീഷൻ ഓവർറൈഡുകൾ — ശൂന്യമായ ഫീൽഡുകൾ ഗ്ലോബൽ ഡിഫോൾട്ട് ഉപയോഗിക്കുന്നു",
+    "globalSettings": "ഗ്ലോബൽ ഡിഫോൾട്ടുകൾ",
+    "globalInfo": "ഗ്ലോബൽ ഡിഫോൾട്ട്: {{percent}}% + ഓരോ പെയ്ഡ് ബുക്കിംഗിനും {{flat}} ഫ്ലാറ്റ് ഫീസ്. System Settings ൽ മാറ്റുക.",
+    "saved": "ഓവർറൈഡ് സേവ് ചെയ്തു. പുതിയ പേയ്മെന്റുകൾക്ക് മാത്രം ബാധകം.",
+    "saveFailed": "ഓവർറൈഡ് സേവ് ചെയ്യാനായില്ല.",
+    "searchPlaceholder": "പേര് അല്ലെങ്കിൽ ഇമെയിൽ ഉപയോഗിച്ച് ഡോക്ടറെ തിരയുക…",
+    "noDoctors": "ഡോക്ടർമാരെ കണ്ടെത്തിയില്ല.",
+    "colDoctor": "ഡോക്ടർ",
+    "colFee": "ഫീസ്",
+    "colPercentOverride": "% ഓവർറൈഡ്",
+    "colFlatOverride": "ഫ്ലാറ്റ് ഓവർറൈഡ്",
+    "snapshotNote": "കമ്മീഷൻ പേയ്മെന്റ് സമയത്ത് സ്നാപ്പ്ഷോട്ട് ചെയ്യുന്നു — മാറ്റങ്ങൾ പഴയ പേയ്മെന്റുകളെ ബാധിക്കില്ല."
+  },
+  "withdrawals": {
+    "title": "പിൻവലിക്കലുകൾ",
+    "payoutOnFile": "പേയ്മെന്റ് വിവരങ്ങൾ രേഖയിലുണ്ട് — ലഭ്യമായ മുഴുവൻ ബാലൻസും പിൻവലിക്കാൻ അഭ്യർത്ഥിക്കാം.",
+    "payoutMissing": "പിൻവലിക്കൽ പ്രാപ്തമാക്കാൻ ബാങ്ക് അക്കൗണ്ട് അല്ലെങ്കിൽ UPI വിവരങ്ങൾ ചേർക്കുക.",
+    "payoutDetails": "പേയ്മെന്റ് വിവരങ്ങൾ",
+    "requestButton": "പിൻവലിക്കൽ അഭ്യർത്ഥിക്കുക",
+    "requested": "പിൻവലിക്കൽ അഭ്യർത്ഥിച്ചു. പ്ലാറ്റ്ഫോം ടീം നിങ്ങളുടെ ബാങ്ക്/UPI ലേക്ക് സെറ്റിൽ ചെയ്യും.",
+    "requestFailed": "പിൻവലിക്കൽ അഭ്യർത്ഥന സൃഷ്ടിക്കാനായില്ല.",
+    "payoutSaved": "പേയ്മെന്റ് വിവരങ്ങൾ സേവ് ചെയ്തു.",
+    "payoutSaveFailed": "പേയ്മെന്റ് വിവരങ്ങൾ സേവ് ചെയ്യാനായില്ല.",
+    "accountName": "അക്കൗണ്ട് ഉടമയുടെ പേര്",
+    "accountNumber": "അക്കൗണ്ട് നമ്പർ",
+    "ifsc": "IFSC കോഡ്",
+    "upi": "UPI ഐഡി (ഓപ്ഷണൽ)",
+    "netPaid": "അറ്റ പേയ്മെന്റ്",
+    "statuses": {
+      "requested": "അഭ്യർത്ഥിച്ചു",
+      "approved": "അംഗീകരിച്ചു",
+      "settled": "സെറ്റിൽ ചെയ്തു",
+      "rejected": "നിരസിച്ചു",
+      "cancelled": "റദ്ദാക്കി"
+    }
+  },
+  "settlementsAdmin": {
+    "title": "സെറ്റിൽമെന്റുകൾ",
+    "subtitle": "ഡോക്ടർ പിൻവലിക്കൽ അഭ്യർത്ഥനകൾ, സെറ്റിൽമെന്റുകൾ, പേഔട്ടുകൾ",
+    "filterAll": "എല്ലാം",
+    "empty": "പിൻവലിക്കൽ അഭ്യർത്ഥനകളില്ല.",
+    "negativeTitle": "നെഗറ്റീവ് ബാലൻസുള്ള ഡോക്ടർമാർ",
+    "discretionary": "വിവേചനാധികാരം",
+    "age": "{{days}} ദിവസമായി കാത്തിരിക്കുന്നു",
+    "approve": "അംഗീകരിക്കുക",
+    "reject": "നിരസിക്കുക",
+    "settle": "സെറ്റിൽ ചെയ്യുക",
+    "approved": "അഭ്യർത്ഥന അംഗീകരിച്ചു.",
+    "rejected": "അഭ്യർത്ഥന നിരസിച്ചു.",
+    "settled": "സെറ്റിൽമെന്റ് രേഖപ്പെടുത്തി.",
+    "actionFailed": "പ്രവർത്തനം പരാജയപ്പെട്ടു.",
+    "settleTitle": "സെറ്റിൽമെന്റ് രേഖപ്പെടുത്തുക",
+    "settleHint": "ആദ്യം ബാങ്ക്/UPI ട്രാൻസ്ഫർ ചെയ്യുക, പിന്നെ റഫറൻസ് ഇവിടെ രേഖപ്പെടുത്തുക.",
+    "utrPlaceholder": "UTR / ഇടപാട് റഫറൻസ്",
+    "notePlaceholder": "കുറിപ്പ് (ഓപ്ഷണൽ)",
+    "rejectTitle": "പിൻവലിക്കൽ നിരസിക്കുക",
+    "reasonPlaceholder": "ഡോക്ടർക്ക് കാണിക്കുന്ന കാരണം…",
+    "discretionaryButton": "വിവേചനാ പേഔട്ട്",
+    "discretionaryTitle": "വിവേചനാ പേഔട്ട്",
+    "discretionaryHint": "കുറഞ്ഞ പരിധി മറികടന്ന് ഡോക്ടറുടെ മുഴുവൻ ബാലൻസും ഉടനെ സെറ്റിൽ ചെയ്യുന്നു. കുറിപ്പ് നിർബന്ധം.",
+    "doctorIdPlaceholder": "ഡോക്ടർ യൂസർ ഐഡി",
+    "discretionaryNotePlaceholder": "ഈ പേഔട്ട് എന്തിനാണ്…",
+    "payNow": "ഇപ്പോൾ അടയ്ക്കുക"
+  },
+  "referrals": {
+    "title": "റഫറലുകൾ",
+    "subtitlePatient": "നിങ്ങളുടെ ഡോക്ടർമാരുടെ റഫറലുകൾ — സ്വീകരിക്കുക, മറ്റൊരു ഡോക്ടറെ തിരഞ്ഞെടുക്കുക, അല്ലെങ്കിൽ റീഫണ്ട് എടുക്കുക",
+    "subtitleVet": "രോഗികളെ മറ്റ് ഡോക്ടർമാർക്ക് റഫർ ചെയ്ത് ഫലങ്ങൾ കാണുക",
+    "referButton": "രോഗിയെ റഫർ ചെയ്യുക",
+    "empty": "ഇതുവരെ റഫറലുകളില്ല.",
+    "anyDoctor": "ഏത് ഡോക്ടറും (നിങ്ങളുടെ തിരഞ്ഞെടുപ്പ്)",
+    "paidAmount": "അടച്ച തുക",
+    "informational": "സ്പെഷ്യലിസ്റ്റ് റഫറൽ",
+    "accept": "സ്വീകരിക്കുക",
+    "chooseAnother": "മറ്റൊരു ഡോക്ടർ",
+    "refund": "റീഫണ്ട്",
+    "acceptTitle": "റഫറൽ സ്വീകരിക്കുക",
+    "acceptHint": "ഡോക്ടറുമായി സ്ലോട്ട് തിരഞ്ഞെടുക്കുക. നേരത്തെ അടച്ചത് സ്വയമേവ കൈമാറും — വ്യത്യാസം മാത്രം അടയ്ക്കുക.",
+    "selectDoctor": "ഡോക്ടറെ തിരഞ്ഞെടുക്കുക…",
+    "noSlots": "ഈ തീയതിയിൽ സ്ലോട്ടുകളില്ല. മറ്റൊരു തീയതി ശ്രമിക്കുക.",
+    "confirmAccept": "തുടരുക",
+    "refundTitle": "പകരം റീഫണ്ട് എടുക്കുക",
+    "refundHint": "ഡോക്ടർ ലഭ്യമല്ലാത്തതിനാൽ പൂർണ്ണ റീഫണ്ടും ഗുഡ്‌വിൽ ബോണസും ലഭിക്കും.",
+    "refundToWallet": "വാലറ്റിലേക്ക് തൽക്ഷണ റീഫണ്ട്",
+    "refundToSource": "യഥാർത്ഥ പേയ്മെന്റ് രീതിയിലേക്ക് (5–7 ദിവസം)",
+    "refunded": "റീഫണ്ട് പൂർത്തിയായി.",
+    "accepted": "റഫറൽ പൂർത്തിയായി — പുതിയ ബുക്കിംഗ് തയ്യാർ.",
+    "created": "റഫറൽ അയച്ചു. രോഗിയെ അറിയിച്ചു.",
+    "actionFailed": "പ്രവർത്തനം പരാജയപ്പെട്ടു.",
+    "deadlineIn": "{{hours}} മണിക്കൂറിനുള്ളിൽ പ്രവർത്തിക്കുക",
+    "deadlinePassed": "സമയപരിധി കഴിഞ്ഞു",
+    "walletHopNotice": "നിങ്ങളുടെ മുൻ പേയ്മെന്റ് വാലറ്റിലേക്ക് മാറ്റി; ചെക്ക്ഔട്ടിൽ സ്വയമേവ ബാധകമാകും.",
+    "referTitle": "രോഗിയെ റഫർ ചെയ്യുക",
+    "referHint": "കൺസൾട്ടേഷന് മുമ്പുള്ള റഫറൽ പേയ്മെന്റ് പുതിയ ഡോക്ടർക്ക് കൈമാറുന്നു. ശേഷമുള്ളതിൽ രോഗി സാധാരണപോലെ ബുക്ക് ചെയ്യുന്നു.",
+    "upcomingBookings": "വരാനിരിക്കുന്ന പെയ്ഡ് ബുക്കിംഗുകൾ (പേയ്മെന്റ് കൈമാറ്റം)",
+    "recentConsultations": "അടുത്തിടെ പൂർത്തിയായ കൺസൾട്ടേഷനുകൾ (സ്പെഷ്യലിസ്റ്റ് റഫറൽ)",
+    "none": "ഒന്നുമില്ല",
+    "targetDoctor": "റഫർ ചെയ്യേണ്ടത്",
+    "patientChooses": "രോഗി തന്നെ ഡോക്ടറെ തിരഞ്ഞെടുക്കട്ടെ",
+    "reasonPlaceholder": "റഫറലിന്റെ കാരണം (രോഗിക്കും സ്വീകരിക്കുന്ന ഡോക്ടർക്കും കാണാം)…",
+    "referCostNotice": "രോഗി റീഫണ്ട് തിരഞ്ഞെടുത്താൽ, ആ ചെലവുകൾ നിങ്ങളുടെ വരുമാനത്തിൽ നിന്ന് ഈടാക്കും.",
+    "submitReferral": "റഫറൽ അയയ്ക്കുക",
+    "transferStatuses": {
+      "offered": "നിങ്ങളുടെ നടപടിക്കായി കാത്തിരിക്കുന്നു",
+      "accepted": "സ്വീകരിച്ചു",
+      "rechosen": "മറ്റൊരു ഡോക്ടർ",
+      "refunded": "റീഫണ്ട് ചെയ്തു",
+      "expired": "കാലഹരണപ്പെട്ടു",
+      "completed": "പൂർത്തിയായി"
+    }
+  },
+  "taxAdmin": {
+    "title": "നികുതി & GST",
+    "subtitle": "SAC നിരക്കുകൾ ഭാവി ഇൻവോയ്സുകൾക്ക് മാത്രം — പഴയവ മാറ്റാനാവാത്ത സ്നാപ്പ്ഷോട്ടുകൾ. GSTIN, നിയമപരമായ പേര്, പ്രിഫിക്സ് System Settings (tax.*) ൽ.",
+    "colLabel": "സേവനം",
+    "colRate": "GST നിരക്ക്",
+    "rateSaved": "നിരക്ക് സേവ് ചെയ്തു. ഇനി ജാരിയാകുന്ന ഇൻവോയ്സുകൾക്ക് ബാധകം.",
+    "rateSaveFailed": "നിരക്ക് സേവ് ചെയ്യാനായില്ല.",
+    "exportTitle": "GST എക്സ്പോർട്ട് (CSV)",
+    "exportButton": "CSV ഡൗൺലോഡ്",
+    "exportFailed": "എക്സ്പോർട്ട് പരാജയപ്പെട്ടു.",
+    "settingsHint": "എക്സ്പോർട്ടിൽ നികുതി കമ്മീഷൻ ഇൻവോയ്സുകളും ഒഴിവാക്കിയ കൺസൾട്ടേഷൻ രജിസ്റ്ററും ഉണ്ട് (നിങ്ങളുടെ CA ക്ക്)."
+  },
+  "financeAdmin": {
+    "title": "ഫിനാൻസ് റിപ്പോർട്ടുകൾ",
+    "subtitle": "വരുമാനം, ബാധ്യതകൾ, TDS, പേയ്മെന്റ് ആരോഗ്യം",
+    "noData": "ഈ പരിധിക്ക് ഡാറ്റയില്ല.",
+    "exportGst": "GST CSV എക്സ്പോർട്ട് ചെയ്യുക",
+    "gstExportFailed": "GST റിപ്പോർട്ട് എക്സ്പോർട്ട് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക.",
+    "revenueTitle": "വരുമാനം (തിരഞ്ഞെടുത്ത പരിധി)",
+    "gmv": "മൊത്ത ബുക്കിംഗ് മൂല്യം",
+    "paidCount": "{{count}} പെയ്ഡ് ബുക്കിംഗുകൾ",
+    "commission": "നേടിയ കമ്മീഷൻ",
+    "processingCharges": "പ്രോസസ്സിംഗ് ചാർജുകൾ",
+    "gatewayFees": "ഗേറ്റ്‌വേ ഫീസ് (ചെലവ്)",
+    "refundsOut": "റീഫണ്ടുകൾ",
+    "netRevenue": "അറ്റ പ്ലാറ്റ്ഫോം വരുമാനം",
+    "netRevenueHint": "കമ്മീഷൻ + പ്രോസസ്സിംഗ് − ഗേറ്റ്‌വേ ഫീസ്",
+    "liabilitiesTitle": "ബാധ്യതകൾ (നിലവിൽ)",
+    "doctorClearing": "ഡോക്ടർ വരുമാനം ക്ലിയറിംഗിൽ",
+    "doctorAvailable": "ഡോക്ടർ വരുമാനം ലഭ്യം",
+    "doctorLocked": "പിൻവലിക്കലിൽ",
+    "walletLiability": "രോഗി വാലറ്റ് ബാധ്യത",
+    "walletLiabilityHint": "ഉപഭോക്താക്കൾക്ക് നൽകേണ്ടത് — പ്ലാറ്റ്ഫോം വരുമാനമല്ല",
+    "tdsTitle": "TDS രജിസ്റ്റർ (തിരഞ്ഞെടുത്ത പരിധി)",
+    "tdsDeducted": "TDS കിഴിവ്",
+    "tdsCount": "{{count}} സെറ്റിൽമെന്റുകൾ",
+    "netPaidToDoctors": "ഡോക്ടർമാർക്ക് അറ്റ പേയ്മെന്റ്",
+    "healthTitle": "പേയ്മെന്റ് ആരോഗ്യം",
+    "stuckPending": "കുടുങ്ങിയ പെൻഡിംഗ് പേയ്മെന്റുകൾ",
+    "stuckPendingHint": "1 മണിക്കൂറിലധികം — ദിവസേന പൊരുത്തപ്പെടുത്തൽ ശ്രമം",
+    "openHolds": "തുറന്ന പേയ്മെന്റ് ഹോൾഡുകൾ"
   }
 }

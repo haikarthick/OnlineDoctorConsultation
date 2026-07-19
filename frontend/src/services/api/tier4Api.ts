@@ -143,6 +143,89 @@ export async function updateOrderStatus(id: string, status: string) {
   return response.data
 }
 
+// Deal handshake: both parties confirm the off-platform settlement
+export async function confirmMarketplaceDeal(orderId: string, paymentMethod?: string) {
+  const response = await client.post(`/marketplace/orders/${orderId}/confirm`, paymentMethod ? { paymentMethod } : {})
+  return response.data
+}
+
+export async function cancelMarketplaceDeal(orderId: string, reason?: string) {
+  const response = await client.post(`/marketplace/orders/${orderId}/cancel`, reason ? { reason } : {})
+  return response.data
+}
+
+// ── Marketplace engagement (Phase 3): messaging, favorites, saved searches ──
+export async function listMarketplaceThreads() {
+  const response = await client.get('/marketplace/threads')
+  return response.data
+}
+export async function getMarketplaceUnreadCount() {
+  const response = await client.get('/marketplace/threads/unread-count')
+  return response.data
+}
+export async function startMarketplaceThread(listingId: string, message?: string) {
+  const response = await client.post(`/marketplace/listings/${listingId}/threads`, message ? { message } : {})
+  return response.data
+}
+export async function getMarketplaceThreadMessages(threadId: string) {
+  const response = await client.get(`/marketplace/threads/${threadId}/messages`)
+  return response.data
+}
+export async function sendMarketplaceMessage(threadId: string, message: string) {
+  const response = await client.post(`/marketplace/threads/${threadId}/messages`, { message })
+  return response.data
+}
+export async function listMarketplaceFavorites() {
+  const response = await client.get('/marketplace/favorites')
+  return response.data
+}
+export async function getMarketplaceFavoriteIds() {
+  const response = await client.get('/marketplace/favorites/ids')
+  return response.data
+}
+export async function addMarketplaceFavorite(listingId: string) {
+  const response = await client.post(`/marketplace/listings/${listingId}/favorite`, {})
+  return response.data
+}
+export async function removeMarketplaceFavorite(listingId: string) {
+  const response = await client.delete(`/marketplace/listings/${listingId}/favorite`)
+  return response.data
+}
+export async function listMarketplaceSavedSearches() {
+  const response = await client.get('/marketplace/saved-searches')
+  return response.data
+}
+export async function createMarketplaceSavedSearch(data: { name: string; filters?: any; alertsEnabled?: boolean }) {
+  const response = await client.post('/marketplace/saved-searches', data)
+  return response.data
+}
+export async function updateMarketplaceSavedSearch(id: string, data: { name?: string; filters?: any; alertsEnabled?: boolean }) {
+  const response = await client.put(`/marketplace/saved-searches/${id}`, data)
+  return response.data
+}
+export async function deleteMarketplaceSavedSearch(id: string) {
+  const response = await client.delete(`/marketplace/saved-searches/${id}`)
+  return response.data
+}
+
+// ── Phase 5: config, reports ──
+export async function getMarketplaceConfig() {
+  const response = await client.get('/marketplace/config')
+  return response.data
+}
+export async function reportMarketplaceListing(listingId: string, reason: string, details?: string) {
+  const response = await client.post(`/marketplace/listings/${listingId}/report`, { reason, details })
+  return response.data
+}
+export async function adminListMarketplaceReports(status?: string) {
+  const response = await client.get('/marketplace/admin/reports', { params: status ? { status } : {} })
+  return response.data
+}
+export async function adminResolveMarketplaceReport(id: string, status: string, resolution?: string) {
+  const response = await client.patch(`/marketplace/admin/reports/${id}`, { status, resolution })
+  return response.data
+}
+
 export async function getMarketPrices(filters: any = {}) {
   const response = await client.get('/marketplace/prices', { params: filters })
   return response.data

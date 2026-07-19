@@ -154,6 +154,14 @@ class VideoSessionService {
           [now, Math.round(duration / 60), now, session.consultationId]
         );
         logger.info('Consultation status updated to completed', { consultationId: session.consultationId, duration });
+
+        // §6.1: doctor earning enters 'clearing' when the consultation completes
+        try {
+          const EarningsService = (await import('./payment/EarningsService')).default;
+          await EarningsService.createEarningOnCompletion(session.consultationId);
+        } catch (earnErr) {
+          logger.warn('Earning creation failed (non-blocking)', { consultationId: session.consultationId, error: earnErr });
+        }
       } catch (err) {
         logger.warn('Failed to update consultation status on session end', { error: err });
       }

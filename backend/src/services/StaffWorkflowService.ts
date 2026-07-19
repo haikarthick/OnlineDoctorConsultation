@@ -108,11 +108,14 @@ class StaffWorkflowService {
     params.push(limit);
     const limitParam = params.length;
 
+    // Referral-target search only — deliberately excludes email, license_number,
+    // consultation_fee: this is reachable by any hospital's staff for any
+    // platform vet, and those fields aren't needed to pick a referral target.
     const result = await database.query(`
-      SELECT u.id, u.first_name, u.last_name, u.email,
+      SELECT u.id, u.first_name, u.last_name,
         vp.specializations, vp.years_of_experience,
-        vp.clinic_name, vp.rating, vp.total_reviews, vp.license_number,
-        vp.is_verified, vp.is_available, vp.consultation_fee, vp.currency
+        vp.clinic_name, vp.rating, vp.total_reviews,
+        vp.is_verified, vp.is_available
       FROM users u
       LEFT JOIN vet_profiles vp ON vp.user_id = u.id
       WHERE ${whereClause}

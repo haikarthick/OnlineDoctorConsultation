@@ -384,7 +384,26 @@ export class VetHospitalService {
     }
   }
 
-  async getHospital(id: string): Promise<VetHospital> {
+  /**
+   * Network-branch hospitals are independent SaaS tenants with zero
+   * integration into the platform's patient marketplace — only their own
+   * network members (or platform admin) may resolve them by id. Non-branch
+   * (standalone) hospitals are unaffected. Returns NotFoundError rather than
+   * ForbiddenError so an unauthorized caller can't confirm the hospital
+   * even exists.
+   */
+  private async isNetworkMemberOfHospital(userId: string, hospitalId: string): Promise<boolean> {
+    const result = await database.query(
+      `SELECT 1 FROM hospital_network_members hnm
+       JOIN hospital_network_hospitals hnh ON hnh.network_id = hnm.network_id
+       WHERE hnm.user_id = $1 AND hnh.hospital_id = $2 AND hnm.is_active = true
+       LIMIT 1`,
+      [userId, hospitalId]
+    );
+    return result.rows.length > 0;
+  }
+
+  async getHospital(id: string, requestingUserId?: string, requestingUserRole?: string): Promise<VetHospital> {
     const result = await database.query(
       `SELECT h.*,
               u.first_name || ' ' || u.last_name AS owner_name,
@@ -395,8 +414,13 @@ export class VetHospitalService {
        WHERE h.id = $1`,
       [id]
     );
-    if (!result.rows[0]) throw new NotFoundError('Vet hospital not found');
-    return this.mapHospitalRow(result.rows[0]);
+    if (!result.rows[0]) throw new NotFoundError('Vet hospital', id);
+    const hospital = this.mapHospitalRow(result.rows[0]);
+    if (hospital.isNetworkBranch && requestingUserRole !== 'admin') {
+      const isMember = requestingUserId ? await this.isNetworkMemberOfHospital(requestingUserId, id) : false;
+      if (!isMember) throw new NotFoundError('Vet hospital', id);
+    }
+    return hospital;
   }
 
   async listHospitals(filters: {
@@ -615,7 +639,15 @@ export class VetHospitalService {
     return this.mapDoctorRow(result.rows[0]);
   }
 
-  async listDoctors(hospitalId: string): Promise<HospitalDoctor[]> {
+  async listDoctors(hospitalId: string, requestingUserId?: string, requestingUserRole?: string): Promise<HospitalDoctor[]> {
+    if (requestingUserRole !== 'admin') {
+      const hospRes = await database.query(`SELECT is_network_branch FROM vet_hospitals WHERE id = $1`, [hospitalId]);
+      if (!hospRes.rows[0]) throw new NotFoundError('Vet hospital', hospitalId);
+      if (hospRes.rows[0].is_network_branch) {
+        const isMember = requestingUserId ? await this.isNetworkMemberOfHospital(requestingUserId, hospitalId) : false;
+        if (!isMember) throw new NotFoundError('Vet hospital', hospitalId);
+      }
+    }
     const result = await database.query(
       `SELECT hd.*,
               u.first_name || ' ' || u.last_name AS doctor_name,
@@ -670,7 +702,15 @@ export class VetHospitalService {
     return this.mapDeptRow(result.rows[0]);
   }
 
-  async listDepartments(hospitalId: string): Promise<HospitalDepartment[]> {
+  async listDepartments(hospitalId: string, requestingUserId?: string, requestingUserRole?: string): Promise<HospitalDepartment[]> {
+    if (requestingUserRole !== 'admin') {
+      const hospRes = await database.query(`SELECT is_network_branch FROM vet_hospitals WHERE id = $1`, [hospitalId]);
+      if (!hospRes.rows[0]) throw new NotFoundError('Vet hospital', hospitalId);
+      if (hospRes.rows[0].is_network_branch) {
+        const isMember = requestingUserId ? await this.isNetworkMemberOfHospital(requestingUserId, hospitalId) : false;
+        if (!isMember) throw new NotFoundError('Vet hospital', hospitalId);
+      }
+    }
     const result = await database.query(
       `SELECT dept.*,
               u.first_name || ' ' || u.last_name AS head_doctor_name,
@@ -730,7 +770,15 @@ export class VetHospitalService {
     return this.mapServiceRow(result.rows[0]);
   }
 
-  async listServices(hospitalId: string): Promise<HospitalService[]> {
+  async listServices(hospitalId: string, requestingUserId?: string, requestingUserRole?: string): Promise<HospitalService[]> {
+    if (requestingUserRole !== 'admin') {
+      const hospRes = await database.query(`SELECT is_network_branch FROM vet_hospitals WHERE id = $1`, [hospitalId]);
+      if (!hospRes.rows[0]) throw new NotFoundError('Vet hospital', hospitalId);
+      if (hospRes.rows[0].is_network_branch) {
+        const isMember = requestingUserId ? await this.isNetworkMemberOfHospital(requestingUserId, hospitalId) : false;
+        if (!isMember) throw new NotFoundError('Vet hospital', hospitalId);
+      }
+    }
     const result = await database.query(
       `SELECT * FROM hospital_services WHERE hospital_id = $1 AND is_available = true ORDER BY category, service_name`,
       [hospitalId]

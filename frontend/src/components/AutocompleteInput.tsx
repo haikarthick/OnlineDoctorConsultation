@@ -56,6 +56,20 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     }
   }
 
+  // Highlight the matched substring using React nodes (never raw HTML) so
+  // option text can never be interpreted as markup — prevents XSS if any
+  // option list is ever sourced from user-generated content.
+  const renderHighlighted = (opt: string) => {
+    if (!value) return opt
+    const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const parts = opt.split(new RegExp(`(${escaped})`, 'gi'))
+    return parts.map((part, i) =>
+      part.toLowerCase() === value.toLowerCase()
+        ? <mark key={i}>{part}</mark>
+        : <React.Fragment key={i}>{part}</React.Fragment>
+    )
+  }
+
   const handleSelect = (opt: string) => {
     onChange(opt)
     setOpen(false)
@@ -104,14 +118,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
                 onMouseDown={() => handleSelect(opt)}
                 onMouseEnter={() => setHighlighted(i)}
               >
-                {value ? (
-                  <span dangerouslySetInnerHTML={{
-                    __html: opt.replace(
-                      new RegExp(`(${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
-                      '<mark>$1</mark>'
-                    )
-                  }} />
-                ) : opt}
+                {renderHighlighted(opt)}
               </div>
             ))
           )}

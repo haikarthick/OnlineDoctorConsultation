@@ -20,7 +20,7 @@ class VetHospitalController {
   }
 
   async getHospital(req: AuthRequest, res: Response): Promise<void> {
-    const hospital = await VetHospitalService.getHospital(req.params.id);
+    const hospital = await VetHospitalService.getHospital(req.params.id, req.userId, req.userRole);
     res.json({ success: true, data: hospital });
   }
 
@@ -78,7 +78,7 @@ class VetHospitalController {
   // ─── Doctor Membership ─────────────────────────────────────
 
   async listDoctors(req: AuthRequest, res: Response): Promise<void> {
-    const doctors = await VetHospitalService.listDoctors(req.params.id);
+    const doctors = await VetHospitalService.listDoctors(req.params.id, req.userId, req.userRole);
     res.json({ success: true, data: doctors });
   }
 
@@ -107,7 +107,7 @@ class VetHospitalController {
   // ─── Departments ───────────────────────────────────────────
 
   async listDepartments(req: AuthRequest, res: Response): Promise<void> {
-    const departments = await VetHospitalService.listDepartments(req.params.id);
+    const departments = await VetHospitalService.listDepartments(req.params.id, req.userId, req.userRole);
     res.json({ success: true, data: departments });
   }
 
@@ -120,7 +120,7 @@ class VetHospitalController {
   }
 
   async updateDepartment(req: AuthRequest, res: Response): Promise<void> {
-    const dept = await VetHospitalService.listDepartments(req.params.id);
+    const dept = await VetHospitalService.listDepartments(req.params.id, req.userId, req.userRole);
     const thisDept = dept.find(d => d.id === req.params.deptId);
     if (!thisDept) throw new NotFoundError('Department not found');
     await this.ensureHospitalAccess(req.params.id, req.userId!, req.userRole!);
@@ -137,7 +137,7 @@ class VetHospitalController {
   // ─── Services ─────────────────────────────────────────────
 
   async listServices(req: AuthRequest, res: Response): Promise<void> {
-    const services = await VetHospitalService.listServices(req.params.id);
+    const services = await VetHospitalService.listServices(req.params.id, req.userId, req.userRole);
     res.json({ success: true, data: services });
   }
 
