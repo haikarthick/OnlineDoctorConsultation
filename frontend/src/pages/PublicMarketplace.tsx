@@ -35,6 +35,8 @@ const PublicMarketplace: React.FC = () => {
   const [filters, setFilters] = useState<Record<string, string>>({})
   const [sortBy, setSortBy] = useState('')
   const [page, setPage] = useState(0)
+  const [browsePanel, setBrowsePanel] = useState<'' | 'species' | 'categories'>('')
+  const [searchInput, setSearchInput] = useState('')
   const PAGE_SIZE = 24
 
   const listingsRef = React.useRef<HTMLDivElement>(null)
@@ -45,21 +47,34 @@ const PublicMarketplace: React.FC = () => {
 
   const handleStatClick = (type: 'listings' | 'species' | 'categories' | 'sellers') => {
     setPage(0)
+    setSelectedListing(null)
     if (type === 'listings') {
-      setFilters({})
-      setSortBy('')
+      setFilters({}); setSearchInput(''); setSortBy(''); setBrowsePanel('')
     } else if (type === 'species') {
-      setFilters({})
-      setSortBy('newest')
+      setBrowsePanel(p => p === 'species' ? '' : 'species')
     } else if (type === 'categories') {
-      setFilters({})
-      setSortBy('')
+      setBrowsePanel(p => p === 'categories' ? '' : 'categories')
     } else if (type === 'sellers') {
-      setFilters({})
-      setSortBy('newest')
+      setFilters({}); setSearchInput(''); setSortBy('newest'); setBrowsePanel('')
     }
     setTimeout(scrollToListings, 100)
   }
+
+  // Debounce free-text search so we don't fire a request per keystroke
+  const applySearch = useCallback((value: string) => {
+    const v = value.trim()
+    setFilters(f => {
+      if ((f.search || '') === v) return f
+      const n = { ...f }
+      if (v) n.search = v; else delete n.search
+      return n
+    })
+    setPage(0)
+  }, [])
+  useEffect(() => {
+    const h = setTimeout(() => applySearch(searchInput), 400)
+    return () => clearTimeout(h)
+  }, [searchInput, applySearch])
 
   const formatCurrency = (n: number) => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
@@ -127,19 +142,19 @@ const PublicMarketplace: React.FC = () => {
           <p className="pub-mp-hero-subtitle">{t('publicMarketplace.heroSubtitle')}</p>
           {stats && (
             <div className="pub-mp-hero-stats">
-              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('listings')} title="Show all listings">
+              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('listings')} title={t('publicMarketplace.tipAllListings')}>
                 <span className="pub-mp-stat-value">{stats.active_listings || 0}</span>
                 <span className="pub-mp-stat-label">{t('publicMarketplace.stats.activeListings')}</span>
               </button>
-              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('species')} title="Browse by species">
+              <button className={`pub-mp-stat pub-mp-stat-btn ${browsePanel === 'species' ? 'active' : ''}`} onClick={() => handleStatClick('species')} title={t('publicMarketplace.tipSpecies')}>
                 <span className="pub-mp-stat-value">{stats.species_count || 0}</span>
                 <span className="pub-mp-stat-label">{t('publicMarketplace.stats.species')}</span>
               </button>
-              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('categories')} title="Browse by category">
+              <button className={`pub-mp-stat pub-mp-stat-btn ${browsePanel === 'categories' ? 'active' : ''}`} onClick={() => handleStatClick('categories')} title={t('publicMarketplace.tipCategories')}>
                 <span className="pub-mp-stat-value">{stats.category_count || 0}</span>
                 <span className="pub-mp-stat-label">{t('publicMarketplace.stats.categories')}</span>
               </button>
-              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('sellers')} title="Browse all rehomers">
+              <button className="pub-mp-stat pub-mp-stat-btn" onClick={() => handleStatClick('sellers')} title={t('publicMarketplace.tipSellers')}>
                 <span className="pub-mp-stat-value">{stats.seller_count || 0}</span>
                 <span className="pub-mp-stat-label">{t('publicMarketplace.stats.sellers')}</span>
               </button>
@@ -167,9 +182,44 @@ const PublicMarketplace: React.FC = () => {
 
       {/* Filter Bar */}
       <div className="pub-mp-container" ref={listingsRef}>
+        {/* Browse-by panel (opened from hero stat tiles) */}
+        {browsePanel && (
+          <div className="pub-mp-browse-panel">
+            <div className="pub-mp-browse-head">
+              <h3>{browsePanel === 'species' ? t('publicMarketplace.browseBySpecies') : t('publicMarketplace.browseByCategory')}</h3>
+              <button className="pub-mp-browse-close" onClick={() => setBrowsePanel('')} aria-label={t('common.close')}>✕</button>
+            </div>
+            <div className="pub-mp-facet-grid">
+              {browsePanel === 'species' ? (
+                (stats?.species_facets?.length ? stats.species_facets : SPECIES_LIST.map((s: string) => ({ species: s }))).map((f: any) => (
+                  <button key={f.species}
+                    className={`pub-mp-facet ${filters.species === f.species ? 'active' : ''}`}
+                    onClick={() => updateFilter('species', filters.species === f.species ? '' : f.species)}>
+                    <span className="pub-mp-facet-name">{f.species}</span>
+                    {f.count !== undefined && <span className="pub-mp-facet-count">{f.count}</span>}
+                  </button>
+                ))
+              ) : (
+                (stats?.category_facets?.length ? stats.category_facets : CATEGORY_KEYS.filter(c => c.value).map(c => ({ category: c.value }))).map((f: any) => {
+                  const labelKey = CATEGORY_KEYS.find(c => c.value === f.category)?.labelKey
+                  return (
+                    <button key={f.category}
+                      className={`pub-mp-facet ${filters.category === f.category ? 'active' : ''}`}
+                      onClick={() => updateFilter('category', filters.category === f.category ? '' : f.category)}>
+                      <span className="pub-mp-facet-icon">{CATEGORY_ICONS[f.category] || '📦'}</span>
+                      <span className="pub-mp-facet-name">{labelKey ? t(labelKey) : f.category}</span>
+                      {f.count !== undefined && <span className="pub-mp-facet-count">{f.count}</span>}
+                    </button>
+                  )
+                })
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="mp-filter-bar">
-          <input className="module-input" value={filters.search || ''} onChange={e => updateFilter('search', e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') fetchListings() }} placeholder={t('marketplace.searchLivestock')} />
+          <input className="module-input" value={searchInput} onChange={e => setSearchInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') applySearch(searchInput) }} placeholder={t('marketplace.searchLivestock')} />
           <select className="module-input" value={filters.category || ''} onChange={e => updateFilter('category', e.target.value)}>
             {CATEGORY_KEYS.map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
           </select>
@@ -182,14 +232,14 @@ const PublicMarketplace: React.FC = () => {
             <option value="male">{t('marketplace.genderLabel.male')}</option>
             <option value="female">{t('marketplace.genderLabel.female')}</option>
           </select>
-          <select className="module-input" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+          <select className="module-input" value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(0) }}>
             <option value="">{t('marketplace.sort.default')}</option>
             <option value="price_asc">{t('marketplace.sort.priceAsc')}</option>
             <option value="price_desc">{t('marketplace.sort.priceDesc')}</option>
             <option value="newest">{t('marketplace.sort.newest')}</option>
             <option value="milk_yield">{t('marketplace.sort.milkYield')}</option>
           </select>
-          <button className="module-btn primary" onClick={fetchListings}>🔍</button>
+          <button className="module-btn primary" onClick={() => applySearch(searchInput)} aria-label={t('common.search')}>🔍</button>
         </div>
 
         {/* Quick Chips */}
@@ -197,7 +247,7 @@ const PublicMarketplace: React.FC = () => {
           <button className={`mp-chip ${filters.healthCertificate === 'true' ? 'active' : ''}`} onClick={() => updateFilter('healthCertificate', filters.healthCertificate === 'true' ? '' : 'true')}>{t('marketplace.chips.healthCert')}</button>
           <button className={`mp-chip ${filters.vaccinationStatus === 'fully_vaccinated' ? 'active' : ''}`} onClick={() => updateFilter('vaccinationStatus', filters.vaccinationStatus === 'fully_vaccinated' ? '' : 'fully_vaccinated')}>{t('marketplace.chips.vaccinated')}</button>
           <button className={`mp-chip ${filters.pregnancyStatus === 'pregnant' ? 'active' : ''}`} onClick={() => updateFilter('pregnancyStatus', filters.pregnancyStatus === 'pregnant' ? '' : 'pregnant')}>{t('marketplace.chips.pregnant')}</button>
-          {Object.keys(filters).length > 0 && <button className="mp-chip clear" onClick={() => { setFilters({}); setSortBy(''); setPage(0) }}>{t('marketplace.chips.clearAll')}</button>}
+          {(Object.keys(filters).length > 0 || sortBy || searchInput) && <button className="mp-chip clear" onClick={() => { setFilters({}); setSearchInput(''); setSortBy(''); setPage(0) }}>{t('marketplace.chips.clearAll')}</button>}
         </div>
 
         {/* Detail View */}
@@ -305,7 +355,7 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
       <div className="mp-card-body">
         <div className="mp-card-badges">
           <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-          <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
+          <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
           {tier === 'premium' && <span className="mp-badge premium">⭐</span>}
         </div>
 
@@ -331,7 +381,7 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
 
         <div className="mp-card-price">
           {l.price ? formatCurrency(l.price) : t('marketplace.card.contact')}
-          {listingType === 'auction' && bidCount && <span className="mp-bid-count">{bidCount} bids</span>}
+          {listingType === 'auction' && +bidCount > 0 && <span className="mp-bid-count">{+bidCount} {t('marketplace.units.bids')}</span>}
         </div>
 
         <div className="mp-card-footer">
@@ -388,7 +438,7 @@ const PublicListingDetail: React.FC<{
         <div className="mp-detail-main">
           <div className="mp-card-badges">
             <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-            <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
+            <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
             {tier && <span className="mp-badge premium">{{ standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }[tier as 'standard' | 'premium' | 'spotlight'] || tier}</span>}
             {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}

@@ -1,6 +1,6 @@
 /**
- * Marketplace & Auction Service — Pet Rehoming & Adoption Board
- * Rehome and adopt animals, equipment, and supplies with fixed-price listings,
+ * Marketplace & Auction Service — Buy & Sell Marketplace
+ * Buy and sell animals, equipment, and supplies with fixed-price listings,
  * live auction bidding, order processing, and search.
  * Compliant with PCA Act 1960, Dog Breeding Rules 2017, Pet Shop Rules 2018.
  * Enhanced with livestock-specific fields, admin controls, and market intelligence.
@@ -708,6 +708,44 @@ class MarketplaceService {
       vaccinationStatus, healthCertificate, sortBy,
       userLat, userLng, radiusKm,
     } = filters;
+
+    // Build WHERE clause once, shared by the page query and the count query
+    // so the reported total always matches the applied filters.
+    const PUB_TSVEC = `to_tsvector('english', coalesce(l.title,'')||' '||coalesce(l.description,'')||' '||coalesce(l.breed,'')||' '||coalesce(l.species,''))`;
+    let where = `l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`;
+    const params: any[] = []; let idx = 1;
+
+    if (category) { where += ` AND l.category = $${idx++}`; params.push(category); }
+    if (listingType) { where += ` AND l.listing_type = $${idx++}`; params.push(listingType); }
+    if (minPrice) { where += ` AND l.price >= $${idx++}`; params.push(minPrice); }
+    if (maxPrice) { where += ` AND l.price <= $${idx++}`; params.push(maxPrice); }
+    let pubFtsRank = '';
+    if (search) {
+      const qIdx = idx++; params.push(search);
+      const likeIdx = idx++; params.push(`%${search}%`);
+      where += ` AND (${PUB_TSVEC} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx})`;
+      pubFtsRank = `ts_rank(${PUB_TSVEC}, plainto_tsquery('english', $${qIdx}))`;
+    }
+    if (species) { where += ` AND l.species = $${idx++}`; params.push(species); }
+    if (breed) { where += ` AND l.breed ILIKE $${idx++}`; params.push(`%${breed}%`); }
+    if (minMilkYield) { where += ` AND l.daily_milk_yield >= $${idx++}`; params.push(minMilkYield); }
+    if (maxMilkYield) { where += ` AND l.daily_milk_yield <= $${idx++}`; params.push(maxMilkYield); }
+    if (pregnancyStatus) { where += ` AND l.pregnancy_status = $${idx++}`; params.push(pregnancyStatus); }
+    if (gender) { where += ` AND l.gender = $${idx++}`; params.push(gender); }
+    if (vaccinationStatus) { where += ` AND l.vaccination_status = $${idx++}`; params.push(vaccinationStatus); }
+    if (healthCertificate === 'true' || healthCertificate === true) { where += ` AND l.health_certificate = true`; }
+    // Proximity filter (requires earthdistance extension)
+    if (userLat && userLng && radiusKm) {
+      where += ` AND l.latitude IS NOT NULL AND l.longitude IS NOT NULL AND earth_distance(ll_to_earth($${idx}::float8, $${idx+1}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) <= $${idx+2}::float8 * 1000`;
+      params.push(+userLat, +userLng, +radiusKm);
+      idx += 3;
+    }
+
+    // Count with the identical WHERE + params (before limit/offset are appended)
+    const countResult = await pool.query(
+      `SELECT COUNT(*) FROM marketplace_listings l WHERE ${where}`, params.slice()
+    );
+
     // Only select safe public columns — no seller email/phone/id
     let query = `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
                  l.quantity, l.unit, l.condition, l.images, l.location, l.tags, l.featured,
@@ -725,35 +763,7 @@ class MarketplaceService {
                  FROM marketplace_listings l
                  LEFT JOIN users u ON l.seller_id = u.id
                  LEFT JOIN animals a ON a.id = l.linked_animal_id
-                 WHERE l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`;
-    const params: any[] = []; let idx = 1;
-
-    const PUB_TSVEC = `to_tsvector('english', coalesce(l.title,'')||' '||coalesce(l.description,'')||' '||coalesce(l.breed,'')||' '||coalesce(l.species,''))`;
-    if (category) { query += ` AND l.category = $${idx++}`; params.push(category); }
-    if (listingType) { query += ` AND l.listing_type = $${idx++}`; params.push(listingType); }
-    if (minPrice) { query += ` AND l.price >= $${idx++}`; params.push(minPrice); }
-    if (maxPrice) { query += ` AND l.price <= $${idx++}`; params.push(maxPrice); }
-    let pubFtsRank = '';
-    if (search) {
-      const qIdx = idx++; params.push(search);
-      const likeIdx = idx++; params.push(`%${search}%`);
-      query += ` AND (${PUB_TSVEC} @@ plainto_tsquery('english', $${qIdx}) OR l.title ILIKE $${likeIdx} OR l.breed ILIKE $${likeIdx})`;
-      pubFtsRank = `ts_rank(${PUB_TSVEC}, plainto_tsquery('english', $${qIdx}))`;
-    }
-    if (species) { query += ` AND l.species = $${idx++}`; params.push(species); }
-    if (breed) { query += ` AND l.breed ILIKE $${idx++}`; params.push(`%${breed}%`); }
-    if (minMilkYield) { query += ` AND l.daily_milk_yield >= $${idx++}`; params.push(minMilkYield); }
-    if (maxMilkYield) { query += ` AND l.daily_milk_yield <= $${idx++}`; params.push(maxMilkYield); }
-    if (pregnancyStatus) { query += ` AND l.pregnancy_status = $${idx++}`; params.push(pregnancyStatus); }
-    if (gender) { query += ` AND l.gender = $${idx++}`; params.push(gender); }
-    if (vaccinationStatus) { query += ` AND l.vaccination_status = $${idx++}`; params.push(vaccinationStatus); }
-    if (healthCertificate === 'true' || healthCertificate === true) { query += ` AND l.health_certificate = true`; }
-    // Proximity filter (requires earthdistance extension)
-    if (userLat && userLng && radiusKm) {
-      query += ` AND l.latitude IS NOT NULL AND l.longitude IS NOT NULL AND earth_distance(ll_to_earth($${idx}::float8, $${idx+1}::float8), ll_to_earth(l.latitude::float8, l.longitude::float8)) <= $${idx+2}::float8 * 1000`;
-      params.push(+userLat, +userLng, +radiusKm);
-      idx += 3;
-    }
+                 WHERE ${where}`;
 
     let orderBy = pubFtsRank
       ? `${pubFtsRank} DESC, l.is_hot_deal DESC NULLS LAST, l.created_at DESC`
@@ -767,18 +777,6 @@ class MarketplaceService {
     query += ` ORDER BY ${orderBy} LIMIT $${idx++} OFFSET $${idx}`;
     params.push(Math.min(+limit, 50), offset);
     const result = await pool.query(query, params);
-
-    // Count (same filters)
-    let countQuery = `SELECT COUNT(*) FROM marketplace_listings l WHERE l.status = 'active' AND (l.admin_approved = true OR l.admin_approved IS NULL)`;
-    const countParams: any[] = []; let cIdx = 1;
-    if (category) { countQuery += ` AND l.category = $${cIdx++}`; countParams.push(category); }
-    if (species) { countQuery += ` AND l.species = $${cIdx++}`; countParams.push(species); }
-    if (search) {
-      const q = `$${cIdx++}`; const lk = `$${cIdx++}`;
-      countQuery += ` AND (${PUB_TSVEC} @@ plainto_tsquery('english', ${q}) OR l.title ILIKE ${lk} OR l.breed ILIKE ${lk})`;
-      countParams.push(search, `%${search}%`);
-    }
-    const countResult = await pool.query(countQuery, countParams);
 
     return { items: result.rows, total: +(countResult.rows[0]?.count || 0) };
   }
@@ -810,15 +808,31 @@ class MarketplaceService {
   }
 
   async getPublicStats() {
-    const result = await pool.query(
-      `SELECT
-        COUNT(*) FILTER (WHERE status = 'active') as active_listings,
-        COUNT(DISTINCT species) FILTER (WHERE status = 'active' AND species IS NOT NULL) as species_count,
-        COUNT(DISTINCT category) FILTER (WHERE status = 'active') as category_count,
-        COUNT(DISTINCT seller_id) FILTER (WHERE status = 'active') as seller_count
-       FROM marketplace_listings WHERE (admin_approved = true OR admin_approved IS NULL)`
-    );
-    return result.rows[0] || {};
+    const [totals, speciesFacets, categoryFacets] = await Promise.all([
+      pool.query(
+        `SELECT
+          COUNT(*) FILTER (WHERE status = 'active') as active_listings,
+          COUNT(DISTINCT species) FILTER (WHERE status = 'active' AND species IS NOT NULL) as species_count,
+          COUNT(DISTINCT category) FILTER (WHERE status = 'active') as category_count,
+          COUNT(DISTINCT seller_id) FILTER (WHERE status = 'active') as seller_count
+         FROM marketplace_listings WHERE (admin_approved = true OR admin_approved IS NULL)`
+      ),
+      pool.query(
+        `SELECT species, COUNT(*)::int as count FROM marketplace_listings
+         WHERE status = 'active' AND (admin_approved = true OR admin_approved IS NULL) AND species IS NOT NULL
+         GROUP BY species ORDER BY count DESC, species ASC`
+      ),
+      pool.query(
+        `SELECT category, COUNT(*)::int as count FROM marketplace_listings
+         WHERE status = 'active' AND (admin_approved = true OR admin_approved IS NULL)
+         GROUP BY category ORDER BY count DESC, category ASC`
+      ),
+    ]);
+    return {
+      ...(totals.rows[0] || {}),
+      species_facets: speciesFacets.rows,
+      category_facets: categoryFacets.rows,
+    };
   }
 
   // ── Auction Feature Flag ──
