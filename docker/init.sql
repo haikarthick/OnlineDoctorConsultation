@@ -874,20 +874,18 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_system_settings_key ON system_settings(key);
 
 -- ============================================================
--- FIX: Update bookings status CHECK to include 'missed'
+-- NOTE: bookings_status_check is (re)created once, later in this file,
+-- by the "46.2 bookings: payment lifecycle statuses" block — with the
+-- FULL, current status list ('missed' included). Do not add another
+-- ALTER TABLE ... ADD CONSTRAINT bookings_status_check block here: this
+-- file runs as one atomic statement, so an earlier block using a
+-- narrower status list than what real rows already contain (e.g. it's
+-- missing 'payment_pending'/'payment_expired'/'referred') aborts the
+-- ENTIRE init.sql run on every existing DB that has such rows — which
+-- is exactly what took down the 2026-07-20 vetcare-dev deploy. If the
+-- status list ever needs to change, edit the single block at the
+-- "46.2 bookings" section below, in place, rather than adding a new one.
 -- ============================================================
-DO $$
-BEGIN
-  -- Drop old constraint and re-create with 'missed' status included
-  IF EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'bookings_status_check'
-  ) THEN
-    ALTER TABLE bookings DROP CONSTRAINT bookings_status_check;
-  END IF;
-  ALTER TABLE bookings ADD CONSTRAINT bookings_status_check
-    CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rescheduled', 'completed', 'missed'));
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
 
 -- ============================================================
 -- FIX: Add missed_by column to bookings if not exists
