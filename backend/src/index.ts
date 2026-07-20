@@ -125,7 +125,7 @@ const startServer = async () => {
     }, 24 * 60 * 60 * 1000);
 
     // ── Vaccinations table reminders ─────────────────────────────
-    async function sendVaccinationsTableReminders() {
+    const sendVaccinationsTableReminders = async () => {
       try {
         const { default: db } = await import('./utils/database');
         const { default: NSvc } = await import('./services/NotificationService');
@@ -161,7 +161,7 @@ const startServer = async () => {
       } catch (err: any) {
         logger.error('[VaccinationReminder] Job failed', { error: err.message });
       }
-    }
+    };
 
     sendVaccinationsTableReminders().catch((err: any) => logger.warn('[VaccinationReminder] Initial run failed', { error: err.message }));
     setInterval(() => {
