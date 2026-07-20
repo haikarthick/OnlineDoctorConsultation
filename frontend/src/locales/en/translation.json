@@ -3424,7 +3424,8 @@
       "lPerDay": "L/day",
       "kg": "kg",
       "avgLPerDay": "L/day avg",
-      "head": "head"
+      "head": "head",
+      "bids": "bids"
     },
     "reviewLabels": {
       "type": "Type",
@@ -5504,7 +5505,13 @@
       "services": "Vet Services",
       "browseNow": "Browse Marketplace",
       "sellYours": "Rehome Your Animals"
-    }
+    },
+    "browseBySpecies": "Browse by Species",
+    "browseByCategory": "Browse by Category",
+    "tipAllListings": "Show all listings",
+    "tipSpecies": "Browse listings by species",
+    "tipCategories": "Browse listings by category",
+    "tipSellers": "See the latest from all rehomers"
   },
   "wallet": {
     "pageTitle": "💰 My Wallet",
