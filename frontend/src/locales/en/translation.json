@@ -3119,12 +3119,12 @@
     "noSimulations": "No simulations run yet"
   },
   "marketplace": {
-    "pageTitle": "🏪 Animal Rehoming Board",
-    "subtitle": "Rehome animals, find new homes, and browse equipment and veterinary supplies",
+    "pageTitle": "🏪 Buy & Sell Marketplace",
+    "subtitle": "Buy and sell animals, and browse equipment and veterinary supplies",
     "tabs": {
       "dashboard": "📊 Dashboard",
       "browse": "🐾 Browse",
-      "sell": "📝 Rehome",
+      "sell": "📝 Sell",
       "auctions": "🔨 Auctions",
       "orders": "📦 Inquiries",
       "prices": "📈 Prices",
@@ -3145,14 +3145,14 @@
     },
     "stats": {
       "activeListings": "Active Listings",
-      "itemsSold": "Animals Rehomed",
+      "itemsSold": "Animals Sold",
       "categories": "Categories",
-      "activeSellers": "Active Rehomers",
+      "activeSellers": "Active Sellers",
       "pendingReview": "Pending Review",
       "speciesListed": "Species Listed",
       "totalListings": "Total Listings",
       "active": "Active",
-      "sold": "Rehomed",
+      "sold": "Sold",
       "hotDeals": "Hot Deals",
       "auctions": "Auctions",
       "totalViews": "Total Views"
@@ -3161,7 +3161,7 @@
       "hotDeals": "🔥 Hot Deals",
       "bySpecies": "📊 By Species",
       "latestListings": "🆕 Latest Listings",
-      "topSellers": "🏆 Top Rehomers",
+      "topSellers": "🏆 Top Sellers",
       "speciesAnalytics": "Species Analytics",
       "priceDistribution": "Price Distribution",
       "listingManagement": "Listing Management",
@@ -3221,7 +3221,7 @@
       "notPregnant": "Not Pregnant"
     },
     "listingType": {
-      "fixedPrice": "🏷️ Rehoming",
+      "fixedPrice": "🏷️ For Sale",
       "auctionType": "🔨 Auction",
       "wanted": "📢 Looking for a Pet"
     },
@@ -3254,8 +3254,8 @@
       "animalDetailsDesc": "Provide breed, age, weight and production details to help seekers find your listing.",
       "healthCertsTitle": "🏥 Health & Certification",
       "healthCertsDesc": "Vaccination status and health certificates build seeker trust and confidence.",
-      "pricingTitle": "💰 Rehoming Fee & Location",
-      "pricingDesc": "Set your rehoming fee and location so seekers can gauge logistics.",
+      "pricingTitle": "💰 Price & Location",
+      "pricingDesc": "Set your price and location so buyers can gauge logistics.",
       "reviewTitle": "🔍 Review & Publish",
       "reviewDesc": "Double-check all details before publishing. You can edit after publishing too.",
       "identificationSection": "Identification",
@@ -3321,15 +3321,15 @@
       "noDescription": "No description provided",
       "animalProfile": "🐄 Animal Profile",
       "healthCert": "🏥 Health & Certification",
-      "sellerLocation": "📍 Rehomer & Location",
+      "sellerLocation": "📍 Seller & Location",
       "adminControls": "🛡️ Admin Controls",
-      "seller": "Rehomer",
+      "seller": "Seller",
       "location": "Location",
       "notSpecified": "Not specified",
       "views": "Views",
       "buyNowTitle": "🐾 Inquire Now",
       "purchaseNow": "Inquire Now",
-      "contactSeller": "Contact rehomer",
+      "contactSeller": "Contact seller",
       "placeBidTitle": "🔨 Place Bid",
       "currentHighest": "Current Highest:",
       "ends": "Ends:",
@@ -3366,26 +3366,26 @@
     },
     "orders": {
       "asBuyer": "� As Seeker",
-      "asSeller": "🏠 As Rehomer",
+      "asSeller": "🏠 As Seller",
       "item": "Item",
       "qty": "Qty",
       "total": "Total",
       "status": "Status",
       "date": "Date",
-      "noOrders": "No rehoming requests found",
+      "noOrders": "No requests found",
       "inquiriesTitle": "💌 Inquiries",
       "noInquiries": "No inquiries yet",
       "message": "Message"
     },
     "prices": {
-      "subtitle": "Average rehoming fees across all active and rehomed listings by species and breed",
+      "subtitle": "Average prices across all active and sold listings by species and breed",
       "listings": "Listings",
       "avgPrice": "Avg Price",
       "min": "Min",
       "max": "Max",
       "avgMilkPerDay": "Avg Milk/day",
       "avgWeight": "Avg Weight",
-      "noData": "No market data available yet. List some animals for rehoming to see trends!"
+      "noData": "No market data available yet. List some animals for sale to see trends!"
     },
     "admin": {
       "count": "Count",
@@ -3431,7 +3431,7 @@
       "type": "Type",
       "milkYield": "Milk Yield",
       "healthCert": "Health Cert",
-      "price": "Rehoming Fee",
+      "price": "Price",
       "tier": "Tier",
       "yes": "✅ Yes",
       "no": "❌ No",
@@ -3442,23 +3442,23 @@
     "loadingListings": "Loading listings...",
     "listingCreated": "Listing created successfully!",
     "bidPlaced": "Bid placed!",
-    "orderPlaced": "Rehoming inquiry sent!",
+    "orderPlaced": "Inquiry sent!",
     "auction": "Auction",
-    "fixedBadge": "🐾 Rehoming",
+    "fixedBadge": "🐾 For Sale",
     "contactForPrice": "Contact for fee",
     "compliance": {
       "sellerTypeTitle": "Lister Type (Legal Compliance)",
       "sellerType": "Lister Type",
-      "individualOwner": "🏠 Individual Owner (Rehoming)",
+      "individualOwner": "🏠 Individual Owner (Personal Sale)",
       "registeredBreeder": "📋 Registered Breeder (PCA Licensed)",
       "registrationNumber": "PCA Registration Certificate No.",
       "registrationPlaceholder": "Enter your PCA/AWBI registration number",
       "registrationHint": "Required under Prevention of Cruelty to Animals (Dog Breeding & Marketing) Rules 2017, Rule 3. Commercial breeders must hold a valid registration certificate from the State Animal Welfare Board.",
-      "individualInfo": "As an individual owner rehoming your own pet/animal, no commercial registration is required. The PCA (Dog Breeding) Rules 2017 and PCA (Pet Shop) Rules 2018 apply only to commercial breeders and pet shop businesses.",
+      "individualInfo": "As an individual owner selling or giving away your own pet/animal (not as a business), no commercial registration is required. The PCA (Dog Breeding) Rules 2017 and PCA (Pet Shop) Rules 2018 apply only to commercial breeders and pet shop businesses.",
       "welfareAttestation": "🛡️ I attest that the animal(s) listed are healthy, well-cared-for, and not subjected to cruelty as per the Prevention of Cruelty to Animals Act, 1960",
       "welfareHint": "This attestation is required under the Prevention of Cruelty to Animals Act, 1960 (PCA Act). By checking this, you confirm the animal is in good health and has been treated humanely.",
       "legalTitle": "Legal Compliance & Terms",
-      "legalDisclaimer": "This platform operates as a pet rehoming classifieds board in compliance with Indian animal welfare laws. All listings must comply with the Prevention of Cruelty to Animals Act, 1960, the PCA (Dog Breeding & Marketing) Rules, 2017, and the PCA (Pet Shop) Rules, 2018. VetCare does not facilitate direct sales — all transactions occur offline between parties.",
+      "legalDisclaimer": "This platform operates as an animal classifieds board in compliance with Indian animal welfare laws. All listings must comply with the Prevention of Cruelty to Animals Act, 1960, the PCA (Dog Breeding & Marketing) Rules, 2017, and the PCA (Pet Shop) Rules, 2018. VetCare does not facilitate direct sales — all transactions occur offline between parties.",
       "termsAccept": "⚖️ I accept the Terms & Conditions and confirm this listing complies with all applicable animal welfare laws of India",
       "breederNote": "As a registered breeder, your PCA registration certificate number will be displayed on your listing. Admin may verify your registration status. Listing without valid registration may be rejected per Rule 3 of PCA (Dog Breeding & Marketing) Rules, 2017.",
       "complianceTitle": "Compliance & Welfare",
@@ -3467,7 +3467,7 @@
       "attested": "Welfare Attested (PCA Act 1960)",
       "accepted": "Accepted",
       "verified": "Verified",
-      "detailDisclaimer": "This listing is published on a rehoming classifieds board. VetCare does not facilitate direct sales. All transactions occur offline. Comply with PCA Act 1960 and applicable state regulations.",
+      "detailDisclaimer": "This listing is published on an animal classifieds board. VetCare does not facilitate direct sales. All transactions occur offline. Comply with PCA Act 1960 and applicable state regulations.",
       "adoptDontShop": "🐾 Adopt, Don't Shop — Consider adopting from shelters and rescue organizations"
     },
     "monetization": {
@@ -5465,15 +5465,15 @@
     "noHospitalsDesc": "You are not currently assigned to any hospital. Please contact your network administrator to get assigned to a branch hospital."
   },
   "publicMarketplace": {
-    "heroTitle": "Browse Animals for Rehoming",
-    "heroSubtitle": "Discover animals available for rehoming — no login required. Sign in to contact rehomers, place bids, or list your own.",
+    "heroTitle": "Browse Animals for Sale",
+    "heroSubtitle": "Discover animals available for sale — no login required. Sign in to contact sellers, place bids, or list your own.",
     "stats": {
       "activeListings": "Active Listings",
       "species": "Species",
       "categories": "Categories",
-      "sellers": "Rehomers"
+      "sellers": "Sellers"
     },
-    "registerToSell": "Register to Rehome",
+    "registerToSell": "Register to Sell",
     "signInToBid": "Sign In to Bid",
     "goToFullMarketplace": "Go to Full Marketplace",
     "showingResults": "Showing {{count}} of {{total}} listings",
@@ -5481,13 +5481,13 @@
     "next": "Next →",
     "pageOf": "Page {{current}} of {{total}}",
     "ctaBanner": {
-      "title": "Ready to Find a Pet, Rehome or Bid?",
-      "subtitle": "Create a free account to contact rehomers, place bids, rehome your animals and access your full marketplace dashboard.",
+      "title": "Ready to Buy, Sell, or Bid?",
+      "subtitle": "Create a free account to contact sellers, place bids, sell your animals and access your full marketplace dashboard.",
       "register": "Create Free Account",
       "signIn": "Sign In"
     },
     "loginGate": {
-      "buyText": "Sign in to inquire about this animal or contact the rehomer.",
+      "buyText": "Sign in to inquire about this animal or contact the seller.",
       "signInToBuy": "Sign In to Inquire",
       "bidText": "Sign in to place a bid on this listing.",
       "signInToBid": "Sign In to Bid",
@@ -5495,8 +5495,8 @@
       "createAccount": "Don't have an account? Register free →"
     },
     "homeCta": {
-      "title": "Animal Rehoming Board",
-      "subtitle": "Browse animals available for rehoming, farm equipment, feed and veterinary supplies — completely free, no login needed.",
+      "title": "Buy & Sell Marketplace",
+      "subtitle": "Browse animals available for sale, farm equipment, feed and veterinary supplies — completely free, no login needed.",
       "livestock": "Animals",
       "feed": "Feed & Nutrition",
       "equipment": "Equipment",
@@ -5504,14 +5504,14 @@
       "genetics": "Genetics",
       "services": "Vet Services",
       "browseNow": "Browse Marketplace",
-      "sellYours": "Rehome Your Animals"
+      "sellYours": "Sell Your Animals"
     },
     "browseBySpecies": "Browse by Species",
     "browseByCategory": "Browse by Category",
     "tipAllListings": "Show all listings",
     "tipSpecies": "Browse listings by species",
     "tipCategories": "Browse listings by category",
-    "tipSellers": "See the latest from all rehomers"
+    "tipSellers": "See the latest from all sellers"
   },
   "wallet": {
     "pageTitle": "💰 My Wallet",

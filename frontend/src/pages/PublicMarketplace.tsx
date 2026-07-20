@@ -355,7 +355,7 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
       <div className="mp-card-body">
         <div className="mp-card-badges">
           <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-          <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
+          <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.fixedBadge')}</span>
           {tier === 'premium' && <span className="mp-badge premium">⭐</span>}
         </div>
 
@@ -438,7 +438,7 @@ const PublicListingDetail: React.FC<{
         <div className="mp-detail-main">
           <div className="mp-card-badges">
             <span className="mp-badge category">{CATEGORY_ICONS[l.category]} {l.category}</span>
-            <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'rehoming'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
+            <span className={`mp-badge ${listingType === 'auction' ? 'auction' : 'sale'}`}>{listingType === 'auction' ? t('marketplace.listingType.auctionType') : t('marketplace.listingType.fixedPrice')}</span>
             {tier && <span className="mp-badge premium">{{ standard: t('marketplace.tier.standard'), premium: t('marketplace.tier.premium'), spotlight: t('marketplace.tier.spotlight') }[tier as 'standard' | 'premium' | 'spotlight'] || tier}</span>}
             {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}

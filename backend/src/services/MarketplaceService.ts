@@ -1,6 +1,6 @@
 /**
- * Marketplace & Auction Service — Pet Rehoming & Adoption Board
- * Rehome and adopt animals, equipment, and supplies with fixed-price listings,
+ * Marketplace & Auction Service — Buy & Sell Marketplace
+ * Buy and sell animals, equipment, and supplies with fixed-price listings,
  * live auction bidding, order processing, and search.
  * Compliant with PCA Act 1960, Dog Breeding Rules 2017, Pet Shop Rules 2018.
  * Enhanced with livestock-specific fields, admin controls, and market intelligence.
