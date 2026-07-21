@@ -51,6 +51,7 @@ const Marketplace: React.FC = () => {
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Filters
   const [filters, setFilters] = useState<Record<string, string>>({})
@@ -144,8 +145,8 @@ const Marketplace: React.FC = () => {
   }, [])
 
   const fetchDashboard = useCallback(async () => {
-    try { const res = await apiService.getMarketplaceDashboard(); setDashboard(res.data) } catch {}
-  }, [])
+    try { const res = await apiService.getMarketplaceDashboard(); setDashboard(res.data) } catch { setError(t('marketplace.errors.dashboardLoadFailed')) }
+  }, [t])
 
   // Load user's animals for auto-populate
   useEffect(() => {
@@ -179,8 +180,8 @@ const Marketplace: React.FC = () => {
 
   // ── Engagement data loaders ──
   const loadFavoriteIds = useCallback(async () => {
-    try { const res = await apiService.getMarketplaceFavoriteIds(); setFavoriteIds(new Set(res.data?.ids || [])) } catch {}
-  }, [])
+    try { const res = await apiService.getMarketplaceFavoriteIds(); setFavoriteIds(new Set(res.data?.ids || [])) } catch { setError(t('marketplace.errors.favoritesLoadFailed')) }
+  }, [t])
 
   const loadUnreadCount = useCallback(async () => {
     try { const res = await apiService.getMarketplaceUnreadCount(); setUnreadCount(res.data?.unread || 0) } catch {}
@@ -544,7 +545,7 @@ const Marketplace: React.FC = () => {
       ])
       setAdminListings(listRes.data?.items || [])
       setAdminStats(statsRes.data || null)
-    } catch {}
+    } catch { setError(t('marketplace.errors.adminDataLoadFailed')) }
   }
 
   const fetchMonetizationSettings = async () => {
@@ -557,7 +558,7 @@ const Marketplace: React.FC = () => {
       setMonetizationSettings(settingsRes.data || [])
       setMonetizationPlans(plansRes.data || [])
       setMonetizationDashboard(dashRes.data || null)
-    } catch {}
+    } catch { setError(t('marketplace.errors.monetizationLoadFailed')) }
   }
 
   const handleToggleSetting = async (key: string, current: boolean) => {
@@ -953,9 +954,12 @@ const Marketplace: React.FC = () => {
                         return vcId ? (
                           <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#6366f1', background: '#eef2ff', borderRadius: 4, padding: '4px 8px', display: 'inline-block', marginTop: 4, cursor: 'pointer' }}
                             title="VetCare Animal ID — click to copy"
-                            onClick={() => navigator.clipboard?.writeText(vcId).catch(() => {})}
+                            onClick={() => navigator.clipboard?.writeText(vcId).then(() => {
+                              setCopiedId(vcId)
+                              setTimeout(() => setCopiedId(prev => (prev === vcId ? null : prev)), 1500)
+                            }).catch(() => setError(t('common.copyFailed')))}
                           >
-                            🏷️ {vcId}
+                            {copiedId === vcId ? `✅ ${t('common.copied')}` : `🏷️ ${vcId}`}
                           </div>
                         ) : null
                       })()}

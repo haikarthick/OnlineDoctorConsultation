@@ -82,6 +82,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "പകർത്തി!",
+    "copyFailed": "ക്ലിപ്പ്ബോർഡിലേക്ക് പകർത്താൻ കഴിഞ്ഞില്ല",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -1269,7 +1271,8 @@
       "confirmRemove": "ഈ മൃഗത്തെ നീക്കം ചെയ്യണമെന്ന് ഉറപ്പാണോ?",
       "removed": "മൃഗം വിജയകരമായി നീക്കം ചെയ്തു",
       "failedSave": "മൃഗത്തെ സേവ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു",
-      "failedRemove": "മൃഗത്തെ നീക്കം ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു"
+      "failedRemove": "മൃഗത്തെ നീക്കം ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു",
+      "failedLoadEnterprises": "നിങ്ങളുടെ എന്റർപ്രൈസ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല"
     },
     "pageTitle": "എന്റെ മൃഗങ്ങൾ",
     "loading": "മൃഗങ്ങൾ ലോഡ് ചെയ്യുന്നു...",
@@ -2920,6 +2923,12 @@
   "marketplace": {
     "pageTitle": "🏪 വാങ്ങൽ-വിൽപ്പന മാർക്കറ്റ്",
     "subtitle": "മൃഗങ്ങളെ വാങ്ങുകയും വിൽക്കുകയും ചെയ്യുക — ഉപകരണങ്ങളും വെറ്ററിനറി സാമഗ്രികളും ബ്രൗസ് ചെയ്യുക",
+    "errors": {
+      "dashboardLoadFailed": "നിങ്ങളുടെ ഡാഷ്‌ബോർഡ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
+      "favoritesLoadFailed": "നിങ്ങളുടെ പ്രിയപ്പെട്ടവ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
+      "adminDataLoadFailed": "അഡ്മിൻ ലിസ്റ്റിംഗുകളും സ്ഥിതിവിവരക്കണക്കുകളും ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
+      "monetizationLoadFailed": "മോണിറ്റൈസേഷൻ ക്രമീകരണങ്ങൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല"
+    },
     "tabs": {
       "dashboard": "📊 ഡാഷ്‌ബോർഡ്",
       "browse": "🐾 ബ്രൗസ് ചെയ്യുക",
@@ -3654,6 +3663,7 @@
     "loadTrail": "പാത ലോഡ് ചെയ്യുക",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -3825,7 +3835,8 @@
     "next": "അടുത്തത്",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "ഫിൽട്ടർ ഓപ്ഷനുകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല (സ്പെഷ്യലൈസേഷനുകൾ/ഭാഷകൾ)"
   },
   "myBookings": {
     "title": "എന്റെ ബുക്കിങ്ങുകൾ",
@@ -3961,6 +3972,7 @@
     "failedToSendMessage": "Failed to send message",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "റെക്കോർഡിംഗ് മാറ്റത്തെക്കുറിച്ച് മറ്റ് പങ്കാളിയെ അറിയിക്കാൻ കഴിഞ്ഞില്ല",
     "micUnavailable": "Microphone unavailable",
     "cameraStillUnavailable": "Camera still unavailable",
     "duration": "Duration",
@@ -5018,6 +5030,7 @@
     "verify": "പരിശോധിക്കുക",
     "unverify": "പരിശോധന റദ്ദാക്കുക",
     "pendingDocReviews": "തീർപ്പുകാത്തിരിക്കുന്ന രേഖ അവലോകനങ്ങൾ",
+    "pendingLoadFailed": "തീർപ്പുകാത്തിരിക്കുന്ന രേഖ അവലോകനങ്ങൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
     "noDocReviews": "തീർപ്പുകാത്തിരിക്കുന്ന രേഖ അവലോകനങ്ങളില്ല",
     "reviewDocuments": "രേഖകൾ അവലോകനം ചെയ്യുക",
     "verifyHospital": "ആശുപത്രി പരിശോധിക്കുക",
@@ -5383,7 +5396,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "നിങ്ങളുടെ സേവ് ചെയ്ത അറിയിപ്പ് മുൻഗണനകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല — ഡിഫോൾട്ടുകൾ കാണിക്കുന്നു"
   },
   "hospitalNetworks": {
     "title": "Hospital Networks",
@@ -5785,6 +5799,7 @@
     "reorder": {
       "title": "Reorder",
       "supplier": "Supplier",
+      "suppliersLoadFailed": "വിതരണക്കാരുടെ ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
       "selectSupplier": "Select supplier",
       "supplierRequired": "Select a supplier",
       "quantity": "Qty",
@@ -6402,7 +6417,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -6650,6 +6667,7 @@
     "expired": "Expired",
     "failedToLoad": "Failed to load certificates",
     "failedToPrint": "Failed to load certificate for printing",
+    "failedToLoadEnterprises": "ഫിൽട്ടറിംഗിനായി എന്റർപ്രൈസുകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
     "certTypes": {
       "health_certificate": "General Health Certificate",
       "fitness_to_travel": "Fitness to Travel Certificate",
@@ -6697,6 +6715,7 @@
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
     "failedToCreate": "Failed to create certificate",
+    "failedToLoadEnterprises": "എന്റർപ്രൈസ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
     "noCertTypeSelected": "Please select a certificate type",
     "viewAllCertificates": "View All Certificates",
     "createAnother": "Create Another",
@@ -6827,6 +6846,7 @@
     "clinicalNotes": "Clinical Notes (optional)",
     "clinicalNotesPlaceholder": "Include relevant history, current condition, and what you need from the receiving hospital...",
     "reasonPlaceholder": "e.g., Specialist consultation needed, surgical intervention required...",
+    "hospitalsLoadFailed": "Failed to load network hospitals list",
     "selectHospital": "— Select hospital —",
     "selectVet": "— Select vet (optional) —",
     "sending": "Sending Referral...",
@@ -7137,6 +7157,7 @@
     "subtitle": "ഡോക്ടർതല കമ്മീഷൻ ഓവർറൈഡുകൾ — ശൂന്യമായ ഫീൽഡുകൾ ഗ്ലോബൽ ഡിഫോൾട്ട് ഉപയോഗിക്കുന്നു",
     "globalSettings": "ഗ്ലോബൽ ഡിഫോൾട്ടുകൾ",
     "globalInfo": "ഗ്ലോബൽ ഡിഫോൾട്ട്: {{percent}}% + ഓരോ പെയ്ഡ് ബുക്കിംഗിനും {{flat}} ഫ്ലാറ്റ് ഫീസ്. System Settings ൽ മാറ്റുക.",
+    "globalsLoadFailed": "നിലവിലെ ഗ്ലോബൽ കമ്മീഷൻ ഡിഫോൾട്ടുകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല — ഫാൾബാക്ക് മൂല്യങ്ങൾ കാണിക്കുന്നു",
     "saved": "ഓവർറൈഡ് സേവ് ചെയ്തു. പുതിയ പേയ്മെന്റുകൾക്ക് മാത്രം ബാധകം.",
     "saveFailed": "ഓവർറൈഡ് സേവ് ചെയ്യാനായില്ല.",
     "searchPlaceholder": "പേര് അല്ലെങ്കിൽ ഇമെയിൽ ഉപയോഗിച്ച് ഡോക്ടറെ തിരയുക…",

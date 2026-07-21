@@ -88,6 +88,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "ನಕಲಿಸಲಾಗಿದೆ!",
+    "copyFailed": "ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -1269,7 +1271,8 @@
       "confirmRemove": "Are you sure you want to remove this animal?",
       "removed": "Animal removed successfully",
       "failedSave": "ಪ್ರಾಣಿಯನ್ನು ಉಳಿಸಲು ವಿಫಲವಾಯಿತು",
-      "failedRemove": "ಪ್ರಾಣಿಯನ್ನು ತೆಗೆದುಹಾಕಲು ವಿಫಲವಾಯಿತು"
+      "failedRemove": "ಪ್ರಾಣಿಯನ್ನು ತೆಗೆದುಹಾಕಲು ವಿಫಲವಾಯಿತು",
+      "failedLoadEnterprises": "ನಿಮ್ಮ ಎಂಟರ್‌ಪ್ರೈಸ್‌ಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"
     },
     "pageTitle": "ನನ್ನ ಪ್ರಾಣಿಗಳು",
     "loading": "ಪ್ರಾಣಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
@@ -3123,6 +3126,12 @@
   "marketplace": {
     "pageTitle": "🏪 ಖರೀದಿ-ಮಾರಾಟ ಮಾರುಕಟ್ಟೆ",
     "subtitle": "ಪ್ರಾಣಿಗಳನ್ನು ಖರೀದಿಸಿ ಮತ್ತು ಮಾರಾಟ ಮಾಡಿ — ಉಪಕರಣಗಳು ಮತ್ತು ಪಶುವೈದ್ಯ ಸರಬರಾಜುಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ",
+    "errors": {
+      "dashboardLoadFailed": "ನಿಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
+      "favoritesLoadFailed": "ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
+      "adminDataLoadFailed": "ನಿರ್ವಾಹಕ ಪಟ್ಟಿಗಳು ಮತ್ತು ಅಂಕಿಅಂಶಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
+      "monetizationLoadFailed": "ಹಣಗಳಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"
+    },
     "tabs": {
       "dashboard": "📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
       "browse": "🛒 ಬ್ರೌಸ್",
@@ -3861,6 +3870,7 @@
     "loadTrail": "Load Trail",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -4032,7 +4042,8 @@
     "next": "ಮುಂದಿನ",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "ಫಿಲ್ಟರ್ ಆಯ್ಕೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ (ವಿಶೇಷತೆಗಳು/ಭಾಷೆಗಳು)"
   },
   "myBookings": {
     "title": "ನನ್ನ ಬುಕಿಂಗ್‌ಗಳು",
@@ -4168,6 +4179,7 @@
     "failedToSendMessage": "Failed to send message",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "ರೆಕಾರ್ಡಿಂಗ್ ಬದಲಾವಣೆಯ ಬಗ್ಗೆ ಇತರ ಭಾಗವಹಿಸುವವರಿಗೆ ತಿಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
     "micUnavailable": "Microphone unavailable",
     "cameraStillUnavailable": "Camera still unavailable",
     "duration": "Duration",
@@ -5258,6 +5270,7 @@
     "verify": "ಪರಿಶೀಲಿಸಿ",
     "unverify": "ಪರಿಶೀಲನೆ ತೆಗೆದುಹಾಕಿ",
     "pendingDocReviews": "ಬಾಕಿ ದಾಖಲೆ ಪರಿಶೀಲನೆಗಳು",
+    "pendingLoadFailed": "ಬಾಕಿ ದಾಖಲೆ ಪರಿಶೀಲನೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
     "noDocReviews": "ಬಾಕಿ ದಾಖಲೆ ಪರಿಶೀಲನೆಗಳಿಲ್ಲ",
     "reviewDocuments": "ದಾಖಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ",
     "verifyHospital": "ಆಸ್ಪತ್ರೆಯನ್ನು ಪರಿಶೀಲಿಸಿ",
@@ -5732,7 +5745,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -5993,6 +6008,7 @@
     "expired": "Expired",
     "failedToLoad": "Failed to load certificates",
     "failedToPrint": "Failed to load certificate for printing",
+    "failedToLoadEnterprises": "ಫಿಲ್ಟರಿಂಗ್‌ಗಾಗಿ ಎಂಟರ್‌ಪ್ರೈಸ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
     "certTypes": {
       "health_certificate": "General Health Certificate",
       "fitness_to_travel": "Fitness to Travel Certificate",
@@ -6039,6 +6055,7 @@
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
     "failedToCreate": "ಪ್ರಮಾಣಪತ್ರ ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ",
+    "failedToLoadEnterprises": "ಎಂಟರ್‌ಪ್ರೈಸ್‌ಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
     "noCertTypeSelected": "ದಯವಿಟ್ಟು ಪ್ರಮಾಣಪತ್ರ ಪ್ರಕಾರ ಆಯ್ಕೆಮಾಡಿ",
     "viewAllCertificates": "ಎಲ್ಲಾ ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ನೋಡಿ",
     "createAnother": "ಮತ್ತೊಂದನ್ನು ರಚಿಸಿ",
@@ -6377,6 +6394,7 @@
     "create": "ರೆಫರಲ್ ರಚಿಸಿ",
     "createTitle": "ರೋಗಿಯನ್ನು ನೆಟ್‌ವರ್ಕ್ ಆಸ್ಪತ್ರೆಗೆ ರೆಫರ್ ಮಾಡಿ",
     "createSubtitle": "ಈ ರೋಗಿಯನ್ನು ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್‌ನ ಇನ್ನೊಂದು ಆಸ್ಪತ್ರೆಗೆ ಕಳುಹಿಸಿ",
+    "hospitalsLoadFailed": "ನೆಟ್‌ವರ್ಕ್ ಆಸ್ಪತ್ರೆಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
     "toHospital": "ಸ್ವೀಕರಿಸುವ ಆಸ್ಪತ್ರೆ *",
     "toVet": "ಸ್ವೀಕರಿಸುವ ಪಶುವೈದ್ಯ (ಐಚ್ಛಿಕ)",
     "reason": "ರೆಫರಲ್ ಕಾರಣ *",
@@ -6652,7 +6670,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "ನಿಮ್ಮ ಉಳಿಸಿದ ಅಧಿಸೂಚನೆ ಆದ್ಯತೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ — ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ"
   },
   "emailTemplates": {
     "title": "ಇಮೇಲ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳು",
@@ -6840,6 +6859,7 @@
     "reorder": {
       "title": "Reorder",
       "supplier": "Supplier",
+      "suppliersLoadFailed": "ಪೂರೈಕೆದಾರರ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
       "selectSupplier": "Select supplier",
       "supplierRequired": "Select a supplier",
       "quantity": "Qty",
@@ -7156,6 +7176,7 @@
     "subtitle": "ವೈದ್ಯ-ಮಟ್ಟದ ಕಮಿಷನ್ ಓವರ್‌ರೈಡ್‌ಗಳು — ಖಾಲಿ ಕ್ಷೇತ್ರಗಳು ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್ ಬಳಸುತ್ತವೆ",
     "globalSettings": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್‌ಗಳು",
     "globalInfo": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್: {{percent}}% + ಪ್ರತಿ ಪಾವತಿ ಬುಕಿಂಗ್‌ಗೆ {{flat}} ಫ್ಲಾಟ್ ಶುಲ್ಕ. System Settings ನಲ್ಲಿ ಬದಲಾಯಿಸಿ.",
+    "globalsLoadFailed": "ಪ್ರಸ್ತುತ ಜಾಗತಿಕ ಕಮಿಷನ್ ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ — ಫಾಲ್‌ಬ್ಯಾಕ್ ಮೌಲ್ಯಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ",
     "saved": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲಾಗಿದೆ. ಹೊಸ ಪಾವತಿಗಳಿಗೆ ಮಾತ್ರ ಅನ್ವಯ.",
     "saveFailed": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ.",
     "searchPlaceholder": "ಹೆಸರು ಅಥವಾ ಇಮೇಲ್ ಮೂಲಕ ವೈದ್ಯರನ್ನು ಹುಡುಕಿ…",

@@ -111,6 +111,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'passport' | 'compliance' | 'history'>('passport')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Passport data — keyed by animalId
   const [passports, setPassports] = useState<PassportAnimal[]>([])
@@ -324,10 +325,17 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                 <div
                   className="vc-id-badge"
                   title={`VetCare ID — click to copy`}
-                  onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(animal.animalUniqueId!).catch(() => {}) }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const id = animal.animalUniqueId!
+                    navigator.clipboard?.writeText(id).then(() => {
+                      setCopiedId(id)
+                      setTimeout(() => setCopiedId(prev => (prev === id ? null : prev)), 1500)
+                    }).catch(() => setError(t('common.copyFailed')))
+                  }}
                   style={{ cursor: 'pointer', fontFamily: 'monospace', fontSize: 11, color: '#6366f1', background: '#eef2ff', borderRadius: 4, padding: '2px 6px', display: 'inline-block', marginTop: 2 }}
                 >
-                  🏷️ {animal.animalUniqueId}
+                  {copiedId === animal.animalUniqueId ? `✅ ${t('common.copied')}` : `🏷️ ${animal.animalUniqueId}`}
                 </div>
               )}
               <div className="vp-animal-meta">

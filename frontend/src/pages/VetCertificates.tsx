@@ -84,8 +84,8 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
     apiService.listEnterprises({ limit: 100 }).then(res => {
       const items = res.data?.items || res.data?.enterprises || (Array.isArray(res.data) ? res.data : [])
       setEnterpriseOptions(items.map((e: any) => ({ id: e.id, name: e.name })))
-    }).catch(() => {})
-  }, [isFarmerOrAdmin])
+    }).catch(() => setError(t('vetCertificates.failedToLoadEnterprises')))
+  }, [isFarmerOrAdmin, t])
 
   const loadCertificates = useCallback(async () => {
     try {

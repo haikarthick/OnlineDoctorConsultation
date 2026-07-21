@@ -102,8 +102,8 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
         const find = (k: string) => arr.find((s: any) => s.key === k)?.value
         setGlobals({ percent: find('commission.defaultPercent') || '15', flat: find('commission.flatFee') || '20' })
       })
-      .catch(() => {})
-  }, [])
+      .catch(() => setMessage(t('commissionAdmin.globalsLoadFailed')))
+  }, [t])
 
   const save = useCallback(async (doctorId: string) => {
     const e = edits[doctorId]

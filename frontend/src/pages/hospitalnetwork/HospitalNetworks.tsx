@@ -1165,7 +1165,7 @@ const HospitalNetworks: React.FC = () => {
       (apiService as any).client
         .get(`/hospital-networks/${selectedNetwork.id}/hospitals`)
         .then((res: any) => setReferralNetworkHospitals(res.data?.hospitals || res.data || []))
-        .catch(() => {})
+        .catch(() => setReferralError(t('networkReferrals.hospitalsLoadFailed')))
     }
   }, [showCreateReferralModal, selectedNetwork])
 

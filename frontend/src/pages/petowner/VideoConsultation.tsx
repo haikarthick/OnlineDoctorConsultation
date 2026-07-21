@@ -434,7 +434,7 @@ setNewMessage(messageText) // restore message on failure
         mediaRecorderRef.current = recorder
         setIsRecording(true)
         if (session) {
-          apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => {})
+          apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => setError(t('videoConsultation.recordingNotifyFailed')))
         }
       } catch (err) {
 setError(t('videoConsultation.failedToStartRecording'))
@@ -447,7 +447,7 @@ setError(t('videoConsultation.failedToStartRecording'))
       }
       setIsRecording(false)
       if (session) {
-        apiService.sendVideoMessage(session.id, '⏹️ Recording stopped').catch(() => {})
+        apiService.sendVideoMessage(session.id, '⏹️ Recording stopped').catch(() => setError(t('videoConsultation.recordingNotifyFailed')))
       }
     }
   }
