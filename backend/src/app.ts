@@ -35,11 +35,15 @@ app.use(helmet({
       // for the widget's own API/analytics calls.
       scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.razorpay.com"],
+      // res.cloudinary.com: marketplace listing images/video (CloudinaryStorage
+      // driver) — added 2026-07-21, without it every Cloudinary-hosted image
+      // and video renders as a broken icon (uploads succeed, delivery is
+      // silently CSP-blocked since it's a cross-origin img/video src).
+      imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.razorpay.com", "https://res.cloudinary.com"],
       connectSrc: ["'self'", "https://*.tile.openstreetmap.org", "wss:", "ws:", "https://api.groq.com", "https://*.razorpay.com"],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
-      mediaSrc: ["'self'", "blob:"],
+      mediaSrc: ["'self'", "blob:", "https://res.cloudinary.com"],
       frameSrc: ["https://*.razorpay.com"],
     },
   },
