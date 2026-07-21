@@ -74,9 +74,29 @@ function getMigrationFiles(): { name: string; path: string }[] {
 
 async function runMigrations() {
   const pool = getPool();
+  // Escape hatch: if a fresh migration turns out to have broken something on
+  // the real production DB in a way that wasn't caught in review, this lets
+  // ops revert to the old tolerate-and-continue behavior via a Render env
+  // var flip — no code rollback/redeploy needed — while we fix it forward.
+  const failFast = (process.env.MIGRATIONS_FAIL_FAST || 'true').toLowerCase() !== 'false';
   try {
-    await ensureTrackingTable(pool);
-    const applied = await getAppliedMigrations(pool);
+    // Connecting/reading migration state is kept separate from *running*
+    // migrations below: a failure here means we couldn't even reach the DB
+    // (e.g. Render free-tier cold start — already retried extensively in the
+    // schema-setup step before this script gets here) and is NOT evidence of
+    // a broken migration. render-start.sh treats this exit code (2) as
+    // transient and tolerates it, same as the old behavior; it treats exit
+    // code 1 (below, an actual migration SQL failure) as fatal.
+    let applied: Set<string>;
+    try {
+      await ensureTrackingTable(pool);
+      applied = await getAppliedMigrations(pool);
+    } catch (err) {
+      console.error(`  ⚠ Could not reach the database to check migration state: ${(err as Error).message}`);
+      process.exitCode = 2;
+      return;
+    }
+
     const files = getMigrationFiles();
     const pending = files.filter(f => !applied.has(f.name));
 
@@ -87,6 +107,7 @@ async function runMigrations() {
 
     console.log(`Running ${pending.length} pending migration(s)...\n`);
 
+    const failedMigrations: string[] = [];
     for (const migration of pending) {
       const sql = fs.readFileSync(migration.path, 'utf-8');
       const client = await pool.connect();
@@ -104,15 +125,30 @@ async function runMigrations() {
         await client.query('ROLLBACK');
         console.error(`  ✗ ${migration.name} — ROLLED BACK`);
         console.error(`    Error: ${(err as Error).message}`);
-        // Don't exit(1) — log warning and continue with remaining migrations
-        // render-start.sh has || echo "continuing" fallback anyway
-        console.error(`  ⚠ Continuing with next migration...`);
+        failedMigrations.push(migration.name);
       } finally {
         client.release();
       }
     }
 
-    console.log(`\n✓ ${pending.length} migration(s) applied successfully.`);
+    const succeededCount = pending.length - failedMigrations.length;
+    if (failedMigrations.length > 0) {
+      console.error(
+        `\n✗ ${failedMigrations.length}/${pending.length} migration(s) FAILED: ${failedMigrations.join(', ')}`
+      );
+      if (failFast) {
+        console.error(
+          '  Aborting deploy (MIGRATIONS_FAIL_FAST=true, the default) — the server will not start ' +
+          'against a partially-migrated schema. Set MIGRATIONS_FAIL_FAST=false to temporarily revert ' +
+          'to the old tolerate-and-continue behavior while investigating.'
+        );
+        process.exitCode = 1;
+        return;
+      }
+      console.error('  MIGRATIONS_FAIL_FAST=false — continuing despite the failure(s) above.');
+    } else {
+      console.log(`\n✓ ${succeededCount} migration(s) applied successfully.`);
+    }
   } finally {
     await pool.end();
   }

@@ -183,6 +183,7 @@ class PostgresDatabase {
       }
 
       logger.info(`SQL migrations: applying ${pending.length} pending file(s)...`);
+      const failed: string[] = [];
       for (const file of pending) {
         const sql = fs.readFileSync(path.join(migDir, file), 'utf-8');
         const client = await this.pool.connect();
@@ -195,15 +196,49 @@ class PostgresDatabase {
         } catch (err: any) {
           await client.query('ROLLBACK');
           logger.error(`  ✗ Migration failed (${file}): ${err.message}`);
+          failed.push(file);
         } finally {
           client.release();
         }
+      }
+      // This runner deliberately never throws — the server has already bound its
+      // port by the time it runs (see index.ts's startServer), and that process is
+      // designed to stay up and self-heal rather than crash over a DB issue once
+      // live. The actual deploy gate is render-start.sh's separate, earlier
+      // `node dist/utils/migrate.js` step, which DOES abort the deploy on a
+      // genuine migration failure (MIGRATIONS_FAIL_FAST, default true) — by the
+      // time this in-process runner executes, `pending` should normally be empty.
+      // This aggregate line exists so a failure here (e.g. this runner disagreeing
+      // with the CLI runner about pending state) is impossible to miss in logs.
+      if (failed.length > 0) {
+        logger.error(
+          `SQL migrations: ${failed.length}/${pending.length} FAILED — server is running with a partially-migrated schema`,
+          { failed }
+        );
+      } else {
+        logger.info(`SQL migrations: ${pending.length} applied successfully`);
       }
     } catch (error: any) {
       logger.warn('SQL migration runner error', { error: error.message });
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // Everything below this point (ensureSchemaPublic and the various
+  // ensure*Table / ensure*Column private methods later in this class) is a
+  // legacy, pre-migrations mechanism: ad-hoc idempotent CREATE TABLE IF NOT
+  // EXISTS / ALTER TABLE ADD COLUMN IF NOT EXISTS statements run on every
+  // startup, many wrapped in a bare `.catch(() => {})` that silently
+  // swallows failures. It predates backend/migrations/ and is kept only
+  // for schema that already depends on it — it is NOT tracked, NOT
+  // versioned, and NOT covered by MIGRATIONS_FAIL_FAST.
+  //
+  // Do not add new schema changes here. Use `npm run migrate:create <name>`
+  // to add a new file under backend/migrations/ instead — that path is
+  // transactional, tracked in _migrations, and (via render-start.sh's
+  // separate migrate.js deploy step) actually blocks a bad deploy instead
+  // of silently shipping a partially-migrated schema.
+  // ─────────────────────────────────────────────────────────────────
   private async ensureSchema(): Promise<void> {
     return this.ensureSchemaPublic();
   }
