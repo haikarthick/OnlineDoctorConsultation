@@ -2,7 +2,7 @@
 -- Adds: staff_positions, appointment_queue, workflow_cases, workflow_transitions, referrals, inpatient_admissions
 
 CREATE TABLE IF NOT EXISTS staff_positions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   position VARCHAR(50) NOT NULL
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS staff_positions (
 );
 
 CREATE TABLE IF NOT EXISTS appointment_queue (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
   animal_id UUID REFERENCES animals(id) ON DELETE SET NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS appointment_queue (
 );
 
 CREATE TABLE IF NOT EXISTS workflow_cases (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   queue_entry_id UUID REFERENCES appointment_queue(id) ON DELETE SET NULL,
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   booking_id UUID REFERENCES bookings(id) ON DELETE SET NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS workflow_cases (
 );
 
 CREATE TABLE IF NOT EXISTS workflow_transitions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   case_id UUID NOT NULL REFERENCES workflow_cases(id) ON DELETE CASCADE,
   from_stage VARCHAR(30),
   to_stage VARCHAR(30) NOT NULL,
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS workflow_transitions (
 );
 
 CREATE TABLE IF NOT EXISTS referrals (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   case_id UUID REFERENCES workflow_cases(id) ON DELETE SET NULL,
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   from_vet_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS referrals (
 );
 
 CREATE TABLE IF NOT EXISTS inpatient_admissions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id UUID REFERENCES vet_hospitals(id) ON DELETE CASCADE,
   animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
   owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

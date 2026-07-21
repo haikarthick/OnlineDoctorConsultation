@@ -17,7 +17,7 @@ END $$;
 -- ── Add patientNoShowRescheduleLimit setting ─────────────────
 INSERT INTO system_settings (id, key, value, category, description)
 VALUES (
-  uuid_generate_v4(),
+  gen_random_uuid(),
   'booking.patientNoShowRescheduleLimit',
   '1',
   'booking',

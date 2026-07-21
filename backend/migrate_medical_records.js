@@ -39,7 +39,7 @@ async function migrate() {
     console.log('3. Creating vaccination_records table...');
     await client.query(`
       CREATE TABLE IF NOT EXISTS vaccination_records (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
         vaccine_name VARCHAR(255) NOT NULL,
         vaccine_type VARCHAR(100),
@@ -63,7 +63,7 @@ async function migrate() {
     console.log('4. Creating weight_history table...');
     await client.query(`
       CREATE TABLE IF NOT EXISTS weight_history (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
         weight DECIMAL(8,2) NOT NULL,
         unit VARCHAR(10) DEFAULT 'kg',
@@ -78,7 +78,7 @@ async function migrate() {
     console.log('5. Creating allergy_records table...');
     await client.query(`
       CREATE TABLE IF NOT EXISTS allergy_records (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
         allergen VARCHAR(255) NOT NULL,
         reaction TEXT,
@@ -96,7 +96,7 @@ async function migrate() {
     console.log('6. Creating medical_record_audit_log table...');
     await client.query(`
       CREATE TABLE IF NOT EXISTS medical_record_audit_log (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         record_id UUID NOT NULL,
         record_type VARCHAR(50) NOT NULL,
         action VARCHAR(50) NOT NULL,
@@ -114,7 +114,7 @@ async function migrate() {
     console.log('7. Creating lab_results table...');
     await client.query(`
       CREATE TABLE IF NOT EXISTS lab_results (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         animal_id UUID NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
         consultation_id UUID REFERENCES consultations(id) ON DELETE SET NULL,
         medical_record_id UUID REFERENCES medical_records(id) ON DELETE SET NULL,
