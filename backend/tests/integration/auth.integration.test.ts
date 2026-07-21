@@ -44,8 +44,11 @@ describe('Integration Tests - Auth Routes', () => {
 
   describe('GET /api/v1/health', () => {
     it('should return health status', async () => {
-      // Mock database connectivity for health check
-      (database.query as jest.Mock).mockResolvedValue({ rows: [{ ok: 1 }] });
+      // Mock database connectivity + schema/users-table checks for health check
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [{ ok: 1 }] })              // SELECT 1 AS ok
+        .mockResolvedValueOnce({ rows: [{ users_exists: true }] }) // information_schema check
+        .mockResolvedValueOnce({ rows: [{ cnt: 0 }] });            // users count
 
       const response = await request(app)
         .get('/api/v1/health');

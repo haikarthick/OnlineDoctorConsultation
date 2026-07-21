@@ -15,8 +15,9 @@ interface SignalMessage {
 
 const signalStore = new Map<string, SignalMessage[]>();
 
-// Clean up stale signals older than 5 minutes every 2 minutes
-setInterval(() => {
+// Clean up stale signals older than 5 minutes every 2 minutes.
+// unref() so this timer alone doesn't keep the process (or a test worker) alive.
+const signalCleanupInterval = setInterval(() => {
   const cutoff = Date.now() - 5 * 60 * 1000;
   for (const [sessionId, signals] of signalStore) {
     const fresh = signals.filter(s => s.timestamp > cutoff);
@@ -24,6 +25,7 @@ setInterval(() => {
     else signalStore.set(sessionId, fresh);
   }
 }, 2 * 60 * 1000);
+signalCleanupInterval.unref();
 
 class VideoSessionService {
   async createSession(hostUserId: string, data: CreateVideoSessionDTO): Promise<VideoSession> {
