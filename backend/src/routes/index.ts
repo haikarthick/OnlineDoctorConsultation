@@ -112,7 +112,7 @@ import VetHospitalService from '../services/VetHospitalService';
 import WalletController from '../controllers/WalletController';
 import StaffWorkflowController from '../controllers/StaffWorkflowController';
 import { FileController } from '../controllers/FileController';
-import { uploadAny } from '../middleware/upload';
+import { uploadAny, uploadImage, uploadVideo } from '../middleware/upload';
 import AdminService from '../services/AdminService';
 import PermissionService from '../services/PermissionService';
 import NetworkRolePermissionService from '../services/NetworkRolePermissionService';
@@ -2877,6 +2877,8 @@ router.post('/repair-schema', async (_req, res) => {
 
 // ─── File Uploads ────────────────────────────────────────────
 router.post('/files/upload', authMiddleware, uploadAny.single('file'), asyncHandler((req: Request, res: Response) => FileController.upload(req, res)));
+router.post('/files/upload-image', authMiddleware, uploadImage.single('file'), asyncHandler((req: Request, res: Response) => FileController.upload(req, res)));
+router.post('/files/upload-video', authMiddleware, uploadVideo.single('file'), asyncHandler((req: Request, res: Response) => FileController.uploadVideo(req, res)));
 router.post('/files/upload-multiple', authMiddleware, uploadAny.array('files', 10), asyncHandler((req: Request, res: Response) => FileController.uploadMultiple(req, res)));
 router.get('/files', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.list(req, res)));
 router.delete('/files/*', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.remove(req, res)));

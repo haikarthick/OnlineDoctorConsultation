@@ -29,6 +29,8 @@ export interface StoredFile {
   url: string;
   /** Storage key (path or S3 key) */
   key: string;
+  /** Video duration in seconds — only set by drivers that can report it (Cloudinary) */
+  duration?: number;
 }
 
 export interface StorageDriver {
@@ -139,11 +141,107 @@ class S3Storage implements StorageDriver {
   }
 }
 
+// ── Cloudinary Storage Driver ──────────────────────────────────
+// Free-tier friendly: images are auto-optimized (format/quality/size-capped)
+// on upload, videos are stored with auto quality so delivery adapts to the
+// viewer's connection. Resource type (image vs video) is inferred from the
+// upload folder — callers append '/video' for video uploads — so delete()
+// knows which Cloudinary API to call without changing the StorageDriver
+// interface.
+
+const VIDEO_FOLDER_MARKER = '/video';
+
+class CloudinaryStorage implements StorageDriver {
+  private cloudinary: typeof import('cloudinary').v2;
+
+  constructor() {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { v2 } = require('cloudinary');
+    this.cloudinary = v2;
+
+    if (process.env.CLOUDINARY_URL) {
+      // SDK auto-parses CLOUDINARY_URL (cloudinary://key:secret@cloud_name) — nothing else to do.
+      this.cloudinary.config({ secure: true });
+    } else {
+      this.cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+        secure: true,
+      });
+    }
+    logger.info(`Cloudinary storage driver initialised — cloud=${this.cloudinary.config().cloud_name || '(from CLOUDINARY_URL)'}`);
+  }
+
+  private isVideo(folder: string, mimetype: string): boolean {
+    return folder.endsWith(VIDEO_FOLDER_MARKER) || mimetype.startsWith('video/');
+  }
+
+  async save(file: Express.Multer.File, folder: string): Promise<StoredFile> {
+    const isVideo = this.isVideo(folder, file.mimetype);
+    const resourceType = isVideo ? 'video' : 'image';
+
+    const uploadOptions: Record<string, any> = {
+      folder,
+      resource_type: resourceType,
+      // Unique, filesystem-safe public_id — Cloudinary would otherwise derive
+      // one from the original filename, which can collide or leak PII.
+      public_id: `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`,
+    };
+    if (isVideo) {
+      // q_auto adapts bitrate/quality to the viewer's connection on delivery.
+      uploadOptions.transformation = [{ quality: 'auto', fetch_format: 'auto' }];
+    } else {
+      // Cap the longest side at 1600px (matches the resize target proven out
+      // by Craigslist/Facebook for user-submitted photos) and auto-optimize
+      // format/quality so mobile viewers on slow connections aren't stuck
+      // downloading full-resolution originals.
+      uploadOptions.transformation = [
+        { width: 1600, height: 1600, crop: 'limit' },
+        { quality: 'auto', fetch_format: 'auto' },
+      ];
+    }
+
+    const result: any = await new Promise((resolve, reject) => {
+      const uploadStream = this.cloudinary.uploader.upload_stream(uploadOptions, (err: any, res: any) => {
+        if (err) reject(err); else resolve(res);
+      });
+      uploadStream.end(file.buffer);
+    });
+
+    return {
+      originalName: file.originalname,
+      fileName: `${result.public_id}.${result.format}`,
+      mimeType: file.mimetype,
+      size: result.bytes,
+      url: result.secure_url,
+      key: result.public_id,
+      duration: typeof result.duration === 'number' ? result.duration : undefined,
+    };
+  }
+
+  async delete(key: string): Promise<void> {
+    const resourceType = key.includes(VIDEO_FOLDER_MARKER) ? 'video' : 'image';
+    try {
+      await this.cloudinary.uploader.destroy(key, { resource_type: resourceType });
+    } catch (err: any) {
+      logger.warn(`Cloudinary delete failed for key=${key}: ${err.message}`);
+    }
+  }
+
+  getUrl(key: string): string {
+    const resourceType = key.includes(VIDEO_FOLDER_MARKER) ? 'video' : 'image';
+    return this.cloudinary.url(key, { resource_type: resourceType, secure: true });
+  }
+}
+
 // ── Factory ───────────────────────────────────────────────────
 
 function createStorageDriver(): StorageDriver {
   const driver = (process.env.STORAGE_DRIVER || 'local').toLowerCase();
   switch (driver) {
+    case 'cloudinary':
+      return new CloudinaryStorage();
     case 's3':
       return new S3Storage();
     case 'local':

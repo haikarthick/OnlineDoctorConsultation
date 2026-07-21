@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
+import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
 import './Marketplace.css'
 import './PublicMarketplace.css'
 
@@ -349,7 +350,7 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
       {tier === 'spotlight' && !isHot && <div className="mp-hot-ribbon spotlight-ribbon">{t('marketplace.card.spotlightLabel')}</div>}
 
       <div className="mp-card-img">
-        {images.length > 0 ? <img src={images[0]} alt={l.title} /> : <div className="mp-card-img-placeholder">{CATEGORY_ICONS[l.category] || '📦'}</div>}
+        {images.length > 0 ? <img {...cldCardImageProps(images[0])} alt={l.title} loading="lazy" /> : <div className="mp-card-img-placeholder">{CATEGORY_ICONS[l.category] || '📦'}</div>}
       </div>
 
       <div className="mp-card-body">
@@ -429,6 +430,9 @@ const PublicListingDetail: React.FC<{
   const breederVerified = g(l, 'breederVerified', 'breeder_verified')
   const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
+  const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
+  const videoUrl = g(l, 'videoUrl', 'video_url')
+  const [activeImageIdx, setActiveImageIdx] = React.useState(0)
 
   return (
     <div className="mp-detail">
@@ -443,6 +447,29 @@ const PublicListingDetail: React.FC<{
             {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
           </div>
+
+          {images.length > 0 && (
+            <div className="mp-detail-gallery">
+              <div className="mp-detail-gallery-main">
+                <img {...cldDetailImageProps(images[activeImageIdx])} alt={l.title} />
+              </div>
+              {images.length > 1 && (
+                <div className="mp-detail-gallery-thumbs">
+                  {images.map((img: string, i: number) => (
+                    <button key={i} type="button" className={`mp-detail-thumb ${i === activeImageIdx ? 'active' : ''}`} onClick={() => setActiveImageIdx(i)}>
+                      <img {...cldCardImageProps(img)} alt={`${l.title} ${i + 1}`} loading="lazy" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {videoUrl && (
+            <div className="mp-detail-video">
+              <video controls preload="metadata" src={videoUrl} className="mp-detail-video-el" />
+            </div>
+          )}
 
           <h2>{l.title}</h2>
           <p className="mp-sell-step-desc">{l.description || t('marketplace.detail.noDescription')}</p>

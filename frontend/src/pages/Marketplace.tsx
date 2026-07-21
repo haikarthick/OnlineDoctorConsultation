@@ -8,6 +8,7 @@ import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
+import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
 import { SPECIES_CATEGORIES, breedsForSpecies } from '../constants/speciesBreeds'
 
 const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
@@ -23,6 +24,34 @@ const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
 const FARMER_SPECIES_LIST = ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Poultry', 'Dog', 'Cat', 'Other']
 const PET_OWNER_SPECIES_LIST = ['Dog', 'Cat', 'Horse', 'Rabbit', 'Cow', 'Buffalo', 'Goat', 'Sheep', 'Camel', 'Pig', 'Poultry', 'Other']
+
+// Media limits — mirror backend caps (uploadImage/uploadVideo in
+// backend/src/middleware/upload.ts, MAX_VIDEO_DURATION_SECONDS in
+// FileController.ts). Checked client-side first so a farmer on a slow
+// mobile connection gets instant feedback instead of uploading a file
+// that the backend will just reject.
+const MAX_LISTING_IMAGES = 4
+const MAX_IMAGE_SIZE_MB = 5
+const MAX_VIDEO_SIZE_MB = 100
+const MAX_VIDEO_DURATION_SECONDS = 60
+
+/** Reads a video file's duration client-side via an offscreen <video> element. */
+function readVideoDuration(file: File): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    const objectUrl = URL.createObjectURL(file)
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(objectUrl)
+      resolve(video.duration)
+    }
+    video.onerror = () => {
+      URL.revokeObjectURL(objectUrl)
+      reject(new Error('Could not read video metadata'))
+    }
+    video.src = objectUrl
+  })
+}
 
 type TabKey = 'dashboard' | 'browse' | 'sell' | 'auctions' | 'orders' | 'messages' | 'favorites' | 'saved' | 'prices' | 'admin'
 
@@ -136,6 +165,7 @@ const Marketplace: React.FC = () => {
   const [userAnimals, setUserAnimals] = useState<any[]>([])
   const [selectedAnimalId, setSelectedAnimalId] = useState('')
   const [uploadingImages, setUploadingImages] = useState(false)
+  const [uploadingVideo, setUploadingVideo] = useState(false)
 
   // Load auction enabled state on mount
   useEffect(() => {
@@ -307,13 +337,41 @@ const Marketplace: React.FC = () => {
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
+      setError(t('marketplace.sell.videoTooLarge', { maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Video is too large — max ${MAX_VIDEO_SIZE_MB}MB` }))
+      e.target.value = ''
+      return
+    }
+
+    // Fail fast on the device before spending mobile data on an upload
+    // the backend will reject anyway.
     try {
-      const res = await apiService.uploadFile(file, 'marketplace')
+      const duration = await readVideoDuration(file)
+      if (duration > MAX_VIDEO_DURATION_SECONDS) {
+        setError(t('marketplace.sell.videoTooLong', { maxSec: MAX_VIDEO_DURATION_SECONDS, defaultValue: `Video is too long — max ${MAX_VIDEO_DURATION_SECONDS} seconds` }))
+        e.target.value = ''
+        return
+      }
+    } catch {
+      // Couldn't read duration client-side (unsupported format/browser) —
+      // let the backend's authoritative check catch it instead of blocking upload.
+    }
+
+    setUploadingVideo(true)
+    try {
+      const res = await apiService.uploadVideoFile(file, 'marketplace')
       const url = res.url || res.fileUrl
       if (url) { sf('videoUrl', url); setSuccessMsg(t('marketplace.sell.videoUploaded')) }
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || t('marketplace.sell.uploadFailed', 'Upload failed'))
+      const apiErr = err?.response?.data?.error
+      if (apiErr?.code === 'VIDEO_TOO_LONG') {
+        setError(t('marketplace.sell.videoTooLong', { maxSec: apiErr.maxSeconds || MAX_VIDEO_DURATION_SECONDS, defaultValue: `Video is too long — max ${MAX_VIDEO_DURATION_SECONDS} seconds` }))
+      } else {
+        setError(apiErr?.message || t('marketplace.sell.uploadFailed', 'Upload failed'))
+      }
     }
+    setUploadingVideo(false)
     e.target.value = ''
   }
 
@@ -463,11 +521,19 @@ const Marketplace: React.FC = () => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
+
+    const oversized = Array.from(files).find(f => f.size > MAX_IMAGE_SIZE_MB * 1024 * 1024)
+    if (oversized) {
+      setError(t('marketplace.sell.imageTooLarge', { maxMb: MAX_IMAGE_SIZE_MB, defaultValue: `Image is too large — max ${MAX_IMAGE_SIZE_MB}MB` }))
+      e.target.value = ''
+      return
+    }
+
     setUploadingImages(true)
     try {
       const urls: string[] = [...(sellForm.images || [])]
-      for (let i = 0; i < Math.min(files.length, 5 - urls.length); i++) {
-        const res = await apiService.uploadFile(files[i], 'marketplace')
+      for (let i = 0; i < Math.min(files.length, MAX_LISTING_IMAGES - urls.length); i++) {
+        const res = await apiService.uploadImageFile(files[i], 'marketplace')
         if (res.url) urls.push(res.url)
         else if (res.fileUrl) urls.push(res.fileUrl)
       }
@@ -1179,14 +1245,14 @@ const Marketplace: React.FC = () => {
                   <div className="mp-form-section">
                     <div className="mp-form-section-title">📸 {t('marketplace.sell.imagesTitle', 'Listing Images')}</div>
                     <div className="module-form-group">
-                      <label className="module-label">{t('marketplace.sell.imagesLabel', 'Upload up to 5 images')}</label>
+                      <label className="module-label">{t('marketplace.sell.imagesLabel', { count: MAX_LISTING_IMAGES, defaultValue: `Upload up to ${MAX_LISTING_IMAGES} images` })}</label>
                       <input
                         type="file"
                         accept="image/*"
                         multiple
                         className="module-input"
                         onChange={handleImageUpload}
-                        disabled={uploadingImages || (sellForm.images?.length || 0) >= 5}
+                        disabled={uploadingImages || (sellForm.images?.length || 0) >= MAX_LISTING_IMAGES}
                       />
                       {uploadingImages && <div className="input-error-msg" style={{ color: '#3b82f6' }}>{t('marketplace.sell.uploading', 'Uploading...')}</div>}
                     </div>
@@ -1212,8 +1278,10 @@ const Marketplace: React.FC = () => {
                         </div>
                       ) : (
                         <>
-                          <input type="file" accept="video/*" className="module-input" onChange={handleVideoUpload} />
+                          <input type="file" accept="video/*" className="module-input" onChange={handleVideoUpload} disabled={uploadingVideo} />
+                          {uploadingVideo && <div className="input-error-msg" style={{ color: '#3b82f6' }}>{t('marketplace.sell.uploadingVideo', 'Uploading video...')}</div>}
                           <div className="mp-compliance-hint">{t('marketplace.sell.videoHint')}</div>
+                          <div className="mp-compliance-hint">{t('marketplace.sell.videoLimits', { maxSec: MAX_VIDEO_DURATION_SECONDS, maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Max ${MAX_VIDEO_DURATION_SECONDS} seconds, up to ${MAX_VIDEO_SIZE_MB}MB` })}</div>
                         </>
                       )}
                     </div>
@@ -2025,7 +2093,7 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
 
       {/* Image placeholder */}
       <div className="mp-card-img">
-        {images.length > 0 ? <img src={images[0]} alt={l.title} /> : <div className="mp-card-img-placeholder">{CATEGORY_ICONS[l.category] || '📦'}</div>}
+        {images.length > 0 ? <img {...cldCardImageProps(images[0])} alt={l.title} loading="lazy" /> : <div className="mp-card-img-placeholder">{CATEGORY_ICONS[l.category] || '📦'}</div>}
         {g(l, 'videoUrl', 'video_url') && <span className="mp-card-video-badge" title={t('marketplace.card.hasVideo')}>🎥</span>}
       </div>
 
@@ -2150,6 +2218,8 @@ const ListingDetail: React.FC<{
   const breederVerified = g(l, 'breederVerified', 'breeder_verified')
   const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
+  const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
+  const [activeImageIdx, setActiveImageIdx] = useState(0)
 
   return (
     <div className="mp-detail">
@@ -2165,6 +2235,23 @@ const ListingDetail: React.FC<{
             {isHot && <span className="mp-badge hot">{t('marketplace.card.hotDeal')}</span>}
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
           </div>
+
+          {images.length > 0 && (
+            <div className="mp-detail-gallery">
+              <div className="mp-detail-gallery-main">
+                <img {...cldDetailImageProps(images[activeImageIdx])} alt={l.title} />
+              </div>
+              {images.length > 1 && (
+                <div className="mp-detail-gallery-thumbs">
+                  {images.map((img: string, i: number) => (
+                    <button key={i} type="button" className={`mp-detail-thumb ${i === activeImageIdx ? 'active' : ''}`} onClick={() => setActiveImageIdx(i)}>
+                      <img {...cldCardImageProps(img)} alt={`${l.title} ${i + 1}`} loading="lazy" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="mp-detail-title-row">
             <h2>{l.title}</h2>

@@ -176,6 +176,22 @@ class ApiService {
     return response.data
   }
 
+  async uploadImageFile(file: File, folder?: string) {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (folder) formData.append('folder', folder)
+    const response = await this.client.post('/files/upload-image', formData, { headers: { 'Content-Type': undefined } })
+    return response.data
+  }
+
+  async uploadVideoFile(file: File, folder?: string) {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (folder) formData.append('folder', folder)
+    const response = await this.client.post('/files/upload-video', formData, { headers: { 'Content-Type': undefined } })
+    return response.data
+  }
+
   // ─── Consultations ────────────────────────────────────────
   async createConsultation(data: { veterinarianId: string; animalType: string; symptomDescription: string; scheduledAt?: string; animalId?: string; bookingId?: string; petOwnerId?: string }) {
     const response = await this.client.post('/consultations', data)

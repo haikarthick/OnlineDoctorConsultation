@@ -3304,7 +3304,7 @@
       "autoPopulated": "Animal details auto-filled!",
       "fieldsAutoFilled": "Fields auto-filled from your animal's profile. You can edit any field below.",
       "imagesTitle": "Listing Images",
-      "imagesLabel": "Upload up to 5 images",
+      "imagesLabel": "Upload up to {{count}} images",
       "uploading": "Uploading...",
       "uploadFailed": "Image upload failed",
       "selectBreed": "Select breed",
@@ -3323,7 +3323,12 @@
       "videoAdded": "Video added",
       "removeVideo": "Remove video",
       "videoUploaded": "Video uploaded",
-      "videoHint": "A short video builds trust and gets more responses."
+      "videoHint": "A short video builds trust and gets more responses.",
+      "imageTooLarge": "Image is too large — max {{maxMb}}MB",
+      "videoTooLarge": "Video is too large — max {{maxMb}}MB",
+      "videoTooLong": "Video is too long — max {{maxSec}} seconds",
+      "uploadingVideo": "Uploading video...",
+      "videoLimits": "Max {{maxSec}} seconds, up to {{maxMb}}MB"
     },
     "detail": {
       "backToListings": "← Back to listings",
