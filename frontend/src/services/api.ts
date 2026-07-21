@@ -1058,6 +1058,16 @@ class ApiService {
     return response.data
   }
 
+  async adminGetEmailTemplates() {
+    const response = await this.client.get('/admin/email-templates')
+    return response.data
+  }
+
+  async adminUpdateEmailTemplate(templateName: string, data: { subject: string; body: string }) {
+    const response = await this.client.put(`/admin/email-templates/${templateName}`, data)
+    return response.data
+  }
+
   async adminGetAuditLogs(params?: { limit?: number; offset?: number; userId?: string; action?: string }) {
     const response = await this.client.get('/admin/audit-logs', { params })
     return response.data

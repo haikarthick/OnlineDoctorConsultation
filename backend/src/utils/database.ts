@@ -8,6 +8,20 @@ import NetworkRolePermissionService from '../services/NetworkRolePermissionServi
 import RefreshTokenService from '../services/RefreshTokenService';
 import VetHospitalService from '../services/VetHospitalService';
 
+/**
+ * Summarize query params for logging without leaking values — params can carry
+ * medical notes, prescriptions, or other patient/contact data.
+ */
+function describeParams(params?: any[]): Array<{ type: string; length?: number }> | undefined {
+  if (!params) return undefined;
+  return params.map((p) => {
+    if (p === null || p === undefined) return { type: 'null' };
+    if (typeof p === 'string') return { type: 'string', length: p.length };
+    if (Array.isArray(p)) return { type: 'array', length: p.length };
+    return { type: typeof p };
+  });
+}
+
 /** Split multi-statement SQL respecting dollar-quoted function bodies ($$...$$) */
 function splitSqlStatements(sql: string): string[] {
   const statements: string[] = [];
@@ -1904,11 +1918,11 @@ class PostgresDatabase {
       const result = await this.pool.query(text, params);
       const duration = Date.now() - start;
       if (duration > 1000) {
-        logger.warn('Slow query detected', { query: text.substring(0, 100), duration, params });
+        logger.warn('Slow query detected', { query: text.substring(0, 100), duration, paramCount: params?.length ?? 0 });
       }
       return result;
     } catch (error: any) {
-      logger.error('Database query error', { query: text.substring(0, 200), error: error.message, params });
+      logger.error('Database query error', { query: text.substring(0, 200), error: error.message, paramTypes: describeParams(params) });
       throw error;
     }
   }

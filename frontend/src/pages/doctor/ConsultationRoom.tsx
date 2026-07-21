@@ -520,7 +520,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         recorder.start(1000)
         mediaRecorderRef.current = recorder
         setIsRecording(true)
-        if (session) apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => {})
+        if (session) apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => setError(t('consultationRoom.recordingNotifyFailed')))
       } catch {
         setError(t('consultationRoom.failedToStartRecording'))
       }
@@ -530,7 +530,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
         mediaRecorderRef.current = null
       }
       setIsRecording(false)
-      if (session) apiService.sendVideoMessage(session.id, '⏹️ Recording stopped').catch(() => {})
+      if (session) apiService.sendVideoMessage(session.id, '⏹️ Recording stopped').catch(() => setError(t('consultationRoom.recordingNotifyFailed')))
     }
   }
 

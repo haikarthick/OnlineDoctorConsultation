@@ -4478,6 +4478,7 @@
     "cameraUnavailable": "कैमरा उपलब्ध नहीं",
     "noMediaStream": "कोई मीडिया स्ट्रीम उपलब्ध नहीं",
     "failedToStartRecording": "रिकॉर्डिंग शुरू करने में विफल",
+    "recordingNotifyFailed": "दूसरे प्रतिभागी को रिकॉर्डिंग परिवर्तन की सूचना नहीं दी जा सकी",
     "failedToSaveNotes": "नोट्स सेव करने में विफल",
     "confirmComplete": "क्या यह परामर्श पूरा करना है? यह सत्र समाप्त करेगा और मरीज़ को सूचित करेगा।",
     "failedToComplete": "परामर्श पूरा करने में विफल",

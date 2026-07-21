@@ -188,10 +188,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       if (find('maintenance.message')) setMaintenanceMessage(find('maintenance.message')!)
       // Load email templates
       try {
-        const tmplRes = await fetch('/api/v1/admin/email-templates', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        })
-        const tmplData = await tmplRes.json()
+        const tmplData = await apiService.adminGetEmailTemplates()
         if (tmplData.success) {
           const defaults: Record<string, {subject: string, body: string}> = {
             booking_confirmation: { subject: 'Booking Confirmed', body: 'Your appointment has been confirmed for {{date}} at {{time}} with {{vetName}}' },
@@ -219,14 +216,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
     if (!editingTemplate) return
     try {
       setSavingTemplate(true)
-      await fetch(`/api/v1/admin/email-templates/${editingTemplate}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}` 
-        },
-        body: JSON.stringify(templateDraft)
-      })
+      await apiService.adminUpdateEmailTemplate(editingTemplate, templateDraft)
       setEmailTemplates(prev => ({ ...prev, [editingTemplate]: templateDraft }))
       setEditingTemplate(null)
       setTemplatesSaved(true)

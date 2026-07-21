@@ -4478,6 +4478,7 @@
     "cameraUnavailable": "Camera unavailable",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "రికార్డింగ్ మార్పు గురించి ఇతర భాగస్వామికి తెలియజేయడం సాధ్యం కాలేదు",
     "failedToSaveNotes": "Failed to save notes",
     "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
     "failedToComplete": "Failed to complete consultation",

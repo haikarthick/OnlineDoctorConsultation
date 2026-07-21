@@ -4273,6 +4273,7 @@
     "cameraUnavailable": "Camera unavailable",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "റെക്കോർഡിംഗ് മാറ്റത്തെക്കുറിച്ച് മറ്റ് പങ്കാളിയെ അറിയിക്കാൻ കഴിഞ്ഞില്ല",
     "failedToSaveNotes": "Failed to save notes",
     "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
     "failedToComplete": "Failed to complete consultation",
