@@ -179,8 +179,8 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
     apiService.listEnterprises({ limit: 100 }).then(res => {
       const items = res.data?.items || res.data?.enterprises || (Array.isArray(res.data) ? res.data : [])
       setEnterpriseOptions(items.map((e: any) => ({ id: e.id, name: e.name })))
-    }).catch(() => {})
-  }, [isFarmerOrAdmin])
+    }).catch(() => setError(t('certificateWriter.failedToLoadEnterprises')))
+  }, [isFarmerOrAdmin, t])
 
   // ── Search owners ──
   const searchOwners = useCallback(async (q: string) => {

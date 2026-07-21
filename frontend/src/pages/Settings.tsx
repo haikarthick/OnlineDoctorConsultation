@@ -34,12 +34,13 @@ const Settings: React.FC = () => {
   const [digestEnabled, setDigestEnabled] = useState(true)
   const [prefSaving, setPrefSaving] = useState(false)
   const [prefSaved, setPrefSaved] = useState(false)
+  const [prefLoadError, setPrefLoadError] = useState('')
 
   React.useEffect(() => {
     apiService.getNotificationPreferences().then((r: any) => {
       setDigestEnabled(r.data?.data?.digestEmailsEnabled ?? r.data?.digestEmailsEnabled ?? true)
-    }).catch(() => {})
-  }, [])
+    }).catch(() => setPrefLoadError(t('notificationPreferences.loadFailed')))
+  }, [t])
 
   React.useEffect(() => {
     apiService.getMyRoleChangeRequests().then((r: any) => setRoleRequests(r.data || [])).catch((err: any) => {
@@ -633,6 +634,12 @@ const Settings: React.FC = () => {
         {/* P6-NOTIFICATIONS: Notification Preferences */}
         <div className="settings-section">
           <h3 style={{ marginBottom: 12, fontSize: 16, fontWeight: 700 }}>🔔 {t('notificationPreferences.title')}</h3>
+          {prefLoadError && (
+            <div className="module-alert error" style={{ marginBottom: 12 }}>
+              ⚠️ {prefLoadError}
+              <button onClick={() => setPrefLoadError('')} style={{ marginLeft: 12, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>{t('common.close')}</button>
+            </div>
+          )}
           {prefSaved && <div className="module-alert success" style={{ marginBottom: 12 }}>✅ {t('notificationPreferences.preferenceSaved')}</div>}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}>

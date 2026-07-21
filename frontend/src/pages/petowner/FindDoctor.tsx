@@ -178,8 +178,8 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
       const all = res.data?.vets || res.data?.items || []
       setAllSpecializations([...new Set(all.flatMap((v: VetProfile) => v.specializations || []))].sort() as string[])
       setAllLanguages([...new Set(all.flatMap((v: VetProfile) => v.languages || []))].sort() as string[])
-    }).catch(() => {})
-  }, [])
+    }).catch(() => setError(t('findDoctor.filterOptionsLoadFailed')))
+  }, [t])
 
   useEffect(() => { setPage(0); loadVets(0) }, [loadVets])
 

@@ -54,7 +54,7 @@ const VetHospitalAdmin: React.FC = () => {
       setPendingLoading(true)
       vetHospitalApi.listPendingVerification({ limit: 50 })
         .then(data => setPendingHospitals(data?.hospitals || data || []))
-        .catch(() => {})
+        .catch(() => flash(t('vetHospitalAdmin.pendingLoadFailed'), true))
         .finally(() => setPendingLoading(false))
     }
   }, [adminTab])

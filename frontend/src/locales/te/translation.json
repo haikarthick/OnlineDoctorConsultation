@@ -88,6 +88,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "కాపీ చేయబడింది!",
+    "copyFailed": "క్లిప్‌బోర్డ్‌కు కాపీ చేయడం సాధ్యం కాలేదు",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -1269,7 +1271,8 @@
       "confirmRemove": "ఈ జంతువును తీసివేయాలనుకుంటున్నారా?",
       "removed": "జంతువు విజయవంతంగా తీసివేయబడింది",
       "failedSave": "జంతువును సేవ్ చేయడం విఫలమైంది",
-      "failedRemove": "జంతువును తీసివేయడం విఫలమైంది"
+      "failedRemove": "జంతువును తీసివేయడం విఫలమైంది",
+      "failedLoadEnterprises": "మీ ఎంటర్‌ప్రైజెస్ జాబితాను లోడ్ చేయడంలో విఫలమైంది"
     },
     "pageTitle": "నా జంతువులు",
     "loading": "జంతువులు లోడ్ అవుతున్నాయి...",
@@ -3121,6 +3124,12 @@
   "marketplace": {
     "pageTitle": "🏪 కొనుగోలు-అమ్మకం మార్కెట్",
     "subtitle": "జంతువులను కొనండి మరియు అమ్మండి — పరికరాలు మరియు పశువైద్య సరఫరాలను బ్రౌజ్ చేయండి",
+    "errors": {
+      "dashboardLoadFailed": "మీ డాష్‌బోర్డ్‌ను లోడ్ చేయడంలో విఫలమైంది",
+      "favoritesLoadFailed": "మీ ఇష్టమైనవాటిని లోడ్ చేయడంలో విఫలమైంది",
+      "adminDataLoadFailed": "అడ్మిన్ లిస్టింగ్‌లు మరియు గణాంకాలను లోడ్ చేయడంలో విఫలమైంది",
+      "monetizationLoadFailed": "మానిటైజేషన్ సెట్టింగ్‌లను లోడ్ చేయడంలో విఫలమైంది"
+    },
     "tabs": {
       "dashboard": "📊 డాష్‌బోర్డ్",
       "browse": "🛒 బ్రౌజ్",
@@ -3859,6 +3868,7 @@
     "loadTrail": "ట్రయిల్ లోడ్ చేయండి",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -4030,7 +4040,8 @@
     "next": "తదుపరి",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "ఫిల్టర్ ఎంపికలను లోడ్ చేయడంలో విఫలమైంది (స్పెషలైజేషన్‌లు/భాషలు)"
   },
   "myBookings": {
     "title": "నా బుకింగ్‌లు",
@@ -4166,6 +4177,7 @@
     "failedToSendMessage": "Failed to send message",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "రికార్డింగ్ మార్పు గురించి ఇతర భాగస్వామికి తెలియజేయడం సాధ్యం కాలేదు",
     "micUnavailable": "Microphone unavailable",
     "cameraStillUnavailable": "Camera still unavailable",
     "duration": "Duration",
@@ -5256,6 +5268,7 @@
     "verify": "ధృవీకరించు",
     "unverify": "ధృవీకరణ తొలగించు",
     "pendingDocReviews": "పెండింగ్ డాక్యుమెంట్ సమీక్షలు",
+    "pendingLoadFailed": "పెండింగ్ డాక్యుమెంట్ సమీక్షలను లోడ్ చేయడంలో విఫలమైంది",
     "noDocReviews": "పెండింగ్ డాక్యుమెంట్ సమీక్షలు లేవు",
     "reviewDocuments": "డాక్యుమెంట్లను సమీక్షించు",
     "verifyHospital": "ఆసుపత్రిని ధృవీకరించు",
@@ -5730,7 +5743,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -5991,6 +6006,7 @@
     "expired": "Expired",
     "failedToLoad": "Failed to load certificates",
     "failedToPrint": "Failed to load certificate for printing",
+    "failedToLoadEnterprises": "ఫిల్టరింగ్ కోసం ఎంటర్‌ప్రైజెస్ లోడ్ చేయడంలో విఫలమైంది",
     "certTypes": {
       "health_certificate": "General Health Certificate",
       "fitness_to_travel": "Fitness to Travel Certificate",
@@ -6037,6 +6053,7 @@
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
     "failedToCreate": "ధృవపత్రాన్ని సృష్టించడంలో విఫలమైంది",
+    "failedToLoadEnterprises": "ఎంటర్‌ప్రైజెస్ జాబితాను లోడ్ చేయడంలో విఫలమైంది",
     "noCertTypeSelected": "దయచేసి ధృవపత్రం రకాన్ని ఎంచుకోండి",
     "viewAllCertificates": "అన్ని ధృవపత్రాలు చూడండి",
     "createAnother": "మరొకటి సృష్టించండి",
@@ -6375,6 +6392,7 @@
     "create": "రెఫరల్ సృష్టించు",
     "createTitle": "పేషెంట్‌ని నెట్‌వర్క్ ఆసుపత్రికి రెఫర్ చేయండి",
     "createSubtitle": "ఈ పేషెంట్‌ని మీ నెట్‌వర్క్‌లోని మరొక ఆసుపత్రికి పంపండి",
+    "hospitalsLoadFailed": "నెట్‌వర్క్ ఆసుపత్రుల జాబితాను లోడ్ చేయడంలో విఫలమైంది",
     "toHospital": "స్వీకరించే ఆసుపత్రి *",
     "toVet": "స్వీకరించే వెటర్నరీ డాక్టర్ (ఐచ్ఛికం)",
     "reason": "రెఫరల్ కారణం *",
@@ -6650,7 +6668,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "మీ సేవ్ చేసిన నోటిఫికేషన్ ప్రాధాన్యతలను లోడ్ చేయడం సాధ్యం కాలేదు — డిఫాల్ట్‌లు చూపబడుతున్నాయి"
   },
   "emailTemplates": {
     "title": "ఇమెయిల్ టెంప్లేట్‌లు",
@@ -6838,6 +6857,7 @@
     "reorder": {
       "title": "Reorder",
       "supplier": "Supplier",
+      "suppliersLoadFailed": "సరఫరాదారుల జాబితాను లోడ్ చేయడంలో విఫలమైంది",
       "selectSupplier": "Select supplier",
       "supplierRequired": "Select a supplier",
       "quantity": "Qty",
@@ -7154,6 +7174,7 @@
     "subtitle": "డాక్టర్ స్థాయి కమిషన్ ఓవర్‌రైడ్‌లు — ఖాళీ ఫీల్డ్‌లు గ్లోబల్ డిఫాల్ట్ వాడతాయి",
     "globalSettings": "గ్లోబల్ డిఫాల్ట్‌లు",
     "globalInfo": "గ్లోబల్ డిఫాల్ట్: {{percent}}% + చెల్లింపు బుకింగ్‌కు {{flat}} ఫ్లాట్ ఫీజు. System Settings లో మార్చండి.",
+    "globalsLoadFailed": "ప్రస్తుత గ్లోబల్ కమిషన్ డిఫాల్ట్‌లను లోడ్ చేయడంలో విఫలమైంది — ఫాల్‌బ్యాక్ విలువలు చూపబడుతున్నాయి",
     "saved": "ఓవర్‌రైడ్ సేవ్ అయింది. కొత్త చెల్లింపులకు మాత్రమే వర్తిస్తుంది.",
     "saveFailed": "ఓవర్‌రైడ్ సేవ్ విఫలమైంది.",
     "searchPlaceholder": "పేరు లేదా ఇమెయిల్‌తో డాక్టర్‌ను వెతకండి…",

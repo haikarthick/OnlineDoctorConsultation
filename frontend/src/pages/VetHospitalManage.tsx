@@ -131,7 +131,7 @@ const VetHospitalManage: React.FC = () => {
   // Load invites when doctors tab is active
   useEffect(() => {
     if (hospital && activeTab === 'doctors' && !invitesLoaded) {
-      vetHospitalApi.listInvites(hospital.id).then(data => { setInvites(data); setInvitesLoaded(true) }).catch(() => {})
+      vetHospitalApi.listInvites(hospital.id).then(data => { setInvites(data); setInvitesLoaded(true) }).catch(() => flash(t('vetHospitalManage.errors.invitesLoadFailed'), true))
     }
   }, [hospital, activeTab, invitesLoaded])
 
@@ -164,7 +164,9 @@ const VetHospitalManage: React.FC = () => {
     try {
       await vetHospitalApi.revokeInvite(hospital.id, inviteId)
       setInvites(prev => prev.map(inv => inv.id === inviteId ? { ...inv, status: 'revoked' } : inv))
-    } catch {}
+    } catch {
+      flash(t('vetHospitalManage.errors.revokeInviteFailed'), true)
+    }
   }
 
   useEffect(() => {

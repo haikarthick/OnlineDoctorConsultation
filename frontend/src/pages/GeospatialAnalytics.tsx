@@ -38,7 +38,7 @@ const GeospatialAnalytics: React.FC = () => {
     animalId: '', eventType: 'location_update', latitude: '', longitude: '', metadata: '',
   })
 
-  useEffect(() => { apiService.listEnterprises().then(r => setEnterprises(r.data?.items || r.data || [])).catch(() => {}) }, [])
+  useEffect(() => { apiService.listEnterprises().then(r => setEnterprises(r.data?.items || r.data || [])).catch(() => setError(t('geospatialAnalytics.enterprisesLoadFailed'))) }, [t])
 
   useEffect(() => { if (enterpriseId) fetchAll() }, [enterpriseId])
 

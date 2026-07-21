@@ -151,6 +151,7 @@ const Animals: React.FC = () => {
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [speciesFilter, setSpeciesFilter] = useState('')
   const [enterpriseFilter, setEnterpriseFilter] = useState('')
@@ -184,8 +185,8 @@ const Animals: React.FC = () => {
     if (!isFarmer && !isAdmin) return
     apiService.listEnterprises({ limit: 100 }).then(res => {
       setEnterpriseOptions((res.data?.items || []).map((e: any) => ({ id: e.id, name: e.name })))
-    }).catch(() => {})
-  }, [isFarmer, isAdmin])
+    }).catch(() => setError(t('animals.toasts.failedLoadEnterprises')))
+  }, [isFarmer, isAdmin, t])
 
   // Load groups when enterprise changes in form
   useEffect(() => {
@@ -761,13 +762,17 @@ const Animals: React.FC = () => {
                       <div
                         style={{ fontSize: 11, fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: 12, fontFamily: 'monospace', cursor: 'copy' }}
                         onClick={() => {
-                          if (animal.uniqueId) {
-                            navigator.clipboard?.writeText(animal.uniqueId).catch(() => {});
+                          const id = animal.uniqueId
+                          if (id) {
+                            navigator.clipboard?.writeText(id).then(() => {
+                              setCopiedId(id)
+                              setTimeout(() => setCopiedId(prev => (prev === id ? null : prev)), 1500)
+                            }).catch(() => setError(t('common.copyFailed')))
                           }
                         }}
                         title={animal.uniqueId ? `Click to copy: ${animal.uniqueId}` : ''}
                       >
-                        {animal.uniqueId || `ID-${animal.id.substring(0, 8).toUpperCase()}`}
+                        {animal.uniqueId && copiedId === animal.uniqueId ? `✅ ${t('common.copied')}` : (animal.uniqueId || `ID-${animal.id.substring(0, 8).toUpperCase()}`)}
                       </div>
                       {age && <div style={{ fontSize: 11, marginTop: 4, opacity: 0.85 }}>{t('animals.cardLabels.age')} {age}</div>}
                     </div>

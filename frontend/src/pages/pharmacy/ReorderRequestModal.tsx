@@ -42,8 +42,8 @@ export default function ReorderRequestModal({ pharmacyId, networkId, item, onClo
     client.get(`/networks/${networkId}/suppliers`).then(res => {
       setSuppliers(res.data || [])
       if (res.data?.length > 0) setForm(f => ({ ...f, supplier_id: res.data[0].id }))
-    }).catch(() => {})
-  }, [networkId])
+    }).catch(() => setError(t('pharmacy.reorder.suppliersLoadFailed')))
+  }, [networkId, t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

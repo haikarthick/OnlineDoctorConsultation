@@ -70,6 +70,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "Copied!",
+    "copyFailed": "Couldn't copy to clipboard",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -1269,7 +1271,8 @@
       "confirmRemove": "Are you sure you want to remove this animal?",
       "removed": "Animal removed successfully",
       "failedSave": "Failed to save animal",
-      "failedRemove": "Failed to remove animal"
+      "failedRemove": "Failed to remove animal",
+      "failedLoadEnterprises": "Failed to load your enterprises list"
     },
     "pageTitle": "My Animals",
     "loading": "Loading animals...",
@@ -3121,6 +3124,12 @@
   "marketplace": {
     "pageTitle": "🏪 Buy & Sell Marketplace",
     "subtitle": "Buy and sell animals, and browse equipment and veterinary supplies",
+    "errors": {
+      "dashboardLoadFailed": "Failed to load your dashboard",
+      "favoritesLoadFailed": "Failed to load your favorites",
+      "adminDataLoadFailed": "Failed to load admin listings and stats",
+      "monetizationLoadFailed": "Failed to load monetization settings"
+    },
     "tabs": {
       "dashboard": "📊 Dashboard",
       "browse": "🐾 Browse",
@@ -3855,6 +3864,7 @@
     "loadTrail": "Load Trail",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -4026,7 +4036,8 @@
     "next": "Next",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "Failed to load filter options (specializations/languages)"
   },
   "myBookings": {
     "title": "My Bookings",
@@ -4162,6 +4173,7 @@
     "failedToSendMessage": "Failed to send message",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "Couldn't notify the other participant about the recording change",
     "micUnavailable": "Microphone unavailable",
     "cameraStillUnavailable": "Camera still unavailable",
     "duration": "Duration",
@@ -5251,6 +5263,7 @@
     "verify": "Verify",
     "unverify": "Unverify",
     "pendingDocReviews": "Pending Document Reviews",
+    "pendingLoadFailed": "Failed to load pending document reviews",
     "noDocReviews": "No pending document reviews",
     "reviewDocuments": "Review Documents",
     "verifyHospital": "Verify Hospital",
@@ -5725,7 +5738,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -5973,6 +5988,7 @@
     "expired": "Expired",
     "failedToLoad": "Failed to load certificates",
     "failedToPrint": "Failed to load certificate for printing",
+    "failedToLoadEnterprises": "Failed to load enterprises for filtering",
     "certTypes": {
       "health_certificate": "General Health Certificate",
       "fitness_to_travel": "Fitness to Travel Certificate",
@@ -6020,6 +6036,7 @@
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
     "failedToCreate": "Failed to create certificate",
+    "failedToLoadEnterprises": "Failed to load enterprises list",
     "noCertTypeSelected": "Please select a certificate type",
     "viewAllCertificates": "View All Certificates",
     "createAnother": "Create Another",
@@ -6364,6 +6381,7 @@
     "clinicalNotes": "Clinical Notes (optional)",
     "clinicalNotesPlaceholder": "Include relevant history, current condition, and what you need from the receiving hospital...",
     "reasonPlaceholder": "e.g., Specialist consultation needed, surgical intervention required...",
+    "hospitalsLoadFailed": "Failed to load network hospitals list",
     "selectHospital": "— Select hospital —",
     "selectVet": "— Select vet (optional) —",
     "sending": "Sending Referral...",
@@ -6632,7 +6650,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "Couldn't load your saved notification preferences — showing defaults"
   },
   "emailTemplates": {
     "title": "Email Templates",
@@ -6821,6 +6840,7 @@
     "reorder": {
       "title": "Request Reorder",
       "supplier": "Supplier",
+      "suppliersLoadFailed": "Failed to load suppliers list",
       "selectSupplier": "Select a supplier",
       "supplierRequired": "Please select a supplier",
       "quantity": "Quantity to Order",
@@ -7136,6 +7156,7 @@
     "subtitle": "Per-doctor commission overrides — blank fields use the global default",
     "globalSettings": "Global defaults",
     "globalInfo": "Global default: {{percent}}% + {{flat}} flat fee per paid booking. Change it in System Settings (commission.defaultPercent / commission.flatFee).",
+    "globalsLoadFailed": "Failed to load the current global commission defaults — showing fallback values",
     "saved": "Override saved. Applies to new payments only — past payments keep their snapshot.",
     "saveFailed": "Failed to save the override.",
     "searchPlaceholder": "Search doctor by name or email…",
