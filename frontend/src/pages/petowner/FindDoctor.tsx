@@ -268,11 +268,11 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
                 fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', transition: 'all 0.15s',
               }}
               onMouseEnter={e => {
-                ;(e.currentTarget as HTMLElement).style.background = '#16a34a'
+                (e.currentTarget as HTMLElement).style.background = '#16a34a'
                 ;(e.currentTarget as HTMLElement).style.color = 'white'
               }}
               onMouseLeave={e => {
-                ;(e.currentTarget as HTMLElement).style.background = 'white'
+                (e.currentTarget as HTMLElement).style.background = 'white'
                 ;(e.currentTarget as HTMLElement).style.color = '#16a34a'
               }}
             >
@@ -306,11 +306,11 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
         cursor: 'pointer', position: 'relative',
       }}
         onMouseEnter={e => {
-          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.12)'
+          (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.12)'
           ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'
         }}
         onMouseLeave={e => {
-          ;(e.currentTarget as HTMLElement).style.boxShadow = hasSlots ? '0 2px 12px rgba(22,163,74,0.10)' : '0 1px 6px rgba(0,0,0,0.04)'
+          (e.currentTarget as HTMLElement).style.boxShadow = hasSlots ? '0 2px 12px rgba(22,163,74,0.10)' : '0 1px 6px rgba(0,0,0,0.04)'
           ;(e.currentTarget as HTMLElement).style.transform = 'none'
         }}
         onClick={() => onNavigate(`/vet-profile/${vet.userId}`)}

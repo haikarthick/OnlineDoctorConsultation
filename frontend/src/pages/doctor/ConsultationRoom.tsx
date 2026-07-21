@@ -201,7 +201,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   // Load available networks when referral modal opens
   useEffect(() => {
     if (showReferralModal) {
-      ;(apiService as any).listHospitalNetworks?.()
+      (apiService as any).listHospitalNetworks?.()
         .then((res: any) => setNetworksList(res.networks || res.data || []))
         .catch(() => {})
     }
@@ -210,7 +210,7 @@ const ConsultationRoom: React.FC<ConsultationRoomProps> = ({ consultationId, onN
   // Load hospitals in selected network
   useEffect(() => {
     if (referralForm.networkId) {
-      ;(apiService as any).client.get(`/hospital-networks/${referralForm.networkId}/hospitals`)
+      (apiService as any).client.get(`/hospital-networks/${referralForm.networkId}/hospitals`)
         .then((res: any) => setNetworkHospitals(res.data?.hospitals || []))
         .catch(() => {})
     }

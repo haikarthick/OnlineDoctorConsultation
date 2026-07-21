@@ -1162,7 +1162,7 @@ const HospitalNetworks: React.FC = () => {
 
   useEffect(() => {
     if (showCreateReferralModal && selectedNetwork) {
-      ;(apiService as any).client
+      (apiService as any).client
         .get(`/hospital-networks/${selectedNetwork.id}/hospitals`)
         .then((res: any) => setReferralNetworkHospitals(res.data?.hospitals || res.data || []))
         .catch(() => {})

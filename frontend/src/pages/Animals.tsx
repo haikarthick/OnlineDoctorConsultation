@@ -466,7 +466,7 @@ const Animals: React.FC = () => {
   ${vaccHtml}
   <h2>Medical Records (${records.length} records)</h2>
   ${medHtml}
-  <script>window.onload = function() { window.print(); };<\/script>
+  <script>window.onload = function() { window.print(); };</script>
 </body>
 </html>`
 

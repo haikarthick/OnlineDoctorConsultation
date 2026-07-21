@@ -78,7 +78,7 @@ const HeatmapLayer: React.FC<HeatmapLayerProps> = ({ points, radius = 25, blur =
   const map = useMap()
   useEffect(() => {
     if (!points.length) return
-    // @ts-ignore – leaflet.heat adds L.heatLayer
+    // leaflet.heat adds L.heatLayer — not in @types/leaflet, hence the `as any`
     const heat = (L as any).heatLayer(points, { radius, blur, maxZoom, gradient: { 0.2: '#2196f3', 0.4: '#4caf50', 0.6: '#ffeb3b', 0.8: '#ff9800', 1.0: '#f44336' } })
     heat.addTo(map)
     return () => { map.removeLayer(heat) }

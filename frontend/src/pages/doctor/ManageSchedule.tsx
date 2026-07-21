@@ -36,7 +36,7 @@ interface CalendarDay {
   reason?: string;
 }
 
-const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
+const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
   const { t } = useTranslation()
   const { formatSlotTime } = useSettings()
   const [activeTab, setActiveTab] = useState<'weekly' | 'calendar' | 'blocks' | 'holidays'>('weekly')
