@@ -5,12 +5,7 @@ import apiService from '../services/api'
 import { useTranslation } from 'react-i18next'
 import '../styles/modules.css'
 import './VaccinationPassport.css'
-
-// ─── Species icons ───────────────────────────────────────────
-const SPECIES_ICONS: Record<string, string> = {
-  Dog: '🐕', Cat: '🐈', Bird: '🐦', Horse: '🐴', Cattle: '🐄',
-  Sheep: '🐑', Goat: '🐐', Pig: '🐷', Rabbit: '🐰', Other: '🐾',
-}
+import { SPECIES_ICONS } from '../constants/speciesBreeds'
 
 // ─── Types ───────────────────────────────────────────────────
 interface PassportDose {

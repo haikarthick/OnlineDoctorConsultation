@@ -5,7 +5,7 @@ import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
 import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
-import { classTermsForSpecies, findClassTerm } from '../constants/speciesBreeds'
+import { classTermsForSpecies, findClassTerm, MARKETPLACE_FARMER_SPECIES } from '../constants/speciesBreeds'
 import './Marketplace.css'
 import './PublicMarketplace.css'
 
@@ -20,7 +20,7 @@ const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
   { value: 'other', labelKey: 'marketplace.categories.other' },
 ]
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
-const SPECIES_LIST = ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Poultry', 'Dog', 'Cat', 'Other']
+const SPECIES_LIST = MARKETPLACE_FARMER_SPECIES
 
 const g = (l: any, ...keys: string[]): any => { for (const k of keys) { if (l[k] !== undefined && l[k] !== null) return l[k]; } return undefined }
 

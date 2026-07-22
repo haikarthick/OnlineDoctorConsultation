@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
-import { SPECIES_CATEGORIES, breedsForSpecies, classTermsForSpecies, findClassTerm } from '../constants/speciesBreeds'
+import { SPECIES_CATEGORIES, breedsForSpecies, classTermsForSpecies, findClassTerm, MARKETPLACE_FARMER_SPECIES, MARKETPLACE_PET_OWNER_SPECIES } from '../constants/speciesBreeds'
 
 const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
   { value: '', labelKey: 'marketplace.categories.all' },
@@ -22,8 +22,6 @@ const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
   { value: 'other', labelKey: 'marketplace.categories.other' },
 ]
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
-const FARMER_SPECIES_LIST = ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Poultry', 'Dog', 'Cat', 'Other']
-const PET_OWNER_SPECIES_LIST = ['Dog', 'Cat', 'Horse', 'Rabbit', 'Cow', 'Buffalo', 'Goat', 'Sheep', 'Camel', 'Pig', 'Poultry', 'Other']
 
 // Media limits — mirror backend caps (uploadImage/uploadVideo in
 // backend/src/middleware/upload.ts, MAX_VIDEO_DURATION_SECONDS in
@@ -65,7 +63,7 @@ const Marketplace: React.FC = () => {
   const navigate = useNavigate()
   const isAdmin = user?.role === 'admin'
   const isFarmer = user?.role === 'farmer'
-  const SPECIES_LIST = (isFarmer || isAdmin) ? FARMER_SPECIES_LIST : PET_OWNER_SPECIES_LIST
+  const SPECIES_LIST = (isFarmer || isAdmin) ? MARKETPLACE_FARMER_SPECIES : MARKETPLACE_PET_OWNER_SPECIES
 
   const GENDER_LABELS: Record<string, string> = { male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') }
   const VAX_LABELS: Record<string, string> = { fully_vaccinated: t('marketplace.vaxLabel.fullyShort'), partially_vaccinated: t('marketplace.vaxLabel.partialShort'), not_vaccinated: t('marketplace.vaxLabel.noneShort'), unknown: t('marketplace.vaxLabel.unknown') }

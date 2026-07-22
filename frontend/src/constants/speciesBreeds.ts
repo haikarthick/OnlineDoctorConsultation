@@ -180,6 +180,16 @@ export const SPECIES_ICONS: Record<string, string> = {
 // Species that commonly use ear tags / registration numbers
 export const EAR_TAG_SPECIES = ['Cattle', 'Buffalo', 'Sheep', 'Goat', 'Pig', 'Horse', 'Donkey', 'Camel', 'Yak', 'Deer', 'Emu', 'Ostrich', 'Peacock', 'Llama', 'Alpaca']
 
+// ─── Marketplace species pickers ──────────────────────────────────────────
+// Curated subsets (not the full SPECIES_CATEGORIES list) for the Marketplace
+// sell form, keyed to canonical BREED_DATABASE names ('Cattle'/'Chicken', not
+// 'Cow'/'Poultry' — the previous local copies of these lists used the wrong
+// names, so breedsForSpecies() silently fell back to a generic ['Mixed
+// Breed', 'Other'] instead of the real curated breed list for anyone
+// listing a cattle or poultry animal).
+export const MARKETPLACE_FARMER_SPECIES = ['Cattle', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Chicken', 'Dog', 'Cat', 'Other']
+export const MARKETPLACE_PET_OWNER_SPECIES = ['Dog', 'Cat', 'Horse', 'Rabbit', 'Cattle', 'Buffalo', 'Goat', 'Sheep', 'Camel', 'Pig', 'Chicken', 'Other']
+
 /** Breeds for a species, tolerant of case/singular differences. Falls back to a generic list. */
 export function breedsForSpecies(species?: string): string[] {
   if (!species) return []
