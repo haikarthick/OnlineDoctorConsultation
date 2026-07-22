@@ -407,6 +407,14 @@ export interface Animal {
   profileImage?: string
   isActive?: boolean
   ownerName?: string
+  animalClass?: string
+  sireId?: string
+  damId?: string
+  sireName?: string
+  damName?: string
+  breedingStatus?: string
+  lastBreedingDate?: string
+  expectedDueDate?: string
   createdAt: string
   updatedAt: string
 }
@@ -1346,6 +1354,8 @@ export interface MarketplaceListing {
   animalWeightKg?: number
   animal_weight_kg?: number
   gender?: 'male' | 'female' | 'unknown'
+  animalClass?: string
+  animal_class?: string
   lactationNumber?: number
   lactation_number?: number
   dailyMilkYield?: number

@@ -249,6 +249,12 @@ export const createAnimalSchema = Joi.object({
   medicalNotes: longText(10000).optional().allow('', null),
   enterpriseId: uuid.optional().allow(null, ''),
   groupId: uuid.optional().allow(null, ''),
+  animalClass: shortText(30).optional().allow('', null),
+  sireId: uuid.optional().allow(null, ''),
+  damId: uuid.optional().allow(null, ''),
+  breedingStatus: Joi.string().valid('not_bred', 'pregnant', 'not_pregnant').optional().allow('', null),
+  lastBreedingDate: Joi.string().optional().allow('', null),
+  expectedDueDate: Joi.string().optional().allow('', null),
 });
 
 export const updateAnimalSchema = createAnimalSchema.fork(
@@ -1108,6 +1114,7 @@ const livestockFields = {
   animalAgeMonths: Joi.number().integer().min(0).max(600).optional().allow(null),
   animalWeightKg: Joi.number().min(0).max(5000).optional().allow(null),
   gender: Joi.string().valid('male', 'female', 'unknown').optional().allow('', null),
+  animalClass: Joi.string().max(30).optional().allow('', null),
   lactationNumber: Joi.number().integer().min(0).max(20).optional().allow(null),
   dailyMilkYield: Joi.number().min(0).max(100).optional().allow(null),
   pregnancyStatus: Joi.string().valid('not_pregnant', 'pregnant', 'unknown').optional().allow('', null),

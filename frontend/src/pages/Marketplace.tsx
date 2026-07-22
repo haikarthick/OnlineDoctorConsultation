@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
-import { SPECIES_CATEGORIES, breedsForSpecies } from '../constants/speciesBreeds'
+import { SPECIES_CATEGORIES, breedsForSpecies, classTermsForSpecies, findClassTerm } from '../constants/speciesBreeds'
 
 const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
   { value: '', labelKey: 'marketplace.categories.all' },
@@ -481,6 +481,8 @@ const Marketplace: React.FC = () => {
     if (animal.species) updates.species = animal.species
     if (animal.breed) updates.breed = animal.breed
     if (animal.gender) updates.gender = animal.gender.toLowerCase()
+    const animalClassVal = animal.animalClass || animal.animal_class
+    if (animalClassVal) updates.animalClass = animalClassVal
     // Weight: prefer current_weight over weight
     const w = animal.currentWeight || animal.current_weight || animal.weight
     if (w) updates.animalWeightKg = String(w)
@@ -500,9 +502,11 @@ const Marketplace: React.FC = () => {
     // Registration number for breeder compliance
     const regNum = animal.registrationNumber || animal.registration_number
     if (regNum) updates.registrationNumber = regNum
-    // Auto-generate title
+    // Auto-generate title — prefer the species-correct class label ("Bullock")
+    // over raw gender ("male") when the linked animal has one set
     const ageStr = updates.animalAgeMonths ? `${updates.animalAgeMonths}m` : ''
-    const genderStr = animal.gender ? ` ${animal.gender}` : ''
+    const classTerm = animalClassVal ? findClassTerm(animal.species, animalClassVal) : undefined
+    const genderStr = classTerm ? ` ${t(classTerm.labelKey)}` : (animal.gender ? ` ${animal.gender}` : '')
     updates.title = `${animal.name} — ${animal.species || ''}${animal.breed ? ' ' + animal.breed : ''}${genderStr}${ageStr ? ', ' + ageStr : ''}`.trim()
     // Auto-generate description from medical notes and profile
     const descParts: string[] = []
@@ -897,6 +901,12 @@ const Marketplace: React.FC = () => {
                   <option value="">{t('marketplace.livestock.anyGender')}</option>
                   <option value="male">{t('marketplace.genderLabel.male')}</option><option value="female">{t('marketplace.genderLabel.female')}</option>
                 </select>
+                {filters.species && classTermsForSpecies(filters.species).length > 0 && (
+                  <select className="module-input" value={filters.animalClass || ''} onChange={e => updateFilter('animalClass', e.target.value)} style={{ width: 140 }}>
+                    <option value="">{t('animalClass.anyClass')}</option>
+                    {classTermsForSpecies(filters.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                  </select>
+                )}
                 <select className="module-input" value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ width: 140 }}>
                   <option value="">{t('marketplace.sort.default')}</option>
                   <option value="price_asc">{t('marketplace.sort.priceAsc')}</option>
@@ -1140,12 +1150,28 @@ const Marketplace: React.FC = () => {
                     <div className="mp-form-section-title">{t('marketplace.sell.physicalSection')}</div>
                     <div className="module-form-row-3">
                       <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.livestock.gender')}</label>
-                        <select className="module-input" value={sellForm.gender} onChange={e => sf('gender', e.target.value)}>
-                          <option value="">{t('marketplace.livestock.selectGender')}</option>
-                          <option value="female">{t('marketplace.genderLabel.female')}</option>
-                          <option value="male">{t('marketplace.genderLabel.male')}</option>
-                        </select>
+                        {classTermsForSpecies(sellForm.species).length > 0 ? (
+                          <>
+                            <label className="module-label">{t('animalClass.fieldLabel')}</label>
+                            <select className="module-input" value={sellForm.animalClass} onChange={e => {
+                              const term = findClassTerm(sellForm.species, e.target.value)
+                              sf('animalClass', e.target.value)
+                              if (term?.impliedGender) sf('gender', term.impliedGender)
+                            }}>
+                              <option value="">{t('animalClass.selectClass')}</option>
+                              {classTermsForSpecies(sellForm.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                            </select>
+                          </>
+                        ) : (
+                          <>
+                            <label className="module-label">{t('marketplace.livestock.gender')}</label>
+                            <select className="module-input" value={sellForm.gender} onChange={e => sf('gender', e.target.value)}>
+                              <option value="">{t('marketplace.livestock.selectGender')}</option>
+                              <option value="female">{t('marketplace.genderLabel.female')}</option>
+                              <option value="male">{t('marketplace.genderLabel.male')}</option>
+                            </select>
+                          </>
+                        )}
                       </div>
                       <div className="module-form-group">
                         <label className="module-label">{t('marketplace.livestock.ageMonths')}</label>
@@ -1157,36 +1183,53 @@ const Marketplace: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="mp-form-section">
-                    <div className="mp-form-section-title">{t('marketplace.sell.productionSection')}</div>
-                    <div className="module-form-row">
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.livestock.lactation')}</label>
-                        <input className="module-input" type="number" value={sellForm.lactationNumber} onChange={e => sf('lactationNumber', e.target.value)} placeholder={t('marketplace.sell.lactationPlaceholder')} />
+                  {(() => {
+                    // Only show production/pregnancy fields when relevant to the
+                    // selected species+class — e.g. a Bullock or Dog listing never
+                    // needs a milk-yield field. Species without a class glossary keep
+                    // today's always-show behavior (no new judgment calls for them).
+                    const hasClassGlossary = classTermsForSpecies(sellForm.species).length > 0
+                    const selectedClassTerm = findClassTerm(sellForm.species, sellForm.animalClass)
+                    const showMilk = !hasClassGlossary || !sellForm.animalClass || selectedClassTerm?.canProduceMilk
+                    const showPregnancy = !hasClassGlossary || !sellForm.animalClass || selectedClassTerm?.canBePregnant
+                    if (!showMilk && !showPregnancy) return null
+                    return (
+                      <div className="mp-form-section">
+                        <div className="mp-form-section-title">{t('marketplace.sell.productionSection')}</div>
+                        {showMilk && (
+                          <div className="module-form-row">
+                            <div className="module-form-group">
+                              <label className="module-label">{t('marketplace.livestock.lactation')}</label>
+                              <input className="module-input" type="number" value={sellForm.lactationNumber} onChange={e => sf('lactationNumber', e.target.value)} placeholder={t('marketplace.sell.lactationPlaceholder')} />
+                            </div>
+                            <div className="module-form-group">
+                              <label className="module-label">{t('marketplace.livestock.milkYield')}</label>
+                              <input className="module-input" type="number" value={sellForm.dailyMilkYield} onChange={e => sf('dailyMilkYield', e.target.value)} placeholder={t('marketplace.sell.milkYieldPlaceholder')} />
+                            </div>
+                          </div>
+                        )}
+                        {showPregnancy && (
+                          <div className="module-form-row">
+                            <div className="module-form-group">
+                              <label className="module-label">{t('marketplace.livestock.pregnancy')}</label>
+                              <select className="module-input" value={sellForm.pregnancyStatus} onChange={e => sf('pregnancyStatus', e.target.value)}>
+                                <option value="">{t('marketplace.livestock.select')}</option>
+                                <option value="pregnant">{t('marketplace.pregnancyLabel.pregnant')}</option>
+                                <option value="not_pregnant">{t('marketplace.pregnancyLabel.notPregnant')}</option>
+                                <option value="unknown">{t('marketplace.genderLabel.unknown')}</option>
+                              </select>
+                            </div>
+                            {sellForm.pregnancyStatus === 'pregnant' && (
+                              <div className="module-form-group">
+                                <label className="module-label">{t('marketplace.livestock.pregnancyMonth')}</label>
+                                <input className="module-input" type="number" value={sellForm.pregnancyMonth} onChange={e => sf('pregnancyMonth', e.target.value)} min="1" max="12" />
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.livestock.milkYield')}</label>
-                        <input className="module-input" type="number" value={sellForm.dailyMilkYield} onChange={e => sf('dailyMilkYield', e.target.value)} placeholder={t('marketplace.sell.milkYieldPlaceholder')} />
-                      </div>
-                    </div>
-                    <div className="module-form-row">
-                      <div className="module-form-group">
-                        <label className="module-label">{t('marketplace.livestock.pregnancy')}</label>
-                        <select className="module-input" value={sellForm.pregnancyStatus} onChange={e => sf('pregnancyStatus', e.target.value)}>
-                          <option value="">{t('marketplace.livestock.select')}</option>
-                          <option value="pregnant">{t('marketplace.pregnancyLabel.pregnant')}</option>
-                          <option value="not_pregnant">{t('marketplace.pregnancyLabel.notPregnant')}</option>
-                          <option value="unknown">{t('marketplace.genderLabel.unknown')}</option>
-                        </select>
-                      </div>
-                      {sellForm.pregnancyStatus === 'pregnant' && (
-                        <div className="module-form-group">
-                          <label className="module-label">{t('marketplace.livestock.pregnancyMonth')}</label>
-                          <input className="module-input" type="number" value={sellForm.pregnancyMonth} onChange={e => sf('pregnancyMonth', e.target.value)} min="1" max="12" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    )
+                  })()}
                   <div className="module-form-group">
                     <label className="module-label">{t('marketplace.livestock.quantity')}</label>
                     <input className="module-input" type="number" value={sellForm.quantity} onChange={e => sf('quantity', e.target.value)} placeholder="1" />
@@ -1371,7 +1414,11 @@ const Marketplace: React.FC = () => {
                   <ReviewItem label={t('marketplace.reviewLabels.type')} value={sellForm.listingType} />
                   <ReviewItem label={t('marketplace.livestock.species')} value={sellForm.species} />
                   <ReviewItem label={t('marketplace.livestock.breed')} value={sellForm.breed} />
-                  <ReviewItem label={t('marketplace.livestock.gender')} value={sellForm.gender ? GENDER_LABELS[sellForm.gender] : '—'} />
+                  <ReviewItem label={t('marketplace.livestock.gender')} value={(() => {
+                    const term = findClassTerm(sellForm.species, sellForm.animalClass)
+                    if (term) return t(term.labelKey)
+                    return sellForm.gender ? GENDER_LABELS[sellForm.gender] : '—'
+                  })()} />
                   <ReviewItem label={t('marketplace.livestock.age')} value={sellForm.animalAgeMonths ? `${sellForm.animalAgeMonths} ${t('marketplace.units.months')}` : '—'} />
                   <ReviewItem label={t('marketplace.livestock.weightKg')} value={sellForm.animalWeightKg ? `${sellForm.animalWeightKg} ${t('marketplace.units.kg')}` : '—'} />
                   <ReviewItem label={t('marketplace.reviewLabels.milkYield')} value={sellForm.dailyMilkYield ? `${sellForm.dailyMilkYield} ${t('marketplace.units.lPerDay')}` : '—'} />
@@ -2201,6 +2248,7 @@ const ListingDetail: React.FC<{
   const weight = g(l, 'animalWeightKg', 'animal_weight_kg')
   const age = g(l, 'animalAgeMonths', 'animal_age_months')
   const gender = l.gender
+  const animalClass = g(l, 'animalClass', 'animal_class')
   const lactation = g(l, 'lactationNumber', 'lactation_number')
   const pregnancy = g(l, 'pregnancyStatus', 'pregnancy_status')
   const pregMonth = g(l, 'pregnancyMonth', 'pregnancy_month')
@@ -2295,7 +2343,11 @@ const ListingDetail: React.FC<{
               <div className="mp-detail-grid">
                 {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{species}</span></div>}
                 {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breed}</span></div>}
-                {gender && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{{ male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') }[gender] || gender}</span></div>}
+                {(gender || animalClass) && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{(() => {
+                  const term = animalClass ? findClassTerm(species || '', animalClass) : undefined
+                  if (term) return t(term.labelKey)
+                  return (gender && ({ male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') } as Record<string, string>)[gender]) || gender
+                })()}</span></div>}
                 {age && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.age')}</span><span className="mp-detail-value">{age >= 12 ? `${Math.floor(age / 12)}y ${age % 12}m` : `${age} ${t('marketplace.units.months')}`}</span></div>}
                 {weight && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.weightKg')}</span><span className="mp-detail-value">{weight} {t('marketplace.units.kg')}</span></div>}
                 {lactation !== undefined && lactation !== null && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.lactation')}</span><span className="mp-detail-value">{lactation}</span></div>}

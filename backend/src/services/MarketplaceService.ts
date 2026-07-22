@@ -47,7 +47,7 @@ class MarketplaceService {
     const {
       category, status = 'active', listingType, minPrice, maxPrice, search,
       sellerId, enterpriseId, limit = 50, offset = 0,
-      species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender,
+      species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       listingTier, isHotDeal, vaccinationStatus, healthCertificate, sortBy,
       userLat, userLng, radiusKm,
     } = filters;
@@ -83,6 +83,7 @@ class MarketplaceService {
     if (maxMilkYield) add('l.daily_milk_yield <= $?', maxMilkYield);
     if (pregnancyStatus) add('l.pregnancy_status = $?', pregnancyStatus);
     if (gender) add('l.gender = $?', gender);
+    if (animalClass) add('l.animal_class = $?', animalClass);
     if (listingTier) add('l.listing_tier = $?', listingTier);
     if (isHotDeal === 'true' || isHotDeal === true) where.push('l.is_hot_deal = true');
     if (vaccinationStatus) add('l.vaccination_status = $?', vaccinationStatus);
@@ -215,8 +216,8 @@ class MarketplaceService {
         linked_animal_id, auction_end_time, reserve_price, contact_phone,
         latitude, longitude, admin_approved,
         seller_type, registration_number, welfare_attestation, terms_accepted, terms_accepted_at,
-        video_url
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44)`,
+        video_url, animal_class
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45)`,
       [
         id, data.enterpriseId || null, data.sellerId, data.title, data.description || null,
         category, data.listingType || 'fixed_price', data.price || null,
@@ -237,7 +238,7 @@ class MarketplaceService {
         data.sellerType || 'individual', data.registrationNumber || null,
         data.welfareAttestation || false, data.termsAccepted || false,
         data.termsAccepted ? new Date().toISOString() : null,
-        data.videoUrl || null,
+        data.videoUrl || null, data.animalClass || null,
       ]
     );
     const result = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [id]);
@@ -259,7 +260,7 @@ class MarketplaceService {
 
     const allowedFields = [
       'title', 'description', 'price', 'quantity', 'status', 'category', 'condition', 'location',
-      'species', 'breed', 'gender', 'listing_type',
+      'species', 'breed', 'gender', 'animal_class', 'listing_type',
       'vaccination_status', 'contact_phone', 'seller_type', 'registration_number',
     ];
     const sets: string[] = []; const vals: any[] = []; let idx = 1;
@@ -704,7 +705,7 @@ class MarketplaceService {
     const {
       category, listingType, minPrice, maxPrice, search,
       limit = 24, offset = 0,
-      species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender,
+      species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       vaccinationStatus, healthCertificate, sortBy,
       userLat, userLng, radiusKm,
     } = filters;
@@ -732,6 +733,7 @@ class MarketplaceService {
     if (maxMilkYield) { where += ` AND l.daily_milk_yield <= $${idx++}`; params.push(maxMilkYield); }
     if (pregnancyStatus) { where += ` AND l.pregnancy_status = $${idx++}`; params.push(pregnancyStatus); }
     if (gender) { where += ` AND l.gender = $${idx++}`; params.push(gender); }
+    if (animalClass) { where += ` AND l.animal_class = $${idx++}`; params.push(animalClass); }
     if (vaccinationStatus) { where += ` AND l.vaccination_status = $${idx++}`; params.push(vaccinationStatus); }
     if (healthCertificate === 'true' || healthCertificate === true) { where += ` AND l.health_certificate = true`; }
     // Proximity filter (requires earthdistance extension)
@@ -749,7 +751,7 @@ class MarketplaceService {
     // Only select safe public columns — no seller email/phone/id
     let query = `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
                  l.quantity, l.unit, l.condition, l.images, l.location, l.tags, l.featured,
-                 l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender,
+                 l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender, l.animal_class,
                  l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
                  l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
                  l.video_url, l.auction_end_time, l.views_count, l.created_at, l.status,
@@ -931,14 +933,14 @@ class MarketplaceService {
   // ── Market Intelligence ──
   async getMarketPrices(filters: any = {}) {
     const { species, breed } = filters;
-    let query = `SELECT species, breed, 
+    let query = `SELECT species, breed, animal_class,
       COUNT(*) as total_listings, AVG(price) as avg_price, MIN(price) as min_price, MAX(price) as max_price,
       AVG(daily_milk_yield) as avg_milk_yield, AVG(animal_weight_kg) as avg_weight
       FROM marketplace_listings WHERE status IN ('active', 'sold', 'rehomed') AND species IS NOT NULL`;
     const params: any[] = []; let idx = 1;
     if (species) { query += ` AND species = $${idx++}`; params.push(species); }
     if (breed) { query += ` AND breed ILIKE $${idx++}`; params.push(`%${breed}%`); }
-    query += ` GROUP BY species, breed ORDER BY total_listings DESC`;
+    query += ` GROUP BY species, breed, animal_class ORDER BY total_listings DESC`;
     const result = await pool.query(query, params);
     return result.rows;
   }

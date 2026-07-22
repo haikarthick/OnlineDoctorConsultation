@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS animals (
   acquisition_date DATE,
   acquisition_source VARCHAR(200),
   production_type VARCHAR(50),
+  animal_class VARCHAR(30),
   avatar_url TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -2097,6 +2098,8 @@ CREATE INDEX IF NOT EXISTS idx_mp_saved_searches_user ON marketplace_saved_searc
 CREATE INDEX IF NOT EXISTS idx_mp_saved_searches_alerts ON marketplace_saved_searches(alerts_enabled) WHERE alerts_enabled = true;
 -- Phase 4: optional listing video (mirrors backend/migrations/017_marketplace_video.sql)
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS video_url VARCHAR(2000);
+-- Species-correct animal class terms (mirrors backend/migrations/020_animal_class_terms.sql)
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_class VARCHAR(30);
 -- Phase 5: reports + full-text index (mirrors backend/migrations/018_marketplace_trust_discovery.sql)
 CREATE TABLE IF NOT EXISTS marketplace_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

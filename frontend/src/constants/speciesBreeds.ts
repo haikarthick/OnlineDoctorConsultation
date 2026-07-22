@@ -80,6 +80,85 @@ export const SPECIES_CATEGORIES: Array<{ label: string; species: string[] }> = [
   { label: 'Other', species: ['Other'] },
 ]
 
+// ─── Sex/reproductive class terms (single source of truth) ───────────────────
+// Species-correct terminology (Bull/Cow/Bullock, Ram/Ewe/Wether, etc.) instead
+// of generic Male/Female. Only covers species with verified source terminology
+// — everything else keeps the plain gender select. `impliedGender` drives the
+// underlying gender field silently (never shown as its own control);
+// `canBePregnant`/`canProduceMilk` gate the pregnancy/lactation form fields.
+// Buffalo terms verified via web research (not assumed from Cattle) — no
+// attested Buffalo equivalent of Steer/Veal, so its castrated-male slot uses
+// a single "Buffalo Bullock" rather than forcing an unverified split.
+export interface AnimalClassTerm {
+  value: string
+  labelKey: string
+  impliedGender: 'male' | 'female' | 'unknown'
+  canBePregnant: boolean
+  canProduceMilk: boolean
+}
+
+export const ANIMAL_CLASS_TERMS: Record<string, AnimalClassTerm[]> = {
+  Cattle: [
+    { value: 'cattle_bull', labelKey: 'animalClass.cattle_bull', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'cattle_cow', labelKey: 'animalClass.cattle_cow', impliedGender: 'female', canBePregnant: true, canProduceMilk: true },
+    { value: 'cattle_calf', labelKey: 'animalClass.cattle_calf', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false },
+    { value: 'cattle_bull_calf', labelKey: 'animalClass.cattle_bull_calf', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'cattle_heifer_calf', labelKey: 'animalClass.cattle_heifer_calf', impliedGender: 'female', canBePregnant: false, canProduceMilk: false },
+    { value: 'cattle_heifer', labelKey: 'animalClass.cattle_heifer', impliedGender: 'female', canBePregnant: true, canProduceMilk: false },
+    { value: 'cattle_bullock', labelKey: 'animalClass.cattle_bullock', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'cattle_steer', labelKey: 'animalClass.cattle_steer', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+  ],
+  Buffalo: [
+    { value: 'buffalo_bull', labelKey: 'animalClass.buffalo_bull', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'buffalo_cow', labelKey: 'animalClass.buffalo_cow', impliedGender: 'female', canBePregnant: true, canProduceMilk: true },
+    { value: 'buffalo_calf', labelKey: 'animalClass.buffalo_calf', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false },
+    { value: 'buffalo_bull_calf', labelKey: 'animalClass.buffalo_bull_calf', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'buffalo_heifer_calf', labelKey: 'animalClass.buffalo_heifer_calf', impliedGender: 'female', canBePregnant: false, canProduceMilk: false },
+    { value: 'buffalo_heifer', labelKey: 'animalClass.buffalo_heifer', impliedGender: 'female', canBePregnant: true, canProduceMilk: false },
+    { value: 'buffalo_bullock', labelKey: 'animalClass.buffalo_bullock', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+  ],
+  Sheep: [
+    { value: 'sheep_ram', labelKey: 'animalClass.sheep_ram', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'sheep_ewe', labelKey: 'animalClass.sheep_ewe', impliedGender: 'female', canBePregnant: true, canProduceMilk: true },
+    { value: 'sheep_lamb', labelKey: 'animalClass.sheep_lamb', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false },
+    { value: 'sheep_ram_lamb', labelKey: 'animalClass.sheep_ram_lamb', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'sheep_ewe_lamb', labelKey: 'animalClass.sheep_ewe_lamb', impliedGender: 'female', canBePregnant: false, canProduceMilk: false },
+    { value: 'sheep_wether', labelKey: 'animalClass.sheep_wether', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+  ],
+  Goat: [
+    { value: 'goat_buck', labelKey: 'animalClass.goat_buck', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'goat_doe', labelKey: 'animalClass.goat_doe', impliedGender: 'female', canBePregnant: true, canProduceMilk: true },
+    { value: 'goat_buckling', labelKey: 'animalClass.goat_buckling', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'goat_goatling', labelKey: 'animalClass.goat_goatling', impliedGender: 'female', canBePregnant: true, canProduceMilk: false },
+    { value: 'goat_kid', labelKey: 'animalClass.goat_kid', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false },
+  ],
+  Pig: [
+    { value: 'pig_boar', labelKey: 'animalClass.pig_boar', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'pig_sow', labelKey: 'animalClass.pig_sow', impliedGender: 'female', canBePregnant: true, canProduceMilk: false },
+    { value: 'pig_gilt', labelKey: 'animalClass.pig_gilt', impliedGender: 'female', canBePregnant: true, canProduceMilk: false },
+    { value: 'pig_barrow', labelKey: 'animalClass.pig_barrow', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+  ],
+  Dog: [
+    { value: 'dog_male', labelKey: 'animalClass.dog_male', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'dog_bitch', labelKey: 'animalClass.dog_bitch', impliedGender: 'female', canBePregnant: true, canProduceMilk: false },
+    { value: 'dog_pup', labelKey: 'animalClass.dog_pup', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false },
+  ],
+  Cat: [
+    { value: 'cat_tom', labelKey: 'animalClass.cat_tom', impliedGender: 'male', canBePregnant: false, canProduceMilk: false },
+    { value: 'cat_queen', labelKey: 'animalClass.cat_queen', impliedGender: 'female', canBePregnant: true, canProduceMilk: false },
+    { value: 'cat_kitten', labelKey: 'animalClass.cat_kitten', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false },
+    { value: 'cat_neuter', labelKey: 'animalClass.cat_neuter', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false },
+  ],
+}
+
+export function classTermsForSpecies(species: string): AnimalClassTerm[] {
+  return ANIMAL_CLASS_TERMS[species] || []
+}
+
+export function findClassTerm(species: string, value: string): AnimalClassTerm | undefined {
+  return classTermsForSpecies(species).find(c => c.value === value)
+}
+
 export const SPECIES_ICONS: Record<string, string> = {
   Dog: '🐕', Cat: '🐈',
   Rabbit: '🐰', Hamster: '🐹', 'Guinea Pig': '🐾', Gerbil: '🐀',

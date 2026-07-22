@@ -2729,7 +2729,7 @@ class ApiService {
   async registerWalkInPatientDirect(networkId: string, data: {
     hospitalId: string; patientName: string; patientPhone?: string; patientEmail?: string; patientAddress?: string;
     animalName: string; animalSpecies: string; animalBreed?: string;
-    animalGender?: string; animalDob?: string; animalWeight?: number;
+    animalGender?: string; animalClass?: string; animalDob?: string; animalWeight?: number;
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
     animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
@@ -2744,7 +2744,7 @@ class ApiService {
   async registerWalkInStandalone(hospitalId: string, data: {
     patientName: string; patientPhone?: string; patientEmail?: string; patientAddress?: string;
     animalName: string; animalSpecies: string; animalBreed?: string;
-    animalGender?: string; animalDob?: string; animalWeight?: number;
+    animalGender?: string; animalClass?: string; animalDob?: string; animalWeight?: number;
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
     animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;

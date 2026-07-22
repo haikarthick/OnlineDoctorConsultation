@@ -1245,7 +1245,7 @@ router.post('/hospital-networks/:id/invite-walkin', authMiddleware, requireNetwo
 // Direct walk-in patient registration — no invite needed, treatment starts immediately
 router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNetworkAccess('walkInRegistration'), asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit, consentCollected, consentMethod } = req.body;
+    const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalClass, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit, consentCollected, consentMethod } = req.body;
     if (!patientName || !animalName || !animalSpecies || !hospitalId) {
       res.status(400).json({ success: false, message: 'patientName, animalName, animalSpecies, and hospitalId are required' }); return;
     }
@@ -1292,7 +1292,7 @@ router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNet
     const result = await HospitalNetworkService.registerWalkInPatientDirect({
       networkId: req.params.id, hospitalId, registeredBy: (req as any).userId,
       patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
-      animalGender, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
+      animalGender, animalClass, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
       animalColor, animalMicrochipId, animalRegistrationNumber,
       animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true',
       animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit,
@@ -1319,7 +1319,7 @@ router.post('/hospitals/:hospitalId/register-walkin', authMiddleware, asyncHandl
       const memberRole = await VetHospitalService.getMemberRole(req.params.hospitalId, (req as any).userId);
       if (!memberRole) { res.status(403).json({ success: false, message: 'You are not a member of this hospital' }); return; }
     }
-    const { patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId } = req.body;
+    const { patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalClass, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId } = req.body;
     if (!patientName || !animalName || !animalSpecies) {
       res.status(400).json({ success: false, message: 'patientName, animalName, and animalSpecies are required' }); return;
     }
@@ -1327,7 +1327,7 @@ router.post('/hospitals/:hospitalId/register-walkin', authMiddleware, asyncHandl
       hospitalId: req.params.hospitalId,
       registeredBy: (req as any).userId,
       patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
-      animalGender, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
+      animalGender, animalClass, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
       animalColor, animalMicrochipId, animalRegistrationNumber,
       animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true',
       animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId,
@@ -3916,12 +3916,12 @@ router.post('/animals/bulk-import', authMiddleware, roleMiddleware(['admin', 'fa
       }
       const id = uuidv4();
       await database.query(
-        `INSERT INTO animals (id, owner_id, enterprise_id, name, species, breed, gender, date_of_birth, weight, color, microchip_id, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
+        `INSERT INTO animals (id, owner_id, enterprise_id, name, species, breed, gender, date_of_birth, weight, color, microchip_id, animal_class, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
          ON CONFLICT DO NOTHING`,
         [id, authReq.userId, enterpriseId || null, animal.name, animal.species,
          animal.breed || null, animal.gender || null, animal.dateOfBirth || null,
-         animal.weight || null, animal.color || null, animal.microchipId || null]
+         animal.weight || null, animal.color || null, animal.microchipId || null, animal.animalClass || null]
       );
       results.created++;
     } catch (err: any) {

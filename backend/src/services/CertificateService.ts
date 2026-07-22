@@ -206,7 +206,7 @@ class CertificateService {
          u_owner.first_name as "ownerFirstName", u_owner.last_name as "ownerLastName",
          u_owner.email as "ownerEmail",
          a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
-         a.date_of_birth as "animalDob", a.gender as "animalGender"
+         a.date_of_birth as "animalDob", a.gender as "animalGender", a.animal_class as "animalClass"
        FROM vet_certificates vc
        LEFT JOIN users u_vet ON u_vet.id = vc.veterinarian_id
        LEFT JOIN vet_profiles vp ON vp.user_id = vc.veterinarian_id
@@ -416,6 +416,7 @@ class CertificateService {
       animalBreed: r.animalBreed,
       animalDob: r.animalDob,
       animalGender: r.animalGender,
+      animalClass: r.animalClass,
     };
   }
 }

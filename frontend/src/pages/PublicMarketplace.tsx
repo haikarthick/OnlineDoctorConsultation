@@ -5,6 +5,7 @@ import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
 import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
+import { classTermsForSpecies, findClassTerm } from '../constants/speciesBreeds'
 import './Marketplace.css'
 import './PublicMarketplace.css'
 
@@ -233,6 +234,12 @@ const PublicMarketplace: React.FC = () => {
             <option value="male">{t('marketplace.genderLabel.male')}</option>
             <option value="female">{t('marketplace.genderLabel.female')}</option>
           </select>
+          {filters.species && classTermsForSpecies(filters.species).length > 0 && (
+            <select className="module-input" value={filters.animalClass || ''} onChange={e => updateFilter('animalClass', e.target.value)}>
+              <option value="">{t('animalClass.anyClass')}</option>
+              {classTermsForSpecies(filters.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+            </select>
+          )}
           <select className="module-input" value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(0) }}>
             <option value="">{t('marketplace.sort.default')}</option>
             <option value="price_asc">{t('marketplace.sort.priceAsc')}</option>
@@ -414,6 +421,7 @@ const PublicListingDetail: React.FC<{
   const weight = g(l, 'animalWeightKg', 'animal_weight_kg')
   const age = g(l, 'animalAgeMonths', 'animal_age_months')
   const gender = l.gender
+  const animalClass = g(l, 'animalClass', 'animal_class')
   const lactation = g(l, 'lactationNumber', 'lactation_number')
   const pregnancy = g(l, 'pregnancyStatus', 'pregnancy_status')
   const pregMonth = g(l, 'pregnancyMonth', 'pregnancy_month')
@@ -482,7 +490,11 @@ const PublicListingDetail: React.FC<{
               <div className="mp-detail-grid">
                 {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{species}</span></div>}
                 {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breed}</span></div>}
-                {gender && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{{ male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') }[gender] || gender}</span></div>}
+                {(gender || animalClass) && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{(() => {
+                  const term = animalClass ? findClassTerm(species || '', animalClass) : undefined
+                  if (term) return t(term.labelKey)
+                  return (gender && ({ male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') } as Record<string, string>)[gender]) || gender
+                })()}</span></div>}
                 {age && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.age')}</span><span className="mp-detail-value">{age >= 12 ? `${Math.floor(age / 12)}y ${age % 12}m` : `${age} ${t('marketplace.units.months')}`}</span></div>}
                 {weight && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.weightKg')}</span><span className="mp-detail-value">{weight} {t('marketplace.units.kg')}</span></div>}
                 {lactation !== undefined && lactation !== null && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.lactation')}</span><span className="mp-detail-value">{lactation}</span></div>}

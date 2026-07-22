@@ -109,7 +109,7 @@ class PrescriptionService {
        COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.unique_id as "animalUniqueId",
-       a.date_of_birth as "animalDob", a.gender as "animalGender",
+       a.date_of_birth as "animalDob", a.gender as "animalGender", a.animal_class as "animalClass",
        c.diagnosis, c.symptom_description as "chiefComplaints",
        vp.license_number as "vetLicense",
        vp.specializations as "vetSpecializations",
@@ -174,7 +174,7 @@ class PrescriptionService {
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "vetName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.unique_id as "animalUniqueId",
-       a.gender as "animalGender",
+       a.gender as "animalGender", a.animal_class as "animalClass",
        c.diagnosis,
        hp.pharmacy_name as "pharmacyName",
        dr.dispensing_status as "dispensingStatus",
@@ -210,7 +210,7 @@ class PrescriptionService {
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "petOwnerName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
        a.unique_id as "animalUniqueId",
-       a.gender as "animalGender",
+       a.gender as "animalGender", a.animal_class as "animalClass",
        c.diagnosis,
        hp.pharmacy_name as "pharmacyName",
        dr.dispensing_status as "dispensingStatus",
@@ -272,7 +272,7 @@ class PrescriptionService {
        COALESCE(v.first_name || ' ' || v.last_name, 'Unknown') as "vetName",
        COALESCE(o.first_name || ' ' || o.last_name, 'Unknown') as "petOwnerName",
        a.name as "animalName", a.species as "animalSpecies", a.breed as "animalBreed",
-       a.gender as "animalGender",
+       a.gender as "animalGender", a.animal_class as "animalClass",
        c.diagnosis
        FROM prescriptions p
        LEFT JOIN users v ON v.id = p.veterinarian_id

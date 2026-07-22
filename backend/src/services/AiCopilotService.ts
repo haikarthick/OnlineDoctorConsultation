@@ -112,7 +112,7 @@ class AiCopilotService {
 
       // 2. ALL animals owned by this user (including inactive for historical context)
       const animalsRes = await pool.query(
-        `SELECT id, name, species, breed, date_of_birth, gender, weight, weight_unit,
+        `SELECT id, name, species, breed, date_of_birth, gender, animal_class, weight, weight_unit,
                 microchip_number, is_neutered, is_active, color, created_at
          FROM animals WHERE owner_id = $1
          ORDER BY is_active DESC, created_at DESC`,
@@ -125,7 +125,13 @@ class AiCopilotService {
             : 'unknown age';
           const dob = a.date_of_birth ? `, DOB: ${new Date(a.date_of_birth).toLocaleDateString()}` : '';
           const inactive = a.is_active ? '' : ' [INACTIVE/DECEASED]';
-          return `- **${a.name}**${inactive}: ${a.species}${a.breed ? ` (${a.breed})` : ''}, ${a.gender || 'unknown gender'}, ${age}${dob}${a.weight ? `, ${a.weight}${a.weight_unit || 'kg'}` : ''}${a.color ? `, ${a.color}` : ''}${a.is_neutered ? ', neutered' : ''}${a.microchip_number ? `, chip: ${a.microchip_number}` : ''}`;
+          // Prefer the species-correct class term (e.g. "Cattle Bull") over raw
+          // gender when set — humanized from the species-prefixed value since
+          // this is plain-text LLM context, not translated UI.
+          const classOrGender = a.animal_class
+            ? a.animal_class.split('_').map((w: string) => w[0].toUpperCase() + w.slice(1)).join(' ')
+            : (a.gender || 'unknown gender');
+          return `- **${a.name}**${inactive}: ${a.species}${a.breed ? ` (${a.breed})` : ''}, ${classOrGender}, ${age}${dob}${a.weight ? `, ${a.weight}${a.weight_unit || 'kg'}` : ''}${a.color ? `, ${a.color}` : ''}${a.is_neutered ? ', neutered' : ''}${a.microchip_number ? `, chip: ${a.microchip_number}` : ''}`;
         });
         sections.push(`## Their Animals (${animalsRes.rows.length})\n${animalLines.join('\n')}`);
       }

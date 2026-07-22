@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../context/SettingsContext'
+import { findClassTerm } from '../constants/speciesBreeds'
 import './PrescriptionPrintView.css'
 
 // ─── Types ────────────────────────────────────────────────────
@@ -25,6 +26,7 @@ export interface PrescriptionPrintData {
   animalBreed?: string
   animalAge?: string
   animalGender?: string
+  animalClass?: string
   // Owner
   petOwnerName?: string
   // Vet
@@ -201,7 +203,11 @@ const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, on
               <div className="rx-info-row">
                 <span className="rx-info-label">{t('prescriptionPrint.ageGender')}:</span>
                 <span className="rx-info-value">
-                  {[rx.animalAge, rx.animalGender].filter(Boolean).join(' / ')}
+                  {(() => {
+                    const classTerm = rx.animalClass ? findClassTerm(rx.animalSpecies || '', rx.animalClass) : undefined
+                    const genderOrClass = classTerm ? t(classTerm.labelKey) : rx.animalGender
+                    return [rx.animalAge, genderOrClass].filter(Boolean).join(' / ')
+                  })()}
                 </span>
               </div>
             )}

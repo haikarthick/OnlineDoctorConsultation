@@ -22,6 +22,14 @@ export interface Animal {
   insurancePolicyNumber?: string;
   insuranceExpiry?: string;
   medicalNotes?: string;
+  animalClass?: string;
+  sireId?: string;
+  damId?: string;
+  sireName?: string;
+  damName?: string;
+  breedingStatus?: string;
+  lastBreedingDate?: string;
+  expectedDueDate?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -45,6 +53,12 @@ export interface AnimalCreateDTO {
   medicalNotes?: string;
   enterpriseId?: string;
   groupId?: string;
+  animalClass?: string;
+  sireId?: string;
+  damId?: string;
+  breedingStatus?: string;
+  lastBreedingDate?: string;
+  expectedDueDate?: string;
 }
 
 export class AnimalService {
@@ -144,14 +158,17 @@ export class AnimalService {
       const query = `
         INSERT INTO animals (id, owner_id, unique_id, name, species, breed, date_of_birth, gender, weight, color, microchip_id,
                              ear_tag_id, registration_number, is_neutered, insurance_provider, insurance_policy_number, insurance_expiry,
-                             medical_notes, enterprise_id, group_id, is_active, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, true, NOW(), NOW())
+                             medical_notes, enterprise_id, group_id, animal_class, sire_id, dam_id,
+                             breeding_status, last_breeding_date, expected_due_date, is_active, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, true, NOW(), NOW())
         RETURNING id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
                   gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
                   registration_number as "registrationNumber", is_neutered as "isNeutered",
                   insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
                   insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
                   enterprise_id as "enterpriseId", group_id as "groupId",
+                  animal_class as "animalClass", sire_id as "sireId", dam_id as "damId",
+                  breeding_status as "breedingStatus", last_breeding_date as "lastBreedingDate", expected_due_date as "expectedDueDate",
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [
@@ -160,7 +177,9 @@ export class AnimalService {
         data.color || null, data.microchipId || null, data.earTagId || null, data.registrationNumber || null,
         data.isNeutered || false, data.insuranceProvider || null, data.insurancePolicyNumber || null,
         data.insuranceExpiry || null, data.medicalNotes || null,
-        data.enterpriseId || null, data.groupId || null
+        data.enterpriseId || null, data.groupId || null,
+        data.animalClass || null, data.sireId || null, data.damId || null,
+        data.breedingStatus || null, data.lastBreedingDate || null, data.expectedDueDate || null
       ]);
       logger.info('Animal created', { id, ownerId, uniqueId });
       return result.rows[0];
@@ -196,16 +215,21 @@ export class AnimalService {
   async getAnimal(animalId: string): Promise<Animal> {
     try {
       const query = `
-        SELECT id, owner_id as "ownerId", unique_id as "uniqueId", name, species, breed, date_of_birth as "dateOfBirth",
-               gender, weight, color, microchip_id as "microchipId", ear_tag_id as "earTagId",
-               registration_number as "registrationNumber", is_neutered as "isNeutered",
-               insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
-               insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
-               breeding_status as "breedingStatus", current_weight as "currentWeight",
-               weight_unit as "weightUnit", last_breeding_date as "lastBreedingDate",
-               expected_due_date as "expectedDueDate",
-               is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
-        FROM animals WHERE id = $1
+        SELECT a.id, a.owner_id as "ownerId", a.unique_id as "uniqueId", a.name, a.species, a.breed, a.date_of_birth as "dateOfBirth",
+               a.gender, a.weight, a.color, a.microchip_id as "microchipId", a.ear_tag_id as "earTagId",
+               a.registration_number as "registrationNumber", a.is_neutered as "isNeutered",
+               a.insurance_provider as "insuranceProvider", a.insurance_policy_number as "insurancePolicyNumber",
+               a.insurance_expiry as "insuranceExpiry", a.medical_notes as "medicalNotes",
+               a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
+               a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
+               a.expected_due_date as "expectedDueDate",
+               a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
+               sire.name as "sireName", dam.name as "damName",
+               a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt"
+        FROM animals a
+        LEFT JOIN animals sire ON sire.id = a.sire_id
+        LEFT JOIN animals dam ON dam.id = a.dam_id
+        WHERE a.id = $1
       `;
       const result = await database.query(query, [animalId]);
       if (result.rows.length === 0) {
@@ -229,6 +253,7 @@ export class AnimalService {
                a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
                a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
                a.expected_due_date as "expectedDueDate",
+               a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                (SELECT acc.network_id FROM animal_care_contexts acc
                 WHERE acc.animal_id = a.id AND acc.is_active = true
@@ -273,6 +298,7 @@ export class AnimalService {
                a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
                a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
                a.expected_due_date as "expectedDueDate",
+               a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
         FROM animals a
@@ -315,6 +341,7 @@ export class AnimalService {
                a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
                a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
                a.expected_due_date as "expectedDueDate",
+               a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
         FROM animals a LEFT JOIN users u ON u.id = a.owner_id
@@ -357,6 +384,7 @@ export class AnimalService {
                a.breeding_status as "breedingStatus", a.current_weight as "currentWeight",
                a.weight_unit as "weightUnit", a.last_breeding_date as "lastBreedingDate",
                a.expected_due_date as "expectedDueDate",
+               a.animal_class as "animalClass", a.sire_id as "sireId", a.dam_id as "damId",
                a.is_active as "isActive", a.created_at as "createdAt", a.updated_at as "updatedAt",
                COALESCE(u.first_name || ' ' || u.last_name, '') as "ownerName"
         FROM animals a
@@ -397,6 +425,8 @@ export class AnimalService {
         earTagId: 'ear_tag_id', registrationNumber: 'registration_number', isNeutered: 'is_neutered',
         insuranceProvider: 'insurance_provider', insurancePolicyNumber: 'insurance_policy_number',
         insuranceExpiry: 'insurance_expiry', medicalNotes: 'medical_notes',
+        animalClass: 'animal_class', sireId: 'sire_id', damId: 'dam_id',
+        breedingStatus: 'breeding_status', lastBreedingDate: 'last_breeding_date', expectedDueDate: 'expected_due_date',
       };
       const entries = Object.entries(updates).filter(([_, v]) => v !== undefined);
       if (entries.length === 0) return this.getAnimal(animalId);
@@ -412,6 +442,8 @@ export class AnimalService {
                   registration_number as "registrationNumber", is_neutered as "isNeutered",
                   insurance_provider as "insuranceProvider", insurance_policy_number as "insurancePolicyNumber",
                   insurance_expiry as "insuranceExpiry", medical_notes as "medicalNotes",
+                  animal_class as "animalClass", sire_id as "sireId", dam_id as "damId",
+                  breeding_status as "breedingStatus", last_breeding_date as "lastBreedingDate", expected_due_date as "expectedDueDate",
                   is_active as "isActive", created_at as "createdAt", updated_at as "updatedAt"
       `;
       const result = await database.query(query, [animalId, ...values]);

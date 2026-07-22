@@ -20,6 +20,7 @@ interface PrescriptionItem {
   animalSpecies?: string
   animalBreed?: string
   animalGender?: string
+  animalClass?: string
   medications: { name: string; dosage: string; frequency: string; duration: string; route?: string; instructions?: string }[]
   instructions?: string
   validUntil?: string
@@ -134,6 +135,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
         animalBreed: rxData?.animalBreed || rx.animalBreed,
         animalAge,
         animalGender: rxData?.animalGender || rx.animalGender,
+        animalClass: rxData?.animalClass || rx.animalClass,
         petOwnerName: rxData?.petOwnerName || rx.petOwnerName,
         vetName: rxData?.vetName || rx.vetName,
         vetLicense: rxData?.vetLicense,

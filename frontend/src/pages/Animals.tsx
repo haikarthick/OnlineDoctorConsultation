@@ -8,112 +8,7 @@ import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
-
-// ─── Breed Database by Species ──────────────────────────────
-// ── Common Pets ──────────────────────────────────────────────────────
-const BREED_DATABASE: Record<string, string[]> = {
-  Dog: ['Indian Pariah', 'Mudhol Hound', 'Rajapalayam', 'Kanni', 'Chippiparai', 'Kombai', 'Bakharwal', 'Rampur Greyhound', 'Himalayan Sheepdog', 'Labrador Retriever', 'Golden Retriever', 'German Shepherd', 'Beagle', 'Pug', 'Dachshund', 'Rottweiler', 'Doberman Pinscher', 'Great Dane', 'Saint Bernard', 'Siberian Husky', 'Shih Tzu', 'Pomeranian', 'Cocker Spaniel', 'Boxer', 'Dalmatian', 'Border Collie', 'Maltese', 'Poodle', 'Bichon Frise', 'German Spitz', 'Lhasa Apso', 'Chow Chow', 'Bulldog', 'French Bulldog', 'Yorkshire Terrier', 'Mixed Breed', 'Other'],
-  Cat: ['Persian', 'Siamese', 'Bengal', 'Maine Coon', 'Russian Blue', 'British Shorthair', 'Scottish Fold', 'Ragdoll', 'Himalayan', 'Turkish Angora', 'Bombay', 'American Shorthair', 'Abyssinian', 'Burmese', 'Devon Rex', 'Indian Domestic', 'Mixed Breed', 'Other'],
-  // ── Small Pets ──────────────────────────────────────────────────────
-  Rabbit: ['New Zealand White', 'Dutch', 'Rex', 'Angora', 'Mini Lop', 'Holland Lop', 'Flemish Giant', 'Lionhead', 'Himalayan', 'Mixed Breed', 'Other'],
-  Hamster: ['Syrian (Golden)', 'Dwarf Campbell', 'Dwarf Winter White', 'Roborovski', 'Chinese', 'Mixed', 'Other'],
-  'Guinea Pig': ['American', 'Abyssinian', 'Peruvian', 'Silkie', 'Teddy', 'Texel', 'Mixed', 'Other'],
-  Gerbil: ['Mongolian', 'Fat-tailed', 'Mixed', 'Other'],
-  Chinchilla: ['Standard Grey', 'White', 'Beige', 'Black Velvet', 'Violet', 'Mixed', 'Other'],
-  Ferret: ['Sable', 'Albino', 'Dark-eyed White', 'Silver', 'Cinnamon', 'Mixed', 'Other'],
-  Hedgehog: ['African Pygmy', 'European', 'Long-eared', 'Mixed', 'Other'],
-  'Sugar Glider': ['Classic Grey', 'Leucistic', 'Albino', 'Black Beauty', 'Mixed', 'Other'],
-  // ── Birds ──────────────────────────────────────────────────────────
-  Parrot: ['African Grey', 'Blue and Gold Macaw', 'Green Wing Macaw', 'Scarlet Macaw', 'Cockatoo', 'Yellow-naped Amazon', 'Blue-fronted Amazon', 'Eclectus', 'Sun Conure', 'Green Cheek Conure', 'Caique', 'Alexandrine Parakeet', 'Rose-ringed Parakeet', 'Mixed', 'Other'],
-  Budgerigar: ['English Budgie', 'American Budgie', 'Australian Budgie', 'Lutino', 'Albino', 'Pied', 'Mixed', 'Other'],
-  Cockatiel: ['Normal Grey', 'Lutino', 'Pearl', 'Cinnamon', 'Pied', 'Whiteface', 'Mixed', 'Other'],
-  Lovebird: ['Peach-faced', "Fischer's", 'Black-masked', 'Nyasa', 'Black-cheeked', 'Mixed', 'Other'],
-  Finch: ['Zebra Finch', 'Society Finch', 'Gouldian Finch', 'Java Sparrow', 'Star Finch', 'Mixed', 'Other'],
-  Canary: ['Yorkshire', 'Border', 'Roller', 'Red Factor', 'Gloster', 'Mixed', 'Other'],
-  Mynah: ['Common Hill Mynah', 'Bank Mynah', 'Jungle Mynah', 'Mixed', 'Other'],
-  Pigeon: ['Fantail', 'Jacobin', 'Tumbler', 'King', 'Racing Homer', 'Indian Fantail', 'Mixed', 'Other'],
-  Bird: ['Mixed / Unknown', 'Other'],
-  // ── Reptiles ───────────────────────────────────────────────────────
-  Tortoise: ['Indian Star Tortoise', 'Russian Tortoise', "Hermann's Tortoise", 'Sulcata', 'Red-footed', 'Mixed', 'Other'],
-  Turtle: ['Red-eared Slider', 'Painted Turtle', 'Map Turtle', 'Box Turtle', 'Mixed', 'Other'],
-  Gecko: ['Leopard Gecko', 'Crested Gecko', 'African Fat-tailed', 'Tokay', 'Day Gecko', 'Mixed', 'Other'],
-  'Bearded Dragon': ['Inland/Central', "Rankin's Dragon", 'Mixed', 'Other'],
-  Chameleon: ['Veiled', 'Panther', "Jackson's", "Fischer's", 'Mixed', 'Other'],
-  Snake: ['Ball Python', 'Corn Snake', 'King Snake', 'Milk Snake', 'Boa Constrictor', 'Mixed', 'Other'],
-  // ── Amphibians ─────────────────────────────────────────────────────
-  Frog: ['African Dwarf', 'Pacman (Horned)', 'Tree Frog', "White's Tree Frog", 'Mixed', 'Other'],
-  Axolotl: ['Wild Type', 'Leucistic', 'Golden Albino', 'Melanoid', 'Axanthic', 'Mixed', 'Other'],
-  // ── Ornamental Fish ────────────────────────────────────────────────
-  'Ornamental Fish': ['Betta', 'Guppy', 'Mollies', 'Platy', 'Swordtail', 'Tetra', 'Angelfish', 'Discus', 'Cichlid', 'Clownfish', 'Mixed', 'Other'],
-  Koi: ['Kohaku', 'Sanke', 'Showa', 'Bekko', 'Asagi', 'Ogon', 'Butterfly Koi', 'Mixed', 'Other'],
-  Arowana: ['Silver', 'Golden', 'Red', 'Black', 'Pearl', 'Mixed', 'Other'],
-  Goldfish: ['Common', 'Comet', 'Fantail', 'Oranda', 'Ryukin', 'Black Moor', 'Telescope', 'Bubble Eye', 'Mixed', 'Other'],
-  // ── Livestock / Farm ───────────────────────────────────────────────
-  Cattle: ['Gir', 'Sahiwal', 'Red Sindhi', 'Tharparkar', 'Ongole', 'Hallikar', 'Khillari', 'Deoni', 'Kangayam', 'Umblachery', 'Malnad Gidda', 'Punganur', 'Vechur', 'Hariana', 'Rathi', 'Holstein Friesian (HF)', 'Jersey', 'Brown Swiss', 'Simmental', 'Mixed Breed', 'Other'],
-  Buffalo: ['Murrah', 'Surti', 'Mehsana', 'Jaffarabadi', 'Nili-Ravi', 'Pandharpuri', 'Marathwadi', 'Nagpuri', 'Toda (Nilgiri)', 'Mixed', 'Other'],
-  Horse: ['Marwari', 'Kathiawari', 'Manipuri Pony', 'Bhutia', 'Spiti', 'Zanskari', 'Thoroughbred', 'Arabian', 'Quarter Horse', 'Warmblood', 'Standardbred', 'Mixed Breed', 'Other'],
-  Donkey: ['Indian Donkey', 'Halari', 'Spiti', 'Mixed', 'Other'],
-  Sheep: ['Nellore', 'Deccani', 'Mandya', 'Bellary', 'Madras Red', 'Coimbatore', 'Mecheri', 'Ramnad White', 'Vembur', 'Nilgiri', 'Korriedale', 'Garole', 'Merino', 'Suffolk', 'Rambouillet', 'Mixed Breed', 'Other'],
-  Goat: ['Jamunapari', 'Barbari', 'Sirohi', 'Black Bengal', 'Osmanabadi', 'Salem Black', 'Malabari', 'Sangamneri', 'Ganjam', 'Kanniadu', 'Boer', 'Alpine', 'Saanen', 'Nubian', 'Angora', 'Mixed Breed', 'Other'],
-  Pig: ['Desi (Indigenous)', 'Ghungroo', 'Niang Megha', 'Yorkshire (Large White)', 'Landrace', 'Duroc', 'Hampshire', 'Berkshire', 'Mixed Breed', 'Other'],
-  Camel: ['Dromedary (One-humped)', 'Bactrian (Two-humped)', 'Mixed', 'Other'],
-  Yak: ['Domestic Yak', 'Mixed', 'Other'],
-  Deer: ['Spotted Deer (Chital)', 'Sambhar', 'Barking Deer (Muntjac)', 'Mixed', 'Other'],
-  // ── Poultry ────────────────────────────────────────────────────────
-  Chicken: ['Aseel', 'Kadaknath', 'Ghagus', 'Naked Neck', 'Kalinga Brown', 'Vanaraja', 'Grampriya', 'Nicobari', 'Broiler', 'White Leghorn', 'Rhode Island Red', 'Plymouth Rock', 'Sussex', 'Australorp', 'Mixed Breed', 'Other'],
-  Duck: ['Indian Runner', 'Khaki Campbell', 'Pekin', 'Muscovy', 'Rouen', 'Mixed', 'Other'],
-  Turkey: ['Broad-breasted White', 'Bronze', 'Bourbon Red', 'Narragansett', 'Mixed', 'Other'],
-  Quail: ['Japanese', 'Bobwhite', 'California', 'Coturnix', 'Mixed', 'Other'],
-  Emu: ['Australian Emu', 'Other'],
-  Ostrich: ['Common Ostrich', 'Other'],
-  Peacock: ['Indian Peafowl (Blue)', 'White Peafowl', 'Green Peafowl', 'Mixed', 'Other'],
-  // ── Exotic Large ───────────────────────────────────────────────────
-  Llama: ['Suri', 'Huacaya', 'Mixed', 'Other'],
-  Alpaca: ['Suri', 'Huacaya', 'Mixed', 'Other'],
-  // ── Other ──────────────────────────────────────────────────────────
-  Other: [],
-}
-
-const SPECIES_CATEGORIES: Array<{ label: string; species: string[] }> = [
-  { label: 'Common Pets', species: ['Dog', 'Cat'] },
-  { label: 'Small Pets', species: ['Rabbit', 'Hamster', 'Guinea Pig', 'Gerbil', 'Chinchilla', 'Ferret', 'Hedgehog', 'Sugar Glider'] },
-  { label: 'Birds', species: ['Parrot', 'Budgerigar', 'Cockatiel', 'Lovebird', 'Finch', 'Canary', 'Mynah', 'Pigeon', 'Bird'] },
-  { label: 'Reptiles', species: ['Tortoise', 'Turtle', 'Gecko', 'Bearded Dragon', 'Chameleon', 'Snake'] },
-  { label: 'Amphibians', species: ['Frog', 'Axolotl'] },
-  { label: 'Ornamental Fish', species: ['Ornamental Fish', 'Koi', 'Arowana', 'Goldfish'] },
-  { label: 'Livestock / Farm', species: ['Cattle', 'Buffalo', 'Horse', 'Donkey', 'Sheep', 'Goat', 'Pig', 'Camel', 'Yak', 'Deer'] },
-  { label: 'Poultry', species: ['Chicken', 'Duck', 'Turkey', 'Quail', 'Emu', 'Ostrich', 'Peacock'] },
-  { label: 'Exotic Large', species: ['Llama', 'Alpaca'] },
-  { label: 'Other', species: ['Other'] },
-]
-
-const SPECIES_ICONS: Record<string, string> = {
-  // Common pets
-  Dog: '🐕', Cat: '🐈',
-  // Small pets
-  Rabbit: '🐰', Hamster: '🐹', 'Guinea Pig': '🐾', Gerbil: '🐀',
-  Chinchilla: '🐭', Ferret: '🦡', Hedgehog: '🦔', 'Sugar Glider': '🦘',
-  // Birds
-  Parrot: '🦜', Budgerigar: '🦜', Cockatiel: '🦜', Lovebird: '💚',
-  Finch: '🐦', Canary: '🐦', Mynah: '🐦', Pigeon: '🕊️', Bird: '🐦',
-  // Reptiles
-  Tortoise: '🐢', Turtle: '🐢', Gecko: '🦎', 'Bearded Dragon': '🦎',
-  Chameleon: '🦎', Snake: '🐍',
-  // Amphibians
-  Frog: '🐸', Axolotl: '🦎',
-  // Fish
-  'Ornamental Fish': '🐠', Koi: '🐟', Arowana: '🐟', Goldfish: '🐡',
-  // Farm/Livestock
-  Cattle: '🐄', Buffalo: '🐃', Horse: '🐴', Donkey: '🫏',
-  Sheep: '🐑', Goat: '🐐', Pig: '🐷', Camel: '🐪', Yak: '🐂', Deer: '🦌',
-  // Poultry
-  Chicken: '🐔', Duck: '🦆', Turkey: '🦃', Quail: '🐦',
-  Emu: '🦤', Ostrich: '🦢', Peacock: '🦚',
-  // Exotic large
-  Llama: '🦙', Alpaca: '🦙',
-  // Other
-  Other: '🐾',
-}
+import { BREED_DATABASE, SPECIES_CATEGORIES, SPECIES_ICONS, classTermsForSpecies, findClassTerm } from '../constants/speciesBreeds'
 
 // Species that commonly use ear tags / registration numbers
 const EAR_TAG_SPECIES = ['Cattle', 'Buffalo', 'Sheep', 'Goat', 'Pig', 'Horse', 'Donkey', 'Camel', 'Yak', 'Deer', 'Emu', 'Ostrich', 'Peacock', 'Llama', 'Alpaca']
@@ -125,10 +20,21 @@ interface AnimalData {
   isNeutered?: boolean; insuranceProvider?: string; insurancePolicyNumber?: string;
   insuranceExpiry?: string; medicalNotes?: string; ownerName?: string;
   enterpriseId?: string; groupId?: string; enterpriseName?: string; groupName?: string; groupColor?: string;
+  animalClass?: string; sireId?: string; damId?: string; sireName?: string; damName?: string;
+  breedingStatus?: string; lastBreedingDate?: string; expectedDueDate?: string;
 }
 
 interface EnterpriseOption { id: string; name: string }
 interface GroupOption { id: string; name: string }
+
+/** Species-correct class label ("Bullock") when set, falling back to raw gender ("Male"). */
+function classOrGenderLabel(t: (k: string) => string, species: string, animalClass: string | undefined, gender: string | undefined): string | null {
+  const term = animalClass ? findClassTerm(species, animalClass) : undefined
+  if (term) return t(term.labelKey)
+  if (gender === 'male') return t('animals.form.maleDisplay')
+  if (gender === 'female') return t('animals.form.femaleDisplay')
+  return null
+}
 
 const Animals: React.FC = () => {
   const { t } = useTranslation()
@@ -146,7 +52,9 @@ const Animals: React.FC = () => {
     name: '', species: '', breed: '', customBreed: '', gender: '', weight: '', color: '',
     dateOfBirth: '', microchipId: '', earTagId: '', registrationNumber: '',
     isNeutered: false, insuranceProvider: '', insurancePolicyNumber: '', insuranceExpiry: '',
-    medicalNotes: '', enterpriseId: '', groupId: ''
+    medicalNotes: '', enterpriseId: '', groupId: '',
+    animalClass: '', sireId: '', damId: '',
+    breedingStatus: '', lastBreedingDate: '', expectedDueDate: ''
   })
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -250,9 +158,12 @@ const Animals: React.FC = () => {
   }
 
   const downloadTemplate = () => {
-    const csv = 'name,species,breed,gender,dateOfBirth,weight,color,microchipId\n' +
-      'Bessie,Cattle,Gir,female,2020-01-15,450,Black & White,900118001234567\n' +
-      'Raja,Horse,Marwari,male,2019-06-01,520,Brown,\n'
+    // animalClass is optional — species-correct terms like cattle_cow, cattle_bull,
+    // sheep_ewe, etc. (see ANIMAL_CLASS_TERMS in constants/speciesBreeds.ts); leave
+    // blank for species without class terms, or to just use gender.
+    const csv = 'name,species,breed,gender,animalClass,dateOfBirth,weight,color,microchipId\n' +
+      'Bessie,Cattle,Gir,female,cattle_cow,2020-01-15,450,Black & White,900118001234567\n' +
+      'Raja,Horse,Marwari,male,,2019-06-01,520,Brown,\n'
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -281,7 +192,9 @@ const Animals: React.FC = () => {
       name: '', species: '', breed: '', customBreed: '', gender: '', weight: '', color: '',
       dateOfBirth: '', microchipId: '', earTagId: '', registrationNumber: '',
       isNeutered: false, insuranceProvider: '', insurancePolicyNumber: '', insuranceExpiry: '',
-      medicalNotes: '', enterpriseId: '', groupId: ''
+      medicalNotes: '', enterpriseId: '', groupId: '',
+      animalClass: '', sireId: '', damId: '',
+      breedingStatus: '', lastBreedingDate: '', expectedDueDate: ''
     })
     setEditingAnimal(null)
   }
@@ -301,7 +214,11 @@ const Animals: React.FC = () => {
       insuranceExpiry: a.insuranceExpiry ? a.insuranceExpiry.split('T')[0] : '',
       medicalNotes: a.medicalNotes || '',
       enterpriseId: (a as any).enterpriseId || (a as any).enterprise_id || '',
-      groupId: (a as any).groupId || (a as any).group_id || ''
+      groupId: (a as any).groupId || (a as any).group_id || '',
+      animalClass: a.animalClass || '', sireId: a.sireId || '', damId: a.damId || '',
+      breedingStatus: a.breedingStatus || '',
+      lastBreedingDate: a.lastBreedingDate ? a.lastBreedingDate.split('T')[0] : '',
+      expectedDueDate: a.expectedDueDate ? a.expectedDueDate.split('T')[0] : ''
     })
     setEditingAnimal(a)
     setShowForm(true)
@@ -325,6 +242,12 @@ const Animals: React.FC = () => {
       medicalNotes: formData.medicalNotes || undefined,
       enterpriseId: formData.enterpriseId || undefined,
       groupId: formData.groupId || undefined,
+      animalClass: formData.animalClass || undefined,
+      sireId: formData.sireId || undefined,
+      damId: formData.damId || undefined,
+      breedingStatus: formData.breedingStatus || undefined,
+      lastBreedingDate: formData.lastBreedingDate || undefined,
+      expectedDueDate: formData.expectedDueDate || undefined,
     }
     try {
       if (editingAnimal) {
@@ -607,12 +530,27 @@ const Animals: React.FC = () => {
                 </div>
               )}
               <div>
-                <label style={labelStyle}>{t('animals.registerModal.gender')}</label>
-                <select value={formData.gender} onChange={e => setFormData(p => ({ ...p, gender: e.target.value }))} style={fieldStyle}>
-                  <option value="">{t('animals.form.selectGender')}</option>
-                  <option value="male">{t('animals.form.male')}</option>
-                  <option value="female">{t('animals.form.female')}</option>
-                </select>
+                {classTermsForSpecies(formData.species).length > 0 ? (
+                  <>
+                    <label style={labelStyle}>{t('animalClass.fieldLabel')}</label>
+                    <select value={formData.animalClass} onChange={e => {
+                      const term = findClassTerm(formData.species, e.target.value)
+                      setFormData(p => ({ ...p, animalClass: e.target.value, gender: term?.impliedGender || p.gender }))
+                    }} style={fieldStyle}>
+                      <option value="">{t('animalClass.selectClass')}</option>
+                      {classTermsForSpecies(formData.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                    </select>
+                  </>
+                ) : (
+                  <>
+                    <label style={labelStyle}>{t('animals.registerModal.gender')}</label>
+                    <select value={formData.gender} onChange={e => setFormData(p => ({ ...p, gender: e.target.value }))} style={fieldStyle}>
+                      <option value="">{t('animals.form.selectGender')}</option>
+                      <option value="male">{t('animals.form.male')}</option>
+                      <option value="female">{t('animals.form.female')}</option>
+                    </select>
+                  </>
+                )}
               </div>
               <div>
                 <label style={labelStyle}>{t('animals.registerModal.dob')}</label>
@@ -630,6 +568,47 @@ const Animals: React.FC = () => {
                 <input type="checkbox" id="isNeutered" checked={formData.isNeutered} onChange={e => setFormData(p => ({ ...p, isNeutered: e.target.checked }))} style={{ width: 18, height: 18 }} />
                 <label htmlFor="isNeutered" style={{ fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>{t('animals.registerModal.neutered')}</label>
               </div>
+              <div>
+                <label style={labelStyle}>{t('animalClass.sire')}</label>
+                <select value={formData.sireId} onChange={e => setFormData(p => ({ ...p, sireId: e.target.value }))} style={fieldStyle}>
+                  <option value="">{t('animalClass.selectSire')}</option>
+                  {animals.filter(a => a.species === formData.species && a.gender === 'male' && a.id !== editingAnimal?.id).map(a => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>{t('animalClass.dam')}</label>
+                <select value={formData.damId} onChange={e => setFormData(p => ({ ...p, damId: e.target.value }))} style={fieldStyle}>
+                  <option value="">{t('animalClass.selectDam')}</option>
+                  {animals.filter(a => a.species === formData.species && a.gender === 'female' && a.id !== editingAnimal?.id).map(a => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </select>
+              </div>
+              {findClassTerm(formData.species, formData.animalClass)?.canBePregnant && (
+                <>
+                  <div>
+                    <label style={labelStyle}>{t('animalClass.breedingStatus')}</label>
+                    <select value={formData.breedingStatus} onChange={e => setFormData(p => ({ ...p, breedingStatus: e.target.value }))} style={fieldStyle}>
+                      <option value="">{t('animalClass.selectBreedingStatus')}</option>
+                      <option value="not_bred">{t('animalClass.notBred')}</option>
+                      <option value="pregnant">{t('animalClass.pregnant')}</option>
+                      <option value="not_pregnant">{t('animalClass.notPregnant')}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>{t('animalClass.lastBreedingDate')}</label>
+                    <input type="date" value={formData.lastBreedingDate} onChange={e => setFormData(p => ({ ...p, lastBreedingDate: e.target.value }))} style={fieldStyle} max={new Date().toISOString().split('T')[0]} />
+                  </div>
+                  {formData.breedingStatus === 'pregnant' && (
+                    <div>
+                      <label style={labelStyle}>{t('animalClass.expectedDueDate')}</label>
+                      <input type="date" value={formData.expectedDueDate} onChange={e => setFormData(p => ({ ...p, expectedDueDate: e.target.value }))} style={fieldStyle} />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             {/* ── Identification ── */}
@@ -781,7 +760,7 @@ const Animals: React.FC = () => {
                   {/* Card Body */}
                   <div style={{ padding: '14px 20px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px', fontSize: 13 }}>
-                      {animal.gender && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.gender')}</span> <strong>{animal.gender === 'male' ? t('animals.form.maleDisplay') : t('animals.form.femaleDisplay')}</strong></div>}
+                      {(animal.animalClass || animal.gender) && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.gender')}</span> <strong>{classOrGenderLabel(t, animal.species, animal.animalClass, animal.gender)}</strong></div>}
                       {animal.weight && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.weight')}</span> <strong>{animal.weight} kg</strong></div>}
                       {animal.color && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.color')}</span> <strong>{animal.color}</strong></div>}
                       {animal.isNeutered && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.neutered')}</span> <strong style={{ color: '#059669' }}>{t('animals.cardLabels.yesCheck')}</strong></div>}
@@ -879,8 +858,12 @@ const Animals: React.FC = () => {
                 <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.name')}</span> <strong>{detailAnimal.name}</strong></div>
                 <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.species')}</span> <strong>{detailAnimal.species}</strong></div>
                 {detailAnimal.breed && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.breed')}</span> <strong>{detailAnimal.breed}</strong></div>}
-                {detailAnimal.gender && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.gender')}</span> <strong>{detailAnimal.gender === 'male' ? t('animals.form.maleDisplay') : t('animals.form.femaleDisplay')}</strong></div>}
+                {(detailAnimal.animalClass || detailAnimal.gender) && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
                 {detailAnimal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.dob')}</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
+                {detailAnimal.sireName && <div><span style={{ color: '#6b7280' }}>{t('animalClass.sire')}</span> <strong>{detailAnimal.sireName}</strong></div>}
+                {detailAnimal.damName && <div><span style={{ color: '#6b7280' }}>{t('animalClass.dam')}</span> <strong>{detailAnimal.damName}</strong></div>}
+                {detailAnimal.breedingStatus && <div><span style={{ color: '#6b7280' }}>{t('animalClass.breedingStatus')}</span> <strong>{t(`animalClass.${detailAnimal.breedingStatus === 'not_bred' ? 'notBred' : detailAnimal.breedingStatus === 'pregnant' ? 'pregnant' : 'notPregnant'}`)}</strong></div>}
+                {detailAnimal.breedingStatus === 'pregnant' && detailAnimal.expectedDueDate && <div><span style={{ color: '#6b7280' }}>{t('animalClass.expectedDueDate')}</span> <strong>{formatDate(detailAnimal.expectedDueDate)}</strong></div>}
                 {detailAnimal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.age')}</span> <strong>{calculateAge(detailAnimal.dateOfBirth)}</strong></div>}
                 {detailAnimal.weight && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.weight')}</span> <strong>{detailAnimal.weight} kg</strong></div>}
                 {detailAnimal.color && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.color')}</span> <strong>{detailAnimal.color}</strong></div>}
