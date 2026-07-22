@@ -360,3 +360,17 @@ test.describe('Auto-Discovered — /admin/finance-reports', () => {
     await context.close()
   })
 })
+
+test.describe('Auto-Discovered — /admin/master-data', () => {
+  test('should load /admin/master-data without crash', async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    await loginAs(page, 'admin')
+    await page.goto('/admin/master-data')
+    await page.waitForLoadState('domcontentloaded')
+    await expect(page).not.toHaveURL(/\/login/)
+    const content = await page.textContent('body')
+    expect(content!.length).toBeGreaterThan(0)
+    await context.close()
+  })
+})
