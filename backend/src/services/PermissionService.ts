@@ -45,6 +45,7 @@ export const PERMISSION_CATEGORIES = {
       'admin_holidays',
       'admin_cancellation_dashboard',
       'admin_vaccine_protocols',
+      'admin_master_data',
       'admin_certificates',
       'dispute_management',
       'hospital_network_subscription',
@@ -340,6 +341,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
     'sustainability_manage', 'wellness_portal', 'geospatial_analytics',
     // Vaccine Protocols
     'vaccination_passport', 'admin_vaccine_protocols', 'vet_certificates',
+    // Master Data
+    'admin_master_data',
     // Certificates admin
     'admin_certificates',
     // Hospital Network (full access)

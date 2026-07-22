@@ -8,10 +8,7 @@ import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
-import { BREED_DATABASE, SPECIES_CATEGORIES, SPECIES_ICONS, classTermsForSpecies, findClassTerm } from '../constants/speciesBreeds'
-
-// Species that commonly use ear tags / registration numbers
-const EAR_TAG_SPECIES = ['Cattle', 'Buffalo', 'Sheep', 'Goat', 'Pig', 'Horse', 'Donkey', 'Camel', 'Yak', 'Deer', 'Emu', 'Ostrich', 'Peacock', 'Llama', 'Alpaca']
+import { useMasterData } from '../context/MasterDataContext'
 
 interface AnimalData {
   id: string; uniqueId?: string; name: string; species: string; breed?: string;
@@ -28,7 +25,11 @@ interface EnterpriseOption { id: string; name: string }
 interface GroupOption { id: string; name: string }
 
 /** Species-correct class label ("Bullock") when set, falling back to raw gender ("Male"). */
-function classOrGenderLabel(t: (k: string) => string, species: string, animalClass: string | undefined, gender: string | undefined): string | null {
+function classOrGenderLabel(
+  t: (k: string) => string,
+  findClassTerm: (species: string, value: string) => { labelKey: string } | undefined,
+  species: string, animalClass: string | undefined, gender: string | undefined
+): string | null {
   const term = animalClass ? findClassTerm(species, animalClass) : undefined
   if (term) return t(term.labelKey)
   if (gender === 'male') return t('animals.form.maleDisplay')
@@ -38,6 +39,7 @@ function classOrGenderLabel(t: (k: string) => string, species: string, animalCla
 
 const Animals: React.FC = () => {
   const { t } = useTranslation()
+  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, speciesIcon, earTagSpecies } = useMasterData()
 
   const { user } = useAuth()
   const { formatDate } = useSettings()
@@ -85,8 +87,8 @@ const Animals: React.FC = () => {
   const isPetOwner = user?.role === 'pet_owner'
   const canManageAnimals = isPetOwner || isFarmer || (isVet && vetView === 'my-pets')
 
-  const breeds = useMemo(() => BREED_DATABASE[formData.species] || [], [formData.species])
-  const showEarTag = EAR_TAG_SPECIES.includes(formData.species)
+  const breeds = useMemo(() => breedsForSpecies(formData.species), [formData.species, breedsForSpecies])
+  const showEarTag = earTagSpecies.includes(formData.species)
 
   // Load enterprises for farmer
   useEffect(() => {
@@ -200,7 +202,7 @@ const Animals: React.FC = () => {
   }
 
   const openEditForm = (a: AnimalData) => {
-    const breedList = BREED_DATABASE[a.species] || []
+    const breedList = breedsForSpecies(a.species)
     const isCustomBreed = a.breed && !breedList.includes(a.breed)
     setFormData({
       name: a.name, species: a.species, breed: isCustomBreed ? 'Other' : (a.breed || ''),
@@ -461,7 +463,7 @@ const Animals: React.FC = () => {
           />
           <select value={speciesFilter} onChange={e => setSpeciesFilter(e.target.value)} style={{ ...fieldStyle, maxWidth: 160 }}>
             <option value="">{t('animals.allSpecies')}</option>
-            {uniqueSpecies.map(s => <option key={s} value={s}>{SPECIES_ICONS[s] || '🐾'} {s}</option>)}
+            {uniqueSpecies.map(s => <option key={s} value={s}>{speciesIcon(s)} {s}</option>)}
           </select>
           {isFarmer && enterpriseOptions.length > 0 && (
             <select value={enterpriseFilter} onChange={e => { setEnterpriseFilter(e.target.value); setGroupFilter('') }} style={{ ...fieldStyle, maxWidth: 180 }}>
@@ -502,10 +504,10 @@ const Animals: React.FC = () => {
                 <label style={labelStyle}>{t('animals.registerModal.species')}</label>
                 <select value={formData.species} onChange={e => setFormData(p => ({ ...p, species: e.target.value, breed: '', customBreed: '' }))} required style={fieldStyle}>
                   <option value="">{t('animals.form.selectSpecies')}</option>
-                  {SPECIES_CATEGORIES.map(cat => (
+                  {speciesCategories.map(cat => (
                     <optgroup key={cat.label} label={cat.label}>
                       {cat.species.map(s => (
-                        <option key={s} value={s}>{SPECIES_ICONS[s] || '🐾'} {s}</option>
+                        <option key={s} value={s}>{speciesIcon(s)} {s}</option>
                       ))}
                     </optgroup>
                   ))}
@@ -728,7 +730,7 @@ const Animals: React.FC = () => {
                   {/* Card Header */}
                   <div className="si-6ac50557">
                     <div className="si-0b20392f">
-                      <span className="si-42fc55d5">{SPECIES_ICONS[animal.species] || '🐾'}</span>
+                      <span className="si-42fc55d5">{speciesIcon(animal.species)}</span>
                       <div>
                         <div className="si-90c2c65d">{animal.name}</div>
                         <div className="si-122e0f6b">{animal.species}{animal.breed ? ` • ${animal.breed}` : ''}</div>
@@ -757,7 +759,7 @@ const Animals: React.FC = () => {
                   {/* Card Body */}
                   <div className="si-d29f2575">
                     <div className="si-3b3a79d7">
-                      {(animal.animalClass || animal.gender) && <div><span className="si-23033f05">{t('animals.cardLabels.gender')}</span> <strong>{classOrGenderLabel(t, animal.species, animal.animalClass, animal.gender)}</strong></div>}
+                      {(animal.animalClass || animal.gender) && <div><span className="si-23033f05">{t('animals.cardLabels.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, animal.species, animal.animalClass, animal.gender)}</strong></div>}
                       {animal.weight && <div><span className="si-23033f05">{t('animals.cardLabels.weight')}</span> <strong>{animal.weight} kg</strong></div>}
                       {animal.color && <div><span className="si-23033f05">{t('animals.cardLabels.color')}</span> <strong>{animal.color}</strong></div>}
                       {animal.isNeutered && <div><span className="si-23033f05">{t('animals.cardLabels.neutered')}</span> <strong className="si-487e8582">{t('animals.cardLabels.yesCheck')}</strong></div>}
@@ -840,7 +842,7 @@ const Animals: React.FC = () => {
             {/* Modal Header */}
             <div className="si-b4f50afa">
               <div className="si-1ec723fc">
-                <span className="si-0067e898">{SPECIES_ICONS[detailAnimal.species] || '🐾'}</span>
+                <span className="si-0067e898">{speciesIcon(detailAnimal.species)}</span>
                 <div>
                   <div className="si-f0920f33">{detailAnimal.name}</div>
                   <div className="si-e17c55f7">{detailAnimal.species}{detailAnimal.breed ? ` • ${detailAnimal.breed}` : ''} — {detailAnimal.uniqueId}</div>
@@ -855,7 +857,7 @@ const Animals: React.FC = () => {
                 <div><span className="si-23033f05">{t('animals.detailModal.name')}</span> <strong>{detailAnimal.name}</strong></div>
                 <div><span className="si-23033f05">{t('animals.detailModal.species')}</span> <strong>{detailAnimal.species}</strong></div>
                 {detailAnimal.breed && <div><span className="si-23033f05">{t('animals.detailModal.breed')}</span> <strong>{detailAnimal.breed}</strong></div>}
-                {(detailAnimal.animalClass || detailAnimal.gender) && <div><span className="si-23033f05">{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
+                {(detailAnimal.animalClass || detailAnimal.gender) && <div><span className="si-23033f05">{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, findClassTerm, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
                 {detailAnimal.dateOfBirth && <div><span className="si-23033f05">{t('animals.detailModal.dob')}</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
                 {detailAnimal.sireName && <div><span className="si-23033f05">{t('animalClass.sire')}</span> <strong>{detailAnimal.sireName}</strong></div>}
                 {detailAnimal.damName && <div><span className="si-23033f05">{t('animalClass.dam')}</span> <strong>{detailAnimal.damName}</strong></div>}

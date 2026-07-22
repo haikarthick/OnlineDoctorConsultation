@@ -205,7 +205,8 @@
     "commissionSettings": "Commission Rules",
     "settlements": "Settlements",
     "referrals": "Referrals",
-    "financeReports": "Finance Reports"
+    "financeReports": "Finance Reports",
+    "masterData": "Master Data"
   },
   "login": {
     "welcome": "Welcome back",
@@ -7365,5 +7366,49 @@
     "cat_queen": "Queen Cat",
     "cat_kitten": "Kitten",
     "cat_neuter": "Neuter"
+  },
+  "masterData": {
+    "title": "Master Data",
+    "subtitle": "Manage species, breeds, animal classes, and marketplace dropdown values — no code deploy needed.",
+    "tabs": {
+      "species": "Species",
+      "breeds": "Breeds",
+      "classes": "Animal Classes",
+      "categories": "Marketplace Categories",
+      "conditions": "Marketplace Conditions"
+    },
+    "filterBySpecies": "Species",
+    "selectSpeciesPrompt": "— Select a species —",
+    "addNew": "Add New",
+    "editEntry": "Edit Entry",
+    "reactivate": "Reactivate",
+    "noEntries": "No entries yet",
+    "protectedHint": "Protected — core logic depends on this code",
+    "labelKeyHint": "Leave blank to keep the built-in translation",
+    "confirmDelete": "Delete this entry? This cannot be undone.",
+    "deleteBlocked": "Could not delete — it may still be in use",
+    "updatedSuccess": "Updated successfully",
+    "createdSuccess": "Created successfully",
+    "archivedSuccess": "Deactivated",
+    "restoredSuccess": "Reactivated",
+    "deletedSuccess": "Deleted",
+    "errors": {
+      "speciesRequired": "Select a species first"
+    },
+    "gender": {
+      "unknown": "Unknown"
+    },
+    "col": {
+      "icon": "Icon",
+      "code": "Code",
+      "label": "Label",
+      "category": "Category",
+      "earTag": "Uses ear tags",
+      "sortOrder": "Sort order",
+      "value": "Value (internal code)",
+      "impliedGender": "Implied gender",
+      "canBePregnant": "Can be pregnant",
+      "canProduceMilk": "Can produce milk"
+    }
   }
 }

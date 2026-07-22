@@ -205,7 +205,8 @@
     "commissionSettings": "कमीशन नियम",
     "settlements": "निपटान",
     "referrals": "रेफ़रल",
-    "financeReports": "वित्त रिपोर्ट"
+    "financeReports": "वित्त रिपोर्ट",
+    "masterData": "मास्टर डेटा"
   },
   "login": {
     "welcome": "वापस स्वागत है",
@@ -7370,5 +7371,49 @@
     "cat_queen": "मादा बिल्ली",
     "cat_kitten": "बिल्ली का बच्चा",
     "cat_neuter": "बधिया बिल्ली"
+  },
+  "masterData": {
+    "title": "मास्टर डेटा",
+    "subtitle": "प्रजाति, नस्ल, पशु वर्ग और मार्केटप्लेस ड्रॉपडाउन मान प्रबंधित करें — कोड डिप्लॉय की आवश्यकता नहीं।",
+    "tabs": {
+      "species": "प्रजाति",
+      "breeds": "नस्लें",
+      "classes": "पशु वर्ग",
+      "categories": "मार्केटप्लेस श्रेणियाँ",
+      "conditions": "मार्केटप्लेस स्थितियाँ"
+    },
+    "filterBySpecies": "प्रजाति",
+    "selectSpeciesPrompt": "— प्रजाति चुनें —",
+    "addNew": "नया जोड़ें",
+    "editEntry": "प्रविष्टि संपादित करें",
+    "reactivate": "पुनः सक्रिय करें",
+    "noEntries": "अभी कोई प्रविष्टि नहीं",
+    "protectedHint": "सुरक्षित — मुख्य लॉजिक इस कोड पर निर्भर है",
+    "labelKeyHint": "अंतर्निहित अनुवाद बनाए रखने के लिए खाली छोड़ें",
+    "confirmDelete": "इस प्रविष्टि को हटाएं? इसे पूर्ववत नहीं किया जा सकता।",
+    "deleteBlocked": "हटाया नहीं जा सका — यह अभी भी उपयोग में हो सकता है",
+    "updatedSuccess": "सफलतापूर्वक अपडेट किया गया",
+    "createdSuccess": "सफलतापूर्वक बनाया गया",
+    "archivedSuccess": "निष्क्रिय किया गया",
+    "restoredSuccess": "पुनः सक्रिय किया गया",
+    "deletedSuccess": "हटा दिया गया",
+    "errors": {
+      "speciesRequired": "पहले एक प्रजाति चुनें"
+    },
+    "gender": {
+      "unknown": "अज्ञात"
+    },
+    "col": {
+      "icon": "आइकन",
+      "code": "कोड",
+      "label": "लेबल",
+      "category": "श्रेणी",
+      "earTag": "ईयर टैग उपयोग करता है",
+      "sortOrder": "क्रम",
+      "value": "मान (आंतरिक कोड)",
+      "impliedGender": "निहित लिंग",
+      "canBePregnant": "गर्भवती हो सकती है",
+      "canProduceMilk": "दूध दे सकती है"
+    }
   }
 }

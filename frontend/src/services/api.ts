@@ -2601,6 +2601,42 @@ class ApiService {
     return response.data
   }
 
+  // ─── Master Data (admin CRUD) ──────────────────────────────────
+  async adminListMasterSpecies() { return (await this.client.get('/admin/master-data/species')).data }
+  async adminCreateMasterSpecies(data: any) { return (await this.client.post('/admin/master-data/species', data)).data }
+  async adminUpdateMasterSpecies(id: string, data: any) { return (await this.client.put(`/admin/master-data/species/${id}`, data)).data }
+  async adminArchiveMasterSpecies(id: string) { return (await this.client.patch(`/admin/master-data/species/${id}/archive`, {})).data }
+  async adminRestoreMasterSpecies(id: string) { return (await this.client.patch(`/admin/master-data/species/${id}/restore`, {})).data }
+  async adminDeleteMasterSpecies(id: string) { return (await this.client.delete(`/admin/master-data/species/${id}`)).data }
+
+  async adminListMasterBreeds(speciesId?: string) { return (await this.client.get('/admin/master-data/breeds', { params: speciesId ? { speciesId } : {} })).data }
+  async adminCreateMasterBreed(data: any) { return (await this.client.post('/admin/master-data/breeds', data)).data }
+  async adminUpdateMasterBreed(id: string, data: any) { return (await this.client.put(`/admin/master-data/breeds/${id}`, data)).data }
+  async adminArchiveMasterBreed(id: string) { return (await this.client.patch(`/admin/master-data/breeds/${id}/archive`, {})).data }
+  async adminRestoreMasterBreed(id: string) { return (await this.client.patch(`/admin/master-data/breeds/${id}/restore`, {})).data }
+  async adminDeleteMasterBreed(id: string) { return (await this.client.delete(`/admin/master-data/breeds/${id}`)).data }
+
+  async adminListMasterAnimalClasses(speciesId?: string) { return (await this.client.get('/admin/master-data/animal-classes', { params: speciesId ? { speciesId } : {} })).data }
+  async adminCreateMasterAnimalClass(data: any) { return (await this.client.post('/admin/master-data/animal-classes', data)).data }
+  async adminUpdateMasterAnimalClass(id: string, data: any) { return (await this.client.put(`/admin/master-data/animal-classes/${id}`, data)).data }
+  async adminArchiveMasterAnimalClass(id: string) { return (await this.client.patch(`/admin/master-data/animal-classes/${id}/archive`, {})).data }
+  async adminRestoreMasterAnimalClass(id: string) { return (await this.client.patch(`/admin/master-data/animal-classes/${id}/restore`, {})).data }
+  async adminDeleteMasterAnimalClass(id: string) { return (await this.client.delete(`/admin/master-data/animal-classes/${id}`)).data }
+
+  async adminListMasterMarketplaceCategories() { return (await this.client.get('/admin/master-data/marketplace/categories')).data }
+  async adminCreateMasterMarketplaceCategory(data: any) { return (await this.client.post('/admin/master-data/marketplace/categories', data)).data }
+  async adminUpdateMasterMarketplaceCategory(id: string, data: any) { return (await this.client.put(`/admin/master-data/marketplace/categories/${id}`, data)).data }
+  async adminArchiveMasterMarketplaceCategory(id: string) { return (await this.client.patch(`/admin/master-data/marketplace/categories/${id}/archive`, {})).data }
+  async adminRestoreMasterMarketplaceCategory(id: string) { return (await this.client.patch(`/admin/master-data/marketplace/categories/${id}/restore`, {})).data }
+  async adminDeleteMasterMarketplaceCategory(id: string) { return (await this.client.delete(`/admin/master-data/marketplace/categories/${id}`)).data }
+
+  async adminListMasterMarketplaceConditions() { return (await this.client.get('/admin/master-data/marketplace/conditions')).data }
+  async adminCreateMasterMarketplaceCondition(data: any) { return (await this.client.post('/admin/master-data/marketplace/conditions', data)).data }
+  async adminUpdateMasterMarketplaceCondition(id: string, data: any) { return (await this.client.put(`/admin/master-data/marketplace/conditions/${id}`, data)).data }
+  async adminArchiveMasterMarketplaceCondition(id: string) { return (await this.client.patch(`/admin/master-data/marketplace/conditions/${id}/archive`, {})).data }
+  async adminRestoreMasterMarketplaceCondition(id: string) { return (await this.client.patch(`/admin/master-data/marketplace/conditions/${id}/restore`, {})).data }
+  async adminDeleteMasterMarketplaceCondition(id: string) { return (await this.client.delete(`/admin/master-data/marketplace/conditions/${id}`)).data }
+
   async getAnimalVaccineAssignments(animalId: string) {
     const response = await this.client.get(`/animals/${animalId}/vaccine-assignments`)
     return response.data

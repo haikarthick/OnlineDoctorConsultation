@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../context/SettingsContext'
-import { findClassTerm } from '../constants/speciesBreeds'
+import { useMasterData } from '../context/MasterDataContext'
 import './PrescriptionPrintView.css'
 
 // ─── Types ────────────────────────────────────────────────────
@@ -81,6 +81,7 @@ function shortId(id: string): string {
 const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, onClose }) => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
+  const { findClassTerm } = useMasterData()
   const tpl = { ...DEFAULT_TEMPLATE, ...template }
   const overlayRef = useRef<HTMLDivElement>(null)
 

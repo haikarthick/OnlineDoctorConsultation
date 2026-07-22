@@ -5,7 +5,7 @@ import apiService from '../services/api'
 import { useTranslation } from 'react-i18next'
 import '../styles/modules.css'
 import './VaccinationPassport.css'
-import { SPECIES_ICONS } from '../constants/speciesBreeds'
+import { useMasterData } from '../context/MasterDataContext'
 
 // ─── Types ───────────────────────────────────────────────────
 interface PassportDose {
@@ -100,6 +100,7 @@ function ComplianceMeter({ percent }: { percent: number }) {
 
 const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _onNavigate }) => {
   const { t } = useTranslation()
+  const { speciesIcon } = useMasterData()
   const { user } = useAuth()
   const { formatDate } = useSettings()
 
@@ -304,7 +305,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   // ── Render passport card ─────────────────────────────────────
   const renderPassportCard = (animal: PassportAnimal) => {
     const isExpanded = expandedAnimal === animal.animalId
-    const icon = SPECIES_ICONS[animal.species] || '🐾'
+    const icon = speciesIcon(animal.species)
     return (
       <div key={animal.animalId} className="vp-passport-card">
         {/* Card header */}
@@ -476,7 +477,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
               {complianceSummary.map((row) => (
                 <tr key={row.animalId}>
                   <td>
-                    <span className="vp-table-icon">{SPECIES_ICONS[row.species] || '🐾'}</span>
+                    <span className="vp-table-icon">{speciesIcon(row.species)}</span>
                     {row.animalName}
                   </td>
                   <td>{row.species}</td>
@@ -527,7 +528,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
           <option value="">{t('vaccinationPassport.selectAnimal')}</option>
           {passports.map((a) => (
             <option key={a.animalId} value={a.animalId}>
-              {SPECIES_ICONS[a.species] || '🐾'} {a.animalName} ({a.species}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
+              {speciesIcon(a.species)} {a.animalName} ({a.species}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
             </option>
           ))}
         </select>

@@ -6,16 +6,11 @@ import apiService from '../services/api'
 import AnimalSearchPicker from '../components/AnimalSearchPicker'
 import VetSearchPicker from '../components/VetSearchPicker'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
-import { BREED_DATABASE, SPECIES_CATEGORIES, classTermsForSpecies, findClassTerm } from '../constants/speciesBreeds'
+import { useMasterData } from '../context/MasterDataContext'
 
 const STAGES = ['triage', 'examination', 'treatment', 'observation', 'discharge'] as const
 const PRIORITIES = ['emergency', 'urgent', 'high', 'normal', 'low'] as const
 
-// Species/breed master data now imported from constants/speciesBreeds.ts (was a
-// hand-maintained, incomplete duplicate — fixed while adding the class-term glossary).
-const WALKIN_BREED_DATABASE = BREED_DATABASE
-const WALKIN_SPECIES_CATEGORIES = SPECIES_CATEGORIES
-const WALKIN_EAR_TAG_SPECIES = ['Cattle', 'Buffalo', 'Sheep', 'Goat', 'Pig', 'Horse', 'Donkey', 'Camel', 'Yak', 'Deer', 'Emu', 'Ostrich', 'Llama', 'Alpaca']
 const PRIORITY_COLORS: Record<string, string> = {
   emergency: '#dc2626', urgent: '#ea580c', high: '#d97706', normal: '#2563eb', low: '#6b7280',
 }
@@ -36,6 +31,7 @@ const STAGE_ICONS: Record<string, string> = {
 export default function HospitalWorkflow() {
   const { t } = useTranslation()
   const { formatDateTime } = useSettings()
+  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, earTagSpecies } = useMasterData()
 
   const [tab, setTab] = useState<'queue' | 'workflow' | 'referrals'>('queue')
   const [hospitalId, setHospitalId] = useState('')
@@ -711,7 +707,7 @@ export default function HospitalWorkflow() {
                             <label className="si-2561596d">{t('hospitalWorkflow.walkIn.species')} <span className="si-f84f41a5">*</span></label>
                             <select value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value, animalBreed: '', animalCustomBreed: '' }))} className="si-f3740d1a">
                               <option value="">{t('hospitalWorkflow.walkIn.selectSpecies')}</option>
-                              {WALKIN_SPECIES_CATEGORIES.map(cat => (
+                              {speciesCategories.map(cat => (
                                 <optgroup key={cat.label} label={cat.label}>
                                   {cat.species.map(sp => <option key={sp} value={sp}>{sp}</option>)}
                                 </optgroup>
@@ -720,10 +716,10 @@ export default function HospitalWorkflow() {
                           </div>
                           <div>
                             <label className="si-2561596d">{t('hospitalWorkflow.walkIn.breed')} <span className="si-17788c1c">(optional)</span></label>
-                            {WALKIN_BREED_DATABASE[walkInForm.animalSpecies]?.length > 0 ? (
+                            {breedsForSpecies(walkInForm.animalSpecies).length > 0 ? (
                               <select value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value, animalCustomBreed: '' }))} className="si-f3740d1a">
                                 <option value="">{t('hospitalWorkflow.walkIn.selectBreed')}</option>
-                                {WALKIN_BREED_DATABASE[walkInForm.animalSpecies].map(b => <option key={b} value={b}>{b}</option>)}
+                                {breedsForSpecies(walkInForm.animalSpecies).map(b => <option key={b} value={b}>{b}</option>)}
                               </select>
                             ) : (
                               <input placeholder={t('hospitalWorkflow.walkIn.breedPlaceholder')} value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} className="si-d0e0df59" />
@@ -795,7 +791,7 @@ export default function HospitalWorkflow() {
                           <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalRegistrationNumber')} <span className="si-17788c1c">(optional)</span></label>
                           <input placeholder={t('hospitalWorkflow.walkIn.animalRegistrationPlaceholder')} value={walkInForm.animalRegistrationNumber} onChange={e => setWalkInForm(f => ({ ...f, animalRegistrationNumber: e.target.value }))} className="si-d0e0df59" />
                         </div>
-                        {WALKIN_EAR_TAG_SPECIES.includes(walkInForm.animalSpecies) && (
+                        {earTagSpecies.includes(walkInForm.animalSpecies) && (
                           <div className="si-06af062a">
                             <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalEarTagId')} <span className="si-17788c1c">(optional)</span></label>
                             <input placeholder={t('hospitalWorkflow.walkIn.animalEarTagPlaceholder')} value={walkInForm.animalEarTagId} onChange={e => setWalkInForm(f => ({ ...f, animalEarTagId: e.target.value }))} className="si-d0e0df59" />

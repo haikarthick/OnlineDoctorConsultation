@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../context/SettingsContext'
-import { findClassTerm } from '../constants/speciesBreeds'
+import { useMasterData } from '../context/MasterDataContext'
 import './CertificatePrintView.css'
 
 // ─── Types ────────────────────────────────────────────────────
@@ -181,6 +181,7 @@ function VaccineTable({ details, t }: { details?: { vaccines?: VaccinationEntry[
 const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, onClose }) => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
+  const { findClassTerm } = useMasterData()
   const tpl = { ...DEFAULT_TEMPLATE, ...template }
   const overlayRef = useRef<HTMLDivElement>(null)
   const docRef = useRef<HTMLDivElement>(null)

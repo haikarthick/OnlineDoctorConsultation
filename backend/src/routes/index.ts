@@ -84,6 +84,12 @@ import {
   inviteHospitalStaffSchema, acceptStaffInviteSchema,
   // Password Reset
   forgotPasswordSchema, resetPasswordSchema,
+  // Master Data
+  createMasterSpeciesSchema, updateMasterSpeciesSchema,
+  createMasterBreedSchema, updateMasterBreedSchema,
+  createMasterAnimalClassSchema, updateMasterAnimalClassSchema,
+  createMasterMarketplaceCategorySchema, updateMasterMarketplaceCategorySchema,
+  createMasterMarketplaceConditionSchema, updateMasterMarketplaceConditionSchema,
 } from '../middleware/validation';
 import { requireFeature, getAllFeatureFlags } from '../config/featureFlags';
 import AuthController from '../controllers/AuthController';
@@ -119,6 +125,7 @@ import NetworkRolePermissionService from '../services/NetworkRolePermissionServi
 import VetProfileService from '../services/VetProfileService';
 import UserService from '../services/UserService';
 import VaccineProtocolService from '../services/VaccineProtocolService';
+import MasterDataService from '../services/MasterDataService';
 import VaccineScheduleService from '../services/VaccineScheduleService';
 import { asyncHandler } from '../utils/errorHandler';
 import { AuthRequest } from '../middleware/auth';
@@ -2990,6 +2997,146 @@ router.get('/vaccine-protocols/:id', authMiddleware, asyncHandler(async (req: Re
   const protocol = await VaccineProtocolService.getProtocol(req.params.id);
   if (!protocol) return res.status(404).json({ success: false, message: 'Not found' });
   res.json({ success: true, data: protocol });
+}));
+
+// ═══════════════════════════════════════════════════════════════════
+// Master Data — species, breeds, animal classes, marketplace categories/conditions.
+// Public read (active-only, powers dropdowns) + admin CRUD (archive/restore + delete
+// blocked while in use). Mirrors the vaccine-protocols route shape above.
+// ═══════════════════════════════════════════════════════════════════
+
+// ─── Public read (no auth — powers dropdowns on both authed pages and the
+// unauthenticated PublicMarketplace; mirrors GET /settings/public's convention
+// for non-sensitive UI config that must load before/without login) ─────────
+router.get('/master-data/species', asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listSpecies(true) });
+}));
+router.get('/master-data/breeds', asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listBreeds(req.query.speciesId as string | undefined, true) });
+}));
+router.get('/master-data/animal-classes', asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listAnimalClasses(req.query.speciesId as string | undefined, true) });
+}));
+router.get('/master-data/marketplace/categories', asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listMarketplaceCategories(true) });
+}));
+router.get('/master-data/marketplace/conditions', asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listMarketplaceConditions(true) });
+}));
+
+// ─── Admin CRUD: Species ───────────────────────────────────────
+router.get('/admin/master-data/species', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listSpecies(false) });
+}));
+router.post('/admin/master-data/species', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterSpeciesSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createSpecies(req.body) });
+}));
+router.put('/admin/master-data/species/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterSpeciesSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateSpecies(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/species/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveSpecies(req.params.id);
+  res.json({ success: true, message: 'Species archived' });
+}));
+router.patch('/admin/master-data/species/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreSpecies(req.params.id);
+  res.json({ success: true, message: 'Species restored' });
+}));
+router.delete('/admin/master-data/species/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteSpecies(req.params.id);
+  res.json({ success: true, message: 'Species deleted' });
+}));
+
+// ─── Admin CRUD: Breeds ────────────────────────────────────────
+router.get('/admin/master-data/breeds', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listBreeds(req.query.speciesId as string | undefined, false) });
+}));
+router.post('/admin/master-data/breeds', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterBreedSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createBreed(req.body) });
+}));
+router.put('/admin/master-data/breeds/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterBreedSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateBreed(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/breeds/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveBreed(req.params.id);
+  res.json({ success: true, message: 'Breed archived' });
+}));
+router.patch('/admin/master-data/breeds/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreBreed(req.params.id);
+  res.json({ success: true, message: 'Breed restored' });
+}));
+router.delete('/admin/master-data/breeds/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteBreed(req.params.id);
+  res.json({ success: true, message: 'Breed deleted' });
+}));
+
+// ─── Admin CRUD: Animal Classes ────────────────────────────────
+router.get('/admin/master-data/animal-classes', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listAnimalClasses(req.query.speciesId as string | undefined, false) });
+}));
+router.post('/admin/master-data/animal-classes', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterAnimalClassSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createAnimalClass(req.body) });
+}));
+router.put('/admin/master-data/animal-classes/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterAnimalClassSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateAnimalClass(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/animal-classes/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveAnimalClass(req.params.id);
+  res.json({ success: true, message: 'Animal class archived' });
+}));
+router.patch('/admin/master-data/animal-classes/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreAnimalClass(req.params.id);
+  res.json({ success: true, message: 'Animal class restored' });
+}));
+router.delete('/admin/master-data/animal-classes/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteAnimalClass(req.params.id);
+  res.json({ success: true, message: 'Animal class deleted' });
+}));
+
+// ─── Admin CRUD: Marketplace Categories ────────────────────────
+router.get('/admin/master-data/marketplace/categories', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listMarketplaceCategories(false) });
+}));
+router.post('/admin/master-data/marketplace/categories', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterMarketplaceCategorySchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createMarketplaceCategory(req.body) });
+}));
+router.put('/admin/master-data/marketplace/categories/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterMarketplaceCategorySchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateMarketplaceCategory(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/marketplace/categories/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveMarketplaceCategory(req.params.id);
+  res.json({ success: true, message: 'Category archived' });
+}));
+router.patch('/admin/master-data/marketplace/categories/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreMarketplaceCategory(req.params.id);
+  res.json({ success: true, message: 'Category restored' });
+}));
+router.delete('/admin/master-data/marketplace/categories/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteMarketplaceCategory(req.params.id);
+  res.json({ success: true, message: 'Category deleted' });
+}));
+
+// ─── Admin CRUD: Marketplace Conditions ────────────────────────
+router.get('/admin/master-data/marketplace/conditions', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listMarketplaceConditions(false) });
+}));
+router.post('/admin/master-data/marketplace/conditions', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterMarketplaceConditionSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createMarketplaceCondition(req.body) });
+}));
+router.put('/admin/master-data/marketplace/conditions/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterMarketplaceConditionSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateMarketplaceCondition(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/marketplace/conditions/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveMarketplaceCondition(req.params.id);
+  res.json({ success: true, message: 'Condition archived' });
+}));
+router.patch('/admin/master-data/marketplace/conditions/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreMarketplaceCondition(req.params.id);
+  res.json({ success: true, message: 'Condition restored' });
+}));
+router.delete('/admin/master-data/marketplace/conditions/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteMarketplaceCondition(req.params.id);
+  res.json({ success: true, message: 'Condition deleted' });
 }));
 
 // ─── Animal vaccine assignment routes ────────────────────────

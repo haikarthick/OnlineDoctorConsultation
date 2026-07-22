@@ -9,18 +9,9 @@ import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
-import { SPECIES_CATEGORIES, breedsForSpecies, classTermsForSpecies, findClassTerm, MARKETPLACE_FARMER_SPECIES, MARKETPLACE_PET_OWNER_SPECIES } from '../constants/speciesBreeds'
+import { MARKETPLACE_FARMER_SPECIES, MARKETPLACE_PET_OWNER_SPECIES } from '../constants/speciesBreeds'
+import { useMasterData } from '../context/MasterDataContext'
 
-const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
-  { value: '', labelKey: 'marketplace.categories.all' },
-  { value: 'animal', labelKey: 'marketplace.categories.animals' },
-  { value: 'feed', labelKey: 'marketplace.categories.feed' },
-  { value: 'equipment', labelKey: 'marketplace.categories.equipment' },
-  { value: 'medicine', labelKey: 'marketplace.categories.medicine' },
-  { value: 'semen_embryo', labelKey: 'marketplace.categories.semenEmbryo' },
-  { value: 'service', labelKey: 'marketplace.categories.services' },
-  { value: 'other', labelKey: 'marketplace.categories.other' },
-]
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
 
 // Media limits — mirror backend caps (uploadImage/uploadVideo in
@@ -61,9 +52,14 @@ const Marketplace: React.FC = () => {
   const { user } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel } = useMasterData()
   const isAdmin = user?.role === 'admin'
   const isFarmer = user?.role === 'farmer'
   const SPECIES_LIST = (isFarmer || isAdmin) ? MARKETPLACE_FARMER_SPECIES : MARKETPLACE_PET_OWNER_SPECIES
+  const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
+    { value: '', label: t('marketplace.categories.all') },
+    ...marketplaceCategories.map(c => ({ value: c.code, label: resolveLabel(c, t) })),
+  ]
 
   const GENDER_LABELS: Record<string, string> = { male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') }
   const VAX_LABELS: Record<string, string> = { fully_vaccinated: t('marketplace.vaxLabel.fullyShort'), partially_vaccinated: t('marketplace.vaxLabel.partialShort'), not_vaccinated: t('marketplace.vaxLabel.noneShort'), unknown: t('marketplace.vaxLabel.unknown') }
@@ -889,7 +885,7 @@ const Marketplace: React.FC = () => {
                 <input className="module-input si-0d5963cb" value={filters.search || ''} onChange={e => updateFilter('search', e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && fetchListings()} placeholder={t('marketplace.searchLivestock')} />
                 <select className="module-input si-549dd079" value={filters.category || ''} onChange={e => updateFilter('category', e.target.value)}>
-                  {CATEGORY_KEYS.map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                  {CATEGORY_KEYS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
                 <select className="module-input si-1403a954" value={filters.species || ''} onChange={e => updateFilter('species', e.target.value)}>
                   <option value="">{t('marketplace.livestock.allSpecies')}</option>
@@ -1052,7 +1048,7 @@ const Marketplace: React.FC = () => {
                     <div className="module-form-group">
                       <label className="module-label">{t('marketplace.sell.category')}</label>
                       <select className="module-input" value={sellForm.category} onChange={e => sf('category', e.target.value)}>
-                        {CATEGORY_KEYS.filter(c => c.value).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+                        {CATEGORY_KEYS.filter(c => c.value).map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                       </select>
                     </div>
                     <div className="module-form-group">
@@ -1121,7 +1117,7 @@ const Marketplace: React.FC = () => {
                         <select className="module-input" value={sellForm.species}
                           onChange={e => setSellForm(f => ({ ...f, species: e.target.value, breed: '' }))}>
                           <option value="">{t('marketplace.livestock.selectSpecies')}</option>
-                          {SPECIES_CATEGORIES.map(cat => (
+                          {speciesCategories.map(cat => (
                             <optgroup key={cat.label} label={cat.label}>
                               {cat.species.map(s => <option key={s} value={s}>{s}</option>)}
                             </optgroup>
@@ -1259,9 +1255,7 @@ const Marketplace: React.FC = () => {
                     <div className="module-form-group">
                       <label className="module-label">{t('marketplace.livestock.condition')}</label>
                       <select className="module-input" value={sellForm.condition} onChange={e => sf('condition', e.target.value)}>
-                        <option value="new">{t('marketplace.conditionLabel.healthy')}</option>
-                        <option value="used">{t('marketplace.conditionLabel.fair')}</option>
-                        <option value="refurbished">{t('marketplace.conditionLabel.underTreatment')}</option>
+                        {marketplaceConditions.map(c => <option key={c.code} value={c.code}>{resolveLabel(c, t)}</option>)}
                       </select>
                     </div>
                   </div>
@@ -2240,6 +2234,7 @@ const ListingDetail: React.FC<{
   onReport?: () => void; onBookVetCheck?: () => void; transport?: { url: string };
   t: (key: string) => string;
 }> = ({ listing: l, bids, formatCurrency, bidAmount, bidMessage, onBidAmountChange, onBidMessageChange, onPlaceBid, onBuyNow, onBack, isAdmin, onToggleHotDeal, onToggleFeatured, userId, onRequestContact, isFavorite, onToggleFavorite, onMessageSeller, onReport, onBookVetCheck, transport, t }) => {
+  const { findClassTerm } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')

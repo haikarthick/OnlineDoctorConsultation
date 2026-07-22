@@ -5,20 +5,11 @@ import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
 import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
-import { classTermsForSpecies, findClassTerm, MARKETPLACE_FARMER_SPECIES } from '../constants/speciesBreeds'
+import { MARKETPLACE_FARMER_SPECIES } from '../constants/speciesBreeds'
+import { useMasterData } from '../context/MasterDataContext'
 import './Marketplace.css'
 import './PublicMarketplace.css'
 
-const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
-  { value: '', labelKey: 'marketplace.categories.all' },
-  { value: 'animal', labelKey: 'marketplace.categories.animals' },
-  { value: 'feed', labelKey: 'marketplace.categories.feed' },
-  { value: 'equipment', labelKey: 'marketplace.categories.equipment' },
-  { value: 'medicine', labelKey: 'marketplace.categories.medicine' },
-  { value: 'semen_embryo', labelKey: 'marketplace.categories.semenEmbryo' },
-  { value: 'service', labelKey: 'marketplace.categories.services' },
-  { value: 'other', labelKey: 'marketplace.categories.other' },
-]
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
 const SPECIES_LIST = MARKETPLACE_FARMER_SPECIES
 
@@ -28,6 +19,11 @@ const PublicMarketplace: React.FC = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
+  const { classTermsForSpecies, marketplaceCategories, resolveLabel } = useMasterData()
+  const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
+    { value: '', label: t('marketplace.categories.all') },
+    ...marketplaceCategories.map(c => ({ value: c.code, label: resolveLabel(c, t) })),
+  ]
 
   const [listings, setListings] = useState<MarketplaceListing[]>([])
   const [total, setTotal] = useState(0)
@@ -203,13 +199,13 @@ const PublicMarketplace: React.FC = () => {
                 ))
               ) : (
                 (stats?.category_facets?.length ? stats.category_facets : CATEGORY_KEYS.filter(c => c.value).map(c => ({ category: c.value }))).map((f: any) => {
-                  const labelKey = CATEGORY_KEYS.find(c => c.value === f.category)?.labelKey
+                  const catLabel = CATEGORY_KEYS.find(c => c.value === f.category)?.label
                   return (
                     <button key={f.category}
                       className={`pub-mp-facet ${filters.category === f.category ? 'active' : ''}`}
                       onClick={() => updateFilter('category', filters.category === f.category ? '' : f.category)}>
                       <span className="pub-mp-facet-icon">{CATEGORY_ICONS[f.category] || '📦'}</span>
-                      <span className="pub-mp-facet-name">{labelKey ? t(labelKey) : f.category}</span>
+                      <span className="pub-mp-facet-name">{catLabel || f.category}</span>
                       {f.count !== undefined && <span className="pub-mp-facet-count">{f.count}</span>}
                     </button>
                   )
@@ -223,7 +219,7 @@ const PublicMarketplace: React.FC = () => {
           <input className="module-input" value={searchInput} onChange={e => setSearchInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') applySearch(searchInput) }} placeholder={t('marketplace.searchLivestock')} />
           <select className="module-input" value={filters.category || ''} onChange={e => updateFilter('category', e.target.value)}>
-            {CATEGORY_KEYS.map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+            {CATEGORY_KEYS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
           <select className="module-input" value={filters.species || ''} onChange={e => updateFilter('species', e.target.value)}>
             <option value="">{t('marketplace.livestock.allSpecies')}</option>
@@ -415,6 +411,7 @@ const PublicListingDetail: React.FC<{
   t: (key: string, opts?: any) => string;
 }> = ({ listing: l, formatCurrency, onBack, onLoginPrompt, isAuthenticated, t }) => {
   const navigate = useNavigate()
+  const { findClassTerm } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
