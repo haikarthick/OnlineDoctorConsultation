@@ -1,7 +1,11 @@
 -- ============================================================
 -- VetCare - Complete Database Schema (PostgreSQL 18)
 -- ============================================================
--- Covers ALL 22 tables used by the application services.
+-- Fresh-install schema covering every table used by the application
+-- services (see backend/migrations/*.sql for the same schema built up
+-- incrementally on already-deployed environments — keep both in sync when
+-- adding new tables/columns, since a migration alone is invisible to a
+-- brand new database that runs only this file).
 -- ============================================================
 
 -- gen_random_uuid() is built into PostgreSQL 13+ — no extension required
@@ -2739,3 +2743,725 @@ ON CONFLICT (environment) DO NOTHING;
 DROP TRIGGER IF EXISTS update_payment_gateway_credentials_updated_at ON payment_gateway_credentials;
 CREATE TRIGGER update_payment_gateway_credentials_updated_at BEFORE UPDATE ON payment_gateway_credentials
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- 47. TIER 2/3/4 ADVANCED FEATURE TABLES
+-- ============================================================
+-- Backported from backend/migrations/006_tier2_features.sql,
+-- 007_tier3_features.sql, 008_tier4_features.sql — these 31 tables existed
+-- only as migrations (applied to every live environment already) but were
+-- never mirrored into this fresh-install schema, so a brand new DB would
+-- 500 the moment any of these features were touched. marketplace_listings/
+-- bids/orders/monetization_settings/plans/subscriptions/listing_boosts/
+-- inquiries/transactions (9 of migration 008's 19 tables) already exist
+-- above (§ marketplace) — not repeated here — but marketplace_listings was
+-- still missing the entire livestock/compliance column block from 008,
+-- backported separately below since active Marketplace code depends on it.
+
+-- ─── 47.1 Health Observations (006) ───────────────────────────
+CREATE TABLE IF NOT EXISTS health_observations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  animal_id UUID REFERENCES animals(id),
+  group_id UUID REFERENCES animal_groups(id),
+  observer_id UUID NOT NULL REFERENCES users(id),
+  observation_type VARCHAR(50) NOT NULL DEFAULT 'general',
+  severity VARCHAR(20) NOT NULL DEFAULT 'normal',
+  title VARCHAR(200) NOT NULL,
+  description TEXT,
+  body_temperature DECIMAL(5,2),
+  weight DECIMAL(10,2),
+  weight_unit VARCHAR(10) DEFAULT 'kg',
+  heart_rate INT,
+  respiratory_rate INT,
+  body_condition_score INT,
+  symptoms TEXT[],
+  diagnosis TEXT,
+  treatment_given TEXT,
+  follow_up_date DATE,
+  is_resolved BOOLEAN DEFAULT false,
+  resolved_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.2 Breeding Records (006) ───────────────────────────────
+CREATE TABLE IF NOT EXISTS breeding_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  dam_id UUID REFERENCES animals(id),
+  sire_id UUID REFERENCES animals(id),
+  breeding_method VARCHAR(50) NOT NULL DEFAULT 'natural',
+  breeding_date DATE NOT NULL,
+  expected_due_date DATE,
+  actual_birth_date DATE,
+  gestation_days INT,
+  offspring_count INT DEFAULT 0,
+  live_births INT DEFAULT 0,
+  stillbirths INT DEFAULT 0,
+  status VARCHAR(30) NOT NULL DEFAULT 'bred',
+  semen_batch VARCHAR(100),
+  technician_id UUID REFERENCES users(id),
+  pregnancy_confirmed BOOLEAN DEFAULT false,
+  pregnancy_check_date DATE,
+  notes TEXT,
+  outcome TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.3 Feed Inventory (006) ─────────────────────────────────
+CREATE TABLE IF NOT EXISTS feed_inventory (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  location_id UUID REFERENCES locations(id),
+  feed_name VARCHAR(200) NOT NULL,
+  feed_type VARCHAR(50) NOT NULL DEFAULT 'grain',
+  brand VARCHAR(100),
+  unit VARCHAR(20) NOT NULL DEFAULT 'kg',
+  current_stock DECIMAL(12,2) NOT NULL DEFAULT 0,
+  minimum_stock DECIMAL(12,2) DEFAULT 0,
+  cost_per_unit DECIMAL(10,2) DEFAULT 0,
+  supplier VARCHAR(200),
+  batch_number VARCHAR(100),
+  expiry_date DATE,
+  storage_location VARCHAR(200),
+  nutritional_info JSONB,
+  is_active BOOLEAN DEFAULT true,
+  last_restocked_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.4 Feed Consumption Logs (006) ──────────────────────────
+CREATE TABLE IF NOT EXISTS feed_consumption_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  feed_id UUID NOT NULL REFERENCES feed_inventory(id),
+  group_id UUID REFERENCES animal_groups(id),
+  location_id UUID REFERENCES locations(id),
+  animal_id UUID REFERENCES animals(id),
+  quantity DECIMAL(10,2) NOT NULL,
+  unit VARCHAR(20) NOT NULL DEFAULT 'kg',
+  consumption_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  recorded_by UUID NOT NULL REFERENCES users(id),
+  cost DECIMAL(10,2) DEFAULT 0,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.5 Compliance Documents (006) ───────────────────────────
+CREATE TABLE IF NOT EXISTS compliance_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  document_type VARCHAR(50) NOT NULL,
+  title VARCHAR(300) NOT NULL,
+  description TEXT,
+  reference_number VARCHAR(100),
+  issued_date DATE,
+  expiry_date DATE,
+  issuing_authority VARCHAR(200),
+  status VARCHAR(30) NOT NULL DEFAULT 'draft',
+  related_campaign_id UUID REFERENCES treatment_campaigns(id),
+  related_movement_id UUID REFERENCES movement_records(id),
+  animal_ids UUID[],
+  group_ids UUID[],
+  document_data JSONB,
+  file_url TEXT,
+  verified_by UUID REFERENCES users(id),
+  verified_at TIMESTAMP,
+  notes TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.6 Financial Records (006) ──────────────────────────────
+CREATE TABLE IF NOT EXISTS financial_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  record_type VARCHAR(30) NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  description TEXT,
+  amount DECIMAL(12,2) NOT NULL,
+  currency VARCHAR(3) DEFAULT 'USD',
+  transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  reference_id UUID,
+  reference_type VARCHAR(50),
+  animal_id UUID REFERENCES animals(id),
+  group_id UUID REFERENCES animal_groups(id),
+  recorded_by UUID NOT NULL REFERENCES users(id),
+  payment_method VARCHAR(30),
+  vendor VARCHAR(200),
+  invoice_number VARCHAR(100),
+  receipt_url TEXT,
+  tags TEXT[],
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.7 Alert Rules (006) ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS alert_rules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  description TEXT,
+  alert_type VARCHAR(50) NOT NULL,
+  conditions JSONB NOT NULL DEFAULT '{}',
+  severity VARCHAR(20) NOT NULL DEFAULT 'info',
+  is_enabled BOOLEAN DEFAULT true,
+  check_interval_hours INT DEFAULT 24,
+  notification_channels TEXT[] DEFAULT ARRAY['in_app'],
+  target_roles TEXT[] DEFAULT ARRAY['owner', 'manager'],
+  last_triggered_at TIMESTAMP,
+  created_by UUID NOT NULL REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.8 Alert Events (006) ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS alert_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  rule_id UUID REFERENCES alert_rules(id),
+  alert_type VARCHAR(50) NOT NULL,
+  severity VARCHAR(20) NOT NULL DEFAULT 'info',
+  title VARCHAR(300) NOT NULL,
+  message TEXT NOT NULL,
+  data JSONB,
+  is_read BOOLEAN DEFAULT false,
+  is_acknowledged BOOLEAN DEFAULT false,
+  acknowledged_by UUID REFERENCES users(id),
+  acknowledged_at TIMESTAMP,
+  related_entity_type VARCHAR(50),
+  related_entity_id UUID,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.9 animals: extend with health/breeding fields (006) ────
+-- breeding_status/last_breeding_date/expected_due_date/current_weight/
+-- weight_unit/last_weighed_at/dam_id/sire_id/animal_class already exist
+-- above in the main animals CREATE TABLE — only birth_weight/health_score
+-- were actually missing.
+ALTER TABLE animals ADD COLUMN IF NOT EXISTS birth_weight DECIMAL(10,2);
+ALTER TABLE animals ADD COLUMN IF NOT EXISTS health_score INT DEFAULT 100;
+
+CREATE INDEX IF NOT EXISTS idx_health_obs_enterprise ON health_observations(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_health_obs_animal ON health_observations(animal_id);
+CREATE INDEX IF NOT EXISTS idx_health_obs_type ON health_observations(observation_type);
+CREATE INDEX IF NOT EXISTS idx_breeding_enterprise ON breeding_records(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_breeding_dam ON breeding_records(dam_id);
+CREATE INDEX IF NOT EXISTS idx_breeding_status ON breeding_records(status);
+CREATE INDEX IF NOT EXISTS idx_feed_inv_enterprise ON feed_inventory(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_feed_log_enterprise ON feed_consumption_logs(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_feed_log_date ON feed_consumption_logs(consumption_date);
+CREATE INDEX IF NOT EXISTS idx_compliance_enterprise ON compliance_documents(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_compliance_type ON compliance_documents(document_type);
+CREATE INDEX IF NOT EXISTS idx_financial_enterprise ON financial_records(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_financial_date ON financial_records(transaction_date);
+CREATE INDEX IF NOT EXISTS idx_financial_type ON financial_records(record_type);
+CREATE INDEX IF NOT EXISTS idx_alert_rules_enterprise ON alert_rules(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_alert_events_enterprise ON alert_events(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_alert_events_read ON alert_events(is_read);
+
+-- ─── 47.10 Disease Prediction & Outbreak Mapping (007) ─────────
+CREATE TABLE IF NOT EXISTS disease_predictions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  animal_id UUID REFERENCES animals(id),
+  group_id UUID REFERENCES animal_groups(id),
+  disease_name VARCHAR(200) NOT NULL,
+  risk_score NUMERIC(5,2) NOT NULL DEFAULT 0,
+  confidence NUMERIC(5,2) NOT NULL DEFAULT 0,
+  predicted_onset DATE,
+  risk_factors JSONB DEFAULT '[]',
+  recommended_actions JSONB DEFAULT '[]',
+  status VARCHAR(30) DEFAULT 'active',
+  outcome VARCHAR(30),
+  created_by UUID REFERENCES users(id),
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS outbreak_zones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  location_id UUID REFERENCES locations(id),
+  disease_name VARCHAR(200) NOT NULL,
+  severity VARCHAR(20) DEFAULT 'low',
+  affected_count INTEGER DEFAULT 0,
+  total_at_risk INTEGER DEFAULT 0,
+  radius_km NUMERIC(8,2),
+  center_lat NUMERIC(10,7),
+  center_lng NUMERIC(10,7),
+  containment_status VARCHAR(30) DEFAULT 'monitoring',
+  containment_actions JSONB DEFAULT '[]',
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.11 Genomic Lineage & Genetic Diversity (007) ───────────
+CREATE TABLE IF NOT EXISTS genetic_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  animal_id UUID NOT NULL REFERENCES animals(id),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  sire_id UUID REFERENCES animals(id),
+  dam_id UUID REFERENCES animals(id),
+  generation INTEGER DEFAULT 0,
+  inbreeding_coefficient NUMERIC(6,4) DEFAULT 0,
+  genetic_traits JSONB DEFAULT '{}',
+  dna_test_date DATE,
+  dna_lab VARCHAR(200),
+  dna_sample_id VARCHAR(100),
+  known_markers JSONB DEFAULT '[]',
+  breed_purity_pct NUMERIC(5,2),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS lineage_pairs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  sire_id UUID NOT NULL REFERENCES animals(id),
+  dam_id UUID NOT NULL REFERENCES animals(id),
+  compatibility_score NUMERIC(5,2) DEFAULT 0,
+  predicted_inbreeding NUMERIC(6,4) DEFAULT 0,
+  predicted_traits JSONB DEFAULT '{}',
+  recommendation VARCHAR(30) DEFAULT 'neutral',
+  reason TEXT,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.12 IoT Sensor Integration (007) ────────────────────────
+CREATE TABLE IF NOT EXISTS iot_sensors (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  location_id UUID REFERENCES locations(id),
+  animal_id UUID REFERENCES animals(id),
+  sensor_type VARCHAR(60) NOT NULL,
+  sensor_name VARCHAR(200) NOT NULL,
+  serial_number VARCHAR(100),
+  manufacturer VARCHAR(200),
+  unit VARCHAR(30),
+  min_threshold NUMERIC(10,2),
+  max_threshold NUMERIC(10,2),
+  reading_interval_seconds INTEGER DEFAULT 300,
+  status VARCHAR(20) DEFAULT 'active',
+  battery_level NUMERIC(5,2),
+  last_reading_at TIMESTAMPTZ,
+  firmware_version VARCHAR(50),
+  metadata JSONB DEFAULT '{}',
+  installed_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS sensor_readings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sensor_id UUID NOT NULL REFERENCES iot_sensors(id),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  value NUMERIC(12,4) NOT NULL,
+  unit VARCHAR(30),
+  is_anomaly BOOLEAN DEFAULT false,
+  anomaly_type VARCHAR(50),
+  metadata JSONB DEFAULT '{}',
+  recorded_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.13 Supply Chain & Traceability (007) ───────────────────
+CREATE TABLE IF NOT EXISTS product_batches (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  batch_number VARCHAR(100) NOT NULL,
+  product_type VARCHAR(60) NOT NULL,
+  description TEXT,
+  quantity NUMERIC(12,2) NOT NULL DEFAULT 0,
+  unit VARCHAR(30) DEFAULT 'kg',
+  source_animal_ids UUID[] DEFAULT '{}',
+  source_group_id UUID REFERENCES animal_groups(id),
+  production_date DATE,
+  expiry_date DATE,
+  quality_grade VARCHAR(30),
+  certifications JSONB DEFAULT '[]',
+  current_holder VARCHAR(200),
+  status VARCHAR(30) DEFAULT 'in_production',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS traceability_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  batch_id UUID REFERENCES product_batches(id),
+  animal_id UUID REFERENCES animals(id),
+  event_type VARCHAR(60) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  description TEXT,
+  location VARCHAR(200),
+  gps_lat NUMERIC(10,7),
+  gps_lng NUMERIC(10,7),
+  recorded_by UUID REFERENCES users(id),
+  verified_by UUID REFERENCES users(id),
+  verification_hash VARCHAR(128),
+  metadata JSONB DEFAULT '{}',
+  event_date TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS qr_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  entity_type VARCHAR(30) NOT NULL,
+  entity_id UUID NOT NULL,
+  code_data TEXT NOT NULL,
+  short_url VARCHAR(200),
+  scan_count INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.14 Workforce & Task Management (007) ───────────────────
+CREATE TABLE IF NOT EXISTS workforce_tasks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  title VARCHAR(300) NOT NULL,
+  description TEXT,
+  task_type VARCHAR(60) DEFAULT 'general',
+  priority VARCHAR(20) DEFAULT 'medium',
+  status VARCHAR(20) DEFAULT 'pending',
+  assigned_to UUID REFERENCES users(id),
+  created_by UUID NOT NULL REFERENCES users(id),
+  location_id UUID REFERENCES locations(id),
+  animal_id UUID REFERENCES animals(id),
+  group_id UUID REFERENCES animal_groups(id),
+  checklist JSONB DEFAULT '[]',
+  due_date TIMESTAMPTZ,
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  estimated_hours NUMERIC(6,2),
+  actual_hours NUMERIC(6,2),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS shift_schedules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  user_id UUID NOT NULL REFERENCES users(id),
+  shift_date DATE NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  role_on_shift VARCHAR(100),
+  location_id UUID REFERENCES locations(id),
+  status VARCHAR(20) DEFAULT 'scheduled',
+  check_in_at TIMESTAMPTZ,
+  check_out_at TIMESTAMPTZ,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.15 Advanced Report Builder & Export Center (007) ───────
+CREATE TABLE IF NOT EXISTS report_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  description TEXT,
+  report_type VARCHAR(60) NOT NULL,
+  config JSONB DEFAULT '{}',
+  columns JSONB DEFAULT '[]',
+  filters JSONB DEFAULT '{}',
+  grouping JSONB DEFAULT '[]',
+  is_system BOOLEAN DEFAULT false,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS generated_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  template_id UUID REFERENCES report_templates(id),
+  name VARCHAR(200) NOT NULL,
+  report_type VARCHAR(60) NOT NULL,
+  format VARCHAR(20) DEFAULT 'json',
+  parameters JSONB DEFAULT '{}',
+  result_data JSONB DEFAULT '{}',
+  row_count INTEGER DEFAULT 0,
+  file_url VARCHAR(500),
+  status VARCHAR(20) DEFAULT 'completed',
+  generated_by UUID NOT NULL REFERENCES users(id),
+  generated_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_disease_pred_enterprise ON disease_predictions(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_disease_pred_status ON disease_predictions(status);
+CREATE INDEX IF NOT EXISTS idx_outbreak_zones_enterprise ON outbreak_zones(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_genetic_profiles_animal ON genetic_profiles(animal_id);
+CREATE INDEX IF NOT EXISTS idx_genetic_profiles_enterprise ON genetic_profiles(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_lineage_pairs_enterprise ON lineage_pairs(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_iot_sensors_enterprise ON iot_sensors(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_sensor_readings_sensor ON sensor_readings(sensor_id);
+CREATE INDEX IF NOT EXISTS idx_sensor_readings_recorded ON sensor_readings(recorded_at);
+CREATE INDEX IF NOT EXISTS idx_product_batches_enterprise ON product_batches(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_traceability_events_batch ON traceability_events(batch_id);
+CREATE INDEX IF NOT EXISTS idx_traceability_events_enterprise ON traceability_events(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_qr_codes_entity ON qr_codes(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_workforce_tasks_enterprise ON workforce_tasks(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_workforce_tasks_assigned ON workforce_tasks(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_workforce_tasks_status ON workforce_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_shift_schedules_enterprise ON shift_schedules(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_shift_schedules_user ON shift_schedules(user_id);
+CREATE INDEX IF NOT EXISTS idx_shift_schedules_date ON shift_schedules(shift_date);
+CREATE INDEX IF NOT EXISTS idx_report_templates_enterprise ON report_templates(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_generated_reports_enterprise ON generated_reports(enterprise_id);
+
+-- ─── 47.16 AI Veterinary Copilot (008) ─────────────────────────
+CREATE TABLE IF NOT EXISTS ai_chat_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID REFERENCES enterprises(id),
+  user_id UUID NOT NULL REFERENCES users(id),
+  animal_id UUID REFERENCES animals(id),
+  title VARCHAR(300) DEFAULT 'New Chat',
+  context_type VARCHAR(50) DEFAULT 'general',
+  status VARCHAR(30) DEFAULT 'active',
+  message_count INT DEFAULT 0,
+  last_message_at TIMESTAMPTZ,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ai_chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id UUID NOT NULL REFERENCES ai_chat_sessions(id) ON DELETE CASCADE,
+  role VARCHAR(20) NOT NULL DEFAULT 'user',
+  content TEXT NOT NULL,
+  content_type VARCHAR(30) DEFAULT 'text',
+  tokens_used INT DEFAULT 0,
+  confidence NUMERIC(5,2),
+  sources JSONB DEFAULT '[]',
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.17 Digital Twin & Scenario Simulator (008) ─────────────
+CREATE TABLE IF NOT EXISTS digital_twins (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  twin_type VARCHAR(50) NOT NULL DEFAULT 'farm',
+  description TEXT,
+  model_data JSONB DEFAULT '{}',
+  current_state JSONB DEFAULT '{}',
+  sync_status VARCHAR(30) DEFAULT 'synced',
+  last_synced_at TIMESTAMPTZ DEFAULT NOW(),
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS simulation_runs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  twin_id UUID NOT NULL REFERENCES digital_twins(id) ON DELETE CASCADE,
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  scenario_type VARCHAR(50) NOT NULL DEFAULT 'disease_spread',
+  parameters JSONB DEFAULT '{}',
+  input_state JSONB DEFAULT '{}',
+  result_data JSONB DEFAULT '{}',
+  outcome_summary TEXT,
+  status VARCHAR(30) DEFAULT 'pending',
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  duration_ms INT,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.18 Sustainability & Carbon Tracker (008) ───────────────
+CREATE TABLE IF NOT EXISTS sustainability_metrics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  metric_type VARCHAR(60) NOT NULL,
+  metric_name VARCHAR(200) NOT NULL,
+  value NUMERIC(14,4) NOT NULL DEFAULT 0,
+  unit VARCHAR(30),
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  category VARCHAR(60) DEFAULT 'general',
+  scope VARCHAR(30) DEFAULT 'scope_1',
+  data_source VARCHAR(100),
+  notes TEXT,
+  recorded_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS sustainability_goals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  goal_name VARCHAR(200) NOT NULL,
+  description TEXT,
+  metric_type VARCHAR(60) NOT NULL,
+  target_value NUMERIC(14,4) NOT NULL,
+  current_value NUMERIC(14,4) DEFAULT 0,
+  unit VARCHAR(30),
+  baseline_value NUMERIC(14,4),
+  baseline_date DATE,
+  target_date DATE NOT NULL,
+  status VARCHAR(30) DEFAULT 'active',
+  progress_pct NUMERIC(5,2) DEFAULT 0,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.19 Client Portal & Wellness Scorecards (008) ───────────
+CREATE TABLE IF NOT EXISTS wellness_scorecards (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  animal_id UUID NOT NULL REFERENCES animals(id),
+  enterprise_id UUID REFERENCES enterprises(id),
+  owner_id UUID NOT NULL REFERENCES users(id),
+  overall_score NUMERIC(5,2) DEFAULT 0,
+  nutrition_score NUMERIC(5,2) DEFAULT 0,
+  activity_score NUMERIC(5,2) DEFAULT 0,
+  vaccination_score NUMERIC(5,2) DEFAULT 0,
+  dental_score NUMERIC(5,2) DEFAULT 0,
+  weight_status VARCHAR(30) DEFAULT 'normal',
+  next_checkup DATE,
+  recommendations JSONB DEFAULT '[]',
+  risk_flags JSONB DEFAULT '[]',
+  assessed_by UUID REFERENCES users(id),
+  assessed_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS wellness_reminders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  animal_id UUID NOT NULL REFERENCES animals(id),
+  owner_id UUID NOT NULL REFERENCES users(id),
+  reminder_type VARCHAR(60) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  description TEXT,
+  due_date DATE NOT NULL,
+  status VARCHAR(30) DEFAULT 'pending',
+  priority VARCHAR(20) DEFAULT 'medium',
+  recurrence VARCHAR(30),
+  recurrence_interval INT,
+  snoozed_until DATE,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.20 Geospatial Analytics & Geofencing (008) ─────────────
+CREATE TABLE IF NOT EXISTS geofence_zones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  zone_type VARCHAR(50) DEFAULT 'boundary',
+  center_lat NUMERIC(10,6),
+  center_lng NUMERIC(10,6),
+  radius_meters NUMERIC(12,2),
+  polygon_coords JSONB DEFAULT '[]',
+  color VARCHAR(20) DEFAULT '#3b82f6',
+  alert_on_entry BOOLEAN DEFAULT false,
+  alert_on_exit BOOLEAN DEFAULT true,
+  is_restricted BOOLEAN DEFAULT false,
+  status VARCHAR(30) DEFAULT 'active',
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS geospatial_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  zone_id UUID REFERENCES geofence_zones(id),
+  animal_id UUID REFERENCES animals(id),
+  sensor_id UUID REFERENCES iot_sensors(id),
+  event_type VARCHAR(50) NOT NULL,
+  latitude NUMERIC(10,6) NOT NULL,
+  longitude NUMERIC(10,6) NOT NULL,
+  altitude NUMERIC(8,2),
+  accuracy_meters NUMERIC(8,2),
+  speed_kmh NUMERIC(8,2),
+  heading NUMERIC(5,2),
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.21 marketplace_listings: livestock + compliance columns (008) ──
+-- The base table already exists above (§ marketplace) but was missing this
+-- entire block — active Marketplace.tsx/MarketplaceService.ts code reads
+-- and writes every one of these columns, so a fresh-install DB would 500 on
+-- the very first listing create/search.
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS species VARCHAR(60);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS breed VARCHAR(100);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_age_months INT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_weight_kg NUMERIC(8,2);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS gender VARCHAR(20);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS lactation_number INT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS daily_milk_yield NUMERIC(6,2);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS pregnancy_status VARCHAR(30);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS pregnancy_month INT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS vaccination_status VARCHAR(30) DEFAULT 'unknown';
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS health_certificate BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS listing_tier VARCHAR(20) DEFAULT 'standard';
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS is_hot_deal BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS linked_animal_id UUID;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS auction_end_time TIMESTAMPTZ;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS reserve_price NUMERIC(12,2);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS contact_phone VARCHAR(20);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS latitude NUMERIC(10,7);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS longitude NUMERIC(10,7);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS admin_approved BOOLEAN DEFAULT true;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS admin_notes TEXT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS seller_type VARCHAR(30) DEFAULT 'individual';
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS registration_number VARCHAR(100);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS breeder_verified BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS welfare_attestation BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ;
+
+-- ─── 47.22 users: network_id/corporate_role (009 hospital networks) ────
+-- Not from 006/007/008, but discovered missing during this same audit —
+-- hospital_networks (defined early in § 1b above) already existed as an FK
+-- target, but these two columns on users referencing it were never
+-- backported.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS corporate_role VARCHAR(50);
+
+CREATE INDEX IF NOT EXISTS idx_ai_chat_sessions_user ON ai_chat_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_ai_chat_sessions_enterprise ON ai_chat_sessions(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_ai_chat_messages_session ON ai_chat_messages(session_id);
+CREATE INDEX IF NOT EXISTS idx_digital_twins_enterprise ON digital_twins(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_simulation_runs_twin ON simulation_runs(twin_id);
+CREATE INDEX IF NOT EXISTS idx_simulation_runs_enterprise ON simulation_runs(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_species ON marketplace_listings(species);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_breed ON marketplace_listings(breed);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_tier ON marketplace_listings(listing_tier);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_admin ON marketplace_listings(admin_approved);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_seller_type ON marketplace_listings(seller_type);
+CREATE INDEX IF NOT EXISTS idx_sustainability_metrics_ent ON sustainability_metrics(enterprise_id, metric_type);
+CREATE INDEX IF NOT EXISTS idx_sustainability_goals_ent ON sustainability_goals(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_wellness_scorecards_animal ON wellness_scorecards(animal_id);
+CREATE INDEX IF NOT EXISTS idx_wellness_scorecards_owner ON wellness_scorecards(owner_id);
+CREATE INDEX IF NOT EXISTS idx_wellness_reminders_owner ON wellness_reminders(owner_id, status);
+CREATE INDEX IF NOT EXISTS idx_wellness_reminders_due ON wellness_reminders(due_date, status);
+CREATE INDEX IF NOT EXISTS idx_geofence_zones_enterprise ON geofence_zones(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_geospatial_events_ent ON geospatial_events(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_geospatial_events_zone ON geospatial_events(zone_id);
+CREATE INDEX IF NOT EXISTS idx_geospatial_events_animal ON geospatial_events(animal_id);
+CREATE INDEX IF NOT EXISTS idx_geospatial_events_time ON geospatial_events(created_at);
