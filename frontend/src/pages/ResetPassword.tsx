@@ -81,9 +81,9 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
     return (
       <div className="auth-page">
         <div style={cardStyle}>
-          <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
-            <p style={{ color: '#64748b' }}>{t('resetPassword.validating')}</p>
+          <div className="si-5a54a33c">
+            <div className="loading-spinner si-9ad92aa9" />
+            <p className="si-98734f9a">{t('resetPassword.validating')}</p>
           </div>
         </div>
       </div>
@@ -94,24 +94,24 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
     return (
       <div className="auth-page">
         <div style={cardStyle}>
-          <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div style={{ fontSize: 48, marginBottom: 8 }}>⚠️</div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1e293b', marginBottom: 8 }}>
+          <div className="si-28dc275c">
+            <div className="si-a5ea92fb">⚠️</div>
+            <h1 className="si-7b1d1b94">
               {t('resetPassword.linkInvalidTitle')}
             </h1>
-            <p style={{ color: '#ef4444', fontSize: 14, margin: 0 }}>{invalidReason}</p>
+            <p className="si-6f3b9b7b">{invalidReason}</p>
           </div>
           <button
-            className="btn btn-primary"
-            style={{ width: '100%', marginBottom: 12 }}
+            className="btn btn-primary si-2f93d373"
+           
             onClick={() => onGoToLogin()}
           >
             {t('resetPassword.requestNewLink')}
           </button>
           <button
             type="button"
-            className="link-btn"
-            style={{ width: '100%', textAlign: 'center', color: '#64748b', fontSize: 14 }}
+            className="link-btn si-db073708"
+           
             onClick={onGoToLogin}
           >
             ← {t('resetPassword.backToLogin')}
@@ -125,18 +125,18 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
     return (
       <div className="auth-page">
         <div style={cardStyle}>
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <div style={{ fontSize: 48, marginBottom: 8 }}>✅</div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#166534', marginBottom: 8 }}>
+          <div className="si-1425bff3">
+            <div className="si-a5ea92fb">✅</div>
+            <h1 className="si-fc510996">
               {t('resetPassword.successTitle')}
             </h1>
-            <p style={{ color: '#166534', fontSize: 14, margin: 0 }}>
+            <p className="si-83c162f4">
               {t('resetPassword.successBody')}
             </p>
           </div>
           <button
-            className="btn btn-primary"
-            style={{ width: '100%' }}
+            className="btn btn-primary si-7d984748"
+           
             onClick={onGoToLogin}
           >
             {t('resetPassword.goToLogin')}
@@ -150,31 +150,31 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
   return (
     <div className="auth-page">
       <div style={cardStyle}>
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ fontSize: 48, marginBottom: 8 }}>🔒</div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1e293b', marginBottom: 8 }}>
+        <div className="si-28dc275c">
+          <div className="si-a5ea92fb">🔒</div>
+          <h1 className="si-2af23621">
             {t('resetPassword.title')}
           </h1>
-          <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>
+          <p className="si-5cc08d30">
             {t('resetPassword.subtitle')}
           </p>
         </div>
 
         <form onSubmit={handleSubmit}>
           {error && (
-            <div className="message error" style={{ marginBottom: 16 }}>{error}</div>
+            <div className="message error si-7e63ec4f">{error}</div>
           )}
 
-          <div className="form-group" style={{ marginBottom: 16 }}>
-            <label htmlFor="rp-password" style={{ display: 'block', marginBottom: 6, fontWeight: 500, color: '#374151', fontSize: 14 }}>
+          <div className="form-group si-7e63ec4f">
+            <label htmlFor="rp-password" className="si-701dd00b">
               {t('resetPassword.newPasswordLabel')}
             </label>
-            <div style={{ position: 'relative' }}>
+            <div className="si-314cecae">
               <input
                 id="rp-password"
                 type={showPassword ? 'text' : 'password'}
-                className="form-input"
-                style={{ width: '100%', boxSizing: 'border-box', paddingRight: 40 }}
+                className="form-input si-40bf6aa1"
+               
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
                 required
@@ -185,21 +185,21 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
               <button
                 type="button"
                 onClick={() => setShowPassword(v => !v)}
-                style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#9ca3af' }}
+                className="si-b1d82847"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? '🙈' : '👁️'}
               </button>
             </div>
             {newPassword.length > 0 && (
-              <div style={{ marginTop: 6, fontSize: 12 }}>
+              <div className="si-291ca0c2">
                 <PasswordStrengthHint password={newPassword} t={t} />
               </div>
             )}
           </div>
 
-          <div className="form-group" style={{ marginBottom: 24 }}>
-            <label htmlFor="rp-confirm" style={{ display: 'block', marginBottom: 6, fontWeight: 500, color: '#374151', fontSize: 14 }}>
+          <div className="form-group si-af65fe13">
+            <label htmlFor="rp-confirm" className="si-701dd00b">
               {t('resetPassword.confirmPasswordLabel')}
             </label>
             <input
@@ -217,7 +217,7 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
               aria-required="true"
             />
             {confirmPassword.length > 0 && !passwordsMatch && (
-              <p style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>
+              <p className="si-93a626a7">
                 {t('resetPassword.passwordsMismatch')}
               </p>
             )}
@@ -225,14 +225,14 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
 
           <button
             type="submit"
-            className="btn btn-primary"
-            style={{ width: '100%', padding: '12px', fontSize: 15, marginBottom: 16 }}
+            className="btn btn-primary si-9a254be0"
+           
             disabled={!canSubmit}
             aria-busy={loading}
           >
             {loading ? (
               <span className="btn-loading">
-                <span className="spinner" aria-hidden="true" style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite', marginRight: 8 }} />
+                <span className="spinner si-d47171fc" aria-hidden="true" />
                 {t('resetPassword.resetting')}
               </span>
             ) : t('resetPassword.resetBtn')}
@@ -240,8 +240,8 @@ export default function ResetPassword({ onGoToLogin }: ResetPasswordProps) {
 
           <button
             type="button"
-            className="link-btn"
-            style={{ width: '100%', textAlign: 'center', color: '#64748b', fontSize: 14 }}
+            className="link-btn si-db073708"
+           
             onClick={onGoToLogin}
           >
             ← {t('resetPassword.backToLogin')}
@@ -260,7 +260,7 @@ function PasswordStrengthHint({ password, t }: { password: string; t: (k: string
     { label: t('resetPassword.hint.number'), pass: /\d/.test(password) },
   ]
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px' }}>
+    <div className="si-6c006a30">
       {checks.map(c => (
         <span key={c.label} style={{ color: c.pass ? '#16a34a' : '#9ca3af', fontSize: 11 }}>
           {c.pass ? '✓' : '○'} {c.label}

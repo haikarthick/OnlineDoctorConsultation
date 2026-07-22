@@ -170,18 +170,18 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
   if (submitted) {
     return (
       <div className="module-page">
-        <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>💊</div>
-          <h1 style={{ marginBottom: 8 }}>{t('prescriptionWriter.prescriptionCreated')}</h1>
-          <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 24 }}>
+        <div className="si-bd60beb2">
+          <div className="si-7615cf7c">💊</div>
+          <h1 className="si-dab75309">{t('prescriptionWriter.prescriptionCreated')}</h1>
+          <p className="si-6bc9c38d">
             {t('prescriptionWriter.medicationsPrescribed', { count: medications.length })}
           </p>
           {conId ? (
             <>
-              <p style={{ color: '#667eea', fontSize: 14, marginBottom: 20 }}>
+              <p className="si-bff71ae0">
                 {t('prescriptionWriter.returningToConsultation', { seconds: redirectCountdown })}
               </p>
-              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <div className="si-7b7a3b80">
                 <button className="btn btn-primary" onClick={() => onNavigate(`/doctor/consultation-room/${conId}`)}>
                   ← {t('prescriptionWriter.backToConsultationNow')}
                 </button>
@@ -194,7 +194,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
               </div>
             </>
           ) : (
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <div className="si-7b7a3b80">
               <button className="btn btn-primary" onClick={() => onNavigate('/dashboard')}>
                 {t('prescriptionWriter.dashboard')}
               </button>
@@ -223,7 +223,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       </div>
 
       {error && (
-        <div style={{ padding: '12px 16px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 20, fontSize: 14 }}>
+        <div className="si-2d8d745c">
           {error}
         </div>
       )}
@@ -231,14 +231,14 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
       <form onSubmit={handleSubmit}>
         {/* Standalone patient/animal selector */}
         {isStandalone && (isVet || isAdmin) && (
-          <div className="card" style={{ marginBottom: 24 }}>
+          <div className="card si-af65fe13">
             <div className="card-header"><h2>👤 {t('prescriptionWriter.patientSelection')}</h2></div>
             <div className="card-body">
               <div className="module-form-row">
                 <div className="module-form-group">
                   <label className="module-label">{t('prescriptionWriter.selectPatient')} *</label>
                   {loadingPatients ? (
-                    <p style={{ fontSize: 14, color: '#6b7280' }}>{t('prescriptionWriter.loadingPatients')}</p>
+                    <p className="si-09dee8a9">{t('prescriptionWriter.loadingPatients')}</p>
                   ) : (
                     <select
                       className="module-input"
@@ -255,7 +255,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                 <div className="module-form-group">
                   <label className="module-label">{t('prescriptionWriter.selectAnimal')}</label>
                   {loadingAnimals ? (
-                    <p style={{ fontSize: 14, color: '#6b7280' }}>{t('prescriptionWriter.loadingAnimals')}</p>
+                    <p className="si-09dee8a9">{t('prescriptionWriter.loadingAnimals')}</p>
                   ) : (
                     <select
                       className="module-input"
@@ -273,7 +273,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
               </div>
               {/* Network pharmacy routing indicator */}
               {networkOptions.length > 0 && (
-                <div style={{ marginTop: 12, padding: '10px 14px', background: '#e8f5e9', borderRadius: 8, border: '1px solid #a5d6a7' }}>
+                <div className="si-b491f410">
                   <div style={{ fontSize: '0.87rem', fontWeight: 600, color: '#2e7d32', marginBottom: networkOptions.length > 1 ? 8 : 0 }}>
                     💊 {networkOptions.length === 1
                       ? `${t('prescriptions.pharmacy.autoRouted')} ${networkOptions[0].name}`
@@ -281,8 +281,8 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                   </div>
                   {networkOptions.length > 1 && (
                     <select
-                      className="module-input"
-                      style={{ marginTop: 4 }}
+                      className="module-input si-f48bb60f"
+                     
                       value={selectedNetworkId || ''}
                       onChange={e => setSelectedNetworkId(e.target.value || null)}
                     >
@@ -293,7 +293,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                     </select>
                   )}
                   {networkOptions.length === 1 && (
-                    <div style={{ fontSize: '0.8rem', color: '#388e3c', marginTop: 2 }}>
+                    <div className="si-d4883bd1">
                       {t('prescriptions.pharmacy.routingNote')}
                     </div>
                   )}
@@ -303,7 +303,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div className="si-e1725f0f">
           {/* Left: Diagnosis & Instructions */}
           <div>
             <div className="card">
@@ -353,24 +353,18 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
               <div className="card-body">
                 {/* Current Medications */}
                 {medications.map((med, i) => (
-                  <div key={i} style={{
-                    padding: 12, background: '#f0fdf4', borderRadius: 8, marginBottom: 10,
-                    border: '1px solid #bbf7d0', position: 'relative'
-                  }}>
+                  <div key={i} className="si-b081583e">
                     <button
                       type="button"
-                      style={{
-                        position: 'absolute', top: 6, right: 6, background: 'none',
-                        border: 'none', cursor: 'pointer', fontSize: 16, color: '#dc2626'
-                      }}
+                      className="si-74524240"
                       onClick={() => removeMedication(i)}
                     >✕</button>
                     <strong>{med.name}</strong>
-                    <p style={{ margin: '4px 0 0', fontSize: 13, color: '#4b5563' }}>
+                    <p className="si-65fb0667">
                       {med.dosage} • {med.frequency} • {med.duration || 'As needed'}
                     </p>
                     {med.instructions && (
-                      <p style={{ margin: '2px 0 0', fontSize: 12, color: '#6b7280' }}>
+                      <p className="si-4debe0bb">
                         📝 {med.instructions}
                       </p>
                     )}
@@ -378,33 +372,33 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                 ))}
 
                 {/* Add Medication Form */}
-                <div style={{ padding: 12, background: '#f9fafb', borderRadius: 8, border: '1px dashed #d1d5db' }}>
-                  <h4 style={{ margin: '0 0 10px', fontSize: 14 }}>+ {t('prescriptionWriter.addMedication')}</h4>
+                <div className="si-bd899740">
+                  <h4 className="si-ba62460d">+ {t('prescriptionWriter.addMedication')}</h4>
                   <div className="form-group">
                     <input className="form-input" placeholder={t('prescriptionWriter.medicationName')} value={newMed.name}
                       onChange={e => setNewMed({ ...newMed, name: e.target.value })} />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div className="si-1327446f">
                     <input className="form-input" placeholder={t('prescriptionWriter.dosage')} value={newMed.dosage}
                       onChange={e => setNewMed({ ...newMed, dosage: e.target.value })} />
                     <input className="form-input" placeholder={t('prescriptionWriter.frequency')} value={newMed.frequency}
                       onChange={e => setNewMed({ ...newMed, frequency: e.target.value })} />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
+                  <div className="si-ec98b0e0">
                     <input className="form-input" placeholder={t('prescriptionWriter.duration')} value={newMed.duration}
                       onChange={e => setNewMed({ ...newMed, duration: e.target.value })} />
                     <input className="form-input" placeholder={t('prescriptionWriter.instructions')} value={newMed.instructions}
                       onChange={e => setNewMed({ ...newMed, instructions: e.target.value })} />
                   </div>
-                  <button type="button" className="btn btn-outline" style={{ marginTop: 10, width: '100%' }} onClick={addMedication}>
+                  <button type="button" className="btn btn-outline si-37f17fee" onClick={addMedication}>
                     + {t('prescriptionWriter.addMedication')}
                   </button>
                 </div>
 
                 {/* Quick Add Templates */}
-                <div style={{ marginTop: 12 }}>
-                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>{t('prescriptionWriter.quickAdd')}</p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <div className="si-66faea9d">
+                  <p className="si-8183ab9c">{t('prescriptionWriter.quickAdd')}</p>
+                  <div className="si-50c82988">
                     {[
                       { name: 'Amoxicillin', dosage: '250mg', frequency: 'Twice daily', duration: '7 days' },
                       { name: 'Meloxicam', dosage: '0.1mg/kg', frequency: 'Once daily', duration: '5 days' },
@@ -413,8 +407,8 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                       <button
                         key={template.name}
                         type="button"
-                        className="btn btn-outline"
-                        style={{ fontSize: 12, padding: '4px 8px' }}
+                        className="btn btn-outline si-82a7d299"
+                       
                         onClick={() => setMedications([...medications, { ...template, instructions: '' }])}
                       >
                         + {template.name}
@@ -428,7 +422,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
         </div>
 
         {/* Submit */}
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
+        <div className="si-94316ddc">
           <button type="button" className="btn btn-outline" onClick={() => onNavigate(conId ? `/doctor/consultation-room/${conId}` : '/dashboard')}>{t('prescriptionWriter.cancel')}</button>
           <button type="submit" className="btn btn-primary btn-lg" disabled={submitting}>
             {submitting ? t('prescriptionWriter.creating') : `💊 ${t('prescriptionWriter.createPrescription')}`}

@@ -305,9 +305,9 @@ const Animals: React.FC = () => {
   const uniqueSpecies = [...new Set(animals.map(a => a.species))]
 
   const sectionTitle = (icon: string, text: string) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 20, marginBottom: 12, paddingBottom: 8, borderBottom: '2px solid #e5e7eb' }}>
-      <span style={{ fontSize: 18 }}>{icon}</span>
-      <span style={{ fontSize: 15, fontWeight: 700, color: '#374151' }}>{text}</span>
+    <div className="si-56b1c7d7">
+      <span className="si-09aa6941">{icon}</span>
+      <span className="si-e378c82e">{text}</span>
     </div>
   )
 
@@ -411,17 +411,17 @@ const Animals: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{isFarmer ? '🐄' : '🐾'} {isVet ? (vetView === 'my-pets' ? t('animals.pageTitles.petOwner') : t('animals.pageTitles.vet')) : isAdmin ? t('animals.pageTitles.admin') : isFarmer ? t('animals.pageTitles.farmer') : t('animals.pageTitles.petOwner')}</h1>
-          <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>
+          <p className="si-48d05eba">
             {isVet ? (vetView === 'my-pets' ? t('animals.subtitles.vetMyPets') : t('animals.subtitles.vet')) : isAdmin ? t('animals.subtitles.admin') : isFarmer ? t('animals.subtitles.farmer') : t('animals.subtitles.petOwner')}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="si-d223efb3">
           {isFarmer && (
             <>
-              <button className="btn-small" onClick={downloadTemplate} style={{ fontSize: 13 }}>
+              <button className="btn-small si-0a803082" onClick={downloadTemplate}>
                 ⬇️ {t('animals.downloadTemplate')}
               </button>
-              <button className="btn-small" onClick={() => { setShowBulkImport(true); setImportPreview([]); setImportResults(null); setImportError('') }} style={{ fontSize: 13 }}>
+              <button className="btn-small si-0a803082" onClick={() => { setShowBulkImport(true); setImportPreview([]); setImportResults(null); setImportError('') }}>
                 📥 {t('animals.importCSV')}
               </button>
             </>
@@ -434,12 +434,12 @@ const Animals: React.FC = () => {
         </div>
       </div>
 
-      {successMsg && <div style={{ padding: '12px 16px', background: '#e8f5e9', color: '#2e7d32', border: '1px solid #a5d6a7', borderRadius: 8, marginBottom: 16, fontWeight: 500 }}>{successMsg}</div>}
-      {error && <div style={{ padding: '12px 16px', background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', borderRadius: 8, marginBottom: 16, fontWeight: 500 }}>{error}</div>}
+      {successMsg && <div className="si-3e658aef">{successMsg}</div>}
+      {error && <div className="si-1bc255da">{error}</div>}
 
       {/* ─── Vet View Tabs ─────────────────────────────── */}
       {isVet && (
-        <div className="module-tabs" style={{ marginBottom: 20 }}>
+        <div className="module-tabs si-478be2e9">
           <button className={`module-tab ${vetView === 'my-pets' ? 'active' : ''}`} onClick={() => setVetView('my-pets')}>
             🐾 {t('animals.vetTabs.myPets')}
           </button>
@@ -451,7 +451,7 @@ const Animals: React.FC = () => {
 
       {/* ─── Search & Filter Bar ───────────────────────────── */}
       {!showForm && animals.length > 0 && (
-        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="si-72baa289">
           <AutocompleteInput
             value={searchTerm}
             onChange={setSearchTerm}
@@ -475,7 +475,7 @@ const Animals: React.FC = () => {
               {groupOptions.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
           )}
-          <span style={{ fontSize: 13, color: '#6b7280' }}>{filteredAnimals.length} {filteredAnimals.length !== 1 ? t('animals.animalsCount') : t('animals.animalCount')}</span>
+          <span className="si-c3b93ebb">{filteredAnimals.length} {filteredAnimals.length !== 1 ? t('animals.animalsCount') : t('animals.animalCount')}</span>
         </div>
       )}
 
@@ -488,12 +488,12 @@ const Animals: React.FC = () => {
             <h2>
               {editingAnimal ? `✏️ ${t('animals.registerModal.titleEdit', { name: editingAnimal.name })}` : t('animals.registerModal.titleNew')}
             </h2>
-          <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 16px' }}>{t('animals.registerModal.requiredNote')}</p>
+          <p className="si-5b728486">{t('animals.registerModal.requiredNote')}</p>
 
           <form onSubmit={handleSubmit}>
             {/* ── Basic Information ── */}
             {sectionTitle('📝', t('animals.sections.basicInfo'))}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+            <div className="si-99cba706">
               <div>
                 <label style={labelStyle}>{t('animals.registerModal.name')}</label>
                 <input type="text" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} required style={fieldStyle} placeholder={t('animals.form.placeholderName')} />
@@ -564,9 +564,9 @@ const Animals: React.FC = () => {
                 <label style={labelStyle}>{t('animals.registerModal.weight')}</label>
                 <input type="number" step="0.1" min="0" value={formData.weight} onChange={e => setFormData(p => ({ ...p, weight: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderWeight')} />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 22 }}>
-                <input type="checkbox" id="isNeutered" checked={formData.isNeutered} onChange={e => setFormData(p => ({ ...p, isNeutered: e.target.checked }))} style={{ width: 18, height: 18 }} />
-                <label htmlFor="isNeutered" style={{ fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>{t('animals.registerModal.neutered')}</label>
+              <div className="si-6046e8a3">
+                <input type="checkbox" id="isNeutered" checked={formData.isNeutered} onChange={e => setFormData(p => ({ ...p, isNeutered: e.target.checked }))} className="si-8f286607" />
+                <label htmlFor="isNeutered" className="si-a84a6c30">{t('animals.registerModal.neutered')}</label>
               </div>
               <div>
                 <label style={labelStyle}>{t('animalClass.sire')}</label>
@@ -613,7 +613,7 @@ const Animals: React.FC = () => {
 
             {/* ── Identification ── */}
             {sectionTitle('🏷️', t('animals.sections.identification'))}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+            <div className="si-b064b4a1">
               <div>
                 <label style={labelStyle}>{t('animals.registerModal.microchip')}</label>
                 <input type="text" value={formData.microchipId} onChange={e => setFormData(p => ({ ...p, microchipId: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderMicrochip')} />
@@ -632,7 +632,7 @@ const Animals: React.FC = () => {
 
             {/* ── Insurance ── */}
             {sectionTitle('🛡️', t('animals.sections.insurance'))}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+            <div className="si-b064b4a1">
               <div>
                 <label style={labelStyle}>{t('animals.registerModal.insuranceProvider')}</label>
                 <input type="text" value={formData.insuranceProvider} onChange={e => setFormData(p => ({ ...p, insuranceProvider: e.target.value }))} style={fieldStyle} placeholder={t('animals.form.placeholderInsurance')} />
@@ -645,7 +645,7 @@ const Animals: React.FC = () => {
                 <label style={labelStyle}>{t('animals.registerModal.policyExpiry')}</label>
                 <input type="date" value={formData.insuranceExpiry} onChange={e => setFormData(p => ({ ...p, insuranceExpiry: e.target.value }))} style={fieldStyle} />
                 {formData.insuranceExpiry && new Date(formData.insuranceExpiry) < new Date() && (
-                  <span style={{ fontSize: 11, color: '#dc2626', fontWeight: 600 }}>{t('animals.registerModal.policyExpired')}</span>
+                  <span className="si-58dcc166">{t('animals.registerModal.policyExpired')}</span>
                 )}
               </div>
             </div>
@@ -660,10 +660,10 @@ const Animals: React.FC = () => {
             {(isFarmer || isAdmin) && enterpriseOptions.length > 0 && (
               <>
                 {sectionTitle('🏢', t('animals.sections.enterprise'))}
-                <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 12px' }}>
+                <p className="si-8c99d39c">
                   {t('animals.enterprise.description')}
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+                <div className="si-b064b4a1">
                   <div>
                     <label style={labelStyle}>{t('animals.enterprise.label')}</label>
                     <select value={formData.enterpriseId} onChange={e => setFormData(p => ({ ...p, enterpriseId: e.target.value, groupId: '' }))} style={fieldStyle}>
@@ -679,7 +679,7 @@ const Animals: React.FC = () => {
                         {groupOptions.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                       </select>
                       {groupOptions.length === 0 && (
-                        <span style={{ fontSize: 11, color: '#6b7280' }}>{t('animals.enterprise.noGroupsFound')} <span style={{ color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate('/animal-groups')}>{t('animals.enterprise.createOne')}</span></span>
+                        <span className="si-a213bf41">{t('animals.enterprise.noGroupsFound')} <span className="si-3745f306" onClick={() => navigate('/animal-groups')}>{t('animals.enterprise.createOne')}</span></span>
                       )}
                     </div>
                   )}
@@ -687,12 +687,12 @@ const Animals: React.FC = () => {
               </>
             )}
 
-            <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-              <button type="submit" className="btn-primary" disabled={isSubmitting} style={{ padding: '10px 28px', fontSize: 14, fontWeight: 600 }}>
+            <div className="si-961e4c67">
+              <button type="submit" className="btn-primary si-542676d1" disabled={isSubmitting}>
                 {isSubmitting ? '⏳ ' + (editingAnimal ? t('animals.registerModal.updateBtn') : t('animals.registerModal.registerBtn')) + '...' : (editingAnimal ? t('animals.registerModal.updateBtn') : t('animals.registerModal.registerBtn'))}
               </button>
               <button type="button" onClick={() => { setShowForm(false); resetForm() }}
-                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontSize: 14 }}>
+                className="si-71a7eeee">
                 {t('animals.actions.cancel')}
               </button>
             </div>
@@ -704,42 +704,39 @@ const Animals: React.FC = () => {
       {/* ─── Animal Cards ──────────────────────────────────── */}
       <div className="module-content">
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 40 }}>
+          <div className="si-86638a30">
             <div className="loading-spinner" />
-            <p style={{ color: '#6b7280', marginTop: 12 }}>{t('animals.loading')}</p>
+            <p className="si-c429ecf4">{t('animals.loading')}</p>
           </div>
         ) : filteredAnimals.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 60 }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🐾</div>
-            <h3 style={{ fontSize: 20, color: '#333', marginBottom: 8 }}>{searchTerm || speciesFilter ? t('animals.emptySearch') : t('animals.emptyAnimals')}</h3>
-            <p style={{ color: '#666' }}>{canManageAnimals ? t('animals.petOwnerCTA') : t('animals.adminCTA')}</p>
+          <div className="si-9fa8d292">
+            <div className="si-86e06f73">🐾</div>
+            <h3 className="si-e34d1325">{searchTerm || speciesFilter ? t('animals.emptySearch') : t('animals.emptyAnimals')}</h3>
+            <p className="si-50edd4e9">{canManageAnimals ? t('animals.petOwnerCTA') : t('animals.adminCTA')}</p>
             {canManageAnimals && !showForm && (
-              <button className="btn-primary" style={{ marginTop: 16 }} onClick={() => { resetForm(); setShowForm(true) }}>{t('animals.registerAnimal')}</button>
+              <button className="btn-primary si-b0aee75b" onClick={() => { resetForm(); setShowForm(true) }}>{t('animals.registerAnimal')}</button>
             )}
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
+          <div className="si-af8b7d7f">
             {filteredAnimals.map(animal => {
               const age = calculateAge(animal.dateOfBirth)
               const insured = animal.insuranceProvider && animal.insurancePolicyNumber
               const insExpired = animal.insuranceExpiry && new Date(animal.insuranceExpiry) < new Date()
               return (
-                <div key={animal.id} style={{
-                  background: 'white', borderRadius: 14, border: '1px solid #e5e7eb', overflow: 'hidden',
-                  boxShadow: '0 1px 6px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s',
-                }}>
+                <div key={animal.id} className="si-9a7422fb">
                   {/* Card Header */}
-                  <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '16px 20px', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <span style={{ fontSize: 32 }}>{SPECIES_ICONS[animal.species] || '🐾'}</span>
+                  <div className="si-6ac50557">
+                    <div className="si-0b20392f">
+                      <span className="si-42fc55d5">{SPECIES_ICONS[animal.species] || '🐾'}</span>
                       <div>
-                        <div style={{ fontSize: 18, fontWeight: 700 }}>{animal.name}</div>
-                        <div style={{ fontSize: 12, opacity: 0.9 }}>{animal.species}{animal.breed ? ` • ${animal.breed}` : ''}</div>
+                        <div className="si-90c2c65d">{animal.name}</div>
+                        <div className="si-122e0f6b">{animal.species}{animal.breed ? ` • ${animal.breed}` : ''}</div>
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
+                    <div className="si-f4e64596">
                       <div
-                        style={{ fontSize: 11, fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: 12, fontFamily: 'monospace', cursor: 'copy' }}
+                        className="si-ddf63368"
                         onClick={() => {
                           const id = animal.uniqueId
                           if (id) {
@@ -753,39 +750,39 @@ const Animals: React.FC = () => {
                       >
                         {animal.uniqueId && copiedId === animal.uniqueId ? `✅ ${t('common.copied')}` : (animal.uniqueId || `ID-${animal.id.substring(0, 8).toUpperCase()}`)}
                       </div>
-                      {age && <div style={{ fontSize: 11, marginTop: 4, opacity: 0.85 }}>{t('animals.cardLabels.age')} {age}</div>}
+                      {age && <div className="si-706df161">{t('animals.cardLabels.age')} {age}</div>}
                     </div>
                   </div>
 
                   {/* Card Body */}
-                  <div style={{ padding: '14px 20px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px', fontSize: 13 }}>
-                      {(animal.animalClass || animal.gender) && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.gender')}</span> <strong>{classOrGenderLabel(t, animal.species, animal.animalClass, animal.gender)}</strong></div>}
-                      {animal.weight && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.weight')}</span> <strong>{animal.weight} kg</strong></div>}
-                      {animal.color && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.color')}</span> <strong>{animal.color}</strong></div>}
-                      {animal.isNeutered && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.neutered')}</span> <strong style={{ color: '#059669' }}>{t('animals.cardLabels.yesCheck')}</strong></div>}
-                      {animal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.dob')}</span> <strong>{formatDate(animal.dateOfBirth)}</strong></div>}
-                      {animal.ownerName && (isVet || isAdmin) && <div><span style={{ color: '#6b7280' }}>{t('animals.cardLabels.owner')}</span> <strong>{animal.ownerName}</strong></div>}
+                  <div className="si-d29f2575">
+                    <div className="si-3b3a79d7">
+                      {(animal.animalClass || animal.gender) && <div><span className="si-23033f05">{t('animals.cardLabels.gender')}</span> <strong>{classOrGenderLabel(t, animal.species, animal.animalClass, animal.gender)}</strong></div>}
+                      {animal.weight && <div><span className="si-23033f05">{t('animals.cardLabels.weight')}</span> <strong>{animal.weight} kg</strong></div>}
+                      {animal.color && <div><span className="si-23033f05">{t('animals.cardLabels.color')}</span> <strong>{animal.color}</strong></div>}
+                      {animal.isNeutered && <div><span className="si-23033f05">{t('animals.cardLabels.neutered')}</span> <strong className="si-487e8582">{t('animals.cardLabels.yesCheck')}</strong></div>}
+                      {animal.dateOfBirth && <div><span className="si-23033f05">{t('animals.cardLabels.dob')}</span> <strong>{formatDate(animal.dateOfBirth)}</strong></div>}
+                      {animal.ownerName && (isVet || isAdmin) && <div><span className="si-23033f05">{t('animals.cardLabels.owner')}</span> <strong>{animal.ownerName}</strong></div>}
                     </div>
 
                                         {/* Enterprise / Group (Farmer view) */}
                     {(animal.enterpriseName || animal.groupName) && (
-                      <div style={{ marginTop: 8, padding: '6px 12px', background: '#f0f4ff', borderRadius: 8, fontSize: 12 }}>
+                      <div className="si-83b1e87d">
                         {animal.groupColor && (
                           <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: animal.groupColor, marginRight: 6, verticalAlign: 'middle' }} />
                         )}
-                        {animal.enterpriseName && <span style={{ color: '#4338ca', fontWeight: 600 }}>🏢 {animal.enterpriseName}</span>}
-                        {animal.groupName && <span style={{ color: '#6b7280', marginLeft: 8 }}>· {animal.groupName}</span>}
+                        {animal.enterpriseName && <span className="si-5fd5ba20">🏢 {animal.enterpriseName}</span>}
+                        {animal.groupName && <span className="si-c12e23c3">· {animal.groupName}</span>}
                       </div>
                     )}
 
                     {/* IDs Row */}
                     {(animal.microchipId || animal.earTagId || animal.registrationNumber) && (
-                      <div style={{ marginTop: 10, padding: '8px 12px', background: '#f8fafc', borderRadius: 8, fontSize: 12 }}>
-                        <div style={{ fontWeight: 600, color: '#374151', marginBottom: 4 }}>{t('animals.cardLabels.identification')}</div>
-                        {animal.microchipId && <div style={{ color: '#4b5563' }}>{t('animals.cardLabels.microchip')} <span style={{ fontFamily: 'monospace', color: '#2563eb' }}>{animal.microchipId}</span></div>}
-                        {animal.earTagId && <div style={{ color: '#4b5563' }}>{t('animals.cardLabels.earTag')} <span style={{ fontFamily: 'monospace', color: '#2563eb' }}>{animal.earTagId}</span></div>}
-                        {animal.registrationNumber && <div style={{ color: '#4b5563' }}>{t('animals.cardLabels.regNumber')} <span style={{ fontFamily: 'monospace', color: '#2563eb' }}>{animal.registrationNumber}</span></div>}
+                      <div className="si-96553843">
+                        <div className="si-c3f28cd6">{t('animals.cardLabels.identification')}</div>
+                        {animal.microchipId && <div className="si-91a28c8c">{t('animals.cardLabels.microchip')} <span className="si-2c506e3b">{animal.microchipId}</span></div>}
+                        {animal.earTagId && <div className="si-91a28c8c">{t('animals.cardLabels.earTag')} <span className="si-2c506e3b">{animal.earTagId}</span></div>}
+                        {animal.registrationNumber && <div className="si-91a28c8c">{t('animals.cardLabels.regNumber')} <span className="si-2c506e3b">{animal.registrationNumber}</span></div>}
                       </div>
                     )}
 
@@ -795,32 +792,32 @@ const Animals: React.FC = () => {
                         <div style={{ fontWeight: 600, color: insExpired ? '#dc2626' : '#059669', marginBottom: 2 }}>
                           {insExpired ? t('animals.cardLabels.insuranceExpired') : `🛡️ ${t('animals.cardLabels.insured')}`}
                         </div>
-                        <div style={{ color: '#4b5563' }}>{animal.insuranceProvider} — {animal.insurancePolicyNumber}</div>
+                        <div className="si-91a28c8c">{animal.insuranceProvider} — {animal.insurancePolicyNumber}</div>
                         {animal.insuranceExpiry && <div style={{ color: insExpired ? '#dc2626' : '#6b7280' }}>{t('animals.cardLabels.expires')} {formatDate(animal.insuranceExpiry)}</div>}
                       </div>
                     )}
                   </div>
 
                   {/* Card Footer */}
-                  <div style={{ padding: '12px 20px', borderTop: '1px solid #f3f4f6', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <button className="btn-small" style={{ background: '#f0fdf4', color: '#059669', border: '1px solid #bbf7d0' }}
+                  <div className="si-ab8d87a7">
+                    <button className="btn-small si-72b31bb1"
                       onClick={() => setDetailAnimal(animal)}>{t('animals.cardLabels.details')}</button>
                     <button className="btn-small" onClick={() => navigate('/medical-records')}>{t('animals.cardActions.records')}</button>
                     {canManageAnimals && (
                       <>
-                        <button className="btn-small" style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }}
+                        <button className="btn-small si-f8147336"
                           onClick={() => openEditForm(animal)}>{t('animals.cardActions.edit')}</button>
-                        <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #fca5a5', background: '#fef2f2' }}
+                        <button className="btn-small si-415f0ec0"
                           onClick={() => handleDelete(animal.id)}>🗑️</button>
                       </>
                     )}
                     {isPetOwner && (
-                      <button className="btn-small" style={{ marginLeft: 'auto', background: '#667eea', color: 'white', border: 'none' }}
+                      <button className="btn-small si-a0f947bf"
                         onClick={() => navigate(`/book-consultation?animalId=${animal.id}`)}>{t('animals.actions.bookConsultation')}</button>
                     )}
                     <button
-                      className="btn-small"
-                      style={{ background: '#e0f2fe', color: '#0369a1', border: '1px solid #7dd3fc' }}
+                      className="btn-small si-14989fd1"
+                     
                       onClick={() => handleDownloadPassport(animal)}
                       disabled={passportLoading === animal.id}
                     >
@@ -836,56 +833,56 @@ const Animals: React.FC = () => {
 
       {/* ─── Detail Modal ──────────────────────────────────── */}
       {detailAnimal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999 }}
+        <div className="si-10f9485f"
           onClick={() => setDetailAnimal(null)}>
-          <div style={{ background: 'white', borderRadius: 16, padding: 0, width: '95%', maxWidth: 600, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
+          <div className="si-64d8c528"
             onClick={e => e.stopPropagation()}>
             {/* Modal Header */}
-            <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '20px 28px', color: 'white', borderRadius: '16px 16px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <span style={{ fontSize: 40 }}>{SPECIES_ICONS[detailAnimal.species] || '🐾'}</span>
+            <div className="si-b4f50afa">
+              <div className="si-1ec723fc">
+                <span className="si-0067e898">{SPECIES_ICONS[detailAnimal.species] || '🐾'}</span>
                 <div>
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>{detailAnimal.name}</div>
-                  <div style={{ fontSize: 13, opacity: 0.9 }}>{detailAnimal.species}{detailAnimal.breed ? ` • ${detailAnimal.breed}` : ''} — {detailAnimal.uniqueId}</div>
+                  <div className="si-f0920f33">{detailAnimal.name}</div>
+                  <div className="si-e17c55f7">{detailAnimal.species}{detailAnimal.breed ? ` • ${detailAnimal.breed}` : ''} — {detailAnimal.uniqueId}</div>
                 </div>
               </div>
-              <button onClick={() => setDetailAnimal(null)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', fontSize: 20, width: 36, height: 36, borderRadius: '50%', cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setDetailAnimal(null)} className="si-1b1a545b">✕</button>
             </div>
             {/* Modal Body */}
-            <div style={{ padding: '20px 28px' }}>
+            <div className="si-4cea2692">
               {sectionTitle('📝', t('animals.detailModal.basicInfo'))}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 24px', fontSize: 14 }}>
-                <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.name')}</span> <strong>{detailAnimal.name}</strong></div>
-                <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.species')}</span> <strong>{detailAnimal.species}</strong></div>
-                {detailAnimal.breed && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.breed')}</span> <strong>{detailAnimal.breed}</strong></div>}
-                {(detailAnimal.animalClass || detailAnimal.gender) && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
-                {detailAnimal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.dob')}</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
-                {detailAnimal.sireName && <div><span style={{ color: '#6b7280' }}>{t('animalClass.sire')}</span> <strong>{detailAnimal.sireName}</strong></div>}
-                {detailAnimal.damName && <div><span style={{ color: '#6b7280' }}>{t('animalClass.dam')}</span> <strong>{detailAnimal.damName}</strong></div>}
-                {detailAnimal.breedingStatus && <div><span style={{ color: '#6b7280' }}>{t('animalClass.breedingStatus')}</span> <strong>{t(`animalClass.${detailAnimal.breedingStatus === 'not_bred' ? 'notBred' : detailAnimal.breedingStatus === 'pregnant' ? 'pregnant' : 'notPregnant'}`)}</strong></div>}
-                {detailAnimal.breedingStatus === 'pregnant' && detailAnimal.expectedDueDate && <div><span style={{ color: '#6b7280' }}>{t('animalClass.expectedDueDate')}</span> <strong>{formatDate(detailAnimal.expectedDueDate)}</strong></div>}
-                {detailAnimal.dateOfBirth && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.age')}</span> <strong>{calculateAge(detailAnimal.dateOfBirth)}</strong></div>}
-                {detailAnimal.weight && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.weight')}</span> <strong>{detailAnimal.weight} kg</strong></div>}
-                {detailAnimal.color && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.color')}</span> <strong>{detailAnimal.color}</strong></div>}
-                <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.neutered')}</span> <strong>{detailAnimal.isNeutered ? t('animals.detailModal.yesCheck') : t('animals.detailModal.no')}</strong></div>
-                {detailAnimal.ownerName && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.owner')}</span> <strong>{detailAnimal.ownerName}</strong></div>}
+              <div className="si-7e1e70ef">
+                <div><span className="si-23033f05">{t('animals.detailModal.name')}</span> <strong>{detailAnimal.name}</strong></div>
+                <div><span className="si-23033f05">{t('animals.detailModal.species')}</span> <strong>{detailAnimal.species}</strong></div>
+                {detailAnimal.breed && <div><span className="si-23033f05">{t('animals.detailModal.breed')}</span> <strong>{detailAnimal.breed}</strong></div>}
+                {(detailAnimal.animalClass || detailAnimal.gender) && <div><span className="si-23033f05">{t('animals.detailModal.gender')}</span> <strong>{classOrGenderLabel(t, detailAnimal.species, detailAnimal.animalClass, detailAnimal.gender)}</strong></div>}
+                {detailAnimal.dateOfBirth && <div><span className="si-23033f05">{t('animals.detailModal.dob')}</span> <strong>{formatDate(detailAnimal.dateOfBirth)}</strong></div>}
+                {detailAnimal.sireName && <div><span className="si-23033f05">{t('animalClass.sire')}</span> <strong>{detailAnimal.sireName}</strong></div>}
+                {detailAnimal.damName && <div><span className="si-23033f05">{t('animalClass.dam')}</span> <strong>{detailAnimal.damName}</strong></div>}
+                {detailAnimal.breedingStatus && <div><span className="si-23033f05">{t('animalClass.breedingStatus')}</span> <strong>{t(`animalClass.${detailAnimal.breedingStatus === 'not_bred' ? 'notBred' : detailAnimal.breedingStatus === 'pregnant' ? 'pregnant' : 'notPregnant'}`)}</strong></div>}
+                {detailAnimal.breedingStatus === 'pregnant' && detailAnimal.expectedDueDate && <div><span className="si-23033f05">{t('animalClass.expectedDueDate')}</span> <strong>{formatDate(detailAnimal.expectedDueDate)}</strong></div>}
+                {detailAnimal.dateOfBirth && <div><span className="si-23033f05">{t('animals.detailModal.age')}</span> <strong>{calculateAge(detailAnimal.dateOfBirth)}</strong></div>}
+                {detailAnimal.weight && <div><span className="si-23033f05">{t('animals.detailModal.weight')}</span> <strong>{detailAnimal.weight} kg</strong></div>}
+                {detailAnimal.color && <div><span className="si-23033f05">{t('animals.detailModal.color')}</span> <strong>{detailAnimal.color}</strong></div>}
+                <div><span className="si-23033f05">{t('animals.detailModal.neutered')}</span> <strong>{detailAnimal.isNeutered ? t('animals.detailModal.yesCheck') : t('animals.detailModal.no')}</strong></div>
+                {detailAnimal.ownerName && <div><span className="si-23033f05">{t('animals.detailModal.owner')}</span> <strong>{detailAnimal.ownerName}</strong></div>}
               </div>
 
               {sectionTitle('🏷️', t('animals.detailModal.identificationSection'))}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 24px', fontSize: 14 }}>
-                <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.systemId')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.uniqueId}</strong></div>
-                {detailAnimal.microchipId && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.microchip')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.microchipId}</strong></div>}
-                {detailAnimal.earTagId && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.earTag')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.earTagId}</strong></div>}
-                {detailAnimal.registrationNumber && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.regNumber')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.registrationNumber}</strong></div>}
+              <div className="si-7e1e70ef">
+                <div><span className="si-23033f05">{t('animals.detailModal.systemId')}</span> <strong className="si-d70e5ad0">{detailAnimal.uniqueId}</strong></div>
+                {detailAnimal.microchipId && <div><span className="si-23033f05">{t('animals.detailModal.microchip')}</span> <strong className="si-d70e5ad0">{detailAnimal.microchipId}</strong></div>}
+                {detailAnimal.earTagId && <div><span className="si-23033f05">{t('animals.detailModal.earTag')}</span> <strong className="si-d70e5ad0">{detailAnimal.earTagId}</strong></div>}
+                {detailAnimal.registrationNumber && <div><span className="si-23033f05">{t('animals.detailModal.regNumber')}</span> <strong className="si-d70e5ad0">{detailAnimal.registrationNumber}</strong></div>}
               </div>
 
               {(detailAnimal.insuranceProvider || detailAnimal.insurancePolicyNumber) && (
                 <>
                   {sectionTitle('🛡️', t('animals.detailModal.insuranceSection'))}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 24px', fontSize: 14 }}>
-                    {detailAnimal.insuranceProvider && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.provider')}</span> <strong>{detailAnimal.insuranceProvider}</strong></div>}
-                    {detailAnimal.insurancePolicyNumber && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.policyNumber')}</span> <strong style={{ fontFamily: 'monospace' }}>{detailAnimal.insurancePolicyNumber}</strong></div>}
-                    {detailAnimal.insuranceExpiry && <div><span style={{ color: '#6b7280' }}>{t('animals.detailModal.expiry')}</span> <strong>{formatDate(detailAnimal.insuranceExpiry)}</strong></div>}
+                  <div className="si-7e1e70ef">
+                    {detailAnimal.insuranceProvider && <div><span className="si-23033f05">{t('animals.detailModal.provider')}</span> <strong>{detailAnimal.insuranceProvider}</strong></div>}
+                    {detailAnimal.insurancePolicyNumber && <div><span className="si-23033f05">{t('animals.detailModal.policyNumber')}</span> <strong className="si-d70e5ad0">{detailAnimal.insurancePolicyNumber}</strong></div>}
+                    {detailAnimal.insuranceExpiry && <div><span className="si-23033f05">{t('animals.detailModal.expiry')}</span> <strong>{formatDate(detailAnimal.insuranceExpiry)}</strong></div>}
                   </div>
                 </>
               )}
@@ -893,14 +890,14 @@ const Animals: React.FC = () => {
               {detailAnimal.medicalNotes && (
                 <>
                   {sectionTitle('📋', t('animals.detailModal.medicalNotesSection'))}
-                  <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.6, margin: 0 }}>{detailAnimal.medicalNotes}</p>
+                  <p className="si-7670ba8d">{detailAnimal.medicalNotes}</p>
                 </>
               )}
             </div>
-            <div style={{ padding: '16px 28px', borderTop: '1px solid #e5e7eb', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <div className="si-6a645de2">
               <button className="btn-small" onClick={() => navigate('/medical-records')}>{t('animals.detailModal.medicalRecords')}</button>
-              {canManageAnimals && <button className="btn-small" style={{ background: '#eef2ff', color: '#4338ca', border: '1px solid #c7d2fe' }} onClick={() => { setDetailAnimal(null); openEditForm(detailAnimal) }}>{t('animals.detailModal.editBtn')}</button>}
-              <button className="btn-small" onClick={() => setDetailAnimal(null)} style={{ padding: '6px 20px' }}>{t('animals.detailModal.closeBtn')}</button>
+              {canManageAnimals && <button className="btn-small si-f8147336" onClick={() => { setDetailAnimal(null); openEditForm(detailAnimal) }}>{t('animals.detailModal.editBtn')}</button>}
+              <button className="btn-small si-c0374481" onClick={() => setDetailAnimal(null)}>{t('animals.detailModal.closeBtn')}</button>
             </div>
           </div>
         </div>
@@ -908,32 +905,32 @@ const Animals: React.FC = () => {
       {/* ── Bulk Import Modal ────────────────────────────── */}
       {showBulkImport && (
         <div className="edit-form-overlay" onClick={() => setShowBulkImport(false)}>
-          <div className="edit-form-panel edit-form-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 700 }}>
+          <div className="edit-form-panel edit-form-modal si-be8d250d" onClick={e => e.stopPropagation()}>
             <button className="edit-form-close" onClick={() => setShowBulkImport(false)} aria-label="Close">✕</button>
             <h2>📥 {t('animals.bulkImport')}</h2>
-            <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 12px' }}>{t('animals.csvHeaders')}</p>
+            <p className="si-31e8dd17">{t('animals.csvHeaders')}</p>
 
             {importError && (
-              <div style={{ padding: '10px 14px', background: '#ffebee', color: '#c62828', border: '1px solid #ef9a9a', borderRadius: 8, marginBottom: 12 }}>{importError}</div>
+              <div className="si-c4c55552">{importError}</div>
             )}
 
             {!importResults && (
               <>
-                <input ref={csvInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleCSVFile} />
-                <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                <input ref={csvInputRef} type="file" accept=".csv" className="si-d6a2f871" onChange={handleCSVFile} />
+                <div className="si-6e782388">
                   <button className="btn-primary" onClick={() => csvInputRef.current?.click()}>
                     📂 {t('animals.importCSV')}
                   </button>
                   <button className="btn-small" onClick={downloadTemplate}>⬇️ {t('animals.downloadTemplate')}</button>
                 </div>
-                <p style={{ color: '#6b7280', fontSize: 13 }}>{t('animals.maxAnimals')}</p>
+                <p className="si-c3b93ebb">{t('animals.maxAnimals')}</p>
               </>
             )}
 
             {importPreview.length > 0 && !importResults && (
               <>
-                <h4 style={{ margin: '0 0 8px' }}>{t('animals.importPreview')} ({importPreview.length} {t('animals.animalsCount')})</h4>
-                <div className="data-table-container" style={{ maxHeight: 300, overflowY: 'auto' }}>
+                <h4 className="si-24d15068">{t('animals.importPreview')} ({importPreview.length} {t('animals.animalsCount')})</h4>
+                <div className="data-table-container si-b7791771">
                   <table className="module-table">
                     <thead>
                       <tr>
@@ -953,12 +950,12 @@ const Animals: React.FC = () => {
                         </tr>
                       ))}
                       {importPreview.length > 20 && (
-                        <tr><td colSpan={4} style={{ textAlign: 'center', color: '#6b7280' }}>…and {importPreview.length - 20} more</td></tr>
+                        <tr><td colSpan={4} className="si-ce2b8b2e">…and {importPreview.length - 20} more</td></tr>
                       )}
                     </tbody>
                   </table>
                 </div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 16, justifyContent: 'flex-end' }}>
+                <div className="si-f5f9f5f6">
                   <button className="btn-small" onClick={() => setImportPreview([])}>✕ Clear</button>
                   <button className="btn-primary" onClick={handleBulkImport} disabled={importLoading}>
                     {importLoading ? '⏳ Importing...' : `✅ Import ${importPreview.length} animals`}
@@ -969,24 +966,24 @@ const Animals: React.FC = () => {
 
             {importResults && (
               <div>
-                <h4 style={{ margin: '0 0 12px' }}>{t('animals.importResults')}</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-                  <div style={{ padding: 16, background: '#e8f5e9', borderRadius: 8, textAlign: 'center' }}>
-                    <div style={{ fontSize: 28, fontWeight: 700, color: '#2e7d32' }}>{importResults.created}</div>
-                    <div style={{ fontSize: 13, color: '#4caf50' }}>{t('animals.animalsCreated')}</div>
+                <h4 className="si-5aae4571">{t('animals.importResults')}</h4>
+                <div className="si-10e693aa">
+                  <div className="si-e3ece768">
+                    <div className="si-676727df">{importResults.created}</div>
+                    <div className="si-698e648e">{t('animals.animalsCreated')}</div>
                   </div>
                   <div style={{ padding: 16, background: importResults.failed > 0 ? '#ffebee' : '#f5f5f5', borderRadius: 8, textAlign: 'center' }}>
                     <div style={{ fontSize: 28, fontWeight: 700, color: importResults.failed > 0 ? '#c62828' : '#9e9e9e' }}>{importResults.failed}</div>
-                    <div style={{ fontSize: 13, color: '#9e9e9e' }}>{t('animals.animalsFailed')}</div>
+                    <div className="si-3ee35c05">{t('animals.animalsFailed')}</div>
                   </div>
                 </div>
                 {importResults.errors.length > 0 && (
-                  <div style={{ background: '#fff8e1', padding: 12, borderRadius: 8, fontSize: 13, maxHeight: 150, overflowY: 'auto' }}>
+                  <div className="si-54785ed0">
                     <strong>{t('animals.importErrors')}:</strong>
-                    {importResults.errors.map((e, i) => <div key={i} style={{ color: '#f57c00', marginTop: 4 }}>• {e}</div>)}
+                    {importResults.errors.map((e, i) => <div key={i} className="si-011cf8c3">• {e}</div>)}
                   </div>
                 )}
-                <div style={{ marginTop: 16, textAlign: 'right' }}>
+                <div className="si-3f63b982">
                   <button className="btn-primary" onClick={() => setShowBulkImport(false)}>✓ Done</button>
                 </div>
               </div>

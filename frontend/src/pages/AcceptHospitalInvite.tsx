@@ -185,8 +185,8 @@ export default function AcceptHospitalInvite() {
             🔒 {t('hospitalStaff.privacyNote')}
           </div>
 
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, margin: '10px 0 14px', cursor: 'pointer', fontSize: 14, lineHeight: 1.5 }}>
-            <input type="checkbox" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)} style={{ marginTop: 3 }} />
+          <label className="si-bb05bc06">
+            <input type="checkbox" checked={acceptTerms} onChange={e => setAcceptTerms(e.target.checked)} className="si-539810b1" />
             <span>
               {t('register.acceptPrefix')}{' '}
               <a href="/policies/terms" target="_blank" rel="noopener noreferrer">{t('register.termsLink')}</a>

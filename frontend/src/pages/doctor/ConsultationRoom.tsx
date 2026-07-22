@@ -644,47 +644,47 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
     const isCompleted = consultationStatus === 'completed'
     return (
       <div className="module-page">
-        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>{isCompleted ? '✅' : '📹'}</div>
-          <h1 style={{ marginBottom: 8 }}>{isCompleted ? t('consultationRoom.consultationCompleted') : t('consultationRoom.sessionEnded')}</h1>
-          <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 8 }}>
+        <div className="si-9ae995d6">
+          <div className="si-7615cf7c">{isCompleted ? '✅' : '📹'}</div>
+          <h1 className="si-dab75309">{isCompleted ? t('consultationRoom.consultationCompleted') : t('consultationRoom.sessionEnded')}</h1>
+          <p className="si-712f4327">
             {t('consultationRoom.duration')}: {formatDuration(session.duration || callDuration)}
           </p>
           {isCompleted && (
-            <p style={{ color: '#059669', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
+            <p className="si-739c4b9c">
               {t('consultationRoom.markedAsCompleted')}
             </p>
           )}
 
           {/* Recording playback */}
           {recordingUrl && (
-            <div style={{ marginTop: 20, marginBottom: 16 }}>
-              <p style={{ color: '#059669', fontSize: 14, marginBottom: 12 }}>🎬 {t('consultationRoom.recordingAvailable')}</p>
-              <video src={recordingUrl} controls style={{ maxWidth: 500, width: '100%', borderRadius: 8, marginBottom: 12 }} />
+            <div className="si-ef14b2c1">
+              <p className="si-c338391d">🎬 {t('consultationRoom.recordingAvailable')}</p>
+              <video src={recordingUrl} controls className="si-a7540650" />
               <br />
               <a href={recordingUrl} download={`consultation-${conId}-${new Date().toISOString().slice(0,10)}.webm`}
-                className="btn btn-outline" style={{ display: 'inline-block', textDecoration: 'none' }}>
+                className="btn btn-outline si-315b6ed5">
                 ⬇️ {t('consultationRoom.downloadRecording')}
               </a>
             </div>
           )}
 
           {/* Notes section */}
-          <div style={{ maxWidth: 600, margin: '24px auto', textAlign: 'left' }}>
+          <div className="si-4734e5a8">
             <h3>📝 {t('consultationRoom.consultationNotes')}</h3>
-            <div style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>{t('consultationRoom.diagnosis')}</label>
-              <textarea className="form-input" rows={2} placeholder={t('consultationRoom.enterDiagnosis')}
-                value={diagnosis} onChange={e => setDiagnosis(e.target.value)} style={{ width: '100%' }}
+            <div className="si-bab8e8bc">
+              <label className="si-e334d170">{t('consultationRoom.diagnosis')}</label>
+              <textarea className="form-input si-7d984748" rows={2} placeholder={t('consultationRoom.enterDiagnosis')}
+                value={diagnosis} onChange={e => setDiagnosis(e.target.value)}
                 readOnly={isCompleted} />
             </div>
-            <div style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 4 }}>{t('consultationRoom.notes')}</label>
-              <textarea className="form-input" rows={4} placeholder={t('consultationRoom.notesPlaceholder')}
-                value={notes} onChange={e => setNotes(e.target.value)} style={{ width: '100%' }}
+            <div className="si-bab8e8bc">
+              <label className="si-e334d170">{t('consultationRoom.notes')}</label>
+              <textarea className="form-input si-7d984748" rows={4} placeholder={t('consultationRoom.notesPlaceholder')}
+                value={notes} onChange={e => setNotes(e.target.value)}
                 readOnly={isCompleted} />
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="si-d223efb3">
               {!isCompleted && (
                 <>
                   <button className="btn btn-outline" onClick={handleSaveNotes} disabled={savingNotes}>
@@ -708,13 +708,13 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
 
           {/* Chat transcript */}
           {messages.length > 0 && (
-            <div style={{ maxWidth: 600, margin: '24px auto', textAlign: 'left' }}>
+            <div className="si-4734e5a8">
               <h3>💬 {t('consultationRoom.chatTranscript', { count: messages.length })}</h3>
-              <div style={{ background: '#f9fafb', borderRadius: 8, padding: 16, maxHeight: 300, overflow: 'auto' }}>
+              <div className="si-cfed40cb">
                 {messages.map(msg => (
-                  <div key={msg.id} style={{ marginBottom: 8, fontSize: 13 }}>
+                  <div key={msg.id} className="si-4815af7f">
                     <strong>{msg.senderName}</strong>: {msg.message}
-                    <span style={{ color: '#9ca3af', marginLeft: 8, fontSize: 11 }}>
+                    <span className="si-a69da2c2">
                       {formatTime(msg.timestamp)}
                     </span>
                   </div>
@@ -723,7 +723,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
+          <div className="si-cf8b12ae">
             <button className="btn btn-outline" onClick={() => onNavigate('/dashboard')}>
               {t('consultationRoom.returnToDashboard')}
             </button>
@@ -742,7 +742,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
           <h1>{t('consultationRoom.title')}</h1>
           <p className="page-subtitle">
             {session?.status === 'active' ? (
-              <span style={{ color: '#dc2626', fontWeight: 600 }}>🔴 {t('consultationRoom.live')} — {formatDuration(callDuration)}</span>
+              <span className="si-1c396c88">🔴 {t('consultationRoom.live')} — {formatDuration(callDuration)}</span>
             ) : t('consultationRoom.waitingForSession')}
           </p>
         </div>
@@ -751,14 +751,14 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
             💊 {t('consultationRoom.prescription')}
           </button>
           <button
-            className="module-btn"
-            style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}
+            className="module-btn si-89f878b4"
+           
             onClick={() => setShowReferralModal(true)}
           >
             🔄 Refer to Network Hospital
           </button>
           {session?.status === 'active' && (
-            <button className="btn btn-danger" onClick={handleEndCall} style={{ background: '#dc2626', color: 'white', border: 'none' }}>
+            <button className="btn btn-danger si-afc65bbc" onClick={handleEndCall}>
               📞 {t('consultationRoom.endCall')}
             </button>
           )}
@@ -766,9 +766,9 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
       </div>
 
       {error && (
-        <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
+        <div className="si-131754ed">
           ⚠️ {error}
-          <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }}
+          <button className="si-f8c15521"
             onClick={() => setError('')}>{t('consultationRoom.dismiss')}</button>
         </div>
       )}
@@ -786,13 +786,12 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                 <div className="video-placeholder">
                   <div className="video-avatar">🧑</div>
                   <p>{connectionState === 'connecting' ? t('consultationRoom.connectingToPatient') : t('consultationRoom.waitingForPatientVideo')}</p>
-                  {mediaMode === 'audio-only' && <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 {t('consultationRoom.audioOnlyMode')}</p>}
-                  {mediaMode === 'none' && <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 {t('consultationRoom.chatOnlyMode')}</p>}
+                  {mediaMode === 'audio-only' && <p className="si-8e438b3b">🎤 {t('consultationRoom.audioOnlyMode')}</p>}
+                  {mediaMode === 'none' && <p className="si-ff8aeeff">💬 {t('consultationRoom.chatOnlyMode')}</p>}
                 </div>
               )}
               {isScreenSharing && (
-                <div style={{ position: 'absolute', bottom: 70, left: 16, background: 'rgba(0,0,0,.75)',
-                  color: '#fff', padding: '4px 12px', borderRadius: 8, fontSize: 13, zIndex: 10 }}>
+                <div className="si-1ded27be">
                   🖥️ {t('consultationRoom.screenSharingActive')}
                 </div>
               )}
@@ -801,7 +800,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
             <div className="video-placeholder">
               <div className="video-avatar">👨‍⚕️</div>
               <p>{t('consultationRoom.waitingForPatient')}</p>
-              <p style={{ fontSize: 13, color: '#9ca3af', marginTop: 4 }}>
+              <p className="si-7dcbd386">
                 {session ? `${t('consultationRoom.room')}: ${session.roomId}` : t('consultationRoom.creatingRoom')}
               </p>
             </div>
@@ -822,13 +821,13 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
           {/* Self-view (PIP) */}
           <div className="video-self" style={isCameraOff || mediaMode !== 'video' ? {} : { padding: 0, overflow: 'hidden' }}>
             {isCameraOff || mediaMode !== 'video' ? (
-              <span style={{ textAlign: 'center', fontSize: 13 }}>
+              <span className="si-ecda976e">
                 {session?.status !== 'active' ? `Dr. ${user?.lastName?.charAt(0) || ''}` :
                   mediaMode === 'audio-only' ? '🎤 Audio' : mediaMode === 'none' ? '💬 Chat' : '📷 Off'}
               </span>
             ) : (
               <video ref={localVideoRef} autoPlay playsInline muted
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit', transform: 'scaleX(-1)' }} />
+                className="si-cb5aeea0" />
             )}
           </div>
 
@@ -865,22 +864,21 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
 
           {/* Recording indicator */}
           {isRecording && (
-            <div style={{ position: 'absolute', top: 16, left: 16, display: 'flex', alignItems: 'center', gap: 8,
-              background: 'rgba(220,38,38,.9)', color: 'white', padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600 }}>
-              <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'white', display: 'inline-block', animation: 'pulse 1s infinite' }} />
+            <div className="si-fe782970">
+              <span className="si-00e70c6a" />
               REC {formatDuration(callDuration)}
             </div>
           )}
         </div>
 
         {/* Side Panel */}
-        <div className="chat-panel" style={{ minWidth: 340 }}>
+        <div className="chat-panel si-78f95ca5">
           {/* Panel Tabs */}
-          <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
+          <div className="si-ffe739ab">
             {(['chat', 'history', 'notes', 'prescribe'] as const).map(tab => (
               <button key={tab}
-                className={`tab ${activePanel === tab ? 'active' : ''}`}
-                style={{ flex: 1, border: 'none', padding: '10px', fontSize: 13 }}
+                className={`tab ${activePanel === tab ? 'active' : ''} si-1114bb34`}
+               
                 onClick={() => { setActivePanel(tab); if (tab === 'history' && !historyLoaded && !historyLoading) { /* auto-load on first click is handled in loadConsultationData */ } }}>
                 {tab === 'chat' ? `💬 ${t('consultationRoom.chat')}${messages.length > 0 ? ` (${messages.length})` : ''}` : tab === 'history' ? `📋 ${t('consultationRoom.historyTab')}` : tab === 'notes' ? `📝 ${t('consultationRoom.notesTab')}` : `💊 ${t('consultationRoom.rx')}`}
               </button>
@@ -892,9 +890,9 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
             <>
               <div className="chat-messages">
                 {messages.length === 0 && (
-                  <div style={{ textAlign: 'center', padding: '40px 16px', color: '#9ca3af' }}>
+                  <div className="si-97639f58">
                     <p>{t('consultationRoom.noMessagesYet')}</p>
-                    <p style={{ fontSize: 13 }}>{t('consultationRoom.startConversation')}</p>
+                    <p className="si-0a803082">{t('consultationRoom.startConversation')}</p>
                   </div>
                 )}
                 {messages.map(msg => (
@@ -918,37 +916,37 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
 
           {/* Medical History Tab */}
           {activePanel === 'history' && (
-            <div style={{ padding: 16, flex: 1, overflowY: 'auto' }}>
+            <div className="si-3dc8ac19">
               {historyLoading && (
-                <div style={{ textAlign: 'center', padding: 30 }}>
-                  <div className="loading-spinner" style={{ margin: '0 auto' }} />
-                  <p style={{ color: '#6b7280', fontSize: 13, marginTop: 8 }}>{t('consultationRoom.loadingMedicalHistory')}</p>
+                <div className="si-ed5d7a12">
+                  <div className="loading-spinner si-8d6ac58b" />
+                  <p className="si-b416ac63">{t('consultationRoom.loadingMedicalHistory')}</p>
                 </div>
               )}
 
               {!historyLoading && !animalInfo && (
-                <div style={{ textAlign: 'center', padding: '30px 16px', color: '#9ca3af' }}>
-                  <div style={{ fontSize: 40, marginBottom: 8 }}>📋</div>
-                  <p style={{ fontWeight: 500 }}>{t('consultationRoom.noAnimalLinked')}</p>
-                  <p style={{ fontSize: 13 }}>{t('consultationRoom.animalLinkMessage')}</p>
+                <div className="si-b1c6542e">
+                  <div className="si-75bae6a3">📋</div>
+                  <p className="si-c6905158">{t('consultationRoom.noAnimalLinked')}</p>
+                  <p className="si-0a803082">{t('consultationRoom.animalLinkMessage')}</p>
                 </div>
               )}
 
               {!historyLoading && animalInfo && (
                 <>
                   {/* Animal Info Card */}
-                  <div style={{ background: '#eff6ff', borderRadius: 8, padding: '10px 14px', marginBottom: 12, border: '1px solid #bfdbfe' }}>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: '#1e40af' }}>
+                  <div className="si-843e21c5">
+                    <div className="si-2cd8f04c">
                       🐾 {animalInfo.name || 'Unknown'}
                     </div>
-                    <div style={{ fontSize: 13, color: '#3b82f6', marginTop: 2 }}>
+                    <div className="si-9ac294d9">
                       {animalInfo.species || ''}{animalInfo.breed ? ` / ${animalInfo.breed}` : ''}
                       {animalInfo.age ? ` — ${animalInfo.age}` : ''}
                       {animalInfo.weight ? ` — ${animalInfo.weight}kg` : ''}
                     </div>
-                    {animalInfo.uniqueId && <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>ID: {animalInfo.uniqueId}</div>}
+                    {animalInfo.uniqueId && <div className="si-b1a83cef">ID: {animalInfo.uniqueId}</div>}
                     {(animalInfo.enterpriseName || animalInfo.enterprise_name) && (
-                      <div style={{ fontSize: '13px', color: '#059669', fontWeight: 600, padding: '4px 8px', background: '#ecfdf5', borderRadius: 6, marginTop: 4 }}>
+                      <div className="si-acad5bc1">
                         🏢 Farm: {animalInfo.enterpriseName || animalInfo.enterprise_name}
                         {(animalInfo.groupName || animalInfo.group_name) && ` › ${animalInfo.groupName || animalInfo.group_name}`}
                       </div>
@@ -956,14 +954,14 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                   </div>
 
                   {/* Allergies */}
-                  <div style={{ marginBottom: 12 }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 700, color: '#991b1b', margin: '0 0 6px' }}>
+                  <div className="si-bab8e8bc">
+                    <h4 className="si-d151fd1b">
                       ⚠️ {t('consultationRoom.allergies')} ({allergies.length})
                     </h4>
                     {allergies.length === 0 ? (
-                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>{t('consultationRoom.noKnownAllergies')}</p>
+                      <p className="si-df056d61">{t('consultationRoom.noKnownAllergies')}</p>
                     ) : (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      <div className="si-a78c2ab8">
                         {allergies.map((a: any, i: number) => (
                           <span key={i} style={{
                             background: a.severity === 'severe' ? '#fef2f2' : '#fef3c7',
@@ -978,19 +976,19 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                   </div>
 
                   {/* Vaccinations */}
-                  <div style={{ marginBottom: 12 }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 700, color: '#065f46', margin: '0 0 6px' }}>
+                  <div className="si-bab8e8bc">
+                    <h4 className="si-72539157">
                       💉 {t('consultationRoom.vaccinations')} ({vaccinations.length})
                     </h4>
                     {vaccinations.length === 0 ? (
-                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>{t('consultationRoom.noVaccinationRecords')}</p>
+                      <p className="si-df056d61">{t('consultationRoom.noVaccinationRecords')}</p>
                     ) : (
-                      <div style={{ maxHeight: 120, overflowY: 'auto' }}>
+                      <div className="si-859b1456">
                         {vaccinations.slice(0, 10).map((v: any, i: number) => (
-                          <div key={i} style={{ fontSize: 12, padding: '4px 0', borderBottom: '1px solid #f3f4f6' }}>
+                          <div key={i} className="si-4c23d640">
                             <strong>{v.vaccineName || v.vaccine_name || v.name || 'Vaccine'}</strong>
                             {v.dateAdministered || v.date_administered ? (
-                              <span style={{ color: '#6b7280', marginLeft: 6 }}>
+                              <span className="si-ee2911f8">
                                 {new Date(v.dateAdministered || v.date_administered).toLocaleDateString()}
                               </span>
                             ) : null}
@@ -1002,21 +1000,21 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                   </div>
 
                   {/* Recent Medical Records */}
-                  <div style={{ marginBottom: 12 }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 700, color: '#1e3a5f', margin: '0 0 6px' }}>
+                  <div className="si-bab8e8bc">
+                    <h4 className="si-1ea073bf">
                       🩺 {t('consultationRoom.medicalRecords')} ({medicalRecords.length})
                     </h4>
                     {medicalRecords.length === 0 ? (
-                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>{t('consultationRoom.noMedicalRecords')}</p>
+                      <p className="si-df056d61">{t('consultationRoom.noMedicalRecords')}</p>
                     ) : (
-                      <div style={{ maxHeight: 150, overflowY: 'auto' }}>
+                      <div className="si-a01c8940">
                         {medicalRecords.slice(0, 10).map((r: any, i: number) => (
-                          <div key={i} style={{ fontSize: 12, padding: '6px 0', borderBottom: '1px solid #f3f4f6' }}>
-                            <div style={{ fontWeight: 600 }}>{r.recordType || r.record_type || r.type || 'Record'}</div>
-                            {r.diagnosis && <div style={{ color: '#374151' }}>Dx: {r.diagnosis}</div>}
-                            {r.treatment && <div style={{ color: '#6b7280' }}>Tx: {r.treatment}</div>}
+                          <div key={i} className="si-55c66e92">
+                            <div className="si-b2cfcbec">{r.recordType || r.record_type || r.type || 'Record'}</div>
+                            {r.diagnosis && <div className="si-93b487ee">Dx: {r.diagnosis}</div>}
+                            {r.treatment && <div className="si-23033f05">Tx: {r.treatment}</div>}
                             {(r.createdAt || r.created_at || r.date) && (
-                              <div style={{ color: '#9ca3af', fontSize: 11 }}>
+                              <div className="si-a5de6cea">
                                 {new Date(r.createdAt || r.created_at || r.date).toLocaleDateString()}
                               </div>
                             )}
@@ -1027,18 +1025,18 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                   </div>
 
                   {/* Lab Results */}
-                  <div style={{ marginBottom: 8 }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 700, color: '#7c3aed', margin: '0 0 6px' }}>
+                  <div className="si-dab75309">
+                    <h4 className="si-7af7d0b5">
                       🔬 {t('consultationRoom.labResults')} ({labResults.length})
                     </h4>
                     {labResults.length === 0 ? (
-                      <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>{t('consultationRoom.noLabResults')}</p>
+                      <p className="si-df056d61">{t('consultationRoom.noLabResults')}</p>
                     ) : (
-                      <div style={{ maxHeight: 120, overflowY: 'auto' }}>
+                      <div className="si-859b1456">
                         {labResults.slice(0, 10).map((l: any, i: number) => (
-                          <div key={i} style={{ fontSize: 12, padding: '4px 0', borderBottom: '1px solid #f3f4f6' }}>
+                          <div key={i} className="si-4c23d640">
                             <strong>{l.testName || l.test_name || l.name || 'Test'}</strong>
-                            {l.result && <span style={{ marginLeft: 6, color: '#374151' }}>→ {l.result}</span>}
+                            {l.result && <span className="si-c3560ab0">→ {l.result}</span>}
                             {l.status && (
                               <span style={{
                                 marginLeft: 6, fontSize: 11, padding: '1px 6px', borderRadius: 4,
@@ -1058,17 +1056,17 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
 
           {/* Notes Tab */}
           {activePanel === 'notes' && (
-            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+            <div className="si-daad42f2">
               <div className="form-group">
                 <label className="form-label">{t('consultationRoom.diagnosis')}</label>
                 <textarea className="form-input" rows={3} placeholder={t('consultationRoom.enterDiagnosis')}
                   value={diagnosis} onChange={e => setDiagnosis(e.target.value)} />
               </div>
-              <div className="form-group" style={{ flex: 1 }}>
+              <div className="form-group si-6acd75e8">
                 <label className="form-label">{t('consultationRoom.consultationNotesLabel')}</label>
-                <textarea className="form-input" rows={8}
+                <textarea className="form-input si-3f7753b6" rows={8}
                   placeholder={t('consultationRoom.notesDocumentPlaceholder')}
-                  value={notes} onChange={e => setNotes(e.target.value)} style={{ resize: 'vertical' }} />
+                  value={notes} onChange={e => setNotes(e.target.value)} />
               </div>
               <button className="btn btn-primary" onClick={handleSaveNotes} disabled={savingNotes}>
                 {savingNotes ? `⏳ ${t('consultationRoom.saving')}` : notesSaved ? `✅ ${t('consultationRoom.saved')}` : `💾 ${t('consultationRoom.saveNotes')}`}
@@ -1078,15 +1076,15 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
 
           {/* Quick Prescribe Tab */}
           {activePanel === 'prescribe' && (
-            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
-              <p style={{ fontSize: 14, color: '#6b7280' }}>
+            <div className="si-c710217c">
+              <p className="si-09dee8a9">
                 {t('consultationRoom.quickPrescribeAccess')}
               </p>
               <button className="btn btn-primary"
                 onClick={() => onNavigate(`/doctor/prescriptions/new?consultationId=${conId}`)}>
                 💊 {t('consultationRoom.openPrescriptionWriter')}
               </button>
-              <div style={{ marginTop: 12 }}>
+              <div className="si-66faea9d">
                 <h4>{t('consultationRoom.commonPrescriptions')}</h4>
                 {[
                   { label: 'Antibiotics Course (7 days)', name: 'Amoxicillin', dosage: '250mg', frequency: 'Twice daily', duration: '7 days', instructions: 'Give with food' },
@@ -1094,11 +1092,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                   { label: 'Anti-inflammatory (10 days)', name: 'Carprofen', dosage: '2mg/kg', frequency: 'Twice daily', duration: '10 days', instructions: 'Give with food, plenty of water' },
                   { label: 'Vitamins & Supplements', name: 'Pet Multivitamin', dosage: '1 tablet', frequency: 'Once daily', duration: '30 days', instructions: 'Mix with food' },
                 ].map(tpl => (
-                  <div key={tpl.label} style={{
-                    padding: '8px 12px', background: '#f3f4f6', borderRadius: 8, marginBottom: 6,
-                    cursor: 'pointer', fontSize: 14, display: 'flex', justifyContent: 'space-between',
-                    transition: 'background 0.15s',
-                  }}
+                  <div key={tpl.label} className="si-394b4e9f"
                   onClick={() => {
                     const med = encodeURIComponent(JSON.stringify([{
                       name: tpl.name, dosage: tpl.dosage, frequency: tpl.frequency,
@@ -1110,7 +1104,7 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                   onMouseLeave={e => (e.currentTarget.style.background = '#f3f4f6')}
                   >
                     <span>{tpl.label}</span>
-                    <span style={{ color: '#3b82f6', fontWeight: 600 }}>+</span>
+                    <span className="si-0134f7a1">+</span>
                   </div>
                 ))}
               </div>
@@ -1122,45 +1116,45 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
 
       {/* Referral Modal */}
       {showReferralModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        <div className="si-5044997e"
           onClick={() => setShowReferralModal(false)}>
-          <div style={{ background: '#fff', borderRadius: 12, padding: 28, width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto' }}
+          <div className="si-e6c98afe"
             onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0 }}>🔄 Refer Patient to Network Hospital</h3>
-              <button onClick={() => setShowReferralModal(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            <div className="si-101fd1d0">
+              <h3 className="si-44087c4b">🔄 Refer Patient to Network Hospital</h3>
+              <button onClick={() => setShowReferralModal(false)} className="si-30be827b">✕</button>
             </div>
-            {referralError && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '8px 12px', borderRadius: 6, marginBottom: 12 }}>{referralError}</div>}
+            {referralError && <div className="si-80ee1308">{referralError}</div>}
             <form onSubmit={handleCreateReferral}>
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Network <span style={{ color: '#dc2626' }}>*</span></label>
-                <select style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }} required
+              <div className="si-bab8e8bc">
+                <label className="si-0402f865">Network <span className="si-f84f41a5">*</span></label>
+                <select className="si-c8d05a40" required
                   value={referralForm.networkId} onChange={e => setReferralForm(f => ({ ...f, networkId: e.target.value, toHospitalId: '' }))}>
                   <option value="">— Select Network —</option>
                   {networksList.map((n: any) => <option key={n.id} value={n.id}>{n.name}</option>)}
                 </select>
               </div>
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>
-                  Receiving Hospital <span style={{ color: '#dc2626' }}>*</span>
-                  {!referralForm.networkId && <span style={{ color: '#f59e0b', fontWeight: 400, fontSize: 12, marginLeft: 8 }}>⚠️ Select a network first</span>}
+              <div className="si-bab8e8bc">
+                <label className="si-0402f865">
+                  Receiving Hospital <span className="si-f84f41a5">*</span>
+                  {!referralForm.networkId && <span className="si-18d8dcb2">⚠️ Select a network first</span>}
                 </label>
-                <select style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }} required
+                <select className="si-c8d05a40" required
                   disabled={!referralForm.networkId}
                   value={referralForm.toHospitalId} onChange={e => setReferralForm(f => ({ ...f, toHospitalId: e.target.value }))}>
                   <option value="">— Select Hospital —</option>
                   {networkHospitals.map((h: any) => <option key={h.id} value={h.id}>{h.name}</option>)}
                 </select>
               </div>
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Reason <span style={{ color: '#dc2626' }}>*</span></label>
-                <textarea style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0', resize: 'vertical' }}
+              <div className="si-bab8e8bc">
+                <label className="si-0402f865">Reason <span className="si-f84f41a5">*</span></label>
+                <textarea className="si-d41674e2"
                   rows={3} required placeholder="Reason for referral..."
                   value={referralForm.reason} onChange={e => setReferralForm(f => ({ ...f, reason: e.target.value }))} />
               </div>
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Priority</label>
-                <select style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}
+              <div className="si-bab8e8bc">
+                <label className="si-0402f865">Priority</label>
+                <select className="si-c8d05a40"
                   value={referralForm.priority} onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))}>
                   <option value="low">Low</option>
                   <option value="normal">Normal</option>
@@ -1168,29 +1162,29 @@ setError(t('consultationRoom.failedToSaveNotes') + ': ' + (err?.response?.data?.
                   <option value="emergency">Emergency</option>
                 </select>
               </div>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Clinical Notes (optional)</label>
-                <textarea style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0', resize: 'vertical' }}
+              <div className="si-7e63ec4f">
+                <label className="si-0402f865">Clinical Notes (optional)</label>
+                <textarea className="si-d41674e2"
                   rows={4} placeholder="Include relevant history, diagnosis, what you need from the receiving hospital..."
                   value={referralForm.clinicalNotes} onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))} />
               </div>
-              <p style={{ fontSize: 12, color: '#94a3b8', margin: '0 0 12px' }}>* Required field</p>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button type="button" onClick={() => setShowReferralModal(false)} style={{ flex: 1, padding: '10px 20px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer' }}>Cancel</button>
+              <p className="si-7dc8bae5">* Required field</p>
+              <div className="si-b1214800">
+                <button type="button" onClick={() => setShowReferralModal(false)} className="si-bf48a746">Cancel</button>
                 <button type="submit" disabled={referralSubmitting || !referralForm.networkId || !referralForm.toHospitalId}
                   style={{ flex: 2, padding: '10px 20px', borderRadius: 8, border: 'none', background: (referralSubmitting || !referralForm.networkId || !referralForm.toHospitalId) ? '#94a3b8' : '#2563eb', color: '#fff', fontWeight: 600, cursor: (referralSubmitting || !referralForm.networkId || !referralForm.toHospitalId) ? 'not-allowed' : 'pointer' }}>
                   {referralSubmitting ? '⏳ Sending...' : '🔄 Send Referral'}
                 </button>
               </div>
               {(!referralForm.networkId || !referralForm.toHospitalId) && (
-                <p style={{ color: '#f59e0b', fontSize: 12, marginTop: 8, textAlign: 'center' }}>⚠️ Select a network and hospital to enable submission</p>
+                <p className="si-d46111c1">⚠️ Select a network and hospital to enable submission</p>
               )}
             </form>
           </div>
         </div>
       )}
       {referralSuccess && (
-        <div style={{ position: 'fixed', bottom: 24, right: 24, background: '#dcfce7', color: '#166534', padding: '12px 20px', borderRadius: 8, fontWeight: 600, zIndex: 3000 }}>
+        <div className="si-6e46e0f9">
           ✓ {referralSuccess}
         </div>
       )}

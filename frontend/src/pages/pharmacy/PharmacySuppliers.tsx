@@ -95,7 +95,7 @@ export default function PharmacySuppliers({ networkId }: Props) {
         {error && !showModal && <div className="pharm-error">⚠️ {error}</div>}
 
         {loading ? (
-          <p style={{ color: '#888' }}>{t('common.loading')}</p>
+          <p className="si-40d2db53">{t('common.loading')}</p>
         ) : suppliers.length === 0 ? (
           <div className="pharmacy-empty"><div className="empty-icon">🏭</div><p>{t('pharmacy.suppliers.empty')}</p></div>
         ) : (
@@ -190,8 +190,8 @@ export default function PharmacySuppliers({ networkId }: Props) {
                 </div>
               </div>
               <div className="pharm-form-group">
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={form.is_approved} onChange={e => setForm(f => ({ ...f, is_approved: e.target.checked }))} style={{ width: 'auto' }} />
+                <label className="si-0c7e7279">
+                  <input type="checkbox" checked={form.is_approved} onChange={e => setForm(f => ({ ...f, is_approved: e.target.checked }))} className="si-7f2e0347" />
                   {t('pharmacy.suppliers.approvedLabel')}
                 </label>
               </div>

@@ -204,7 +204,7 @@ const WorkforcePage: React.FC = () => {
                     <thead><tr><th>{t('workforce.task')}</th><th>{t('workforce.assignedTo')}</th><th>{t('workforce.due')}</th><th>{t('workforce.priority')}</th></tr></thead>
                     <tbody>{dashboard.overdueTasks.map((ot: any, i: number) => (
                       <tr key={i}><td>{ot.title}</td><td>{ot.assigned_to_name || '—'}</td>
-                        <td style={{ color: '#ef4444' }}>{ot.due_date ? new Date(ot.due_date).toLocaleDateString() : '—'}</td>
+                        <td className="si-4fb20e94">{ot.due_date ? new Date(ot.due_date).toLocaleDateString() : '—'}</td>
                         <td><span className="badge" style={{ backgroundColor: PRIORITY_COLORS[ot.priority] }}>{ot.priority}</span></td></tr>
                     ))}</tbody>
                   </table>

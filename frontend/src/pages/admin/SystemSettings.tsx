@@ -492,26 +492,26 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
   }
 
   return (
-    <div className="module-page" style={{ maxWidth: 1100, margin: '0 auto' }}>
+    <div className="module-page si-7751cc54">
       {/* Header */}
-      <div className="page-header" style={{ flexWrap: 'wrap', gap: 16 }}>
+      <div className="page-header si-70c30b8a">
         <div>
-          <h1 style={{ color: '#111827' }}>{t('systemSettings.title')}</h1>
+          <h1 className="si-63c2680d">{t('systemSettings.title')}</h1>
           <p className="page-subtitle">{t('systemSettings.subtitle', { count: settings.length })}</p>
         </div>
-        <div className="page-header-actions" style={{ flexWrap: 'wrap', gap: 8 }}>
+        <div className="page-header-actions si-f83c50b4">
           <button className="btn btn-primary" onClick={() => setShowAdd(true)}>+ {t('systemSettings.addSetting')}</button>
           <button
-            className="btn btn-outline"
+            className="btn btn-outline si-cc651457"
             onClick={() => onNavigate('/admin/prescription-settings')}
-            style={{ borderColor: '#2b6cb0', color: '#2b6cb0' }}
+           
           >
             📄 {t('systemSettings.prescriptionTemplate')}
           </button>
           <button
-            className="btn btn-outline"
+            className="btn btn-outline si-5634b397"
             onClick={() => onNavigate('/admin/certificate-settings')}
-            style={{ borderColor: '#2d3748', color: '#2d3748' }}
+           
           >
             📋 {t('systemSettings.certificateTemplate')}
           </button>
@@ -520,36 +520,20 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       </div>
 
       {/* Search Bar */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #fafbfc 100%)',
-        paddingBottom: 16, marginBottom: 16
-      }}>
-        <div style={{
-          display: 'flex', gap: 12, alignItems: 'center',
-          background: 'white', borderRadius: 12,
-          border: '1px solid #e5e7eb', padding: '8px 16px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-        }}>
-          <span style={{ fontSize: 18, color: '#9ca3af' }}>🔍</span>
+      <div className="si-b825048d">
+        <div className="si-560c8fdf">
+          <span className="si-72d04014">🔍</span>
           <input
             type="text"
             placeholder={t('systemSettings.searchPlaceholder')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            style={{
-              flex: 1, border: 'none', outline: 'none', fontSize: 15, padding: '8px 0',
-              background: 'transparent', color: '#111827', WebkitTextFillColor: '#111827'
-            }}
+            className="si-22e74dd3"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              style={{
-                background: '#f3f4f6', border: 'none', borderRadius: 6,
-                padding: '4px 10px', fontSize: 13, cursor: 'pointer',
-                color: '#6b7280', WebkitTextFillColor: '#6b7280'
-              }}
+              className="si-8b4eab1a"
             >
               Clear
             </button>
@@ -557,9 +541,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
         </div>
 
         {/* Quick nav pills */}
-        <div style={{
-          display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap'
-        }}>
+        <div className="si-9c6e20a7">
           {sections.map(s => (
             <button
               key={s.id}
@@ -582,9 +564,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       {/* Add Setting Modal */}
       {showAdd && (
         <div className="modal-overlay" onClick={() => setShowAdd(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+          <div className="modal si-197ba518" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 style={{ color: '#111827' }}>{t('systemSettings.addSetting')}</h2>
+              <h2 className="si-63c2680d">{t('systemSettings.addSetting')}</h2>
               <button className="modal-close" onClick={() => setShowAdd(false)}>✕</button>
             </div>
             <div className="modal-body">
@@ -603,7 +585,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                 <input className="form-input" placeholder={t('systemSettings.descriptionPlaceholder')} value={newSetting.description}
                   onChange={e => setNewSetting({ ...newSetting, description: e.target.value })} style={inputStyle} />
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+              <div className="si-f5f9f5f6">
                 <button className="btn btn-outline" onClick={() => setShowAdd(false)}>{t('systemSettings.cancel')}</button>
                 <button className="btn btn-primary" disabled={saving} onClick={handleAddSetting}>
                   {saving ? t('systemSettings.saving') : t('systemSettings.addSetting')}
@@ -616,24 +598,24 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
       {/* ─── Maintenance Mode ─── */}
       {showMaintenanceCard && (
-        <div id="settings-section-maintenance" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 style={{ color: '#111827' }}>🚧 {t('systemSettings.maintenanceMode')}</h2>
+        <div id="settings-section-maintenance" className="card si-478be2e9">
+          <div className="card-header si-9803f8d1">
+            <h2 className="si-63c2680d">🚧 {t('systemSettings.maintenanceMode')}</h2>
             {maintenanceEnabled && (
-              <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5', padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}>
+              <span className="si-a324d557">
                 🔴 ACTIVE
               </span>
             )}
           </div>
           <div className="card-body">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.maintenanceEnabled')}</h3>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+            <div className="si-ccc9b2e4">
+              <div className="si-0c982175">
+                <h3 className="si-3301c332">{t('systemSettings.maintenanceEnabled')}</h3>
+                <p className="si-faa1c026">
                   {t('systemSettings.maintenanceActive')}
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="si-d223efb3">
                 <button
                   className={`btn btn-sm ${maintenanceEnabled ? 'btn-primary' : 'btn-outline'}`}
                   style={maintenanceEnabled ? { background: '#dc2626', borderColor: '#dc2626' } : {}}
@@ -643,7 +625,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   onClick={() => setMaintenanceEnabled(false)}>✅ Disabled</button>
               </div>
             </div>
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
+            <div className="si-50d6616f">
               <label className="module-label">{t('systemSettings.maintenanceMessage')}</label>
               <textarea
                 className="module-input"
@@ -655,12 +637,12 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
               />
             </div>
             {maintenanceEnabled && (
-              <div style={{ padding: '8px 12px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, fontSize: 13, color: '#991b1b', marginBottom: 12 }}>
+              <div className="si-5fe8f7aa">
                 ⚠️ <strong>Maintenance mode is ON.</strong> Non-admin users will see a maintenance page. {t('systemSettings.maintenanceBypass')}
               </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6' }}>
-              {maintenanceSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ Saved!</span>}
+            <div className="si-7332b1a9">
+              {maintenanceSaved && <span className="si-392ff007">✅ Saved!</span>}
               <button className="btn btn-primary" disabled={savingMaintenance} onClick={handleSaveMaintenance}>
                 {savingMaintenance ? t('systemSettings.saving') : '🚧 Save Maintenance Settings'}
               </button>
@@ -671,27 +653,27 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
       {/* ─── Display Settings ─── */}
       {showDisplayCard && (
-        <div id="settings-section-display" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>🕐 {t('systemSettings.displaySettings')}</h2></div>
+        <div id="settings-section-display" className="card si-478be2e9">
+          <div className="card-header"><h2 className="si-63c2680d">🕐 {t('systemSettings.displaySettings')}</h2></div>
           <div className="card-body">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.timeFormat')}</h3>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+            <div className="si-ccc9b2e4">
+              <div className="si-0c982175">
+                <h3 className="si-3301c332">{t('systemSettings.timeFormat')}</h3>
+                <p className="si-faa1c026">
                   {t('systemSettings.timeFormatDesc')}
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="si-ef8e09e5">
                 <button className={`btn btn-sm ${timeFormat === '12h' ? 'btn-primary' : 'btn-outline'}`}
                   disabled={savingTimeFormat} onClick={() => handleTimeFormatChange('12h')}>12h (AM/PM)</button>
                 <button className={`btn btn-sm ${timeFormat === '24h' ? 'btn-primary' : 'btn-outline'}`}
                   disabled={savingTimeFormat} onClick={() => handleTimeFormatChange('24h')}>24 Hour</button>
-                {savingTimeFormat && <span style={{ fontSize: 12, color: '#6b7280' }}>{t('systemSettings.saving')}</span>}
-                {timeFormatSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                {savingTimeFormat && <span className="si-48a0b045">{t('systemSettings.saving')}</span>}
+                {timeFormatSaved && <span className="si-ab4fa2e9">✅ Saved!</span>}
               </div>
             </div>
-            <div style={{ padding: '8px 0', borderTop: '1px solid #f3f4f6' }}>
-              <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>
+            <div className="si-06d61960">
+              <p className="si-baf5210b">
                 <strong>Preview:</strong>{' '}
                 {timeFormat === '12h'
                   ? new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })
@@ -700,13 +682,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             </div>
 
             {/* Date Format */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.dateFormat')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.dateFormatDesc')}</p>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">{t('systemSettings.dateFormat')}</h3>
+                  <p className="si-faa1c026">{t('systemSettings.dateFormatDesc')}</p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {['MMM d, yyyy', 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd'].map(fmt => (
                     <button key={fmt} className={`btn btn-sm ${dateFormat === fmt ? 'btn-primary' : 'btn-outline'}`}
                       disabled={savingInline === 'display.dateFormat'}
@@ -714,8 +696,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                       {fmt}
                     </button>
                   ))}
-                  {savingInline === 'display.dateFormat' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
-                  {savedInline === 'display.dateFormat' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                  {savingInline === 'display.dateFormat' && <span className="si-48a0b045">Saving...</span>}
+                  {savedInline === 'display.dateFormat' && <span className="si-ab4fa2e9">✅ Saved!</span>}
                 </div>
               </div>
             </div>
@@ -725,17 +707,17 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
       {/* ─── Consultation Settings ─── */}
       {showConsultationCard && (
-        <div id="settings-section-consultation" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>🩺 {t('systemSettings.consultationSettings')}</h2></div>
+        <div id="settings-section-consultation" className="card si-478be2e9">
+          <div className="card-header"><h2 className="si-63c2680d">🩺 {t('systemSettings.consultationSettings')}</h2></div>
           <div className="card-body">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.joinWindow')}</h3>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+            <div className="si-ccc9b2e4">
+              <div className="si-0c982175">
+                <h3 className="si-3301c332">{t('systemSettings.joinWindow')}</h3>
+                <p className="si-faa1c026">
                   {t('systemSettings.joinWindowDesc')}
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="si-ef8e09e5">
                 {[5, 10, 15, 30].map(mins => (
                   <button key={mins} className={`btn btn-sm ${joinWindow === mins ? 'btn-primary' : 'btn-outline'}`}
                     disabled={savingJoinWindow} onClick={() => handleJoinWindowChange(mins)}>{mins} min</button>
@@ -746,25 +728,25 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 0 && v <= 120) setJoinWindow(v) }}
                   onBlur={() => handleJoinWindowChange(joinWindow)}
                   onKeyDown={e => { if (e.key === 'Enter') handleJoinWindowChange(joinWindow) }} />
-                {savingJoinWindow && <span style={{ fontSize: 12, color: '#6b7280' }}>{t('systemSettings.saving')}</span>}
-                {joinWindowSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                {savingJoinWindow && <span className="si-48a0b045">{t('systemSettings.saving')}</span>}
+                {joinWindowSaved && <span className="si-ab4fa2e9">✅ Saved!</span>}
               </div>
             </div>
-            <div style={{ padding: '8px 0', borderTop: '1px solid #f3f4f6' }}>
-              <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>
+            <div className="si-06d61960">
+              <p className="si-baf5210b">
                 <strong>Current:</strong> Join/Start available <strong>{joinWindow} minutes</strong> before appointment.
                 {joinWindow === 0 && ' (0 = always available)'}
               </p>
             </div>
 
             {/* Max Duration */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.maxDuration')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.maxDurationDesc')}</p>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">{t('systemSettings.maxDuration')}</h3>
+                  <p className="si-faa1c026">{t('systemSettings.maxDurationDesc')}</p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {[30, 45, 60, 90].map(mins => (
                     <button key={mins} className={`btn btn-sm ${maxDurationMinutes === mins ? 'btn-primary' : 'btn-outline'}`}
                       disabled={savingInline === 'consultation.maxDurationMinutes'}
@@ -779,8 +761,8 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                     onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 10 && v <= 240) setMaxDurationMinutes(v) }}
                     onBlur={() => saveInlineSetting('consultation.maxDurationMinutes', String(maxDurationMinutes))}
                     onKeyDown={e => { if (e.key === 'Enter') saveInlineSetting('consultation.maxDurationMinutes', String(maxDurationMinutes)) }} />
-                  {savingInline === 'consultation.maxDurationMinutes' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
-                  {savedInline === 'consultation.maxDurationMinutes' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                  {savingInline === 'consultation.maxDurationMinutes' && <span className="si-48a0b045">Saving...</span>}
+                  {savedInline === 'consultation.maxDurationMinutes' && <span className="si-ab4fa2e9">✅ Saved!</span>}
                 </div>
               </div>
             </div>
@@ -790,16 +772,16 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
       {/* ─── Booking Settings ─── */}
       {showBookingCard && (
-        <div id="settings-section-booking" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>📅 {t('systemSettings.bookingSettings')}</h2></div>
+        <div id="settings-section-booking" className="card si-478be2e9">
+          <div className="card-header"><h2 className="si-63c2680d">📅 {t('systemSettings.bookingSettings')}</h2></div>
           <div className="card-body">
             {/* Advance Booking Days */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.advanceBooking')}</h3>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.advanceBookingDesc')}</p>
+            <div className="si-ccc9b2e4">
+              <div className="si-0c982175">
+                <h3 className="si-3301c332">{t('systemSettings.advanceBooking')}</h3>
+                <p className="si-faa1c026">{t('systemSettings.advanceBookingDesc')}</p>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="si-ef8e09e5">
                 {[7, 14, 30, 60, 90].map(d => (
                   <button key={d} className={`btn btn-sm ${advanceBookingDays === d ? 'btn-primary' : 'btn-outline'}`}
                     disabled={savingInline === 'booking.advanceBookingDays'}
@@ -814,19 +796,19 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 1 && v <= 365) setAdvanceBookingDays(v) }}
                   onBlur={() => saveInlineSetting('booking.advanceBookingDays', String(advanceBookingDays))}
                   onKeyDown={e => { if (e.key === 'Enter') saveInlineSetting('booking.advanceBookingDays', String(advanceBookingDays)) }} />
-                {savingInline === 'booking.advanceBookingDays' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
-                {savedInline === 'booking.advanceBookingDays' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                {savingInline === 'booking.advanceBookingDays' && <span className="si-48a0b045">Saving...</span>}
+                {savedInline === 'booking.advanceBookingDays' && <span className="si-ab4fa2e9">✅ Saved!</span>}
               </div>
             </div>
 
             {/* Cancellation Window Hours */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.freeCancellationWindow')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.freeCancellationWindowDesc')}</p>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">{t('systemSettings.freeCancellationWindow')}</h3>
+                  <p className="si-faa1c026">{t('systemSettings.freeCancellationWindowDesc')}</p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {[6, 12, 24, 48].map(h => (
                     <button key={h} className={`btn btn-sm ${cancellationWindowHours === h ? 'btn-primary' : 'btn-outline'}`}
                       disabled={savingInline === 'booking.cancellationWindowHours'}
@@ -834,20 +816,20 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                       {h}h
                     </button>
                   ))}
-                  {savingInline === 'booking.cancellationWindowHours' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
-                  {savedInline === 'booking.cancellationWindowHours' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                  {savingInline === 'booking.cancellationWindowHours' && <span className="si-48a0b045">Saving...</span>}
+                  {savedInline === 'booking.cancellationWindowHours' && <span className="si-ab4fa2e9">✅ Saved!</span>}
                 </div>
               </div>
             </div>
 
             {/* Max Reschedules */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.maxReschedules')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.maxReschedulesDesc')}</p>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">{t('systemSettings.maxReschedules')}</h3>
+                  <p className="si-faa1c026">{t('systemSettings.maxReschedulesDesc')}</p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {[0, 1, 2, 3, 5].map(n => (
                     <button key={n} className={`btn btn-sm ${maxReschedules === n ? 'btn-primary' : 'btn-outline'}`}
                       disabled={savingInline === 'booking.maxReschedules'}
@@ -855,40 +837,40 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                       {n === 0 ? '∞' : n}
                     </button>
                   ))}
-                  {savingInline === 'booking.maxReschedules' && <span style={{ fontSize: 12, color: '#6b7280' }}>Saving...</span>}
-                  {savedInline === 'booking.maxReschedules' && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                  {savingInline === 'booking.maxReschedules' && <span className="si-48a0b045">Saving...</span>}
+                  {savedInline === 'booking.maxReschedules' && <span className="si-ab4fa2e9">✅ Saved!</span>}
                 </div>
               </div>
             </div>
 
             {/* No-Show Rules Divider */}
-            <div style={{ borderTop: '2px solid #e5e7eb', padding: '12px 0 4px', marginTop: 4 }}>
-              <h3 style={{ margin: 0, fontSize: 14, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>{t('systemSettings.noShowRules')}</h3>
+            <div className="si-8771e243">
+              <h3 className="si-74ba25f7">{t('systemSettings.noShowRules')}</h3>
             </div>
 
             {/* Doctor No-Show */}
-            <div style={{ padding: '12px 0', borderTop: '1px solid #f3f4f6' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>🩺 {t('systemSettings.doctorNoShow')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">🩺 {t('systemSettings.doctorNoShow')}</h3>
+                  <p className="si-faa1c026">
                     {t('systemSettings.doctorNoShowDesc')}
                   </p>
                 </div>
-                <span style={{ background: '#d1fae5', color: '#065f46', padding: '5px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600 }}>♾ {t('systemSettings.unlimited')}</span>
+                <span className="si-5651fa81">♾ {t('systemSettings.unlimited')}</span>
               </div>
             </div>
 
             {/* Patient No-Show */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>🙋 {t('systemSettings.patientNoShowLimit')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">🙋 {t('systemSettings.patientNoShowLimit')}</h3>
+                  <p className="si-faa1c026">
                     {t('systemSettings.patientNoShowLimitDesc')}
                   </p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {[0, 1, 2, 3].map(n => (
                     <button key={n} className={`btn btn-sm ${patientNoShowLimit === n ? 'btn-primary' : 'btn-outline'}`}
                       disabled={savingPatientLimit} onClick={() => handlePatientNoShowLimitChange(n)}>
@@ -901,11 +883,11 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                     onChange={e => { const v = parseInt(e.target.value, 10); if (!isNaN(v) && v >= 0 && v <= 10) setPatientNoShowLimit(v) }}
                     onBlur={() => handlePatientNoShowLimitChange(patientNoShowLimit)}
                     onKeyDown={e => { if (e.key === 'Enter') handlePatientNoShowLimitChange(patientNoShowLimit) }} />
-                  {savingPatientLimit && <span style={{ fontSize: 12, color: '#6b7280' }}>{t('systemSettings.saving')}</span>}
-                  {patientLimitSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                  {savingPatientLimit && <span className="si-48a0b045">{t('systemSettings.saving')}</span>}
+                  {patientLimitSaved && <span className="si-ab4fa2e9">✅ Saved!</span>}
                 </div>
               </div>
-              <p style={{ margin: '8px 0 0', fontSize: 13, color: '#6b7280' }}>
+              <p className="si-e73c55d1">
                 <strong>Current:</strong> Patient may reschedule a no-show{' '}
                 {patientNoShowLimit === 0 ? <strong>unlimited times</strong> : <><strong>{patientNoShowLimit} time{patientNoShowLimit !== 1 ? 's' : ''}</strong></>}.
               </p>
@@ -916,17 +898,17 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
       {/* ─── Platform Currency ─── */}
       {showCurrencyCard && (
-        <div id="settings-section-currency" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>💱 {t('systemSettings.platformCurrency')}</h2></div>
+        <div id="settings-section-currency" className="card si-478be2e9">
+          <div className="card-header"><h2 className="si-63c2680d">💱 {t('systemSettings.platformCurrency')}</h2></div>
           <div className="card-body">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.defaultCurrency')}</h3>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+            <div className="si-ccc9b2e4">
+              <div className="si-0c982175">
+                <h3 className="si-3301c332">{t('systemSettings.defaultCurrency')}</h3>
+                <p className="si-faa1c026">
                   {t('systemSettings.defaultCurrencyDesc')}
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="si-ef8e09e5">
                 <select
                   className="form-input"
                   value={selectedCurrency}
@@ -955,11 +937,11 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                   <option value="NZD">🇳🇿 NZD — New Zealand Dollar (NZ$)</option>
                   <option value="CHF">🇨🇭 CHF — Swiss Franc (CHF)</option>
                 </select>
-                {savingCurrency && <span style={{ fontSize: 12, color: '#6b7280' }}>{t('systemSettings.saving')}</span>}
-                {currencySaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved!</span>}
+                {savingCurrency && <span className="si-48a0b045">{t('systemSettings.saving')}</span>}
+                {currencySaved && <span className="si-ab4fa2e9">✅ Saved!</span>}
               </div>
             </div>
-            <p style={{ margin: '8px 0 0', fontSize: 13, color: '#6b7280' }}>
+            <p className="si-e73c55d1">
               <strong>Current:</strong> All prices across the platform display in <strong>{selectedCurrency}</strong>.
               Changing this will update currency symbols on all pages for all users.
             </p>
@@ -969,17 +951,17 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
       {/* ─── Payment Gateway Settings ─── */}
       {showPaymentCard && (
-        <div id="settings-section-payment" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>💳 {t('systemSettings.paymentGateway')}</h2></div>
+        <div id="settings-section-payment" className="card si-478be2e9">
+          <div className="card-header"><h2 className="si-63c2680d">💳 {t('systemSettings.paymentGateway')}</h2></div>
           <div className="card-body">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.gatewayMode')}</h3>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+            <div className="si-ccc9b2e4">
+              <div className="si-0c982175">
+                <h3 className="si-3301c332">{t('systemSettings.gatewayMode')}</h3>
+                <p className="si-faa1c026">
                   <strong>Demo:</strong> Simulated payments. <strong>Test:</strong> Sandbox. <strong>Live:</strong> Real processing.
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="si-ef8e09e5">
                 {(['demo', 'test', 'live'] as const).map(mode => (
                   <button key={mode} className={`btn btn-sm ${gatewayMode === mode ? 'btn-primary' : 'btn-outline'}`}
                     onClick={() => setGatewayMode(mode)}>
@@ -990,10 +972,10 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             </div>
 
             {gatewayMode !== 'demo' && (
-              <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: 180 }}>
-                    <label className="form-label" style={{ fontSize: 13 }}>Provider</label>
+              <div className="si-50d6616f">
+                <div className="si-7e460960">
+                  <div className="si-0f14bb0a">
+                    <label className="form-label si-0a803082">Provider</label>
                     <select className="form-input" value={gatewayProvider} onChange={e => setGatewayProvider(e.target.value)} style={inputStyle}>
                       <option value="stripe">Stripe</option>
                       <option value="razorpay">Razorpay</option>
@@ -1001,13 +983,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                       <option value="square">Square</option>
                     </select>
                   </div>
-                  <div style={{ flex: 2, minWidth: 200 }}>
-                    <label className="form-label" style={{ fontSize: 13 }}>Gateway URL</label>
+                  <div className="si-c5aba850">
+                    <label className="form-label si-0a803082">Gateway URL</label>
                     <input className="form-input" placeholder="https://api.stripe.com/v1" value={gatewayUrl}
                       onChange={e => setGatewayUrl(e.target.value)} style={inputStyle} />
                   </div>
-                  <div style={{ flex: 2, minWidth: 200 }}>
-                    <label className="form-label" style={{ fontSize: 13 }}>API Key</label>
+                  <div className="si-c5aba850">
+                    <label className="form-label si-0a803082">API Key</label>
                     <input className="form-input" type="password" placeholder="sk_test_..." value={gatewayApiKey}
                       onChange={e => setGatewayApiKey(e.target.value)} style={inputStyle} />
                   </div>
@@ -1016,23 +998,23 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             )}
 
             {gatewayMode === 'demo' && (
-              <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-                <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
+              <div className="si-50d6616f">
+                <div className="si-8638f8e4">
                   ⚠️ <strong>{t('systemSettings.demoModeActive')}</strong> — {t('systemSettings.demoModeDesc')}
                 </div>
               </div>
             )}
 
             {gatewayMode === 'live' && (
-              <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-                <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
+              <div className="si-50d6616f">
+                <div className="si-ce0d3ed4">
                   🔴 <strong>{t('systemSettings.liveMode')}</strong> — {t('systemSettings.liveModeDesc')}
                 </div>
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6' }}>
-              {gatewaySaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ {t('systemSettings.gatewaySaved')}</span>}
+            <div className="si-7332b1a9">
+              {gatewaySaved && <span className="si-392ff007">✅ {t('systemSettings.gatewaySaved')}</span>}
               <button className="btn btn-primary" disabled={savingGateway} onClick={handleSaveGateway}>
                 {savingGateway ? t('systemSettings.saving') : t('systemSettings.saveGateway')}
               </button>
@@ -1043,10 +1025,10 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
       {/* ─── Razorpay Credentials (payment module) ─── */}
       {showPaymentCard && (
-        <div className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>🔑 Razorpay Credentials</h2></div>
+        <div className="card si-478be2e9">
+          <div className="card-header"><h2 className="si-63c2680d">🔑 Razorpay Credentials</h2></div>
           <div className="card-body">
-            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#6b7280' }}>
+            <p className="si-5b728486">
               Used by the payment module when Gateway Mode above is <strong>Test</strong> or <strong>Live</strong>. Secrets are encrypted at rest and never shown again after saving — leave a secret field blank to keep its current value.
             </p>
             {(['test', 'live'] as const).map(env => {
@@ -1055,30 +1037,30 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
               const isActive = (env === 'test' && gatewayMode === 'test') || (env === 'live' && gatewayMode === 'live')
               return (
                 <div key={env} style={{ borderTop: env === 'live' ? '1px solid #f3f4f6' : undefined, paddingTop: env === 'live' ? 16 : 0, marginTop: env === 'live' ? 16 : 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{env === 'test' ? '🧪 Test Credentials' : '🟢 Live Credentials'}</h3>
-                    {isActive && <span style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 600 }}>ACTIVE</span>}
-                    {status.configured && <span style={{ fontSize: 12, color: '#059669' }}>✓ configured</span>}
+                  <div className="si-61a69ccf">
+                    <h3 className="si-3301c332">{env === 'test' ? '🧪 Test Credentials' : '🟢 Live Credentials'}</h3>
+                    {isActive && <span className="si-f856b74a">ACTIVE</span>}
+                    {status.configured && <span className="si-07c48918">✓ configured</span>}
                   </div>
-                  <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                    <div style={{ flex: 2, minWidth: 220 }}>
-                      <label className="form-label" style={{ fontSize: 13 }}>Key Id</label>
+                  <div className="si-7e460960">
+                    <div className="si-556e093e">
+                      <label className="form-label si-0a803082">Key Id</label>
                       <input className="form-input" placeholder={`rzp_${env}_...`} value={form.keyId}
                         onChange={e => setRazorpayForm(f => ({ ...f, [env]: { ...f[env], keyId: e.target.value } }))} style={inputStyle} />
                     </div>
-                    <div style={{ flex: 2, minWidth: 220 }}>
-                      <label className="form-label" style={{ fontSize: 13 }}>Key Secret</label>
+                    <div className="si-556e093e">
+                      <label className="form-label si-0a803082">Key Secret</label>
                       <input className="form-input" type="password" placeholder={status.keySecretConfigured ? '•••••••• (unchanged if left blank)' : 'Not set'} value={form.keySecret}
                         onChange={e => setRazorpayForm(f => ({ ...f, [env]: { ...f[env], keySecret: e.target.value } }))} style={inputStyle} />
                     </div>
-                    <div style={{ flex: 2, minWidth: 220 }}>
-                      <label className="form-label" style={{ fontSize: 13 }}>Webhook Secret</label>
+                    <div className="si-556e093e">
+                      <label className="form-label si-0a803082">Webhook Secret</label>
                       <input className="form-input" type="password" placeholder={status.webhookSecretConfigured ? '•••••••• (unchanged if left blank)' : 'Not set'} value={form.webhookSecret}
                         onChange={e => setRazorpayForm(f => ({ ...f, [env]: { ...f[env], webhookSecret: e.target.value } }))} style={inputStyle} />
                     </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, marginTop: 10 }}>
-                    {razorpaySaved === env && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>✅ Saved</span>}
+                  <div className="si-e735c763">
+                    {razorpaySaved === env && <span className="si-ab4fa2e9">✅ Saved</span>}
                     <button className="btn btn-primary btn-sm" disabled={savingRazorpay === env} onClick={() => handleSaveRazorpay(env)}>
                       {savingRazorpay === env ? t('systemSettings.saving') : `Save ${env === 'test' ? 'Test' : 'Live'} Credentials`}
                     </button>
@@ -1086,9 +1068,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                 </div>
               )
             })}
-            <div style={{ borderTop: '1px solid #f3f4f6', marginTop: 16, paddingTop: 12 }}>
-              <label className="form-label" style={{ fontSize: 13 }}>Webhook URL (paste into Razorpay Dashboard → Webhooks)</label>
-              <div style={{ display: 'flex', gap: 8 }}>
+            <div className="si-bfb0f1bd">
+              <label className="form-label si-0a803082">Webhook URL (paste into Razorpay Dashboard → Webhooks)</label>
+              <div className="si-d223efb3">
                 <input className="form-input" readOnly value={razorpayWebhookUrl} style={{ ...inputStyle, background: '#f9fafb' }} />
                 <button className="btn btn-outline btn-sm" onClick={() => navigator.clipboard?.writeText(razorpayWebhookUrl)}>Copy</button>
               </div>
@@ -1099,18 +1081,18 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
       {/* ─── Cancellation & Refund Policy ─── */}
       {showCancellationCard && (
-        <div id="settings-section-cancellation" className="card" style={{ marginBottom: 20 }}>
-          <div className="card-header"><h2 style={{ color: '#111827' }}>🔄 {t('systemSettings.cancellationPolicy')}</h2></div>
+        <div id="settings-section-cancellation" className="card si-478be2e9">
+          <div className="card-header"><h2 className="si-63c2680d">🔄 {t('systemSettings.cancellationPolicy')}</h2></div>
           <div className="card-body">
             {/* Auto-refund on doctor cancel */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.autoRefund')}</h3>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
+            <div className="si-ccc9b2e4">
+              <div className="si-0c982175">
+                <h3 className="si-3301c332">{t('systemSettings.autoRefund')}</h3>
+                <p className="si-faa1c026">
                   {t('systemSettings.autoRefundDesc')}
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div className="si-bab2d193">
                 <button className={`btn btn-sm ${cancellationPolicy.autoRefundOnDoctorCancel ? 'btn-primary' : 'btn-outline'}`}
                   onClick={() => setCancellationPolicy({ ...cancellationPolicy, autoRefundOnDoctorCancel: true })}>✅ Enabled</button>
                 <button className={`btn btn-sm ${!cancellationPolicy.autoRefundOnDoctorCancel ? 'btn-primary' : 'btn-outline'}`}
@@ -1119,13 +1101,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             </div>
 
             {/* Goodwill bonus */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.goodwillBonus')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.goodwillBonusDesc')}</p>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">{t('systemSettings.goodwillBonus')}</h3>
+                  <p className="si-faa1c026">{t('systemSettings.goodwillBonusDesc')}</p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {[0, 5, 10, 15, 20].map(n => (
                     <button key={n} className={`btn btn-sm ${cancellationPolicy.goodwillBonusPercent === n ? 'btn-primary' : 'btn-outline'}`}
                       onClick={() => setCancellationPolicy({ ...cancellationPolicy, goodwillBonusPercent: n })}>{n}%</button>
@@ -1135,13 +1117,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             </div>
 
             {/* Patient free cancellation window */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.freeCancellationHours')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.freeCancellationHoursDesc')}</p>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">{t('systemSettings.freeCancellationHours')}</h3>
+                  <p className="si-faa1c026">{t('systemSettings.freeCancellationHoursDesc')}</p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {[12, 24, 48, 72].map(h => (
                     <button key={h} className={`btn btn-sm ${cancellationPolicy.patientFreeWindowHours === h ? 'btn-primary' : 'btn-outline'}`}
                       onClick={() => setCancellationPolicy({ ...cancellationPolicy, patientFreeWindowHours: h })}>{h}h</button>
@@ -1155,13 +1137,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             </div>
 
             {/* Partial refund window */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.partialRefundWindow')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.partialRefundWindowDesc')}</p>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">{t('systemSettings.partialRefundWindow')}</h3>
+                  <p className="si-faa1c026">{t('systemSettings.partialRefundWindowDesc')}</p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {[1, 2, 4, 6].map(h => (
                     <button key={h} className={`btn btn-sm ${cancellationPolicy.partialRefundWindowHours === h ? 'btn-primary' : 'btn-outline'}`}
                       onClick={() => setCancellationPolicy({ ...cancellationPolicy, partialRefundWindowHours: h })}>{h}h</button>
@@ -1171,13 +1153,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             </div>
 
             {/* Partial refund percentage */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.partialRefundPercent')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('systemSettings.partialRefundPercentDesc')}</p>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">{t('systemSettings.partialRefundPercent')}</h3>
+                  <p className="si-faa1c026">{t('systemSettings.partialRefundPercentDesc')}</p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {[25, 50, 75].map(n => (
                     <button key={n} className={`btn btn-sm ${cancellationPolicy.partialRefundPercent === n ? 'btn-primary' : 'btn-outline'}`}
                       onClick={() => setCancellationPolicy({ ...cancellationPolicy, partialRefundPercent: n })}>{n}%</button>
@@ -1191,13 +1173,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             </div>
 
             {/* Doctor max cancellations per month */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <div style={{ flex: 1, minWidth: 220 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>{t('systemSettings.doctorMaxCancellations')}</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>0 = unlimited.</p>
+            <div className="si-50d6616f">
+              <div className="si-45f02350">
+                <div className="si-0c982175">
+                  <h3 className="si-3301c332">{t('systemSettings.doctorMaxCancellations')}</h3>
+                  <p className="si-faa1c026">0 = unlimited.</p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-ef8e09e5">
                   {[0, 3, 5, 10].map(n => (
                     <button key={n} className={`btn btn-sm ${cancellationPolicy.doctorMaxCancellationsPerMonth === n ? 'btn-primary' : 'btn-outline'}`}
                       onClick={() => setCancellationPolicy({ ...cancellationPolicy, doctorMaxCancellationsPerMonth: n })}>
@@ -1209,20 +1191,20 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
             </div>
 
             {/* Refund policy preview */}
-            <div style={{ borderTop: '1px solid #f3f4f6', padding: '12px 0' }}>
-              <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: '12px 14px', fontSize: 13, color: '#1e3a5f' }}>
+            <div className="si-50d6616f">
+              <div className="si-e36b189a">
                 <strong>📋 Policy Preview (for a {formatCurrency(1000)} consultation):</strong>
-                <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
-                  <li>Cancel {cancellationPolicy.patientFreeWindowHours}+ hours before → <strong style={{ color: '#059669' }}>{formatCurrency(1000)} full refund</strong></li>
-                  <li>Cancel {cancellationPolicy.partialRefundWindowHours}–{cancellationPolicy.patientFreeWindowHours} hours before → <strong style={{ color: '#d97706' }}>{formatCurrency(cancellationPolicy.partialRefundPercent * 10)} ({cancellationPolicy.partialRefundPercent}%)</strong></li>
-                  <li>Cancel &lt; {cancellationPolicy.partialRefundWindowHours} hours before → <strong style={{ color: '#dc2626' }}>No refund</strong></li>
-                  <li>Doctor cancels → <strong style={{ color: '#059669' }}>{formatCurrency(1000)} + {formatCurrency(cancellationPolicy.goodwillBonusPercent * 10)} bonus ({cancellationPolicy.goodwillBonusPercent}%)</strong></li>
+                <ul className="si-9f9227b0">
+                  <li>Cancel {cancellationPolicy.patientFreeWindowHours}+ hours before → <strong className="si-487e8582">{formatCurrency(1000)} full refund</strong></li>
+                  <li>Cancel {cancellationPolicy.partialRefundWindowHours}–{cancellationPolicy.patientFreeWindowHours} hours before → <strong className="si-cdb09cc1">{formatCurrency(cancellationPolicy.partialRefundPercent * 10)} ({cancellationPolicy.partialRefundPercent}%)</strong></li>
+                  <li>Cancel &lt; {cancellationPolicy.partialRefundWindowHours} hours before → <strong className="si-f84f41a5">No refund</strong></li>
+                  <li>Doctor cancels → <strong className="si-487e8582">{formatCurrency(1000)} + {formatCurrency(cancellationPolicy.goodwillBonusPercent * 10)} bonus ({cancellationPolicy.goodwillBonusPercent}%)</strong></li>
                 </ul>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6' }}>
-              {cancellationSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ {t('systemSettings.cancellationSaved')}</span>}
+            <div className="si-7332b1a9">
+              {cancellationSaved && <span className="si-392ff007">✅ {t('systemSettings.cancellationSaved')}</span>}
               <button className="btn btn-primary" disabled={savingCancellation} onClick={handleSaveCancellation}>
                 {savingCancellation ? t('systemSettings.saving') : t('systemSettings.saveCancellationPolicy')}
               </button>
@@ -1232,9 +1214,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       )}
 
       {/* ─── Email Configuration ─── */}
-      <div className="card" style={{ marginBottom: 20 }}>
+      <div className="card si-478be2e9">
         <div className="card-header">
-          <h2 style={{ color: '#111827' }}>📧 Email Configuration</h2>
+          <h2 className="si-63c2680d">📧 Email Configuration</h2>
         </div>
         <div className="card-body">
           <div className="module-form">
@@ -1244,7 +1226,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                 <input type="email" className="module-input" value={emailDevRedirect} style={inputStyle}
                   onChange={e => setEmailDevRedirect(e.target.value)}
                   placeholder="test@example.com" />
-                <p style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>When set, ALL outgoing emails are redirected to this address instead of the actual recipient. Use for testing.</p>
+                <p className="si-3341a4cc">When set, ALL outgoing emails are redirected to this address instead of the actual recipient. Use for testing.</p>
               </div>
             </div>
             <div className="module-form-row">
@@ -1262,15 +1244,15 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid #f3f4f6', marginTop: 12 }}>
-            {emailSaved && <span style={{ fontSize: 12, color: '#059669', fontWeight: 600, paddingTop: 8 }}>✅ Saved</span>}
+          <div className="si-618178f5">
+            {emailSaved && <span className="si-392ff007">✅ Saved</span>}
             <button className="btn btn-primary" disabled={emailSaving} onClick={handleSaveEmailSettings}>
               {emailSaving ? 'Saving...' : 'Save Email Settings'}
             </button>
           </div>
-          <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #f3f4f6' }}>
+          <div className="si-da631b2c">
             <label className="module-label">Send Test Email</label>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <div className="si-d4b9ebb0">
               <input type="email" className="module-input" value={testEmailTo} style={{ ...inputStyle, flex: 1 }}
                 onChange={e => setTestEmailTo(e.target.value)}
                 placeholder="recipient@example.com" />
@@ -1282,7 +1264,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
               <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 6, background: testEmailResult.success ? '#f0fdf4' : '#fef2f2', color: testEmailResult.success ? '#059669' : '#dc2626', fontSize: 13 }}>
                 {testEmailResult.success ? '✅ ' : '❌ '}{testEmailResult.message}
                 {testEmailResult.previewUrl && (
-                  <> — <a href={testEmailResult.previewUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#0369a1' }}>Preview Email</a></>
+                  <> — <a href={testEmailResult.previewUrl} target="_blank" rel="noopener noreferrer" className="si-215a56c7">Preview Email</a></>
                 )}
               </div>
             )}
@@ -1295,48 +1277,44 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
         {loading ? (
           <div className="loading-container"><div className="loading-spinner" /></div>
         ) : filteredSettings.length === 0 && !searchQuery ? (
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div className="card-body" style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontSize: 40 }}>⚙️</div>
-              <h3 style={{ color: '#111827', marginTop: 12 }}>{t('systemSettings.noAdditional')}</h3>
-              <p style={{ color: '#6b7280' }}>{t('systemSettings.noAdditionalDesc')}</p>
-              <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => setShowAdd(true)}>+ {t('systemSettings.addCustomSetting')}</button>
+          <div className="card si-478be2e9">
+            <div className="card-body si-86638a30">
+              <div className="si-0067e898">⚙️</div>
+              <h3 className="si-ff45b6e8">{t('systemSettings.noAdditional')}</h3>
+              <p className="si-23033f05">{t('systemSettings.noAdditionalDesc')}</p>
+              <button className="btn btn-primary si-66faea9d" onClick={() => setShowAdd(true)}>+ {t('systemSettings.addCustomSetting')}</button>
             </div>
           </div>
         ) : filteredSettings.length === 0 && searchQuery ? (
-          <div className="card" style={{ marginBottom: 20 }}>
-            <div className="card-body" style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontSize: 40 }}>🔍</div>
-              <h3 style={{ color: '#111827', marginTop: 12 }}>{t('systemSettings.noMatch', { query: searchQuery })}</h3>
-              <p style={{ color: '#6b7280' }}>{t('systemSettings.noMatchDesc')}</p>
-              <button className="btn btn-outline" style={{ marginTop: 12 }} onClick={() => setSearchQuery('')}>{t('systemSettings.clearSearch')}</button>
+          <div className="card si-478be2e9">
+            <div className="card-body si-86638a30">
+              <div className="si-0067e898">🔍</div>
+              <h3 className="si-ff45b6e8">{t('systemSettings.noMatch', { query: searchQuery })}</h3>
+              <p className="si-23033f05">{t('systemSettings.noMatchDesc')}</p>
+              <button className="btn btn-outline si-66faea9d" onClick={() => setSearchQuery('')}>{t('systemSettings.clearSearch')}</button>
             </div>
           </div>
         ) : (
           Object.entries(groupedSettings).map(([category, items]) => (
-            <div key={category} className="card" style={{ marginBottom: 16 }}>
+            <div key={category} className="card si-7e63ec4f">
               <div className="card-header">
-                <h2 style={{ textTransform: 'capitalize', color: '#111827' }}>⚙️ {category}</h2>
-                <span style={{ fontSize: 12, color: '#9ca3af', fontWeight: 500 }}>{items.length} setting{items.length !== 1 ? 's' : ''}</span>
+                <h2 className="si-196afefa">⚙️ {category}</h2>
+                <span className="si-5e2bdda7">{items.length} setting{items.length !== 1 ? 's' : ''}</span>
               </div>
-              <div className="card-body" style={{ padding: 0 }}>
+              <div className="card-body si-159de68c">
                 {items.map(setting => (
-                  <div key={setting.key} style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    padding: '14px 20px', borderBottom: '1px solid #f3f4f6',
-                    flexWrap: 'wrap', gap: 8
-                  }}>
-                    <div style={{ flex: 1, minWidth: 180 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <code style={{ fontSize: 13, background: '#f3f4f6', padding: '2px 8px', borderRadius: 4, color: '#374151' }}>
+                  <div key={setting.key} className="si-aa3ba45f">
+                    <div className="si-0f14bb0a">
+                      <div className="si-bab2d193">
+                        <code className="si-273df55c">
                           {setting.key}
                         </code>
                       </div>
                       {setting.description && (
-                        <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6b7280' }}>{setting.description}</p>
+                        <p className="si-ada3b9d6">{setting.description}</p>
                       )}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 200, flexWrap: 'wrap' }}>
+                    <div className="si-2889f74b">
                       {editingKey === setting.key ? (
                         <>
                           <input
@@ -1354,7 +1332,7 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
                         </>
                       ) : (
                         <>
-                          <span style={{ fontSize: 14, fontWeight: 500, background: '#f9fafb', padding: '4px 12px', borderRadius: 6, color: '#111827' }}>
+                          <span className="si-5dfcfb05">
                             {setting.value}
                           </span>
                           <button className="btn btn-sm btn-outline"
@@ -1373,13 +1351,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
       </div>
 
       {/* ─── Email Templates Card ─────────────────────────────────── */}
-      <div className="module-card" style={{ marginBottom: 24 }}>
-        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="module-card si-af65fe13">
+        <div className="card-header si-9803f8d1">
           <h2>📧 {t('emailTemplates.title')}</h2>
         </div>
         <div className="card-body">
           {templateSaved && <div className="module-alert success">{t('emailTemplates.saved')}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          <div className="si-42a2dabd">
             {(['booking_confirmation', 'booking_cancellation', 'booking_reminder', 'password_reset', 'staff_invite'] as const).map(key => {
               const labelMap: Record<string, string> = {
                 booking_confirmation: t('emailTemplates.bookingConfirmation'),
@@ -1390,13 +1368,13 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
               }
               const tmpl = emailTemplates[key]
               return (
-                <div key={key} className="module-card" style={{ margin: 0 }}>
+                <div key={key} className="module-card si-44087c4b">
                   <div className="card-header">
                     <strong>{labelMap[key]}</strong>
                   </div>
-                  <div className="card-body" style={{ fontSize: 13 }}>
+                  <div className="card-body si-0a803082">
                     {tmpl ? (
-                      <p style={{ color: '#666', marginBottom: 8 }}>{t('emailTemplates.subject')}: {tmpl.subject}</p>
+                      <p className="si-649dc167">{t('emailTemplates.subject')}: {tmpl.subject}</p>
                     ) : null}
                     <button
                       className="module-btn primary small"
@@ -1417,9 +1395,9 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
 
       {/* Email Template Edit Modal */}
       {editingTemplate && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-          <div className="module-card" style={{ width: '100%', maxWidth: 560, margin: 16 }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="si-5044997e">
+          <div className="module-card si-a118ca47">
+            <div className="card-header si-9803f8d1">
               <h3>✏️ {t('emailTemplates.edit')}</h3>
               <button className="module-btn" onClick={() => setEditingTemplate(null)}>✕</button>
             </div>
@@ -1435,14 +1413,14 @@ const SystemSettings: React.FC<SystemSettingsProps> = ({ onNavigate }) => {
               <div className="module-form-group">
                 <label className="module-label">{t('emailTemplates.body')} *</label>
                 <textarea
-                  className="module-input"
+                  className="module-input si-3f7753b6"
                   rows={6}
                   value={templateDraft.body}
                   onChange={e => setTemplateDraft(prev => ({ ...prev, body: e.target.value }))}
-                  style={{ resize: 'vertical' }}
+                 
                 />
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+              <div className="si-8d13495b">
                 <button className="module-btn" onClick={() => setEditingTemplate(null)}>{t('common.cancel')}</button>
                 <button
                   className="module-btn primary"

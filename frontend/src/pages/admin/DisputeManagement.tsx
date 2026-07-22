@@ -89,30 +89,30 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
       <div className="module-header">
         <div>
           <h1>⚖️ {t('disputeManagement.title')}</h1>
-          <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>{disputes.length} {t('disputeManagement.title')}</p>
+          <p className="si-48d05eba">{disputes.length} {t('disputeManagement.title')}</p>
         </div>
         {onNavigate && (
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="si-d223efb3">
             <button className="module-btn" onClick={() => onNavigate('/admin/dashboard')}>← Dashboard</button>
           </div>
         )}
       </div>
 
       {error && (
-        <div className="module-alert error" style={{ marginBottom: 16 }}>
+        <div className="module-alert error si-7e63ec4f">
           ⚠️ {error}
-          <button onClick={() => setError('')} style={{ marginLeft: 12, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}>✕</button>
+          <button onClick={() => setError('')} className="si-e8a617c1">✕</button>
         </div>
       )}
 
       {/* Filters */}
-      <div className="module-card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="module-card si-7e63ec4f">
+        <div className="si-588e32ac">
           <select
-            className="module-input"
+            className="module-input si-d83d7d70"
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            style={{ maxWidth: 200 }}
+           
           >
             <option value="">{t('common.all')}</option>
             <option value="open">{t('disputeManagement.open')}</option>
@@ -129,8 +129,8 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /></div>
       ) : disputes.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 60 }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>⚖️</div>
+        <div className="si-9fa8d292">
+          <div className="si-fc4388e2">⚖️</div>
           <h3>{t('disputeManagement.noDisputes')}</h3>
         </div>
       ) : (
@@ -153,7 +153,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
                     <td>
                       <strong>{d.subject}</strong>
                       {d.description && (
-                        <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2, maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.description}</div>
+                        <div className="si-00cccd00">{d.description}</div>
                       )}
                     </td>
                     <td>
@@ -164,9 +164,9 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
                     </td>
                     <td>
                       <div>{d.reportedByName || '—'}</div>
-                      {d.reportedByEmail && <div style={{ fontSize: 12, color: '#6b7280' }}>{d.reportedByEmail}</div>}
+                      {d.reportedByEmail && <div className="si-48a0b045">{d.reportedByEmail}</div>}
                     </td>
-                    <td style={{ fontSize: 13, color: '#6b7280' }}>
+                    <td className="si-c3b93ebb">
                       {d.createdAt ? new Date(d.createdAt).toLocaleDateString() : '—'}
                     </td>
                     <td>
@@ -179,7 +179,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
                         </button>
                       )}
                       {d.resolution && (
-                        <div style={{ fontSize: 12, color: '#059669', marginTop: 4 }}>✓ {d.resolution.substring(0, 40)}{d.resolution.length > 40 ? '…' : ''}</div>
+                        <div className="si-8e2bd4f5">✓ {d.resolution.substring(0, 40)}{d.resolution.length > 40 ? '…' : ''}</div>
                       )}
                     </td>
                   </tr>
@@ -193,15 +193,15 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
       {/* Resolve Modal */}
       {resolving && (
         <div className="edit-form-overlay" onClick={() => setResolving(null)}>
-          <div className="edit-form-panel edit-form-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 520 }}>
+          <div className="edit-form-panel edit-form-modal si-63396e81" onClick={e => e.stopPropagation()}>
             <button className="edit-form-close" onClick={() => setResolving(null)} aria-label="Close">✕</button>
             <h2>⚖️ {t('disputeManagement.resolve')}</h2>
-            <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 16px' }}>
+            <p className="si-5b728486">
               <strong>{resolving.subject}</strong>
             </p>
 
             {resolveError && (
-              <div className="module-alert error" style={{ marginBottom: 12 }}>⚠️ {resolveError}</div>
+              <div className="module-alert error si-bab8e8bc">⚠️ {resolveError}</div>
             )}
 
             <div className="module-form-group">
@@ -216,16 +216,16 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
             <div className="module-form-group">
               <label className="module-label">{t('disputeManagement.resolution')} *</label>
               <textarea
-                className="module-input"
+                className="module-input si-3f7753b6"
                 rows={4}
                 value={resolution}
                 onChange={e => setResolution(e.target.value)}
                 placeholder={t('disputeManagement.description')}
-                style={{ resize: 'vertical' }}
+               
               />
             </div>
 
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+            <div className="si-f5f9f5f6">
               <button className="module-btn" onClick={() => setResolving(null)}>{t('common.cancel')}</button>
               <button
                 className="module-btn primary"
@@ -235,7 +235,7 @@ const DisputeManagement: React.FC<DisputeManagementProps> = ({ onNavigate }) => 
                 {resolveLoading ? '⏳ Saving...' : t('disputeManagement.resolve')}
               </button>
             </div>
-            <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>* {t('common.required')}</p>
+            <p className="si-0eab1e14">* {t('common.required')}</p>
           </div>
         </div>
       )}

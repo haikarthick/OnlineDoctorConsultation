@@ -170,7 +170,7 @@ const GenomicLineagePage: React.FC = () => {
                   <table className="data-table">
                     <thead><tr><th>{t('genomicLineage.animal')}</th><th>{t('genomicLineage.species')}</th><th>{t('genomicLineage.inbreedingCoeff')}</th></tr></thead>
                     <tbody>{dashboard.highRiskInbreeding.map((a: any, i: number) => (
-                      <tr key={i}><td>{a.name}</td><td>{a.species}</td><td style={{ color: '#ef4444', fontWeight: 'bold' }}>{(+a.inbreeding_coefficient).toFixed(4)}</td></tr>
+                      <tr key={i}><td>{a.name}</td><td>{a.species}</td><td className="si-d36904fc">{(+a.inbreeding_coefficient).toFixed(4)}</td></tr>
                     ))}</tbody>
                   </table>
                 </div>

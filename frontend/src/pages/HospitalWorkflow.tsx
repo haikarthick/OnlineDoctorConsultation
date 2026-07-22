@@ -378,7 +378,7 @@ export default function HospitalWorkflow() {
   }
 
   if (loading && !hospitalId) {
-    return <div className="module-page" style={{ minHeight: 'calc(100vh - 64px)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div className="spinner" /></div>
+    return <div className="module-page si-102b95ff"><div className="spinner" /></div>
   }
 
   // Derived helpers for walk-in form (extracted to avoid duplication)
@@ -387,19 +387,19 @@ export default function HospitalWorkflow() {
 
   if (!loading && hospitals.length === 0) {
     return (
-      <div className="module-page" style={{ minHeight: 'calc(100vh - 64px)', padding: '24px' }}>
-        <h1 style={{ margin: 0, fontSize: 24 }}>🏥 {t('hospitalWorkflow.title')}</h1>
-        <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: 14 }}>{t('hospitalWorkflow.subtitle')}</p>
+      <div className="module-page si-5cec5e87">
+        <h1 className="si-1bc3a9fe">🏥 {t('hospitalWorkflow.title')}</h1>
+        <p className="si-1b6d639e">{t('hospitalWorkflow.subtitle')}</p>
         {loadError && (
-          <div className="module-alert error" style={{ marginTop: 16 }}>
+          <div className="module-alert error si-b0aee75b">
             <span>⚠️ {loadError}</span>
-            <button onClick={() => setLoadError('')} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>✕</button>
+            <button onClick={() => setLoadError('')} className="si-7b1cae98">✕</button>
           </div>
         )}
-        <div style={{ marginTop: 48, textAlign: 'center', padding: 40, background: '#f8fafc', borderRadius: 12, border: '2px dashed #cbd5e1' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🏥</div>
-          <h2 style={{ margin: '0 0 8px', color: '#334155' }}>{t('hospitalWorkflow.noHospitals', 'No Hospital Assigned')}</h2>
-          <p style={{ color: '#64748b', maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
+        <div className="si-9b5ce7ea">
+          <div className="si-aea35a6f">🏥</div>
+          <h2 className="si-f16caa7b">{t('hospitalWorkflow.noHospitals', 'No Hospital Assigned')}</h2>
+          <p className="si-8160408e">
             {t('hospitalWorkflow.noHospitalsDesc', 'You are not currently assigned to any hospital. Please contact your network administrator to get assigned to a branch hospital.')}
           </p>
         </div>
@@ -408,28 +408,28 @@ export default function HospitalWorkflow() {
   }
 
   return (
-    <div className="module-page" style={{ minHeight: 'calc(100vh - 64px)', padding: '24px' }}>
+    <div className="module-page si-5cec5e87">
       {loadError && (
-        <div className="module-alert error" style={{ marginBottom: 16 }}>
+        <div className="module-alert error si-7e63ec4f">
           <span>⚠️ {loadError}</span>
-          <button onClick={() => setLoadError('')} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>✕</button>
+          <button onClick={() => setLoadError('')} className="si-7b1cae98">✕</button>
         </div>
       )}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+      <div className="si-a307e2db">
         <div>
-          <h1 style={{ margin: 0, fontSize: 24 }}>🏥 {t('hospitalWorkflow.title')}</h1>
-          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 14 }}>{t('hospitalWorkflow.subtitle')}</p>
+          <h1 className="si-1bc3a9fe">🏥 {t('hospitalWorkflow.title')}</h1>
+          <p className="si-d078dad1">{t('hospitalWorkflow.subtitle')}</p>
         </div>
         {hospitals.length > 1 && (
           <select value={hospitalId} onChange={e => setHospitalId(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 14 }}>
+            className="si-89cf1ca1">
             {hospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
           </select>
         )}
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#f1f5f9', borderRadius: 10, padding: 4, width: 'fit-content' }}>
+      <div className="si-7b57eef9">
         {(['queue', 'workflow', 'referrals'] as const).map(tb => (
           <button key={tb} onClick={() => setTab(tb)}
             style={{
@@ -457,7 +457,7 @@ export default function HospitalWorkflow() {
               { label: t('hospitalWorkflow.todayTotal'), value: queueStats.today_total,       color: '#0ea5e9', filter: null },
             ]
             return (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
+              <div className="si-60815cf3">
                 {tiles.map((s, i) => {
                   const isActive = s.filter && queueStatusFilter === s.filter
                   const isClickable = s.filter !== null
@@ -476,7 +476,7 @@ export default function HospitalWorkflow() {
                         transition: 'all .15s',
                         outline: isActive ? `2px solid ${s.color}` : 'none',
                       }}>
-                      <div style={{ fontSize: 12, color: isActive ? '#fff' : '#64748b', marginBottom: 4 }}>{s.label} {isClickable && <span style={{ fontSize: 10, opacity: 0.7 }}>{isActive ? '▲' : '▼'}</span>}</div>
+                      <div style={{ fontSize: 12, color: isActive ? '#fff' : '#64748b', marginBottom: 4 }}>{s.label} {isClickable && <span className="si-5672d952">{isActive ? '▲' : '▼'}</span>}</div>
                       <div style={{ fontSize: 22, fontWeight: 700, color: isActive ? '#fff' : s.color }}>{s.value ?? 0}</div>
                     </div>
                   )
@@ -485,17 +485,17 @@ export default function HospitalWorkflow() {
             )
           })()}
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <h2 style={{ margin: 0, fontSize: 18 }}>{t('hospitalWorkflow.patientQueue')}</h2>
+          <div className="si-101fd1d0">
+            <div className="si-0b20392f">
+              <h2 className="si-670df8d2">{t('hospitalWorkflow.patientQueue')}</h2>
               {queueStatusFilter && (
-                <span style={{ fontSize: 13, color: '#64748b', background: '#f1f5f9', borderRadius: 20, padding: '3px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="si-9d452bc4">
                   Filtered: <strong>{queueStatusFilter.replace(/_/g, ' ')}</strong>
-                  <button onClick={() => setQueueStatusFilter('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: 14, lineHeight: 1, padding: 0 }}>✕</button>
+                  <button onClick={() => setQueueStatusFilter('')} className="si-dff28099">✕</button>
                 </span>
               )}
             </div>
-            <button onClick={() => setShowCheckIn(true)} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>
+            <button onClick={() => setShowCheckIn(true)} className="si-880bdf60">
               + {t('hospitalWorkflow.checkInPatient')}
             </button>
           </div>
@@ -510,53 +510,53 @@ export default function HospitalWorkflow() {
               filtered = queue.filter(q => q.status === queueStatusFilter)
             }
             return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {filtered.length === 0 && <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>{t('hospitalWorkflow.noPatients')}</p>}
+              <div className="si-977f8af1">
+                {filtered.length === 0 && <p className="si-d91f9779">{t('hospitalWorkflow.noPatients')}</p>}
                 {filtered.map((q, idx) => (
                   <div key={q.id} style={{ background: '#fff', borderRadius: 10, padding: '14px 18px', boxShadow: '0 1px 3px rgba(0,0,0,.06)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', borderLeft: `4px solid ${PRIORITY_COLORS[q.priority] || '#2563eb'}` }}>
                     {/* Queue position: per-status index when filtered, global number when unfiltered */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 36 }}>
-                      <div style={{ fontWeight: 700, fontSize: 18, color: '#2563eb', lineHeight: 1 }}>
+                    <div className="si-88c652ba">
+                      <div className="si-2602e7d1">
                         #{queueStatusFilter ? idx + 1 : q.queue_number}
                       </div>
                       {queueStatusFilter && (
-                        <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>Q#{q.queue_number}</div>
+                        <div className="si-0de1dca7">Q#{q.queue_number}</div>
                       )}
                     </div>
-                    <div style={{ flex: 1, minWidth: 120 }}>
-                      <div style={{ fontWeight: 600 }}>{q.animal_name || t('hospitalWorkflow.unknownPatient')} <span style={{ fontSize: 12, color: '#94a3b8' }}>({q.animal_species}{q.animal_breed ? ` — ${q.animal_breed}` : ''})</span></div>
-                      <div style={{ fontSize: 13, color: '#64748b' }}>{t('hospitalWorkflow.owner')}: {q.owner_first_name} {q.owner_last_name}</div>
+                    <div className="si-42eae7d1">
+                      <div className="si-b2cfcbec">{q.animal_name || t('hospitalWorkflow.unknownPatient')} <span className="si-db3602ae">({q.animal_species}{q.animal_breed ? ` — ${q.animal_breed}` : ''})</span></div>
+                      <div className="si-4801fc30">{t('hospitalWorkflow.owner')}: {q.owner_first_name} {q.owner_last_name}</div>
                       {q.enterpriseName && (
-                        <div style={{ fontSize: '12px', color: '#059669', fontWeight: 600, marginTop: 2 }}>
+                        <div className="si-e893254c">
                           🏢 {q.enterpriseName}{q.groupName ? ` › ${q.groupName}` : ''}
                         </div>
                       )}
                       {(q.referralId || (q as any).referral_id) && (
-                        <div style={{ fontSize: '12px', color: '#1d4ed8', fontWeight: 600, marginTop: 2 }}>
+                        <div className="si-fd4f18cf">
                           🔄 Referred from Network
                         </div>
                       )}
-                      {q.reason && <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{q.reason}</div>}
+                      {q.reason && <div className="si-aff656fd">{q.reason}</div>}
                       {/* Check-in time */}
-                      <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 3 }}>🕐 Checked in: {formatDateTime(q.checked_in_at)}</div>
+                      <div className="si-c992365a">🕐 Checked in: {formatDateTime(q.checked_in_at)}</div>
                     </div>
                     <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: PRIORITY_COLORS[q.priority] + '20', color: PRIORITY_COLORS[q.priority] }}>{q.priority}</span>
-                    <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#f1f5f9', color: '#475569' }}>{(q.status || '').replace(/_/g, ' ')}</span>
-                    <div style={{ display: 'flex', gap: 4 }}>
+                    <span className="si-9e05cc79">{(q.status || '').replace(/_/g, ' ')}</span>
+                    <div className="si-9f48dfc6">
                       {q.status === 'waiting' && (
-                        <button onClick={() => { setTriageTarget(q); setTriageForm({ triageLevel: 3, triageNotes: '' }); }} style={{ padding: '6px 12px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.triage')}</button>
+                        <button onClick={() => { setTriageTarget(q); setTriageForm({ triageLevel: 3, triageNotes: '' }); }} className="si-ac0a504f">{t('hospitalWorkflow.triage')}</button>
                       )}
                       {['waiting', 'in_triage'].includes(q.status) && (
-                        <button onClick={() => handleQueueStatus(q.id, 'in_examination')} style={{ padding: '6px 12px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.startExam')}</button>
+                        <button onClick={() => handleQueueStatus(q.id, 'in_examination')} className="si-6a421f43">{t('hospitalWorkflow.startExam')}</button>
                       )}
                       {q.status === 'in_examination' && (
-                        <button onClick={() => handleQueueStatus(q.id, 'in_treatment')} style={{ padding: '6px 12px', background: '#059669', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.treat')}</button>
+                        <button onClick={() => handleQueueStatus(q.id, 'in_treatment')} className="si-d903510c">{t('hospitalWorkflow.treat')}</button>
                       )}
                       {q.status !== 'discharged' && q.status !== 'no_show' && (
-                        <button onClick={() => handleQueueStatus(q.id, 'discharged')} style={{ padding: '6px 12px', background: '#64748b', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.discharge')}</button>
+                        <button onClick={() => handleQueueStatus(q.id, 'discharged')} className="si-cf604be4">{t('hospitalWorkflow.discharge')}</button>
                       )}
                       {q.status === 'waiting' && (
-                        <button onClick={() => handleQueueStatus(q.id, 'no_show')} style={{ padding: '6px 10px', background: '#fecaca', color: '#dc2626', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.noShow')}</button>
+                        <button onClick={() => handleQueueStatus(q.id, 'no_show')} className="si-487fb5c6">{t('hospitalWorkflow.noShow')}</button>
                       )}
                     </div>
                   </div>
@@ -568,26 +568,26 @@ export default function HospitalWorkflow() {
           {/* Check-in Modal */}
           {showCheckIn && (
             <div onClick={e => { if (e.target === e.currentTarget) closeCheckInModal() }}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: 16 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 520, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              className="si-6d1caf37">
+              <div className="si-57f9eac3">
+                <div className="si-fe2d5bfb">
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>🏥 {t('hospitalWorkflow.checkInPatient')}</h3>
+                    <h3 className="si-3fe3cab8">🏥 {t('hospitalWorkflow.checkInPatient')}</h3>
                     {checkInMode === 'register' && (
-                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{t('hospitalWorkflow.walkIn.subtitle')}</div>
+                      <div className="si-f199afd6">{t('hospitalWorkflow.walkIn.subtitle')}</div>
                     )}
                   </div>
-                  <button onClick={closeCheckInModal} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#64748b' }}>✕</button>
+                  <button onClick={closeCheckInModal} className="si-034e37c2">✕</button>
                 </div>
 
                 {checkInError && (
-                  <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, fontWeight: 500 }}>
+                  <div className="si-86aee441">
                     ⚠️ {checkInError}
                   </div>
                 )}
 
                 {checkInMode === 'search' ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div className="si-7a28b1a9">
                     <div>
                       <AnimalSearchPicker
                         selectedAnimal={checkInAnimal}
@@ -597,36 +597,36 @@ export default function HospitalWorkflow() {
                         hospitalId={hospitalId || undefined}
                       />
                       {!checkInAnimal && (
-                        <div style={{ marginTop: 6, fontSize: 12, color: '#b45309', background: '#fef3c7', borderRadius: 6, padding: '6px 10px' }}>
+                        <div className="si-80df77c2">
                           ⚠️ <strong>{t('hospitalWorkflow.walkIn.searchRequired')}</strong>
                         </div>
                       )}
                     </div>
                     {!checkInAnimal && (
-                      <div style={{ textAlign: 'center', padding: '4px 0' }}>
-                        <span style={{ fontSize: 12, color: '#94a3b8' }}>{t('hospitalWorkflow.walkIn.or')} </span>
+                      <div className="si-20547c1e">
+                        <span className="si-db3602ae">{t('hospitalWorkflow.walkIn.or')} </span>
                         <button onClick={openRegisterMode}
-                          style={{ background: 'none', border: 'none', color: '#2563eb', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '2px 4px', textDecoration: 'underline' }}>
+                          className="si-fa312d0d">
                           ➕ {t('hospitalWorkflow.walkIn.registerNew')}
                         </button>
                       </div>
                     )}
                     <div>
-                      <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.reasonForVisit')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                      <input placeholder="e.g., Vaccination, Limping, Skin rash..." value={checkInForm.reason} onChange={e => setCheckInForm(f => ({ ...f, reason: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                      <label className="si-2561596d">{t('hospitalWorkflow.reasonForVisit')} <span className="si-17788c1c">(optional)</span></label>
+                      <input placeholder="e.g., Vaccination, Limping, Skin rash..." value={checkInForm.reason} onChange={e => setCheckInForm(f => ({ ...f, reason: e.target.value }))} className="si-d0e0df59" />
                     </div>
                     <div>
-                      <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 6, display: 'block' }}>{t('hospitalWorkflow.priority')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                      <div style={{ display: 'flex', gap: 6 }}>
+                      <label className="si-1e22ae90">{t('hospitalWorkflow.priority')} <span className="si-17788c1c">(optional)</span></label>
+                      <div className="si-9f20fe5e">
                         {PRIORITIES.map(p => (
                           <button key={p} onClick={() => setCheckInForm(f => ({ ...f, priority: p }))}
                             style={{ flex: 1, padding: '8px 4px', borderRadius: 8, border: checkInForm.priority === p ? `2px solid ${PRIORITY_COLORS[p]}` : '1px solid #d1d5db', background: checkInForm.priority === p ? PRIORITY_COLORS[p] + '15' : '#fff', fontWeight: 600, cursor: 'pointer', fontSize: 12, color: PRIORITY_COLORS[p], textTransform: 'capitalize' }}>{p}</button>
                         ))}
                       </div>
                     </div>
-                    <div style={{ fontSize: 12, color: '#94a3b8' }}><span style={{ color: '#dc2626' }}>*</span> Required field</div>
-                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
-                      <button onClick={closeCheckInModal} style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.cancel')}</button>
+                    <div className="si-db3602ae"><span className="si-f84f41a5">*</span> Required field</div>
+                    <div className="si-81c39146">
+                      <button onClick={closeCheckInModal} className="si-db673962">{t('hospitalWorkflow.cancel')}</button>
                       <button onClick={handleCheckIn} disabled={!checkInAnimal || checkInSubmitting}
                         style={{ padding: '10px 20px', background: checkInAnimal && !checkInSubmitting ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: checkInAnimal && !checkInSubmitting ? 'pointer' : 'not-allowed', fontWeight: 700, minWidth: 120 }}>
                         {checkInSubmitting ? `⏳ ${t('hospitalWorkflow.checkingIn')}` : `✅ ${t('hospitalWorkflow.checkIn')}`}
@@ -635,34 +635,34 @@ export default function HospitalWorkflow() {
                   </div>
                 ) : (
                   /* Walk-in Patient Registration Form */
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#15803d' }}>
+                  <div className="si-7a28b1a9">
+                    <div className="si-223e4798">
                       🐾 {t('hospitalWorkflow.walkIn.instructions')}
                     </div>
 
                     {walkInError && (
-                      <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: 8, padding: '10px 14px', fontSize: 13, fontWeight: 500 }}>
+                      <div className="si-dfe9e95d">
                         ⚠️ {walkInError}
                       </div>
                     )}
 
                     {/* Photo upload */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div className="si-1d133837">
                       <div
                         onClick={() => document.getElementById('walkInPhotoInput')?.click()}
                         style={{ width: 80, height: 80, borderRadius: '50%', border: '2px dashed #d1d5db', background: walkInPhotoPreview ? 'transparent' : '#f8fafc', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, position: 'relative' }}
                       >
                         {walkInPhotoPreview
-                          ? <img src={walkInPhotoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          : <span style={{ fontSize: 28, color: '#94a3b8' }}>🐾</span>
+                          ? <img src={walkInPhotoPreview} alt="preview" className="si-0ece644a" />
+                          : <span className="si-db109633">🐾</span>
                         }
                       </div>
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>{t('hospitalWorkflow.walkIn.animalPhoto')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></div>
-                        <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{walkInPhotoPreview ? t('hospitalWorkflow.walkIn.photoChangeHint') : t('hospitalWorkflow.walkIn.photoUploadHint')}</div>
-                        {walkInPhotoPreview && <button onClick={() => { setWalkInPhotoFile(null); setWalkInPhotoPreview('') }} style={{ marginTop: 6, fontSize: 11, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>✕ {t('hospitalWorkflow.walkIn.removePhoto')}</button>}
+                        <div className="si-2fed5332">{t('hospitalWorkflow.walkIn.animalPhoto')} <span className="si-17788c1c">(optional)</span></div>
+                        <div className="si-aff656fd">{walkInPhotoPreview ? t('hospitalWorkflow.walkIn.photoChangeHint') : t('hospitalWorkflow.walkIn.photoUploadHint')}</div>
+                        {walkInPhotoPreview && <button onClick={() => { setWalkInPhotoFile(null); setWalkInPhotoPreview('') }} className="si-8cb303c0">✕ {t('hospitalWorkflow.walkIn.removePhoto')}</button>}
                       </div>
-                      <input id="walkInPhotoInput" type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                      <input id="walkInPhotoInput" type="file" accept="image/*" className="si-d6a2f871" onChange={e => {
                         const file = e.target.files?.[0]
                         if (!file) return
                         setWalkInPhotoFile(file)
@@ -674,42 +674,42 @@ export default function HospitalWorkflow() {
                     </div>
 
                     {/* Owner Details */}
-                    <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: 14 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>👤 {t('hospitalWorkflow.walkIn.ownerDetails')}</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div className="si-9a250e84">
+                      <div className="si-27da07a6">👤 {t('hospitalWorkflow.walkIn.ownerDetails')}</div>
+                      <div className="si-51b511c9">
                         <div>
-                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.ownerName')} <span style={{ color: '#dc2626' }}>*</span></label>
-                          <input placeholder={t('hospitalWorkflow.walkIn.ownerNamePlaceholder')} value={walkInForm.ownerName} onChange={e => setWalkInForm(f => ({ ...f, ownerName: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          <label className="si-2561596d">{t('hospitalWorkflow.walkIn.ownerName')} <span className="si-f84f41a5">*</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.ownerNamePlaceholder')} value={walkInForm.ownerName} onChange={e => setWalkInForm(f => ({ ...f, ownerName: e.target.value }))} className="si-d0e0df59" />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <div className="si-347df862">
                           <div>
-                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.ownerPhone')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                            <input placeholder="+91 9876543210" value={walkInForm.ownerPhone} onChange={e => setWalkInForm(f => ({ ...f, ownerPhone: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                            <label className="si-2561596d">{t('hospitalWorkflow.walkIn.ownerPhone')} <span className="si-17788c1c">(optional)</span></label>
+                            <input placeholder="+91 9876543210" value={walkInForm.ownerPhone} onChange={e => setWalkInForm(f => ({ ...f, ownerPhone: e.target.value }))} className="si-d0e0df59" />
                           </div>
                           <div>
-                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.ownerEmail')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                            <input placeholder="owner@email.com" type="email" value={walkInForm.ownerEmail} onChange={e => setWalkInForm(f => ({ ...f, ownerEmail: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                            <label className="si-2561596d">{t('hospitalWorkflow.walkIn.ownerEmail')} <span className="si-17788c1c">(optional)</span></label>
+                            <input placeholder="owner@email.com" type="email" value={walkInForm.ownerEmail} onChange={e => setWalkInForm(f => ({ ...f, ownerEmail: e.target.value }))} className="si-d0e0df59" />
                           </div>
                         </div>
                         <div>
-                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.ownerAddress')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                          <input placeholder={t('hospitalWorkflow.walkIn.ownerAddressPlaceholder')} value={walkInForm.ownerAddress} onChange={e => setWalkInForm(f => ({ ...f, ownerAddress: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          <label className="si-2561596d">{t('hospitalWorkflow.walkIn.ownerAddress')} <span className="si-17788c1c">(optional)</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.ownerAddressPlaceholder')} value={walkInForm.ownerAddress} onChange={e => setWalkInForm(f => ({ ...f, ownerAddress: e.target.value }))} className="si-d0e0df59" />
                         </div>
                       </div>
                     </div>
 
                     {/* Patient Details — core */}
-                    <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: 14 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>🐾 {t('hospitalWorkflow.walkIn.patientDetails')}</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div className="si-9a250e84">
+                      <div className="si-27da07a6">🐾 {t('hospitalWorkflow.walkIn.patientDetails')}</div>
+                      <div className="si-51b511c9">
                         <div>
-                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalName')} <span style={{ color: '#dc2626' }}>*</span></label>
-                          <input placeholder={t('hospitalWorkflow.walkIn.animalNamePlaceholder')} value={walkInForm.animalName} onChange={e => setWalkInForm(f => ({ ...f, animalName: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalName')} <span className="si-f84f41a5">*</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.animalNamePlaceholder')} value={walkInForm.animalName} onChange={e => setWalkInForm(f => ({ ...f, animalName: e.target.value }))} className="si-d0e0df59" />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <div className="si-347df862">
                           <div>
-                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.species')} <span style={{ color: '#dc2626' }}>*</span></label>
-                            <select value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value, animalBreed: '', animalCustomBreed: '' }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
+                            <label className="si-2561596d">{t('hospitalWorkflow.walkIn.species')} <span className="si-f84f41a5">*</span></label>
+                            <select value={walkInForm.animalSpecies} onChange={e => setWalkInForm(f => ({ ...f, animalSpecies: e.target.value, animalBreed: '', animalCustomBreed: '' }))} className="si-f3740d1a">
                               <option value="">{t('hospitalWorkflow.walkIn.selectSpecies')}</option>
                               {WALKIN_SPECIES_CATEGORIES.map(cat => (
                                 <optgroup key={cat.label} label={cat.label}>
@@ -719,40 +719,40 @@ export default function HospitalWorkflow() {
                             </select>
                           </div>
                           <div>
-                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.breed')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                            <label className="si-2561596d">{t('hospitalWorkflow.walkIn.breed')} <span className="si-17788c1c">(optional)</span></label>
                             {WALKIN_BREED_DATABASE[walkInForm.animalSpecies]?.length > 0 ? (
-                              <select value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value, animalCustomBreed: '' }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
+                              <select value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value, animalCustomBreed: '' }))} className="si-f3740d1a">
                                 <option value="">{t('hospitalWorkflow.walkIn.selectBreed')}</option>
                                 {WALKIN_BREED_DATABASE[walkInForm.animalSpecies].map(b => <option key={b} value={b}>{b}</option>)}
                               </select>
                             ) : (
-                              <input placeholder={t('hospitalWorkflow.walkIn.breedPlaceholder')} value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                              <input placeholder={t('hospitalWorkflow.walkIn.breedPlaceholder')} value={walkInForm.animalBreed} onChange={e => setWalkInForm(f => ({ ...f, animalBreed: e.target.value }))} className="si-d0e0df59" />
                             )}
                           </div>
                         </div>
                         {walkInForm.animalBreed === 'Other' && (
                           <div>
-                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.customBreed')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                            <input placeholder={t('hospitalWorkflow.walkIn.customBreedPlaceholder')} value={walkInForm.animalCustomBreed} onChange={e => setWalkInForm(f => ({ ...f, animalCustomBreed: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                            <label className="si-2561596d">{t('hospitalWorkflow.walkIn.customBreed')} <span className="si-17788c1c">(optional)</span></label>
+                            <input placeholder={t('hospitalWorkflow.walkIn.customBreedPlaceholder')} value={walkInForm.animalCustomBreed} onChange={e => setWalkInForm(f => ({ ...f, animalCustomBreed: e.target.value }))} className="si-d0e0df59" />
                           </div>
                         )}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <div className="si-347df862">
                           <div>
                             {classTermsForSpecies(walkInForm.animalSpecies).length > 0 ? (
                               <>
-                                <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('animalClass.fieldLabel')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                                <label className="si-2561596d">{t('animalClass.fieldLabel')} <span className="si-17788c1c">(optional)</span></label>
                                 <select value={walkInForm.animalClass} onChange={e => {
                                   const term = findClassTerm(walkInForm.animalSpecies, e.target.value)
                                   setWalkInForm(f => ({ ...f, animalClass: e.target.value, animalGender: term?.impliedGender || f.animalGender }))
-                                }} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
+                                }} className="si-f3740d1a">
                                   <option value="">{t('animalClass.selectClass')}</option>
                                   {classTermsForSpecies(walkInForm.animalSpecies).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
                                 </select>
                               </>
                             ) : (
                               <>
-                                <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalGender')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                                <select value={walkInForm.animalGender} onChange={e => setWalkInForm(f => ({ ...f, animalGender: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, background: '#fff' }}>
+                                <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalGender')} <span className="si-17788c1c">(optional)</span></label>
+                                <select value={walkInForm.animalGender} onChange={e => setWalkInForm(f => ({ ...f, animalGender: e.target.value }))} className="si-f3740d1a">
                                   <option value="">{t('hospitalWorkflow.walkIn.selectGender')}</option>
                                   <option value="male">{t('hospitalWorkflow.walkIn.male')}</option>
                                   <option value="female">{t('hospitalWorkflow.walkIn.female')}</option>
@@ -762,43 +762,43 @@ export default function HospitalWorkflow() {
                             )}
                           </div>
                           <div>
-                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalDob')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                            <input type="date" value={walkInForm.animalDob} onChange={e => setWalkInForm(f => ({ ...f, animalDob: e.target.value }))} max={new Date().toISOString().split('T')[0]} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                            <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalDob')} <span className="si-17788c1c">(optional)</span></label>
+                            <input type="date" value={walkInForm.animalDob} onChange={e => setWalkInForm(f => ({ ...f, animalDob: e.target.value }))} max={new Date().toISOString().split('T')[0]} className="si-d0e0df59" />
                           </div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <div className="si-347df862">
                           <div>
-                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalWeight')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                            <input type="number" step="0.1" min="0" placeholder="e.g., 12.5" value={walkInForm.animalWeight} onChange={e => setWalkInForm(f => ({ ...f, animalWeight: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                            <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalWeight')} <span className="si-17788c1c">(optional)</span></label>
+                            <input type="number" step="0.1" min="0" placeholder="e.g., 12.5" value={walkInForm.animalWeight} onChange={e => setWalkInForm(f => ({ ...f, animalWeight: e.target.value }))} className="si-d0e0df59" />
                           </div>
                           <div>
-                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalColor')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                            <input placeholder={t('hospitalWorkflow.walkIn.animalColorPlaceholder')} value={walkInForm.animalColor} onChange={e => setWalkInForm(f => ({ ...f, animalColor: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                            <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalColor')} <span className="si-17788c1c">(optional)</span></label>
+                            <input placeholder={t('hospitalWorkflow.walkIn.animalColorPlaceholder')} value={walkInForm.animalColor} onChange={e => setWalkInForm(f => ({ ...f, animalColor: e.target.value }))} className="si-d0e0df59" />
                           </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingTop: 2 }}>
-                          <input type="checkbox" id="walkInNeutered" checked={walkInForm.animalIsNeutered} onChange={e => setWalkInForm(f => ({ ...f, animalIsNeutered: e.target.checked }))} style={{ width: 16, height: 16, cursor: 'pointer' }} />
-                          <label htmlFor="walkInNeutered" style={{ fontWeight: 500, fontSize: 13, color: '#374151', cursor: 'pointer' }}>{t('hospitalWorkflow.walkIn.animalIsNeutered')}</label>
+                        <div className="si-a8fa078e">
+                          <input type="checkbox" id="walkInNeutered" checked={walkInForm.animalIsNeutered} onChange={e => setWalkInForm(f => ({ ...f, animalIsNeutered: e.target.checked }))} className="si-f9badade" />
+                          <label htmlFor="walkInNeutered" className="si-e6d76076">{t('hospitalWorkflow.walkIn.animalIsNeutered')}</label>
                         </div>
                       </div>
                     </div>
 
                     {/* Identification */}
-                    <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: 14 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>🔖 {t('hospitalWorkflow.walkIn.identificationDetails')}</div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    <div className="si-9a250e84">
+                      <div className="si-27da07a6">🔖 {t('hospitalWorkflow.walkIn.identificationDetails')}</div>
+                      <div className="si-347df862">
                         <div>
-                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalMicrochipId')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                          <input placeholder={t('hospitalWorkflow.walkIn.animalMicrochipPlaceholder')} value={walkInForm.animalMicrochipId} onChange={e => setWalkInForm(f => ({ ...f, animalMicrochipId: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalMicrochipId')} <span className="si-17788c1c">(optional)</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.animalMicrochipPlaceholder')} value={walkInForm.animalMicrochipId} onChange={e => setWalkInForm(f => ({ ...f, animalMicrochipId: e.target.value }))} className="si-d0e0df59" />
                         </div>
                         <div>
-                          <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalRegistrationNumber')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                          <input placeholder={t('hospitalWorkflow.walkIn.animalRegistrationPlaceholder')} value={walkInForm.animalRegistrationNumber} onChange={e => setWalkInForm(f => ({ ...f, animalRegistrationNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalRegistrationNumber')} <span className="si-17788c1c">(optional)</span></label>
+                          <input placeholder={t('hospitalWorkflow.walkIn.animalRegistrationPlaceholder')} value={walkInForm.animalRegistrationNumber} onChange={e => setWalkInForm(f => ({ ...f, animalRegistrationNumber: e.target.value }))} className="si-d0e0df59" />
                         </div>
                         {WALKIN_EAR_TAG_SPECIES.includes(walkInForm.animalSpecies) && (
-                          <div style={{ gridColumn: '1 / -1' }}>
-                            <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.animalEarTagId')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                            <input placeholder={t('hospitalWorkflow.walkIn.animalEarTagPlaceholder')} value={walkInForm.animalEarTagId} onChange={e => setWalkInForm(f => ({ ...f, animalEarTagId: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                          <div className="si-06af062a">
+                            <label className="si-2561596d">{t('hospitalWorkflow.walkIn.animalEarTagId')} <span className="si-17788c1c">(optional)</span></label>
+                            <input placeholder={t('hospitalWorkflow.walkIn.animalEarTagPlaceholder')} value={walkInForm.animalEarTagId} onChange={e => setWalkInForm(f => ({ ...f, animalEarTagId: e.target.value }))} className="si-d0e0df59" />
                           </div>
                         )}
                       </div>
@@ -806,39 +806,39 @@ export default function HospitalWorkflow() {
 
                     {/* Medical Notes */}
                     <div>
-                      <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>📋 {t('hospitalWorkflow.walkIn.animalMedicalNotes')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
+                      <label className="si-2561596d">📋 {t('hospitalWorkflow.walkIn.animalMedicalNotes')} <span className="si-17788c1c">(optional)</span></label>
                       <textarea
                         placeholder={t('hospitalWorkflow.walkIn.animalMedicalNotesPlaceholder')}
                         value={walkInForm.animalMedicalNotes}
                         onChange={e => setWalkInForm(f => ({ ...f, animalMedicalNotes: e.target.value }))}
                         rows={3}
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14, resize: 'vertical' }}
+                        className="si-0523a7a3"
                       />
                     </div>
 
                     {/* Insurance Details */}
-                    <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, textTransform: 'uppercase' }}>🛡️ {t('hospitalWorkflow.walkIn.insuranceSection')}</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div className="si-27da07a6">🛡️ {t('hospitalWorkflow.walkIn.insuranceSection')}</div>
+                    <div className="si-fbb64b4e">
                       <div>
-                        <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.insuranceProvider')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                        <input placeholder={t('hospitalWorkflow.walkIn.insuranceProviderPlaceholder')} value={walkInForm.animalInsuranceProvider} onChange={e => setWalkInForm(f => ({ ...f, animalInsuranceProvider: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                        <label className="si-2561596d">{t('hospitalWorkflow.walkIn.insuranceProvider')} <span className="si-17788c1c">(optional)</span></label>
+                        <input placeholder={t('hospitalWorkflow.walkIn.insuranceProviderPlaceholder')} value={walkInForm.animalInsuranceProvider} onChange={e => setWalkInForm(f => ({ ...f, animalInsuranceProvider: e.target.value }))} className="si-d0e0df59" />
                       </div>
                       <div>
-                        <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.insurancePolicyNumber')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                        <input placeholder={t('hospitalWorkflow.walkIn.insurancePolicyPlaceholder')} value={walkInForm.animalInsurancePolicyNumber} onChange={e => setWalkInForm(f => ({ ...f, animalInsurancePolicyNumber: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                        <label className="si-2561596d">{t('hospitalWorkflow.walkIn.insurancePolicyNumber')} <span className="si-17788c1c">(optional)</span></label>
+                        <input placeholder={t('hospitalWorkflow.walkIn.insurancePolicyPlaceholder')} value={walkInForm.animalInsurancePolicyNumber} onChange={e => setWalkInForm(f => ({ ...f, animalInsurancePolicyNumber: e.target.value }))} className="si-d0e0df59" />
                       </div>
                     </div>
                     <div>
-                      <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.walkIn.insuranceExpiry')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span></label>
-                      <input type="date" value={walkInForm.animalInsuranceExpiry} onChange={e => setWalkInForm(f => ({ ...f, animalInsuranceExpiry: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: 14 }} />
+                      <label className="si-2561596d">{t('hospitalWorkflow.walkIn.insuranceExpiry')} <span className="si-17788c1c">(optional)</span></label>
+                      <input type="date" value={walkInForm.animalInsuranceExpiry} onChange={e => setWalkInForm(f => ({ ...f, animalInsuranceExpiry: e.target.value }))} className="si-d0e0df59" />
                       {walkInForm.animalInsuranceExpiry && new Date(walkInForm.animalInsuranceExpiry) < new Date() && (
-                        <div style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>⚠️ {t('hospitalWorkflow.walkIn.insuranceExpired')}</div>
+                        <div className="si-9e7b17f4">⚠️ {t('hospitalWorkflow.walkIn.insuranceExpired')}</div>
                       )}
                     </div>
 
-                    <div style={{ fontSize: 12, color: '#94a3b8' }}><span style={{ color: '#dc2626' }}>*</span> Required field</div>
-                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
-                      <button onClick={() => { setCheckInMode('search'); setWalkInError('') }} style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>← {t('hospitalWorkflow.walkIn.backToSearch')}</button>
+                    <div className="si-db3602ae"><span className="si-f84f41a5">*</span> Required field</div>
+                    <div className="si-81c39146">
+                      <button onClick={() => { setCheckInMode('search'); setWalkInError('') }} className="si-db673962">← {t('hospitalWorkflow.walkIn.backToSearch')}</button>
                       <button onClick={handleWalkInRegister}
                         disabled={!walkInFormValid || walkInRegistering}
                         style={{ padding: '10px 20px', background: walkInFormValid && !walkInRegistering ? '#15803d' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: walkInFormValid && !walkInRegistering ? 'pointer' : 'not-allowed', fontWeight: 700, minWidth: 140 }}>
@@ -854,24 +854,24 @@ export default function HospitalWorkflow() {
           {/* Triage Modal */}
           {triageTarget && (
             <div onClick={e => { if (e.target === e.currentTarget) setTriageTarget(null) }}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: 16 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+              className="si-6d1caf37">
+              <div className="si-37f24010">
                 {/* Header */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div className="si-fe2d5bfb">
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>🏥 Triage — #{triageTarget.queue_number} {triageTarget.animal_name}</h3>
-                    <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>Select severity level — priority is derived automatically</div>
+                    <h3 className="si-3fe3cab8">🏥 Triage — #{triageTarget.queue_number} {triageTarget.animal_name}</h3>
+                    <div className="si-aff656fd">Select severity level — priority is derived automatically</div>
                   </div>
-                  <button onClick={() => setTriageTarget(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#64748b' }}>✕</button>
+                  <button onClick={() => setTriageTarget(null)} className="si-034e37c2">✕</button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="si-7a28b1a9">
                   {/* Unified triage level selector — number + label + color all in one */}
                   <div>
-                    <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 8, display: 'block' }}>
-                      {t('hospitalWorkflow.triageLevel')} <span style={{ color: '#dc2626' }}>*</span>
+                    <label className="si-1cac7fac">
+                      {t('hospitalWorkflow.triageLevel')} <span className="si-f84f41a5">*</span>
                     </label>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div className="si-85143a6f">
                       {([1, 2, 3, 4, 5] as const).map(n => {
                         const tl = TRIAGE_LEVELS[n]
                         const isSelected = triageForm.triageLevel === n
@@ -905,15 +905,15 @@ export default function HospitalWorkflow() {
 
                   {/* Notes */}
                   <div>
-                    <label style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
-                      {t('hospitalWorkflow.triageNotesPlaceholder')} <span style={{ color: '#94a3b8', fontWeight: 400 }}>(optional)</span>
+                    <label className="si-2561596d">
+                      {t('hospitalWorkflow.triageNotesPlaceholder')} <span className="si-17788c1c">(optional)</span>
                     </label>
-                    <textarea placeholder="Observed symptoms, vital signs, reason for triage level..." value={triageForm.triageNotes} onChange={e => setTriageForm(f => ({ ...f, triageNotes: e.target.value }))} rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box', fontSize: 14 }} />
+                    <textarea placeholder="Observed symptoms, vital signs, reason for triage level..." value={triageForm.triageNotes} onChange={e => setTriageForm(f => ({ ...f, triageNotes: e.target.value }))} rows={3} className="si-0523a7a3" />
                   </div>
 
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4, borderTop: '1px solid #f1f5f9' }}>
-                    <button onClick={() => setTriageTarget(null)} style={{ padding: '10px 20px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.cancel')}</button>
-                    <button onClick={handleTriage} style={{ padding: '10px 20px', background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 700 }}>{t('hospitalWorkflow.saveTriage')}</button>
+                  <div className="si-cfc4497e">
+                    <button onClick={() => setTriageTarget(null)} className="si-db673962">{t('hospitalWorkflow.cancel')}</button>
+                    <button onClick={handleTriage} className="si-afdd074e">{t('hospitalWorkflow.saveTriage')}</button>
                   </div>
                 </div>
               </div>
@@ -927,30 +927,30 @@ export default function HospitalWorkflow() {
         <div>
           {/* Workflow Dashboard */}
           {dashboard && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
-              <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: '4px solid #2563eb' }}>
-                <div style={{ fontSize: 12, color: '#64748b' }}>{t('hospitalWorkflow.activeCases')}</div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#2563eb' }}>{dashboard.today?.active_cases ?? 0}</div>
+            <div className="si-7186a6b3">
+              <div className="si-8e371dd0">
+                <div className="si-655cd763">{t('hospitalWorkflow.activeCases')}</div>
+                <div className="si-075b513e">{dashboard.today?.active_cases ?? 0}</div>
               </div>
-              <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: '4px solid #059669' }}>
-                <div style={{ fontSize: 12, color: '#64748b' }}>{t('hospitalWorkflow.completedToday')}</div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#059669' }}>{dashboard.today?.completed_today ?? 0}</div>
+              <div className="si-e8d607cc">
+                <div className="si-655cd763">{t('hospitalWorkflow.completedToday')}</div>
+                <div className="si-3ca1ce25">{dashboard.today?.completed_today ?? 0}</div>
               </div>
-              <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: '4px solid #f59e0b' }}>
-                <div style={{ fontSize: 12, color: '#64748b' }}>{t('hospitalWorkflow.avgDuration')}</div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#f59e0b' }}>{dashboard.avgCaseDurationMinutes ?? 0}m</div>
+              <div className="si-20ff762c">
+                <div className="si-655cd763">{t('hospitalWorkflow.avgDuration')}</div>
+                <div className="si-724132a4">{dashboard.avgCaseDurationMinutes ?? 0}m</div>
               </div>
               {(dashboard.stageCounts || []).map((s: any) => (
-                <div key={s.current_stage} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: '4px solid #94a3b8' }}>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>{STAGE_ICONS[s.current_stage]} {s.current_stage}</div>
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>{s.count}</div>
+                <div key={s.current_stage} className="si-974475c5">
+                  <div className="si-655cd763">{STAGE_ICONS[s.current_stage]} {s.current_stage}</div>
+                  <div className="si-f0920f33">{s.count}</div>
                 </div>
               ))}
             </div>
           )}
 
           {/* Stage Pipeline View */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
+          <div className="si-c5224945">
             <button onClick={() => setStageFilter('')} style={{ padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', background: stageFilter === '' ? '#2563eb' : '#e2e8f0', color: stageFilter === '' ? '#fff' : '#475569', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>{t('hospitalWorkflow.allStages')}</button>
             {STAGES.map(s => (
               <button key={s} onClick={() => setStageFilter(s)} style={{ padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', background: stageFilter === s ? '#2563eb' : '#e2e8f0', color: stageFilter === s ? '#fff' : '#475569', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
@@ -959,34 +959,34 @@ export default function HospitalWorkflow() {
             ))}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+          <div className="si-4c5f81c0">
             <div>
-              <h2 style={{ margin: 0, fontSize: 18 }}>{t('hospitalWorkflow.clinicalCases')}</h2>
-              <p style={{ margin: '4px 0 0', fontSize: 12, color: '#64748b' }}>
+              <h2 className="si-670df8d2">{t('hospitalWorkflow.clinicalCases')}</h2>
+              <p className="si-f03d86de">
                 📋 Tracks detailed clinical journey for each patient (triage → examination → treatment → observation → discharge).
                 Cases are <strong>auto-created</strong> when you click <em>Start Exam</em> in Queue &amp; Triage.
               </p>
             </div>
-            <button onClick={() => setShowNewCase(true)} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, alignSelf: 'flex-start' }}>+ {t('hospitalWorkflow.newCase')}</button>
+            <button onClick={() => setShowNewCase(true)} className="si-41d90713">+ {t('hospitalWorkflow.newCase')}</button>
           </div>
 
           {/* Cases List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {cases.length === 0 && <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>{t('hospitalWorkflow.noCases')}</p>}
+          <div className="si-977f8af1">
+            {cases.length === 0 && <p className="si-d91f9779">{t('hospitalWorkflow.noCases')}</p>}
             {cases.map(c => (
               <div key={c.id} onClick={() => loadCaseDetail(c.id)} style={{ background: '#fff', borderRadius: 10, padding: '14px 18px', boxShadow: '0 1px 3px rgba(0,0,0,.06)', cursor: 'pointer', borderLeft: `4px solid ${PRIORITY_COLORS[c.priority] || '#2563eb'}`, transition: 'box-shadow .2s' }}
                 onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,.12)')}
                 onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,.06)')}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 20 }}>{STAGE_ICONS[c.current_stage]}</span>
-                  <div style={{ flex: 1, minWidth: 120 }}>
-                    <div style={{ fontWeight: 600 }}>{c.animal_name || t('hospitalWorkflow.unknown')} <span style={{ fontSize: 12, color: '#94a3b8' }}>({c.animal_species})</span></div>
-                    <div style={{ fontSize: 13, color: '#64748b' }}>{c.chief_complaint || t('hospitalWorkflow.noComplaintNoted')}</div>
+                <div className="si-588e32ac">
+                  <span className="si-7ff2b341">{STAGE_ICONS[c.current_stage]}</span>
+                  <div className="si-42eae7d1">
+                    <div className="si-b2cfcbec">{c.animal_name || t('hospitalWorkflow.unknown')} <span className="si-db3602ae">({c.animal_species})</span></div>
+                    <div className="si-4801fc30">{c.chief_complaint || t('hospitalWorkflow.noComplaintNoted')}</div>
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: PRIORITY_COLORS[c.priority] + '20', color: PRIORITY_COLORS[c.priority] }}>{c.priority}</span>
-                  <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#dbeafe', color: '#1d4ed8' }}>{c.current_stage}</span>
+                  <span className="si-138fd2c9">{c.current_stage}</span>
                   <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: c.status === 'active' ? '#dcfce7' : '#f1f5f9', color: c.status === 'active' ? '#166534' : '#64748b' }}>{c.status}</span>
-                  {c.vet_first_name && <span style={{ fontSize: 12, color: '#64748b' }}>Dr. {c.vet_first_name} {c.vet_last_name}</span>}
+                  {c.vet_first_name && <span className="si-655cd763">Dr. {c.vet_first_name} {c.vet_last_name}</span>}
                 </div>
               </div>
             ))}
@@ -994,15 +994,15 @@ export default function HospitalWorkflow() {
 
           {/* Case Detail Modal */}
           {selectedCase && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 600, maxWidth: '95vw', maxHeight: '80vh', overflowY: 'auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <h3 style={{ margin: 0 }}>{t('hospitalWorkflow.case')}: {selectedCase.animal_name || t('hospitalWorkflow.unknown')}</h3>
-                  <button onClick={() => setSelectedCase(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            <div className="si-db8248e9">
+              <div className="si-0eebe146">
+                <div className="si-101fd1d0">
+                  <h3 className="si-44087c4b">{t('hospitalWorkflow.case')}: {selectedCase.animal_name || t('hospitalWorkflow.unknown')}</h3>
+                  <button onClick={() => setSelectedCase(null)} className="si-30be827b">✕</button>
                 </div>
 
                 {/* Stage Pipeline */}
-                <div style={{ display: 'flex', gap: 4, marginBottom: 20, overflowX: 'auto' }}>
+                <div className="si-41235f19">
                   {STAGES.map((s, i) => {
                     const isActive = s === selectedCase.current_stage
                     const isPast = STAGES.indexOf(selectedCase.current_stage) > i
@@ -1014,26 +1014,26 @@ export default function HospitalWorkflow() {
                   })}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16, fontSize: 14 }}>
+                <div className="si-0c1c8326">
                   <div><strong>{t('hospitalWorkflow.priority')}:</strong> <span style={{ color: PRIORITY_COLORS[selectedCase.priority] }}>{selectedCase.priority}</span></div>
                   <div><strong>{t('hospitalWorkflow.status')}:</strong> {selectedCase.status}</div>
                   <div><strong>{t('hospitalWorkflow.owner')}:</strong> {selectedCase.owner_first_name} {selectedCase.owner_last_name}</div>
                   <div><strong>{t('hospitalWorkflow.vet')}:</strong> {selectedCase.vet_first_name ? `Dr. ${selectedCase.vet_first_name} ${selectedCase.vet_last_name}` : t('hospitalWorkflow.unassigned')}</div>
-                  {selectedCase.chief_complaint && <div style={{ gridColumn: '1/3' }}><strong>{t('hospitalWorkflow.chiefComplaint')}:</strong> {selectedCase.chief_complaint}</div>}
-                  {selectedCase.diagnosis && <div style={{ gridColumn: '1/3' }}><strong>{t('hospitalWorkflow.diagnosis')}:</strong> {selectedCase.diagnosis}</div>}
-                  {selectedCase.treatment_plan && <div style={{ gridColumn: '1/3' }}><strong>{t('hospitalWorkflow.treatmentPlan')}:</strong> {selectedCase.treatment_plan}</div>}
+                  {selectedCase.chief_complaint && <div className="si-0defe487"><strong>{t('hospitalWorkflow.chiefComplaint')}:</strong> {selectedCase.chief_complaint}</div>}
+                  {selectedCase.diagnosis && <div className="si-0defe487"><strong>{t('hospitalWorkflow.diagnosis')}:</strong> {selectedCase.diagnosis}</div>}
+                  {selectedCase.treatment_plan && <div className="si-0defe487"><strong>{t('hospitalWorkflow.treatmentPlan')}:</strong> {selectedCase.treatment_plan}</div>}
                 </div>
 
                 {/* Transition History */}
                 {selectedCase.transitions && selectedCase.transitions.length > 0 && (
-                  <div style={{ marginBottom: 16 }}>
-                    <h4 style={{ margin: '0 0 8px' }}>{t('hospitalWorkflow.workflowHistory')}</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div className="si-7e63ec4f">
+                    <h4 className="si-24d15068">{t('hospitalWorkflow.workflowHistory')}</h4>
+                    <div className="si-85143a6f">
                       {selectedCase.transitions.map((tr: any, i: number) => (
-                        <div key={i} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: 8, fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}>
-                          <span style={{ fontWeight: 600 }}>{tr.from_stage || '—'} → {tr.to_stage}</span>
-                          <span style={{ color: '#64748b' }}>{t('hospitalWorkflow.by')} {tr.first_name} {tr.last_name}</span>
-                          <span style={{ color: '#94a3b8', marginLeft: 'auto', fontSize: 12 }}>{formatDateTime(tr.created_at)}</span>
+                        <div key={i} className="si-72912216">
+                          <span className="si-b2cfcbec">{tr.from_stage || '—'} → {tr.to_stage}</span>
+                          <span className="si-98734f9a">{t('hospitalWorkflow.by')} {tr.first_name} {tr.last_name}</span>
+                          <span className="si-bd94d1af">{formatDateTime(tr.created_at)}</span>
                         </div>
                       ))}
                     </div>
@@ -1042,40 +1042,40 @@ export default function HospitalWorkflow() {
 
                 {/* Medical History Panel */}
                 {caseMedicalSummary && (
-                  <div style={{ marginBottom: 16, border: '1px solid #e0e7ff', borderRadius: 10, overflow: 'hidden' }}>
-                    <div style={{ background: '#eef2ff', padding: '10px 14px', fontWeight: 700, fontSize: 14, color: '#3730a3' }}>📋 {t('hospitalWorkflow.medicalHistory')} — {caseMedicalSummary.animal?.name}</div>
-                    <div style={{ padding: '12px 14px' }}>
+                  <div className="si-3d341eca">
+                    <div className="si-db20e0d4">📋 {t('hospitalWorkflow.medicalHistory')} — {caseMedicalSummary.animal?.name}</div>
+                    <div className="si-933bc6a9">
                       {/* Allergies */}
                       {caseMedicalSummary.allergies?.length > 0 && (
-                        <div style={{ marginBottom: 10 }}>
-                          <div style={{ fontWeight: 600, fontSize: 12, color: '#dc2626', marginBottom: 4 }}>⚠️ {t('hospitalWorkflow.allergies')}</div>
-                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        <div className="si-170de209">
+                          <div className="si-17b5a0dc">⚠️ {t('hospitalWorkflow.allergies')}</div>
+                          <div className="si-50c82988">
                             {caseMedicalSummary.allergies.map((a: any) => (
-                              <span key={a.id} style={{ padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: '#fef2f2', color: '#991b1b' }}>{a.allergen} ({a.severity})</span>
+                              <span key={a.id} className="si-8edb907a">{a.allergen} ({a.severity})</span>
                             ))}
                           </div>
                         </div>
                       )}
                       {/* Recent records */}
                       {caseMedicalSummary.recentRecords?.length > 0 && (
-                        <div style={{ marginBottom: 10 }}>
-                          <div style={{ fontWeight: 600, fontSize: 12, color: '#374151', marginBottom: 4 }}>{t('hospitalWorkflow.recentRecords')}</div>
+                        <div className="si-170de209">
+                          <div className="si-47ae2048">{t('hospitalWorkflow.recentRecords')}</div>
                           {caseMedicalSummary.recentRecords.slice(0, 5).map((r: any) => (
-                            <div key={r.id} style={{ padding: '6px 10px', borderRadius: 6, background: '#f9fafb', marginBottom: 4, fontSize: 12 }}>
-                              <span style={{ fontWeight: 600 }}>{r.title || r.record_type}</span>
-                              {r.diagnosis && <span style={{ color: '#6b7280' }}> — {r.diagnosis}</span>}
-                              <span style={{ color: '#94a3b8', marginLeft: 8 }}>{formatDateTime(r.created_at)}</span>
+                            <div key={r.id} className="si-6804a5dc">
+                              <span className="si-b2cfcbec">{r.title || r.record_type}</span>
+                              {r.diagnosis && <span className="si-23033f05"> — {r.diagnosis}</span>}
+                              <span className="si-68f18f88">{formatDateTime(r.created_at)}</span>
                             </div>
                           ))}
                         </div>
                       )}
                       {/* Active prescriptions */}
                       {caseMedicalSummary.recentPrescriptions?.length > 0 && (
-                        <div style={{ marginBottom: 10 }}>
-                          <div style={{ fontWeight: 600, fontSize: 12, color: '#374151', marginBottom: 4 }}>💊 {t('hospitalWorkflow.recentPrescriptions')}</div>
+                        <div className="si-170de209">
+                          <div className="si-47ae2048">💊 {t('hospitalWorkflow.recentPrescriptions')}</div>
                           {caseMedicalSummary.recentPrescriptions.slice(0, 3).map((p: any) => (
-                            <div key={p.id} style={{ padding: '4px 10px', fontSize: 12, color: '#4b5563' }}>
-                              {p.diagnosis || 'Prescription'} — Dr. {p.vet_first_name} {p.vet_last_name} <span style={{ color: '#94a3b8' }}>{formatDateTime(p.created_at)}</span>
+                            <div key={p.id} className="si-05aae049">
+                              {p.diagnosis || 'Prescription'} — Dr. {p.vet_first_name} {p.vet_last_name} <span className="si-385f4f50">{formatDateTime(p.created_at)}</span>
                             </div>
                           ))}
                         </div>
@@ -1083,16 +1083,16 @@ export default function HospitalWorkflow() {
                       {/* Vaccinations */}
                       {caseMedicalSummary.recentVaccinations?.length > 0 && (
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: 12, color: '#374151', marginBottom: 4 }}>💉 {t('hospitalWorkflow.vaccinations')}</div>
-                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          <div className="si-47ae2048">💉 {t('hospitalWorkflow.vaccinations')}</div>
+                          <div className="si-50c82988">
                             {caseMedicalSummary.recentVaccinations.map((v: any) => (
-                              <span key={v.id} style={{ padding: '3px 10px', borderRadius: 12, fontSize: 11, background: '#dcfce7', color: '#166534' }}>{v.vaccine_name}</span>
+                              <span key={v.id} className="si-657d89a1">{v.vaccine_name}</span>
                             ))}
                           </div>
                         </div>
                       )}
                       {!caseMedicalSummary.recentRecords?.length && !caseMedicalSummary.allergies?.length && (
-                        <div style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', padding: 12 }}>{t('hospitalWorkflow.noMedicalHistory')}</div>
+                        <div className="si-72381c27">{t('hospitalWorkflow.noMedicalHistory')}</div>
                       )}
                     </div>
                   </div>
@@ -1100,7 +1100,7 @@ export default function HospitalWorkflow() {
 
                 {/* Advance Stage */}
                 {selectedCase.status === 'active' && (
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div className="si-b9eb5ec7">
                     {STAGES.filter(s => STAGES.indexOf(s) > STAGES.indexOf(selectedCase.current_stage)).map(s => (
                       <button key={s} onClick={() => { setTransTarget(selectedCase); setTransStage(s); }}
                         style={{ padding: '8px 14px', background: s === 'discharge' ? '#059669' : '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
@@ -1115,13 +1115,13 @@ export default function HospitalWorkflow() {
 
           {/* Transition Notes Modal */}
           {transTarget && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 400, maxWidth: '90vw' }}>
-                <h3 style={{ marginTop: 0 }}>{t('hospitalWorkflow.moveTo')} {STAGE_ICONS[transStage]} {transStage}</h3>
-                <textarea placeholder={t('hospitalWorkflow.notesOptional')} value={transNotes} onChange={e => setTransNotes(e.target.value)} rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', marginBottom: 12, resize: 'vertical', boxSizing: 'border-box' }} />
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                  <button onClick={() => setTransTarget(null)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('hospitalWorkflow.cancel')}</button>
-                  <button onClick={handleTransition} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.confirm')}</button>
+            <div className="si-1c4649c0">
+              <div className="si-dc0fea35">
+                <h3 className="si-33c1a83e">{t('hospitalWorkflow.moveTo')} {STAGE_ICONS[transStage]} {transStage}</h3>
+                <textarea placeholder={t('hospitalWorkflow.notesOptional')} value={transNotes} onChange={e => setTransNotes(e.target.value)} rows={3} className="si-2a364628" />
+                <div className="si-f0412db6">
+                  <button onClick={() => setTransTarget(null)} className="si-978a1643">{t('hospitalWorkflow.cancel')}</button>
+                  <button onClick={handleTransition} className="si-880bdf60">{t('hospitalWorkflow.confirm')}</button>
                 </div>
               </div>
             </div>
@@ -1129,26 +1129,26 @@ export default function HospitalWorkflow() {
 
           {/* Create Case Modal */}
           {showNewCase && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto' }}>
-                <h3 style={{ marginTop: 0 }}>🔄 {t('hospitalWorkflow.newClinicalCase')}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="si-db8248e9">
+              <div className="si-7f17206a">
+                <h3 className="si-33c1a83e">🔄 {t('hospitalWorkflow.newClinicalCase')}</h3>
+                <div className="si-d8480906">
                   <AnimalSearchPicker selectedAnimal={caseAnimal} onSelect={setCaseAnimal} hospitalId={hospitalId || undefined} />
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.chiefComplaint')}</label>
-                    <textarea placeholder={t('hospitalWorkflow.chiefComplaintPlaceholder')} value={caseForm.chiefComplaint} onChange={e => setCaseForm(f => ({ ...f, chiefComplaint: e.target.value }))} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }} />
+                    <label className="si-1d2216db">{t('hospitalWorkflow.chiefComplaint')}</label>
+                    <textarea placeholder={t('hospitalWorkflow.chiefComplaintPlaceholder')} value={caseForm.chiefComplaint} onChange={e => setCaseForm(f => ({ ...f, chiefComplaint: e.target.value }))} rows={2} className="si-dc3839a2" />
                   </div>
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>{t('hospitalWorkflow.priority')}</label>
-                    <div style={{ display: 'flex', gap: 6 }}>
+                    <label className="si-1d2216db">{t('hospitalWorkflow.priority')}</label>
+                    <div className="si-9f20fe5e">
                       {PRIORITIES.map(p => (
                         <button key={p} onClick={() => setCaseForm(f => ({ ...f, priority: p }))}
                           style={{ flex: 1, padding: '8px 4px', borderRadius: 8, border: caseForm.priority === p ? `2px solid ${PRIORITY_COLORS[p]}` : '1px solid #d1d5db', background: caseForm.priority === p ? PRIORITY_COLORS[p] + '15' : '#fff', fontWeight: 600, cursor: 'pointer', fontSize: 12, color: PRIORITY_COLORS[p], textTransform: 'capitalize' }}>{p}</button>
                       ))}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
-                    <button onClick={() => { setShowNewCase(false); setCaseAnimal(null) }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('hospitalWorkflow.cancel')}</button>
+                  <div className="si-8d13495b">
+                    <button onClick={() => { setShowNewCase(false); setCaseAnimal(null) }} className="si-978a1643">{t('hospitalWorkflow.cancel')}</button>
                     <button onClick={handleCreateCase} disabled={!caseAnimal} style={{ padding: '8px 16px', background: caseAnimal ? '#2563eb' : '#94a3b8', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('hospitalWorkflow.createCase')}</button>
                   </div>
                 </div>
@@ -1161,31 +1161,31 @@ export default function HospitalWorkflow() {
       {/* ═══ REFERRALS TAB ═══ */}
       {tab === 'referrals' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>{t('hospitalWorkflow.specialistReferrals')}</h2>
-            <button onClick={() => setShowNewReferral(true)} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>+ {t('hospitalWorkflow.newReferral')}</button>
+          <div className="si-101fd1d0">
+            <h2 className="si-670df8d2">{t('hospitalWorkflow.specialistReferrals')}</h2>
+            <button onClick={() => setShowNewReferral(true)} className="si-880bdf60">+ {t('hospitalWorkflow.newReferral')}</button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {referrals.length === 0 && <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>{t('hospitalWorkflow.noReferrals')}</p>}
+          <div className="si-977f8af1">
+            {referrals.length === 0 && <p className="si-d91f9779">{t('hospitalWorkflow.noReferrals')}</p>}
             {referrals.map(r => (
               <div key={r.id} style={{ background: '#fff', borderRadius: 10, padding: '14px 18px', boxShadow: '0 1px 3px rgba(0,0,0,.06)', borderLeft: `4px solid ${PRIORITY_COLORS[r.priority] || '#2563eb'}` }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: 160 }}>
-                    <div style={{ fontWeight: 600 }}>From Dr. {r.from_vet_first} {r.from_vet_last} → Dr. {r.to_vet_first} {r.to_vet_last}</div>
-                    <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>{r.reason}</div>
-                    {r.specialty_needed && <div style={{ fontSize: 12, color: '#8b5cf6', marginTop: 2 }}>{t('hospitalWorkflow.specialty')}: {r.specialty_needed}</div>}
-                    {r.animal_name && <div style={{ fontSize: 12, color: '#94a3b8' }}>{t('hospitalWorkflow.patient')}: {r.animal_name} ({r.animal_species})</div>}
+                <div className="si-588e32ac">
+                  <div className="si-aa342140">
+                    <div className="si-b2cfcbec">From Dr. {r.from_vet_first} {r.from_vet_last} → Dr. {r.to_vet_first} {r.to_vet_last}</div>
+                    <div className="si-7eadb7a8">{r.reason}</div>
+                    {r.specialty_needed && <div className="si-029cdd46">{t('hospitalWorkflow.specialty')}: {r.specialty_needed}</div>}
+                    {r.animal_name && <div className="si-db3602ae">{t('hospitalWorkflow.patient')}: {r.animal_name} ({r.animal_species})</div>}
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: r.status === 'pending' ? '#fef3c7' : r.status === 'accepted' ? '#dcfce7' : r.status === 'completed' ? '#dbeafe' : '#fecaca', color: r.status === 'pending' ? '#92400e' : r.status === 'accepted' ? '#166534' : r.status === 'completed' ? '#1d4ed8' : '#991b1b' }}>{r.status}</span>
                   {r.status === 'pending' && (
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button onClick={() => handleReferralAction(r.id, 'accepted')} style={{ padding: '6px 12px', background: '#059669', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.accept')}</button>
-                      <button onClick={() => handleReferralAction(r.id, 'declined')} style={{ padding: '6px 12px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>{t('hospitalWorkflow.decline')}</button>
+                    <div className="si-9f48dfc6">
+                      <button onClick={() => handleReferralAction(r.id, 'accepted')} className="si-d903510c">{t('hospitalWorkflow.accept')}</button>
+                      <button onClick={() => handleReferralAction(r.id, 'declined')} className="si-ad808723">{t('hospitalWorkflow.decline')}</button>
                     </div>
                   )}
                   {r.status === 'accepted' && (
-                    <button onClick={() => handleReferralAction(r.id, 'completed')} style={{ padding: '6px 12px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>{t('hospitalWorkflow.complete')}</button>
+                    <button onClick={() => handleReferralAction(r.id, 'completed')} className="si-6a421f43">{t('hospitalWorkflow.complete')}</button>
                   )}
                 </div>
               </div>
@@ -1194,24 +1194,24 @@ export default function HospitalWorkflow() {
 
           {/* Create Referral Modal */}
           {showNewReferral && (
-            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}
+            <div className="si-db8248e9"
               onClick={e => { if (e.target === e.currentTarget) { setShowNewReferral(false); setSelectedToVet(null); setReferralAnimal(null); setReferralError('') } }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 520, maxWidth: '92vw', maxHeight: '88vh', overflowY: 'auto', position: 'relative' }}>
+              <div className="si-b011d727">
                 <button onClick={() => { setShowNewReferral(false); setSelectedToVet(null); setReferralAnimal(null); setReferralError('') }}
-                  style={{ position: 'absolute', top: 16, right: 16, background: '#f1f5f9', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>✕</button>
-                <h3 style={{ marginTop: 0, marginBottom: 16 }}>🔀 {t('hospitalWorkflow.newSpecialistReferral')}</h3>
+                  className="si-9142cad1">✕</button>
+                <h3 className="si-f522c581">🔀 {t('hospitalWorkflow.newSpecialistReferral')}</h3>
 
                 {referralError && (
-                  <div style={{ background: '#fee2e2', color: '#dc2626', borderRadius: 8, padding: '10px 14px', marginBottom: 12, fontSize: 13 }}>
+                  <div className="si-ebc0428a">
                     ⚠️ {referralError}
                   </div>
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div className="si-d8480906">
                   {/* Vet Search — required */}
                   <VetSearchPicker selectedVet={selectedToVet} onSelect={setSelectedToVet} required />
                   {!selectedToVet && (
-                    <p style={{ margin: '-6px 0 0', fontSize: 12, color: '#d97706' }}>
+                    <p className="si-7bdf7b77">
                       ⚠️ Required: Search and select a veterinarian to enable submission
                     </p>
                   )}
@@ -1221,8 +1221,8 @@ export default function HospitalWorkflow() {
 
                   {/* Reason — required */}
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
-                      {t('hospitalWorkflow.reasonForReferral')} <span style={{ color: '#dc2626' }}>*</span>
+                    <label className="si-1d2216db">
+                      {t('hospitalWorkflow.reasonForReferral')} <span className="si-f84f41a5">*</span>
                     </label>
                     <input
                       placeholder="e.g., Complex orthopedic case requiring specialist evaluation"
@@ -1231,7 +1231,7 @@ export default function HospitalWorkflow() {
                       style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: `1px solid ${!referralForm.reason.trim() ? '#fca5a5' : '#d1d5db'}`, boxSizing: 'border-box' }}
                     />
                     {!referralForm.reason.trim() && (
-                      <p style={{ margin: '4px 0 0', fontSize: 12, color: '#d97706' }}>
+                      <p className="si-c4e6ca6a">
                         ⚠️ Required: Provide a reason for the referral
                       </p>
                     )}
@@ -1239,26 +1239,26 @@ export default function HospitalWorkflow() {
 
                   {/* Specialty — optional */}
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
-                      {t('hospitalWorkflow.specialtyNeeded')} <span style={{ fontSize: 12, color: '#6b7280', fontWeight: 400 }}>(optional)</span>
+                    <label className="si-1d2216db">
+                      {t('hospitalWorkflow.specialtyNeeded')} <span className="si-fe954780">(optional)</span>
                     </label>
                     <input
                       placeholder="e.g., Cardiology, Orthopedics, Surgery"
                       value={referralForm.specialtyNeeded}
                       onChange={e => setReferralForm(f => ({ ...f, specialtyNeeded: e.target.value }))}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }}
+                      className="si-0c92c61f"
                     />
                   </div>
 
                   {/* Priority */}
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
-                      {t('hospitalWorkflow.priority')} <span style={{ color: '#dc2626' }}>*</span>
+                    <label className="si-1d2216db">
+                      {t('hospitalWorkflow.priority')} <span className="si-f84f41a5">*</span>
                     </label>
                     <select
                       value={referralForm.priority}
                       onChange={e => setReferralForm(f => ({ ...f, priority: e.target.value }))}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', boxSizing: 'border-box' }}
+                      className="si-0c92c61f"
                     >
                       {PRIORITIES.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
                     </select>
@@ -1266,26 +1266,26 @@ export default function HospitalWorkflow() {
 
                   {/* Clinical Notes — optional */}
                   <div>
-                    <label style={{ fontWeight: 500, fontSize: 13, color: '#374151', marginBottom: 4, display: 'block' }}>
-                      {t('hospitalWorkflow.clinicalNotes')} <span style={{ fontSize: 12, color: '#6b7280', fontWeight: 400 }}>(optional)</span>
+                    <label className="si-1d2216db">
+                      {t('hospitalWorkflow.clinicalNotes')} <span className="si-fe954780">(optional)</span>
                     </label>
                     <textarea
                       placeholder={t('hospitalWorkflow.clinicalNotesPlaceholder')}
                       value={referralForm.clinicalNotes}
                       onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))}
                       rows={3}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical', boxSizing: 'border-box' }}
+                      className="si-dc3839a2"
                     />
                   </div>
 
-                  <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6b7280' }}>
-                    <span style={{ color: '#dc2626' }}>*</span> Required field
+                  <p className="si-ada3b9d6">
+                    <span className="si-f84f41a5">*</span> Required field
                   </p>
 
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+                  <div className="si-8d13495b">
                     <button
                       onClick={() => { setShowNewReferral(false); setSelectedToVet(null); setReferralAnimal(null); setReferralError('') }}
-                      style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}
+                      className="si-978a1643"
                     >{t('hospitalWorkflow.cancel')}</button>
                     <button
                       onClick={handleCreateReferral}

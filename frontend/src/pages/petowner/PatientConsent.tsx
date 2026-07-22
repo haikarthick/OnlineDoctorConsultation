@@ -366,7 +366,7 @@ const PatientConsentPage: React.FC = () => {
           {animalsLoading ? (
             <div className="pc-loading"><div className="pc-spinner" /></div>
           ) : animals.length === 0 ? (
-            <p style={{ color: 'var(--gray-500)', fontSize: '14px', padding: '12px 4px' }}>
+            <p className="si-965ccfa5">
               No animals found.
             </p>
           ) : (
@@ -421,11 +421,11 @@ const PatientConsentPage: React.FC = () => {
                   <div className="pc-stat-label">Total Consents</div>
                 </div>
                 <div className="pc-stat-card">
-                  <div className="pc-stat-value" style={{ color: 'var(--success)' }}>{activeConsents}</div>
+                  <div className="pc-stat-value si-adb11626">{activeConsents}</div>
                   <div className="pc-stat-label">{t('patientConsent.status.active')}</div>
                 </div>
                 <div className="pc-stat-card">
-                  <div className="pc-stat-value" style={{ color: 'var(--gray-400)' }}>{revokedConsents}</div>
+                  <div className="pc-stat-value si-7d7d4e5e">{revokedConsents}</div>
                   <div className="pc-stat-label">{t('patientConsent.status.revoked')}</div>
                 </div>
               </div>
@@ -625,7 +625,7 @@ const PatientConsentPage: React.FC = () => {
                     <div className="module-form-group">
                       <label className="module-label">
                         {t('patientConsent.validUntil')}{' '}
-                        <span style={{ fontWeight: 400, color: 'var(--gray-400)' }}>(optional)</span>
+                        <span className="si-f7f517fe">(optional)</span>
                       </label>
                       <input
                         className="module-input"
@@ -676,7 +676,7 @@ const ConsentCard: React.FC<ConsentCardProps> = ({
   return (
     <div className="pc-consent-card" data-scope={consent.consentScope}>
       <div className="pc-consent-card-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <div className="si-28e38327">
           <span className={'pc-scope-badge pc-scope-badge-' + consent.consentScope}>
             {scopeIcon(consent.consentScope)} {scopeLabel(consent.consentScope)}
           </span>
@@ -684,7 +684,7 @@ const ConsentCard: React.FC<ConsentCardProps> = ({
             {consent.isActive ? '● ' + t('patientConsent.status.active') : '○ ' + t('patientConsent.status.revoked')}
           </span>
         </div>
-        <span style={{ fontSize: '12px', color: 'var(--gray-400)' }}>
+        <span className="si-3a6a64e1">
           {formatDate(consent.createdAt)}
         </span>
       </div>
@@ -702,7 +702,7 @@ const ConsentCard: React.FC<ConsentCardProps> = ({
             {' → '}
             {consent.validUntil
               ? formatDate(consent.validUntil)
-              : <em style={{ color: 'var(--gray-400)' }}>{t('patientConsent.noExpiry')}</em>
+              : <em className="si-7d7d4e5e">{t('patientConsent.noExpiry')}</em>
             }
           </span>
         </div>
@@ -723,7 +723,7 @@ const ConsentCard: React.FC<ConsentCardProps> = ({
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '13px', color: 'var(--gray-600)' }}>
+        <div className="si-0f7a7cdd">
           <span className={consent.allowView        ? '' : 'pc-permission-item disabled'}>
             {consent.allowView        ? '✅' : '⬜'} {t('patientConsent.permissions.allowView')}
           </span>
@@ -737,7 +737,7 @@ const ConsentCard: React.FC<ConsentCardProps> = ({
       </div>
 
       <div className="pc-consent-card-footer">
-        <span style={{ fontSize: '12px', color: 'var(--gray-400)' }}>
+        <span className="si-3a6a64e1">
           ID: {consent.id.slice(0, 8)}…
         </span>
         {consent.isActive && (

@@ -198,7 +198,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
       </div>
 
       {/* Search + Filter bar */}
-      <div className="module-form-row" style={{ marginBottom: 16 }}>
+      <div className="module-form-row si-7e63ec4f">
         <input
           className="module-input"
           placeholder={t('prescriptions.searchPlaceholder')}
@@ -206,10 +206,10 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
           onChange={e => setSearchTerm(e.target.value)}
         />
         <select
-          className="module-input"
+          className="module-input si-61658cb1"
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
-          style={{ maxWidth: 180 }}
+         
         >
           <option value="all">{t('prescriptions.filterAll')}</option>
           <option value="active">{t('prescriptions.filterActive')}</option>
@@ -218,7 +218,7 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
       </div>
 
       {error && (
-        <div className="module-alert error" style={{ marginBottom: 16 }}>
+        <div className="module-alert error si-7e63ec4f">
           {error}
           <button className="module-alert-close" onClick={() => setError('')}>✕</button>
         </div>
@@ -227,53 +227,53 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /><p>{t('prescriptions.loadingPrescriptions')}</p></div>
       ) : filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#6b7280' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>💊</div>
+        <div className="si-71785fd4">
+          <div className="si-aea35a6f">💊</div>
           <h2>{prescriptions.length === 0 ? t('prescriptions.noPrescriptionsYet') : t('prescriptions.noMatchingPrescriptions')}</h2>
           <p>{isVet || isAdmin ? t('prescriptions.vetEmptyMessage') : t('prescriptions.ownerEmptyMessage')}</p>
           {(isVet || isAdmin) && prescriptions.length === 0 && (
-            <button className="module-btn primary" style={{ marginTop: 16 }} onClick={() => onNavigate('/doctor/prescriptions/new')}>
+            <button className="module-btn primary si-b0aee75b" onClick={() => onNavigate('/doctor/prescriptions/new')}>
               {t('prescriptions.writeAPrescription')}
             </button>
           )}
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: 16 }}>
-          <p style={{ fontSize: 13, color: '#6b7280', margin: 0 }}>
+        <div className="si-e295240a">
+          <p className="si-baf5210b">
             {t('prescriptions.showing', { count: filtered.length, total: prescriptions.length })}
           </p>
           {filtered.map(rx => (
             <div key={rx.id} className="card" style={{ borderLeft: rx.isActive ? '4px solid #10b981' : '4px solid #9ca3af' }}>
-              <div className="card-body" style={{ padding: 20 }}>
+              <div className="card-body si-95d82b41">
 
                 {/* Header row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+                <div className="si-9133fe98">
                   <div>
-                    <h3 style={{ margin: 0, fontSize: 16 }}>
+                    <h3 className="si-36330245">
                       💊 {rx.medications.map(m => m.name).join(', ')}
                     </h3>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginTop: 4 }}>
+                    <div className="si-7240d631">
                       {rx.animalName && (
-                        <span style={{ fontSize: 13, color: '#059669', fontWeight: 600 }}>
+                        <span className="si-e18fdbc5">
                           🐾 {rx.animalName}
                           {rx.animalSpecies && ` (${rx.animalSpecies}${rx.animalBreed ? ', ' + rx.animalBreed : ''})`}
                         </span>
                       )}
                       {isVet || isAdmin ? (
-                        rx.petOwnerName && <span style={{ fontSize: 13, color: '#6b7280' }}>👤 {rx.petOwnerName}</span>
+                        rx.petOwnerName && <span className="si-c3b93ebb">👤 {rx.petOwnerName}</span>
                       ) : (
-                        rx.vetName && <span style={{ fontSize: 13, color: '#6b7280' }}>👨‍⚕️ Dr. {rx.vetName}</span>
+                        rx.vetName && <span className="si-c3b93ebb">👨‍⚕️ Dr. {rx.vetName}</span>
                       )}
                       {rx.diagnosis && (
-                        <span style={{ fontSize: 13, color: '#667eea' }}>🩺 {rx.diagnosis}</span>
+                        <span className="si-c7510bed">🩺 {rx.diagnosis}</span>
                       )}
                     </div>
-                    <p style={{ color: '#9ca3af', fontSize: 12, margin: '4px 0 0' }}>
+                    <p className="si-08ee63ed">
                       {t('prescriptions.created')}: {formatDate(rx.createdAt)}
                       {rx.validUntil && ` • ${t('prescriptions.validUntil')}: ${formatDate(rx.validUntil)}`}
                     </p>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div className="si-ef8e09e5">
                     <span style={{
                       padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600,
                       background: rx.isActive ? '#d1fae5' : '#f3f4f6',
@@ -297,19 +297,19 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                       return (
                         <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: statusInfo.bg, color: statusInfo.color }}>
                           {statusInfo.label}
-                          {rx.pharmacyName && <small style={{ fontWeight: 400, opacity: 0.8 }}> · {rx.pharmacyName}</small>}
+                          {rx.pharmacyName && <small className="si-85beb1f8"> · {rx.pharmacyName}</small>}
                         </span>
                       )
                     })()}
                     {/* Rejection reason for vet */}
                     {(isVet || isAdmin) && rx.reviewStatus === 'rejected' && rx.reviewNotes && (
-                      <span style={{ fontSize: 11, color: '#c62828', background: '#fff5f5', padding: '3px 8px', borderRadius: 8, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={rx.reviewNotes}>
+                      <span className="si-cc5b138f" title={rx.reviewNotes}>
                         Reason: {rx.reviewNotes}
                       </span>
                     )}
                     <button
-                      className="btn btn-outline"
-                      style={{ fontSize: 12, padding: '4px 10px', color: '#2b6cb0', borderColor: '#2b6cb0' }}
+                      className="btn btn-outline si-3557c289"
+                     
                       disabled={loadingPrint === rx.id}
                       onClick={() => handlePrint(rx)}
                       title={t('prescriptions.printPrescription')}
@@ -317,15 +317,15 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                       {loadingPrint === rx.id ? '...' : `🖨 ${t('prescriptions.print')}`}
                     </button>
                     {rx.consultationId && (
-                      <button className="btn btn-outline" style={{ fontSize: 12, padding: '4px 10px' }}
+                      <button className="btn btn-outline si-10e9d421"
                         onClick={() => onNavigate(isVet || isAdmin ? `/doctor/consultation-room/${rx.consultationId}` : `/video-consultation/${rx.consultationId}`)}>
                         {t('prescriptions.viewConsultation')}
                       </button>
                     )}
                     {(isVet || isAdmin) && rx.isActive && (
                       <button
-                        className="btn btn-outline"
-                        style={{ fontSize: 12, padding: '4px 10px', color: '#dc2626', borderColor: '#dc2626' }}
+                        className="btn btn-outline si-45f0a758"
+                       
                         disabled={deactivating === rx.id}
                         onClick={() => handleDeactivate(rx.id)}
                       >
@@ -336,18 +336,18 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Medications */}
-                <div style={{ display: 'grid', gap: 6 }}>
+                <div className="si-10e52e93">
                   {rx.medications.map((med, i) => (
-                    <div key={i} style={{ padding: '8px 12px', background: '#f0fdf4', borderRadius: 6, fontSize: 14 }}>
+                    <div key={i} className="si-2b2ac1e4">
                       <strong>{med.name}</strong> — {med.dosage} • {med.frequency}
                       {med.duration && ` • ${med.duration}`}
-                      {med.instructions && <span style={{ color: '#6b7280' }}> ({med.instructions})</span>}
+                      {med.instructions && <span className="si-23033f05"> ({med.instructions})</span>}
                     </div>
                   ))}
                 </div>
 
                 {rx.instructions && (
-                  <p style={{ margin: '10px 0 0', fontSize: 13, color: '#4b5563' }}>
+                  <p className="si-e6856d50">
                     📝 {rx.instructions}
                   </p>
                 )}

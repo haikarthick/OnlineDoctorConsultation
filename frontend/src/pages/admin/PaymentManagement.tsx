@@ -92,7 +92,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       </div>
 
       {/* Tabs */}
-      <div className="module-tabs" style={{ marginBottom: 24 }}>
+      <div className="module-tabs si-af65fe13">
         <button className={`module-tab${activeTab === 'payments' ? ' active' : ''}`} onClick={() => setActiveTab('payments')}>
           💳 {t('paymentManagement.title')}
         </button>
@@ -108,7 +108,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
             <div className="loading-container"><div className="loading-spinner" /></div>
           ) : walletSummary ? (
             <>
-              <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 24 }}>
+              <div className="stats-grid si-ca072b4a">
                 <div className="stat-card">
                   <div className="stat-icon">💰</div>
                   <div className="stat-value">{formatCurrency((walletSummary.summary?.totalPlatformBalance || 0) / 100)}</div>
@@ -125,7 +125,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
                   <div className="stat-label">{t('paymentManagement.avgBalance')}</div>
                 </div>
               </div>
-              <h3 style={{ marginBottom: 12 }}>{t('paymentManagement.topBalances')}</h3>
+              <h3 className="si-bab8e8bc">{t('paymentManagement.topBalances')}</h3>
               {walletSummary.topBalances?.length === 0 ? (
                 <div className="empty-state"><p>No wallet balances found.</p></div>
               ) : (
@@ -163,7 +163,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       {activeTab === 'payments' && (<>
 
       {/* Summary */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 24 }}>
+      <div className="stats-grid si-30ab8a62">
         <div className="stat-card">
           <div className="stat-icon">💰</div>
           <div className="stat-value">{formatCurrency(totalRevenue / 100)}</div>
@@ -184,7 +184,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       {/* Refund Modal */}
       {refundingId && (
         <div className="modal-overlay" onClick={() => setRefundingId(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
+          <div className="modal si-25615047" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{t('paymentManagement.processRefund')}</h2>
               <button className="modal-close" onClick={() => setRefundingId(null)}>✕</button>
@@ -198,7 +198,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
                 <label className="form-label">{t('paymentManagement.reason')}</label>
                 <textarea className="form-input" rows={3} value={refundReason} onChange={e => setRefundReason(e.target.value)} placeholder={t('paymentManagement.reasonPlaceholder')} />
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+              <div className="si-f5f9f5f6">
                 <button className="btn btn-outline" onClick={() => setRefundingId(null)}>{t('paymentManagement.cancel')}</button>
                 <button className="btn btn-warning" disabled={processing || !refundAmount} onClick={handleRefund}>
                   {processing ? t('paymentManagement.processing') : t('paymentManagement.processRefund')}
@@ -210,8 +210,8 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       )}
 
       {/* Filters */}
-      <div className="search-filter-bar" style={{ marginBottom: 16 }}>
-        <select className="form-input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: 180 }}>
+      <div className="search-filter-bar si-7e63ec4f">
+        <select className="form-input si-7f996198" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
           <option value="">{t('paymentManagement.allStatuses')}</option>
           <option value="pending">{t('paymentManagement.pending')}</option>
           <option value="completed">{t('paymentManagement.completed')}</option>
@@ -225,7 +225,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /></div>
       ) : payments.length === 0 ? (
-        <div className="empty-state"><div style={{ fontSize: 48 }}>💳</div><h3>{t('paymentManagement.noPaymentsFound')}</h3></div>
+        <div className="empty-state"><div className="si-353e617d">💳</div><h3>{t('paymentManagement.noPaymentsFound')}</h3></div>
       ) : (
         <div className="data-table-container">
           <table className="data-table">
@@ -243,7 +243,7 @@ const PaymentManagement: React.FC<PaymentManagementProps> = ({ onNavigate }) => 
             <tbody>
               {payments.map(p => (
                 <tr key={p.id}>
-                  <td><code style={{ fontSize: 12 }}>{p.invoiceNumber || p.id.slice(0, 8)}</code></td>
+                  <td><code className="si-756a9f21">{p.invoiceNumber || p.id.slice(0, 8)}</code></td>
                   <td><strong>{formatCurrency(p.amount / 100)}</strong></td>
                   <td>{formatCurrency((p.taxAmount || 0) / 100)}</td>
                   <td>{p.paymentMethod || '—'}</td>

@@ -97,7 +97,7 @@ const NetworkMemberships: React.FC = () => {
       {error && (
         <div className="module-alert error">
           {error}
-          <button style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setError('')}>✕</button>
+          <button className="si-c93d89f9" onClick={() => setError('')}>✕</button>
         </div>
       )}
       {successMsg && <div className="module-alert success">{successMsg}</div>}
@@ -118,7 +118,7 @@ const NetworkMemberships: React.FC = () => {
         <>
           {/* ── Pending Requests ── */}
           {pending.length > 0 && (
-            <div className="module-card" style={{ marginBottom: 24 }}>
+            <div className="module-card si-af65fe13">
               <div className="nm-pending-banner">
                 🔔 {t('networkMemberships.pendingBanner', { count: pending.length })}
               </div>
@@ -190,7 +190,7 @@ const NetworkMemberships: React.FC = () => {
 
           {/* ── Active Memberships ── */}
           {active.length > 0 && (
-            <div className="module-card" style={{ marginBottom: 24 }}>
+            <div className="module-card si-af65fe13">
               <h2 className="nm-section-title">{t('networkMemberships.activeMemberships')}</h2>
               <div className="nm-cards-grid">
                 {active.map((e, idx) => (
@@ -209,14 +209,14 @@ const NetworkMemberships: React.FC = () => {
                     {e.hospitalName ? (
                       <div className="nm-id-row">
                         <span className="nm-id-label">{t('networkMemberships.consentScope')}</span>
-                        <span className="nm-id-value" style={{ background: '#eff6ff', color: '#1d4ed8', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>
+                        <span className="nm-id-value si-5c0f194d">
                           🏥 {e.hospitalName}
                         </span>
                       </div>
                     ) : (
                       <div className="nm-id-row">
                         <span className="nm-id-label">{t('networkMemberships.consentScope')}</span>
-                        <span className="nm-id-value" style={{ background: '#f0fdf4', color: '#15803d', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>
+                        <span className="nm-id-value si-9470d07e">
                           🌐 {t('networkMemberships.allBranches')}
                         </span>
                       </div>

@@ -124,7 +124,7 @@ const MovementLog: React.FC = () => {
       {error && !showForm && <div className="alert alert-error">{error}</div>}
 
       <div className="filters-bar">
-        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input" style={{ maxWidth: '350px' }}>
+        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input si-58fb376a">
           <option value="">{t('movementLog.selectEnterprise')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
@@ -146,18 +146,18 @@ const MovementLog: React.FC = () => {
           <button className="btn btn-primary" onClick={() => setShowForm(true)}>{t('movementLog.recordMovement')}</button>
         </div>
       ) : (
-        <div style={{ background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden' }}>
-          <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="si-bde003a3">
+          <table className="data-table si-4d966555">
             <thead>
               <tr>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.type')}</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.animalGroup')}</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.from')}</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.to')}</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.reason')}</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('common.status')}</th>
-                <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('movementLog.headers.date')}</th>
-                {user?.role === 'farmer' && <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>{t('common.actions')}</th>}
+                <th className="si-9874afe5">{t('movementLog.headers.type')}</th>
+                <th className="si-9874afe5">{t('movementLog.headers.animalGroup')}</th>
+                <th className="si-9874afe5">{t('movementLog.headers.from')}</th>
+                <th className="si-9874afe5">{t('movementLog.headers.to')}</th>
+                <th className="si-9874afe5">{t('movementLog.headers.reason')}</th>
+                <th className="si-9874afe5">{t('common.status')}</th>
+                <th className="si-9874afe5">{t('movementLog.headers.date')}</th>
+                {user?.role === 'farmer' && <th className="si-9874afe5">{t('common.actions')}</th>}
               </tr>
             </thead>
             <tbody>
@@ -167,28 +167,28 @@ const MovementLog: React.FC = () => {
                 }
                 const status = mov.status || 'pending'
                 return (
-                  <tr key={mov.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '0.75rem 1rem' }}>
+                  <tr key={mov.id} className="si-d953d1c8">
+                    <td className="si-1e6cf2e2">
                       <span>{MOVEMENT_TYPE_ICONS[mov.movementType] || '🔄'}</span>{' '}
                       <span className="badge">{MOVEMENT_TYPE_LABELS[mov.movementType] || mov.movementType}</span>
                     </td>
-                    <td style={{ padding: '0.75rem 1rem' }}>{mov.animalName || mov.groupName || '—'}</td>
-                    <td style={{ padding: '0.75rem 1rem' }}>{mov.fromLocationName || '—'}</td>
-                    <td style={{ padding: '0.75rem 1rem' }}>{mov.toLocationName || '—'}</td>
-                    <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{mov.reason || '—'}</td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
+                    <td className="si-1e6cf2e2">{mov.animalName || mov.groupName || '—'}</td>
+                    <td className="si-1e6cf2e2">{mov.fromLocationName || '—'}</td>
+                    <td className="si-1e6cf2e2">{mov.toLocationName || '—'}</td>
+                    <td className="si-64c8f9db">{mov.reason || '—'}</td>
+                    <td className="si-1e6cf2e2">
                       <span className="badge" style={{ background: statusColors[status] || '#94a3b8', color: '#fff', fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>
                         {t(`movements.${status}`, status)}
                       </span>
                     </td>
-                    <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{formatDate(mov.createdAt)}</td>
+                    <td className="si-9b4bf64c">{formatDate(mov.createdAt)}</td>
                     {user?.role === 'farmer' && (
-                      <td style={{ padding: '0.75rem 1rem', whiteSpace: 'nowrap' }}>
+                      <td className="si-fcba35b6">
                         {status === 'pending' ? (
                           <>
                             <button
-                              className="btn btn-sm"
-                              style={{ background: '#22c55e', color: '#fff', marginRight: '0.4rem' }}
+                              className="btn btn-sm si-d63e0b7c"
+                             
                               disabled={!!approvingId}
                               onClick={() => handleApprove(mov.id, 'approve')}
                             >
@@ -203,7 +203,7 @@ const MovementLog: React.FC = () => {
                             </button>
                           </>
                         ) : (
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>—</span>
+                          <span className="si-93f5e4c5">—</span>
                         )}
                       </td>
                     )}
@@ -227,7 +227,7 @@ const MovementLog: React.FC = () => {
                   {Object.entries(MOVEMENT_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </select>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="si-ec24da01">
                 <div className="form-group">
                   <label>{t('movementLog.form.animalId')}</label>
                   <SearchSelect
@@ -275,7 +275,7 @@ const MovementLog: React.FC = () => {
                 <label>{t('movementLog.form.notes')}</label>
                 <textarea rows={2} value={formData.notes} onChange={e => setFormData(f => ({ ...f, notes: e.target.value }))} />
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+              <div className="si-5af10afb">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>{t('common.cancel')}</button>
                 <button type="submit" className="btn btn-primary">{t('movementLog.form.recordBtn')}</button>
               </div>

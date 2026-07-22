@@ -18,6 +18,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import './App.css'
 import './styles/modules.css'
+import './styles/extracted-inline-styles.css'
 
 // ── Lazy-loaded protected pages ─────────────────────────────
 const Dashboard = lazy(() => import('./pages/Dashboard'))

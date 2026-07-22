@@ -167,7 +167,7 @@ const AlertCenter: React.FC = () => {
         <>
           <div className="tab-bar">
             <button className={`tab-btn ${tab === 'events' ? 'active' : ''}`} onClick={() => setTab('events')}>
-              {t('alertCenter.tabs.events')} {unreadCount > 0 && <span className="badge badge-danger" style={{ marginLeft: 6 }}>{unreadCount}</span>}
+              {t('alertCenter.tabs.events')} {unreadCount > 0 && <span className="badge badge-danger si-b4c2e3bc">{unreadCount}</span>}
             </button>
             <button className={`tab-btn ${tab === 'rules' ? 'active' : ''}`} onClick={() => setTab('rules')}>{t('alertCenter.tabs.rules')} ({rules.length})</button>
             <button className="btn btn-primary" onClick={handleRunChecks}>{t('alertCenter.runChecks')}</button>
@@ -200,7 +200,7 @@ const AlertCenter: React.FC = () => {
               </div>
               <div className="form-group">
                 <label>{t('alertCenter.ruleModal.conditions')}</label>
-                <textarea rows={4} value={ruleFormData.conditions} onChange={e => setRuleFormData({ ...ruleFormData, conditions: e.target.value })} style={{ fontFamily: 'monospace' }} />
+                <textarea rows={4} value={ruleFormData.conditions} onChange={e => setRuleFormData({ ...ruleFormData, conditions: e.target.value })} className="si-d70e5ad0" />
                 <small>Examples: {`{"daysAhead": 14}`} for vaccination_due, {`{"minScore": 50}`} for health_threshold</small>
               </div>
               <div className="form-actions">

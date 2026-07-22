@@ -97,7 +97,7 @@ export default function ReordersManagement({ pharmacyId }: Props) {
           <h3>🔄 {t('pharmacy.reorders.title')}</h3>
         </div>
 
-        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button></div>}
+        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} className="si-540cb98a">✕</button></div>}
 
         <div className="pharmacy-filter-bar">
           <select className="pharmacy-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
@@ -109,11 +109,11 @@ export default function ReordersManagement({ pharmacyId }: Props) {
             <option value="received">{t('pharmacy.reorders.status.received')}</option>
             <option value="cancelled">{t('pharmacy.reorders.status.cancelled')}</option>
           </select>
-          <span style={{ fontSize: '0.82rem', color: '#888' }}>{filtered.length} {t('pharmacy.reorders.orders')}</span>
+          <span className="si-22cd98cf">{filtered.length} {t('pharmacy.reorders.orders')}</span>
         </div>
 
         {loading ? (
-          <p style={{ color: '#888', padding: '20px 0', textAlign: 'center' }}>{t('common.loading')}</p>
+          <p className="si-43f86130">{t('common.loading')}</p>
         ) : filtered.length === 0 ? (
           <div className="pharmacy-empty">
             <div className="empty-icon">🔄</div>
@@ -141,22 +141,22 @@ export default function ReordersManagement({ pharmacyId }: Props) {
                     <tr key={r.id}>
                       <td>
                         <strong>{r.med_name}</strong>
-                        {r.form && <small style={{ color: '#888', display: 'block' }}>{r.form} {r.strength}</small>}
+                        {r.form && <small className="si-1a0c0bfa">{r.form} {r.strength}</small>}
                       </td>
                       <td><strong>{r.requested_qty}</strong></td>
-                      <td>{r.supplier_name || <span style={{ color: '#ccc' }}>—</span>}</td>
-                      <td style={{ fontSize: '0.82rem' }}>
+                      <td>{r.supplier_name || <span className="si-c81ca09e">—</span>}</td>
+                      <td className="si-c5381d69">
                         {r.requested_by_name}
                         {r.triggered_by === 'automatic' && (
-                          <span className="pharm-badge" style={{ background: '#e3f2fd', color: '#1565c0', marginLeft: 4, fontSize: '0.7rem' }}>
+                          <span className="pharm-badge si-d463a1cd">
                             {t('pharmacy.reorders.auto')}
                           </span>
                         )}
                       </td>
-                      <td style={{ fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
+                      <td className="si-86931177">
                         {formatDate(r.created_at)}
                         {r.expected_delivery_date && (
-                          <small style={{ display: 'block', color: '#888' }}>
+                          <small className="si-1a0c0bfa">
                             Exp: {formatDate(r.expected_delivery_date)}
                           </small>
                         )}
@@ -166,13 +166,13 @@ export default function ReordersManagement({ pharmacyId }: Props) {
                           {t(`pharmacy.reorders.status.${r.status}`) || r.status.replace(/_/g, ' ')}
                         </span>
                       </td>
-                      <td style={{ fontSize: '0.82rem', color: '#555' }}>
-                        {r.tracking_number || <span style={{ color: '#ccc' }}>—</span>}
-                        {r.shipped_at && <small style={{ display: 'block', color: '#888' }}>Shipped: {formatDate(r.shipped_at)}</small>}
-                        {r.received_at && <small style={{ display: 'block', color: '#388e3c' }}>Received: {formatDate(r.received_at)}</small>}
+                      <td className="si-f2dbbee4">
+                        {r.tracking_number || <span className="si-c81ca09e">—</span>}
+                        {r.shipped_at && <small className="si-1a0c0bfa">Shipped: {formatDate(r.shipped_at)}</small>}
+                        {r.received_at && <small className="si-b661dbed">Received: {formatDate(r.received_at)}</small>}
                       </td>
                       <td>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <div className="si-8aa04a6d">
                           {r.status === 'pending' && (
                             <button type="button" className="module-btn small"
                               disabled={updatingId === r.id}
@@ -201,7 +201,7 @@ export default function ReordersManagement({ pharmacyId }: Props) {
                             </button>
                           )}
                           {!['received', 'cancelled'].includes(r.status) && (
-                            <button type="button" className="module-btn small" style={{ color: '#c62828', borderColor: '#f44336' }}
+                            <button type="button" className="module-btn small si-bc631a4a"
                               disabled={updatingId === r.id}
                               onClick={() => updateStatus(r.id, 'cancelled')}>
                               {t('common.cancel')}
@@ -221,7 +221,7 @@ export default function ReordersManagement({ pharmacyId }: Props) {
       {/* Tracking modal */}
       {editingTracking && (
         <div className="pharm-modal-overlay" onClick={() => setEditingTracking(null)}>
-          <div className="pharm-modal" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
+          <div className="pharm-modal si-3196bd33" onClick={e => e.stopPropagation()}>
             <div className="pharm-modal-header">
               <h2>📦 {t('pharmacy.reorders.addTracking')}</h2>
               <button type="button" className="pharm-modal-close" onClick={() => setEditingTracking(null)}>✕</button>

@@ -166,7 +166,7 @@ export default function MedicationCatalog({ networkId }: Props) {
           </button>
         </div>
 
-        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button></div>}
+        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} className="si-540cb98a">✕</button></div>}
 
         <div className="pharmacy-filter-bar">
           <input
@@ -175,19 +175,19 @@ export default function MedicationCatalog({ networkId }: Props) {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <span style={{ fontSize: '0.82rem', color: '#888', whiteSpace: 'nowrap' }}>
+          <span className="si-6ac84057">
             {filtered.length} {t('pharmacy.catalog.medications')}
           </span>
         </div>
 
         {loading ? (
-          <p style={{ color: '#888', padding: '20px 0', textAlign: 'center' }}>{t('common.loading')}</p>
+          <p className="si-43f86130">{t('common.loading')}</p>
         ) : filtered.length === 0 ? (
           <div className="pharmacy-empty">
             <div className="empty-icon">💊</div>
             <p>{search ? t('pharmacy.catalog.noResults') : t('pharmacy.catalog.empty')}</p>
             {!search && (
-              <button type="button" className="module-btn primary" style={{ marginTop: 12 }} onClick={openAdd}>
+              <button type="button" className="module-btn primary si-66faea9d" onClick={openAdd}>
                 + {t('pharmacy.catalog.addFirst')}
               </button>
             )}
@@ -213,23 +213,23 @@ export default function MedicationCatalog({ networkId }: Props) {
                     <td>
                       <strong>{med.name}</strong>
                       {med.generic_name && <br />}
-                      {med.generic_name && <small style={{ color: '#888' }}>{med.generic_name}</small>}
+                      {med.generic_name && <small className="si-40d2db53">{med.generic_name}</small>}
                       {med.is_controlled && (
-                        <span className="pharm-badge" style={{ background: '#fce4ec', color: '#c62828', marginLeft: 6, fontSize: '0.7rem' }}>
+                        <span className="pharm-badge si-4acb6c45">
                           {t('pharmacy.catalog.controlled')}
                         </span>
                       )}
                       {(med.withdrawal_period_days ?? 0) > 0 && (
-                        <span className="pharm-badge" style={{ background: '#fff8e1', color: '#f57f17', marginLeft: 4, fontSize: '0.7rem' }}>
+                        <span className="pharm-badge si-61bfaf4d">
                           WP {med.withdrawal_period_days}d
                         </span>
                       )}
                     </td>
                     <td>
-                      <span style={{ textTransform: 'capitalize' }}>{med.form}</span>
-                      {med.strength && <small style={{ color: '#888', display: 'block' }}>{med.strength}</small>}
+                      <span className="si-ecf1d5e5">{med.form}</span>
+                      {med.strength && <small className="si-1a0c0bfa">{med.strength}</small>}
                     </td>
-                    <td>{med.supplier_name || <span style={{ color: '#ccc' }}>—</span>}</td>
+                    <td>{med.supplier_name || <span className="si-c81ca09e">—</span>}</td>
                     <td>{formatCurrency(med.unit_cost)}</td>
                     <td>{formatCurrency(med.selling_price)}</td>
                     <td>{med.reorder_point} {med.unit}</td>
@@ -239,12 +239,12 @@ export default function MedicationCatalog({ networkId }: Props) {
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: 6 }}>
+                      <div className="si-9f20fe5e">
                         <button type="button" className="module-btn small" onClick={() => openEdit(med)}>
                           {t('common.edit')}
                         </button>
                         {med.is_active && (
-                          <button type="button" className="module-btn small" style={{ color: '#c62828', borderColor: '#f44336' }} onClick={() => handleDeactivate(med)}>
+                          <button type="button" className="module-btn small si-bc631a4a" onClick={() => handleDeactivate(med)}>
                             {t('common.deactivate')}
                           </button>
                         )}
@@ -261,7 +261,7 @@ export default function MedicationCatalog({ networkId }: Props) {
       {/* Add / Edit Modal */}
       {showModal && (
         <div className="pharm-modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="pharm-modal" style={{ maxWidth: 680 }} onClick={e => e.stopPropagation()}>
+          <div className="pharm-modal si-053af531" onClick={e => e.stopPropagation()}>
             <div className="pharm-modal-header">
               <h2>{editing ? t('pharmacy.catalog.editTitle') : t('pharmacy.catalog.addTitle')}</h2>
               <button type="button" className="pharm-modal-close" onClick={() => setShowModal(false)}>✕</button>
@@ -285,7 +285,7 @@ export default function MedicationCatalog({ networkId }: Props) {
                 <div className="pharm-form-group">
                   <label>{t('pharmacy.catalog.form')}</label>
                   <select value={form.form} onChange={e => setForm(f => ({ ...f, form: e.target.value }))}>
-                    {FORMS.map(f => <option key={f} value={f} style={{ textTransform: 'capitalize' }}>{f}</option>)}
+                    {FORMS.map(f => <option key={f} value={f} className="si-ecf1d5e5">{f}</option>)}
                   </select>
                 </div>
                 <div className="pharm-form-group">
@@ -370,13 +370,13 @@ export default function MedicationCatalog({ networkId }: Props) {
                   <label>{t('pharmacy.catalog.withdrawalDays')}</label>
                   <input type="number" min="0" value={form.withdrawal_period_days}
                     onChange={e => setForm(f => ({ ...f, withdrawal_period_days: parseInt(e.target.value) || 0 }))} />
-                  <small style={{ color: '#888', fontSize: '0.75rem' }}>{t('pharmacy.catalog.withdrawalNote')}</small>
+                  <small className="si-66fcce46">{t('pharmacy.catalog.withdrawalNote')}</small>
                 </div>
-                <div className="pharm-form-group" style={{ display: 'flex', alignItems: 'center', paddingTop: 24 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 600 }}>
+                <div className="pharm-form-group si-86b7241a">
+                  <label className="si-6fb0823b">
                     <input type="checkbox" checked={form.is_controlled}
                       onChange={e => setForm(f => ({ ...f, is_controlled: e.target.checked }))}
-                      style={{ width: 'auto' }} />
+                      className="si-7f2e0347" />
                     {t('pharmacy.catalog.isControlled')}
                   </label>
                 </div>

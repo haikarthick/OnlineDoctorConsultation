@@ -68,7 +68,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
   }
 
   const renderStars = (rating: number, size = 16) => (
-    <span style={{ display: 'inline-flex', gap: 1 }}>
+    <span className="si-317a3d7a">
       {Array.from({ length: 5 }, (_, i) => (
         <span key={i} style={{ color: i < Math.round(rating) ? '#f59e0b' : '#d1d5db', fontSize: size }}>★</span>
       ))}
@@ -97,7 +97,7 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
         <div className="empty-state">
           <div className="empty-icon">⚠️</div>
           <h3>{error || t('vetProfile.notFound')}</h3>
-          <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => onNavigate('/find-doctor')}>
+          <button className="btn btn-primary si-66faea9d" onClick={() => onNavigate('/find-doctor')}>
             {t('vetProfile.backToFindDoctor')}
           </button>
         </div>
@@ -108,195 +108,183 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
   const experience = vet.yearsOfExperience || vet.experience || 0
 
   return (
-    <div className="module-page" style={{ maxWidth: 960, margin: '0 auto' }}>
+    <div className="module-page si-93ce6507">
       {/* Back button */}
       <button onClick={() => onNavigate('/find-doctor')}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+        className="si-b4d07026">
         {t('vetProfile.backToFindDoctor')}
       </button>
 
       {/* ── Profile Header ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        borderRadius: 16, padding: '32px 36px', color: 'white', marginBottom: 24,
-        display: 'flex', gap: 28, alignItems: 'center', flexWrap: 'wrap'
-      }}>
-        <div style={{
-          width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 42, fontWeight: 700,
-          border: '3px solid rgba(255,255,255,0.4)', flexShrink: 0
-        }}>
+      <div className="si-9c8f4f29">
+        <div className="si-c4374ccb">
           {vet.firstName?.charAt(0) || '🐾'}
         </div>
-        <div style={{ flex: 1, minWidth: 240 }}>
-          <h1 style={{ margin: 0, fontSize: 28 }}>Dr. {vet.firstName || ''} {vet.lastName || ''}</h1>
-          <p style={{ margin: '6px 0 0', opacity: 0.9, fontSize: 15 }}>
+        <div className="si-f9a19b13">
+          <h1 className="si-941c12ef">Dr. {vet.firstName || ''} {vet.lastName || ''}</h1>
+          <p className="si-703d77f6">
             {(vet.specializations || []).join(', ') || 'General Veterinarian'}
           </p>
-          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div className="si-145bdc71">
             {renderStars(Number(vet.rating) || 0, 18)}
-            <span style={{ fontWeight: 600, fontSize: 16 }}>{Number(vet.rating || 0).toFixed(1)}</span>
-            <span style={{ opacity: 0.8, fontSize: 13 }}>({vet.totalReviews || 0} reviews)</span>
-            {vet.isVerified && <span style={{ background: 'rgba(255,255,255,0.2)', padding: '2px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600 }}>✓ Verified</span>}
+            <span className="si-244b0f61">{Number(vet.rating || 0).toFixed(1)}</span>
+            <span className="si-7e5620e0">({vet.totalReviews || 0} reviews)</span>
+            {vet.isVerified && <span className="si-796c4341">✓ Verified</span>}
           </div>
-          <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {vet.isAvailable && <span style={{ background: '#059669', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>● Available</span>}
-            {vet.acceptsEmergency && <span style={{ background: '#dc2626', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}>🚨 Emergency</span>}
+          <div className="si-f4a5565c">
+            {vet.isAvailable && <span className="si-a74bd6ce">● Available</span>}
+            {vet.acceptsEmergency && <span className="si-ee4b738d">🚨 Emergency</span>}
             {reliability?.isReliable && (
-              <span style={{ background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}
+              <span className="si-cb5a5738"
                 title={`Reliability score: ${reliability.reliabilityScore}% (${reliability.totalBookings} bookings, ${reliability.totalCancellations} cancellations)`}>
                 ✅ Guaranteed
               </span>
             )}
             {reliability && !reliability.isReliable && (
-              <span style={{ background: 'rgba(255,200,0,0.3)', padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600 }}
+              <span className="si-dbec1238"
                 title={`Reliability score: ${reliability.reliabilityScore}% — This doctor has had ${reliability.monthCancellations} cancellation(s) this month`}>
                 ⚠️ {reliability.reliabilityScore}% reliable
               </span>
             )}
           </div>
         </div>
-        <div style={{ textAlign: 'center', flexShrink: 0 }}>
-          <div style={{ fontSize: 28, fontWeight: 700 }}>{formatCurrency(vet.consultationFee || 0)}</div>
-          <div style={{ fontSize: 12, opacity: 0.8 }}>{t('vetProfile.perSession')}</div>
-          <button className="btn" onClick={() => onNavigate(`/book-consultation?vetId=${vet.userId}`)}
-            style={{ marginTop: 12, background: 'white', color: '#4F46E5', fontWeight: 700, padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}>
+        <div className="si-f9523ef5">
+          <div className="si-2154c3c2">{formatCurrency(vet.consultationFee || 0)}</div>
+          <div className="si-dbe52463">{t('vetProfile.perSession')}</div>
+          <button className="btn si-6b456d68" onClick={() => onNavigate(`/book-consultation?vetId=${vet.userId}`)}
+           >
             📅 {t('vetProfile.bookConsultation')}
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+      <div className="si-3161d7c5">
         {/* ── About ── */}
-        <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '20px 24px' }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>📋 {t('vetProfile.about')}</h3>
-          <p style={{ color: '#4b5563', fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+        <div className="si-8d2f51ba">
+          <h3 className="si-74083aa1">📋 {t('vetProfile.about')}</h3>
+          <p className="si-ee644e7d">
             {vet.bio || t('vetProfile.noBio')}
           </p>
         </div>
 
         {/* ── Stats ── */}
-        <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '20px 24px' }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>📊 {t('vetProfile.statistics')}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#2563eb' }}>{experience}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('vetProfile.yearsExperience')}</div>
+        <div className="si-8d2f51ba">
+          <h3 className="si-74083aa1">📊 {t('vetProfile.statistics')}</h3>
+          <div className="si-fbb64b4e">
+            <div className="si-789be025">
+              <div className="si-89e8725d">{experience}</div>
+              <div className="si-48a0b045">{t('vetProfile.yearsExperience')}</div>
             </div>
-            <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#059669' }}>{vet.totalConsultations || 0}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('vetProfile.consultations')}</div>
+            <div className="si-789be025">
+              <div className="si-5ed0b9a5">{vet.totalConsultations || 0}</div>
+              <div className="si-48a0b045">{t('vetProfile.consultations')}</div>
             </div>
-            <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#f59e0b' }}>{Number(vet.rating || 0).toFixed(1)}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('vetProfile.rating')}</div>
+            <div className="si-789be025">
+              <div className="si-96dc472c">{Number(vet.rating || 0).toFixed(1)}</div>
+              <div className="si-48a0b045">{t('vetProfile.rating')}</div>
             </div>
-            <div style={{ textAlign: 'center', padding: 12, background: '#f9fafb', borderRadius: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#8b5cf6' }}>{vet.totalReviews || 0}</div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('vetProfile.reviews')}</div>
+            <div className="si-789be025">
+              <div className="si-575f78ab">{vet.totalReviews || 0}</div>
+              <div className="si-48a0b045">{t('vetProfile.reviews')}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+      <div className="si-3161d7c5">
         {/* ── Qualifications & Specializations ── */}
-        <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '20px 24px' }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>🎓 {t('vetProfile.qualifications')}</h3>
+        <div className="si-8d2f51ba">
+          <h3 className="si-74083aa1">🎓 {t('vetProfile.qualifications')}</h3>
           {(vet.qualifications || []).length > 0 ? (
-            <ul style={{ margin: 0, paddingLeft: 20, color: '#374151', fontSize: 14, lineHeight: 2 }}>
+            <ul className="si-67f60fa0">
               {vet.qualifications.map((q, i) => <li key={i}>{q}</li>)}
             </ul>
-          ) : <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>{t('vetProfile.notSpecified')}</p>}
+          ) : <p className="si-dd1c0d5a">{t('vetProfile.notSpecified')}</p>}
 
-          <h3 style={{ margin: '16px 0 12px', fontSize: 16, color: '#1f2937' }}>🩺 {t('vetProfile.specializations')}</h3>
+          <h3 className="si-ac6bd8ad">🩺 {t('vetProfile.specializations')}</h3>
           {(vet.specializations || []).length > 0 ? (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <div className="si-50c82988">
               {vet.specializations.map((s, i) => (
-                <span key={i} style={{ background: '#eef2ff', color: '#4338ca', padding: '4px 12px', borderRadius: 16, fontSize: 13, fontWeight: 500 }}>{s}</span>
+                <span key={i} className="si-f0aea0d0">{s}</span>
               ))}
             </div>
-          ) : <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>{t('vetProfile.generalPractice')}</p>}
+          ) : <p className="si-dd1c0d5a">{t('vetProfile.generalPractice')}</p>}
         </div>
 
         {/* ── Practice Details ── */}
-        <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '20px 24px' }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, color: '#1f2937' }}>🏥 {t('vetProfile.practiceDetails')}</h3>
-          <div style={{ display: 'grid', gap: 10, fontSize: 14, color: '#374151' }}>
+        <div className="si-8d2f51ba">
+          <h3 className="si-74083aa1">🏥 {t('vetProfile.practiceDetails')}</h3>
+          <div className="si-a3e0353e">
             {vet.clinicName && (
-              <div><span style={{ color: '#6b7280' }}>{t('vetProfile.clinic')}:</span> <strong>{vet.clinicName}</strong></div>
+              <div><span className="si-23033f05">{t('vetProfile.clinic')}:</span> <strong>{vet.clinicName}</strong></div>
             )}
             {vet.clinicAddress && (
-              <div><span style={{ color: '#6b7280' }}>{t('vetProfile.address')}:</span> <strong>{vet.clinicAddress}</strong></div>
+              <div><span className="si-23033f05">{t('vetProfile.address')}:</span> <strong>{vet.clinicAddress}</strong></div>
             )}
             {vet.licenseNumber && (
-              <div><span style={{ color: '#6b7280' }}>{t('vetProfile.license')}:</span> <strong style={{ fontFamily: 'monospace' }}>{vet.licenseNumber}</strong></div>
+              <div><span className="si-23033f05">{t('vetProfile.license')}:</span> <strong className="si-d70e5ad0">{vet.licenseNumber}</strong></div>
             )}
-            <div><span style={{ color: '#6b7280' }}>{t('vetProfile.availableDays')}:</span> <strong>{formatDays(vet.availableDays)}</strong></div>
+            <div><span className="si-23033f05">{t('vetProfile.availableDays')}:</span> <strong>{formatDays(vet.availableDays)}</strong></div>
             {vet.availableHoursStart && vet.availableHoursEnd && (
-              <div><span style={{ color: '#6b7280' }}>{t('vetProfile.hours')}:</span> <strong>{vet.availableHoursStart} – {vet.availableHoursEnd}</strong></div>
+              <div><span className="si-23033f05">{t('vetProfile.hours')}:</span> <strong>{vet.availableHoursStart} – {vet.availableHoursEnd}</strong></div>
             )}
           </div>
 
-          <h3 style={{ margin: '16px 0 12px', fontSize: 16, color: '#1f2937' }}>🌐 {t('vetProfile.languages')}</h3>
+          <h3 className="si-ac6bd8ad">🌐 {t('vetProfile.languages')}</h3>
           {(vet.languages || []).length > 0 ? (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <div className="si-50c82988">
               {vet.languages.map((l, i) => (
-                <span key={i} style={{ background: '#f0fdf4', color: '#166534', padding: '4px 12px', borderRadius: 16, fontSize: 13, fontWeight: 500 }}>{l}</span>
+                <span key={i} className="si-2d17b549">{l}</span>
               ))}
             </div>
-          ) : <p style={{ color: '#9ca3af', fontSize: 14, margin: 0 }}>{t('vetProfile.notSpecified')}</p>}
+          ) : <p className="si-dd1c0d5a">{t('vetProfile.notSpecified')}</p>}
         </div>
       </div>
 
       {/* ── Reviews Section ── */}
-      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '24px 28px', marginBottom: 24 }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 18, color: '#1f2937' }}>
+      <div className="si-6430d10e">
+        <h3 className="si-2ba6a341">
           ⭐ {t('vetProfile.patientReviews')} ({vet.totalReviews || 0})
         </h3>
 
         {reviews.length === 0 && !reviewsLoading ? (
-          <div style={{ textAlign: 'center', padding: '24px 0', color: '#9ca3af' }}>
-            <div style={{ fontSize: 40, marginBottom: 8 }}>💬</div>
+          <div className="si-bd1436ca">
+            <div className="si-75bae6a3">💬</div>
             <p>{t('vetProfile.noReviews')}</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="si-58f59f7a">
             {reviews.map(review => (
-              <div key={review.id} style={{ borderBottom: '1px solid #f3f4f6', paddingBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                      width: 36, height: 36, borderRadius: '50%', background: '#eef2ff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontWeight: 700, color: '#4338ca', fontSize: 14
-                    }}>
+              <div key={review.id} className="si-22ff1db5">
+                <div className="si-9ba69a5a">
+                  <div className="si-98d3a741">
+                    <div className="si-851f0983">
                       {(review.petOwnerName || review.reviewerName || 'A').charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: 14, color: '#1f2937' }}>
+                      <div className="si-643647c5">
                         {review.petOwnerName || review.reviewerName || 'Anonymous'}
                       </div>
-                      <div style={{ fontSize: 12, color: '#9ca3af' }}>
+                      <div className="si-3f4bbe41">
                         {new Date(review.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <div className="si-ba711cbb">
                     {renderStars(review.rating, 14)}
-                    <span style={{ fontWeight: 600, fontSize: 13, color: '#374151', marginLeft: 4 }}>{review.rating}/5</span>
-                    {review.isVerified && <span style={{ fontSize: 11, color: '#059669', marginLeft: 6 }}>✓ Verified</span>}
+                    <span className="si-be4f16ea">{review.rating}/5</span>
+                    {review.isVerified && <span className="si-3896a67f">✓ Verified</span>}
                   </div>
                 </div>
                 {review.comment && (
-                  <p style={{ color: '#4b5563', fontSize: 14, lineHeight: 1.6, margin: '4px 0 0', paddingLeft: 46 }}>
+                  <p className="si-8ecea675">
                     {review.comment}
                   </p>
                 )}
                 {review.responseFromVet && (
-                  <div style={{ marginTop: 8, marginLeft: 46, padding: '10px 14px', background: '#fefce8', borderRadius: 8, borderLeft: '3px solid #f59e0b' }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#92400e', marginBottom: 4 }}>{t('vetProfile.doctorResponse')}:</div>
-                    <p style={{ color: '#4b5563', fontSize: 13, lineHeight: 1.5, margin: 0 }}>{review.responseFromVet}</p>
+                  <div className="si-d0e3e03a">
+                    <div className="si-b89b9194">{t('vetProfile.doctorResponse')}:</div>
+                    <p className="si-387955ba">{review.responseFromVet}</p>
                   </div>
                 )}
               </div>
@@ -305,23 +293,21 @@ const VetProfilePage: React.FC<VetProfilePageProps> = ({ onNavigate }) => {
         )}
 
         {reviewsLoading && (
-          <div style={{ textAlign: 'center', padding: 16 }}>
-            <div className="loading-spinner" style={{ width: 24, height: 24, margin: '0 auto' }} />
+          <div className="si-0e6b0ac5">
+            <div className="loading-spinner si-c22fb4da" />
           </div>
         )}
 
         {hasMoreReviews && !reviewsLoading && (
           <button onClick={() => loadReviews(reviewPage + 1)}
-            className="btn btn-outline" style={{ display: 'block', margin: '16px auto 0' }}>
+            className="btn btn-outline si-81d60c8b">
             {t('vetProfile.loadMoreReviews')}
           </button>
         )}
       </div>
 
       {/* ── CTA Footer ── */}
-      <div style={{
-        textAlign: 'center', padding: '24px 0 8px'
-      }}>
+      <div className="si-70977387">
         <button className="btn btn-primary btn-lg" onClick={() => onNavigate(`/book-consultation?vetId=${vet.userId}`)}>
           📅 Book Consultation with Dr. {vet.firstName} {vet.lastName}
         </button>

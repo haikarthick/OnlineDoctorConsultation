@@ -71,10 +71,10 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
     return (
       <div className="module-page">
         <div className="page-header"><div><h1>{t('adminDashboard.title')}</h1></div></div>
-        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+        <div className="si-9ae995d6">
+          <div className="si-aea35a6f">⚠️</div>
           <h3>{error || t('adminDashboard.failedToLoad')}</h3>
-          <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={loadStats}>🔄 {t('adminDashboard.retry')}</button>
+          <button className="btn btn-primary si-b0aee75b" onClick={loadStats}>🔄 {t('adminDashboard.retry')}</button>
         </div>
       </div>
     )
@@ -93,29 +93,29 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
       </div>
 
       {/* Stats Grid */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
-        <div className="stat-card" onClick={() => onNavigate('/admin/users')} style={{ cursor: 'pointer' }} title={t('adminDashboard.userManagement')}>
+      <div className="stats-grid si-019485cb">
+        <div className="stat-card si-3c1f81b9" onClick={() => onNavigate('/admin/users')} title={t('adminDashboard.userManagement')}>
           <div className="stat-icon">👥</div>
           <div className="stat-value">{stats.totalUsers}</div>
           <div className="stat-label">{t('adminDashboard.totalUsers')}</div>
-          <p style={{ fontSize: 12, color: '#059669', margin: '4px 0 0' }}>
+          <p className="si-cbb75da5">
             {stats.activeUsers} {t('adminDashboard.active')}
           </p>
         </div>
-        <div className="stat-card" onClick={() => onNavigate('/admin/users')} style={{ cursor: 'pointer' }} title={t('adminDashboard.veterinarians')}>
+        <div className="stat-card si-3c1f81b9" onClick={() => onNavigate('/admin/users')} title={t('adminDashboard.veterinarians')}>
           <div className="stat-icon">👨‍⚕️</div>
           <div className="stat-value">{stats.totalVets}</div>
           <div className="stat-label">{t('adminDashboard.veterinarians')}</div>
         </div>
-        <div className="stat-card" onClick={() => onNavigate('/admin/consultations')} style={{ cursor: 'pointer' }} title={t('adminDashboard.consultations')}>
+        <div className="stat-card si-3c1f81b9" onClick={() => onNavigate('/admin/consultations')} title={t('adminDashboard.consultations')}>
           <div className="stat-icon">🩺</div>
           <div className="stat-value">{stats.totalConsultations}</div>
           <div className="stat-label">{t('adminDashboard.totalConsultations')}</div>
-          <p style={{ fontSize: 12, color: '#3b82f6', margin: '4px 0 0' }}>
+          <p className="si-92ce97ac">
             {stats.activeConsultations} {t('adminDashboard.active')}
           </p>
         </div>
-        <div className="stat-card" onClick={() => onNavigate('/admin/payments')} style={{ cursor: 'pointer' }} title={t('adminDashboard.payments')}>
+        <div className="stat-card si-3c1f81b9" onClick={() => onNavigate('/admin/payments')} title={t('adminDashboard.payments')}>
           <div className="stat-icon">💰</div>
           <div className="stat-value">${((stats.totalRevenue || 0) / 100).toLocaleString()}</div>
           <div className="stat-label">{t('adminDashboard.totalRevenue')}</div>
@@ -123,23 +123,23 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
       </div>
 
       {/* More Stats */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginTop: 16 }}>
-        <div className="stat-card" onClick={() => onNavigate('/consultations')} style={{ cursor: 'pointer' }} title={t('adminDashboard.pendingBookings')}>
+      <div className="stats-grid si-54b5c5e0">
+        <div className="stat-card si-3c1f81b9" onClick={() => onNavigate('/consultations')} title={t('adminDashboard.pendingBookings')}>
           <div className="stat-icon">📅</div>
           <div className="stat-value">{stats.pendingBookings}</div>
           <div className="stat-label">{t('adminDashboard.pendingBookings')}</div>
         </div>
-        <div className="stat-card" onClick={() => onNavigate('/admin/reviews')} style={{ cursor: 'pointer' }} title={t('adminDashboard.totalReviews')}>
+        <div className="stat-card si-3c1f81b9" onClick={() => onNavigate('/admin/reviews')} title={t('adminDashboard.totalReviews')}>
           <div className="stat-icon">⭐</div>
           <div className="stat-value">{(+(stats.averageRating ?? 0)).toFixed(1)}</div>
           <div className="stat-label">{t('adminDashboard.avgRating')}</div>
         </div>
-        <div className="stat-card" onClick={() => onNavigate('/admin/reviews')} style={{ cursor: 'pointer' }} title={t('adminDashboard.totalReviews')}>
+        <div className="stat-card si-3c1f81b9" onClick={() => onNavigate('/admin/reviews')} title={t('adminDashboard.totalReviews')}>
           <div className="stat-icon">📝</div>
           <div className="stat-value">{stats.totalReviews}</div>
           <div className="stat-label">{t('adminDashboard.totalReviews')}</div>
         </div>
-        <div className="stat-card" onClick={() => onNavigate('/admin/payments')} style={{ cursor: 'pointer' }} title={t('adminDashboard.pendingPayments')}>
+        <div className="stat-card si-3c1f81b9" onClick={() => onNavigate('/admin/payments')} title={t('adminDashboard.pendingPayments')}>
           <div className="stat-icon">💳</div>
           <div className="stat-value">{stats.pendingPayments}</div>
           <div className="stat-label">{t('adminDashboard.pendingPayments')}</div>
@@ -148,29 +148,29 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
 
       {/* Pending Actions */}
       {(stats.pendingUserApprovals ?? 0) > 0 && (
-        <div className="module-alert error" style={{ marginTop: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        <div className="module-alert error si-d0408997"
           onClick={() => onNavigate('/admin/users')}>
           <span>⚠️ <strong>{stats.pendingUserApprovals}</strong> user registration{(stats.pendingUserApprovals ?? 0) > 1 ? 's' : ''} pending your approval</span>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>Review →</span>
+          <span className="si-8756b2e7">Review →</span>
         </div>
       )}
       {(stats.pendingNetworkApprovals ?? 0) > 0 && (
-        <div className="module-alert error" style={{ marginTop: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+        <div className="module-alert error si-f764bc8b"
           onClick={() => onNavigate('/hospital-networks')}>
           <span>⚠️ <strong>{stats.pendingNetworkApprovals}</strong> hospital network{(stats.pendingNetworkApprovals ?? 0) > 1 ? 's' : ''} pending your approval</span>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>Review → </span>
+          <span className="si-8756b2e7">Review → </span>
         </div>
       )}
 
       {/* More Stats — row 3: approval queues */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginTop: 16 }}>
+      <div className="stats-grid si-54b5c5e0">
         <div className="stat-card" onClick={() => onNavigate('/admin/users')} style={{ cursor: 'pointer', borderLeft: (stats.pendingUserApprovals ?? 0) > 0 ? '4px solid #ef4444' : undefined }}
           title="User registrations awaiting approval">
           <div className="stat-icon">👤</div>
           <div className="stat-value" style={{ color: (stats.pendingUserApprovals ?? 0) > 0 ? '#ef4444' : undefined }}>{stats.pendingUserApprovals ?? 0}</div>
           <div className="stat-label">Pending User Approvals</div>
           {(stats.pendingUserApprovals ?? 0) > 0 && (
-            <p style={{ fontSize: 12, color: '#ef4444', margin: '4px 0 0', fontWeight: 600 }}>⚠️ Action Required</p>
+            <p className="si-74e80c30">⚠️ Action Required</p>
           )}
         </div>
         <div className="stat-card" onClick={() => onNavigate('/hospital-networks')} style={{ cursor: 'pointer', borderLeft: (stats.pendingNetworkApprovals ?? 0) > 0 ? '4px solid #f59e0b' : undefined }}
@@ -179,7 +179,7 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
           <div className="stat-value" style={{ color: (stats.pendingNetworkApprovals ?? 0) > 0 ? '#f59e0b' : undefined }}>{stats.pendingNetworkApprovals ?? 0}</div>
           <div className="stat-label">Pending Network Approvals</div>
           {(stats.pendingNetworkApprovals ?? 0) > 0 && (
-            <p style={{ fontSize: 12, color: '#f59e0b', margin: '4px 0 0', fontWeight: 600 }}>⚠️ Action Required</p>
+            <p className="si-28f50e75">⚠️ Action Required</p>
           )}
         </div>
         <div className="stat-card">
@@ -195,10 +195,10 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
       </div>
 
       {/* Quick Navigation */}
-      <div className="card" style={{ marginTop: 24 }}>
+      <div className="card si-b4c2d096">
         <div className="card-header"><h2>⚡ {t('adminDashboard.management')}</h2></div>
         <div className="card-body">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          <div className="si-8474b7be">
             {[
               { icon: '👥', label: t('adminDashboard.userManagement'), path: '/admin/users' },
               { icon: '🩺', label: t('adminDashboard.consultations'), path: '/admin/consultations' },
@@ -209,11 +209,11 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
             ].map(item => (
               <button
                 key={item.path}
-                className="btn btn-outline"
-                style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, height: 'auto' }}
+                className="btn btn-outline si-7ac62883"
+               
                 onClick={() => onNavigate(item.path)}
               >
-                <span style={{ fontSize: 28 }}>{item.icon}</span>
+                <span className="si-4b9a6e6e">{item.icon}</span>
                 <span>{item.label}</span>
               </button>
             ))}
@@ -222,54 +222,54 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
       </div>
 
       {/* System Health */}
-      <div className="card" style={{ marginTop: 24 }}>
+      <div className="card si-b4c2d096">
         <div className="card-header"><h2>🏥 {t('adminDashboard.systemHealth')}</h2></div>
         <div className="card-body">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            <div style={{ padding: 16, background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+          <div className="si-11f7f734">
+            <div className="si-d85b8bef">
+              <div className="si-bab2d193">
+                <span className="si-1a2a957f" />
                 <strong>{t('adminDashboard.apiServer')}</strong>
               </div>
-              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('adminDashboard.operational')}</p>
+              <p className="si-faa1c026">{t('adminDashboard.operational')}</p>
             </div>
-            <div style={{ padding: 16, background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+            <div className="si-d85b8bef">
+              <div className="si-bab2d193">
+                <span className="si-1a2a957f" />
                 <strong>{t('adminDashboard.database')}</strong>
               </div>
-              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('adminDashboard.connected')}</p>
+              <p className="si-faa1c026">{t('adminDashboard.connected')}</p>
             </div>
-            <div style={{ padding: 16, background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+            <div className="si-d85b8bef">
+              <div className="si-bab2d193">
+                <span className="si-1a2a957f" />
                 <strong>{t('adminDashboard.videoService')}</strong>
               </div>
-              <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>{t('adminDashboard.available')}</p>
+              <p className="si-faa1c026">{t('adminDashboard.available')}</p>
             </div>
           </div>
         </div>
       </div>
       {/* Revenue Trends */}
       {revenueTrends && (
-        <div className="card" style={{ marginTop: 24 }}>
+        <div className="card si-b4c2d096">
           <div className="card-header"><h2>📈 {t('adminDashboard.revenueTrends')} — {t('adminDashboard.last30Days')}</h2></div>
           <div className="card-body">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            <div className="si-e1725f0f">
               {/* Top Earning Vets */}
               <div>
-                <h4 style={{ margin: '0 0 12px', color: '#374151' }}>🏆 {t('adminDashboard.topEarningVets')}</h4>
+                <h4 className="si-861621a0">🏆 {t('adminDashboard.topEarningVets')}</h4>
                 {revenueTrends.topVets.length === 0 ? (
-                  <p style={{ color: '#9ca3af', fontSize: 14 }}>No data</p>
+                  <p className="si-c36d98d3">No data</p>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div className="si-977f8af1">
                     {revenueTrends.topVets.map((v, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#f9fafb', borderRadius: 8 }}>
+                      <div key={i} className="si-c1ac1c29">
                         <div>
-                          <span style={{ fontWeight: 600, fontSize: 14 }}>{i + 1}. {v.vetName}</span>
-                          <span style={{ fontSize: 12, color: '#6b7280', marginLeft: 8 }}>{v.consultations} consults</span>
+                          <span className="si-a9b7f385">{i + 1}. {v.vetName}</span>
+                          <span className="si-824a7a1e">{v.consultations} consults</span>
                         </div>
-                        <span style={{ fontWeight: 700, color: '#059669' }}>${((v.totalRevenue || 0) / 100).toFixed(2)}</span>
+                        <span className="si-a1917757">${((v.totalRevenue || 0) / 100).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -278,9 +278,9 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
 
               {/* Daily Revenue (last 7 days) */}
               <div>
-                <h4 style={{ margin: '0 0 12px', color: '#374151' }}>📊 {t('adminDashboard.dailyRevenue')}</h4>
+                <h4 className="si-861621a0">📊 {t('adminDashboard.dailyRevenue')}</h4>
                 {revenueTrends.daily.length === 0 ? (
-                  <p style={{ color: '#9ca3af', fontSize: 14 }}>No data</p>
+                  <p className="si-c36d98d3">No data</p>
                 ) : (() => {
                   const last7 = revenueTrends.daily.slice(-7)
                   const maxRev = Math.max(...last7.map(d => Number(d.revenue) || 0), 1)
@@ -288,20 +288,20 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
                   const totalRefunds = revenueTrends.daily.reduce((s, d) => s + (Number(d.refunds) || 0), 0)
                   return (
                     <>
-                      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 80, marginBottom: 8 }}>
+                      <div className="si-55b6ce05">
                         {last7.map((d, i) => {
                           const h = Math.max(4, Math.round(((Number(d.revenue) || 0) / maxRev) * 72))
                           return (
-                            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                            <div key={i} className="si-4ab6939e">
                               <div style={{ width: '100%', height: h, background: 'linear-gradient(180deg,#6366f1,#818cf8)', borderRadius: '4px 4px 0 0' }} title={`$${((Number(d.revenue) || 0) / 100).toFixed(2)}`} />
-                              <span style={{ fontSize: 10, color: '#9ca3af' }}>{new Date(d.date).getDate()}</span>
+                              <span className="si-85dee051">{new Date(d.date).getDate()}</span>
                             </div>
                           )
                         })}
                       </div>
-                      <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 13 }}>
+                      <div className="si-2b60bf86">
                         <span><strong>{totalTx}</strong> {t('adminDashboard.totalTransactions')}</span>
-                        <span style={{ color: '#ef4444' }}><strong>${((totalRefunds || 0) / 100).toFixed(2)}</strong> {t('adminDashboard.refundsIssued')}</span>
+                        <span className="si-4fb20e94"><strong>${((totalRefunds || 0) / 100).toFixed(2)}</strong> {t('adminDashboard.refundsIssued')}</span>
                       </div>
                     </>
                   )

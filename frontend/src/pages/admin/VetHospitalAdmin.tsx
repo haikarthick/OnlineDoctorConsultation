@@ -77,17 +77,17 @@ const VetHospitalAdmin: React.FC = () => {
 
   return (
     <div className="admin-page">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="si-5e716629">
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.6rem' }}>🏥 {t('vetHospitalAdmin.title')}</h1>
-          <p style={{ margin: '.3rem 0 0', color: 'var(--text-muted,#666)' }}>{t('vetHospitalAdmin.subtitle')}</p>
+          <h1 className="si-b3b517f5">🏥 {t('vetHospitalAdmin.title')}</h1>
+          <p className="si-0331b58e">{t('vetHospitalAdmin.subtitle')}</p>
         </div>
         <button className="btn-secondary" onClick={() => navigate('/vet-hospitals')}>{t('vetHospitalAdmin.browseAsUser')}</button>
       </div>
 
       {/* Stats Row */}
       {stats && (
-        <div className="vh-manage-stats" style={{ marginBottom: '1.5rem' }}>
+        <div className="vh-manage-stats si-1e52b2bd">
           {[
             { label: t('vetHospitalAdmin.totalHospitals'), value: Number(stats.total) || 0, icon: '🏥' },
             { label: t('vetHospitalAdmin.verified'), value: Number(stats.verified) || 0, icon: '✓', accent: '#059669' },
@@ -97,7 +97,7 @@ const VetHospitalAdmin: React.FC = () => {
             { label: t('vetHospitalAdmin.multiSpecialty'), value: Number(stats.multi_specialty) || 0, icon: '🏨' },
           ].map(s => (
             <div key={s.label} className="vh-stat-card">
-              <div style={{ fontSize: '1.3rem' }}>{s.icon}</div>
+              <div className="si-46606d89">{s.icon}</div>
               <div className="vh-stat-value" style={{ color: s.accent }}>{s.value}</div>
               <div className="vh-stat-label">{s.label}</div>
             </div>
@@ -106,7 +106,7 @@ const VetHospitalAdmin: React.FC = () => {
       )}
 
       {/* Admin Tabs */}
-      <div className="vh-profile-tabs" style={{ marginBottom: '1.25rem' }}>
+      <div className="vh-profile-tabs si-78c26469">
         <button className={`vh-tab${adminTab === 'hospitals' ? ' active' : ''}`} onClick={() => setAdminTab('hospitals')}>
           🏥 {t('vetHospitalAdmin.hospitals')} ({hospitals.length})
         </button>
@@ -117,7 +117,7 @@ const VetHospitalAdmin: React.FC = () => {
 
       {adminTab === 'hospitals' && (<>
       {/* Filters */}
-      <div className="vh-filters" style={{ marginBottom: '1.25rem' }}>
+      <div className="vh-filters si-78c26469">
         <div className="vh-search-row">
           <input className="vh-search-input" placeholder={t('vetHospitalAdmin.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
           <select className="vh-select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
@@ -132,8 +132,8 @@ const VetHospitalAdmin: React.FC = () => {
         </div>
       </div>
 
-      {error && <div className="error-message" style={{ marginBottom: '1rem' }}>{error}</div>}
-      {success && <div className="success-message" style={{ marginBottom: '1rem' }}>{success}</div>}
+      {error && <div className="error-message si-1cb81cae">{error}</div>}
+      {success && <div className="success-message si-1cb81cae">{success}</div>}
 
       {/* Table */}
       {loading ? (
@@ -141,7 +141,7 @@ const VetHospitalAdmin: React.FC = () => {
       ) : hospitals.length === 0 ? (
         <div className="empty-state"><div className="empty-state-icon">🏥</div><p>{t('vetHospitalAdmin.noHospitals')}</p></div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <div className="si-9aa6c55f">
           <table className="vh-admin-table">
             <thead>
               <tr>
@@ -159,40 +159,40 @@ const VetHospitalAdmin: React.FC = () => {
               {hospitals.map(h => (
                 <tr key={h.id}>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{h.name}</div>
-                    <div style={{ fontSize: '.77rem', color: 'var(--text-muted,#888)' }}>{h.id.slice(0,8)}…</div>
+                    <div className="si-b2cfcbec">{h.name}</div>
+                    <div className="si-a734c257">{h.id.slice(0,8)}…</div>
                   </td>
                   <td>{HOSPITAL_TYPE_LABELS[h.hospitalType] || h.hospitalType}</td>
                   <td>{h.city || '—'}{h.state ? `, ${h.state}` : ''}</td>
-                  <td style={{ textAlign: 'center' }}>{(h as any).totalDoctors ?? 0}</td>
+                  <td className="si-4b6b7fbc">{(h as any).totalDoctors ?? 0}</td>
                   <td>
                     {Number(h.rating) > 0
-                      ? <span style={{ color: '#f59e0b', fontWeight: 600 }}>★ {Number(h.rating).toFixed(1)}</span>
-                      : <span style={{ color: 'var(--text-muted,#aaa)' }}>—</span>}
+                      ? <span className="si-37c6b3a7">★ {Number(h.rating).toFixed(1)}</span>
+                      : <span className="si-d436f5f9">—</span>}
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '.3rem', flexWrap: 'wrap' }}>
+                    <div className="si-b06973c0">
                       {h.hasEmergency && <span className="badge badge-emergency">⚡</span>}
                       {h.is24Hours && <span className="badge badge-24h">24h</span>}
-                      {!h.isActive && <span className="badge" style={{ background: '#fee2e2', color: '#b91c1c' }}>{t('vetHospitalAdmin.inactive')}</span>}
+                      {!h.isActive && <span className="badge si-fbb9810e">{t('vetHospitalAdmin.inactive')}</span>}
                     </div>
                   </td>
                   <td>
                     {h.isVerified
                       ? <span className="badge badge-verified">✓ {t('vetHospitalAdmin.verified')}</span>
-                      : <span className="badge" style={{ background: '#fef9c3', color: '#92400e' }}>⏳ {t('vetHospitalAdmin.pendingStatus')}</span>}
+                      : <span className="badge si-48e60a28">⏳ {t('vetHospitalAdmin.pendingStatus')}</span>}
                   </td>
                   <td>
                     <div className="action-btns">
-                      <button className="btn-secondary" style={{ fontSize: '.76rem', padding: '.25rem .55rem' }}
+                      <button className="btn-secondary si-bdd5e4ae"
                         onClick={() => navigate(`/vet-hospitals/${h.id}`)}>{t('vetHospitalAdmin.view')}</button>
                       {!h.isVerified
-                        ? <button className="btn-primary" style={{ fontSize: '.76rem', padding: '.25rem .55rem' }}
+                        ? <button className="btn-primary si-bdd5e4ae"
                             disabled={actionLoading === h.id}
                             onClick={() => setVerifyTarget(h)}>
                             {actionLoading === h.id ? '…' : t('vetHospitalAdmin.verify')}
                           </button>
-                        : <button className="btn-danger" style={{ fontSize: '.76rem', padding: '.25rem .55rem' }}
+                        : <button className="btn-danger si-bdd5e4ae"
                             disabled={actionLoading === h.id}
                             onClick={() => handleVerify(h, false)}>
                             {actionLoading === h.id ? '…' : t('vetHospitalAdmin.unverify')}
@@ -210,18 +210,18 @@ const VetHospitalAdmin: React.FC = () => {
       {/* ── Document Review Tab ── */}
       {adminTab === 'documents' && (
         <div>
-          <h3 style={{ margin: '0 0 1rem' }}>{t('vetHospitalAdmin.pendingDocReviews')}</h3>
+          <h3 className="si-7f683059">{t('vetHospitalAdmin.pendingDocReviews')}</h3>
           {pendingLoading ? (
             <div className="loading-container"><div className="loading-spinner" /></div>
           ) : pendingHospitals.length === 0 ? (
-            <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '.5rem' }}>✅</div>
+            <div className="empty-state si-41acd90c">
+              <div className="si-28db9f67">✅</div>
               <p>{t('vetHospitalAdmin.noDocReviews')}</p>
             </div>
           ) : (
             <div className="doc-cards-grid">
               {pendingHospitals.map((h: any) => (
-                <div key={h.id} className="doc-card" style={{ cursor: 'pointer' }} onClick={() => navigate(`/vet-hospitals/${h.id}`)}>
+                <div key={h.id} className="doc-card si-3c1f81b9" onClick={() => navigate(`/vet-hospitals/${h.id}`)}>
                   <div className="doc-card-top">
                     <div>
                       <div className="doc-type-label">{h.name}</div>
@@ -231,13 +231,13 @@ const VetHospitalAdmin: React.FC = () => {
                       {h.pending_docs || h.pendingDocs || 0} pending
                     </span>
                   </div>
-                  <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap', marginTop: '.4rem' }}>
+                  <div className="si-3a2a02b0">
                     <span className="dac-item approved">{h.approved_docs || h.approvedDocs || 0} Approved</span>
                     <span className="dac-item rejected">{h.rejected_docs || h.rejectedDocs || 0} Rejected</span>
                     <span className="dac-item missing">{h.missing_docs || h.missingDocs || 0} Missing</span>
                   </div>
-                  <div style={{ marginTop: '.5rem', textAlign: 'right' }}>
-                    <span style={{ fontSize: '.82rem', color: '#2563eb', fontWeight: 600 }}>{t('vetHospitalAdmin.reviewDocuments')} →</span>
+                  <div className="si-f13c452b">
+                    <span className="si-44ed7787">{t('vetHospitalAdmin.reviewDocuments')} →</span>
                   </div>
                 </div>
               ))}
@@ -249,14 +249,14 @@ const VetHospitalAdmin: React.FC = () => {
       {/* Verify Confirmation Modal */}
       {verifyTarget && (
         <div className="modal-overlay" onClick={() => setVerifyTarget(null)}>
-          <div className="modal-content" style={{ maxWidth: 420 }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content si-25615047" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setVerifyTarget(null)}>✕</button>
             <h2>{t('vetHospitalAdmin.verifyHospital')}</h2>
             <p>{t('vetHospitalAdmin.verifyConfirm')} <strong>{verifyTarget.name}</strong>?</p>
-            <p style={{ fontSize: '.88rem', color: 'var(--text-muted,#666)' }}>
+            <p className="si-2c46f209">
               {t('vetHospitalAdmin.verifyMsg')}
             </p>
-            <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+            <div className="si-19fe263f">
               <button className="btn-secondary" onClick={() => setVerifyTarget(null)}>{t('vetHospitalAdmin.cancel')}</button>
               <button className="btn-primary" disabled={!!actionLoading} onClick={() => handleVerify(verifyTarget, true)}>
                 {actionLoading ? t('vetHospitalAdmin.verifying') : t('vetHospitalAdmin.confirmVerify')}

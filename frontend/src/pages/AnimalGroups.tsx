@@ -209,7 +209,7 @@ const AnimalGroups: React.FC = () => {
           <h1>{t('animalGroups.pageTitle')}</h1>
           <p className="subtitle">{t('animalGroups.subtitle')}</p>
         </div>
-        <div className="header-actions" style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="header-actions si-6fdaaf49">
           {selectedEnterpriseId && (
             <>
               <button className="btn btn-secondary" onClick={() => navigate('/animals')}>{t('common.myAnimals')}</button>
@@ -224,7 +224,7 @@ const AnimalGroups: React.FC = () => {
 
       {/* Enterprise Selector */}
       <div className="filters-bar">
-        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input" style={{ maxWidth: '350px' }}>
+        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input si-58fb376a">
           <option value="">{t('animalGroups.selectEnterprise')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
@@ -246,24 +246,24 @@ const AnimalGroups: React.FC = () => {
           <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>{t('animalGroups.createBtn')}</button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+        <div className="si-22cdfbdb">
           {groups.map(g => (
             <div key={g.id} className="card" style={{ borderRadius: '12px', padding: '1.25rem', borderLeft: `4px solid ${g.colorCode || 'var(--primary)'}` }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '1.75rem' }}>{groupIcon(g.groupType as AnimalGroupType)}</span>
+              <div className="si-99f8abcc">
+                <span className="si-91db75dc">{groupIcon(g.groupType as AnimalGroupType)}</span>
                 <div>
-                  <h3 style={{ margin: 0 }}>{g.name}</h3>
-                  <span className="badge" style={{ fontSize: '0.75rem' }}>{GROUP_TYPE_LABELS[g.groupType as AnimalGroupType] || g.groupType}</span>
+                  <h3 className="si-44087c4b">{g.name}</h3>
+                  <span className="badge si-8c23064b">{GROUP_TYPE_LABELS[g.groupType as AnimalGroupType] || g.groupType}</span>
                 </div>
               </div>
-              {g.species && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>{t('animalGroups.species')} {g.species} {g.breed ? `(${g.breed})` : ''}</p>}
-              {g.purpose && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>{t('animalGroups.purpose')} {g.purpose}</p>}
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>
+              {g.species && <p className="si-cf622af4">{t('animalGroups.species')} {g.species} {g.breed ? `(${g.breed})` : ''}</p>}
+              {g.purpose && <p className="si-cf622af4">{t('animalGroups.purpose')} {g.purpose}</p>}
+              <div className="si-bbfa5d5e">
                 <span>🐾 {g.currentCount} {t('animalGroups.animals')}</span>
-                {g.targetCount > 0 && <span style={{ color: 'var(--text-secondary)' }}>/ {g.targetCount} {t('animalGroups.target')}</span>}
+                {g.targetCount > 0 && <span className="si-c46367a3">/ {g.targetCount} {t('animalGroups.target')}</span>}
               </div>
-              {g.description && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>{g.description}</p>}
-              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {g.description && <p className="si-9cbc3f5c">{g.description}</p>}
+              <div className="si-0eca3602">
                 <button className="btn btn-sm btn-primary" onClick={() => openManageAnimals(g)} title={t('animalGroups.manageAnimals')}>
                   {t('animalGroups.manageAnimals')}
                 </button>
@@ -285,49 +285,49 @@ const AnimalGroups: React.FC = () => {
           ══════════════════════════════════════════════════════════ */}
       {manageGroup && (
         <div className="modal-overlay" onClick={() => setManageGroup(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '720px', maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
+          <div className="modal-content si-1e3f280a" onClick={e => e.stopPropagation()}>
+            <div className="si-ae9b91a7">
               <div>
-                <h2 style={{ margin: 0 }}>{t('animalGroups.manage.title', { name: manageGroup.name })}</h2>
-                <p style={{ color: '#6b7280', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
+                <h2 className="si-44087c4b">{t('animalGroups.manage.title', { name: manageGroup.name })}</h2>
+                <p className="si-34b83357">
                   {GROUP_TYPE_LABELS[manageGroup.groupType as AnimalGroupType] || manageGroup.groupType}
                   {manageGroup.species ? ` • ${manageGroup.species}` : ''}
                 </p>
               </div>
-              <button onClick={() => setManageGroup(null)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#6b7280' }}>✕</button>
+              <button onClick={() => setManageGroup(null)} className="si-2d49037b">✕</button>
             </div>
 
-            {animalSuccess && <div className="alert alert-success" style={{ padding: '8px 12px', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{animalSuccess}</div>}
-            {animalError && <div className="alert alert-error" style={{ padding: '8px 12px', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{animalError}</div>}
+            {animalSuccess && <div className="alert alert-success si-2bef5018">{animalSuccess}</div>}
+            {animalError && <div className="alert alert-error si-2bef5018">{animalError}</div>}
 
             {loadingAnimals ? (
-              <div style={{ padding: '2rem', textAlign: 'center' }}>{t('common.loading')}</div>
+              <div className="si-41acd90c">{t('common.loading')}</div>
             ) : (
-              <div style={{ flex: 1, overflow: 'auto' }}>
+              <div className="si-0adf99df">
                 {/* ── Animals Currently in Group ── */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.5rem' }}>
+                <div className="si-1e52b2bd">
+                  <h3 className="si-66e7e82d">
                     {t('animalGroups.manage.inGroup', { count: groupAnimals.length })}
                   </h3>
                   {groupAnimals.length === 0 ? (
-                    <div style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px', color: '#6b7280', fontSize: '0.85rem', textAlign: 'center' }}>
+                    <div className="si-7e76947c">
                       {t('animalGroups.manage.emptyGroup')}{' '}
                       <button onClick={() => { setManageGroup(null); navigate('/animals') }}
-                        style={{ background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.85rem', padding: 0 }}>
+                        className="si-42cfb803">
                         {t('animalGroups.manage.registerAnimal')}
                       </button> {t('animalGroups.manage.first')}
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <div className="si-41debbe8">
                       {groupAnimals.map((a: any) => (
-                        <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                        <div key={a.id} className="si-b948943c">
                           <div>
-                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{a.name}</span>
-                            <span style={{ color: '#6b7280', fontSize: '0.8rem', marginLeft: '0.5rem' }}>{a.species}{a.breed ? ` • ${a.breed}` : ''}</span>
-                            {a.uniqueId && <span style={{ color: '#9ca3af', fontSize: '0.75rem', marginLeft: '0.5rem', fontFamily: 'monospace' }}>{a.uniqueId}</span>}
+                            <span className="si-f30b396a">{a.name}</span>
+                            <span className="si-5e80ef64">{a.species}{a.breed ? ` • ${a.breed}` : ''}</span>
+                            {a.uniqueId && <span className="si-6a41a2a7">{a.uniqueId}</span>}
                           </div>
-                          <button className="btn btn-sm btn-danger" onClick={() => handleRemoveAnimal(a.id)}
-                            style={{ padding: '4px 10px', fontSize: '0.75rem' }}>{t('common.remove')}</button>
+                          <button className="btn btn-sm btn-danger si-70a187fb" onClick={() => handleRemoveAnimal(a.id)}
+                           >{t('common.remove')}</button>
                         </div>
                       ))}
                     </div>
@@ -336,20 +336,20 @@ const AnimalGroups: React.FC = () => {
 
                 {/* ── Available Animals to Assign ── */}
                 <div>
-                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1f2937', marginBottom: '0.5rem' }}>
+                  <h3 className="si-66e7e82d">
                     {t('animalGroups.manage.available', { count: availableAnimals.length })}
                   </h3>
                   <input
                     type="text" placeholder={t('animalGroups.manage.searchPlaceholder')}
                     value={animalSearch} onChange={e => setAnimalSearch(e.target.value)}
-                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '0.5rem' }}
+                    className="si-103cebdb"
                   />
                   {availableAnimals.length === 0 ? (
-                    <div style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px', color: '#6b7280', fontSize: '0.85rem', textAlign: 'center' }}>
+                    <div className="si-7e76947c">
                       {allMyAnimals.length === 0
                         ? <>{t('animalGroups.manage.noAnimals')}{' '}
                             <button onClick={() => { setManageGroup(null); navigate('/animals') }}
-                              style={{ background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.85rem', padding: 0 }}>
+                              className="si-42cfb803">
                               {t('animalGroups.manage.registerFirst')}
                             </button> {t('animalGroups.manage.toGetStarted')}</>
                         : animalSearch
@@ -357,21 +357,21 @@ const AnimalGroups: React.FC = () => {
                           : t('animalGroups.manage.allAssigned')}
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '250px', overflowY: 'auto' }}>
+                    <div className="si-66dba6d1">
                       {availableAnimals.map(a => (
-                        <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', background: '#fafafa', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                        <div key={a.id} className="si-aff1dbb0">
                           <div>
-                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{a.name}</span>
-                            <span style={{ color: '#6b7280', fontSize: '0.8rem', marginLeft: '0.5rem' }}>{a.species}{a.breed ? ` • ${a.breed}` : ''}</span>
-                            {a.uniqueId && <span style={{ color: '#9ca3af', fontSize: '0.75rem', marginLeft: '0.5rem', fontFamily: 'monospace' }}>{a.uniqueId}</span>}
+                            <span className="si-f30b396a">{a.name}</span>
+                            <span className="si-5e80ef64">{a.species}{a.breed ? ` • ${a.breed}` : ''}</span>
+                            {a.uniqueId && <span className="si-6a41a2a7">{a.uniqueId}</span>}
                             {a.groupId && a.groupName && (
-                              <span style={{ color: '#f59e0b', fontSize: '0.72rem', marginLeft: '0.5rem' }}>
+                              <span className="si-cfa7a876">
                                 (in: {a.groupName})
                               </span>
                             )}
                           </div>
-                          <button className="btn btn-sm btn-primary" onClick={() => handleAssignAnimal(a.id)}
-                            style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
+                          <button className="btn btn-sm btn-primary si-70a187fb" onClick={() => handleAssignAnimal(a.id)}
+                           >
                             {t('animalGroups.manage.assign')}
                           </button>
                         </div>
@@ -382,7 +382,7 @@ const AnimalGroups: React.FC = () => {
               </div>
             )}
 
-            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '0.75rem', marginTop: '0.75rem', display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="si-64c669e9">
               <button className="btn btn-secondary" onClick={() => setManageGroup(null)}>{t('common.close')}</button>
             </div>
           </div>
@@ -391,24 +391,24 @@ const AnimalGroups: React.FC = () => {
 
       {/* ══ Reassignment Confirmation Dialog ══ */}
       {confirmReassign && manageGroup && (
-        <div className="modal-overlay" style={{ zIndex: 10001 }} onClick={() => setConfirmReassign(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '460px', padding: '1.5rem' }}>
-            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-              <span style={{ fontSize: '2.5rem' }}>⚠️</span>
+        <div className="modal-overlay si-0f362879" onClick={() => setConfirmReassign(null)}>
+          <div className="modal-content si-9f12971b" onClick={e => e.stopPropagation()}>
+            <div className="si-0de4ec62">
+              <span className="si-818ab2c7">⚠️</span>
             </div>
-            <h3 style={{ margin: '0 0 0.5rem', textAlign: 'center', color: '#1f2937' }}>{t('animalGroups.reassign.title')}</h3>
-            <p style={{ color: '#4b5563', fontSize: '0.9rem', textAlign: 'center', lineHeight: 1.6, margin: '0 0 1rem' }}>
-              <strong style={{ color: '#1f2937' }}>{confirmReassign.name}</strong> ({confirmReassign.species}{confirmReassign.breed ? ` • ${confirmReassign.breed}` : ''})
-              is currently in <strong style={{ color: '#dc2626' }}>{confirmReassign.groupName || t('animalGroups.reassign.currentGroup')}</strong>.
+            <h3 className="si-ff99b75c">{t('animalGroups.reassign.title')}</h3>
+            <p className="si-cc0437c0">
+              <strong className="si-672b6b98">{confirmReassign.name}</strong> ({confirmReassign.species}{confirmReassign.breed ? ` • ${confirmReassign.breed}` : ''})
+              is currently in <strong className="si-f84f41a5">{confirmReassign.groupName || t('animalGroups.reassign.currentGroup')}</strong>.
             </p>
-            <p style={{ color: '#4b5563', fontSize: '0.9rem', textAlign: 'center', lineHeight: 1.6, margin: '0 0 1.25rem' }}>
+            <p className="si-908e4d8e">
               {t('animalGroups.reassign.moveMessage', { targetGroup: manageGroup.name })}
             </p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-              <button className="btn btn-secondary" onClick={() => setConfirmReassign(null)}
-                style={{ padding: '8px 20px', fontSize: '0.9rem' }}>{t('common.cancel')}</button>
-              <button className="btn btn-primary" onClick={() => doAssignAnimal(confirmReassign.id)}
-                style={{ padding: '8px 20px', fontSize: '0.9rem', background: '#dc2626', borderColor: '#dc2626' }}>
+            <div className="si-3083878c">
+              <button className="btn btn-secondary si-303f991c" onClick={() => setConfirmReassign(null)}
+               >{t('common.cancel')}</button>
+              <button className="btn btn-primary si-f5da1353" onClick={() => doAssignAnimal(confirmReassign.id)}
+               >
                 {t('animalGroups.reassign.confirmBtn')}
               </button>
             </div>
@@ -427,7 +427,7 @@ const AnimalGroups: React.FC = () => {
                 <label>{t('animalGroups.modal.name')}</label>
                 <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="si-ec24da01">
                 <div className="form-group">
                   <label>{t('animalGroups.modal.type')}</label>
                   <select value={formData.groupType} onChange={e => setFormData(f => ({ ...f, groupType: e.target.value as AnimalGroupType }))} required>
@@ -456,10 +456,10 @@ const AnimalGroups: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('animalGroups.modal.colorCode')}</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div className="si-0dd04361">
                     <div style={{ width: 36, height: 36, borderRadius: 6, border: '2px solid #d1d5db', background: formData.colorCode, flexShrink: 0 }} />
-                    <input type="color" value={formData.colorCode} onChange={e => setFormData(f => ({ ...f, colorCode: e.target.value }))} style={{ width: 40, height: 36, padding: 0, border: 'none', cursor: 'pointer' }} title="Pick a color" />
-                    <input type="text" value={formData.colorCode} onChange={e => { const v = e.target.value; if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setFormData(f => ({ ...f, colorCode: v })) }} style={{ width: 90, fontFamily: 'monospace', fontSize: '0.85rem' }} placeholder="#4F46E5" />
+                    <input type="color" value={formData.colorCode} onChange={e => setFormData(f => ({ ...f, colorCode: e.target.value }))} className="si-63147c7d" title="Pick a color" />
+                    <input type="text" value={formData.colorCode} onChange={e => { const v = e.target.value; if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) setFormData(f => ({ ...f, colorCode: v })) }} className="si-4ab6b540" placeholder="#4F46E5" />
                   </div>
                 </div>
               </div>
@@ -467,7 +467,7 @@ const AnimalGroups: React.FC = () => {
                 <label>{t('animalGroups.modal.description')}</label>
                 <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+              <div className="si-5af10afb">
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
                 <button type="submit" className="btn btn-primary">{editingGroup ? t('animalGroups.modal.updateBtn') : t('animalGroups.modal.createBtn')}</button>
               </div>

@@ -178,7 +178,7 @@ const HealthAnalytics: React.FC = () => {
                   <input type="number" step="0.1" value={formData.weightAtObservation} onChange={e => setFormData({ ...formData, weightAtObservation: e.target.value })} />
                 </div>
               </div>
-              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <div className="form-group si-06af062a">
                 <label>Description</label>
                 <textarea rows={3} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
               </div>

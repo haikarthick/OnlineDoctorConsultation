@@ -190,7 +190,7 @@ const IoTSensorPage: React.FC = () => {
                   <table className="data-table">
                     <thead><tr><th>{t('iotSensors.sensor')}</th><th>{t('common.type')}</th><th>{t('iotSensors.value')}</th><th>{t('iotSensors.anomaly')}</th><th>{t('iotSensors.time')}</th></tr></thead>
                     <tbody>{dashboard.recentAnomalies.slice(0, 10).map((a: any, i: number) => (
-                      <tr key={i} style={{ backgroundColor: 'rgba(239,68,68,0.05)' }}>
+                      <tr key={i} className="si-cbcacd9b">
                         <td>{a.sensor_name}</td><td>{a.sensor_type}</td>
                         <td><strong>{(+a.value).toFixed(2)}</strong> {a.sensor_unit || a.unit}</td>
                         <td><span className="badge badge-critical">{a.anomaly_type}</span></td>

@@ -540,7 +540,7 @@ const PublicListingDetail: React.FC<{
           </div>
 
           {tags.length > 0 && (
-            <div className="mp-card-tags" style={{ marginTop: 16 }}>
+            <div className="mp-card-tags si-b0aee75b">
               {tags.map((tag: string) => <span key={tag} className="mp-tag">{tag}</span>)}
             </div>
           )}

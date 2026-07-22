@@ -77,7 +77,7 @@ export default function PharmacySettings({ pharmacy, onRefresh }: Props) {
     return (
       <div className="pharmacy-card">
         <div className="pharmacy-card-header"><h3>⚙️ {t('pharmacy.settings.title')}</h3></div>
-        <p style={{ color: '#888', padding: '20px 0', textAlign: 'center' }}>{t('common.loading')}</p>
+        <p className="si-43f86130">{t('common.loading')}</p>
       </div>
     )
   }
@@ -87,9 +87,9 @@ export default function PharmacySettings({ pharmacy, onRefresh }: Props) {
       <div className="pharmacy-card-header">
         <h3>⚙️ {t('pharmacy.settings.title')}</h3>
       </div>
-      {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button></div>}
-      {success && <div style={{ background: '#e8f5e9', color: '#2e7d32', padding: '10px 14px', borderRadius: 8, marginBottom: 14, fontSize: '0.87rem' }}>✅ {success}</div>}
-      <form onSubmit={handleSave} style={{ maxWidth: 600 }}>
+      {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} className="si-540cb98a">✕</button></div>}
+      {success && <div className="si-b4b2a275">✅ {success}</div>}
+      <form onSubmit={handleSave} className="si-fd3355c4">
         <div className="pharm-form-group">
           <label>{t('pharmacy.settings.nameLabel')} <span className="req-star">*</span></label>
           <input value={form.pharmacy_name} onChange={e => setForm(f => ({ ...f, pharmacy_name: e.target.value }))} />
@@ -112,24 +112,24 @@ export default function PharmacySettings({ pharmacy, onRefresh }: Props) {
           <label>{t('pharmacy.settings.licenseNumber')}</label>
           <input value={form.license_number} onChange={e => setForm(f => ({ ...f, license_number: e.target.value }))} placeholder="e.g. PH/2024/001234" />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem' }}>
-            <input type="checkbox" checked={form.is_accepting_requests} onChange={e => setForm(f => ({ ...f, is_accepting_requests: e.target.checked }))} style={{ width: 'auto' }} />
+        <div className="si-f7d0e944">
+          <label className="si-5b02de19">
+            <input type="checkbox" checked={form.is_accepting_requests} onChange={e => setForm(f => ({ ...f, is_accepting_requests: e.target.checked }))} className="si-7f2e0347" />
             <span>
               <strong>{t('pharmacy.settings.acceptingRequests')}</strong>
-              <small style={{ display: 'block', color: '#888' }}>{t('pharmacy.settings.acceptingRequestsNote')}</small>
+              <small className="si-1a0c0bfa">{t('pharmacy.settings.acceptingRequestsNote')}</small>
             </span>
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem' }}>
-            <input type="checkbox" checked={form.is_primary_pharmacy} onChange={e => setForm(f => ({ ...f, is_primary_pharmacy: e.target.checked }))} style={{ width: 'auto' }} />
+          <label className="si-5b02de19">
+            <input type="checkbox" checked={form.is_primary_pharmacy} onChange={e => setForm(f => ({ ...f, is_primary_pharmacy: e.target.checked }))} className="si-7f2e0347" />
             <span>
               <strong>{t('pharmacy.settings.primaryPharmacy')}</strong>
-              <small style={{ display: 'block', color: '#888' }}>{t('pharmacy.settings.primaryPharmacyNote')}</small>
+              <small className="si-1a0c0bfa">{t('pharmacy.settings.primaryPharmacyNote')}</small>
             </span>
           </label>
         </div>
         <p className="req-legend">* {t('common.requiredField')}</p>
-        <div style={{ marginTop: 16, display: 'flex', gap: 10 }}>
+        <div className="si-6ef8ed8f">
           <button type="submit" className="module-btn primary" disabled={saving}>
             {saving ? `⏳ ${t('common.saving')}` : t('common.saveChanges')}
           </button>

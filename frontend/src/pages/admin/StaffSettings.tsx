@@ -105,44 +105,44 @@ export default function StaffSettings() {
   staff.forEach(s => { positionCounts[s.position] = (positionCounts[s.position] || 0) + 1 })
 
   return (
-    <div className="module-page" style={{ minHeight: 'calc(100vh - 64px)', padding: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+    <div className="module-page si-5cec5e87">
+      <div className="si-a307e2db">
         <div>
-          <h1 style={{ margin: 0, fontSize: 24 }}>👥 {t('staffSettings.title')}</h1>
-          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 14 }}>{t('staffSettings.subtitle')}</p>
+          <h1 className="si-1bc3a9fe">👥 {t('staffSettings.title')}</h1>
+          <p className="si-d078dad1">{t('staffSettings.subtitle')}</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="si-d223efb3">
           {hospitals.length > 1 && (
-            <select value={hospitalId} onChange={e => setHospitalId(e.target.value)} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 14 }}>
+            <select value={hospitalId} onChange={e => setHospitalId(e.target.value)} className="si-89cf1ca1">
               {hospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
             </select>
           )}
-          <button onClick={() => setShowAdd(true)} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>+ {t('staffSettings.addStaff')}</button>
+          <button onClick={() => setShowAdd(true)} className="si-880bdf60">+ {t('staffSettings.addStaff')}</button>
         </div>
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 20 }}>
-        <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: '4px solid #2563eb' }}>
-          <div style={{ fontSize: 12, color: '#64748b' }}>{t('staffSettings.totalStaff')}</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#2563eb' }}>{staff.length}</div>
+      <div className="si-cfa92bf8">
+        <div className="si-8e371dd0">
+          <div className="si-655cd763">{t('staffSettings.totalStaff')}</div>
+          <div className="si-075b513e">{staff.length}</div>
         </div>
-        <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: '4px solid #059669' }}>
-          <div style={{ fontSize: 12, color: '#64748b' }}>{t('staffSettings.active')}</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#059669' }}>{activeCount}</div>
+        <div className="si-e8d607cc">
+          <div className="si-655cd763">{t('staffSettings.active')}</div>
+          <div className="si-3ca1ce25">{activeCount}</div>
         </div>
-        <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: '4px solid #f59e0b' }}>
-          <div style={{ fontSize: 12, color: '#64748b' }}>{t('staffSettings.departments')}</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#f59e0b' }}>{Object.keys(grouped).length}</div>
+        <div className="si-20ff762c">
+          <div className="si-655cd763">{t('staffSettings.departments')}</div>
+          <div className="si-724132a4">{Object.keys(grouped).length}</div>
         </div>
-        <div style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', borderLeft: '4px solid #8b5cf6' }}>
-          <div style={{ fontSize: 12, color: '#64748b' }}>{t('staffSettings.positions')}</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#8b5cf6' }}>{Object.keys(positionCounts).length}</div>
+        <div className="si-e7273ea6">
+          <div className="si-655cd763">{t('staffSettings.positions')}</div>
+          <div className="si-8651386d">{Object.keys(positionCounts).length}</div>
         </div>
       </div>
 
       {/* Position Filter */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 16, overflowX: 'auto', paddingBottom: 4, flexWrap: 'wrap' }}>
+      <div className="si-ce182cb4">
         <button onClick={() => setFilter('')} style={{ padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', background: filter === '' ? '#2563eb' : '#e2e8f0', color: filter === '' ? '#fff' : '#475569', fontWeight: 600, fontSize: 13 }}>{t('staffSettings.all')}</button>
         {POSITIONS.map(p => (
           <button key={p} onClick={() => setFilter(p)} style={{ padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', background: filter === p ? '#2563eb' : '#e2e8f0', color: filter === p ? '#fff' : '#475569', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
@@ -153,28 +153,28 @@ export default function StaffSettings() {
 
       {/* Staff grouped by department */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 60 }}><div className="spinner" /></div>
+        <div className="si-9fa8d292"><div className="spinner" /></div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {Object.keys(grouped).length === 0 && <p style={{ textAlign: 'center', color: '#94a3b8', padding: 40 }}>{t('staffSettings.noStaff')}</p>}
+        <div className="si-0fa972fb">
+          {Object.keys(grouped).length === 0 && <p className="si-d91f9779">{t('staffSettings.noStaff')}</p>}
           {Object.entries(grouped).map(([dept, members]) => (
             <div key={dept}>
-              <h3 style={{ margin: '0 0 8px', fontSize: 16, color: '#334155' }}>🏢 {dept} <span style={{ fontSize: 13, fontWeight: 400, color: '#94a3b8' }}>({members.length})</span></h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 10 }}>
+              <h3 className="si-ffae4dd2">🏢 {dept} <span className="si-ec8e5c31">({members.length})</span></h3>
+              <div className="si-53f32bc1">
                 {members.map((s: any) => (
                   <div key={s.id} style={{ background: '#fff', borderRadius: 10, padding: '14px 18px', boxShadow: '0 1px 3px rgba(0,0,0,.06)', display: 'flex', alignItems: 'center', gap: 12, opacity: s.is_active ? 1 : 0.5 }}>
                     <div style={{ width: 40, height: 40, borderRadius: '50%', background: s.avatar_url ? 'none' : '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
-                      {s.avatar_url ? <img src={s.avatar_url} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} alt="" /> : POSITION_ICONS[s.position] || '👤'}
+                      {s.avatar_url ? <img src={s.avatar_url} className="si-23fd597f" alt="" /> : POSITION_ICONS[s.position] || '👤'}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: 14 }}>{s.first_name} {s.last_name}</div>
-                      <div style={{ fontSize: 12, color: '#64748b' }}>{(s.position || '').replace(/_/g, ' ')} • {s.email}</div>
-                      {s.notes && <div style={{ fontSize: 11, color: '#94a3b8' }}>{s.notes}</div>}
+                    <div className="si-26d7edc3">
+                      <div className="si-a9b7f385">{s.first_name} {s.last_name}</div>
+                      <div className="si-655cd763">{(s.position || '').replace(/_/g, ' ')} • {s.email}</div>
+                      {s.notes && <div className="si-26b03e6b">{s.notes}</div>}
                     </div>
-                    {!s.is_active && <span style={{ padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 600, background: '#fecaca', color: '#991b1b' }}>{t('staffSettings.inactive')}</span>}
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button onClick={() => { setEditId(s.id); setEditForm({ position: s.position, department: s.department || '', notes: s.notes || '', isActive: s.is_active }) }} style={{ padding: '4px 8px', background: '#f1f5f9', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>✏️</button>
-                      <button onClick={() => handleRemove(s.id)} style={{ padding: '4px 8px', background: '#fef2f2', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>🗑️</button>
+                    {!s.is_active && <span className="si-d85dcc04">{t('staffSettings.inactive')}</span>}
+                    <div className="si-9f48dfc6">
+                      <button onClick={() => { setEditId(s.id); setEditForm({ position: s.position, department: s.department || '', notes: s.notes || '', isActive: s.is_active }) }} className="si-581164d1">✏️</button>
+                      <button onClick={() => handleRemove(s.id)} className="si-4c51bebe">🗑️</button>
                     </div>
                   </div>
                 ))}
@@ -186,10 +186,10 @@ export default function StaffSettings() {
 
       {/* Add Staff Modal */}
       {showAdd && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 440, maxWidth: '90vw' }}>
-            <h3 style={{ marginTop: 0 }}>{t('staffSettings.addStaffPosition')}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="si-db8248e9">
+          <div className="si-508dcb85">
+            <h3 className="si-33c1a83e">{t('staffSettings.addStaffPosition')}</h3>
+            <div className="si-d8480906">
               <SearchSelect
                 placeholder={t('staffSettings.userIdPlaceholder')}
                 value={form.userId}
@@ -206,17 +206,17 @@ export default function StaffSettings() {
                   }))
                 }}
               />
-              <select value={form.position} onChange={e => setForm(f => ({ ...f, position: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
+              <select value={form.position} onChange={e => setForm(f => ({ ...f, position: e.target.value }))} className="si-3fc5634b">
                 {POSITIONS.map(p => <option key={p} value={p}>{POSITION_ICONS[p]} {p.replace(/_/g, ' ')}</option>)}
               </select>
-              <select value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
+              <select value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} className="si-3fc5634b">
                 <option value="">{t('staffSettings.selectDepartment')}</option>
                 {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
-              <textarea placeholder={t('staffSettings.notesPlaceholder')} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical' }} />
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => { setShowAdd(false); setUserLabel('') }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('staffSettings.cancel')}</button>
-                <button onClick={handleAdd} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('staffSettings.add')}</button>
+              <textarea placeholder={t('staffSettings.notesPlaceholder')} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} className="si-361ccde4" />
+              <div className="si-f0412db6">
+                <button onClick={() => { setShowAdd(false); setUserLabel('') }} className="si-978a1643">{t('staffSettings.cancel')}</button>
+                <button onClick={handleAdd} className="si-880bdf60">{t('staffSettings.add')}</button>
               </div>
             </div>
           </div>
@@ -225,24 +225,24 @@ export default function StaffSettings() {
 
       {/* Edit Staff Modal */}
       {editId && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 440, maxWidth: '90vw' }}>
-            <h3 style={{ marginTop: 0 }}>{t('staffSettings.editStaffPosition')}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <select value={editForm.position} onChange={e => setEditForm(f => ({ ...f, position: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
+        <div className="si-db8248e9">
+          <div className="si-508dcb85">
+            <h3 className="si-33c1a83e">{t('staffSettings.editStaffPosition')}</h3>
+            <div className="si-d8480906">
+              <select value={editForm.position} onChange={e => setEditForm(f => ({ ...f, position: e.target.value }))} className="si-3fc5634b">
                 {POSITIONS.map(p => <option key={p} value={p}>{POSITION_ICONS[p]} {p.replace(/_/g, ' ')}</option>)}
               </select>
-              <select value={editForm.department} onChange={e => setEditForm(f => ({ ...f, department: e.target.value }))} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db' }}>
+              <select value={editForm.department} onChange={e => setEditForm(f => ({ ...f, department: e.target.value }))} className="si-3fc5634b">
                 <option value="">{t('staffSettings.selectDepartment')}</option>
                 {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
-              <textarea placeholder={t('staffSettings.notesPlaceholder')} value={editForm.notes} onChange={e => setEditForm(f => ({ ...f, notes: e.target.value }))} rows={2} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', resize: 'vertical' }} />
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+              <textarea placeholder={t('staffSettings.notesPlaceholder')} value={editForm.notes} onChange={e => setEditForm(f => ({ ...f, notes: e.target.value }))} rows={2} className="si-361ccde4" />
+              <label className="si-7797842f">
                 <input type="checkbox" checked={editForm.isActive} onChange={e => setEditForm(f => ({ ...f, isActive: e.target.checked }))} /> {t('staffSettings.active')}
               </label>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                <button onClick={() => setEditId(null)} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: 8, cursor: 'pointer' }}>{t('staffSettings.cancel')}</button>
-                <button onClick={handleUpdate} style={{ padding: '8px 16px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>{t('staffSettings.save')}</button>
+              <div className="si-f0412db6">
+                <button onClick={() => setEditId(null)} className="si-978a1643">{t('staffSettings.cancel')}</button>
+                <button onClick={handleUpdate} className="si-880bdf60">{t('staffSettings.save')}</button>
               </div>
             </div>
           </div>

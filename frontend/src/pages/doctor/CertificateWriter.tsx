@@ -527,9 +527,9 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
                 {t('certificateWriter.selectAnimal')} {isHerd ? `(${t('certificateWriter.optionalForHerd')})` : '*'}
               </label>
               {loadingAnimals ? (
-                <div style={{ fontSize: 13, color: '#718096' }}>{t('common.loading')}</div>
+                <div className="si-ad8ab961">{t('common.loading')}</div>
               ) : animals.length === 0 ? (
-                <div style={{ fontSize: 13, color: '#e53e3e' }}>{t('certificateWriter.noAnimals')}</div>
+                <div className="si-c22a66cc">{t('certificateWriter.noAnimals')}</div>
               ) : (
                 <select
                   className="module-input"
@@ -812,19 +812,19 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           {/* Common clinical fields */}
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.clinicalFindings')}</label>
-            <textarea className="module-input" rows={4} value={clinicalFindings} onChange={e => setClinicalFindings(e.target.value)} placeholder={t('certificateWriter.clinicalFindingsPlaceholder')} style={{ resize: 'vertical' }} />
+            <textarea className="module-input si-3f7753b6" rows={4} value={clinicalFindings} onChange={e => setClinicalFindings(e.target.value)} placeholder={t('certificateWriter.clinicalFindingsPlaceholder')} />
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.diagnosis')}</label>
-            <textarea className="module-input" rows={3} value={diagnosis} onChange={e => setDiagnosis(e.target.value)} placeholder="Assessment or diagnostic conclusion..." style={{ resize: 'vertical' }} />
+            <textarea className="module-input si-3f7753b6" rows={3} value={diagnosis} onChange={e => setDiagnosis(e.target.value)} placeholder="Assessment or diagnostic conclusion..." />
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.treatmentSummary')}</label>
-            <textarea className="module-input" rows={3} value={treatmentSummary} onChange={e => setTreatmentSummary(e.target.value)} placeholder="Describe treatments or procedures performed..." style={{ resize: 'vertical' }} />
+            <textarea className="module-input si-3f7753b6" rows={3} value={treatmentSummary} onChange={e => setTreatmentSummary(e.target.value)} placeholder="Describe treatments or procedures performed..." />
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.recommendations')}</label>
-            <textarea className="module-input" rows={2} value={recommendations} onChange={e => setRecommendations(e.target.value)} placeholder="Post-certificate recommendations..." style={{ resize: 'vertical' }} />
+            <textarea className="module-input si-3f7753b6" rows={2} value={recommendations} onChange={e => setRecommendations(e.target.value)} placeholder="Post-certificate recommendations..." />
           </div>
           <div className="module-form-row">
             <div className="module-form-group">
@@ -834,7 +834,7 @@ const CertificateWriter: React.FC<CertificateWriterProps> = ({ onNavigate }) => 
           </div>
           <div className="module-form-group">
             <label className="module-label">{t('certificateWriter.notes')}</label>
-            <textarea className="module-input" rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any additional notes..." style={{ resize: 'vertical' }} />
+            <textarea className="module-input si-3f7753b6" rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any additional notes..." />
           </div>
 
           <div className="cw-actions">

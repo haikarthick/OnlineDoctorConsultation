@@ -130,7 +130,7 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '2px solid #e5e7eb' }}>
+      <div className="si-49b00590">
         {tabBtn('records', `📄 ${t('medicalRecordManagement.allRecords')} (${recordsTotal})`)}
         {tabBtn('audit', '📜 ' + t('medicalRecordManagement.auditTrail'))}
         {tabBtn('stats', '📊 ' + t('medicalRecordManagement.statistics'))}
@@ -139,26 +139,26 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
       {/* ═══ RECORDS TAB ═══════════════════════════════════ */}
       {activeTab === 'records' && (
         <div>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="si-ad0381af">
             <input type="text" placeholder={t('medicalRecordManagement.searchPlaceholder')}
               value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, flex: 1, minWidth: 220 }} />
+              className="si-aa4a1d68" />
             <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}
-              style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}>
+              className="si-5448b657">
               <option value="">{t('medicalRecordManagement.allTypes')}</option>
               {RECORD_TYPES.map(t => <option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
             </select>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: 40 }}>
-              <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
+            <div className="si-86638a30">
+              <div className="loading-spinner si-9ad92aa9" />
               <p>{t('medicalRecordManagement.loadingRecords')}</p>
             </div>
           ) : records.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 60, color: '#9ca3af' }}>
-              <p style={{ fontSize: 48 }}>📄</p>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>{t('medicalRecordManagement.noRecordsFound')}</p>
+            <div className="si-73dafd71">
+              <p className="si-353e617d">📄</p>
+              <p className="si-37a5ef01">{t('medicalRecordManagement.noRecordsFound')}</p>
             </div>
           ) : (
             <div className="data-table-container">
@@ -183,16 +183,16 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
                       <React.Fragment key={rec.id}>
                         <tr onClick={() => setExpandedId(expandedId === rec.id ? null : rec.id)}
                           style={{ cursor: 'pointer', background: expandedId === rec.id ? '#f0f4ff' : undefined }}>
-                          <td><code style={{ fontSize: 11, color: '#667eea' }}>{rec.recordNumber || '—'}</code></td>
+                          <td><code className="si-0ca383e1">{rec.recordNumber || '—'}</code></td>
                           <td><span title={typeInfo.label}>{typeInfo.icon} {typeInfo.label}</span></td>
-                          <td style={{ fontWeight: 500, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rec.title}</td>
+                          <td className="si-11b14278">{rec.title}</td>
                           <td>
                             {rec.animalName || '—'}
-                            {rec.animalUniqueId && <div style={{ fontSize: 10, color: '#667eea' }}>{rec.animalUniqueId}</div>}
+                            {rec.animalUniqueId && <div className="si-323dcf2c">{rec.animalUniqueId}</div>}
                           </td>
                           <td>
                             {rec.ownerName || '—'}
-                            {rec.ownerUniqueId && <div style={{ fontSize: 10, color: '#059669' }}>{rec.ownerUniqueId}</div>}
+                            {rec.ownerUniqueId && <div className="si-95a3275e">{rec.ownerUniqueId}</div>}
                           </td>
                           <td>{rec.veterinarianName || '—'}</td>
                           <td>
@@ -208,15 +208,15 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
                               {rec.status}
                             </span>
                           </td>
-                          <td style={{ fontSize: 12 }}>{fmtDate(rec.createdAt)}</td>
+                          <td className="si-756a9f21">{fmtDate(rec.createdAt)}</td>
                         </tr>
                         {expandedId === rec.id && (
                           <tr>
-                            <td colSpan={9} style={{ padding: 16, background: '#f9fafb' }}>
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 13 }}>
+                            <td colSpan={9} className="si-969e356e">
+                              <div className="si-1908d30e">
                                 <div>
                                   <strong>{t('medicalRecordManagement.content')}:</strong>
-                                  <div style={{ padding: 8, background: '#fff', borderRadius: 6, marginTop: 4, whiteSpace: 'pre-wrap' }}>
+                                  <div className="si-e003ebb7">
                                     {rec.content || t('medicalRecordManagement.noContent')}
                                   </div>
                                 </div>
@@ -224,19 +224,19 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
                                   {rec.followUpDate && <p><strong>{t('medicalRecordManagement.followUp')}:</strong> {fmtDate(rec.followUpDate)}</p>}
                                   {rec.isConfidential && <p><strong>🔒 {t('medicalRecordManagement.confidentialRecord')}</strong></p>}
                                   {rec.medications && rec.medications.length > 0 && (
-                                    <div style={{ marginTop: 8 }}>
+                                    <div className="si-cbfb1eb8">
                                       <strong>{t('medicalRecordManagement.medications')}:</strong>
                                       {rec.medications.map((m: any, i: number) => (
-                                        <div key={i} style={{ padding: 4, fontSize: 12 }}>
+                                        <div key={i} className="si-189b37b6">
                                           • <strong>{m.name}</strong> {m.dosage || ''} {m.frequency || ''} {m.duration || ''}
                                         </div>
                                       ))}
                                     </div>
                                   )}
                                   {rec.tags && rec.tags.length > 0 && (
-                                    <div style={{ marginTop: 8, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                                    <div className="si-d2dd2367">
                                       {rec.tags.map((tag: string, i: number) => (
-                                        <span key={i} style={{ padding: '2px 8px', background: '#e5e7eb', borderRadius: 12, fontSize: 10 }}>{tag}</span>
+                                        <span key={i} className="si-bcf9ed17">{tag}</span>
                                       ))}
                                     </div>
                                   )}
@@ -259,15 +259,15 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
       {activeTab === 'audit' && (
         <div>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: 40 }}>
-              <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
+            <div className="si-86638a30">
+              <div className="loading-spinner si-9ad92aa9" />
               <p>{t('medicalRecordManagement.loadingAuditTrail')}</p>
             </div>
           ) : auditLogs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 60, color: '#9ca3af' }}>
-              <p style={{ fontSize: 48 }}>📜</p>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>{t('medicalRecordManagement.noAuditEntries')}</p>
-              <p style={{ fontSize: 13 }}>{t('medicalRecordManagement.auditTrackingNote')}</p>
+            <div className="si-73dafd71">
+              <p className="si-353e617d">📜</p>
+              <p className="si-37a5ef01">{t('medicalRecordManagement.noAuditEntries')}</p>
+              <p className="si-0a803082">{t('medicalRecordManagement.auditTrackingNote')}</p>
             </div>
           ) : (
             <div className="data-table-container">
@@ -286,26 +286,26 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
                 <tbody>
                   {auditLogs.map((log: any) => (
                     <React.Fragment key={log.id}>
-                      <tr onClick={() => setExpandedId(expandedId === log.id ? null : log.id)} style={{ cursor: 'pointer' }}>
-                        <td style={{ fontSize: 16 }}>{getActionIcon(log.action)}</td>
+                      <tr onClick={() => setExpandedId(expandedId === log.id ? null : log.id)} className="si-3c1f81b9">
+                        <td className="si-5c854a6d">{getActionIcon(log.action)}</td>
                         <td>
                           <span style={{ fontWeight: 600, color: getActionColor(log.action), fontSize: 12 }}>
                             {log.action}
                           </span>
                         </td>
                         <td>{log.recordType || '—'}</td>
-                        <td><code style={{ fontSize: 11 }}>{log.recordId ? log.recordId.substring(0, 8) + '...' : '—'}</code></td>
+                        <td><code className="si-6af9d82f">{log.recordId ? log.recordId.substring(0, 8) + '...' : '—'}</code></td>
                         <td>{log.performedByName || log.performedBy || '—'}</td>
-                        <td style={{ fontSize: 12 }}>{fmtDateTime(log.createdAt || log.performedAt)}</td>
-                        <td style={{ fontSize: 12, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <td className="si-756a9f21">{fmtDateTime(log.createdAt || log.performedAt)}</td>
+                        <td className="si-28a2a588">
                           {log.details ? (typeof log.details === 'string' ? log.details : JSON.stringify(log.details).substring(0, 80)) : '—'}
                         </td>
                       </tr>
                       {expandedId === log.id && log.details && (
                         <tr>
-                          <td colSpan={7} style={{ padding: 16, background: '#f9fafb' }}>
+                          <td colSpan={7} className="si-969e356e">
                             <strong>{t('medicalRecordManagement.fullDetails')}:</strong>
-                            <pre style={{ fontSize: 11, background: '#fff', padding: 12, borderRadius: 6, marginTop: 4, overflow: 'auto', maxHeight: 200 }}>
+                            <pre className="si-728b264e">
                               {typeof log.details === 'string' ? log.details : JSON.stringify(log.details, null, 2)}
                             </pre>
                           </td>
@@ -324,19 +324,19 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
       {activeTab === 'stats' && (
         <div>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: 40 }}>
-              <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
+            <div className="si-86638a30">
+              <div className="loading-spinner si-9ad92aa9" />
               <p>{t('medicalRecordManagement.loadingStatistics')}</p>
             </div>
           ) : !stats ? (
-            <div style={{ textAlign: 'center', padding: 60, color: '#9ca3af' }}>
-              <p style={{ fontSize: 48 }}>📊</p>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>{t('medicalRecordManagement.noStatisticsAvailable')}</p>
+            <div className="si-73dafd71">
+              <p className="si-353e617d">📊</p>
+              <p className="si-37a5ef01">{t('medicalRecordManagement.noStatisticsAvailable')}</p>
             </div>
           ) : (
             <div>
               {/* Summary Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
+              <div className="si-3b3f146b">
                 <StatsCard icon="📋" label={t('medicalRecordManagement.totalMedicalRecords')} value={stats.totalRecords || 0} color="#667eea" />
                 <StatsCard icon="💉" label={t('medicalRecordManagement.totalVaccinations')} value={stats.vaccinations?.total || 0}
                   sub={stats.vaccinations?.upcomingDue ? `${stats.vaccinations.upcomingDue} ${t('medicalRecordManagement.dueWithin30Days')}` : undefined} color="#7c3aed" />
@@ -348,20 +348,20 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
 
               {/* Records by Type */}
               {stats.recordsByType && Object.keys(stats.recordsByType).length > 0 && (
-                <div style={{ marginBottom: 24, padding: 20, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t('medicalRecordManagement.recordsDistribution')}</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="si-dd7d0d73">
+                  <h3 className="si-6c6c1dcc">{t('medicalRecordManagement.recordsDistribution')}</h3>
+                  <div className="si-977f8af1">
                     {Object.entries(stats.recordsByType).map(([type, count]: [string, any]) => {
                       const info = getTypeInfo(type)
                       const total = stats.totalRecords || 1
                       const pct = Math.round((count / total) * 100)
                       return (
-                        <div key={type} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <span style={{ width: 120, fontSize: 13 }}>{info.icon} {info.label}</span>
-                          <div style={{ flex: 1, height: 20, background: '#f3f4f6', borderRadius: 10, overflow: 'hidden' }}>
+                        <div key={type} className="si-0b20392f">
+                          <span className="si-a12022e1">{info.icon} {info.label}</span>
+                          <div className="si-f0c784e7">
                             <div style={{ width: `${pct}%`, height: '100%', background: '#667eea', borderRadius: 10, minWidth: pct > 0 ? 20 : 0, transition: 'width 0.3s' }} />
                           </div>
-                          <span style={{ width: 60, fontSize: 13, fontWeight: 600, textAlign: 'right' }}>{count} ({pct}%)</span>
+                          <span className="si-2ba20356">{count} ({pct}%)</span>
                         </div>
                       )
                     })}
@@ -370,9 +370,9 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
               )}
 
               {/* Compliance note */}
-              <div style={{ padding: 16, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8 }}>
-                <h4 style={{ fontSize: 14, fontWeight: 600, color: '#059669', marginBottom: 8 }}>✅ {t('medicalRecordManagement.complianceStatus')}</h4>
-                <p style={{ fontSize: 13, color: '#374151', margin: 0 }}>
+              <div className="si-d85b8bef">
+                <h4 className="si-739c4b9c">✅ {t('medicalRecordManagement.complianceStatus')}</h4>
+                <p className="si-3351d8ac">
                   {t('medicalRecordManagement.complianceNote')}
                   Pet owners ({stats.allergies?.active || 0} active allergy alerts) and veterinarians can access records
                   based on RBAC permissions.
@@ -388,10 +388,10 @@ const MedicalRecordManagement: React.FC<MedicalRecordManagementProps> = ({ onNav
 
 const StatsCard: React.FC<{ icon: string; label: string; value: number; color: string; sub?: string }> = ({ icon, label, value, color, sub }) => (
   <div style={{ padding: 20, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, borderLeft: `4px solid ${color}` }}>
-    <div style={{ fontSize: 28, marginBottom: 4 }}>{icon}</div>
+    <div className="si-3540f604">{icon}</div>
     <div style={{ fontSize: 28, fontWeight: 700, color }}>{value}</div>
-    <div style={{ fontSize: 13, color: '#6b7280', fontWeight: 500 }}>{label}</div>
-    {sub && <div style={{ fontSize: 11, color: '#d97706', marginTop: 4 }}>⏱️ {sub}</div>}
+    <div className="si-73510eb6">{label}</div>
+    {sub && <div className="si-4f20e511">⏱️ {sub}</div>}
   </div>
 )
 

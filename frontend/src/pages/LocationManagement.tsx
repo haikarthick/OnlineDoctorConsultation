@@ -124,15 +124,15 @@ const LocationManagement: React.FC = () => {
 
   const renderTreeNode = (loc: FarmLocation, depth = 0) => (
     <div key={loc.id} style={{ marginLeft: depth * 24, padding: '0.5rem', borderLeft: depth > 0 ? '2px solid var(--border)' : 'none' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="si-0dd04361">
         <span>{LOCATION_TYPE_ICONS[loc.locationType] || '📍'}</span>
         <strong>{loc.name}</strong>
-        <span className="badge" style={{ fontSize: '0.7rem' }}>{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+        <span className="badge si-cf3f332c">{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span>
+        <span className="si-93f5e4c5">
           {loc.currentOccupancy}/{loc.capacity} {t('locationManagement.occupancy').toLowerCase()}
         </span>
-        <button className="btn btn-sm btn-secondary" style={{ marginLeft: 'auto', padding: '0.15rem 0.5rem' }} onClick={() => openEdit(loc)}>{t('common.edit')}</button>
-        <button className="btn btn-sm btn-danger" style={{ padding: '0.15rem 0.5rem' }} onClick={() => handleDelete(loc.id)}>×</button>
+        <button className="btn btn-sm btn-secondary si-bad86510" onClick={() => openEdit(loc)}>{t('common.edit')}</button>
+        <button className="btn btn-sm btn-danger si-e712fc62" onClick={() => handleDelete(loc.id)}>×</button>
       </div>
       {loc.children?.map(child => renderTreeNode(child, depth + 1))}
     </div>
@@ -161,7 +161,7 @@ const LocationManagement: React.FC = () => {
       {error && !showForm && <div className="alert alert-error">{error}</div>}
 
       <div className="filters-bar">
-        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input" style={{ maxWidth: '350px' }}>
+        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input si-58fb376a">
           <option value="">{t('locationManagement.selectEnterprise')}</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
@@ -183,16 +183,16 @@ const LocationManagement: React.FC = () => {
           <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>{t('locationManagement.createBtn')}</button>
         </div>
       ) : viewMode === 'tree' ? (
-        <div style={{ background: 'var(--surface)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+        <div className="si-478f1da8">
           {locationTree.map(loc => renderTreeNode(loc))}
         </div>
       ) : viewMode === 'map' ? (
         <div>
           {/* Interactive Location Map */}
-          <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 20 }}>
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-              <h3 style={{ margin: 0 }}>{t('locationManagement.mapTitle')}</h3>
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+          <div className="si-a87c8813">
+            <div className="si-5214c8b8">
+              <h3 className="si-44087c4b">{t('locationManagement.mapTitle')}</h3>
+              <p className="si-29492778">
                 {locations.filter(l => l.gpsLatitude && l.gpsLongitude).length} of {locations.length} locations have GPS coordinates
               </p>
             </div>
@@ -209,10 +209,10 @@ const LocationManagement: React.FC = () => {
                 popup: (
                   <div>
                     <strong>{LOCATION_TYPE_ICONS[loc.locationType] || '📍'} {loc.name}</strong><br />
-                    <span style={{ fontSize: 12 }}>{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span><br />
-                    <span style={{ fontSize: 12 }}>{t('locationManagement.occupancy')}: {loc.currentOccupancy} / {loc.capacity}</span>
-                    {loc.area && <><br /><span style={{ fontSize: 12 }}>Area: {loc.area} {loc.areaUnit}</span></>}
-                    {loc.description && <><br /><span style={{ fontSize: 11, color: '#888' }}>{loc.description}</span></>}
+                    <span className="si-756a9f21">{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span><br />
+                    <span className="si-756a9f21">{t('locationManagement.occupancy')}: {loc.currentOccupancy} / {loc.capacity}</span>
+                    {loc.area && <><br /><span className="si-756a9f21">Area: {loc.area} {loc.areaUnit}</span></>}
+                    {loc.description && <><br /><span className="si-dd67611c">{loc.description}</span></>}
                   </div>
                 ),
               }))}
@@ -225,37 +225,37 @@ const LocationManagement: React.FC = () => {
             />
           </div>
           {locations.filter(l => !l.gpsLatitude || !l.gpsLongitude).length > 0 && (
-            <div style={{ padding: '12px 16px', background: '#fef3c7', borderRadius: 8, fontSize: 13, color: '#92400e', marginBottom: 16 }}>
+            <div className="si-ef04e5fd">
               ⚠️ {locations.filter(l => !l.gpsLatitude || !l.gpsLongitude).length} location(s) don't have GPS coordinates: {locations.filter(l => !l.gpsLatitude || !l.gpsLongitude).map(l => l.name).join(', ')}. Edit them to add coordinates.
             </div>
           )}
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+        <div className="si-a1694610">
           {locations.map(loc => (
-            <div key={loc.id} className="card" style={{ borderRadius: '12px', padding: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '1.75rem' }}>{LOCATION_TYPE_ICONS[loc.locationType] || '📍'}</span>
+            <div key={loc.id} className="card si-a43a6b11">
+              <div className="si-99f8abcc">
+                <span className="si-91db75dc">{LOCATION_TYPE_ICONS[loc.locationType] || '📍'}</span>
                 <div>
-                  <h3 style={{ margin: 0 }}>{loc.name}</h3>
-                  <span className="badge" style={{ fontSize: '0.75rem' }}>{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span>
+                  <h3 className="si-44087c4b">{loc.name}</h3>
+                  <span className="badge si-8c23064b">{LOCATION_TYPE_LABELS[loc.locationType] || loc.locationType}</span>
                 </div>
               </div>
-              {loc.parentLocationName && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{t('locationManagement.inside')} {loc.parentLocationName}</p>}
-              <div style={{ marginTop: '0.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+              {loc.parentLocationName && <p className="si-93f5e4c5">{t('locationManagement.inside')} {loc.parentLocationName}</p>}
+              <div className="si-60e2e250">
+                <div className="si-89c2f30f">
                   <span>{t('locationManagement.occupancy')}</span>
-                  <span style={{ fontWeight: 600 }}>{loc.currentOccupancy} / {loc.capacity}</span>
+                  <span className="si-b2cfcbec">{loc.currentOccupancy} / {loc.capacity}</span>
                 </div>
                 {loc.capacity > 0 && (
-                  <div style={{ height: '6px', background: 'var(--border)', borderRadius: '3px', marginTop: '0.25rem', overflow: 'hidden' }}>
+                  <div className="si-ade9e368">
                     <div style={{ height: '100%', width: `${Math.min(100, (loc.currentOccupancy / loc.capacity) * 100)}%`, background: loc.currentOccupancy >= loc.capacity ? 'var(--danger)' : 'var(--primary)', borderRadius: '3px' }} />
                   </div>
                 )}
               </div>
-              {loc.area && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>{t('locationManagement.area')} {loc.area} {loc.areaUnit}</p>}
-              {loc.description && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{loc.description}</p>}
-              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+              {loc.area && <p className="si-9cbc3f5c">{t('locationManagement.area')} {loc.area} {loc.areaUnit}</p>}
+              {loc.description && <p className="si-93f5e4c5">{loc.description}</p>}
+              <div className="si-3429dc13">
                 <button className="btn btn-sm btn-secondary" onClick={() => openEdit(loc)}>{t('common.edit')}</button>
                 <button className="btn btn-sm btn-danger" onClick={() => handleDelete(loc.id)}>{t('common.delete')}</button>
               </div>
@@ -275,7 +275,7 @@ const LocationManagement: React.FC = () => {
                 <label>{t('locationManagement.form.name')}</label>
                 <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="si-ec24da01">
                 <div className="form-group">
                   <label>{t('locationManagement.form.type')}</label>
                   <select value={formData.locationType} onChange={e => setFormData(f => ({ ...f, locationType: e.target.value as LocationType }))} required>
@@ -296,9 +296,9 @@ const LocationManagement: React.FC = () => {
                 </div>
                 <div className="form-group">
                   <label>{t('locationManagement.form.area')}</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input type="number" step="0.01" value={formData.area} onChange={e => setFormData(f => ({ ...f, area: e.target.value }))} style={{ flex: 1 }} />
-                    <select value={formData.areaUnit} onChange={e => setFormData(f => ({ ...f, areaUnit: e.target.value }))} style={{ width: '80px' }}>
+                  <div className="si-6fdaaf49">
+                    <input type="number" step="0.01" value={formData.area} onChange={e => setFormData(f => ({ ...f, area: e.target.value }))} className="si-6acd75e8" />
+                    <select value={formData.areaUnit} onChange={e => setFormData(f => ({ ...f, areaUnit: e.target.value }))} className="si-4706e1bb">
                       <option value="sqft">sqft</option><option value="sqm">sqm</option>
                       <option value="acres">acres</option><option value="hectares">ha</option>
                     </select>
@@ -309,7 +309,7 @@ const LocationManagement: React.FC = () => {
                 <label>{t('common.description')}</label>
                 <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="si-ec24da01">
                 <div className="form-group">
                   <label>{t('locationManagement.form.gpsLatitude')}</label>
                   <input type="number" step="0.000001" placeholder="Click map or type" value={formData.gpsLatitude} onChange={e => setFormData(f => ({ ...f, gpsLatitude: e.target.value }))} />
@@ -320,8 +320,8 @@ const LocationManagement: React.FC = () => {
                 </div>
               </div>
               {showForm && (
-                <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: '0.5rem' }}>
-                  <div style={{ padding: '8px 12px', fontSize: 12, color: '#888', background: '#f9fafb', borderBottom: '1px solid var(--border)' }}>
+                <div className="si-78f76e08">
+                  <div className="si-45536f4a">
                     💡 Click the map to set GPS coordinates
                   </div>
                   <MapView
@@ -340,7 +340,7 @@ const LocationManagement: React.FC = () => {
                   />
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+              <div className="si-5af10afb">
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
                 <button type="submit" className="btn btn-primary">{editingLocation ? t('locationManagement.modal.updateBtn') : t('locationManagement.modal.createBtn')}</button>
               </div>

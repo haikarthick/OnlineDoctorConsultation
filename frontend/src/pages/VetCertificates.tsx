@@ -228,14 +228,14 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
       </div>
 
       {error && (
-        <div className="module-alert error" style={{ marginBottom: 16 }}>
+        <div className="module-alert error si-7e63ec4f">
           {error}
           <button className="module-alert-close" onClick={() => setError('')}>✕</button>
         </div>
       )}
 
       {/* ── Filters ── */}
-      <div className="module-card" style={{ marginBottom: 20, padding: '14px 18px' }}>
+      <div className="module-card si-e8460199">
         <div className="module-form-row">
           <div className="module-form-group">
             <label className="module-label">{t('vetCertificates.filterType')}</label>
@@ -296,12 +296,12 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
 
       {/* ── Table ── */}
       {certificates.length === 0 ? (
-        <div className="module-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-          <p style={{ fontSize: 32 }}>📜</p>
+        <div className="module-card si-165885e7">
+          <p className="si-42fc55d5">📜</p>
           <h3>{isVet ? t('vetCertificates.vetNoCertificates') : t('vetCertificates.noCertificates')}</h3>
-          <p style={{ color: '#718096' }}>{isVet ? t('vetCertificates.vetNoCertificatesMsg') : t('vetCertificates.noCertificatesMsg')}</p>
+          <p className="si-119caf90">{isVet ? t('vetCertificates.vetNoCertificatesMsg') : t('vetCertificates.noCertificatesMsg')}</p>
           {isVet && (
-            <button className="module-btn primary" onClick={() => onNavigate('/doctor/certificates/new')} style={{ marginTop: 12 }}>
+            <button className="module-btn primary si-66faea9d" onClick={() => onNavigate('/doctor/certificates/new')}>
               + {t('vetCertificates.createNew')}
             </button>
           )}
@@ -328,15 +328,15 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
                 {certificates.map(cert => (
                   <tr key={cert.id}>
                     <td>
-                      <code style={{ fontSize: 11, background: '#f7fafc', padding: '2px 5px', borderRadius: 3 }}>
+                      <code className="si-fde700bf">
                         {cert.certificateNumber.startsWith('DRAFT') ? '—' : cert.certificateNumber}
                       </code>
                     </td>
-                    <td style={{ fontSize: 12 }}>{certTypeLabel(cert.certificateType)}</td>
+                    <td className="si-756a9f21">{certTypeLabel(cert.certificateType)}</td>
                     <td>
                       {cert.animalName || '—'}
-                      {cert.animalSpecies && <div style={{ fontSize: 11, color: '#718096' }}>{cert.animalSpecies}</div>}
-                      {cert.animalUniqueId && <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#4F46E5', background: '#EEF2FF', padding: '1px 5px', borderRadius: 4, display: 'inline-block', marginTop: 2 }}>{cert.animalUniqueId}</div>}
+                      {cert.animalSpecies && <div className="si-be928573">{cert.animalSpecies}</div>}
+                      {cert.animalUniqueId && <div className="si-8ff90223">{cert.animalUniqueId}</div>}
                     </td>
                     {isFarmerOrAdmin && (
                       <td style={{ fontSize: 12, color: cert.enterpriseName ? '#374151' : '#9ca3af' }}>
@@ -344,21 +344,21 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
                       </td>
                     )}
                     {(isAdmin || !isVet) && (
-                      <td style={{ fontSize: 12 }}>
+                      <td className="si-756a9f21">
                         {cert.vetFirstName || cert.vetLastName
                           ? `Dr. ${[cert.vetFirstName, cert.vetLastName].filter(Boolean).join(' ')}`
                           : '—'}
                       </td>
                     )}
                     {(isAdmin || isVet) && (
-                      <td style={{ fontSize: 12 }}>
+                      <td className="si-756a9f21">
                         {[cert.ownerFirstName, cert.ownerLastName].filter(Boolean).join(' ') || '—'}
                       </td>
                     )}
-                    <td style={{ fontSize: 12 }}>
+                    <td className="si-756a9f21">
                       {cert.issuedAt ? formatDate(cert.issuedAt) : '—'}
                     </td>
-                    <td style={{ fontSize: 12 }}>
+                    <td className="si-756a9f21">
                       {cert.validUntil ? formatDate(cert.validUntil) : '—'}
                     </td>
                     <td>{statusBadge(cert.status)}</td>
@@ -449,7 +449,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
 
           {/* ── Pagination ── */}
           {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
+            <div className="si-1e8ab4a5">
               <button
                 className="module-btn small"
                 disabled={page === 0}
@@ -457,7 +457,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
               >
                 ← Prev
               </button>
-              <span style={{ padding: '6px 12px', fontSize: 13, color: '#4a5568' }}>
+              <span className="si-a84da03e">
                 Page {page + 1} / {totalPages}
               </span>
               <button
@@ -470,7 +470,7 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
             </div>
           )}
 
-          <p style={{ textAlign: 'center', fontSize: 13, color: '#718096', marginTop: 10 }}>
+          <p className="si-5e38ac16">
             {t('vetCertificates.showing', { count: certificates.length, total })}
           </p>
         </>
@@ -479,19 +479,19 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
       {/* ── Issue Confirmation Modal ── */}
       {issueTarget && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9980, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          className="si-fae7060f"
           onClick={() => setIssueTarget(null)}
         >
           <div
-            style={{ background: '#fff', borderRadius: 10, padding: '28px 32px', maxWidth: 440, width: '100%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}
+            className="si-056dd23d"
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ margin: '0 0 8px' }}>✅ {t('vetCertificates.issueCertificate')}</h3>
-            <p style={{ color: '#4a5568', marginBottom: 20, fontSize: 14 }}>
+            <h3 className="si-24d15068">✅ {t('vetCertificates.issueCertificate')}</h3>
+            <p className="si-cf672efd">
               Issue <strong>{certTypeLabel(issueTarget.certificateType)}</strong> for <strong>{issueTarget.animalName || 'this animal'}</strong>?
               A certificate number will be auto-generated.
             </p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <div className="si-6e89f197">
               <button className="module-btn" onClick={() => setIssueTarget(null)} disabled={issuing}>
                 {t('common.cancel')}
               </button>
@@ -506,15 +506,15 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
       {/* ── Revoke Modal ── */}
       {revokeTarget && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9980, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+          className="si-fae7060f"
           onClick={() => { setRevokeTarget(null); setRevokeReason('') }}
         >
           <div
-            style={{ background: '#fff', borderRadius: 10, padding: '28px 32px', maxWidth: 460, width: '100%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}
+            className="si-ddb56114"
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ margin: '0 0 8px', color: '#c53030' }}>🚫 {t('vetCertificates.revoke')}</h3>
-            <p style={{ color: '#4a5568', marginBottom: 16, fontSize: 14 }}>
+            <h3 className="si-d1f4710f">🚫 {t('vetCertificates.revoke')}</h3>
+            <p className="si-751c1b0d">
               {t('vetCertificates.confirmRevoke')}<br />
               <strong>{certTypeLabel(revokeTarget.certificateType)}</strong> — {revokeTarget.certificateNumber}
             </p>
@@ -529,15 +529,15 @@ const VetCertificates: React.FC<VetCertificatesProps> = ({ onNavigate }) => {
                 autoFocus
               />
             </div>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
+            <div className="si-6e55f9fd">
               <button className="module-btn" onClick={() => { setRevokeTarget(null); setRevokeReason('') }} disabled={revoking}>
                 {t('common.cancel')}
               </button>
               <button
-                className="module-btn primary"
+                className="module-btn primary si-78f4ab70"
                 onClick={handleRevoke}
                 disabled={revoking || !revokeReason.trim()}
-                style={{ background: '#e53e3e' }}
+               
               >
                 {revoking ? t('common.saving') : `🚫 ${t('vetCertificates.revoke')}`}
               </button>

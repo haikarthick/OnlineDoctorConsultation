@@ -483,12 +483,12 @@ const VetHospitalManage: React.FC = () => {
       <div className="vh-manage-header">
         <div>
           <h1 className="module-title">🏥 {hospital.name}</h1>
-          <p className="module-subtitle" style={{ margin: 0 }}>
+          <p className="module-subtitle si-44087c4b">
             {HOSPITAL_TYPE_LABELS[hospital.hospitalType] || hospital.hospitalType}
-            {hospital.isVerified && <span className="badge badge-verified" style={{ marginLeft: '.5rem' }}>✓ Verified</span>}
+            {hospital.isVerified && <span className="badge badge-verified si-c6efbebc">✓ Verified</span>}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '.6rem', flexWrap: 'wrap' }}>
+        <div className="si-83aa9196">
           {hospitals.length > 1 && (
             <select className="vh-select" value={hospital.id}
               onChange={async e => {
@@ -518,8 +518,8 @@ const VetHospitalManage: React.FC = () => {
         )
       })()}
 
-      {error && <div className="error-message" style={{ marginBottom: '1rem' }}>{error}</div>}
-      {success && <div className="success-message" style={{ marginBottom: '1rem' }}>{success}</div>}
+      {error && <div className="error-message si-1cb81cae">{error}</div>}
+      {success && <div className="success-message si-1cb81cae">{success}</div>}
 
       {/* Tabs */}
       <div className="vh-profile-tabs">
@@ -548,7 +548,7 @@ const VetHospitalManage: React.FC = () => {
               { label: t('common.status'), value: hospital.isActive ? t('common.active') : t('vetHospitalManage.overview.inactive'), icon: '🔘' },
             ].map(s => (
               <div key={s.label} className="vh-stat-card">
-                <div style={{ fontSize: '1.3rem' }}>{s.icon}</div>
+                <div className="si-46606d89">{s.icon}</div>
                 <div className="vh-stat-value">{s.value}</div>
                 <div className="vh-stat-label">{s.label}</div>
               </div>
@@ -556,13 +556,13 @@ const VetHospitalManage: React.FC = () => {
           </div>
           {stats && (
             <div className="card">
-              <h3 style={{ marginTop: 0 }}>{t('vetHospitalManage.overview.acceptingPatients')}</h3>
+              <h3 className="si-33c1a83e">{t('vetHospitalManage.overview.acceptingPatients')}</h3>
               <p>{doctors.filter(d => d.isAcceptingPatients).length} of {doctors.length} doctors are accepting new patients</p>
             </div>
           )}
-          <div className="card" style={{ marginTop: '1rem' }}>
-            <h3 style={{ marginTop: 0 }}>{t('vetHospitalManage.overview.quickActions')}</h3>
-            <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
+          <div className="card si-216c99b7">
+            <h3 className="si-33c1a83e">{t('vetHospitalManage.overview.quickActions')}</h3>
+            <div className="si-05b84723">
               <button className="btn-secondary" onClick={() => { setActiveTab('doctors'); setShowAddDoctor(true) }}>+ {t('vetHospitalManage.modal.addDoctor')}</button>
               <button className="btn-secondary" onClick={() => { setActiveTab('departments'); setShowAddDept(true) }}>+ {t('vetHospitalManage.modal.addDept')}</button>
               <button className="btn-secondary" onClick={() => { setActiveTab('services'); setShowAddService(true) }}>+ {t('vetHospitalManage.modal.addService')}</button>
@@ -575,9 +575,9 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Doctors ── */}
       {activeTab === 'doctors' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '.5rem' }}>
-            <h3 style={{ margin: 0 }}>{t('vetHospitalManage.doctors.staff')} ({doctors.length})</h3>
-            <div style={{ display: 'flex', gap: '.5rem' }}>
+          <div className="si-3a656330">
+            <h3 className="si-44087c4b">{t('vetHospitalManage.doctors.staff')} ({doctors.length})</h3>
+            <div className="si-52c0cb1e">
               <button className="btn-secondary" onClick={() => { setModalMsg(null); setInviteLink(''); setLinkCopied(''); setInviteForm({ email: '', firstName: '', lastName: '', phone: '', hospitalRole: 'staff', departmentId: '' }); setShowInviteDoctor(true) }}>✉ {t('vetHospitalManage.doctors.inviteNew')}</button>
               <button className="btn-primary" onClick={() => { setEditDoctor(null); setDoctorForm({ doctorId: '', hospitalRole: 'staff', employmentType: 'full_time', departmentId: '', title: '', consultationFee: '', isPrimaryHospital: false }); setShowAddDoctor(true) }}>+ {t('vetHospitalManage.doctors.addExisting')}</button>
             </div>
@@ -585,16 +585,16 @@ const VetHospitalManage: React.FC = () => {
 
           {/* Pending Invites */}
           {invites.filter(i => i.status === 'pending').length > 0 && (
-            <div style={{ marginBottom: '1rem', background: '#fffbeb', borderRadius: 10, padding: '.75rem 1rem', border: '1px solid #fde68a' }}>
-              <div style={{ fontWeight: 700, fontSize: '.88rem', marginBottom: '.5rem' }}>📨 Pending Invitations ({invites.filter(i => i.status === 'pending').length})</div>
+            <div className="si-e4efb72b">
+              <div className="si-a32532b1">📨 Pending Invitations ({invites.filter(i => i.status === 'pending').length})</div>
               {invites.filter(i => i.status === 'pending').map(inv => (
-                <div key={inv.id} style={{ display: 'flex', alignItems: 'center', gap: '.75rem', padding: '.35rem 0', borderBottom: '1px solid #fef3c7', fontSize: '.88rem' }}>
-                  <span style={{ flex: 1 }}>
-                    <strong>{inv.first_name || ''} {inv.last_name || ''}</strong> · {inv.email} · <span style={{ textTransform: 'capitalize' }}>{(inv.hospital_role || 'staff').replace(/_/g, ' ')}</span>
+                <div key={inv.id} className="si-633e4b1e">
+                  <span className="si-6acd75e8">
+                    <strong>{inv.first_name || ''} {inv.last_name || ''}</strong> · {inv.email} · <span className="si-ecf1d5e5">{(inv.hospital_role || 'staff').replace(/_/g, ' ')}</span>
                   </span>
-                  <span style={{ fontSize: '.78rem', color: '#92400e' }}>Expires {new Date(inv.expires_at).toLocaleDateString()}</span>
-                  {inv.inviteUrl && <button type="button" className="btn-secondary" style={{ fontSize: '.72rem', padding: '.15rem .45rem' }} onClick={() => { navigator.clipboard.writeText(inv.inviteUrl); setLinkCopied(inv.id); setTimeout(() => setLinkCopied(''), 2000) }}>{linkCopied === inv.id ? '✓ Copied' : '📋 Copy Link'}</button>}
-                  <button className="btn-danger" style={{ fontSize: '.75rem', padding: '.2rem .5rem' }} onClick={() => handleRevokeInvite(inv.id)}>{t('vetHospitalManage.invite.revoke')}</button>
+                  <span className="si-908660d1">Expires {new Date(inv.expires_at).toLocaleDateString()}</span>
+                  {inv.inviteUrl && <button type="button" className="btn-secondary si-a792b2c1" onClick={() => { navigator.clipboard.writeText(inv.inviteUrl); setLinkCopied(inv.id); setTimeout(() => setLinkCopied(''), 2000) }}>{linkCopied === inv.id ? '✓ Copied' : '📋 Copy Link'}</button>}
+                  <button className="btn-danger si-fb053872" onClick={() => handleRevokeInvite(inv.id)}>{t('vetHospitalManage.invite.revoke')}</button>
                 </div>
               ))}
             </div>
@@ -606,16 +606,16 @@ const VetHospitalManage: React.FC = () => {
                   <div key={doc.id} className="vh-doctor-card">
                     <div className="vh-doctor-name">{doc.doctorName || `Doctor ${doc.doctorId.slice(0,6)}`}</div>
                     <div className="vh-doctor-role">{doc.hospitalRole?.replace(/_/g,' ')}</div>
-                    {doc.title && <div style={{ fontSize: '.82rem' }}>{doc.title}</div>}
+                    {doc.title && <div className="si-de1781c0">{doc.title}</div>}
                     {doc.departmentId && <div className="vh-doctor-dept">{departments.find(d => d.id === doc.departmentId)?.name || 'Dept'}</div>}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem', marginTop: '.3rem' }}>
+                    <div className="si-12530887">
                       <span style={{ fontSize: '.75rem', color: doc.isAcceptingPatients ? '#059669' : '#dc2626' }}>
                         {doc.isAcceptingPatients ? `● ${t('vetHospitalManage.doctors.accepting')}` : `● ${t('vetHospitalManage.doctors.notAccepting')}`}
                       </span>
                     </div>
                     <div className="vh-doctor-actions">
-                      <button className="btn-secondary" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => openEditDoctor(doc)}>{t('common.edit')}</button>
-                      <button className="btn-danger" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => handleRemoveDoctor(doc)}>{t('common.remove')}</button>
+                      <button className="btn-secondary si-aa7179fc" onClick={() => openEditDoctor(doc)}>{t('common.edit')}</button>
+                      <button className="btn-danger si-aa7179fc" onClick={() => handleRemoveDoctor(doc)}>{t('common.remove')}</button>
                     </div>
                   </div>
                 ))}
@@ -626,8 +626,8 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Departments ── */}
       {activeTab === 'departments' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>{t('vetHospitalManage.departments.title')} ({departments.length})</h3>
+          <div className="si-c66b816b">
+            <h3 className="si-44087c4b">{t('vetHospitalManage.departments.title')} ({departments.length})</h3>
             <button className="btn-primary" onClick={() => { setEditDept(null); setDeptForm({ name: '', code: '', description: '', specializations: '', floorNumber: '', headDoctorId: '' }); setShowAddDept(true) }}>+ {t('vetHospitalManage.modal.addDept')}</button>
           </div>
           {departments.length === 0
@@ -636,19 +636,19 @@ const VetHospitalManage: React.FC = () => {
                 {departments.map(dept => (
                   <div key={dept.id} className="vh-dept-card">
                     <div className="vh-dept-name">{dept.name}</div>
-                    {dept.code && <div style={{ fontSize: '.75rem', color: 'var(--text-muted,#888)' }}>Code: {dept.code}</div>}
-                    {dept.description && <div style={{ fontSize: '.83rem', margin: '.25rem 0' }}>{dept.description}</div>}
+                    {dept.code && <div className="si-95f0b257">Code: {dept.code}</div>}
+                    {dept.description && <div className="si-880fbd4a">{dept.description}</div>}
                     {dept.specializations && dept.specializations.length > 0 && (
-                      <div className="hcard-chips" style={{ margin: '.4rem 0' }}>
+                      <div className="hcard-chips si-200bd478">
                         {dept.specializations.map(s => <span key={s} className="chip">{s}</span>)}
                       </div>
                     )}
-                    <div style={{ fontSize: '.8rem', color: 'var(--text-muted,#888)', marginBottom: '.5rem' }}>
+                    <div className="si-953889dc">
                       {doctors.filter(d => d.departmentId === dept.id).length} {t('vetHospitalManage.departments.doctors')}
                     </div>
-                    <div style={{ display: 'flex', gap: '.4rem' }}>
-                      <button className="btn-secondary" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => openEditDept(dept)}>{t('common.edit')}</button>
-                      <button className="btn-danger" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => handleDeleteDept(dept)}>{t('common.delete')}</button>
+                    <div className="si-49829023">
+                      <button className="btn-secondary si-aa7179fc" onClick={() => openEditDept(dept)}>{t('common.edit')}</button>
+                      <button className="btn-danger si-aa7179fc" onClick={() => handleDeleteDept(dept)}>{t('common.delete')}</button>
                     </div>
                   </div>
                 ))}
@@ -659,8 +659,8 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Services ── */}
       {activeTab === 'services' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>{t('vetHospitalManage.services.title')} ({services.length})</h3>
+          <div className="si-c66b816b">
+            <h3 className="si-44087c4b">{t('vetHospitalManage.services.title')} ({services.length})</h3>
             <button className="btn-primary" onClick={() => { setEditService(null); setServiceForm({ serviceName: '', category: 'consultation', description: '', priceMin: '', priceMax: '', durationMinutes: '', requiresAppointment: false }); setShowAddService(true) }}>+ {t('vetHospitalManage.modal.addService')}</button>
           </div>
           {services.length === 0
@@ -678,9 +678,9 @@ const VetHospitalManage: React.FC = () => {
                       </div>
                     )}
                     {svc.durationMinutes && <div className="vh-service-duration">⏱ {svc.durationMinutes} min</div>}
-                    <div style={{ display: 'flex', gap: '.4rem', marginTop: '.5rem' }}>
-                      <button className="btn-secondary" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => openEditService(svc)}>{t('common.edit')}</button>
-                      <button className="btn-danger" style={{ fontSize: '.78rem', padding: '.25rem .6rem' }} onClick={() => handleDeleteService(svc)}>{t('common.delete')}</button>
+                    <div className="si-b074ba0c">
+                      <button className="btn-secondary si-aa7179fc" onClick={() => openEditService(svc)}>{t('common.edit')}</button>
+                      <button className="btn-danger si-aa7179fc" onClick={() => handleDeleteService(svc)}>{t('common.delete')}</button>
                     </div>
                   </div>
                 ))}
@@ -693,8 +693,8 @@ const VetHospitalManage: React.FC = () => {
         <div className="doc-tab-root">
           <div className="doc-tab-header">
             <div>
-              <h3 style={{ margin: 0 }}>Compliance Documents</h3>
-              <p style={{ margin: '.25rem 0 0', fontSize: '.86rem', color: 'var(--text-muted,#888)' }}>
+              <h3 className="si-44087c4b">Compliance Documents</h3>
+              <p className="si-47869ba9">
                 Upload all required documents. Hospitals are only activated after admin verification.
               </p>
             </div>
@@ -737,8 +737,8 @@ const VetHospitalManage: React.FC = () => {
                       )}
                       <button
                         type="button"
-                        className="doc-view-link"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit', color: 'inherit', textDecoration: 'underline' }}
+                        className="doc-view-link si-4fac113b"
+                       
                         onClick={() => setDocViewModal({ url: existing.fileUrl, name: existing.fileName })}
                       >View</button>
                     </div>
@@ -760,8 +760,8 @@ const VetHospitalManage: React.FC = () => {
                   {user?.role !== 'admin' && existing?.status !== 'approved' && (
                     <div className="doc-upload-area">
                       {needsExpiry && (
-                        <div className="form-group" style={{ marginBottom: '.5rem' }}>
-                          <label style={{ fontSize: '.8rem' }}>Expiry Date</label>
+                        <div className="form-group si-882b1663">
+                          <label className="si-168b6e99">Expiry Date</label>
                           <input
                             type="date"
                             className="doc-expiry-input"
@@ -775,7 +775,7 @@ const VetHospitalManage: React.FC = () => {
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
                         ref={el => { fileInputRefs.current[dt] = el }}
-                        style={{ display: 'none' }}
+                        className="si-d6a2f871"
                         onChange={async e => {
                           const file = e.target.files?.[0]
                           if (!file) return
@@ -825,8 +825,8 @@ const VetHospitalManage: React.FC = () => {
           {/* Admin pending review summary */}
           {user?.role === 'admin' && (
             <div className="doc-admin-summary card">
-              <h4 style={{ marginTop: 0 }}>Admin Actions</h4>
-              <p style={{ fontSize: '.86rem', color: 'var(--text-muted,#888)' }}>
+              <h4 className="si-33c1a83e">Admin Actions</h4>
+              <p className="si-936796c2">
                 Review each document above. When all 7 documents are approved, the hospital will be automatically activated.
               </p>
               <div className="doc-admin-counts">
@@ -843,9 +843,9 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Appointments ── */}
       {activeTab === 'appointments' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '.75rem', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>{t('vetHospitalManage.appointments.title')}</h3>
-            <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+          <div className="si-f456fb79">
+            <h3 className="si-44087c4b">{t('vetHospitalManage.appointments.title')}</h3>
+            <div className="si-0d113669">
               <select className="vh-select" value={bookingsStatusFilter} onChange={e => { setBookingsStatusFilter(e.target.value); setBookingsPage(0) }}>
                 <option value="">{t('vetHospitalManage.appointments.allStatuses')}</option>
                 <option value="pending">{t('common.pending')}</option>
@@ -857,10 +857,10 @@ const VetHospitalManage: React.FC = () => {
             </div>
           </div>
           {bookingsLoading ? (
-            <p style={{ textAlign: 'center', color: '#888', padding: '2rem 0' }}>{t('vetHospitalManage.appointments.loading')}</p>
+            <p className="si-38b53f15">{t('vetHospitalManage.appointments.loading')}</p>
           ) : bookings.length === 0 ? (
-            <div className="empty-state" style={{ textAlign: 'center', padding: '2rem' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '.5rem' }}>📅</div>
+            <div className="empty-state si-41acd90c">
+              <div className="si-28db9f67">📅</div>
               <p>{t('vetHospitalManage.appointments.noAppointments')}{bookingsStatusFilter ? ` ${t('vetHospitalManage.appointments.withStatus', { status: bookingsStatusFilter })}` : ''}</p>
             </div>
           ) : (
@@ -891,15 +891,15 @@ const VetHospitalManage: React.FC = () => {
                           color: b.status === 'confirmed' ? '#166534' : b.status === 'pending' ? '#92400e' : b.status === 'completed' ? '#1e40af' : '#991b1b'
                         }}>{b.status}</span>
                       </td>
-                      <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.reasonForVisit || '—'}</td>
+                      <td className="si-073b955b">{b.reasonForVisit || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               {bookingsTotal > 15 && (
-                <div className="pagination" style={{ marginTop: '1rem' }}>
+                <div className="pagination si-216c99b7">
                   <button disabled={bookingsPage === 0} onClick={() => setBookingsPage(p => p - 1)}>← Prev</button>
-                  <span style={{ padding: '.4rem .75rem', fontSize: '.88rem', color: '#666' }}>
+                  <span className="si-24635ff2">
                     Page {bookingsPage + 1} of {Math.ceil(bookingsTotal / 15)}
                   </span>
                   <button disabled={(bookingsPage + 1) * 15 >= bookingsTotal} onClick={() => setBookingsPage(p => p + 1)}>Next →</button>
@@ -913,7 +913,7 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Settings ── */}
       {activeTab === 'settings' && (
         <form onSubmit={handleSettingsSave} className="vh-form">
-          <h3 style={{ marginTop: 0 }}>{t('vetHospitalManage.settings.title')}</h3>
+          <h3 className="si-33c1a83e">{t('vetHospitalManage.settings.title')}</h3>
           <div className="form-row">
             <div className="form-group">
               <label>{t('vetHospitals.form.hospitalName')}</label>
@@ -964,8 +964,8 @@ const VetHospitalManage: React.FC = () => {
               <input value={settingsForm.address || ''} onChange={e => setSettingsForm(f => ({ ...f, address: e.target.value }))} />
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '1.5rem', margin: '.6rem 0 1rem' }}>
-            <label className="vh-toggle" style={{ marginBottom: '.75rem' }}>
+          <div className="si-c8512b7d">
+            <label className="vh-toggle si-5afcd5fa">
               <input type="checkbox" checked={!!settingsForm.hasEmergency} onChange={e => setSettingsForm(f => ({ ...f, hasEmergency: e.target.checked }))} />
               {t('vetHospitalManage.settings.hasEmergency')}
             </label>
@@ -983,10 +983,10 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Invite Doctor Modal ── */}
       {showInviteDoctor && (
         <div className="modal-overlay" onClick={() => setShowInviteDoctor(false)}>
-          <div className="modal-content" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content si-197ba518" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowInviteDoctor(false)}>✕</button>
             <h2>{t('consultations.pageTitle')}</h2>
-            <p style={{ fontSize: '.88rem', color: '#666', margin: '-.25rem 0 1rem' }}>
+            <p className="si-35176fa1">
               Create an invitation for a new doctor to join your hospital. Share the invite link with them to set up their account.
             </p>
 
@@ -994,16 +994,16 @@ const VetHospitalManage: React.FC = () => {
               /* ── Success: show the invite link ── */
               <div>
                 <div className="modal-alert success">✅ Invitation created! Share this link with the doctor:</div>
-                <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center', margin: '.75rem 0' }}>
-                  <input readOnly value={inviteLink} style={{ flex: 1, fontSize: '.82rem', padding: '.5rem .75rem', border: '1px solid #d1d5db', borderRadius: 8, background: '#f9fafb', color: '#1f2937' }} onClick={e => (e.target as HTMLInputElement).select()} />
-                  <button type="button" className="btn-primary" style={{ whiteSpace: 'nowrap', fontSize: '.82rem' }} onClick={() => { navigator.clipboard.writeText(inviteLink); setLinkCopied('modal'); setTimeout(() => setLinkCopied(''), 2000) }}>
+                <div className="si-91a145cf">
+                  <input readOnly value={inviteLink} className="si-7ddfee34" onClick={e => (e.target as HTMLInputElement).select()} />
+                  <button type="button" className="btn-primary si-c3aee843" onClick={() => { navigator.clipboard.writeText(inviteLink); setLinkCopied('modal'); setTimeout(() => setLinkCopied(''), 2000) }}>
                     {linkCopied === 'modal' ? '✓ Copied!' : '📋 Copy'}
                   </button>
                 </div>
-                <p style={{ fontSize: '.78rem', color: '#92400e', background: '#fffbeb', padding: '.5rem .75rem', borderRadius: 8, margin: '.5rem 0' }}>
+                <p className="si-6c6d83b6">
                   ⚠️ This link expires in 7 days. The doctor will use it to create their account and join the hospital automatically.
                 </p>
-                <div className="form-actions" style={{ marginTop: '1rem' }}>
+                <div className="form-actions si-216c99b7">
                   <button type="button" className="btn-secondary" onClick={() => setShowInviteDoctor(false)}>{t('common.close')}</button>
                   <button type="button" className="btn-primary" onClick={() => { setInviteLink(''); setModalMsg(null); setLinkCopied('') }}>{t('vetHospitalManage.invite.inviteAnother')}</button>
                 </div>
@@ -1060,7 +1060,7 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Add/Edit Doctor Modal ── */}
       {showAddDoctor && (
         <div className="modal-overlay" onClick={closeDocModal}>
-          <div className="modal-content" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content si-197ba518" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={closeDocModal}>✕</button>
             <h2>{editDoctor ? t('vetHospitalManage.modal.editDoctor') : t('vetHospitalManage.modal.addDoctor')}</h2>
             <form onSubmit={handleDoctorSubmit} className="vh-form">
@@ -1082,10 +1082,10 @@ const VetHospitalManage: React.FC = () => {
                         onChange={e => setVetSearch(e.target.value)}
                         placeholder="Search by name, email, or specialization..."
                         autoComplete="off"
-                        style={{ marginBottom: 6 }}
+                        className="si-3c64c436"
                       />
                       {allSpecializations.length > 0 && (
-                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
+                        <div className="si-8d41d654">
                           <button type="button" onClick={() => setSpecFilter('')}
                             style={{ padding: '3px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: specFilter === '' ? 700 : 400, background: specFilter === '' ? '#2563eb' : '#e2e8f0', color: specFilter === '' ? '#fff' : '#475569' }}>All</button>
                           {allSpecializations.slice(0, 8).map(s => (
@@ -1094,10 +1094,10 @@ const VetHospitalManage: React.FC = () => {
                           ))}
                         </div>
                       )}
-                      <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #e5e7eb', borderRadius: 10, background: '#fafafa' }}>
-                        {vetSearchLoading && <div style={{ padding: 16, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>Loading veterinarians…</div>}
+                      <div className="si-d252a329">
+                        {vetSearchLoading && <div className="si-61ce8c47">Loading veterinarians…</div>}
                         {!vetSearchLoading && filteredVets.length === 0 && (
-                          <div style={{ padding: 16, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>
+                          <div className="si-61ce8c47">
                             {allVets.length === 0 ? 'No veterinarians registered in the system' : 'No matching veterinarians'}
                           </div>
                         )}
@@ -1107,31 +1107,31 @@ const VetHospitalManage: React.FC = () => {
                               setDoctorForm(f => ({ ...f, doctorId: v.userId }))
                               setSelectedVetName(`${v.firstName || ''} ${v.lastName || ''}`.trim() + (v.email ? ` (${v.email})` : ''))
                             }}
-                            style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background .1s' }}
+                            className="si-42884720"
                             onMouseEnter={e => (e.currentTarget.style.background = '#eff6ff')}
                             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                           >
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontWeight: 600, fontSize: 14 }}>👨‍⚕️ {v.firstName} {v.lastName}</div>
-                              <div style={{ fontSize: 12, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.email}</div>
+                            <div className="si-26d7edc3">
+                              <div className="si-a9b7f385">👨‍⚕️ {v.firstName} {v.lastName}</div>
+                              <div className="si-7f4ca63a">{v.email}</div>
                               {v.specializations?.length > 0 && (
-                                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 }}>
+                                <div className="si-f49f847e">
                                   {v.specializations.slice(0, 3).map((s: string) => (
-                                    <span key={s} style={{ background: '#dbeafe', color: '#1d4ed8', padding: '1px 6px', borderRadius: 8, fontSize: 10, fontWeight: 600 }}>{s}</span>
+                                    <span key={s} className="si-03983371">{s}</span>
                                   ))}
                                 </div>
                               )}
                             </div>
-                            <div style={{ textAlign: 'right', marginLeft: 12, flexShrink: 0 }}>
-                              {v.rating > 0 && <div style={{ fontSize: 12, fontWeight: 600, color: '#f59e0b' }}>⭐ {Number(v.rating).toFixed(1)}</div>}
-                              {v.yearsOfExperience > 0 && <div style={{ fontSize: 11, color: '#94a3b8' }}>{v.yearsOfExperience} yrs exp</div>}
+                            <div className="si-d052cd20">
+                              {v.rating > 0 && <div className="si-7c2973e6">⭐ {Number(v.rating).toFixed(1)}</div>}
+                              {v.yearsOfExperience > 0 && <div className="si-26b03e6b">{v.yearsOfExperience} yrs exp</div>}
                               <div style={{ fontSize: 10, color: v.isAvailable ? '#059669' : '#dc2626', fontWeight: 600 }}>{v.isAvailable ? '● Available' : '○ Unavailable'}</div>
                             </div>
                           </div>
                         ))}
                       </div>
                       {!vetSearchLoading && allVets.length > 0 && (
-                        <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>Showing {filteredVets.length} of {allVets.length} veterinarians{existingDoctorIds.size > 0 ? ` (${existingDoctorIds.size} already added)` : ''}</div>
+                        <div className="si-0610a7ce">Showing {filteredVets.length} of {allVets.length} veterinarians{existingDoctorIds.size > 0 ? ` (${existingDoctorIds.size} already added)` : ''}</div>
                       )}
                     </>
                   )}
@@ -1169,7 +1169,7 @@ const VetHospitalManage: React.FC = () => {
                 <label>{t('vetHospitalManage.modal.consultationFee', { currency: settings.currency })}</label>
                 <input type="number" value={doctorForm.consultationFee} onChange={e => setDoctorForm(f => ({ ...f, consultationFee: e.target.value }))} placeholder="e.g. 500" min="0" />
               </div>
-              <label className="vh-toggle" style={{ marginBottom: '.75rem' }}>
+              <label className="vh-toggle si-5afcd5fa">
                 <input type="checkbox" checked={doctorForm.isPrimaryHospital} onChange={e => setDoctorForm(f => ({ ...f, isPrimaryHospital: e.target.checked }))} />
                 {t('vetHospitalManage.modal.primaryHospital')}
               </label>
@@ -1185,7 +1185,7 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Add/Edit Department Modal ── */}
       {showAddDept && (
         <div className="modal-overlay" onClick={closeDeptModal}>
-          <div className="modal-content" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content si-197ba518" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={closeDeptModal}>✕</button>
             <h2>{editDept ? t('vetHospitalManage.modal.editDept') : t('vetHospitalManage.modal.addDept')}</h2>
             <form onSubmit={handleDeptSubmit} className="vh-form">
@@ -1233,7 +1233,7 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Add/Edit Service Modal ── */}
       {showAddService && (
         <div className="modal-overlay" onClick={closeServiceModal}>
-          <div className="modal-content" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content si-197ba518" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={closeServiceModal}>✕</button>
             <h2>{editService ? t('vetHospitalManage.modal.editService') : t('vetHospitalManage.modal.addService')}</h2>
             <form onSubmit={handleServiceSubmit} className="vh-form">
@@ -1268,7 +1268,7 @@ const VetHospitalManage: React.FC = () => {
                 <label>{t('vetHospitalManage.modal.duration')}</label>
                 <input type="number" value={serviceForm.durationMinutes} onChange={e => setServiceForm(f => ({ ...f, durationMinutes: e.target.value }))} min="5" step="5" />
               </div>
-              <label className="vh-toggle" style={{ marginBottom: '.75rem' }}>
+              <label className="vh-toggle si-5afcd5fa">
                 <input type="checkbox" checked={serviceForm.requiresAppointment} onChange={e => setServiceForm(f => ({ ...f, requiresAppointment: e.target.checked }))} />
                 {t('vetHospitalManage.modal.requiresAppointment')}
               </label>
@@ -1284,12 +1284,12 @@ const VetHospitalManage: React.FC = () => {
       {/* ── Admin: Document Review Modal ── */}
       {reviewForm && (
         <div className="modal-overlay" onClick={() => { setReviewForm(null); setModalMsg(null) }}>
-          <div className="modal-content" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content si-3196bd33" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => { setReviewForm(null); setModalMsg(null) }}>✕</button>
-            <h2 style={{ marginTop: 0 }}>
+            <h2 className="si-33c1a83e">
               {reviewForm.status === 'approved' ? '✓ Approve Document' : '✗ Reject Document'}
             </h2>
-            <p style={{ color: 'var(--text-muted,#888)', fontSize: '.9rem' }}>
+            <p className="si-afed7db4">
               {reviewForm.status === 'approved'
                 ? 'Are you sure you want to approve this document?'
                 : 'Please provide a reason for rejection so the hospital owner can correct it.'}
@@ -1324,25 +1324,17 @@ const VetHospitalManage: React.FC = () => {
 
       {/* ─── Document Viewer Modal ──────────────────────────── */}
       {docViewModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center',
-          alignItems: 'center', zIndex: 9999
-        }} onClick={() => setDocViewModal(null)}>
-          <div style={{
-            background: 'white', borderRadius: 12, width: '90%', maxWidth: 800,
-            maxHeight: '90vh', display: 'flex', flexDirection: 'column',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ margin: 0, fontSize: 16 }}>📄 {docViewModal.name}</h3>
+        <div className="si-9c6164ca" onClick={() => setDocViewModal(null)}>
+          <div className="si-56d8d394" onClick={e => e.stopPropagation()}>
+            <div className="si-95e025b0">
+              <h3 className="si-36330245">📄 {docViewModal.name}</h3>
               <button onClick={() => setDocViewModal(null)}
-                style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#6b7280', lineHeight: 1 }}>✕</button>
+                className="si-06279df8">✕</button>
             </div>
-            <div style={{ flex: 1, overflow: 'auto', padding: 16, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', minHeight: 300 }}>
+            <div className="si-c9793de6">
               {/\.(jpe?g|png|gif|webp|svg)$/i.test(docViewModal.name)
-                ? <img src={docViewModal.url} alt={docViewModal.name} style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: 8 }} />
-                : <iframe src={docViewModal.url} title={docViewModal.name} style={{ width: '100%', height: '70vh', border: 'none', borderRadius: 8 }} />
+                ? <img src={docViewModal.url} alt={docViewModal.name} className="si-e8617b4e" />
+                : <iframe src={docViewModal.url} title={docViewModal.name} className="si-066874ad" />
               }
             </div>
           </div>

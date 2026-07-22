@@ -471,13 +471,13 @@ const AnimalTimeline: React.FC = () => {
     return (
       <div className="tl-page">
         <button className="page-back-btn" onClick={() => routerNavigate(-1)}>← {t('common.back')}</button>
-        <div style={{ textAlign: 'center', padding: '60px 24px' }}>
-          <div style={{ fontSize: 56, marginBottom: 16 }}>📅</div>
-          <h2 style={{ color: '#374151', marginBottom: 8 }}>{t('timeline.noAnimalsTitle', 'No Animals Registered')}</h2>
-          <p style={{ color: '#6b7280', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>
+        <div className="si-7d3f112c">
+          <div className="si-71a36f28">📅</div>
+          <h2 className="si-68be4326">{t('timeline.noAnimalsTitle', 'No Animals Registered')}</h2>
+          <p className="si-b399e78f">
             {t('timeline.noAnimalsHint', 'Register your pets or animals to view their life timeline.')}
           </p>
-          <button className="module-btn primary" style={{ padding: '10px 24px', fontSize: 14, borderRadius: 8 }} onClick={() => routerNavigate('/animals')}>
+          <button className="module-btn primary si-e01a9e73" onClick={() => routerNavigate('/animals')}>
             + {t('timeline.addAnimal', 'Register Animal')}
           </button>
         </div>

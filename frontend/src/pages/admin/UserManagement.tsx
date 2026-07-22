@@ -456,14 +456,14 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       </div>
 
       {actionError && (
-        <div className="module-alert error" style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="module-alert error si-101fd1d0">
           <span>⚠️ {actionError}</span>
-          <button type="button" onClick={() => setActionError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: 'inherit', marginLeft: 8 }}>✕</button>
+          <button type="button" onClick={() => setActionError('')} className="si-2188ebb7">✕</button>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="module-tabs" style={{ marginBottom: 24 }}>
+      <div className="module-tabs si-af65fe13">
         <button className={`module-tab${activeTab === 'users' ? ' active' : ''}`} onClick={() => setActiveTab('users')}>
           👥 Users
         </button>
@@ -478,12 +478,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       {/* ── Pending Approvals Tab ── */}
       {activeTab === 'pending' && (
         <div>
-          {pendingMsg && <div className="module-alert success" style={{ marginBottom: 16 }}>{pendingMsg}</div>}
+          {pendingMsg && <div className="module-alert success si-7e63ec4f">{pendingMsg}</div>}
           {pendingLoading ? (
             <div className="loading-container"><div className="loading-spinner" /></div>
           ) : pendingUsers.length === 0 ? (
             <div className="empty-state">
-              <div style={{ fontSize: 48 }}>✅</div>
+              <div className="si-353e617d">✅</div>
               <h3>No Pending Registrations</h3>
               <p>All veterinarian and corporate admin registrations have been reviewed.</p>
             </div>
@@ -505,11 +505,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       <td>
                         <div>
                           <strong>{pu.firstName} {pu.lastName}</strong>
-                          <div style={{ fontSize: 12, color: '#6b7280' }}>{pu.email}</div>
+                          <div className="si-48a0b045">{pu.email}</div>
                         </div>
                       </td>
                       <td>{getRoleBadge(pu.role)}</td>
-                      <td style={{ fontSize: 13 }}>
+                      <td className="si-0a803082">
                         {pu.role === 'veterinarian' ? (
                           <div>
                             {pu.licenseNumber && <div><strong>License:</strong> {pu.licenseNumber}</div>}
@@ -519,12 +519,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                             {pu.qualifications?.length ? <div><strong>Qualifications:</strong> {pu.qualifications.join(', ')}</div> : null}
                           </div>
                         ) : (
-                          <span style={{ color: '#9ca3af' }}>Corporate Admin account</span>
+                          <span className="si-e70e9abd">Corporate Admin account</span>
                         )}
                       </td>
-                      <td style={{ fontSize: 13 }}>{new Date(pu.createdAt).toLocaleDateString()}</td>
+                      <td className="si-0a803082">{new Date(pu.createdAt).toLocaleDateString()}</td>
                       <td>
-                        <div style={{ display: 'flex', gap: 6 }}>
+                        <div className="si-9f20fe5e">
                           <button
                             className="btn btn-sm btn-success"
                             disabled={processing === pu.id}
@@ -551,15 +551,15 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
           {/* Reject Registration Modal */}
           {showRejectRegistrationModal && (
             <div className="modal-overlay" onClick={() => setShowRejectRegistrationModal(null)}>
-              <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+              <div className="modal si-3196bd33" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                   <h2>Reject Registration</h2>
                   <button className="modal-close" onClick={() => setShowRejectRegistrationModal(null)}>✕</button>
                 </div>
                 <div className="modal-body">
                   <p>Rejecting <strong>{showRejectRegistrationModal.firstName} {showRejectRegistrationModal.lastName}</strong>'s application.</p>
-                  <p style={{ fontSize: 13, color: '#6b7280' }}>The applicant will be notified by email. This action will suspend their account.</p>
-                  <div className="form-group" style={{ marginTop: 12 }}>
+                  <p className="si-c3b93ebb">The applicant will be notified by email. This action will suspend their account.</p>
+                  <div className="form-group si-66faea9d">
                     <label className="form-label">Reason for Rejection *</label>
                     <textarea
                       className="form-input"
@@ -569,7 +569,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       placeholder="e.g. License could not be verified. Please re-apply with a valid license number."
                     />
                   </div>
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+                  <div className="si-f5f9f5f6">
                     <button className="btn btn-outline" onClick={() => setShowRejectRegistrationModal(null)}>Cancel</button>
                     <button
                       className="btn btn-primary"
@@ -589,8 +589,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       {/* ── Role Change Requests Tab ── */}
       {activeTab === 'requests' && (
         <div>
-          {requestMsg && <div className="module-alert success" style={{ marginBottom: 16 }}>{requestMsg}</div>}
-          <div className="module-tabs" style={{ marginBottom: 16 }}>
+          {requestMsg && <div className="module-alert success si-7e63ec4f">{requestMsg}</div>}
+          <div className="module-tabs si-7e63ec4f">
             {(['pending', 'approved', 'rejected'] as const).map(s => (
               <button key={s} className={`module-tab${requestsFilter === s ? ' active' : ''}`} onClick={() => setRequestsFilter(s)}>
                 {t(`adminRoleRequests.tabs.${s}`)}
@@ -601,7 +601,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
             <div className="loading-container"><div className="loading-spinner" /></div>
           ) : roleRequests.length === 0 ? (
             <div className="empty-state">
-              <div style={{ fontSize: 40 }}>🔄</div>
+              <div className="si-0067e898">🔄</div>
               <p>{t('adminRoleRequests.noRequests', { status: requestsFilter })}</p>
             </div>
           ) : (
@@ -624,17 +624,17 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       <td>
                         <div>
                           <strong>{r.userName}</strong>
-                          <div style={{ fontSize: 12, color: '#6b7280' }}>{r.userEmail}</div>
-                          {r.uniqueId && <div style={{ fontSize: 11, color: '#9ca3af' }}>{r.uniqueId}</div>}
+                          <div className="si-48a0b045">{r.userEmail}</div>
+                          {r.uniqueId && <div className="si-a5de6cea">{r.uniqueId}</div>}
                         </div>
                       </td>
                       <td>{getRoleBadge(r.currentRole)}</td>
                       <td>{getRoleBadge(r.requestedRole)}</td>
-                      <td style={{ maxWidth: 200, fontSize: 13 }}>{r.reason}</td>
-                      <td style={{ fontSize: 13 }}>{new Date(r.createdAt).toLocaleDateString()}</td>
+                      <td className="si-af971f42">{r.reason}</td>
+                      <td className="si-0a803082">{new Date(r.createdAt).toLocaleDateString()}</td>
                       {requestsFilter === 'pending' ? (
                         <td>
-                          <div style={{ display: 'flex', gap: 6 }}>
+                          <div className="si-9f20fe5e">
                             <button
                               className="btn btn-sm btn-primary"
                               disabled={requestProcessing === r.id}
@@ -652,9 +652,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                           </div>
                         </td>
                       ) : (
-                        <td style={{ fontSize: 12 }}>
+                        <td className="si-756a9f21">
                           {r.reviewedBy && <div>{t('adminRoleRequests.reviewedBy', { name: r.reviewedBy })}</div>}
-                          {r.rejectionReason && <div style={{ color: '#ef4444' }}>{t('adminRoleRequests.rejectedReason', { reason: r.rejectionReason })}</div>}
+                          {r.rejectionReason && <div className="si-4fb20e94">{t('adminRoleRequests.rejectedReason', { reason: r.rejectionReason })}</div>}
                         </td>
                       )}
                     </tr>
@@ -667,7 +667,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
           {/* Reject Modal */}
           {showRejectModal && (
             <div className="modal-overlay" onClick={() => setShowRejectModal(null)}>
-              <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+              <div className="modal si-3196bd33" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                   <h2>{t('adminRoleRequests.rejectModal.title')}</h2>
                   <button className="modal-close" onClick={() => setShowRejectModal(null)}>✕</button>
@@ -683,7 +683,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       placeholder={t('adminRoleRequests.rejectModal.reasonPlaceholder')}
                     />
                   </div>
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+                  <div className="si-f5f9f5f6">
                     <button className="btn btn-outline" onClick={() => setShowRejectModal(null)}>
                       {t('adminRoleRequests.rejectModal.cancelBtn')}
                     </button>
@@ -704,15 +704,15 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
 
       {/* ── Users Tab ── */}
       {activeTab === 'users' && (<>
-      <div className="search-filter-bar" style={{ marginBottom: 24 }}>
+      <div className="search-filter-bar si-af65fe13">
         <input
-          className="form-input"
+          className="form-input si-6acd75e8"
           placeholder={t('userManagement.searchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ flex: 1 }}
+         
         />
-        <select className="form-input" value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={{ width: 160 }}>
+        <select className="form-input si-549dd079" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
           <option value="">{t('userManagement.allRoles')}</option>
           <option value="pet_owner">{t('userManagement.petOwners')}</option>
           <option value="veterinarian">{t('userManagement.veterinarians')}</option>
@@ -725,14 +725,14 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       {/* Role Change Modal */}
       {showRoleModal && (
         <div className="modal-overlay" onClick={() => setShowRoleModal(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+          <div className="modal si-0a161398" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{t('userManagement.changeRole')}</h2>
               <button className="modal-close" onClick={() => setShowRoleModal(null)}>✕</button>
             </div>
             <div className="modal-body">
               <p>{t('userManagement.changeRoleFor')} <strong>{showRoleModal.firstName} {showRoleModal.lastName}</strong></p>
-              <p style={{ fontSize: 13, color: '#6b7280' }}>{t('userManagement.currentRole')}: {showRoleModal.role}</p>
+              <p className="si-c3b93ebb">{t('userManagement.currentRole')}: {showRoleModal.role}</p>
               <div className="form-group">
                 <label className="form-label">{t('userManagement.newRole')}</label>
                 <select className="form-input" value={newRole} onChange={e => setNewRole(e.target.value)}>
@@ -744,7 +744,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                   <option value="admin">{t('userManagement.admin')}</option>
                 </select>
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+              <div className="si-f5f9f5f6">
                 <button className="btn btn-outline" onClick={() => setShowRoleModal(null)}>{t('userManagement.cancel')}</button>
                 <button className="btn btn-primary" disabled={!newRole || processing === showRoleModal.id} onClick={handleChangeRole}>
                   {processing === showRoleModal.id ? t('userManagement.saving') : t('userManagement.changeRole')}
@@ -760,7 +760,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
         <div className="loading-container"><div className="loading-spinner" /></div>
       ) : users.length === 0 ? (
         <div className="empty-state">
-          <div style={{ fontSize: 48 }}>👥</div>
+          <div className="si-353e617d">👥</div>
           <h3>{t('userManagement.noUsers')}</h3>
           <p>{t('userManagement.adjustSearch')}</p>
         </div>
@@ -781,12 +781,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
               {users.map(u => (
                 <tr key={u.id}>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{
-                        width: 36, height: 36, borderRadius: '50%', background: '#e0e7ff',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: 600, color: '#4f46e5', fontSize: 14
-                      }}>
+                    <div className="si-98d3a741">
+                      <div className="si-92c7add1">
                         {u.firstName?.charAt(0)}{u.lastName?.charAt(0)}
                       </div>
                       <span>{u.firstName} {u.lastName}</span>
@@ -801,11 +797,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       const label: Record<string, string> = { active: 'Active', pending_approval: 'Pending', frozen: 'Frozen', suspended: 'Suspended' }
                       return <span className={`badge badge-${map[s] || 'inactive'}`}>{label[s] || s}</span>
                     })()}
-                    {u.freezeReason && <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 2 }} title={u.freezeReason}>⚠ {u.freezeReason.substring(0, 40)}</div>}
+                    {u.freezeReason && <div className="si-ba379b86" title={u.freezeReason}>⚠ {u.freezeReason.substring(0, 40)}</div>}
                   </td>
                   <td>{formatDate(u.createdAt)}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <div className="si-50c82988">
                       {/* Role button */}
                       <button className="btn btn-sm btn-outline" onClick={() => { setShowRoleModal(u); setNewRole('') }}>
                         {t('userManagement.role')}
@@ -856,7 +852,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       {/* Vet Profile Modal */}
       {showVetModal && (
         <div className="modal-overlay" onClick={() => setShowVetModal(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 600, maxHeight: '90vh', overflow: 'auto' }}>
+          <div className="modal si-fd563096" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>🩺 {t('userManagement.vetProfile')} — {showVetModal.firstName} {showVetModal.lastName}</h2>
               <button className="modal-close" onClick={() => setShowVetModal(null)}>✕</button>
@@ -865,8 +861,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
               {vetLoading ? (
                 <div className="loading-container"><div className="loading-spinner" /></div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="si-7a28b1a9">
+                  <div className="si-fbb64b4e">
                     <div className="form-group">
                       <label className="form-label">{t('userManagement.licenseNumber')}</label>
                       <input className="form-input" name="licenseNumber" value={vetForm.licenseNumber} onChange={handleVetFormChange} />
@@ -878,12 +874,12 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                   </div>
                   <div className="form-group">
                       <label className="form-label">{t('userManagement.bio')}</label>
-                    <textarea className="form-input" name="bio" value={vetForm.bio} onChange={handleVetFormChange} rows={3} style={{ resize: 'vertical' }} />
+                    <textarea className="form-input si-3f7753b6" name="bio" value={vetForm.bio} onChange={handleVetFormChange} rows={3} />
                   </div>
                   <div className="form-group">
                       <label className="form-label">{t('userManagement.consultationFee')}</label>
                     <input className="form-input" type="number" name="consultationFee" value={vetForm.consultationFee} onChange={handleVetFormChange} min="0" step="0.01" />
-                    {vetForm.consultationFee && <span style={{ fontSize: 12, color: '#6b7280' }}>Preview: {formatCurrency(parseFloat(vetForm.consultationFee) || 0)}</span>}
+                    {vetForm.consultationFee && <span className="si-48a0b045">Preview: {formatCurrency(parseFloat(vetForm.consultationFee) || 0)}</span>}
                   </div>
                   <div className="form-group">
                       <label className="form-label">{t('userManagement.specializations')}</label>
@@ -897,7 +893,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       <label className="form-label">{t('userManagement.languages')}</label>
                     <input className="form-input" name="languages" value={vetForm.languages} onChange={handleVetFormChange} placeholder="English, Hindi" />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="si-fbb64b4e">
                     <div className="form-group">
                       <label className="form-label">{t('userManagement.clinicName')}</label>
                       <input className="form-input" name="clinicName" value={vetForm.clinicName} onChange={handleVetFormChange} />
@@ -911,7 +907,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       <label className="form-label">{t('userManagement.availableDays')}</label>
                     <input className="form-input" name="availableDays" value={vetForm.availableDays} onChange={handleVetFormChange} placeholder="Mon-Fri" />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="si-fbb64b4e">
                     <div className="form-group">
                       <label className="form-label">{t('userManagement.hoursStart')}</label>
                       <input className="form-input" type="time" name="availableHoursStart" value={vetForm.availableHoursStart} onChange={handleVetFormChange} />
@@ -921,22 +917,22 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       <input className="form-input" type="time" name="availableHoursEnd" value={vetForm.availableHoursEnd} onChange={handleVetFormChange} />
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 20, padding: '4px 0' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <div className="si-a65a6462">
+                    <label className="si-0c7e7279">
                       <input type="checkbox" name="isAvailable" checked={vetForm.isAvailable} onChange={handleVetFormChange} />
                       <span>{t('userManagement.available')}</span>
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <label className="si-0c7e7279">
                       <input type="checkbox" name="acceptsEmergency" checked={vetForm.acceptsEmergency} onChange={handleVetFormChange} />
                       <span>{t('userManagement.acceptEmergencies')}</span>
                     </label>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+                  <div className="si-8d13495b">
                     <button className="btn btn-outline" onClick={() => setShowVetModal(null)}>{t('userManagement.cancel')}</button>
                     <button className="btn btn-primary" disabled={vetSaving} onClick={handleSaveVetProfile}>
                       {vetSaving ? t('userManagement.saving') : t('userManagement.saveVetProfile')}
                     </button>
-                    {vetSaved && <span style={{ color: '#16a34a', alignSelf: 'center', fontSize: 13 }}>✓ {t('userManagement.saved')}</span>}
+                    {vetSaved && <span className="si-fb870846">✓ {t('userManagement.saved')}</span>}
                   </div>
                 </div>
               )}
@@ -947,34 +943,34 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       {/* Secondary Roles Modal (P4-HIGH1) */}
       {showSecondaryRolesModal && (
         <div className="modal-overlay" onClick={() => setShowSecondaryRolesModal(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, maxHeight: '90vh', overflow: 'auto' }}>
+          <div className="modal si-f366f390" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>🔑 {t('userManagement.roles')} — {showSecondaryRolesModal.firstName} {showSecondaryRolesModal.lastName}</h2>
               <button className="modal-close" onClick={() => setShowSecondaryRolesModal(null)}>✕</button>
             </div>
             <div className="modal-body">
-              {rolesActionMsg && <div className="module-alert success" style={{ marginBottom: 12 }}>{rolesActionMsg}</div>}
-              {rolesActionErr && <div className="module-alert error" style={{ marginBottom: 12 }}>{rolesActionErr}<button style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setRolesActionErr('')}>✕</button></div>}
+              {rolesActionMsg && <div className="module-alert success si-bab8e8bc">{rolesActionMsg}</div>}
+              {rolesActionErr && <div className="module-alert error si-bab8e8bc">{rolesActionErr}<button className="si-c93d89f9" onClick={() => setRolesActionErr('')}>✕</button></div>}
 
               {secondaryRolesLoading ? (
                 <div className="loading-container"><div className="loading-spinner" /></div>
               ) : (
                 <>
-                  <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{t('userManagement.primaryRole')}</h3>
+                  <div className="si-7e63ec4f">
+                    <h3 className="si-23235cf3">{t('userManagement.primaryRole')}</h3>
                     {getRoleBadge(showSecondaryRolesModal.role)}
                   </div>
-                  <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{t('userManagement.secondaryRoles')}</h3>
+                  <div className="si-7e63ec4f">
+                    <h3 className="si-23235cf3">{t('userManagement.secondaryRoles')}</h3>
                     {secondaryRoles.filter(r => !r.isPrimary).length === 0 ? (
-                      <p style={{ color: '#6b7280', fontSize: 13 }}>No secondary roles assigned.</p>
+                      <p className="si-c3b93ebb">No secondary roles assigned.</p>
                     ) : (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      <div className="si-b9eb5ec7">
                         {secondaryRoles.filter(r => !r.isPrimary).map((r: any) => (
-                          <div key={r.role} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '4px 8px' }}>
+                          <div key={r.role} className="si-1f4153fd">
                             {getRoleBadge(r.role)}
                             <button
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: 14, padding: 0 }}
+                              className="si-e5a53ae5"
                               onClick={() => handleRemoveSecondaryRole(r.role)}
                               title={t('userManagement.removeRole')}
                             >✕</button>
@@ -983,8 +979,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                       </div>
                     )}
                   </div>
-                  <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{t('userManagement.addRole')}</h3>
+                  <div className="si-04321f8b">
+                    <h3 className="si-23235cf3">{t('userManagement.addRole')}</h3>
                     <div className="form-group">
                       <select className="form-input" value={addRoleValue} onChange={e => setAddRoleValue(e.target.value)}>
                         <option value="">{t('userManagement.selectRole')}</option>
@@ -996,7 +992,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                     <div className="form-group">
                       <input className="form-input" placeholder="Notes (optional)" value={addRoleNotes} onChange={e => setAddRoleNotes(e.target.value)} />
                     </div>
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <div className="si-f0412db6">
                       <button className="btn btn-outline" onClick={() => setShowSecondaryRolesModal(null)}>{t('userManagement.cancel')}</button>
                       <button className="btn btn-primary" disabled={!addRoleValue} onClick={handleAddSecondaryRole}>
                         {t('userManagement.addRole')}
@@ -1012,19 +1008,19 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       {/* Freeze Account Modal */}
       {showFreezeModal && (
         <div className="modal-overlay" onClick={() => setShowFreezeModal(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+          <div className="modal si-3196bd33" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>❄ Freeze Account</h2>
               <button className="modal-close" onClick={() => setShowFreezeModal(null)}>✕</button>
             </div>
             <div className="modal-body">
               <p>Temporarily freeze <strong>{showFreezeModal.firstName} {showFreezeModal.lastName}</strong>'s account.</p>
-              <p style={{ fontSize: 13, color: '#6b7280' }}>The user will not be able to log in while frozen. They will see a polite notice to contact the platform team.</p>
-              <div className="form-group" style={{ marginTop: 12 }}>
+              <p className="si-c3b93ebb">The user will not be able to log in while frozen. They will see a polite notice to contact the platform team.</p>
+              <div className="form-group si-66faea9d">
                 <label className="form-label">Reason (shown to support team) *</label>
                 <textarea className="form-input" rows={3} value={actionReason} onChange={e => setActionReason(e.target.value)} placeholder="e.g. Pending investigation into activity" />
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+              <div className="si-f5f9f5f6">
                 <button className="btn btn-outline" onClick={() => setShowFreezeModal(null)}>Cancel</button>
                 <button className="btn btn-warning" disabled={!actionReason.trim() || processing === showFreezeModal.id} onClick={handleFreezeUser}>
                   {processing === showFreezeModal.id ? 'Freezing...' : '❄ Freeze Account'}
@@ -1038,19 +1034,19 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       {/* Suspend Account Modal */}
       {showSuspendModal && (
         <div className="modal-overlay" onClick={() => setShowSuspendModal(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+          <div className="modal si-3196bd33" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>⛔ Suspend Account</h2>
               <button className="modal-close" onClick={() => setShowSuspendModal(null)}>✕</button>
             </div>
             <div className="modal-body">
               <p>Permanently suspend <strong>{showSuspendModal.firstName} {showSuspendModal.lastName}</strong>'s account.</p>
-              <p style={{ fontSize: 13, color: '#ef4444' }}>The account will be disabled. The reason is stored for audit purposes. Use Reactivate to re-enable.</p>
-              <div className="form-group" style={{ marginTop: 12 }}>
+              <p className="si-5b64929a">The account will be disabled. The reason is stored for audit purposes. Use Reactivate to re-enable.</p>
+              <div className="form-group si-66faea9d">
                 <label className="form-label">Reason for Suspension *</label>
                 <textarea className="form-input" rows={3} value={actionReason} onChange={e => setActionReason(e.target.value)} placeholder="e.g. Repeated policy violations" />
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+              <div className="si-f5f9f5f6">
                 <button className="btn btn-outline" onClick={() => setShowSuspendModal(null)}>Cancel</button>
                 <button className="btn btn-danger" disabled={!actionReason.trim() || processing === showSuspendModal.id} onClick={handleSuspendUser}>
                   {processing === showSuspendModal.id ? 'Suspending...' : '⛔ Suspend Account'}
@@ -1064,13 +1060,13 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
       {/* Reset Password Modal (C7) */}
       {showResetPasswordModal && (
         <div className="modal-overlay" onClick={() => setShowResetPasswordModal(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
+          <div className="modal si-25615047" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>🔒 {t('userManagement.resetPasswordTitle')} — {showResetPasswordModal.firstName} {showResetPasswordModal.lastName}</h2>
               <button className="modal-close" onClick={() => setShowResetPasswordModal(null)}>✕</button>
             </div>
             <div className="modal-body">
-              {resetPasswordMsg && <div className="module-alert success" style={{ marginBottom: 12 }}>{resetPasswordMsg}</div>}
+              {resetPasswordMsg && <div className="module-alert success si-bab8e8bc">{resetPasswordMsg}</div>}
               <div className="form-group">
                 <label className="form-label">{t('userManagement.resetPasswordLabel')} *</label>
                 <input
@@ -1082,10 +1078,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate }) => {
                   minLength={8}
                 />
                 {resetPasswordValue && resetPasswordValue.length < 8 && (
-                  <p style={{ color: '#f59e0b', fontSize: 12, marginTop: 4 }}>⚠️ {t('userManagement.resetPasswordMin')}</p>
+                  <p className="si-513c70eb">⚠️ {t('userManagement.resetPasswordMin')}</p>
                 )}
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+              <div className="si-f5f9f5f6">
                 <button className="btn btn-outline" onClick={() => setShowResetPasswordModal(null)}>{t('userManagement.cancel')}</button>
                 <button
                   className="btn btn-primary"

@@ -318,7 +318,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
               <div className="vp-animal-name">{animal.animalName}</div>
               {animal.animalUniqueId && (
                 <div
-                  className="vc-id-badge"
+                  className="vc-id-badge si-4af0b366"
                   title={`VetCare ID — click to copy`}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -328,7 +328,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
                       setTimeout(() => setCopiedId(prev => (prev === id ? null : prev)), 1500)
                     }).catch(() => setError(t('common.copyFailed')))
                   }}
-                  style={{ cursor: 'pointer', fontFamily: 'monospace', fontSize: 11, color: '#6366f1', background: '#eef2ff', borderRadius: 4, padding: '2px 6px', display: 'inline-block', marginTop: 2 }}
+                 
                 >
                   {copiedId === animal.animalUniqueId ? `✅ ${t('common.copied')}` : `🏷️ ${animal.animalUniqueId}`}
                 </div>

@@ -52,10 +52,10 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
   }
 
   const tile = (label: string, value: string, color: string, hint?: string) => (
-    <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px' }}>
-      <div style={{ color: '#6b7280', fontSize: 13 }}>{label}</div>
+    <div className="si-73701409">
+      <div className="si-c3b93ebb">{label}</div>
       <div style={{ fontSize: 22, fontWeight: 700, color }}>{value}</div>
-      {hint && <div style={{ color: '#9ca3af', fontSize: 11 }}>{hint}</div>}
+      {hint && <div className="si-a5de6cea">{hint}</div>}
     </div>
   )
 
@@ -66,12 +66,12 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
           <h1>{t('financeAdmin.title')}</h1>
           <p className="page-subtitle">{t('financeAdmin.subtitle')}</p>
         </div>
-        <div className="page-header-actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className="page-header-actions si-bab2d193">
           <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
-            style={{ border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }} />
+            className="si-676bd163" />
           <span>→</span>
           <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
-            style={{ border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }} />
+            className="si-676bd163" />
           <button className="btn btn-outline btn-sm" disabled={exporting} onClick={exportGstCsv}>
             {exporting ? t('common.loading') : t('financeAdmin.exportGst')}
           </button>
@@ -79,7 +79,7 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
       </div>
 
       {exportError && (
-        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 14 }}>
+        <div className="si-a1036ec3">
           {exportError}
         </div>
       )}
@@ -87,11 +87,11 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /><p>{t('common.loading')}</p></div>
       ) : !data ? (
-        <div style={{ textAlign: 'center', padding: '50px 20px', color: '#6b7280' }}>{t('financeAdmin.noData')}</div>
+        <div className="si-8fce2994">{t('financeAdmin.noData')}</div>
       ) : (
         <>
-          <h2 style={{ fontSize: 16, margin: '4px 0 10px' }}>{t('financeAdmin.revenueTitle')}</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 22 }}>
+          <h2 className="si-229a75d2">{t('financeAdmin.revenueTitle')}</h2>
+          <div className="si-2f255410">
             {tile(t('financeAdmin.gmv'), formatCurrency(data.revenue.gmv), '#111827', t('financeAdmin.paidCount', { count: data.revenue.paidCount }))}
             {tile(t('financeAdmin.commission'), formatCurrency(data.revenue.commissionEarned), '#15803d')}
             {tile(t('financeAdmin.processingCharges'), formatCurrency(data.revenue.processingCharges), '#15803d')}
@@ -100,22 +100,22 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
             {tile(t('financeAdmin.netRevenue'), formatCurrency(data.revenue.netPlatformRevenue), data.revenue.netPlatformRevenue >= 0 ? '#15803d' : '#dc2626', t('financeAdmin.netRevenueHint'))}
           </div>
 
-          <h2 style={{ fontSize: 16, margin: '4px 0 10px' }}>{t('financeAdmin.liabilitiesTitle')}</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 22 }}>
+          <h2 className="si-229a75d2">{t('financeAdmin.liabilitiesTitle')}</h2>
+          <div className="si-2f255410">
             {tile(t('financeAdmin.doctorClearing'), formatCurrency(data.settlementLiability.clearing), '#b45309')}
             {tile(t('financeAdmin.doctorAvailable'), formatCurrency(data.settlementLiability.available), data.settlementLiability.available < 0 ? '#dc2626' : '#6d28d9')}
             {tile(t('financeAdmin.doctorLocked'), formatCurrency(data.settlementLiability.locked), '#6d28d9')}
             {tile(t('financeAdmin.walletLiability'), formatCurrency(data.walletLiability.total), '#1d4ed8', t('financeAdmin.walletLiabilityHint'))}
           </div>
 
-          <h2 style={{ fontSize: 16, margin: '4px 0 10px' }}>{t('financeAdmin.tdsTitle')}</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 22 }}>
+          <h2 className="si-229a75d2">{t('financeAdmin.tdsTitle')}</h2>
+          <div className="si-2f255410">
             {tile(t('financeAdmin.tdsDeducted'), formatCurrency(data.tds.totalDeducted), '#111827', t('financeAdmin.tdsCount', { count: data.tds.settledCount }))}
             {tile(t('financeAdmin.netPaidToDoctors'), formatCurrency(data.tds.netPaidTotal), '#15803d')}
           </div>
 
-          <h2 style={{ fontSize: 16, margin: '4px 0 10px' }}>{t('financeAdmin.healthTitle')}</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+          <h2 className="si-229a75d2">{t('financeAdmin.healthTitle')}</h2>
+          <div className="si-b3a5ea3d">
             {tile(t('financeAdmin.stuckPending'), String(data.health.stuckPending), data.health.stuckPending > 0 ? '#dc2626' : '#15803d', t('financeAdmin.stuckPendingHint'))}
             {tile(t('financeAdmin.openHolds'), String(data.health.openHolds), '#6b7280')}
           </div>

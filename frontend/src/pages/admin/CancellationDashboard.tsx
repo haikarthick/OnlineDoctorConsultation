@@ -60,45 +60,45 @@ const CancellationDashboard: React.FC<CancellationDashboardProps> = ({ onNavigat
       </div>
 
       {/* Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('cancellationDashboard.totalCancellations')}</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: '#dc2626' }}>{totalCancellations}</div>
+      <div className="si-76bd994f">
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('cancellationDashboard.totalCancellations')}</div>
+          <div className="si-92e68741">{totalCancellations}</div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('cancellationDashboard.byDoctors')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#d97706' }}>{doctorCancellations}</div>
-          <div style={{ fontSize: 12, color: '#9ca3af' }}>{doctorPercent}% {t('cancellationDashboard.ofTotal')}</div>
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('cancellationDashboard.byDoctors')}</div>
+          <div className="si-a3e9861f">{doctorCancellations}</div>
+          <div className="si-3f4bbe41">{doctorPercent}% {t('cancellationDashboard.ofTotal')}</div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('cancellationDashboard.byPatients')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#2563eb' }}>{patientCancellations}</div>
-          <div style={{ fontSize: 12, color: '#9ca3af' }}>{patientPercent}% {t('cancellationDashboard.ofTotal')}</div>
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('cancellationDashboard.byPatients')}</div>
+          <div className="si-87ce733a">{patientCancellations}</div>
+          <div className="si-3f4bbe41">{patientPercent}% {t('cancellationDashboard.ofTotal')}</div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('cancellationDashboard.byAdmin')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#6b7280' }}>{adminCancellations}</div>
-          <div style={{ fontSize: 12, color: '#9ca3af' }}>{adminPercent}% {t('cancellationDashboard.ofTotal')}</div>
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('cancellationDashboard.byAdmin')}</div>
+          <div className="si-927ef5d8">{adminCancellations}</div>
+          <div className="si-3f4bbe41">{adminPercent}% {t('cancellationDashboard.ofTotal')}</div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('cancellationDashboard.totalRefunded')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#059669' }}>{formatCurrency(totalRefunded)}</div>
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('cancellationDashboard.totalRefunded')}</div>
+          <div className="si-5c34ccdf">{formatCurrency(totalRefunded)}</div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('cancellationDashboard.avgRefund')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#059669' }}>{formatCurrency(avgRefund)}</div>
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('cancellationDashboard.avgRefund')}</div>
+          <div className="si-5c34ccdf">{formatCurrency(avgRefund)}</div>
         </div>
       </div>
 
       {/* Cancellation Breakdown Bar */}
-      <div className="card" style={{ marginBottom: 24 }}>
+      <div className="card si-af65fe13">
         <div className="card-header">
           <h2>📊 {t('cancellationDashboard.cancellationBreakdown')}</h2>
         </div>
         <div className="card-body">
           {totalCancellations > 0 ? (
             <>
-              <div style={{ display: 'flex', height: 32, borderRadius: 8, overflow: 'hidden', marginBottom: 16 }}>
+              <div className="si-53a3ff01">
                 {doctorPercent > 0 && (
                   <div style={{ width: `${doctorPercent}%`, background: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 600 }}>
                     {doctorPercent}%
@@ -115,23 +115,23 @@ const CancellationDashboard: React.FC<CancellationDashboardProps> = ({ onNavigat
                   </div>
                 )}
               </div>
-              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 12, height: 12, borderRadius: 3, background: '#f59e0b' }} />
-                  <span style={{ fontSize: 13 }}>{t('cancellationDashboard.doctor')} ({doctorCancellations})</span>
+              <div className="si-33938b8e">
+                <div className="si-c2db3694">
+                  <div className="si-84086133" />
+                  <span className="si-0a803082">{t('cancellationDashboard.doctor')} ({doctorCancellations})</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 12, height: 12, borderRadius: 3, background: '#3b82f6' }} />
-                  <span style={{ fontSize: 13 }}>{t('cancellationDashboard.patient')} ({patientCancellations})</span>
+                <div className="si-c2db3694">
+                  <div className="si-d404ed51" />
+                  <span className="si-0a803082">{t('cancellationDashboard.patient')} ({patientCancellations})</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 12, height: 12, borderRadius: 3, background: '#6b7280' }} />
-                  <span style={{ fontSize: 13 }}>{t('cancellationDashboard.admin')} ({adminCancellations})</span>
+                <div className="si-c2db3694">
+                  <div className="si-84e43ea0" />
+                  <span className="si-0a803082">{t('cancellationDashboard.admin')} ({adminCancellations})</span>
                 </div>
               </div>
             </>
           ) : (
-            <div style={{ textAlign: 'center', padding: '20px', color: '#6b7280' }}>
+            <div className="si-e64a3412">
               <p>{t('cancellationDashboard.noCancellationsYet')}</p>
             </div>
           )}
@@ -144,28 +144,28 @@ const CancellationDashboard: React.FC<CancellationDashboardProps> = ({ onNavigat
           <h2>💡 {t('cancellationDashboard.insightsAndActions')}</h2>
         </div>
         <div className="card-body">
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div className="si-2a57fba0">
             {doctorPercent > 40 && (
-              <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
+              <div className="si-56fca271">
                 🚨 <strong>{t('cancellationDashboard.highDoctorCancellationRate')} ({doctorPercent}%)</strong> — {t('cancellationDashboard.highDoctorCancellationAdvice')}
-                <button className="btn btn-sm btn-outline" style={{ marginLeft: 8 }} onClick={() => onNavigate('/admin/settings')}>
+                <button className="btn btn-sm btn-outline si-7984dfbc" onClick={() => onNavigate('/admin/settings')}>
                   {t('cancellationDashboard.reviewPolicy')}
                 </button>
               </div>
             )}
             {totalRefunded > 10000 && (
-              <div style={{ background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
+              <div className="si-88cee687">
                 ⚠️ <strong>{t('cancellationDashboard.highRefundVolume')} ({formatCurrency(totalRefunded)})</strong> — {t('cancellationDashboard.highRefundAdvice')}
               </div>
             )}
             {totalCancellations === 0 && (
-              <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
+              <div className="si-a535e093">
                 ✅ <strong>{t('cancellationDashboard.noCancellations')}</strong> — {t('cancellationDashboard.perfectCompletionRate')}
               </div>
             )}
-            <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: '12px 16px', fontSize: 13 }}>
+            <div className="si-fbbff6c4">
               📋 <strong>{t('cancellationDashboard.managePolicies')}</strong> {' '}
-              <button className="btn btn-sm btn-outline" style={{ marginLeft: 4 }} onClick={() => onNavigate('/admin/settings')}>
+              <button className="btn btn-sm btn-outline si-12f273ab" onClick={() => onNavigate('/admin/settings')}>
                 {t('cancellationDashboard.systemSettings')}
               </button>
             </div>

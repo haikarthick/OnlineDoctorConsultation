@@ -72,26 +72,26 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
       </div>
 
       {/* Rating Summary */}
-      <div className="card" style={{ marginBottom: 24 }}>
+      <div className="card si-af65fe13">
         <div className="card-body">
-          <div style={{ display: 'flex', gap: 40, alignItems: 'center' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 48, fontWeight: 700 }}>{avgRating.toFixed(1)}</div>
-              <div className="star-rating" style={{ justifyContent: 'center', gap: 4 }}>
+          <div className="si-2f303522">
+            <div className="si-4b6b7fbc">
+              <div className="si-4a0be8b2">{avgRating.toFixed(1)}</div>
+              <div className="star-rating si-79bc7330">
                 {[1, 2, 3, 4, 5].map(s => (
                   <span key={s} style={{ fontSize: 24, color: s <= Math.round(avgRating) ? '#f59e0b' : '#d1d5db' }}>★</span>
                 ))}
               </div>
-              <p style={{ color: '#6b7280', fontSize: 14 }}>{reviews.length} {t('doctorReviews.reviews')}</p>
+              <p className="si-09dee8a9">{reviews.length} {t('doctorReviews.reviews')}</p>
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="si-6acd75e8">
               {ratingDist.map(d => (
-                <div key={d.star} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                  <span style={{ width: 20, fontSize: 14, textAlign: 'right' }}>{d.star}★</span>
-                  <div style={{ flex: 1, height: 8, background: '#f3f4f6', borderRadius: 4, overflow: 'hidden' }}>
+                <div key={d.star} className="si-b8d2089f">
+                  <span className="si-b2b5468c">{d.star}★</span>
+                  <div className="si-bda83d5f">
                     <div style={{ width: `${d.pct}%`, height: '100%', background: '#f59e0b', borderRadius: 4 }} />
                   </div>
-                  <span style={{ width: 30, fontSize: 12, color: '#6b7280' }}>{d.count}</span>
+                  <span className="si-e922db48">{d.count}</span>
                 </div>
               ))}
             </div>
@@ -102,26 +102,26 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
       {/* Reviews List */}
       {reviews.length === 0 ? (
         <div className="empty-state">
-          <div style={{ fontSize: 48 }}>⭐</div>
+          <div className="si-353e617d">⭐</div>
           <h3>{t('doctorReviews.noReviewsYet')}</h3>
           <p>{t('doctorReviews.reviewsWillAppear')}</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="si-58f59f7a">
           {reviews.map(review => (
             <div key={review.id} className="card">
               <div className="card-body">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="si-b1549cde">
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <div className="si-b8d2089f">
                       <strong>{review.petOwnerName || t('doctorReviews.petOwner')}</strong>
-                      <div className="star-rating" style={{ gap: 2 }}>
+                      <div className="star-rating si-32deb58a">
                         {[1, 2, 3, 4, 5].map(s => (
                           <span key={s} style={{ fontSize: 16, color: s <= review.rating ? '#f59e0b' : '#d1d5db' }}>★</span>
                         ))}
                       </div>
                     </div>
-                    <p style={{ color: '#6b7280', fontSize: 12, margin: 0 }}>
+                    <p className="si-4c7d5b07">
                       {formatDate(review.createdAt || '')}
                     </p>
                   </div>
@@ -130,28 +130,28 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
                   </span>
                 </div>
 
-                <p style={{ marginTop: 12, fontSize: 14, lineHeight: 1.6 }}>{review.comment}</p>
+                <p className="si-fe0c9bbe">{review.comment}</p>
 
                 {/* Vet Response */}
                 {review.responseFromVet && (
-                  <div style={{ marginTop: 12, padding: 12, background: '#eff6ff', borderRadius: 8, borderLeft: '3px solid #3b82f6' }}>
-                    <p style={{ fontSize: 12, color: '#3b82f6', fontWeight: 600, margin: '0 0 4px' }}>{t('doctorReviews.yourResponse')}</p>
-                    <p style={{ margin: 0, fontSize: 14 }}>{review.responseFromVet}</p>
+                  <div className="si-5facabee">
+                    <p className="si-96b2fabe">{t('doctorReviews.yourResponse')}</p>
+                    <p className="si-c3c3ed3b">{review.responseFromVet}</p>
                   </div>
                 )}
 
                 {/* Respond Form */}
                 {!review.responseFromVet && respondingTo === review.id && (
-                  <div style={{ marginTop: 12 }}>
+                  <div className="si-66faea9d">
                     <textarea
-                      className="module-input"
+                      className="module-input si-71dd43e2"
                       placeholder={t('doctorReviews.writeResponse')}
                       value={responseText}
                       onChange={e => setResponseText(e.target.value)}
                       rows={3}
-                      style={{ width: '100%', resize: 'vertical', marginBottom: 8 }}
+                     
                     />
-                    <div style={{ display: 'flex', gap: 8 }}>
+                    <div className="si-d223efb3">
                       <button className="btn btn-primary" onClick={() => handleRespond(review.id)}>{t('doctorReviews.send')}</button>
                       <button className="btn btn-outline" onClick={() => { setRespondingTo(null); setResponseText('') }}>{t('doctorReviews.cancel')}</button>
                     </div>
@@ -160,8 +160,8 @@ const MyReviews: React.FC<MyReviewsProps> = ({ onNavigate: _onNavigate }) => {
 
                 {!review.responseFromVet && respondingTo !== review.id && (
                   <button
-                    className="btn btn-outline btn-sm"
-                    style={{ marginTop: 12 }}
+                    className="btn btn-outline btn-sm si-66faea9d"
+                   
                     onClick={() => setRespondingTo(review.id)}
                   >
                     💬 {t('doctorReviews.respond')}

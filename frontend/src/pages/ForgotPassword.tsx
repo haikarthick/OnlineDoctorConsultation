@@ -32,37 +32,34 @@ export default function ForgotPassword({ onGoToLogin }: ForgotPasswordProps) {
 
   return (
     <div className="auth-page">
-      <div className="auth-card" style={{ maxWidth: 440, width: '100%', margin: '0 auto', background: '#fff', borderRadius: 16, boxShadow: '0 20px 60px rgba(0,0,0,0.15)', padding: '40px 36px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ fontSize: 48, marginBottom: 8 }}>🔑</div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1e293b', marginBottom: 8 }}>
+      <div className="auth-card si-b7fe9f74">
+        <div className="si-28dc275c">
+          <div className="si-a5ea92fb">🔑</div>
+          <h1 className="si-2af23621">
             {t('forgotPassword.title')}
           </h1>
-          <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>
+          <p className="si-5cc08d30">
             {t('forgotPassword.subtitle')}
           </p>
         </div>
 
         {submitted ? (
           <div>
-            <div style={{
-              background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10,
-              padding: '20px 24px', textAlign: 'center', marginBottom: 24,
-            }}>
-              <div style={{ fontSize: 36, marginBottom: 8 }}>✉️</div>
-              <p style={{ color: '#166534', fontWeight: 600, margin: '0 0 6px' }}>
+            <div className="si-9a2d5efa">
+              <div className="si-d34c4c42">✉️</div>
+              <p className="si-dde48169">
                 {t('forgotPassword.successTitle')}
               </p>
-              <p style={{ color: '#166534', fontSize: 13, margin: 0 }}>
+              <p className="si-0f7f24f4">
                 {t('forgotPassword.successBody')}
               </p>
             </div>
-            <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', marginBottom: 20 }}>
+            <p className="si-a4246cfc">
               {t('forgotPassword.spamHint')}
             </p>
             <button
-              className="btn btn-outline"
-              style={{ width: '100%' }}
+              className="btn btn-outline si-7d984748"
+             
               onClick={onGoToLogin}
             >
               ← {t('forgotPassword.backToLogin')}
@@ -71,17 +68,17 @@ export default function ForgotPassword({ onGoToLogin }: ForgotPasswordProps) {
         ) : (
           <form onSubmit={handleSubmit}>
             {error && (
-              <div className="message error" style={{ marginBottom: 16 }}>{error}</div>
+              <div className="message error si-7e63ec4f">{error}</div>
             )}
-            <div className="form-group" style={{ marginBottom: 20 }}>
-              <label htmlFor="fp-email" style={{ display: 'block', marginBottom: 6, fontWeight: 500, color: '#374151', fontSize: 14 }}>
+            <div className="form-group si-478be2e9">
+              <label htmlFor="fp-email" className="si-701dd00b">
                 {t('forgotPassword.emailLabel')}
               </label>
               <input
                 id="fp-email"
                 type="email"
-                className="form-input"
-                style={{ width: '100%', boxSizing: 'border-box' }}
+                className="form-input si-3ebd46a5"
+               
                 placeholder="you@email.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -93,22 +90,22 @@ export default function ForgotPassword({ onGoToLogin }: ForgotPasswordProps) {
             </div>
             <button
               type="submit"
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: 15, marginBottom: 16 }}
+              className="btn btn-primary si-9a254be0"
+             
               disabled={loading || !email.trim()}
               aria-busy={loading}
             >
               {loading ? (
                 <span className="btn-loading">
-                  <span className="spinner" aria-hidden="true" style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite', marginRight: 8 }} />
+                  <span className="spinner si-d47171fc" aria-hidden="true" />
                   {t('forgotPassword.sending')}
                 </span>
               ) : t('forgotPassword.sendLink')}
             </button>
             <button
               type="button"
-              className="link-btn"
-              style={{ width: '100%', textAlign: 'center', color: '#64748b', fontSize: 14 }}
+              className="link-btn si-db073708"
+             
               onClick={onGoToLogin}
             >
               ← {t('forgotPassword.backToLogin')}

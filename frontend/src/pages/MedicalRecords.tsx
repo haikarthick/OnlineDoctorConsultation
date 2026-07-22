@@ -412,8 +412,8 @@ const MedicalRecords: React.FC = () => {
     return (
       <div className="module-page">
         <div className="module-header"><h1>{t('medicalRecords.pageTitle')}</h1></div>
-        <div className="module-content" style={{ textAlign: 'center', padding: 60 }}>
-          <div className="loading-spinner" style={{ margin: '0 auto 16px' }} />
+        <div className="module-content si-9fa8d292">
+          <div className="loading-spinner si-9ad92aa9" />
           <p>{t('medicalRecords.loading')}</p>
         </div>
       </div>
@@ -425,10 +425,10 @@ const MedicalRecords: React.FC = () => {
     return (
       <div className="module-page">
         <div className="module-header"><h1>{t('medicalRecords.pageTitle')}</h1></div>
-        <div style={{ textAlign: 'center', padding: '60px 24px' }}>
-          <div style={{ fontSize: 56, marginBottom: 16 }}>🐾</div>
-          <h2 style={{ color: '#374151', marginBottom: 8 }}>{t('medicalRecords.noAnimalsTitle')}</h2>
-          <p style={{ color: '#6b7280', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>{t('medicalRecords.noAnimalsHint')}</p>
+        <div className="si-7d3f112c">
+          <div className="si-71a36f28">🐾</div>
+          <h2 className="si-68be4326">{t('medicalRecords.noAnimalsTitle')}</h2>
+          <p className="si-b399e78f">{t('medicalRecords.noAnimalsHint')}</p>
           <button className="module-btn primary" onClick={() => navigate('/animals')}>
             + {t('medicalRecords.registerAnimal')}
           </button>
@@ -439,16 +439,16 @@ const MedicalRecords: React.FC = () => {
 
   return (
     <div className="module-page">
-      <div className="module-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+      <div className="module-header si-45f02350">
         <h1>{t('medicalRecords.pageTitle')}</h1>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="si-ef8e09e5">
           {/* Animal selector */}
           {enterprises.length > 0 && (isVet || isAdmin) && (
             <select
-              className="module-input"
+              className="module-input si-7d2a9fcb"
               value={enterpriseFilter}
               onChange={e => setEnterpriseFilter(e.target.value)}
-              style={{ width: 'auto', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13 }}
+             
             >
               <option value="">All Animals</option>
               <option value="__enterprise__">🏢 {t('medicalRecords.enterpriseFarmAnimals')}</option>
@@ -458,7 +458,7 @@ const MedicalRecords: React.FC = () => {
           <select
             value={selectedAnimal}
             onChange={(e) => setSelectedAnimal(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 13, minWidth: 180 }}
+            className="si-c8f927e4"
           >
             <option value="">{t('medicalRecords.allAnimals')}</option>
             {filteredAnimals.map((a: any) => (
@@ -468,7 +468,7 @@ const MedicalRecords: React.FC = () => {
             ))}
           </select>
           {(isVet || isAdmin || isFarmer) && (
-            <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
+            <button className="btn-primary si-f1d94d5d"
               onClick={() => { setShowModal('record'); setModalData({ recordType: 'diagnosis', severity: 'normal' }) }}>
               {t('medicalRecords.newRecord')}
             </button>
@@ -477,28 +477,28 @@ const MedicalRecords: React.FC = () => {
       </div>
 
       {error && (
-        <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 12, fontSize: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="si-14daa2be">
           <span>⚠️ {error}</span>
-          <button onClick={() => setError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#dc2626' }}>✕</button>
+          <button onClick={() => setError('')} className="si-8949525c">✕</button>
         </div>
       )}
 
       {/* Selected Animal Info Bar */}
       {selectedAnimalData && (
-        <div style={{ padding: '12px 16px', background: '#f0f4ff', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 700, color: '#667eea' }}>🐾 {selectedAnimalData.uniqueId || selectedAnimalData.unique_id || 'N/A'}</span>
+        <div className="si-75ecbe2d">
+          <div className="si-475f4b02">
+            <span className="si-4dac8ea3">🐾 {selectedAnimalData.uniqueId || selectedAnimalData.unique_id || 'N/A'}</span>
             <span><strong>{selectedAnimalData.name}</strong> ({selectedAnimalData.species}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''})</span>
             {selectedAnimalData.ownerName && <span>{t('medicalRecords.animalInfo.owner')} {selectedAnimalData.ownerName}</span>}
             {selectedAnimalData.gender && <span>{t('medicalRecords.animalInfo.gender')} {selectedAnimalData.gender === 'male' ? t('medicalRecords.animalInfo.maleSymbol') : t('medicalRecords.animalInfo.femaleSymbol')}</span>}
             {selectedAnimalData.weight && <span>{t('medicalRecords.animalInfo.weight')} {selectedAnimalData.weight} kg</span>}
             {selectedAnimalData.dateOfBirth && <span>{t('medicalRecords.animalInfo.dob')} {fmtDate(selectedAnimalData.dateOfBirth || selectedAnimalData.date_of_birth)}</span>}
-            {selectedAnimalData.isNeutered && <span style={{ color: '#059669' }}>{t('medicalRecords.animalInfo.neutered')}</span>}
+            {selectedAnimalData.isNeutered && <span className="si-487e8582">{t('medicalRecords.animalInfo.neutered')}</span>}
           </div>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 6 }}>
-            {selectedAnimalData.microchipId && <span>🏷️ {t('medicalRecords.animalInfo.microchip')} <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.microchipId}</strong></span>}
-            {selectedAnimalData.earTagId && <span>🏷️ {t('medicalRecords.animalInfo.earTag')} <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.earTagId}</strong></span>}
-            {selectedAnimalData.registrationNumber && <span>📋 {t('medicalRecords.animalInfo.regNumber')} <strong style={{ fontFamily: 'monospace' }}>{selectedAnimalData.registrationNumber}</strong></span>}
+          <div className="si-dd57460c">
+            {selectedAnimalData.microchipId && <span>🏷️ {t('medicalRecords.animalInfo.microchip')} <strong className="si-d70e5ad0">{selectedAnimalData.microchipId}</strong></span>}
+            {selectedAnimalData.earTagId && <span>🏷️ {t('medicalRecords.animalInfo.earTag')} <strong className="si-d70e5ad0">{selectedAnimalData.earTagId}</strong></span>}
+            {selectedAnimalData.registrationNumber && <span>📋 {t('medicalRecords.animalInfo.regNumber')} <strong className="si-d70e5ad0">{selectedAnimalData.registrationNumber}</strong></span>}
             {selectedAnimalData.insuranceProvider && <span>🛡️ {t('medicalRecords.animalInfo.insurance')} <strong>{selectedAnimalData.insuranceProvider}</strong>{selectedAnimalData.insurancePolicyNumber ? ` (${selectedAnimalData.insurancePolicyNumber})` : ''}</span>}
           </div>
         </div>
@@ -528,7 +528,7 @@ const MedicalRecords: React.FC = () => {
           <div>
             {/* Stats Cards */}
             {stats && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
+              <div className="si-e03859be">
                 <StatCard icon="🩺" label={t('medicalRecords.overview.stats.consultations')} value={stats.consultations?.total || 0}
                   sub={stats.consultations?.completed ? `${stats.consultations.completed} ${t('medicalRecords.overview.completed')}` : ''} color="#667eea" />
                 <StatCard icon="💊" label={t('medicalRecords.overview.stats.prescriptions')} value={stats.prescriptions?.total || 0}
@@ -547,9 +547,9 @@ const MedicalRecords: React.FC = () => {
 
             {/* Quick Actions */}
             {(isVet || isAdmin || isFarmer) && selectedAnimal && (
-              <div style={{ marginBottom: 24 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>{t('medicalRecords.overview.quickActions')}</h3>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div className="si-af65fe13">
+                <h3 className="si-d0d40338">{t('medicalRecords.overview.quickActions')}</h3>
+                <div className="si-b9eb5ec7">
                   <QuickBtn label={t('medicalRecords.overview.addVaccination')} onClick={openVaccinationModal} />
                   <QuickBtn label={t('medicalRecords.overview.addWeight')} onClick={() => { setShowModal('weight'); setModalData({ unit: 'kg' }) }} />
                   <QuickBtn label={t('medicalRecords.overview.addAllergy')} onClick={() => { setShowModal('allergy'); setModalData({ severity: 'mild' }) }} />
@@ -560,16 +560,16 @@ const MedicalRecords: React.FC = () => {
 
             {/* Recent Activity preview */}
             {prescriptions.length > 0 && (
-              <div style={{ marginBottom: 24 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: '#374151' }}>{t('medicalRecords.overview.recentPrescriptions')}</h3>
+              <div className="si-af65fe13">
+                <h3 className="si-d0d40338">{t('medicalRecords.overview.recentPrescriptions')}</h3>
                 <div className="records-list">
                   {prescriptions.slice(0, 5).map((rx: any) => (
-                    <div key={rx.id} {...recordItemProps(rx.id)} style={{ borderLeft: '4px solid #059669' }}>
+                    <div key={rx.id} {...recordItemProps(rx.id)} className="si-c9335004">
                       <div className="record-icon">💊</div>
                       <div className="record-details">
                         <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : t('medicalRecords.overview.medication')}</h4>
-                        {rx.diagnosis && <p style={{ color: '#667eea', fontSize: 12 }}><strong>{t('medicalRecords.overview.diagnosis')}</strong> {rx.diagnosis}</p>}
-                        <p className="text-muted" style={{ fontSize: 11 }}>
+                        {rx.diagnosis && <p className="si-96d9ee51"><strong>{t('medicalRecords.overview.diagnosis')}</strong> {rx.diagnosis}</p>}
+                        <p className="text-muted si-6af9d82f">
                           {rx.veterinarianName && `👨‍⚕️ Dr. ${rx.veterinarianName} • `}
                           {fmtDate(rx.createdAt || rx.created_at || '')}
                         </p>
@@ -581,7 +581,7 @@ const MedicalRecords: React.FC = () => {
                   ))}
                 </div>
                 {prescriptions.length > 5 && (
-                  <button onClick={() => setActiveTab('prescriptions')} style={{ marginTop: 8, color: '#059669', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+                  <button onClick={() => setActiveTab('prescriptions')} className="si-96479a2f">
                     {t('medicalRecords.overview.viewAllPrescriptions', { count: prescriptionsTotal })}
                   </button>
                 )}
@@ -608,7 +608,7 @@ const MedicalRecords: React.FC = () => {
                       <div className="record-details">
                         <h4>
                           {t('medicalRecords.consultationsTab.consultWith', { name: c.veterinarianName || t('medicalRecords.consultationsTab.unknown') })}
-                          {c.prescriptionCount > 0 && <span style={{ fontSize: 11, color: '#059669', marginLeft: 8 }}>💊 {t('medicalRecords.consultationsTab.prescriptionCount', { count: c.prescriptionCount })}</span>}
+                          {c.prescriptionCount > 0 && <span className="si-2d5f7558">💊 {t('medicalRecords.consultationsTab.prescriptionCount', { count: c.prescriptionCount })}</span>}
                         </h4>
                         {c.diagnosis && <p><strong>{t('medicalRecords.consultationsTab.diagnosis')}</strong> {c.diagnosis}</p>}
                         {c.notes && <p className="text-muted">📝 {(c.notes || '').substring(0, 150)}{(c.notes || '').length > 150 ? '...' : ''}</p>}
@@ -633,8 +633,8 @@ const MedicalRecords: React.FC = () => {
         {activeTab === 'prescriptions' && (
           <div>
             {(isVet || isAdmin) && selectedAnimal && (
-              <div style={{ marginBottom: 12 }}>
-                <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
+              <div className="si-bab8e8bc">
+                <button className="btn-primary si-f1d94d5d"
                   onClick={() => navigate(`/doctor/prescriptions/new?animalId=${selectedAnimal}`)}>
                   💊 {t('medicalRecords.prescriptionsTab.addButton')}
                 </button>
@@ -645,14 +645,14 @@ const MedicalRecords: React.FC = () => {
             ) : (
               <div className="records-list">
                 {prescriptions.map((rx: any) => (
-                  <div key={rx.id} {...recordItemProps(rx.id)} style={{ borderLeft: '4px solid #059669' }}>
+                  <div key={rx.id} {...recordItemProps(rx.id)} className="si-c9335004">
                     <div className="record-icon">💊</div>
                     <div className="record-details">
                       <h4>{Array.isArray(rx.medications) ? rx.medications.map((m: any) => m.name).join(', ') : t('medicalRecords.prescriptionsTab.medication')}</h4>
                       {Array.isArray(rx.medications) && rx.medications.map((med: any, mi: number) => (
                         <p key={mi}><strong>{med.name}</strong>{med.dosage ? ` — ${med.dosage}` : ''}{med.frequency ? `, ${med.frequency}` : ''}{med.duration ? ` for ${med.duration}` : ''}</p>
                       ))}
-                      {rx.diagnosis && <p style={{ color: '#667eea' }}><strong>{t('medicalRecords.prescriptionsTab.diagnosis')}</strong> {rx.diagnosis}</p>}
+                      {rx.diagnosis && <p className="si-76a355c2"><strong>{t('medicalRecords.prescriptionsTab.diagnosis')}</strong> {rx.diagnosis}</p>}
                       {rx.instructions && <p className="text-muted">📝 {rx.instructions}</p>}
                       <p className="text-muted">
                         {rx.veterinarianName && `👨‍⚕️ Dr. ${rx.veterinarianName} • `}
@@ -677,8 +677,8 @@ const MedicalRecords: React.FC = () => {
             ) : (
               <>
                 {(isVet || isAdmin || isFarmer) && (
-                  <div style={{ marginBottom: 12 }}>
-                    <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
+                  <div className="si-bab8e8bc">
+                    <button className="btn-primary si-f1d94d5d"
                       onClick={openVaccinationModal}>
                       {t('medicalRecords.vaccinationsTab.addButton')}
                     </button>
@@ -723,8 +723,8 @@ const MedicalRecords: React.FC = () => {
             ) : (
               <>
                 {(isVet || isAdmin || isFarmer) && (
-                  <div style={{ marginBottom: 12 }}>
-                    <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
+                  <div className="si-bab8e8bc">
+                    <button className="btn-primary si-f1d94d5d"
                       onClick={() => { setShowModal('lab_result'); setModalData({ status: 'pending' }) }}>
                       {t('medicalRecords.labResultsTab.addButton')}
                     </button>
@@ -746,9 +746,9 @@ const MedicalRecords: React.FC = () => {
                           {lr.interpretation && <p className="text-muted">📝 {lr.interpretation}</p>}
                           {lr.labName && <p className="text-muted">{t('medicalRecords.labResultsTab.lab')} {lr.labName}</p>}
                         </div>
-                        <div className="record-actions" style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+                        <div className="record-actions si-3cc8434c">
                           <span className={`badge ${lr.status === 'completed' ? 'badge-completed' : lr.status === 'pending' ? 'badge-pending' : 'badge-info'}`}>{t(lr.status === 'in_progress' ? 'common.inProgress' : `common.${lr.status}`)}</span>
-                          {lr.isAbnormal && <span className="badge" style={{ background: '#fef2f2', color: '#dc2626', fontWeight: 700 }}>{t('medicalRecords.labResultsTab.abnormal')}</span>}
+                          {lr.isAbnormal && <span className="badge si-26aba32a">{t('medicalRecords.labResultsTab.abnormal')}</span>}
                         </div>
                       </div>
                     ))}
@@ -766,8 +766,8 @@ const MedicalRecords: React.FC = () => {
               <EmptyState icon="⚠️" title={t('medicalRecords.allergiesTab.selectPet')} subtitle={t('medicalRecords.selectPetGenericSub')} />
             ) : (
               <>
-                <div style={{ marginBottom: 12 }}>
-                  <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
+                <div className="si-bab8e8bc">
+                  <button className="btn-primary si-f1d94d5d"
                     onClick={() => { setShowModal('allergy'); setModalData({ severity: 'mild' }) }}>
                     {t('medicalRecords.allergiesTab.addButton')}
                   </button>
@@ -811,8 +811,8 @@ const MedicalRecords: React.FC = () => {
               <EmptyState icon="⚖️" title={t('medicalRecords.weightTab.selectPet')} subtitle={t('medicalRecords.selectPetGenericSub')} />
             ) : (
               <>
-                <div style={{ marginBottom: 12 }}>
-                  <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}
+                <div className="si-bab8e8bc">
+                  <button className="btn-primary si-f1d94d5d"
                     onClick={() => { setShowModal('weight'); setModalData({ unit: 'kg' }) }}>
                     {t('medicalRecords.weightTab.addButton')}
                   </button>
@@ -822,9 +822,9 @@ const MedicalRecords: React.FC = () => {
                 ) : (
                   <>
                     {/* Weight Chart (simple text-based) */}
-                    <div style={{ marginBottom: 20, padding: 16, background: '#f9fafb', borderRadius: 8 }}>
-                      <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>{t('medicalRecords.weightTab.weightTrend')}</h4>
-                      <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', height: 100 }}>
+                    <div className="si-55be0ff5">
+                      <h4 className="si-02563074">{t('medicalRecords.weightTab.weightTrend')}</h4>
+                      <div className="si-d8174e8b">
                         {weightHistory.slice().reverse().slice(-20).map((w: any, i: number) => {
                           const max = Math.max(...weightHistory.map((x: any) => parseFloat(x.weight)))
                           const min = Math.min(...weightHistory.map((x: any) => parseFloat(x.weight)))
@@ -836,7 +836,7 @@ const MedicalRecords: React.FC = () => {
                           )
                         })}
                       </div>
-                      <p className="text-muted" style={{ fontSize: 11, marginTop: 8 }}>
+                      <p className="text-muted si-f27ad32c">
                         {t('medicalRecords.weightTab.latest')} <strong>{weightHistory[0]?.weight} {weightHistory[0]?.unit}</strong>
                         {weightHistory.length > 1 && (() => {
                           const diff = (parseFloat(weightHistory[0].weight) - parseFloat(weightHistory[1].weight)).toFixed(2)
@@ -847,7 +847,7 @@ const MedicalRecords: React.FC = () => {
                     </div>
                     <div className="records-list">
                       {weightHistory.map((w: any) => (
-                        <div key={w.id} {...recordItemProps(w.id)} style={{ borderLeft: '4px solid #667eea' }}>
+                        <div key={w.id} {...recordItemProps(w.id)} className="si-605c43ff">
                           <div className="record-icon">⚖️</div>
                           <div className="record-details">
                             <h4>{w.weight} {w.unit}</h4>
@@ -872,8 +872,8 @@ const MedicalRecords: React.FC = () => {
             ) : timeline.length === 0 ? (
               <EmptyState icon="📅" title={t('medicalRecords.timelineTab.emptyTitle')} subtitle={t('medicalRecords.timelineTab.emptySubtitle')} />
             ) : (
-              <div style={{ position: 'relative', paddingLeft: 32 }}>
-                <div style={{ position: 'absolute', left: 12, top: 0, bottom: 0, width: 2, background: '#e5e7eb' }} />
+              <div className="si-0e8a6d7c">
+                <div className="si-e73de40e" />
                 {timeline.map((item: any, i: number) => {
                   const typeIcon = item.type.startsWith('record_') ? getRecordTypeInfo(item.type.replace('record_', '')).icon
                     : item.type === 'vaccination' ? '💉' : item.type === 'lab_result' ? '🔬'
@@ -882,20 +882,20 @@ const MedicalRecords: React.FC = () => {
                     : item.type === 'vaccination' ? '#7c3aed' : item.type === 'lab_result' ? '#d97706'
                     : item.type === 'prescription' ? '#059669' : '#667eea'
                   return (
-                    <div key={`${item.id}-${i}`} style={{ position: 'relative', marginBottom: 16, paddingBottom: 8 }}>
+                    <div key={`${item.id}-${i}`} className="si-312d4e03">
                       <div style={{
                         position: 'absolute', left: -26, top: 4, width: 24, height: 24, borderRadius: '50%',
                         background: typeColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, zIndex: 1
                       }}>{typeIcon}</div>
-                      <div style={{ padding: '10px 16px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, marginLeft: 8 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                          <strong style={{ fontSize: 13 }}>{item.title}</strong>
-                          <span className="text-muted" style={{ fontSize: 11 }}>{fmtDate(item.date)}</span>
+                      <div className="si-48ce4ea4">
+                        <div className="si-2a170661">
+                          <strong className="si-0a803082">{item.title}</strong>
+                          <span className="text-muted si-6af9d82f">{fmtDate(item.date)}</span>
                         </div>
-                        {item.description && <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>{item.description}</p>}
-                        {item.createdByName && <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>{t('medicalRecords.timelineTab.by')} {item.createdByName}</p>}
-                        <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
-                          {item.status && <span className={`badge badge-${item.status === 'active' || item.status === 'valid' ? 'completed' : item.status === 'pending' ? 'pending' : 'info'}`} style={{ fontSize: 10 }}>{t(item.status === 'in_progress' ? 'common.inProgress' : `common.${item.status}`)}</span>}
+                        {item.description && <p className="si-ada3b9d6">{item.description}</p>}
+                        {item.createdByName && <p className="si-1f14f25b">{t('medicalRecords.timelineTab.by')} {item.createdByName}</p>}
+                        <div className="si-beb18125">
+                          {item.status && <span className={`badge badge-${item.status === 'active' || item.status === 'valid' ? 'completed' : item.status === 'pending' ? 'pending' : 'info'} si-586056cf`}>{t(item.status === 'in_progress' ? 'common.inProgress' : `common.${item.status}`)}</span>}
                           {item.severity && item.severity !== 'normal' && <span className="badge" style={{ fontSize: 10, background: getSeverityInfo(item.severity).color, color: '#fff' }}>{t(`medicalRecords.severityLevels.${item.severity}`)}</span>}
                         </div>
                       </div>
@@ -915,8 +915,8 @@ const MedicalRecords: React.FC = () => {
             ) : (
               <>
                 {/* Filter bar */}
-                <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span style={{ fontSize: 13, color: '#6b7280', fontWeight: 500 }}>{t('medicalRecords.recordsTab.filterBy')}</span>
+                <div className="si-ad0381af">
+                  <span className="si-73510eb6">{t('medicalRecords.recordsTab.filterBy')}</span>
                   {[{ value: '', label: t('medicalRecords.recordsTab.allTypes') }, ...RECORD_TYPES].map(rt => (
                     <button
                       key={rt.value}
@@ -934,33 +934,33 @@ const MedicalRecords: React.FC = () => {
                 {medRecords.length === 0 ? (
                   <EmptyState icon="📋" title={t('medicalRecords.recordsTab.emptyTitle')} subtitle={t('medicalRecords.recordsTab.emptySubtitle')} />
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div className="si-51b511c9">
                     {medRecords.map((rec: any) => {
                       const rtInfo = getRecordTypeInfo(rec.recordType || rec.record_type)
                       const sev = rec.severity
                       const sevInfo = getSeverityInfo(sev)
                       return (
                         <div key={rec.id} className="record-item" style={{ padding: '14px 16px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, borderLeft: `4px solid ${rtInfo.color}` }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 4 }}>
-                                <span style={{ fontSize: 16 }}>{rtInfo.icon}</span>
-                                <strong style={{ fontSize: 14 }}>{rec.title}</strong>
+                          <div className="si-4f84a9e7">
+                            <div className="si-6acd75e8">
+                              <div className="si-5c21a377">
+                                <span className="si-5c854a6d">{rtInfo.icon}</span>
+                                <strong className="si-38c57a68">{rec.title}</strong>
                                 <span className="badge" style={{ background: rtInfo.color, color: '#fff', fontSize: 10 }}>{rtInfo.label}</span>
                                 {sev && sev !== 'normal' && (
                                   <span className="badge" style={{ background: sevInfo.color, color: '#fff', fontSize: 10 }}>{sev}</span>
                                 )}
-                                {rec.isConfidential && <span className="badge" style={{ background: '#f3f4f6', color: '#374151', fontSize: 10 }}>🔒 {t('medicalRecords.recordsTab.confidential')}</span>}
+                                {rec.isConfidential && <span className="badge si-f20de549">🔒 {t('medicalRecords.recordsTab.confidential')}</span>}
                               </div>
-                              <p style={{ fontSize: 13, color: '#374151', margin: '4px 0', lineHeight: 1.5 }}>{rec.content}</p>
+                              <p className="si-479558e0">{rec.content}</p>
                               {rec.followUpDate && (
-                                <p style={{ fontSize: 12, color: '#ea580c', marginTop: 4 }}>📅 {t('medicalRecords.recordsTab.followUp')} {fmtDate(rec.followUpDate || rec.follow_up_date)}</p>
+                                <p className="si-d8d51f83">📅 {t('medicalRecords.recordsTab.followUp')} {fmtDate(rec.followUpDate || rec.follow_up_date)}</p>
                               )}
                             </div>
-                            <span style={{ fontSize: 11, color: '#9ca3af', whiteSpace: 'nowrap' }}>{fmtDate(rec.createdAt || rec.created_at)}</span>
+                            <span className="si-ad866f58">{fmtDate(rec.createdAt || rec.created_at)}</span>
                           </div>
                           {rec.veterinarianName && (
-                            <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>
+                            <p className="si-77d60966">
                               {t('medicalRecords.recordsTab.by')} {rec.veterinarianName}
                             </p>
                           )}
@@ -980,38 +980,38 @@ const MedicalRecords: React.FC = () => {
             {!selectedAnimal ? (
               <EmptyState icon="🏥" title={t('medicalRecords.hospitalVisitsTab.selectPet')} subtitle={t('medicalRecords.hospitalVisitsTab.selectPetHint')} />
             ) : loadingHospitalVisits ? (
-              <div style={{ textAlign: 'center', padding: 40 }}><div className="loading-spinner" style={{ margin: '0 auto' }} /></div>
+              <div className="si-86638a30"><div className="loading-spinner si-8d6ac58b" /></div>
             ) : (hospitalVisits.queueVisits.length === 0 && hospitalVisits.inpatientAdmissions.length === 0) ? (
               <EmptyState icon="🏥" title={t('medicalRecords.hospitalVisitsTab.emptyTitle')} subtitle={t('medicalRecords.hospitalVisitsTab.emptyHint')} />
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div className="si-0fa972fb">
 
                 {/* Queue / Walk-in Visits */}
                 {hospitalVisits.queueVisits.length > 0 && (
                   <div>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 10 }}>🚶 {t('medicalRecords.hospitalVisitsTab.queueVisits')} ({hospitalVisits.queueVisits.length})</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <h3 className="si-f27ecf95">🚶 {t('medicalRecords.hospitalVisitsTab.queueVisits')} ({hospitalVisits.queueVisits.length})</h3>
+                    <div className="si-977f8af1">
                       {hospitalVisits.queueVisits.map((v: any) => {
                         const statusColor: Record<string, string> = { waiting: '#f59e0b', in_triage: '#8b5cf6', in_examination: '#2563eb', in_treatment: '#059669', discharged: '#64748b', no_show: '#dc2626' }
                         const sc = statusColor[v.status] || '#64748b'
                         return (
                           <div key={v.id} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.07)', borderLeft: `4px solid ${sc}` }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                            <div className="si-9d036184">
                               <div>
-                                <div style={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>🏥 {v.hospital_name}</div>
-                                {v.reason && <div style={{ fontSize: 13, color: '#475569', marginTop: 2 }}>📋 {v.reason}</div>}
-                                {v.chief_complaint && v.chief_complaint !== v.reason && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Case: {v.chief_complaint}</div>}
-                                {v.diagnosis && <div style={{ fontSize: 12, color: '#059669', marginTop: 2 }}>🩺 {v.diagnosis}</div>}
-                                {(v.vet_first_name || v.vet_last_name) && <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>👨‍⚕️ Dr. {v.vet_first_name} {v.vet_last_name}</div>}
+                                <div className="si-abd5b4ee">🏥 {v.hospital_name}</div>
+                                {v.reason && <div className="si-f473664f">📋 {v.reason}</div>}
+                                {v.chief_complaint && v.chief_complaint !== v.reason && <div className="si-f199afd6">Case: {v.chief_complaint}</div>}
+                                {v.diagnosis && <div className="si-c4ec351d">🩺 {v.diagnosis}</div>}
+                                {(v.vet_first_name || v.vet_last_name) && <div className="si-aff656fd">👨‍⚕️ Dr. {v.vet_first_name} {v.vet_last_name}</div>}
                               </div>
-                              <div style={{ textAlign: 'right' }}>
+                              <div className="si-f4e64596">
                                 <span style={{ padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: `${sc}20`, color: sc }}>#{v.queue_number} · {(v.status || '').replace(/_/g, ' ')}</span>
-                                {v.priority !== 'normal' && <div style={{ fontSize: 11, color: '#b45309', marginTop: 4, fontWeight: 600 }}>⚡ {v.priority}</div>}
-                                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>{v.checked_in_at ? fmtDate(v.checked_in_at) : ''}</div>
-                                {v.case_stage && <div style={{ fontSize: 11, color: '#7c3aed', marginTop: 2 }}>📊 Case: {v.case_stage}</div>}
+                                {v.priority !== 'normal' && <div className="si-9c8a4c03">⚡ {v.priority}</div>}
+                                <div className="si-0610a7ce">{v.checked_in_at ? fmtDate(v.checked_in_at) : ''}</div>
+                                {v.case_stage && <div className="si-7de800ff">📊 Case: {v.case_stage}</div>}
                               </div>
                             </div>
-                            {v.triage_notes && <div style={{ marginTop: 8, padding: '6px 10px', background: '#fef9c3', borderRadius: 6, fontSize: 12, color: '#92400e' }}>📝 Triage: {v.triage_notes}</div>}
+                            {v.triage_notes && <div className="si-995d72ed">📝 Triage: {v.triage_notes}</div>}
                           </div>
                         )
                       })}
@@ -1022,27 +1022,27 @@ const MedicalRecords: React.FC = () => {
                 {/* Inpatient Admissions */}
                 {hospitalVisits.inpatientAdmissions.length > 0 && (
                   <div>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 10 }}>🛏️ {t('medicalRecords.hospitalVisitsTab.inpatientAdmissions')} ({hospitalVisits.inpatientAdmissions.length})</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <h3 className="si-f27ecf95">🛏️ {t('medicalRecords.hospitalVisitsTab.inpatientAdmissions')} ({hospitalVisits.inpatientAdmissions.length})</h3>
+                    <div className="si-977f8af1">
                       {hospitalVisits.inpatientAdmissions.map((a: any) => {
                         const statusColor: Record<string, string> = { admitted: '#2563eb', in_treatment: '#b45309', recovering: '#059669', ready_to_discharge: '#0ea5e9', discharged: '#64748b', icu: '#991b1b' }
                         const sc = statusColor[a.status] || '#64748b'
                         const vitals = Array.isArray(a.vitals_log) ? a.vitals_log : (() => { try { return JSON.parse(a.vitals_log || '[]') } catch { return [] } })()
                         return (
                           <div key={a.id} style={{ background: '#fff', borderRadius: 10, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,.07)', borderLeft: `4px solid ${sc}` }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                            <div className="si-9d036184">
                               <div>
-                                <div style={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>🏥 {a.hospital_name}</div>
-                                <div style={{ fontSize: 13, color: '#475569', marginTop: 2 }}>🛏️ {(a.admission_type || '').replace(/_/g, ' ')}{a.room_number ? ` · Room ${a.room_number}` : ''}</div>
-                                {a.care_instructions && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>💊 {a.care_instructions.substring(0, 80)}{a.care_instructions.length > 80 ? '...' : ''}</div>}
-                                {a.discharge_notes && <div style={{ fontSize: 12, color: '#374151', marginTop: 2 }}>📋 {a.discharge_notes.substring(0, 80)}</div>}
-                                {(a.vet_first_name || a.vet_last_name) && <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>👨‍⚕️ Dr. {a.vet_first_name} {a.vet_last_name}</div>}
+                                <div className="si-abd5b4ee">🏥 {a.hospital_name}</div>
+                                <div className="si-f473664f">🛏️ {(a.admission_type || '').replace(/_/g, ' ')}{a.room_number ? ` · Room ${a.room_number}` : ''}</div>
+                                {a.care_instructions && <div className="si-f199afd6">💊 {a.care_instructions.substring(0, 80)}{a.care_instructions.length > 80 ? '...' : ''}</div>}
+                                {a.discharge_notes && <div className="si-37eb6ea2">📋 {a.discharge_notes.substring(0, 80)}</div>}
+                                {(a.vet_first_name || a.vet_last_name) && <div className="si-aff656fd">👨‍⚕️ Dr. {a.vet_first_name} {a.vet_last_name}</div>}
                               </div>
-                              <div style={{ textAlign: 'right' }}>
+                              <div className="si-f4e64596">
                                 <span style={{ padding: '3px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: `${sc}20`, color: sc }}>{(a.status || '').replace(/_/g, ' ')}</span>
-                                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>In: {fmtDate(a.admitted_at)}</div>
-                                {a.discharged_at && <div style={{ fontSize: 11, color: '#94a3b8' }}>Out: {fmtDate(a.discharged_at)}</div>}
-                                {vitals.length > 0 && <div style={{ fontSize: 11, color: '#7c3aed', marginTop: 2 }}>📊 {vitals.length} vitals recorded</div>}
+                                <div className="si-0610a7ce">In: {fmtDate(a.admitted_at)}</div>
+                                {a.discharged_at && <div className="si-26b03e6b">Out: {fmtDate(a.discharged_at)}</div>}
+                                {vitals.length > 0 && <div className="si-7de800ff">📊 {vitals.length} vitals recorded</div>}
                               </div>
                             </div>
                           </div>
@@ -1054,8 +1054,8 @@ const MedicalRecords: React.FC = () => {
 
                 {/* P4-MED2: Unified Referral History */}
                 {networkReferralHistory.length > 0 && (
-                  <div style={{ marginTop: 8 }}>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 10 }}>🔄 {t('medicalRecords.unifiedReferrals')} ({networkReferralHistory.length})</h3>
+                  <div className="si-cbfb1eb8">
+                    <h3 className="si-f27ecf95">🔄 {t('medicalRecords.unifiedReferrals')} ({networkReferralHistory.length})</h3>
                     <div className="data-table-container">
                       <table className="module-table">
                         <thead>
@@ -1072,7 +1072,7 @@ const MedicalRecords: React.FC = () => {
                         <tbody>
                           {networkReferralHistory.map((ref: any) => (
                             <tr key={`${ref.type}-${ref.id}`}>
-                              <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
+                              <td className="si-7a2c0aef">
                                 {fmtDate(ref.createdAt)}
                               </td>
                               <td>
@@ -1084,11 +1084,11 @@ const MedicalRecords: React.FC = () => {
                                   {ref.type === 'network' ? t('medicalRecords.networkReferral') : t('medicalRecords.platformReferral')}
                                 </span>
                               </td>
-                              <td style={{ fontSize: 13 }}>{ref.fromVetName || '—'}</td>
-                              <td style={{ fontSize: 13 }}>
+                              <td className="si-0a803082">{ref.fromVetName || '—'}</td>
+                              <td className="si-0a803082">
                                 {ref.toHospitalName || ref.toVetName || '—'}
                               </td>
-                              <td style={{ fontSize: 13, maxWidth: 180 }}>{ref.reason}</td>
+                              <td className="si-633ac59d">{ref.reason}</td>
                               <td>
                                 <span style={{
                                   padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600,
@@ -1120,10 +1120,10 @@ const MedicalRecords: React.FC = () => {
         {activeTab === 'certificates' && (
           <div>
             {certsLoading ? (
-              <div style={{ textAlign: 'center', padding: 40 }}><div className="loading-spinner" style={{ margin: '0 auto' }} /></div>
+              <div className="si-86638a30"><div className="loading-spinner si-8d6ac58b" /></div>
             ) : certificates.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
-                <div style={{ fontSize: 48, marginBottom: 12 }}>📜</div>
+              <div className="si-b409cd9b">
+                <div className="si-fc4388e2">📜</div>
                 <p>{t('certificates.noCertificates')}</p>
                 {(isVet || isAdmin) && (
                   <button className="module-btn primary" onClick={() => window.location.href = '/doctor/certificates/new'}>
@@ -1134,7 +1134,7 @@ const MedicalRecords: React.FC = () => {
             ) : (
               <div>
                 {(isVet || isAdmin) && (
-                  <div style={{ marginBottom: 12 }}>
+                  <div className="si-bab8e8bc">
                     <button className="module-btn primary" onClick={() => window.location.href = '/doctor/certificates/new'}>
                       + {t('certificates.issue')}
                     </button>
@@ -1154,7 +1154,7 @@ const MedicalRecords: React.FC = () => {
                     <tbody>
                       {certificates.map((cert: any) => (
                         <tr key={cert.id}>
-                          <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{cert.certificateNumber || cert.certificate_number}</td>
+                          <td className="si-19925664">{cert.certificateNumber || cert.certificate_number}</td>
                           <td>{cert.certificateType || cert.certificate_type}</td>
                           <td>{formatDate(cert.issuedDate || cert.issued_date || cert.createdAt || cert.created_at)}</td>
                           <td>{cert.validUntil || cert.valid_until ? formatDate(cert.validUntil || cert.valid_until) : '—'}</td>
@@ -1173,21 +1173,21 @@ const MedicalRecords: React.FC = () => {
 
       {/* ═══ CREATE MODALS ═══════════════════════════════════ */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+        <div className="si-6e1f69a1"
           onClick={closeModal}>
-          <div style={{ background: '#fff', borderRadius: 12, maxWidth: 600, width: '100%', maxHeight: '90vh', overflow: 'auto', padding: 24 }}
+          <div className="si-34a7f42e"
             onClick={(e) => e.stopPropagation()}>
             {modalError && (
-              <div style={{ padding: '10px 14px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="si-5b1231f8">
                 <span>⚠ {modalError}</span>
-                <button onClick={() => setModalError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#b91c1c', padding: 0, marginLeft: 8 }}>✕</button>
+                <button onClick={() => setModalError('')} className="si-9b665e15">✕</button>
               </div>
             )}
 
             {/* Medical Record Modal */}
             {showModal === 'record' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.newRecord')}</h2>
+                <h2 className="si-fdff7499">{t('medicalRecords.modals.newRecord')}</h2>
                 <ModalField label={t('medicalRecords.modals.recordType')}>
                   <select value={modalData.recordType || ''} onChange={(e) => setModalData({ ...modalData, recordType: e.target.value })} style={inputStyle}>
                     {RECORD_TYPES.map(rt => <option key={rt.value} value={rt.value}>{rt.icon} {t(`medicalRecords.recordTypes.${rt.value === 'lab_report' ? 'labReport' : rt.value === 'follow_up' ? 'followUp' : rt.value}`)}</option>)}
@@ -1211,9 +1211,9 @@ const MedicalRecords: React.FC = () => {
             {/* Vaccination Modal */}
             {showModal === 'vaccination' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>{t('medicalRecords.modals.addVaccination')}</h2>
+                <h2 className="si-2fda8813">{t('medicalRecords.modals.addVaccination')}</h2>
                 {selectedAnimalData && (
-                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 16 }}>
+                  <p className="si-3a80c844">
                     {selectedAnimalData.name} &bull; {selectedAnimalData.species}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''}
                   </p>
                 )}
@@ -1221,7 +1221,7 @@ const MedicalRecords: React.FC = () => {
                 {/* Protocol Selector — primary integration point */}
                 <ModalField label={t('medicalRecords.modals.selectProtocol')}>
                   {loadingProtocols ? (
-                    <div style={{ padding: '8px 0', fontSize: 13, color: '#6b7280' }}>{t('common.loading')}</div>
+                    <div className="si-2bffca72">{t('common.loading')}</div>
                   ) : vaccineProtocols.length > 0 ? (
                     <select
                       value={modalData.protocolId || ''}
@@ -1236,11 +1236,11 @@ const MedicalRecords: React.FC = () => {
                       ))}
                     </select>
                   ) : (
-                    <p style={{ fontSize: 12, color: '#9ca3af', margin: '4px 0' }}>{t('medicalRecords.modals.noProtocolsForSpecies')}</p>
+                    <p className="si-54168195">{t('medicalRecords.modals.noProtocolsForSpecies')}</p>
                   )}
                 </ModalField>
 
-                <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 14, marginTop: 4 }}>
+                <div className="si-b35a790c">
                   <ModalField label={t('medicalRecords.modals.vaccineName')}><input value={modalData.vaccineName || ''} onChange={(e) => setModalData({ ...modalData, vaccineName: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.vaccineNamePlaceholder')} /></ModalField>
                   <ModalField label={t('medicalRecords.modals.vaccineType')}><input value={modalData.vaccineType || ''} onChange={(e) => setModalData({ ...modalData, vaccineType: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.vaccineTypePlaceholder')} /></ModalField>
                   <ModalField label={t('medicalRecords.modals.dateAdministered')}><input type="date" value={modalData.dateAdministered || ''} onChange={(e) => setModalData({ ...modalData, dateAdministered: e.target.value })} style={inputStyle} /></ModalField>
@@ -1260,7 +1260,7 @@ const MedicalRecords: React.FC = () => {
             {/* Weight Modal */}
             {showModal === 'weight' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.recordWeight')}</h2>
+                <h2 className="si-fdff7499">{t('medicalRecords.modals.recordWeight')}</h2>
                 <ModalField label={t('medicalRecords.modals.weightValue')}><input type="number" step="0.01" value={modalData.weight || ''} onChange={(e) => setModalData({ ...modalData, weight: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.weightPlaceholder')} /></ModalField>
                 <ModalField label={t('medicalRecords.modals.unit')}>
                   <select value={modalData.unit || 'kg'} onChange={(e) => setModalData({ ...modalData, unit: e.target.value })} style={inputStyle}>
@@ -1276,7 +1276,7 @@ const MedicalRecords: React.FC = () => {
             {/* Allergy Modal */}
             {showModal === 'allergy' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.reportAllergy')}</h2>
+                <h2 className="si-fdff7499">{t('medicalRecords.modals.reportAllergy')}</h2>
                 <ModalField label={t('medicalRecords.modals.allergen')}><input value={modalData.allergen || ''} onChange={(e) => setModalData({ ...modalData, allergen: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.allergenPlaceholder')} /></ModalField>
                 <ModalField label={t('medicalRecords.modals.reaction')}><textarea value={modalData.reaction || ''} onChange={(e) => setModalData({ ...modalData, reaction: e.target.value })} style={{ ...inputStyle, height: 60 }} placeholder={t('medicalRecords.modals.reactionDescPlaceholder')} /></ModalField>
                 <ModalField label={t('medicalRecords.modals.severity')}>
@@ -1294,7 +1294,7 @@ const MedicalRecords: React.FC = () => {
             {/* Lab Result Modal */}
             {showModal === 'lab_result' && (
               <>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>{t('medicalRecords.modals.addLabResult')}</h2>
+                <h2 className="si-fdff7499">{t('medicalRecords.modals.addLabResult')}</h2>
                 <ModalField label={t('medicalRecords.modals.testName')}><input value={modalData.testName || ''} onChange={(e) => setModalData({ ...modalData, testName: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.testNamePlaceholder')} /></ModalField>
                 <ModalField label={t('medicalRecords.modals.testCategory')}><input value={modalData.testCategory || ''} onChange={(e) => setModalData({ ...modalData, testCategory: e.target.value })} style={inputStyle} placeholder={t('medicalRecords.modals.testCategoryPlaceholder')} /></ModalField>
                 <ModalField label={t('medicalRecords.modals.testDate')}><input type="date" value={modalData.testDate || ''} onChange={(e) => setModalData({ ...modalData, testDate: e.target.value })} style={inputStyle} /></ModalField>
@@ -1308,7 +1308,7 @@ const MedicalRecords: React.FC = () => {
                 </ModalField>
                 <ModalField label={t('medicalRecords.modals.labName')}><input value={modalData.labName || ''} onChange={(e) => setModalData({ ...modalData, labName: e.target.value })} style={inputStyle} /></ModalField>
                 <ModalField label={t('medicalRecords.modals.abnormalLabel')}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label className="si-bab2d193">
                     <input type="checkbox" checked={modalData.isAbnormal || false} onChange={(e) => setModalData({ ...modalData, isAbnormal: e.target.checked })} />
                     {t('medicalRecords.modals.abnormalLabel')}
                   </label>
@@ -1337,32 +1337,29 @@ const StatCard: React.FC<{ icon: string; label: string; value: number; color: st
     onMouseEnter={onClick ? (e) => { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)' } : undefined}
     onMouseLeave={onClick ? (e) => { (e.currentTarget as HTMLElement).style.boxShadow = 'none' } : undefined}
   >
-    <div style={{ fontSize: 24, marginBottom: 4 }}>{icon}</div>
+    <div className="si-a98fab3e">{icon}</div>
     <div style={{ fontSize: 24, fontWeight: 700, color }}>{value}</div>
-    <div style={{ fontSize: 12, color: '#6b7280', fontWeight: 500 }}>{label}</div>
-    {sub && <div style={{ fontSize: 11, color: '#d97706', marginTop: 4 }}>{sub}</div>}
-    {onClick && <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 4 }}>Click to view →</div>}
+    <div className="si-d29f9778">{label}</div>
+    {sub && <div className="si-4f20e511">{sub}</div>}
+    {onClick && <div className="si-0293220f">Click to view →</div>}
   </div>
 )
 
 const EmptyState: React.FC<{ icon: string; title: string; subtitle: string }> = ({ icon, title, subtitle }) => (
-  <div style={{ textAlign: 'center', padding: 60, color: '#9ca3af' }}>
-    <div style={{ fontSize: 48, marginBottom: 12 }}>{icon}</div>
-    <p style={{ fontSize: 16, fontWeight: 500 }}>{title}</p>
-    <p style={{ fontSize: 13 }}>{subtitle}</p>
+  <div className="si-73dafd71">
+    <div className="si-fc4388e2">{icon}</div>
+    <p className="si-37a5ef01">{title}</p>
+    <p className="si-0a803082">{subtitle}</p>
   </div>
 )
 
 const QuickBtn: React.FC<{ label: string; onClick: () => void }> = ({ label, onClick }) => (
-  <button type="button" onClick={onClick} style={{
-    padding: '8px 16px', borderRadius: 6, border: '1px solid #d1d5db', background: '#fff',
-    cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#374151'
-  }}>{label}</button>
+  <button type="button" onClick={onClick} className="si-e52e3f8e">{label}</button>
 )
 
 const ModalField: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div style={{ marginBottom: 12 }}>
-    <label style={{ display: 'block', marginBottom: 4, fontSize: 12, fontWeight: 600, color: '#374151' }}>{label}</label>
+  <div className="si-bab8e8bc">
+    <label className="si-13e1b2f2">{label}</label>
     {children}
   </div>
 )
@@ -1370,8 +1367,8 @@ const ModalField: React.FC<{ label: string; children: React.ReactNode }> = ({ la
 const ModalActions: React.FC<{ onCancel: () => void; onSave: () => void; saving: boolean; disabled: boolean }> = ({ onCancel, onSave, saving, disabled }) => {
   const { t } = useTranslation()
   return (
-  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-    <button type="button" onClick={onCancel} style={{ padding: '8px 20px', borderRadius: 6, border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontSize: 13, color: '#374151' }}>{t('medicalRecords.modals.cancel')}</button>
+  <div className="si-f74c20c9">
+    <button type="button" onClick={onCancel} className="si-3bb1104a">{t('medicalRecords.modals.cancel')}</button>
     <button onClick={onSave} disabled={disabled || saving} className="btn-primary" style={{ padding: '8px 20px', fontSize: 13, opacity: (disabled || saving) ? 0.5 : 1 }}>
       {saving ? t('medicalRecords.modals.saving') : t('medicalRecords.modals.save')}
     </button>

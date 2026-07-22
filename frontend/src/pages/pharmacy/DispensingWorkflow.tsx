@@ -64,7 +64,7 @@ export default function DispensingWorkflow({ pharmacyId, mode, onRefresh }: Prop
         </div>
         {error && <div className="pharm-error">⚠️ {error}</div>}
         {loading ? (
-          <p style={{ color: '#888' }}>{t('common.loading')}</p>
+          <p className="si-40d2db53">{t('common.loading')}</p>
         ) : items.length === 0 ? (
           <div className="pharmacy-empty"><div className="empty-icon">{mode === 'review' ? '📋' : '✅'}</div><p>{emptyMsg}</p></div>
         ) : (
@@ -87,7 +87,7 @@ export default function DispensingWorkflow({ pharmacyId, mode, onRefresh }: Prop
                     <td>{rx.pet_name || '—'}</td>
                     <td>{rx.owner_name || '—'}</td>
                     <td>{rx.vet_name || '—'}</td>
-                    <td style={{ maxWidth: 200 }}>{rx.medication_names || '—'}</td>
+                    <td className="si-d83d7d70">{rx.medication_names || '—'}</td>
                     <td>{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '—'}</td>
                     <td><span className={`pharm-badge ${rx.review_status === 'pending_review' ? 'pending' : 'approved'}`}>{rx.review_status}</span></td>
                     <td>

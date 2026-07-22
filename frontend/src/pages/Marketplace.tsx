@@ -886,26 +886,26 @@ const Marketplace: React.FC = () => {
             <div>
               {/* Advanced Filters */}
               <div className="mp-filter-bar">
-                <input className="module-input" value={filters.search || ''} onChange={e => updateFilter('search', e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && fetchListings()} placeholder={t('marketplace.searchLivestock')} style={{ flex: 1, minWidth: 200 }} />
-                <select className="module-input" value={filters.category || ''} onChange={e => updateFilter('category', e.target.value)} style={{ width: 160 }}>
+                <input className="module-input si-0d5963cb" value={filters.search || ''} onChange={e => updateFilter('search', e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && fetchListings()} placeholder={t('marketplace.searchLivestock')} />
+                <select className="module-input si-549dd079" value={filters.category || ''} onChange={e => updateFilter('category', e.target.value)}>
                   {CATEGORY_KEYS.map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
                 </select>
-                <select className="module-input" value={filters.species || ''} onChange={e => updateFilter('species', e.target.value)} style={{ width: 130 }}>
+                <select className="module-input si-1403a954" value={filters.species || ''} onChange={e => updateFilter('species', e.target.value)}>
                   <option value="">{t('marketplace.livestock.allSpecies')}</option>
                   {SPECIES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-                <select className="module-input" value={filters.gender || ''} onChange={e => updateFilter('gender', e.target.value)} style={{ width: 120 }}>
+                <select className="module-input si-8ceadd67" value={filters.gender || ''} onChange={e => updateFilter('gender', e.target.value)}>
                   <option value="">{t('marketplace.livestock.anyGender')}</option>
                   <option value="male">{t('marketplace.genderLabel.male')}</option><option value="female">{t('marketplace.genderLabel.female')}</option>
                 </select>
                 {filters.species && classTermsForSpecies(filters.species).length > 0 && (
-                  <select className="module-input" value={filters.animalClass || ''} onChange={e => updateFilter('animalClass', e.target.value)} style={{ width: 140 }}>
+                  <select className="module-input si-e28594a4" value={filters.animalClass || ''} onChange={e => updateFilter('animalClass', e.target.value)}>
                     <option value="">{t('animalClass.anyClass')}</option>
                     {classTermsForSpecies(filters.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
                   </select>
                 )}
-                <select className="module-input" value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ width: 140 }}>
+                <select className="module-input si-e28594a4" value={sortBy} onChange={e => setSortBy(e.target.value)}>
                   <option value="">{t('marketplace.sort.default')}</option>
                   <option value="price_asc">{t('marketplace.sort.priceAsc')}</option>
                   <option value="price_desc">{t('marketplace.sort.priceDesc')}</option>
@@ -924,7 +924,7 @@ const Marketplace: React.FC = () => {
                   📍 {nearMeActive ? t('marketplace.proximity.nearMeOn', 'Near Me ON') : t('marketplace.proximity.nearMe', 'Near Me')}
                 </button>
                 {nearMeActive && (
-                  <select className="module-input" value={radiusKm} onChange={e => setRadiusKm(e.target.value)} style={{ width: 120 }}>
+                  <select className="module-input si-8ceadd67" value={radiusKm} onChange={e => setRadiusKm(e.target.value)}>
                     <option value="5">5 km</option>
                     <option value="10">10 km</option>
                     <option value="25">25 km</option>
@@ -933,11 +933,11 @@ const Marketplace: React.FC = () => {
                   </select>
                 )}
                 {nearMeActive && userLocation && (
-                  <span className="mp-location-hint" style={{ fontSize: 12, color: '#6b7280' }}>
+                  <span className="mp-location-hint si-48a0b045">
                     {t('marketplace.proximity.searching', 'Searching within')} {radiusKm} km
                   </span>
                 )}
-                {locationError && <span style={{ fontSize: 12, color: '#ef4444' }}>{locationError}</span>}
+                {locationError && <span className="si-a41d01e2">{locationError}</span>}
               </div>
 
               {/* Quick filter chips */}
@@ -1026,7 +1026,7 @@ const Marketplace: React.FC = () => {
                         const sel = userAnimals.find((a: any) => a.id === selectedAnimalId)
                         const vcId = sel?.uniqueId || sel?.unique_id
                         return vcId ? (
-                          <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#6366f1', background: '#eef2ff', borderRadius: 4, padding: '4px 8px', display: 'inline-block', marginTop: 4, cursor: 'pointer' }}
+                          <div className="si-a85540c4"
                             title="VetCare Animal ID — click to copy"
                             onClick={() => navigator.clipboard?.writeText(vcId).then(() => {
                               setCopiedId(vcId)
@@ -1295,7 +1295,7 @@ const Marketplace: React.FC = () => {
                         onChange={handleImageUpload}
                         disabled={uploadingImages || (sellForm.images?.length || 0) >= MAX_LISTING_IMAGES}
                       />
-                      {uploadingImages && <div className="input-error-msg" style={{ color: '#3b82f6' }}>{t('marketplace.sell.uploading', 'Uploading...')}</div>}
+                      {uploadingImages && <div className="input-error-msg si-8ad4a3c7">{t('marketplace.sell.uploading', 'Uploading...')}</div>}
                     </div>
                     {sellForm.images?.length > 0 && (
                       <div className="mp-image-preview-row">
@@ -1310,7 +1310,7 @@ const Marketplace: React.FC = () => {
                       </div>
                     )}
                     {/* Optional video */}
-                    <div className="module-form-group" style={{ marginTop: 10 }}>
+                    <div className="module-form-group si-7930ee5e">
                       <label className="module-label">🎥 {t('marketplace.sell.videoLabel')}</label>
                       {sellForm.videoUrl ? (
                         <div className="mp-video-set">
@@ -1320,7 +1320,7 @@ const Marketplace: React.FC = () => {
                       ) : (
                         <>
                           <input type="file" accept="video/*" className="module-input" onChange={handleVideoUpload} disabled={uploadingVideo} />
-                          {uploadingVideo && <div className="input-error-msg" style={{ color: '#3b82f6' }}>{t('marketplace.sell.uploadingVideo', 'Uploading video...')}</div>}
+                          {uploadingVideo && <div className="input-error-msg si-8ad4a3c7">{t('marketplace.sell.uploadingVideo', 'Uploading video...')}</div>}
                           <div className="mp-compliance-hint">{t('marketplace.sell.videoHint')}</div>
                           <div className="mp-compliance-hint">{t('marketplace.sell.videoLimits', { maxSec: MAX_VIDEO_DURATION_SECONDS, maxMb: MAX_VIDEO_SIZE_MB, defaultValue: `Max ${MAX_VIDEO_DURATION_SECONDS} seconds, up to ${MAX_VIDEO_SIZE_MB}MB` })}</div>
                         </>
@@ -1852,12 +1852,12 @@ const Marketplace: React.FC = () => {
               {/* Auction Feature Toggle — prominent card */}
               <div className="mp-section">
                 <h3 className="mp-section-title">🔨 {t('marketplace.admin.auctionFeature', 'Auction Feature')}</h3>
-                <div className={`mp-setting-card ${auctionEnabled ? 'enabled' : ''}`} style={{ maxWidth: 480 }}>
+                <div className={`mp-setting-card ${auctionEnabled ? 'enabled' : ''} si-197ba518`}>
                   <div className="mp-setting-header">
                     <span className="mp-setting-icon">🔨</span>
                     <div className="mp-setting-info">
                       <h4>{t('marketplace.admin.auctionTitle', 'Live Auction Bidding')}</h4>
-                      <p style={{ fontSize: 12, color: '#6b7280' }}>
+                      <p className="si-48a0b045">
                         {auctionEnabled
                           ? t('marketplace.admin.auctionEnabledDesc', 'Auctions are LIVE. Users can create auction listings and place bids.')
                           : t('marketplace.admin.auctionDisabledDesc', 'Auctions are DISABLED platform-wide. Legal review pending. Enable only after legal clearance.')}
@@ -1872,7 +1872,7 @@ const Marketplace: React.FC = () => {
                     <span className={`module-badge ${auctionEnabled ? 'success' : 'error'}`}>
                       {auctionEnabled ? t('marketplace.monetization.active') : t('marketplace.monetization.inactive')}
                     </span>
-                    <span className="mp-setting-category" style={{ fontSize: 11, color: '#6b7280' }}>
+                    <span className="mp-setting-category si-a213bf41">
                       {t('marketplace.admin.auctionLegalNote', 'Consult legal before enabling in India')}
                     </span>
                   </div>
@@ -2156,7 +2156,7 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
         <h4 className="mp-card-title">{l.title}</h4>
         {/* VC Animal ID badge */}
         {(g(l, 'animalUniqueId', 'animal_unique_id')) && (
-          <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#6366f1', background: '#eef2ff', borderRadius: 4, padding: '2px 6px', display: 'inline-block', marginBottom: 4 }}>
+          <div className="si-849b9ee0">
             🏷️ {g(l, 'animalUniqueId', 'animal_unique_id')}
           </div>
         )}
@@ -2180,8 +2180,8 @@ const ListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency: (n: n
           {welfareAtt && <span className="mp-metric welfare">🛡️ {t('marketplace.card.welfareAttested')}</span>}
           {sellerType === 'registered_breeder' && <span className={`mp-metric breeder ${breederVerified ? 'verified' : ''}`}>{breederVerified ? '✅' : '📋'} {t('marketplace.card.registeredBreeder')}</span>}
           {hasHealthPassport && <span className="mp-metric cert" title="Vaccination records verified in VetCare system">🏥 {t('marketplace.card.healthPassport')}</span>}
-          {isFairDeal && <span className="mp-metric" style={{ background: '#dcfce7', color: '#16a34a', fontWeight: 600 }}>💚 {t('marketplace.card.fairDeal')} ({fairDealPct}%)</span>}
-          {isPremiumPriced && <span className="mp-metric" style={{ background: '#fef3c7', color: '#92400e' }}>⭐ {t('marketplace.card.premiumPriced')}</span>}
+          {isFairDeal && <span className="mp-metric si-7cbce2ec">💚 {t('marketplace.card.fairDeal')} ({fairDealPct}%)</span>}
+          {isPremiumPriced && <span className="mp-metric si-aa4985c8">⭐ {t('marketplace.card.premiumPriced')}</span>}
         </div>
 
         {/* Price */}
@@ -2388,14 +2388,14 @@ const ListingDetail: React.FC<{
                     </div>
                   ) : userId && l.seller_id !== userId ? (
                     <div>
-                      <span style={{ color: '#9ca3af', fontSize: 13 }}>{t('marketplace.detail.contactHidden')}</span>
+                      <span className="si-7b05444b">{t('marketplace.detail.contactHidden')}</span>
                       {onRequestContact && (
-                        <button className="module-btn small" style={{ marginTop: 6 }} onClick={onRequestContact}>
+                        <button className="module-btn small si-5dc995a0" onClick={onRequestContact}>
                           📩 {t('marketplace.detail.requestContact')}
                         </button>
                       )}
                     </div>
-                  ) : <span style={{ color: '#9ca3af' }}>—</span>}
+                  ) : <span className="si-e70e9abd">—</span>}
                 </span>
               </div>
               <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.detail.views')}</span><span className="mp-detail-value">{viewsCount || 0}</span></div>
@@ -2470,7 +2470,7 @@ const ListingDetail: React.FC<{
                 <div className="mp-auction-end">
                   <span>{t('marketplace.detail.ends')} </span>
                   <AuctionCountdown endTime={auctionEnd} t={t} />
-                  <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{new Date(auctionEnd).toLocaleString()}</div>
+                  <div className="si-b1a83cef">{new Date(auctionEnd).toLocaleString()}</div>
                 </div>
               )}
               <input className="module-input" type="number" placeholder={t('marketplace.detail.yourBidAmount')} value={bidAmount} onChange={e => onBidAmountChange(e.target.value)} />
