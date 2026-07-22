@@ -39,8 +39,6 @@
   "dependencies": {
     "axios": "^1.6.7",
     "bcryptjs": "^2.4.3",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.0",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -48,7 +46,6 @@
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",
     "express-rate-limit": "^7.1.5",
-    "groq-sdk": "^0.37.0",
     "helmet": "^7.1.0",
     "joi": "^17.11.0",
     "jsonwebtoken": "9.0.2",
@@ -60,7 +57,6 @@
     "resend": "^6.11.0",
     "socket.io": "^4.8.3",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
     "uuid": "^9.0.1",
     "winston": "^3.11.0"
   },
@@ -78,7 +74,6 @@
     "@types/socket.io": "^3.0.1",
     "@types/supertest": "^6.0.2",
     "@types/swagger-jsdoc": "^6.0.4",
-    "@types/swagger-ui-express": "^4.1.8",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",

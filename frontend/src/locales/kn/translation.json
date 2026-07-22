@@ -103,7 +103,8 @@
     "fillRequired": "Please fill all required fields",
     "none": "None",
     "error": "Error",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "previous": "ಹಿಂದಿನ"
   },
   "nav": {
     "brand": "VetCare",

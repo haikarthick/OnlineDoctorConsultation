@@ -2,6 +2,10 @@ import React, { useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+// Side-effect import: patches L with .heatLayer() — must load after 'leaflet'
+// itself. Without this, HeatmapLayer below throws "heatLayer is not a
+// function" the first time any heatmap prop is actually used.
+import 'leaflet.heat'
 
 // Fix default marker icons (Leaflet + bundlers issue)
 delete (L.Icon.Default.prototype as any)._getIconUrl
