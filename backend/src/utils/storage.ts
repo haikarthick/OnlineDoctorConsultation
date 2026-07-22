@@ -2,10 +2,10 @@
  * Storage Abstraction Layer
  *
  * Provides a unified interface for file storage with two backends:
- * 1. LocalStorage  – saves to disk (default, development)
- * 2. S3Storage     – ready for AWS S3 / MinIO (production)
+ * 1. LocalStorage      – saves to disk (default, development)
+ * 2. CloudinaryStorage – production (images + video, see render.yaml)
  *
- * Switch backends via the STORAGE_DRIVER env var ('local' | 's3').
+ * Switch backends via the STORAGE_DRIVER env var ('local' | 'cloudinary').
  */
 
 import path from 'path';
@@ -95,49 +95,6 @@ class LocalStorage implements StorageDriver {
 
   getUrl(key: string): string {
     return `${getBackendUrl()}/uploads/${key}`;
-  }
-}
-
-// ── S3 Storage Driver (stub – wire up aws-sdk when ready) ─────
-
-class S3Storage implements StorageDriver {
-  private bucket: string;
-  private region: string;
-
-  constructor() {
-    this.bucket = process.env.S3_BUCKET || 'vetcare-uploads';
-    this.region = process.env.S3_REGION || 'us-east-1';
-    logger.info(`S3 storage driver initialised – bucket=${this.bucket}, region=${this.region}`);
-  }
-
-  async save(file: Express.Multer.File, folder: string): Promise<StoredFile> {
-    const ext = path.extname(file.originalname);
-    const uniqueName = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
-    const key = `${folder}/${uniqueName}`;
-
-    // TODO: Replace with actual aws-sdk S3.putObject when ready
-    // const s3 = new AWS.S3({ region: this.region });
-    // await s3.putObject({ Bucket: this.bucket, Key: key, Body: file.buffer, ContentType: file.mimetype }).promise();
-
-    logger.warn('S3Storage.save() stub – file NOT uploaded. Install aws-sdk and implement putObject.');
-
-    return {
-      originalName: file.originalname,
-      fileName: uniqueName,
-      mimeType: file.mimetype,
-      size: file.size,
-      url: `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`,
-      key,
-    };
-  }
-
-  async delete(key: string): Promise<void> {
-    // TODO: Replace with actual aws-sdk S3.deleteObject
-    logger.warn(`S3Storage.delete() stub – key=${key} NOT deleted.`);
-  }
-
-  getUrl(key: string): string {
-    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
   }
 }
 
@@ -242,8 +199,6 @@ function createStorageDriver(): StorageDriver {
   switch (driver) {
     case 'cloudinary':
       return new CloudinaryStorage();
-    case 's3':
-      return new S3Storage();
     case 'local':
     default:
       return new LocalStorage();
