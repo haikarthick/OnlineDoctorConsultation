@@ -5,13 +5,11 @@ import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
 import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
-import { MARKETPLACE_FARMER_SPECIES } from '../constants/speciesBreeds'
 import { useMasterData } from '../context/MasterDataContext'
 import './Marketplace.css'
 import './PublicMarketplace.css'
 
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
-const SPECIES_LIST = MARKETPLACE_FARMER_SPECIES
 
 const g = (l: any, ...keys: string[]): any => { for (const k of keys) { if (l[k] !== undefined && l[k] !== null) return l[k]; } return undefined }
 
@@ -19,7 +17,8 @@ const PublicMarketplace: React.FC = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-  const { classTermsForSpecies, marketplaceCategories, resolveLabel } = useMasterData()
+  const { classTermsForSpecies, marketplaceCategories, resolveLabel, marketplaceEligibleSpecies } = useMasterData()
+  const SPECIES_LIST = marketplaceEligibleSpecies
   const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
     { value: '', label: t('marketplace.categories.all') },
     ...marketplaceCategories.map(c => ({ value: c.code, label: resolveLabel(c, t) })),

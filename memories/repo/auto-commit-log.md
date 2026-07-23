@@ -5152,3 +5152,27 @@
 </details>
 
 ---
+
+## 2026-07-23 06:18 · `6eb1554` · OTHER
+
+**Commit:** fix(marketplace,animals): vetcare-demo never switched to Cloudinary + breed-rename data drift + orphan media cleanup  
+**Author:** haikarthick  
+**Categories:** SERVICE · UTILS · DB · DB-SCHEMA · MEMORY · DEPLOY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - backend/src/app.ts
+  - backend/src/controllers/FileController.ts
+  - backend/src/services/MarketplaceService.ts
+  - backend/src/services/MasterDataService.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/storage.ts
+  - docker/init.sql
+  - memories/repo/auto-commit-log.md
+  - render.yaml
+
+</details>
+
+---

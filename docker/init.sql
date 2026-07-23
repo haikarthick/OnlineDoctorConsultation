@@ -3490,6 +3490,11 @@ CREATE TABLE IF NOT EXISTS master_species (
   sort_order INT DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
   is_protected BOOLEAN DEFAULT false,
+  -- Controls whether this species appears in the Marketplace "sell an animal" species
+  -- picker (Marketplace.tsx/PublicMarketplace.tsx) — see migration 023. Defaults false so
+  -- newly admin-added species don't silently become sellable; the seed data below
+  -- explicitly enables it for the species that were already in the old hardcoded picker.
+  is_marketplace_eligible BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -3606,6 +3611,12 @@ INSERT INTO master_species (id, code, label, icon, category, has_ear_tag, sort_o
   (gen_random_uuid(), 'Alpaca', 'Alpaca', '🦙', 'Exotic Large', true, 500, true),
   (gen_random_uuid(), 'Other', 'Other', '🐾', 'Other', false, 510, true)
 ON CONFLICT (code) DO NOTHING;
+
+-- Marketplace eligibility backfill (migration 023): exactly the species that were already
+-- in the old hardcoded MARKETPLACE_FARMER_SPECIES/MARKETPLACE_PET_OWNER_SPECIES arrays —
+-- preserves today's marketplace species picker contents exactly, nothing more.
+UPDATE master_species SET is_marketplace_eligible = true
+WHERE code IN ('Cattle', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Chicken', 'Dog', 'Cat', 'Rabbit', 'Other');
 
 -- Breeds (generated from BREED_DATABASE, frontend/src/constants/speciesBreeds.ts)
 INSERT INTO master_breeds (id, species_id, name, sort_order, is_active) VALUES

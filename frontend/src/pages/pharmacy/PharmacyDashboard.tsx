@@ -13,6 +13,7 @@ import PharmacySettings from './PharmacySettings'
 import MedicationCatalog from './MedicationCatalog'
 import DispensingHistory from './DispensingHistory'
 import ReordersManagement from './ReordersManagement'
+import MedicationTransfers from './MedicationTransfers'
 import PrescriptionReviewModal from './PrescriptionReviewModal'
 import DispensingModal from './DispensingModal'
 
@@ -70,12 +71,12 @@ interface Analytics {
   expiring_count: number
 }
 
-const TABS = ['overview', 'review', 'dispense', 'inventory', 'catalog', 'suppliers', 'history', 'reorders', 'analytics', 'settings'] as const
+const TABS = ['overview', 'review', 'dispense', 'inventory', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
   overview: '🏠', review: '📋', dispense: '✅', inventory: '📦',
-  catalog: '💊', suppliers: '🏭', history: '📜', reorders: '🔄',
+  catalog: '💊', suppliers: '🏭', history: '📜', reorders: '🔄', transfers: '🚚',
   analytics: '📊', settings: '⚙️'
 }
 
@@ -384,6 +385,10 @@ export default function PharmacyDashboard() {
 
       {tab === 'reorders' && selectedPharmacy && (
         <ReordersManagement pharmacyId={selectedPharmacy.id} networkId={networkId ?? ''} />
+      )}
+
+      {tab === 'transfers' && networkId && (
+        <MedicationTransfers networkId={networkId} />
       )}
 
       {/* Analytics Tab */}

@@ -6781,6 +6781,7 @@
       "catalog": "Catalog",
       "history": "History",
       "reorders": "Reorders",
+      "transfers": "Transfers",
       "analytics": "Analytics"
     },
     "stats": {
@@ -7056,6 +7057,44 @@
         "shipped": "Shipped",
         "received": "Received",
         "cancelled": "Cancelled"
+      }
+    },
+    "transfers": {
+      "title": "Inter-Hospital Medication Transfers",
+      "newRequest": "New Transfer Request",
+      "activeRequests": "Active Requests",
+      "requests": "requests",
+      "noActive": "No active transfer requests",
+      "empty": "No transfer history",
+      "route": "Route",
+      "requestedBy": "Requested By",
+      "sourceHospital": "From Hospital",
+      "destHospital": "To Hospital",
+      "selectHospital": "Select hospital",
+      "medications": "Medications",
+      "selectMedication": "Select medication",
+      "addLine": "Add Medication",
+      "submitRequest": "Submit Request",
+      "addTracking": "Add Tracking",
+      "decline": "Decline",
+      "declineReason": "Reason for declining",
+      "formIncomplete": "Select both hospitals and at least one medication line",
+      "sameHospital": "Source and destination hospitals must be different",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "preparing": "Preparing",
+        "shipped": "Shipped",
+        "received": "Received",
+        "fulfilled": "Fulfilled",
+        "declined": "Declined"
+      },
+      "advanceTo": {
+        "accepted": "Accept",
+        "preparing": "Mark Preparing",
+        "shipped": "Mark Shipped",
+        "received": "Mark Received",
+        "fulfilled": "Mark Fulfilled"
       }
     },
     "analytics": {
@@ -7467,7 +7506,8 @@
       "value": "மதிப்பு (உள் குறியீடு)",
       "impliedGender": "உள்ளார்ந்த பாலினம்",
       "canBePregnant": "கர்ப்பமாக இருக்க முடியும்",
-      "canProduceMilk": "பால் உற்பத்தி செய்ய முடியும்"
+      "canProduceMilk": "பால் உற்பத்தி செய்ய முடியும்",
+      "marketplaceEligible": "மார்க்கெட்பிளேஸில் விற்பனைக்கு தகுதி"
     }
   }
 }

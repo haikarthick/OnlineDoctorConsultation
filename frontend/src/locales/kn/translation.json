@@ -6796,6 +6796,7 @@
       "catalog": "Catalog",
       "history": "History",
       "reorders": "Reorders",
+      "transfers": "Transfers",
       "analytics": "Analytics"
     },
     "stats": {
@@ -7071,6 +7072,44 @@
         "shipped": "Shipped",
         "received": "Received",
         "cancelled": "Cancelled"
+      }
+    },
+    "transfers": {
+      "title": "Inter-Hospital Medication Transfers",
+      "newRequest": "New Transfer Request",
+      "activeRequests": "Active Requests",
+      "requests": "requests",
+      "noActive": "No active transfer requests",
+      "empty": "No transfer history",
+      "route": "Route",
+      "requestedBy": "Requested By",
+      "sourceHospital": "From Hospital",
+      "destHospital": "To Hospital",
+      "selectHospital": "Select hospital",
+      "medications": "Medications",
+      "selectMedication": "Select medication",
+      "addLine": "Add Medication",
+      "submitRequest": "Submit Request",
+      "addTracking": "Add Tracking",
+      "decline": "Decline",
+      "declineReason": "Reason for declining",
+      "formIncomplete": "Select both hospitals and at least one medication line",
+      "sameHospital": "Source and destination hospitals must be different",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "preparing": "Preparing",
+        "shipped": "Shipped",
+        "received": "Received",
+        "fulfilled": "Fulfilled",
+        "declined": "Declined"
+      },
+      "advanceTo": {
+        "accepted": "Accept",
+        "preparing": "Mark Preparing",
+        "shipped": "Mark Shipped",
+        "received": "Mark Received",
+        "fulfilled": "Mark Fulfilled"
       }
     },
     "analytics": {
@@ -7482,7 +7521,8 @@
       "value": "ಮೌಲ್ಯ (ಆಂತರಿಕ ಕೋಡ್)",
       "impliedGender": "ಸೂಚಿತ ಲಿಂಗ",
       "canBePregnant": "ಗರ್ಭಿಣಿಯಾಗಬಹುದು",
-      "canProduceMilk": "ಹಾಲು ಉತ್ಪಾದಿಸಬಹುದು"
+      "canProduceMilk": "ಹಾಲು ಉತ್ಪಾದಿಸಬಹುದು",
+      "marketplaceEligible": "ಮಾರುಕಟ್ಟೆಯಲ್ಲಿ ಮಾರಾಟ ಯೋಗ್ಯ"
     }
   }
 }

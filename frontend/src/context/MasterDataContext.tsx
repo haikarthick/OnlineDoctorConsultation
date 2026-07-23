@@ -6,8 +6,16 @@ import {
   ANIMAL_CLASS_TERMS as FALLBACK_ANIMAL_CLASS_TERMS,
   SPECIES_ICONS as FALLBACK_SPECIES_ICONS,
   EAR_TAG_SPECIES as FALLBACK_EAR_TAG_SPECIES,
+  MARKETPLACE_FARMER_SPECIES,
+  MARKETPLACE_PET_OWNER_SPECIES,
   AnimalClassTerm,
 } from '../constants/speciesBreeds'
+
+// Fallback marketplace-eligible species list — union of the old hardcoded farmer/pet-owner
+// arrays, used only until the live master-data fetch resolves (see loadMasterData below).
+// The admin-configurable is_marketplace_eligible flag (migration 023) replaces both arrays
+// with a single flag per species — see MEMORY.md / marketplace species-picker note.
+const FALLBACK_MARKETPLACE_ELIGIBLE_SPECIES = Array.from(new Set([...MARKETPLACE_FARMER_SPECIES, ...MARKETPLACE_PET_OWNER_SPECIES]))
 
 // Fallback marketplace categories/conditions — mirrors the pre-migration hardcoded
 // CATEGORY_KEYS/condition <option>s in Marketplace.tsx, used only until the live
@@ -37,6 +45,9 @@ interface MasterDataContextType {
   classTermsForSpecies: (species: string) => AnimalClassTerm[]
   findClassTerm: (species: string, value: string) => AnimalClassTerm | undefined
   earTagSpecies: string[]
+  /** Species codes eligible for the Marketplace "sell an animal" picker — admin-configurable
+   *  via master-data CRUD (is_marketplace_eligible), not a hardcoded list. */
+  marketplaceEligibleSpecies: string[]
   marketplaceCategories: MasterMarketplaceCategory[]
   marketplaceConditions: MasterMarketplaceCondition[]
   /** Resolve a label_key-or-label master-data row to display text (labelKey takes priority when set). */
@@ -51,6 +62,7 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
   const [speciesCategories, setSpeciesCategories] = useState(FALLBACK_SPECIES_CATEGORIES)
   const [speciesIcons, setSpeciesIcons] = useState<Record<string, string>>(FALLBACK_SPECIES_ICONS)
   const [earTagSpecies, setEarTagSpecies] = useState<string[]>(FALLBACK_EAR_TAG_SPECIES)
+  const [marketplaceEligibleSpecies, setMarketplaceEligibleSpecies] = useState<string[]>(FALLBACK_MARKETPLACE_ELIGIBLE_SPECIES)
   const [marketplaceCategories, setMarketplaceCategories] = useState<MasterMarketplaceCategory[]>(FALLBACK_MARKETPLACE_CATEGORIES)
   const [marketplaceConditions, setMarketplaceConditions] = useState<MasterMarketplaceCondition[]>(FALLBACK_MARKETPLACE_CONDITIONS)
 
@@ -86,6 +98,7 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
       setSpeciesCategories([...byCategory.entries()].map(([label, list]) => ({ label, species: list })))
       setSpeciesIcons(iconMap)
       setEarTagSpecies(earTags)
+      setMarketplaceEligibleSpecies(species.filter(s => s.isMarketplaceEligible).map(s => s.code))
 
       const breedMap: Record<string, string[]> = {}
       for (const b of [...breeds].sort((a, b2) => a.sortOrder - b2.sortOrder)) {
@@ -146,7 +159,7 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
   return (
     <MasterDataContext.Provider value={{
       speciesCategories, speciesIcon, breedsForSpecies, classTermsForSpecies, findClassTerm,
-      earTagSpecies, marketplaceCategories, marketplaceConditions, resolveLabel,
+      earTagSpecies, marketplaceEligibleSpecies, marketplaceCategories, marketplaceConditions, resolveLabel,
     }}>
       {children}
     </MasterDataContext.Provider>

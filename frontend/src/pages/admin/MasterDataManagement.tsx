@@ -9,7 +9,7 @@ type TabKey = 'species' | 'breeds' | 'classes' | 'categories' | 'conditions'
 
 interface SpeciesRow {
   id: string; code: string; label: string; icon: string | null; category: string | null;
-  hasEarTag: boolean; sortOrder: number; isActive: boolean; isProtected: boolean
+  hasEarTag: boolean; sortOrder: number; isActive: boolean; isProtected: boolean; isMarketplaceEligible: boolean
 }
 interface BreedRow { id: string; speciesId: string; speciesCode?: string; name: string; sortOrder: number; isActive: boolean }
 interface ClassRow {
@@ -80,7 +80,7 @@ const MasterDataManagement: React.FC = () => {
   const openAdd = () => {
     clearMessages()
     setEditingId(null)
-    if (tab === 'species') setFormData({ code: '', label: '', icon: '', category: '', hasEarTag: false, sortOrder: 0 })
+    if (tab === 'species') setFormData({ code: '', label: '', icon: '', category: '', hasEarTag: false, sortOrder: 0, isMarketplaceEligible: false })
     else if (tab === 'breeds') setFormData({ speciesId: scopeSpeciesId, name: '', sortOrder: 0 })
     else if (tab === 'classes') setFormData({ speciesId: scopeSpeciesId, value: '', label: '', impliedGender: 'unknown', canBePregnant: false, canProduceMilk: false, sortOrder: 0 })
     else if (tab === 'categories') setFormData({ code: '', label: '', icon: '', sortOrder: 0 })
@@ -213,7 +213,7 @@ const MasterDataManagement: React.FC = () => {
           <table className="data-table">
             <thead>
               {tab === 'species' && (
-                <tr><th>{t('masterData.col.icon', 'Icon')}</th><th>{t('masterData.col.code', 'Code')}</th><th>{t('masterData.col.label', 'Label')}</th><th>{t('masterData.col.category', 'Category')}</th><th>{t('masterData.col.earTag', 'Ear Tag')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr>
+                <tr><th>{t('masterData.col.icon', 'Icon')}</th><th>{t('masterData.col.code', 'Code')}</th><th>{t('masterData.col.label', 'Label')}</th><th>{t('masterData.col.category', 'Category')}</th><th>{t('masterData.col.earTag', 'Ear Tag')}</th><th>{t('masterData.col.marketplaceEligible', 'Marketplace')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr>
               )}
               {tab === 'breeds' && (
                 <tr><th>{t('common.name')}</th><th>{t('masterData.col.sortOrder', 'Sort')}</th><th>{t('common.status')}</th><th>{t('common.actions')}</th></tr>
@@ -236,6 +236,7 @@ const MasterDataManagement: React.FC = () => {
                   <td>{row.label}</td>
                   <td>{row.category || '—'}</td>
                   <td>{row.hasEarTag ? '✓' : '—'}</td>
+                  <td>{row.isMarketplaceEligible ? '✓' : '—'}</td>
                   <td><span className={`module-badge ${row.isActive ? 'badge-success' : 'badge-error'}`}>{row.isActive ? t('common.active') : t('common.inactive')}</span></td>
                   <td>
                     <button className="module-btn small" onClick={() => openEdit(row)}>{t('common.edit')}</button>
@@ -338,6 +339,10 @@ const MasterDataManagement: React.FC = () => {
                 <label className="checkbox-label">
                   <input type="checkbox" checked={!!formData.hasEarTag} onChange={e => setFormData((f: any) => ({ ...f, hasEarTag: e.target.checked }))} />
                   {t('masterData.col.earTag', 'Uses ear tags')}
+                </label>
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={!!formData.isMarketplaceEligible} onChange={e => setFormData((f: any) => ({ ...f, isMarketplaceEligible: e.target.checked }))} />
+                  {t('masterData.col.marketplaceEligible', 'Sellable on Marketplace')}
                 </label>
                 <div className="module-form-group">
                   <label className="module-label">{t('masterData.col.sortOrder', 'Sort order')}</label>

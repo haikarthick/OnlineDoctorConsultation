@@ -1709,6 +1709,7 @@ export const createMasterSpeciesSchema = Joi.object({
   category: Joi.string().max(50).allow('', null).optional(),
   hasEarTag: Joi.boolean().optional(),
   sortOrder: Joi.number().integer().optional(),
+  isMarketplaceEligible: Joi.boolean().optional(),
 });
 export const updateMasterSpeciesSchema = Joi.object({
   label: Joi.string().min(1).max(100).optional(),
@@ -1716,6 +1717,7 @@ export const updateMasterSpeciesSchema = Joi.object({
   category: Joi.string().max(50).allow('', null).optional(),
   hasEarTag: Joi.boolean().optional(),
   sortOrder: Joi.number().integer().optional(),
+  isMarketplaceEligible: Joi.boolean().optional(),
 });
 
 export const createMasterBreedSchema = Joi.object({

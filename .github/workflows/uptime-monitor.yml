@@ -1,6 +1,18 @@
 name: Uptime Monitor — Keep Demo & Dev Warm
 
-# WHY TWO CRON ENTRIES:
+# DISABLED (2026-07-23): the automatic schedule below (running every ~2-3 minutes across
+# two overlapping crons) plus the backend's own self-ping (backend/src/index.ts,
+# ENABLE_SELF_PING) were together keeping both services warm around the clock. That's the
+# actual root cause of the June 2026 625/750-free-tier-hour scare — see memory:
+# render-usage-root-cause-corrected. It went unfixed for 5+ weeks because that corrected
+# diagnosis was written but never got surfaced. User decision (2026-07-23): conserve
+# free-tier hours over always-warm demo/dev, so the schedule trigger is removed. Manual
+# on-demand pinging (workflow_dispatch, below) still works if you ever need to pre-warm
+# before a demo. To restore always-on behavior instead, re-add a `schedule:` block here
+# AND/OR set ENABLE_SELF_PING=true for the relevant Render service — don't rely on only
+# one of the two, they're independent keep-alive mechanisms.
+#
+# WHY TWO CRON ENTRIES (historical, kept for context if ever re-enabled):
 #   GitHub Actions cron is NOT guaranteed to fire at exact times — it can be
 #   delayed 10-30+ minutes during high GitHub load. Render free tier spins down
 #   after exactly 15 minutes of inactivity. A single */5 schedule can miss the
@@ -20,13 +32,6 @@ name: Uptime Monitor — Keep Demo & Dev Warm
 #   with a fresh 15-minute window from a fully-warmed state.
 
 on:
-  schedule:
-    # Schedule A: every 5 min starting at :00 → 0,5,10,15,20,25,30,35,40,45,50,55
-    - cron: '*/5 * * * *'
-    # Schedule B: every 5 min starting at :02 → 2,7,12,17,22,27,32,37,42,47,52,57
-    # Together A+B fire every ~2-3 minutes — even if GitHub delays one by 10+ min,
-    # the other fires within the 15-min Render idle window.
-    - cron: '2-59/5 * * * *'
   workflow_dispatch:
     inputs:
       environment:
@@ -45,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping vetcare-demo
-        if: github.event_name == 'schedule' || github.event.inputs.environment == 'both' || github.event.inputs.environment == 'demo'
+        if: github.event.inputs.environment == 'both' || github.event.inputs.environment == 'demo'
         run: |
           DEMO_URL="https://vetcare-demo.onrender.com/api/v1/health"
           echo "⏰ $(date -u '+%Y-%m-%d %H:%M:%S UTC') — Pinging vetcare-demo..."
@@ -82,7 +87,7 @@ jobs:
           fi
 
       - name: Ping vetcare-dev
-        if: github.event_name == 'schedule' || github.event.inputs.environment == 'both' || github.event.inputs.environment == 'dev'
+        if: github.event.inputs.environment == 'both' || github.event.inputs.environment == 'dev'
         run: |
           DEV_URL="https://vetcare-dev.onrender.com/api/v1/health"
           echo "⏰ $(date -u '+%Y-%m-%d %H:%M:%S UTC') — Pinging vetcare-dev..."

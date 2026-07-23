@@ -9,7 +9,6 @@ import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing, MarketplaceBid, MarketplaceOrder, MarketplaceStats, MarketPriceData, MarketplaceThread, MarketplaceMessage, MarketplaceSavedSearch } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
-import { MARKETPLACE_FARMER_SPECIES, MARKETPLACE_PET_OWNER_SPECIES } from '../constants/speciesBreeds'
 import { useMasterData } from '../context/MasterDataContext'
 
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
@@ -52,10 +51,9 @@ const Marketplace: React.FC = () => {
   const { user } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel } = useMasterData()
+  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, marketplaceCategories, marketplaceConditions, resolveLabel, marketplaceEligibleSpecies } = useMasterData()
   const isAdmin = user?.role === 'admin'
-  const isFarmer = user?.role === 'farmer'
-  const SPECIES_LIST = (isFarmer || isAdmin) ? MARKETPLACE_FARMER_SPECIES : MARKETPLACE_PET_OWNER_SPECIES
+  const SPECIES_LIST = marketplaceEligibleSpecies
   const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
     { value: '', label: t('marketplace.categories.all') },
     ...marketplaceCategories.map(c => ({ value: c.code, label: resolveLabel(c, t) })),
