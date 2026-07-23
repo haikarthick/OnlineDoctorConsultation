@@ -9,6 +9,18 @@ import pool from '../utils/database';
 import { v4 as uuidv4 } from 'uuid';
 import NotificationService from './NotificationService';
 import logger from '../utils/logger';
+import storage, { extractStorageKeyFromUrl } from '../utils/storage';
+
+/** Deletes storage assets for a set of listing media URLs — non-fatal per URL (a delete
+ *  failure here should never block the listing update/delete itself; storage.delete()
+ *  already swallows its own errors to a warn log). Skips URLs with no extractable key
+ *  (legacy local /uploads/ paths, nulls) — nothing to clean up for those. */
+async function cleanupListingMedia(urls: Array<string | null | undefined>): Promise<void> {
+  for (const url of urls) {
+    const key = extractStorageKeyFromUrl(url);
+    if (key) await storage.delete(key);
+  }
+}
 
 // Categories that involve a live animal (or germplasm) must pass admin review
 // before going public — Pet Shop Rules 2018 compliance posture.
@@ -247,7 +259,7 @@ class MarketplaceService {
 
   async updateListing(id: string, data: any, userId?: string, isAdmin = false) {
     // Ownership guard: only the seller or an admin may modify a listing
-    const existing = await pool.query('SELECT seller_id, status FROM marketplace_listings WHERE id = $1', [id]);
+    const existing = await pool.query('SELECT seller_id, status, images, video_url FROM marketplace_listings WHERE id = $1', [id]);
     if (!existing.rows[0]) throw new Error('Listing not found');
     if (!isAdmin && existing.rows[0].seller_id !== userId) throw new Error('You can only edit your own listings');
     // Sellers may only move a listing between self-service statuses; system/admin
@@ -303,15 +315,42 @@ class MarketplaceService {
     sets.push('updated_at = NOW()'); vals.push(id);
     await pool.query(`UPDATE marketplace_listings SET ${sets.join(', ')} WHERE id = $${idx}`, vals);
     const result = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [id]);
+
+    // Clean up Cloudinary assets dropped by this edit (removed photos, a replaced/removed
+    // video) — only after the UPDATE succeeds, so a failed request never deletes media a
+    // listing still references. Runs after the response-worthy work, never blocks it.
+    const oldImages: string[] = Array.isArray(existing.rows[0].images) ? existing.rows[0].images : [];
+    const oldVideoUrl: string | null = existing.rows[0].video_url || null;
+    const removedMedia: string[] = [];
+    if (data.images) {
+      const newImages: string[] = data.images;
+      removedMedia.push(...oldImages.filter(img => !newImages.includes(img)));
+    }
+    if (data.videoUrl !== undefined && oldVideoUrl && oldVideoUrl !== (data.videoUrl || null)) {
+      removedMedia.push(oldVideoUrl);
+    }
+    if (removedMedia.length > 0) {
+      cleanupListingMedia(removedMedia).catch(err => logger.warn('Listing media cleanup failed (non-fatal)', { listingId: id, error: err.message }));
+    }
+
     return result.rows[0];
   }
 
   async deleteListing(id: string, userId?: string, isAdmin = false) {
-    const existing = await pool.query('SELECT seller_id, status FROM marketplace_listings WHERE id = $1', [id]);
+    const existing = await pool.query('SELECT seller_id, status, images, video_url FROM marketplace_listings WHERE id = $1', [id]);
     if (!existing.rows[0]) throw new Error('Listing not found');
     if (!isAdmin && existing.rows[0].seller_id !== userId) throw new Error('You can only delete your own listings');
     if (!isAdmin && existing.rows[0].status === 'reserved') throw new Error('Listing is reserved — complete or cancel the deal first');
     await pool.query('UPDATE marketplace_listings SET status = $1, updated_at = NOW() WHERE id = $2', ['deleted', id]);
+
+    // Soft-delete keeps the row (price/species/breed/etc.) for audit/history, but the
+    // listing has no further product purpose for its photos/video — clean those up so a
+    // deleted listing doesn't go on consuming Cloudinary storage credits indefinitely.
+    const media: string[] = Array.isArray(existing.rows[0].images) ? [...existing.rows[0].images] : [];
+    if (existing.rows[0].video_url) media.push(existing.rows[0].video_url);
+    if (media.length > 0) {
+      cleanupListingMedia(media).catch(err => logger.warn('Deleted-listing media cleanup failed (non-fatal)', { listingId: id, error: err.message }));
+    }
   }
 
   // ── Bids ──

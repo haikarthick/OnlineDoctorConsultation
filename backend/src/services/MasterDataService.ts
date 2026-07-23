@@ -219,6 +219,40 @@ class MasterDataService {
       if (!existing.rows[0]) throw new NotFoundError('Breed', id);
       return mapBreed(existing.rows[0]);
     }
+
+    // animals.breed / marketplace_listings.breed are denormalized text, not FKs (same
+    // reasoning as animal_class — see migration 022's header comment). A bare rename here
+    // used to leave every existing row holding the old breed string, silently orphaned
+    // from the catalog with no error. Renaming now cascades the same text change to every
+    // referencing row in the same transaction, so the catalog and the data never drift.
+    if (input.name !== undefined) {
+      const existing = await database.query(
+        `SELECT b.name, s.code AS species_code FROM master_breeds b JOIN master_species s ON s.id = b.species_id WHERE b.id = $1`,
+        [id]
+      );
+      if (!existing.rows[0]) throw new NotFoundError('Breed', id);
+      const { name: oldName, species_code: speciesCode } = existing.rows[0];
+
+      if (oldName !== input.name) {
+        const client = await database.getPool().connect();
+        try {
+          await client.query('BEGIN');
+          await client.query(`UPDATE animals SET breed = $1 WHERE species = $2 AND breed = $3`, [input.name, speciesCode, oldName]);
+          await client.query(`UPDATE marketplace_listings SET breed = $1 WHERE species = $2 AND breed = $3`, [input.name, speciesCode, oldName]);
+          params.push(id);
+          const result = await client.query(`UPDATE master_breeds SET ${setClauses.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING *`, params);
+          await client.query('COMMIT');
+          if (!result.rows[0]) throw new NotFoundError('Breed', id);
+          return mapBreed(result.rows[0]);
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      }
+    }
+
     params.push(id);
     const result = await database.query(`UPDATE master_breeds SET ${setClauses.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING *`, params);
     if (!result.rows[0]) throw new NotFoundError('Breed', id);

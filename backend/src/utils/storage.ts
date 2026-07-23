@@ -35,7 +35,8 @@ export interface StoredFile {
 
 export interface StorageDriver {
   save(file: Express.Multer.File, folder: string): Promise<StoredFile>;
-  delete(key: string): Promise<void>;
+  /** Returns true if the asset was deleted (or never existed), false if deletion failed. */
+  delete(key: string): Promise<boolean>;
   getUrl(key: string): string;
 }
 
@@ -86,10 +87,16 @@ class LocalStorage implements StorageDriver {
     };
   }
 
-  async delete(key: string): Promise<void> {
+  async delete(key: string): Promise<boolean> {
     const filePath = path.join(UPLOAD_ROOT, key);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      return true;
+    } catch (err: any) {
+      logger.warn(`Local file delete failed for key=${key}: ${err.message}`);
+      return false;
     }
   }
 
@@ -177,12 +184,14 @@ class CloudinaryStorage implements StorageDriver {
     };
   }
 
-  async delete(key: string): Promise<void> {
+  async delete(key: string): Promise<boolean> {
     const resourceType = key.includes(VIDEO_FOLDER_MARKER) ? 'video' : 'image';
     try {
       await this.cloudinary.uploader.destroy(key, { resource_type: resourceType });
+      return true;
     } catch (err: any) {
       logger.warn(`Cloudinary delete failed for key=${key}: ${err.message}`);
+      return false;
     }
   }
 
@@ -192,10 +201,44 @@ class CloudinaryStorage implements StorageDriver {
   }
 }
 
+// ── URL → storage key ─────────────────────────────────────────
+// The DB stores full delivery URLs (marketplace_listings.images/video_url), not raw
+// storage keys — callers that need to delete an asset (e.g. MarketplaceService cleaning
+// up removed/replaced media) must reverse the URL back into a key first. Cloudinary
+// delivery URLs are always shaped
+// https://res.cloudinary.com/<cloud>/<image|video>/upload/v<version>/<public_id>.<ext>
+// (this app always sets an explicit public_id on upload — see CloudinaryStorage.save —
+// so <public_id> here includes the folder path exactly as stored in the DB `key`/`url`
+// pair). Returns null for anything that doesn't match (legacy local /uploads/ paths,
+// empty/undefined) — callers should treat null as "nothing to delete."
+export function extractStorageKeyFromUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  // Greedy capture + mandatory trailing extension so the LAST dot-extension is stripped
+  // correctly (a lazy capture with an optional extension group would never backtrack into
+  // stripping it, since "match zero characters of the optional group" always succeeds
+  // first — leaving the extension incorrectly inside the returned key).
+  const match = url.match(/res\.cloudinary\.com\/[^/]+\/(?:image|video)\/upload\/v\d+\/(.+)\.[a-zA-Z0-9]+$/);
+  return match ? match[1] : null;
+}
+
 // ── Factory ───────────────────────────────────────────────────
 
+const KNOWN_DRIVERS = ['local', 'cloudinary'];
+
 function createStorageDriver(): StorageDriver {
-  const driver = (process.env.STORAGE_DRIVER || 'local').toLowerCase();
+  const raw = process.env.STORAGE_DRIVER;
+  const driver = (raw || 'local').toLowerCase();
+
+  if (raw && !KNOWN_DRIVERS.includes(driver)) {
+    // A typo'd STORAGE_DRIVER (e.g. "clodinary") would otherwise silently fall through to
+    // LocalStorage — on Render's ephemeral disk that means uploads work fine until the
+    // next deploy/restart wipes them, with zero error signal until a user notices missing
+    // images days later. Loud at boot beats silent data loss.
+    logger.error(`STORAGE_DRIVER="${raw}" is not a recognized driver (expected one of: ${KNOWN_DRIVERS.join(', ')}) — falling back to 'local'. On an ephemeral-disk host this means uploaded files WILL be lost on the next deploy/restart.`);
+  } else if (!raw) {
+    logger.warn(`STORAGE_DRIVER is not set — defaulting to 'local'. On an ephemeral-disk host (e.g. Render free tier) uploaded files will be lost on the next deploy/restart; set STORAGE_DRIVER=cloudinary there instead.`);
+  }
+
   switch (driver) {
     case 'cloudinary':
       return new CloudinaryStorage();

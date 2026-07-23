@@ -855,10 +855,18 @@ class PostgresDatabase {
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS last_weighed_at TIMESTAMP`,
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS current_location_id UUID`,
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS avatar_url TEXT`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS animal_class VARCHAR(30)`,
     ];
     for (const ddl of animalColumns) {
       await this.pool.query(ddl).catch(() => {});
     }
+
+    // animal_class is filtered/grouped on in MarketplaceService's search + aggregation
+    // queries (both marketplace_listings and animals) with no backing index — added here
+    // as a safety net for DBs that predate this column on marketplace_listings too.
+    await this.pool.query(`ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_class VARCHAR(30)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_marketplace_listings_animal_class ON marketplace_listings(animal_class)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_animals_animal_class ON animals(animal_class)`).catch(() => {});
 
     // Widen avatar_url columns from VARCHAR(500) to TEXT (base64 photos exceed 500 chars)
     const widenAvatarUrl = [

@@ -5132,3 +5132,23 @@
 </details>
 
 ---
+
+## 2026-07-23 05:52 · `3699d19` · OTHER
+
+**Commit:** fix(network-hospital): cross-network leave-request IDOR + consolidate 4 duplicated access-gate implementations  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - backend/src/controllers/HospitalNetworkController.ts
+  - backend/src/middleware/networkAccess.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/HospitalNetworkService.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---

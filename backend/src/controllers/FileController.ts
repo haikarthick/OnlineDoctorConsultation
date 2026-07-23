@@ -66,7 +66,14 @@ export class FileController {
     const storedFile = await storage.save(req.file, `${folder}/video`);
 
     if (typeof storedFile.duration === 'number' && storedFile.duration > MAX_VIDEO_DURATION_SECONDS) {
-      await storage.delete(storedFile.key);
+      const deleted = await storage.delete(storedFile.key);
+      if (!deleted) {
+        // storage.delete() already warn-logs the underlying error — this is a distinct,
+        // higher-severity log specifically for "an oversized video is now permanently
+        // parked in storage consuming credits with nothing left to retry the delete,"
+        // since the client only ever sees a generic 400 and has no reason to retry.
+        logger.error(`Orphaned rejected video left in storage — delete failed for key=${storedFile.key}, duration=${storedFile.duration}s, uploadedBy=${(req as any).userId || 'anonymous'}`);
+      }
       return res.status(400).json({
         error: {
           code: 'VIDEO_TOO_LONG',

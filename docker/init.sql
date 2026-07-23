@@ -3456,6 +3456,8 @@ CREATE INDEX IF NOT EXISTS idx_marketplace_listings_breed ON marketplace_listing
 CREATE INDEX IF NOT EXISTS idx_marketplace_listings_tier ON marketplace_listings(listing_tier);
 CREATE INDEX IF NOT EXISTS idx_marketplace_listings_admin ON marketplace_listings(admin_approved);
 CREATE INDEX IF NOT EXISTS idx_marketplace_listings_seller_type ON marketplace_listings(seller_type);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_animal_class ON marketplace_listings(animal_class);
+CREATE INDEX IF NOT EXISTS idx_animals_animal_class ON animals(animal_class);
 CREATE INDEX IF NOT EXISTS idx_sustainability_metrics_ent ON sustainability_metrics(enterprise_id, metric_type);
 CREATE INDEX IF NOT EXISTS idx_sustainability_goals_ent ON sustainability_goals(enterprise_id);
 CREATE INDEX IF NOT EXISTS idx_wellness_scorecards_animal ON wellness_scorecards(animal_id);

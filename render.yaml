@@ -81,6 +81,12 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+      # Was missing on demo — CLOUDINARY_URL alone does nothing without this; the storage
+      # driver defaulted to 'local' (Render's ephemeral disk), so demo marketplace
+      # images/video were still being silently wiped on every deploy even after the
+      # Cloudinary migration shipped for dev. See STORAGE_DRIVER comment on vetcare-dev above.
+      - key: STORAGE_DRIVER
+        value: cloudinary
       - key: CLOUDINARY_URL
         sync: false
       - key: GROQ_API_KEY
