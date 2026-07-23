@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
+import DispensingReceiptView, { DispensingReceiptData } from '../../components/pharmacy/DispensingReceiptView'
+import MedicationLabelPrint, { LabelItem } from '../../components/pharmacy/MedicationLabelPrint'
 
 interface Medication {
   name: string
@@ -75,8 +77,16 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
   const [loadingInv, setLoadingInv] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [pharmacyInfo, setPharmacyInfo] = useState<{ pharmacy_name?: string; address?: string; phone?: string }>({})
+  const [receipt, setReceipt] = useState<DispensingReceiptData | null>(null)
+  const [labelItems, setLabelItems] = useState<LabelItem[] | null>(null)
+  const [showLabels, setShowLabels] = useState(false)
 
   const medications = parseMedications(prescription.medications)
+
+  useEffect(() => {
+    client.get(`/pharmacies/${pharmacyId}`).then(res => setPharmacyInfo(res.data || {})).catch(() => {})
+  }, [pharmacyId])
 
   // Load pharmacy inventory and pre-match medications
   useEffect(() => {
@@ -163,12 +173,13 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
     setSaving(true)
     setError('')
     try {
-      await client.post('/dispensing', {
+      const dispensedLines = lineItems.filter(l => l.inventory_id && l.quantity_dispensed > 0)
+      const res = await client.post('/dispensing', {
         prescription_id: prescription.id,
         pharmacy_id: pharmacyId,
         dispensing_method: method,
         notes,
-        line_items: lineItems.filter(l => l.inventory_id && l.quantity_dispensed > 0).map(l => ({
+        line_items: dispensedLines.map(l => ({
           med_id: l.med_id,
           inventory_id: l.inventory_id,
           batch_number: l.batch_number,
@@ -178,12 +189,58 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
           line_total: l.line_total,
         })),
       })
-      onDone()
+      setReceipt({
+        dispensingId: res.data?.id || '',
+        createdAt: res.data?.created_at || new Date().toISOString(),
+        dispensingMethod: method,
+        pharmacyName: pharmacyInfo.pharmacy_name,
+        pharmacyAddress: pharmacyInfo.address,
+        pharmacyPhone: pharmacyInfo.phone,
+        animalName: prescription.pet_name,
+        animalSpecies: prescription.animal_species,
+        ownerName: prescription.owner_name,
+        vetName: prescription.vet_name,
+        lineItems: dispensedLines.map(l => ({
+          name: l.med_name, quantity: l.quantity_dispensed, unit: l.unit,
+          unitPrice: l.unit_price, lineTotal: l.line_total, batchNumber: l.batch_number,
+        })),
+        totalCost,
+      })
+      setLabelItems(dispensedLines.map((l, idx) => ({
+        medicationName: l.med_name,
+        directions: medications[idx] ? `${medications[idx].dosage} · ${medications[idx].frequency}${medications[idx].duration ? ' · ' + medications[idx].duration : ''}` : undefined,
+        quantity: l.quantity_dispensed,
+        unit: l.unit,
+      })))
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
     } finally {
       setSaving(false)
     }
+  }
+
+  if (receipt) {
+    return (
+      <>
+        <DispensingReceiptView
+          receipt={receipt}
+          onClose={onDone}
+          secondaryAction={labelItems && labelItems.length > 0 ? { label: `🏷 ${t('medicationLabel.printLabels')}`, onClick: () => setShowLabels(true) } : undefined}
+        />
+        {showLabels && labelItems && (
+          <MedicationLabelPrint
+            pharmacyName={pharmacyInfo.pharmacy_name}
+            pharmacyPhone={pharmacyInfo.phone}
+            animalName={prescription.pet_name}
+            animalSpecies={prescription.animal_species}
+            ownerName={prescription.owner_name}
+            rxRef={prescription.id}
+            items={labelItems}
+            onClose={() => setShowLabels(false)}
+          />
+        )}
+      </>
+    )
   }
 
   return (

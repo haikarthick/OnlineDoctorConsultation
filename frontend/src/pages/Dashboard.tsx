@@ -30,6 +30,7 @@ const Dashboard: React.FC = () => {
   const [enterpriseOverview, setEnterpriseOverview] = useState<EnterpriseOverviewStats | null>(null)
   const [corpStats, setCorpStats] = useState({ totalNetworks: 0, approvedNetworks: 0, pendingNetworks: 0, totalHospitals: 0, totalMembers: 0 })
   const [staffDashboard, setStaffDashboard] = useState<any>(null)
+  const [vetPharmacyStats, setVetPharmacyStats] = useState<{ pendingReview: number; rejectedThisWeek: number; dispensedCount: number } | null>(null)
 
   // Doctor-specific state
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([])
@@ -53,6 +54,14 @@ const Dashboard: React.FC = () => {
   }, [isPharmacist, navigate])
 
   useEffect(() => { loadDashboardData() }, [])
+
+  // Vets who prescribe into a network pharmacy get a lightweight status tile — silent no-op for standalone vets
+  useEffect(() => {
+    if (!isVeterinarian) return
+    apiService.getVetPharmacyStats()
+      .then((resp: any) => setVetPharmacyStats(resp?.data || null))
+      .catch(() => setVetPharmacyStats(null))
+  }, [isVeterinarian])
 
   const loadDashboardData = async () => {
     // Pharmacist is redirected to /pharmacy — skip all data loading
@@ -220,12 +229,21 @@ const Dashboard: React.FC = () => {
     }
 
     if (isVeterinarian) {
-      return [
+      const tiles = [
         { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
         { label: t('dashboard.stats.consultations'), value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
         { label: t('dashboard.stats.patients'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
         { label: t('dashboard.stats.pending'), value: stats.pending, icon: '🔔', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
       ]
+      // Only shown once this vet has ever sent a prescription into a network pharmacy
+      if (vetPharmacyStats && (vetPharmacyStats.pendingReview + vetPharmacyStats.rejectedThisWeek + vetPharmacyStats.dispensedCount) > 0) {
+        tiles.push(
+          { label: t('dashboard.stats.rxPendingReview'), value: vetPharmacyStats.pendingReview, icon: '💊', color: '#3949ab', path: '/doctor/prescriptions' },
+          { label: t('dashboard.stats.rxRejectedThisWeek'), value: vetPharmacyStats.rejectedThisWeek, icon: '❌', color: '#dc2626', path: '/doctor/prescriptions' },
+          { label: t('dashboard.stats.rxDispensed'), value: vetPharmacyStats.dispensedCount, icon: '✅', color: '#15803d', path: '/doctor/prescriptions' },
+        )
+      }
+      return tiles
     }
 
     if (isCorporateAdmin) {
@@ -257,7 +275,7 @@ const Dashboard: React.FC = () => {
       { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
       { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
     ]
-  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, corpStats, t])
+  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, corpStats, vetPharmacyStats, t])
 
   // Quick actions — role-specific
   const quickActions: QuickAction[] = useMemo(() => {

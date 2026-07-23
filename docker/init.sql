@@ -2270,6 +2270,7 @@ CREATE TABLE IF NOT EXISTS hospital_pharmacies (
   phone VARCHAR(50),
   email VARCHAR(255),
   license_number VARCHAR(100),
+  gstin VARCHAR(20),
   operating_hours JSONB DEFAULT '{}',
   is_primary_pharmacy BOOLEAN DEFAULT false,
   is_accepting_requests BOOLEAN DEFAULT true,
@@ -2469,7 +2470,7 @@ CREATE INDEX IF NOT EXISTS idx_med_requests_network ON pharmacy_medication_reque
 CREATE INDEX IF NOT EXISTS idx_med_requests_status ON pharmacy_medication_requests(status);
 
 -- 45.11 ALTER prescriptions: add pharmacy workflow fields
-ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_status VARCHAR(30) DEFAULT 'pending_review' CHECK (review_status IN ('pending_review','reviewed','rejected','approved_for_dispensing','dispensed'));
+ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_status VARCHAR(30) DEFAULT 'pending_review' CHECK (review_status IN ('pending_review','reviewed','rejected','approved_for_dispensing','dispensed','needs_clarification'));
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_notes TEXT;
@@ -2640,14 +2641,15 @@ CREATE TABLE IF NOT EXISTS tax_codes (
 INSERT INTO tax_codes (id, sac_code, label, rate_percent, is_active) VALUES
   (gen_random_uuid(), '998351', 'Veterinary services for pet animals (GST-exempt healthcare)', 0, true),
   (gen_random_uuid(), '998352', 'Veterinary services for livestock (GST-exempt healthcare)', 0, true),
-  (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true)
+  (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true),
+  (gen_random_uuid(), '300490', 'Pharmacy — dispensed veterinary medicaments (HSN 3004)', 12, true)
 ON CONFLICT (sac_code) DO NOTHING;
 
 -- 46.10 invoices: immutable snapshots
 CREATE TABLE IF NOT EXISTS invoices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   invoice_number VARCHAR(100) UNIQUE NOT NULL,
-  invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission')),
+  invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy')),
   payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
   withdrawal_id UUID REFERENCES withdrawal_requests(id) ON DELETE SET NULL,
   issuer_details JSONB NOT NULL DEFAULT '{}',

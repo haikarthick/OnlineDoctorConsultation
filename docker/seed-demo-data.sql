@@ -3507,11 +3507,15 @@ ON CONFLICT (network_id, feature_key) DO UPDATE SET is_enabled = EXCLUDED.is_ena
 -- ═══════════════════════════════════════════════════════════
 -- PATIENT ENROLLMENT — demo animals enrolled in network
 -- ═══════════════════════════════════════════════════════════
-INSERT INTO animal_care_contexts (id, animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id, visibility, enrolled_by)
+-- animal_id values below are real `animals` rows (Buddy/Whiskers/Max — see STEP: ANIMALS).
+-- Previously these referenced 'e0000000-...' ids, which only exist in the `enterprises`
+-- table — the FK violation silently failed this whole INSERT (0 rows), so network
+-- patient enrollment never actually worked in the demo environment.
+INSERT INTO animal_care_contexts (id, animal_id, network_id, hospital_id, platform_unique_id, corporate_patient_id, visibility, enrolled_by, enrollment_status)
 VALUES
-  ('acc00000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'dbf6f0de-0000-0000-0000-000000000001', '2265ccba-0000-0000-0000-000000000001', 'VC-DOG-24-00001', 'DVG-P-00001', 'private', 'd0000000-0000-0000-0000-000000000001'),
-  ('acc00000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000002', 'dbf6f0de-0000-0000-0000-000000000001', '2265ccba-0000-0000-0000-000000000001', 'VC-CAT-24-00001', 'DVG-P-00002', 'private', 'd0000000-0000-0000-0000-000000000001'),
-  ('acc00000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'dbf6f0de-0000-0000-0000-000000000001', '2265ccba-0000-0000-0000-000000000002', 'VC-DOG-24-00002', 'DVG-P-00003', 'network_only', 'd0000000-0000-0000-0000-000000000001')
+  ('acc00000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000001', 'dbf6f0de-0000-0000-0000-000000000001', '2265ccba-0000-0000-0000-000000000001', 'VC-DOG-24-00001', 'DVG-P-00001', 'private', 'd0000000-0000-0000-0000-000000000001', 'active'),
+  ('acc00000-0000-0000-0000-000000000002', 'aa000000-0000-0000-0000-000000000002', 'dbf6f0de-0000-0000-0000-000000000001', '2265ccba-0000-0000-0000-000000000001', 'VC-CAT-24-00001', 'DVG-P-00002', 'private', 'd0000000-0000-0000-0000-000000000001', 'active'),
+  ('acc00000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000004', 'dbf6f0de-0000-0000-0000-000000000001', '2265ccba-0000-0000-0000-000000000002', 'VC-DOG-24-00002', 'DVG-P-00003', 'network_only', 'd0000000-0000-0000-0000-000000000001', 'active')
 ON CONFLICT (animal_id, network_id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
@@ -3519,9 +3523,9 @@ ON CONFLICT (animal_id, network_id) DO NOTHING;
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO patient_data_consent (id, animal_id, owner_id, granted_to_network_id, consent_scope, allow_medical_records, allow_vaccination_records, allow_prescriptions, allow_lab_results, allow_view, is_active)
 VALUES
-  ('dac00000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'dbf6f0de-0000-0000-0000-000000000001', 'full_history', true, true, true, true, true, true),
-  ('dac00000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', 'dbf6f0de-0000-0000-0000-000000000001', 'basic_history', true, true, false, false, true, true),
-  ('dac00000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', 'dbf6f0de-0000-0000-0000-000000000001', 'basic_history', true, false, false, false, true, true)
+  ('dac00000-0000-0000-0000-000000000001', 'aa000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'dbf6f0de-0000-0000-0000-000000000001', 'full_history', true, true, true, true, true, true),
+  ('dac00000-0000-0000-0000-000000000002', 'aa000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', 'dbf6f0de-0000-0000-0000-000000000001', 'basic_history', true, true, false, false, true, true),
+  ('dac00000-0000-0000-0000-000000000003', 'aa000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000002', 'dbf6f0de-0000-0000-0000-000000000001', 'basic_history', true, false, false, false, true, true)
 ON CONFLICT (id) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════
@@ -3792,12 +3796,14 @@ VALUES (
   'PHM-001'
 ) ON CONFLICT (id) DO NOTHING;
 
--- Link demo pharmacist to demo network
+-- Link demo pharmacist to demo network (network_role stays 'hospital_staff' — the
+-- network_role_check CHECK constraint only allows 5 fixed values; the pharmacist
+-- identity itself lives on users.role and staff_positions, not network_role)
 INSERT INTO hospital_network_members (network_id, user_id, network_role, hospital_id, granted_by)
 VALUES (
   'dbf6f0de-0000-0000-0000-000000000001',
   'e8200b44-0000-0000-0000-000000000099',
-  'pharmacist',
+  'hospital_staff',
   '2265ccba-0000-0000-0000-000000000001',
   'd0000000-0000-0000-0000-000000000001'
 ) ON CONFLICT (network_id, user_id) DO NOTHING;
@@ -3806,3 +3812,49 @@ VALUES (
 INSERT INTO staff_positions (hospital_id, user_id, position)
 VALUES ('2265ccba-0000-0000-0000-000000000001', 'e8200b44-0000-0000-0000-000000000099', 'pharmacist')
 ON CONFLICT DO NOTHING;
+
+-- ═══════════════════════════════════════════════════════════
+-- NETWORK-ROUTED PRESCRIPTIONS — so the demo pharmacist's queue
+-- (review / ready-to-dispense / history) is not empty on first login.
+-- Max (aa...004) is enrolled in the demo network (see animal_care_contexts above).
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO prescriptions (id, veterinarian_id, pet_owner_id, animal_id, medications, instructions, valid_until, is_active,
+  network_id, is_network_coordinated, target_pharmacy_id, review_status)
+VALUES
+  ('ee000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 'aa000000-0000-0000-0000-000000000004',
+   '[{"name":"Meloxicam","dosage":"1.5mg","frequency":"Once daily","duration":"14 days","instructions":"Give with food"}]',
+   'Meloxicam for joint pain flare-up. Recheck in 2 weeks.', CURRENT_DATE + INTERVAL '30 days', true,
+   'dbf6f0de-0000-0000-0000-000000000001', true, 'e8200b44-0000-0000-0000-000000000001', 'pending_review'),
+
+  ('ee000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 'aa000000-0000-0000-0000-000000000004',
+   '[{"name":"Amoxicillin","dosage":"250mg","frequency":"Twice daily","duration":"7 days","instructions":"Complete full course"}]',
+   'Amoxicillin for mild skin infection.', CURRENT_DATE + INTERVAL '30 days', true,
+   'dbf6f0de-0000-0000-0000-000000000001', true, 'e8200b44-0000-0000-0000-000000000001', 'approved_for_dispensing'),
+
+  ('ee000000-0000-0000-0000-000000000006', 'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 'aa000000-0000-0000-0000-000000000004',
+   '[{"name":"Meloxicam","dosage":"1.5mg","frequency":"Once daily","duration":"10 days","instructions":"Give with food"}]',
+   'Meloxicam — post-op pain management.', CURRENT_DATE + INTERVAL '30 days', true,
+   'dbf6f0de-0000-0000-0000-000000000001', true, 'e8200b44-0000-0000-0000-000000000001', 'dispensed')
+ON CONFLICT (id) DO NOTHING;
+
+-- Pharmacist review for the approved prescription (ee...005)
+INSERT INTO prescription_reviews (prescription_id, pharmacist_id, review_status, validation_checks, findings)
+VALUES (
+  'ee000000-0000-0000-0000-000000000005', 'e8200b44-0000-0000-0000-000000000099', 'approved',
+  '{"dosage_ok": true, "allergy_ok": true, "interaction_ok": true, "stock_ok": true}'::jsonb,
+  ARRAY['Dosage appropriate for weight.', 'No contraindications identified.']
+) ON CONFLICT DO NOTHING;
+
+-- Completed dispensing for ee...006 (10 tablets of Meloxicam from the demo batch)
+INSERT INTO dispensing_records (id, prescription_id, pharmacy_id, pharmacist_id, dispensing_method, dispensing_status, total_cost, handed_over_at)
+VALUES (
+  '2b900000-0000-0000-0000-000000000001', 'ee000000-0000-0000-0000-000000000006',
+  'e8200b44-0000-0000-0000-000000000001', 'e8200b44-0000-0000-0000-000000000099',
+  'walk_in_pickup', 'handed_over', 80.00, NOW() - INTERVAL '2 days'
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO dispensing_line_items (dispensing_record_id, med_id, inventory_id, batch_number, quantity_dispensed, unit, unit_price, line_total)
+VALUES (
+  '2b900000-0000-0000-0000-000000000001', '8b8d813c-0000-0000-0000-000000000001', '0bd66b4c-0000-0000-0000-000000000001',
+  'MLX-2024-0111', 10, 'tablet', 8.00, 80.00
+) ON CONFLICT DO NOTHING;

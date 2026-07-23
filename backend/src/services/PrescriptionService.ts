@@ -71,6 +71,36 @@ class PrescriptionService {
 
     logger.info('Prescription created', { prescriptionId: id, consultationId: data.consultationId });
 
+    // Notify the network's pharmacists that a new prescription is awaiting review
+    if (isNetworkCoordinated && targetPharmacyId) {
+      try {
+        const [vetRow, animalRow, pharmacists] = await Promise.all([
+          database.query(`SELECT first_name, last_name FROM users WHERE id = $1`, [veterinarianId]),
+          animalId ? database.query(`SELECT name FROM animals WHERE id = $1`, [animalId]) : Promise.resolve({ rows: [] as any[] }),
+          database.query(
+            `SELECT hnm.user_id FROM hospital_network_members hnm
+             JOIN users u ON u.id = hnm.user_id
+             WHERE hnm.network_id = $1 AND hnm.is_active = true AND u.role = 'pharmacist'`,
+            [networkId]
+          ),
+        ]);
+        const vetName = vetRow.rows[0] ? `${vetRow.rows[0].first_name} ${vetRow.rows[0].last_name}` : 'A veterinarian';
+        const animalName = animalRow.rows[0]?.name || 'a patient';
+        if (pharmacists.rows.length > 0) {
+          const NSvc = (await import('./NotificationService')).default;
+          await Promise.all(pharmacists.rows.map((p: any) =>
+            NSvc.createNotification(
+              p.user_id, 'prescription', 'New Prescription for Review',
+              `${vetName} sent a prescription for ${animalName} for your review.`,
+              'all', { prescriptionId: id, targetPharmacyId }
+            )
+          ));
+        }
+      } catch (err) {
+        logger.warn('Failed to notify pharmacists of new prescription', { prescriptionId: id, error: err });
+      }
+    }
+
     // If diagnosis or followUpDate provided, update the consultation record
     if (data.consultationId && (data.diagnosis || data.followUpDate)) {
       try {
@@ -238,12 +268,18 @@ class PrescriptionService {
       `SELECT p.id, p.consultation_id as "consultationId", p.veterinarian_id as "veterinarianId",
        p.pet_owner_id as "petOwnerId", p.animal_id as "animalId", p.medications, p.instructions,
        p.valid_until as "validUntil", p.is_active as "isActive",
+       p.review_status as "reviewStatus", p.is_network_coordinated as "isNetworkCoordinated",
        p.created_at as "createdAt", p.updated_at as "updatedAt",
        COALESCE(u.first_name || ' ' || u.last_name, 'Unknown') as "veterinarianName",
-       c.diagnosis
+       c.diagnosis,
+       hp.pharmacy_name as "pharmacyName",
+       dr.dispensing_status as "dispensingStatus", dr.dispensing_method as "dispensingMethod",
+       dr.created_at as "dispensedAt"
        FROM prescriptions p
        LEFT JOIN users u ON u.id = p.veterinarian_id
        LEFT JOIN consultations c ON c.id = p.consultation_id
+       LEFT JOIN hospital_pharmacies hp ON hp.id = p.target_pharmacy_id
+       LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.dispensing_status != 'cancelled'
        WHERE p.animal_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
       [animalId, limit, offset]
     );

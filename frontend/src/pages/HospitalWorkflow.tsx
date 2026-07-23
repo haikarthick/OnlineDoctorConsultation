@@ -535,6 +535,20 @@ export default function HospitalWorkflow() {
                       {q.reason && <div className="si-aff656fd">{q.reason}</div>}
                       {/* Check-in time */}
                       <div className="si-c992365a">🕐 Checked in: {formatDateTime(q.checked_in_at)}</div>
+                      {(q as any).medication_status && (() => {
+                        const ms = (q as any).medication_status
+                        const dot = ms.dispensingStatus ? '#6b7280' : (ms.reviewStatus === 'approved_for_dispensing' ? '#15803d' : '#b45309')
+                        const label = ms.dispensingStatus
+                          ? t('hospitalWorkflow.medicationDispensed')
+                          : ms.reviewStatus === 'approved_for_dispensing'
+                            ? t('hospitalWorkflow.medicationReady')
+                            : t('hospitalWorkflow.medicationPendingReview')
+                        return (
+                          <div style={{ fontSize: 11, color: dot, marginTop: 2 }}>
+                            💊 {label}{ms.pharmacyName ? ` — ${ms.pharmacyName}` : ''}
+                          </div>
+                        )
+                      })()}
                     </div>
                     <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: PRIORITY_COLORS[q.priority] + '20', color: PRIORITY_COLORS[q.priority] }}>{q.priority}</span>
                     <span className="si-9e05cc79">{(q.status || '').replace(/_/g, ' ')}</span>

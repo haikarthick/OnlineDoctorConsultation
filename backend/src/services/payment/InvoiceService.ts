@@ -131,6 +131,73 @@ class InvoiceService {
     }
   }
 
+  /** Pharmacy invoice — network pharmacy → pet owner, created at time of dispensing (goods
+   *  leave the shelf then, independent of whether payment is collected immediately or later). */
+  async createPharmacyInvoice(paymentId: string): Promise<void> {
+    if (!(await PaymentModuleConfig.isEnabled())) return;
+    try {
+      const existing = await database.query(
+        `SELECT id FROM invoices WHERE payment_id = $1 AND invoice_type = 'pharmacy' LIMIT 1`,
+        [paymentId]
+      );
+      if (existing.rows.length > 0) return;
+
+      const res = await database.query(
+        `SELECT p.id, p.amount, p.currency,
+                CONCAT(po.first_name, ' ', po.last_name) as patient_name, po.email as patient_email,
+                hp.pharmacy_name, hp.gstin as pharmacy_gstin,
+                a.name as animal_name,
+                (SELECT json_agg(json_build_object('description', pm.name, 'quantity', dli.quantity_dispensed, 'unitPrice', dli.unit_price, 'amount', dli.line_total))
+                 FROM dispensing_line_items dli LEFT JOIN pharmacy_medications pm ON pm.id = dli.med_id
+                 WHERE dli.dispensing_record_id = dr.id) as line_items
+         FROM payments p
+         JOIN dispensing_records dr ON dr.id = p.dispensing_id
+         LEFT JOIN hospital_pharmacies hp ON hp.id = dr.pharmacy_id
+         LEFT JOIN prescriptions rx ON rx.id = dr.prescription_id
+         LEFT JOIN animals a ON a.id = rx.animal_id
+         LEFT JOIN users po ON po.id = p.user_id
+         WHERE p.id = $1 AND p.payment_source = 'pharmacy'`,
+        [paymentId]
+      );
+      if (res.rows.length === 0) return;
+      const r = res.rows[0];
+
+      const sacCode = '300490';
+      const tax = await this.getTaxCode(sacCode);
+      const total = parseFloat(String(r.amount));
+      const taxAmount = tax.ratePercent > 0 ? round2(total * tax.ratePercent / (100 + tax.ratePercent)) : 0;
+      const subtotal = round2(total - taxAmount);
+      const platformName = await PaymentModuleConfig.getString('tax.platformLegalName', 'VetCare Platform');
+      const lineItems = r.line_items || [{ description: `Medication for ${r.animal_name || 'patient'}`, quantity: 1, amount: total }];
+
+      const client = await database.getPool().connect();
+      try {
+        await client.query('BEGIN');
+        const invoiceNumber = await this.nextInvoiceNumber(client);
+        await client.query(
+          `INSERT INTO invoices (id, invoice_number, invoice_type, payment_id,
+            issuer_details, recipient_details, line_items, subtotal, tax_amount, total,
+            sac_code, tax_rate, currency, issued_at, created_at)
+           VALUES ($1, $2, 'pharmacy', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())`,
+          [uuidv4(), invoiceNumber, paymentId,
+           JSON.stringify({ name: r.pharmacy_name || platformName, gstin: r.pharmacy_gstin || null }),
+           JSON.stringify({ name: r.patient_name, email: r.patient_email, animal: r.animal_name || null }),
+           JSON.stringify(lineItems.map((li: any) => ({ ...li, sacCode, sacLabel: tax.label }))),
+           subtotal, taxAmount, total, sacCode, tax.ratePercent, r.currency || 'INR']
+        );
+        await client.query('COMMIT');
+        logger.info('Pharmacy invoice created', { paymentId, invoiceNumber });
+      } catch (err) {
+        await client.query('ROLLBACK');
+        throw err;
+      } finally {
+        client.release();
+      }
+    } catch (err: any) {
+      logger.error('createPharmacyInvoice failed (non-blocking)', { paymentId, error: err.message });
+    }
+  }
+
   /** Commission invoice — platform → doctor, created on settlement (idempotent per withdrawal). */
   async createCommissionInvoice(withdrawalId: string): Promise<void> {
     if (!(await PaymentModuleConfig.isEnabled())) return;
@@ -219,7 +286,7 @@ class InvoiceService {
     const res = await database.query(
       `SELECT i.*, p.user_id as payer_id, p.payee_id, NULL as doctor_id
        FROM invoices i JOIN payments p ON p.id = i.payment_id
-       WHERE i.payment_id = $1 AND i.invoice_type = 'consultation' LIMIT 1`,
+       WHERE i.payment_id = $1 AND i.invoice_type IN ('consultation', 'pharmacy') LIMIT 1`,
       [paymentId]
     );
     if (res.rows.length === 0) return null;

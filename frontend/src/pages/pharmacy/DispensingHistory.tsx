@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
+import DispensingReceiptView, { DispensingReceiptData } from '../../components/pharmacy/DispensingReceiptView'
 
 interface DispensingRecord {
   id: string
@@ -11,6 +12,7 @@ interface DispensingRecord {
   owner_name: string
   animal_name: string
   animal_species: string
+  vet_name: string
   dispensing_method: string
   dispensing_status: string
   total_cost: number
@@ -19,6 +21,10 @@ interface DispensingRecord {
   created_at: string
   handed_over_at: string | null
   prescription_medications: any
+  pharmacy_name: string
+  pharmacy_address: string
+  pharmacy_phone: string
+  line_items: { name: string; quantity: number; unit: string; unitPrice: number; lineTotal: number; batchNumber: string }[] | null
 }
 
 interface Props {
@@ -48,6 +54,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
   const [error, setError] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [receipt, setReceipt] = useState<DispensingReceiptData | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -84,6 +91,26 @@ export default function DispensingHistory({ pharmacyId }: Props) {
       const arr = Array.isArray(raw) ? raw : JSON.parse(raw)
       return arr.map((m: any) => m?.name || m).join(', ')
     } catch { return '—' }
+  }
+
+  const openReceipt = (r: DispensingRecord) => {
+    setReceipt({
+      dispensingId: r.id,
+      createdAt: r.created_at,
+      dispensingMethod: r.dispensing_method,
+      pharmacyName: r.pharmacy_name,
+      pharmacyAddress: r.pharmacy_address,
+      pharmacyPhone: r.pharmacy_phone,
+      animalName: r.animal_name,
+      animalSpecies: r.animal_species,
+      ownerName: r.owner_name,
+      vetName: r.vet_name,
+      pharmacistName: r.pharmacist_name,
+      lineItems: (r.line_items || []).map(li => ({
+        name: li.name, quantity: li.quantity, unit: li.unit, unitPrice: li.unitPrice, lineTotal: li.lineTotal, batchNumber: li.batchNumber,
+      })),
+      totalCost: r.total_cost,
+    })
   }
 
   return (
@@ -191,6 +218,11 @@ export default function DispensingHistory({ pharmacyId }: Props) {
                               {t('pharmacy.history.markDelivered')}
                             </button>
                           )}
+                          {r.dispensing_status !== 'cancelled' && (
+                            <button type="button" className="module-btn small" onClick={() => openReceipt(r)}>
+                              🖨 {t('pharmacyReceipt.print')}
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -201,6 +233,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
           </div>
         )}
       </div>
+      {receipt && <DispensingReceiptView receipt={receipt} onClose={() => setReceipt(null)} />}
     </div>
   )
 }

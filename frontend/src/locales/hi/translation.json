@@ -872,7 +872,10 @@
       "todayQueue": "आज की कतार",
       "activeInpatients": "सक्रिय भर्ती",
       "pendingReferrals": "लंबित रेफरल",
-      "branchStaff": "शाखा स्टाफ"
+      "branchStaff": "शाखा स्टाफ",
+      "rxPendingReview": "फार्मासिस्ट समीक्षा हेतु लंबित नुस्खे",
+      "rxRejectedThisWeek": "इस सप्ताह अस्वीकृत नुस्खे",
+      "rxDispensed": "वितरित नुस्खे"
     },
     "quickActions": {
       "viewConsultations": "परामर्श देखें",
@@ -1519,7 +1522,15 @@
       "validUntil": "तक मान्य:",
       "active": "सक्रिय",
       "expired": "समाप्त",
-      "addButton": "नुस्खा लिखें"
+      "addButton": "नुस्खा लिखें",
+      "networkPharmacy": "नेटवर्क फार्मेसी",
+      "dispensedOn": "{{date}} को वितरित",
+      "reviewStatus": {
+        "pending_review": "फार्मासिस्ट समीक्षा की प्रतीक्षा में",
+        "approved_for_dispensing": "स्वीकृत — वितरण की प्रतीक्षा में",
+        "rejected": "फार्मासिस्ट द्वारा अस्वीकृत",
+        "needs_clarification": "फार्मासिस्ट ने स्पष्टीकरण मांगा"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ टीकाकरण जोड़ें",
@@ -4696,6 +4707,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5302,6 +5320,9 @@
     "checkInPatient": "रोगी चेक इन",
     "noPatients": "कतार में कोई रोगी नहीं",
     "unknownPatient": "अज्ञात रोगी",
+    "medicationDispensed": "दवा वितरित",
+    "medicationReady": "दवा वितरण के लिए तैयार",
+    "medicationPendingReview": "फार्मासिस्ट समीक्षा की प्रतीक्षा में दवा",
     "owner": "मालिक",
     "triage": "ट्राइएज",
     "startExam": "परीक्षा शुरू करें",
@@ -5965,7 +5986,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "पशु चिकित्सा प्रमाणपत्र",
@@ -7084,6 +7133,8 @@
     "receiptTitle": "भुगतान रसीद",
     "patient": "मरीज़",
     "doctor": "डॉक्टर",
+    "pharmacy": "फार्मेसी",
+    "medications": "दवाइयाँ",
     "animal": "पशु",
     "date": "तारीख",
     "totalPaid": "कुल भुगतान",
@@ -7304,6 +7355,9 @@
     "refundsOut": "रिफंड",
     "netRevenue": "शुद्ध प्लेटफ़ॉर्म राजस्व",
     "netRevenueHint": "कमीशन + प्रोसेसिंग शुल्क − गेटवे शुल्क",
+    "pharmacyRevenueTitle": "फार्मेसी राजस्व (चयनित अवधि)",
+    "pharmacyCollected": "फार्मेसी से प्राप्त राशि",
+    "pharmacyPending": "फार्मेसी लंबित भुगतान",
     "liabilitiesTitle": "देनदारियाँ (वर्तमान)",
     "doctorClearing": "डॉक्टर कमाई क्लियरिंग में",
     "doctorAvailable": "डॉक्टर कमाई उपलब्ध",

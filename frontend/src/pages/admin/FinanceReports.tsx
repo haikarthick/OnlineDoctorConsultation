@@ -100,6 +100,12 @@ const FinanceReports: React.FC<FinanceReportsProps> = () => {
             {tile(t('financeAdmin.netRevenue'), formatCurrency(data.revenue.netPlatformRevenue), data.revenue.netPlatformRevenue >= 0 ? '#15803d' : '#dc2626', t('financeAdmin.netRevenueHint'))}
           </div>
 
+          <h2 className="si-229a75d2">{t('financeAdmin.pharmacyRevenueTitle')}</h2>
+          <div className="si-2f255410">
+            {tile(t('financeAdmin.pharmacyCollected'), formatCurrency(data.pharmacyRevenue.collected), '#15803d', t('financeAdmin.paidCount', { count: data.pharmacyRevenue.dispensedCount }))}
+            {tile(t('financeAdmin.pharmacyPending'), formatCurrency(data.pharmacyRevenue.pendingAmount), '#b45309', t('financeAdmin.paidCount', { count: data.pharmacyRevenue.pendingCount }))}
+          </div>
+
           <h2 className="si-229a75d2">{t('financeAdmin.liabilitiesTitle')}</h2>
           <div className="si-2f255410">
             {tile(t('financeAdmin.doctorClearing'), formatCurrency(data.settlementLiability.clearing), '#b45309')}

@@ -153,6 +153,9 @@ const Prescriptions: React.FC<PrescriptionsProps> = ({ onNavigate }) => {
           route: m.route,
           instructions: m.instructions,
         })),
+        isNetworkCoordinated: rx.isNetworkCoordinated,
+        pharmacyName: rx.pharmacyName,
+        reviewStatus: rx.reviewStatus,
       }
       const template: PrescriptionTemplate = {
         clinicName: tpl.clinicName || 'VetCare Platform',

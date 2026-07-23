@@ -431,6 +431,11 @@ class ApiService {
     return response.data
   }
 
+  async getVetPharmacyStats() {
+    const response = await this.client.get('/vet/pharmacy-stats')
+    return response.data
+  }
+
   async getConsultationsByAnimal(animalId: string, params?: { limit?: number; offset?: number }) {
     const response = await this.client.get(`/consultations/animal/${animalId}`, { params })
     return response.data
@@ -932,6 +937,11 @@ class ApiService {
   // ─── Admin ────────────────────────────────────────────────
   async getAdminDashboard() {
     const response = await this.client.get('/admin/dashboard')
+    return response.data
+  }
+
+  async getAdminPharmacyOverview() {
+    const response = await this.client.get('/admin/pharmacy-overview')
     return response.data
   }
 

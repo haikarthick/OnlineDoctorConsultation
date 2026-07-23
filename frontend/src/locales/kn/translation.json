@@ -872,7 +872,10 @@
       "todayQueue": "ಇಂದಿನ ಸರತಿ",
       "activeInpatients": "ಸಕ್ರಿಯ ಒಳರೋಗಿಗಳು",
       "pendingReferrals": "ಬಾಕಿ ರೆಫರಲ್‌ಗಳು",
-      "branchStaff": "ಶಾಖೆ ಸಿಬ್ಬಂದಿ"
+      "branchStaff": "ಶಾಖೆ ಸಿಬ್ಬಂದಿ",
+      "rxPendingReview": "ಫಾರ್ಮಸಿಸ್ಟ್ ಪರಿಶೀಲನೆಗಾಗಿ ಬಾಕಿ ಇರುವ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು",
+      "rxRejectedThisWeek": "ಈ ವಾರ ತಿರಸ್ಕರಿಸಿದ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು",
+      "rxDispensed": "ವಿತರಿಸಿದ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು"
     },
     "quickActions": {
       "viewConsultations": "ಸಮಾಲೋಚನೆಗಳನ್ನು ನೋಡಿ",
@@ -1519,7 +1522,15 @@
       "validUntil": "Valid until:",
       "active": "active",
       "expired": "expired",
-      "addButton": "ಔಷಧಿ ಚೀಟಿ ಬರೆಯಿರಿ"
+      "addButton": "ಔಷಧಿ ಚೀಟಿ ಬರೆಯಿರಿ",
+      "networkPharmacy": "ನೆಟ್‌ವರ್ಕ್ ಫಾರ್ಮಸಿ",
+      "dispensedOn": "{{date}} ರಂದು ವಿತರಿಸಲಾಗಿದೆ",
+      "reviewStatus": {
+        "pending_review": "ಫಾರ್ಮಸಿಸ್ಟ್ ಪರಿಶೀಲನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
+        "approved_for_dispensing": "ಅನುಮೋದಿಸಲಾಗಿದೆ — ವಿತರಣೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
+        "rejected": "ಫಾರ್ಮಸಿಸ್ಟ್‌ನಿಂದ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+        "needs_clarification": "ಫಾರ್ಮಸಿಸ್ಟ್ ಸ್ಪಷ್ಟೀಕರಣ ಕೋರಿದ್ದಾರೆ"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ Add Vaccination",
@@ -4698,6 +4709,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5304,6 +5322,9 @@
     "checkInPatient": "ರೋಗಿ ಚೆಕ್ ಇನ್",
     "noPatients": "ಕ್ಯೂನಲ್ಲಿ ರೋಗಿಗಳಿಲ್ಲ",
     "unknownPatient": "ಅಪರಿಚಿತ ರೋಗಿ",
+    "medicationDispensed": "ಔಷಧಿ ವಿತರಿಸಲಾಗಿದೆ",
+    "medicationReady": "ಔಷಧಿ ವಿತರಣೆಗೆ ಸಿದ್ಧವಾಗಿದೆ",
+    "medicationPendingReview": "ಔಷಧಿ ಫಾರ್ಮಸಿಸ್ಟ್ ಪರಿಶೀಲನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
     "owner": "ಮಾಲೀಕ",
     "triage": "ಟ್ರಯಾಜ್",
     "startExam": "ಪರೀಕ್ಷೆ ಪ್ರಾರಂಭಿಸಿ",
@@ -5980,7 +6001,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -7099,6 +7148,8 @@
     "receiptTitle": "ಪಾವತಿ ರಸೀದಿ",
     "patient": "ರೋಗಿ",
     "doctor": "ವೈದ್ಯರು",
+    "pharmacy": "ಫಾರ್ಮಸಿ",
+    "medications": "ಔಷಧಿಗಳು",
     "animal": "ಪ್ರಾಣಿ",
     "date": "ದಿನಾಂಕ",
     "totalPaid": "ಒಟ್ಟು ಪಾವತಿ",
@@ -7319,6 +7370,9 @@
     "refundsOut": "ಮರುಪಾವತಿಗಳು",
     "netRevenue": "ನಿವ್ವಳ ವೇದಿಕೆ ಆದಾಯ",
     "netRevenueHint": "ಕಮಿಷನ್ + ಪ್ರಕ್ರಿಯೆ − ಗೇಟ್‌ವೇ ಶುಲ್ಕ",
+    "pharmacyRevenueTitle": "ಫಾರ್ಮಸಿ ಆದಾಯ (ಆಯ್ದ ಅವಧಿ)",
+    "pharmacyCollected": "ಫಾರ್ಮಸಿ ಸಂಗ್ರಹಿಸಿದೆ",
+    "pharmacyPending": "ಫಾರ್ಮಸಿ ಬಾಕಿ ಪಾವತಿ",
     "liabilitiesTitle": "ಹೊಣೆಗಾರಿಕೆಗಳು (ಪ್ರಸ್ತುತ)",
     "doctorClearing": "ವೈದ್ಯ ಗಳಿಕೆ ಕ್ಲಿಯರಿಂಗ್‌ನಲ್ಲಿ",
     "doctorAvailable": "ವೈದ್ಯ ಗಳಿಕೆ ಲಭ್ಯ",

@@ -218,7 +218,15 @@ class StaffWorkflowService {
         u_vet.first_name AS vet_first_name, u_vet.last_name AS vet_last_name,
         a.name AS animal_name, a.species AS animal_species, a.breed AS animal_breed,
         e.name AS "enterpriseName", e.enterprise_type AS "enterpriseType",
-        ag.name AS "groupName", ag.group_type AS "groupType"
+        ag.name AS "groupName", ag.group_type AS "groupType",
+        (SELECT json_build_object('reviewStatus', p.review_status, 'dispensingStatus', dr.dispensing_status, 'pharmacyName', hp.pharmacy_name)
+         FROM prescriptions p
+         LEFT JOIN dispensing_records dr ON dr.prescription_id = p.id AND dr.dispensing_status != 'cancelled'
+         LEFT JOIN hospital_pharmacies hp ON hp.id = p.target_pharmacy_id
+         WHERE p.animal_id = aq.animal_id AND p.is_network_coordinated = true AND p.is_active = true
+           AND p.network_id IN (SELECT network_id FROM hospital_network_hospitals WHERE hospital_id = aq.hospital_id AND is_active = true)
+         ORDER BY p.created_at DESC LIMIT 1
+        ) AS medication_status
       FROM appointment_queue aq
       LEFT JOIN users u_owner ON u_owner.id = aq.owner_id
       LEFT JOIN users u_vet ON u_vet.id = aq.assigned_vet_id

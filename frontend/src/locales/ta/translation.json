@@ -872,7 +872,10 @@
       "todayQueue": "இன்றைய வரிசை",
       "activeInpatients": "செயலில் உள்ள உள்நோயாளிகள்",
       "pendingReferrals": "நிலுவையில் உள்ள பரிந்துரைகள்",
-      "branchStaff": "கிளை ஊழியர்கள்"
+      "branchStaff": "கிளை ஊழியர்கள்",
+      "rxPendingReview": "மருந்தாளர் மதிப்பாய்வுக்காக நிலுவையிலுள்ள மருந்துச்சீட்டுகள்",
+      "rxRejectedThisWeek": "இந்த வாரம் நிராகரிக்கப்பட்ட மருந்துச்சீட்டுகள்",
+      "rxDispensed": "வழங்கப்பட்ட மருந்துச்சீட்டுகள்"
     },
     "quickActions": {
       "viewConsultations": "ஆலோசனைகளைக் காண்க",
@@ -1519,7 +1522,15 @@
       "validUntil": "செல்லுபடியாகும் வரை:",
       "active": "செயலில்",
       "expired": "காலாவதியானது",
-      "addButton": "மருந்து சீட்டு எழுது"
+      "addButton": "மருந்து சீட்டு எழுது",
+      "networkPharmacy": "நெட்வொர்க் மருந்தகம்",
+      "dispensedOn": "{{date}} அன்று வழங்கப்பட்டது",
+      "reviewStatus": {
+        "pending_review": "மருந்தாளர் மதிப்பாய்வுக்காக காத்திருக்கிறது",
+        "approved_for_dispensing": "அங்கீகரிக்கப்பட்டது — வழங்கப்பட காத்திருக்கிறது",
+        "rejected": "மருந்தாளரால் நிராகரிக்கப்பட்டது",
+        "needs_clarification": "மருந்தாளர் விளக்கம் கோரியுள்ளார்"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ தடுப்பூசி சேர்",
@@ -4696,6 +4707,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5302,6 +5320,9 @@
     "checkInPatient": "நோயாளி பதிவு",
     "noPatients": "வரிசையில் நோயாளிகள் இல்லை",
     "unknownPatient": "அறியப்படாத நோயாளி",
+    "medicationDispensed": "மருந்து வழங்கப்பட்டது",
+    "medicationReady": "மருந்து வழங்க தயார்",
+    "medicationPendingReview": "மருந்தாளர் மதிப்பாய்வுக்காக காத்திருக்கும் மருந்து",
     "owner": "உரிமையாளர்",
     "triage": "தீவிரம் வகைப்படுத்தல்",
     "startExam": "பரிசோதனை தொடங்கு",
@@ -5965,7 +5986,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -7084,6 +7133,8 @@
     "receiptTitle": "கட்டண ரசீது",
     "patient": "நோயாளி",
     "doctor": "மருத்துவர்",
+    "pharmacy": "மருந்தகம்",
+    "medications": "மருந்துகள்",
     "animal": "விலங்கு",
     "date": "தேதி",
     "totalPaid": "மொத்தம் செலுத்தியது",
@@ -7304,6 +7355,9 @@
     "refundsOut": "திரும்பங்கள்",
     "netRevenue": "நிகர தள வருவாய்",
     "netRevenueHint": "கமிஷன் + செயலாக்கம் − கேட்வே கட்டணம்",
+    "pharmacyRevenueTitle": "மருந்தக வருவாய் (தேர்ந்தெடுக்கப்பட்ட காலம்)",
+    "pharmacyCollected": "மருந்தகம் பெறப்பட்டது",
+    "pharmacyPending": "மருந்தக நிலுவை கட்டணம்",
     "liabilitiesTitle": "பொறுப்புகள் (தற்போது)",
     "doctorClearing": "மருத்துவர் வருவாய் தீர்வில்",
     "doctorAvailable": "மருத்துவர் வருவாய் கிடைக்கிறது",

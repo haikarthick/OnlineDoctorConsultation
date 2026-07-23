@@ -30,11 +30,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [revenueTrends, setRevenueTrends] = useState<{ daily: RevenueTrend[], topVets: TopVet[] } | null>(null)
+  const [pharmacyOverview, setPharmacyOverview] = useState<{
+    dispensingToday: number; dispensingThisWeek: number; pendingReviewCount: number;
+    lowStockNetworks: number; lowStockItems: number; revenueThisWeek: number;
+  } | null>(null)
 
   useEffect(() => {
     loadStats()
     loadRevenueTrends()
+    loadPharmacyOverview()
   }, [])
+
+  const loadPharmacyOverview = async () => {
+    try {
+      const result = await apiService.getAdminPharmacyOverview()
+      setPharmacyOverview(result?.data || null)
+    } catch {
+      // non-fatal — pharmacy overview unavailable
+    }
+  }
 
   const loadStats = async () => {
     try {
@@ -250,6 +264,45 @@ setError(err?.response?.data?.error?.message || err?.message || 'Failed to load 
           </div>
         </div>
       </div>
+      {/* Pharmacy Activity */}
+      {pharmacyOverview && (
+        <div className="card si-b4c2d096">
+          <div className="card-header"><h2>💊 {t('adminDashboard.pharmacyActivity')}</h2></div>
+          <div className="card-body">
+            <div className="stats-grid si-54b5c5e0">
+              <div className="stat-card">
+                <div className="stat-icon">📦</div>
+                <div className="stat-value">{pharmacyOverview.dispensingToday}</div>
+                <div className="stat-label">{t('adminDashboard.dispensingToday')}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">📊</div>
+                <div className="stat-value">{pharmacyOverview.dispensingThisWeek}</div>
+                <div className="stat-label">{t('adminDashboard.dispensingThisWeek')}</div>
+              </div>
+              <div className="stat-card" style={{ borderLeft: pharmacyOverview.pendingReviewCount > 0 ? '4px solid #f59e0b' : undefined }}>
+                <div className="stat-icon">⏳</div>
+                <div className="stat-value" style={{ color: pharmacyOverview.pendingReviewCount > 0 ? '#f59e0b' : undefined }}>{pharmacyOverview.pendingReviewCount}</div>
+                <div className="stat-label">{t('adminDashboard.pendingReviewsAllNetworks')}</div>
+              </div>
+              <div className="stat-card" style={{ borderLeft: pharmacyOverview.lowStockItems > 0 ? '4px solid #dc2626' : undefined }}>
+                <div className="stat-icon">⚠️</div>
+                <div className="stat-value" style={{ color: pharmacyOverview.lowStockItems > 0 ? '#dc2626' : undefined }}>{pharmacyOverview.lowStockItems}</div>
+                <div className="stat-label">
+                  {t('adminDashboard.lowStockItems')}
+                  {pharmacyOverview.lowStockNetworks > 0 && ` (${pharmacyOverview.lowStockNetworks} ${t('adminDashboard.networks')})`}
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">💰</div>
+                <div className="stat-value">${((pharmacyOverview.revenueThisWeek || 0)).toLocaleString()}</div>
+                <div className="stat-label">{t('adminDashboard.pharmacyRevenueThisWeek')}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Revenue Trends */}
       {revenueTrends && (
         <div className="card si-b4c2d096">

@@ -4496,3 +4496,603 @@
 </details>
 
 ---
+
+## 2026-07-19 15:59 · `0b68db1` · OTHER
+
+**Commit:** feat(marketplace): Phase 5 — reports, full-text search, vet-check funnel, interlinks (escrow parked)  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · DB-SCHEMA · i18n · UI · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (19)</summary>
+
+  - backend/migrations/018_marketplace_trust_discovery.sql
+  - backend/src/controllers/Tier4Controller.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/MarketplaceEngagementService.ts
+  - backend/src/services/MarketplaceService.ts
+  - backend/tests/unit/MarketplaceEngagementService.test.ts
+  - docker/init.sql
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Marketplace.css
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/services/api.ts
+  - frontend/src/services/api/tier4Api.ts
+  - memories/repo/auto-commit-log.md
+
+</details>
+
+---
+
+## 2026-07-20 06:42 · `4ab5c30` · OTHER
+
+**Commit:** fix(marketplace): public browse 404, stat-tile filters, and pagination totals  
+**Author:** haikarthick  
+**Categories:** SERVICE · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - backend/src/services/MarketplaceService.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/PublicMarketplace.css
+  - frontend/src/pages/PublicMarketplace.tsx
+  - frontend/vercel.json
+
+</details>
+
+---
+
+## 2026-07-20 08:27 · `47fe379` · OTHER
+
+**Commit:** fix(db): remove stale bookings_status_check block breaking every deploy  
+**Author:** haikarthick  
+**Categories:** DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docker/init.sql
+
+</details>
+
+---
+
+## 2026-07-20 09:58 · `bcbcb24` · OTHER
+
+**Commit:** fix(ci): restore missing backend .eslintrc.json, breaking CI lint since 2026-07-10  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - backend/.eslintrc.json
+  - backend/src/index.ts
+
+</details>
+
+---
+
+## 2026-07-20 15:16 · `b16782c` · OTHER
+
+**Commit:** refactor(marketplace): rename "Rehoming" terminology to "Buy & Sell" across all UI/UX  
+**Author:** haikarthick  
+**Categories:** SERVICE · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - backend/src/services/MarketplaceService.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Marketplace.css
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/pages/PublicMarketplace.tsx
+
+</details>
+
+---
+
+## 2026-07-21 06:57 · `3e751c9` · OTHER
+
+**Commit:** fix(admin,auth,logging): email-template Bearer-null bug, multi-role RBAC, param-log redaction  
+**Author:** haikarthick  
+**Categories:** UTILS · DB · i18n · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - backend/src/middleware/auth.ts
+  - backend/src/utils/database.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/admin/SystemSettings.tsx
+  - frontend/src/pages/doctor/ConsultationRoom.tsx
+  - frontend/src/services/api.ts
+
+</details>
+
+---
+
+## 2026-07-21 07:20 · `7a6af06` · OTHER
+
+**Commit:** fix(backend): repair test-suite drift, enable integration suite, fix process-exit leak  
+**Author:** haikarthick  
+**Categories:** SERVICE  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (11)</summary>
+
+  - backend/jest.config.js
+  - backend/src/services/VideoSessionService.ts
+  - backend/tests/integration/auth.integration.test.ts
+  - backend/tests/unit/AdminService.test.ts
+  - backend/tests/unit/AnimalService.test.ts
+  - backend/tests/unit/BookingService.test.ts
+  - backend/tests/unit/MedicalRecordService.test.ts
+  - backend/tests/unit/ReviewService.test.ts
+  - backend/tests/unit/StaffWorkflowService.test.ts
+  - backend/tests/unit/validation.extended.test.ts
+  - backend/tests/unit/validation.test.ts
+
+</details>
+
+---
+
+## 2026-07-21 07:32 · `94e4e07` · OTHER
+
+**Commit:** fix(frontend): add missing ESLint config so `npm run lint` actually runs  
+**Author:** haikarthick  
+**Categories:** DEPS · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (10)</summary>
+
+  - frontend/.eslintrc.json
+  - frontend/package-lock.json
+  - frontend/package.json
+  - frontend/src/components/MapView.tsx
+  - frontend/src/hooks/useWebRTC.ts
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/doctor/ConsultationRoom.tsx
+  - frontend/src/pages/doctor/ManageSchedule.tsx
+  - frontend/src/pages/hospitalnetwork/HospitalNetworks.tsx
+  - frontend/src/pages/petowner/FindDoctor.tsx
+
+</details>
+
+---
+
+## 2026-07-21 09:26 · `b2160a1` · OTHER
+
+**Commit:** perf(frontend): lazy-load non-English locales, cut main JS chunk 72%  
+**Author:** haikarthick  
+**Categories:** DEPS · BUILD  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (9)</summary>
+
+  - .gitignore
+  - frontend/index.html
+  - frontend/package-lock.json
+  - frontend/package.json
+  - frontend/scripts/check-bundle-budget.cjs
+  - frontend/scripts/copy-locales.cjs
+  - frontend/src/i18n/index.ts
+  - frontend/src/main.tsx
+  - frontend/vite.config.ts
+
+</details>
+
+---
+
+## 2026-07-21 09:44 · `d39ffc0` · OTHER
+
+**Commit:** test(frontend): wire up vitest, add CSRF/refresh interceptor tests  
+**Author:** haikarthick  
+**Categories:** DEPS · BUILD  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - frontend/package-lock.json
+  - frontend/package.json
+  - frontend/src/services/api.csrf-refresh.test.ts
+  - frontend/src/test/setup.ts
+  - frontend/vite.config.ts
+
+</details>
+
+---
+
+## 2026-07-21 09:49 · `20a9302` · OTHER
+
+**Commit:** test(frontend): wire up vitest, add CSRF/refresh interceptor tests  
+**Author:** haikarthick  
+**Categories:** DEPS · BUILD  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (5)</summary>
+
+  - frontend/package-lock.json
+  - frontend/package.json
+  - frontend/src/services/api.csrf-refresh.test.ts
+  - frontend/src/test/setup.ts
+  - frontend/vite.config.ts
+
+</details>
+
+---
+
+## 2026-07-21 09:56 · `6f62fd5` · OTHER
+
+**Commit:** fix(frontend): consolidate the two duplicated Axios/CSRF/refresh clients  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - frontend/src/services/api.ts
+  - frontend/src/services/api/client.ts
+
+</details>
+
+---
+
+## 2026-07-21 10:01 · `c7791e6` · OTHER
+
+**Commit:** test(frontend): add auth persistence, payment, form validation, error-state tests  
+**Author:** haikarthick  
+**Categories:** UI · AUTH/PERM  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (4)</summary>
+
+  - frontend/src/components/PaymentCheckout.test.tsx
+  - frontend/src/context/AuthContext.test.tsx
+  - frontend/src/pages/Register.test.tsx
+  - frontend/src/pages/petowner/NetworkMemberships.test.tsx
+
+</details>
+
+---
+
+## 2026-07-21 10:45 · `97ddf00` · OTHER
+
+**Commit:** fix(deploy): fail deployment on a genuinely broken migration  
+**Author:** haikarthick  
+**Categories:** UTILS · DB · DEPLOY  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (3)</summary>
+
+  - backend/src/utils/database.ts
+  - backend/src/utils/migrate.ts
+  - render-start.sh
+
+</details>
+
+---
+
+## 2026-07-21 13:19 · `e1cd527` · OTHER
+
+**Commit:** fix(deploy): uuid_generate_v4() broke the Render deploy — replace with gen_random_uuid()  
+**Author:** haikarthick  
+**Categories:** MIGRATION · TOOLING · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - backend/migrate_medical_records.js
+  - backend/migrations/002_missed_by.sql
+  - backend/migrations/002_staff_workflow.sql
+  - backend/migrations/003_cancellation_wallet_payment.sql
+  - backend/migrations/004_vet_certificates.sql
+  - backend/scripts/schema-check.js
+  - memories/repo/lessons.md
+  - memories/repo/past-bugs.md
+
+</details>
+
+---
+
+## 2026-07-21 13:49 · `1bbfa31` · OTHER
+
+**Commit:** feat(marketplace): Cloudinary-backed media pipeline — images+video, 4/1 caps, responsive delivery  
+**Author:** haikarthick  
+**Categories:** MIGRATION · DEPS · API · UTILS · i18n · UI · DEPLOY  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (20)</summary>
+
+  - backend/migrations/019_cleanup_broken_local_media.sql
+  - backend/package-lock.json
+  - backend/package.json
+  - backend/src/controllers/FileController.ts
+  - backend/src/middleware/upload.ts
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/utils/storage.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Marketplace.css
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/pages/PublicMarketplace.tsx
+  - frontend/src/services/api.ts
+  - frontend/src/utils/media.ts
+  - render.yaml
+
+</details>
+
+---
+
+## 2026-07-21 16:14 · `59dbb2d` · OTHER
+
+**Commit:** fix(security): allow res.cloudinary.com in CSP img-src/media-src  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - backend/src/app.ts
+
+</details>
+
+---
+
+## 2026-07-22 10:45 · `2b365a4` · OTHER
+
+**Commit:** feat(animals): species-correct sex/class terminology (Bull/Cow/Bullock etc.)  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · DB-SCHEMA · UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (27)</summary>
+
+  - backend/migrations/020_animal_class_terms.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/AiCopilotService.ts
+  - backend/src/services/AnimalService.ts
+  - backend/src/services/CertificateService.ts
+  - backend/src/services/HospitalNetworkService.ts
+  - backend/src/services/MarketplaceService.ts
+  - backend/src/services/PrescriptionService.ts
+  - backend/src/services/VetHospitalService.ts
+  - docker/init.sql
+  - frontend/src/components/CertificatePrintView.tsx
+  - frontend/src/components/PrescriptionPrintView.tsx
+  - frontend/src/constants/speciesBreeds.ts
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - ... and 7 more
+
+</details>
+
+---
+
+## 2026-07-22 11:56 · `50f9b98` · 🔧 CHORE
+
+**Commit:** chore: pre-production cleanup batch 1 — safe fixes, dead code, dead deps  
+**Author:** haikarthick  
+**Categories:** DEPS · DB-SCHEMA · UI · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (19)</summary>
+
+  - backend/package-lock.json
+  - backend/package.json
+  - backend/src/index.ts
+  - docker/seed-demo-data.sql
+  - frontend/package-lock.json
+  - frontend/package.json
+  - frontend/src/components/MapView.tsx
+  - frontend/src/components/PharmacyReceiptView.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Appointments.tsx
+  - frontend/src/pages/doctor/DoctorDashboard.tsx
+  - frontend/src/pages/doctor/PatientQueue.tsx
+  - frontend/src/pages/petowner/MyBookings.css
+  - frontend/src/pages/petowner/MyBookings.tsx
+
+</details>
+
+---
+
+## 2026-07-22 13:13 · `b2a111d` · 🔧 CHORE
+
+**Commit:** chore: pre-production cleanup batch 2 — consistency fixes across modules  
+**Author:** haikarthick  
+**Categories:** MIGRATION · DB-SCHEMA · UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (8)</summary>
+
+  - backend/migrations/021_drop_unused_animal_columns.sql
+  - backend/src/controllers/CertificateController.ts
+  - docker/init.sql
+  - docker/seed-demo-data.sql
+  - frontend/src/constants/speciesBreeds.ts
+  - frontend/src/pages/Marketplace.tsx
+  - frontend/src/pages/PublicMarketplace.tsx
+  - frontend/src/pages/VaccinationPassport.tsx
+
+</details>
+
+---
+
+## 2026-07-22 13:21 · `5006e2a` · 🔧 CHORE
+
+**Commit:** chore: pre-production cleanup batch 3 — backport 31 missing tables into init.sql  
+**Author:** haikarthick  
+**Categories:** DB-SCHEMA  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - docker/init.sql
+
+</details>
+
+---
+
+## 2026-07-22 13:37 · `28bedfb` · 🔧 CHORE
+
+**Commit:** chore: pre-production cleanup batch 4 — extract static inline styles to CSS classes  
+**Author:** haikarthick  
+**Categories:** UI  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (98)</summary>
+
+  - frontend/src/App.tsx
+  - frontend/src/pages/AICopilot.tsx
+  - frontend/src/pages/AcceptHospitalInvite.tsx
+  - frontend/src/pages/AcceptInvite.tsx
+  - frontend/src/pages/AlertCenter.tsx
+  - frontend/src/pages/AnimalGroups.tsx
+  - frontend/src/pages/AnimalTimeline.tsx
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/Consultations.tsx
+  - frontend/src/pages/Dashboard.tsx
+  - frontend/src/pages/DigitalTwin.tsx
+  - frontend/src/pages/DiseasePrediction.tsx
+  - frontend/src/pages/EnterpriseManagement.tsx
+  - frontend/src/pages/FeedInventory.tsx
+  - frontend/src/pages/ForgotPassword.tsx
+  - frontend/src/pages/GenomicLineage.tsx
+  - frontend/src/pages/GeospatialAnalytics.tsx
+  - frontend/src/pages/HealthAnalytics.tsx
+  - frontend/src/pages/HerdMedicalManagement.tsx
+  - frontend/src/pages/Home.tsx
+  - ... and 78 more
+
+</details>
+
+---
+
+## 2026-07-22 13:45 · `7c298d8` · 🔧 CHORE
+
+**Commit:** chore: remove dead S3Storage stub — silent data-loss trap, superseded by Cloudinary  
+**Author:** haikarthick  
+**Categories:** UTILS  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (2)</summary>
+
+  - .env.production.template
+  - backend/src/utils/storage.ts
+
+</details>
+
+---
+
+## 2026-07-22 16:13 · `1433dd8` · OTHER
+
+**Commit:** feat(admin): master-data CRUD for species/breeds/animal-classes/marketplace categories & conditions  
+**Author:** haikarthick  
+**Categories:** MIGRATION · API · SERVICE · DB-SCHEMA · UI · AUTH/PERM · i18n  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (26)</summary>
+
+  - backend/migrations/022_master_data_tables.sql
+  - backend/src/middleware/validation.ts
+  - backend/src/routes/index.ts
+  - backend/src/services/MasterDataService.ts
+  - backend/src/services/PermissionService.ts
+  - docker/init.sql
+  - frontend/src/App.tsx
+  - frontend/src/components/CertificatePrintView.tsx
+  - frontend/src/components/Navigation.tsx
+  - frontend/src/components/PrescriptionPrintView.tsx
+  - frontend/src/context/MasterDataContext.tsx
+  - frontend/src/context/PermissionContext.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - frontend/src/locales/te/translation.json
+  - frontend/src/pages/Animals.tsx
+  - frontend/src/pages/HospitalWorkflow.tsx
+  - ... and 6 more
+
+</details>
+
+---
+
+## 2026-07-22 16:17 · `5cff83f` · OTHER
+
+**Commit:** test(e2e): add route-coverage stub for /admin/master-data  
+**Author:** haikarthick  
+**Categories:** MISC  
+**Memory:** ⚠️  Memory NOT updated in this commit
+
+<details>
+<summary>Files changed (1)</summary>
+
+  - frontend/e2e/auto-discovered.spec.ts
+
+</details>
+
+---

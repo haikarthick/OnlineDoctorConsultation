@@ -85,7 +85,14 @@ export default function PaymentsHistory() {
           {payments.map((p) => (
             <div key={p.id} className="si-59aaa11e">
               <div className="si-8b796880">
-                <div className="si-1ad73044">{formatCurrency(parseFloat(String(p.amount)))}</div>
+                <div className="si-1ad73044">
+                  {formatCurrency(parseFloat(String(p.amount)))}
+                  {p.paymentSource === 'pharmacy' && (
+                    <span style={{ marginLeft: 8, background: '#ede9fe', color: '#6d28d9', padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600 }}>
+                      💊 {p.pharmacyName || t('paymentsPage.pharmacy')}
+                    </span>
+                  )}
+                </div>
                 <div className="si-c3b93ebb">
                   {p.createdAt ? new Date(p.createdAt).toLocaleString() : '—'}
                   {p.transactionId ? ` · ${p.transactionId}` : ''}
@@ -120,9 +127,25 @@ export default function PaymentsHistory() {
             </div>
             <div className="si-134fc453">
               <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.patient')}</span><strong>{receipt.patientName || '—'}</strong></div>
-              <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.doctor')}</span><strong>{receipt.doctorName || '—'}</strong></div>
+              {receipt.paymentSource === 'pharmacy' ? (
+                <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.pharmacy')}</span><strong>{receipt.pharmacyName || '—'}</strong></div>
+              ) : (
+                <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.doctor')}</span><strong>{receipt.doctorName || '—'}</strong></div>
+              )}
               {receipt.animalName && (
                 <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.animal')}</span><strong>{receipt.animalName}</strong></div>
+              )}
+              {Array.isArray(receipt.medicationLines) && receipt.medicationLines.length > 0 && (
+                <div className="si-34ec0bf0" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                  <span className="si-23033f05">{t('paymentsPage.medications')}</span>
+                  <ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>
+                    {receipt.medicationLines.map((li: any, idx: number) => (
+                      <li key={idx} style={{ fontSize: 13 }}>
+                        {li.name} — {li.quantity} {li.unit} × {formatCurrency(parseFloat(String(li.unitPrice || 0)))} = <strong>{formatCurrency(parseFloat(String(li.lineTotal || 0)))}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
               <div className="si-34ec0bf0"><span className="si-23033f05">{t('paymentsPage.date')}</span><strong>{receipt.paidAt ? new Date(receipt.paidAt).toLocaleString() : '—'}</strong></div>
               {parseFloat(String(receipt.walletAmountUsed || 0)) > 0 && (

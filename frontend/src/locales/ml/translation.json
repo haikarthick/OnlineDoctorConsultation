@@ -871,7 +871,10 @@
       "todayQueue": "Today's Queue",
       "activeInpatients": "Active Inpatients",
       "pendingReferrals": "Pending Referrals",
-      "branchStaff": "Branch Staff"
+      "branchStaff": "Branch Staff",
+      "rxPendingReview": "ഫാർമസിസ്റ്റ് അവലോകനത്തിനായി കാത്തിരിക്കുന്ന കുറിപ്പടികൾ",
+      "rxRejectedThisWeek": "ഈ ആഴ്ച നിരസിച്ച കുറിപ്പടികൾ",
+      "rxDispensed": "വിതരണം ചെയ്ത കുറിപ്പടികൾ"
     },
     "quickActions": {
       "viewConsultations": "കൺസൾട്ടേഷനുകൾ കാണുക",
@@ -1518,7 +1521,15 @@
       "validUntil": "ഇത് വരെ സാധുവാണ്:",
       "active": "സജീവം",
       "expired": "കാലഹരണപ്പെട്ടു",
-      "addButton": "Write Prescription"
+      "addButton": "Write Prescription",
+      "networkPharmacy": "നെറ്റ്‌വർക്ക് ഫാർമസി",
+      "dispensedOn": "{{date}} ന് വിതരണം ചെയ്തു",
+      "reviewStatus": {
+        "pending_review": "ഫാർമസിസ്റ്റ് അവലോകനത്തിനായി കാത്തിരിക്കുന്നു",
+        "approved_for_dispensing": "അംഗീകരിച്ചു — വിതരണത്തിനായി കാത്തിരിക്കുന്നു",
+        "rejected": "ഫാർമസിസ്റ്റ് നിരസിച്ചു",
+        "needs_clarification": "ഫാർമസിസ്റ്റ് വിശദീകരണം ആവശ്യപ്പെട്ടു"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ വാക്‌സിനേഷൻ ചേർക്കുക",
@@ -4458,6 +4469,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5064,6 +5082,9 @@
     "checkInPatient": "രോഗിയെ ചെക്ക് ഇൻ ചെയ്യുക",
     "noPatients": "ക്യൂവിൽ രോഗികളില്ല",
     "unknownPatient": "അജ്ഞാത രോഗി",
+    "medicationDispensed": "മരുന്ന് വിതരണം ചെയ്തു",
+    "medicationReady": "മരുന്ന് വിതരണത്തിന് തയ്യാർ",
+    "medicationPendingReview": "മരുന്ന് ഫാർമസിസ്റ്റ് അവലോകനത്തിനായി കാത്തിരിക്കുന്നു",
     "owner": "ഉടമ",
     "triage": "ട്രയാജ്",
     "startExam": "പരിശോധന ആരംഭിക്കുക",
@@ -6639,7 +6660,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -7080,6 +7129,8 @@
     "receiptTitle": "പേയ്മെന്റ് രസീത്",
     "patient": "രോഗി",
     "doctor": "ഡോക്ടർ",
+    "pharmacy": "ഫാർമസി",
+    "medications": "മരുന്നുകൾ",
     "animal": "മൃഗം",
     "date": "തീയതി",
     "totalPaid": "ആകെ അടച്ചത്",
@@ -7300,6 +7351,9 @@
     "refundsOut": "റീഫണ്ടുകൾ",
     "netRevenue": "അറ്റ പ്ലാറ്റ്ഫോം വരുമാനം",
     "netRevenueHint": "കമ്മീഷൻ + പ്രോസസ്സിംഗ് − ഗേറ്റ്‌വേ ഫീസ്",
+    "pharmacyRevenueTitle": "ഫാർമസി വരുമാനം (തിരഞ്ഞെടുത്ത കാലയളവ്)",
+    "pharmacyCollected": "ഫാർമസി ലഭിച്ചത്",
+    "pharmacyPending": "ഫാർമസി തീർപ്പാക്കാത്ത പണമടയ്ക്കൽ",
     "liabilitiesTitle": "ബാധ്യതകൾ (നിലവിൽ)",
     "doctorClearing": "ഡോക്ടർ വരുമാനം ക്ലിയറിംഗിൽ",
     "doctorAvailable": "ഡോക്ടർ വരുമാനം ലഭ്യം",

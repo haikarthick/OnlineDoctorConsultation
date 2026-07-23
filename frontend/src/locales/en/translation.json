@@ -872,7 +872,10 @@
       "todayQueue": "Today's Queue",
       "activeInpatients": "Active Inpatients",
       "pendingReferrals": "Pending Referrals",
-      "branchStaff": "Branch Staff"
+      "branchStaff": "Branch Staff",
+      "rxPendingReview": "Rx Pending Pharmacist Review",
+      "rxRejectedThisWeek": "Rx Rejected This Week",
+      "rxDispensed": "Rx Dispensed"
     },
     "quickActions": {
       "viewConsultations": "View Consultations",
@@ -1519,7 +1522,15 @@
       "validUntil": "Valid until:",
       "active": "active",
       "expired": "expired",
-      "addButton": "Write Prescription"
+      "addButton": "Write Prescription",
+      "networkPharmacy": "Network pharmacy",
+      "dispensedOn": "Dispensed {{date}}",
+      "reviewStatus": {
+        "pending_review": "Awaiting pharmacist review",
+        "approved_for_dispensing": "Approved — awaiting dispensing",
+        "rejected": "Rejected by pharmacist",
+        "needs_clarification": "Pharmacist requested clarification"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ Add Vaccination",
@@ -4692,6 +4703,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5297,6 +5315,9 @@
     "checkInPatient": "Check In Patient",
     "noPatients": "No patients in queue",
     "unknownPatient": "Unknown Patient",
+    "medicationDispensed": "Medication dispensed",
+    "medicationReady": "Medication ready for dispensing",
+    "medicationPendingReview": "Medication awaiting pharmacist review",
     "owner": "Owner",
     "triage": "Triage",
     "startExam": "Start Exam",
@@ -5960,7 +5981,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -7079,6 +7128,8 @@
     "receiptTitle": "Payment Receipt",
     "patient": "Patient",
     "doctor": "Doctor",
+    "pharmacy": "Pharmacy",
+    "medications": "Medications",
     "animal": "Animal",
     "date": "Date",
     "totalPaid": "Total paid",
@@ -7299,6 +7350,9 @@
     "refundsOut": "Refunds out",
     "netRevenue": "Net platform revenue",
     "netRevenueHint": "commission + processing charges − gateway fees",
+    "pharmacyRevenueTitle": "Pharmacy revenue (selected range)",
+    "pharmacyCollected": "Pharmacy collected",
+    "pharmacyPending": "Pharmacy pending payment",
     "liabilitiesTitle": "Liabilities (current)",
     "doctorClearing": "Doctor earnings clearing",
     "doctorAvailable": "Doctor earnings available",

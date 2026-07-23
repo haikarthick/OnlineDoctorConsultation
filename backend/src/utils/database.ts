@@ -516,7 +516,8 @@ class PostgresDatabase {
       INSERT INTO tax_codes (id, sac_code, label, rate_percent, is_active) VALUES
         (gen_random_uuid(), '998351', 'Veterinary services for pet animals (GST-exempt healthcare)', 0, true),
         (gen_random_uuid(), '998352', 'Veterinary services for livestock (GST-exempt healthcare)', 0, true),
-        (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true)
+        (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true),
+        (gen_random_uuid(), '300490', 'Pharmacy — dispensed veterinary medicaments (HSN 3004)', 12, true)
       ON CONFLICT (sac_code) DO NOTHING
     `).catch((e: any) => logger.warn('tax_codes seed failed', { error: e.message }));
 
@@ -1899,9 +1900,28 @@ class PostgresDatabase {
     await this.pool.query(`ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ`).catch(() => {});
     await this.pool.query(`ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_notes TEXT`).catch(() => {});
 
+    // GSTIN on the pharmacy entity itself (issuer of the pharmacy invoice, distinct from the network's own GSTIN)
+    await this.pool.query(`ALTER TABLE hospital_pharmacies ADD COLUMN IF NOT EXISTS gstin VARCHAR(20)`).catch(() => {});
+
+    // invoice_type CHECK was missing 'pharmacy' — dispensing payments could never get a GST invoice
+    await this.pool.query(`ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_invoice_type_check`).catch(() => {});
+    await this.pool.query(`
+      ALTER TABLE invoices ADD CONSTRAINT invoices_invoice_type_check
+        CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy'))
+    `).catch(() => {});
+
     // Add withdrawal_period_days to pharmacy_medications (for livestock)
     await this.pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS withdrawal_period_days INTEGER DEFAULT 0`).catch(() => {});
     await this.pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS is_refrigerated BOOLEAN DEFAULT false`).catch(() => {});
+
+    // review_status CHECK was missing 'needs_clarification', so the pharmacist-review route
+    // silently collapsed that outcome to 'pending_review' and the status could never be
+    // distinguished again once the one-time notification was read.
+    await this.pool.query(`ALTER TABLE prescriptions DROP CONSTRAINT IF EXISTS prescriptions_review_status_check`).catch(() => {});
+    await this.pool.query(`
+      ALTER TABLE prescriptions ADD CONSTRAINT prescriptions_review_status_check
+        CHECK (review_status IN ('pending_review','reviewed','rejected','approved_for_dispensing','dispensed','needs_clarification'))
+    `).catch(() => {});
 
     // ── Password Reset Tokens (self-service forgot-password flow) ──────────
     // token_hash: SHA-256 of the raw token sent in the email link.

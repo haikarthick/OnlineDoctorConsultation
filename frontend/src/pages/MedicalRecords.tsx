@@ -659,6 +659,14 @@ const MedicalRecords: React.FC = () => {
                         {t('medicalRecords.prescriptionsTab.prescribed')} {fmtDate(rx.createdAt || rx.created_at || '')} • {t('medicalRecords.prescriptionsTab.validUntil')} {fmtDate(rx.validUntil || rx.valid_until || '')}
                       </p>
                     </div>
+                      {rx.isNetworkCoordinated && (
+                        <p className="text-muted">
+                          💊 {rx.pharmacyName || t('medicalRecords.prescriptionsTab.networkPharmacy')}
+                          {rx.dispensingStatus
+                            ? ` — ${t('medicalRecords.prescriptionsTab.dispensedOn', { date: fmtDate(rx.dispensedAt || '') })}`
+                            : ` — ${t(`medicalRecords.prescriptionsTab.reviewStatus.${rx.reviewStatus}`, rx.reviewStatus || '')}`}
+                        </p>
+                      )}
                     <div className="record-actions">
                       <span className="badge badge-completed">{rx.isActive || rx.is_active ? t('medicalRecords.prescriptionsTab.active') : t('medicalRecords.prescriptionsTab.expired')}</span>
                     </div>

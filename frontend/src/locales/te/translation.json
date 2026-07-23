@@ -872,7 +872,10 @@
       "todayQueue": "ఈ రోజు క్యూ",
       "activeInpatients": "యాక్టివ్ ఇన్‌పేషెంట్లు",
       "pendingReferrals": "పెండింగ్ రెఫరల్స్",
-      "branchStaff": "బ్రాంచ్ సిబ్బంది"
+      "branchStaff": "బ్రాంచ్ సిబ్బంది",
+      "rxPendingReview": "ఫార్మసిస్ట్ సమీక్ష కోసం పెండింగ్‌లో ఉన్న ప్రిస్క్రిప్షన్లు",
+      "rxRejectedThisWeek": "ఈ వారం తిరస్కరించబడిన ప్రిస్క్రిప్షన్లు",
+      "rxDispensed": "పంపిణీ చేయబడిన ప్రిస్క్రిప్షన్లు"
     },
     "quickActions": {
       "viewConsultations": "సంప్రదింపులు చూడండి",
@@ -1519,7 +1522,15 @@
       "validUntil": "గడువు:",
       "active": "ప్రస్తుతం",
       "expired": "గడువు ముగిసింది",
-      "addButton": "ప్రిస్క్రిప్షన్ రాయండి"
+      "addButton": "ప్రిస్క్రిప్షన్ రాయండి",
+      "networkPharmacy": "నెట్‌వర్క్ ఫార్మసీ",
+      "dispensedOn": "{{date}} న పంపిణీ చేయబడింది",
+      "reviewStatus": {
+        "pending_review": "ఫార్మసిస్ట్ సమీక్ష కోసం వేచి ఉంది",
+        "approved_for_dispensing": "ఆమోదించబడింది — పంపిణీ కోసం వేచి ఉంది",
+        "rejected": "ఫార్మసిస్ట్ చేత తిరస్కరించబడింది",
+        "needs_clarification": "ఫార్మసిస్ట్ వివరణ కోరారు"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ టీకా జోడించు",
@@ -4696,6 +4707,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5302,6 +5320,9 @@
     "checkInPatient": "రోగి చెక్ ఇన్",
     "noPatients": "క్యూలో రోగులు లేరు",
     "unknownPatient": "తెలియని రోగి",
+    "medicationDispensed": "మందు పంపిణీ చేయబడింది",
+    "medicationReady": "మందు పంపిణీకి సిద్ధంగా ఉంది",
+    "medicationPendingReview": "ఫార్మసిస్ట్ సమీక్ష కోసం మందు వేచి ఉంది",
     "owner": "యజమాని",
     "triage": "ట్రయాజ్",
     "startExam": "పరీక్ష ప్రారంభించు",
@@ -5978,7 +5999,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -7097,6 +7146,8 @@
     "receiptTitle": "చెల్లింపు రసీదు",
     "patient": "రోగి",
     "doctor": "డాక్టర్",
+    "pharmacy": "ఫార్మసీ",
+    "medications": "మందులు",
     "animal": "జంతువు",
     "date": "తేదీ",
     "totalPaid": "మొత్తం చెల్లించినది",
@@ -7317,6 +7368,9 @@
     "refundsOut": "రీఫండ్లు",
     "netRevenue": "నికర ప్లాట్‌ఫారమ్ ఆదాయం",
     "netRevenueHint": "కమిషన్ + ప్రాసెసింగ్ − గేట్‌వే ఫీజులు",
+    "pharmacyRevenueTitle": "ఫార్మసీ ఆదాయం (ఎంచుకున్న పరిధి)",
+    "pharmacyCollected": "ఫార్మసీ వసూలు చేయబడింది",
+    "pharmacyPending": "ఫార్మసీ పెండింగ్ చెల్లింపు",
     "liabilitiesTitle": "బాధ్యతలు (ప్రస్తుతం)",
     "doctorClearing": "డాక్టర్ సంపాదన క్లియరింగ్‌లో",
     "doctorAvailable": "డాక్టర్ సంపాదన అందుబాటులో",

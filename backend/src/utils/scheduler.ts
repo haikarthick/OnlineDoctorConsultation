@@ -30,9 +30,11 @@ export function startScheduler(): void {
   // Run once immediately on startup (catches overnight drift if server was down)
   runExpiryCheck();
   runMissedBookingsCheck();
+  runPharmacyStockAlerts();
 
   // Then every 24 hours
   setInterval(runExpiryCheck, TWENTY_FOUR_HOURS);
+  setInterval(runPharmacyStockAlerts, TWENTY_FOUR_HOURS);
 
   // Check for missed bookings every 15 minutes
   setInterval(runMissedBookingsCheck, FIFTEEN_MINUTES);
@@ -65,7 +67,7 @@ export function startScheduler(): void {
   // Payment module: emergency confirm-window fast-track (every minute; cheap no-op query)
   setInterval(runEmergencyFastTrack, 60 * 1000);
 
-  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min');
+  logger.info('Scheduler started — expiry check every 24h, missed bookings every 15min, pharmacy stock alerts every 24h, weekly digest check every 1h, marketplace boost expiry every 1h, listing expiry every 6h, auction close every 5min, payment hold expiry every 5min');
 }
 
 async function runExpiryCheck(): Promise<void> {
@@ -174,6 +176,46 @@ async function runMarketplaceSavedSearchAlerts(): Promise<void> {
     if (sent > 0) logger.info(`[Marketplace] Sent ${sent} saved-search alert(s)`);
   } catch (err: any) {
     logger.error('[Marketplace] Saved-search alert job failed', { error: err.message });
+  }
+}
+
+/** Daily digest to each network's pharmacists: low-stock items + batches expiring within 30 days. */
+async function runPharmacyStockAlerts(): Promise<void> {
+  try {
+    const pharmaciesRes = await database.query(
+      `SELECT hp.id AS pharmacy_id, hp.network_id, hp.pharmacy_name,
+         COUNT(*) FILTER (WHERE pi.quantity <= pi.min_stock_level) AS low_stock_count,
+         COUNT(*) FILTER (WHERE pi.expiry_date IS NOT NULL AND pi.expiry_date <= CURRENT_DATE + INTERVAL '30 days' AND pi.expiry_date >= CURRENT_DATE) AS expiring_count
+       FROM hospital_pharmacies hp
+       JOIN pharmacy_inventory pi ON pi.pharmacy_id = hp.id
+       WHERE hp.is_active = true
+       GROUP BY hp.id, hp.network_id, hp.pharmacy_name
+       HAVING COUNT(*) FILTER (WHERE pi.quantity <= pi.min_stock_level) > 0
+           OR COUNT(*) FILTER (WHERE pi.expiry_date IS NOT NULL AND pi.expiry_date <= CURRENT_DATE + INTERVAL '30 days' AND pi.expiry_date >= CURRENT_DATE) > 0`
+    );
+    let sent = 0;
+    for (const pharmacy of pharmaciesRes.rows) {
+      const pharmacistsRes = await database.query(
+        `SELECT hnm.user_id FROM hospital_network_members hnm
+         JOIN users u ON u.id = hnm.user_id
+         WHERE hnm.network_id = $1 AND hnm.is_active = true AND u.role = 'pharmacist'`,
+        [pharmacy.network_id]
+      );
+      const parts: string[] = [];
+      if (Number(pharmacy.low_stock_count) > 0) parts.push(`${pharmacy.low_stock_count} item(s) low on stock`);
+      if (Number(pharmacy.expiring_count) > 0) parts.push(`${pharmacy.expiring_count} batch(es) expiring within 30 days`);
+      const message = `${pharmacy.pharmacy_name}: ${parts.join(', ')}.`;
+      for (const p of pharmacistsRes.rows) {
+        await NotificationService.createNotification(
+          p.user_id, 'pharmacy_alert', 'Pharmacy Stock Alert', message, 'all',
+          { pharmacyId: pharmacy.pharmacy_id, lowStockCount: Number(pharmacy.low_stock_count), expiringCount: Number(pharmacy.expiring_count) }
+        );
+        sent++;
+      }
+    }
+    if (sent > 0) logger.info(`[Pharmacy] Sent ${sent} stock alert digest(s)`);
+  } catch (err: any) {
+    logger.error('[Pharmacy] Stock alert job failed', { error: err.message });
   }
 }
 

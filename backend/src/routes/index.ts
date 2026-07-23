@@ -1574,7 +1574,7 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
   if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) {
     return res.status(400).json({ success: false, error: 'from/to must be YYYY-MM-DD' });
   }
-  const [payments, earnings, wallets, tds, health] = await Promise.all([
+  const [payments, pharmacyPayments, earnings, wallets, tds, health] = await Promise.all([
     database.query(
       `SELECT
          COALESCE(SUM(amount) FILTER (WHERE status IN ('completed', 'partially_refunded', 'refunded', 'transferred')), 0) as gmv,
@@ -1584,6 +1584,18 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
          COALESCE(SUM(gateway_fee_amount) FILTER (WHERE status IN ('completed', 'partially_refunded', 'refunded', 'transferred')), 0) as gateway_fees,
          COUNT(*) FILTER (WHERE status IN ('completed', 'partially_refunded')) as paid_count
        FROM payments WHERE payment_source = 'consultation'
+         AND created_at >= $1::date AND created_at < ($2::date + INTERVAL '1 day')`,
+      [from, to]
+    ),
+    // Pharmacy revenue has no platform commission split (it's the network's own dispensing
+    // revenue, not a consultation the platform brokered) — tracked separately from GMV/commission above.
+    database.query(
+      `SELECT
+         COALESCE(SUM(amount) FILTER (WHERE status = 'completed'), 0) as collected,
+         COALESCE(SUM(amount) FILTER (WHERE status = 'pending'), 0) as pending_amount,
+         COUNT(*) FILTER (WHERE status = 'completed') as dispensed_count,
+         COUNT(*) FILTER (WHERE status = 'pending') as pending_count
+       FROM payments WHERE payment_source = 'pharmacy'
          AND created_at >= $1::date AND created_at < ($2::date + INTERVAL '1 day')`,
       [from, to]
     ),
@@ -1612,7 +1624,7 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
        FROM payments WHERE payment_source = 'consultation'`
     ),
   ]);
-  const p = payments.rows[0]; const e = earnings.rows[0]; const w = wallets.rows[0];
+  const p = payments.rows[0]; const pp = pharmacyPayments.rows[0]; const e = earnings.rows[0]; const w = wallets.rows[0];
   const t = tds.rows[0]; const h = health.rows[0];
   res.json({
     success: true,
@@ -1623,6 +1635,10 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
         refundsOut: parseFloat(p.refunds_out), processingCharges: parseFloat(p.processing_charges),
         gatewayFees: parseFloat(p.gateway_fees), paidCount: parseInt(p.paid_count, 10),
         netPlatformRevenue: Math.round((parseFloat(p.commission_earned) + parseFloat(p.processing_charges) - parseFloat(p.gateway_fees)) * 100) / 100,
+      },
+      pharmacyRevenue: {
+        collected: parseFloat(pp.collected), pendingAmount: parseFloat(pp.pending_amount),
+        dispensedCount: parseInt(pp.dispensed_count, 10), pendingCount: parseInt(pp.pending_count, 10),
       },
       settlementLiability: {
         clearing: parseFloat(e.clearing), available: parseFloat(e.available), locked: parseFloat(e.locked),
@@ -4234,15 +4250,6 @@ router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: R
   res.json({ success: true, data: pharmaRes.rows, networkId });
 }));
 
-router.get('/debug/my-network-members', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as any;
-  const membersRes = await database.query(
-    `SELECT * FROM hospital_network_members WHERE user_id = $1`,
-    [authReq.userId]
-  );
-  res.json({ success: true, data: membersRes.rows });
-}));
-
 // ── Pharmacy Setup ──────────────────────────────────────────
 
 // List pharmacies for a network
@@ -4647,13 +4654,16 @@ router.post('/prescriptions/:prescriptionId/review', authMiddleware, roleMiddlew
   const validStatuses = ['approved', 'rejected', 'needs_clarification'];
   if (!validStatuses.includes(review_status)) return res.status(400).json({ success: false, message: 'Invalid review_status' });
   // Insert review record
+  // findings is TEXT[] — the frontend sends one free-text string, so wrap it as a
+  // single-element array; binding a bare JS string to an array column throws
+  // "malformed array literal" in Postgres.
   await database.query(
     `INSERT INTO prescription_reviews (prescription_id, pharmacist_id, review_status, validation_checks, findings, suggested_modifications, rejection_reason)
      VALUES ($1,$2,$3,$4::jsonb,$5,$6,$7)`,
-    [req.params.prescriptionId, authReq.userId, review_status, JSON.stringify(validation_checks), findings || '', suggested_modifications, rejection_reason]
+    [req.params.prescriptionId, authReq.userId, review_status, JSON.stringify(validation_checks), findings ? [findings] : null, suggested_modifications, rejection_reason]
   );
   // Map to prescription review_status
-  const prescriptionStatus = review_status === 'approved' ? 'approved_for_dispensing' : review_status === 'rejected' ? 'rejected' : 'pending_review';
+  const prescriptionStatus = review_status === 'approved' ? 'approved_for_dispensing' : review_status === 'rejected' ? 'rejected' : 'needs_clarification';
   await database.query(
     `UPDATE prescriptions SET review_status = $1, reviewed_by = $2, reviewed_at = NOW(), review_notes = $3, updated_at = NOW() WHERE id = $4`,
     [prescriptionStatus, authReq.userId, rejection_reason || suggested_modifications || null, req.params.prescriptionId]
@@ -4681,6 +4691,18 @@ router.post('/prescriptions/:prescriptionId/review', authMiddleware, roleMiddlew
 
 // Get review history for a prescription
 router.get('/prescriptions/:prescriptionId/reviews', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const rxRow = await database.query(
+    `SELECT veterinarian_id, pet_owner_id, network_id FROM prescriptions WHERE id = $1`,
+    [req.params.prescriptionId]
+  );
+  if (!rxRow.rows[0]) return res.status(404).json({ success: false, message: 'Prescription not found' });
+  const { veterinarian_id, pet_owner_id, network_id } = rxRow.rows[0];
+  const isOwner = authReq.userId === veterinarian_id || authReq.userId === pet_owner_id;
+  if (authReq.userRole !== 'admin' && !isOwner) {
+    if (!network_id) return res.status(403).json({ success: false, message: 'You do not have access to this prescription' });
+    if (!await guardNetworkPharmacy(req, res, network_id)) return;
+  }
   const result = await database.query(
     `SELECT pr.*, u.first_name || ' ' || u.last_name AS pharmacist_name
      FROM prescription_reviews pr
@@ -4765,12 +4787,15 @@ router.post('/dispensing', authMiddleware, asyncHandler(async (req: Request, res
       if (rxForBilling.rows[0]) {
         const invoiceNum = `PHARM-${recordId.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
         const payStatus = (dispensing_method === 'walk_in_pickup' || dispensing_method === 'hospital_pickup') ? 'completed' : 'pending';
-        await database.query(
+        const payRow = await database.query(
           `INSERT INTO payments (consultation_id, dispensing_id, user_id, payer_id, amount, currency, status, payment_method, payment_source, invoice_number, paid_at, created_at, updated_at)
            VALUES ($1,$2,$3,$3,$4,'INR',$5,'cash','pharmacy',$6,
-             CASE WHEN $5='completed' THEN NOW() ELSE NULL END, NOW(), NOW())`,
+             CASE WHEN $5='completed' THEN NOW() ELSE NULL END, NOW(), NOW())
+           RETURNING id`,
           [rxForBilling.rows[0].consultation_id || null, recordId, rxForBilling.rows[0].pet_owner_id, total_cost, payStatus, invoiceNum]
         );
+        const InvoiceService = (await import('../services/payment/InvoiceService')).default;
+        await InvoiceService.createPharmacyInvoice(payRow.rows[0].id);
       }
     } catch (billErr: any) {
       logger.warn('Pharmacy billing record creation failed (non-fatal)', { error: billErr.message });
@@ -4827,17 +4852,47 @@ router.get('/pharmacies/:pharmacyId/dispensing-history', authMiddleware, asyncHa
     `SELECT dr.*, p.medications AS prescription_medications,
             a.name AS animal_name, a.species AS animal_species,
             u.first_name || ' ' || u.last_name AS pharmacist_name,
-            po.first_name || ' ' || po.last_name AS owner_name
+            po.first_name || ' ' || po.last_name AS owner_name,
+            v.first_name || ' ' || v.last_name AS vet_name,
+            hp.pharmacy_name, hp.address AS pharmacy_address, hp.phone AS pharmacy_phone,
+            (SELECT json_agg(json_build_object('name', pm.name, 'quantity', dli.quantity_dispensed, 'unit', dli.unit, 'unitPrice', dli.unit_price, 'lineTotal', dli.line_total, 'batchNumber', dli.batch_number) ORDER BY dli.created_at)
+             FROM dispensing_line_items dli LEFT JOIN pharmacy_medications pm ON pm.id = dli.med_id
+             WHERE dli.dispensing_record_id = dr.id) AS line_items
      FROM dispensing_records dr
      JOIN prescriptions p ON dr.prescription_id = p.id
      JOIN animals a ON p.animal_id = a.id
      LEFT JOIN users po ON p.pet_owner_id = po.id
+     LEFT JOIN users v ON p.veterinarian_id = v.id
      JOIN users u ON dr.pharmacist_id = u.id
+     LEFT JOIN hospital_pharmacies hp ON hp.id = dr.pharmacy_id
      WHERE dr.pharmacy_id = $1
      ORDER BY dr.created_at DESC LIMIT $2`,
     [req.params.pharmacyId, limit]
   );
   res.json(result.rows);
+}));
+
+// Vet's own pharmacy stats (dashboard tile) — self-scoped, no guard needed
+router.get('/vet/pharmacy-stats', authMiddleware, roleMiddleware(['veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const result = await database.query(
+    `SELECT
+       COUNT(*) FILTER (WHERE review_status = 'pending_review') AS pending_review,
+       COUNT(*) FILTER (WHERE review_status = 'rejected' AND updated_at >= NOW() - INTERVAL '7 days') AS rejected_this_week,
+       COUNT(*) FILTER (WHERE review_status = 'dispensed') AS dispensed_count
+     FROM prescriptions
+     WHERE veterinarian_id = $1 AND is_network_coordinated = true AND is_active = true`,
+    [authReq.userId]
+  );
+  const r = result.rows[0];
+  res.json({
+    success: true,
+    data: {
+      pendingReview: parseInt(r.pending_review, 10),
+      rejectedThisWeek: parseInt(r.rejected_this_week, 10),
+      dispensedCount: parseInt(r.dispensed_count, 10),
+    },
+  });
 }));
 
 // ── Analytics ────────────────────────────────────────────────
@@ -4909,6 +4964,40 @@ router.get('/networks/:networkId/pharmacy-reports', authMiddleware, asyncHandler
     [req.params.networkId, days]
   );
   res.json({ period_days: days, pharmacies: result.rows });
+}));
+
+// Cross-network pharmacy overview for the admin dashboard
+router.get('/admin/pharmacy-overview', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const [dispensing, pendingReview, lowStock, revenue] = await Promise.all([
+    database.query(
+      `SELECT
+         COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE) AS today,
+         COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days') AS this_week
+       FROM dispensing_records`
+    ),
+    database.query(
+      `SELECT COUNT(*) AS count FROM prescriptions WHERE review_status = 'pending_review' AND is_network_coordinated = true AND is_active = true`
+    ),
+    database.query(
+      `SELECT COUNT(DISTINCT hp.network_id) AS network_count, COUNT(*) AS item_count
+       FROM pharmacy_inventory pi JOIN hospital_pharmacies hp ON hp.id = pi.pharmacy_id
+       WHERE pi.quantity <= pi.min_stock_level AND hp.is_active = true`
+    ),
+    database.query(
+      `SELECT COALESCE(SUM(total_cost), 0) AS revenue FROM dispensing_records WHERE created_at >= NOW() - INTERVAL '7 days'`
+    ),
+  ]);
+  res.json({
+    success: true,
+    data: {
+      dispensingToday: parseInt(dispensing.rows[0].today, 10),
+      dispensingThisWeek: parseInt(dispensing.rows[0].this_week, 10),
+      pendingReviewCount: parseInt(pendingReview.rows[0].count, 10),
+      lowStockNetworks: parseInt(lowStock.rows[0].network_count, 10),
+      lowStockItems: parseInt(lowStock.rows[0].item_count, 10),
+      revenueThisWeek: parseFloat(revenue.rows[0].revenue),
+    },
+  });
 }));
 
 // ── Inter-hospital Medication Requests ───────────────────────
