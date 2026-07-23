@@ -510,3 +510,10 @@
 - **Lesson:** Always define referenced tables BEFORE tables that reference them in init.sql. schema-check.js now validates FK order on every pre-push.
 - **Apply to:** All future init.sql edits
 
+
+### LESSON-050 — Hand-rolled `t` function-shape params are not assignable from real i18next TFunction
+- **Logged:** 2026-07-23
+- **Context:** Wrote `speciesLabel(species, t: (key: string, fallback?: string) => string)` in MasterDataContext.tsx. It looked structurally identical to how `t` is actually called everywhere (`t('key', 'fallback')`), but passing the real `t` from `useTranslation()` into it failed `tsc --noEmit` with a TFunction overload-assignability error, at every one of the ~30 call sites, only once tsc was actually run — not at edit time.
+- **Lesson:** When typing a parameter that will receive the real i18next `t`, import and use the real `TFunction` type from `'i18next'` — never hand-roll an equivalent-looking function signature. Also applies one level removed: any component receiving `t` as a **prop** (not its own `useTranslation()` call) needs that prop typed as `TFunction` too, or passing it into a helper expecting the real type fails the same way.
+- **Apply to:** Any new context helper or component prop that forwards `t`
+
