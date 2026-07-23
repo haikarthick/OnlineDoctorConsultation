@@ -7,6 +7,7 @@ import type { VetHospital, HospitalDoctor, HospitalDepartment } from '../types'
 import './ModulePage.css'
 import './VetHospitals.css'
 import { useSettings } from '../context/SettingsContext'
+import { useMasterData } from '../context/MasterDataContext'
 import { useTranslation } from 'react-i18next'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
@@ -36,6 +37,7 @@ const BOOKING_TYPES = [
 const HospitalBooking: React.FC = () => {
   const { t } = useTranslation()
   const { formatCurrency } = useSettings()
+  const { speciesLabel } = useMasterData()
   const { id: hospitalId } = useParams<{ id: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -400,7 +402,7 @@ const HospitalBooking: React.FC = () => {
                 <select className="form-input" value={animalId} onChange={e => setAnimalId(e.target.value)}>
                   <option value="">— Select —</option>
                   {animals.map((a: any) => (
-                    <option key={a.id} value={a.id}>{a.name} ({a.species}{a.breed ? ` — ${a.breed}` : ''})</option>
+                    <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)}{a.breed ? ` — ${a.breed}` : ''})</option>
                   ))}
                 </select>
               </div>

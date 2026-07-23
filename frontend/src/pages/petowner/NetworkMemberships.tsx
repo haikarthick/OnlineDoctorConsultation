@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
 import '../ModulePage.css'
 import './NetworkMemberships.css'
@@ -8,6 +9,7 @@ import './NetworkMemberships.css'
 const NetworkMemberships: React.FC = () => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
+  const { speciesLabel } = useMasterData()
 
   const [enrollments, setEnrollments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -199,7 +201,7 @@ const NetworkMemberships: React.FC = () => {
                       <span className="nm-card-icon">✅</span>
                       <div>
                         <p className="nm-card-title">{e.networkName} — {e.animalName}</p>
-                        <p className="nm-card-sub">{e.species}{e.breed ? ` · ${e.breed}` : ''}</p>
+                        <p className="nm-card-sub">{speciesLabel(e.species, t)}{e.breed ? ` · ${e.breed}` : ''}</p>
                       </div>
                     </div>
 
@@ -258,7 +260,7 @@ const NetworkMemberships: React.FC = () => {
                         <span className="nm-card-icon">📋</span>
                         <div>
                           <p className="nm-card-title">{e.networkName} — {e.animalName}</p>
-                          <p className="nm-card-sub">{e.species}</p>
+                          <p className="nm-card-sub">{speciesLabel(e.species, t)}</p>
                         </div>
                       </div>
                       <span className={`nm-status-badge ${e.enrollmentStatus}`}>{getStatusBadgeText(e.enrollmentStatus)}</span>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSettings } from '../context/SettingsContext'
 import { useAuth } from '../context/AuthContext'
+import { useMasterData } from '../context/MasterDataContext'
 import apiService from '../services/api'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
@@ -32,6 +33,7 @@ const MedicalRecords: React.FC = () => {
 
   const { formatDate } = useSettings()
   const { user } = useAuth()
+  const { speciesLabel } = useMasterData()
   const location = useLocation()
   const navigate = useNavigate()
   const isVet = user?.role === 'veterinarian'
@@ -463,7 +465,7 @@ const MedicalRecords: React.FC = () => {
             <option value="">{t('medicalRecords.allAnimals')}</option>
             {filteredAnimals.map((a: any) => (
               <option key={a.id} value={a.id}>
-                {a.uniqueId || a.unique_id || ''} {a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{(isAdmin || isVet) && a.ownerName ? ` · ${a.ownerName}` : ''}
+                {a.uniqueId || a.unique_id || ''} {a.name} — {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{(isAdmin || isVet) && a.ownerName ? ` · ${a.ownerName}` : ''}
               </option>
             ))}
           </select>
@@ -488,7 +490,7 @@ const MedicalRecords: React.FC = () => {
         <div className="si-75ecbe2d">
           <div className="si-475f4b02">
             <span className="si-4dac8ea3">🐾 {selectedAnimalData.uniqueId || selectedAnimalData.unique_id || 'N/A'}</span>
-            <span><strong>{selectedAnimalData.name}</strong> ({selectedAnimalData.species}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''})</span>
+            <span><strong>{selectedAnimalData.name}</strong> ({speciesLabel(selectedAnimalData.species, t)}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''})</span>
             {selectedAnimalData.ownerName && <span>{t('medicalRecords.animalInfo.owner')} {selectedAnimalData.ownerName}</span>}
             {selectedAnimalData.gender && <span>{t('medicalRecords.animalInfo.gender')} {selectedAnimalData.gender === 'male' ? t('medicalRecords.animalInfo.maleSymbol') : t('medicalRecords.animalInfo.femaleSymbol')}</span>}
             {selectedAnimalData.weight && <span>{t('medicalRecords.animalInfo.weight')} {selectedAnimalData.weight} kg</span>}
@@ -1222,7 +1224,7 @@ const MedicalRecords: React.FC = () => {
                 <h2 className="si-2fda8813">{t('medicalRecords.modals.addVaccination')}</h2>
                 {selectedAnimalData && (
                   <p className="si-3a80c844">
-                    {selectedAnimalData.name} &bull; {selectedAnimalData.species}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''}
+                    {selectedAnimalData.name} &bull; {speciesLabel(selectedAnimalData.species, t)}{selectedAnimalData.breed ? ` / ${selectedAnimalData.breed}` : ''}
                   </p>
                 )}
 

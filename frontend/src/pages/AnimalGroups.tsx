@@ -4,6 +4,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { Enterprise, AnimalGroup, GROUP_TYPE_LABELS, AnimalGroupType } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 import { useScrollToForm } from '../hooks/useScrollToForm'
 
 const PURPOSE_OPTIONS = [
@@ -20,6 +21,7 @@ interface SimpleAnimal { id: string; name: string; species: string; breed?: stri
 
 const AnimalGroups: React.FC = () => {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
 
   const navigate = useNavigate()
   const [enterprises, setEnterprises] = useState<Enterprise[]>([])
@@ -256,7 +258,7 @@ const AnimalGroups: React.FC = () => {
                   <span className="badge si-8c23064b">{GROUP_TYPE_LABELS[g.groupType as AnimalGroupType] || g.groupType}</span>
                 </div>
               </div>
-              {g.species && <p className="si-cf622af4">{t('animalGroups.species')} {g.species} {g.breed ? `(${g.breed})` : ''}</p>}
+              {g.species && <p className="si-cf622af4">{t('animalGroups.species')} {speciesLabel(g.species, t)} {g.breed ? `(${g.breed})` : ''}</p>}
               {g.purpose && <p className="si-cf622af4">{t('animalGroups.purpose')} {g.purpose}</p>}
               <div className="si-bbfa5d5e">
                 <span>🐾 {g.currentCount} {t('animalGroups.animals')}</span>
@@ -291,7 +293,7 @@ const AnimalGroups: React.FC = () => {
                 <h2 className="si-44087c4b">{t('animalGroups.manage.title', { name: manageGroup.name })}</h2>
                 <p className="si-34b83357">
                   {GROUP_TYPE_LABELS[manageGroup.groupType as AnimalGroupType] || manageGroup.groupType}
-                  {manageGroup.species ? ` • ${manageGroup.species}` : ''}
+                  {manageGroup.species ? ` • ${speciesLabel(manageGroup.species, t)}` : ''}
                 </p>
               </div>
               <button onClick={() => setManageGroup(null)} className="si-2d49037b">✕</button>
@@ -323,7 +325,7 @@ const AnimalGroups: React.FC = () => {
                         <div key={a.id} className="si-b948943c">
                           <div>
                             <span className="si-f30b396a">{a.name}</span>
-                            <span className="si-5e80ef64">{a.species}{a.breed ? ` • ${a.breed}` : ''}</span>
+                            <span className="si-5e80ef64">{speciesLabel(a.species, t)}{a.breed ? ` • ${a.breed}` : ''}</span>
                             {a.uniqueId && <span className="si-6a41a2a7">{a.uniqueId}</span>}
                           </div>
                           <button className="btn btn-sm btn-danger si-70a187fb" onClick={() => handleRemoveAnimal(a.id)}
@@ -362,7 +364,7 @@ const AnimalGroups: React.FC = () => {
                         <div key={a.id} className="si-aff1dbb0">
                           <div>
                             <span className="si-f30b396a">{a.name}</span>
-                            <span className="si-5e80ef64">{a.species}{a.breed ? ` • ${a.breed}` : ''}</span>
+                            <span className="si-5e80ef64">{speciesLabel(a.species, t)}{a.breed ? ` • ${a.breed}` : ''}</span>
                             {a.uniqueId && <span className="si-6a41a2a7">{a.uniqueId}</span>}
                             {a.groupId && a.groupName && (
                               <span className="si-cfa7a876">
@@ -398,7 +400,7 @@ const AnimalGroups: React.FC = () => {
             </div>
             <h3 className="si-ff99b75c">{t('animalGroups.reassign.title')}</h3>
             <p className="si-cc0437c0">
-              <strong className="si-672b6b98">{confirmReassign.name}</strong> ({confirmReassign.species}{confirmReassign.breed ? ` • ${confirmReassign.breed}` : ''})
+              <strong className="si-672b6b98">{confirmReassign.name}</strong> ({speciesLabel(confirmReassign.species, t)}{confirmReassign.breed ? ` • ${confirmReassign.breed}` : ''})
               is currently in <strong className="si-f84f41a5">{confirmReassign.groupName || t('animalGroups.reassign.currentGroup')}</strong>.
             </p>
             <p className="si-908e4d8e">

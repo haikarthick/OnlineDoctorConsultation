@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
 import client from '../../services/api/client'
 import { Medication } from '../../types'
@@ -14,6 +15,7 @@ interface PrescriptionWriterProps {
 const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId, onNavigate }) => {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const { speciesLabel } = useMasterData()
   const params = new URLSearchParams(window.location.search)
   const conId = consultationId || params.get('consultationId') || ''
   const urlAnimalId = params.get('animalId') || ''
@@ -265,7 +267,7 @@ const PrescriptionWriter: React.FC<PrescriptionWriterProps> = ({ consultationId,
                     >
                       <option value="">{t('prescriptionWriter.chooseAnimal')}</option>
                       {animals.map(a => (
-                        <option key={a.id} value={a.id}>{a.name} ({a.species})</option>
+                        <option key={a.id} value={a.id}>{a.name} ({speciesLabel(a.species, t)})</option>
                       ))}
                     </select>
                   )}

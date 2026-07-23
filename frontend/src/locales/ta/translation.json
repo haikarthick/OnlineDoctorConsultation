@@ -7509,5 +7509,18 @@
       "canProduceMilk": "பால் உற்பத்தி செய்ய முடியும்",
       "marketplaceEligible": "மார்க்கெட்பிளேஸில் விற்பனைக்கு தகுதி"
     }
+  },
+  "speciesNames": {
+    "dog": "நாய்", "cat": "பூனை", "rabbit": "முயல்", "hamster": "ஹாம்ஸ்டர்", "guinea_pig": "கினிப்பன்றி",
+    "gerbil": "ஜெர்பில்", "chinchilla": "சின்சில்லா", "ferret": "ஃபெரெட்", "hedgehog": "முள்ளம்பன்றி",
+    "sugar_glider": "சுகர் கிளைடர்", "parrot": "கிளி", "budgerigar": "பட்ஜி", "cockatiel": "காக்டேல்",
+    "lovebird": "லவ்பேர்ட்", "finch": "ஃபின்ச்", "canary": "கானரி", "mynah": "மைனா", "pigeon": "புறா",
+    "bird": "பறவை", "tortoise": "ஆமை", "turtle": "நீர் ஆமை", "gecko": "பல்லி",
+    "bearded_dragon": "பியர்டட் டிராகன்", "chameleon": "பச்சோந்தி", "snake": "பாம்பு", "frog": "தவளை",
+    "axolotl": "அக்சலோட்டல்", "ornamental_fish": "அலங்கார மீன்", "koi": "கோய் மீன்", "arowana": "அரோவானா",
+    "goldfish": "தங்க மீன்", "cattle": "மாடு", "buffalo": "எருமை", "horse": "குதிரை", "donkey": "கழுதை",
+    "sheep": "செம்மறியாடு", "goat": "வெள்ளாடு", "pig": "பன்றி", "camel": "ஒட்டகம்", "yak": "யாக்", "deer": "மான்",
+    "chicken": "கோழி", "duck": "வாத்து", "turkey": "வான்கோழி", "quail": "காடை", "emu": "எமு",
+    "ostrich": "தீக்கோழி", "peacock": "மயில்", "llama": "லாமா", "alpaca": "அல்பாக்கா", "other": "மற்றவை"
   }
 }

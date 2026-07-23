@@ -31,7 +31,7 @@ const STAGE_ICONS: Record<string, string> = {
 export default function HospitalWorkflow() {
   const { t } = useTranslation()
   const { formatDateTime } = useSettings()
-  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, earTagSpecies } = useMasterData()
+  const { speciesCategories, breedsForSpecies, classTermsForSpecies, findClassTerm, earTagSpecies, speciesLabel } = useMasterData()
 
   const [tab, setTab] = useState<'queue' | 'workflow' | 'referrals'>('queue')
   const [hospitalId, setHospitalId] = useState('')
@@ -520,7 +520,7 @@ export default function HospitalWorkflow() {
                       )}
                     </div>
                     <div className="si-42eae7d1">
-                      <div className="si-b2cfcbec">{q.animal_name || t('hospitalWorkflow.unknownPatient')} <span className="si-db3602ae">({q.animal_species}{q.animal_breed ? ` — ${q.animal_breed}` : ''})</span></div>
+                      <div className="si-b2cfcbec">{q.animal_name || t('hospitalWorkflow.unknownPatient')} <span className="si-db3602ae">({speciesLabel(q.animal_species, t)}{q.animal_breed ? ` — ${q.animal_breed}` : ''})</span></div>
                       <div className="si-4801fc30">{t('hospitalWorkflow.owner')}: {q.owner_first_name} {q.owner_last_name}</div>
                       {q.enterpriseName && (
                         <div className="si-e893254c">
@@ -723,7 +723,7 @@ export default function HospitalWorkflow() {
                               <option value="">{t('hospitalWorkflow.walkIn.selectSpecies')}</option>
                               {speciesCategories.map(cat => (
                                 <optgroup key={cat.label} label={cat.label}>
-                                  {cat.species.map(sp => <option key={sp} value={sp}>{sp}</option>)}
+                                  {cat.species.map(sp => <option key={sp} value={sp}>{speciesLabel(sp, t)}</option>)}
                                 </optgroup>
                               ))}
                             </select>
@@ -990,7 +990,7 @@ export default function HospitalWorkflow() {
                 <div className="si-588e32ac">
                   <span className="si-7ff2b341">{STAGE_ICONS[c.current_stage]}</span>
                   <div className="si-42eae7d1">
-                    <div className="si-b2cfcbec">{c.animal_name || t('hospitalWorkflow.unknown')} <span className="si-db3602ae">({c.animal_species})</span></div>
+                    <div className="si-b2cfcbec">{c.animal_name || t('hospitalWorkflow.unknown')} <span className="si-db3602ae">({speciesLabel(c.animal_species, t)})</span></div>
                     <div className="si-4801fc30">{c.chief_complaint || t('hospitalWorkflow.noComplaintNoted')}</div>
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: PRIORITY_COLORS[c.priority] + '20', color: PRIORITY_COLORS[c.priority] }}>{c.priority}</span>
@@ -1185,7 +1185,7 @@ export default function HospitalWorkflow() {
                     <div className="si-b2cfcbec">From Dr. {r.from_vet_first} {r.from_vet_last} → Dr. {r.to_vet_first} {r.to_vet_last}</div>
                     <div className="si-7eadb7a8">{r.reason}</div>
                     {r.specialty_needed && <div className="si-029cdd46">{t('hospitalWorkflow.specialty')}: {r.specialty_needed}</div>}
-                    {r.animal_name && <div className="si-db3602ae">{t('hospitalWorkflow.patient')}: {r.animal_name} ({r.animal_species})</div>}
+                    {r.animal_name && <div className="si-db3602ae">{t('hospitalWorkflow.patient')}: {r.animal_name} ({speciesLabel(r.animal_species, t)})</div>}
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: r.status === 'pending' ? '#fef3c7' : r.status === 'accepted' ? '#dcfce7' : r.status === 'completed' ? '#dbeafe' : '#fecaca', color: r.status === 'pending' ? '#92400e' : r.status === 'accepted' ? '#166534' : r.status === 'completed' ? '#1d4ed8' : '#991b1b' }}>{r.status}</span>
                   {r.status === 'pending' && (

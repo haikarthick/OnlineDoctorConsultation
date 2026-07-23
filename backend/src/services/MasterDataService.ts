@@ -7,6 +7,7 @@ export interface MasterSpecies {
   id: string;
   code: string;
   label: string;
+  labelKey: string | null;
   icon: string | null;
   category: string | null;
   hasEarTag: boolean;
@@ -74,7 +75,7 @@ export interface MasterMarketplaceCondition {
 
 function mapSpecies(row: any): MasterSpecies {
   return {
-    id: row.id, code: row.code, label: row.label, icon: row.icon, category: row.category,
+    id: row.id, code: row.code, label: row.label, labelKey: row.label_key, icon: row.icon, category: row.category,
     hasEarTag: row.has_ear_tag, sortOrder: row.sort_order, isActive: row.is_active,
     isProtected: row.is_protected, isMarketplaceEligible: row.is_marketplace_eligible,
     createdAt: row.created_at, updatedAt: row.updated_at,
@@ -135,20 +136,20 @@ class MasterDataService {
     return result.rows.map(mapSpecies);
   }
 
-  async createSpecies(input: { code: string; label: string; icon?: string; category?: string; hasEarTag?: boolean; sortOrder?: number; isMarketplaceEligible?: boolean }): Promise<MasterSpecies> {
+  async createSpecies(input: { code: string; label: string; labelKey?: string; icon?: string; category?: string; hasEarTag?: boolean; sortOrder?: number; isMarketplaceEligible?: boolean }): Promise<MasterSpecies> {
     const result = await database.query(
-      `INSERT INTO master_species (code, label, icon, category, has_ear_tag, sort_order, is_marketplace_eligible)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [input.code, input.label, input.icon ?? null, input.category ?? null, input.hasEarTag ?? false, input.sortOrder ?? 0, input.isMarketplaceEligible ?? false]
+      `INSERT INTO master_species (code, label, label_key, icon, category, has_ear_tag, sort_order, is_marketplace_eligible)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [input.code, input.label, input.labelKey ?? null, input.icon ?? null, input.category ?? null, input.hasEarTag ?? false, input.sortOrder ?? 0, input.isMarketplaceEligible ?? false]
     );
     return mapSpecies(result.rows[0]);
   }
 
-  async updateSpecies(id: string, input: { label?: string; icon?: string; category?: string; hasEarTag?: boolean; sortOrder?: number; isMarketplaceEligible?: boolean }): Promise<MasterSpecies> {
+  async updateSpecies(id: string, input: { label?: string; labelKey?: string; icon?: string; category?: string; hasEarTag?: boolean; sortOrder?: number; isMarketplaceEligible?: boolean }): Promise<MasterSpecies> {
     const setClauses: string[] = [];
     const params: any[] = [];
     let idx = 1;
-    const fieldMap: Record<string, string> = { label: 'label', icon: 'icon', category: 'category', hasEarTag: 'has_ear_tag', sortOrder: 'sort_order', isMarketplaceEligible: 'is_marketplace_eligible' };
+    const fieldMap: Record<string, string> = { label: 'label', labelKey: 'label_key', icon: 'icon', category: 'category', hasEarTag: 'has_ear_tag', sortOrder: 'sort_order', isMarketplaceEligible: 'is_marketplace_eligible' };
     for (const [key, col] of Object.entries(fieldMap)) {
       if ((input as any)[key] !== undefined) { setClauses.push(`${col} = $${idx}`); params.push((input as any)[key]); idx++; }
     }

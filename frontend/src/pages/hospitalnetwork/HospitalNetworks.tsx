@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
 import NetworkRoleMatrix from './NetworkRoleMatrix'
 import '../ModulePage.css'
@@ -763,6 +764,7 @@ const HospitalNetworks: React.FC = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatDate } = useSettings()
+  const { speciesLabel } = useMasterData()
 
   const [activeTab, setActiveTab] = useState<'networks' | 'detail' | 'audit' | 'patients' | 'referrals' | 'leave' | 'roleMatrix' | 'analytics'>('networks')
   const [selectedNetwork, setSelectedNetwork] = useState<HospitalNetwork | null>(null)
@@ -2337,7 +2339,7 @@ const HospitalNetworks: React.FC = () => {
                             {(patient.animals ?? []).map(animal => (
                               <div key={animal.id} className="si-e677ad2d">
                                 <span className="si-8756b2e7">{animal.name}</span>
-                                <span className="si-192b696d">{animal.species}</span>
+                                <span className="si-192b696d">{speciesLabel(animal.species, t)}</span>
                                 {animal.uniqueId && <span className="si-ee839ecf">{animal.uniqueId}</span>}
                                 {((animal as any).enrollmentStatus === 'active' || (animal as any).isEnrolled) && (
                                   <span className="si-f781ec01">
@@ -2411,7 +2413,7 @@ const HospitalNetworks: React.FC = () => {
                                 <tr key={e.id}>
                                   <td>
                                     <div className="si-b2cfcbec">{e.animalName}</div>
-                                    <div className="si-3e1bd646">{e.species}</div>
+                                    <div className="si-3e1bd646">{speciesLabel(e.species, t)}</div>
                                   </td>
                                   <td>
                                     <div>{e.ownerName}</div>
@@ -2955,7 +2957,7 @@ const HospitalNetworks: React.FC = () => {
                     <tr key={ref.id}>
                       <td>
                         <strong>{ref.animalName}</strong><br />
-                        <span className="si-655cd763">{ref.animalSpecies}</span>
+                        <span className="si-655cd763">{speciesLabel(ref.animalSpecies, t)}</span>
                       </td>
                       <td>
                         {ref.fromHospitalName}<br />
@@ -3036,7 +3038,7 @@ const HospitalNetworks: React.FC = () => {
                     <tbody>
                       {transfers.map((t_item: any) => (
                         <tr key={t_item.id}>
-                          <td>{t_item.animalName} ({t_item.animalSpecies})</td>
+                          <td>{t_item.animalName} ({speciesLabel(t_item.animalSpecies, t)})</td>
                           <td>{t_item.fromHospitalName}</td>
                           <td>{t_item.toHospitalName}</td>
                           <td>{t_item.reason}</td>

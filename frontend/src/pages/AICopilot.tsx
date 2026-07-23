@@ -4,6 +4,7 @@ import apiService from '../services/api'
 import './ModulePage.css'
 import { AIChatSession, AIChatMessage } from '../types'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 // Render AI markdown responses nicely
@@ -46,6 +47,7 @@ const AIMessage: React.FC<{ content: string; confidence?: number; sources?: stri
 
 const AICopilot: React.FC = () => {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
 
   const [sessions, setSessions] = useState<AIChatSession[]>([])
   const [selectedSession, setSelectedSession] = useState<AIChatSession | null>(null)
@@ -394,7 +396,7 @@ const AICopilot: React.FC = () => {
                 <div className="si-486971fb" />
                 <div>
                   <span className="si-3ac604f5">Species</span>
-                  <div className="si-6061c14d">{symptomResults.species}</div>
+                  <div className="si-6061c14d">{speciesLabel(symptomResults.species, t)}</div>
                 </div>
                 {symptomResults.provider && (
                   <div className="si-764828b3">Powered by: {symptomResults.provider}</div>

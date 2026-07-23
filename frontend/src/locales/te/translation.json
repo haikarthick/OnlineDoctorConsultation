@@ -7522,5 +7522,18 @@
       "canProduceMilk": "పాలు ఉత్పత్తి చేయగలదు",
       "marketplaceEligible": "మార్కెట్‌ప్లేస్‌లో అమ్మకానికి అర్హత"
     }
+  },
+  "speciesNames": {
+    "dog": "కుక్క", "cat": "పిల్లి", "rabbit": "కుందేలు", "hamster": "హామ్‌స్టర్", "guinea_pig": "గినియా పంది",
+    "gerbil": "గెర్బిల్", "chinchilla": "చించిల్లా", "ferret": "ఫెర్రెట్", "hedgehog": "ముళ్ళపంది",
+    "sugar_glider": "షుగర్ గ్లైడర్", "parrot": "చిలుక", "budgerigar": "బడ్జి", "cockatiel": "కాకటీల్",
+    "lovebird": "లవ్ బర్డ్", "finch": "ఫించ్", "canary": "కెనరీ", "mynah": "గోరువంక", "pigeon": "పావురం",
+    "bird": "పక్షి", "tortoise": "తాబేలు", "turtle": "నీటి తాబేలు", "gecko": "బల్లి",
+    "bearded_dragon": "బియర్డెడ్ డ్రాగన్", "chameleon": "ఊసరవెల్లి", "snake": "పాము", "frog": "కప్ప",
+    "axolotl": "ఆక్సోలోటల్", "ornamental_fish": "అలంకరణ చేప", "koi": "కోయ్ చేప", "arowana": "అరోవానా",
+    "goldfish": "బంగారు చేప", "cattle": "పశువులు", "buffalo": "గేదె", "horse": "గుర్రం", "donkey": "గాడిద",
+    "sheep": "గొర్రె", "goat": "మేక", "pig": "పంది", "camel": "ఒంటె", "yak": "యాక్", "deer": "జింక",
+    "chicken": "కోడి", "duck": "బాతు", "turkey": "టర్కీ కోడి", "quail": "పులుగు", "emu": "ఈము",
+    "ostrich": "ఉష్ట్రపక్షి", "peacock": "నెమలి", "llama": "లామా", "alpaca": "అల్పాకా", "other": "ఇతరులు"
   }
 }

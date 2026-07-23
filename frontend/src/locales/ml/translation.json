@@ -7505,5 +7505,18 @@
       "canProduceMilk": "പാൽ ഉത്പാദിപ്പിക്കാം",
       "marketplaceEligible": "മാർക്കറ്റ്‌പ്ലേസിൽ വിൽക്കാവുന്നത്"
     }
+  },
+  "speciesNames": {
+    "dog": "നായ", "cat": "പൂച്ച", "rabbit": "മുയൽ", "hamster": "ഹാംസ്റ്റർ", "guinea_pig": "ഗിനിപ്പന്നി",
+    "gerbil": "ജെർബിൽ", "chinchilla": "ചിഞ്ചില്ല", "ferret": "ഫെററ്റ്", "hedgehog": "മുള്ളൻപന്നി",
+    "sugar_glider": "ഷുഗർ ഗ്ലൈഡർ", "parrot": "തത്ത", "budgerigar": "ബഡ്ജി", "cockatiel": "കോക്കാറ്റിയേൽ",
+    "lovebird": "ലവ്ബേർഡ്", "finch": "ഫിഞ്ച്", "canary": "കാനറി", "mynah": "മൈന", "pigeon": "പ്രാവ്",
+    "bird": "പക്ഷി", "tortoise": "ആമ", "turtle": "ജല ആമ", "gecko": "പല്ലി",
+    "bearded_dragon": "ബിയേർഡഡ് ഡ്രാഗൺ", "chameleon": "അഴിഞ്ഞാൻ", "snake": "പാമ്പ്", "frog": "തവള",
+    "axolotl": "ആക്സൊലോട്ടിൽ", "ornamental_fish": "അലങ്കാര മത്സ്യം", "koi": "കോയ് മത്സ്യം", "arowana": "അരോവാന",
+    "goldfish": "സ്വർണ്ണ മത്സ്യം", "cattle": "കന്നുകാലി", "buffalo": "എരുമ", "horse": "കുതിര", "donkey": "കഴുത",
+    "sheep": "ചെമ്മരിയാട്", "goat": "ആട്", "pig": "പന്നി", "camel": "ഒട്ടകം", "yak": "യാക്ക്", "deer": "മാൻ",
+    "chicken": "കോഴി", "duck": "താറാവ്", "turkey": "ടർക്കി", "quail": "കാട", "emu": "ഈമു",
+    "ostrich": "ഒട്ടകപ്പക്ഷി", "peacock": "മയിൽ", "llama": "ലാമ", "alpaca": "ആൽപ്പാക്ക", "other": "മറ്റുള്ളവ"
   }
 }

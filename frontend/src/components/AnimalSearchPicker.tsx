@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 import apiService from '../services/api'
 
 export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, onRegisterNew, hospitalId }: {
   onSelect: (animal: any) => void; selectedAnimal: any; label?: string; onRegisterNew?: (query: string) => void; hospitalId?: string;
 }) {
   const { t } = useTranslation()
+  const { speciesLabel } = useMasterData()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<any[]>([])
   const [searching, setSearching] = useState(false)
@@ -44,7 +46,7 @@ export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, on
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: 15, color: '#0c4a6e' }}>🐾 {selectedAnimal.name}</div>
-            <div style={{ fontSize: 13, color: '#0369a1' }}>{selectedAnimal.species}{selectedAnimal.breed ? ` — ${selectedAnimal.breed}` : ''}{selectedAnimal.weight ? ` • ${selectedAnimal.weight}kg` : ''}</div>
+            <div style={{ fontSize: 13, color: '#0369a1' }}>{speciesLabel(selectedAnimal.species, t)}{selectedAnimal.breed ? ` — ${selectedAnimal.breed}` : ''}{selectedAnimal.weight ? ` • ${selectedAnimal.weight}kg` : ''}</div>
             <div style={{ fontSize: 12, color: '#64748b' }}>Owner: {selectedAnimal.owner_first_name} {selectedAnimal.owner_last_name}{selectedAnimal.owner_phone ? ` • ${selectedAnimal.owner_phone}` : ''}</div>
           </div>
           <button onClick={() => onSelect(null)} style={{ background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>✕ Change</button>
@@ -89,7 +91,7 @@ export default function AnimalSearchPicker({ onSelect, selectedAnimal, label, on
               style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f3f4f6', transition: 'background .1s' }}
               onMouseEnter={e => (e.currentTarget.style.background = '#f0f9ff')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>🐾 {a.name} <span style={{ fontWeight: 400, color: '#6b7280', fontSize: 12 }}>({a.species}{a.breed ? ` — ${a.breed}` : ''})</span></div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>🐾 {a.name} <span style={{ fontWeight: 400, color: '#6b7280', fontSize: 12 }}>({speciesLabel(a.species, t)}{a.breed ? ` — ${a.breed}` : ''})</span></div>
               <div style={{ fontSize: 12, color: '#64748b' }}>Owner: {a.owner_first_name} {a.owner_last_name}{a.owner_phone ? ` • ${a.owner_phone}` : ''}</div>
             </div>
           ))}

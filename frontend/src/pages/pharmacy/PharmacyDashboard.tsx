@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 import client from '../../services/api/client'
 import './PharmacyDashboard.css'
@@ -83,6 +84,7 @@ const TAB_ICONS: Record<Tab, string> = {
 export default function PharmacyDashboard() {
   const { t } = useTranslation()
   const { formatCurrency } = useSettings()
+  const { speciesLabel } = useMasterData()
 
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([])
   const [selectedPharmacy, setSelectedPharmacy] = useState<Pharmacy | null>(null)
@@ -288,7 +290,7 @@ export default function PharmacyDashboard() {
                       <tr key={rx.id}>
                         <td>
                           <strong>{rx.pet_name || '—'}</strong>
-                          {rx.animal_species && <small className="si-1a0c0bfa">{rx.animal_species}</small>}
+                          {rx.animal_species && <small className="si-1a0c0bfa">{speciesLabel(rx.animal_species, t)}</small>}
                         </td>
                         <td>{rx.owner_name || '—'}</td>
                         <td>{rx.vet_name || '—'}</td>
@@ -340,7 +342,7 @@ export default function PharmacyDashboard() {
                       <tr key={rx.id}>
                         <td>
                           <strong>{rx.pet_name || '—'}</strong>
-                          {rx.animal_species && <small className="si-1a0c0bfa">{rx.animal_species}</small>}
+                          {rx.animal_species && <small className="si-1a0c0bfa">{speciesLabel(rx.animal_species, t)}</small>}
                         </td>
                         <td>{rx.owner_name || '—'}</td>
                         <td className="si-4a370a4e">{rx.medication_names || '—'}</td>

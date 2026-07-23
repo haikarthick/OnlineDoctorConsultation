@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
+import type { TFunction } from 'i18next'
 import apiService from '../services/api'
 import {
   SPECIES_CATEGORIES as FALLBACK_SPECIES_CATEGORIES,
@@ -16,6 +17,16 @@ import {
 // The admin-configurable is_marketplace_eligible flag (migration 023) replaces both arrays
 // with a single flag per species — see MEMORY.md / marketplace species-picker note.
 const FALLBACK_MARKETPLACE_ELIGIBLE_SPECIES = Array.from(new Set([...MARKETPLACE_FARMER_SPECIES, ...MARKETPLACE_PET_OWNER_SPECIES]))
+
+/** Same deterministic transform as migration 024's SQL backfill (lower + non-alnum -> _),
+ *  so the pre-load fallback resolves translations immediately instead of showing English
+ *  until the /master-data/species fetch completes. */
+function deriveLabelKey(code: string): string {
+  return `speciesNames.${code.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`
+}
+const FALLBACK_SPECIES_LABEL_KEYS: Record<string, string> = Object.fromEntries(
+  Object.keys(FALLBACK_SPECIES_ICONS).map(code => [code, deriveLabelKey(code)])
+)
 
 // Fallback marketplace categories/conditions — mirrors the pre-migration hardcoded
 // CATEGORY_KEYS/condition <option>s in Marketplace.tsx, used only until the live
@@ -48,6 +59,10 @@ interface MasterDataContextType {
   /** Species codes eligible for the Marketplace "sell an animal" picker — admin-configurable
    *  via master-data CRUD (is_marketplace_eligible), not a hardcoded list. */
   marketplaceEligibleSpecies: string[]
+  /** Translated species display name — replaces rendering the raw species code directly
+   *  (e.g. "Buffalo") which never translated regardless of locale. Falls back to the raw
+   *  code if no translation key resolves (defensive; every seeded species has one). */
+  speciesLabel: (species: string | undefined, t: TFunction) => string
   marketplaceCategories: MasterMarketplaceCategory[]
   marketplaceConditions: MasterMarketplaceCondition[]
   /** Resolve a label_key-or-label master-data row to display text (labelKey takes priority when set). */
@@ -63,6 +78,7 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
   const [speciesIcons, setSpeciesIcons] = useState<Record<string, string>>(FALLBACK_SPECIES_ICONS)
   const [earTagSpecies, setEarTagSpecies] = useState<string[]>(FALLBACK_EAR_TAG_SPECIES)
   const [marketplaceEligibleSpecies, setMarketplaceEligibleSpecies] = useState<string[]>(FALLBACK_MARKETPLACE_ELIGIBLE_SPECIES)
+  const [speciesLabelKeys, setSpeciesLabelKeys] = useState<Record<string, string>>(FALLBACK_SPECIES_LABEL_KEYS)
   const [marketplaceCategories, setMarketplaceCategories] = useState<MasterMarketplaceCategory[]>(FALLBACK_MARKETPLACE_CATEGORIES)
   const [marketplaceConditions, setMarketplaceConditions] = useState<MasterMarketplaceCondition[]>(FALLBACK_MARKETPLACE_CONDITIONS)
 
@@ -99,6 +115,9 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
       setSpeciesIcons(iconMap)
       setEarTagSpecies(earTags)
       setMarketplaceEligibleSpecies(species.filter(s => s.isMarketplaceEligible).map(s => s.code))
+      const labelKeyMap: Record<string, string> = {}
+      for (const s of species) { if (s.labelKey) labelKeyMap[s.code] = s.labelKey }
+      setSpeciesLabelKeys(labelKeyMap)
 
       const breedMap: Record<string, string[]> = {}
       for (const b of [...breeds].sort((a, b2) => a.sortOrder - b2.sortOrder)) {
@@ -156,10 +175,17 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
     return item.label || ''
   }, [])
 
+  const speciesLabel = useCallback((species: string | undefined, t: TFunction): string => {
+    if (!species) return ''
+    const key = speciesLabelKeys[species]
+    if (key) return t(key, species)
+    return species
+  }, [speciesLabelKeys])
+
   return (
     <MasterDataContext.Provider value={{
       speciesCategories, speciesIcon, breedsForSpecies, classTermsForSpecies, findClassTerm,
-      earTagSpecies, marketplaceEligibleSpecies, marketplaceCategories, marketplaceConditions, resolveLabel,
+      earTagSpecies, marketplaceEligibleSpecies, speciesLabel, marketplaceCategories, marketplaceConditions, resolveLabel,
     }}>
       {children}
     </MasterDataContext.Provider>

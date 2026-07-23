@@ -181,7 +181,7 @@ function VaccineTable({ details, t }: { details?: { vaccines?: VaccinationEntry[
 const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, onClose }) => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
-  const { findClassTerm } = useMasterData()
+  const { findClassTerm, speciesLabel } = useMasterData()
   const tpl = { ...DEFAULT_TEMPLATE, ...template }
   const overlayRef = useRef<HTMLDivElement>(null)
   const docRef = useRef<HTMLDivElement>(null)
@@ -351,7 +351,7 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
               <span className="cert-info-label">{t('certificatePrint.patient')}:</span>
               <span className="cert-info-value">
                 <strong>{cert.animalName || '—'}</strong>
-                {cert.animalSpecies && ` (${cert.animalSpecies}${cert.animalBreed ? ', ' + cert.animalBreed : ''})`}
+                {cert.animalSpecies && ` (${speciesLabel(cert.animalSpecies, t)}${cert.animalBreed ? ', ' + cert.animalBreed : ''})`}
               </span>
             </div>
             <div className="cert-info-row">
@@ -585,7 +585,7 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
                 {cert.herdDetails.species && (
                   <>
                     <span className="cert-kv-key">{t('certificateWriter.herdSpecies')}:</span>
-                    <span className="cert-kv-val">{cert.herdDetails.species}</span>
+                    <span className="cert-kv-val">{speciesLabel(cert.herdDetails.species, t)}</span>
                   </>
                 )}
                 {cert.herdDetails.purpose && (

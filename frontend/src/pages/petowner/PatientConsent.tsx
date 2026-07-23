@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import apiService from '../../services/api'
 import SearchSelect, { SearchSelectOption } from '../../components/SearchSelect'
 import '../../styles/modules.css'
@@ -126,6 +127,7 @@ const Toggle: React.FC<ToggleProps> = ({ checked, onChange, label, note }) => (
 const PatientConsentPage: React.FC = () => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
+  const { speciesLabel } = useMasterData()
 
   const [animals, setAnimals] = useState<Animal[]>([])
   const [animalsLoading, setAnimalsLoading] = useState(true)
@@ -386,7 +388,7 @@ const PatientConsentPage: React.FC = () => {
                   <div className="pc-animal-avatar">{speciesEmoji(animal.species)}</div>
                   <div className="pc-animal-info">
                     <div className="pc-animal-name">{animal.name}</div>
-                    <div className="pc-animal-species">{animal.species}</div>
+                    <div className="pc-animal-species">{speciesLabel(animal.species, t)}</div>
                   </div>
                   <span className={'pc-consent-count-badge' + (activeCount === 0 ? ' zero' : '')}>
                     {activeCount}

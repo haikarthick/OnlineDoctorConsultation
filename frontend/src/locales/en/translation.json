@@ -7504,5 +7504,18 @@
       "canProduceMilk": "Can produce milk",
       "marketplaceEligible": "Sellable on Marketplace"
     }
+  },
+  "speciesNames": {
+    "dog": "Dog", "cat": "Cat", "rabbit": "Rabbit", "hamster": "Hamster", "guinea_pig": "Guinea Pig",
+    "gerbil": "Gerbil", "chinchilla": "Chinchilla", "ferret": "Ferret", "hedgehog": "Hedgehog",
+    "sugar_glider": "Sugar Glider", "parrot": "Parrot", "budgerigar": "Budgerigar", "cockatiel": "Cockatiel",
+    "lovebird": "Lovebird", "finch": "Finch", "canary": "Canary", "mynah": "Mynah", "pigeon": "Pigeon",
+    "bird": "Bird", "tortoise": "Tortoise", "turtle": "Turtle", "gecko": "Gecko",
+    "bearded_dragon": "Bearded Dragon", "chameleon": "Chameleon", "snake": "Snake", "frog": "Frog",
+    "axolotl": "Axolotl", "ornamental_fish": "Ornamental Fish", "koi": "Koi", "arowana": "Arowana",
+    "goldfish": "Goldfish", "cattle": "Cattle", "buffalo": "Buffalo", "horse": "Horse", "donkey": "Donkey",
+    "sheep": "Sheep", "goat": "Goat", "pig": "Pig", "camel": "Camel", "yak": "Yak", "deer": "Deer",
+    "chicken": "Chicken", "duck": "Duck", "turkey": "Turkey", "quail": "Quail", "emu": "Emu",
+    "ostrich": "Ostrich", "peacock": "Peacock", "llama": "Llama", "alpaca": "Alpaca", "other": "Other"
   }
 }

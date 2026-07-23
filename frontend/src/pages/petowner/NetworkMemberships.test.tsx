@@ -21,6 +21,12 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
+vi.mock('../../context/MasterDataContext', () => ({
+  useMasterData: () => ({
+    speciesLabel: (species: string) => species,
+  }),
+}))
+
 const mockedApi = apiService as unknown as {
   getMyNetworkEnrollments: ReturnType<typeof vi.fn>
 }

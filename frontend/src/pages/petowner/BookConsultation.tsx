@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import apiService from '../../services/api'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 import { VetProfile, TimeSlot, Animal } from '../../types'
 import PaymentCheckout from '../../components/PaymentCheckout'
 import '../../styles/modules.css'
@@ -30,6 +31,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { formatCurrency, formatSlotTime } = useSettings()
+  const { speciesLabel } = useMasterData()
   const [step, setStep] = useState(1)
   const [vets, setVets] = useState<VetProfile[]>([])
   const [animals, setAnimals] = useState<Animal[]>([])
@@ -133,7 +135,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
         if (animal) {
           setSelectionMode('individual')
           setSelectedAnimal(preselectedAnimalId)
-          setPrefilledContext({ animalName: `${animal.name} (${animal.species}${animal.breed ? ' • ' + animal.breed : ''})` })
+          setPrefilledContext({ animalName: `${animal.name} (${speciesLabel(animal.species, t)}${animal.breed ? ' • ' + animal.breed : ''})` })
         }
       }
 
@@ -170,7 +172,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
               const animal = entAnimalList.find((a: any) => a.id === preselectedAnimalId)
               if (animal) {
                 setSelectedAnimal(preselectedAnimalId)
-                prefillCtx.animalName = `${animal.name} (${animal.species})`
+                prefillCtx.animalName = `${animal.name} (${speciesLabel(animal.species, t)})`
               }
             }
           } catch (err: any) {
@@ -757,7 +759,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                         <option value="">-- {t('bookConsultation.selectAnimalOptional')} --</option>
                         {filteredEnterpriseAnimals.map((a: any) => (
                           <option key={a.id} value={a.id}>
-                            {a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}
+                            {a.name} — {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}
                           </option>
                         ))}
                       </select>
@@ -826,7 +828,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                     >
                       <option value="">-- {t('bookConsultation.selectPetOptional')} --</option>
                       {animals.map(a => (
-                        <option key={a.id} value={a.id}>{a.name} — {a.species}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
+                        <option key={a.id} value={a.id}>{a.name} — {speciesLabel(a.species, t)}{a.breed ? ` / ${a.breed}` : ''}{a.uniqueId ? ` [${a.uniqueId}]` : ''}</option>
                       ))}
                     </select>
                   )}
@@ -990,7 +992,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                       <div className="si-f48bb60f">
                         <span className="si-48a0b045">{t('bookConsultation.animalLabel')}:</span>
                         <p className="si-3611a35f">
-                          {selectedAnimalObj.name} — {selectedAnimalObj.species}
+                          {selectedAnimalObj.name} — {speciesLabel(selectedAnimalObj.species, t)}
                           {selectedAnimalObj.breed ? ` / ${selectedAnimalObj.breed}` : ''}
                         </p>
                       </div>

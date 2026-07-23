@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
+import { useMasterData } from '../../context/MasterDataContext'
 
 interface Medication {
   name: string
@@ -42,6 +43,7 @@ type Decision = 'approved' | 'rejected' | 'needs_clarification'
 export default function PrescriptionReviewModal({ prescription, onClose, onDone }: Props) {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
+  const { speciesLabel } = useMasterData()
   const [checks, setChecks] = useState({ dosage_ok: false, allergy_ok: false, interaction_ok: false, stock_ok: false })
   const [decision, setDecision] = useState<Decision>('approved')
   const [rejectionReason, setRejectionReason] = useState('')
@@ -95,7 +97,7 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
           <div className="si-9d036184">
             <div>
               <strong>🐾 {prescription.pet_name}</strong>
-              {prescription.animal_species && <span className="si-4cb713cc">({prescription.animal_species})</span>}
+              {prescription.animal_species && <span className="si-4cb713cc">({speciesLabel(prescription.animal_species, t)})</span>}
               <br />
               <span className="si-c8a87bc3">👤 {prescription.owner_name}</span>
               {prescription.vet_name && (

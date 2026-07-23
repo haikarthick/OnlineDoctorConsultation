@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import AutocompleteInput from '../components/AutocompleteInput'
 import './ModulePage.css'
 import { useTranslation } from 'react-i18next'
+import { useMasterData } from '../context/MasterDataContext'
 
 interface Enterprise { id: string; name: string }
 interface Animal { id: string; name: string; species: string; breed?: string; uniqueId?: string; groupName?: string; groupId?: string }
@@ -31,6 +32,7 @@ const HerdMedicalManagement: React.FC = () => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
   const { user } = useAuth()
+  const { speciesLabel } = useMasterData()
   const role = user?.role || ''
   const isVet = role === 'veterinarian'
   const isAdmin = role === 'admin'
@@ -326,7 +328,7 @@ const HerdMedicalManagement: React.FC = () => {
       <option value="">{t('herdMedical.selectAnimal')}</option>
       {animals.map(a => (
         <option key={a.id} value={a.id}>
-          {a.name} ({a.species}{a.breed ? ' - ' + a.breed : ''}{a.groupName ? ' | ' + a.groupName : ''})
+          {a.name} ({speciesLabel(a.species, t)}{a.breed ? ' - ' + a.breed : ''}{a.groupName ? ' | ' + a.groupName : ''})
         </option>
       ))}
     </select>
@@ -415,7 +417,7 @@ const HerdMedicalManagement: React.FC = () => {
                   {stats.recentRecords.map((r: any) => (
                     <tr key={r.id}>
                       <td>{fmtDate(r.createdAt)}</td>
-                      <td>{r.animalName} ({r.animalSpecies})</td>
+                      <td>{r.animalName} ({speciesLabel(r.animalSpecies, t)})</td>
                       <td>{RECORD_TYPE_ICONS[r.recordType] || ''} {r.recordType?.replace(/_/g, ' ')}</td>
                       <td>{r.title}</td>
                       <td><span style={{ backgroundColor: SEVERITY_COLORS[r.severity] || '#6b7280', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8em' }}>{r.severity}</span></td>
@@ -469,7 +471,7 @@ const HerdMedicalManagement: React.FC = () => {
                 {records.map((r: any) => (
                   <tr key={r.id}>
                     <td>{fmtDate(r.createdAt)}</td>
-                    <td><strong>{r.animalName}</strong><br /><small className="si-50edd4e9">{r.animalSpecies}{r.animalBreed ? ' - ' + r.animalBreed : ''}</small></td>
+                    <td><strong>{r.animalName}</strong><br /><small className="si-50edd4e9">{speciesLabel(r.animalSpecies, t)}{r.animalBreed ? ' - ' + r.animalBreed : ''}</small></td>
                     <td>{r.groupName || '-'}</td>
                     <td>{RECORD_TYPE_ICONS[r.recordType] || ''} {r.recordType?.replace(/_/g, ' ')}</td>
                     <td>{r.title}</td>
@@ -523,7 +525,7 @@ const HerdMedicalManagement: React.FC = () => {
             <tbody>
               {vaccinations.map((v: any) => (
                 <tr key={v.id}>
-                  <td><strong>{v.animalName}</strong><br /><small className="si-50edd4e9">{v.animalSpecies}</small></td>
+                  <td><strong>{v.animalName}</strong><br /><small className="si-50edd4e9">{speciesLabel(v.animalSpecies, t)}</small></td>
                   <td>{v.groupName || '-'}</td>
                   <td><strong>{v.vaccineName}</strong></td>
                   <td>{v.vaccineType || '-'}</td>
@@ -568,7 +570,7 @@ const HerdMedicalManagement: React.FC = () => {
             <tbody>
               {allergies.map((a: any, i: number) => (
                 <tr key={a.id || i}>
-                  <td><strong>{a.animalName}</strong> ({a.animalSpecies})</td>
+                  <td><strong>{a.animalName}</strong> ({speciesLabel(a.animalSpecies, t)})</td>
                   <td><strong>{a.allergen}</strong></td>
                   <td>{a.reaction || '-'}</td>
                   <td><span style={{ backgroundColor: SEVERITY_COLORS[a.severity] || '#6b7280', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8em' }}>{a.severity || 'normal'}</span></td>
@@ -604,7 +606,7 @@ const HerdMedicalManagement: React.FC = () => {
               {labResults.map((l: any, i: number) => (
                 <tr key={l.id || i}>
                   <td>{fmtDate(l.testDate || l.createdAt)}</td>
-                  <td><strong>{l.animalName}</strong> ({l.animalSpecies})</td>
+                  <td><strong>{l.animalName}</strong> ({speciesLabel(l.animalSpecies, t)})</td>
                   <td><strong>{l.testName}</strong></td>
                   <td>{l.testCategory || '-'}</td>
                   <td style={{ color: l.isAbnormal ? '#dc2626' : undefined, fontWeight: l.isAbnormal ? 600 : undefined }}>{l.resultValue || t('common.pending')} {l.unit || ''}</td>
