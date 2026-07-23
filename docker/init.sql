@@ -3499,6 +3499,15 @@ CREATE TABLE IF NOT EXISTS master_species (
   -- newly admin-added species don't silently become sellable; the seed data below
   -- explicitly enables it for the species that were already in the old hardcoded picker.
   is_marketplace_eligible BOOLEAN NOT NULL DEFAULT false,
+  -- Per-locale label overrides (migration 025) — lets an admin type all 6 language
+  -- labels directly when adding a species, no labelKey/i18n-file/deploy needed.
+  -- Checked first by the frontend's speciesLabel() resolver; NULL falls back to
+  -- the label_key/i18n-key path above, same as pre-seeded species always have.
+  label_hi VARCHAR(150),
+  label_kn VARCHAR(150),
+  label_ml VARCHAR(150),
+  label_ta VARCHAR(150),
+  label_te VARCHAR(150),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

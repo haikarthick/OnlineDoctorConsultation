@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
 import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
 import {
   SPECIES_CATEGORIES as FALLBACK_SPECIES_CATEGORIES,
@@ -79,8 +80,13 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
   const [earTagSpecies, setEarTagSpecies] = useState<string[]>(FALLBACK_EAR_TAG_SPECIES)
   const [marketplaceEligibleSpecies, setMarketplaceEligibleSpecies] = useState<string[]>(FALLBACK_MARKETPLACE_ELIGIBLE_SPECIES)
   const [speciesLabelKeys, setSpeciesLabelKeys] = useState<Record<string, string>>(FALLBACK_SPECIES_LABEL_KEYS)
+  /** Per-locale label overrides admins typed directly on a species row (migration 025) —
+   *  keyed by species code, then by locale ('hi'/'kn'/'ml'/'ta'/'te'; 'en' comes from `label`).
+   *  Checked before the labelKey/i18n-key path in speciesLabel() below. */
+  const [speciesTranslatedLabels, setSpeciesTranslatedLabels] = useState<Record<string, Record<string, string>>>({})
   const [marketplaceCategories, setMarketplaceCategories] = useState<MasterMarketplaceCategory[]>(FALLBACK_MARKETPLACE_CATEGORIES)
   const [marketplaceConditions, setMarketplaceConditions] = useState<MasterMarketplaceCondition[]>(FALLBACK_MARKETPLACE_CONDITIONS)
+  const { i18n } = useTranslation()
 
   const loadMasterData = useCallback(async () => {
     try {
@@ -116,8 +122,20 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
       setEarTagSpecies(earTags)
       setMarketplaceEligibleSpecies(species.filter(s => s.isMarketplaceEligible).map(s => s.code))
       const labelKeyMap: Record<string, string> = {}
-      for (const s of species) { if (s.labelKey) labelKeyMap[s.code] = s.labelKey }
+      const translatedLabelMap: Record<string, Record<string, string>> = {}
+      for (const s of species) {
+        if (s.labelKey) labelKeyMap[s.code] = s.labelKey
+        const overrides: Record<string, string> = {}
+        if (s.label) overrides.en = s.label
+        if (s.labelHi) overrides.hi = s.labelHi
+        if (s.labelKn) overrides.kn = s.labelKn
+        if (s.labelMl) overrides.ml = s.labelMl
+        if (s.labelTa) overrides.ta = s.labelTa
+        if (s.labelTe) overrides.te = s.labelTe
+        if (Object.keys(overrides).length > 0) translatedLabelMap[s.code] = overrides
+      }
       setSpeciesLabelKeys(labelKeyMap)
+      setSpeciesTranslatedLabels(translatedLabelMap)
 
       const breedMap: Record<string, string[]> = {}
       for (const b of [...breeds].sort((a, b2) => a.sortOrder - b2.sortOrder)) {
@@ -177,10 +195,13 @@ export const MasterDataProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const speciesLabel = useCallback((species: string | undefined, t: TFunction): string => {
     if (!species) return ''
+    const lang = (i18n.language || 'en').split('-')[0]
+    const override = speciesTranslatedLabels[species]?.[lang]
+    if (override) return override
     const key = speciesLabelKeys[species]
     if (key) return t(key, species)
     return species
-  }, [speciesLabelKeys])
+  }, [speciesLabelKeys, speciesTranslatedLabels, i18n.language])
 
   return (
     <MasterDataContext.Provider value={{

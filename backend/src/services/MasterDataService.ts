@@ -8,6 +8,12 @@ export interface MasterSpecies {
   code: string;
   label: string;
   labelKey: string | null;
+  /** Per-locale label overrides — admin-typed, take priority over labelKey when present. */
+  labelHi: string | null;
+  labelKn: string | null;
+  labelMl: string | null;
+  labelTa: string | null;
+  labelTe: string | null;
   icon: string | null;
   category: string | null;
   hasEarTag: boolean;
@@ -75,7 +81,9 @@ export interface MasterMarketplaceCondition {
 
 function mapSpecies(row: any): MasterSpecies {
   return {
-    id: row.id, code: row.code, label: row.label, labelKey: row.label_key, icon: row.icon, category: row.category,
+    id: row.id, code: row.code, label: row.label, labelKey: row.label_key,
+    labelHi: row.label_hi, labelKn: row.label_kn, labelMl: row.label_ml, labelTa: row.label_ta, labelTe: row.label_te,
+    icon: row.icon, category: row.category,
     hasEarTag: row.has_ear_tag, sortOrder: row.sort_order, isActive: row.is_active,
     isProtected: row.is_protected, isMarketplaceEligible: row.is_marketplace_eligible,
     createdAt: row.created_at, updatedAt: row.updated_at,
@@ -136,20 +144,24 @@ class MasterDataService {
     return result.rows.map(mapSpecies);
   }
 
-  async createSpecies(input: { code: string; label: string; labelKey?: string; icon?: string; category?: string; hasEarTag?: boolean; sortOrder?: number; isMarketplaceEligible?: boolean }): Promise<MasterSpecies> {
+  async createSpecies(input: { code: string; label: string; labelKey?: string; labelHi?: string; labelKn?: string; labelMl?: string; labelTa?: string; labelTe?: string; icon?: string; category?: string; hasEarTag?: boolean; sortOrder?: number; isMarketplaceEligible?: boolean }): Promise<MasterSpecies> {
     const result = await database.query(
-      `INSERT INTO master_species (code, label, label_key, icon, category, has_ear_tag, sort_order, is_marketplace_eligible)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [input.code, input.label, input.labelKey ?? null, input.icon ?? null, input.category ?? null, input.hasEarTag ?? false, input.sortOrder ?? 0, input.isMarketplaceEligible ?? false]
+      `INSERT INTO master_species (code, label, label_key, label_hi, label_kn, label_ml, label_ta, label_te, icon, category, has_ear_tag, sort_order, is_marketplace_eligible)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+      [input.code, input.label, input.labelKey ?? null, input.labelHi ?? null, input.labelKn ?? null, input.labelMl ?? null, input.labelTa ?? null, input.labelTe ?? null, input.icon ?? null, input.category ?? null, input.hasEarTag ?? false, input.sortOrder ?? 0, input.isMarketplaceEligible ?? false]
     );
     return mapSpecies(result.rows[0]);
   }
 
-  async updateSpecies(id: string, input: { label?: string; labelKey?: string; icon?: string; category?: string; hasEarTag?: boolean; sortOrder?: number; isMarketplaceEligible?: boolean }): Promise<MasterSpecies> {
+  async updateSpecies(id: string, input: { label?: string; labelKey?: string; labelHi?: string; labelKn?: string; labelMl?: string; labelTa?: string; labelTe?: string; icon?: string; category?: string; hasEarTag?: boolean; sortOrder?: number; isMarketplaceEligible?: boolean }): Promise<MasterSpecies> {
     const setClauses: string[] = [];
     const params: any[] = [];
     let idx = 1;
-    const fieldMap: Record<string, string> = { label: 'label', labelKey: 'label_key', icon: 'icon', category: 'category', hasEarTag: 'has_ear_tag', sortOrder: 'sort_order', isMarketplaceEligible: 'is_marketplace_eligible' };
+    const fieldMap: Record<string, string> = {
+      label: 'label', labelKey: 'label_key',
+      labelHi: 'label_hi', labelKn: 'label_kn', labelMl: 'label_ml', labelTa: 'label_ta', labelTe: 'label_te',
+      icon: 'icon', category: 'category', hasEarTag: 'has_ear_tag', sortOrder: 'sort_order', isMarketplaceEligible: 'is_marketplace_eligible',
+    };
     for (const [key, col] of Object.entries(fieldMap)) {
       if ((input as any)[key] !== undefined) { setClauses.push(`${col} = $${idx}`); params.push((input as any)[key]); idx++; }
     }
