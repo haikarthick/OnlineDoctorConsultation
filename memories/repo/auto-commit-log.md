@@ -5096,3 +5096,39 @@
 </details>
 
 ---
+
+## 2026-07-23 05:17 · `273a4ae` · OTHER
+
+**Commit:** feat(pharmacy): deep re-audit + 18-gap fix — security, billing/GST, print, cross-module visibility  
+**Author:** haikarthick  
+**Categories:** API · SERVICE · UTILS · DB · DB-SCHEMA · UI · i18n · MEMORY  
+**Memory:** ✅ Memory updated
+
+<details>
+<summary>Files changed (32)</summary>
+
+  - backend/src/routes/index.ts
+  - backend/src/services/PaymentService.ts
+  - backend/src/services/PrescriptionService.ts
+  - backend/src/services/StaffWorkflowService.ts
+  - backend/src/services/payment/InvoiceService.ts
+  - backend/src/services/payment/PaymentOrchestrator.ts
+  - backend/src/utils/database.ts
+  - backend/src/utils/scheduler.ts
+  - docker/init.sql
+  - docker/seed-demo-data.sql
+  - frontend/src/components/PrescriptionPrintView.tsx
+  - frontend/src/components/pharmacy/DispensingReceiptView.css
+  - frontend/src/components/pharmacy/DispensingReceiptView.tsx
+  - frontend/src/components/pharmacy/MedicationLabelPrint.css
+  - frontend/src/components/pharmacy/MedicationLabelPrint.tsx
+  - frontend/src/locales/en/translation.json
+  - frontend/src/locales/hi/translation.json
+  - frontend/src/locales/kn/translation.json
+  - frontend/src/locales/ml/translation.json
+  - frontend/src/locales/ta/translation.json
+  - ... and 12 more
+
+</details>
+
+---

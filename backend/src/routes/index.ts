@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import logger from '../utils/logger';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
-import { requireNetworkAccess, NetworkAccessRequest } from '../middleware/networkAccess';
+import { requireNetworkAccess, NetworkAccessRequest, resolveNetworkAccess } from '../middleware/networkAccess';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
 import {
@@ -1178,12 +1178,12 @@ router.get('/hospital-networks/:id/analytics', authMiddleware, asyncHandler(asyn
     const networkId = req.params.id;
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
-    if (userRole !== 'admin') {
-      const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
-      if (!member || !['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor'].includes(member.networkRole)) {
-        res.status(403).json({ success: false, message: 'Access denied' });
-        return;
-      }
+    // Was a hardcoded role list that included auditor, whose networkDashboardStats
+    // matrix default is actually false — now honors the configurable matrix.
+    const access = await resolveNetworkAccess(networkId, userId, userRole, 'networkDashboardStats');
+    if (!access.allowed) {
+      res.status(access.reason === 'not_member' ? 404 : 403).json({ success: false, message: 'Access denied' });
+      return;
     }
     const analytics = await HospitalNetworkService.getNetworkAnalytics(networkId);
     const trend = await HospitalNetworkService.getPatientEnrollmentTrend(networkId);
@@ -1205,12 +1205,12 @@ router.get('/hospital-networks/:id/compliance-report', authMiddleware, asyncHand
       res.status(400).json({ success: false, message: 'from and to date params are required' });
       return;
     }
-    if (userRole !== 'admin') {
-      const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
-      if (!member || !['corporate_admin', 'compliance_officer', 'auditor'].includes(member.networkRole)) {
-        res.status(403).json({ success: false, message: 'Access denied' });
-        return;
-      }
+    // Matches matrix defaults exactly (hospital_director=false, others=true) — converted
+    // to the matrix-driven check for consistency with the rest of this route family.
+    const access = await resolveNetworkAccess(networkId, userId, userRole, 'exportComplianceReport');
+    if (!access.allowed) {
+      res.status(access.reason === 'not_member' ? 404 : 403).json({ success: false, message: 'Access denied' });
+      return;
     }
     const report = await HospitalNetworkService.generateComplianceReport(networkId, from, to);
     res.json({ success: true, data: report });
@@ -2557,7 +2557,11 @@ router.patch('/referrals/:id/status', authMiddleware, asyncHandler(async (req: R
   return StaffWorkflowController.updateReferralStatus(req, res);
 }));
 // Inpatient / Boarding
-// Network-aware inpatient access helper
+// Network-aware inpatient access helper — membership check delegated to the same
+// resolveNetworkAccess() core used by requireNetworkAccess/ensureNetworkAccess (see
+// [[feedback-network-hospital-change-approval]]); only the hospital→network resolution
+// is specific to this helper. Non-membership responds 404 (not 403) — anti-enumeration,
+// consistent with VetHospitalService's getHospital/listDoctors pattern.
 async function checkInpatientNetworkAccess(req: Request, res: Response): Promise<boolean> {
   const userId = (req as any).userId;
   const userRole = (req as any).userRole;
@@ -2566,12 +2570,9 @@ async function checkInpatientNetworkAccess(req: Request, res: Response): Promise
   const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
   const networkId = hospitalRes.rows[0]?.branch_network_id;
   if (!networkId) return true; // standalone hospital — no network check needed
-  const memberRes = await database.query(
-    `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-    [networkId, userId]
-  );
-  if (memberRes.rows.length === 0) {
-    res.status(403).json({ success: false, error: 'You are not a member of the network that owns this hospital' });
+  const result = await resolveNetworkAccess(networkId, userId, userRole);
+  if (!result.allowed) {
+    res.status(404).json({ success: false, error: 'Hospital not found' });
     return false;
   }
   return true;
@@ -2596,12 +2597,9 @@ async function checkResourceNetworkAccess(req: Request, res: Response, table: st
   const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
   const networkId = hospitalRes.rows[0]?.branch_network_id;
   if (!networkId) return true; // standalone hospital — no network check needed
-  const memberRes = await database.query(
-    `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-    [networkId, userId]
-  );
-  if (memberRes.rows.length === 0) {
-    res.status(403).json({ success: false, error: 'You are not a member of the network that owns this resource' });
+  const result = await resolveNetworkAccess(networkId, userId, userRole);
+  if (!result.allowed) {
+    res.status(404).json({ success: false, error: 'Resource not found' });
     return false;
   }
   return true;
@@ -3574,15 +3572,11 @@ router.post('/hospital-networks/:id/invite-staff', authMiddleware, roleMiddlewar
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
   const networkId = req.params.id;
-  // Secondary check: verify caller has appropriate network role (corporate_admin or hospital_director)
-  if (authReq.userRole !== 'admin') {
-    const callerMember = await db.query(
-      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [networkId, authReq.userId]
-    );
-    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
-      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can invite staff' });
-    }
+  // Secondary check: verify caller has appropriate network role for the (admin-configurable) inviteStaff action
+  const access = await resolveNetworkAccess(networkId, authReq.userId, authReq.userRole, 'inviteStaff');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, message: 'Network not found' });
+    return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can invite staff' });
   }
   const seat = await checkSeatLimit(networkId, db);
   if (!seat.allowed) {
@@ -3737,15 +3731,11 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
 router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
-  // Verify caller has appropriate network role
-  if (authReq.userRole !== 'admin') {
-    const callerMember = await db.query(
-      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [req.params.id, authReq.userId]
-    );
-    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
-      return res.status(403).json({ success: false, error: 'Only corporate admins and hospital directors can send staff invites' });
-    }
+  // Verify caller has appropriate network role for the (admin-configurable) inviteStaff action
+  const access = await resolveNetworkAccess(req.params.id, authReq.userId, authReq.userRole, 'inviteStaff');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, error: 'Network not found' });
+    return res.status(403).json({ success: false, error: 'Only corporate admins and hospital directors can send staff invites' });
   }
 
   const { inviteeEmail, inviteeName = '', staffPosition, hospitalId, expiresInHours = 72 } = req.body;
@@ -3838,15 +3828,11 @@ router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewa
 router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
-  // Secondary check: verify caller has appropriate network role
-  if (authReq.userRole !== 'admin') {
-    const callerMember = await db.query(
-      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [req.params.id, authReq.userId]
-    );
-    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
-      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can view invites' });
-    }
+  // Secondary check: verify caller has appropriate network role for the (admin-configurable) inviteStaff action
+  const access = await resolveNetworkAccess(req.params.id, authReq.userId, authReq.userRole, 'inviteStaff');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, message: 'Network not found' });
+    return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can view invites' });
   }
   const result = await db.query(
     `SELECT hsi.*, u.first_name AS "inviterFirstName", u.last_name AS "inviterLastName", vh.name AS "hospitalName"
@@ -3865,15 +3851,11 @@ router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewar
 router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
-  // Secondary check: verify caller has appropriate network role
-  if (authReq.userRole !== 'admin') {
-    const callerMember = await db.query(
-      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [req.params.id, authReq.userId]
-    );
-    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
-      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can manage invites' });
-    }
+  // Secondary check: verify caller has appropriate network role for the (admin-configurable) inviteStaff action
+  const access = await resolveNetworkAccess(req.params.id, authReq.userId, authReq.userRole, 'inviteStaff');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, message: 'Network not found' });
+    return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can manage invites' });
   }
   await db.query(`UPDATE hospital_staff_invites SET status='revoked', updated_at=NOW() WHERE id=$1 AND network_id=$2 AND status='pending'`, [req.params.inviteId, req.params.id]);
   res.json({ success: true });
@@ -3883,10 +3865,14 @@ router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, 
 router.get('/hospital-networks/:id/audit-logs/export', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
+  const userRole = (req as any).userRole;
 
-  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
-  if (!member) {
-    return res.status(403).json({ success: false, error: 'Not a member of this network' });
+  // Was previously "any member" — hospital_staff has viewAuditLogs=false in the matrix
+  // and should not be able to pull the raw clinical-access audit log via this endpoint.
+  const access = await resolveNetworkAccess(networkId, userId, userRole, 'viewAuditLogs');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, error: 'Network not found' });
+    return res.status(403).json({ success: false, error: 'Insufficient role to view audit logs' });
   }
 
   const result = await database.query(
@@ -3918,8 +3904,13 @@ router.get('/hospital-networks/:id/audit-logs/export', authMiddleware, asyncHand
 router.get('/hospital-networks/:id/financial-summary', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
-  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
-  if (!member || !['corporate_admin', 'hospital_director', 'auditor'].includes(member.networkRole)) {
+  const userRole = (req as any).userRole;
+  // Was previously a hardcoded ['corporate_admin','hospital_director','auditor'] list that bypassed
+  // the admin-configurable financialAnalytics matrix entirely (matrix sets it false for both
+  // hospital_director and auditor) — now honors whatever the network's admin has actually configured.
+  const access = await resolveNetworkAccess(networkId, userId, userRole, 'financialAnalytics');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, error: 'Network not found' });
     return res.status(403).json({ success: false, error: 'Insufficient permissions' });
   }
   const result = await HospitalNetworkService.getNetworkFinancialSummary(networkId);
@@ -3972,7 +3963,7 @@ router.patch('/hospital-networks/:id/leave-requests/:requestId', authMiddleware,
     return res.status(403).json({ success: false, error: 'Only directors and admins can approve/reject leave' });
   }
 
-  const result = await HospitalNetworkService.updateLeaveRequestStatus(requestId, status, userId, rejectionReason);
+  const result = await HospitalNetworkService.updateLeaveRequestStatus(networkId, requestId, status, userId, rejectionReason);
   res.json({ success: true, data: result });
 }));
 
@@ -3980,6 +3971,7 @@ router.patch('/hospital-networks/:id/leave-requests/:requestId', authMiddleware,
 router.post('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
+  const userRole = (req as any).userRole;
   const { fromHospitalId, toHospitalId, animalId, reason, transferReason, clinicalNotes } = req.body;
 
   if (!fromHospitalId || !toHospitalId || !animalId || !reason) {
@@ -3987,7 +3979,7 @@ router.post('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHan
   }
 
   const result = await HospitalNetworkService.createPatientTransfer({
-    networkId, fromHospitalId, toHospitalId, animalId, reason, transferReason, clinicalNotes, createdBy: userId
+    networkId, fromHospitalId, toHospitalId, animalId, reason, transferReason, clinicalNotes, createdBy: userId, createdByRole: userRole
   });
   res.json({ success: true, data: result });
 }));
@@ -3995,7 +3987,8 @@ router.post('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHan
 router.post('/hospital-networks/:id/patient-transfers/:transferId/complete', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const { transferId } = req.params;
   const userId = (req as any).userId;
-  const result = await HospitalNetworkService.completePatientTransfer(transferId, userId);
+  const userRole = (req as any).userRole;
+  const result = await HospitalNetworkService.completePatientTransfer(transferId, userId, userRole);
   res.json({ success: true, data: result });
 }));
 

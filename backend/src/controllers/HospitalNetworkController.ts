@@ -1,9 +1,9 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import HospitalNetworkService from '../services/HospitalNetworkService';
-import NetworkRolePermissionService from '../services/NetworkRolePermissionService';
 import NotificationService from '../services/NotificationService';
-import { ValidationError, ForbiddenError } from '../utils/errors';
+import { ValidationError, ForbiddenError, NotFoundError } from '../utils/errors';
+import { resolveNetworkAccess } from '../middleware/networkAccess';
 import database from '../utils/database';
 import logger from '../utils/logger';
 
@@ -257,23 +257,27 @@ class HospitalNetworkController {
     userRole: string,
     actionOrRoles?: string | string[]
   ): Promise<void> {
+    // Delegates the membership + action-matrix check to the same core resolveNetworkAccess()
+    // used by the requireNetworkAccess middleware and the resource-id-keyed checks in
+    // routes/index.ts, rather than re-querying hospital_network_members independently here.
+    // Non-membership throws NotFoundError (404) — an unauthorized caller should not be able
+    // to confirm a network exists just by probing ids.
     if (userRole === 'admin') return;
 
-    const members = await HospitalNetworkService.listNetworkMembers(networkId);
-    const membership = members.find((m) => m.userId === userId);
-    if (!membership) throw new ForbiddenError('You do not have access to this network');
-
-    if (actionOrRoles) {
-      if (Array.isArray(actionOrRoles)) {
-        // Legacy path: check against hardcoded role list
-        if (!actionOrRoles.includes(membership.networkRole)) {
-          throw new ForbiddenError('Insufficient role for this action');
-        }
-      } else {
-        // DB-backed path: check network_role_permissions table
-        const hasAccess = await NetworkRolePermissionService.checkAccess(networkId, membership.networkRole, actionOrRoles);
-        if (!hasAccess) throw new ForbiddenError('Insufficient role for this action');
+    if (Array.isArray(actionOrRoles)) {
+      // Legacy path: some callers still pass a hardcoded role list instead of a matrix action.
+      const result = await resolveNetworkAccess(networkId, userId, userRole);
+      if (!result.allowed) throw new NotFoundError('Network', networkId);
+      if (!actionOrRoles.includes(result.networkRole)) {
+        throw new ForbiddenError('Insufficient role for this action');
       }
+      return;
+    }
+
+    const result = await resolveNetworkAccess(networkId, userId, userRole, actionOrRoles);
+    if (!result.allowed) {
+      if (result.reason === 'not_member') throw new NotFoundError('Network', networkId);
+      throw new ForbiddenError('Insufficient role for this action');
     }
   }
 }
