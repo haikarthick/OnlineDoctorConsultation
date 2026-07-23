@@ -10,7 +10,6 @@ describe('MedicalRecordService', () => {
     it('should create a medical record', async () => {
       const record = { id: 'mr1', animal_id: 'a1', record_type: 'examination' };
       (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ count: '0' }] })  // generateRecordNumber
         .mockResolvedValueOnce({ rows: [{ id: 'mr1' }] })   // INSERT
         .mockResolvedValueOnce({ rows: [] })                 // logMedicalAudit
         .mockResolvedValueOnce({ rows: [record] });          // getRecord

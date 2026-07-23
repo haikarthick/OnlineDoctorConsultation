@@ -144,7 +144,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       {/* Top Navigation Bar */}
       <nav className={`home-nav${navScrolled ? ' home-nav--scrolled' : ''}`}>
         <div className="home-nav-inner">
-          <div className="home-nav-brand" onClick={scrollToTop} style={{ cursor: 'pointer' }}>
+          <div className="home-nav-brand si-3c1f81b9" onClick={scrollToTop}>
             <span className="home-nav-logo">🏥</span>
             <span className="home-nav-title">{t('common.brand')}</span>
             <span className="home-nav-badge">{t('common.enterprise')}</span>
@@ -307,10 +307,10 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
             <p className="hero-subtext">
               {t('home.guarantees')}
             </p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
-              <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(16,185,129,0.15)', color: '#059669', border: '1px solid rgba(16,185,129,0.3)' }}>🛡️ {t('home.heroBadge1')}</span>
-              <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(99,102,241,0.15)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.3)' }}>🔒 {t('home.heroBadge2')}</span>
-              <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: 'rgba(245,158,11,0.15)', color: '#d97706', border: '1px solid rgba(245,158,11,0.3)' }}>📜 {t('home.heroBadge3')}</span>
+            <div className="si-50ec4078">
+              <span className="si-26d9a494">🛡️ {t('home.heroBadge1')}</span>
+              <span className="si-4dee5e15">🔒 {t('home.heroBadge2')}</span>
+              <span className="si-2b77bd57">📜 {t('home.heroBadge3')}</span>
             </div>
             <p className="hero-login-link">
               {t('home.signinLink').split('→')[0]} <button className="link-button" onClick={onLogin || (() => {})}>{t('home.signIn')} →</button>
@@ -514,68 +514,68 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       </section>
 
       {/* Next-Generation Innovation */}
-      <section className="advanced-features-section" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
-        <h2 className="section-title" style={{ color: '#f8fafc' }}>🚀 {t('home.innovationTitle')}</h2>
-        <p className="section-subtitle" style={{ color: '#94a3b8' }}>{t('home.innovationSubtitle')}</p>
+      <section className="advanced-features-section si-e41618a7">
+        <h2 className="section-title si-f46f8eb4">🚀 {t('home.innovationTitle')}</h2>
+        <p className="section-subtitle si-385f4f50">{t('home.innovationSubtitle')}</p>
         <div className="advanced-grid">
           {featureIcons.innovation.map((icon, idx) => (
-            <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0' }}>
+            <div key={idx} className="advanced-card si-e5cef6dc">
               <div className="advanced-icon">{icon}</div>
-              <h3 style={{ color: '#f8fafc' }}>{t(`home.innovationFeatures.${idx}.title`)}</h3>
-              <p style={{ color: '#94a3b8' }}>{t(`home.innovationFeatures.${idx}.desc`)}</p>
+              <h3 className="si-f46f8eb4">{t(`home.innovationFeatures.${idx}.title`)}</h3>
+              <p className="si-385f4f50">{t(`home.innovationFeatures.${idx}.desc`)}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Futuristic Intelligence */}
-      <section className="advanced-features-section" style={{ background: 'linear-gradient(135deg, #4a1d96 0%, #7c3aed 50%, #2563eb 100%)' }}>
-        <h2 className="section-title" style={{ color: '#f8fafc' }}>🔮 {t('home.intelligenceTitle')}</h2>
-        <p className="section-subtitle" style={{ color: '#c4b5fd' }}>{t('home.intelligenceSubtitle')}</p>
+      <section className="advanced-features-section si-50901860">
+        <h2 className="section-title si-f46f8eb4">🔮 {t('home.intelligenceTitle')}</h2>
+        <p className="section-subtitle si-212a770e">{t('home.intelligenceSubtitle')}</p>
         <div className="advanced-grid">
           {featureIcons.intelligence.map((icon, idx) => (
-            <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#e2e8f0' }}>
+            <div key={idx} className="advanced-card si-b6538183">
               <div className="advanced-icon">{icon}</div>
-              <h3 style={{ color: '#f8fafc' }}>{t(`home.intelligenceFeatures.${idx}.title`)}</h3>
-              <p style={{ color: '#c4b5fd' }}>{t(`home.intelligenceFeatures.${idx}.desc`)}</p>
+              <h3 className="si-f46f8eb4">{t(`home.intelligenceFeatures.${idx}.title`)}</h3>
+              <p className="si-212a770e">{t(`home.intelligenceFeatures.${idx}.desc`)}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Staff & Workflow Management */}
-      <section className="advanced-features-section" id="workflow" style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #0ea5e9 100%)' }}>
-        <h2 className="section-title" style={{ color: '#f8fafc' }}>🏥 {t('home.workflowTitle')}</h2>
-        <p className="section-subtitle" style={{ color: '#bfdbfe' }}>{t('home.workflowSubtitle')}</p>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
+      <section className="advanced-features-section si-e35d7e85" id="workflow">
+        <h2 className="section-title si-f46f8eb4">🏥 {t('home.workflowTitle')}</h2>
+        <p className="section-subtitle si-5d8fd676">{t('home.workflowSubtitle')}</p>
+        <div className="si-d0c03892">
           {[0, 1, 2, 3, 4].map(i => (
-            <span key={i} style={{ padding: '6px 14px', borderRadius: 20, background: 'rgba(255,255,255,.15)', color: '#e0f2fe', fontSize: 13, fontWeight: 600 }}>{t(`home.workflowChips.${i}`)}</span>
+            <span key={i} className="si-cbb16502">{t(`home.workflowChips.${i}`)}</span>
           ))}
         </div>
         <div className="advanced-grid">
           {featureIcons.workflow.map((icon, idx) => (
-            <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#e2e8f0' }}>
+            <div key={idx} className="advanced-card si-b6538183">
               <div className="advanced-icon">{icon}</div>
-              <h3 style={{ color: '#f8fafc' }}>{t(`home.workflowFeatures.${idx}.title`)}</h3>
-              <p style={{ color: '#bfdbfe' }}>{t(`home.workflowFeatures.${idx}.desc`)}</p>
+              <h3 className="si-f46f8eb4">{t(`home.workflowFeatures.${idx}.title`)}</h3>
+              <p className="si-5d8fd676">{t(`home.workflowFeatures.${idx}.desc`)}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* HIPAA Compliance & Data Privacy */}
-      <section className="advanced-features-section" id="compliance" style={{ background: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)' }}>
-        <h2 className="section-title" style={{ color: '#f8fafc' }}>🛡️ {t('home.complianceTitle')}</h2>
-        <p className="section-subtitle" style={{ color: '#a7f3d0' }}>{t('home.complianceSubtitle')}</p>
+      <section className="advanced-features-section si-042ced1c" id="compliance">
+        <h2 className="section-title si-f46f8eb4">🛡️ {t('home.complianceTitle')}</h2>
+        <p className="section-subtitle si-674d8d14">{t('home.complianceSubtitle')}</p>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+        <div className="si-dc432d6d">
           {[
             { icon: '🏥', key: 0 },
             { icon: '🔐', key: 1 },
             { icon: '📜', key: 2 },
             { icon: '🔒', key: 3 },
           ].map((badge) => (
-            <div key={badge.key} style={{ padding: '8px 20px', borderRadius: 24, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', color: '#d1fae5', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div key={badge.key} className="si-2accc4ba">
               <span>{badge.icon}</span> {t(`home.complianceBadges.${badge.key}`)}
             </div>
           ))}
@@ -583,17 +583,17 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
 
         <div className="advanced-grid">
           {featureIcons.compliance.map((icon, idx) => (
-            <div key={idx} className="advanced-card" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#e2e8f0' }}>
+            <div key={idx} className="advanced-card si-b6538183">
               <div className="advanced-icon">{icon}</div>
-              <h3 style={{ color: '#f8fafc' }}>{t(`home.complianceFeatures.${idx}.title`)}</h3>
-              <p style={{ color: '#a7f3d0' }}>{t(`home.complianceFeatures.${idx}.desc`)}</p>
+              <h3 className="si-f46f8eb4">{t(`home.complianceFeatures.${idx}.title`)}</h3>
+              <p className="si-674d8d14">{t(`home.complianceFeatures.${idx}.desc`)}</p>
             </div>
           ))}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 32, padding: '20px 24px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', maxWidth: 700, margin: '32px auto 0' }}>
-          <p style={{ margin: 0, color: '#d1fae5', fontSize: 14, lineHeight: 1.7 }}>
-            <strong style={{ color: '#f8fafc' }}>{t('home.dataPrivacyTitle')}</strong> {t('home.dataPrivacyText')}
+        <div className="si-74627804">
+          <p className="si-590e8f62">
+            <strong className="si-f46f8eb4">{t('home.dataPrivacyTitle')}</strong> {t('home.dataPrivacyText')}
           </p>
         </div>
       </section>
@@ -602,7 +602,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
       <section className="how-it-works-section" id="how-it-works">
         <h2 className="section-title">{t('home.howItWorksTitle')}</h2>
         
-        <div className="tabs-container" style={{ marginBottom: '2rem' }}>
+        <div className="tabs-container si-9f0a8269">
           <button className={`tab-button ${activeTab === 'owner' ? 'active' : ''}`} onClick={() => setActiveTab('owner')}>
             🐕 {t('home.tabs.petOwners')}
           </button>
@@ -685,7 +685,7 @@ export default function Home({ onGetStarted, onViewForDoctors, onLogin }: HomePr
         <div className="footer-content">
           <div className="footer-brand">
             <span>🏥</span> <strong>{t('home.footer.brand')}</strong>
-            <span style={{ marginLeft: 12, padding: '2px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: 'rgba(16,185,129,0.2)', color: '#34d399' }}>{t('home.footer.hipaa')}</span>
+            <span className="si-3a41c16c">{t('home.footer.hipaa')}</span>
           </div>
           <p>{t('home.footer.copyright')}</p>
           <div className="footer-links">

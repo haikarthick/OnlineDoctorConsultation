@@ -33,7 +33,7 @@ END $$;
 
 -- ── 3. Create wallets table ─────────────────────────────────
 CREATE TABLE IF NOT EXISTS wallets (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   balance DECIMAL(10,2) DEFAULT 0.00,
   bonus_credits DECIMAL(10,2) DEFAULT 0.00,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS wallets (
 
 -- ── 4. Create wallet_transactions table ─────────────────────
 CREATE TABLE IF NOT EXISTS wallet_transactions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   wallet_id UUID NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
   type VARCHAR(30) NOT NULL CHECK (type IN ('credit', 'debit', 'refund', 'bonus', 'withdrawal')),
   amount DECIMAL(10,2) NOT NULL,
@@ -63,24 +63,24 @@ CREATE TRIGGER update_wallets_updated_at
 -- ── 6. Seed cancellation & payment gateway settings ─────────
 INSERT INTO system_settings (id, key, value, category, description)
 VALUES
-  (uuid_generate_v4(), 'payment.gatewayMode', 'demo', 'payment',
+  (gen_random_uuid(), 'payment.gatewayMode', 'demo', 'payment',
    'Payment gateway mode: demo (stub payments), test (sandbox), live (real gateway)'),
-  (uuid_generate_v4(), 'payment.gatewayUrl', '', 'payment',
+  (gen_random_uuid(), 'payment.gatewayUrl', '', 'payment',
    'Payment gateway API base URL (leave empty for demo/stub mode)'),
-  (uuid_generate_v4(), 'payment.gatewayApiKey', '', 'payment',
+  (gen_random_uuid(), 'payment.gatewayApiKey', '', 'payment',
    'Payment gateway API key (encrypted in production)'),
-  (uuid_generate_v4(), 'payment.gatewayProvider', 'stripe', 'payment',
+  (gen_random_uuid(), 'payment.gatewayProvider', 'stripe', 'payment',
    'Payment gateway provider: stripe, paypal, razorpay'),
-  (uuid_generate_v4(), 'cancellation.autoRefundOnDoctorCancel', 'true', 'cancellation',
+  (gen_random_uuid(), 'cancellation.autoRefundOnDoctorCancel', 'true', 'cancellation',
    'Automatically refund patient when doctor cancels a paid booking'),
-  (uuid_generate_v4(), 'cancellation.patientFreeWindowHours', '24', 'cancellation',
+  (gen_random_uuid(), 'cancellation.patientFreeWindowHours', '24', 'cancellation',
    'Hours before appointment when patient can cancel for free (full refund)'),
-  (uuid_generate_v4(), 'cancellation.partialRefundPercent', '50', 'cancellation',
+  (gen_random_uuid(), 'cancellation.partialRefundPercent', '50', 'cancellation',
    'Refund percentage for patient cancellation within partial window'),
-  (uuid_generate_v4(), 'cancellation.partialRefundWindowHours', '2', 'cancellation',
+  (gen_random_uuid(), 'cancellation.partialRefundWindowHours', '2', 'cancellation',
    'Hours before appointment for partial refund (0 = no partial, directly no-refund)'),
-  (uuid_generate_v4(), 'cancellation.goodwillBonusPercent', '10', 'cancellation',
+  (gen_random_uuid(), 'cancellation.goodwillBonusPercent', '10', 'cancellation',
    'Bonus wallet credit percentage on top of refund when doctor cancels'),
-  (uuid_generate_v4(), 'cancellation.doctorMaxCancellationsPerMonth', '3', 'cancellation',
+  (gen_random_uuid(), 'cancellation.doctorMaxCancellationsPerMonth', '3', 'cancellation',
    'Max doctor cancellations per month before reliability penalty')
 ON CONFLICT (key) DO NOTHING;

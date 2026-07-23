@@ -218,14 +218,14 @@ const PrescriptionSettings: React.FC<PrescriptionSettingsProps> = ({ onNavigate 
           <h1>📄 {t('prescriptionSettings.title')}</h1>
           <p>{t('prescriptionSettings.subtitle')}</p>
         </div>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="si-1f73e46e">
           <button className="module-btn" onClick={() => onNavigate('/admin/settings')}>
             ← {t('prescriptionSettings.backToSettings')}
           </button>
           <button
-            className="module-btn"
+            className="module-btn si-e74c278d"
             onClick={() => setPreviewOpen(true)}
-            style={{ background: '#2b6cb0', color: '#fff' }}
+           
           >
             👁 {t('prescriptionSettings.preview')}
           </button>
@@ -240,42 +240,42 @@ const PrescriptionSettings: React.FC<PrescriptionSettingsProps> = ({ onNavigate 
       </div>
 
       {error && (
-        <div className="module-alert error" style={{ marginBottom: 16 }}>
+        <div className="module-alert error si-7e63ec4f">
           {error}
           <button className="module-alert-close" onClick={() => setError('')}>✕</button>
         </div>
       )}
 
       {/* ── Info card ── */}
-      <div className="module-card" style={{ marginBottom: 24, padding: '14px 18px', background: '#ebf8ff', border: '1px solid #bee3f8' }}>
-        <p style={{ margin: 0, fontSize: 14, color: '#2c5282' }}>
+      <div className="module-card si-7323c815">
+        <p className="si-c325fe02">
           <strong>ℹ {t('prescriptionSettings.infoTitle')}</strong><br />
           {t('prescriptionSettings.infoBody')}
         </p>
       </div>
 
       {/* ── Settings grid ── */}
-      <div style={{ display: 'grid', gap: 16 }}>
+      <div className="si-e295240a">
         {FIELDS.map(field => {
           const isSaved = savedKeys.has(field.key)
           const isDirty = (values[field.key] ?? '') !== (original[field.key] ?? '')
           const isSavingThis = saving === field.key
           return (
-            <div key={field.key} className="module-card" style={{ padding: '16px 20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
-                <div style={{ flex: 1 }}>
-                  <label className="module-label" style={{ marginBottom: 2 }}>
+            <div key={field.key} className="module-card si-c1cf531d">
+              <div className="si-b4e0b8ef">
+                <div className="si-6acd75e8">
+                  <label className="module-label si-5590bd39">
                     {t(field.label)}
-                    {isDirty && <span style={{ marginLeft: 8, color: '#d97706', fontSize: 12, fontWeight: 600 }}>● {t('prescriptionSettings.unsaved')}</span>}
-                    {isSaved && <span style={{ marginLeft: 8, color: '#059669', fontSize: 12, fontWeight: 600 }}>✓ {t('prescriptionSettings.saved')}</span>}
+                    {isDirty && <span className="si-0b1fc646">● {t('prescriptionSettings.unsaved')}</span>}
+                    {isSaved && <span className="si-55254f4a">✓ {t('prescriptionSettings.saved')}</span>}
                   </label>
-                  <p style={{ margin: 0, fontSize: 12, color: '#718096' }}>{t(field.description)}</p>
+                  <p className="si-cae0e328">{t(field.description)}</p>
                 </div>
                 <button
-                  className="module-btn small primary"
+                  className="module-btn small primary si-9c776b6c"
                   onClick={() => handleSave(field.key)}
                   disabled={!isDirty || isSavingThis}
-                  style={{ minWidth: 72 }}
+                 
                 >
                   {isSavingThis ? t('common.saving') : t('common.save')}
                 </button>
@@ -283,29 +283,29 @@ const PrescriptionSettings: React.FC<PrescriptionSettingsProps> = ({ onNavigate 
 
               {/* Logo field gets a special upload option */}
               {field.key === 'prescription.clinicLogo' && (
-                <div style={{ marginBottom: 8, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div className="si-73ddb51a">
                   {logoValue && (
                     <img
                       src={logoValue}
                       alt="logo preview"
-                      style={{ width: 56, height: 56, objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: 6, background: '#f7fafc' }}
+                      className="si-97bf0235"
                     />
                   )}
                   <div>
                     <button
-                      className="module-btn small"
+                      className="module-btn small si-e57614ee"
                       onClick={() => fileInputRef.current?.click()}
-                      style={{ marginBottom: 4 }}
+                     
                     >
                       📁 {t('prescriptionSettings.uploadLogo')}
                     </button>
-                    <p style={{ margin: 0, fontSize: 11, color: '#a0aec0' }}>{t('prescriptionSettings.logoSizeHint')}</p>
+                    <p className="si-107b2991">{t('prescriptionSettings.logoSizeHint')}</p>
                   </div>
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
-                    style={{ display: 'none' }}
+                    className="si-d6a2f871"
                     onChange={handleLogoFileSelect}
                   />
                 </div>
@@ -313,12 +313,12 @@ const PrescriptionSettings: React.FC<PrescriptionSettingsProps> = ({ onNavigate 
 
               {field.type === 'textarea' ? (
                 <textarea
-                  className="module-input"
+                  className="module-input si-3d14eb54"
                   value={values[field.key] || ''}
                   onChange={e => handleChange(field.key, e.target.value)}
                   placeholder={field.placeholder}
                   rows={field.rows || 3}
-                  style={{ resize: 'vertical', minHeight: 60 }}
+                 
                 />
               ) : (
                 <input
@@ -337,90 +337,66 @@ const PrescriptionSettings: React.FC<PrescriptionSettingsProps> = ({ onNavigate 
       {/* ── Preview modal (letterhead preview only) ── */}
       {previewOpen && (
         <div
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)',
-            zIndex: 9990, display: 'flex', alignItems: 'flex-start',
-            justifyContent: 'center', padding: 20, overflowY: 'auto',
-          }}
+          className="si-e4d19b82"
           onClick={() => setPreviewOpen(false)}
         >
           <div
-            style={{
-              background: '#fff', width: 600, borderRadius: 8,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.4)', padding: '24px 28px',
-              margin: 'auto', position: 'relative',
-            }}
+            className="si-099182d8"
             onClick={e => e.stopPropagation()}
           >
             <button
               onClick={() => setPreviewOpen(false)}
-              style={{
-                position: 'absolute', top: 12, right: 16, background: 'none',
-                border: 'none', fontSize: 20, cursor: 'pointer', color: '#4a5568',
-              }}
+              className="si-4e0924aa"
             >✕</button>
-            <h2 style={{ margin: '0 0 16px', color: '#1a365d', fontSize: 16 }}>
+            <h2 className="si-eefdbd81">
               {t('prescriptionSettings.letterheadPreview')}
             </h2>
 
             {/* Letterhead preview */}
-            <div style={{
-              border: '2px solid #1a365d', borderRadius: 6,
-              padding: '14px 16px', fontFamily: 'Segoe UI, Arial, sans-serif',
-            }}>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <div className="si-320a01a0">
+              <div className="si-82c77ef0">
                 {previewTemplate.clinicLogo ? (
                   <img src={previewTemplate.clinicLogo} alt="logo"
-                    style={{ width: 56, height: 56, objectFit: 'contain', borderRadius: 4 }} />
+                    className="si-da66f361" />
                 ) : (
-                  <div style={{
-                    width: 56, height: 56, background: 'linear-gradient(135deg, #1a365d, #2b6cb0)',
-                    borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 24, color: '#fff', flexShrink: 0,
-                  }}>🐾</div>
+                  <div className="si-dbafcb6e">🐾</div>
                 )}
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: '#1a365d' }}>
+                <div className="si-6acd75e8">
+                  <div className="si-9a37d6b6">
                     {previewTemplate.clinicName}
                   </div>
                   {previewTemplate.clinicTagline && (
-                    <div style={{ fontSize: 11, color: '#4a5568', fontStyle: 'italic', marginBottom: 4 }}>
+                    <div className="si-8c492035">
                       {previewTemplate.clinicTagline}
                     </div>
                   )}
-                  <div style={{ fontSize: 10, color: '#4a5568', display: 'flex', flexWrap: 'wrap', gap: '2px 10px' }}>
+                  <div className="si-782ddda2">
                     {previewTemplate.clinicPhone && <span>📞 {previewTemplate.clinicPhone}</span>}
                     {previewTemplate.clinicEmail && <span>✉ {previewTemplate.clinicEmail}</span>}
                     {previewTemplate.clinicWebsite && <span>🌐 {previewTemplate.clinicWebsite}</span>}
                   </div>
                   {previewTemplate.clinicAddress && (
-                    <div style={{ fontSize: 9, color: '#718096', marginTop: 2 }}>
+                    <div className="si-a53c147b">
                       📍 {previewTemplate.clinicAddress}
                     </div>
                   )}
                   {previewTemplate.registrationNumber && (
-                    <div style={{ fontSize: 9, color: '#a0aec0', marginTop: 2 }}>
+                    <div className="si-c4d06922">
                       {t('prescriptionPrint.regNo')}: {previewTemplate.registrationNumber}
                     </div>
                   )}
                 </div>
               </div>
-              <div style={{ borderTop: '3px solid #1a365d', margin: '10px 0 6px' }} />
-              <div style={{
-                background: '#1a365d', color: '#fff', textAlign: 'center',
-                fontSize: 11, fontWeight: 700, padding: '3px 0', letterSpacing: '1.5px', borderRadius: 2,
-              }}>
+              <div className="si-d6351209" />
+              <div className="si-e47cd326">
                 ⚕ PRESCRIPTION ⚕
               </div>
-              <div style={{
-                marginTop: 10, fontSize: 9, color: '#a0aec0',
-                borderTop: '1px solid #e2e8f0', paddingTop: 6,
-              }}>
+              <div className="si-bdc34173">
                 {previewTemplate.footerText}
               </div>
             </div>
 
-            <p style={{ marginTop: 12, fontSize: 12, color: '#718096', textAlign: 'center' }}>
+            <p className="si-1480138f">
               {t('prescriptionSettings.previewNote')}
             </p>
           </div>

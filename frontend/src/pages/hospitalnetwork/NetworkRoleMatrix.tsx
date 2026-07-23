@@ -288,12 +288,12 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
       </div>
 
       {error && (
-        <div className="module-alert error" style={{ marginBottom: 16 }}>
-          ⚠️ {error} <button onClick={() => setError('')} style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+        <div className="module-alert error si-7e63ec4f">
+          ⚠️ {error} <button onClick={() => setError('')} className="si-c93d89f9">✕</button>
         </div>
       )}
       {success && (
-        <div className="module-alert success" style={{ marginBottom: 16 }}>
+        <div className="module-alert success si-7e63ec4f">
           ✅ {success}
         </div>
       )}
@@ -385,30 +385,30 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
 
       {/* Custom Roles Section */}
       {adminMode && (
-        <div style={{ marginTop: 32, borderTop: '2px solid #e5e7eb', paddingTop: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div className="si-9091d770">
+          <div className="si-101fd1d0">
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#1e3a5f' }}>
+              <h3 className="si-091fa5a5">
                 🎭 {t('networkRoleMatrix.customRoles')}
               </h3>
-              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+              <p className="si-20a3be27">
                 Create custom roles specific to this network (e.g., Receptionist, Lab Tech, Night Supervisor)
               </p>
             </div>
             <button
-              className="module-btn primary"
+              className="module-btn primary si-1e8b29be"
               onClick={() => setShowCreateRole(v => !v)}
-              style={{ fontSize: '0.85rem', padding: '6px 14px' }}
+             
             >
               {showCreateRole ? '✕ Cancel' : '+ New Custom Role'}
             </button>
           </div>
 
           {showCreateRole && (
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 20, marginBottom: 20 }}>
-              <div className="module-form-row" style={{ marginBottom: 12 }}>
+            <div className="si-8135ec20">
+              <div className="module-form-row si-bab8e8bc">
                 <div className="module-form-group">
-                  <label className="module-label">{t('networkRoleMatrix.roleKey')} * <span style={{ fontSize: '0.75rem', color: '#64748b' }}>(slug, e.g. receptionist)</span></label>
+                  <label className="module-label">{t('networkRoleMatrix.roleKey')} * <span className="si-beb3548b">(slug, e.g. receptionist)</span></label>
                   <input className="module-input" placeholder="e.g. receptionist" value={newRole.roleKey}
                     onChange={e => setNewRole(p => ({ ...p, roleKey: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_') }))} />
                 </div>
@@ -418,9 +418,9 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
                     onChange={e => setNewRole(p => ({ ...p, displayName: e.target.value }))} />
                 </div>
               </div>
-              <div className="module-form-row" style={{ marginBottom: 12 }}>
+              <div className="module-form-row si-bab8e8bc">
                 <div className="module-form-group">
-                  <label className="module-label">{t('networkRoleMatrix.baseTemplate')} * <span style={{ fontSize: '0.75rem', color: '#64748b' }}>(inherits default permissions from)</span></label>
+                  <label className="module-label">{t('networkRoleMatrix.baseTemplate')} * <span className="si-beb3548b">(inherits default permissions from)</span></label>
                   <select className="module-input" value={newRole.baseTemplate}
                     onChange={e => setNewRole(p => ({ ...p, baseTemplate: e.target.value }))}>
                     <option value="hospital_staff">Hospital Staff</option>
@@ -432,44 +432,44 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
                 </div>
                 <div className="module-form-group">
                   <label className="module-label">Icon (emoji)</label>
-                  <input className="module-input" maxLength={2} placeholder="👤" value={newRole.icon}
-                    onChange={e => setNewRole(p => ({ ...p, icon: e.target.value }))} style={{ width: 80 }} />
+                  <input className="module-input si-a30c62ec" maxLength={2} placeholder="👤" value={newRole.icon}
+                    onChange={e => setNewRole(p => ({ ...p, icon: e.target.value }))} />
                 </div>
               </div>
-              <div className="module-form-group" style={{ marginBottom: 12 }}>
+              <div className="module-form-group si-bab8e8bc">
                 <label className="module-label">Description (optional)</label>
                 <input className="module-input" placeholder="Brief description of this role's responsibilities" value={newRole.description}
                   onChange={e => setNewRole(p => ({ ...p, description: e.target.value }))} />
               </div>
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button className="module-btn" onClick={() => setShowCreateRole(false)} style={{ background: '#f1f5f9' }}>Cancel</button>
+              <div className="si-6e89f197">
+                <button className="module-btn si-e9ff9765" onClick={() => setShowCreateRole(false)}>Cancel</button>
                 <button className="module-btn primary" onClick={handleCreateRole} disabled={creatingRole || !newRole.roleKey || !newRole.displayName}>
                   {creatingRole ? '⏳ Creating...' : '✓ Create Role'}
                 </button>
               </div>
               {(!newRole.roleKey || !newRole.displayName) && (
-                <p style={{ color: '#f59e0b', fontSize: '0.8rem', marginTop: 8 }}>⚠️ Role Key and Display Name are required</p>
+                <p className="si-ea3fee8b">⚠️ Role Key and Display Name are required</p>
               )}
             </div>
           )}
 
           {customRoles.length === 0 ? (
-            <p style={{ color: '#94a3b8', fontSize: '0.9rem', textAlign: 'center', padding: '20px 0' }}>
+            <p className="si-13b5c4f7">
               {t('networkRoleMatrix.noCustomRoles')}
             </p>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+            <div className="si-6e1e433a">
               {customRoles.map(role => (
-                <div key={role.roleKey} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, padding: 16 }}>
+                <div key={role.roleKey} className="si-51a09952">
                   {editingRole === role.roleKey ? (
                     <div>
-                      <div className="module-form-group" style={{ marginBottom: 8 }}>
-                        <label className="module-label" style={{ fontSize: '0.8rem' }}>Display Name</label>
+                      <div className="module-form-group si-dab75309">
+                        <label className="module-label si-bd374474">Display Name</label>
                         <input className="module-input" value={editRoleData.displayName}
                           onChange={e => setEditRoleData(p => ({ ...p, displayName: e.target.value }))} />
                       </div>
-                      <div className="module-form-group" style={{ marginBottom: 8 }}>
-                        <label className="module-label" style={{ fontSize: '0.8rem' }}>Base Template</label>
+                      <div className="module-form-group si-dab75309">
+                        <label className="module-label si-bd374474">Base Template</label>
                         <select className="module-input" value={editRoleData.baseTemplate}
                           onChange={e => setEditRoleData(p => ({ ...p, baseTemplate: e.target.value }))}>
                           <option value="hospital_staff">Hospital Staff</option>
@@ -479,37 +479,37 @@ const NetworkRoleMatrix: React.FC<NetworkRoleMatrixProps> = ({ networkId, networ
                           <option value="corporate_admin">Corporate Admin</option>
                         </select>
                       </div>
-                      <div className="module-form-group" style={{ marginBottom: 8 }}>
-                        <label className="module-label" style={{ fontSize: '0.8rem' }}>Description</label>
+                      <div className="module-form-group si-dab75309">
+                        <label className="module-label si-bd374474">Description</label>
                         <input className="module-input" value={editRoleData.description}
                           onChange={e => setEditRoleData(p => ({ ...p, description: e.target.value }))} />
                       </div>
-                      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                        <button onClick={() => setEditingRole(null)} style={{ fontSize: '0.8rem', padding: '4px 10px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 4, cursor: 'pointer' }}>Cancel</button>
-                        <button onClick={() => handleUpdateRole(role.roleKey)} style={{ fontSize: '0.8rem', padding: '4px 10px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Save</button>
+                      <div className="si-f0412db6">
+                        <button onClick={() => setEditingRole(null)} className="si-d2765f70">Cancel</button>
+                        <button onClick={() => handleUpdateRole(role.roleKey)} className="si-289b3577">Save</button>
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                        <span style={{ fontSize: '1.3rem' }}>{role.icon}</span>
+                      <div className="si-b01feffa">
+                        <span className="si-46606d89">{role.icon}</span>
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#1e3a5f' }}>{role.displayName}</div>
-                          <div style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>{role.roleKey}</div>
+                          <div className="si-e171bea0">{role.displayName}</div>
+                          <div className="si-ccfa8f47">{role.roleKey}</div>
                         </div>
                       </div>
-                      {role.description && <p style={{ margin: '0 0 8px', fontSize: '0.82rem', color: '#64748b' }}>{role.description}</p>}
-                      <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: 10 }}>
+                      {role.description && <p className="si-0a144a9b">{role.description}</p>}
+                      <div className="si-3e179bf0">
                         Inherits from: <strong>{role.baseTemplate.replace(/_/g, ' ')}</strong>
                       </div>
-                      <div style={{ display: 'flex', gap: 8 }}>
+                      <div className="si-d223efb3">
                         <button
                           onClick={() => { setEditingRole(role.roleKey); setEditRoleData({ displayName: role.displayName, description: role.description || '', baseTemplate: role.baseTemplate, icon: role.icon }); }}
-                          style={{ fontSize: '0.78rem', padding: '3px 10px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 4, cursor: 'pointer' }}
+                          className="si-0334bced"
                         >✏️ Edit</button>
                         <button
                           onClick={() => handleDeleteRole(role.roleKey, role.displayName)}
-                          style={{ fontSize: '0.78rem', padding: '3px 10px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 4, cursor: 'pointer' }}
+                          className="si-ccc82195"
                         >🗑 Deactivate</button>
                       </div>
                     </div>

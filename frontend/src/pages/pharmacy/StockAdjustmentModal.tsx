@@ -60,10 +60,10 @@ export default function StockAdjustmentModal({ pharmacyId, item, onClose, onDone
           <button className="pharm-modal-close" onClick={onClose}>✕</button>
         </div>
 
-        <div style={{ background: '#f5f7fa', borderRadius: 8, padding: '10px 14px', marginBottom: 14, fontSize: '0.88rem' }}>
+        <div className="si-b5128f08">
           <strong>{item.medication_name || item.med_name}</strong> — {t('pharmacy.table.batch')}: {item.batch_number}
           <br />
-          <span style={{ color: '#666' }}>{t('pharmacy.stock.currentQty')}: {item.quantity} {item.unit}</span>
+          <span className="si-50edd4e9">{t('pharmacy.stock.currentQty')}: {item.quantity} {item.unit}</span>
         </div>
 
         {error && <div className="pharm-error">⚠️ {error}</div>}

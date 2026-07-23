@@ -88,6 +88,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "நகலெடுக்கப்பட்டது!",
+    "copyFailed": "கிளிப்போர்டுக்கு நகலெடுக்க முடியவில்லை",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -101,7 +103,8 @@
     "fillRequired": "Please fill all required fields",
     "none": "None",
     "error": "Error",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "previous": "முந்தைய"
   },
   "nav": {
     "brand": "VetCare",
@@ -202,7 +205,8 @@
     "commissionSettings": "கமிஷன் விதிகள்",
     "settlements": "தீர்வுகள்",
     "referrals": "பரிந்துரைகள்",
-    "financeReports": "நிதி அறிக்கைகள்"
+    "financeReports": "நிதி அறிக்கைகள்",
+    "masterData": "மாஸ்டர் தரவு"
   },
   "login": {
     "welcome": "மீண்டும் வரவேற்கிறோம்",
@@ -868,7 +872,10 @@
       "todayQueue": "இன்றைய வரிசை",
       "activeInpatients": "செயலில் உள்ள உள்நோயாளிகள்",
       "pendingReferrals": "நிலுவையில் உள்ள பரிந்துரைகள்",
-      "branchStaff": "கிளை ஊழியர்கள்"
+      "branchStaff": "கிளை ஊழியர்கள்",
+      "rxPendingReview": "மருந்தாளர் மதிப்பாய்வுக்காக நிலுவையிலுள்ள மருந்துச்சீட்டுகள்",
+      "rxRejectedThisWeek": "இந்த வாரம் நிராகரிக்கப்பட்ட மருந்துச்சீட்டுகள்",
+      "rxDispensed": "வழங்கப்பட்ட மருந்துச்சீட்டுகள்"
     },
     "quickActions": {
       "viewConsultations": "ஆலோசனைகளைக் காண்க",
@@ -1269,7 +1276,8 @@
       "confirmRemove": "இந்த விலங்கை நீக்க விரும்புகிறீர்களா?",
       "removed": "விலங்கு வெற்றிகரமாக நீக்கப்பட்டது",
       "failedSave": "விலங்கை சேமிக்க முடியவில்லை",
-      "failedRemove": "விலங்கை நீக்க முடியவில்லை"
+      "failedRemove": "விலங்கை நீக்க முடியவில்லை",
+      "failedLoadEnterprises": "உங்கள் நிறுவனங்கள் பட்டியலை ஏற்ற முடியவில்லை"
     },
     "pageTitle": "எனது விலங்குகள்",
     "loading": "விலங்குகள் ஏற்றப்படுகின்றன...",
@@ -1514,7 +1522,15 @@
       "validUntil": "செல்லுபடியாகும் வரை:",
       "active": "செயலில்",
       "expired": "காலாவதியானது",
-      "addButton": "மருந்து சீட்டு எழுது"
+      "addButton": "மருந்து சீட்டு எழுது",
+      "networkPharmacy": "நெட்வொர்க் மருந்தகம்",
+      "dispensedOn": "{{date}} அன்று வழங்கப்பட்டது",
+      "reviewStatus": {
+        "pending_review": "மருந்தாளர் மதிப்பாய்வுக்காக காத்திருக்கிறது",
+        "approved_for_dispensing": "அங்கீகரிக்கப்பட்டது — வழங்கப்பட காத்திருக்கிறது",
+        "rejected": "மருந்தாளரால் நிராகரிக்கப்பட்டது",
+        "needs_clarification": "மருந்தாளர் விளக்கம் கோரியுள்ளார்"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ தடுப்பூசி சேர்",
@@ -3121,6 +3137,12 @@
   "marketplace": {
     "pageTitle": "🏪 வாங்க-விற்க சந்தை",
     "subtitle": "விலங்குகளை வாங்கவும் விற்கவும் — உபகரணங்கள் மற்றும் கால்நடை மருத்துவ பொருட்களை உலாவவும்",
+    "errors": {
+      "dashboardLoadFailed": "உங்கள் டாஷ்போர்டை ஏற்ற முடியவில்லை",
+      "favoritesLoadFailed": "உங்கள் பிடித்தவைகளை ஏற்ற முடியவில்லை",
+      "adminDataLoadFailed": "நிர்வாக பட்டியல்கள் மற்றும் புள்ளிவிவரங்களை ஏற்ற முடியவில்லை",
+      "monetizationLoadFailed": "பணமாக்கல் அமைப்புகளை ஏற்ற முடியவில்லை"
+    },
     "tabs": {
       "dashboard": "📊 டாஷ்போர்டு",
       "browse": "🛒 உலாவு",
@@ -3295,7 +3317,7 @@
       "autoPopulated": "விலங்கு விவரங்கள் தானாக நிரப்பப்பட்டன!",
       "fieldsAutoFilled": "உங்கள் விலங்கின் சுயவிவரத்திலிருந்து புலங்கள் தானாக நிரப்பப்பட்டன. கீழே எந்த புலத்தையும் திருத்தலாம்.",
       "imagesTitle": "பட்டியல் படங்கள்",
-      "imagesLabel": "5 படங்கள் வரை பதிவேற்றவும்",
+      "imagesLabel": "{{count}} படங்கள் வரை பதிவேற்றவும்",
       "uploading": "பதிவேற்றுகிறது...",
       "uploadFailed": "பட பதிவேற்றம் தோல்வி",
       "selectBreed": "இனத்தைத் தேர்ந்தெடுக்கவும்",
@@ -3314,7 +3336,12 @@
       "videoAdded": "வீடியோ சேர்க்கப்பட்டது",
       "removeVideo": "வீடியோவை அகற்று",
       "videoUploaded": "வீடியோ பதிவேற்றப்பட்டது",
-      "videoHint": "ஒரு குறுகிய வீடியோ நம்பிக்கையை உருவாக்கி அதிக பதில்களைப் பெறுகிறது."
+      "videoHint": "ஒரு குறுகிய வீடியோ நம்பிக்கையை உருவாக்கி அதிக பதில்களைப் பெறுகிறது.",
+      "imageTooLarge": "படம் மிகப் பெரியது — அதிகபட்சம் {{maxMb}}MB",
+      "videoTooLarge": "வீடியோ மிகப் பெரியது — அதிகபட்சம் {{maxMb}}MB",
+      "videoTooLong": "வீடியோ மிக நீளமானது — அதிகபட்சம் {{maxSec}} விநாடிகள்",
+      "uploadingVideo": "வீடியோ பதிவேற்றப்படுகிறது...",
+      "videoLimits": "அதிகபட்சம் {{maxSec}} விநாடிகள், {{maxMb}}MB வரை"
     },
     "detail": {
       "backToListings": "← பட்டியல்களுக்குத் திரும்பு",
@@ -3859,6 +3886,7 @@
     "loadTrail": "தடத்தை ஏற்று",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -4030,7 +4058,8 @@
     "next": "அடுத்து",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "வடிகட்டி விருப்பங்களை ஏற்ற முடியவில்லை (சிறப்புத் துறைகள்/மொழிகள்)"
   },
   "myBookings": {
     "title": "எனது முன்பதிவுகள்",
@@ -4166,6 +4195,7 @@
     "failedToSendMessage": "Failed to send message",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "பதிவு மாற்றத்தை மற்ற பங்கேற்பாளருக்கு அறிவிக்க முடியவில்லை",
     "micUnavailable": "Microphone unavailable",
     "cameraStillUnavailable": "Camera still unavailable",
     "duration": "Duration",
@@ -4478,6 +4508,7 @@
     "cameraUnavailable": "Camera unavailable",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "பதிவு மாற்றத்தை மற்ற பங்கேற்பாளருக்கு அறிவிக்க முடியவில்லை",
     "failedToSaveNotes": "Failed to save notes",
     "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
     "failedToComplete": "Failed to complete consultation",
@@ -4676,6 +4707,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5255,6 +5293,7 @@
     "verify": "சரிபார்",
     "unverify": "சரிபார்ப்பை நீக்கு",
     "pendingDocReviews": "நிலுவை ஆவண மதிப்பாய்வுகள்",
+    "pendingLoadFailed": "நிலுவை ஆவண மதிப்பாய்வுகளை ஏற்ற முடியவில்லை",
     "noDocReviews": "நிலுவை ஆவண மதிப்பாய்வுகள் இல்லை",
     "reviewDocuments": "ஆவணங்களை மதிப்பாய்வு செய்",
     "verifyHospital": "மருத்துவமனையை சரிபார்",
@@ -5281,6 +5320,9 @@
     "checkInPatient": "நோயாளி பதிவு",
     "noPatients": "வரிசையில் நோயாளிகள் இல்லை",
     "unknownPatient": "அறியப்படாத நோயாளி",
+    "medicationDispensed": "மருந்து வழங்கப்பட்டது",
+    "medicationReady": "மருந்து வழங்க தயார்",
+    "medicationPendingReview": "மருந்தாளர் மதிப்பாய்வுக்காக காத்திருக்கும் மருந்து",
     "owner": "உரிமையாளர்",
     "triage": "தீவிரம் வகைப்படுத்தல்",
     "startExam": "பரிசோதனை தொடங்கு",
@@ -5729,7 +5771,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -5942,7 +5986,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -5977,6 +6049,7 @@
     "expired": "Expired",
     "failedToLoad": "Failed to load certificates",
     "failedToPrint": "Failed to load certificate for printing",
+    "failedToLoadEnterprises": "வடிகட்டலுக்கான நிறுவனங்களை ஏற்ற முடியவில்லை",
     "certTypes": {
       "health_certificate": "General Health Certificate",
       "fitness_to_travel": "Fitness to Travel Certificate",
@@ -6023,6 +6096,7 @@
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
     "failedToCreate": "சான்றிதழை உருவாக்க முடியவில்லை",
+    "failedToLoadEnterprises": "நிறுவனங்கள் பட்டியலை ஏற்ற முடியவில்லை",
     "noCertTypeSelected": "சான்றிதழ் வகையை தேர்ந்தெடுக்கவும்",
     "viewAllCertificates": "அனைத்து சான்றிதழ்களை காண்க",
     "createAnother": "மற்றொன்று உருவாக்கு",
@@ -6361,6 +6435,7 @@
     "create": "பரிந்துரை உருவாக்கு",
     "createTitle": "நோயாளியை நெட்வொர்க் மருத்துவமனைக்கு பரிந்துரைக்கவும்",
     "createSubtitle": "இந்த நோயாளியை உங்கள் நெட்வொர்க்கில் உள்ள மற்றொரு மருத்துவமனைக்கு அனுப்புங்கள்",
+    "hospitalsLoadFailed": "நெட்வொர்க் மருத்துவமனைகள் பட்டியலை ஏற்ற முடியவில்லை",
     "toHospital": "பெறும் மருத்துவமனை *",
     "toVet": "பெறும் கால்நடை மருத்துவர் (விருப்பம்)",
     "reason": "பரிந்துரை காரணம் *",
@@ -6636,7 +6711,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "உங்கள் சேமிக்கப்பட்ட அறிவிப்பு விருப்பங்களை ஏற்ற முடியவில்லை — இயல்புநிலைகள் காட்டப்படுகின்றன"
   },
   "emailTemplates": {
     "title": "மின்னஞ்சல் வார்ப்புருக்கள்",
@@ -6705,6 +6781,7 @@
       "catalog": "Catalog",
       "history": "History",
       "reorders": "Reorders",
+      "transfers": "Transfers",
       "analytics": "Analytics"
     },
     "stats": {
@@ -6824,6 +6901,7 @@
     "reorder": {
       "title": "Reorder",
       "supplier": "Supplier",
+      "suppliersLoadFailed": "சப்ளையர் பட்டியலை ஏற்ற முடியவில்லை",
       "selectSupplier": "Select supplier",
       "supplierRequired": "Select a supplier",
       "quantity": "Qty",
@@ -6981,6 +7059,44 @@
         "cancelled": "Cancelled"
       }
     },
+    "transfers": {
+      "title": "Inter-Hospital Medication Transfers",
+      "newRequest": "New Transfer Request",
+      "activeRequests": "Active Requests",
+      "requests": "requests",
+      "noActive": "No active transfer requests",
+      "empty": "No transfer history",
+      "route": "Route",
+      "requestedBy": "Requested By",
+      "sourceHospital": "From Hospital",
+      "destHospital": "To Hospital",
+      "selectHospital": "Select hospital",
+      "medications": "Medications",
+      "selectMedication": "Select medication",
+      "addLine": "Add Medication",
+      "submitRequest": "Submit Request",
+      "addTracking": "Add Tracking",
+      "decline": "Decline",
+      "declineReason": "Reason for declining",
+      "formIncomplete": "Select both hospitals and at least one medication line",
+      "sameHospital": "Source and destination hospitals must be different",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "preparing": "Preparing",
+        "shipped": "Shipped",
+        "received": "Received",
+        "fulfilled": "Fulfilled",
+        "declined": "Declined"
+      },
+      "advanceTo": {
+        "accepted": "Accept",
+        "preparing": "Mark Preparing",
+        "shipped": "Mark Shipped",
+        "received": "Mark Received",
+        "fulfilled": "Mark Fulfilled"
+      }
+    },
     "analytics": {
       "title": "Pharmacy Analytics",
       "days": "days",
@@ -7056,6 +7172,8 @@
     "receiptTitle": "கட்டண ரசீது",
     "patient": "நோயாளி",
     "doctor": "மருத்துவர்",
+    "pharmacy": "மருந்தகம்",
+    "medications": "மருந்துகள்",
     "animal": "விலங்கு",
     "date": "தேதி",
     "totalPaid": "மொத்தம் செலுத்தியது",
@@ -7140,6 +7258,7 @@
     "subtitle": "மருத்துவர் அளவிலான கமிஷன் மேலெழுதல்கள் — காலி புலங்கள் இயல்புநிலையைப் பயன்படுத்தும்",
     "globalSettings": "இயல்புநிலை அமைப்புகள்",
     "globalInfo": "இயல்புநிலை: {{percent}}% + ஒரு கட்டண பதிவுக்கு {{flat}} நிலையான கட்டணம். System Settings-இல் மாற்றவும்.",
+    "globalsLoadFailed": "தற்போதைய உலகளாவிய கமிஷன் இயல்புநிலைகளை ஏற்ற முடியவில்லை — மாற்று மதிப்புகள் காட்டப்படுகின்றன",
     "saved": "மேலெழுதல் சேமிக்கப்பட்டது. புதிய கட்டணங்களுக்கு மட்டுமே பொருந்தும்.",
     "saveFailed": "மேலெழுதலை சேமிக்க முடியவில்லை.",
     "searchPlaceholder": "பெயர் அல்லது மின்னஞ்சலால் மருத்துவரைத் தேடு…",
@@ -7275,6 +7394,9 @@
     "refundsOut": "திரும்பங்கள்",
     "netRevenue": "நிகர தள வருவாய்",
     "netRevenueHint": "கமிஷன் + செயலாக்கம் − கேட்வே கட்டணம்",
+    "pharmacyRevenueTitle": "மருந்தக வருவாய் (தேர்ந்தெடுக்கப்பட்ட காலம்)",
+    "pharmacyCollected": "மருந்தகம் பெறப்பட்டது",
+    "pharmacyPending": "மருந்தக நிலுவை கட்டணம்",
     "liabilitiesTitle": "பொறுப்புகள் (தற்போது)",
     "doctorClearing": "மருத்துவர் வருவாய் தீர்வில்",
     "doctorAvailable": "மருத்துவர் வருவாய் கிடைக்கிறது",
@@ -7289,5 +7411,103 @@
     "stuckPending": "நிலுவையில் சிக்கியவை",
     "stuckPendingHint": "1 மணி நேரத்திற்கும் மேல் — தினசரி சரிபார்ப்பு",
     "openHolds": "திறந்த கட்டண ஹோல்டுகள்"
+  },
+  "animalClass": {
+    "fieldLabel": "வகுப்பு",
+    "selectClass": "வகுப்பைத் தேர்ந்தெடுக்கவும்",
+    "anyClass": "எந்த வகுப்பும்",
+    "sire": "ஆண் பெற்றோர் (சயர்)",
+    "dam": "பெண் பெற்றோர் (டேம்)",
+    "selectSire": "ஆண் பெற்றோரைத் தேர்ந்தெடுக்கவும் (விருப்பம்)",
+    "selectDam": "பெண் பெற்றோரைத் தேர்ந்தெடுக்கவும் (விருப்பம்)",
+    "breedingStatus": "இனப்பெருக்க நிலை",
+    "selectBreedingStatus": "நிலையைத் தேர்ந்தெடுக்கவும்",
+    "notBred": "இனப்பெருக்கம் செய்யப்படவில்லை",
+    "pregnant": "கர்ப்பமாக உள்ளது",
+    "notPregnant": "கர்ப்பமாக இல்லை",
+    "lastBreedingDate": "கடைசி இனப்பெருக்க தேதி",
+    "expectedDueDate": "எதிர்பார்க்கப்படும் பிரசவ தேதி",
+    "cattle_bull": "காளை",
+    "cattle_cow": "பசு",
+    "cattle_calf": "கன்று",
+    "cattle_bull_calf": "ஆண் கன்று",
+    "cattle_heifer_calf": "பெண் கன்று",
+    "cattle_heifer": "இளம் பசு",
+    "cattle_bullock": "எருது",
+    "cattle_steer": "மாட்டு எருது (இறைச்சிக்கு)",
+    "buffalo_bull": "எருமை காளை",
+    "buffalo_cow": "எருமை",
+    "buffalo_calf": "எருமை கன்று",
+    "buffalo_bull_calf": "ஆண் எருமை கன்று",
+    "buffalo_heifer_calf": "பெண் எருமை கன்று",
+    "buffalo_heifer": "இளம் எருமை",
+    "buffalo_bullock": "எருமை எருது",
+    "sheep_ram": "செம்மறி ஆட்டுக் கிடா",
+    "sheep_ewe": "செம்மறி ஆடு",
+    "sheep_lamb": "ஆட்டுக்குட்டி",
+    "sheep_ram_lamb": "ஆண் ஆட்டுக்குட்டி",
+    "sheep_ewe_lamb": "பெண் ஆட்டுக்குட்டி",
+    "sheep_wether": "சிப்பமாக்கப்பட்ட ஆட்டுக் கிடா",
+    "goat_buck": "வெள்ளாட்டுக் கிடா",
+    "goat_doe": "வெள்ளாடு",
+    "goat_buckling": "ஆண் வெள்ளாட்டுக் குட்டி",
+    "goat_goatling": "பெண் வெள்ளாட்டுக் குட்டி",
+    "goat_kid": "வெள்ளாட்டுக்குட்டி",
+    "pig_boar": "ஆண் பன்றி",
+    "pig_sow": "பெண் பன்றி",
+    "pig_gilt": "இளம் பெண் பன்றி",
+    "pig_barrow": "சிப்பமாக்கப்பட்ட பன்றி",
+    "dog_male": "நாய்",
+    "dog_bitch": "பெண் நாய்",
+    "dog_pup": "நாய்க்குட்டி",
+    "cat_tom": "ஆண் பூனை",
+    "cat_queen": "பெண் பூனை",
+    "cat_kitten": "பூனைக்குட்டி",
+    "cat_neuter": "சிப்பமாக்கப்பட்ட பூனை"
+  },
+  "masterData": {
+    "title": "மாஸ்டர் தரவு",
+    "subtitle": "இனங்கள், இனவகைகள், விலங்கு வகுப்புகள் மற்றும் மார்க்கெட்பிளேஸ் மதிப்புகளை நிர்வகிக்கவும் — குறியீடு டெப்ளாய் தேவையில்லை.",
+    "tabs": {
+      "species": "இனங்கள்",
+      "breeds": "இனவகைகள்",
+      "classes": "விலங்கு வகுப்புகள்",
+      "categories": "மார்க்கெட்பிளேஸ் வகைகள்",
+      "conditions": "மார்க்கெட்பிளேஸ் நிலைகள்"
+    },
+    "filterBySpecies": "இனம்",
+    "selectSpeciesPrompt": "— ஒரு இனத்தைத் தேர்ந்தெடுக்கவும் —",
+    "addNew": "புதிதாக சேர்",
+    "editEntry": "உள்ளீட்டைத் திருத்து",
+    "reactivate": "மீண்டும் செயல்படுத்து",
+    "noEntries": "இன்னும் உள்ளீடுகள் இல்லை",
+    "protectedHint": "பாதுகாக்கப்பட்டது — முக்கிய தர்க்கம் இந்த குறியீட்டைச் சார்ந்துள்ளது",
+    "labelKeyHint": "உள்ளமைந்த மொழிபெயர்ப்பை வைத்திருக்க வெறுமையாக விடவும்",
+    "confirmDelete": "இந்த உள்ளீட்டை நீக்கவா? இதை மீட்க முடியாது.",
+    "deleteBlocked": "நீக்க முடியவில்லை — இது இன்னும் பயன்பாட்டில் இருக்கலாம்",
+    "updatedSuccess": "வெற்றிகரமாக புதுப்பிக்கப்பட்டது",
+    "createdSuccess": "வெற்றிகரமாக உருவாக்கப்பட்டது",
+    "archivedSuccess": "செயலிழக்கச் செய்யப்பட்டது",
+    "restoredSuccess": "மீண்டும் செயல்படுத்தப்பட்டது",
+    "deletedSuccess": "நீக்கப்பட்டது",
+    "errors": {
+      "speciesRequired": "முதலில் ஒரு இனத்தைத் தேர்ந்தெடுக்கவும்"
+    },
+    "gender": {
+      "unknown": "தெரியவில்லை"
+    },
+    "col": {
+      "icon": "ஐகான்",
+      "code": "குறியீடு",
+      "label": "லேபிள்",
+      "category": "வகை",
+      "earTag": "காது டேக் பயன்படுத்துகிறது",
+      "sortOrder": "வரிசை",
+      "value": "மதிப்பு (உள் குறியீடு)",
+      "impliedGender": "உள்ளார்ந்த பாலினம்",
+      "canBePregnant": "கர்ப்பமாக இருக்க முடியும்",
+      "canProduceMilk": "பால் உற்பத்தி செய்ய முடியும்",
+      "marketplaceEligible": "மார்க்கெட்பிளேஸில் விற்பனைக்கு தகுதி"
+    }
   }
 }

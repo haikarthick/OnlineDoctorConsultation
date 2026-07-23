@@ -1,7 +1,11 @@
 -- ============================================================
 -- VetCare - Complete Database Schema (PostgreSQL 18)
 -- ============================================================
--- Covers ALL 22 tables used by the application services.
+-- Fresh-install schema covering every table used by the application
+-- services (see backend/migrations/*.sql for the same schema built up
+-- incrementally on already-deployed environments — keep both in sync when
+-- adding new tables/columns, since a migration alone is invisible to a
+-- brand new database that runs only this file).
 -- ============================================================
 
 -- gen_random_uuid() is built into PostgreSQL 13+ — no extension required
@@ -146,9 +150,7 @@ CREATE TABLE IF NOT EXISTS animals (
     CHECK (status IN ('active','sold','deceased','transferred','quarantined','retired','lost')),
   dam_id UUID,
   sire_id UUID,
-  acquisition_date DATE,
-  acquisition_source VARCHAR(200),
-  production_type VARCHAR(50),
+  animal_class VARCHAR(30),
   avatar_url TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -2097,6 +2099,8 @@ CREATE INDEX IF NOT EXISTS idx_mp_saved_searches_user ON marketplace_saved_searc
 CREATE INDEX IF NOT EXISTS idx_mp_saved_searches_alerts ON marketplace_saved_searches(alerts_enabled) WHERE alerts_enabled = true;
 -- Phase 4: optional listing video (mirrors backend/migrations/017_marketplace_video.sql)
 ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS video_url VARCHAR(2000);
+-- Species-correct animal class terms (mirrors backend/migrations/020_animal_class_terms.sql)
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_class VARCHAR(30);
 -- Phase 5: reports + full-text index (mirrors backend/migrations/018_marketplace_trust_discovery.sql)
 CREATE TABLE IF NOT EXISTS marketplace_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -2266,6 +2270,7 @@ CREATE TABLE IF NOT EXISTS hospital_pharmacies (
   phone VARCHAR(50),
   email VARCHAR(255),
   license_number VARCHAR(100),
+  gstin VARCHAR(20),
   operating_hours JSONB DEFAULT '{}',
   is_primary_pharmacy BOOLEAN DEFAULT false,
   is_accepting_requests BOOLEAN DEFAULT true,
@@ -2465,7 +2470,7 @@ CREATE INDEX IF NOT EXISTS idx_med_requests_network ON pharmacy_medication_reque
 CREATE INDEX IF NOT EXISTS idx_med_requests_status ON pharmacy_medication_requests(status);
 
 -- 45.11 ALTER prescriptions: add pharmacy workflow fields
-ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_status VARCHAR(30) DEFAULT 'pending_review' CHECK (review_status IN ('pending_review','reviewed','rejected','approved_for_dispensing','dispensed'));
+ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_status VARCHAR(30) DEFAULT 'pending_review' CHECK (review_status IN ('pending_review','reviewed','rejected','approved_for_dispensing','dispensed','needs_clarification'));
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
 ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_notes TEXT;
@@ -2636,14 +2641,15 @@ CREATE TABLE IF NOT EXISTS tax_codes (
 INSERT INTO tax_codes (id, sac_code, label, rate_percent, is_active) VALUES
   (gen_random_uuid(), '998351', 'Veterinary services for pet animals (GST-exempt healthcare)', 0, true),
   (gen_random_uuid(), '998352', 'Veterinary services for livestock (GST-exempt healthcare)', 0, true),
-  (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true)
+  (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true),
+  (gen_random_uuid(), '300490', 'Pharmacy — dispensed veterinary medicaments (HSN 3004)', 12, true)
 ON CONFLICT (sac_code) DO NOTHING;
 
 -- 46.10 invoices: immutable snapshots
 CREATE TABLE IF NOT EXISTS invoices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   invoice_number VARCHAR(100) UNIQUE NOT NULL,
-  invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission')),
+  invoice_type VARCHAR(20) NOT NULL CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy')),
   payment_id UUID REFERENCES payments(id) ON DELETE SET NULL,
   withdrawal_id UUID REFERENCES withdrawal_requests(id) ON DELETE SET NULL,
   issuer_details JSONB NOT NULL DEFAULT '{}',
@@ -2739,3 +2745,1361 @@ ON CONFLICT (environment) DO NOTHING;
 DROP TRIGGER IF EXISTS update_payment_gateway_credentials_updated_at ON payment_gateway_credentials;
 CREATE TRIGGER update_payment_gateway_credentials_updated_at BEFORE UPDATE ON payment_gateway_credentials
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- 47. TIER 2/3/4 ADVANCED FEATURE TABLES
+-- ============================================================
+-- Backported from backend/migrations/006_tier2_features.sql,
+-- 007_tier3_features.sql, 008_tier4_features.sql — these 31 tables existed
+-- only as migrations (applied to every live environment already) but were
+-- never mirrored into this fresh-install schema, so a brand new DB would
+-- 500 the moment any of these features were touched. marketplace_listings/
+-- bids/orders/monetization_settings/plans/subscriptions/listing_boosts/
+-- inquiries/transactions (9 of migration 008's 19 tables) already exist
+-- above (§ marketplace) — not repeated here — but marketplace_listings was
+-- still missing the entire livestock/compliance column block from 008,
+-- backported separately below since active Marketplace code depends on it.
+
+-- ─── 47.1 Health Observations (006) ───────────────────────────
+CREATE TABLE IF NOT EXISTS health_observations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  animal_id UUID REFERENCES animals(id),
+  group_id UUID REFERENCES animal_groups(id),
+  observer_id UUID NOT NULL REFERENCES users(id),
+  observation_type VARCHAR(50) NOT NULL DEFAULT 'general',
+  severity VARCHAR(20) NOT NULL DEFAULT 'normal',
+  title VARCHAR(200) NOT NULL,
+  description TEXT,
+  body_temperature DECIMAL(5,2),
+  weight DECIMAL(10,2),
+  weight_unit VARCHAR(10) DEFAULT 'kg',
+  heart_rate INT,
+  respiratory_rate INT,
+  body_condition_score INT,
+  symptoms TEXT[],
+  diagnosis TEXT,
+  treatment_given TEXT,
+  follow_up_date DATE,
+  is_resolved BOOLEAN DEFAULT false,
+  resolved_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.2 Breeding Records (006) ───────────────────────────────
+CREATE TABLE IF NOT EXISTS breeding_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  dam_id UUID REFERENCES animals(id),
+  sire_id UUID REFERENCES animals(id),
+  breeding_method VARCHAR(50) NOT NULL DEFAULT 'natural',
+  breeding_date DATE NOT NULL,
+  expected_due_date DATE,
+  actual_birth_date DATE,
+  gestation_days INT,
+  offspring_count INT DEFAULT 0,
+  live_births INT DEFAULT 0,
+  stillbirths INT DEFAULT 0,
+  status VARCHAR(30) NOT NULL DEFAULT 'bred',
+  semen_batch VARCHAR(100),
+  technician_id UUID REFERENCES users(id),
+  pregnancy_confirmed BOOLEAN DEFAULT false,
+  pregnancy_check_date DATE,
+  notes TEXT,
+  outcome TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.3 Feed Inventory (006) ─────────────────────────────────
+CREATE TABLE IF NOT EXISTS feed_inventory (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  location_id UUID REFERENCES locations(id),
+  feed_name VARCHAR(200) NOT NULL,
+  feed_type VARCHAR(50) NOT NULL DEFAULT 'grain',
+  brand VARCHAR(100),
+  unit VARCHAR(20) NOT NULL DEFAULT 'kg',
+  current_stock DECIMAL(12,2) NOT NULL DEFAULT 0,
+  minimum_stock DECIMAL(12,2) DEFAULT 0,
+  cost_per_unit DECIMAL(10,2) DEFAULT 0,
+  supplier VARCHAR(200),
+  batch_number VARCHAR(100),
+  expiry_date DATE,
+  storage_location VARCHAR(200),
+  nutritional_info JSONB,
+  is_active BOOLEAN DEFAULT true,
+  last_restocked_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.4 Feed Consumption Logs (006) ──────────────────────────
+CREATE TABLE IF NOT EXISTS feed_consumption_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  feed_id UUID NOT NULL REFERENCES feed_inventory(id),
+  group_id UUID REFERENCES animal_groups(id),
+  location_id UUID REFERENCES locations(id),
+  animal_id UUID REFERENCES animals(id),
+  quantity DECIMAL(10,2) NOT NULL,
+  unit VARCHAR(20) NOT NULL DEFAULT 'kg',
+  consumption_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  recorded_by UUID NOT NULL REFERENCES users(id),
+  cost DECIMAL(10,2) DEFAULT 0,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.5 Compliance Documents (006) ───────────────────────────
+CREATE TABLE IF NOT EXISTS compliance_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  document_type VARCHAR(50) NOT NULL,
+  title VARCHAR(300) NOT NULL,
+  description TEXT,
+  reference_number VARCHAR(100),
+  issued_date DATE,
+  expiry_date DATE,
+  issuing_authority VARCHAR(200),
+  status VARCHAR(30) NOT NULL DEFAULT 'draft',
+  related_campaign_id UUID REFERENCES treatment_campaigns(id),
+  related_movement_id UUID REFERENCES movement_records(id),
+  animal_ids UUID[],
+  group_ids UUID[],
+  document_data JSONB,
+  file_url TEXT,
+  verified_by UUID REFERENCES users(id),
+  verified_at TIMESTAMP,
+  notes TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.6 Financial Records (006) ──────────────────────────────
+CREATE TABLE IF NOT EXISTS financial_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  record_type VARCHAR(30) NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  description TEXT,
+  amount DECIMAL(12,2) NOT NULL,
+  currency VARCHAR(3) DEFAULT 'USD',
+  transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  reference_id UUID,
+  reference_type VARCHAR(50),
+  animal_id UUID REFERENCES animals(id),
+  group_id UUID REFERENCES animal_groups(id),
+  recorded_by UUID NOT NULL REFERENCES users(id),
+  payment_method VARCHAR(30),
+  vendor VARCHAR(200),
+  invoice_number VARCHAR(100),
+  receipt_url TEXT,
+  tags TEXT[],
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.7 Alert Rules (006) ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS alert_rules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  description TEXT,
+  alert_type VARCHAR(50) NOT NULL,
+  conditions JSONB NOT NULL DEFAULT '{}',
+  severity VARCHAR(20) NOT NULL DEFAULT 'info',
+  is_enabled BOOLEAN DEFAULT true,
+  check_interval_hours INT DEFAULT 24,
+  notification_channels TEXT[] DEFAULT ARRAY['in_app'],
+  target_roles TEXT[] DEFAULT ARRAY['owner', 'manager'],
+  last_triggered_at TIMESTAMP,
+  created_by UUID NOT NULL REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.8 Alert Events (006) ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS alert_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  rule_id UUID REFERENCES alert_rules(id),
+  alert_type VARCHAR(50) NOT NULL,
+  severity VARCHAR(20) NOT NULL DEFAULT 'info',
+  title VARCHAR(300) NOT NULL,
+  message TEXT NOT NULL,
+  data JSONB,
+  is_read BOOLEAN DEFAULT false,
+  is_acknowledged BOOLEAN DEFAULT false,
+  acknowledged_by UUID REFERENCES users(id),
+  acknowledged_at TIMESTAMP,
+  related_entity_type VARCHAR(50),
+  related_entity_id UUID,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ─── 47.9 animals: extend with health/breeding fields (006) ────
+-- breeding_status/last_breeding_date/expected_due_date/current_weight/
+-- weight_unit/last_weighed_at/dam_id/sire_id/animal_class already exist
+-- above in the main animals CREATE TABLE — only birth_weight/health_score
+-- were actually missing.
+ALTER TABLE animals ADD COLUMN IF NOT EXISTS birth_weight DECIMAL(10,2);
+ALTER TABLE animals ADD COLUMN IF NOT EXISTS health_score INT DEFAULT 100;
+
+CREATE INDEX IF NOT EXISTS idx_health_obs_enterprise ON health_observations(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_health_obs_animal ON health_observations(animal_id);
+CREATE INDEX IF NOT EXISTS idx_health_obs_type ON health_observations(observation_type);
+CREATE INDEX IF NOT EXISTS idx_breeding_enterprise ON breeding_records(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_breeding_dam ON breeding_records(dam_id);
+CREATE INDEX IF NOT EXISTS idx_breeding_status ON breeding_records(status);
+CREATE INDEX IF NOT EXISTS idx_feed_inv_enterprise ON feed_inventory(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_feed_log_enterprise ON feed_consumption_logs(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_feed_log_date ON feed_consumption_logs(consumption_date);
+CREATE INDEX IF NOT EXISTS idx_compliance_enterprise ON compliance_documents(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_compliance_type ON compliance_documents(document_type);
+CREATE INDEX IF NOT EXISTS idx_financial_enterprise ON financial_records(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_financial_date ON financial_records(transaction_date);
+CREATE INDEX IF NOT EXISTS idx_financial_type ON financial_records(record_type);
+CREATE INDEX IF NOT EXISTS idx_alert_rules_enterprise ON alert_rules(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_alert_events_enterprise ON alert_events(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_alert_events_read ON alert_events(is_read);
+
+-- ─── 47.10 Disease Prediction & Outbreak Mapping (007) ─────────
+CREATE TABLE IF NOT EXISTS disease_predictions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  animal_id UUID REFERENCES animals(id),
+  group_id UUID REFERENCES animal_groups(id),
+  disease_name VARCHAR(200) NOT NULL,
+  risk_score NUMERIC(5,2) NOT NULL DEFAULT 0,
+  confidence NUMERIC(5,2) NOT NULL DEFAULT 0,
+  predicted_onset DATE,
+  risk_factors JSONB DEFAULT '[]',
+  recommended_actions JSONB DEFAULT '[]',
+  status VARCHAR(30) DEFAULT 'active',
+  outcome VARCHAR(30),
+  created_by UUID REFERENCES users(id),
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS outbreak_zones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  location_id UUID REFERENCES locations(id),
+  disease_name VARCHAR(200) NOT NULL,
+  severity VARCHAR(20) DEFAULT 'low',
+  affected_count INTEGER DEFAULT 0,
+  total_at_risk INTEGER DEFAULT 0,
+  radius_km NUMERIC(8,2),
+  center_lat NUMERIC(10,7),
+  center_lng NUMERIC(10,7),
+  containment_status VARCHAR(30) DEFAULT 'monitoring',
+  containment_actions JSONB DEFAULT '[]',
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.11 Genomic Lineage & Genetic Diversity (007) ───────────
+CREATE TABLE IF NOT EXISTS genetic_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  animal_id UUID NOT NULL REFERENCES animals(id),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  sire_id UUID REFERENCES animals(id),
+  dam_id UUID REFERENCES animals(id),
+  generation INTEGER DEFAULT 0,
+  inbreeding_coefficient NUMERIC(6,4) DEFAULT 0,
+  genetic_traits JSONB DEFAULT '{}',
+  dna_test_date DATE,
+  dna_lab VARCHAR(200),
+  dna_sample_id VARCHAR(100),
+  known_markers JSONB DEFAULT '[]',
+  breed_purity_pct NUMERIC(5,2),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS lineage_pairs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  sire_id UUID NOT NULL REFERENCES animals(id),
+  dam_id UUID NOT NULL REFERENCES animals(id),
+  compatibility_score NUMERIC(5,2) DEFAULT 0,
+  predicted_inbreeding NUMERIC(6,4) DEFAULT 0,
+  predicted_traits JSONB DEFAULT '{}',
+  recommendation VARCHAR(30) DEFAULT 'neutral',
+  reason TEXT,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.12 IoT Sensor Integration (007) ────────────────────────
+CREATE TABLE IF NOT EXISTS iot_sensors (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  location_id UUID REFERENCES locations(id),
+  animal_id UUID REFERENCES animals(id),
+  sensor_type VARCHAR(60) NOT NULL,
+  sensor_name VARCHAR(200) NOT NULL,
+  serial_number VARCHAR(100),
+  manufacturer VARCHAR(200),
+  unit VARCHAR(30),
+  min_threshold NUMERIC(10,2),
+  max_threshold NUMERIC(10,2),
+  reading_interval_seconds INTEGER DEFAULT 300,
+  status VARCHAR(20) DEFAULT 'active',
+  battery_level NUMERIC(5,2),
+  last_reading_at TIMESTAMPTZ,
+  firmware_version VARCHAR(50),
+  metadata JSONB DEFAULT '{}',
+  installed_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS sensor_readings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sensor_id UUID NOT NULL REFERENCES iot_sensors(id),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  value NUMERIC(12,4) NOT NULL,
+  unit VARCHAR(30),
+  is_anomaly BOOLEAN DEFAULT false,
+  anomaly_type VARCHAR(50),
+  metadata JSONB DEFAULT '{}',
+  recorded_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.13 Supply Chain & Traceability (007) ───────────────────
+CREATE TABLE IF NOT EXISTS product_batches (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  batch_number VARCHAR(100) NOT NULL,
+  product_type VARCHAR(60) NOT NULL,
+  description TEXT,
+  quantity NUMERIC(12,2) NOT NULL DEFAULT 0,
+  unit VARCHAR(30) DEFAULT 'kg',
+  source_animal_ids UUID[] DEFAULT '{}',
+  source_group_id UUID REFERENCES animal_groups(id),
+  production_date DATE,
+  expiry_date DATE,
+  quality_grade VARCHAR(30),
+  certifications JSONB DEFAULT '[]',
+  current_holder VARCHAR(200),
+  status VARCHAR(30) DEFAULT 'in_production',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS traceability_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  batch_id UUID REFERENCES product_batches(id),
+  animal_id UUID REFERENCES animals(id),
+  event_type VARCHAR(60) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  description TEXT,
+  location VARCHAR(200),
+  gps_lat NUMERIC(10,7),
+  gps_lng NUMERIC(10,7),
+  recorded_by UUID REFERENCES users(id),
+  verified_by UUID REFERENCES users(id),
+  verification_hash VARCHAR(128),
+  metadata JSONB DEFAULT '{}',
+  event_date TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS qr_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  entity_type VARCHAR(30) NOT NULL,
+  entity_id UUID NOT NULL,
+  code_data TEXT NOT NULL,
+  short_url VARCHAR(200),
+  scan_count INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.14 Workforce & Task Management (007) ───────────────────
+CREATE TABLE IF NOT EXISTS workforce_tasks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  title VARCHAR(300) NOT NULL,
+  description TEXT,
+  task_type VARCHAR(60) DEFAULT 'general',
+  priority VARCHAR(20) DEFAULT 'medium',
+  status VARCHAR(20) DEFAULT 'pending',
+  assigned_to UUID REFERENCES users(id),
+  created_by UUID NOT NULL REFERENCES users(id),
+  location_id UUID REFERENCES locations(id),
+  animal_id UUID REFERENCES animals(id),
+  group_id UUID REFERENCES animal_groups(id),
+  checklist JSONB DEFAULT '[]',
+  due_date TIMESTAMPTZ,
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  estimated_hours NUMERIC(6,2),
+  actual_hours NUMERIC(6,2),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS shift_schedules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  user_id UUID NOT NULL REFERENCES users(id),
+  shift_date DATE NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  role_on_shift VARCHAR(100),
+  location_id UUID REFERENCES locations(id),
+  status VARCHAR(20) DEFAULT 'scheduled',
+  check_in_at TIMESTAMPTZ,
+  check_out_at TIMESTAMPTZ,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.15 Advanced Report Builder & Export Center (007) ───────
+CREATE TABLE IF NOT EXISTS report_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  description TEXT,
+  report_type VARCHAR(60) NOT NULL,
+  config JSONB DEFAULT '{}',
+  columns JSONB DEFAULT '[]',
+  filters JSONB DEFAULT '{}',
+  grouping JSONB DEFAULT '[]',
+  is_system BOOLEAN DEFAULT false,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS generated_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  template_id UUID REFERENCES report_templates(id),
+  name VARCHAR(200) NOT NULL,
+  report_type VARCHAR(60) NOT NULL,
+  format VARCHAR(20) DEFAULT 'json',
+  parameters JSONB DEFAULT '{}',
+  result_data JSONB DEFAULT '{}',
+  row_count INTEGER DEFAULT 0,
+  file_url VARCHAR(500),
+  status VARCHAR(20) DEFAULT 'completed',
+  generated_by UUID NOT NULL REFERENCES users(id),
+  generated_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_disease_pred_enterprise ON disease_predictions(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_disease_pred_status ON disease_predictions(status);
+CREATE INDEX IF NOT EXISTS idx_outbreak_zones_enterprise ON outbreak_zones(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_genetic_profiles_animal ON genetic_profiles(animal_id);
+CREATE INDEX IF NOT EXISTS idx_genetic_profiles_enterprise ON genetic_profiles(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_lineage_pairs_enterprise ON lineage_pairs(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_iot_sensors_enterprise ON iot_sensors(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_sensor_readings_sensor ON sensor_readings(sensor_id);
+CREATE INDEX IF NOT EXISTS idx_sensor_readings_recorded ON sensor_readings(recorded_at);
+CREATE INDEX IF NOT EXISTS idx_product_batches_enterprise ON product_batches(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_traceability_events_batch ON traceability_events(batch_id);
+CREATE INDEX IF NOT EXISTS idx_traceability_events_enterprise ON traceability_events(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_qr_codes_entity ON qr_codes(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_workforce_tasks_enterprise ON workforce_tasks(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_workforce_tasks_assigned ON workforce_tasks(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_workforce_tasks_status ON workforce_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_shift_schedules_enterprise ON shift_schedules(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_shift_schedules_user ON shift_schedules(user_id);
+CREATE INDEX IF NOT EXISTS idx_shift_schedules_date ON shift_schedules(shift_date);
+CREATE INDEX IF NOT EXISTS idx_report_templates_enterprise ON report_templates(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_generated_reports_enterprise ON generated_reports(enterprise_id);
+
+-- ─── 47.16 AI Veterinary Copilot (008) ─────────────────────────
+CREATE TABLE IF NOT EXISTS ai_chat_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID REFERENCES enterprises(id),
+  user_id UUID NOT NULL REFERENCES users(id),
+  animal_id UUID REFERENCES animals(id),
+  title VARCHAR(300) DEFAULT 'New Chat',
+  context_type VARCHAR(50) DEFAULT 'general',
+  status VARCHAR(30) DEFAULT 'active',
+  message_count INT DEFAULT 0,
+  last_message_at TIMESTAMPTZ,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ai_chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id UUID NOT NULL REFERENCES ai_chat_sessions(id) ON DELETE CASCADE,
+  role VARCHAR(20) NOT NULL DEFAULT 'user',
+  content TEXT NOT NULL,
+  content_type VARCHAR(30) DEFAULT 'text',
+  tokens_used INT DEFAULT 0,
+  confidence NUMERIC(5,2),
+  sources JSONB DEFAULT '[]',
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.17 Digital Twin & Scenario Simulator (008) ─────────────
+CREATE TABLE IF NOT EXISTS digital_twins (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  twin_type VARCHAR(50) NOT NULL DEFAULT 'farm',
+  description TEXT,
+  model_data JSONB DEFAULT '{}',
+  current_state JSONB DEFAULT '{}',
+  sync_status VARCHAR(30) DEFAULT 'synced',
+  last_synced_at TIMESTAMPTZ DEFAULT NOW(),
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS simulation_runs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  twin_id UUID NOT NULL REFERENCES digital_twins(id) ON DELETE CASCADE,
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  scenario_type VARCHAR(50) NOT NULL DEFAULT 'disease_spread',
+  parameters JSONB DEFAULT '{}',
+  input_state JSONB DEFAULT '{}',
+  result_data JSONB DEFAULT '{}',
+  outcome_summary TEXT,
+  status VARCHAR(30) DEFAULT 'pending',
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  duration_ms INT,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.18 Sustainability & Carbon Tracker (008) ───────────────
+CREATE TABLE IF NOT EXISTS sustainability_metrics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  metric_type VARCHAR(60) NOT NULL,
+  metric_name VARCHAR(200) NOT NULL,
+  value NUMERIC(14,4) NOT NULL DEFAULT 0,
+  unit VARCHAR(30),
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  category VARCHAR(60) DEFAULT 'general',
+  scope VARCHAR(30) DEFAULT 'scope_1',
+  data_source VARCHAR(100),
+  notes TEXT,
+  recorded_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS sustainability_goals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  goal_name VARCHAR(200) NOT NULL,
+  description TEXT,
+  metric_type VARCHAR(60) NOT NULL,
+  target_value NUMERIC(14,4) NOT NULL,
+  current_value NUMERIC(14,4) DEFAULT 0,
+  unit VARCHAR(30),
+  baseline_value NUMERIC(14,4),
+  baseline_date DATE,
+  target_date DATE NOT NULL,
+  status VARCHAR(30) DEFAULT 'active',
+  progress_pct NUMERIC(5,2) DEFAULT 0,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.19 Client Portal & Wellness Scorecards (008) ───────────
+CREATE TABLE IF NOT EXISTS wellness_scorecards (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  animal_id UUID NOT NULL REFERENCES animals(id),
+  enterprise_id UUID REFERENCES enterprises(id),
+  owner_id UUID NOT NULL REFERENCES users(id),
+  overall_score NUMERIC(5,2) DEFAULT 0,
+  nutrition_score NUMERIC(5,2) DEFAULT 0,
+  activity_score NUMERIC(5,2) DEFAULT 0,
+  vaccination_score NUMERIC(5,2) DEFAULT 0,
+  dental_score NUMERIC(5,2) DEFAULT 0,
+  weight_status VARCHAR(30) DEFAULT 'normal',
+  next_checkup DATE,
+  recommendations JSONB DEFAULT '[]',
+  risk_flags JSONB DEFAULT '[]',
+  assessed_by UUID REFERENCES users(id),
+  assessed_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS wellness_reminders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  animal_id UUID NOT NULL REFERENCES animals(id),
+  owner_id UUID NOT NULL REFERENCES users(id),
+  reminder_type VARCHAR(60) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  description TEXT,
+  due_date DATE NOT NULL,
+  status VARCHAR(30) DEFAULT 'pending',
+  priority VARCHAR(20) DEFAULT 'medium',
+  recurrence VARCHAR(30),
+  recurrence_interval INT,
+  snoozed_until DATE,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.20 Geospatial Analytics & Geofencing (008) ─────────────
+CREATE TABLE IF NOT EXISTS geofence_zones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  name VARCHAR(200) NOT NULL,
+  zone_type VARCHAR(50) DEFAULT 'boundary',
+  center_lat NUMERIC(10,6),
+  center_lng NUMERIC(10,6),
+  radius_meters NUMERIC(12,2),
+  polygon_coords JSONB DEFAULT '[]',
+  color VARCHAR(20) DEFAULT '#3b82f6',
+  alert_on_entry BOOLEAN DEFAULT false,
+  alert_on_exit BOOLEAN DEFAULT true,
+  is_restricted BOOLEAN DEFAULT false,
+  status VARCHAR(30) DEFAULT 'active',
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS geospatial_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enterprise_id UUID NOT NULL REFERENCES enterprises(id),
+  zone_id UUID REFERENCES geofence_zones(id),
+  animal_id UUID REFERENCES animals(id),
+  sensor_id UUID REFERENCES iot_sensors(id),
+  event_type VARCHAR(50) NOT NULL,
+  latitude NUMERIC(10,6) NOT NULL,
+  longitude NUMERIC(10,6) NOT NULL,
+  altitude NUMERIC(8,2),
+  accuracy_meters NUMERIC(8,2),
+  speed_kmh NUMERIC(8,2),
+  heading NUMERIC(5,2),
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─── 47.21 marketplace_listings: livestock + compliance columns (008) ──
+-- The base table already exists above (§ marketplace) but was missing this
+-- entire block — active Marketplace.tsx/MarketplaceService.ts code reads
+-- and writes every one of these columns, so a fresh-install DB would 500 on
+-- the very first listing create/search.
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS species VARCHAR(60);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS breed VARCHAR(100);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_age_months INT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_weight_kg NUMERIC(8,2);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS gender VARCHAR(20);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS lactation_number INT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS daily_milk_yield NUMERIC(6,2);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS pregnancy_status VARCHAR(30);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS pregnancy_month INT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS vaccination_status VARCHAR(30) DEFAULT 'unknown';
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS health_certificate BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS listing_tier VARCHAR(20) DEFAULT 'standard';
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS is_hot_deal BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS linked_animal_id UUID;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS auction_end_time TIMESTAMPTZ;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS reserve_price NUMERIC(12,2);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS contact_phone VARCHAR(20);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS latitude NUMERIC(10,7);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS longitude NUMERIC(10,7);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS admin_approved BOOLEAN DEFAULT true;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS admin_notes TEXT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS seller_type VARCHAR(30) DEFAULT 'individual';
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS registration_number VARCHAR(100);
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS breeder_verified BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS welfare_attestation BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted BOOLEAN DEFAULT false;
+ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ;
+
+-- ─── 47.22 users: network_id/corporate_role (009 hospital networks) ────
+-- Not from 006/007/008, but discovered missing during this same audit —
+-- hospital_networks (defined early in § 1b above) already existed as an FK
+-- target, but these two columns on users referencing it were never
+-- backported.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS network_id UUID REFERENCES hospital_networks(id) ON DELETE SET NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS corporate_role VARCHAR(50);
+
+CREATE INDEX IF NOT EXISTS idx_ai_chat_sessions_user ON ai_chat_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_ai_chat_sessions_enterprise ON ai_chat_sessions(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_ai_chat_messages_session ON ai_chat_messages(session_id);
+CREATE INDEX IF NOT EXISTS idx_digital_twins_enterprise ON digital_twins(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_simulation_runs_twin ON simulation_runs(twin_id);
+CREATE INDEX IF NOT EXISTS idx_simulation_runs_enterprise ON simulation_runs(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_species ON marketplace_listings(species);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_breed ON marketplace_listings(breed);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_tier ON marketplace_listings(listing_tier);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_admin ON marketplace_listings(admin_approved);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_seller_type ON marketplace_listings(seller_type);
+CREATE INDEX IF NOT EXISTS idx_marketplace_listings_animal_class ON marketplace_listings(animal_class);
+CREATE INDEX IF NOT EXISTS idx_animals_animal_class ON animals(animal_class);
+CREATE INDEX IF NOT EXISTS idx_sustainability_metrics_ent ON sustainability_metrics(enterprise_id, metric_type);
+CREATE INDEX IF NOT EXISTS idx_sustainability_goals_ent ON sustainability_goals(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_wellness_scorecards_animal ON wellness_scorecards(animal_id);
+CREATE INDEX IF NOT EXISTS idx_wellness_scorecards_owner ON wellness_scorecards(owner_id);
+CREATE INDEX IF NOT EXISTS idx_wellness_reminders_owner ON wellness_reminders(owner_id, status);
+CREATE INDEX IF NOT EXISTS idx_wellness_reminders_due ON wellness_reminders(due_date, status);
+CREATE INDEX IF NOT EXISTS idx_geofence_zones_enterprise ON geofence_zones(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_geospatial_events_ent ON geospatial_events(enterprise_id);
+CREATE INDEX IF NOT EXISTS idx_geospatial_events_zone ON geospatial_events(zone_id);
+CREATE INDEX IF NOT EXISTS idx_geospatial_events_animal ON geospatial_events(animal_id);
+CREATE INDEX IF NOT EXISTS idx_geospatial_events_time ON geospatial_events(created_at);
+
+-- ============================================================
+-- 48. MASTER DATA (species, breeds, animal classes, marketplace categories/conditions)
+-- ============================================================
+-- Backported from backend/migrations/022_master_data_tables.sql — admin-editable
+-- reference data that replaces the hardcoded TypeScript arrays previously in
+-- frontend/src/constants/speciesBreeds.ts and Marketplace.tsx's CATEGORY_KEYS/
+-- condition options. Identity is matched by the `code`/`value` string columns —
+-- animals.species, marketplace_listings.species/category/condition/animal_class stay
+-- plain VARCHAR (not FKs), matching existing behavior exactly.
+
+CREATE TABLE IF NOT EXISTS master_species (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code VARCHAR(50) UNIQUE NOT NULL,
+  label VARCHAR(100) NOT NULL,
+  icon VARCHAR(10),
+  category VARCHAR(50),
+  has_ear_tag BOOLEAN DEFAULT false,
+  sort_order INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  is_protected BOOLEAN DEFAULT false,
+  -- Controls whether this species appears in the Marketplace "sell an animal" species
+  -- picker (Marketplace.tsx/PublicMarketplace.tsx) — see migration 023. Defaults false so
+  -- newly admin-added species don't silently become sellable; the seed data below
+  -- explicitly enables it for the species that were already in the old hardcoded picker.
+  is_marketplace_eligible BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS master_breeds (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  species_id UUID NOT NULL REFERENCES master_species(id) ON DELETE CASCADE,
+  name VARCHAR(150) NOT NULL,
+  sort_order INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(species_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS master_animal_classes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  species_id UUID NOT NULL REFERENCES master_species(id) ON DELETE CASCADE,
+  value VARCHAR(50) NOT NULL,
+  label_key VARCHAR(150),
+  label VARCHAR(100),
+  implied_gender VARCHAR(10) NOT NULL DEFAULT 'unknown' CHECK (implied_gender IN ('male', 'female', 'unknown')),
+  can_be_pregnant BOOLEAN DEFAULT false,
+  can_produce_milk BOOLEAN DEFAULT false,
+  sort_order INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(species_id, value)
+);
+
+CREATE TABLE IF NOT EXISTS master_marketplace_categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code VARCHAR(50) UNIQUE NOT NULL,
+  label_key VARCHAR(150),
+  label VARCHAR(100),
+  icon VARCHAR(10),
+  sort_order INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  is_protected BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS master_marketplace_conditions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code VARCHAR(30) UNIQUE NOT NULL,
+  label_key VARCHAR(150),
+  label VARCHAR(100),
+  sort_order INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_master_species_active ON master_species(is_active);
+CREATE INDEX IF NOT EXISTS idx_master_breeds_species ON master_breeds(species_id);
+CREATE INDEX IF NOT EXISTS idx_master_breeds_active ON master_breeds(is_active);
+CREATE INDEX IF NOT EXISTS idx_master_animal_classes_species ON master_animal_classes(species_id);
+CREATE INDEX IF NOT EXISTS idx_master_animal_classes_active ON master_animal_classes(is_active);
+CREATE INDEX IF NOT EXISTS idx_master_mp_categories_active ON master_marketplace_categories(is_active);
+CREATE INDEX IF NOT EXISTS idx_master_mp_conditions_active ON master_marketplace_conditions(is_active);
+-- Species (generated from SPECIES_CATEGORIES + BREED_DATABASE keys, frontend/src/constants/speciesBreeds.ts)
+INSERT INTO master_species (id, code, label, icon, category, has_ear_tag, sort_order, is_active) VALUES
+  (gen_random_uuid(), 'Dog', 'Dog', '🐕', 'Common Pets', false, 10, true),
+  (gen_random_uuid(), 'Cat', 'Cat', '🐈', 'Common Pets', false, 20, true),
+  (gen_random_uuid(), 'Rabbit', 'Rabbit', '🐰', 'Small Pets', false, 30, true),
+  (gen_random_uuid(), 'Hamster', 'Hamster', '🐹', 'Small Pets', false, 40, true),
+  (gen_random_uuid(), 'Guinea Pig', 'Guinea Pig', '🐾', 'Small Pets', false, 50, true),
+  (gen_random_uuid(), 'Gerbil', 'Gerbil', '🐀', 'Small Pets', false, 60, true),
+  (gen_random_uuid(), 'Chinchilla', 'Chinchilla', '🐭', 'Small Pets', false, 70, true),
+  (gen_random_uuid(), 'Ferret', 'Ferret', '🦡', 'Small Pets', false, 80, true),
+  (gen_random_uuid(), 'Hedgehog', 'Hedgehog', '🦔', 'Small Pets', false, 90, true),
+  (gen_random_uuid(), 'Sugar Glider', 'Sugar Glider', '🦘', 'Small Pets', false, 100, true),
+  (gen_random_uuid(), 'Parrot', 'Parrot', '🦜', 'Birds', false, 110, true),
+  (gen_random_uuid(), 'Budgerigar', 'Budgerigar', '🦜', 'Birds', false, 120, true),
+  (gen_random_uuid(), 'Cockatiel', 'Cockatiel', '🦜', 'Birds', false, 130, true),
+  (gen_random_uuid(), 'Lovebird', 'Lovebird', '💚', 'Birds', false, 140, true),
+  (gen_random_uuid(), 'Finch', 'Finch', '🐦', 'Birds', false, 150, true),
+  (gen_random_uuid(), 'Canary', 'Canary', '🐦', 'Birds', false, 160, true),
+  (gen_random_uuid(), 'Mynah', 'Mynah', '🐦', 'Birds', false, 170, true),
+  (gen_random_uuid(), 'Pigeon', 'Pigeon', '🕊️', 'Birds', false, 180, true),
+  (gen_random_uuid(), 'Bird', 'Bird', '🐦', 'Birds', false, 190, true),
+  (gen_random_uuid(), 'Tortoise', 'Tortoise', '🐢', 'Reptiles', false, 200, true),
+  (gen_random_uuid(), 'Turtle', 'Turtle', '🐢', 'Reptiles', false, 210, true),
+  (gen_random_uuid(), 'Gecko', 'Gecko', '🦎', 'Reptiles', false, 220, true),
+  (gen_random_uuid(), 'Bearded Dragon', 'Bearded Dragon', '🦎', 'Reptiles', false, 230, true),
+  (gen_random_uuid(), 'Chameleon', 'Chameleon', '🦎', 'Reptiles', false, 240, true),
+  (gen_random_uuid(), 'Snake', 'Snake', '🐍', 'Reptiles', false, 250, true),
+  (gen_random_uuid(), 'Frog', 'Frog', '🐸', 'Amphibians', false, 260, true),
+  (gen_random_uuid(), 'Axolotl', 'Axolotl', '🦎', 'Amphibians', false, 270, true),
+  (gen_random_uuid(), 'Ornamental Fish', 'Ornamental Fish', '🐠', 'Ornamental Fish', false, 280, true),
+  (gen_random_uuid(), 'Koi', 'Koi', '🐟', 'Ornamental Fish', false, 290, true),
+  (gen_random_uuid(), 'Arowana', 'Arowana', '🐟', 'Ornamental Fish', false, 300, true),
+  (gen_random_uuid(), 'Goldfish', 'Goldfish', '🐡', 'Ornamental Fish', false, 310, true),
+  (gen_random_uuid(), 'Cattle', 'Cattle', '🐄', 'Livestock / Farm', true, 320, true),
+  (gen_random_uuid(), 'Buffalo', 'Buffalo', '🐃', 'Livestock / Farm', true, 330, true),
+  (gen_random_uuid(), 'Horse', 'Horse', '🐴', 'Livestock / Farm', true, 340, true),
+  (gen_random_uuid(), 'Donkey', 'Donkey', '🫏', 'Livestock / Farm', true, 350, true),
+  (gen_random_uuid(), 'Sheep', 'Sheep', '🐑', 'Livestock / Farm', true, 360, true),
+  (gen_random_uuid(), 'Goat', 'Goat', '🐐', 'Livestock / Farm', true, 370, true),
+  (gen_random_uuid(), 'Pig', 'Pig', '🐷', 'Livestock / Farm', true, 380, true),
+  (gen_random_uuid(), 'Camel', 'Camel', '🐪', 'Livestock / Farm', true, 390, true),
+  (gen_random_uuid(), 'Yak', 'Yak', '🐂', 'Livestock / Farm', true, 400, true),
+  (gen_random_uuid(), 'Deer', 'Deer', '🦌', 'Livestock / Farm', true, 410, true),
+  (gen_random_uuid(), 'Chicken', 'Chicken', '🐔', 'Poultry', false, 420, true),
+  (gen_random_uuid(), 'Duck', 'Duck', '🦆', 'Poultry', false, 430, true),
+  (gen_random_uuid(), 'Turkey', 'Turkey', '🦃', 'Poultry', false, 440, true),
+  (gen_random_uuid(), 'Quail', 'Quail', '🐦', 'Poultry', false, 450, true),
+  (gen_random_uuid(), 'Emu', 'Emu', '🦤', 'Poultry', true, 460, true),
+  (gen_random_uuid(), 'Ostrich', 'Ostrich', '🦢', 'Poultry', true, 470, true),
+  (gen_random_uuid(), 'Peacock', 'Peacock', '🦚', 'Poultry', true, 480, true),
+  (gen_random_uuid(), 'Llama', 'Llama', '🦙', 'Exotic Large', true, 490, true),
+  (gen_random_uuid(), 'Alpaca', 'Alpaca', '🦙', 'Exotic Large', true, 500, true),
+  (gen_random_uuid(), 'Other', 'Other', '🐾', 'Other', false, 510, true)
+ON CONFLICT (code) DO NOTHING;
+
+-- Marketplace eligibility backfill (migration 023): exactly the species that were already
+-- in the old hardcoded MARKETPLACE_FARMER_SPECIES/MARKETPLACE_PET_OWNER_SPECIES arrays —
+-- preserves today's marketplace species picker contents exactly, nothing more.
+UPDATE master_species SET is_marketplace_eligible = true
+WHERE code IN ('Cattle', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Chicken', 'Dog', 'Cat', 'Rabbit', 'Other');
+
+-- Breeds (generated from BREED_DATABASE, frontend/src/constants/speciesBreeds.ts)
+INSERT INTO master_breeds (id, species_id, name, sort_order, is_active) VALUES
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Indian Pariah', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Mudhol Hound', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Rajapalayam', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Kanni', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Chippiparai', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Kombai', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Bakharwal', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Rampur Greyhound', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Himalayan Sheepdog', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Labrador Retriever', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Golden Retriever', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'German Shepherd', 120, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Beagle', 130, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Pug', 140, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Dachshund', 150, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Rottweiler', 160, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Doberman Pinscher', 170, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Great Dane', 180, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Saint Bernard', 190, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Siberian Husky', 200, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Shih Tzu', 210, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Pomeranian', 220, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Cocker Spaniel', 230, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Boxer', 240, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Dalmatian', 250, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Border Collie', 260, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Maltese', 270, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Poodle', 280, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Bichon Frise', 290, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'German Spitz', 300, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Lhasa Apso', 310, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Chow Chow', 320, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Bulldog', 330, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'French Bulldog', 340, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Yorkshire Terrier', 350, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Mixed Breed', 360, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'Other', 370, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Persian', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Siamese', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Bengal', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Maine Coon', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Russian Blue', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'British Shorthair', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Scottish Fold', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Ragdoll', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Himalayan', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Turkish Angora', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Bombay', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'American Shorthair', 120, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Abyssinian', 130, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Burmese', 140, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Devon Rex', 150, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Indian Domestic', 160, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Mixed Breed', 170, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'Other', 180, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'New Zealand White', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Dutch', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Rex', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Angora', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Mini Lop', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Holland Lop', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Flemish Giant', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Lionhead', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Himalayan', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Mixed Breed', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Rabbit'), 'Other', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hamster'), 'Syrian (Golden)', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hamster'), 'Dwarf Campbell', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hamster'), 'Dwarf Winter White', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hamster'), 'Roborovski', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hamster'), 'Chinese', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hamster'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hamster'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Guinea Pig'), 'American', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Guinea Pig'), 'Abyssinian', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Guinea Pig'), 'Peruvian', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Guinea Pig'), 'Silkie', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Guinea Pig'), 'Teddy', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Guinea Pig'), 'Texel', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Guinea Pig'), 'Mixed', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Guinea Pig'), 'Other', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gerbil'), 'Mongolian', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gerbil'), 'Fat-tailed', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gerbil'), 'Mixed', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gerbil'), 'Other', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chinchilla'), 'Standard Grey', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chinchilla'), 'White', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chinchilla'), 'Beige', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chinchilla'), 'Black Velvet', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chinchilla'), 'Violet', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chinchilla'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chinchilla'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ferret'), 'Sable', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ferret'), 'Albino', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ferret'), 'Dark-eyed White', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ferret'), 'Silver', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ferret'), 'Cinnamon', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ferret'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ferret'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hedgehog'), 'African Pygmy', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hedgehog'), 'European', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hedgehog'), 'Long-eared', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hedgehog'), 'Mixed', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Hedgehog'), 'Other', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sugar Glider'), 'Classic Grey', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sugar Glider'), 'Leucistic', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sugar Glider'), 'Albino', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sugar Glider'), 'Black Beauty', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sugar Glider'), 'Mixed', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sugar Glider'), 'Other', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'African Grey', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Blue and Gold Macaw', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Green Wing Macaw', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Scarlet Macaw', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Cockatoo', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Yellow-naped Amazon', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Blue-fronted Amazon', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Eclectus', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Sun Conure', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Green Cheek Conure', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Caique', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Alexandrine Parakeet', 120, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Rose-ringed Parakeet', 130, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Mixed', 140, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Parrot'), 'Other', 150, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Budgerigar'), 'English Budgie', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Budgerigar'), 'American Budgie', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Budgerigar'), 'Australian Budgie', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Budgerigar'), 'Lutino', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Budgerigar'), 'Albino', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Budgerigar'), 'Pied', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Budgerigar'), 'Mixed', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Budgerigar'), 'Other', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cockatiel'), 'Normal Grey', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cockatiel'), 'Lutino', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cockatiel'), 'Pearl', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cockatiel'), 'Cinnamon', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cockatiel'), 'Pied', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cockatiel'), 'Whiteface', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cockatiel'), 'Mixed', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cockatiel'), 'Other', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Lovebird'), 'Peach-faced', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Lovebird'), 'Fischer''s', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Lovebird'), 'Black-masked', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Lovebird'), 'Nyasa', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Lovebird'), 'Black-cheeked', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Lovebird'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Lovebird'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Finch'), 'Zebra Finch', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Finch'), 'Society Finch', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Finch'), 'Gouldian Finch', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Finch'), 'Java Sparrow', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Finch'), 'Star Finch', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Finch'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Finch'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Canary'), 'Yorkshire', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Canary'), 'Border', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Canary'), 'Roller', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Canary'), 'Red Factor', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Canary'), 'Gloster', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Canary'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Canary'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Mynah'), 'Common Hill Mynah', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Mynah'), 'Bank Mynah', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Mynah'), 'Jungle Mynah', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Mynah'), 'Mixed', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Mynah'), 'Other', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pigeon'), 'Fantail', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pigeon'), 'Jacobin', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pigeon'), 'Tumbler', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pigeon'), 'King', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pigeon'), 'Racing Homer', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pigeon'), 'Indian Fantail', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pigeon'), 'Mixed', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pigeon'), 'Other', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Bird'), 'Mixed / Unknown', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Bird'), 'Other', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Tortoise'), 'Indian Star Tortoise', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Tortoise'), 'Russian Tortoise', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Tortoise'), 'Hermann''s Tortoise', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Tortoise'), 'Sulcata', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Tortoise'), 'Red-footed', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Tortoise'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Tortoise'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turtle'), 'Red-eared Slider', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turtle'), 'Painted Turtle', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turtle'), 'Map Turtle', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turtle'), 'Box Turtle', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turtle'), 'Mixed', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turtle'), 'Other', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gecko'), 'Leopard Gecko', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gecko'), 'Crested Gecko', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gecko'), 'African Fat-tailed', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gecko'), 'Tokay', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gecko'), 'Day Gecko', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gecko'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Gecko'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Bearded Dragon'), 'Inland/Central', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Bearded Dragon'), 'Rankin''s Dragon', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Bearded Dragon'), 'Mixed', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Bearded Dragon'), 'Other', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chameleon'), 'Veiled', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chameleon'), 'Panther', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chameleon'), 'Jackson''s', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chameleon'), 'Fischer''s', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chameleon'), 'Mixed', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chameleon'), 'Other', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Snake'), 'Ball Python', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Snake'), 'Corn Snake', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Snake'), 'King Snake', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Snake'), 'Milk Snake', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Snake'), 'Boa Constrictor', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Snake'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Snake'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Frog'), 'African Dwarf', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Frog'), 'Pacman (Horned)', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Frog'), 'Tree Frog', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Frog'), 'White''s Tree Frog', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Frog'), 'Mixed', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Frog'), 'Other', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Axolotl'), 'Wild Type', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Axolotl'), 'Leucistic', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Axolotl'), 'Golden Albino', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Axolotl'), 'Melanoid', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Axolotl'), 'Axanthic', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Axolotl'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Axolotl'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Betta', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Guppy', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Mollies', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Platy', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Swordtail', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Tetra', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Angelfish', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Discus', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Cichlid', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Clownfish', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Mixed', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ornamental Fish'), 'Other', 120, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Koi'), 'Kohaku', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Koi'), 'Sanke', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Koi'), 'Showa', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Koi'), 'Bekko', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Koi'), 'Asagi', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Koi'), 'Ogon', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Koi'), 'Butterfly Koi', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Koi'), 'Mixed', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Koi'), 'Other', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Arowana'), 'Silver', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Arowana'), 'Golden', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Arowana'), 'Red', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Arowana'), 'Black', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Arowana'), 'Pearl', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Arowana'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Arowana'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Common', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Comet', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Fantail', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Oranda', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Ryukin', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Black Moor', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Telescope', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Bubble Eye', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Mixed', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goldfish'), 'Other', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Gir', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Sahiwal', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Red Sindhi', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Tharparkar', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Ongole', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Hallikar', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Khillari', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Deoni', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Kangayam', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Umblachery', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Malnad Gidda', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Punganur', 120, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Vechur', 130, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Hariana', 140, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Rathi', 150, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Holstein Friesian (HF)', 160, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Jersey', 170, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Brown Swiss', 180, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Simmental', 190, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Mixed Breed', 200, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'Other', 210, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Murrah', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Surti', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Mehsana', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Jaffarabadi', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Nili-Ravi', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Pandharpuri', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Marathwadi', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Nagpuri', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Toda (Nilgiri)', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Mixed', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'Other', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Marwari', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Kathiawari', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Manipuri Pony', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Bhutia', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Spiti', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Zanskari', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Thoroughbred', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Arabian', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Quarter Horse', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Warmblood', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Standardbred', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Mixed Breed', 120, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Horse'), 'Other', 130, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Donkey'), 'Indian Donkey', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Donkey'), 'Halari', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Donkey'), 'Spiti', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Donkey'), 'Mixed', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Donkey'), 'Other', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Nellore', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Deccani', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Mandya', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Bellary', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Madras Red', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Coimbatore', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Mecheri', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Ramnad White', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Vembur', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Nilgiri', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Korriedale', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Garole', 120, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Merino', 130, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Suffolk', 140, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Rambouillet', 150, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Mixed Breed', 160, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'Other', 170, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Jamunapari', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Barbari', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Sirohi', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Black Bengal', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Osmanabadi', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Salem Black', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Malabari', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Sangamneri', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Ganjam', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Kanniadu', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Boer', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Alpine', 120, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Saanen', 130, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Nubian', 140, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Angora', 150, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Mixed Breed', 160, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'Other', 170, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Desi (Indigenous)', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Ghungroo', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Niang Megha', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Yorkshire (Large White)', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Landrace', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Duroc', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Hampshire', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Berkshire', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Mixed Breed', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'Other', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Camel'), 'Dromedary (One-humped)', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Camel'), 'Bactrian (Two-humped)', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Camel'), 'Mixed', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Camel'), 'Other', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Yak'), 'Domestic Yak', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Yak'), 'Mixed', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Yak'), 'Other', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Deer'), 'Spotted Deer (Chital)', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Deer'), 'Sambhar', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Deer'), 'Barking Deer (Muntjac)', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Deer'), 'Mixed', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Deer'), 'Other', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Aseel', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Kadaknath', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Ghagus', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Naked Neck', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Kalinga Brown', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Vanaraja', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Grampriya', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Nicobari', 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Broiler', 90, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'White Leghorn', 100, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Rhode Island Red', 110, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Plymouth Rock', 120, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Sussex', 130, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Australorp', 140, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Mixed Breed', 150, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Chicken'), 'Other', 160, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Duck'), 'Indian Runner', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Duck'), 'Khaki Campbell', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Duck'), 'Pekin', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Duck'), 'Muscovy', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Duck'), 'Rouen', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Duck'), 'Mixed', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Duck'), 'Other', 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turkey'), 'Broad-breasted White', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turkey'), 'Bronze', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turkey'), 'Bourbon Red', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turkey'), 'Narragansett', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turkey'), 'Mixed', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Turkey'), 'Other', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Quail'), 'Japanese', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Quail'), 'Bobwhite', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Quail'), 'California', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Quail'), 'Coturnix', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Quail'), 'Mixed', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Quail'), 'Other', 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Emu'), 'Australian Emu', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Emu'), 'Other', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ostrich'), 'Common Ostrich', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Ostrich'), 'Other', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Peacock'), 'Indian Peafowl (Blue)', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Peacock'), 'White Peafowl', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Peacock'), 'Green Peafowl', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Peacock'), 'Mixed', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Peacock'), 'Other', 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Llama'), 'Suri', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Llama'), 'Huacaya', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Llama'), 'Mixed', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Llama'), 'Other', 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Alpaca'), 'Suri', 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Alpaca'), 'Huacaya', 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Alpaca'), 'Mixed', 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Alpaca'), 'Other', 40, true)
+ON CONFLICT (species_id, name) DO NOTHING;
+
+-- Animal classes (generated from ANIMAL_CLASS_TERMS, frontend/src/constants/speciesBreeds.ts)
+INSERT INTO master_animal_classes (id, species_id, value, label_key, implied_gender, can_be_pregnant, can_produce_milk, sort_order, is_active) VALUES
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'cattle_bull', 'animalClass.cattle_bull', 'male', false, false, 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'cattle_cow', 'animalClass.cattle_cow', 'female', true, true, 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'cattle_calf', 'animalClass.cattle_calf', 'unknown', false, false, 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'cattle_bull_calf', 'animalClass.cattle_bull_calf', 'male', false, false, 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'cattle_heifer_calf', 'animalClass.cattle_heifer_calf', 'female', false, false, 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'cattle_heifer', 'animalClass.cattle_heifer', 'female', true, false, 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'cattle_bullock', 'animalClass.cattle_bullock', 'male', false, false, 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cattle'), 'cattle_steer', 'animalClass.cattle_steer', 'male', false, false, 80, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'buffalo_bull', 'animalClass.buffalo_bull', 'male', false, false, 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'buffalo_cow', 'animalClass.buffalo_cow', 'female', true, true, 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'buffalo_calf', 'animalClass.buffalo_calf', 'unknown', false, false, 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'buffalo_bull_calf', 'animalClass.buffalo_bull_calf', 'male', false, false, 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'buffalo_heifer_calf', 'animalClass.buffalo_heifer_calf', 'female', false, false, 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'buffalo_heifer', 'animalClass.buffalo_heifer', 'female', true, false, 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Buffalo'), 'buffalo_bullock', 'animalClass.buffalo_bullock', 'male', false, false, 70, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'sheep_ram', 'animalClass.sheep_ram', 'male', false, false, 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'sheep_ewe', 'animalClass.sheep_ewe', 'female', true, true, 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'sheep_lamb', 'animalClass.sheep_lamb', 'unknown', false, false, 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'sheep_ram_lamb', 'animalClass.sheep_ram_lamb', 'male', false, false, 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'sheep_ewe_lamb', 'animalClass.sheep_ewe_lamb', 'female', false, false, 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Sheep'), 'sheep_wether', 'animalClass.sheep_wether', 'male', false, false, 60, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'goat_buck', 'animalClass.goat_buck', 'male', false, false, 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'goat_doe', 'animalClass.goat_doe', 'female', true, true, 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'goat_buckling', 'animalClass.goat_buckling', 'male', false, false, 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'goat_goatling', 'animalClass.goat_goatling', 'female', true, false, 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Goat'), 'goat_kid', 'animalClass.goat_kid', 'unknown', false, false, 50, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'pig_boar', 'animalClass.pig_boar', 'male', false, false, 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'pig_sow', 'animalClass.pig_sow', 'female', true, false, 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'pig_gilt', 'animalClass.pig_gilt', 'female', true, false, 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Pig'), 'pig_barrow', 'animalClass.pig_barrow', 'male', false, false, 40, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'dog_male', 'animalClass.dog_male', 'male', false, false, 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'dog_bitch', 'animalClass.dog_bitch', 'female', true, false, 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Dog'), 'dog_pup', 'animalClass.dog_pup', 'unknown', false, false, 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'cat_tom', 'animalClass.cat_tom', 'male', false, false, 10, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'cat_queen', 'animalClass.cat_queen', 'female', true, false, 20, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'cat_kitten', 'animalClass.cat_kitten', 'unknown', false, false, 30, true),
+  (gen_random_uuid(), (SELECT id FROM master_species WHERE code = 'Cat'), 'cat_neuter', 'animalClass.cat_neuter', 'unknown', false, false, 40, true)
+ON CONFLICT (species_id, value) DO NOTHING;
+
+-- Marketplace categories (generated from CATEGORY_KEYS, frontend/src/pages/Marketplace.tsx — skips the blank '' "all" filter entry)
+INSERT INTO master_marketplace_categories (id, code, label_key, sort_order, is_active, is_protected) VALUES
+  (gen_random_uuid(), 'animal', 'marketplace.categories.animals', 10, true, true),
+  (gen_random_uuid(), 'feed', 'marketplace.categories.feed', 20, true, false),
+  (gen_random_uuid(), 'equipment', 'marketplace.categories.equipment', 30, true, false),
+  (gen_random_uuid(), 'medicine', 'marketplace.categories.medicine', 40, true, false),
+  (gen_random_uuid(), 'semen_embryo', 'marketplace.categories.semenEmbryo', 50, true, false),
+  (gen_random_uuid(), 'service', 'marketplace.categories.services', 60, true, false),
+  (gen_random_uuid(), 'other', 'marketplace.categories.other', 70, true, false)
+ON CONFLICT (code) DO NOTHING;
+
+-- Marketplace conditions (3 fixed values from Marketplace.tsx sell-form <option>s)
+INSERT INTO master_marketplace_conditions (id, code, label_key, sort_order, is_active) VALUES
+  (gen_random_uuid(), 'new', 'marketplace.conditionLabel.healthy', 10, true),
+  (gen_random_uuid(), 'used', 'marketplace.conditionLabel.fair', 20, true),
+  (gen_random_uuid(), 'refurbished', 'marketplace.conditionLabel.underTreatment', 30, true)
+ON CONFLICT (code) DO NOTHING;

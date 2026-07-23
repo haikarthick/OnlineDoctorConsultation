@@ -102,8 +102,8 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
         const find = (k: string) => arr.find((s: any) => s.key === k)?.value
         setGlobals({ percent: find('commission.defaultPercent') || '15', flat: find('commission.flatFee') || '20' })
       })
-      .catch(() => {})
-  }, [])
+      .catch(() => setMessage(t('commissionAdmin.globalsLoadFailed')))
+  }, [t])
 
   const save = useCallback(async (doctorId: string) => {
     const e = edits[doctorId]
@@ -138,23 +138,23 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
         </div>
       </div>
 
-      <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '12px 16px', marginBottom: 16, fontSize: 14 }}>
+      <div className="si-a0bcd0db">
         {t('commissionAdmin.globalInfo', { percent: globals.percent, flat: formatCurrency(parseFloat(globals.flat) || 0) })}
       </div>
 
       {message && (
-        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', borderRadius: 8, padding: '10px 14px', marginBottom: 14, fontSize: 14 }}>
+        <div className="si-320cf962">
           {message}
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+      <div className="si-b4c62bf9">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') load(search) }}
           placeholder={t('commissionAdmin.searchPlaceholder')}
-          style={{ flex: 1, border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px' }}
+          className="si-620e16a1"
         />
         <button className="btn btn-primary" onClick={() => load(search)}>{t('common.search')}</button>
       </div>
@@ -162,53 +162,53 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /><p>{t('common.loading')}</p></div>
       ) : doctors.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '50px 20px', color: '#6b7280' }}>{t('commissionAdmin.noDoctors')}</div>
+        <div className="si-8fce2994">{t('commissionAdmin.noDoctors')}</div>
       ) : (
-        <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <div className="si-0b7c8512">
+          <div className="si-9aa6c55f">
+            <table className="si-ec76dd85">
               <thead>
-                <tr style={{ background: '#f9fafb', textAlign: 'left' }}>
-                  <th style={{ padding: '10px 14px' }}>{t('commissionAdmin.colDoctor')}</th>
-                  <th style={{ padding: '10px 14px', textAlign: 'right' }}>{t('commissionAdmin.colFee')}</th>
-                  <th style={{ padding: '10px 14px' }}>{t('commissionAdmin.colPercentOverride')}</th>
-                  <th style={{ padding: '10px 14px' }}>{t('commissionAdmin.colFlatOverride')}</th>
-                  <th style={{ padding: '10px 14px' }}></th>
+                <tr className="si-321a0f36">
+                  <th className="si-37f3ee27">{t('commissionAdmin.colDoctor')}</th>
+                  <th className="si-7e6dbf07">{t('commissionAdmin.colFee')}</th>
+                  <th className="si-37f3ee27">{t('commissionAdmin.colPercentOverride')}</th>
+                  <th className="si-37f3ee27">{t('commissionAdmin.colFlatOverride')}</th>
+                  <th className="si-37f3ee27"></th>
                 </tr>
               </thead>
               <tbody>
                 {doctors.map((d) => (
-                  <tr key={d.id} style={{ borderTop: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '10px 14px' }}>
-                      <div style={{ fontWeight: 600 }}>{d.name}</div>
-                      <div style={{ color: '#9ca3af', fontSize: 12 }}>{d.email}</div>
+                  <tr key={d.id} className="si-c20fa118">
+                    <td className="si-37f3ee27">
+                      <div className="si-b2cfcbec">{d.name}</div>
+                      <div className="si-3f4bbe41">{d.email}</div>
                     </td>
-                    <td style={{ padding: '10px 14px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <td className="si-048cfa66">
                       {formatCurrency(parseFloat(String(d.consultationFee || 0)))}
-                      {d.emergencyFee ? <div style={{ color: '#b45309', fontSize: 11 }}>⚡ {formatCurrency(parseFloat(String(d.emergencyFee)))}</div> : null}
+                      {d.emergencyFee ? <div className="si-55234acc">⚡ {formatCurrency(parseFloat(String(d.emergencyFee)))}</div> : null}
                     </td>
-                    <td style={{ padding: '10px 14px' }}>
+                    <td className="si-37f3ee27">
                       <input
                         type="number" min={0} max={100} step={0.5}
                         value={edits[d.id]?.pct ?? ''}
                         placeholder={`${globals.percent}%`}
                         onChange={(e) => setEdits((prev) => ({ ...prev, [d.id]: { ...prev[d.id], pct: e.target.value } }))}
-                        style={{ width: 90, border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }}
+                        className="si-76a9c4f7"
                       />
                     </td>
-                    <td style={{ padding: '10px 14px' }}>
+                    <td className="si-37f3ee27">
                       <input
                         type="number" min={0} step={1}
                         value={edits[d.id]?.flat ?? ''}
                         placeholder={globals.flat}
                         onChange={(e) => setEdits((prev) => ({ ...prev, [d.id]: { ...prev[d.id], flat: e.target.value } }))}
-                        style={{ width: 90, border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }}
+                        className="si-76a9c4f7"
                       />
                     </td>
-                    <td style={{ padding: '10px 14px' }}>
+                    <td className="si-37f3ee27">
                       <button
-                        className="btn btn-primary"
-                        style={{ padding: '6px 14px', fontSize: 13 }}
+                        className="btn btn-primary si-efbe533c"
+                       
                         onClick={() => save(d.id)}
                         disabled={savingId === d.id}
                       >
@@ -223,38 +223,38 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
         </div>
       )}
 
-      <p style={{ color: '#9ca3af', fontSize: 12, marginTop: 12 }}>{t('commissionAdmin.snapshotNote')}</p>
+      <p className="si-5a747b21">{t('commissionAdmin.snapshotNote')}</p>
 
       {/* ── Tax & GST (D13 — rates fully admin-configurable) ── */}
-      <div style={{ marginTop: 28 }}>
-        <h2 style={{ marginBottom: 4 }}>{t('taxAdmin.title')}</h2>
-        <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 14 }}>{t('taxAdmin.subtitle')}</p>
+      <div className="si-789c0fab">
+        <h2 className="si-e57614ee">{t('taxAdmin.title')}</h2>
+        <p className="si-ea95bef1">{t('taxAdmin.subtitle')}</p>
 
-        <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <div className="si-6d867bc6">
+          <div className="si-9aa6c55f">
+            <table className="si-ec76dd85">
               <thead>
-                <tr style={{ background: '#f9fafb', textAlign: 'left' }}>
-                  <th style={{ padding: '10px 14px' }}>SAC</th>
-                  <th style={{ padding: '10px 14px' }}>{t('taxAdmin.colLabel')}</th>
-                  <th style={{ padding: '10px 14px' }}>{t('taxAdmin.colRate')}</th>
-                  <th style={{ padding: '10px 14px' }}></th>
+                <tr className="si-321a0f36">
+                  <th className="si-37f3ee27">SAC</th>
+                  <th className="si-37f3ee27">{t('taxAdmin.colLabel')}</th>
+                  <th className="si-37f3ee27">{t('taxAdmin.colRate')}</th>
+                  <th className="si-37f3ee27"></th>
                 </tr>
               </thead>
               <tbody>
                 {taxCodes.map((tc) => (
-                  <tr key={tc.sacCode} style={{ borderTop: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '10px 14px', fontFamily: 'monospace' }}>{tc.sacCode}</td>
-                    <td style={{ padding: '10px 14px' }}>{tc.label}</td>
-                    <td style={{ padding: '10px 14px' }}>
+                  <tr key={tc.sacCode} className="si-c20fa118">
+                    <td className="si-674357ac">{tc.sacCode}</td>
+                    <td className="si-37f3ee27">{tc.label}</td>
+                    <td className="si-37f3ee27">
                       <input type="number" min={0} max={100} step={0.5}
                         value={taxEdits[tc.sacCode] ?? ''}
                         onChange={(e) => setTaxEdits((prev) => ({ ...prev, [tc.sacCode]: e.target.value }))}
-                        style={{ width: 80, border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }} />
-                      <span style={{ marginLeft: 4 }}>%</span>
+                        className="si-4de231f8" />
+                      <span className="si-12f273ab">%</span>
                     </td>
-                    <td style={{ padding: '10px 14px' }}>
-                      <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }}
+                    <td className="si-37f3ee27">
+                      <button className="btn btn-primary si-efbe533c"
                         disabled={taxBusy === tc.sacCode} onClick={() => saveTaxRate(tc.sacCode)}>
                         {taxBusy === tc.sacCode ? t('common.loading') : t('common.save')}
                       </button>
@@ -266,16 +266,16 @@ const CommissionSettings: React.FC<CommissionSettingsProps> = ({ onNavigate }) =
           </div>
         </div>
 
-        <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <strong style={{ fontSize: 13 }}>{t('taxAdmin.exportTitle')}</strong>
+        <div className="si-f554cf3f">
+          <strong className="si-0a803082">{t('taxAdmin.exportTitle')}</strong>
           <input type="date" value={gstFrom} onChange={(e) => setGstFrom(e.target.value)}
-            style={{ border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }} />
+            className="si-676bd163" />
           <span>→</span>
           <input type="date" value={gstTo} onChange={(e) => setGstTo(e.target.value)}
-            style={{ border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 8px' }} />
+            className="si-676bd163" />
           <button className="btn btn-outline" onClick={downloadGst}>{t('taxAdmin.exportButton')}</button>
         </div>
-        <p style={{ color: '#9ca3af', fontSize: 12, marginTop: 10 }}>{t('taxAdmin.settingsHint')}</p>
+        <p className="si-afe6b95d">{t('taxAdmin.settingsHint')}</p>
       </div>
     </div>
   )

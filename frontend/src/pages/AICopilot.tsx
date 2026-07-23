@@ -8,39 +8,35 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 // Render AI markdown responses nicely
 const AIMessage: React.FC<{ content: string; confidence?: number; sources?: string[] }> = ({ content, confidence, sources }) => (
-  <div style={{ maxWidth: '78%' }}>
-    <div style={{
-      padding: '14px 18px', borderRadius: '18px 18px 18px 4px',
-      background: 'white', border: '1px solid #e8ecf0',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.06)', fontSize: 14, lineHeight: 1.7, color: '#2d3748'
-    }}>
+  <div className="si-369fec94">
+    <div className="si-e2f1257e">
       <div className="ai-markdown">
         <ReactMarkdown
           components={{
-            h1: ({children}) => <h3 style={{margin:'0 0 8px',fontSize:16,color:'#1a202c'}}>{children}</h3>,
-            h2: ({children}) => <h4 style={{margin:'12px 0 6px',fontSize:15,color:'#2d3748'}}>{children}</h4>,
-            h3: ({children}) => <h4 style={{margin:'12px 0 6px',fontSize:14,fontWeight:700,color:'#4a5568'}}>{children}</h4>,
-            p: ({children}) => <p style={{margin:'0 0 10px'}}>{children}</p>,
-            ul: ({children}) => <ul style={{margin:'0 0 10px',paddingLeft:20}}>{children}</ul>,
-            ol: ({children}) => <ol style={{margin:'0 0 10px',paddingLeft:20}}>{children}</ol>,
-            li: ({children}) => <li style={{marginBottom:4}}>{children}</li>,
-            strong: ({children}) => <strong style={{color:'#2d3748',fontWeight:700}}>{children}</strong>,
-            code: ({children}) => <code style={{background:'#edf2f7',padding:'2px 6px',borderRadius:4,fontSize:13}}>{children}</code>,
-            blockquote: ({children}) => <blockquote style={{borderLeft:'3px solid #667eea',paddingLeft:12,margin:'8px 0',color:'#555'}}>{children}</blockquote>,
+            h1: ({children}) => <h3 className="si-329e8220">{children}</h3>,
+            h2: ({children}) => <h4 className="si-d14e8fe4">{children}</h4>,
+            h3: ({children}) => <h4 className="si-62111cf1">{children}</h4>,
+            p: ({children}) => <p className="si-1141db05">{children}</p>,
+            ul: ({children}) => <ul className="si-7bc306de">{children}</ul>,
+            ol: ({children}) => <ol className="si-7bc306de">{children}</ol>,
+            li: ({children}) => <li className="si-e57614ee">{children}</li>,
+            strong: ({children}) => <strong className="si-6fe4f96c">{children}</strong>,
+            code: ({children}) => <code className="si-374f06e8">{children}</code>,
+            blockquote: ({children}) => <blockquote className="si-e3440d78">{children}</blockquote>,
           }}
         >{content}</ReactMarkdown>
       </div>
       {(confidence !== undefined || (sources && sources.length > 0)) && (
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #eef0f3', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="si-5beacd67">
           {confidence !== undefined && (
-            <span style={{ fontSize: 11, color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span className="si-a820b7cc">
               <span style={{ width: 6, height: 6, borderRadius: '50%',
                 background: confidence >= 80 ? '#22c55e' : confidence >= 60 ? '#f59e0b' : '#ef4444', display: 'inline-block' }} />
               Confidence: {confidence}%
             </span>
           )}
           {sources && sources.length > 0 && (
-            <span style={{ fontSize: 11, color: '#888' }}>📚 {sources.join(' · ')}</span>
+            <span className="si-dd67611c">📚 {sources.join(' · ')}</span>
           )}
         </div>
       )}
@@ -208,12 +204,12 @@ const AICopilot: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('aiCopilot.pageTitle')}</h1>
-          <p style={{ color: '#666', margin: '8px 0 0' }}>{t('aiCopilot.subtitle')}</p>
+          <p className="si-f80b783e">{t('aiCopilot.subtitle')}</p>
         </div>
       </div>
 
-      {error && <div className="module-alert error" style={{ marginBottom: 16 }}>{error} <button onClick={() => setError('')}>✕</button></div>}
-      {successMsg && <div className="module-alert success" style={{ marginBottom: 16 }}>{successMsg} <button onClick={() => setSuccessMsg('')}>✕</button></div>}
+      {error && <div className="module-alert error si-7e63ec4f">{error} <button onClick={() => setError('')}>✕</button></div>}
+      {successMsg && <div className="module-alert success si-7e63ec4f">{successMsg} <button onClick={() => setSuccessMsg('')}>✕</button></div>}
 
       <div className="module-tabs">
         {(['chat', 'drugs', 'symptoms', 'scan'] as const).map(t => (
@@ -224,42 +220,40 @@ const AICopilot: React.FC = () => {
       </div>
 
       {tab === 'chat' && (
-        <div style={{ display: 'flex', gap: 24, height: 'calc(100vh - 280px)', minHeight: 500 }}>
+        <div className="si-feb53fea">
           {/* Session sidebar */}
-          <div style={{ width: 280, background: 'white', borderRadius: 12, padding: 16, overflow: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-            <button className="module-btn primary" style={{ width: '100%', marginBottom: 16 }} onClick={() => createSession()}>+ New Chat</button>
+          <div className="si-7dd051b0">
+            <button className="module-btn primary si-075e78b2" onClick={() => createSession()}>+ New Chat</button>
             {sessions.map(s => (
               <div key={s.id} onClick={() => selectSession(s)}
                 style={{ padding: '12px 14px', borderRadius: 8, marginBottom: 8, cursor: 'pointer',
                   background: selectedSession?.id === s.id ? 'linear-gradient(135deg, #667eea20, #764ba220)' : '#f8f9fa',
                   border: selectedSession?.id === s.id ? '1px solid #667eea40' : '1px solid transparent' }}>
-                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{s.title}</div>
-                <div style={{ fontSize: 12, color: '#888' }}>{s.messageCount || 0} messages · {s.contextType}</div>
+                <div className="si-660018c2">{s.title}</div>
+                <div className="si-a3f3564c">{s.messageCount || 0} messages · {s.contextType}</div>
                 <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id) }}
-                  style={{ fontSize: 11, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', marginTop: 4 }}>{t('common.delete')}</button>
+                  className="si-4a100ba9">{t('common.delete')}</button>
               </div>
             ))}
-            {sessions.length === 0 && <p style={{ color: '#999', textAlign: 'center', fontSize: 14 }}>{t('aiCopilot.chat.emptySessions')}</p>}
+            {sessions.length === 0 && <p className="si-5d9e9bea">{t('aiCopilot.chat.emptySessions')}</p>}
           </div>
 
           {/* Chat area */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+          <div className="si-861b23e3">
             {selectedSession ? (
               <>
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid #eee', fontWeight: 600 }}>
+                <div className="si-5b00ce26">
                   {selectedSession.title}
-                  {selectedSession.animalName && <span style={{ color: '#667eea', marginLeft: 8 }}>· {selectedSession.animalName}</span>}
+                  {selectedSession.animalName && <span className="si-1a7093be">· {selectedSession.animalName}</span>}
                 </div>
-                <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
+                <div className="si-63f5b6f7">
                   {messages.map((msg, i) => (
                     <div key={msg.id || i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: 20, gap: 10, alignItems: 'flex-end' }}>
                       {msg.role === 'assistant' && (
-                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🤖</div>
+                        <div className="si-804c4002">🤖</div>
                       )}
                       {msg.role === 'user' ? (
-                        <div style={{ maxWidth: '72%', padding: '12px 18px', borderRadius: '18px 18px 4px 18px',
-                          background: 'linear-gradient(135deg, #667eea, #764ba2)', color: 'white', fontSize: 14, lineHeight: 1.6 }}>
+                        <div className="si-a386258c">
                           {msg.content}
                         </div>
                       ) : (
@@ -268,12 +262,10 @@ const AICopilot: React.FC = () => {
                     </div>
                   ))}
                   {sending && (
-                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, marginBottom: 16 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🤖</div>
-                      <div style={{ padding: '14px 20px', borderRadius: '18px 18px 18px 4px', background: 'white',
-                        border: '1px solid #e8ecf0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                        <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                    <div className="si-3c8bc4bc">
+                      <div className="si-868cfc63">🤖</div>
+                      <div className="si-eced51bd">
+                        <div className="si-d0f954ea">
                           {[0,1,2].map(d => (
                             <div key={d} style={{ width: 8, height: 8, borderRadius: '50%', background: '#667eea',
                               animation: 'pulse 1.2s ease-in-out infinite', animationDelay: `${d * 0.2}s`, opacity: 0.7 }} />
@@ -283,14 +275,14 @@ const AICopilot: React.FC = () => {
                     </div>
                   )}
                   {messages.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: 40 }}>
-                      <div style={{ fontSize: 48, marginBottom: 16 }}>🐾</div>
-                      <h3 style={{ color: '#333' }}>{t('aiCopilot.chat.greeting')}</h3>
-                      <p style={{ color: '#888', marginBottom: 20 }}>{t('aiCopilot.chat.placeholder')}</p>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+                    <div className="si-86638a30">
+                      <div className="si-aea35a6f">🐾</div>
+                      <h3 className="si-5f7c0d93">{t('aiCopilot.chat.greeting')}</h3>
+                      <p className="si-257b9adb">{t('aiCopilot.chat.placeholder')}</p>
+                      <div className="si-27a43432">
                         {SUGGESTED_PROMPTS.map(p => (
                           <button key={p} onClick={() => { setMessageInput(p) }}
-                            style={{ padding: '8px 16px', borderRadius: 20, border: '1px solid #ddd', background: '#fafafa', cursor: 'pointer', fontSize: 13, color: '#555' }}>
+                            className="si-ab519a6b">
                             {p}
                           </button>
                         ))}
@@ -299,7 +291,7 @@ const AICopilot: React.FC = () => {
                   )}
                   <div ref={chatEndRef} />
                 </div>
-                <div style={{ padding: '12px 20px', borderTop: '1px solid #eee', display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div className="si-136c7bca">
                   <input value={messageInput} onChange={e => setMessageInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                     placeholder={t('aiCopilot.chat.inputPlaceholder')} disabled={sending}
@@ -312,12 +304,12 @@ const AICopilot: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 64, marginBottom: 16 }}>🤖</div>
-                  <h2 style={{ color: '#333' }}>{t('aiCopilot.chat.emptyTitle')}</h2>
+              <div className="si-cd9c3d15">
+                <div className="si-4b6b7fbc">
+                  <div className="si-86e06f73">🤖</div>
+                  <h2 className="si-5f7c0d93">{t('aiCopilot.chat.emptyTitle')}</h2>
                   <p>{t('aiCopilot.chat.emptySubtitle')}</p>
-                  <button className="module-btn primary" style={{ marginTop: 16 }} onClick={() => createSession()}>{t('aiCopilot.chat.startNew')}</button>
+                  <button className="module-btn primary si-b0aee75b" onClick={() => createSession()}>{t('aiCopilot.chat.startNew')}</button>
                 </div>
               </div>
             )}
@@ -326,32 +318,32 @@ const AICopilot: React.FC = () => {
       )}
 
       {tab === 'drugs' && (
-        <div className="module-card" style={{ marginTop: 24 }}>
+        <div className="module-card si-b4c2d096">
           <h3>💊 Drug Interaction Checker</h3>
-          <p style={{ color: '#666', marginBottom: 16 }}>Enter medication names separated by commas to check for interactions</p>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+          <p className="si-63eaea98">Enter medication names separated by commas to check for interactions</p>
+          <div className="si-ec031879">
             <input value={drugInput} onChange={e => setDrugInput(e.target.value)} placeholder="e.g. nsaids, corticosteroids, metronidazole"
-              style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14 }} />
+              className="si-8edee620" />
             <button className="module-btn primary" onClick={checkDrugs} disabled={loading}>Check Interactions</button>
           </div>
           {drugResults && (
             <div>
               <div style={{ padding: 16, borderRadius: 8, background: drugResults.hasInteractions ? '#fef2f2' : '#f0fdf4', marginBottom: 16, border: `1px solid ${drugResults.hasInteractions ? '#fecaca' : '#bbf7d0'}` }}>
                 <strong>{drugResults.hasInteractions ? '⚠️ Interactions Found' : '✅ No Interactions Detected'}</strong>
-                <p style={{ margin: '8px 0 0', color: '#666' }}>Checked: {drugResults.drugs?.join(', ')}</p>
-                {drugResults.provider && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#888' }}>Powered by: {drugResults.provider}</p>}
+                <p className="si-f80b783e">Checked: {drugResults.drugs?.join(', ')}</p>
+                {drugResults.provider && <p className="si-fcdf5498">Powered by: {drugResults.provider}</p>}
               </div>
               {/* AI full analysis (Groq/GPT response) */}
               {drugResults.aiAnalysis && (
-                <div style={{ padding: '16px 20px', borderRadius: 10, background: 'white', border: '1px solid #e8ecf0', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', marginBottom: 16 }}>
-                  <div className="ai-markdown" style={{ fontSize: 14, lineHeight: 1.7, color: '#2d3748' }}>
+                <div className="si-75f342dc">
+                  <div className="ai-markdown si-585a6eec">
                     <ReactMarkdown
                       components={{
-                        h3: ({children}) => <h4 style={{margin:'10px 0 4px',fontSize:14,color:'#4a5568'}}>{children}</h4>,
-                        p: ({children}) => <p style={{margin:'0 0 8px'}}>{children}</p>,
-                        ul: ({children}) => <ul style={{margin:'0 0 8px',paddingLeft:18}}>{children}</ul>,
-                        li: ({children}) => <li style={{marginBottom:3}}>{children}</li>,
-                        strong: ({children}) => <strong style={{fontWeight:700}}>{children}</strong>,
+                        h3: ({children}) => <h4 className="si-a831306b">{children}</h4>,
+                        p: ({children}) => <p className="si-24d15068">{children}</p>,
+                        ul: ({children}) => <ul className="si-aaa14e67">{children}</ul>,
+                        li: ({children}) => <li className="si-423b515a">{children}</li>,
+                        strong: ({children}) => <strong className="si-f3347717">{children}</strong>,
                       }}
                     >{drugResults.aiAnalysis}</ReactMarkdown>
                   </div>
@@ -359,14 +351,14 @@ const AICopilot: React.FC = () => {
               )}
               {/* Local fallback interaction cards */}
               {drugResults.interactions?.map((interaction: any, i: number) => (
-                <div key={i} style={{ padding: 16, borderRadius: 8, background: '#fff', border: '1px solid #eee', marginBottom: 8 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <div key={i} className="si-2b863e5d">
+                  <div className="si-b01feffa">
                     <strong>{interaction.drug1}</strong><span>↔</span><strong>{interaction.drug2}</strong>
                     <span style={{ padding: '2px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600,
                       background: interaction.severity === 'high' ? '#fecaca' : '#fef08a',
                       color: interaction.severity === 'high' ? '#dc2626' : '#ca8a04' }}>{interaction.severity}</span>
                   </div>
-                  <p style={{ margin: 0, color: '#555', fontSize: 14 }}>{interaction.note}</p>
+                  <p className="si-cba7cf8e">{interaction.note}</p>
                 </div>
               ))}
             </div>
@@ -375,14 +367,14 @@ const AICopilot: React.FC = () => {
       )}
 
       {tab === 'symptoms' && (
-        <div className="module-card" style={{ marginTop: 24 }}>
+        <div className="module-card si-b4c2d096">
           <h3>🔬 Symptom Analysis</h3>
-          <p style={{ color: '#666', marginBottom: 16 }}>Describe symptoms to receive AI-assisted preliminary analysis</p>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          <p className="si-63eaea98">Describe symptoms to receive AI-assisted preliminary analysis</p>
+          <div className="si-3631aec4">
             <input value={symptomInput} onChange={e => setSymptomInput(e.target.value)} placeholder="e.g. fever, vomiting, lameness"
-              style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14 }} />
+              className="si-8edee620" />
             <input value={speciesInput} onChange={e => setSpeciesInput(e.target.value)} placeholder="Species (optional)"
-              style={{ width: 200, padding: '12px 16px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14 }} />
+              className="si-c098521a" />
             <button className="module-btn primary" onClick={analyzeSymptoms} disabled={loading}>Analyze</button>
           </div>
           {symptomResults && (
@@ -392,35 +384,35 @@ const AICopilot: React.FC = () => {
                   ? '#fef2f2' : symptomResults.overallUrgency === 'moderate' ? '#fffbeb' : '#f0fdf4',
                 display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
                 <div>
-                  <span style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Urgency</span>
+                  <span className="si-3ac604f5">Urgency</span>
                   <div style={{ fontWeight: 700, fontSize: 16, marginTop: 2,
                     color: symptomResults.overallUrgency === 'high' || symptomResults.overallUrgency === 'emergency' ? '#dc2626'
                       : symptomResults.overallUrgency === 'moderate' ? '#d97706' : '#16a34a' }}>
                     {symptomResults.overallUrgency?.toUpperCase()}
                   </div>
                 </div>
-                <div style={{ width: 1, height: 36, background: '#ddd' }} />
+                <div className="si-486971fb" />
                 <div>
-                  <span style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', letterSpacing: 1 }}>Species</span>
-                  <div style={{ fontWeight: 600, marginTop: 2 }}>{symptomResults.species}</div>
+                  <span className="si-3ac604f5">Species</span>
+                  <div className="si-6061c14d">{symptomResults.species}</div>
                 </div>
                 {symptomResults.provider && (
-                  <div style={{ marginLeft: 'auto', fontSize: 12, color: '#888' }}>Powered by: {symptomResults.provider}</div>
+                  <div className="si-764828b3">Powered by: {symptomResults.provider}</div>
                 )}
               </div>
 
               {/* AI full analysis */}
               {symptomResults.aiAnalysis && (
-                <div style={{ padding: '16px 20px', borderRadius: 10, background: 'white', border: '1px solid #e8ecf0', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', marginBottom: 16 }}>
-                  <div className="ai-markdown" style={{ fontSize: 14, lineHeight: 1.7, color: '#2d3748' }}>
+                <div className="si-75f342dc">
+                  <div className="ai-markdown si-585a6eec">
                     <ReactMarkdown
                       components={{
-                        h3: ({children}) => <h4 style={{margin:'10px 0 4px',fontSize:14,color:'#4a5568'}}>{children}</h4>,
-                        p: ({children}) => <p style={{margin:'0 0 8px'}}>{children}</p>,
-                        ul: ({children}) => <ul style={{margin:'0 0 8px',paddingLeft:18}}>{children}</ul>,
-                        ol: ({children}) => <ol style={{margin:'0 0 8px',paddingLeft:18}}>{children}</ol>,
-                        li: ({children}) => <li style={{marginBottom:3}}>{children}</li>,
-                        strong: ({children}) => <strong style={{fontWeight:700}}>{children}</strong>,
+                        h3: ({children}) => <h4 className="si-a831306b">{children}</h4>,
+                        p: ({children}) => <p className="si-24d15068">{children}</p>,
+                        ul: ({children}) => <ul className="si-aaa14e67">{children}</ul>,
+                        ol: ({children}) => <ol className="si-aaa14e67">{children}</ol>,
+                        li: ({children}) => <li className="si-423b515a">{children}</li>,
+                        strong: ({children}) => <strong className="si-f3347717">{children}</strong>,
                       }}
                     >{symptomResults.aiAnalysis}</ReactMarkdown>
                   </div>
@@ -428,13 +420,13 @@ const AICopilot: React.FC = () => {
               )}
               {/* Local fallback finding cards */}
               {symptomResults.findings?.map((finding: any, i: number) => (
-                <div key={i} style={{ padding: 16, borderRadius: 8, background: '#fff', border: '1px solid #eee', marginBottom: 12 }}>
-                  <div style={{ fontWeight: 600, marginBottom: 8, color: '#333' }}>{finding.symptom}</div>
-                  <p style={{ margin: '0 0 8px', color: '#555', fontSize: 14, lineHeight: 1.6 }}>{finding.response}</p>
-                  <div style={{ fontSize: 12, color: '#888' }}>Confidence: {finding.confidence}% · Sources: {finding.sources?.join(', ')}</div>
+                <div key={i} className="si-96de6f15">
+                  <div className="si-6c37c242">{finding.symptom}</div>
+                  <p className="si-ed231772">{finding.response}</p>
+                  <div className="si-a3f3564c">Confidence: {finding.confidence}% · Sources: {finding.sources?.join(', ')}</div>
                 </div>
               ))}
-              <div style={{ padding: 12, borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a', marginTop: 16, fontSize: 13, color: '#92400e' }}>
+              <div className="si-deb696b4">
                 ⚠️ {symptomResults.disclaimer}
               </div>
             </div>
@@ -444,14 +436,14 @@ const AICopilot: React.FC = () => {
 
       {/* ═══ SCAN ANALYSIS TAB ═══════════════════════════════ */}
       {tab === 'scan' && (
-        <div className="module-card" style={{ marginTop: 24 }}>
+        <div className="module-card si-b4c2d096">
           <h3>🩻 AI Scan & Image Analysis</h3>
-          <p style={{ color: '#666', marginBottom: 16 }}>Upload a veterinary scan (X-ray, MRI, ultrasound, CT, or clinical photo) for AI-powered triage analysis</p>
+          <p className="si-63eaea98">Upload a veterinary scan (X-ray, MRI, ultrasound, CT, or clinical photo) for AI-powered triage analysis</p>
 
           {/* Upload area */}
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 320px' }}>
-              <input ref={scanFileRef} type="file" accept="image/*" onChange={handleScanFileChange} style={{ display: 'none' }} />
+          <div className="si-33938b8e">
+            <div className="si-eea342ba">
+              <input ref={scanFileRef} type="file" accept="image/*" onChange={handleScanFileChange} className="si-d6a2f871" />
               <div onClick={() => scanFileRef.current?.click()}
                 style={{
                   border: '2px dashed #cbd5e1', borderRadius: 12, padding: scanPreview ? 0 : '40px 20px',
@@ -463,31 +455,31 @@ const AICopilot: React.FC = () => {
                 onMouseLeave={e => (e.currentTarget.style.borderColor = '#cbd5e1')}
               >
                 {scanPreview ? (
-                  <img src={scanPreview} alt="Scan preview" style={{ maxWidth: '100%', maxHeight: 350, borderRadius: 10 }} />
+                  <img src={scanPreview} alt="Scan preview" className="si-f62c643d" />
                 ) : (
                   <div>
-                    <div style={{ fontSize: 48, marginBottom: 12 }}>🩻</div>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#4a5568' }}>Click to upload scan image</div>
-                    <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>X-ray, MRI, Ultrasound, CT, or clinical photo</div>
-                    <div style={{ fontSize: 12, color: '#aaa', marginTop: 8 }}>JPEG, PNG, WebP — Max 10MB</div>
+                    <div className="si-fc4388e2">🩻</div>
+                    <div className="si-a71f4610">Click to upload scan image</div>
+                    <div className="si-b95e40ca">X-ray, MRI, Ultrasound, CT, or clinical photo</div>
+                    <div className="si-3277a787">JPEG, PNG, WebP — Max 10MB</div>
                   </div>
                 )}
               </div>
               {scanFile && (
-                <div style={{ marginTop: 8, fontSize: 13, color: '#666', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="si-83190d3b">
                   <span>📎 {scanFile.name} ({(scanFile.size / 1024 / 1024).toFixed(1)} MB)</span>
-                  <button style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 13 }}
+                  <button className="si-25a60d6b"
                     onClick={() => { setScanFile(null); setScanPreview(''); setScanResults(null) }}>Remove</button>
                 </div>
               )}
             </div>
 
             {/* Context inputs */}
-            <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="si-f989dc4f">
               <div>
-                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Species</label>
+                <label className="si-2561596d">Species</label>
                 <select value={scanSpecies} onChange={e => setScanSpecies(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14 }}>
+                  className="si-4bf99b94">
                   <option value="">Select species...</option>
                   <option value="dog">Dog</option>
                   <option value="cat">Cat</option>
@@ -502,9 +494,9 @@ const AICopilot: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Scan Type</label>
+                <label className="si-2561596d">Scan Type</label>
                 <select value={scanType} onChange={e => setScanType(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14 }}>
+                  className="si-4bf99b94">
                   <option value="">Select type...</option>
                   <option value="x-ray">X-Ray</option>
                   <option value="mri">MRI</option>
@@ -517,17 +509,17 @@ const AICopilot: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Body Part / Region</label>
+                <label className="si-2561596d">Body Part / Region</label>
                 <input value={scanBodyPart} onChange={e => setScanBodyPart(e.target.value)} placeholder="e.g. left foreleg, thorax, abdomen"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14 }} />
+                  className="si-4bf99b94" />
               </div>
               <div>
-                <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>Clinical Notes (optional)</label>
+                <label className="si-2561596d">Clinical Notes (optional)</label>
                 <textarea value={scanNotes} onChange={e => setScanNotes(e.target.value)} placeholder="Any relevant history or symptoms..."
-                  rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd', fontSize: 14, resize: 'vertical' }} />
+                  rows={3} className="si-06c176a5" />
               </div>
-              <button className="module-btn primary" onClick={analyzeScan} disabled={!scanFile || scanAnalyzing}
-                style={{ padding: '12px 20px', fontSize: 15, marginTop: 4 }}>
+              <button className="module-btn primary si-0a4ef46c" onClick={analyzeScan} disabled={!scanFile || scanAnalyzing}
+               >
                 {scanAnalyzing ? '🔄 Analyzing...' : '🩻 Analyze Scan'}
               </button>
             </div>
@@ -535,7 +527,7 @@ const AICopilot: React.FC = () => {
 
           {/* Results */}
           {scanResults && (
-            <div style={{ marginTop: 24 }}>
+            <div className="si-b4c2d096">
               {scanResults.success ? (
                 <>
                   {/* Triage banner */}
@@ -548,42 +540,42 @@ const AICopilot: React.FC = () => {
                       : { background: '#f0fdf4', borderColor: '#86efac', color: '#166534' }),
                     display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap'
                   }}>
-                    <div style={{ fontSize: 32 }}>
+                    <div className="si-42fc55d5">
                       {scanResults.triageLevel === 'critical' ? '🚨' : scanResults.triageLevel === 'urgent' ? '⚠️' : scanResults.triageLevel === 'moderate' ? '📋' : '✅'}
                     </div>
                     <div>
-                      <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 1.5, fontWeight: 600 }}>Triage Level</div>
-                      <div style={{ fontSize: 22, fontWeight: 800, textTransform: 'uppercase' }}>{scanResults.triageLevel}</div>
+                      <div className="si-cbda629b">Triage Level</div>
+                      <div className="si-1ce6f017">{scanResults.triageLevel}</div>
                     </div>
                     {scanResults.provider && (
-                      <div style={{ marginLeft: 'auto', fontSize: 12, opacity: 0.7 }}>Powered by: {scanResults.provider}</div>
+                      <div className="si-b660b53b">Powered by: {scanResults.provider}</div>
                     )}
                   </div>
 
                   {/* Full AI analysis */}
-                  <div style={{ padding: '20px 24px', borderRadius: 12, background: 'white', border: '1px solid #e8ecf0', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                    <div className="ai-markdown" style={{ fontSize: 14, lineHeight: 1.8, color: '#2d3748' }}>
+                  <div className="si-534f6c73">
+                    <div className="ai-markdown si-4bcdb937">
                       <ReactMarkdown
                         components={{
-                          h2: ({children}) => <h3 style={{margin:'18px 0 8px',fontSize:16,color:'#1a202c',borderBottom:'1px solid #eee',paddingBottom:6}}>{children}</h3>,
-                          h3: ({children}) => <h4 style={{margin:'14px 0 6px',fontSize:14,fontWeight:700,color:'#4a5568'}}>{children}</h4>,
-                          p: ({children}) => <p style={{margin:'0 0 10px'}}>{children}</p>,
-                          ul: ({children}) => <ul style={{margin:'0 0 10px',paddingLeft:20}}>{children}</ul>,
-                          ol: ({children}) => <ol style={{margin:'0 0 10px',paddingLeft:20}}>{children}</ol>,
-                          li: ({children}) => <li style={{marginBottom:4}}>{children}</li>,
-                          strong: ({children}) => <strong style={{color:'#1a202c',fontWeight:700}}>{children}</strong>,
+                          h2: ({children}) => <h3 className="si-0abf51ad">{children}</h3>,
+                          h3: ({children}) => <h4 className="si-f3cf4650">{children}</h4>,
+                          p: ({children}) => <p className="si-1141db05">{children}</p>,
+                          ul: ({children}) => <ul className="si-7bc306de">{children}</ul>,
+                          ol: ({children}) => <ol className="si-7bc306de">{children}</ol>,
+                          li: ({children}) => <li className="si-e57614ee">{children}</li>,
+                          strong: ({children}) => <strong className="si-319fe0be">{children}</strong>,
                         }}
                       >{scanResults.analysis}</ReactMarkdown>
                     </div>
                   </div>
 
                   {/* Disclaimer */}
-                  <div style={{ padding: 14, borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a', marginTop: 16, fontSize: 13, color: '#92400e' }}>
+                  <div className="si-0c9eaa3b">
                     ⚠️ {scanResults.disclaimer}
                   </div>
                 </>
               ) : (
-                <div style={{ padding: 16, borderRadius: 10, background: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b' }}>
+                <div className="si-2800aa40">
                   ❌ {scanResults.error}
                 </div>
               )}

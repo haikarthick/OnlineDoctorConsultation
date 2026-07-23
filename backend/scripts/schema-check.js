@@ -320,7 +320,62 @@ function checkFkOrder(filePath) {
   return forwardFkErrors;
 }
 
+// ── Check for banned SQL patterns ────────────────────────────
+// uuid_generate_v4() requires the uuid-ossp extension, and Render's managed
+// PostgreSQL runs the app as a restricted (non-superuser) role — CREATE
+// EXTENSION always fails there. This has caused two separate production
+// incidents (see memories/repo/past-bugs.md, memories/repo/lessons.md
+// LESSON-001): once when it aborted init.sql entirely (zero tables
+// created), and once when it silently failed two migrations for an
+// unknown length of time (the migration runner used to catch and log a
+// warning rather than fail — see the MIGRATIONS_FAIL_FAST fix). Always use
+// gen_random_uuid() (built into PostgreSQL 13+ core, no extension needed).
+function checkBannedSqlPatterns() {
+  const violations = [];
+  const BANNED = [
+    { pattern: /uuid_generate_v4\s*\(/i, name: 'uuid_generate_v4()', fix: 'gen_random_uuid()' },
+    { pattern: /CREATE\s+EXTENSION/i, name: 'CREATE EXTENSION', fix: 'nothing — Render managed PostgreSQL does not permit CREATE EXTENSION; use only functions built into PostgreSQL core (gen_random_uuid(), etc.)' },
+  ];
 
+  const sqlDirs = [
+    path.join(ROOT, 'docker'),
+    path.join(ROOT, 'backend', 'migrations'),
+  ];
+
+  function walkSqlFiles(dir) {
+    if (!fs.existsSync(dir)) return [];
+    const out = [];
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) out.push(...walkSqlFiles(full));
+      else if (entry.name.endsWith('.sql')) out.push(full);
+    }
+    return out;
+  }
+
+  const files = sqlDirs.flatMap(walkSqlFiles);
+  for (const file of files) {
+    const lines = fs.readFileSync(file, 'utf-8').split('\n');
+    lines.forEach((line, idx) => {
+      // cube/earthdistance/pgcrypto etc. ARE allowed — Render permits some
+      // extensions via CASCADE for the app role; only the pattern name
+      // itself is banned when it's specifically uuid-ossp/uuid_generate_v4.
+      if (/CREATE\s+EXTENSION/i.test(line) && !/uuid-ossp/i.test(line)) return;
+      for (const banned of BANNED) {
+        if (banned.pattern.test(line)) {
+          violations.push({
+            file: path.relative(ROOT, file),
+            line: idx + 1,
+            found: banned.name,
+            fix: banned.fix,
+            text: line.trim(),
+          });
+        }
+      }
+    });
+  }
+  return violations;
+}
 
 function main() {
   console.log(`\n${CYAN}🔍 Running pre-deployment schema validation...${RESET}`);
@@ -370,8 +425,21 @@ function main() {
     console.log(`${GREEN}✓ No forward FK references in init.sql${RESET}\n`);
   }
 
+  // Check for banned SQL patterns (uuid_generate_v4, CREATE EXTENSION "uuid-ossp")
+  const bannedViolations = checkBannedSqlPatterns();
+  if (bannedViolations.length > 0) {
+    console.log(`\n${RED}✗ Found ${bannedViolations.length} banned SQL pattern(s):${RESET}\n`);
+    for (const v of bannedViolations) {
+      console.log(`  ${YELLOW}${v.file}:${v.line}${RESET}`);
+      console.log(`    ${RED}${v.found}${RESET} — ${DIM}${v.text}${RESET}`);
+      console.log(`    ${DIM}Fix: use ${v.fix}${RESET}\n`);
+    }
+  } else {
+    console.log(`${GREEN}✓ No banned SQL patterns (uuid_generate_v4, CREATE EXTENSION uuid-ossp)${RESET}\n`);
+  }
+
   // Summary
-  const totalErrors = insertErrors + updateProblems.length + fkErrors.length;
+  const totalErrors = insertErrors + updateProblems.length + fkErrors.length + bannedViolations.length;
   if (totalErrors > 0) {
     console.log(`${RED}━━━ FAILED: ${totalErrors} schema error(s) found ━━━${RESET}`);
     console.log(`${DIM}Fix all errors before deploying. Every column in an INSERT/UPDATE must exist in docker/init.sql or a migration.${RESET}\n`);

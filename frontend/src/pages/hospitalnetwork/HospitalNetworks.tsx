@@ -258,7 +258,7 @@ const NetworkModal: React.FC<NetworkModalProps> = ({ editing, onClose, onSaved, 
               <div className="module-form-group">
                 <label className="module-label">{t('hospitalNetworks.form.idPrefix')}</label>
                 <input className="module-input" value={(form as any).idPrefix} onChange={e => set('idPrefix', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} placeholder="e.g. APOLLO, NH1, TNGOV" maxLength={10} />
-                <small style={{color: '#666', fontSize: '12px'}}>{t('hospitalNetworks.form.idPrefixHint')}</small>
+                <small className="si-fd547d99">{t('hospitalNetworks.form.idPrefixHint')}</small>
               </div>
             </div>
             <div className="module-form-row">
@@ -383,17 +383,17 @@ const CreateBranchHospitalModal: React.FC<{
 
   return (
     <div className="hn-modal-overlay" onClick={onClose}>
-      <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="hn-modal si-dde6b9b9" onClick={e => e.stopPropagation()}>
         <div className="hn-modal-header">
           <h3>🏥 Create Branch Hospital</h3>
           <button type="button" className="hn-modal-close" onClick={onClose}>✕</button>
         </div>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 12px' }}>
-            {error && <div className="module-alert error" style={{ margin: '12px 0' }}>{error}</div>}
+        <form onSubmit={handleSubmit} className="si-3834fcb3">
+          <div className="si-28fc7e41">
+            {error && <div className="module-alert error si-af843d88">{error}</div>}
             <div className="module-form">
               <div className="module-form-group">
-                <label className="module-label">Hospital Name <span style={{ color: 'red' }}>*</span></label>
+                <label className="module-label">Hospital Name <span className="si-19136384">*</span></label>
                 <input className="module-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Chennai Branch - North" required />
               </div>
               <div className="module-form-row">
@@ -441,11 +441,11 @@ const CreateBranchHospitalModal: React.FC<{
                 </div>
               </div>
               <div className="module-form-group">
-                <label className="module-label">Description <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+                <label className="module-label">Description <span className="si-f7764c70">(optional)</span></label>
                 <textarea className="module-input" rows={2} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description of this branch..." />
               </div>
               <div className="module-form-group">
-                <label className="module-label">{t('networkSettings.operatingHours')} <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+                <label className="module-label">{t('networkSettings.operatingHours')} <span className="si-f7764c70">(optional)</span></label>
                 <input
                   className="module-input"
                   value={form.operatingHours || ''}
@@ -454,16 +454,16 @@ const CreateBranchHospitalModal: React.FC<{
                 />
               </div>
               <div className="module-form-group">
-                <label className="module-label">{t('networkSettings.specializations')} <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                <label className="module-label">{t('networkSettings.specializations')} <span className="si-f7764c70">(optional)</span></label>
+                <div className="si-4526a3dd">
                   {(form.specializations || []).map(spec => (
-                    <span key={spec} style={{ background: '#e0e7ff', color: '#3730a3', padding: '2px 10px', borderRadius: 20, fontSize: 13, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span key={spec} className="si-bbabfb92">
                       {spec}
-                      <button type="button" onClick={() => setForm(f => ({ ...f, specializations: (f.specializations || []).filter(s => s !== spec) }))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 14, color: '#3730a3', lineHeight: 1 }}>×</button>
+                      <button type="button" onClick={() => setForm(f => ({ ...f, specializations: (f.specializations || []).filter(s => s !== spec) }))} className="si-f021bb7e">×</button>
                     </span>
                   ))}
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <div className="si-50c82988">
                   {['Cardiology', 'Surgery', 'Emergency', 'Orthopedics', 'Dermatology', 'Ophthalmology', 'Neurology', 'Oncology', 'Internal Medicine', 'General Practice'].map(spec => (
                     <button
                       key={spec}
@@ -485,12 +485,12 @@ const CreateBranchHospitalModal: React.FC<{
                     </button>
                   ))}
                 </div>
-                <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>{t('hospitalNetworks.specializationsHint')}</p>
+                <p className="si-ada3b9d6">{t('hospitalNetworks.specializationsHint')}</p>
               </div>
             </div>
           </div>
-          <div style={{ padding: '16px 20px', borderTop: '1px solid #e5e7eb', background: '#fff', display: 'flex', gap: 12, justifyContent: 'flex-end', alignItems: 'center', borderRadius: '0 0 12px 12px' }}>
-            <p style={{ fontSize: '0.8em', color: '#888', margin: 0, flex: 1 }}>* Name required</p>
+          <div className="si-23022006">
+            <p className="si-a089afbe">* Name required</p>
             <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
             <button type="submit" className="module-btn primary" disabled={saving || !form.name.trim()}>
               {saving ? '⏳ Creating...' : '🏥 Create Branch Hospital'}
@@ -542,17 +542,17 @@ const EditBranchHospitalModal: React.FC<{
 
   return (
     <div className="hn-modal-overlay" onClick={onClose}>
-      <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="hn-modal si-dde6b9b9" onClick={e => e.stopPropagation()}>
         <div className="hn-modal-header">
           <h3>✏️ Edit Branch Hospital</h3>
           <button type="button" className="hn-modal-close" onClick={onClose}>✕</button>
         </div>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 12px' }}>
-            {error && <div className="module-alert error" style={{ margin: '12px 0' }}>{error}</div>}
+        <form onSubmit={handleSubmit} className="si-3834fcb3">
+          <div className="si-28fc7e41">
+            {error && <div className="module-alert error si-af843d88">{error}</div>}
             <div className="module-form">
               <div className="module-form-group">
-                <label className="module-label">Hospital Name <span style={{ color: 'red' }}>*</span></label>
+                <label className="module-label">Hospital Name <span className="si-19136384">*</span></label>
                 <input className="module-input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
               </div>
               <div className="module-form-row">
@@ -590,12 +590,12 @@ const EditBranchHospitalModal: React.FC<{
                 </div>
               </div>
               <div className="module-form-group">
-                <label className="module-label">Description <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+                <label className="module-label">Description <span className="si-f7764c70">(optional)</span></label>
                 <textarea className="module-input" rows={2} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
             </div>
           </div>
-          <div style={{ padding: '16px 20px', borderTop: '1px solid #e5e7eb', background: '#fff', display: 'flex', gap: 12, justifyContent: 'flex-end', borderRadius: '0 0 12px 12px' }}>
+          <div className="si-de5a14e5">
             <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
             <button type="submit" className="module-btn primary" disabled={saving || !form.name.trim()}>
               {saving ? '⏳ Saving...' : '✏️ Save Changes'}
@@ -668,7 +668,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
           {error && <div className="module-alert error">{error}</div>}
 
           <div className="module-form-group">
-            <label className="module-label">Search User <span style={{ color: 'red' }}>*</span></label>
+            <label className="module-label">Search User <span className="si-19136384">*</span></label>
             <input
               className="module-input"
               value={searchQuery}
@@ -676,32 +676,32 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
               placeholder="Type name or email to search..."
               autoFocus
             />
-            {searching && <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>🔍 Searching...</p>}
+            {searching && <p className="si-acff8193">🔍 Searching...</p>}
 
             {searchResults.length > 0 && !selectedUser && (
-              <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, marginTop: 4, maxHeight: 200, overflowY: 'auto', background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+              <div className="si-22cbcd6a">
                 {searchResults.map(u => (
                   <div
                     key={u.id}
                     onClick={() => { setSelectedUser(u); setSearchQuery(`${u.firstName} ${u.lastName} (${u.email})`) }}
-                    style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: 2 }}
+                    className="si-632b9cb5"
                     onMouseEnter={e => (e.currentTarget.style.background = '#f9fafb')}
                     onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
                   >
-                    <span style={{ fontWeight: 600, fontSize: 14 }}>{u.firstName} {u.lastName}</span>
-                    <span style={{ fontSize: 12, color: '#6b7280' }}>{u.email} • {u.role}</span>
+                    <span className="si-a9b7f385">{u.firstName} {u.lastName}</span>
+                    <span className="si-48a0b045">{u.email} • {u.role}</span>
                   </div>
                 ))}
               </div>
             )}
             {searchQuery.length >= 2 && searchResults.length === 0 && !searching && !selectedUser && (
-              <div style={{ marginTop: 8, padding: '10px 12px', background: '#fffbeb', border: '1px solid #fbbf24', borderRadius: 6 }}>
-                <p style={{ fontSize: 13, color: '#92400e', margin: '0 0 6px' }}>No registered users found for "{searchQuery}".</p>
-                <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 8px' }}>This person may not have a VetCare account yet.</p>
+              <div className="si-fa4fc649">
+                <p className="si-519a52ea">No registered users found for "{searchQuery}".</p>
+                <p className="si-79d4f0fa">This person may not have a VetCare account yet.</p>
                 <button
                   type="button"
                   onClick={onInviteInstead}
-                  style={{ fontSize: 13, color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline', fontWeight: 600 }}
+                  className="si-20f10f40"
                 >
                   ✉️ Invite them by email instead →
                 </button>
@@ -709,12 +709,12 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
             )}
 
             {selectedUser && (
-              <div style={{ marginTop: 8, padding: '8px 12px', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="si-b6f52d6c">
                 <div>
-                  <span style={{ fontWeight: 600 }}>✅ {selectedUser.firstName} {selectedUser.lastName}</span>
-                  <span style={{ fontSize: 12, color: '#6b7280', marginLeft: 8 }}>{selectedUser.email}</span>
+                  <span className="si-b2cfcbec">✅ {selectedUser.firstName} {selectedUser.lastName}</span>
+                  <span className="si-824a7a1e">{selectedUser.email}</span>
                 </div>
-                <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }} onClick={() => { setSelectedUser(null); setSearchQuery('') }}>✕</button>
+                <button type="button" className="si-4b47cdf7" onClick={() => { setSelectedUser(null); setSearchQuery('') }}>✕</button>
               </div>
             )}
           </div>
@@ -728,7 +728,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
 
           {networkHospitals.length > 0 && (
             <div className="module-form-group">
-              <label className="module-label">Assign to Branch Hospital <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+              <label className="module-label">Assign to Branch Hospital <span className="si-f7764c70">(optional)</span></label>
               <select className="module-input" value={hospitalId} onChange={e => setHospitalId(e.target.value)}>
                 <option value="">— Not assigned to specific hospital —</option>
                 {networkHospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
@@ -737,17 +737,17 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ networkId, networkHospi
           )}
 
           <div className="module-form-group">
-            <label className="module-label">Notes <span style={{ color: '#888', fontSize: '0.85em' }}>(optional)</span></label>
+            <label className="module-label">Notes <span className="si-f7764c70">(optional)</span></label>
             <input className="module-input" value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. Head of Cardiology" />
           </div>
 
           {!selectedUser && (
-            <p style={{ fontSize: 12, color: '#f59e0b', marginTop: 4 }}>⚠️ Required: Search and select a user above to enable adding</p>
+            <p className="si-513c70eb">⚠️ Required: Search and select a user above to enable adding</p>
           )}
-          <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 8 }}>* Required field. User must already have a VetCare account.</p>
+          <p className="si-2c2a1863">* Required field. User must already have a VetCare account.</p>
         </div>
 
-        <div className="hn-modal-actions" style={{ borderTop: '1px solid #e5e7eb', padding: '16px 20px', background: '#fff', borderRadius: '0 0 12px 12px' }}>
+        <div className="hn-modal-actions si-70412b08">
           <button type="button" className="module-btn" onClick={onClose}>{t('common.cancel')}</button>
           <button type="button" className="module-btn primary" disabled={saving || !selectedUser} onClick={handleAdd}>
             {saving ? '⏳ Adding...' : `➕ ${t('hospitalNetworks.detail.addMember')}`}
@@ -1162,10 +1162,10 @@ const HospitalNetworks: React.FC = () => {
 
   useEffect(() => {
     if (showCreateReferralModal && selectedNetwork) {
-      ;(apiService as any).client
+      (apiService as any).client
         .get(`/hospital-networks/${selectedNetwork.id}/hospitals`)
         .then((res: any) => setReferralNetworkHospitals(res.data?.hospitals || res.data || []))
-        .catch(() => {})
+        .catch(() => setReferralError(t('networkReferrals.hospitalsLoadFailed')))
     }
   }, [showCreateReferralModal, selectedNetwork])
 
@@ -1478,7 +1478,7 @@ const HospitalNetworks: React.FC = () => {
         >
           👥 {t('hospitalNetworks.patients.tab')}
           {selectedNetwork && allEnrollments.filter(e => e.enrollmentStatus === 'pending_consent').length > 0 && (
-            <span style={{ marginLeft: 6, background: '#ffc107', color: '#fff', borderRadius: 10, padding: '1px 7px', fontSize: 11, fontWeight: 700 }}>
+            <span className="si-e04dd9c4">
               {allEnrollments.filter(e => e.enrollmentStatus === 'pending_consent').length}
             </span>
           )}
@@ -1592,7 +1592,7 @@ const HospitalNetworks: React.FC = () => {
                       <td>
                         <div className="hn-network-name">{network.name}</div>
                         {network.legalName && <div className="hn-network-legal">{network.legalName}</div>}
-                        {network.idPrefix && <span className="module-badge" style={{backgroundColor: '#e3f2fd', color: '#1565c0', fontSize: '11px'}}>{network.idPrefix}-*</span>}
+                        {network.idPrefix && <span className="module-badge si-a42e1735">{network.idPrefix}-*</span>}
                       </td>
                       <td><NetworkTypeLabel type={network.networkType} /></td>
                       <td>
@@ -1672,8 +1672,8 @@ const HospitalNetworks: React.FC = () => {
                   )}
                   {userNetworkRole === 'corporate_admin' && (
                     <button
-                      className="module-btn small"
-                      style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' }}
+                      className="module-btn small si-42e8005b"
+                     
                       onClick={() => handleDeactivateNetwork(selectedNetwork.id)}
                     >
                       ⚠️ {t('hospitalNetworks.deactivate')}
@@ -1786,15 +1786,15 @@ const HospitalNetworks: React.FC = () => {
                     ) : (
                       <div className="hn-hospital-list">
                         {networkHospitals.map(h => (
-                          <div key={h.id} className="hn-hospital-item" style={{ alignItems: 'flex-start' }}>
+                          <div key={h.id} className="hn-hospital-item si-418b4a36">
                             <span className="hn-hospital-icon">🏥</span>
-                            <div className="hn-hospital-info" style={{ flex: 1 }}>
+                            <div className="hn-hospital-info si-6acd75e8">
                               <div className="hn-hospital-name">
                                 {h.name}
-                                {h.isNetworkBranch && <span style={{ marginLeft: 6, fontSize: 11, background: '#dbeafe', color: '#1d4ed8', borderRadius: 10, padding: '1px 7px', fontWeight: 600 }}>Branch</span>}
-                                {h.isVerified && <span style={{ marginLeft: 4, fontSize: 11, background: '#dcfce7', color: '#15803d', borderRadius: 10, padding: '1px 7px', fontWeight: 600 }}>✓ Verified</span>}
+                                {h.isNetworkBranch && <span className="si-dfca5832">Branch</span>}
+                                {h.isVerified && <span className="si-31f987da">✓ Verified</span>}
                               </div>
-                              <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                              <div className="si-c9661b3b">
                                 {h.city && <span>📍 {h.city}{h.state ? `, ${h.state}` : ''}</span>}
                                 {h.hospitalType && <span>🏷️ {h.hospitalType.replace(/_/g, ' ')}</span>}
                                 {h.staffCount != null && <span>👥 {h.staffCount} staff</span>}
@@ -1802,18 +1802,18 @@ const HospitalNetworks: React.FC = () => {
                               </div>
                             </div>
                             {h.isNetworkBranch && (
-                              <div style={{ display: 'flex', gap: 6, marginLeft: 8, flexShrink: 0 }}>
+                              <div className="si-542ae40d">
                                 <button
                                   type="button"
                                   title="Edit branch hospital"
                                   onClick={() => setEditingBranch(h)}
-                                  style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: 13 }}
+                                  className="si-9acabb0d"
                                 >✏️</button>
                                 <button
                                   type="button"
                                   title="Remove branch hospital"
                                   onClick={() => setDeletingBranch(h)}
-                                  style={{ background: '#fff1f2', border: '1px solid #fecaca', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: 13 }}
+                                  className="si-19b6a27c"
                                 >🗑️</button>
                               </div>
                             )}
@@ -1830,20 +1830,20 @@ const HospitalNetworks: React.FC = () => {
                     <div className="hn-panel-header">
                       <h3>📋 {t('networkApproval.title')}</h3>
                       {user?.role === 'admin' && !selectedNetwork.isApproved && (
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <button className="module-btn small" style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fcd34d' }} onClick={() => setShowApprovalModal('info_requested')}>
+                        <div className="si-d223efb3">
+                          <button className="module-btn small si-e54ed6c3" onClick={() => setShowApprovalModal('info_requested')}>
                             ❓ {t('networkApproval.requestInfo')}
                           </button>
                           <button className="module-btn small primary" onClick={() => setShowApprovalModal('approved')}>
                             ✅ {t('networkApproval.approveNetwork')}
                           </button>
-                          <button className="module-btn small" style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' }} onClick={() => setShowApprovalModal('rejected')}>
+                          <button className="module-btn small si-42e8005b" onClick={() => setShowApprovalModal('rejected')}>
                             ❌ {t('networkApproval.rejectNetwork')}
                           </button>
                         </div>
                       )}
                       {user?.role === 'admin' && selectedNetwork.isApproved && (
-                        <button className="module-btn small" style={{ background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa' }} onClick={() => setShowApprovalModal('suspended')}>
+                        <button className="module-btn small si-01fda312" onClick={() => setShowApprovalModal('suspended')}>
                           ⏸ Suspend Network
                         </button>
                       )}
@@ -1896,8 +1896,8 @@ const HospitalNetworks: React.FC = () => {
                         <div className="module-form-group">
                           <label className="module-label">{t('networkSettings.logoUpload')}</label>
                           {brandingForm.logoUrl && (
-                            <div style={{ marginBottom: 8 }}>
-                              <img src={brandingForm.logoUrl} alt="Network Logo" style={{ maxWidth: 120, maxHeight: 60, objectFit: 'contain', border: '1px solid #e5e7eb', borderRadius: 6, padding: 4 }} />
+                            <div className="si-dab75309">
+                              <img src={brandingForm.logoUrl} alt="Network Logo" className="si-62661c53" />
                             </div>
                           )}
                           <input type="file" accept="image/*" className="module-input"
@@ -1943,8 +1943,8 @@ const HospitalNetworks: React.FC = () => {
                             </button>
                           ))}
                         </div>
-                        <div className="module-form-group" style={{ marginTop: 12 }}>
-                          <label className="module-label" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div className="module-form-group si-66faea9d">
+                          <label className="module-label si-98d3a741">
                             <input type="checkbox" checked={brandingForm.emergencyServices}
                               onChange={e => setBrandingForm(f => ({ ...f, emergencyServices: e.target.checked }))} />
                             {t('networkSettings.emergencyServices')}
@@ -1975,7 +1975,7 @@ const HospitalNetworks: React.FC = () => {
                             )
                           })}
                         </div>
-                        <div className="hn-modal-actions" style={{ marginTop: 16 }}>
+                        <div className="hn-modal-actions si-b0aee75b">
                           <button className="module-btn primary" disabled={brandingSaving} onClick={handleBrandingSubmit}>
                             {brandingSaving ? `⏳ ${t('common.saving')}` : t('networkSettings.saveSettings')}
                           </button>
@@ -1989,7 +1989,7 @@ const HospitalNetworks: React.FC = () => {
                   <div className="hn-panel-header">
                     <h3>{t('hospitalNetworks.detail.staff')}</h3>
                     {(userNetworkRole === 'corporate_admin' || userNetworkRole === 'hospital_director' || user?.role === 'admin') && (
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div className="si-fe667bdf">
                         <button className="module-btn small" onClick={() => { setShowInviteStaff(true); setInviteStaffError('') }}>
                           ✉️ {t('hospitalNetworks.detail.inviteStaff')}
                         </button>
@@ -2288,10 +2288,10 @@ const HospitalNetworks: React.FC = () => {
           ) : (
             <>
               {/* Section A: Smart Patient Search */}
-              <div className="module-card" style={{ marginBottom: 24 }}>
+              <div className="module-card si-af65fe13">
                 <div className="hn-panel-header">
                   <h3>{t('hospitalNetworks.patients.searchTitle')}</h3>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div className="si-d223efb3">
                     <button className="module-btn small primary" onClick={() => setShowWalkInRegModal(true)}>
                       + {t('hospitalNetworks.patients.registerWalkIn', 'Register Walk-In')}
                     </button>
@@ -2301,7 +2301,7 @@ const HospitalNetworks: React.FC = () => {
                   </div>
                 </div>
                 <div className="card-body">
-                  <p className="module-form-helper" style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>
+                  <p className="module-form-helper si-676930d7">
                     {t('hospitalNetworks.patients.searchHelper')}
                   </p>
                   <div className="module-form-group">
@@ -2313,46 +2313,43 @@ const HospitalNetworks: React.FC = () => {
                     />
                   </div>
                   {patientSearch.length > 0 && patientSearch.length < 2 && (
-                    <p style={{ fontSize: 12, color: '#999', margin: '4px 0 0 0' }}>{t('hospitalNetworks.patients.searchMinChars')}</p>
+                    <p className="si-1617d817">{t('hospitalNetworks.patients.searchMinChars')}</p>
                   )}
                   {patientSearchLoading && <div className="hn-loading">⏳ {t('common.loading')}</div>}
                   {!patientSearchLoading && patientSearch.length >= 2 && patientResults.length === 0 && (
-                    <p style={{ color: '#999', fontSize: 14, marginTop: 8 }}>{t('hospitalNetworks.patients.noResults')}</p>
+                    <p className="si-55855538">{t('hospitalNetworks.patients.noResults')}</p>
                   )}
                   {patientResults.map(patient => (
-                    <div key={patient.userId} className="hn-member-item" style={{ marginBottom: 12, alignItems: 'flex-start', flexDirection: 'column', padding: 12 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                    <div key={patient.userId} className="hn-member-item si-a5c710fe">
+                      <div className="si-4eadb825">
                         <div className="hn-member-avatar">{(patient.userName ?? 'P').charAt(0).toUpperCase()}</div>
                         <div>
                           <div className="hn-member-name">{patient.userName}</div>
-                          <div style={{ fontSize: 12, color: '#666' }}>{patient.userEmail}</div>
-                          {patient.userPhone && <div style={{ fontSize: 12, color: '#999' }}>{patient.userPhone}</div>}
+                          <div className="si-3e1bd646">{patient.userEmail}</div>
+                          {patient.userPhone && <div className="si-921b05f1">{patient.userPhone}</div>}
                         </div>
                       </div>
-                      <div style={{ marginTop: 10, width: '100%' }}>
+                      <div className="si-37f17fee">
                         {(patient.animals ?? []).length === 0 ? (
-                          <p style={{ fontSize: 12, color: '#999' }}>No animals registered</p>
+                          <p className="si-921b05f1">No animals registered</p>
                         ) : (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                          <div className="si-b9eb5ec7">
                             {(patient.animals ?? []).map(animal => (
-                              <div key={animal.id} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f5f5f5', borderRadius: 8, padding: '6px 10px' }}>
-                                <span style={{ fontSize: 13, fontWeight: 600 }}>{animal.name}</span>
-                                <span style={{ fontSize: 11, color: '#666' }}>{animal.species}</span>
-                                {animal.uniqueId && <span style={{ fontSize: 10, fontFamily: 'monospace', color: '#999' }}>{animal.uniqueId}</span>}
+                              <div key={animal.id} className="si-e677ad2d">
+                                <span className="si-8756b2e7">{animal.name}</span>
+                                <span className="si-192b696d">{animal.species}</span>
+                                {animal.uniqueId && <span className="si-ee839ecf">{animal.uniqueId}</span>}
                                 {((animal as any).enrollmentStatus === 'active' || (animal as any).isEnrolled) && (
-                                  <span style={{
-                                    background: '#dcfce7', color: '#166534', padding: '2px 8px',
-                                    borderRadius: 12, fontSize: 11, fontWeight: 600, marginLeft: 8
-                                  }}>
+                                  <span className="si-f781ec01">
                                     ✓ Already Enrolled
                                   </span>
                                 )}
                                 {enrollmentSuccessIds.has(animal.id) ? (
-                                  <span style={{ fontSize: 11, color: '#2e7d32', fontWeight: 600 }}>✓ {t('hospitalNetworks.patients.enrollmentRequested')}</span>
+                                  <span className="si-8812039f">✓ {t('hospitalNetworks.patients.enrollmentRequested')}</span>
                                 ) : (
                                   <button
-                                    className="module-btn small primary"
-                                    style={{ fontSize: 11, padding: '3px 8px' }}
+                                    className="module-btn small primary si-d013fb7a"
+                                   
                                     disabled={requestingEnrollment === animal.id}
                                     onClick={() => handleRequestEnrollment(animal.id)}
                                   >
@@ -2413,16 +2410,16 @@ const HospitalNetworks: React.FC = () => {
                               {filtered.map(e => (
                                 <tr key={e.id}>
                                   <td>
-                                    <div style={{ fontWeight: 600 }}>{e.animalName}</div>
-                                    <div style={{ fontSize: 12, color: '#666' }}>{e.species}</div>
+                                    <div className="si-b2cfcbec">{e.animalName}</div>
+                                    <div className="si-3e1bd646">{e.species}</div>
                                   </td>
                                   <td>
                                     <div>{e.ownerName}</div>
-                                    <div style={{ fontSize: 12, color: '#999' }}>{e.ownerEmail}</div>
+                                    <div className="si-921b05f1">{e.ownerEmail}</div>
                                   </td>
                                   <td>
                                     {e.networkPatientId
-                                      ? <span style={{ fontFamily: 'monospace', fontSize: 12, background: '#f0f7ff', padding: '2px 6px', borderRadius: 4 }}>{e.networkPatientId}</span>
+                                      ? <span className="si-714eb092">{e.networkPatientId}</span>
                                       : '—'}
                                   </td>
                                   <td>
@@ -2433,7 +2430,7 @@ const HospitalNetworks: React.FC = () => {
                                         : t('hospitalNetworks.patients.statusRevoked')}
                                     </span>
                                   </td>
-                                  <td style={{ fontSize: 12, color: '#666' }}>{formatDate(e.enrollmentRequestedAt)}</td>
+                                  <td className="si-3e1bd646">{formatDate(e.enrollmentRequestedAt)}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -2460,13 +2457,13 @@ const HospitalNetworks: React.FC = () => {
       {/* ═══ ONBOARDING CHECKLIST MODAL ═══ */}
       {showOnboarding && onboardingNetwork && (
         <div className="hn-modal-overlay" onClick={() => setShowOnboarding(false)}>
-          <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 520 }}>
+          <div className="hn-modal si-63396e81" onClick={e => e.stopPropagation()}>
             <div className="hn-modal-header">
               <h3>🚀 {t('hospitalNetworks.onboarding.title')}</h3>
               <button type="button" className="hn-modal-close" onClick={() => setShowOnboarding(false)}>✕</button>
             </div>
             <div className="hn-modal-body">
-              <p style={{ margin: '0 0 20px', color: '#6b7280', fontSize: 14 }}>{t('hospitalNetworks.onboarding.subtitle')}</p>
+              <p className="si-57baef54">{t('hospitalNetworks.onboarding.subtitle')}</p>
               {[
                 { id: 'details', label: t('hospitalNetworks.onboarding.networkDetails'), done: true },
                 { id: 'branch', label: t('hospitalNetworks.onboarding.addBranch'), done: false },
@@ -2474,12 +2471,12 @@ const HospitalNetworks: React.FC = () => {
                 { id: 'staff', label: t('hospitalNetworks.onboarding.inviteStaff'), done: false },
                 { id: 'compliance', label: t('hospitalNetworks.onboarding.complianceOfficer'), done: false },
               ].map(item => (
-                <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid #f3f4f6' }}>
-                  <span style={{ fontSize: 20 }}>{item.done ? '✅' : '⬜'}</span>
+                <div key={item.id} className="si-2c2ebf39">
+                  <span className="si-7ff2b341">{item.done ? '✅' : '⬜'}</span>
                   <span style={{ fontSize: 14, color: item.done ? '#059669' : '#374151', fontWeight: item.done ? 600 : 400 }}>{item.label}</span>
                 </div>
               ))}
-              <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end' }}>
+              <div className="si-b32ecabd">
                 <button className="module-btn primary" onClick={() => {
                   setShowOnboarding(false)
                   handleView(onboardingNetwork)
@@ -2520,21 +2517,21 @@ const HospitalNetworks: React.FC = () => {
 
       {deletingBranch && selectedNetwork && (
         <div className="hn-modal-overlay" onClick={() => setDeletingBranch(null)}>
-          <div className="hn-modal hn-modal-sm" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+          <div className="hn-modal hn-modal-sm si-0a161398" onClick={e => e.stopPropagation()}>
             <div className="hn-modal-header">
               <h3>🗑️ Remove Branch Hospital</h3>
               <button type="button" className="hn-modal-close" onClick={() => setDeletingBranch(null)}>✕</button>
             </div>
             <div className="hn-modal-body">
               <p>Are you sure you want to remove <strong>{deletingBranch.name}</strong> from this network?</p>
-              <p style={{ fontSize: 13, color: '#6b7280' }}>The hospital record will be deactivated and removed from the network. This cannot be undone.</p>
+              <p className="si-c3b93ebb">The hospital record will be deactivated and removed from the network. This cannot be undone.</p>
             </div>
             <div className="hn-modal-actions">
               <button type="button" className="module-btn" onClick={() => setDeletingBranch(null)}>{t('common.cancel')}</button>
               <button
                 type="button"
-                className="module-btn primary"
-                style={{ background: '#ef4444' }}
+                className="module-btn primary si-ada871e1"
+               
                 onClick={async () => {
                   try {
                     await apiService.deleteBranchHospital(selectedNetwork.id, deletingBranch.id)
@@ -2556,7 +2553,7 @@ const HospitalNetworks: React.FC = () => {
       {/* Edit Member Modal */}
       {editingMember && selectedNetwork && (
         <div className="hn-modal-overlay" onClick={() => setEditingMember(null)}>
-          <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+          <div className="hn-modal si-197ba518" onClick={e => e.stopPropagation()}>
             <div className="hn-modal-header">
               <h2>✏️ {t('hospitalNetworks.detail.editMember', 'Edit Member')}</h2>
               <button type="button" className="hn-modal-close" onClick={() => setEditingMember(null)}>✕</button>
@@ -2571,7 +2568,7 @@ const HospitalNetworks: React.FC = () => {
                 <input className="module-input" value={editingMember.userEmail || '—'} disabled />
               </div>
               <div className="module-form-group">
-                <label className="module-label">{t('hospitalNetworks.detail.networkRole', 'Role')} <span style={{ color: '#ef4444' }}>*</span></label>
+                <label className="module-label">{t('hospitalNetworks.detail.networkRole', 'Role')} <span className="si-4fb20e94">*</span></label>
                 <select className="module-input" value={editMemberForm.networkRole} onChange={e => setEditMemberForm(p => ({ ...p, networkRole: e.target.value }))}>
                   {MEMBER_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
@@ -2629,28 +2626,28 @@ const HospitalNetworks: React.FC = () => {
               <button type="button" className="hn-modal-close" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteStaffError(''); setInviteLink('') }}>✕</button>
             </div>
             {inviteStaffSuccess ? (
-              <div style={{ padding: '2rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✅</div>
-                <p style={{ fontWeight: 600 }}>{inviteStaffSuccess}</p>
-                <p style={{ color: '#6b7280', fontSize: '0.9rem', marginTop: '0.5rem' }}>{t('hospitalStaff.inviteSentHint')}</p>
+              <div className="si-41acd90c">
+                <div className="si-d32e5e44">✅</div>
+                <p className="si-b2cfcbec">{inviteStaffSuccess}</p>
+                <p className="si-c367a229">{t('hospitalStaff.inviteSentHint')}</p>
                 {inviteLink && (
-                  <div style={{ marginTop: 16, background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: 16, textAlign: 'left' }}>
-                    <p style={{ fontWeight: 600, fontSize: 13, marginBottom: 8, color: '#0369a1' }}>📋 Share this invite link if email is not configured:</p>
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <input readOnly value={inviteLink} style={{ flex: 1, padding: '8px 12px', border: '1px solid #bae6fd', borderRadius: 6, fontSize: 12, background: '#fff' }} />
-                      <button type="button" style={{ padding: '8px 12px', background: '#0369a1', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}
+                  <div className="si-58e4ada6">
+                    <p className="si-ddbe24a1">📋 Share this invite link if email is not configured:</p>
+                    <div className="si-bab2d193">
+                      <input readOnly value={inviteLink} className="si-444032bb" />
+                      <button type="button" className="si-69f59685"
                         onClick={() => { navigator.clipboard.writeText(inviteLink) }}>Copy</button>
                     </div>
                   </div>
                 )}
-                <button className="module-btn primary" style={{ marginTop: '1.5rem' }} onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteLink('') }}>
+                <button className="module-btn primary si-70453e1a" onClick={() => { setShowInviteStaff(false); setInviteStaffSuccess(''); setInviteLink('') }}>
                   {t('common.close')}
                 </button>
               </div>
             ) : (
               <div className="hn-modal-body">
-                {inviteStaffError && <div className="module-alert error" style={{ marginBottom: 12 }}>{inviteStaffError}</div>}
-                <p style={{ color: '#6b7280', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                {inviteStaffError && <div className="module-alert error si-bab8e8bc">{inviteStaffError}</div>}
+                <p className="si-216e02a4">
                   {t('hospitalNetworks.detail.inviteStaffDesc')}
                 </p>
                 <div className="module-form">
@@ -2783,7 +2780,7 @@ const HospitalNetworks: React.FC = () => {
                   </div>
                   <div className="module-form-group">
                     <label className="module-label">{t('hospitalNetworks.patients.inviteMessage')}</label>
-                    <textarea className="module-input" rows={3} value={inviteForm.message} onChange={e => setInviteForm(f => ({ ...f, message: e.target.value }))} style={{ resize: 'vertical' }} />
+                    <textarea className="module-input si-3f7753b6" rows={3} value={inviteForm.message} onChange={e => setInviteForm(f => ({ ...f, message: e.target.value }))} />
                   </div>
                   <div className="hn-modal-actions">
                     <button type="button" className="module-btn" onClick={() => setShowInviteModal(false)}>{t('common.cancel')}</button>
@@ -2811,7 +2808,7 @@ const HospitalNetworks: React.FC = () => {
                 <div className="module-alert success">✅ {t('hospitalNetworks.patients.walkInSuccess', 'Patient registered!')} ID: {walkInSuccess}</div>
               ) : (
                 <form onSubmit={handleRegisterWalkIn}>
-                  <p className="module-form-helper" style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>
+                  <p className="module-form-helper si-676930d7">
                     {t('hospitalNetworks.patients.walkInHelperText', 'Register a walk-in patient for immediate treatment. No invite or account needed — patient can be given online access later.')}
                   </p>
                   <div className="module-form-group">
@@ -2858,25 +2855,25 @@ const HospitalNetworks: React.FC = () => {
                   </div>
                   <div className="module-form-group">
                     <label className="module-label">{t('hospitalNetworks.patients.reasonForVisit', 'Reason for Visit')}</label>
-                    <textarea className="module-input" rows={2} value={walkInForm.reasonForVisit} onChange={e => setWalkInForm(f => ({ ...f, reasonForVisit: e.target.value }))} style={{ resize: 'vertical' }} />
+                    <textarea className="module-input si-3f7753b6" rows={2} value={walkInForm.reasonForVisit} onChange={e => setWalkInForm(f => ({ ...f, reasonForVisit: e.target.value }))} />
                   </div>
-                  <div className="module-form-group" style={{ marginTop: 12 }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
+                  <div className="module-form-group si-66faea9d">
+                    <label className="si-901f8e47">
                       <input
                         type="checkbox"
                         checked={walkInForm.consentCollected}
                         onChange={e => setWalkInForm(f => ({ ...f, consentCollected: e.target.checked }))}
-                        style={{ width: 16, height: 16, cursor: 'pointer' }}
+                        className="si-f9badade"
                       />
-                      <span style={{ fontSize: 14, fontWeight: 500 }}>
+                      <span className="si-0c1df75e">
                         {t('hospitalNetworks.patients.consentCollected', 'Patient consent has been collected in person')}
-                        <span style={{ marginLeft: 6, fontSize: 12, color: '#6b7280', fontWeight: 400 }}>
+                        <span className="si-3fb91c19">
                           ({t('hospitalNetworks.patients.consentCollectedHint', 'Check if owner signed consent form or gave verbal consent')})
                         </span>
                       </span>
                     </label>
                     {!walkInForm.consentCollected && (
-                      <p style={{ fontSize: 12, color: '#f59e0b', marginTop: 4 }}>
+                      <p className="si-513c70eb">
                         ⚠️ {t('hospitalNetworks.patients.consentPendingWarning', 'Without consent, the animal will be registered as "Pending Consent" and the owner must accept before full access is granted.')}
                       </p>
                     )}
@@ -2898,10 +2895,10 @@ const HospitalNetworks: React.FC = () => {
       {activeTab === 'referrals' && selectedNetwork && (
         <div className="hn-tab-content">
           {/* Header */}
-          <div className="module-header" style={{ marginBottom: 20 }}>
+          <div className="module-header si-478be2e9">
             <div>
-              <h2 style={{ margin: 0 }}>{t('networkReferrals.title')}</h2>
-              <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 14 }}>{selectedNetwork.name}</p>
+              <h2 className="si-44087c4b">{t('networkReferrals.title')}</h2>
+              <p className="si-d078dad1">{selectedNetwork.name}</p>
             </div>
             <button className="module-btn primary" onClick={() => setShowCreateReferralModal(true)}>
               + {t('networkReferrals.create')}
@@ -2909,11 +2906,11 @@ const HospitalNetworks: React.FC = () => {
           </div>
 
           {/* Alerts */}
-          {referralSuccess && <div className="module-alert success" style={{ marginBottom: 16 }}>{referralSuccess}</div>}
-          {referralError && <div className="module-alert error" style={{ marginBottom: 16 }}>{referralError}</div>}
+          {referralSuccess && <div className="module-alert success si-7e63ec4f">{referralSuccess}</div>}
+          {referralError && <div className="module-alert error si-7e63ec4f">{referralError}</div>}
 
           {/* Direction sub-tabs */}
-          <div className="module-tabs" style={{ marginBottom: 20 }}>
+          <div className="module-tabs si-478be2e9">
             {(['incoming', 'outgoing', 'all'] as const).map(dir => (
               <button
                 key={dir}
@@ -2929,11 +2926,11 @@ const HospitalNetworks: React.FC = () => {
 
           {/* Table or empty state */}
           {referralsLoading ? (
-            <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>⏳ {t('common.loading')}</div>
+            <div className="si-78446846">⏳ {t('common.loading')}</div>
           ) : referrals.length === 0 ? (
-            <div className="module-card" style={{ textAlign: 'center', padding: 40 }}>
-              <div style={{ fontSize: 48 }}>🔄</div>
-              <p style={{ color: '#64748b', marginTop: 12 }}>
+            <div className="module-card si-86638a30">
+              <div className="si-353e617d">🔄</div>
+              <p className="si-651ede6d">
                 {referralDirection === 'incoming' ? t('networkReferrals.noIncoming') :
                  referralDirection === 'outgoing' ? t('networkReferrals.noOutgoing') :
                  t('networkReferrals.noReferrals')}
@@ -2958,17 +2955,17 @@ const HospitalNetworks: React.FC = () => {
                     <tr key={ref.id}>
                       <td>
                         <strong>{ref.animalName}</strong><br />
-                        <span style={{ fontSize: 12, color: '#64748b' }}>{ref.animalSpecies}</span>
+                        <span className="si-655cd763">{ref.animalSpecies}</span>
                       </td>
                       <td>
                         {ref.fromHospitalName}<br />
-                        <span style={{ fontSize: 12, color: '#64748b' }}>{ref.fromVetName}</span>
+                        <span className="si-655cd763">{ref.fromVetName}</span>
                       </td>
                       <td>
                         {ref.toHospitalName}<br />
-                        <span style={{ fontSize: 12, color: '#64748b' }}>{ref.toVetName || '—'}</span>
+                        <span className="si-655cd763">{ref.toVetName || '—'}</span>
                       </td>
-                      <td style={{ maxWidth: 200 }}>{ref.reason}</td>
+                      <td className="si-d83d7d70">{ref.reason}</td>
                       <td>
                         <span className={`module-badge ${
                           ref.status === 'accepted' ? 'badge-success' :
@@ -2978,20 +2975,20 @@ const HospitalNetworks: React.FC = () => {
                           {String(t(`networkReferrals.status.${ref.status}` as any, ref.status))}
                         </span>
                       </td>
-                      <td style={{ fontSize: 13 }}>{new Date(ref.created_at || ref.createdAt).toLocaleDateString()}</td>
+                      <td className="si-0a803082">{new Date(ref.created_at || ref.createdAt).toLocaleDateString()}</td>
                       <td>
                         {ref.status === 'pending' && referralDirection !== 'outgoing' && (
-                          <div style={{ display: 'flex', gap: 6 }}>
+                          <div className="si-9f20fe5e">
                             <button
-                              className="module-btn small"
-                              style={{ background: '#dcfce7', color: '#166534' }}
+                              className="module-btn small si-e44bed18"
+                             
                               onClick={() => setResponseModal({ referral: ref, action: 'accepted' })}
                             >
                               ✓ {t('networkReferrals.accept')}
                             </button>
                             <button
-                              className="module-btn small"
-                              style={{ background: '#fee2e2', color: '#dc2626' }}
+                              className="module-btn small si-b150e41a"
+                             
                               onClick={() => setResponseModal({ referral: ref, action: 'rejected' })}
                             >
                               ✗ {t('networkReferrals.reject')}
@@ -3000,8 +2997,8 @@ const HospitalNetworks: React.FC = () => {
                         )}
                         {ref.consultationId && (
                           <button
-                            className="module-btn small"
-                            style={{ marginTop: 4 }}
+                            className="module-btn small si-f48bb60f"
+                           
                             onClick={() => window.open(`/consultation/${ref.consultationId}`, '_blank')}
                           >
                             🔗 {t('networkReferrals.viewConsultation')}
@@ -3072,18 +3069,18 @@ const HospitalNetworks: React.FC = () => {
           {/* Create Referral Modal */}
           {showCreateReferralModal && (
             <div
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              className="si-2140be19"
               onClick={() => setShowCreateReferralModal(false)}
             >
               <div
-                style={{ background: '#fff', borderRadius: 12, padding: 32, width: '100%', maxWidth: 540, maxHeight: '90vh', overflowY: 'auto' }}
+                className="si-b212c540"
                 onClick={e => e.stopPropagation()}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                  <h3 style={{ margin: 0 }}>{t('networkReferrals.createTitle')}</h3>
-                  <button type="button" onClick={() => setShowCreateReferralModal(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>✕</button>
+                <div className="si-fe2d5bfb">
+                  <h3 className="si-44087c4b">{t('networkReferrals.createTitle')}</h3>
+                  <button type="button" onClick={() => setShowCreateReferralModal(false)} className="si-30be827b">✕</button>
                 </div>
-                {referralError && <div className="module-alert error" style={{ marginBottom: 12 }}>{referralError}</div>}
+                {referralError && <div className="module-alert error si-bab8e8bc">{referralError}</div>}
                 <form onSubmit={handleCreateReferral}>
                   <div className="module-form-group">
                     <label className="module-label">{t('networkReferrals.toHospital')}</label>
@@ -3101,7 +3098,7 @@ const HospitalNetworks: React.FC = () => {
                   </div>
                   <div className="module-form-group">
                     <label className="module-label">
-                      {t('networkReferrals.reason')} <span style={{ color: '#dc2626' }}>*</span>
+                      {t('networkReferrals.reason')} <span className="si-f84f41a5">*</span>
                     </label>
                     <textarea
                       className="module-input"
@@ -3136,8 +3133,8 @@ const HospitalNetworks: React.FC = () => {
                       onChange={e => setReferralForm(f => ({ ...f, clinicalNotes: e.target.value }))}
                     />
                   </div>
-                  <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>* {t('common.requiredField', 'Required field')}</p>
-                  <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+                  <p className="si-b5cd343d">* {t('common.requiredField', 'Required field')}</p>
+                  <div className="si-961e4c67">
                     <button type="button" className="module-btn" onClick={() => setShowCreateReferralModal(false)}>
                       {t('common.cancel')}
                     </button>
@@ -3153,17 +3150,17 @@ const HospitalNetworks: React.FC = () => {
           {/* Accept / Reject Response Modal */}
           {responseModal && (
             <div
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              className="si-2140be19"
               onClick={() => setResponseModal(null)}
             >
               <div
-                style={{ background: '#fff', borderRadius: 12, padding: 28, width: '100%', maxWidth: 460 }}
+                className="si-083e3903"
                 onClick={e => e.stopPropagation()}
               >
-                <h3 style={{ margin: '0 0 16px' }}>
+                <h3 className="si-3fd9d5d4">
                   {responseModal.action === 'accepted' ? `✓ ${t('networkReferrals.accept')}` : `✗ ${t('networkReferrals.reject')}`}
                 </h3>
-                <p style={{ color: '#64748b', marginBottom: 16 }}>
+                <p className="si-384c018a">
                   {responseModal.action === 'accepted' ? t('networkReferrals.confirmAccept') : t('networkReferrals.confirmReject')}
                 </p>
                 <div className="module-form-group">
@@ -3176,7 +3173,7 @@ const HospitalNetworks: React.FC = () => {
                     onChange={e => setResponseNotes(e.target.value)}
                   />
                 </div>
-                <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+                <div className="si-37b52067">
                   <button className="module-btn" onClick={() => setResponseModal(null)}>{t('common.cancel')}</button>
                   <button
                     className="module-btn primary"
@@ -3367,10 +3364,10 @@ const HospitalNetworks: React.FC = () => {
 
               {/* Enrollment Trend */}
               {Array.isArray(analyticsData.enrollmentTrend) && analyticsData.enrollmentTrend.length > 0 && (
-                <div className="module-card" style={{ marginTop: 24 }}>
+                <div className="module-card si-b4c2d096">
                   <div className="hn-panel-header">
                     <h3>{t('networkAnalytics.enrollmentTrend')}</h3>
-                    <span style={{ fontSize: 12, color: '#6b7280' }}>{t('networkAnalytics.lastNMonths', { n: 6 })}</span>
+                    <span className="si-48a0b045">{t('networkAnalytics.lastNMonths', { n: 6 })}</span>
                   </div>
                   <div className="card-body">
                     {[...analyticsData.enrollmentTrend].reverse().map((item: any, i: number) => {
@@ -3404,7 +3401,7 @@ const HospitalNetworks: React.FC = () => {
       {/* Compliance Export Modal */}
       {showComplianceModal && selectedNetwork && (
         <div className="hn-modal-overlay" onClick={() => setShowComplianceModal(false)}>
-          <div className="hn-modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+          <div className="hn-modal si-197ba518" onClick={e => e.stopPropagation()}>
             <div className="hn-modal-header">
               <h2>📋 {t('complianceExport.exportDateRange')}</h2>
               <button type="button" className="hn-modal-close" onClick={() => setShowComplianceModal(false)}>✕</button>
@@ -3440,7 +3437,7 @@ const HospitalNetworks: React.FC = () => {
       {/* P6-APPROVAL: Approval Action Modal */}
       {showApprovalModal && (
         <div className="hn-modal-overlay" onClick={() => { setShowApprovalModal(null); setApprovalNotes('') }}>
-          <div className="hn-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+          <div className="hn-modal si-197ba518" onClick={e => e.stopPropagation()}>
             <div className="hn-modal-header">
               <h3>
                 {showApprovalModal === 'info_requested' && ('❓ ' + t('networkApproval.requestInfo'))}

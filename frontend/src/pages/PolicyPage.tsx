@@ -26,31 +26,31 @@ export default function PolicyPage() {
   }, [docType])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
-      <div style={{ maxWidth: 800, margin: '0 auto', padding: '40px 20px' }}>
-        <Link to="/" style={{ fontSize: 14, color: '#2563eb', textDecoration: 'none' }}>
+    <div className="si-eedc6ede">
+      <div className="si-be241fff">
+        <Link to="/" className="si-bc0ad2ea">
           ← {t('policy.backToHome')}
         </Link>
 
         {loading && (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#6b7280' }}>{t('common.loading')}</div>
+          <div className="si-3086e186">{t('common.loading')}</div>
         )}
 
         {error && !loading && (
-          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+          <div className="si-c3a5d0e8">
             <h2>{t('policy.notFoundTitle')}</h2>
-            <p style={{ color: '#6b7280' }}>{t('policy.notFoundMessage')}</p>
+            <p className="si-23033f05">{t('policy.notFoundMessage')}</p>
           </div>
         )}
 
         {doc && !loading && (
-          <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e5e7eb', padding: '32px 28px', marginTop: 20 }}>
-            <h1 style={{ marginBottom: 4 }}>{doc.title}</h1>
-            <p style={{ color: '#9ca3af', fontSize: 13, marginBottom: 24 }}>
+          <div className="si-d4e81483">
+            <h1 className="si-e57614ee">{doc.title}</h1>
+            <p className="si-bc7c0248">
               {t('policy.version')} {doc.version} · {t('policy.effectiveFrom')}{' '}
               {doc.effectiveFrom ? new Date(doc.effectiveFrom).toLocaleDateString() : '—'}
             </p>
-            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, color: '#374151', fontSize: 15, overflowWrap: 'break-word' }}>
+            <div className="si-3fcc6b1f">
               {doc.content}
             </div>
           </div>

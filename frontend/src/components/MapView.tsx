@@ -2,6 +2,10 @@ import React, { useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+// Side-effect import: patches L with .heatLayer() — must load after 'leaflet'
+// itself. Without this, HeatmapLayer below throws "heatLayer is not a
+// function" the first time any heatmap prop is actually used.
+import 'leaflet.heat'
 
 // Fix default marker icons (Leaflet + bundlers issue)
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -78,7 +82,7 @@ const HeatmapLayer: React.FC<HeatmapLayerProps> = ({ points, radius = 25, blur =
   const map = useMap()
   useEffect(() => {
     if (!points.length) return
-    // @ts-ignore – leaflet.heat adds L.heatLayer
+    // leaflet.heat adds L.heatLayer — not in @types/leaflet, hence the `as any`
     const heat = (L as any).heatLayer(points, { radius, blur, maxZoom, gradient: { 0.2: '#2196f3', 0.4: '#4caf50', 0.6: '#ffeb3b', 0.8: '#ff9800', 1.0: '#f44336' } })
     heat.addTo(map)
     return () => { map.removeLayer(heat) }

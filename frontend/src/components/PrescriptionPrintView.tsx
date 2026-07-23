@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../context/SettingsContext'
+import { useMasterData } from '../context/MasterDataContext'
 import './PrescriptionPrintView.css'
 
 // ─── Types ────────────────────────────────────────────────────
@@ -25,6 +26,7 @@ export interface PrescriptionPrintData {
   animalBreed?: string
   animalAge?: string
   animalGender?: string
+  animalClass?: string
   // Owner
   petOwnerName?: string
   // Vet
@@ -39,6 +41,10 @@ export interface PrescriptionPrintData {
   instructions?: string
   // Meds
   medications: PrescriptionMedication[]
+  // Pharmacy routing (network-coordinated prescriptions only)
+  isNetworkCoordinated?: boolean
+  pharmacyName?: string
+  reviewStatus?: string
 }
 
 export interface PrescriptionTemplate {
@@ -76,9 +82,18 @@ function shortId(id: string): string {
   return id.replace(/-/g, '').substring(0, 12).toUpperCase()
 }
 
+const REVIEW_STATUS_KEY: Record<string, string> = {
+  pending_review: 'pendingReview',
+  approved_for_dispensing: 'approvedForDispensing',
+  dispensed: 'dispensed',
+  rejected: 'rejected',
+  needs_clarification: 'needsClarification',
+}
+
 const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, onClose }) => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
+  const { findClassTerm } = useMasterData()
   const tpl = { ...DEFAULT_TEMPLATE, ...template }
   const overlayRef = useRef<HTMLDivElement>(null)
 
@@ -201,7 +216,11 @@ const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, on
               <div className="rx-info-row">
                 <span className="rx-info-label">{t('prescriptionPrint.ageGender')}:</span>
                 <span className="rx-info-value">
-                  {[rx.animalAge, rx.animalGender].filter(Boolean).join(' / ')}
+                  {(() => {
+                    const classTerm = rx.animalClass ? findClassTerm(rx.animalSpecies || '', rx.animalClass) : undefined
+                    const genderOrClass = classTerm ? t(classTerm.labelKey) : rx.animalGender
+                    return [rx.animalAge, genderOrClass].filter(Boolean).join(' / ')
+                  })()}
                 </span>
               </div>
             )}
@@ -317,6 +336,21 @@ const PrescriptionPrintView: React.FC<Props> = ({ prescription: rx, template, on
                 <span>📝</span> {t('prescriptionPrint.generalInstructions')}
               </div>
               <div className="rx-section-body">{rx.instructions}</div>
+            </div>
+          )}
+
+          {/* ────────────────────────────────────────
+              PHARMACY ROUTING STAMP (network-coordinated only)
+          ─────────────────────────────────────── */}
+          {rx.isNetworkCoordinated && (
+            <div className="rx-section" style={{ border: '1px dashed #94a3b8', borderRadius: 6, padding: '8px 12px' }}>
+              <div className="rx-section-header">
+                <span>💊</span> {t('prescriptionPrint.pharmacyRouting')}
+              </div>
+              <div className="rx-section-body" style={{ fontSize: '9pt' }}>
+                {t('prescriptionPrint.forwardedTo', { pharmacy: rx.pharmacyName || t('prescriptionPrint.networkPharmacy') })}
+                {rx.reviewStatus && REVIEW_STATUS_KEY[rx.reviewStatus] && ` — ${t(`prescriptions.pharmacy.${REVIEW_STATUS_KEY[rx.reviewStatus]}`)}`}
+              </div>
             </div>
           )}
 

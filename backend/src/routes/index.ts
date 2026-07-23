@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import logger from '../utils/logger';
 import { authMiddleware, roleMiddleware, validateBody } from '../middleware/auth';
-import { requireNetworkAccess, NetworkAccessRequest } from '../middleware/networkAccess';
+import { requireNetworkAccess, NetworkAccessRequest, resolveNetworkAccess } from '../middleware/networkAccess';
 import database from '../utils/database';
 import cacheManager from '../utils/cacheManager';
 import {
@@ -84,6 +84,12 @@ import {
   inviteHospitalStaffSchema, acceptStaffInviteSchema,
   // Password Reset
   forgotPasswordSchema, resetPasswordSchema,
+  // Master Data
+  createMasterSpeciesSchema, updateMasterSpeciesSchema,
+  createMasterBreedSchema, updateMasterBreedSchema,
+  createMasterAnimalClassSchema, updateMasterAnimalClassSchema,
+  createMasterMarketplaceCategorySchema, updateMasterMarketplaceCategorySchema,
+  createMasterMarketplaceConditionSchema, updateMasterMarketplaceConditionSchema,
 } from '../middleware/validation';
 import { requireFeature, getAllFeatureFlags } from '../config/featureFlags';
 import AuthController from '../controllers/AuthController';
@@ -112,13 +118,14 @@ import VetHospitalService from '../services/VetHospitalService';
 import WalletController from '../controllers/WalletController';
 import StaffWorkflowController from '../controllers/StaffWorkflowController';
 import { FileController } from '../controllers/FileController';
-import { uploadAny } from '../middleware/upload';
+import { uploadAny, uploadImage, uploadVideo } from '../middleware/upload';
 import AdminService from '../services/AdminService';
 import PermissionService from '../services/PermissionService';
 import NetworkRolePermissionService from '../services/NetworkRolePermissionService';
 import VetProfileService from '../services/VetProfileService';
 import UserService from '../services/UserService';
 import VaccineProtocolService from '../services/VaccineProtocolService';
+import MasterDataService from '../services/MasterDataService';
 import VaccineScheduleService from '../services/VaccineScheduleService';
 import { asyncHandler } from '../utils/errorHandler';
 import { AuthRequest } from '../middleware/auth';
@@ -1171,12 +1178,12 @@ router.get('/hospital-networks/:id/analytics', authMiddleware, asyncHandler(asyn
     const networkId = req.params.id;
     const userId = (req as any).userId;
     const userRole = (req as any).userRole;
-    if (userRole !== 'admin') {
-      const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
-      if (!member || !['corporate_admin', 'hospital_director', 'compliance_officer', 'auditor'].includes(member.networkRole)) {
-        res.status(403).json({ success: false, message: 'Access denied' });
-        return;
-      }
+    // Was a hardcoded role list that included auditor, whose networkDashboardStats
+    // matrix default is actually false — now honors the configurable matrix.
+    const access = await resolveNetworkAccess(networkId, userId, userRole, 'networkDashboardStats');
+    if (!access.allowed) {
+      res.status(access.reason === 'not_member' ? 404 : 403).json({ success: false, message: 'Access denied' });
+      return;
     }
     const analytics = await HospitalNetworkService.getNetworkAnalytics(networkId);
     const trend = await HospitalNetworkService.getPatientEnrollmentTrend(networkId);
@@ -1198,12 +1205,12 @@ router.get('/hospital-networks/:id/compliance-report', authMiddleware, asyncHand
       res.status(400).json({ success: false, message: 'from and to date params are required' });
       return;
     }
-    if (userRole !== 'admin') {
-      const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
-      if (!member || !['corporate_admin', 'compliance_officer', 'auditor'].includes(member.networkRole)) {
-        res.status(403).json({ success: false, message: 'Access denied' });
-        return;
-      }
+    // Matches matrix defaults exactly (hospital_director=false, others=true) — converted
+    // to the matrix-driven check for consistency with the rest of this route family.
+    const access = await resolveNetworkAccess(networkId, userId, userRole, 'exportComplianceReport');
+    if (!access.allowed) {
+      res.status(access.reason === 'not_member' ? 404 : 403).json({ success: false, message: 'Access denied' });
+      return;
     }
     const report = await HospitalNetworkService.generateComplianceReport(networkId, from, to);
     res.json({ success: true, data: report });
@@ -1245,7 +1252,7 @@ router.post('/hospital-networks/:id/invite-walkin', authMiddleware, requireNetwo
 // Direct walk-in patient registration — no invite needed, treatment starts immediately
 router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNetworkAccess('walkInRegistration'), asyncHandler(async (req: Request, res: Response) => {
   try {
-    const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit, consentCollected, consentMethod } = req.body;
+    const { hospitalId, patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalClass, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit, consentCollected, consentMethod } = req.body;
     if (!patientName || !animalName || !animalSpecies || !hospitalId) {
       res.status(400).json({ success: false, message: 'patientName, animalName, animalSpecies, and hospitalId are required' }); return;
     }
@@ -1292,7 +1299,7 @@ router.post('/hospital-networks/:id/register-walkin', authMiddleware, requireNet
     const result = await HospitalNetworkService.registerWalkInPatientDirect({
       networkId: req.params.id, hospitalId, registeredBy: (req as any).userId,
       patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
-      animalGender, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
+      animalGender, animalClass, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
       animalColor, animalMicrochipId, animalRegistrationNumber,
       animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true',
       animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId, reasonForVisit,
@@ -1319,7 +1326,7 @@ router.post('/hospitals/:hospitalId/register-walkin', authMiddleware, asyncHandl
       const memberRole = await VetHospitalService.getMemberRole(req.params.hospitalId, (req as any).userId);
       if (!memberRole) { res.status(403).json({ success: false, message: 'You are not a member of this hospital' }); return; }
     }
-    const { patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId } = req.body;
+    const { patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed, animalGender, animalClass, animalDob, animalWeight, animalColor, animalMicrochipId, animalRegistrationNumber, animalIsNeutered, animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId } = req.body;
     if (!patientName || !animalName || !animalSpecies) {
       res.status(400).json({ success: false, message: 'patientName, animalName, and animalSpecies are required' }); return;
     }
@@ -1327,7 +1334,7 @@ router.post('/hospitals/:hospitalId/register-walkin', authMiddleware, asyncHandl
       hospitalId: req.params.hospitalId,
       registeredBy: (req as any).userId,
       patientName, patientPhone, patientEmail, patientAddress, animalName, animalSpecies, animalBreed,
-      animalGender, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
+      animalGender, animalClass, animalDob, animalWeight: animalWeight ? parseFloat(animalWeight) : undefined,
       animalColor, animalMicrochipId, animalRegistrationNumber,
       animalIsNeutered: animalIsNeutered === true || animalIsNeutered === 'true',
       animalMedicalNotes, animalAvatarUrl, animalInsuranceProvider, animalInsurancePolicyNumber, animalInsuranceExpiry, animalEarTagId,
@@ -1567,7 +1574,7 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
   if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) {
     return res.status(400).json({ success: false, error: 'from/to must be YYYY-MM-DD' });
   }
-  const [payments, earnings, wallets, tds, health] = await Promise.all([
+  const [payments, pharmacyPayments, earnings, wallets, tds, health] = await Promise.all([
     database.query(
       `SELECT
          COALESCE(SUM(amount) FILTER (WHERE status IN ('completed', 'partially_refunded', 'refunded', 'transferred')), 0) as gmv,
@@ -1577,6 +1584,18 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
          COALESCE(SUM(gateway_fee_amount) FILTER (WHERE status IN ('completed', 'partially_refunded', 'refunded', 'transferred')), 0) as gateway_fees,
          COUNT(*) FILTER (WHERE status IN ('completed', 'partially_refunded')) as paid_count
        FROM payments WHERE payment_source = 'consultation'
+         AND created_at >= $1::date AND created_at < ($2::date + INTERVAL '1 day')`,
+      [from, to]
+    ),
+    // Pharmacy revenue has no platform commission split (it's the network's own dispensing
+    // revenue, not a consultation the platform brokered) — tracked separately from GMV/commission above.
+    database.query(
+      `SELECT
+         COALESCE(SUM(amount) FILTER (WHERE status = 'completed'), 0) as collected,
+         COALESCE(SUM(amount) FILTER (WHERE status = 'pending'), 0) as pending_amount,
+         COUNT(*) FILTER (WHERE status = 'completed') as dispensed_count,
+         COUNT(*) FILTER (WHERE status = 'pending') as pending_count
+       FROM payments WHERE payment_source = 'pharmacy'
          AND created_at >= $1::date AND created_at < ($2::date + INTERVAL '1 day')`,
       [from, to]
     ),
@@ -1605,7 +1624,7 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
        FROM payments WHERE payment_source = 'consultation'`
     ),
   ]);
-  const p = payments.rows[0]; const e = earnings.rows[0]; const w = wallets.rows[0];
+  const p = payments.rows[0]; const pp = pharmacyPayments.rows[0]; const e = earnings.rows[0]; const w = wallets.rows[0];
   const t = tds.rows[0]; const h = health.rows[0];
   res.json({
     success: true,
@@ -1616,6 +1635,10 @@ router.get('/admin/reports/finance/overview', authMiddleware, roleMiddleware(['a
         refundsOut: parseFloat(p.refunds_out), processingCharges: parseFloat(p.processing_charges),
         gatewayFees: parseFloat(p.gateway_fees), paidCount: parseInt(p.paid_count, 10),
         netPlatformRevenue: Math.round((parseFloat(p.commission_earned) + parseFloat(p.processing_charges) - parseFloat(p.gateway_fees)) * 100) / 100,
+      },
+      pharmacyRevenue: {
+        collected: parseFloat(pp.collected), pendingAmount: parseFloat(pp.pending_amount),
+        dispensedCount: parseInt(pp.dispensed_count, 10), pendingCount: parseInt(pp.pending_count, 10),
       },
       settlementLiability: {
         clearing: parseFloat(e.clearing), available: parseFloat(e.available), locked: parseFloat(e.locked),
@@ -2534,7 +2557,11 @@ router.patch('/referrals/:id/status', authMiddleware, asyncHandler(async (req: R
   return StaffWorkflowController.updateReferralStatus(req, res);
 }));
 // Inpatient / Boarding
-// Network-aware inpatient access helper
+// Network-aware inpatient access helper — membership check delegated to the same
+// resolveNetworkAccess() core used by requireNetworkAccess/ensureNetworkAccess (see
+// [[feedback-network-hospital-change-approval]]); only the hospital→network resolution
+// is specific to this helper. Non-membership responds 404 (not 403) — anti-enumeration,
+// consistent with VetHospitalService's getHospital/listDoctors pattern.
 async function checkInpatientNetworkAccess(req: Request, res: Response): Promise<boolean> {
   const userId = (req as any).userId;
   const userRole = (req as any).userRole;
@@ -2543,12 +2570,9 @@ async function checkInpatientNetworkAccess(req: Request, res: Response): Promise
   const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
   const networkId = hospitalRes.rows[0]?.branch_network_id;
   if (!networkId) return true; // standalone hospital — no network check needed
-  const memberRes = await database.query(
-    `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-    [networkId, userId]
-  );
-  if (memberRes.rows.length === 0) {
-    res.status(403).json({ success: false, error: 'You are not a member of the network that owns this hospital' });
+  const result = await resolveNetworkAccess(networkId, userId, userRole);
+  if (!result.allowed) {
+    res.status(404).json({ success: false, error: 'Hospital not found' });
     return false;
   }
   return true;
@@ -2573,12 +2597,9 @@ async function checkResourceNetworkAccess(req: Request, res: Response, table: st
   const hospitalRes = await database.query(`SELECT branch_network_id FROM vet_hospitals WHERE id = $1`, [hospitalId]);
   const networkId = hospitalRes.rows[0]?.branch_network_id;
   if (!networkId) return true; // standalone hospital — no network check needed
-  const memberRes = await database.query(
-    `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-    [networkId, userId]
-  );
-  if (memberRes.rows.length === 0) {
-    res.status(403).json({ success: false, error: 'You are not a member of the network that owns this resource' });
+  const result = await resolveNetworkAccess(networkId, userId, userRole);
+  if (!result.allowed) {
+    res.status(404).json({ success: false, error: 'Resource not found' });
     return false;
   }
   return true;
@@ -2877,6 +2898,8 @@ router.post('/repair-schema', async (_req, res) => {
 
 // ─── File Uploads ────────────────────────────────────────────
 router.post('/files/upload', authMiddleware, uploadAny.single('file'), asyncHandler((req: Request, res: Response) => FileController.upload(req, res)));
+router.post('/files/upload-image', authMiddleware, uploadImage.single('file'), asyncHandler((req: Request, res: Response) => FileController.upload(req, res)));
+router.post('/files/upload-video', authMiddleware, uploadVideo.single('file'), asyncHandler((req: Request, res: Response) => FileController.uploadVideo(req, res)));
 router.post('/files/upload-multiple', authMiddleware, uploadAny.array('files', 10), asyncHandler((req: Request, res: Response) => FileController.uploadMultiple(req, res)));
 router.get('/files', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.list(req, res)));
 router.delete('/files/*', authMiddleware, asyncHandler((req: Request, res: Response) => FileController.remove(req, res)));
@@ -2988,6 +3011,146 @@ router.get('/vaccine-protocols/:id', authMiddleware, asyncHandler(async (req: Re
   const protocol = await VaccineProtocolService.getProtocol(req.params.id);
   if (!protocol) return res.status(404).json({ success: false, message: 'Not found' });
   res.json({ success: true, data: protocol });
+}));
+
+// ═══════════════════════════════════════════════════════════════════
+// Master Data — species, breeds, animal classes, marketplace categories/conditions.
+// Public read (active-only, powers dropdowns) + admin CRUD (archive/restore + delete
+// blocked while in use). Mirrors the vaccine-protocols route shape above.
+// ═══════════════════════════════════════════════════════════════════
+
+// ─── Public read (no auth — powers dropdowns on both authed pages and the
+// unauthenticated PublicMarketplace; mirrors GET /settings/public's convention
+// for non-sensitive UI config that must load before/without login) ─────────
+router.get('/master-data/species', asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listSpecies(true) });
+}));
+router.get('/master-data/breeds', asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listBreeds(req.query.speciesId as string | undefined, true) });
+}));
+router.get('/master-data/animal-classes', asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listAnimalClasses(req.query.speciesId as string | undefined, true) });
+}));
+router.get('/master-data/marketplace/categories', asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listMarketplaceCategories(true) });
+}));
+router.get('/master-data/marketplace/conditions', asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listMarketplaceConditions(true) });
+}));
+
+// ─── Admin CRUD: Species ───────────────────────────────────────
+router.get('/admin/master-data/species', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listSpecies(false) });
+}));
+router.post('/admin/master-data/species', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterSpeciesSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createSpecies(req.body) });
+}));
+router.put('/admin/master-data/species/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterSpeciesSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateSpecies(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/species/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveSpecies(req.params.id);
+  res.json({ success: true, message: 'Species archived' });
+}));
+router.patch('/admin/master-data/species/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreSpecies(req.params.id);
+  res.json({ success: true, message: 'Species restored' });
+}));
+router.delete('/admin/master-data/species/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteSpecies(req.params.id);
+  res.json({ success: true, message: 'Species deleted' });
+}));
+
+// ─── Admin CRUD: Breeds ────────────────────────────────────────
+router.get('/admin/master-data/breeds', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listBreeds(req.query.speciesId as string | undefined, false) });
+}));
+router.post('/admin/master-data/breeds', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterBreedSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createBreed(req.body) });
+}));
+router.put('/admin/master-data/breeds/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterBreedSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateBreed(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/breeds/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveBreed(req.params.id);
+  res.json({ success: true, message: 'Breed archived' });
+}));
+router.patch('/admin/master-data/breeds/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreBreed(req.params.id);
+  res.json({ success: true, message: 'Breed restored' });
+}));
+router.delete('/admin/master-data/breeds/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteBreed(req.params.id);
+  res.json({ success: true, message: 'Breed deleted' });
+}));
+
+// ─── Admin CRUD: Animal Classes ────────────────────────────────
+router.get('/admin/master-data/animal-classes', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listAnimalClasses(req.query.speciesId as string | undefined, false) });
+}));
+router.post('/admin/master-data/animal-classes', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterAnimalClassSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createAnimalClass(req.body) });
+}));
+router.put('/admin/master-data/animal-classes/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterAnimalClassSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateAnimalClass(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/animal-classes/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveAnimalClass(req.params.id);
+  res.json({ success: true, message: 'Animal class archived' });
+}));
+router.patch('/admin/master-data/animal-classes/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreAnimalClass(req.params.id);
+  res.json({ success: true, message: 'Animal class restored' });
+}));
+router.delete('/admin/master-data/animal-classes/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteAnimalClass(req.params.id);
+  res.json({ success: true, message: 'Animal class deleted' });
+}));
+
+// ─── Admin CRUD: Marketplace Categories ────────────────────────
+router.get('/admin/master-data/marketplace/categories', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listMarketplaceCategories(false) });
+}));
+router.post('/admin/master-data/marketplace/categories', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterMarketplaceCategorySchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createMarketplaceCategory(req.body) });
+}));
+router.put('/admin/master-data/marketplace/categories/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterMarketplaceCategorySchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateMarketplaceCategory(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/marketplace/categories/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveMarketplaceCategory(req.params.id);
+  res.json({ success: true, message: 'Category archived' });
+}));
+router.patch('/admin/master-data/marketplace/categories/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreMarketplaceCategory(req.params.id);
+  res.json({ success: true, message: 'Category restored' });
+}));
+router.delete('/admin/master-data/marketplace/categories/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteMarketplaceCategory(req.params.id);
+  res.json({ success: true, message: 'Category deleted' });
+}));
+
+// ─── Admin CRUD: Marketplace Conditions ────────────────────────
+router.get('/admin/master-data/marketplace/conditions', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (_req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.listMarketplaceConditions(false) });
+}));
+router.post('/admin/master-data/marketplace/conditions', authMiddleware, roleMiddleware(['admin']), validateBody(createMasterMarketplaceConditionSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.status(201).json({ success: true, data: await MasterDataService.createMarketplaceCondition(req.body) });
+}));
+router.put('/admin/master-data/marketplace/conditions/:id', authMiddleware, roleMiddleware(['admin']), validateBody(updateMasterMarketplaceConditionSchema), asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: await MasterDataService.updateMarketplaceCondition(req.params.id, req.body) });
+}));
+router.patch('/admin/master-data/marketplace/conditions/:id/archive', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.archiveMarketplaceCondition(req.params.id);
+  res.json({ success: true, message: 'Condition archived' });
+}));
+router.patch('/admin/master-data/marketplace/conditions/:id/restore', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.restoreMarketplaceCondition(req.params.id);
+  res.json({ success: true, message: 'Condition restored' });
+}));
+router.delete('/admin/master-data/marketplace/conditions/:id', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  await MasterDataService.deleteMarketplaceCondition(req.params.id);
+  res.json({ success: true, message: 'Condition deleted' });
 }));
 
 // ─── Animal vaccine assignment routes ────────────────────────
@@ -3409,15 +3572,11 @@ router.post('/hospital-networks/:id/invite-staff', authMiddleware, roleMiddlewar
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
   const networkId = req.params.id;
-  // Secondary check: verify caller has appropriate network role (corporate_admin or hospital_director)
-  if (authReq.userRole !== 'admin') {
-    const callerMember = await db.query(
-      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [networkId, authReq.userId]
-    );
-    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
-      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can invite staff' });
-    }
+  // Secondary check: verify caller has appropriate network role for the (admin-configurable) inviteStaff action
+  const access = await resolveNetworkAccess(networkId, authReq.userId, authReq.userRole, 'inviteStaff');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, message: 'Network not found' });
+    return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can invite staff' });
   }
   const seat = await checkSeatLimit(networkId, db);
   if (!seat.allowed) {
@@ -3572,15 +3731,11 @@ router.post('/hospital-staff-invites/accept', validateBody(acceptStaffInviteSche
 router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
-  // Verify caller has appropriate network role
-  if (authReq.userRole !== 'admin') {
-    const callerMember = await db.query(
-      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [req.params.id, authReq.userId]
-    );
-    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
-      return res.status(403).json({ success: false, error: 'Only corporate admins and hospital directors can send staff invites' });
-    }
+  // Verify caller has appropriate network role for the (admin-configurable) inviteStaff action
+  const access = await resolveNetworkAccess(req.params.id, authReq.userId, authReq.userRole, 'inviteStaff');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, error: 'Network not found' });
+    return res.status(403).json({ success: false, error: 'Only corporate admins and hospital directors can send staff invites' });
   }
 
   const { inviteeEmail, inviteeName = '', staffPosition, hospitalId, expiresInHours = 72 } = req.body;
@@ -3673,15 +3828,11 @@ router.post('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewa
 router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
-  // Secondary check: verify caller has appropriate network role
-  if (authReq.userRole !== 'admin') {
-    const callerMember = await db.query(
-      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [req.params.id, authReq.userId]
-    );
-    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
-      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can view invites' });
-    }
+  // Secondary check: verify caller has appropriate network role for the (admin-configurable) inviteStaff action
+  const access = await resolveNetworkAccess(req.params.id, authReq.userId, authReq.userRole, 'inviteStaff');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, message: 'Network not found' });
+    return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can view invites' });
   }
   const result = await db.query(
     `SELECT hsi.*, u.first_name AS "inviterFirstName", u.last_name AS "inviterLastName", vh.name AS "hospitalName"
@@ -3700,15 +3851,11 @@ router.get('/hospital-networks/:id/staff-invites', authMiddleware, roleMiddlewar
 router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, roleMiddleware(['admin', 'corporate_admin', 'veterinarian', 'hospital_staff']), asyncHandler(async (req: Request, res: Response) => {
   const authReq = req as any;
   const db = (await import('../utils/database')).default;
-  // Secondary check: verify caller has appropriate network role
-  if (authReq.userRole !== 'admin') {
-    const callerMember = await db.query(
-      `SELECT network_role FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [req.params.id, authReq.userId]
-    );
-    if (!callerMember.rows.length || !['corporate_admin', 'hospital_director'].includes(callerMember.rows[0].network_role)) {
-      return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can manage invites' });
-    }
+  // Secondary check: verify caller has appropriate network role for the (admin-configurable) inviteStaff action
+  const access = await resolveNetworkAccess(req.params.id, authReq.userId, authReq.userRole, 'inviteStaff');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, message: 'Network not found' });
+    return res.status(403).json({ success: false, message: 'Only corporate admins and hospital directors can manage invites' });
   }
   await db.query(`UPDATE hospital_staff_invites SET status='revoked', updated_at=NOW() WHERE id=$1 AND network_id=$2 AND status='pending'`, [req.params.inviteId, req.params.id]);
   res.json({ success: true });
@@ -3718,10 +3865,14 @@ router.delete('/hospital-networks/:id/staff-invites/:inviteId', authMiddleware, 
 router.get('/hospital-networks/:id/audit-logs/export', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
+  const userRole = (req as any).userRole;
 
-  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
-  if (!member) {
-    return res.status(403).json({ success: false, error: 'Not a member of this network' });
+  // Was previously "any member" — hospital_staff has viewAuditLogs=false in the matrix
+  // and should not be able to pull the raw clinical-access audit log via this endpoint.
+  const access = await resolveNetworkAccess(networkId, userId, userRole, 'viewAuditLogs');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, error: 'Network not found' });
+    return res.status(403).json({ success: false, error: 'Insufficient role to view audit logs' });
   }
 
   const result = await database.query(
@@ -3753,8 +3904,13 @@ router.get('/hospital-networks/:id/audit-logs/export', authMiddleware, asyncHand
 router.get('/hospital-networks/:id/financial-summary', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
-  const member = await HospitalNetworkService.getNetworkMember(networkId, userId);
-  if (!member || !['corporate_admin', 'hospital_director', 'auditor'].includes(member.networkRole)) {
+  const userRole = (req as any).userRole;
+  // Was previously a hardcoded ['corporate_admin','hospital_director','auditor'] list that bypassed
+  // the admin-configurable financialAnalytics matrix entirely (matrix sets it false for both
+  // hospital_director and auditor) — now honors whatever the network's admin has actually configured.
+  const access = await resolveNetworkAccess(networkId, userId, userRole, 'financialAnalytics');
+  if (!access.allowed) {
+    if (access.reason === 'not_member') return res.status(404).json({ success: false, error: 'Network not found' });
     return res.status(403).json({ success: false, error: 'Insufficient permissions' });
   }
   const result = await HospitalNetworkService.getNetworkFinancialSummary(networkId);
@@ -3807,7 +3963,7 @@ router.patch('/hospital-networks/:id/leave-requests/:requestId', authMiddleware,
     return res.status(403).json({ success: false, error: 'Only directors and admins can approve/reject leave' });
   }
 
-  const result = await HospitalNetworkService.updateLeaveRequestStatus(requestId, status, userId, rejectionReason);
+  const result = await HospitalNetworkService.updateLeaveRequestStatus(networkId, requestId, status, userId, rejectionReason);
   res.json({ success: true, data: result });
 }));
 
@@ -3815,6 +3971,7 @@ router.patch('/hospital-networks/:id/leave-requests/:requestId', authMiddleware,
 router.post('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const networkId = req.params.id;
   const userId = (req as any).userId;
+  const userRole = (req as any).userRole;
   const { fromHospitalId, toHospitalId, animalId, reason, transferReason, clinicalNotes } = req.body;
 
   if (!fromHospitalId || !toHospitalId || !animalId || !reason) {
@@ -3822,7 +3979,7 @@ router.post('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHan
   }
 
   const result = await HospitalNetworkService.createPatientTransfer({
-    networkId, fromHospitalId, toHospitalId, animalId, reason, transferReason, clinicalNotes, createdBy: userId
+    networkId, fromHospitalId, toHospitalId, animalId, reason, transferReason, clinicalNotes, createdBy: userId, createdByRole: userRole
   });
   res.json({ success: true, data: result });
 }));
@@ -3830,7 +3987,8 @@ router.post('/hospital-networks/:id/patient-transfers', authMiddleware, asyncHan
 router.post('/hospital-networks/:id/patient-transfers/:transferId/complete', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
   const { transferId } = req.params;
   const userId = (req as any).userId;
-  const result = await HospitalNetworkService.completePatientTransfer(transferId, userId);
+  const userRole = (req as any).userRole;
+  const result = await HospitalNetworkService.completePatientTransfer(transferId, userId, userRole);
   res.json({ success: true, data: result });
 }));
 
@@ -3914,12 +4072,12 @@ router.post('/animals/bulk-import', authMiddleware, roleMiddleware(['admin', 'fa
       }
       const id = uuidv4();
       await database.query(
-        `INSERT INTO animals (id, owner_id, enterprise_id, name, species, breed, gender, date_of_birth, weight, color, microchip_id, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
+        `INSERT INTO animals (id, owner_id, enterprise_id, name, species, breed, gender, date_of_birth, weight, color, microchip_id, animal_class, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
          ON CONFLICT DO NOTHING`,
         [id, authReq.userId, enterpriseId || null, animal.name, animal.species,
          animal.breed || null, animal.gender || null, animal.dateOfBirth || null,
-         animal.weight || null, animal.color || null, animal.microchipId || null]
+         animal.weight || null, animal.color || null, animal.microchipId || null, animal.animalClass || null]
       );
       results.created++;
     } catch (err: any) {
@@ -4083,15 +4241,6 @@ router.get('/pharmacy/my-pharmacies', authMiddleware, asyncHandler(async (req: R
     [networkId]
   );
   res.json({ success: true, data: pharmaRes.rows, networkId });
-}));
-
-router.get('/debug/my-network-members', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as any;
-  const membersRes = await database.query(
-    `SELECT * FROM hospital_network_members WHERE user_id = $1`,
-    [authReq.userId]
-  );
-  res.json({ success: true, data: membersRes.rows });
 }));
 
 // ── Pharmacy Setup ──────────────────────────────────────────
@@ -4498,13 +4647,16 @@ router.post('/prescriptions/:prescriptionId/review', authMiddleware, roleMiddlew
   const validStatuses = ['approved', 'rejected', 'needs_clarification'];
   if (!validStatuses.includes(review_status)) return res.status(400).json({ success: false, message: 'Invalid review_status' });
   // Insert review record
+  // findings is TEXT[] — the frontend sends one free-text string, so wrap it as a
+  // single-element array; binding a bare JS string to an array column throws
+  // "malformed array literal" in Postgres.
   await database.query(
     `INSERT INTO prescription_reviews (prescription_id, pharmacist_id, review_status, validation_checks, findings, suggested_modifications, rejection_reason)
      VALUES ($1,$2,$3,$4::jsonb,$5,$6,$7)`,
-    [req.params.prescriptionId, authReq.userId, review_status, JSON.stringify(validation_checks), findings || '', suggested_modifications, rejection_reason]
+    [req.params.prescriptionId, authReq.userId, review_status, JSON.stringify(validation_checks), findings ? [findings] : null, suggested_modifications, rejection_reason]
   );
   // Map to prescription review_status
-  const prescriptionStatus = review_status === 'approved' ? 'approved_for_dispensing' : review_status === 'rejected' ? 'rejected' : 'pending_review';
+  const prescriptionStatus = review_status === 'approved' ? 'approved_for_dispensing' : review_status === 'rejected' ? 'rejected' : 'needs_clarification';
   await database.query(
     `UPDATE prescriptions SET review_status = $1, reviewed_by = $2, reviewed_at = NOW(), review_notes = $3, updated_at = NOW() WHERE id = $4`,
     [prescriptionStatus, authReq.userId, rejection_reason || suggested_modifications || null, req.params.prescriptionId]
@@ -4532,6 +4684,18 @@ router.post('/prescriptions/:prescriptionId/review', authMiddleware, roleMiddlew
 
 // Get review history for a prescription
 router.get('/prescriptions/:prescriptionId/reviews', authMiddleware, asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const rxRow = await database.query(
+    `SELECT veterinarian_id, pet_owner_id, network_id FROM prescriptions WHERE id = $1`,
+    [req.params.prescriptionId]
+  );
+  if (!rxRow.rows[0]) return res.status(404).json({ success: false, message: 'Prescription not found' });
+  const { veterinarian_id, pet_owner_id, network_id } = rxRow.rows[0];
+  const isOwner = authReq.userId === veterinarian_id || authReq.userId === pet_owner_id;
+  if (authReq.userRole !== 'admin' && !isOwner) {
+    if (!network_id) return res.status(403).json({ success: false, message: 'You do not have access to this prescription' });
+    if (!await guardNetworkPharmacy(req, res, network_id)) return;
+  }
   const result = await database.query(
     `SELECT pr.*, u.first_name || ' ' || u.last_name AS pharmacist_name
      FROM prescription_reviews pr
@@ -4616,12 +4780,15 @@ router.post('/dispensing', authMiddleware, asyncHandler(async (req: Request, res
       if (rxForBilling.rows[0]) {
         const invoiceNum = `PHARM-${recordId.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
         const payStatus = (dispensing_method === 'walk_in_pickup' || dispensing_method === 'hospital_pickup') ? 'completed' : 'pending';
-        await database.query(
+        const payRow = await database.query(
           `INSERT INTO payments (consultation_id, dispensing_id, user_id, payer_id, amount, currency, status, payment_method, payment_source, invoice_number, paid_at, created_at, updated_at)
            VALUES ($1,$2,$3,$3,$4,'INR',$5,'cash','pharmacy',$6,
-             CASE WHEN $5='completed' THEN NOW() ELSE NULL END, NOW(), NOW())`,
+             CASE WHEN $5='completed' THEN NOW() ELSE NULL END, NOW(), NOW())
+           RETURNING id`,
           [rxForBilling.rows[0].consultation_id || null, recordId, rxForBilling.rows[0].pet_owner_id, total_cost, payStatus, invoiceNum]
         );
+        const InvoiceService = (await import('../services/payment/InvoiceService')).default;
+        await InvoiceService.createPharmacyInvoice(payRow.rows[0].id);
       }
     } catch (billErr: any) {
       logger.warn('Pharmacy billing record creation failed (non-fatal)', { error: billErr.message });
@@ -4678,17 +4845,47 @@ router.get('/pharmacies/:pharmacyId/dispensing-history', authMiddleware, asyncHa
     `SELECT dr.*, p.medications AS prescription_medications,
             a.name AS animal_name, a.species AS animal_species,
             u.first_name || ' ' || u.last_name AS pharmacist_name,
-            po.first_name || ' ' || po.last_name AS owner_name
+            po.first_name || ' ' || po.last_name AS owner_name,
+            v.first_name || ' ' || v.last_name AS vet_name,
+            hp.pharmacy_name, hp.address AS pharmacy_address, hp.phone AS pharmacy_phone,
+            (SELECT json_agg(json_build_object('name', pm.name, 'quantity', dli.quantity_dispensed, 'unit', dli.unit, 'unitPrice', dli.unit_price, 'lineTotal', dli.line_total, 'batchNumber', dli.batch_number) ORDER BY dli.created_at)
+             FROM dispensing_line_items dli LEFT JOIN pharmacy_medications pm ON pm.id = dli.med_id
+             WHERE dli.dispensing_record_id = dr.id) AS line_items
      FROM dispensing_records dr
      JOIN prescriptions p ON dr.prescription_id = p.id
      JOIN animals a ON p.animal_id = a.id
      LEFT JOIN users po ON p.pet_owner_id = po.id
+     LEFT JOIN users v ON p.veterinarian_id = v.id
      JOIN users u ON dr.pharmacist_id = u.id
+     LEFT JOIN hospital_pharmacies hp ON hp.id = dr.pharmacy_id
      WHERE dr.pharmacy_id = $1
      ORDER BY dr.created_at DESC LIMIT $2`,
     [req.params.pharmacyId, limit]
   );
   res.json(result.rows);
+}));
+
+// Vet's own pharmacy stats (dashboard tile) — self-scoped, no guard needed
+router.get('/vet/pharmacy-stats', authMiddleware, roleMiddleware(['veterinarian']), asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as any;
+  const result = await database.query(
+    `SELECT
+       COUNT(*) FILTER (WHERE review_status = 'pending_review') AS pending_review,
+       COUNT(*) FILTER (WHERE review_status = 'rejected' AND updated_at >= NOW() - INTERVAL '7 days') AS rejected_this_week,
+       COUNT(*) FILTER (WHERE review_status = 'dispensed') AS dispensed_count
+     FROM prescriptions
+     WHERE veterinarian_id = $1 AND is_network_coordinated = true AND is_active = true`,
+    [authReq.userId]
+  );
+  const r = result.rows[0];
+  res.json({
+    success: true,
+    data: {
+      pendingReview: parseInt(r.pending_review, 10),
+      rejectedThisWeek: parseInt(r.rejected_this_week, 10),
+      dispensedCount: parseInt(r.dispensed_count, 10),
+    },
+  });
 }));
 
 // ── Analytics ────────────────────────────────────────────────
@@ -4760,6 +4957,40 @@ router.get('/networks/:networkId/pharmacy-reports', authMiddleware, asyncHandler
     [req.params.networkId, days]
   );
   res.json({ period_days: days, pharmacies: result.rows });
+}));
+
+// Cross-network pharmacy overview for the admin dashboard
+router.get('/admin/pharmacy-overview', authMiddleware, roleMiddleware(['admin']), asyncHandler(async (req: Request, res: Response) => {
+  const [dispensing, pendingReview, lowStock, revenue] = await Promise.all([
+    database.query(
+      `SELECT
+         COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE) AS today,
+         COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days') AS this_week
+       FROM dispensing_records`
+    ),
+    database.query(
+      `SELECT COUNT(*) AS count FROM prescriptions WHERE review_status = 'pending_review' AND is_network_coordinated = true AND is_active = true`
+    ),
+    database.query(
+      `SELECT COUNT(DISTINCT hp.network_id) AS network_count, COUNT(*) AS item_count
+       FROM pharmacy_inventory pi JOIN hospital_pharmacies hp ON hp.id = pi.pharmacy_id
+       WHERE pi.quantity <= pi.min_stock_level AND hp.is_active = true`
+    ),
+    database.query(
+      `SELECT COALESCE(SUM(total_cost), 0) AS revenue FROM dispensing_records WHERE created_at >= NOW() - INTERVAL '7 days'`
+    ),
+  ]);
+  res.json({
+    success: true,
+    data: {
+      dispensingToday: parseInt(dispensing.rows[0].today, 10),
+      dispensingThisWeek: parseInt(dispensing.rows[0].this_week, 10),
+      pendingReviewCount: parseInt(pendingReview.rows[0].count, 10),
+      lowStockNetworks: parseInt(lowStock.rows[0].network_count, 10),
+      lowStockItems: parseInt(lowStock.rows[0].item_count, 10),
+      revenueThisWeek: parseFloat(revenue.rows[0].revenue),
+    },
+  });
 }));
 
 // ── Inter-hospital Medication Requests ───────────────────────

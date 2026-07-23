@@ -13,6 +13,7 @@ import PharmacySettings from './PharmacySettings'
 import MedicationCatalog from './MedicationCatalog'
 import DispensingHistory from './DispensingHistory'
 import ReordersManagement from './ReordersManagement'
+import MedicationTransfers from './MedicationTransfers'
 import PrescriptionReviewModal from './PrescriptionReviewModal'
 import DispensingModal from './DispensingModal'
 
@@ -70,12 +71,12 @@ interface Analytics {
   expiring_count: number
 }
 
-const TABS = ['overview', 'review', 'dispense', 'inventory', 'catalog', 'suppliers', 'history', 'reorders', 'analytics', 'settings'] as const
+const TABS = ['overview', 'review', 'dispense', 'inventory', 'catalog', 'suppliers', 'history', 'reorders', 'transfers', 'analytics', 'settings'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
   overview: '🏠', review: '📋', dispense: '✅', inventory: '📦',
-  catalog: '💊', suppliers: '🏭', history: '📜', reorders: '🔄',
+  catalog: '💊', suppliers: '🏭', history: '📜', reorders: '🔄', transfers: '🚚',
   analytics: '📊', settings: '⚙️'
 }
 
@@ -152,10 +153,10 @@ export default function PharmacyDashboard() {
   if (!loading && networkId === null) {
     return (
       <div className="pharmacy-page">
-        <div className="pharmacy-empty" style={{ paddingTop: 80 }}>
+        <div className="pharmacy-empty si-a7bd6c2e">
           <div className="empty-icon">🔒</div>
-          <p style={{ fontSize: '1rem', fontWeight: 600, color: '#555' }}>{t('pharmacy.noNetwork')}</p>
-          <small style={{ color: '#888' }}>{t('pharmacy.noNetworkHint')}</small>
+          <p className="si-56e7c6ba">{t('pharmacy.noNetwork')}</p>
+          <small className="si-40d2db53">{t('pharmacy.noNetworkHint')}</small>
         </div>
       </div>
     )
@@ -172,16 +173,16 @@ export default function PharmacyDashboard() {
         <div className="pharmacy-header-actions">
           {pharmacies.length > 1 && (
             <select
-              className="pharmacy-select"
+              className="pharmacy-select si-ef1e2ca0"
               value={selectedPharmacy?.id || ''}
               onChange={e => {
                 const p = pharmacies.find(x => x.id === e.target.value)
                 if (p) setSelectedPharmacy(p)
               }}
-              style={{ color: '#fff', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.4)' }}
+             
             >
               {pharmacies.map(p => (
-                <option key={p.id} value={p.id} style={{ color: '#333', background: '#fff' }}>{p.pharmacy_name}</option>
+                <option key={p.id} value={p.id} className="si-856e6b88">{p.pharmacy_name}</option>
               ))}
             </select>
           )}
@@ -189,9 +190,9 @@ export default function PharmacyDashboard() {
       </div>
 
       {error && (
-        <div className="pharm-error" style={{ marginBottom: 16 }}>
+        <div className="pharm-error si-7e63ec4f">
           ⚠️ {error}
-          <button type="button" onClick={() => setError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+          <button type="button" onClick={() => setError('')} className="si-540cb98a">✕</button>
         </div>
       )}
 
@@ -204,15 +205,15 @@ export default function PharmacyDashboard() {
             className={`pharmacy-tab${tab === tabId ? ' active' : ''}`}
             onClick={() => setTab(tabId)}
           >
-            <span style={{ marginRight: 4 }}>{TAB_ICONS[tabId]}</span>
+            <span className="si-a072da4e">{TAB_ICONS[tabId]}</span>
             {t(`pharmacy.tabs.${tabId}`)}
             {tabId === 'review' && (summary?.pending_reviews ?? 0) > 0 && (
-              <span style={{ marginLeft: 4, background: '#f44336', color: '#fff', borderRadius: 10, fontSize: '0.7rem', padding: '1px 5px' }}>
+              <span className="si-c466ace1">
                 {summary?.pending_reviews}
               </span>
             )}
             {tabId === 'dispense' && (summary?.ready_to_dispense ?? 0) > 0 && (
-              <span style={{ marginLeft: 4, background: '#4caf50', color: '#fff', borderRadius: 10, fontSize: '0.7rem', padding: '1px 5px' }}>
+              <span className="si-b3272c19">
                 {summary?.ready_to_dispense}
               </span>
             )}
@@ -225,27 +226,27 @@ export default function PharmacyDashboard() {
         <>
           {/* Stats tiles */}
           <div className="pharmacy-stats">
-            <div className="pharmacy-stat-card warning" style={{ cursor: 'pointer' }} onClick={() => setTab('review')}>
+            <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('review')}>
               <span className="stat-icon">📋</span>
               <span className="stat-value">{summary?.pending_reviews ?? '—'}</span>
               <span className="stat-label">{t('pharmacy.stats.pendingReviews')}</span>
             </div>
-            <div className="pharmacy-stat-card success" style={{ cursor: 'pointer' }} onClick={() => setTab('dispense')}>
+            <div className="pharmacy-stat-card success si-3c1f81b9" onClick={() => setTab('dispense')}>
               <span className="stat-icon">✅</span>
               <span className="stat-value">{summary?.ready_to_dispense ?? '—'}</span>
               <span className="stat-label">{t('pharmacy.stats.readyToDispense')}</span>
             </div>
-            <div className="pharmacy-stat-card danger" style={{ cursor: 'pointer' }} onClick={() => setTab('inventory')}>
+            <div className="pharmacy-stat-card danger si-3c1f81b9" onClick={() => setTab('inventory')}>
               <span className="stat-icon">⚠️</span>
               <span className="stat-value">{summary?.low_stock_count ?? '—'}</span>
               <span className="stat-label">{t('pharmacy.stats.lowStock')}</span>
             </div>
-            <div className="pharmacy-stat-card warning" style={{ cursor: 'pointer' }} onClick={() => setTab('inventory')}>
+            <div className="pharmacy-stat-card warning si-3c1f81b9" onClick={() => setTab('inventory')}>
               <span className="stat-icon">⏰</span>
               <span className="stat-value">{summary?.expiring_soon_count ?? '—'}</span>
               <span className="stat-label">{t('pharmacy.stats.expiringSoon')}</span>
             </div>
-            <div className="pharmacy-stat-card info" style={{ cursor: 'pointer' }} onClick={() => setTab('reorders')}>
+            <div className="pharmacy-stat-card info si-3c1f81b9" onClick={() => setTab('reorders')}>
               <span className="stat-icon">🔄</span>
               <span className="stat-value">{summary?.pending_reorders ?? '—'}</span>
               <span className="stat-label">{t('pharmacy.stats.pendingReorders')}</span>
@@ -264,9 +265,9 @@ export default function PharmacyDashboard() {
               <button type="button" className="module-btn small" onClick={() => setTab('review')}>{t('common.viewAll')}</button>
             </div>
             {loading ? (
-              <p style={{ color: '#888', fontSize: '0.9rem' }}>{t('common.loading')}</p>
+              <p className="si-6a9f93ca">{t('common.loading')}</p>
             ) : pendingRx.length === 0 ? (
-              <div className="pharmacy-empty" style={{ padding: '20px 0' }}>
+              <div className="pharmacy-empty si-8a6436c0">
                 <p>✅ {t('pharmacy.noPendingReviews')}</p>
               </div>
             ) : (
@@ -287,12 +288,12 @@ export default function PharmacyDashboard() {
                       <tr key={rx.id}>
                         <td>
                           <strong>{rx.pet_name || '—'}</strong>
-                          {rx.animal_species && <small style={{ display: 'block', color: '#888' }}>{rx.animal_species}</small>}
+                          {rx.animal_species && <small className="si-1a0c0bfa">{rx.animal_species}</small>}
                         </td>
                         <td>{rx.owner_name || '—'}</td>
                         <td>{rx.vet_name || '—'}</td>
-                        <td style={{ maxWidth: 180, fontSize: '0.83rem' }}>{rx.medication_names || '—'}</td>
-                        <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '—'}</td>
+                        <td className="si-cf8f70f1">{rx.medication_names || '—'}</td>
+                        <td className="si-86931177">{rx.created_at ? new Date(rx.created_at).toLocaleDateString() : '—'}</td>
                         <td>
                           <button type="button" className="module-btn small primary" onClick={() => setReviewTarget(rx)}>
                             {t('pharmacy.actions.review')}
@@ -303,7 +304,7 @@ export default function PharmacyDashboard() {
                   </tbody>
                 </table>
                 {pendingRx.length > 5 && (
-                  <div style={{ padding: '8px 12px', textAlign: 'center' }}>
+                  <div className="si-c0b3a91c">
                     <button type="button" className="module-btn small" onClick={() => setTab('review')}>
                       +{pendingRx.length - 5} more → {t('common.viewAll')}
                     </button>
@@ -320,7 +321,7 @@ export default function PharmacyDashboard() {
               <button type="button" className="module-btn small" onClick={() => setTab('dispense')}>{t('common.viewAll')}</button>
             </div>
             {readyDispense.length === 0 ? (
-              <div className="pharmacy-empty" style={{ padding: '20px 0' }}>
+              <div className="pharmacy-empty si-8a6436c0">
                 <p>{t('pharmacy.noReadyDispense')}</p>
               </div>
             ) : (
@@ -339,10 +340,10 @@ export default function PharmacyDashboard() {
                       <tr key={rx.id}>
                         <td>
                           <strong>{rx.pet_name || '—'}</strong>
-                          {rx.animal_species && <small style={{ display: 'block', color: '#888' }}>{rx.animal_species}</small>}
+                          {rx.animal_species && <small className="si-1a0c0bfa">{rx.animal_species}</small>}
                         </td>
                         <td>{rx.owner_name || '—'}</td>
-                        <td style={{ maxWidth: 200, fontSize: '0.83rem' }}>{rx.medication_names || '—'}</td>
+                        <td className="si-4a370a4e">{rx.medication_names || '—'}</td>
                         <td>
                           <button type="button" className="module-btn small primary" onClick={() => setDispenseTarget(rx)}>
                             {t('pharmacy.actions.dispense')}
@@ -386,6 +387,10 @@ export default function PharmacyDashboard() {
         <ReordersManagement pharmacyId={selectedPharmacy.id} networkId={networkId ?? ''} />
       )}
 
+      {tab === 'transfers' && networkId && (
+        <MedicationTransfers networkId={networkId} />
+      )}
+
       {/* Analytics Tab */}
       {tab === 'analytics' && selectedPharmacy && (
         <div>
@@ -399,7 +404,7 @@ export default function PharmacyDashboard() {
               </select>
             </div>
             {!analytics ? (
-              <p style={{ color: '#888', textAlign: 'center', padding: '20px 0' }}>{t('common.loading')}</p>
+              <p className="si-43f86130">{t('common.loading')}</p>
             ) : (
               <>
                 <div className="analytics-grid">
@@ -432,23 +437,23 @@ export default function PharmacyDashboard() {
                 </div>
 
                 {analytics.top_medications?.length > 0 && (
-                  <div style={{ marginTop: 20 }}>
-                    <h4 style={{ margin: '0 0 12px', color: '#1a237e', fontSize: '0.95rem' }}>
+                  <div className="si-138c678b">
+                    <h4 className="si-fe789c18">
                       🏆 {t('pharmacy.analytics.topMedications')}
                     </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div className="si-977f8af1">
                       {analytics.top_medications.map((med, i) => {
                         const maxDispensed = analytics.top_medications[0]?.total_dispensed || 1
                         const pct = Math.round((med.total_dispensed / maxDispensed) * 100)
                         return (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <span style={{ fontWeight: 700, color: '#555', minWidth: 16, fontSize: '0.82rem' }}>#{i + 1}</span>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.87rem', marginBottom: 3 }}>
+                          <div key={i} className="si-98d3a741">
+                            <span className="si-bed43d56">#{i + 1}</span>
+                            <div className="si-6acd75e8">
+                              <div className="si-50d7f990">
                                 <strong>{med.med_name}</strong>
-                                <span style={{ color: '#888' }}>{med.total_dispensed} units · {formatCurrency(med.total_revenue)}</span>
+                                <span className="si-40d2db53">{med.total_dispensed} units · {formatCurrency(med.total_revenue)}</span>
                               </div>
-                              <div style={{ height: 8, background: '#e8eaf6', borderRadius: 4 }}>
+                              <div className="si-9a7e25d0">
                                 <div style={{ height: '100%', background: '#3949ab', borderRadius: 4, width: `${pct}%` }} />
                               </div>
                             </div>

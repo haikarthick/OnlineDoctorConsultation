@@ -5,7 +5,7 @@
 
 -- Step 1: enterprises must exist before vet_certificates (FK dependency)
 CREATE TABLE IF NOT EXISTS enterprises (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   enterprise_type VARCHAR(50),
   description TEXT,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS enterprises (
 
 -- Step 2: vet_certificates with full schema matching init.sql
 CREATE TABLE IF NOT EXISTS vet_certificates (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   certificate_number VARCHAR(100) NOT NULL UNIQUE,
   certificate_type VARCHAR(50) NOT NULL CHECK (certificate_type IN (
     'health_certificate','fitness_to_travel','rabies_vaccination','vaccination_record',

@@ -9,6 +9,18 @@ import pool from '../utils/database';
 import { v4 as uuidv4 } from 'uuid';
 import NotificationService from './NotificationService';
 import logger from '../utils/logger';
+import storage, { extractStorageKeyFromUrl } from '../utils/storage';
+
+/** Deletes storage assets for a set of listing media URLs — non-fatal per URL (a delete
+ *  failure here should never block the listing update/delete itself; storage.delete()
+ *  already swallows its own errors to a warn log). Skips URLs with no extractable key
+ *  (legacy local /uploads/ paths, nulls) — nothing to clean up for those. */
+async function cleanupListingMedia(urls: Array<string | null | undefined>): Promise<void> {
+  for (const url of urls) {
+    const key = extractStorageKeyFromUrl(url);
+    if (key) await storage.delete(key);
+  }
+}
 
 // Categories that involve a live animal (or germplasm) must pass admin review
 // before going public — Pet Shop Rules 2018 compliance posture.
@@ -47,7 +59,7 @@ class MarketplaceService {
     const {
       category, status = 'active', listingType, minPrice, maxPrice, search,
       sellerId, enterpriseId, limit = 50, offset = 0,
-      species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender,
+      species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       listingTier, isHotDeal, vaccinationStatus, healthCertificate, sortBy,
       userLat, userLng, radiusKm,
     } = filters;
@@ -83,6 +95,7 @@ class MarketplaceService {
     if (maxMilkYield) add('l.daily_milk_yield <= $?', maxMilkYield);
     if (pregnancyStatus) add('l.pregnancy_status = $?', pregnancyStatus);
     if (gender) add('l.gender = $?', gender);
+    if (animalClass) add('l.animal_class = $?', animalClass);
     if (listingTier) add('l.listing_tier = $?', listingTier);
     if (isHotDeal === 'true' || isHotDeal === true) where.push('l.is_hot_deal = true');
     if (vaccinationStatus) add('l.vaccination_status = $?', vaccinationStatus);
@@ -215,8 +228,8 @@ class MarketplaceService {
         linked_animal_id, auction_end_time, reserve_price, contact_phone,
         latitude, longitude, admin_approved,
         seller_type, registration_number, welfare_attestation, terms_accepted, terms_accepted_at,
-        video_url
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44)`,
+        video_url, animal_class
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45)`,
       [
         id, data.enterpriseId || null, data.sellerId, data.title, data.description || null,
         category, data.listingType || 'fixed_price', data.price || null,
@@ -237,7 +250,7 @@ class MarketplaceService {
         data.sellerType || 'individual', data.registrationNumber || null,
         data.welfareAttestation || false, data.termsAccepted || false,
         data.termsAccepted ? new Date().toISOString() : null,
-        data.videoUrl || null,
+        data.videoUrl || null, data.animalClass || null,
       ]
     );
     const result = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [id]);
@@ -246,7 +259,7 @@ class MarketplaceService {
 
   async updateListing(id: string, data: any, userId?: string, isAdmin = false) {
     // Ownership guard: only the seller or an admin may modify a listing
-    const existing = await pool.query('SELECT seller_id, status FROM marketplace_listings WHERE id = $1', [id]);
+    const existing = await pool.query('SELECT seller_id, status, images, video_url FROM marketplace_listings WHERE id = $1', [id]);
     if (!existing.rows[0]) throw new Error('Listing not found');
     if (!isAdmin && existing.rows[0].seller_id !== userId) throw new Error('You can only edit your own listings');
     // Sellers may only move a listing between self-service statuses; system/admin
@@ -259,7 +272,7 @@ class MarketplaceService {
 
     const allowedFields = [
       'title', 'description', 'price', 'quantity', 'status', 'category', 'condition', 'location',
-      'species', 'breed', 'gender', 'listing_type',
+      'species', 'breed', 'gender', 'animal_class', 'listing_type',
       'vaccination_status', 'contact_phone', 'seller_type', 'registration_number',
     ];
     const sets: string[] = []; const vals: any[] = []; let idx = 1;
@@ -302,15 +315,42 @@ class MarketplaceService {
     sets.push('updated_at = NOW()'); vals.push(id);
     await pool.query(`UPDATE marketplace_listings SET ${sets.join(', ')} WHERE id = $${idx}`, vals);
     const result = await pool.query('SELECT * FROM marketplace_listings WHERE id = $1', [id]);
+
+    // Clean up Cloudinary assets dropped by this edit (removed photos, a replaced/removed
+    // video) — only after the UPDATE succeeds, so a failed request never deletes media a
+    // listing still references. Runs after the response-worthy work, never blocks it.
+    const oldImages: string[] = Array.isArray(existing.rows[0].images) ? existing.rows[0].images : [];
+    const oldVideoUrl: string | null = existing.rows[0].video_url || null;
+    const removedMedia: string[] = [];
+    if (data.images) {
+      const newImages: string[] = data.images;
+      removedMedia.push(...oldImages.filter(img => !newImages.includes(img)));
+    }
+    if (data.videoUrl !== undefined && oldVideoUrl && oldVideoUrl !== (data.videoUrl || null)) {
+      removedMedia.push(oldVideoUrl);
+    }
+    if (removedMedia.length > 0) {
+      cleanupListingMedia(removedMedia).catch(err => logger.warn('Listing media cleanup failed (non-fatal)', { listingId: id, error: err.message }));
+    }
+
     return result.rows[0];
   }
 
   async deleteListing(id: string, userId?: string, isAdmin = false) {
-    const existing = await pool.query('SELECT seller_id, status FROM marketplace_listings WHERE id = $1', [id]);
+    const existing = await pool.query('SELECT seller_id, status, images, video_url FROM marketplace_listings WHERE id = $1', [id]);
     if (!existing.rows[0]) throw new Error('Listing not found');
     if (!isAdmin && existing.rows[0].seller_id !== userId) throw new Error('You can only delete your own listings');
     if (!isAdmin && existing.rows[0].status === 'reserved') throw new Error('Listing is reserved — complete or cancel the deal first');
     await pool.query('UPDATE marketplace_listings SET status = $1, updated_at = NOW() WHERE id = $2', ['deleted', id]);
+
+    // Soft-delete keeps the row (price/species/breed/etc.) for audit/history, but the
+    // listing has no further product purpose for its photos/video — clean those up so a
+    // deleted listing doesn't go on consuming Cloudinary storage credits indefinitely.
+    const media: string[] = Array.isArray(existing.rows[0].images) ? [...existing.rows[0].images] : [];
+    if (existing.rows[0].video_url) media.push(existing.rows[0].video_url);
+    if (media.length > 0) {
+      cleanupListingMedia(media).catch(err => logger.warn('Deleted-listing media cleanup failed (non-fatal)', { listingId: id, error: err.message }));
+    }
   }
 
   // ── Bids ──
@@ -704,7 +744,7 @@ class MarketplaceService {
     const {
       category, listingType, minPrice, maxPrice, search,
       limit = 24, offset = 0,
-      species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender,
+      species, breed, minMilkYield, maxMilkYield, pregnancyStatus, gender, animalClass,
       vaccinationStatus, healthCertificate, sortBy,
       userLat, userLng, radiusKm,
     } = filters;
@@ -732,6 +772,7 @@ class MarketplaceService {
     if (maxMilkYield) { where += ` AND l.daily_milk_yield <= $${idx++}`; params.push(maxMilkYield); }
     if (pregnancyStatus) { where += ` AND l.pregnancy_status = $${idx++}`; params.push(pregnancyStatus); }
     if (gender) { where += ` AND l.gender = $${idx++}`; params.push(gender); }
+    if (animalClass) { where += ` AND l.animal_class = $${idx++}`; params.push(animalClass); }
     if (vaccinationStatus) { where += ` AND l.vaccination_status = $${idx++}`; params.push(vaccinationStatus); }
     if (healthCertificate === 'true' || healthCertificate === true) { where += ` AND l.health_certificate = true`; }
     // Proximity filter (requires earthdistance extension)
@@ -749,7 +790,7 @@ class MarketplaceService {
     // Only select safe public columns — no seller email/phone/id
     let query = `SELECT l.id, l.title, l.description, l.category, l.listing_type, l.price, l.currency,
                  l.quantity, l.unit, l.condition, l.images, l.location, l.tags, l.featured,
-                 l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender,
+                 l.species, l.breed, l.animal_age_months, l.animal_weight_kg, l.gender, l.animal_class,
                  l.lactation_number, l.daily_milk_yield, l.pregnancy_status, l.pregnancy_month,
                  l.vaccination_status, l.health_certificate, l.listing_tier, l.is_hot_deal,
                  l.video_url, l.auction_end_time, l.views_count, l.created_at, l.status,
@@ -931,14 +972,14 @@ class MarketplaceService {
   // ── Market Intelligence ──
   async getMarketPrices(filters: any = {}) {
     const { species, breed } = filters;
-    let query = `SELECT species, breed, 
+    let query = `SELECT species, breed, animal_class,
       COUNT(*) as total_listings, AVG(price) as avg_price, MIN(price) as min_price, MAX(price) as max_price,
       AVG(daily_milk_yield) as avg_milk_yield, AVG(animal_weight_kg) as avg_weight
       FROM marketplace_listings WHERE status IN ('active', 'sold', 'rehomed') AND species IS NOT NULL`;
     const params: any[] = []; let idx = 1;
     if (species) { query += ` AND species = $${idx++}`; params.push(species); }
     if (breed) { query += ` AND breed ILIKE $${idx++}`; params.push(`%${breed}%`); }
-    query += ` GROUP BY species, breed ORDER BY total_listings DESC`;
+    query += ` GROUP BY species, breed, animal_class ORDER BY total_listings DESC`;
     const result = await pool.query(query, params);
     return result.rows;
   }

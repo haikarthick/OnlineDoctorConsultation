@@ -84,25 +84,25 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
 
   return (
     <div className="pharm-modal-overlay" onClick={onClose}>
-      <div className="pharm-modal" style={{ maxWidth: 620 }} onClick={e => e.stopPropagation()}>
+      <div className="pharm-modal si-74e802cf" onClick={e => e.stopPropagation()}>
         <div className="pharm-modal-header">
           <h2>🔍 {t('pharmacy.review.title')}</h2>
           <button type="button" className="pharm-modal-close" onClick={onClose}>✕</button>
         </div>
 
         {/* Patient summary */}
-        <div style={{ background: '#f0f4ff', borderRadius: 8, padding: '12px 16px', marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+        <div className="si-acd46076">
+          <div className="si-9d036184">
             <div>
               <strong>🐾 {prescription.pet_name}</strong>
-              {prescription.animal_species && <span style={{ color: '#666', marginLeft: 6 }}>({prescription.animal_species})</span>}
+              {prescription.animal_species && <span className="si-4cb713cc">({prescription.animal_species})</span>}
               <br />
-              <span style={{ color: '#555', fontSize: '0.87rem' }}>👤 {prescription.owner_name}</span>
+              <span className="si-c8a87bc3">👤 {prescription.owner_name}</span>
               {prescription.vet_name && (
-                <span style={{ color: '#555', fontSize: '0.87rem', marginLeft: 12 }}>👨‍⚕️ {prescription.vet_name}</span>
+                <span className="si-4a4067fd">👨‍⚕️ {prescription.vet_name}</span>
               )}
             </div>
-            <div style={{ fontSize: '0.8rem', color: '#888' }}>
+            <div className="si-66f87a99">
               {prescription.created_at && formatDate(prescription.created_at)}
             </div>
           </div>
@@ -110,22 +110,22 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
 
         {/* Medications detail */}
         {meds.length > 0 ? (
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ fontWeight: 600, fontSize: '0.87rem', color: '#444', marginBottom: 8 }}>💊 {t('pharmacy.review.prescribedMedications')}</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="si-7e63ec4f">
+            <p className="si-76642629">💊 {t('pharmacy.review.prescribedMedications')}</p>
+            <div className="si-977f8af1">
               {meds.map((med, i) => (
-                <div key={i} style={{ background: '#fafafa', border: '1px solid #e0e0e0', borderRadius: 8, padding: '10px 14px', fontSize: '0.87rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 4 }}>
-                    <strong style={{ color: '#1a237e' }}>{med.name}</strong>
-                    <span style={{ fontSize: '0.78rem', background: '#e8eaf6', color: '#3949ab', borderRadius: 4, padding: '1px 8px' }}>
+                <div key={i} className="si-057eacc7">
+                  <div className="si-c340846a">
+                    <strong className="si-e28b1afb">{med.name}</strong>
+                    <span className="si-35232631">
                       {med.dosage}
                     </span>
                   </div>
-                  <div style={{ color: '#555', marginTop: 3, fontSize: '0.83rem' }}>
+                  <div className="si-7a67cd5f">
                     {[med.frequency, med.duration, med.route].filter(Boolean).join(' · ')}
                   </div>
                   {med.instructions && (
-                    <div style={{ color: '#666', fontSize: '0.8rem', marginTop: 3, fontStyle: 'italic' }}>
+                    <div className="si-cc217c18">
                       {med.instructions}
                     </div>
                   )}
@@ -134,7 +134,7 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
             </div>
           </div>
         ) : prescription.medication_names ? (
-          <div style={{ background: '#fafafa', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: '0.87rem' }}>
+          <div className="si-06b9a537">
             <strong>💊 </strong>{prescription.medication_names}
           </div>
         ) : null}
@@ -147,19 +147,19 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
             <label>{t('pharmacy.review.validationChecks')} <span className="req-star">*</span></label>
             <div className="validation-checks">
               {(['dosage_ok', 'allergy_ok', 'interaction_ok', 'stock_ok'] as const).map(key => (
-                <label key={key} className="check-item" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                <label key={key} className="check-item si-d1a45dca">
                   <input
                     type="checkbox"
                     checked={checks[key]}
                     onChange={e => setChecks(c => ({ ...c, [key]: e.target.checked }))}
-                    style={{ width: 'auto', marginRight: 0 }}
+                    className="si-ceb5ec59"
                   />
                   <span className={`check-icon ${checks[key] ? 'check-ok' : 'check-fail'}`}>
                     {checks[key] ? '✅' : '⬜'}
                   </span>
                   <div>
                     <strong>{t(`pharmacy.review.checks.${key}`)}</strong>
-                    <small style={{ display: 'block', color: '#888', fontWeight: 400 }}>
+                    <small className="si-1eb9b2b0">
                       {t(`pharmacy.review.checksNote.${key}`)}
                     </small>
                   </div>
@@ -171,7 +171,7 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
           {/* Decision */}
           <div className="pharm-form-group">
             <label>{t('pharmacy.review.decision')} <span className="req-star">*</span></label>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div className="si-84129df0">
               {(['approved', 'rejected', 'needs_clarification'] as Decision[]).map(d => (
                 <label key={d} style={{
                   display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', flex: 1, minWidth: 140,
@@ -186,7 +186,7 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
                   userSelect: 'none',
                 }}>
                   <input type="radio" name="decision" value={d} checked={decision === d}
-                    onChange={() => setDecision(d)} style={{ width: 'auto' }} />
+                    onChange={() => setDecision(d)} className="si-7f2e0347" />
                   {d === 'approved' ? '✅' : d === 'rejected' ? '❌' : '❓'}
                   {' '}{t(`pharmacy.review.${d}`)}
                 </label>
@@ -219,7 +219,7 @@ export default function PrescriptionReviewModal({ prescription, onClose, onDone 
 
           {/* Submit blocker hints */}
           {decision === 'approved' && !allChecked && (
-            <div style={{ background: '#fff8e1', border: '1px solid #ffe082', borderRadius: 8, padding: '8px 12px', fontSize: '0.82rem', color: '#f57f17', marginBottom: 12 }}>
+            <div className="si-1e49cacf">
               ⚠️ {t('pharmacy.review.completeChecksFirst')}
             </div>
           )}

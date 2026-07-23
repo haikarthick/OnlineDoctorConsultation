@@ -258,7 +258,7 @@ const DiseasePredictionPage: React.FC = () => {
 
               {showOutbreakForm && (
                 <form className="module-form" onSubmit={handleCreateOutbreak}>
-                  <p style={{ fontSize: 13, color: '#888', margin: '0 0 12px' }}>💡 Click on the map below to set the outbreak center location</p>
+                  <p className="si-f2fe0f46">💡 Click on the map below to set the outbreak center location</p>
                   <div className="form-grid">
                     <div className="form-group"><label>{t('diseasePrediction.disease')} *</label><input required value={outbreakForm.diseaseName} onChange={e => setOutbreakForm({ ...outbreakForm, diseaseName: e.target.value })} /></div>
                     <div className="form-group"><label>{t('diseasePrediction.severity')}</label>
@@ -278,10 +278,10 @@ const DiseasePredictionPage: React.FC = () => {
               )}
 
               {/* Interactive Outbreak Map */}
-              <div style={{ marginBottom: 20, borderRadius: 12, overflow: 'hidden', border: '1px solid #e5e7eb' }}>
-                <div style={{ padding: '14px 20px', borderBottom: '1px solid #e5e7eb', background: '#fafafa' }}>
-                  <h3 style={{ margin: 0 }}>🗺️ {t('diseasePrediction.outbreakZoneMap')}</h3>
-                  <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
+              <div className="si-3f5b50f7">
+                <div className="si-be8ac8a2">
+                  <h3 className="si-44087c4b">🗺️ {t('diseasePrediction.outbreakZoneMap')}</h3>
+                  <p className="si-7438976a">
                     {outbreakZones.length} outbreak zone{outbreakZones.length !== 1 ? 's' : ''} · Circle size represents radius · Color represents severity
                   </p>
                 </div>
@@ -299,9 +299,9 @@ const DiseasePredictionPage: React.FC = () => {
                         <div>
                           <strong>{z.diseaseName || (z as any).disease_name}</strong><br />
                           <span style={{ fontSize: 12, color: SEVERITY_COLORS[z.severity] }}>{(z.severity || '').toUpperCase()}</span><br />
-                          <span style={{ fontSize: 12 }}>Affected: {z.affectedCount || (z as any).affected_count} · At risk: {z.totalAtRisk || (z as any).total_at_risk}</span><br />
-                          <span style={{ fontSize: 12 }}>Radius: {z.radiusKm || (z as any).radius_km}km</span><br />
-                          <span style={{ fontSize: 11, color: '#888' }}>Status: {z.containmentStatus || (z as any).containment_status}</span>
+                          <span className="si-756a9f21">Affected: {z.affectedCount || (z as any).affected_count} · At risk: {z.totalAtRisk || (z as any).total_at_risk}</span><br />
+                          <span className="si-756a9f21">Radius: {z.radiusKm || (z as any).radius_km}km</span><br />
+                          <span className="si-dd67611c">Status: {z.containmentStatus || (z as any).containment_status}</span>
                         </div>
                       ),
                     })),
@@ -312,7 +312,7 @@ const DiseasePredictionPage: React.FC = () => {
                       radius: (+outbreakForm.radiusKm || 1) * 1000,
                       color: SEVERITY_COLORS[outbreakForm.severity] || '#ec4899',
                       fillOpacity: 0.3,
-                      popup: <div><strong>New Outbreak Zone</strong><br /><span style={{ fontSize: 12 }}>{outbreakForm.centerLat}, {outbreakForm.centerLng}</span></div>,
+                      popup: <div><strong>New Outbreak Zone</strong><br /><span className="si-756a9f21">{outbreakForm.centerLat}, {outbreakForm.centerLng}</span></div>,
                     }] : []),
                   ]}
                   markers={outbreakForm.centerLat && outbreakForm.centerLng && showOutbreakForm ? [{
@@ -333,7 +333,7 @@ const DiseasePredictionPage: React.FC = () => {
               </div>
 
               {/* Severity Legend */}
-              <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap', fontSize: 12 }}>
+              <div className="si-92d1d3e8">
                 {Object.entries(SEVERITY_COLORS).map(([sev, color]) => (
                   <span key={sev}><span style={{ display: 'inline-block', width: 12, height: 12, borderRadius: '50%', background: color, marginRight: 4, opacity: 0.7 }}></span>{sev.charAt(0).toUpperCase() + sev.slice(1)}</span>
                 ))}
@@ -353,7 +353,7 @@ const DiseasePredictionPage: React.FC = () => {
                       {(z.radiusKm || (z as any).radius_km) && <div><strong>{z.radiusKm || (z as any).radius_km} km</strong> radius</div>}
                     </div>
                     {(z.centerLat || (z as any).center_lat) && (
-                      <div style={{ fontSize: 12, color: '#aaa', marginTop: 4 }}>📍 {(+(z.centerLat || (z as any).center_lat)).toFixed(4)}, {(+(z.centerLng || (z as any).center_lng)).toFixed(4)}</div>
+                      <div className="si-5b3d984f">📍 {(+(z.centerLat || (z as any).center_lat)).toFixed(4)}, {(+(z.centerLng || (z as any).center_lng)).toFixed(4)}</div>
                     )}
                     <div className="card-footer">
                       <small>{t('diseasePrediction.started')} {(z.startedAt || (z as any).started_at) ? new Date(z.startedAt || (z as any).started_at).toLocaleDateString() : '–'}</small>

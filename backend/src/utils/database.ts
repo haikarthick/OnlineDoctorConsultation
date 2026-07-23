@@ -8,6 +8,20 @@ import NetworkRolePermissionService from '../services/NetworkRolePermissionServi
 import RefreshTokenService from '../services/RefreshTokenService';
 import VetHospitalService from '../services/VetHospitalService';
 
+/**
+ * Summarize query params for logging without leaking values — params can carry
+ * medical notes, prescriptions, or other patient/contact data.
+ */
+function describeParams(params?: any[]): Array<{ type: string; length?: number }> | undefined {
+  if (!params) return undefined;
+  return params.map((p) => {
+    if (p === null || p === undefined) return { type: 'null' };
+    if (typeof p === 'string') return { type: 'string', length: p.length };
+    if (Array.isArray(p)) return { type: 'array', length: p.length };
+    return { type: typeof p };
+  });
+}
+
 /** Split multi-statement SQL respecting dollar-quoted function bodies ($$...$$) */
 function splitSqlStatements(sql: string): string[] {
   const statements: string[] = [];
@@ -169,6 +183,7 @@ class PostgresDatabase {
       }
 
       logger.info(`SQL migrations: applying ${pending.length} pending file(s)...`);
+      const failed: string[] = [];
       for (const file of pending) {
         const sql = fs.readFileSync(path.join(migDir, file), 'utf-8');
         const client = await this.pool.connect();
@@ -181,15 +196,49 @@ class PostgresDatabase {
         } catch (err: any) {
           await client.query('ROLLBACK');
           logger.error(`  ✗ Migration failed (${file}): ${err.message}`);
+          failed.push(file);
         } finally {
           client.release();
         }
+      }
+      // This runner deliberately never throws — the server has already bound its
+      // port by the time it runs (see index.ts's startServer), and that process is
+      // designed to stay up and self-heal rather than crash over a DB issue once
+      // live. The actual deploy gate is render-start.sh's separate, earlier
+      // `node dist/utils/migrate.js` step, which DOES abort the deploy on a
+      // genuine migration failure (MIGRATIONS_FAIL_FAST, default true) — by the
+      // time this in-process runner executes, `pending` should normally be empty.
+      // This aggregate line exists so a failure here (e.g. this runner disagreeing
+      // with the CLI runner about pending state) is impossible to miss in logs.
+      if (failed.length > 0) {
+        logger.error(
+          `SQL migrations: ${failed.length}/${pending.length} FAILED — server is running with a partially-migrated schema`,
+          { failed }
+        );
+      } else {
+        logger.info(`SQL migrations: ${pending.length} applied successfully`);
       }
     } catch (error: any) {
       logger.warn('SQL migration runner error', { error: error.message });
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // Everything below this point (ensureSchemaPublic and the various
+  // ensure*Table / ensure*Column private methods later in this class) is a
+  // legacy, pre-migrations mechanism: ad-hoc idempotent CREATE TABLE IF NOT
+  // EXISTS / ALTER TABLE ADD COLUMN IF NOT EXISTS statements run on every
+  // startup, many wrapped in a bare `.catch(() => {})` that silently
+  // swallows failures. It predates backend/migrations/ and is kept only
+  // for schema that already depends on it — it is NOT tracked, NOT
+  // versioned, and NOT covered by MIGRATIONS_FAIL_FAST.
+  //
+  // Do not add new schema changes here. Use `npm run migrate:create <name>`
+  // to add a new file under backend/migrations/ instead — that path is
+  // transactional, tracked in _migrations, and (via render-start.sh's
+  // separate migrate.js deploy step) actually blocks a bad deploy instead
+  // of silently shipping a partially-migrated schema.
+  // ─────────────────────────────────────────────────────────────────
   private async ensureSchema(): Promise<void> {
     return this.ensureSchemaPublic();
   }
@@ -467,7 +516,8 @@ class PostgresDatabase {
       INSERT INTO tax_codes (id, sac_code, label, rate_percent, is_active) VALUES
         (gen_random_uuid(), '998351', 'Veterinary services for pet animals (GST-exempt healthcare)', 0, true),
         (gen_random_uuid(), '998352', 'Veterinary services for livestock (GST-exempt healthcare)', 0, true),
-        (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true)
+        (gen_random_uuid(), '998599', 'Platform facilitation / commission services', 18, true),
+        (gen_random_uuid(), '300490', 'Pharmacy — dispensed veterinary medicaments (HSN 3004)', 12, true)
       ON CONFLICT (sac_code) DO NOTHING
     `).catch((e: any) => logger.warn('tax_codes seed failed', { error: e.message }));
 
@@ -805,10 +855,18 @@ class PostgresDatabase {
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS last_weighed_at TIMESTAMP`,
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS current_location_id UUID`,
       `ALTER TABLE animals ADD COLUMN IF NOT EXISTS avatar_url TEXT`,
+      `ALTER TABLE animals ADD COLUMN IF NOT EXISTS animal_class VARCHAR(30)`,
     ];
     for (const ddl of animalColumns) {
       await this.pool.query(ddl).catch(() => {});
     }
+
+    // animal_class is filtered/grouped on in MarketplaceService's search + aggregation
+    // queries (both marketplace_listings and animals) with no backing index — added here
+    // as a safety net for DBs that predate this column on marketplace_listings too.
+    await this.pool.query(`ALTER TABLE marketplace_listings ADD COLUMN IF NOT EXISTS animal_class VARCHAR(30)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_marketplace_listings_animal_class ON marketplace_listings(animal_class)`).catch(() => {});
+    await this.pool.query(`CREATE INDEX IF NOT EXISTS idx_animals_animal_class ON animals(animal_class)`).catch(() => {});
 
     // Widen avatar_url columns from VARCHAR(500) to TEXT (base64 photos exceed 500 chars)
     const widenAvatarUrl = [
@@ -1850,9 +1908,28 @@ class PostgresDatabase {
     await this.pool.query(`ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ`).catch(() => {});
     await this.pool.query(`ALTER TABLE prescriptions ADD COLUMN IF NOT EXISTS review_notes TEXT`).catch(() => {});
 
+    // GSTIN on the pharmacy entity itself (issuer of the pharmacy invoice, distinct from the network's own GSTIN)
+    await this.pool.query(`ALTER TABLE hospital_pharmacies ADD COLUMN IF NOT EXISTS gstin VARCHAR(20)`).catch(() => {});
+
+    // invoice_type CHECK was missing 'pharmacy' — dispensing payments could never get a GST invoice
+    await this.pool.query(`ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_invoice_type_check`).catch(() => {});
+    await this.pool.query(`
+      ALTER TABLE invoices ADD CONSTRAINT invoices_invoice_type_check
+        CHECK (invoice_type IN ('consultation', 'commission', 'pharmacy'))
+    `).catch(() => {});
+
     // Add withdrawal_period_days to pharmacy_medications (for livestock)
     await this.pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS withdrawal_period_days INTEGER DEFAULT 0`).catch(() => {});
     await this.pool.query(`ALTER TABLE pharmacy_medications ADD COLUMN IF NOT EXISTS is_refrigerated BOOLEAN DEFAULT false`).catch(() => {});
+
+    // review_status CHECK was missing 'needs_clarification', so the pharmacist-review route
+    // silently collapsed that outcome to 'pending_review' and the status could never be
+    // distinguished again once the one-time notification was read.
+    await this.pool.query(`ALTER TABLE prescriptions DROP CONSTRAINT IF EXISTS prescriptions_review_status_check`).catch(() => {});
+    await this.pool.query(`
+      ALTER TABLE prescriptions ADD CONSTRAINT prescriptions_review_status_check
+        CHECK (review_status IN ('pending_review','reviewed','rejected','approved_for_dispensing','dispensed','needs_clarification'))
+    `).catch(() => {});
 
     // ── Password Reset Tokens (self-service forgot-password flow) ──────────
     // token_hash: SHA-256 of the raw token sent in the email link.
@@ -1904,11 +1981,11 @@ class PostgresDatabase {
       const result = await this.pool.query(text, params);
       const duration = Date.now() - start;
       if (duration > 1000) {
-        logger.warn('Slow query detected', { query: text.substring(0, 100), duration, params });
+        logger.warn('Slow query detected', { query: text.substring(0, 100), duration, paramCount: params?.length ?? 0 });
       }
       return result;
     } catch (error: any) {
-      logger.error('Database query error', { query: text.substring(0, 200), error: error.message, params });
+      logger.error('Database query error', { query: text.substring(0, 200), error: error.message, paramTypes: describeParams(params) });
       throw error;
     }
   }

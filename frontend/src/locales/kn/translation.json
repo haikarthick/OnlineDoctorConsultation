@@ -88,6 +88,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "ನಕಲಿಸಲಾಗಿದೆ!",
+    "copyFailed": "ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -101,7 +103,8 @@
     "fillRequired": "Please fill all required fields",
     "none": "None",
     "error": "Error",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "previous": "ಹಿಂದಿನ"
   },
   "nav": {
     "brand": "VetCare",
@@ -202,7 +205,8 @@
     "commissionSettings": "ಕಮಿಷನ್ ನಿಯಮಗಳು",
     "settlements": "ಸೆಟಲ್ಮೆಂಟ್‌ಗಳು",
     "referrals": "ರೆಫರಲ್‌ಗಳು",
-    "financeReports": "ಹಣಕಾಸು ವರದಿಗಳು"
+    "financeReports": "ಹಣಕಾಸು ವರದಿಗಳು",
+    "masterData": "ಮಾಸ್ಟರ್ ಡೇಟಾ"
   },
   "login": {
     "welcome": "ಮತ್ತೆ ಸ್ವಾಗತ",
@@ -868,7 +872,10 @@
       "todayQueue": "ಇಂದಿನ ಸರತಿ",
       "activeInpatients": "ಸಕ್ರಿಯ ಒಳರೋಗಿಗಳು",
       "pendingReferrals": "ಬಾಕಿ ರೆಫರಲ್‌ಗಳು",
-      "branchStaff": "ಶಾಖೆ ಸಿಬ್ಬಂದಿ"
+      "branchStaff": "ಶಾಖೆ ಸಿಬ್ಬಂದಿ",
+      "rxPendingReview": "ಫಾರ್ಮಸಿಸ್ಟ್ ಪರಿಶೀಲನೆಗಾಗಿ ಬಾಕಿ ಇರುವ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು",
+      "rxRejectedThisWeek": "ಈ ವಾರ ತಿರಸ್ಕರಿಸಿದ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು",
+      "rxDispensed": "ವಿತರಿಸಿದ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳು"
     },
     "quickActions": {
       "viewConsultations": "ಸಮಾಲೋಚನೆಗಳನ್ನು ನೋಡಿ",
@@ -1269,7 +1276,8 @@
       "confirmRemove": "Are you sure you want to remove this animal?",
       "removed": "Animal removed successfully",
       "failedSave": "ಪ್ರಾಣಿಯನ್ನು ಉಳಿಸಲು ವಿಫಲವಾಯಿತು",
-      "failedRemove": "ಪ್ರಾಣಿಯನ್ನು ತೆಗೆದುಹಾಕಲು ವಿಫಲವಾಯಿತು"
+      "failedRemove": "ಪ್ರಾಣಿಯನ್ನು ತೆಗೆದುಹಾಕಲು ವಿಫಲವಾಯಿತು",
+      "failedLoadEnterprises": "ನಿಮ್ಮ ಎಂಟರ್‌ಪ್ರೈಸ್‌ಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"
     },
     "pageTitle": "ನನ್ನ ಪ್ರಾಣಿಗಳು",
     "loading": "ಪ್ರಾಣಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...",
@@ -1514,7 +1522,15 @@
       "validUntil": "Valid until:",
       "active": "active",
       "expired": "expired",
-      "addButton": "ಔಷಧಿ ಚೀಟಿ ಬರೆಯಿರಿ"
+      "addButton": "ಔಷಧಿ ಚೀಟಿ ಬರೆಯಿರಿ",
+      "networkPharmacy": "ನೆಟ್‌ವರ್ಕ್ ಫಾರ್ಮಸಿ",
+      "dispensedOn": "{{date}} ರಂದು ವಿತರಿಸಲಾಗಿದೆ",
+      "reviewStatus": {
+        "pending_review": "ಫಾರ್ಮಸಿಸ್ಟ್ ಪರಿಶೀಲನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
+        "approved_for_dispensing": "ಅನುಮೋದಿಸಲಾಗಿದೆ — ವಿತರಣೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
+        "rejected": "ಫಾರ್ಮಸಿಸ್ಟ್‌ನಿಂದ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
+        "needs_clarification": "ಫಾರ್ಮಸಿಸ್ಟ್ ಸ್ಪಷ್ಟೀಕರಣ ಕೋರಿದ್ದಾರೆ"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ Add Vaccination",
@@ -3123,6 +3139,12 @@
   "marketplace": {
     "pageTitle": "🏪 ಖರೀದಿ-ಮಾರಾಟ ಮಾರುಕಟ್ಟೆ",
     "subtitle": "ಪ್ರಾಣಿಗಳನ್ನು ಖರೀದಿಸಿ ಮತ್ತು ಮಾರಾಟ ಮಾಡಿ — ಉಪಕರಣಗಳು ಮತ್ತು ಪಶುವೈದ್ಯ ಸರಬರಾಜುಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ",
+    "errors": {
+      "dashboardLoadFailed": "ನಿಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
+      "favoritesLoadFailed": "ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
+      "adminDataLoadFailed": "ನಿರ್ವಾಹಕ ಪಟ್ಟಿಗಳು ಮತ್ತು ಅಂಕಿಅಂಶಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
+      "monetizationLoadFailed": "ಹಣಗಳಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"
+    },
     "tabs": {
       "dashboard": "📊 ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
       "browse": "🛒 ಬ್ರೌಸ್",
@@ -3297,7 +3319,7 @@
       "autoPopulated": "ಪ್ರಾಣಿ ವಿವರಗಳು ಆಟೋ-ಫಿಲ್ ಆಗಿವೆ!",
       "fieldsAutoFilled": "ನಿಮ್ಮ ಪ್ರಾಣಿಯ ಪ್ರೊಫೈಲ್‌ನಿಂದ ಕ್ಷೇತ್ರಗಳು ಆಟೋ-ಫಿಲ್ ಆಗಿವೆ. ಕೆಳಗಿನ ಯಾವುದೇ ಕ್ಷೇತ್ರವನ್ನು ನೀವು ಸಂಪಾದಿಸಬಹುದು.",
       "imagesTitle": "ಪಟ್ಟಿ ಚಿತ್ರಗಳು",
-      "imagesLabel": "5 ಚಿತ್ರಗಳವರೆಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+      "imagesLabel": "{{count}} ಚಿತ್ರಗಳವರೆಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
       "uploading": "ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
       "uploadFailed": "ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಗಿದೆ",
       "selectBreed": "ತಳಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
@@ -3316,7 +3338,12 @@
       "videoAdded": "ವೀಡಿಯೊ ಸೇರಿಸಲಾಗಿದೆ",
       "removeVideo": "ವೀಡಿಯೊ ತೆಗೆದುಹಾಕಿ",
       "videoUploaded": "ವೀಡಿಯೊ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ",
-      "videoHint": "ಸಣ್ಣ ವೀಡಿಯೊ ವಿಶ್ವಾಸ ಮೂಡಿಸಿ ಹೆಚ್ಚು ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ಪಡೆಯುತ್ತದೆ."
+      "videoHint": "ಸಣ್ಣ ವೀಡಿಯೊ ವಿಶ್ವಾಸ ಮೂಡಿಸಿ ಹೆಚ್ಚು ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ಪಡೆಯುತ್ತದೆ.",
+      "imageTooLarge": "ಚಿತ್ರ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ — ಗರಿಷ್ಠ {{maxMb}}MB",
+      "videoTooLarge": "ವೀಡಿಯೊ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ — ಗರಿಷ್ಠ {{maxMb}}MB",
+      "videoTooLong": "ವೀಡಿಯೊ ತುಂಬಾ ಉದ್ದವಾಗಿದೆ — ಗರಿಷ್ಠ {{maxSec}} ಸೆಕೆಂಡುಗಳು",
+      "uploadingVideo": "ವೀಡಿಯೊ ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+      "videoLimits": "ಗರಿಷ್ಠ {{maxSec}} ಸೆಕೆಂಡುಗಳು, {{maxMb}}MB ವರೆಗೆ"
     },
     "detail": {
       "backToListings": "← ಪಟ್ಟಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ",
@@ -3861,6 +3888,7 @@
     "loadTrail": "Load Trail",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -4032,7 +4060,8 @@
     "next": "ಮುಂದಿನ",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "ಫಿಲ್ಟರ್ ಆಯ್ಕೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ (ವಿಶೇಷತೆಗಳು/ಭಾಷೆಗಳು)"
   },
   "myBookings": {
     "title": "ನನ್ನ ಬುಕಿಂಗ್‌ಗಳು",
@@ -4168,6 +4197,7 @@
     "failedToSendMessage": "Failed to send message",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "ರೆಕಾರ್ಡಿಂಗ್ ಬದಲಾವಣೆಯ ಬಗ್ಗೆ ಇತರ ಭಾಗವಹಿಸುವವರಿಗೆ ತಿಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
     "micUnavailable": "Microphone unavailable",
     "cameraStillUnavailable": "Camera still unavailable",
     "duration": "Duration",
@@ -4480,6 +4510,7 @@
     "cameraUnavailable": "Camera unavailable",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "ರೆಕಾರ್ಡಿಂಗ್ ಬದಲಾವಣೆಯ ಬಗ್ಗೆ ಇತರ ಭಾಗವಹಿಸುವವರಿಗೆ ತಿಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
     "failedToSaveNotes": "Failed to save notes",
     "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
     "failedToComplete": "Failed to complete consultation",
@@ -4678,6 +4709,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5257,6 +5295,7 @@
     "verify": "ಪರಿಶೀಲಿಸಿ",
     "unverify": "ಪರಿಶೀಲನೆ ತೆಗೆದುಹಾಕಿ",
     "pendingDocReviews": "ಬಾಕಿ ದಾಖಲೆ ಪರಿಶೀಲನೆಗಳು",
+    "pendingLoadFailed": "ಬಾಕಿ ದಾಖಲೆ ಪರಿಶೀಲನೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
     "noDocReviews": "ಬಾಕಿ ದಾಖಲೆ ಪರಿಶೀಲನೆಗಳಿಲ್ಲ",
     "reviewDocuments": "ದಾಖಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ",
     "verifyHospital": "ಆಸ್ಪತ್ರೆಯನ್ನು ಪರಿಶೀಲಿಸಿ",
@@ -5283,6 +5322,9 @@
     "checkInPatient": "ರೋಗಿ ಚೆಕ್ ಇನ್",
     "noPatients": "ಕ್ಯೂನಲ್ಲಿ ರೋಗಿಗಳಿಲ್ಲ",
     "unknownPatient": "ಅಪರಿಚಿತ ರೋಗಿ",
+    "medicationDispensed": "ಔಷಧಿ ವಿತರಿಸಲಾಗಿದೆ",
+    "medicationReady": "ಔಷಧಿ ವಿತರಣೆಗೆ ಸಿದ್ಧವಾಗಿದೆ",
+    "medicationPendingReview": "ಔಷಧಿ ಫಾರ್ಮಸಿಸ್ಟ್ ಪರಿಶೀಲನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
     "owner": "ಮಾಲೀಕ",
     "triage": "ಟ್ರಯಾಜ್",
     "startExam": "ಪರೀಕ್ಷೆ ಪ್ರಾರಂಭಿಸಿ",
@@ -5731,7 +5773,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -5957,7 +6001,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -5992,6 +6064,7 @@
     "expired": "Expired",
     "failedToLoad": "Failed to load certificates",
     "failedToPrint": "Failed to load certificate for printing",
+    "failedToLoadEnterprises": "ಫಿಲ್ಟರಿಂಗ್‌ಗಾಗಿ ಎಂಟರ್‌ಪ್ರೈಸ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
     "certTypes": {
       "health_certificate": "General Health Certificate",
       "fitness_to_travel": "Fitness to Travel Certificate",
@@ -6038,6 +6111,7 @@
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
     "failedToCreate": "ಪ್ರಮಾಣಪತ್ರ ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ",
+    "failedToLoadEnterprises": "ಎಂಟರ್‌ಪ್ರೈಸ್‌ಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
     "noCertTypeSelected": "ದಯವಿಟ್ಟು ಪ್ರಮಾಣಪತ್ರ ಪ್ರಕಾರ ಆಯ್ಕೆಮಾಡಿ",
     "viewAllCertificates": "ಎಲ್ಲಾ ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ನೋಡಿ",
     "createAnother": "ಮತ್ತೊಂದನ್ನು ರಚಿಸಿ",
@@ -6376,6 +6450,7 @@
     "create": "ರೆಫರಲ್ ರಚಿಸಿ",
     "createTitle": "ರೋಗಿಯನ್ನು ನೆಟ್‌ವರ್ಕ್ ಆಸ್ಪತ್ರೆಗೆ ರೆಫರ್ ಮಾಡಿ",
     "createSubtitle": "ಈ ರೋಗಿಯನ್ನು ನಿಮ್ಮ ನೆಟ್‌ವರ್ಕ್‌ನ ಇನ್ನೊಂದು ಆಸ್ಪತ್ರೆಗೆ ಕಳುಹಿಸಿ",
+    "hospitalsLoadFailed": "ನೆಟ್‌ವರ್ಕ್ ಆಸ್ಪತ್ರೆಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
     "toHospital": "ಸ್ವೀಕರಿಸುವ ಆಸ್ಪತ್ರೆ *",
     "toVet": "ಸ್ವೀಕರಿಸುವ ಪಶುವೈದ್ಯ (ಐಚ್ಛಿಕ)",
     "reason": "ರೆಫರಲ್ ಕಾರಣ *",
@@ -6651,7 +6726,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "ನಿಮ್ಮ ಉಳಿಸಿದ ಅಧಿಸೂಚನೆ ಆದ್ಯತೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ — ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ"
   },
   "emailTemplates": {
     "title": "ಇಮೇಲ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳು",
@@ -6720,6 +6796,7 @@
       "catalog": "Catalog",
       "history": "History",
       "reorders": "Reorders",
+      "transfers": "Transfers",
       "analytics": "Analytics"
     },
     "stats": {
@@ -6839,6 +6916,7 @@
     "reorder": {
       "title": "Reorder",
       "supplier": "Supplier",
+      "suppliersLoadFailed": "ಪೂರೈಕೆದಾರರ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ",
       "selectSupplier": "Select supplier",
       "supplierRequired": "Select a supplier",
       "quantity": "Qty",
@@ -6996,6 +7074,44 @@
         "cancelled": "Cancelled"
       }
     },
+    "transfers": {
+      "title": "Inter-Hospital Medication Transfers",
+      "newRequest": "New Transfer Request",
+      "activeRequests": "Active Requests",
+      "requests": "requests",
+      "noActive": "No active transfer requests",
+      "empty": "No transfer history",
+      "route": "Route",
+      "requestedBy": "Requested By",
+      "sourceHospital": "From Hospital",
+      "destHospital": "To Hospital",
+      "selectHospital": "Select hospital",
+      "medications": "Medications",
+      "selectMedication": "Select medication",
+      "addLine": "Add Medication",
+      "submitRequest": "Submit Request",
+      "addTracking": "Add Tracking",
+      "decline": "Decline",
+      "declineReason": "Reason for declining",
+      "formIncomplete": "Select both hospitals and at least one medication line",
+      "sameHospital": "Source and destination hospitals must be different",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "preparing": "Preparing",
+        "shipped": "Shipped",
+        "received": "Received",
+        "fulfilled": "Fulfilled",
+        "declined": "Declined"
+      },
+      "advanceTo": {
+        "accepted": "Accept",
+        "preparing": "Mark Preparing",
+        "shipped": "Mark Shipped",
+        "received": "Mark Received",
+        "fulfilled": "Mark Fulfilled"
+      }
+    },
     "analytics": {
       "title": "Pharmacy Analytics",
       "days": "days",
@@ -7071,6 +7187,8 @@
     "receiptTitle": "ಪಾವತಿ ರಸೀದಿ",
     "patient": "ರೋಗಿ",
     "doctor": "ವೈದ್ಯರು",
+    "pharmacy": "ಫಾರ್ಮಸಿ",
+    "medications": "ಔಷಧಿಗಳು",
     "animal": "ಪ್ರಾಣಿ",
     "date": "ದಿನಾಂಕ",
     "totalPaid": "ಒಟ್ಟು ಪಾವತಿ",
@@ -7155,6 +7273,7 @@
     "subtitle": "ವೈದ್ಯ-ಮಟ್ಟದ ಕಮಿಷನ್ ಓವರ್‌ರೈಡ್‌ಗಳು — ಖಾಲಿ ಕ್ಷೇತ್ರಗಳು ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್ ಬಳಸುತ್ತವೆ",
     "globalSettings": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್‌ಗಳು",
     "globalInfo": "ಜಾಗತಿಕ ಡೀಫಾಲ್ಟ್: {{percent}}% + ಪ್ರತಿ ಪಾವತಿ ಬುಕಿಂಗ್‌ಗೆ {{flat}} ಫ್ಲಾಟ್ ಶುಲ್ಕ. System Settings ನಲ್ಲಿ ಬದಲಾಯಿಸಿ.",
+    "globalsLoadFailed": "ಪ್ರಸ್ತುತ ಜಾಗತಿಕ ಕಮಿಷನ್ ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ — ಫಾಲ್‌ಬ್ಯಾಕ್ ಮೌಲ್ಯಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ",
     "saved": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲಾಗಿದೆ. ಹೊಸ ಪಾವತಿಗಳಿಗೆ ಮಾತ್ರ ಅನ್ವಯ.",
     "saveFailed": "ಓವರ್‌ರೈಡ್ ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ.",
     "searchPlaceholder": "ಹೆಸರು ಅಥವಾ ಇಮೇಲ್ ಮೂಲಕ ವೈದ್ಯರನ್ನು ಹುಡುಕಿ…",
@@ -7290,6 +7409,9 @@
     "refundsOut": "ಮರುಪಾವತಿಗಳು",
     "netRevenue": "ನಿವ್ವಳ ವೇದಿಕೆ ಆದಾಯ",
     "netRevenueHint": "ಕಮಿಷನ್ + ಪ್ರಕ್ರಿಯೆ − ಗೇಟ್‌ವೇ ಶುಲ್ಕ",
+    "pharmacyRevenueTitle": "ಫಾರ್ಮಸಿ ಆದಾಯ (ಆಯ್ದ ಅವಧಿ)",
+    "pharmacyCollected": "ಫಾರ್ಮಸಿ ಸಂಗ್ರಹಿಸಿದೆ",
+    "pharmacyPending": "ಫಾರ್ಮಸಿ ಬಾಕಿ ಪಾವತಿ",
     "liabilitiesTitle": "ಹೊಣೆಗಾರಿಕೆಗಳು (ಪ್ರಸ್ತುತ)",
     "doctorClearing": "ವೈದ್ಯ ಗಳಿಕೆ ಕ್ಲಿಯರಿಂಗ್‌ನಲ್ಲಿ",
     "doctorAvailable": "ವೈದ್ಯ ಗಳಿಕೆ ಲಭ್ಯ",
@@ -7304,5 +7426,103 @@
     "stuckPending": "ಸಿಲುಕಿದ ಬಾಕಿ ಪಾವತಿಗಳು",
     "stuckPendingHint": "1 ಗಂಟೆಗಿಂತ ಹೆಚ್ಚು — ದೈನಂದಿನ ಹೊಂದಾಣಿಕೆ ಪ್ರಯತ್ನ",
     "openHolds": "ತೆರೆದ ಪಾವತಿ ಹೋಲ್ಡ್‌ಗಳು"
+  },
+  "animalClass": {
+    "fieldLabel": "ವರ್ಗ",
+    "selectClass": "ವರ್ಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "anyClass": "ಯಾವುದೇ ವರ್ಗ",
+    "sire": "ತಂದೆ ಪ್ರಾಣಿ (ಸೈರ್)",
+    "dam": "ತಾಯಿ ಪ್ರಾಣಿ (ಡ್ಯಾಮ್)",
+    "selectSire": "ತಂದೆ ಪ್ರಾಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಐಚ್ಛಿಕ)",
+    "selectDam": "ತಾಯಿ ಪ್ರಾಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ (ಐಚ್ಛಿಕ)",
+    "breedingStatus": "ಸಂತಾನೋತ್ಪತ್ತಿ ಸ್ಥಿತಿ",
+    "selectBreedingStatus": "ಸ್ಥಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "notBred": "ಸಂತಾನೋತ್ಪತ್ತಿ ಆಗಿಲ್ಲ",
+    "pregnant": "ಗರ್ಭಿಣಿ",
+    "notPregnant": "ಗರ್ಭಿಣಿ ಅಲ್ಲ",
+    "lastBreedingDate": "ಕೊನೆಯ ಸಂತಾನೋತ್ಪತ್ತಿ ದಿನಾಂಕ",
+    "expectedDueDate": "ನಿರೀಕ್ಷಿತ ಹೆರಿಗೆ ದಿನಾಂಕ",
+    "cattle_bull": "ಹೋರಿ",
+    "cattle_cow": "ಹಸು",
+    "cattle_calf": "ಕರು",
+    "cattle_bull_calf": "ಗಂಡು ಕರು",
+    "cattle_heifer_calf": "ಹೆಣ್ಣು ಕರು",
+    "cattle_heifer": "ಬಡ್ಡಿ ಹಸು",
+    "cattle_bullock": "ಎತ್ತು",
+    "cattle_steer": "ಬಂಜೆ ಎತ್ತು (ಮಾಂಸಕ್ಕಾಗಿ)",
+    "buffalo_bull": "ಎಮ್ಮೆ ಕೋಣ",
+    "buffalo_cow": "ಎಮ್ಮೆ",
+    "buffalo_calf": "ಎಮ್ಮೆ ಕರು",
+    "buffalo_bull_calf": "ಗಂಡು ಎಮ್ಮೆ ಕರು",
+    "buffalo_heifer_calf": "ಹೆಣ್ಣು ಎಮ್ಮೆ ಕರು",
+    "buffalo_heifer": "ಬಡ್ಡಿ ಎಮ್ಮೆ",
+    "buffalo_bullock": "ಎಮ್ಮೆ ಎತ್ತು",
+    "sheep_ram": "ಟಗರು",
+    "sheep_ewe": "ಹೆಣ್ಣು ಕುರಿ",
+    "sheep_lamb": "ಕುರಿ ಮರಿ",
+    "sheep_ram_lamb": "ಗಂಡು ಕುರಿ ಮರಿ",
+    "sheep_ewe_lamb": "ಹೆಣ್ಣು ಕುರಿ ಮರಿ",
+    "sheep_wether": "ಬಂಜೆ ಟಗರು",
+    "goat_buck": "ಹೋತ",
+    "goat_doe": "ಆಡು",
+    "goat_buckling": "ಗಂಡು ಆಡು ಮರಿ",
+    "goat_goatling": "ಹೆಣ್ಣು ಆಡು ಮರಿ",
+    "goat_kid": "ಆಡು ಮರಿ",
+    "pig_boar": "ಗಂಡು ಹಂದಿ",
+    "pig_sow": "ಹೆಣ್ಣು ಹಂದಿ",
+    "pig_gilt": "ಎಳೆಯ ಹೆಣ್ಣು ಹಂದಿ",
+    "pig_barrow": "ಬಂಜೆ ಹಂದಿ",
+    "dog_male": "ನಾಯಿ",
+    "dog_bitch": "ಹೆಣ್ಣು ನಾಯಿ",
+    "dog_pup": "ನಾಯಿ ಮರಿ",
+    "cat_tom": "ಗಂಡು ಬೆಕ್ಕು",
+    "cat_queen": "ಹೆಣ್ಣು ಬೆಕ್ಕು",
+    "cat_kitten": "ಬೆಕ್ಕಿನ ಮರಿ",
+    "cat_neuter": "ಬಂಜೆ ಬೆಕ್ಕು"
+  },
+  "masterData": {
+    "title": "ಮಾಸ್ಟರ್ ಡೇಟಾ",
+    "subtitle": "ಪ್ರಭೇದಗಳು, ತಳಿಗಳು, ಪ್ರಾಣಿ ವರ್ಗಗಳು ಮತ್ತು ಮಾರುಕಟ್ಟೆ ಡ್ರಾಪ್‌ಡೌನ್ ಮೌಲ್ಯಗಳನ್ನು ನಿರ್ವಹಿಸಿ — ಕೋಡ್ ಡಿಪ್ಲಾಯ್ ಅಗತ್ಯವಿಲ್ಲ.",
+    "tabs": {
+      "species": "ಪ್ರಭೇದಗಳು",
+      "breeds": "ತಳಿಗಳು",
+      "classes": "ಪ್ರಾಣಿ ವರ್ಗಗಳು",
+      "categories": "ಮಾರುಕಟ್ಟೆ ವರ್ಗಗಳು",
+      "conditions": "ಮಾರುಕಟ್ಟೆ ಸ್ಥಿತಿಗಳು"
+    },
+    "filterBySpecies": "ಪ್ರಭೇದ",
+    "selectSpeciesPrompt": "— ಒಂದು ಪ್ರಭೇದವನ್ನು ಆಯ್ಕೆಮಾಡಿ —",
+    "addNew": "ಹೊಸದನ್ನು ಸೇರಿಸಿ",
+    "editEntry": "ನಮೂದನ್ನು ಸಂಪಾದಿಸಿ",
+    "reactivate": "ಮರುಸಕ್ರಿಯಗೊಳಿಸಿ",
+    "noEntries": "ಇನ್ನೂ ನಮೂದುಗಳಿಲ್ಲ",
+    "protectedHint": "ಸಂರಕ್ಷಿತ — ಪ್ರಮುಖ ತರ್ಕವು ಈ ಕೋಡ್ ಅನ್ನು ಅವಲಂಬಿಸಿದೆ",
+    "labelKeyHint": "ಅಂತರ್ನಿರ್ಮಿತ ಅನುವಾದವನ್ನು ಇರಿಸಿಕೊಳ್ಳಲು ಖಾಲಿ ಬಿಡಿ",
+    "confirmDelete": "ಈ ನಮೂದನ್ನು ಅಳಿಸುವುದೇ? ಇದನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ.",
+    "deleteBlocked": "ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ — ಇದು ಇನ್ನೂ ಬಳಕೆಯಲ್ಲಿರಬಹುದು",
+    "updatedSuccess": "ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ",
+    "createdSuccess": "ಯಶಸ್ವಿಯಾಗಿ ರಚಿಸಲಾಗಿದೆ",
+    "archivedSuccess": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
+    "restoredSuccess": "ಮರುಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
+    "deletedSuccess": "ಅಳಿಸಲಾಗಿದೆ",
+    "errors": {
+      "speciesRequired": "ಮೊದಲು ಒಂದು ಪ್ರಭೇದವನ್ನು ಆಯ್ಕೆಮಾಡಿ"
+    },
+    "gender": {
+      "unknown": "ಅಜ್ಞಾತ"
+    },
+    "col": {
+      "icon": "ಐಕಾನ್",
+      "code": "ಕೋಡ್",
+      "label": "ಲೇಬಲ್",
+      "category": "ವರ್ಗ",
+      "earTag": "ಇಯರ್ ಟ್ಯಾಗ್ ಬಳಸುತ್ತದೆ",
+      "sortOrder": "ಕ್ರಮ",
+      "value": "ಮೌಲ್ಯ (ಆಂತರಿಕ ಕೋಡ್)",
+      "impliedGender": "ಸೂಚಿತ ಲಿಂಗ",
+      "canBePregnant": "ಗರ್ಭಿಣಿಯಾಗಬಹುದು",
+      "canProduceMilk": "ಹಾಲು ಉತ್ಪಾದಿಸಬಹುದು",
+      "marketplaceEligible": "ಮಾರುಕಟ್ಟೆಯಲ್ಲಿ ಮಾರಾಟ ಯೋಗ್ಯ"
+    }
   }
 }

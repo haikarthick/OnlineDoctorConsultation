@@ -153,14 +153,14 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
       <div className="module-page">
         <div className="wr-success">
           <div className="wr-success-icon">🎉</div>
-          <h1 style={{ marginBottom: 8 }}>{t('writeReview.thankYou')}</h1>
-          <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 8 }}>
+          <h1 className="si-dab75309">{t('writeReview.thankYou')}</h1>
+          <p className="si-712f4327">
             {t('writeReview.submittedFor', { name: selectedConsultation.vetName })}
           </p>
-          <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 28 }}>
+          <p className="si-ccddda80">
             {t('writeReview.helpCommunity')}
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="si-6625a27e">
             <button className="module-btn primary" onClick={() => onNavigate('/my-bookings')}>
               {t('writeReview.myBookings')}
             </button>
@@ -224,7 +224,7 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
                     </p>
                   )}
                   {c.consultationReason && (
-                    <p className="wr-consult-date" style={{ marginTop: 2 }}>
+                    <p className="wr-consult-date si-38436050">
                       {c.consultationReason.slice(0, 80)}{c.consultationReason.length > 80 ? '…' : ''}
                     </p>
                   )}
@@ -259,7 +259,7 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
         </div>
       </div>
 
-      <div className="module-card" style={{ maxWidth: 640, margin: '0 auto' }}>
+      <div className="module-card si-4b1d66f9">
         {error && <div className="wr-error">{error}</div>}
 
         {/* Doctor context banner */}
@@ -288,7 +288,7 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
           {/* Star Rating */}
           <div className="module-form-group">
             <label className="module-label">
-              {t('writeReview.overallRating')} <span style={{ color: '#dc2626' }}>*</span>
+              {t('writeReview.overallRating')} <span className="si-f84f41a5">*</span>
             </label>
             <div className="wr-stars">
               {[1, 2, 3, 4, 5].map(star => (
@@ -309,15 +309,15 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
           {/* Comment */}
           <div className="module-form-group">
             <label className="module-label">
-              {t('writeReview.yourReview')} <span style={{ color: '#dc2626' }}>*</span>
+              {t('writeReview.yourReview')} <span className="si-f84f41a5">*</span>
             </label>
             <textarea
-              className="module-input"
+              className="module-input si-3f7753b6"
               rows={5}
               placeholder={t('writeReview.reviewPlaceholder')}
               value={comment}
               onChange={e => setComment(e.target.value)}
-              style={{ resize: 'vertical' }}
+             
             />
             <p className="wr-char-count">{t('writeReview.charCount', { count: comment.length })}</p>
           </div>
@@ -345,17 +345,17 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
 
           {/* Make Public */}
           <div className="module-form-group">
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+            <label className="si-a3a642f8">
               <input
                 type="checkbox"
                 checked={isPublic}
                 onChange={e => setIsPublic(e.target.checked)}
-                style={{ width: 18, height: 18, marginTop: 2 }}
+                className="si-a858f960"
               />
               <span>
                 <strong>{t('writeReview.isPublic')}</strong>
                 <br />
-                <span style={{ color: '#6b7280', fontSize: 13 }}>{t('writeReview.isPublicDesc')}</span>
+                <span className="si-c3b93ebb">{t('writeReview.isPublicDesc')}</span>
               </span>
             </label>
           </div>
@@ -366,7 +366,7 @@ const WriteReview: React.FC<WriteReviewProps> = ({ consultationId, vetId, onNavi
           )}
 
           {/* Submit */}
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', paddingTop: 8 }}>
+          <div className="si-7c261ac2">
             <button
               type="button"
               className="module-btn"

@@ -149,7 +149,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
   if (!metadata) {
     return (
       <div className="module-page">
-        <div style={{ textAlign: 'center', padding: 40 }}>
+        <div className="si-86638a30">
           <p>{t('permissionManagement.noData')}</p>
           <button className="btn btn-primary" onClick={loadPermissions}>{t('permissionManagement.retry')}</button>
         </div>
@@ -172,19 +172,19 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
 
       {/* Page-level content */}
       {error && (
-        <div style={{ padding: '14px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
+        <div className="si-9bc53e01">
           ⚠️ {error}
-          <button style={{ marginLeft: 12, padding: '4px 12px', border: '1px solid #dc2626', borderRadius: 4, background: 'white', color: '#dc2626', cursor: 'pointer' }} onClick={() => setError('')}>✕</button>
+          <button className="si-53b56f1c" onClick={() => setError('')}>✕</button>
         </div>
       )}
       {success && (
-        <div style={{ padding: '14px 18px', background: '#f0fdf4', color: '#16a34a', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
+        <div className="si-d059a7aa">
           ✅ {success}
         </div>
       )}
 
       {/* View Mode Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 24, background: '#f3f4f6', borderRadius: 10, padding: 4, width: 'fit-content' }}>
+      <div className="si-1bfe228c">
         <button
           onClick={() => setViewMode('systemRoles')}
           style={{
@@ -215,7 +215,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
 
       {viewMode === 'systemRoles' && (<>
       {/* Role Selector Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="si-1c568433">
         {metadata.roles.map(role => (
           <button
             key={role}
@@ -236,18 +236,18 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
           </button>
         ))}
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className="si-f869b5ad">
           <input
             type="text"
             placeholder={t('permissionManagement.searchPlaceholder')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            style={{ padding: '8px 14px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: 14, width: 200 }}
+            className="si-41de0833"
           />
           <button
             onClick={handleResetDefaults}
             disabled={resetting}
-            style={{ padding: '8px 16px', border: '1px solid #dc2626', borderRadius: 6, background: 'white', color: '#dc2626', cursor: 'pointer', fontSize: 13 }}
+            className="si-b9fdedc2"
           >
             {resetting ? t('permissionManagement.resetting') : t('permissionManagement.resetToDefaults')}
           </button>
@@ -255,18 +255,18 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       </div>
 
       {/* Role Summary */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-        <div style={{ background: 'white', borderRadius: 12, padding: '16px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', flex: 1 }}>
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#667eea' }}>{enabledCount}</div>
-          <div style={{ fontSize: 13, color: '#6b7280' }}>{t('permissionManagement.enabledPermissions')}</div>
+      <div className="si-c36935e5">
+        <div className="si-3b741829">
+          <div className="si-ad9b823b">{enabledCount}</div>
+          <div className="si-c3b93ebb">{t('permissionManagement.enabledPermissions')}</div>
         </div>
-        <div style={{ background: 'white', borderRadius: 12, padding: '16px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', flex: 1 }}>
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#9ca3af' }}>{totalCount - enabledCount}</div>
-          <div style={{ fontSize: 13, color: '#6b7280' }}>{t('permissionManagement.disabledPermissions')}</div>
+        <div className="si-3b741829">
+          <div className="si-3ceb7b8f">{totalCount - enabledCount}</div>
+          <div className="si-c3b93ebb">{t('permissionManagement.disabledPermissions')}</div>
         </div>
-        <div style={{ background: 'white', borderRadius: 12, padding: '16px 24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', flex: 1 }}>
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#16a34a' }}>{totalCount}</div>
-          <div style={{ fontSize: 13, color: '#6b7280' }}>{t('permissionManagement.totalPermissions')}</div>
+        <div className="si-3b741829">
+          <div className="si-ad25aaa8">{totalCount}</div>
+          <div className="si-c3b93ebb">{t('permissionManagement.totalPermissions')}</div>
         </div>
       </div>
 
@@ -283,25 +283,25 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
         const catEnabledCount = filteredPerms.filter(p => rolePerms[p]).length
 
         return (
-          <div key={catKey} style={{ background: 'white', borderRadius: 12, marginBottom: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          <div key={catKey} className="si-5ef1c116">
             {/* Category Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+            <div className="si-569a8b5c">
               <div>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{category.label}</h3>
-                <span style={{ fontSize: 12, color: '#6b7280' }}>{catEnabledCount}/{filteredPerms.length} enabled</span>
+                <h3 className="si-44e3b5bb">{category.label}</h3>
+                <span className="si-48a0b045">{catEnabledCount}/{filteredPerms.length} enabled</span>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="si-d223efb3">
                 <button
                   onClick={() => handleEnableAll(catKey)}
                   disabled={saving === catKey}
-                  style={{ padding: '4px 12px', fontSize: 12, border: '1px solid #16a34a', borderRadius: 4, background: 'white', color: '#16a34a', cursor: 'pointer' }}
+                  className="si-136113f8"
                 >
                   {t('permissionManagement.enableAll')}
                 </button>
                 <button
                   onClick={() => handleDisableAll(catKey)}
                   disabled={saving === catKey}
-                  style={{ padding: '4px 12px', fontSize: 12, border: '1px solid #dc2626', borderRadius: 4, background: 'white', color: '#dc2626', cursor: 'pointer' }}
+                  className="si-8c7aa0c3"
                 >
                   {t('permissionManagement.disableAll')}
                 </button>
@@ -309,7 +309,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
             </div>
 
             {/* Permission Rows */}
-            <div style={{ padding: '8px 0' }}>
+            <div className="si-147db73d">
               {filteredPerms.map(permission => {
                 const isEnabled = rolePerms[permission] ?? false
                 const isSaving = saving === `${selectedRole}.${permission}`
@@ -317,22 +317,15 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
                 return (
                   <div
                     key={permission}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '12px 20px',
-                      borderBottom: '1px solid #f3f4f6',
-                      transition: 'background 0.15s',
-                    }}
+                    className="si-aab105d1"
                     onMouseEnter={e => (e.currentTarget.style.background = '#f9fafb')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   >
                     <div>
-                      <div style={{ fontWeight: 500, fontSize: 14, color: '#111827' }}>
+                      <div className="si-4904507d">
                         {metadata.labels[permission] || permission}
                       </div>
-                      <div style={{ fontSize: 12, color: '#9ca3af', fontFamily: 'monospace' }}>
+                      <div className="si-a78c767f">
                         {permission}
                       </div>
                     </div>
@@ -342,7 +335,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
                         checked={isEnabled}
                         onChange={() => handleToggle(selectedRole, permission)}
                         disabled={isSaving}
-                        style={{ opacity: 0, width: 0, height: 0 }}
+                        className="si-f3060c35"
                       />
                       <span style={{
                         position: 'absolute',
@@ -374,15 +367,15 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
       })}
 
       {/* Permission Matrix View */}
-      <div style={{ background: 'white', borderRadius: 12, marginTop: 24, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <h3 style={{ margin: '0 0 16px 0' }}>📊 {t('permissionManagement.roleComparisonMatrix')}</h3>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <div className="si-d0887729">
+        <h3 className="si-2f312154">📊 {t('permissionManagement.roleComparisonMatrix')}</h3>
+        <div className="si-9aa6c55f">
+          <table className="si-ec76dd85">
             <thead>
               <tr>
-                <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '2px solid #e5e7eb', background: '#f9fafb', position: 'sticky', left: 0 }}>{t('permissionManagement.permission')}</th>
+                <th className="si-dfddaa19">{t('permissionManagement.permission')}</th>
                 {metadata.roles.map(role => (
-                  <th key={role} style={{ padding: '10px 12px', textAlign: 'center', borderBottom: '2px solid #e5e7eb', background: '#f9fafb', minWidth: 100 }}>
+                  <th key={role} className="si-5e7911ce">
                     {metadata.roleLabels[role]}
                   </th>
                 ))}
@@ -395,11 +388,11 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ onNavigate:
                 return label.toLowerCase().includes(searchQuery.toLowerCase())
               }).map(perm => (
                 <tr key={perm}>
-                  <td style={{ padding: '8px 12px', borderBottom: '1px solid #f3f4f6', fontWeight: 500, position: 'sticky', left: 0, background: 'white' }}>
+                  <td className="si-3e3648be">
                     {metadata.labels[perm] || perm}
                   </td>
                   {metadata.roles.map(role => (
-                    <td key={role} style={{ padding: '8px 12px', textAlign: 'center', borderBottom: '1px solid #f3f4f6' }}>
+                    <td key={role} className="si-71024195">
                       <span style={{
                         display: 'inline-block',
                         width: 20, height: 20,

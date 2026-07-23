@@ -9,15 +9,18 @@ describe('AdminService', () => {
   describe('getDashboardStats', () => {
     it('should return dashboard statistics', async () => {
       (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ total: '100', pet_owners: '60', veterinarians: '20', farmers: '15', admins: '5' }] })
-        .mockResolvedValueOnce({ rows: [{ total: '50', active: '10', completed: '35', cancelled: '5' }] })
-        .mockResolvedValueOnce({ rows: [{ total: '200', pending: '20' }] })
-        .mockResolvedValueOnce({ rows: [{ total: '30', average_rating: '4.2' }] })
-        .mockResolvedValueOnce({ rows: [{ count: '80' }] })
-        .mockResolvedValueOnce({ rows: [{ total: '25', today: '3' }] });
+        .mockResolvedValueOnce({ rows: [{ role: 'pet_owner', count: '60' }, { role: 'veterinarian', count: '20' }] }) // users GROUP BY role
+        .mockResolvedValueOnce({ rows: [{ status: 'completed', count: '35' }, { status: 'cancelled', count: '5' }] }) // consultations GROUP BY status
+        .mockResolvedValueOnce({ rows: [{ status: 'completed', total: '500', count: '30' }] })                       // payments GROUP BY status
+        .mockResolvedValueOnce({ rows: [{ count: '30', avgRating: '4.2' }] })                                        // reviews
+        .mockResolvedValueOnce({ rows: [{ count: '80' }] })                                                          // bookings
+        .mockResolvedValueOnce({ rows: [{ count: '3' }] })                                                           // active video sessions
+        .mockResolvedValueOnce({ rows: [{ count: '2' }] })                                                           // pending network approvals
+        .mockResolvedValueOnce({ rows: [{ count: '5' }] });                                                          // pending user approvals
       const result = await adminService.getDashboardStats();
       expect(result).toBeDefined();
-      expect(result).toHaveProperty('totalUsers');
+      expect(result).toHaveProperty('totalUsers', 80);
+      expect(result.pendingActions).toBe(7);
     });
   });
 

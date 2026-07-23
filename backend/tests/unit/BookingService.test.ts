@@ -14,6 +14,10 @@ jest.mock('../../src/services/NotificationService', () => ({
   __esModule: true,
   default: { createNotification: jest.fn().mockResolvedValue({}) }
 }));
+jest.mock('../../src/services/payment/PaymentModuleConfig', () => ({
+  __esModule: true,
+  default: { isEnabled: jest.fn().mockResolvedValue(false) }
+}));
 
 describe('BookingService', () => {
   beforeEach(() => jest.clearAllMocks());

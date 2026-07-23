@@ -11,6 +11,7 @@
 - **Context:** init.sql used `CREATE EXTENSION uuid-ossp` + `uuid_generate_v4()`. Render's managed PostgreSQL runs as a restricted user — `CREATE EXTENSION` requires superuser. This aborted ALL table creation silently.
 - **Lesson:** Always use `gen_random_uuid()` (built-in PostgreSQL 13+). Never use `uuid_generate_v4()`. Never add `CREATE EXTENSION` to any SQL file.
 - **Apply to:** ALL SQL files, ALL TypeScript migration files, ALL service SQL strings
+- **2026-07-21 recurrence (see past-bugs.md DEPLOY-012):** this rule alone did not stop the bug from coming back — 4 files under `backend/migrations/*.sql` had it and went undetected for an unknown length of time because nothing automated checked for it. **Do not rely on this memory note alone.** `backend/scripts/schema-check.js` now greps every `.sql` file under `docker/` and `backend/migrations/` for this pattern and fails the pre-push hook if found — that automated check, not this note, is what actually prevents recurrence now. If you add a new "works locally, breaks on Render's restricted DB role" rule, add an automated check for it too, not just a memory entry.
 
 ### LESSON-002 — Always CREATE SCHEMA Before Creating Tables In It
 - **Context:** `ensureSchemaPublic()` checked if `users` table existed in `vetcare_prod`, then ran init.sql — but never created the `vetcare_prod` schema first. Tables ended up in `public` or the whole thing errored.

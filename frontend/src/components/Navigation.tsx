@@ -244,6 +244,8 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentPath 
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-vaccine-protocols', label: t('nav.vaccineProtocols'), icon: '🧬', path: '/admin/vaccine-protocols',
       roles: ['admin'], section: 'Administration' },
+    { id: 'admin-master-data', label: t('nav.masterData'), icon: '🗂️', path: '/admin/master-data',
+      roles: ['admin'], section: 'Administration' },
     { id: 'admin-certificate-settings', label: t('nav.certificateSettings'), icon: '📋', path: '/admin/certificate-settings',
       roles: ['admin'], section: 'Administration' },
     { id: 'admin-holidays', label: 'Holiday Management', icon: '🎉', path: '/admin/holidays',

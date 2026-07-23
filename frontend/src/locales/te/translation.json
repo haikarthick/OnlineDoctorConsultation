@@ -88,6 +88,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "కాపీ చేయబడింది!",
+    "copyFailed": "క్లిప్‌బోర్డ్‌కు కాపీ చేయడం సాధ్యం కాలేదు",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -101,7 +103,8 @@
     "fillRequired": "Please fill all required fields",
     "none": "None",
     "error": "Error",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "previous": "మునుపటి"
   },
   "nav": {
     "brand": "VetCare",
@@ -202,7 +205,8 @@
     "commissionSettings": "కమిషన్ నియమాలు",
     "settlements": "సెటిల్మెంట్లు",
     "referrals": "రెఫరల్స్",
-    "financeReports": "ఫైనాన్స్ నివేదికలు"
+    "financeReports": "ఫైనాన్స్ నివేదికలు",
+    "masterData": "మాస్టర్ డేటా"
   },
   "login": {
     "welcome": "తిరిగి స్వాగతం",
@@ -868,7 +872,10 @@
       "todayQueue": "ఈ రోజు క్యూ",
       "activeInpatients": "యాక్టివ్ ఇన్‌పేషెంట్లు",
       "pendingReferrals": "పెండింగ్ రెఫరల్స్",
-      "branchStaff": "బ్రాంచ్ సిబ్బంది"
+      "branchStaff": "బ్రాంచ్ సిబ్బంది",
+      "rxPendingReview": "ఫార్మసిస్ట్ సమీక్ష కోసం పెండింగ్‌లో ఉన్న ప్రిస్క్రిప్షన్లు",
+      "rxRejectedThisWeek": "ఈ వారం తిరస్కరించబడిన ప్రిస్క్రిప్షన్లు",
+      "rxDispensed": "పంపిణీ చేయబడిన ప్రిస్క్రిప్షన్లు"
     },
     "quickActions": {
       "viewConsultations": "సంప్రదింపులు చూడండి",
@@ -1269,7 +1276,8 @@
       "confirmRemove": "ఈ జంతువును తీసివేయాలనుకుంటున్నారా?",
       "removed": "జంతువు విజయవంతంగా తీసివేయబడింది",
       "failedSave": "జంతువును సేవ్ చేయడం విఫలమైంది",
-      "failedRemove": "జంతువును తీసివేయడం విఫలమైంది"
+      "failedRemove": "జంతువును తీసివేయడం విఫలమైంది",
+      "failedLoadEnterprises": "మీ ఎంటర్‌ప్రైజెస్ జాబితాను లోడ్ చేయడంలో విఫలమైంది"
     },
     "pageTitle": "నా జంతువులు",
     "loading": "జంతువులు లోడ్ అవుతున్నాయి...",
@@ -1514,7 +1522,15 @@
       "validUntil": "గడువు:",
       "active": "ప్రస్తుతం",
       "expired": "గడువు ముగిసింది",
-      "addButton": "ప్రిస్క్రిప్షన్ రాయండి"
+      "addButton": "ప్రిస్క్రిప్షన్ రాయండి",
+      "networkPharmacy": "నెట్‌వర్క్ ఫార్మసీ",
+      "dispensedOn": "{{date}} న పంపిణీ చేయబడింది",
+      "reviewStatus": {
+        "pending_review": "ఫార్మసిస్ట్ సమీక్ష కోసం వేచి ఉంది",
+        "approved_for_dispensing": "ఆమోదించబడింది — పంపిణీ కోసం వేచి ఉంది",
+        "rejected": "ఫార్మసిస్ట్ చేత తిరస్కరించబడింది",
+        "needs_clarification": "ఫార్మసిస్ట్ వివరణ కోరారు"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ టీకా జోడించు",
@@ -3121,6 +3137,12 @@
   "marketplace": {
     "pageTitle": "🏪 కొనుగోలు-అమ్మకం మార్కెట్",
     "subtitle": "జంతువులను కొనండి మరియు అమ్మండి — పరికరాలు మరియు పశువైద్య సరఫరాలను బ్రౌజ్ చేయండి",
+    "errors": {
+      "dashboardLoadFailed": "మీ డాష్‌బోర్డ్‌ను లోడ్ చేయడంలో విఫలమైంది",
+      "favoritesLoadFailed": "మీ ఇష్టమైనవాటిని లోడ్ చేయడంలో విఫలమైంది",
+      "adminDataLoadFailed": "అడ్మిన్ లిస్టింగ్‌లు మరియు గణాంకాలను లోడ్ చేయడంలో విఫలమైంది",
+      "monetizationLoadFailed": "మానిటైజేషన్ సెట్టింగ్‌లను లోడ్ చేయడంలో విఫలమైంది"
+    },
     "tabs": {
       "dashboard": "📊 డాష్‌బోర్డ్",
       "browse": "🛒 బ్రౌజ్",
@@ -3295,7 +3317,7 @@
       "autoPopulated": "జంతువు వివరాలు ఆటో-ఫిల్ చేయబడ్డాయి!",
       "fieldsAutoFilled": "మీ జంతువు ప్రొఫైల్ నుండి ఫీల్డ్‌లు ఆటో-ఫిల్ చేయబడ్డాయి. మీరు క్రింద ఏ ఫీల్డ్‌ను అయినా సవరించవచ్చు.",
       "imagesTitle": "లిస్టింగ్ చిత్రాలు",
-      "imagesLabel": "5 చిత్రాల వరకు అప్‌లోడ్ చేయండి",
+      "imagesLabel": "{{count}} చిత్రాల వరకు అప్‌లోడ్ చేయండి",
       "uploading": "అప్‌లోడ్ అవుతోంది...",
       "uploadFailed": "చిత్రం అప్‌లోడ్ విఫలమైంది",
       "selectBreed": "జాతిని ఎంచుకోండి",
@@ -3314,7 +3336,12 @@
       "videoAdded": "వీడియో జోడించబడింది",
       "removeVideo": "వీడియో తీసివేయి",
       "videoUploaded": "వీడియో అప్‌లోడ్ చేయబడింది",
-      "videoHint": "చిన్న వీడియో నమ్మకాన్ని పెంచి ఎక్కువ ప్రతిస్పందనలు తెస్తుంది."
+      "videoHint": "చిన్న వీడియో నమ్మకాన్ని పెంచి ఎక్కువ ప్రతిస్పందనలు తెస్తుంది.",
+      "imageTooLarge": "చిత్రం చాలా పెద్దది — గరిష్టం {{maxMb}}MB",
+      "videoTooLarge": "వీడియో చాలా పెద్దది — గరిష్టం {{maxMb}}MB",
+      "videoTooLong": "వీడియో చాలా పొడవుగా ఉంది — గరిష్టం {{maxSec}} సెకన్లు",
+      "uploadingVideo": "వీడియో అప్‌లోడ్ అవుతోంది...",
+      "videoLimits": "గరిష్టం {{maxSec}} సెకన్లు, {{maxMb}}MB వరకు"
     },
     "detail": {
       "backToListings": "← జాబితాలకు తిరిగి",
@@ -3859,6 +3886,7 @@
     "loadTrail": "ట్రయిల్ లోడ్ చేయండి",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -4030,7 +4058,8 @@
     "next": "తదుపరి",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "ఫిల్టర్ ఎంపికలను లోడ్ చేయడంలో విఫలమైంది (స్పెషలైజేషన్‌లు/భాషలు)"
   },
   "myBookings": {
     "title": "నా బుకింగ్‌లు",
@@ -4166,6 +4195,7 @@
     "failedToSendMessage": "Failed to send message",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "రికార్డింగ్ మార్పు గురించి ఇతర భాగస్వామికి తెలియజేయడం సాధ్యం కాలేదు",
     "micUnavailable": "Microphone unavailable",
     "cameraStillUnavailable": "Camera still unavailable",
     "duration": "Duration",
@@ -4478,6 +4508,7 @@
     "cameraUnavailable": "Camera unavailable",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "రికార్డింగ్ మార్పు గురించి ఇతర భాగస్వామికి తెలియజేయడం సాధ్యం కాలేదు",
     "failedToSaveNotes": "Failed to save notes",
     "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
     "failedToComplete": "Failed to complete consultation",
@@ -4676,6 +4707,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5255,6 +5293,7 @@
     "verify": "ధృవీకరించు",
     "unverify": "ధృవీకరణ తొలగించు",
     "pendingDocReviews": "పెండింగ్ డాక్యుమెంట్ సమీక్షలు",
+    "pendingLoadFailed": "పెండింగ్ డాక్యుమెంట్ సమీక్షలను లోడ్ చేయడంలో విఫలమైంది",
     "noDocReviews": "పెండింగ్ డాక్యుమెంట్ సమీక్షలు లేవు",
     "reviewDocuments": "డాక్యుమెంట్లను సమీక్షించు",
     "verifyHospital": "ఆసుపత్రిని ధృవీకరించు",
@@ -5281,6 +5320,9 @@
     "checkInPatient": "రోగి చెక్ ఇన్",
     "noPatients": "క్యూలో రోగులు లేరు",
     "unknownPatient": "తెలియని రోగి",
+    "medicationDispensed": "మందు పంపిణీ చేయబడింది",
+    "medicationReady": "మందు పంపిణీకి సిద్ధంగా ఉంది",
+    "medicationPendingReview": "ఫార్మసిస్ట్ సమీక్ష కోసం మందు వేచి ఉంది",
     "owner": "యజమాని",
     "triage": "ట్రయాజ్",
     "startExam": "పరీక్ష ప్రారంభించు",
@@ -5729,7 +5771,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -5955,7 +5999,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -5990,6 +6062,7 @@
     "expired": "Expired",
     "failedToLoad": "Failed to load certificates",
     "failedToPrint": "Failed to load certificate for printing",
+    "failedToLoadEnterprises": "ఫిల్టరింగ్ కోసం ఎంటర్‌ప్రైజెస్ లోడ్ చేయడంలో విఫలమైంది",
     "certTypes": {
       "health_certificate": "General Health Certificate",
       "fitness_to_travel": "Fitness to Travel Certificate",
@@ -6036,6 +6109,7 @@
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
     "failedToCreate": "ధృవపత్రాన్ని సృష్టించడంలో విఫలమైంది",
+    "failedToLoadEnterprises": "ఎంటర్‌ప్రైజెస్ జాబితాను లోడ్ చేయడంలో విఫలమైంది",
     "noCertTypeSelected": "దయచేసి ధృవపత్రం రకాన్ని ఎంచుకోండి",
     "viewAllCertificates": "అన్ని ధృవపత్రాలు చూడండి",
     "createAnother": "మరొకటి సృష్టించండి",
@@ -6374,6 +6448,7 @@
     "create": "రెఫరల్ సృష్టించు",
     "createTitle": "పేషెంట్‌ని నెట్‌వర్క్ ఆసుపత్రికి రెఫర్ చేయండి",
     "createSubtitle": "ఈ పేషెంట్‌ని మీ నెట్‌వర్క్‌లోని మరొక ఆసుపత్రికి పంపండి",
+    "hospitalsLoadFailed": "నెట్‌వర్క్ ఆసుపత్రుల జాబితాను లోడ్ చేయడంలో విఫలమైంది",
     "toHospital": "స్వీకరించే ఆసుపత్రి *",
     "toVet": "స్వీకరించే వెటర్నరీ డాక్టర్ (ఐచ్ఛికం)",
     "reason": "రెఫరల్ కారణం *",
@@ -6649,7 +6724,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "మీ సేవ్ చేసిన నోటిఫికేషన్ ప్రాధాన్యతలను లోడ్ చేయడం సాధ్యం కాలేదు — డిఫాల్ట్‌లు చూపబడుతున్నాయి"
   },
   "emailTemplates": {
     "title": "ఇమెయిల్ టెంప్లేట్‌లు",
@@ -6718,6 +6794,7 @@
       "catalog": "Catalog",
       "history": "History",
       "reorders": "Reorders",
+      "transfers": "Transfers",
       "analytics": "Analytics"
     },
     "stats": {
@@ -6837,6 +6914,7 @@
     "reorder": {
       "title": "Reorder",
       "supplier": "Supplier",
+      "suppliersLoadFailed": "సరఫరాదారుల జాబితాను లోడ్ చేయడంలో విఫలమైంది",
       "selectSupplier": "Select supplier",
       "supplierRequired": "Select a supplier",
       "quantity": "Qty",
@@ -6994,6 +7072,44 @@
         "cancelled": "Cancelled"
       }
     },
+    "transfers": {
+      "title": "Inter-Hospital Medication Transfers",
+      "newRequest": "New Transfer Request",
+      "activeRequests": "Active Requests",
+      "requests": "requests",
+      "noActive": "No active transfer requests",
+      "empty": "No transfer history",
+      "route": "Route",
+      "requestedBy": "Requested By",
+      "sourceHospital": "From Hospital",
+      "destHospital": "To Hospital",
+      "selectHospital": "Select hospital",
+      "medications": "Medications",
+      "selectMedication": "Select medication",
+      "addLine": "Add Medication",
+      "submitRequest": "Submit Request",
+      "addTracking": "Add Tracking",
+      "decline": "Decline",
+      "declineReason": "Reason for declining",
+      "formIncomplete": "Select both hospitals and at least one medication line",
+      "sameHospital": "Source and destination hospitals must be different",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "preparing": "Preparing",
+        "shipped": "Shipped",
+        "received": "Received",
+        "fulfilled": "Fulfilled",
+        "declined": "Declined"
+      },
+      "advanceTo": {
+        "accepted": "Accept",
+        "preparing": "Mark Preparing",
+        "shipped": "Mark Shipped",
+        "received": "Mark Received",
+        "fulfilled": "Mark Fulfilled"
+      }
+    },
     "analytics": {
       "title": "Pharmacy Analytics",
       "days": "days",
@@ -7069,6 +7185,8 @@
     "receiptTitle": "చెల్లింపు రసీదు",
     "patient": "రోగి",
     "doctor": "డాక్టర్",
+    "pharmacy": "ఫార్మసీ",
+    "medications": "మందులు",
     "animal": "జంతువు",
     "date": "తేదీ",
     "totalPaid": "మొత్తం చెల్లించినది",
@@ -7153,6 +7271,7 @@
     "subtitle": "డాక్టర్ స్థాయి కమిషన్ ఓవర్‌రైడ్‌లు — ఖాళీ ఫీల్డ్‌లు గ్లోబల్ డిఫాల్ట్ వాడతాయి",
     "globalSettings": "గ్లోబల్ డిఫాల్ట్‌లు",
     "globalInfo": "గ్లోబల్ డిఫాల్ట్: {{percent}}% + చెల్లింపు బుకింగ్‌కు {{flat}} ఫ్లాట్ ఫీజు. System Settings లో మార్చండి.",
+    "globalsLoadFailed": "ప్రస్తుత గ్లోబల్ కమిషన్ డిఫాల్ట్‌లను లోడ్ చేయడంలో విఫలమైంది — ఫాల్‌బ్యాక్ విలువలు చూపబడుతున్నాయి",
     "saved": "ఓవర్‌రైడ్ సేవ్ అయింది. కొత్త చెల్లింపులకు మాత్రమే వర్తిస్తుంది.",
     "saveFailed": "ఓవర్‌రైడ్ సేవ్ విఫలమైంది.",
     "searchPlaceholder": "పేరు లేదా ఇమెయిల్‌తో డాక్టర్‌ను వెతకండి…",
@@ -7288,6 +7407,9 @@
     "refundsOut": "రీఫండ్లు",
     "netRevenue": "నికర ప్లాట్‌ఫారమ్ ఆదాయం",
     "netRevenueHint": "కమిషన్ + ప్రాసెసింగ్ − గేట్‌వే ఫీజులు",
+    "pharmacyRevenueTitle": "ఫార్మసీ ఆదాయం (ఎంచుకున్న పరిధి)",
+    "pharmacyCollected": "ఫార్మసీ వసూలు చేయబడింది",
+    "pharmacyPending": "ఫార్మసీ పెండింగ్ చెల్లింపు",
     "liabilitiesTitle": "బాధ్యతలు (ప్రస్తుతం)",
     "doctorClearing": "డాక్టర్ సంపాదన క్లియరింగ్‌లో",
     "doctorAvailable": "డాక్టర్ సంపాదన అందుబాటులో",
@@ -7302,5 +7424,103 @@
     "stuckPending": "నిలిచిన పెండింగ్ చెల్లింపులు",
     "stuckPendingHint": "1 గంటకు పైగా — రోజువారీ సరిదిద్దే ప్రయత్నం",
     "openHolds": "తెరిచిన చెల్లింపు హోల్డ్‌లు"
+  },
+  "animalClass": {
+    "fieldLabel": "తరగతి",
+    "selectClass": "తరగతిని ఎంచుకోండి",
+    "anyClass": "ఏదైనా తరగతి",
+    "sire": "తండ్రి జంతువు (సైర్)",
+    "dam": "తల్లి జంతువు (డామ్)",
+    "selectSire": "తండ్రి జంతువును ఎంచుకోండి (ఐచ్ఛికం)",
+    "selectDam": "తల్లి జంతువును ఎంచుకోండి (ఐచ్ఛికం)",
+    "breedingStatus": "సంతానోత్పత్తి స్థితి",
+    "selectBreedingStatus": "స్థితిని ఎంచుకోండి",
+    "notBred": "సంతానోత్పత్తి చేయలేదు",
+    "pregnant": "గర్భవతి",
+    "notPregnant": "గర్భవతి కాదు",
+    "lastBreedingDate": "చివరి సంతానోత్పత్తి తేదీ",
+    "expectedDueDate": "అంచనా ప్రసవ తేదీ",
+    "cattle_bull": "ఎద్దు (సిద్ధ)",
+    "cattle_cow": "ఆవు",
+    "cattle_calf": "దూడ",
+    "cattle_bull_calf": "మగ దూడ",
+    "cattle_heifer_calf": "ఆడ దూడ",
+    "cattle_heifer": "పెయ్య",
+    "cattle_bullock": "ఎద్దు",
+    "cattle_steer": "నపుంసక ఎద్దు (మాంసం కోసం)",
+    "buffalo_bull": "దున్న",
+    "buffalo_cow": "గేదె",
+    "buffalo_calf": "గేదె దూడ",
+    "buffalo_bull_calf": "మగ గేదె దూడ",
+    "buffalo_heifer_calf": "ఆడ గేదె దూడ",
+    "buffalo_heifer": "పెయ్య గేదె",
+    "buffalo_bullock": "దున్న ఎద్దు",
+    "sheep_ram": "పొట్టేలు",
+    "sheep_ewe": "గొర్రె (ఆడ)",
+    "sheep_lamb": "గొర్రె పిల్ల",
+    "sheep_ram_lamb": "మగ గొర్రె పిల్ల",
+    "sheep_ewe_lamb": "ఆడ గొర్రె పిల్ల",
+    "sheep_wether": "నపుంసక పొట్టేలు",
+    "goat_buck": "మేక పోతు",
+    "goat_doe": "మేక (ఆడ)",
+    "goat_buckling": "మగ మేక పిల్ల",
+    "goat_goatling": "ఆడ మేక పిల్ల",
+    "goat_kid": "మేక పిల్ల",
+    "pig_boar": "మగ పంది",
+    "pig_sow": "ఆడ పంది",
+    "pig_gilt": "యువ ఆడ పంది",
+    "pig_barrow": "నపుంసక పంది",
+    "dog_male": "కుక్క",
+    "dog_bitch": "ఆడ కుక్క",
+    "dog_pup": "కుక్క పిల్ల",
+    "cat_tom": "మగ పిల్లి",
+    "cat_queen": "ఆడ పిల్లి",
+    "cat_kitten": "పిల్లి పిల్ల",
+    "cat_neuter": "నపుంసక పిల్లి"
+  },
+  "masterData": {
+    "title": "మాస్టర్ డేటా",
+    "subtitle": "జాతులు, జాతి రకాలు, జంతు తరగతులు మరియు మార్కెట్‌ప్లేస్ డ్రాప్‌డౌన్ విలువలను నిర్వహించండి — కోడ్ డిప్లాయ్ అవసరం లేదు.",
+    "tabs": {
+      "species": "జాతులు",
+      "breeds": "జాతి రకాలు",
+      "classes": "జంతు తరగతులు",
+      "categories": "మార్కెట్‌ప్లేస్ వర్గాలు",
+      "conditions": "మార్కెట్‌ప్లేస్ పరిస్థితులు"
+    },
+    "filterBySpecies": "జాతి",
+    "selectSpeciesPrompt": "— ఒక జాతిని ఎంచుకోండి —",
+    "addNew": "కొత్తది జోడించు",
+    "editEntry": "ఎంట్రీని సవరించండి",
+    "reactivate": "మళ్లీ సక్రియం చేయండి",
+    "noEntries": "ఇంకా ఎంట్రీలు లేవు",
+    "protectedHint": "రక్షించబడింది — ప్రధాన లాజిక్ ఈ కోడ్‌పై ఆధారపడి ఉంటుంది",
+    "labelKeyHint": "అంతర్నిర్మిత అనువాదాన్ని ఉంచడానికి ఖాళీగా వదలండి",
+    "confirmDelete": "ఈ ఎంట్రీని తొలగించాలా? దీన్ని రద్దు చేయలేరు.",
+    "deleteBlocked": "తొలగించలేకపోయాము — ఇది ఇంకా వాడుకలో ఉండవచ్చు",
+    "updatedSuccess": "విజయవంతంగా నవీకరించబడింది",
+    "createdSuccess": "విజయవంతంగా సృష్టించబడింది",
+    "archivedSuccess": "నిష్క్రియం చేయబడింది",
+    "restoredSuccess": "మళ్లీ సక్రియం చేయబడింది",
+    "deletedSuccess": "తొలగించబడింది",
+    "errors": {
+      "speciesRequired": "ముందుగా ఒక జాతిని ఎంచుకోండి"
+    },
+    "gender": {
+      "unknown": "తెలియదు"
+    },
+    "col": {
+      "icon": "చిహ్నం",
+      "code": "కోడ్",
+      "label": "లేబుల్",
+      "category": "వర్గం",
+      "earTag": "చెవి ట్యాగ్ ఉపయోగిస్తుంది",
+      "sortOrder": "క్రమం",
+      "value": "విలువ (అంతర్గత కోడ్)",
+      "impliedGender": "సూచించిన లింగం",
+      "canBePregnant": "గర్భవతిగా ఉండగలదు",
+      "canProduceMilk": "పాలు ఉత్పత్తి చేయగలదు",
+      "marketplaceEligible": "మార్కెట్‌ప్లేస్‌లో అమ్మకానికి అర్హత"
+    }
   }
 }

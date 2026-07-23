@@ -17,11 +17,20 @@ import VaccineScheduleService from './services/VaccineScheduleService';
  * Solution: ping our OWN external URL every 10 min from inside the process.
  * Render's load balancer sees it as a real incoming request → resets idle timer.
  * Uses built-in `https` module — no extra dependencies.
+ *
+ * Gated on ENABLE_SELF_PING, NOT nodeEnv==='production'. Those are different questions —
+ * "is this a production-configured deploy" says nothing about "should this service stay
+ * warm 24/7." Tying them together meant there was no way to run a production-configured
+ * service (security headers, disabled debug logging, etc.) without ALSO permanently eating
+ * free-tier instance-hours. This conflation is exactly how a since-corrected root-cause
+ * analysis of a June 2026 quota overrun (see memory: render-usage-root-cause-corrected,
+ * MEMORY.md index) went unactioned for 5+ weeks — the fix needed an explicit on/off knob
+ * independent of nodeEnv, not a change to nodeEnv itself.
  */
 const startSelfPing = () => {
   const externalUrl = process.env.RENDER_EXTERNAL_URL;
-  if (!externalUrl || config.app.nodeEnv !== 'production') {
-    logger.info('[KeepAlive] Self-ping disabled (not on Render production)');
+  if (!externalUrl || process.env.ENABLE_SELF_PING !== 'true') {
+    logger.info('[KeepAlive] Self-ping disabled (set ENABLE_SELF_PING=true to enable)');
     return;
   }
 
@@ -172,16 +181,27 @@ const startServer = async () => {
     // BEFORE the first login request arrives. Previously this fired async
     // causing "Invalid email or password" on fresh-DB deploys if login
     // was attempted before bcrypt hashes were corrected.
-    try {
-      await fixDemoPasswords();
-      logger.info('fixDemoPasswords completed successfully');
-    } catch (err: any) {
-      logger.error('fixDemoPasswords failed on first attempt — retrying in 30s', { error: err.message || String(err) });
-      setTimeout(() => {
-        fixDemoPasswords().catch((err2: any) =>
-          logger.error('fixDemoPasswords retry also failed', { error: err2.message || String(err2) })
-        );
-      }, 30000);
+    // Gated on SEED_ON_STARTUP (not NODE_ENV, and not AuthController's
+    // DEMO_SEED_ENABLED — that one isn't actually set anywhere in
+    // render.yaml today, so gating on it here would have silently disabled
+    // this on both currently-live environments). SEED_ON_STARTUP=true is
+    // already set on both vetcare-dev and vetcare-demo specifically to mean
+    // "this environment manages seeded demo data" (vetcare-demo runs
+    // NODE_ENV=production on purpose, so a plain NODE_ENV check would wrongly
+    // skip this there too). A real customer-facing production deploy should
+    // not set SEED_ON_STARTUP=true, so this stays off there by default.
+    if (String(process.env.SEED_ON_STARTUP).toLowerCase() === 'true') {
+      try {
+        await fixDemoPasswords();
+        logger.info('fixDemoPasswords completed successfully');
+      } catch (err: any) {
+        logger.error('fixDemoPasswords failed on first attempt — retrying in 30s', { error: err.message || String(err) });
+        setTimeout(() => {
+          fixDemoPasswords().catch((err2: any) =>
+            logger.error('fixDemoPasswords retry also failed', { error: err2.message || String(err2) })
+          );
+        }, 30000);
+      }
     }
 
     // Keep Render free-tier awake — self-ping every 10 min via external URL

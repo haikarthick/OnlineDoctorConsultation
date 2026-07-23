@@ -36,7 +36,7 @@ interface CalendarDay {
   reason?: string;
 }
 
-const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
+const ManageSchedule: React.FC<ManageScheduleProps> = (_props) => {
   const { t } = useTranslation()
   const { formatSlotTime } = useSettings()
   const [activeTab, setActiveTab] = useState<'weekly' | 'calendar' | 'blocks' | 'holidays'>('weekly')
@@ -267,26 +267,26 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
         </div>
       </div>
 
-      {pageMsg && <div className={`modal-alert ${pageMsg.isError ? 'error' : 'success'}`} style={{ marginBottom: 16 }}>{pageMsg.text}</div>}
+      {pageMsg && <div className={`modal-alert ${pageMsg.isError ? 'error' : 'success'} si-7e63ec4f`}>{pageMsg.text}</div>}
 
       {/* Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 20 }}>
+      <div className="si-cfa92bf8">
         {[
           { label: t('manageSchedule.activeDays'), value: `${activeDays}/7`, color: '#16a34a', icon: '📅' },
           { label: t('manageSchedule.dateOverrides'), value: upcomingOverrides, color: '#dc2626', icon: '🚫' },
           { label: t('manageSchedule.timeBlocks'), value: `${recurringBlocks} ${t('manageSchedule.recurring')}`, color: '#2563eb', icon: '⏰' },
           { label: t('manageSchedule.holidays'), value: upcomingHolidays, color: '#ca8a04', icon: '🎉' },
         ].map((s, i) => (
-          <div key={i} className="card" style={{ padding: '14px 16px', textAlign: 'center' }}>
-            <div style={{ fontSize: 24 }}>{s.icon}</div>
+          <div key={i} className="card si-54a779b9">
+            <div className="si-2ae66f62">{s.icon}</div>
             <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 12, color: '#6b7280' }}>{s.label}</div>
+            <div className="si-48a0b045">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#f3f4f6', borderRadius: 10, padding: 4 }}>
+      <div className="si-b2cab0f1">
         {([
           { key: 'weekly', label: `📅 ${t('manageSchedule.weeklySchedule')}`, subtitle: t('manageSchedule.recurringHours') },
           { key: 'calendar', label: `📆 ${t('manageSchedule.calendar')}`, subtitle: t('manageSchedule.dateOverridesSubtitle') },
@@ -301,7 +301,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
               fontWeight: activeTab === tab.key ? 600 : 400, fontSize: 13, transition: 'all 0.2s'
             }}>
             <div>{tab.label}</div>
-            <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 2 }}>{tab.subtitle}</div>
+            <div className="si-e79ab918">{tab.subtitle}</div>
           </button>
         ))}
       </div>
@@ -309,15 +309,15 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       {/* ═══ TAB 1: Weekly Schedule ═══ */}
       {activeTab === 'weekly' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>{t('manageSchedule.weeklyRecurringSchedule')}</h2>
+          <div className="si-101fd1d0">
+            <h2 className="si-670df8d2">{t('manageSchedule.weeklyRecurringSchedule')}</h2>
             <button className="btn btn-primary" onClick={() => { resetSchedForm(); setEditingSchedId(null); setSchedFormError(''); setShowSchedForm(true) }}>
               + {t('manageSchedule.addTimeSlot')}
             </button>
           </div>
 
           {/* Visual Week Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, marginBottom: 16 }}>
+          <div className="si-4ca33dc3">
             {DAYS.map(day => {
               const daySched = getScheduleForDay(day)
               const isActive = daySched.some(s => s.isActive ?? s.isAvailable)
@@ -330,11 +330,11 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 }}>
                   <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4, color: isActive ? '#166534' : '#6b7280' }}>{DAY_SHORT[day]}</div>
                   {daySched.length === 0 ? (
-                    <div style={{ color: '#9ca3af', fontSize: 11, marginTop: 12 }}>{t('manageSchedule.off')}</div>
+                    <div className="si-ed6d4afe">{t('manageSchedule.off')}</div>
                   ) : daySched.map(s => (
-                    <div key={s.id} style={{ fontSize: 12, marginTop: 4 }}>
-                      <div style={{ fontWeight: 600 }}>{formatSlotTime(s.startTime)}–{formatSlotTime(s.endTime)}</div>
-                      <div style={{ color: '#6b7280', fontSize: 11 }}>{s.slotDuration || s.slotDurationMinutes}min</div>
+                    <div key={s.id} className="si-692258ce">
+                      <div className="si-b2cfcbec">{formatSlotTime(s.startTime)}–{formatSlotTime(s.endTime)}</div>
+                      <div className="si-a213bf41">{s.slotDuration || s.slotDurationMinutes}min</div>
                     </div>
                   ))}
                 </div>
@@ -347,21 +347,21 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
             const daySched = getScheduleForDay(day)
             if (daySched.length === 0) return null
             return (
-              <div key={day} className="card" style={{ marginBottom: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <h3 style={{ margin: 0, fontSize: 15 }}>{DAY_LABELS[day]}</h3>
+              <div key={day} className="card si-170de209">
+                <div className="si-a0cc3086">
+                  <div className="si-98d3a741">
+                    <h3 className="si-5ec640a4">{DAY_LABELS[day]}</h3>
                     <span className={`badge ${(daySched[0].isActive ?? daySched[0].isAvailable) ? 'badge-active' : 'badge-inactive'}`}>
                       {(daySched[0].isActive ?? daySched[0].isAvailable) ? t('common.active') : t('manageSchedule.inactive')}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
+                  <div className="si-9f20fe5e">
                     <button className="btn btn-sm btn-outline" title={t('manageSchedule.copyToAllEmpty')} onClick={() => handleCopyDay(day)}>📋 {t('manageSchedule.copyToAll')}</button>
                     <button className="btn btn-sm btn-outline" onClick={() => handleEditSched(daySched[0])}>✏️ {t('manageSchedule.edit')}</button>
                     <button className="btn btn-sm btn-danger" onClick={() => handleDeleteSched(daySched[0].id)}>🗑️</button>
                   </div>
                 </div>
-                <div style={{ padding: '4px 16px 10px', display: 'flex', gap: 16, fontSize: 13, color: '#374151' }}>
+                <div className="si-9e38e1e1">
                   <span>🕐 {formatSlotTime(daySched[0].startTime)} – {formatSlotTime(daySched[0].endTime)}</span>
                   <span>⏱️ {daySched[0].slotDuration || daySched[0].slotDurationMinutes}{t('manageSchedule.minSlots')}</span>
                 </div>
@@ -370,8 +370,8 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           })}
 
           {schedules.length === 0 && (
-            <div className="card" style={{ padding: 32, textAlign: 'center', color: '#6b7280' }}>
-              <div style={{ fontSize: 40, marginBottom: 8 }}>📅</div>
+            <div className="card si-f6d75b01">
+              <div className="si-75bae6a3">📅</div>
               <p>{t('manageSchedule.noScheduleConfigured')}</p>
             </div>
           )}
@@ -381,22 +381,22 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       {/* ═══ TAB 2: Calendar View ═══ */}
       {activeTab === 'calendar' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="si-101fd1d0">
+            <div className="si-0b20392f">
               <button className="btn btn-sm btn-outline" onClick={() => setCalMonth(p => { const m = p.month - 1; return m < 1 ? { year: p.year - 1, month: 12 } : { ...p, month: m } })}>◀</button>
-              <h2 style={{ margin: 0, fontSize: 18, minWidth: 160, textAlign: 'center' }}>
+              <h2 className="si-de4136e0">
                 {new Date(calMonth.year, calMonth.month - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
               </h2>
               <button className="btn btn-sm btn-outline" onClick={() => setCalMonth(p => { const m = p.month + 1; return m > 12 ? { year: p.year + 1, month: 1 } : { ...p, month: m } })}>▶</button>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="si-d223efb3">
               <button className="btn btn-outline" onClick={() => { setVacationForm({ startDate: '', endDate: '', reason: '' }); setShowVacationForm(true) }}>🏖️ {t('manageSchedule.setVacation')}</button>
               <button className="btn btn-primary" onClick={() => { setOverrideForm({ overrideDate: '', overrideType: 'unavailable', startTime: '09:00', endTime: '17:00', slotDuration: 30, reason: '' }); setShowOverrideForm(true) }}>+ {t('manageSchedule.dayOverride')}</button>
             </div>
           </div>
 
           {/* Legend */}
-          <div style={{ display: 'flex', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
+          <div className="si-f5a443a7">
             {[
               { status: 'available', label: t('manageSchedule.available') }, { status: 'custom', label: t('manageSchedule.customHours') },
               { status: 'unavailable', label: t('manageSchedule.dayOff') }, { status: 'holiday', label: t('manageSchedule.holiday') },
@@ -404,7 +404,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
             ].map(l => {
               const c = statusColor(l.status)
               return (
-                <div key={l.status} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
+                <div key={l.status} className="si-aace88d4">
                   <div style={{ width: 14, height: 14, borderRadius: 3, background: c.bg, border: `2px solid ${c.border}` }} />
                   <span style={{ color: c.text }}>{l.label}</span>
                 </div>
@@ -413,9 +413,9 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           </div>
 
           {/* Calendar Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 16 }}>
+          <div className="si-a1d48e67">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} style={{ textAlign: 'center', fontWeight: 600, fontSize: 12, color: '#6b7280', padding: 6 }}>{d}</div>
+              <div key={d} className="si-ac98329f">{d}</div>
             ))}
             {calendarGrid().map((cd, i) => {
               if (!cd) return <div key={`pad-${i}`} />
@@ -439,7 +439,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   {cd.status !== 'no_schedule' && !isPast && (
                     <div style={{ fontSize: 9, color: c.text, marginTop: 3, fontWeight: 500 }}>
                       {cd.status === 'holiday' ? '🎉' : cd.status === 'unavailable' ? '🚫' : cd.status === 'custom' ? '⚙️' : '✅'}
-                      {cd.reason && <div style={{ fontSize: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={cd.reason}>{cd.reason}</div>}
+                      {cd.reason && <div className="si-3b8d5aa2" title={cd.reason}>{cd.reason}</div>}
                     </div>
                   )}
                 </div>
@@ -448,20 +448,20 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           </div>
 
           {/* Upcoming Overrides List */}
-          <h3 style={{ fontSize: 15, marginBottom: 8 }}>{t('manageSchedule.upcomingDateOverrides')}</h3>
+          <h3 className="si-b1238182">{t('manageSchedule.upcomingDateOverrides')}</h3>
           {overrides.filter(o => o.overrideDate >= todayStr).length === 0 ? (
-            <div className="card" style={{ padding: 20, textAlign: 'center', color: '#6b7280' }}>{t('manageSchedule.noUpcomingOverrides')}</div>
+            <div className="card si-6c943430">{t('manageSchedule.noUpcomingOverrides')}</div>
           ) : (
-            <div style={{ display: 'grid', gap: 8 }}>
+            <div className="si-b1691638">
               {overrides.filter(o => o.overrideDate >= todayStr).map(o => (
                 <div key={o.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   borderLeft: `4px solid ${o.overrideType === 'unavailable' ? '#ef4444' : '#3b82f6'}` }}>
                   <div>
                     <strong>{new Date(o.overrideDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</strong>
-                    <span style={{ marginLeft: 10, fontSize: 13 }}>
+                    <span className="si-fddef076">
                       {o.overrideType === 'unavailable' ? `🚫 ${t('manageSchedule.dayOff')}` : `⚙️ ${t('manageSchedule.custom')}: ${formatSlotTime(o.startTime || '')}\u2013${formatSlotTime(o.endTime || '')}`}
                     </span>
-                    {o.reason && <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>({o.reason})</span>}
+                    {o.reason && <span className="si-824a7a1e">({o.reason})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteOverride(o.id)}>✕</button>
                 </div>
@@ -474,29 +474,29 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       {/* ═══ TAB 3: Time Blocks ═══ */}
       {activeTab === 'blocks' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>{t('manageSchedule.timeBlocksTitle')}</h2>
+          <div className="si-101fd1d0">
+            <h2 className="si-670df8d2">{t('manageSchedule.timeBlocksTitle')}</h2>
             <button className="btn btn-primary" onClick={() => { setBlockForm({ blockDate: '', startTime: '12:00', endTime: '13:00', reason: '', isRecurring: false, recurringDay: 'monday' }); setShowBlockForm(true) }}>+ {t('manageSchedule.addTimeBlock')}</button>
           </div>
 
-          <div className="card" style={{ padding: 16, marginBottom: 16, background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-            <p style={{ margin: 0, fontSize: 13, color: '#1e40af' }}>
+          <div className="card si-c5145b89">
+            <p className="si-272ffbdb">
               💡 <strong>{t('manageSchedule.timeBlocksInfo')}</strong>
             </p>
           </div>
 
           {/* Recurring blocks */}
-          <h3 style={{ fontSize: 15, marginBottom: 8, color: '#374151' }}>🔄 {t('manageSchedule.recurringWeeklyBlocks')}</h3>
+          <h3 className="si-37c342ae">🔄 {t('manageSchedule.recurringWeeklyBlocks')}</h3>
           {blockedSlots.filter(b => b.isRecurring).length === 0 ? (
-            <div className="card" style={{ padding: 16, textAlign: 'center', color: '#6b7280', marginBottom: 16 }}>{t('manageSchedule.noRecurringBlocks')}</div>
+            <div className="card si-05535ed3">{t('manageSchedule.noRecurringBlocks')}</div>
           ) : (
-            <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
+            <div className="si-ade41b1f">
               {blockedSlots.filter(b => b.isRecurring).map(b => (
-                <div key={b.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid #3b82f6' }}>
+                <div key={b.id} className="card si-25d97c4a">
                   <div>
                     <strong>{t('manageSchedule.every')} {DAY_LABELS[b.recurringDay || '']}</strong>
-                    <span style={{ marginLeft: 10, fontSize: 13 }}>🕐 {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</span>
-                    {b.reason && <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>({b.reason})</span>}
+                    <span className="si-fddef076">🕐 {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</span>
+                    {b.reason && <span className="si-824a7a1e">({b.reason})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteBlock(b.id)}>✕</button>
                 </div>
@@ -505,17 +505,17 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           )}
 
           {/* One-time blocks */}
-          <h3 style={{ fontSize: 15, marginBottom: 8, color: '#374151' }}>📌 {t('manageSchedule.oneTimeBlocks')}</h3>
+          <h3 className="si-37c342ae">📌 {t('manageSchedule.oneTimeBlocks')}</h3>
           {blockedSlots.filter(b => !b.isRecurring).length === 0 ? (
-            <div className="card" style={{ padding: 16, textAlign: 'center', color: '#6b7280' }}>{t('manageSchedule.noOneTimeBlocks')}</div>
+            <div className="card si-eb9d45f8">{t('manageSchedule.noOneTimeBlocks')}</div>
           ) : (
-            <div style={{ display: 'grid', gap: 8 }}>
+            <div className="si-b1691638">
               {blockedSlots.filter(b => !b.isRecurring).map(b => (
-                <div key={b.id} className="card" style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid #f97316' }}>
+                <div key={b.id} className="card si-1ad6e65d">
                   <div>
                     <strong>{b.blockDate ? new Date(b.blockDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '—'}</strong>
-                    <span style={{ marginLeft: 10, fontSize: 13 }}>🕐 {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</span>
-                    {b.reason && <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>({b.reason})</span>}
+                    <span className="si-fddef076">🕐 {formatSlotTime(b.startTime)} – {formatSlotTime(b.endTime)}</span>
+                    {b.reason && <span className="si-824a7a1e">({b.reason})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteBlock(b.id)}>✕</button>
                 </div>
@@ -528,19 +528,19 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
       {/* ═══ TAB 4: Holidays ═══ */}
       {activeTab === 'holidays' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>{t('manageSchedule.hospitalSystemHolidays')}</h2>
+          <div className="si-101fd1d0">
+            <h2 className="si-670df8d2">{t('manageSchedule.hospitalSystemHolidays')}</h2>
             <button className="btn btn-primary" onClick={() => { setHolidayForm({ holidayDate: '', name: '', holidayType: 'general', isFullDay: true, startTime: '09:00', endTime: '17:00' }); setShowHolidayForm(true) }}>+ {t('manageSchedule.addHoliday')}</button>
           </div>
 
-          <div className="card" style={{ padding: 16, marginBottom: 16, background: '#fefce8', border: '1px solid #fde047' }}>
-            <p style={{ margin: 0, fontSize: 13, color: '#854d0e' }}>
+          <div className="card si-20cc5dae">
+            <p className="si-9f6f0e77">
               🎉 <strong>{t('manageSchedule.systemHolidaysInfo')}</strong>
             </p>
           </div>
 
           {/* Holiday year filter */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <div className="si-cf4a3ba4">
             {[calMonth.year - 1, calMonth.year, calMonth.year + 1].map(y => (
               <button key={y} className={`btn btn-sm ${calMonth.year === y ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => setCalMonth(p => ({ ...p, year: y }))}>{y}</button>
@@ -548,25 +548,25 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
           </div>
 
           {holidays.length === 0 ? (
-            <div className="card" style={{ padding: 32, textAlign: 'center', color: '#6b7280' }}>
-              <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
+            <div className="card si-f6d75b01">
+              <div className="si-75bae6a3">🎉</div>
               <p>{t('manageSchedule.noHolidaysConfigured', { year: calMonth.year })}</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gap: 8 }}>
+            <div className="si-b1691638">
               {holidays.map(h => (
                 <div key={h.id} className="card" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   borderLeft: `4px solid ${h.holidayType === 'emergency_closure' ? '#ef4444' : '#eab308'}`,
                   opacity: h.holidayDate < todayStr ? 0.5 : 1 }}>
                   <div>
-                    <strong style={{ fontSize: 14 }}>{h.name}</strong>
-                    <span style={{ marginLeft: 10, fontSize: 13, color: '#6b7280' }}>
+                    <strong className="si-38c57a68">{h.name}</strong>
+                    <span className="si-3d174d55">
                       {new Date(h.holidayDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
-                    <span style={{ marginLeft: 8 }} className={`badge ${h.holidayType === 'general' ? 'badge-active' : h.holidayType === 'emergency_closure' ? 'badge-danger' : 'badge-warning'}`}>
+                    <span className={`badge ${h.holidayType === 'general' ? 'badge-active' : h.holidayType === 'emergency_closure' ? 'badge-danger' : 'badge-warning'} si-7984dfbc`}>
                       {(h.holidayType || '').replace('_', ' ')}
                     </span>
-                    {!h.isFullDay && <span style={{ marginLeft: 8, fontSize: 12, color: '#6b7280' }}>({formatSlotTime(h.startTime || '')}–{formatSlotTime(h.endTime || '')})</span>}
+                    {!h.isFullDay && <span className="si-824a7a1e">({formatSlotTime(h.startTime || '')}–{formatSlotTime(h.endTime || '')})</span>}
                   </div>
                   <button className="btn btn-sm btn-danger" onClick={() => handleDeleteHoliday(h.id)}>✕</button>
                 </div>
@@ -587,7 +587,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
               <button className="modal-close" onClick={() => setShowSchedForm(false)}>✕</button>
             </div>
             <div className="modal-body">
-              {schedFormError && <div className="modal-alert error" style={{ marginBottom: 16 }}>{schedFormError}</div>}
+              {schedFormError && <div className="modal-alert error si-7e63ec4f">{schedFormError}</div>}
               <form onSubmit={handleSchedSubmit}>
                 <div className="form-group">
                   <label className="form-label">{t('manageSchedule.dayOfWeek')}</label>
@@ -595,7 +595,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                     {DAYS.map(d => <option key={d} value={d}>{DAY_LABELS[d]}</option>)}
                   </select>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div className="si-f23844fb">
                   <div className="form-group">
                     <label className="form-label">{t('manageSchedule.startTime')}</label>
                     <input className="form-input" type="time" value={schedForm.startTime} onChange={e => setSchedForm({ ...schedForm, startTime: e.target.value })} />
@@ -612,12 +612,12 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={schedForm.isAvailable} onChange={e => setSchedForm({ ...schedForm, isAvailable: e.target.checked })} style={{ width: 18, height: 18 }} />
+                  <label className="si-0c7e7279">
+                    <input type="checkbox" checked={schedForm.isAvailable} onChange={e => setSchedForm({ ...schedForm, isAvailable: e.target.checked })} className="si-8f286607" />
                     <span>{t('manageSchedule.availableForBookings')}</span>
                   </label>
                 </div>
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+                <div className="si-2afd2545">
                   <button type="button" className="btn btn-outline" onClick={() => setShowSchedForm(false)}>{t('manageSchedule.cancel')}</button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.saving') : editingSchedId ? t('manageSchedule.update') : t('manageSchedule.create')}</button>
                 </div>
@@ -644,7 +644,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 </div>
                 <div className="form-group">
                   <label className="form-label">{t('manageSchedule.overrideType')}</label>
-                  <div style={{ display: 'flex', gap: 12 }}>
+                  <div className="si-b1214800">
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: '8px 14px', borderRadius: 8,
                       background: overrideForm.overrideType === 'unavailable' ? '#fef2f2' : '#f9fafb', border: `2px solid ${overrideForm.overrideType === 'unavailable' ? '#fca5a5' : '#e5e7eb'}` }}>
                       <input type="radio" name="overrideType" value="unavailable" checked={overrideForm.overrideType === 'unavailable'}
@@ -661,7 +661,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                 </div>
                 {overrideForm.overrideType === 'custom_hours' && (
                   <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div className="si-f23844fb">
                       <div className="form-group">
                         <label className="form-label">{t('manageSchedule.startTime')}</label>
                         <input className="form-input" type="time" value={overrideForm.startTime} onChange={e => setOverrideForm({ ...overrideForm, startTime: e.target.value })} />
@@ -684,7 +684,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   <input className="form-input" value={overrideForm.reason} onChange={e => setOverrideForm({ ...overrideForm, reason: e.target.value })}
                     placeholder={t('manageSchedule.reasonPlaceholder')} />
                 </div>
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+                <div className="si-2afd2545">
                   <button type="button" className="btn btn-outline" onClick={() => setShowOverrideForm(false)}>{t('manageSchedule.cancel')}</button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.saving') : t('manageSchedule.saveOverride')}</button>
                 </div>
@@ -703,13 +703,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
               <button className="modal-close" onClick={() => setShowVacationForm(false)}>✕</button>
             </div>
             <div className="modal-body">
-              <div className="card" style={{ padding: 12, marginBottom: 16, background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                <p style={{ margin: 0, fontSize: 13, color: '#1e40af' }}>
+              <div className="card si-a9e61de4">
+                <p className="si-272ffbdb">
                   {t('manageSchedule.vacationInfoText')}
                 </p>
               </div>
               <form onSubmit={handleVacationSubmit}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div className="si-f23844fb">
                   <div className="form-group">
                     <label className="form-label">{t('manageSchedule.startDate')}</label>
                     <input className="form-input" type="date" value={vacationForm.startDate} min={todayStr}
@@ -727,11 +727,11 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                     placeholder={t('manageSchedule.vacationReasonPlaceholder')} />
                 </div>
                 {vacationForm.startDate && vacationForm.endDate && (
-                  <div style={{ padding: 12, borderRadius: 8, background: '#f0fdf4', border: '1px solid #bbf7d0', marginBottom: 12, fontSize: 13 }}>
+                  <div className="si-80778f39">
                     📅 {t('manageSchedule.daysWillBeMarked', { count: Math.max(1, Math.ceil((new Date(vacationForm.endDate).getTime() - new Date(vacationForm.startDate).getTime()) / 86400000) + 1) })}
                   </div>
                 )}
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+                <div className="si-2afd2545">
                   <button type="button" className="btn btn-outline" onClick={() => setShowVacationForm(false)}>{t('manageSchedule.cancel')}</button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.setting') : t('manageSchedule.setVacationBtn')}</button>
                 </div>
@@ -753,7 +753,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
               <form onSubmit={handleBlockSubmit}>
                 <div className="form-group">
                   <label className="form-label">{t('manageSchedule.blockType')}</label>
-                  <div style={{ display: 'flex', gap: 12 }}>
+                  <div className="si-b1214800">
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', padding: '8px 14px', borderRadius: 8,
                       background: !blockForm.isRecurring ? '#eff6ff' : '#f9fafb', border: `2px solid ${!blockForm.isRecurring ? '#93c5fd' : '#e5e7eb'}` }}>
                       <input type="radio" name="blockType" checked={!blockForm.isRecurring}
@@ -782,7 +782,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                       onChange={e => setBlockForm({ ...blockForm, blockDate: e.target.value })} required />
                   </div>
                 )}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div className="si-f23844fb">
                   <div className="form-group">
                     <label className="form-label">{t('manageSchedule.blockStart')}</label>
                     <input className="form-input" type="time" value={blockForm.startTime} onChange={e => setBlockForm({ ...blockForm, startTime: e.target.value })} />
@@ -797,7 +797,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   <input className="form-input" value={blockForm.reason} onChange={e => setBlockForm({ ...blockForm, reason: e.target.value })}
                     placeholder={t('manageSchedule.blockReasonPlaceholder')} />
                 </div>
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+                <div className="si-2afd2545">
                   <button type="button" className="btn btn-outline" onClick={() => setShowBlockForm(false)}>{t('manageSchedule.cancel')}</button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.saving') : t('manageSchedule.createBlock')}</button>
                 </div>
@@ -836,13 +836,13 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={holidayForm.isFullDay} onChange={e => setHolidayForm({ ...holidayForm, isFullDay: e.target.checked })} style={{ width: 18, height: 18 }} />
+                  <label className="si-0c7e7279">
+                    <input type="checkbox" checked={holidayForm.isFullDay} onChange={e => setHolidayForm({ ...holidayForm, isFullDay: e.target.checked })} className="si-8f286607" />
                     <span>{t('manageSchedule.fullDayClosure')}</span>
                   </label>
                 </div>
                 {!holidayForm.isFullDay && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="si-f23844fb">
                     <div className="form-group">
                       <label className="form-label">{t('manageSchedule.closureStart')}</label>
                       <input className="form-input" type="time" value={holidayForm.startTime} onChange={e => setHolidayForm({ ...holidayForm, startTime: e.target.value })} />
@@ -853,7 +853,7 @@ const ManageSchedule: React.FC<ManageScheduleProps> = ({  }) => {
                     </div>
                   </div>
                 )}
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+                <div className="si-2afd2545">
                   <button type="button" className="btn btn-outline" onClick={() => setShowHolidayForm(false)}>{t('manageSchedule.cancel')}</button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t('manageSchedule.saving') : t('manageSchedule.addHolidayBtn')}</button>
                 </div>

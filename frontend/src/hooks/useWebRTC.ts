@@ -139,7 +139,7 @@ export function useWebRTC(
 
     if (isHost) {
       // Host: create offer and send it
-      ;(async () => {
+      (async () => {
         try {
           setConnectionState('connecting')
           const offer = await pc.createOffer()

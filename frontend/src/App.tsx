@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
+import { MasterDataProvider } from './context/MasterDataContext'
 import { PermissionProvider, usePermission, ROUTE_PERMISSION_MAP } from './context/PermissionContext'
 import { SocketProvider } from './context/SocketContext'
 import { Layout } from './components/Layout'
@@ -18,6 +19,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import './App.css'
 import './styles/modules.css'
+import './styles/extracted-inline-styles.css'
 
 // ── Lazy-loaded protected pages ─────────────────────────────
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -103,6 +105,7 @@ const StaffSettingsAdmin = lazy(() => import('./pages/admin/StaffSettings'))
 const AnimalTimeline = lazy(() => import('./pages/AnimalTimeline'))
 const VaccinationPassport = lazy(() => import('./pages/VaccinationPassport'))
 const VaccineProtocolAdmin = lazy(() => import('./pages/admin/VaccineProtocolAdmin'))
+const MasterDataManagement = lazy(() => import('./pages/admin/MasterDataManagement'))
 const VetCertificates = lazy(() => import('./pages/VetCertificates'))
 const CertificateWriter = lazy(() => import('./pages/doctor/CertificateWriter'))
 const VetEarnings = lazy(() => import('./pages/doctor/VetEarnings'))
@@ -376,6 +379,7 @@ function AppRoutes() {
       <Route path="/admin/settlements" element={<RoleRoute path="/admin/settlements"><AppLayout><RoutedPage Component={SettlementsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/finance-reports" element={<RoleRoute path="/admin/finance-reports"><AppLayout><RoutedPage Component={FinanceReportsAdmin} /></AppLayout></RoleRoute>} />
       <Route path="/admin/vaccine-protocols" element={<RoleRoute path="/admin/vaccine-protocols"><AppLayout><RoutedPage Component={VaccineProtocolAdmin} /></AppLayout></RoleRoute>} />
+      <Route path="/admin/master-data" element={<RoleRoute path="/admin/master-data"><AppLayout><RoutedPage Component={MasterDataManagement} /></AppLayout></RoleRoute>} />
       <Route path="/admin/certificate-settings" element={<RoleRoute path="/admin/certificate-settings"><AppLayout><RoutedPage Component={CertificateSettings} /></AppLayout></RoleRoute>} />
 
       {/* ── Hospital Workflow Module ── */}
@@ -411,16 +415,18 @@ function App() {
   return (
     <BrowserRouter>
       <SettingsProvider>
-        <AuthProvider>
-          <PermissionProvider>
-            <SocketProvider>
-              <AppRoutes />
-              <FloatingChatWidget />
-              <FloatingLanguageSelector />
-              <PWAPrompt />
-            </SocketProvider>
-          </PermissionProvider>
-        </AuthProvider>
+        <MasterDataProvider>
+          <AuthProvider>
+            <PermissionProvider>
+              <SocketProvider>
+                <AppRoutes />
+                <FloatingChatWidget />
+                <FloatingLanguageSelector />
+                <PWAPrompt />
+              </SocketProvider>
+            </PermissionProvider>
+          </AuthProvider>
+        </MasterDataProvider>
       </SettingsProvider>
     </BrowserRouter>
   )

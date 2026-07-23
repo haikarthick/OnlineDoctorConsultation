@@ -3,6 +3,7 @@ import { DatabaseError, NotFoundError, ForbiddenError, ValidationError, Conflict
 import logger from '../utils/logger';
 import NotificationService from './NotificationService';
 import NetworkRolePermissionService from './NetworkRolePermissionService';
+import { resolveNetworkAccess } from '../middleware/networkAccess';
 
 // ─── Interfaces ──────────────────────────────────────────────
 export interface HospitalNetwork {
@@ -1219,7 +1220,7 @@ export class HospitalNetworkService {
     networkId: string; hospitalId: string; registeredBy: string;
     patientName: string; patientPhone?: string; patientEmail?: string; patientAddress?: string;
     animalName: string; animalSpecies: string; animalBreed?: string;
-    animalGender?: string; animalDob?: string; animalWeight?: number;
+    animalGender?: string; animalClass?: string; animalDob?: string; animalWeight?: number;
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
     animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
@@ -1267,8 +1268,8 @@ export class HospitalNetworkService {
             gender, date_of_birth, weight, color, microchip_id, registration_number,
             is_neutered, medical_notes, avatar_url,
             insurance_provider, insurance_policy_number, insurance_expiry,
-            ear_tag_id)
-         VALUES ($1, $2, $3, $4, $5, true, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+            ear_tag_id, animal_class)
+         VALUES ($1, $2, $3, $4, $5, true, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
          RETURNING id`,
         [
           data.animalName, data.animalSpecies, data.animalBreed || null, ownerId, animalUniqueId,
@@ -1285,6 +1286,7 @@ export class HospitalNetworkService {
           data.animalInsurancePolicyNumber || null,
           data.animalInsuranceExpiry || null,
           data.animalEarTagId || null,
+          data.animalClass || null,
         ]
       );
       const animalId = animalRes.rows[0].id;
@@ -1918,17 +1920,21 @@ export class HospitalNetworkService {
   }
 
   async updateLeaveRequestStatus(
-    requestId: string, status: 'approved' | 'rejected' | 'cancelled',
+    networkId: string, requestId: string, status: 'approved' | 'rejected' | 'cancelled',
     userId: string, rejectionReason?: string
   ): Promise<any> {
-    const extraFields = status === 'approved' ? ', approved_by = $4, approved_at = NOW()' : '';
+    // WHERE network_id = $networkId is the fix: without it, a director/corporate_admin of
+    // ANY network could approve/reject/cancel a leave request belonging to a DIFFERENT
+    // network just by supplying that request's id — the caller's authority was only ever
+    // checked against the URL's :id, never against the request row's own network_id.
+    const extraFields = status === 'approved' ? ', approved_by = $5, approved_at = NOW()' : '';
     const result = await database.query(
       `UPDATE staff_leave_requests
        SET status = $1, rejection_reason = $2, updated_at = NOW() ${extraFields}
-       WHERE id = $3 RETURNING *`,
+       WHERE id = $3 AND network_id = $4 RETURNING *`,
       status === 'approved'
-        ? [status, rejectionReason || null, requestId, userId]
-        : [status, rejectionReason || null, requestId]
+        ? [status, rejectionReason || null, requestId, networkId, userId]
+        : [status, rejectionReason || null, requestId, networkId]
     );
     if (result.rows.length === 0) throw new NotFoundError('Leave request');
     return result.rows[0];
@@ -1938,7 +1944,7 @@ export class HospitalNetworkService {
   async createPatientTransfer(data: {
     networkId: string; fromHospitalId: string; toHospitalId: string;
     animalId: string; reason: string; transferReason?: string;
-    clinicalNotes?: string; createdBy: string;
+    clinicalNotes?: string; createdBy: string; createdByRole: string;
   }): Promise<any> {
     const fromCheck = await database.query(
       `SELECT id FROM hospital_network_hospitals WHERE network_id = $1 AND hospital_id = $2`,
@@ -1952,11 +1958,11 @@ export class HospitalNetworkService {
     );
     if (toCheck.rows.length === 0) throw new ValidationError('Destination hospital is not in this network');
 
-    const callerCheck = await database.query(
-      `SELECT id FROM hospital_network_members WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [data.networkId, data.createdBy]
-    );
-    if (callerCheck.rows.length === 0) throw new ForbiddenError('Not authorized to create transfers');
+    // Was a bare "is an active member" check — compliance_officer/auditor have
+    // patientTransfers=false in the matrix but could still hit this route. Now checks the
+    // actual matrix action, same as every other network-gated mutation.
+    const access = await resolveNetworkAccess(data.networkId, data.createdBy, data.createdByRole, 'patientTransfers');
+    if (!access.allowed) throw new ForbiddenError('Not authorized to create transfers');
 
     const result = await database.query(
       `INSERT INTO network_referrals
@@ -2132,19 +2138,18 @@ export class HospitalNetworkService {
     }
   }
 
-  async completePatientTransfer(transferId: string, userId: string): Promise<any> {
+  async completePatientTransfer(transferId: string, userId: string, userRole: string): Promise<any> {
     const transfer = await database.query(
       `SELECT * FROM network_referrals WHERE id = $1 AND referral_type = 'transfer'`,
       [transferId]
     );
     if (transfer.rows.length === 0) throw new NotFoundError('Patient transfer');
 
-    const callerCheck = await database.query(
-      `SELECT id FROM hospital_network_members
-       WHERE network_id = $1 AND user_id = $2 AND is_active = true`,
-      [transfer.rows[0].network_id, userId]
-    );
-    if (callerCheck.rows.length === 0) throw new ForbiddenError('Not authorized');
+    // Was a bare "is an active member" check — now checks the patientTransfers matrix
+    // action, same as createPatientTransfer, so compliance_officer/auditor (false in the
+    // matrix) can't complete a transfer even though they could see it exists.
+    const access = await resolveNetworkAccess(transfer.rows[0].network_id, userId, userRole, 'patientTransfers');
+    if (!access.allowed) throw new ForbiddenError('Not authorized');
 
     await database.query(
       `UPDATE animal_care_contexts

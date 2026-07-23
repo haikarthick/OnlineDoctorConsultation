@@ -1,5 +1,7 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 /**
  * Silence transient proxy errors (ECONNREFUSED / ECONNRESET / ECONNABORTED).
@@ -20,7 +22,12 @@ function silenceProxyErrors(proxy: any) {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Run `ANALYZE=true npm run build` to generate frontend/bundle-stats.html
+    // (a treemap of what's in each chunk) — not part of the normal build.
+    process.env.ANALYZE && visualizer({ filename: 'bundle-stats.html', gzipSize: true, template: 'treemap' }),
+  ].filter(Boolean),
   build: {
     // Split vendor libs into separate chunks to reduce peak memory during minification.
     // Render free tier has 512MB RAM — a single 1,585KB bundle OOM-kills the build process.
@@ -58,5 +65,13 @@ export default defineConfig({
         configure: silenceProxyErrors,
       }
     }
-  }
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
+    css: false,
+    include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['e2e/**', 'node_modules/**'],
+  },
 })

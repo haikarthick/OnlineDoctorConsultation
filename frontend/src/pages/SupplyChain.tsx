@@ -206,7 +206,7 @@ const SupplyChainPage: React.FC = () => {
                     <thead><tr><th>{t('supplyChain.batchNum')}</th><th>{t('supplyChain.product')}</th><th>{t('supplyChain.expiry')}</th><th>{t('supplyChain.qty')}</th></tr></thead>
                     <tbody>{dashboard.expiringBatches.map((b: any, i: number) => (
                       <tr key={i}><td>{b.batch_number}</td><td>{b.product_type}</td>
-                        <td style={{ color: '#f97316' }}>{b.expiry_date ? new Date(b.expiry_date).toLocaleDateString() : '–'}</td><td>{b.quantity} {b.unit}</td></tr>
+                        <td className="si-a80c554d">{b.expiry_date ? new Date(b.expiry_date).toLocaleDateString() : '–'}</td><td>{b.quantity} {b.unit}</td></tr>
                     ))}</tbody>
                   </table>
                 </div>
@@ -275,7 +275,7 @@ const SupplyChainPage: React.FC = () => {
 
               {showEventForm && (
                 <form className="module-form" onSubmit={handleCreateEvent}>
-                  <p style={{ fontSize: 13, color: '#888', margin: '0 0 12px' }}>💡 Click on the map below to set GPS location for this event</p>
+                  <p className="si-f2fe0f46">💡 Click on the map below to set GPS location for this event</p>
                   <div className="form-grid">
                     <div className="form-group"><label>{t('supplyChain.batch')}</label>
                       <select value={eventForm.batchId} onChange={e => setEventForm({ ...eventForm, batchId: e.target.value })}>
@@ -304,10 +304,10 @@ const SupplyChainPage: React.FC = () => {
               {(() => {
                 const geoEvents = events.filter(ev => (ev.gpsLat || (ev as any).gps_lat) && (ev.gpsLng || (ev as any).gps_lng))
                 return geoEvents.length > 0 || showEventForm ? (
-                  <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e5e7eb', marginBottom: 20 }}>
-                    <div style={{ padding: '14px 20px', borderBottom: '1px solid #e5e7eb', background: '#fafafa' }}>
-                      <h3 style={{ margin: 0 }}>🗺️ Traceability Route Map</h3>
-                      <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
+                  <div className="si-3f5b50f7">
+                    <div className="si-be8ac8a2">
+                      <h3 className="si-44087c4b">🗺️ Traceability Route Map</h3>
+                      <p className="si-7438976a">
                         {geoEvents.length} event{geoEvents.length !== 1 ? 's' : ''} with GPS coordinates
                         {showEventForm && ' · Click map to set event location'}
                       </p>
@@ -326,9 +326,9 @@ const SupplyChainPage: React.FC = () => {
                           popup: (
                             <div>
                               <strong>{ev.title}</strong><br />
-                              <span style={{ fontSize: 12 }}>{ev.eventType || (ev as any).event_type}</span><br />
-                              {ev.location && <span style={{ fontSize: 12 }}>{ev.location}</span>}
-                              {ev.batchNumber && <><br /><span style={{ fontSize: 11 }}>Batch: {ev.batchNumber}</span></>}
+                              <span className="si-756a9f21">{ev.eventType || (ev as any).event_type}</span><br />
+                              {ev.location && <span className="si-756a9f21">{ev.location}</span>}
+                              {ev.batchNumber && <><br /><span className="si-6af9d82f">Batch: {ev.batchNumber}</span></>}
                             </div>
                           ),
                         })),

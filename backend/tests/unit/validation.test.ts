@@ -25,6 +25,7 @@ describe('Validation Schemas', () => {
       phone: '+919876543210',
       password: 'Passw0rd',
       role: 'pet_owner',
+      acceptTerms: true,
     }
 
     it('accepts valid data', () => {

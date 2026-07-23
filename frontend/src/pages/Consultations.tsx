@@ -376,9 +376,9 @@ const Consultations: React.FC = () => {
 
   if (loading) return (
     <div className="module-page">
-      <div style={{ textAlign: 'center', padding: 60 }}>
+      <div className="si-9fa8d292">
         <div className="loading-spinner" />
-        <p style={{ color: '#6b7280', marginTop: 16 }}>{t('consultations.loading')}</p>
+        <p className="si-d9bcb803">{t('consultations.loading')}</p>
       </div>
     </div>
   )
@@ -388,7 +388,7 @@ const Consultations: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('consultations.pageTitle')}</h1>
-          <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>
+          <p className="si-48d05eba">
             {isAdmin ? t('consultations.subtitles.admin') : isVet ? t('consultations.subtitles.vet') : t('consultations.subtitles.petOwner')}
           </p>
         </div>
@@ -398,14 +398,14 @@ const Consultations: React.FC = () => {
       </div>
 
       {error && (
-        <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
+        <div className="si-131754ed">
           ⚠️ {error}
-          <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }} onClick={() => setError('')}>{t('consultations.dismiss')}</button>
+          <button className="si-f8c15521" onClick={() => setError('')}>{t('consultations.dismiss')}</button>
         </div>
       )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: 20 }}>
+      <div className="si-49b00590">
         {[{ key: 'bookings' as const, label: t('consultations.tabs.appointments'), count: activeBookings.length },
           { key: 'consultations' as const, label: t('consultations.tabs.history'), count: historyBookings.length }
         ].map(t => (
@@ -420,8 +420,8 @@ const Consultations: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div style={{ marginBottom: 16, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 13, color: '#6b7280' }}>{t('consultations.filterLabel')}:</span>
+      <div className="si-ad0381af">
+        <span className="si-c3b93ebb">{t('consultations.filterLabel')}:</span>
         {['', ...currentFilterStatuses].map(s => (
           <button key={s} type="button" onClick={() => setStatusFilter(s)}
             style={{ padding: '5px 14px', borderRadius: 16, fontSize: 12, fontWeight: 500, cursor: 'pointer',
@@ -431,18 +431,18 @@ const Consultations: React.FC = () => {
             {s ? t(`consultations.statuses.${s}`, s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())) : t('consultations.filterAll')}
           </button>
         ))}
-        <button type="button" onClick={loadData} style={{ marginLeft: 'auto', padding: '5px 14px', borderRadius: 6, border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#374151' }}>{t('common.refresh')}</button>
+        <button type="button" onClick={loadData} className="si-a5c246fd">{t('common.refresh')}</button>
       </div>
 
       {/* Appointments Tab — items needing attention or upcoming */}
       {activeTab === 'bookings' && (
         <div className="module-content">
           {filteredActive.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>📅</div>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>{statusFilter ? t('consultations.noMatchAppointments') : t('consultations.emptyAppointments')}</p>
-              <p style={{ fontSize: 13, margin: '4px 0 12px' }}>{t('consultations.appointmentHint')}</p>
-              {isPetOwner && !statusFilter && <button className="btn-primary" style={{ marginTop: 4 }} onClick={() => navigate('/book-consultation')}>{t('consultations.bookButton')}</button>}
+            <div className="si-b409cd9b">
+              <div className="si-fc4388e2">📅</div>
+              <p className="si-37a5ef01">{statusFilter ? t('consultations.noMatchAppointments') : t('consultations.emptyAppointments')}</p>
+              <p className="si-ee604956">{t('consultations.appointmentHint')}</p>
+              {isPetOwner && !statusFilter && <button className="btn-primary si-f48bb60f" onClick={() => navigate('/book-consultation')}>{t('consultations.bookButton')}</button>}
             </div>
           ) : (
             <div className="appt-card-grid">
@@ -455,7 +455,7 @@ const Consultations: React.FC = () => {
                       {isPetOwner && <strong>{b.vetName || t('common.doctor')}</strong>}
                       {isAdmin && <span>{b.petOwnerName || '—'} / {b.vetName || '—'}</span>}
                     </div>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
+                    <div className="si-0fb5fcc7">
                       <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: 11, fontWeight: 600,
                         background: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#fef2f2' : '#f0f0f0',
                         color: b.priority === 'high' || b.priority === 'urgent' || b.priority === 'emergency' ? '#dc2626' : '#555'
@@ -470,15 +470,15 @@ const Consultations: React.FC = () => {
                     <div className="appt-card-animal">
                       {b.enterpriseName ? (
                         <>
-                          <span style={{ fontWeight: 600, color: '#059669' }}>🏢 {b.enterpriseName}</span>
-                          {b.groupName && <span style={{ color: '#6b7280' }}> · 📋 {b.groupName}</span>}
+                          <span className="si-e5391e22">🏢 {b.enterpriseName}</span>
+                          {b.groupName && <span className="si-23033f05"> · 📋 {b.groupName}</span>}
                           {b.animalName ? <span> · 🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</span>
-                            : <span style={{ color: '#9ca3af', fontStyle: 'italic' }}> · {t('consultations.herdLevel')}</span>}
+                            : <span className="si-bce9b403"> · {t('consultations.herdLevel')}</span>}
                         </>
                       ) : b.animalName ? (
                         <span>🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}{b.animalBreed ? ` / ${b.animalBreed}` : ''}</span>
                       ) : (
-                        <span style={{ color: '#9ca3af' }}>—</span>
+                        <span className="si-e70e9abd">—</span>
                       )}
                     </div>
 
@@ -498,7 +498,7 @@ const Consultations: React.FC = () => {
 
                     {/* PENDING — awaiting vet confirmation */}
                     {b.status === 'pending' && !isExpiredPending(b) && (
-                      <div style={{ padding: '8px 12px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#92400e', marginTop: 6 }}>
+                      <div className="si-f3ba3645">
                         {isPetOwner && t('consultations.pendingMessages.petOwner')}
                         {isVet && t('consultations.pendingMessages.vet')}
                         {isAdmin && t('consultations.pendingMessages.admin')}
@@ -507,14 +507,14 @@ const Consultations: React.FC = () => {
 
                     {/* PENDING but expired (safety fallback — backend normally auto-expires these) */}
                     {isExpiredPending(b) && (
-                      <div style={{ padding: '8px 12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, fontSize: 12, color: '#991b1b', marginTop: 6 }}>
+                      <div className="si-d3e4ea8a">
                         {isPetOwner ? t('consultations.expiredPendingMessages.petOwner') : t('consultations.expiredPendingMessages.general')}
                       </div>
                     )}
 
                     {/* CONFIRMED — appointment is set */}
                     {b.status === 'confirmed' && (
-                      <div style={{ padding: '8px 12px', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 6, fontSize: 12, color: '#065f46', marginTop: 6 }}>
+                      <div className="si-ad9785fc">
                         {isPetOwner && t('consultations.confirmedMessages.petOwner')}
                         {isVet && t('consultations.confirmedMessages.vet')}
                         {isAdmin && t('consultations.confirmedMessages.admin')}
@@ -523,24 +523,24 @@ const Consultations: React.FC = () => {
 
                     {/* MISSED — distinguish pending→missed vs confirmed→missed */}
                     {b.status === 'missed' && (
-                      <div style={{ marginTop: 8 }}>
+                      <div className="si-cbfb1eb8">
                         {missedBadge(b.missedBy)}
 
                         {/* Doctor missed — was never confirmed (pending → missed) */}
                         {b.missedBy === 'doctor' && !b.confirmedAt && (
                           <>
                             {isPetOwner && (
-                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                              <div className="si-3e55ea7f">
                                 {t('consultations.doctorMissedPending.petOwner')}
                               </div>
                             )}
                             {isVet && (
-                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                              <div className="si-3e55ea7f">
                                 {t('consultations.doctorMissedPending.vet')}
                               </div>
                             )}
                             {isAdmin && (
-                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                              <div className="si-3e55ea7f">
                                 {t('consultations.doctorMissedPending.admin')}
                               </div>
                             )}
@@ -551,17 +551,17 @@ const Consultations: React.FC = () => {
                         {b.missedBy === 'doctor' && b.confirmedAt && (
                           <>
                             {isPetOwner && (
-                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                              <div className="si-3e55ea7f">
                                 {t('consultations.doctorMissedConfirmed.petOwner')}
                               </div>
                             )}
                             {isVet && (
-                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                              <div className="si-3e55ea7f">
                                 {t('consultations.doctorMissedConfirmed.vet')}
                               </div>
                             )}
                             {isAdmin && (
-                              <div style={{ padding: '8px 12px', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: 6, fontSize: 12, color: '#78350f', marginTop: 6 }}>
+                              <div className="si-3e55ea7f">
                                 {t('consultations.doctorMissedConfirmed.admin')}
                               </div>
                             )}
@@ -574,7 +574,7 @@ const Consultations: React.FC = () => {
                           const limit = patientNoShowRescheduleLimit
                           const remaining = limit === 0 ? null : Math.max(0, limit - used)
                           return (
-                            <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
+                            <div className="si-f9e66937">
                               {b.missedBy === 'both' ? t('consultations.missedMessages.bothMissed') : t('consultations.missedMessages.youMissed')}{' '}
                               {limit === 0
                                 ? t('consultations.missedMessages.rescheduleAnytime')
@@ -585,17 +585,17 @@ const Consultations: React.FC = () => {
                           )
                         })()}
                         {isVet && b.missedBy === 'patient' && (
-                          <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
+                          <div className="si-f9e66937">
                             {t('consultations.missedMessages.patientNoJoin')}
                           </div>
                         )}
                         {isVet && b.missedBy === 'both' && (
-                          <div style={{ padding: '8px 12px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, color: '#475569', marginTop: 6 }}>
+                          <div className="si-f1d7a58f">
                             {t('consultations.missedMessages.neitherJoined')}
                           </div>
                         )}
                         {isAdmin && (b.missedBy === 'patient' || b.missedBy === 'both') && (
-                          <div style={{ padding: '8px 12px', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, fontSize: 12, color: '#5b21b6', marginTop: 6 }}>
+                          <div className="si-f9e66937">
                             {b.missedBy === 'patient' ? t('consultations.adminMissed.patientNoShow') : t('consultations.adminMissed.bothMissed')}
                           </div>
                         )}
@@ -606,17 +606,17 @@ const Consultations: React.FC = () => {
                   {/* Card Actions */}
                   <div className="appt-card-actions">
                     {isVet && b.status === 'pending' && !isExpiredPending(b) && (
-                      <button className="btn-small" disabled={actionLoading === b.id} style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
+                      <button className="btn-small si-0e51a69a" disabled={actionLoading === b.id} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
                     )}
                     {(isVet || isAdmin) && b.status === 'confirmed' && b.bookingType === 'video_call' && (
                       isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
-                        ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>{t('consultations.actions.start')}</button>
-                        : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={t('consultations.joinWindowTooltip', { minutes: appSettings.joinWindowMinutes })}>{t('consultations.actions.notYet')}</button>
+                        ? <button className="btn-small si-af66012c" onClick={() => handleStartConsultation(b)}>{t('consultations.actions.start')}</button>
+                        : <button className="btn-small si-33f445bc" disabled title={t('consultations.joinWindowTooltip', { minutes: appSettings.joinWindowMinutes })}>{t('consultations.actions.notYet')}</button>
                     )}
                     {isPetOwner && b.status === 'confirmed' && b.bookingType === 'video_call' && (
                       isJoinable(b.scheduledDate, b.timeSlotStart, b.timeSlotEnd)
-                        ? <button className="btn-small" style={{ background: '#667eea', color: 'white', border: 'none' }} onClick={() => handleStartConsultation(b)}>{t('consultations.actions.join')}</button>
-                        : <button className="btn-small" style={{ background: '#e5e7eb', color: '#9ca3af', border: 'none', cursor: 'not-allowed' }} disabled title={t('consultations.joinWindowTooltip', { minutes: appSettings.joinWindowMinutes })}>{t('consultations.actions.notYet')}</button>
+                        ? <button className="btn-small si-af66012c" onClick={() => handleStartConsultation(b)}>{t('consultations.actions.join')}</button>
+                        : <button className="btn-small si-33f445bc" disabled title={t('consultations.joinWindowTooltip', { minutes: appSettings.joinWindowMinutes })}>{t('consultations.actions.notYet')}</button>
                     )}
                     {/* Reschedule button — conditional on who missed and reschedule limits */}
                     {(b.status === 'confirmed' || (b.status === 'pending' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit)) || (b.status === 'missed' && canReschedule(b, maxReschedules, patientNoShowRescheduleLimit))) && (
@@ -628,12 +628,12 @@ const Consultations: React.FC = () => {
                       </button>
                     )}
                     {(b.status === 'pending' || b.status === 'confirmed') && (
-                      <button className="btn-small" style={{ color: '#dc2626', border: '1px solid #dc2626', background: 'white' }} onClick={() => handleCancelBooking(b.id)}>{t('consultations.actions.cancelBooking')}</button>
+                      <button className="btn-small si-b2f36fe7" onClick={() => handleCancelBooking(b.id)}>{t('consultations.actions.cancelBooking')}</button>
                     )}
                     {isAdmin && b.status === 'pending' && !isExpiredPending(b) && (
-                      <button className="btn-small" disabled={actionLoading === b.id} style={{ background: '#059669', color: 'white', border: 'none' }} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
+                      <button className="btn-small si-0e51a69a" disabled={actionLoading === b.id} onClick={() => handleConfirmBooking(b.id)}>{actionLoading === b.id ? '⏳' : t('consultations.actions.confirm')}</button>
                     )}
-                    <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title={t('consultations.viewActionHistory')}>{t('consultations.actions.log')}</button>
+                    <button className="btn-small si-1827a52c" onClick={() => openActionLog(b.id)} title={t('consultations.viewActionHistory')}>{t('consultations.actions.log')}</button>
                   </div>
                 </div>
               ))}
@@ -646,10 +646,10 @@ const Consultations: React.FC = () => {
       {activeTab === 'consultations' && (
         <div className="module-content">
           {filteredHistory.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: 40, color: '#9ca3af' }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🩺</div>
-              <p style={{ fontSize: 16, fontWeight: 500 }}>{statusFilter ? t('consultations.noMatchFilter') : t('consultations.noHistory')}</p>
-              <p style={{ fontSize: 13 }}>{t('consultations.historyHint')}</p>
+            <div className="si-b409cd9b">
+              <div className="si-fc4388e2">🩺</div>
+              <p className="si-37a5ef01">{statusFilter ? t('consultations.noMatchFilter') : t('consultations.noHistory')}</p>
+              <p className="si-0a803082">{t('consultations.historyHint')}</p>
             </div>
           ) : (
             <div className="appt-card-grid">
@@ -665,9 +665,9 @@ const Consultations: React.FC = () => {
                         {isPetOwner && <strong>{b.vetName || t('common.doctor')}</strong>}
                         {isAdmin && <span>{b.petOwnerName || '—'} / {b.vetName || '—'}</span>}
                       </div>
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
+                      <div className="si-0fb5fcc7">
                         {networkInfo && networkInfo.networkName && (
-                          <span className="badge" style={{ background: '#e8f4f8', color: '#1a6a8a', fontSize: '0.7rem', padding: '2px 6px', borderRadius: 4 }}>
+                          <span className="badge si-3969f1f4">
                             🏥 {networkInfo.networkName}
                           </span>
                         )}
@@ -680,14 +680,14 @@ const Consultations: React.FC = () => {
                       <div className="appt-card-animal">
                         {b.enterpriseName ? (
                           <>
-                            <span style={{ fontWeight: 600, color: '#059669' }}>🏢 {b.enterpriseName}</span>
-                            {b.groupName && <span style={{ color: '#6b7280' }}> · 📋 {b.groupName}</span>}
+                            <span className="si-e5391e22">🏢 {b.enterpriseName}</span>
+                            {b.groupName && <span className="si-23033f05"> · 📋 {b.groupName}</span>}
                             {b.animalName && <span> · 🐾 {b.animalName}{b.animalBreed ? ` (${b.animalBreed})` : ''}</span>}
                           </>
                         ) : b.animalName ? (
                           <span>🐾 {b.animalName}{b.animalSpecies ? ` — ${b.animalSpecies}` : ''}</span>
                         ) : (
-                          <span style={{ color: '#9ca3af' }}>—</span>
+                          <span className="si-e70e9abd">—</span>
                         )}
                       </div>
 
@@ -701,7 +701,7 @@ const Consultations: React.FC = () => {
                       )}
 
                       {diagnosis && (
-                        <div style={{ fontSize: 13, color: '#059669', marginTop: 4 }}>🩺 {diagnosis}</div>
+                        <div className="si-8c7a9026">🩺 {diagnosis}</div>
                       )}
 
                       {/* Cancelled by indicator */}
@@ -710,7 +710,7 @@ const Consultations: React.FC = () => {
                           background: b.cancelledBy === user?.id ? '#fef3c7' : '#fef2f2',
                           color: b.cancelledBy === user?.id ? '#92400e' : '#991b1b' }}>
                           {b.cancelledBy === user?.id ? t('consultations.cancelledByYou') : t('consultations.cancelledByOther')}
-                          {b.cancelledAt && <span style={{ marginLeft: 8, fontSize: 11, color: '#9ca3af' }}>
+                          {b.cancelledAt && <span className="si-a69da2c2">
                             {formatDate(b.cancelledAt)}
                           </span>}
                         </div>
@@ -718,8 +718,7 @@ const Consultations: React.FC = () => {
 
                       {/* Rescheduled indicator — this is the OLD booking that was superseded */}
                       {b.status === 'rescheduled' && (
-                        <div style={{ fontSize: 12, marginTop: 6, padding: '8px 12px', borderRadius: 6,
-                          background: '#fef3c7', border: '1px solid #fcd34d', color: '#92400e' }}>
+                        <div className="si-01262b7b">
                           {t('consultations.rescheduledNotice')}
                         </div>
                       )}
@@ -728,7 +727,7 @@ const Consultations: React.FC = () => {
                     {/* Card Actions */}
                     <div className="appt-card-actions">
                       {b.status === 'completed' && b.consultationId && (
-                        <button className="btn-small" style={{ background: '#f0fdf4', color: '#059669', border: '1px solid #059669' }}
+                        <button className="btn-small si-26ca7215"
                           onClick={() => {
                             if (isVet) navigate(`/doctor/consultation-room/${b.consultationId}`)
                             else navigate(`/video-consultation/${b.consultationId}`)
@@ -738,7 +737,7 @@ const Consultations: React.FC = () => {
                         <button className="btn-small" onClick={() => navigate(`/write-review?consultationId=${b.consultationId}&veterinarianId=${b.veterinarianId}`)}>{t('consultations.actions.review')}</button>
                       )}
                       {b.status === 'cancelled' && (
-                        <button className="btn-small" style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db' }} onClick={() => openActionLog(b.id)} title={t('consultations.viewCancellationDetails')}>{t('consultations.actions.details')}</button>
+                        <button className="btn-small si-1827a52c" onClick={() => openActionLog(b.id)} title={t('consultations.viewCancellationDetails')}>{t('consultations.actions.details')}</button>
                       )}
                     </div>
                   </div>
@@ -751,31 +750,25 @@ const Consultations: React.FC = () => {
 
       {/* ─── Reschedule Modal ──────────────────────────────── */}
       {rescheduleBooking && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999
-        }} onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}>
-          <div style={{
-            background: 'white', borderRadius: 16, padding: 32, width: '95%', maxWidth: 520,
-            maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ margin: 0 }}>{t('consultations.reschedule.title')}</h2>
+        <div className="si-10f9485f" onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}>
+          <div className="si-f9e05bb3" onClick={e => e.stopPropagation()}>
+            <div className="si-fe2d5bfb">
+              <h2 className="si-44087c4b">{t('consultations.reschedule.title')}</h2>
               <button type="button" onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
-                style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: '#6b7280' }}>✕</button>
+                className="si-6a334ebc">✕</button>
             </div>
 
             {/* Current booking info */}
-            <div style={{ background: '#fef3c7', borderRadius: 8, padding: 14, marginBottom: 20, border: '1px solid #fcd34d' }}>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#92400e' }}>{t('consultations.reschedule.originalLabel')}</p>
-              <p style={{ margin: '6px 0 0', fontSize: 13, color: '#92400e' }}>
+            <div className="si-9c52ec04">
+              <p className="si-75f3eb54">{t('consultations.reschedule.originalLabel')}</p>
+              <p className="si-63d91992">
                 {rescheduleBooking.vetName || t('common.doctor')} — {fmt(rescheduleBooking.scheduledDate)} {t('common.at')} {formatSlotTime(rescheduleBooking.timeSlotStart)} - {formatSlotTime(rescheduleBooking.timeSlotEnd)}
               </p>
             </div>
 
             {/* Reschedule count info */}
             {rescheduleBooking.status === 'pending' && !isExpiredPending(rescheduleBooking) && appSettings.maxReschedules > 0 && (
-              <div style={{ padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#1e40af' }}>
+              <div className="si-b8a27886">
                 {t('consultations.reschedule.rescheduleCount', { current: (rescheduleBooking.rescheduleCount || 0) + 1, max: appSettings.maxReschedules })}
               </div>
             )}
@@ -804,23 +797,23 @@ const Consultations: React.FC = () => {
 
             {/* Expired pending notice */}
             {isExpiredPending(rescheduleBooking) && (
-              <div style={{ padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, marginBottom: 16, fontSize: 13, color: '#991b1b' }}>
+              <div className="si-a2619258">
                 {t('consultations.reschedule.expiredPendingNotice')}
               </div>
             )}
 
             {/* Doctor selection */}
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>
+            <div className="si-7e63ec4f">
+              <label className="si-e68e52cd">
                 {isExpiredPending(rescheduleBooking) ? t('consultations.reschedule.selectDoctor') : t('consultations.reschedule.selectDoctorOptional')}
               </label>
               {vetListLoading ? (
-                <div style={{ padding: 10, textAlign: 'center', color: '#6b7280', fontSize: 13 }}>{t('consultations.reschedule.loadingDoctors')}</div>
+                <div className="si-3f8e0459">{t('consultations.reschedule.loadingDoctors')}</div>
               ) : (
                 <select
                   value={rescheduleVetId}
                   onChange={(e) => handleVetChange(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '2px solid #d1d5db', fontSize: 14, boxSizing: 'border-box', background: 'white', color: '#1a1a1a' }}
+                  className="si-92bee81f"
                 >
                   <option value="">{t('consultations.reschedule.keepCurrentDoctor')}</option>
                   {vetList.map(v => (
@@ -833,11 +826,11 @@ const Consultations: React.FC = () => {
             </div>
 
             {/* New date picker */}
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>{t('consultations.reschedule.dateLabel')}</label>
+            <div className="si-7e63ec4f">
+              <label className="si-e68e52cd">{t('consultations.reschedule.dateLabel')}</label>
               <input
                 type="date"
-                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }}
+                className="si-d0e0df59"
                 value={rescheduleDate}
                 min={(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()}
                 onChange={(e) => loadRescheduleSlots(e.target.value)}
@@ -848,22 +841,22 @@ const Consultations: React.FC = () => {
             {rescheduleDate && (() => {
               const futureSlots = filterFutureSlots(rescheduleSlots, rescheduleDate)
               return (
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, fontSize: 14 }}>{t('consultations.reschedule.slotsTitle')}</label>
+              <div className="si-478be2e9">
+                <label className="si-efbbcec8">{t('consultations.reschedule.slotsTitle')}</label>
                 {rescheduleSlotsLoading ? (
-                  <div style={{ textAlign: 'center', padding: 20 }}>
-                    <div className="loading-spinner" style={{ margin: '0 auto' }} />
+                  <div className="si-5686f5eb">
+                    <div className="loading-spinner si-8d6ac58b" />
                   </div>
                 ) : rescheduleDateMsg ? (
-                  <div style={{ padding: '12px 16px', borderRadius: 8, background: '#fefce8', border: '1px solid #fde047', fontSize: 13, color: '#854d0e', textAlign: 'center' }}>
+                  <div className="si-88c863bb">
                     {rescheduleDateMsg} — {t('consultations.reschedule.selectAnotherDate')}
                   </div>
                 ) : futureSlots.length === 0 ? (
-                  <p style={{ color: '#9ca3af', fontSize: 13, textAlign: 'center', padding: 16 }}>
+                  <p className="si-ed4d0fb3">
                     {t('consultations.reschedule.noSlots')}
                   </p>
                 ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  <div className="si-d925f834">
                     {futureSlots.map((slot, idx) => (
                       <button
                         key={idx}
@@ -886,22 +879,22 @@ const Consultations: React.FC = () => {
 
             {/* Doctor approval note for pet owners */}
             {isPetOwner && rescheduleSelectedSlot && (
-              <div style={{ padding: '10px 14px', background: '#dbeafe', color: '#1e40af', borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
+              <div className="si-c72eca10">
                 {t('consultations.reschedule.approvalNote')}
               </div>
             )}
 
             {/* Error banner */}
             {rescheduleError && (
-              <div style={{ padding: '10px 14px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 12 }}>
+              <div className="si-919b5437">
                 ⚠ {rescheduleError}
               </div>
             )}
 
             {/* Confirm reschedule */}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <div className="si-7be0b9bd">
               <button type="button" onClick={() => { setRescheduleBooking(null); setRescheduleError('') }}
-                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 500 }}
+                className="si-60c838b7"
               >{t('common.cancel')}</button>
               <button
                 onClick={handleRescheduleSubmit}
@@ -921,28 +914,21 @@ const Consultations: React.FC = () => {
 
       {/* Action Log Modal */}
       {actionLogBookingId && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', zIndex: 1100
-        }} onClick={() => setActionLogBookingId(null)}>
-          <div style={{
-            background: 'white', borderRadius: 12, padding: 24, width: '90%',
-            maxWidth: 520, maxHeight: '80vh', overflowY: 'auto'
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ margin: 0, fontSize: 18 }}>{t('consultations.actionLog.title')}</h2>
-              <button type="button" onClick={() => setActionLogBookingId(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
+        <div className="si-8d03dc26" onClick={() => setActionLogBookingId(null)}>
+          <div className="si-49aa5192" onClick={e => e.stopPropagation()}>
+            <div className="si-101fd1d0">
+              <h2 className="si-670df8d2">{t('consultations.actionLog.title')}</h2>
+              <button type="button" onClick={() => setActionLogBookingId(null)} className="si-60f45c55">✕</button>
             </div>
 
-            {actionLogsLoading && <p style={{ color: '#6b7280' }}>{t('consultations.actionLog.loading')}</p>}
+            {actionLogsLoading && <p className="si-23033f05">{t('consultations.actionLog.loading')}</p>}
 
             {!actionLogsLoading && actionLogs.length === 0 && (
-              <p style={{ color: '#9ca3af', textAlign: 'center', padding: 20 }}>{t('consultations.actionLog.empty')}</p>
+              <p className="si-8a6a7c8a">{t('consultations.actionLog.empty')}</p>
             )}
 
             {!actionLogsLoading && actionLogs.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              <div className="si-3edfa4b6">
                 {actionLogs.map((log, idx) => (
                   <div key={log.id} style={{
                     display: 'flex', gap: 12, padding: '12px 0',
@@ -955,30 +941,30 @@ const Consultations: React.FC = () => {
                         : log.action === 'BOOKING_CANCELLED' ? '#ef4444'
                         : log.action === 'BOOKING_RESCHEDULED' ? '#f59e0b' : '#6b7280'
                     }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, fontSize: 14, color: '#111827' }}>
+                    <div className="si-6acd75e8">
+                      <div className="si-807dc7b4">
                         {actionLabel(log.action)}
                       </div>
-                      <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
+                      <div className="si-d93f66e1">
                         {t('consultations.actionLog.by')} <strong>{log.userName || t('consultations.actionLog.system')}</strong>
                         {log.details?.role && <span> ({log.details.role})</span>}
                         {' · '}
                         {log.createdAt ? new Date(log.createdAt).toLocaleString() : '–'}
                       </div>
                       {log.action === 'BOOKING_RESCHEDULED' && log.details && (
-                        <div style={{ fontSize: 12, color: '#4b5563', marginTop: 4, padding: '4px 8px', background: '#fef3c7', borderRadius: 4 }}>
+                        <div className="si-e4117c98">
                           {t('consultations.actionLog.newSlot')} {log.details.newDate} {formatSlotTime(log.details.newTimeSlotStart)}–{formatSlotTime(log.details.newTimeSlotEnd)}
                           {log.details.newStatus === 'pending' && (
                             // Check if a subsequent confirmation exists in the log
                             actionLogs.some((l, j) => j > idx && l.action === 'BOOKING_CONFIRMED')
-                              ? <span style={{ color: '#059669' }}> {t('consultations.actionLog.approved')}</span>
-                              : <span style={{ color: '#d97706' }}> {t('consultations.actionLog.awaitingApproval')}</span>
+                              ? <span className="si-487e8582"> {t('consultations.actionLog.approved')}</span>
+                              : <span className="si-cdb09cc1"> {t('consultations.actionLog.awaitingApproval')}</span>
                           )}
-                          {log.details.newStatus === 'confirmed' && <span style={{ color: '#059669' }}> {t('consultations.actionLog.autoConfirmed')}</span>}
+                          {log.details.newStatus === 'confirmed' && <span className="si-487e8582"> {t('consultations.actionLog.autoConfirmed')}</span>}
                         </div>
                       )}
                       {log.action === 'BOOKING_CANCELLED' && (
-                        <div style={{ fontSize: 12, color: '#dc2626', marginTop: 4 }}>
+                        <div className="si-9e7b17f4">
                           {log.details?.cancelledByRole && <span>{t('consultations.actionLog.cancelledBy', { role: log.details.cancelledByRole })} </span>}
                           {log.details?.reason && <span>{t('consultations.actionLog.reason', { reason: log.details.reason })}</span>}
                         </div>
@@ -989,8 +975,8 @@ const Consultations: React.FC = () => {
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-              <button type="button" className="btn-small" style={{ padding: '8px 20px' }} onClick={() => setActionLogBookingId(null)}>{t('consultations.actionLog.close')}</button>
+            <div className="si-87877f89">
+              <button type="button" className="btn-small si-71810deb" onClick={() => setActionLogBookingId(null)}>{t('consultations.actionLog.close')}</button>
             </div>
           </div>
         </div>
@@ -1004,20 +990,14 @@ const Consultations: React.FC = () => {
           ? (t('consultations.cancelModal.reasonPresetsVet', { returnObjects: true }) as string[])
           : (t('consultations.cancelModal.reasonPresetsPatient', { returnObjects: true }) as string[])
         return (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 9999
-        }} onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}>
-          <div style={{
-            background: 'white', borderRadius: 12, padding: 24, width: '90%', maxWidth: 480,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)', maxHeight: '90vh', overflowY: 'auto'
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ margin: 0, fontSize: 18 }}>{t('consultations.cancelModal.title')}</h2>
+        <div className="si-10f9485f" onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}>
+          <div className="si-b6bf627f" onClick={e => e.stopPropagation()}>
+            <div className="si-101fd1d0">
+              <h2 className="si-670df8d2">{t('consultations.cancelModal.title')}</h2>
               <button type="button" onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
-                style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#6b7280' }}>✕</button>
+                className="si-60f45c55">✕</button>
             </div>
-            <div style={{ background: '#fef2f2', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13, color: '#991b1b' }}>
+            <div className="si-941430f8">
               {t('consultations.cancelModal.warning')}
             </div>
 
@@ -1029,44 +1009,44 @@ const Consultations: React.FC = () => {
                 borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13
               }}>
                 <strong>{refundEstimate.percent === 100 ? '✅' : refundEstimate.percent > 0 ? '⚠️' : '❌'} {t('consultations.cancelModal.refundPolicy')}:</strong>
-                <div style={{ marginTop: 4 }}>{refundEstimate.reason}</div>
+                <div className="si-f48bb60f">{refundEstimate.reason}</div>
               </div>
             )}
 
             {/* Quick reason presets */}
-            <div style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>{t('consultations.cancelModal.quickReasons')}</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <div className="si-bab8e8bc">
+              <label className="si-e68e52cd">{t('consultations.cancelModal.quickReasons')}</label>
+              <div className="si-50c82988">
                 {reasonPresets.map(r => (
                   <button key={r}
                     type="button"
-                    className={`btn btn-sm ${cancelModal.reason === r ? 'btn-primary' : 'btn-outline'}`}
+                    className={`btn btn-sm ${cancelModal.reason === r ? 'btn-primary' : 'btn-outline'} si-756a9f21`}
                     onClick={() => setCancelModal({ ...cancelModal, reason: r })}
-                    style={{ fontSize: 12 }}
+                   
                   >{r}</button>
                 ))}
               </div>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: 14 }}>{t('consultations.cancelModal.reasonLabel')}</label>
+            <div className="si-7e63ec4f">
+              <label className="si-e68e52cd">{t('consultations.cancelModal.reasonLabel')}</label>
               <textarea
                 placeholder={t('consultations.cancelModal.reasonPlaceholder')}
                 value={cancelModal.reason}
                 onChange={(e) => setCancelModal({ ...cancelModal, reason: e.target.value })}
-                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, minHeight: 80, resize: 'vertical', boxSizing: 'border-box' }}
+                className="si-6c17b3f3"
               />
             </div>
             {cancelError && (
-              <div style={{ padding: '10px 14px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: 8, fontSize: 13, fontWeight: 500, marginBottom: 12 }}>
+              <div className="si-919b5437">
                 ⚠ {cancelError}
               </div>
             )}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <div className="si-7be0b9bd">
               <button
                 type="button"
                 onClick={() => { setCancelModal({ show: false, bookingId: '', reason: '' }); setCancelError('') }}
-                style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #d1d5db', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 500 }}
+                className="si-60c838b7"
               >{t('consultations.cancelModal.keepBooking')}</button>
               <button
                 onClick={() => handleCancelBooking()}

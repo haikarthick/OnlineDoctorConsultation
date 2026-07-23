@@ -249,6 +249,12 @@ export const createAnimalSchema = Joi.object({
   medicalNotes: longText(10000).optional().allow('', null),
   enterpriseId: uuid.optional().allow(null, ''),
   groupId: uuid.optional().allow(null, ''),
+  animalClass: shortText(30).optional().allow('', null),
+  sireId: uuid.optional().allow(null, ''),
+  damId: uuid.optional().allow(null, ''),
+  breedingStatus: Joi.string().valid('not_bred', 'pregnant', 'not_pregnant').optional().allow('', null),
+  lastBreedingDate: Joi.string().optional().allow('', null),
+  expectedDueDate: Joi.string().optional().allow('', null),
 });
 
 export const updateAnimalSchema = createAnimalSchema.fork(
@@ -1108,6 +1114,7 @@ const livestockFields = {
   animalAgeMonths: Joi.number().integer().min(0).max(600).optional().allow(null),
   animalWeightKg: Joi.number().min(0).max(5000).optional().allow(null),
   gender: Joi.string().valid('male', 'female', 'unknown').optional().allow('', null),
+  animalClass: Joi.string().max(30).optional().allow('', null),
   lactationNumber: Joi.number().integer().min(0).max(20).optional().allow(null),
   dailyMilkYield: Joi.number().min(0).max(100).optional().allow(null),
   pregnancyStatus: Joi.string().valid('not_pregnant', 'pregnant', 'unknown').optional().allow('', null),
@@ -1139,7 +1146,7 @@ export const createMarketplaceListingSchema = Joi.object({
   quantity: positiveInt.optional(),
   unit: shortText(20).optional(),
   condition: shortText(50).optional(),
-  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).optional(),
+  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).max(4).optional(),
   videoUrl: Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000)).optional().allow('', null),
   location: shortText(500).optional().allow('', null),
   shippingOptions: Joi.array().items(Joi.any()).optional(),
@@ -1157,7 +1164,7 @@ export const updateMarketplaceListingSchema = Joi.object({
   category: shortText(100).optional(),
   condition: shortText(50).optional(),
   location: shortText(500).optional().allow('', null),
-  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).optional(),
+  images: Joi.array().items(Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000))).max(4).optional(),
   videoUrl: Joi.alternatives().try(Joi.string().uri().max(2000), Joi.string().pattern(/^\/uploads\//).max(2000)).optional().allow('', null),
   tags: Joi.array().items(Joi.string().max(50)).optional(),
   listingType: Joi.string().valid('sale', 'auction', 'wanted').optional(),
@@ -1692,4 +1699,78 @@ export const createBranchHospitalSchema = Joi.object({
   email: Joi.string().email().allow('', null).optional(),
   description: Joi.string().allow('', null).optional(),
   specializations: Joi.array().items(Joi.string()).optional(),
+});
+
+// ─── Master Data (admin CRUD: species/breeds/animal classes/marketplace categories/conditions) ───
+export const createMasterSpeciesSchema = Joi.object({
+  code: Joi.string().min(1).max(50).required(),
+  label: Joi.string().min(1).max(100).required(),
+  icon: Joi.string().max(10).allow('', null).optional(),
+  category: Joi.string().max(50).allow('', null).optional(),
+  hasEarTag: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().optional(),
+  isMarketplaceEligible: Joi.boolean().optional(),
+});
+export const updateMasterSpeciesSchema = Joi.object({
+  label: Joi.string().min(1).max(100).optional(),
+  icon: Joi.string().max(10).allow('', null).optional(),
+  category: Joi.string().max(50).allow('', null).optional(),
+  hasEarTag: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().optional(),
+  isMarketplaceEligible: Joi.boolean().optional(),
+});
+
+export const createMasterBreedSchema = Joi.object({
+  speciesId: Joi.string().uuid().required(),
+  name: Joi.string().min(1).max(150).required(),
+  sortOrder: Joi.number().integer().optional(),
+});
+export const updateMasterBreedSchema = Joi.object({
+  name: Joi.string().min(1).max(150).optional(),
+  sortOrder: Joi.number().integer().optional(),
+});
+
+export const createMasterAnimalClassSchema = Joi.object({
+  speciesId: Joi.string().uuid().required(),
+  value: Joi.string().min(1).max(50).required(),
+  labelKey: Joi.string().max(150).allow('', null).optional(),
+  label: Joi.string().max(100).allow('', null).optional(),
+  impliedGender: Joi.string().valid('male', 'female', 'unknown').required(),
+  canBePregnant: Joi.boolean().optional(),
+  canProduceMilk: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().optional(),
+});
+export const updateMasterAnimalClassSchema = Joi.object({
+  labelKey: Joi.string().max(150).allow('', null).optional(),
+  label: Joi.string().max(100).allow('', null).optional(),
+  impliedGender: Joi.string().valid('male', 'female', 'unknown').optional(),
+  canBePregnant: Joi.boolean().optional(),
+  canProduceMilk: Joi.boolean().optional(),
+  sortOrder: Joi.number().integer().optional(),
+});
+
+export const createMasterMarketplaceCategorySchema = Joi.object({
+  code: Joi.string().min(1).max(50).required(),
+  labelKey: Joi.string().max(150).allow('', null).optional(),
+  label: Joi.string().max(100).allow('', null).optional(),
+  icon: Joi.string().max(10).allow('', null).optional(),
+  sortOrder: Joi.number().integer().optional(),
+});
+export const updateMasterMarketplaceCategorySchema = Joi.object({
+  labelKey: Joi.string().max(150).allow('', null).optional(),
+  label: Joi.string().max(100).allow('', null).optional(),
+  icon: Joi.string().max(10).allow('', null).optional(),
+  sortOrder: Joi.number().integer().optional(),
+});
+
+export const createMasterMarketplaceConditionSchema = Joi.object({
+  code: Joi.string().min(1).max(30).required(),
+  labelKey: Joi.string().max(150).allow('', null).optional(),
+  label: Joi.string().max(100).allow('', null).optional(),
+  sortOrder: Joi.number().integer().optional(),
+});
+export const updateMasterMarketplaceConditionSchema = Joi.object({
+  labelKey: Joi.string().max(150).allow('', null).optional(),
+  label: Joi.string().max(100).allow('', null).optional(),
+  sortOrder: Joi.number().integer().optional(),
 });

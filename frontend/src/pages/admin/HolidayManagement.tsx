@@ -159,7 +159,7 @@ export default function HolidayManagement() {
             <th>{t('holidayManagement.date')}</th>
             <th>{t('holidayManagement.type')}</th>
             <th>{t('holidayManagement.duration')}</th>
-            <th style={{ textAlign: 'right' }}>{t('holidayManagement.actions')}</th>
+            <th className="si-f4e64596">{t('holidayManagement.actions')}</th>
           </tr>
         </thead>
         <tbody>
@@ -212,7 +212,7 @@ export default function HolidayManagement() {
         </div>
       </div>
 
-      {pageMsg && <div className={`modal-alert ${pageMsg.isError ? 'error' : 'success'}`} style={{ marginBottom: 16 }}>{pageMsg.text}</div>}
+      {pageMsg && <div className={`modal-alert ${pageMsg.isError ? 'error' : 'success'} si-7e63ec4f`}>{pageMsg.text}</div>}
 
       {/* Stats */}
       <div className="holiday-stats">
@@ -300,8 +300,8 @@ export default function HolidayManagement() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                    <input type="checkbox" checked={form.isFullDay} onChange={e => setForm({ ...form, isFullDay: e.target.checked })} style={{ width: 18, height: 18 }} />
+                  <label className="si-0c7e7279">
+                    <input type="checkbox" checked={form.isFullDay} onChange={e => setForm({ ...form, isFullDay: e.target.checked })} className="si-8f286607" />
                     <span>{t('holidayManagement.fullDayClosure')}</span>
                   </label>
                 </div>
@@ -317,7 +317,7 @@ export default function HolidayManagement() {
                     </div>
                   </div>
                 )}
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+                <div className="si-2afd2545">
                   <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>{t('holidayManagement.cancel')}</button>
                   <button type="submit" className="btn btn-primary" disabled={submitting}>
                     {submitting ? t('holidayManagement.saving') : editId ? t('holidayManagement.updateHoliday') : t('holidayManagement.addHoliday')}

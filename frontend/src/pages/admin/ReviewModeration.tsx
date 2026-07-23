@@ -96,17 +96,17 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
       {error && <div className="module-alert error">{error}</div>}
 
       {/* Filters */}
-      <div className="module-filters" style={{ marginBottom: 24, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+      <div className="module-filters si-cb911935">
         <input
-          className="module-input"
-          style={{ flex: '1 1 200px', maxWidth: 280 }}
+          className="module-input si-41094ac4"
+         
           placeholder={t('reviewModeration.searchByVet')}
           value={vetSearch}
           onChange={e => setVetSearch(e.target.value)}
         />
         <select
-          className="module-input"
-          style={{ width: 180 }}
+          className="module-input si-7f996198"
+         
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
         >
@@ -122,20 +122,20 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
       {loading && page === 0 ? (
         <div className="loading-container"><div className="loading-spinner" /></div>
       ) : filteredReviews.length === 0 ? (
-        <div className="empty-state"><div style={{ fontSize: 48 }}>⭐</div><h3>{t('reviewModeration.noReviews')}</h3></div>
+        <div className="empty-state"><div className="si-353e617d">⭐</div><h3>{t('reviewModeration.noReviews')}</h3></div>
       ) : (
         <>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="si-58f59f7a">
             {filteredReviews.map(review => (
               <div key={review.id} className="module-card" style={{
                 borderLeft: `4px solid ${STATUS_COLOR[review.status] || '#6b7280'}`
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="si-0a210958">
+                  <div className="si-26d7edc3">
                     {/* Reviewer → Vet + Stars */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                    <div className="si-5c21a377">
                       <strong>{(review as any).reviewerFirstName ? `${(review as any).reviewerFirstName} ${(review as any).reviewerLastName}` : (review as any).petOwnerName || t('reviewModeration.petOwner')}</strong>
-                      <span style={{ color: '#9ca3af' }}>→</span>
+                      <span className="si-e70e9abd">→</span>
                       <strong>{review.vetName || t('reviewModeration.vet')}</strong>
                       <span>
                         {[1, 2, 3, 4, 5].map(s => (
@@ -146,34 +146,34 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
 
                     {/* Comment */}
                     {review.comment && (
-                      <p style={{ fontSize: 14, margin: '8px 0', lineHeight: 1.5, color: '#374151' }}>{review.comment}</p>
+                      <p className="si-637d2dc1">{review.comment}</p>
                     )}
 
                     {/* Meta */}
-                    <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#6b7280', flexWrap: 'wrap' }}>
+                    <div className="si-948dbd2b">
                       <span>📅 {formatDate(review.createdAt || '')}</span>
                       {(review as any).consultationDate && (
                         <span>{t('reviewModeration.consultationDate')}: {formatDate((review as any).consultationDate)}</span>
                       )}
                       {review.helpfulCount ? <span>👍 {review.helpfulCount} {t('reviewModeration.helpful')}</span> : null}
-                      {review.reportCount ? <span style={{ color: '#dc2626' }}>🚩 {review.reportCount} {t('reviewModeration.reports')}</span> : null}
+                      {review.reportCount ? <span className="si-f84f41a5">🚩 {review.reportCount} {t('reviewModeration.reports')}</span> : null}
                     </div>
 
                     {/* Vet response */}
                     {review.responseFromVet && (
-                      <div style={{ marginTop: 8, padding: 10, background: '#eff6ff', borderRadius: 6, fontSize: 13 }}>
-                        <strong style={{ color: '#3b82f6' }}>{t('reviewModeration.vetResponse')}:</strong> {review.responseFromVet}
+                      <div className="si-06a5e7fa">
+                        <strong className="si-8ad4a3c7">{t('reviewModeration.vetResponse')}:</strong> {review.responseFromVet}
                       </div>
                     )}
                   </div>
 
                   {/* Action buttons */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+                  <div className="si-d3e2681c">
                     <span className={`module-badge badge-${
                       review.status === 'active'  ? 'success' :
                       review.status === 'hidden'  ? 'neutral' :
                       review.status === 'flagged' ? 'warning' : 'danger'
-                    }`} style={{ textAlign: 'center' }}>
+                    } si-4b6b7fbc`}>
                       {review.status === 'active' ? t('reviewModeration.approved') :
                        review.status === 'flagged' ? t('reviewModeration.flagged') :
                        review.status}
@@ -204,9 +204,9 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
                       </button>
                     )}
                     {review.status !== 'removed' && (
-                      <button className="module-btn module-btn-small" disabled={processing === review.id}
+                      <button className="module-btn module-btn-small si-f28a2f40" disabled={processing === review.id}
                         onClick={() => handleModerate(review.id, 'remove')}
-                        style={{ color: '#dc2626', borderColor: '#fecaca' }}>
+                       >
                         🗑️ {t('reviewModeration.remove')}
                       </button>
                     )}
@@ -218,7 +218,7 @@ const ReviewModeration: React.FC<ReviewModerationProps> = ({ onNavigate }) => {
 
           {/* Load More */}
           {filteredReviews.length >= PAGE_SIZE && (
-            <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <div className="si-e8476e94">
               <button className="module-btn" onClick={() => setPage(p => p + 1)} disabled={loading}>
                 {loading ? '⏳ Loading...' : 'Load More'}
               </button>

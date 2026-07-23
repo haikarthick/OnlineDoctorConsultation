@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { registerServiceWorker, initInstallPrompt } from './pwa.ts'
-import './i18n'  // Initialize i18next before rendering
+import { i18nInitialized } from './i18n'
 import './index.css'
 
 // Register PWA service worker & install prompt
@@ -22,12 +22,19 @@ const queryClient = new QueryClient({
   },
 })
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </QueryClientProvider>
-  </React.StrictMode>,
-)
+// Wait for i18next to finish loading the active language before the first
+// render. English is bundled synchronously (instant either way); other
+// languages are fetched over HTTP by i18next-http-backend, and rendering
+// before that resolves would flash raw translation keys (e.g. "nav.home")
+// since react-i18next's useSuspense is disabled.
+i18nInitialized.then(() => {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </QueryClientProvider>
+    </React.StrictMode>,
+  )
+})

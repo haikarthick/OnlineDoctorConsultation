@@ -828,10 +828,13 @@ class PaymentOrchestrator {
     return res.rows.length > 0;
   }
 
-  /** Receipt payload (P1 basic receipts). */
+  /** Receipt payload (P1 basic receipts). Handles both consultation (booking-linked) and
+   *  pharmacy (dispensing-linked) payments — the two payment_source values that carry
+   *  their own line-item context instead of a booking. */
   async getReceipt(paymentId: string, requesterId: string, requesterRole: string): Promise<any> {
     const res = await database.query(
-      `SELECT p.id, p.booking_id as "bookingId", p.amount, p.currency, p.status,
+      `SELECT p.id, p.booking_id as "bookingId", p.dispensing_id as "dispensingId",
+              p.payment_source as "paymentSource", p.amount, p.currency, p.status,
               p.payment_method as "paymentMethod", p.transaction_id as "transactionId",
               p.wallet_amount_used as "walletAmountUsed", p.refund_amount as "refundAmount",
               p.processing_charge_amount as "processingChargeAmount", p.paid_at as "paidAt",
@@ -839,14 +842,23 @@ class PaymentOrchestrator {
               b.scheduled_date as "scheduledDate", b.time_slot_start as "timeSlotStart",
               b.booking_type as "bookingType", b.reason_for_visit as "reasonForVisit",
               CONCAT(po.first_name, ' ', po.last_name) as "patientName",
-              CONCAT('Dr. ', v.first_name, ' ', v.last_name) as "doctorName",
-              a.name as "animalName", a.species as "animalSpecies",
-              p.user_id as "userId", p.payee_id as "payeeId"
+              COALESCE(CONCAT('Dr. ', v.first_name, ' ', v.last_name), CONCAT('Dr. ', rxVet.first_name, ' ', rxVet.last_name)) as "doctorName",
+              COALESCE(a.name, rxAnimal.name) as "animalName", COALESCE(a.species, rxAnimal.species) as "animalSpecies",
+              p.user_id as "userId", p.payee_id as "payeeId",
+              hp.pharmacy_name as "pharmacyName", dr.dispensing_method as "dispensingMethod",
+              (SELECT json_agg(json_build_object('name', pm.name, 'quantity', dli.quantity_dispensed, 'unit', dli.unit, 'unitPrice', dli.unit_price, 'lineTotal', dli.line_total))
+               FROM dispensing_line_items dli LEFT JOIN pharmacy_medications pm ON pm.id = dli.med_id
+               WHERE dli.dispensing_record_id = dr.id) as "medicationLines"
        FROM payments p
        LEFT JOIN bookings b ON b.id = p.booking_id
        LEFT JOIN users po ON po.id = p.user_id
        LEFT JOIN users v ON v.id = p.payee_id
        LEFT JOIN animals a ON a.id = b.animal_id
+       LEFT JOIN dispensing_records dr ON dr.id = p.dispensing_id
+       LEFT JOIN hospital_pharmacies hp ON hp.id = dr.pharmacy_id
+       LEFT JOIN prescriptions rx ON rx.id = dr.prescription_id
+       LEFT JOIN users rxVet ON rxVet.id = rx.veterinarian_id
+       LEFT JOIN animals rxAnimal ON rxAnimal.id = rx.animal_id
        WHERE p.id = $1`,
       [paymentId]
     );

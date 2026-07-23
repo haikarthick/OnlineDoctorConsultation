@@ -30,6 +30,7 @@ const Dashboard: React.FC = () => {
   const [enterpriseOverview, setEnterpriseOverview] = useState<EnterpriseOverviewStats | null>(null)
   const [corpStats, setCorpStats] = useState({ totalNetworks: 0, approvedNetworks: 0, pendingNetworks: 0, totalHospitals: 0, totalMembers: 0 })
   const [staffDashboard, setStaffDashboard] = useState<any>(null)
+  const [vetPharmacyStats, setVetPharmacyStats] = useState<{ pendingReview: number; rejectedThisWeek: number; dispensedCount: number } | null>(null)
 
   // Doctor-specific state
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([])
@@ -53,6 +54,14 @@ const Dashboard: React.FC = () => {
   }, [isPharmacist, navigate])
 
   useEffect(() => { loadDashboardData() }, [])
+
+  // Vets who prescribe into a network pharmacy get a lightweight status tile — silent no-op for standalone vets
+  useEffect(() => {
+    if (!isVeterinarian) return
+    apiService.getVetPharmacyStats()
+      .then((resp: any) => setVetPharmacyStats(resp?.data || null))
+      .catch(() => setVetPharmacyStats(null))
+  }, [isVeterinarian])
 
   const loadDashboardData = async () => {
     // Pharmacist is redirected to /pharmacy — skip all data loading
@@ -220,12 +229,21 @@ const Dashboard: React.FC = () => {
     }
 
     if (isVeterinarian) {
-      return [
+      const tiles = [
         { label: t('dashboard.stats.appointments'), value: stats.bookings, icon: '📅', color: '#667eea', path: '/consultations?tab=bookings' },
         { label: t('dashboard.stats.consultations'), value: stats.consultations, icon: '🩺', color: '#764ba2', path: '/consultations?tab=consultations' },
         { label: t('dashboard.stats.patients'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
         { label: t('dashboard.stats.pending'), value: stats.pending, icon: '🔔', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
       ]
+      // Only shown once this vet has ever sent a prescription into a network pharmacy
+      if (vetPharmacyStats && (vetPharmacyStats.pendingReview + vetPharmacyStats.rejectedThisWeek + vetPharmacyStats.dispensedCount) > 0) {
+        tiles.push(
+          { label: t('dashboard.stats.rxPendingReview'), value: vetPharmacyStats.pendingReview, icon: '💊', color: '#3949ab', path: '/doctor/prescriptions' },
+          { label: t('dashboard.stats.rxRejectedThisWeek'), value: vetPharmacyStats.rejectedThisWeek, icon: '❌', color: '#dc2626', path: '/doctor/prescriptions' },
+          { label: t('dashboard.stats.rxDispensed'), value: vetPharmacyStats.dispensedCount, icon: '✅', color: '#15803d', path: '/doctor/prescriptions' },
+        )
+      }
+      return tiles
     }
 
     if (isCorporateAdmin) {
@@ -257,7 +275,7 @@ const Dashboard: React.FC = () => {
       { label: t('dashboard.stats.myAnimals'), value: stats.animals, icon: '🐾', color: '#10b981', path: '/animals' },
       { label: t('dashboard.stats.pending'), value: stats.pending, icon: '⏳', color: '#ef4444', path: '/consultations?tab=bookings&status=pending' },
     ]
-  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, corpStats, t])
+  }, [stats, isFarmer, isPetOwner, isVeterinarian, isAdmin, isHospitalStaff, isCorporateAdmin, isPharmacist, corpStats, vetPharmacyStats, t])
 
   // Quick actions — role-specific
   const quickActions: QuickAction[] = useMemo(() => {
@@ -391,7 +409,7 @@ const Dashboard: React.FC = () => {
 
       {/* ── Hospital Staff Dashboard ── */}
       {isHospitalStaff && staffDashboard && (
-        <div className="module-stats" style={{ marginBottom: 24 }}>
+        <div className="module-stats si-af65fe13">
           <div className="stat-card">
             <div className="stat-icon">🏥</div>
             <div className="stat-value">{staffDashboard.hospitalName || t('dashboard.noHospital')}</div>
@@ -614,38 +632,38 @@ const Dashboard: React.FC = () => {
 
       {/* Farmer Enterprise Overview */}
       {isFarmer && enterpriseOverview && (
-        <div className="module-card" style={{ marginBottom: '1.5rem' }}>
-          <div style={{ padding: '1rem 1.25rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>🏢 {t('dashboard.enterpriseOverview', 'Enterprise Overview')}</h3>
+        <div className="module-card si-1e52b2bd">
+          <div className="si-6625e7cc">
+            <h3 className="si-657b8a7c">🏢 {t('dashboard.enterpriseOverview', 'Enterprise Overview')}</h3>
             <button className="btn btn-sm btn-secondary" onClick={() => navigate('/enterprises')}>{t('common.viewAll', 'View All')}</button>
           </div>
-          <div className="module-stats" style={{ padding: '0.75rem 1.25rem 1.25rem' }}>
-            <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/animals')}>
+          <div className="module-stats si-2d6a231a">
+            <div className="stat-card si-3c1f81b9" onClick={() => navigate('/animals')}>
               <div className="stat-icon">🐄</div>
               <div className="stat-value">{enterpriseOverview.totalAnimals}</div>
               <div className="stat-label">{t('dashboard.stats.myAnimals', 'Total Animals')}</div>
             </div>
-            <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/campaigns')}>
+            <div className="stat-card si-3c1f81b9" onClick={() => navigate('/campaigns')}>
               <div className="stat-icon">💉</div>
               <div className="stat-value">{enterpriseOverview.activeCampaigns}</div>
               <div className="stat-label">{t('dashboard.enterpriseStats.activeCampaigns', 'Active Campaigns')}</div>
             </div>
-            <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/movement-log')}>
+            <div className="stat-card si-3c1f81b9" onClick={() => navigate('/movement-log')}>
               <div className="stat-icon">⏳</div>
               <div className="stat-value">{enterpriseOverview.pendingMovements}</div>
               <div className="stat-label">{t('dashboard.enterpriseStats.pendingApprovals', 'Pending Approvals')}</div>
             </div>
-            <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/animal-groups')}>
+            <div className="stat-card si-3c1f81b9" onClick={() => navigate('/animal-groups')}>
               <div className="stat-icon">📂</div>
               <div className="stat-value">{enterpriseOverview.activeGroups}</div>
               <div className="stat-label">{t('dashboard.enterpriseStats.groups', 'Enterprise Groups')}</div>
             </div>
           </div>
-          <div style={{ padding: '0 1.25rem 1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button className="btn btn-secondary" style={{ fontSize: '0.85rem' }} onClick={() => navigate('/herd-medical')}>💊 {t('dashboard.features.herdMedicalTitle', 'Herd Medical')}</button>
-            <button className="btn btn-secondary" style={{ fontSize: '0.85rem' }} onClick={() => navigate('/campaigns')}>💉 {t('dashboard.features.treatmentCampaigns', 'Campaigns')}</button>
-            <button className="btn btn-secondary" style={{ fontSize: '0.85rem' }} onClick={() => navigate('/movement-log')}>🔄 {t('movementLog.pageTitle', 'Movement Log')}</button>
-            <button className="btn btn-secondary" style={{ fontSize: '0.85rem' }} onClick={() => navigate('/feed-inventory')}>🌾 {t('dashboard.features.feedTitle', 'Feed Inventory')}</button>
+          <div className="si-44eb72fc">
+            <button className="btn btn-secondary si-1a1e3482" onClick={() => navigate('/herd-medical')}>💊 {t('dashboard.features.herdMedicalTitle', 'Herd Medical')}</button>
+            <button className="btn btn-secondary si-1a1e3482" onClick={() => navigate('/campaigns')}>💉 {t('dashboard.features.treatmentCampaigns', 'Campaigns')}</button>
+            <button className="btn btn-secondary si-1a1e3482" onClick={() => navigate('/movement-log')}>🔄 {t('movementLog.pageTitle', 'Movement Log')}</button>
+            <button className="btn btn-secondary si-1a1e3482" onClick={() => navigate('/feed-inventory')}>🌾 {t('dashboard.features.feedTitle', 'Feed Inventory')}</button>
           </div>
         </div>
       )}
@@ -653,7 +671,7 @@ const Dashboard: React.FC = () => {
       {isFarmer && (
         <div className="dashboard-feature-grid">
           <div className="feature-card" onClick={() => navigate('/herd-medical')}>
-            <div className="feature-card-icon" style={{ background: '#ec489915', color: '#ec4899' }}>💊</div>
+            <div className="feature-card-icon si-237b0eb5">💊</div>
             <div className="feature-card-body">
               <h3>{t('dashboard.features.herdMedicalTitle')}</h3>
               <p>{t('dashboard.features.herdMedicalDesc')}</p>
@@ -661,7 +679,7 @@ const Dashboard: React.FC = () => {
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/breeding')}>
-            <div className="feature-card-icon" style={{ background: '#8b5cf615', color: '#8b5cf6' }}>🧬</div>
+            <div className="feature-card-icon si-decf142f">🧬</div>
             <div className="feature-card-body">
               <h3>{t('dashboard.features.breedingTitle')}</h3>
               <p>{t('dashboard.features.breedingDesc')}</p>
@@ -669,7 +687,7 @@ const Dashboard: React.FC = () => {
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/feed-inventory')}>
-            <div className="feature-card-icon" style={{ background: '#f59e0b15', color: '#f59e0b' }}>🌾</div>
+            <div className="feature-card-icon si-9861cb6d">🌾</div>
             <div className="feature-card-body">
               <h3>{t('dashboard.features.feedTitle')}</h3>
               <p>{t('dashboard.features.feedDesc')}</p>
@@ -682,7 +700,7 @@ const Dashboard: React.FC = () => {
       {isPetOwner && (
         <div className="dashboard-feature-grid">
           <div className="feature-card" onClick={() => navigate('/wellness')}>
-            <div className="feature-card-icon" style={{ background: '#14b8a615', color: '#14b8a6' }}>💚</div>
+            <div className="feature-card-icon si-0545d449">💚</div>
             <div className="feature-card-body">
               <h3>{t('dashboard.features.wellnessTitle')}</h3>
               <p>{t('dashboard.features.wellnessDesc')}</p>
@@ -690,7 +708,7 @@ const Dashboard: React.FC = () => {
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/marketplace')}>
-            <div className="feature-card-icon" style={{ background: '#6366f115', color: '#6366f1' }}>🏪</div>
+            <div className="feature-card-icon si-bdf67f5f">🏪</div>
             <div className="feature-card-body">
               <h3>{t('dashboard.features.marketplaceTitle')}</h3>
               <p>{t('dashboard.features.marketplaceDesc')}</p>
@@ -698,7 +716,7 @@ const Dashboard: React.FC = () => {
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/ai-copilot')}>
-            <div className="feature-card-icon" style={{ background: '#667eea15', color: '#667eea' }}>🤖</div>
+            <div className="feature-card-icon si-f4bcf8a7">🤖</div>
             <div className="feature-card-body">
               <h3>{t('dashboard.features.aiHealthTitle')}</h3>
               <p>{t('dashboard.features.aiHealthDesc')}</p>
@@ -711,7 +729,7 @@ const Dashboard: React.FC = () => {
       {isVeterinarian && (
         <div className="dashboard-feature-grid">
           <div className="feature-card" onClick={() => navigate('/disease-prediction')}>
-            <div className="feature-card-icon" style={{ background: '#ec489915', color: '#ec4899' }}>🧠</div>
+            <div className="feature-card-icon si-237b0eb5">🧠</div>
             <div className="feature-card-body">
               <h3>{t('dashboard.features.diseaseAITitle')}</h3>
               <p>{t('dashboard.features.diseaseAIDesc')}</p>
@@ -719,7 +737,7 @@ const Dashboard: React.FC = () => {
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/report-builder')}>
-            <div className="feature-card-icon" style={{ background: '#6366f115', color: '#6366f1' }}>📊</div>
+            <div className="feature-card-icon si-bdf67f5f">📊</div>
             <div className="feature-card-body">
               <h3>{t('dashboard.features.reportBuilderTitle')}</h3>
               <p>{t('dashboard.features.reportBuilderDesc')}</p>
@@ -727,7 +745,7 @@ const Dashboard: React.FC = () => {
             <span className="feature-arrow">→</span>
           </div>
           <div className="feature-card" onClick={() => navigate('/ai-copilot')}>
-            <div className="feature-card-icon" style={{ background: '#667eea15', color: '#667eea' }}>🤖</div>
+            <div className="feature-card-icon si-f4bcf8a7">🤖</div>
             <div className="feature-card-body">
               <h3>{t('dashboard.features.aiCopilotTitle')}</h3>
               <p>{t('dashboard.features.aiCopilotDesc')}</p>

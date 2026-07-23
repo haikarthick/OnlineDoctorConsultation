@@ -144,13 +144,18 @@ export class PaymentService {
   async listPaymentsByUser(userId: string, limit: number = 20, offset: number = 0): Promise<{ payments: Payment[]; total: number }> {
     try {
       const query = `
-        SELECT id, consultation_id as "consultationId", booking_id as "bookingId",
-               user_id as "userId", amount, currency,
-               status, payment_method as "paymentMethod", gateway,
-               refund_amount as "refundAmount", refund_reason as "refundReason",
-               paid_at as "paidAt", created_at as "createdAt", updated_at as "updatedAt"
-        FROM payments WHERE user_id = $1
-        ORDER BY created_at DESC LIMIT $2 OFFSET $3
+        SELECT p.id, p.consultation_id as "consultationId", p.booking_id as "bookingId",
+               p.user_id as "userId", p.amount, p.currency,
+               p.status, p.payment_method as "paymentMethod", p.gateway,
+               p.refund_amount as "refundAmount", p.refund_reason as "refundReason",
+               p.paid_at as "paidAt", p.created_at as "createdAt", p.updated_at as "updatedAt",
+               COALESCE(p.payment_source, 'consultation') as "paymentSource",
+               p.dispensing_id as "dispensingId", hp.pharmacy_name as "pharmacyName"
+        FROM payments p
+        LEFT JOIN dispensing_records dr ON dr.id = p.dispensing_id
+        LEFT JOIN hospital_pharmacies hp ON hp.id = dr.pharmacy_id
+        WHERE p.user_id = $1
+        ORDER BY p.created_at DESC LIMIT $2 OFFSET $3
       `;
       const countQuery = `SELECT COUNT(*) as count FROM payments WHERE user_id = $1`;
       const [paymentsResult, countResult] = await Promise.all([

@@ -69,9 +69,29 @@ echo ""
 
 # Step 1: Run database migrations using the migrate runner (idempotent — safe to re-run)
 # The migrate runner tracks applied migrations in _migrations table, never re-runs a file.
+# This step runs BEFORE the server binds its port, so aborting here actually fails the
+# Render deploy (rather than shipping traffic to a partially-migrated schema) — unlike
+# the server's own startup, which deliberately never crashes over DB issues once it's
+# already listening (see index.ts).
+#
+# Exit codes from migrate.js:
+#   0   — success (or nothing pending)
+#   1   — a migration's SQL genuinely failed — this is the only case that aborts the deploy
+#   2   — couldn't even reach the DB to check migration state (cold start) — transient, tolerated
+#   124 — the `timeout` wrapper below killed it — also transient, tolerated
 echo "━━━ Running database migrations ━━━"
-timeout 60 node dist/utils/migrate.js 2>&1 || echo "  (migration runner warning — continuing)"
-echo "✓ Migrations complete"
+timeout 60 node dist/utils/migrate.js 2>&1
+MIGRATE_EXIT=$?
+if [ "$MIGRATE_EXIT" = "0" ]; then
+  echo "✓ Migrations complete"
+elif [ "$MIGRATE_EXIT" = "124" ] || [ "$MIGRATE_EXIT" = "2" ]; then
+  echo "  ⚠ Could not reach the database to run migrations (likely a slow free-tier DB wake-up) — continuing"
+else
+  echo "  ✗ FATAL: Database migration(s) failed — aborting deploy"
+  echo "  Set MIGRATIONS_FAIL_FAST=false in the Render environment to temporarily bypass this"
+  echo "  and investigate with a running server, then unset it once fixed."
+  exit 1
+fi
 
 # Step 1b: Load mandatory platform seed data (admin user, settings, permissions)
 # This is idempotent (ON CONFLICT DO NOTHING) — safe to re-run on every deploy.

@@ -10,11 +10,13 @@ describe('ReviewService', () => {
     it('should create a review and update vet profile', async () => {
       const review = { id: 'r1', reviewer_id: 'u1', consultation_id: 'c1', veterinarian_id: 'v1', rating: 5, comment: 'Great' };
       (database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [review] })
-        .mockResolvedValueOnce({ rows: [] });
+        .mockResolvedValueOnce({ rows: [{ id: 'c1', veterinarian_id: 'v1', status: 'completed' }] }) // consultation ownership/status check
+        .mockResolvedValueOnce({ rows: [] })       // duplicate review check — none found
+        .mockResolvedValueOnce({ rows: [review] }) // INSERT
+        .mockResolvedValueOnce({ rows: [] });      // UPDATE vet_profiles rating
       const result = await reviewService.createReview('u1', 'c1', 'v1', 5, 'Great');
       expect(result).toEqual(review);
-      expect(database.query).toHaveBeenCalledTimes(2);
+      expect(database.query).toHaveBeenCalledTimes(4);
     });
   });
 

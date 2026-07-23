@@ -35,11 +35,15 @@ app.use(helmet({
       // for the widget's own API/analytics calls.
       scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.razorpay.com"],
+      // res.cloudinary.com: marketplace listing images/video (CloudinaryStorage
+      // driver) — added 2026-07-21, without it every Cloudinary-hosted image
+      // and video renders as a broken icon (uploads succeed, delivery is
+      // silently CSP-blocked since it's a cross-origin img/video src).
+      imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.razorpay.com", "https://res.cloudinary.com"],
       connectSrc: ["'self'", "https://*.tile.openstreetmap.org", "wss:", "ws:", "https://api.groq.com", "https://*.razorpay.com"],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
-      mediaSrc: ["'self'", "blob:"],
+      mediaSrc: ["'self'", "blob:", "https://res.cloudinary.com"],
       frameSrc: ["https://*.razorpay.com"],
     },
   },
@@ -96,12 +100,28 @@ const sensitiveLimiter = rateLimit({
   keyGenerator,
 })
 
+// Uploads: /files/upload-image and /files/upload-video. These previously only inherited
+// the general 300-req/15min apiLimiter — video uploads in particular are checked for
+// duration only AFTER landing in Cloudinary (duration can't be read from raw bytes), so a
+// user repeatedly uploading and getting rejected 100MB clips could burn through
+// Cloudinary's hard-capped free tier (25 credits/month) well before hitting 300 requests.
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: 'Too many upload attempts. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator,
+})
+
 // Apply limiters in order (most specific first)
 app.use(`/api/${config.app.apiVersion}/auth/login`, authLimiter)
 app.use(`/api/${config.app.apiVersion}/auth/register`, authLimiter)
 app.use(`/api/${config.app.apiVersion}/auth/refresh`, authLimiter)
 app.use(`/api/${config.app.apiVersion}/admin`, sensitiveLimiter)
 app.use(`/api/${config.app.apiVersion}/payments`, sensitiveLimiter)
+app.use(`/api/${config.app.apiVersion}/files/upload-image`, uploadLimiter)
+app.use(`/api/${config.app.apiVersion}/files/upload-video`, uploadLimiter)
 app.use('/api/', apiLimiter)
 
 // Body parser

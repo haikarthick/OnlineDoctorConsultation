@@ -115,28 +115,28 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
       </div>
 
       {/* Balance Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('wallet.totalBalance')}</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: '#059669' }}>{formatCurrency(total)}</div>
+      <div className="si-3b3f146b">
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('wallet.totalBalance')}</div>
+          <div className="si-e6038282">{formatCurrency(total)}</div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('wallet.refundBalance')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#2563eb' }}>{formatCurrency(balance)}</div>
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('wallet.refundBalance')}</div>
+          <div className="si-87ce733a">{formatCurrency(balance)}</div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('wallet.bonusCredits')}</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: '#d97706' }}>{formatCurrency(bonus)}</div>
-          <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>{t('wallet.bonusTip')}</div>
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('wallet.bonusCredits')}</div>
+          <div className="si-a3e9861f">{formatCurrency(bonus)}</div>
+          <div className="si-1f14f25b">{t('wallet.bonusTip')}</div>
         </div>
-        <div className="card" style={{ textAlign: 'center', padding: 24 }}>
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 4 }}>{t('wallet.paymentMode')}</div>
-          <div style={{ fontSize: 18, fontWeight: 600 }}>
-            {gatewayMode === 'demo' && <span style={{ color: '#d97706' }}>🧪 Demo</span>}
-            {gatewayMode === 'test' && <span style={{ color: '#2563eb' }}>🔧 Test</span>}
-            {gatewayMode === 'live' && <span style={{ color: '#059669' }}>🟢 Live</span>}
+        <div className="card si-5e451b11">
+          <div className="si-d8c79ed7">{t('wallet.paymentMode')}</div>
+          <div className="si-48056e8a">
+            {gatewayMode === 'demo' && <span className="si-cdb09cc1">🧪 Demo</span>}
+            {gatewayMode === 'test' && <span className="si-8cec8808">🔧 Test</span>}
+            {gatewayMode === 'live' && <span className="si-487e8582">🟢 Live</span>}
           </div>
-          <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>
+          <div className="si-1f14f25b">
             {gatewayMode === 'demo' ? t('wallet.simulated') : gatewayMode === 'test' ? t('wallet.sandbox') : t('wallet.realPayments')}
           </div>
         </div>
@@ -147,35 +147,32 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
         <div className="card-header">
           <h2>{t('wallet.transactionHistory')}</h2>
         </div>
-        <div className="card-body" style={{ padding: 0 }}>
+        <div className="card-body si-159de68c">
           {transactions.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6b7280' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>💳</div>
+            <div className="si-f94b6ef9">
+              <div className="si-94ee153f">💳</div>
               <h3>{t('wallet.noTransactions')}</h3>
               <p>{t('wallet.refundsAppearHere')}</p>
             </div>
           ) : (
             <>
               {transactions.map(tx => (
-                <div key={tx.id} style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '14px 20px', borderBottom: '1px solid #f3f4f6'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-                    <span style={{ fontSize: 24 }}>{getTypeIcon(tx.type)}</span>
+                <div key={tx.id} className="si-0d39f6c9">
+                  <div className="si-3216ecf2">
+                    <span className="si-2ae66f62">{getTypeIcon(tx.type)}</span>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 500 }}>{tx.description}</div>
-                      <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>
+                      <div className="si-0c1df75e">{tx.description}</div>
+                      <div className="si-55c58fd0">
                         {formatDateTime(tx.createdAt)}
                         {tx.referenceType && (
-                          <span style={{ marginLeft: 8, background: '#f3f4f6', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>
+                          <span className="si-e084bc25">
                             {tx.referenceType}
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="si-0b20392f">
                     {getTypeBadge(tx.type)}
                     <span style={{ fontSize: 16, fontWeight: 600, color: getTypeColor(tx.type), minWidth: 80, textAlign: 'right' }}>
                       {tx.type === 'debit' ? '-' : '+'}{formatCurrency(tx.amount)}
@@ -184,7 +181,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
                 </div>
               ))}
               {hasMore && (
-                <div style={{ textAlign: 'center', padding: 16 }}>
+                <div className="si-0e6b0ac5">
                   <button className="btn btn-outline" disabled={txLoading} onClick={() => loadTransactions(offset + limit)}>
                     {txLoading ? t('common.loading') : t('wallet.loadMore')}
                   </button>

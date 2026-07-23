@@ -18,10 +18,9 @@ describe('AnimalService', () => {
         ownerId: 'u1',
         uniqueId: 'PET-00001',
       }
-      // 3 queries: generateTrackingNumber count, uniqueId count, INSERT
+      // 2 queries: generateUniqueId (INSERT ... ON CONFLICT ... RETURNING last_seq), then INSERT animal
       ;(database.query as jest.Mock)
-        .mockResolvedValueOnce({ rows: [{ count: '0' }] }) // tracking number
-        .mockResolvedValueOnce({ rows: [{ count: '0' }] }) // unique id
+        .mockResolvedValueOnce({ rows: [{ last_seq: 1 }] }) // unique id sequence
         .mockResolvedValueOnce({ rows: [mockAnimal] }) // insert
 
       const result = await AnimalService.createAnimal('u1', { name: 'Buddy', species: 'Dog' })

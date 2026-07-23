@@ -76,15 +76,15 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
       </div>
 
       {/* Filters */}
-      <div className="search-filter-bar" style={{ marginBottom: 24, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 200 }}>
+      <div className="search-filter-bar si-c2a8d72a">
+        <div className="si-5af989ef">
           <input
             type="text"
-            className="form-input"
+            className="form-input si-6acd75e8"
             placeholder={t('auditLogs.searchUser')}
             value={userSearch}
             onChange={e => { setUserSearch(e.target.value); setUserIdFilter('') }}
-            style={{ flex: 1 }}
+           
           />
           {(userSearch || userIdFilter) && (
             <button className="btn btn-outline btn-sm" onClick={() => { setUserSearch(''); setUserIdFilter('') }}>
@@ -92,7 +92,7 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
             </button>
           )}
         </div>
-        <select className="form-input" value={actionFilter} onChange={e => setActionFilter(e.target.value)} style={{ width: 200 }}>
+        <select className="form-input si-a94a444e" value={actionFilter} onChange={e => setActionFilter(e.target.value)}>
           <option value="">{t('auditLogs.allActions')}</option>
           <option value="user.status_change">{t('auditLogs.userStatusChange')}</option>
           <option value="user.role_change">{t('auditLogs.userRoleChange')}</option>
@@ -106,13 +106,13 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
         <div className="loading-container"><div className="loading-spinner" /></div>
       ) : filteredLogs.length === 0 ? (
         <div className="empty-state">
-          <div style={{ fontSize: 48 }}>📋</div>
+          <div className="si-353e617d">📋</div>
           <h3>{t('auditLogs.noLogsFound')}</h3>
           <p>{t('auditLogs.noLogsDescription')}</p>
         </div>
       ) : (
         <div className="card">
-          <div className="card-body" style={{ padding: 0 }}>
+          <div className="card-body si-159de68c">
             {filteredLogs.map((log, i) => (
               <div
                 key={log.id}
@@ -124,7 +124,7 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
                 }}
                 onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="si-0b20392f">
                   {/* Icon */}
                   <div style={{
                     width: 36, height: 36, borderRadius: '50%',
@@ -136,8 +136,8 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
                   </div>
 
                   {/* Content */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="si-6acd75e8">
+                    <div className="si-bab2d193">
                       <code style={{
                         fontSize: 12, padding: '2px 8px', borderRadius: 4,
                         background: `${getActionColor(log.action)}15`,
@@ -147,25 +147,25 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
                         {log.action}
                       </code>
                       {log.resourceType && (
-                        <span style={{ fontSize: 12, color: '#6b7280' }}>
+                        <span className="si-48a0b045">
                           {t('auditLogs.on')} {log.resourceType}
                         </span>
                       )}
                     </div>
                     {log.details && (
-                      <p style={{ margin: '4px 0 0', fontSize: 13, color: '#4b5563' }}>
+                      <p className="si-65fb0667">
                         {typeof log.details === 'string' ? log.details : JSON.stringify(log.details)}
                       </p>
                     )}
                   </div>
 
                   {/* Timestamp + user */}
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>
+                  <div className="si-d4499730">
+                    <p className="si-baf5210b">
                       {formatDateTime(log.timestamp)}
                     </p>
                     <p
-                      style={{ margin: 0, fontSize: 11, color: '#1d4ed8', cursor: 'pointer', textDecoration: 'underline' }}
+                      className="si-90658aed"
                       onClick={e => {
                         e.stopPropagation()
                         setUserIdFilter(log.userId)
@@ -180,8 +180,8 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
 
                 {/* Expanded Details */}
                 {expandedId === log.id && (
-                  <div style={{ marginTop: 12, padding: 12, background: '#f3f4f6', borderRadius: 8, fontSize: 13 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div className="si-660753ea">
+                    <div className="si-1327446f">
                       <div><strong>{t('auditLogs.logId')}:</strong> {log.id}</div>
                       <div><strong>{t('auditLogs.user')}:</strong> {log.userName || log.userEmail || '—'}</div>
                       <div><strong>{t('auditLogs.userId')}:</strong> {log.userId || '—'}</div>
@@ -190,9 +190,9 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ onNavigate }) => {
                       {log.ipAddress && <div><strong>{t('auditLogs.ip')}:</strong> {log.ipAddress}</div>}
                     </div>
                     {log.details && (
-                      <div style={{ marginTop: 8 }}>
+                      <div className="si-cbfb1eb8">
                         <strong>{t('auditLogs.details')}:</strong>
-                        <pre style={{ margin: '4px 0 0', padding: 8, background: '#fff', borderRadius: 4, fontSize: 12, overflow: 'auto' }}>
+                        <pre className="si-35833f4d">
                           {typeof log.details === 'string' ? log.details : JSON.stringify(log.details, null, 2)}
                         </pre>
                       </div>

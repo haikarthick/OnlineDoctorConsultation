@@ -91,7 +91,7 @@ const LegalPolicies: React.FC<LegalPoliciesProps> = () => {
       </div>
 
       {message && (
-        <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 14 }}>
+        <div className="si-677dc8b7">
           {message}
         </div>
       )}
@@ -99,29 +99,26 @@ const LegalPolicies: React.FC<LegalPoliciesProps> = () => {
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /><p>{t('common.loading')}</p></div>
       ) : (
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div className="si-2a57fba0">
           {DOC_TYPES.map((docType) => {
             const version = activeVersionOf(docType)
             const stat = statFor(docType)
             return (
-              <div key={docType} style={{
-                background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 18px',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10,
-              }}>
+              <div key={docType} className="si-59aaa11e">
                 <div>
-                  <div style={{ fontWeight: 700 }}>{t(`legalAdmin.docTypes.${docType}`)}</div>
-                  <div style={{ color: '#6b7280', fontSize: 13 }}>
+                  <div className="si-f3347717">{t(`legalAdmin.docTypes.${docType}`)}</div>
+                  <div className="si-c3b93ebb">
                     {version > 0
                       ? `${t('policy.version')} ${version}${stat ? ` · ${stat.acceptedUsers} ${t('legalAdmin.usersAccepted')}` : ''}`
                       : t('legalAdmin.notPublished')}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <a className="btn btn-outline" style={{ padding: '6px 14px', fontSize: 13, textDecoration: 'none' }}
+                <div className="si-d223efb3">
+                  <a className="btn btn-outline si-115b986f"
                      href={`/policies/${docType}`} target="_blank" rel="noopener noreferrer">
                     {t('legalAdmin.view')}
                   </a>
-                  <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: 13 }} onClick={() => startEdit(docType)}>
+                  <button className="btn btn-primary si-efbe533c" onClick={() => startEdit(docType)}>
                     {t('legalAdmin.newVersion')}
                   </button>
                 </div>
@@ -133,29 +130,26 @@ const LegalPolicies: React.FC<LegalPoliciesProps> = () => {
 
       {/* Publish new version modal */}
       {editing && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
-        }}>
-          <div style={{ background: 'white', borderRadius: 12, maxWidth: 720, width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: 24 }}>
-            <h2 style={{ marginBottom: 4 }}>{t('legalAdmin.publishTitle')} — {t(`legalAdmin.docTypes.${editing.docType}`)}</h2>
-            <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 14 }}>{t('legalAdmin.publishHint')}</p>
+        <div className="si-9f028f26">
+          <div className="si-914527c6">
+            <h2 className="si-e57614ee">{t('legalAdmin.publishTitle')} — {t(`legalAdmin.docTypes.${editing.docType}`)}</h2>
+            <p className="si-ea95bef1">{t('legalAdmin.publishHint')}</p>
 
-            <label style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{t('legalAdmin.docTitle')}</label>
+            <label className="si-2262bb4a">{t('legalAdmin.docTitle')}</label>
             <input
               value={editing.title}
               onChange={(e) => setEditing({ ...editing, title: e.target.value })}
-              style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px', marginBottom: 12 }}
+              className="si-134b590c"
             />
 
-            <label style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{t('legalAdmin.docContent')}</label>
+            <label className="si-2262bb4a">{t('legalAdmin.docContent')}</label>
             <textarea
               value={editing.content}
               onChange={(e) => setEditing({ ...editing, content: e.target.value })}
-              style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '10px 12px', minHeight: 240, flex: 1, fontFamily: 'inherit', fontSize: 14, lineHeight: 1.6 }}
+              className="si-771c4134"
             />
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '14px 0', cursor: 'pointer', fontSize: 14 }}>
+            <label className="si-8a93465c">
               <input
                 type="checkbox"
                 checked={editing.requiresReacceptance}
@@ -164,11 +158,11 @@ const LegalPolicies: React.FC<LegalPoliciesProps> = () => {
               <span>{t('legalAdmin.requireReacceptance')}</span>
             </label>
 
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setEditing(null)} disabled={saving}>
+            <div className="si-ad918842">
+              <button className="btn btn-outline si-6acd75e8" onClick={() => setEditing(null)} disabled={saving}>
                 {t('common.cancel')}
               </button>
-              <button className="btn btn-primary" style={{ flex: 1 }} onClick={publish} disabled={saving || !editing.title.trim() || !editing.content.trim()}>
+              <button className="btn btn-primary si-6acd75e8" onClick={publish} disabled={saving || !editing.title.trim() || !editing.content.trim()}>
                 {saving ? t('common.loading') : t('legalAdmin.publishButton')}
               </button>
             </div>

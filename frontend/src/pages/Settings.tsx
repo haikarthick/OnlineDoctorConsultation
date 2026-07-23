@@ -34,12 +34,13 @@ const Settings: React.FC = () => {
   const [digestEnabled, setDigestEnabled] = useState(true)
   const [prefSaving, setPrefSaving] = useState(false)
   const [prefSaved, setPrefSaved] = useState(false)
+  const [prefLoadError, setPrefLoadError] = useState('')
 
   React.useEffect(() => {
     apiService.getNotificationPreferences().then((r: any) => {
       setDigestEnabled(r.data?.data?.digestEmailsEnabled ?? r.data?.digestEmailsEnabled ?? true)
-    }).catch(() => {})
-  }, [])
+    }).catch(() => setPrefLoadError(t('notificationPreferences.loadFailed')))
+  }, [t])
 
   React.useEffect(() => {
     apiService.getMyRoleChangeRequests().then((r: any) => setRoleRequests(r.data || [])).catch((err: any) => {
@@ -268,7 +269,7 @@ const Settings: React.FC = () => {
               <button className="btn-primary" onClick={handleSaveBasic} disabled={saving}>
                 {saving ? t('settings.saving') : t('settings.profile.saveChanges')}
               </button>
-              {saved === 'basic' && <span style={{ color: '#16a34a', marginLeft: 12, fontSize: 13 }}>{t('settings.saved')}</span>}
+              {saved === 'basic' && <span className="si-cff10492">{t('settings.saved')}</span>}
             </div>
           </div>
 
@@ -279,31 +280,27 @@ const Settings: React.FC = () => {
                 <h2>{t('settings.professional.title')}</h2>
 
                 {/* Photo Upload */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-                  <div style={{
-                    width: 80, height: 80, borderRadius: '50%', background: '#e0e7ff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    overflow: 'hidden', border: '3px solid #667eea', flexShrink: 0
-                  }}>
+                <div className="si-d8ebb03c">
+                  <div className="si-8853e284">
                     {profileImageUrl ? (
-                      <img src={profileImageUrl} alt={t('settings.professional.profileAlt')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={profileImageUrl} alt={t('settings.professional.profileAlt')} className="si-0ece644a" />
                     ) : (
-                      <span style={{ fontSize: 32, color: '#667eea' }}>
+                      <span className="si-3fd90974">
                         {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                       </span>
                     )}
                   </div>
                   <div>
-                    <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
+                    <input ref={fileInputRef} type="file" accept="image/*" className="si-d6a2f871" onChange={handlePhotoUpload} />
                     <button className="btn-small" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
                       {uploading ? t('settings.professional.uploading') : t('settings.professional.changePhoto')}
                     </button>
-                    <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>{t('settings.professional.maxFileSize')}</p>
+                    <p className="si-ada3b9d6">{t('settings.professional.maxFileSize')}</p>
                   </div>
                 </div>
 
                 <div className="settings-form">
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="si-f23844fb">
                     <div className="form-group">
                       <label>{t('settings.professional.licenseNumber')}</label>
                       <input type="text" name="licenseNumber" value={vetForm.licenseNumber} onChange={handleVetChange} placeholder={t('settings.professional.licensePlaceholder')} />
@@ -318,7 +315,7 @@ const Settings: React.FC = () => {
                     <label>{t('settings.professional.bio')}</label>
                     <textarea name="bio" value={vetForm.bio} onChange={handleVetChange} rows={3}
                       placeholder={t('settings.professional.bioPlaceholder')} 
-                      style={{ padding: '10px 12px', border: '1px solid #e0e0e0', borderRadius: 6, fontSize: 14, resize: 'vertical' }} />
+                      className="si-bc27eda8" />
                   </div>
 
                   <div className="form-group">
@@ -345,17 +342,17 @@ const Settings: React.FC = () => {
               <div className="settings-section">
                 <h2>📜 {t('settings.certificateServices')}</h2>
                 <div className="settings-form">
-                  <p style={{ fontSize: 13, color: '#6b7280', margin: '0 0 14px' }}>
+                  <p className="si-b555c2ef">
                     {t('settings.certificateServicesDesc')}
                   </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '10px 20px' }}>
+                  <div className="si-cb0f6283">
                     {[
                       'health_certificate', 'fitness_to_travel', 'rabies_vaccination', 'vaccination_record',
                       'pre_travel', 'sterilization', 'treatment', 'animal_injury', 'post_mortem',
                       'breeding_soundness', 'pregnancy_diagnosis', 'infertility_evaluation',
                       'fitness_for_sale', 'animal_valuation',
                     ].map(ct => (
-                      <label key={ct} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, padding: '6px 0' }}>
+                      <label key={ct} className="si-db8d8b8b">
                         <input
                           type="checkbox"
                           checked={selectedCertTypes.includes(ct)}
@@ -365,11 +362,11 @@ const Settings: React.FC = () => {
                       </label>
                     ))}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
+                  <div className="si-265c889f">
                     <button className="btn-primary" onClick={handleSaveCertTypes} disabled={savingCertTypes}>
                       {savingCertTypes ? t('settings.saving') : t('settings.saveCertificateTypes')}
                     </button>
-                    {certTypesSaved && <span style={{ color: '#16a34a', fontSize: 13 }}>✓ {t('settings.certificateTypesSaved')}</span>}
+                    {certTypesSaved && <span className="si-628b19bf">✓ {t('settings.certificateTypesSaved')}</span>}
                   </div>
                 </div>
               </div>
@@ -380,14 +377,14 @@ const Settings: React.FC = () => {
                 <div className="settings-form">
                   <div className="form-group">
                     <label>{t('settings.consultation.fee')}</label>
-                    <div style={{ position: 'relative' }}>
+                    <div className="si-314cecae">
                       <input type="number" name="consultationFee" value={vetForm.consultationFee} onChange={handleVetChange}
-                        min="0" step="0.01" placeholder="500" style={{ paddingLeft: 12 }} />
-                      <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#6b7280', fontSize: 13 }}>
+                        min="0" step="0.01" placeholder="500" className="si-054905ad" />
+                      <span className="si-147c1f2f">
                         {formatCurrency(parseFloat(vetForm.consultationFee) || 0).replace(/[\d,.\s]/g, '').trim() || '$'}
                       </span>
                     </div>
-                    <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>
+                    <p className="si-ada3b9d6">
                       {t('settings.consultation.preview')} {formatCurrency(parseFloat(vetForm.consultationFee) || 0)}
                     </p>
                   </div>
@@ -413,7 +410,7 @@ const Settings: React.FC = () => {
                     <input type="text" name="availableDays" value={vetForm.availableDays} onChange={handleVetChange}
                       placeholder={t('settings.clinic.availableDaysPlaceholder')} />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="si-f23844fb">
                     <div className="form-group">
                       <label>{t('settings.clinic.hoursStart')}</label>
                       <input type="time" name="availableHoursStart" value={vetForm.availableHoursStart} onChange={handleVetChange} />
@@ -423,12 +420,12 @@ const Settings: React.FC = () => {
                       <input type="time" name="availableHoursEnd" value={vetForm.availableHoursEnd} onChange={handleVetChange} />
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 24, padding: '8px 0' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <div className="si-be731a69">
+                    <label className="si-0c7e7279">
                       <input type="checkbox" name="isAvailable" checked={vetForm.isAvailable} onChange={handleVetChange} />
                       <span>{t('settings.clinic.availableForConsultations')}</span>
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <label className="si-0c7e7279">
                       <input type="checkbox" name="acceptsEmergency" checked={vetForm.acceptsEmergency} onChange={handleVetChange} />
                       <span>{t('settings.clinic.acceptEmergency')}</span>
                     </label>
@@ -436,7 +433,7 @@ const Settings: React.FC = () => {
                   <button className="btn-primary" onClick={handleSaveVet} disabled={saving}>
                     {saving ? t('settings.saving') : t('settings.professional.saveProfile')}
                   </button>
-                  {saved === 'vet' && <span style={{ color: '#16a34a', marginLeft: 12, fontSize: 13 }}>{t('settings.professional.profileSaved')}</span>}
+                  {saved === 'vet' && <span className="si-cff10492">{t('settings.professional.profileSaved')}</span>}
                 </div>
               </div>
             </>
@@ -468,7 +465,7 @@ const Settings: React.FC = () => {
           {/* Privacy & Data section */}
           <div className="settings-section">
             <h2>{t('settings.privacy.title')}</h2>
-            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
+            <p className="si-9a3b1c05">
               {t('settings.privacy.description')}
             </p>
 
@@ -484,7 +481,7 @@ const Settings: React.FC = () => {
               </button>
             ) : (
               <div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 16 }}>
+                <div className="si-a148c368">
                   {[
                     { label: t('settings.privacy.medicalRecords'), value: dataSummary.medicalRecords, icon: '📋' },
                     { label: t('settings.privacy.consultations'), value: dataSummary.consultations, icon: '🏥' },
@@ -493,22 +490,22 @@ const Settings: React.FC = () => {
                     { label: t('settings.privacy.auditTrail'), value: dataSummary.auditEntries, icon: '📜' },
                     { label: t('settings.privacy.activeSessions'), value: dataSummary.activeSessions, icon: '🟢' },
                   ].map((item, i) => (
-                    <div key={i} style={{ padding: '12px 16px', borderRadius: 8, background: '#f9fafb', border: '1px solid #e5e7eb', textAlign: 'center' }}>
-                      <div style={{ fontSize: 20 }}>{item.icon}</div>
-                      <div style={{ fontSize: 20, fontWeight: 700, color: '#374151' }}>{item.value ?? 0}</div>
-                      <div style={{ fontSize: 11, color: '#6b7280' }}>{item.label}</div>
+                    <div key={i} className="si-3d271bf3">
+                      <div className="si-7ff2b341">{item.icon}</div>
+                      <div className="si-bc63c0cb">{item.value ?? 0}</div>
+                      <div className="si-a213bf41">{item.label}</div>
                     </div>
                   ))}
                 </div>
                 {dataSummary.lastLogin && (
-                  <p style={{ fontSize: 12, color: '#6b7280' }}>{t('settings.privacy.lastLogin')} {formatDateTime(dataSummary.lastLogin)}</p>
+                  <p className="si-48a0b045">{t('settings.privacy.lastLogin')} {formatDateTime(dataSummary.lastLogin)}</p>
                 )}
               </div>
             )}
 
-            <div style={{ marginTop: 16, padding: 16, borderRadius: 8, background: '#f0fdf4', border: '1px solid #86efac' }}>
-              <h4 style={{ margin: '0 0 8px', fontSize: 14 }}>{t('settings.privacy.dataRightsTitle')}</h4>
-              <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#166534', lineHeight: 1.8 }}>
+            <div className="si-4c7fdb19">
+              <h4 className="si-9449bd55">{t('settings.privacy.dataRightsTitle')}</h4>
+              <ul className="si-cfa0ca27">
                 <li><strong>{t('settings.privacy.rightToAccess')}</strong> {t('settings.privacy.rightToAccessDesc')}</li>
                 <li><strong>{t('settings.privacy.rightToRectification')}</strong> {t('settings.privacy.rightToRectificationDesc')}</li>
                 <li><strong>{t('settings.privacy.rightToPortability')}</strong> {t('settings.privacy.rightToPortabilityDesc')}</li>
@@ -517,7 +514,7 @@ const Settings: React.FC = () => {
               </ul>
             </div>
 
-            <div style={{ marginTop: 16, padding: 12, borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a', fontSize: 12, color: '#92400e' }}>
+            <div className="si-a3fafceb">
               {t('settings.privacy.retentionWarning')}
             </div>
           </div>
@@ -527,21 +524,21 @@ const Settings: React.FC = () => {
       {/* ── Role & Account Type Section ── */}
       <div className="settings-section">
         <h2>{t('settings.roleChange.sectionTitle')}</h2>
-        <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 16 }}>{t('settings.roleChange.sectionDesc')}</p>
+        <p className="si-edc77e88">{t('settings.roleChange.sectionDesc')}</p>
 
-        <div style={{ marginBottom: 16 }}>
-          <span style={{ fontSize: 13, color: '#6b7280' }}>{t('settings.roleChange.currentRole')}: </span>
-          <span className="badge badge-active" style={{ textTransform: 'capitalize' }}>{user?.role?.replace('_', ' ')}</span>
+        <div className="si-7e63ec4f">
+          <span className="si-c3b93ebb">{t('settings.roleChange.currentRole')}: </span>
+          <span className="badge badge-active si-ecf1d5e5">{user?.role?.replace('_', ' ')}</span>
         </div>
 
-        {rcMsg && <div className={`module-alert ${rcMsg.includes('✓') || rcMsg.includes('submitted') || rcMsg.includes('cancel') ? 'success' : 'error'}`} style={{ marginBottom: 16 }}>{rcMsg}</div>}
+        {rcMsg && <div className={`module-alert ${rcMsg.includes('✓') || rcMsg.includes('submitted') || rcMsg.includes('cancel') ? 'success' : 'error'} si-7e63ec4f`}>{rcMsg}</div>}
 
         {/* Approved — need to re-login */}
         {approvedRequest && (
           <div className="module-alert success">
             <strong>{t('settings.roleChange.approvedTitle')}</strong>
             <p>{t('settings.roleChange.approvedDesc', { requestedRole: approvedRequest.requestedRole?.replace('_', ' ') })}</p>
-            <button className="module-btn primary" style={{ marginTop: 8 }} onClick={() => { localStorage.clear(); sessionStorage.clear(); window.location.href = '/'; }}>
+            <button className="module-btn primary si-cbfb1eb8" onClick={() => { localStorage.clear(); sessionStorage.clear(); window.location.href = '/'; }}>
               {t('settings.roleChange.reLoginBtn')}
             </button>
           </div>
@@ -549,11 +546,11 @@ const Settings: React.FC = () => {
 
         {/* Pending request */}
         {!approvedRequest && pendingRequest && (
-          <div className="module-alert" style={{ background: '#fefce8', borderColor: '#fbbf24' }}>
+          <div className="module-alert si-e120eda2">
             <strong>{t('settings.roleChange.pendingTitle')}</strong>
             <p>{t('settings.roleChange.pendingDesc', { currentRole: pendingRequest.currentRole?.replace('_', ' '), requestedRole: pendingRequest.requestedRole?.replace('_', ' ') })}</p>
-            <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>{t('settings.roleChange.submitted')}: {new Date(pendingRequest.createdAt).toLocaleDateString()}</p>
-            <button className="module-btn" style={{ marginTop: 8 }} onClick={() => handleCancelRoleChange(pendingRequest.id)}>
+            <p className="si-322b324f">{t('settings.roleChange.submitted')}: {new Date(pendingRequest.createdAt).toLocaleDateString()}</p>
+            <button className="module-btn si-cbfb1eb8" onClick={() => handleCancelRoleChange(pendingRequest.id)}>
               {t('settings.roleChange.cancelBtn')}
             </button>
           </div>
@@ -562,8 +559,8 @@ const Settings: React.FC = () => {
         {/* Request form (no pending) */}
         {!approvedRequest && !pendingRequest && !rcLoading && (
           <div>
-            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{t('settings.roleChange.requestTitle')}</h3>
-            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>{t('settings.roleChange.requestDesc')}</p>
+            <h3 className="si-ff527946">{t('settings.roleChange.requestTitle')}</h3>
+            <p className="si-676930d7">{t('settings.roleChange.requestDesc')}</p>
             <div className="module-form-row">
               <div className="module-form-group">
                 <label className="module-label">{t('settings.roleChange.selectRole')}</label>
@@ -580,12 +577,12 @@ const Settings: React.FC = () => {
             <div className="module-form-group">
               <label className="module-label">{t('settings.roleChange.reasonLabel')}</label>
               <textarea
-                className="module-input"
+                className="module-input si-3f7753b6"
                 rows={3}
                 value={rcReason}
                 onChange={e => setRcReason(e.target.value)}
                 placeholder={t('settings.roleChange.reasonPlaceholder')}
-                style={{ resize: 'vertical' }}
+               
               />
             </div>
             <button
@@ -600,8 +597,8 @@ const Settings: React.FC = () => {
 
         {/* History */}
         {roleRequests.length > 0 && (
-          <div style={{ marginTop: 24 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 600, color: '#6b7280', marginBottom: 10 }}>{t('settings.roleChange.historyTitle')}</h3>
+          <div className="si-b4c2d096">
+            <h3 className="si-155c25d0">{t('settings.roleChange.historyTitle')}</h3>
             <div className="data-table-container">
               <table className="module-table">
                 <thead>
@@ -617,10 +614,10 @@ const Settings: React.FC = () => {
                     <tr key={r.id}>
                       <td>{r.requestedRole?.replace('_', ' ')}</td>
                       <td><span className={`badge badge-${r.status === 'approved' ? 'active' : r.status === 'rejected' ? 'danger' : 'pending'}`}>{r.status}</span></td>
-                      <td style={{ fontSize: 12 }}>{new Date(r.createdAt).toLocaleDateString()}</td>
-                      <td style={{ fontSize: 12 }}>
+                      <td className="si-756a9f21">{new Date(r.createdAt).toLocaleDateString()}</td>
+                      <td className="si-756a9f21">
                         {r.reviewedBy || '—'}
-                        {r.rejectionReason && <div style={{ color: '#ef4444', fontSize: 11 }}>{r.rejectionReason}</div>}
+                        {r.rejectionReason && <div className="si-16697caf">{r.rejectionReason}</div>}
                       </td>
                     </tr>
                   ))}
@@ -632,21 +629,27 @@ const Settings: React.FC = () => {
 
         {/* P6-NOTIFICATIONS: Notification Preferences */}
         <div className="settings-section">
-          <h3 style={{ marginBottom: 12, fontSize: 16, fontWeight: 700 }}>🔔 {t('notificationPreferences.title')}</h3>
-          {prefSaved && <div className="module-alert success" style={{ marginBottom: 12 }}>✅ {t('notificationPreferences.preferenceSaved')}</div>}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}>
-              <input type="checkbox" checked={digestEnabled} style={{ marginTop: 3, width: 16, height: 16 }}
+          <h3 className="si-ce279a8c">🔔 {t('notificationPreferences.title')}</h3>
+          {prefLoadError && (
+            <div className="module-alert error si-bab8e8bc">
+              ⚠️ {prefLoadError}
+              <button onClick={() => setPrefLoadError('')} className="si-8e913916">{t('common.close')}</button>
+            </div>
+          )}
+          {prefSaved && <div className="module-alert success si-bab8e8bc">✅ {t('notificationPreferences.preferenceSaved')}</div>}
+          <div className="si-d8480906">
+            <label className="si-c15e7777">
+              <input type="checkbox" checked={digestEnabled} className="si-72c5bae2"
                 onChange={e => setDigestEnabled(e.target.checked)} />
               <div>
-                <div style={{ fontWeight: 600, fontSize: 14 }}>{t('notificationPreferences.weeklyDigest')}</div>
-                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{t('notificationPreferences.weeklyDigestDesc')}</div>
+                <div className="si-a9b7f385">{t('notificationPreferences.weeklyDigest')}</div>
+                <div className="si-d93f66e1">{t('notificationPreferences.weeklyDigestDesc')}</div>
               </div>
             </label>
           </div>
           <button
-            className="module-btn primary"
-            style={{ marginTop: 16 }}
+            className="module-btn primary si-b0aee75b"
+           
             disabled={prefSaving}
             onClick={async () => {
               setPrefSaving(true)

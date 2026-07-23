@@ -137,12 +137,12 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
   if (submitted && isPendingRole) {
     return (
       <div className="auth-page register-page">
-        <div className="register-wrapper" style={{ justifyContent: 'center' }}>
-          <div className="register-form-panel" style={{ maxWidth: 520 }}>
-            <div style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
-              <h2 style={{ color: '#1e3a5f', marginBottom: '1rem' }}>Registration Submitted</h2>
-              <p style={{ color: '#475569', lineHeight: 1.7, marginBottom: '2rem' }}>{message}</p>
+        <div className="register-wrapper si-9c74bdb1">
+          <div className="register-form-panel si-63396e81">
+            <div className="si-39f4be31">
+              <div className="si-fa85da6a">📋</div>
+              <h2 className="si-3917559d">Registration Submitted</h2>
+              <p className="si-936668ca">{message}</p>
               <button className="btn btn-primary" onClick={onSwitchToLogin}>Back to Login</button>
             </div>
           </div>
@@ -220,8 +220,8 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             </div>
 
             {/* Role selector */}
-            <fieldset className="form-group" style={{ border: 'none', margin: 0, padding: 0 }}>
-              <legend style={{ fontWeight: 600, marginBottom: '8px' }}>{t('register.roleTitle')}</legend>
+            <fieldset className="form-group si-cb5809a5">
+              <legend className="si-7d20e6f0">{t('register.roleTitle')}</legend>
               <div className="role-selector" role="radiogroup" aria-label="Select your role">
                 {roleOptions.map(opt => (
                   <label key={opt.value} className={`role-option ${formData.role === opt.value ? 'selected' : ''}`}>
@@ -253,7 +253,7 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             {isVet && (
               <div className="vet-fields">
                 <div className="form-group">
-                  <label htmlFor="reg-license">License Number <span style={{ color: '#e53e3e' }}>*</span></label>
+                  <label htmlFor="reg-license">License Number <span className="si-132ea2d7">*</span></label>
                   <input
                     id="reg-license" type="text" name="licenseNumber"
                     placeholder="e.g. VET-MH-2024-00123"
@@ -275,11 +275,11 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
                   <input id="reg-clinic" type="text" name="clinicName" placeholder="City Animal Clinic" value={formData.clinicName} onChange={handleChange} />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="reg-specializations">Specializations <span style={{ color: '#718096', fontWeight: 400 }}>(comma separated)</span></label>
+                  <label htmlFor="reg-specializations">Specializations <span className="si-dc842080">(comma separated)</span></label>
                   <input id="reg-specializations" type="text" name="specializations" placeholder="Small Animals, Surgery, Dentistry" value={formData.specializations} onChange={handleChange} />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="reg-qualifications">Qualifications <span style={{ color: '#718096', fontWeight: 400 }}>(comma separated)</span></label>
+                  <label htmlFor="reg-qualifications">Qualifications <span className="si-dc842080">(comma separated)</span></label>
                   <input id="reg-qualifications" type="text" name="qualifications" placeholder="BVSc, MVSc, PhD" value={formData.qualifications} onChange={handleChange} />
                 </div>
               </div>
@@ -298,12 +298,12 @@ export default function Register({ onSwitchToLogin, onGoHome }: RegisterProps) {
             </div>
 
             {/* §17.2: policy acknowledgement — required before account creation */}
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, margin: '4px 0 16px', cursor: 'pointer', fontSize: 14, lineHeight: 1.5 }}>
+            <label className="si-98a162b5">
               <input
                 type="checkbox"
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
-                style={{ marginTop: 3 }}
+                className="si-539810b1"
                 aria-required="true"
               />
               <span>

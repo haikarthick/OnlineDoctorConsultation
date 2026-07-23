@@ -162,19 +162,19 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
     <div>
       {/* Alert bar */}
       {(lowStockCount > 0 || expiringCount > 0) && (
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+        <div className="si-51ef6b7c">
           {lowStockCount > 0 && (
-            <div style={{ background: '#fff8e1', border: '1px solid #ffe082', borderRadius: 8, padding: '8px 16px', fontSize: '0.85rem', color: '#f57f17', flex: 1, minWidth: 200 }}>
+            <div className="si-68d88ade">
               ⚠️ {lowStockCount} {t('pharmacy.inventory.lowStockAlert')}
-              <button type="button" style={{ marginLeft: 8, color: '#e65100', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem' }} onClick={() => setFilterMode('low')}>
+              <button type="button" className="si-288ba992" onClick={() => setFilterMode('low')}>
                 {t('pharmacy.filter.show')} →
               </button>
             </div>
           )}
           {expiringCount > 0 && (
-            <div style={{ background: '#fff3e0', border: '1px solid #ffcc80', borderRadius: 8, padding: '8px 16px', fontSize: '0.85rem', color: '#e65100', flex: 1, minWidth: 200 }}>
+            <div className="si-c9f0d294">
               ⏰ {expiringCount} {t('pharmacy.inventory.expiringAlert')}
-              <button type="button" style={{ marginLeft: 8, color: '#bf360c', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem' }} onClick={() => setFilterMode('expiring')}>
+              <button type="button" className="si-edc371b0" onClick={() => setFilterMode('expiring')}>
                 {t('pharmacy.filter.show')} →
               </button>
             </div>
@@ -190,7 +190,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
           </button>
         </div>
 
-        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button></div>}
+        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} className="si-540cb98a">✕</button></div>}
 
         <div className="pharmacy-filter-bar">
           <input
@@ -213,13 +213,13 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
         </div>
 
         {loading ? (
-          <p style={{ color: '#888', padding: '20px 0', textAlign: 'center' }}>{t('common.loading')}</p>
+          <p className="si-43f86130">{t('common.loading')}</p>
         ) : filtered.length === 0 ? (
           <div className="pharmacy-empty">
             <div className="empty-icon">📦</div>
             <p>{items.length === 0 ? t('pharmacy.inventory.empty') : t('pharmacy.inventory.noResults')}</p>
             {items.length === 0 && (
-              <button type="button" className="module-btn primary" style={{ marginTop: 12 }} onClick={() => { setAddForm(emptyAddForm()); setShowAddStock(true) }}>
+              <button type="button" className="module-btn primary si-66faea9d" onClick={() => { setAddForm(emptyAddForm()); setShowAddStock(true) }}>
                 + {t('pharmacy.inventory.addFirst')}
               </button>
             )}
@@ -245,25 +245,25 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
                     <td>
                       <strong>{item.med_name}</strong>
                       <br />
-                      <small style={{ color: '#888' }}>
+                      <small className="si-40d2db53">
                         {[item.generic_name, item.form, item.strength].filter(Boolean).join(' · ')}
                       </small>
                     </td>
-                    <td style={{ fontFamily: 'monospace', fontSize: '0.82rem' }}>{item.batch_number || '—'}</td>
+                    <td className="si-e04e9204">{item.batch_number || '—'}</td>
                     <td className={getStockClass(item)}>
                       <strong>{item.quantity}</strong> {item.unit}
                     </td>
-                    <td style={{ fontSize: '0.82rem', color: '#666' }}>{item.min_stock_level} {item.unit}</td>
+                    <td className="si-d5d2428b">{item.min_stock_level} {item.unit}</td>
                     <td className={getStockClass(item)}>
                       {item.expiry_date ? formatDate(item.expiry_date) : '—'}
                       {item.days_until_expiry !== null && item.days_until_expiry <= 30 && item.days_until_expiry >= 0 && (
-                        <small style={{ display: 'block', color: '#e65100' }}>({item.days_until_expiry}d left)</small>
+                        <small className="si-3b0e4dc4">({item.days_until_expiry}d left)</small>
                       )}
                     </td>
                     <td>{formatCurrency(item.unit_cost)}</td>
                     <td>{getStockBadge(item)}</td>
                     <td>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <div className="si-50c82988">
                         <button type="button" className="module-btn small" onClick={() => setAdjustTarget(item)}>
                           {t('pharmacy.actions.adjust')}
                         </button>
@@ -276,7 +276,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
                 ))}
               </tbody>
             </table>
-            <div style={{ padding: '8px 12px', fontSize: '0.8rem', color: '#888', borderTop: '1px solid #f0f0f0' }}>
+            <div className="si-cbaeeb44">
               {t('pharmacy.inventory.showing', { count: filtered.length, total: items.length })}
             </div>
           </div>
@@ -286,16 +286,16 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
       {/* Add Stock Modal */}
       {showAddStock && (
         <div className="pharm-modal-overlay" onClick={() => setShowAddStock(false)}>
-          <div className="pharm-modal" style={{ maxWidth: 560 }} onClick={e => e.stopPropagation()}>
+          <div className="pharm-modal si-11bb4061" onClick={e => e.stopPropagation()}>
             <div className="pharm-modal-header">
               <h2>📦 {t('pharmacy.inventory.addStockTitle')}</h2>
               <button type="button" className="pharm-modal-close" onClick={() => setShowAddStock(false)}>✕</button>
             </div>
             {addError && <div className="pharm-error">⚠️ {addError}</div>}
             {medications.length === 0 ? (
-              <div className="pharmacy-empty" style={{ padding: '20px 0' }}>
+              <div className="pharmacy-empty si-8a6436c0">
                 <p>{t('pharmacy.inventory.noCatalogMeds')}</p>
-                <small style={{ color: '#888' }}>{t('pharmacy.inventory.goToCatalogHint')}</small>
+                <small className="si-40d2db53">{t('pharmacy.inventory.goToCatalogHint')}</small>
               </div>
             ) : (
               <form onSubmit={handleAddStock}>
@@ -349,7 +349,7 @@ export default function PharmacyInventory({ pharmacyId, networkId, onRefresh }: 
                       ))}
                     </select>
                   ) : (
-                    <div style={{ padding: '9px 12px', background: '#fff8e1', border: '1px solid #ffe082', borderRadius: 8, fontSize: '0.85rem', color: '#f57f17' }}>
+                    <div className="si-6651dbab">
                       ⚠️ {t('pharmacy.inventory.noSuppliersHint')}
                     </div>
                   )}

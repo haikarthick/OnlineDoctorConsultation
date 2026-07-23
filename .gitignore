@@ -53,6 +53,14 @@ temp/
 # Uploaded files
 uploads/
 
+# Generated: synced from frontend/src/locales by scripts/copy-locales.cjs
+# (predev/prebuild) so i18next-http-backend can lazy-load non-English
+# locales instead of them being statically bundled into the main JS chunk.
+frontend/public/locales/
+
+# Generated: `ANALYZE=true npm run build` bundle treemap (frontend/vite.config.ts)
+frontend/bundle-stats.html
+
 # Cache
 .eslintcache
 .parcel-cache

@@ -1088,7 +1088,7 @@ export class VetHospitalService {
     hospitalId: string; registeredBy: string;
     patientName: string; patientPhone?: string; patientEmail?: string; patientAddress?: string;
     animalName: string; animalSpecies: string; animalBreed?: string;
-    animalGender?: string; animalDob?: string; animalWeight?: number;
+    animalGender?: string; animalClass?: string; animalDob?: string; animalWeight?: number;
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
     animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
@@ -1133,8 +1133,8 @@ export class VetHospitalService {
             gender, date_of_birth, weight, color, microchip_id, registration_number,
             is_neutered, medical_notes, avatar_url,
             insurance_provider, insurance_policy_number, insurance_expiry,
-            ear_tag_id)
-         VALUES ($1, $2, $3, $4, $5, true, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+            ear_tag_id, animal_class)
+         VALUES ($1, $2, $3, $4, $5, true, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
          RETURNING id`,
         [
           data.animalName, data.animalSpecies, data.animalBreed || null, ownerId!, animalUniqueId,
@@ -1151,6 +1151,7 @@ export class VetHospitalService {
           data.animalInsurancePolicyNumber || null,
           data.animalInsuranceExpiry || null,
           data.animalEarTagId || null,
+          data.animalClass || null,
         ]
       );
       const animalId = animalRes.rows[0].id;

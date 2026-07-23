@@ -70,6 +70,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "Copied!",
+    "copyFailed": "Couldn't copy to clipboard",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -101,7 +103,8 @@
     "fillRequired": "Please fill all required fields",
     "none": "None",
     "error": "Error",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "previous": "Previous"
   },
   "nav": {
     "brand": "VetCare",
@@ -202,7 +205,8 @@
     "commissionSettings": "Commission Rules",
     "settlements": "Settlements",
     "referrals": "Referrals",
-    "financeReports": "Finance Reports"
+    "financeReports": "Finance Reports",
+    "masterData": "Master Data"
   },
   "login": {
     "welcome": "Welcome back",
@@ -868,7 +872,10 @@
       "todayQueue": "Today's Queue",
       "activeInpatients": "Active Inpatients",
       "pendingReferrals": "Pending Referrals",
-      "branchStaff": "Branch Staff"
+      "branchStaff": "Branch Staff",
+      "rxPendingReview": "Rx Pending Pharmacist Review",
+      "rxRejectedThisWeek": "Rx Rejected This Week",
+      "rxDispensed": "Rx Dispensed"
     },
     "quickActions": {
       "viewConsultations": "View Consultations",
@@ -1269,7 +1276,8 @@
       "confirmRemove": "Are you sure you want to remove this animal?",
       "removed": "Animal removed successfully",
       "failedSave": "Failed to save animal",
-      "failedRemove": "Failed to remove animal"
+      "failedRemove": "Failed to remove animal",
+      "failedLoadEnterprises": "Failed to load your enterprises list"
     },
     "pageTitle": "My Animals",
     "loading": "Loading animals...",
@@ -1514,7 +1522,15 @@
       "validUntil": "Valid until:",
       "active": "active",
       "expired": "expired",
-      "addButton": "Write Prescription"
+      "addButton": "Write Prescription",
+      "networkPharmacy": "Network pharmacy",
+      "dispensedOn": "Dispensed {{date}}",
+      "reviewStatus": {
+        "pending_review": "Awaiting pharmacist review",
+        "approved_for_dispensing": "Approved — awaiting dispensing",
+        "rejected": "Rejected by pharmacist",
+        "needs_clarification": "Pharmacist requested clarification"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ Add Vaccination",
@@ -3121,6 +3137,12 @@
   "marketplace": {
     "pageTitle": "🏪 Buy & Sell Marketplace",
     "subtitle": "Buy and sell animals, and browse equipment and veterinary supplies",
+    "errors": {
+      "dashboardLoadFailed": "Failed to load your dashboard",
+      "favoritesLoadFailed": "Failed to load your favorites",
+      "adminDataLoadFailed": "Failed to load admin listings and stats",
+      "monetizationLoadFailed": "Failed to load monetization settings"
+    },
     "tabs": {
       "dashboard": "📊 Dashboard",
       "browse": "🐾 Browse",
@@ -3295,7 +3317,7 @@
       "autoPopulated": "Animal details auto-filled!",
       "fieldsAutoFilled": "Fields auto-filled from your animal's profile. You can edit any field below.",
       "imagesTitle": "Listing Images",
-      "imagesLabel": "Upload up to 5 images",
+      "imagesLabel": "Upload up to {{count}} images",
       "uploading": "Uploading...",
       "uploadFailed": "Image upload failed",
       "selectBreed": "Select breed",
@@ -3314,7 +3336,12 @@
       "videoAdded": "Video added",
       "removeVideo": "Remove video",
       "videoUploaded": "Video uploaded",
-      "videoHint": "A short video builds trust and gets more responses."
+      "videoHint": "A short video builds trust and gets more responses.",
+      "imageTooLarge": "Image is too large — max {{maxMb}}MB",
+      "videoTooLarge": "Video is too large — max {{maxMb}}MB",
+      "videoTooLong": "Video is too long — max {{maxSec}} seconds",
+      "uploadingVideo": "Uploading video...",
+      "videoLimits": "Max {{maxSec}} seconds, up to {{maxMb}}MB"
     },
     "detail": {
       "backToListings": "← Back to listings",
@@ -3855,6 +3882,7 @@
     "loadTrail": "Load Trail",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -4026,7 +4054,8 @@
     "next": "Next",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "Failed to load filter options (specializations/languages)"
   },
   "myBookings": {
     "title": "My Bookings",
@@ -4162,6 +4191,7 @@
     "failedToSendMessage": "Failed to send message",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "Couldn't notify the other participant about the recording change",
     "micUnavailable": "Microphone unavailable",
     "cameraStillUnavailable": "Camera still unavailable",
     "duration": "Duration",
@@ -4474,6 +4504,7 @@
     "cameraUnavailable": "Camera unavailable",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "Couldn't notify the other participant about the recording change",
     "failedToSaveNotes": "Failed to save notes",
     "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
     "failedToComplete": "Failed to complete consultation",
@@ -4672,6 +4703,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5250,6 +5288,7 @@
     "verify": "Verify",
     "unverify": "Unverify",
     "pendingDocReviews": "Pending Document Reviews",
+    "pendingLoadFailed": "Failed to load pending document reviews",
     "noDocReviews": "No pending document reviews",
     "reviewDocuments": "Review Documents",
     "verifyHospital": "Verify Hospital",
@@ -5276,6 +5315,9 @@
     "checkInPatient": "Check In Patient",
     "noPatients": "No patients in queue",
     "unknownPatient": "Unknown Patient",
+    "medicationDispensed": "Medication dispensed",
+    "medicationReady": "Medication ready for dispensing",
+    "medicationPendingReview": "Medication awaiting pharmacist review",
     "owner": "Owner",
     "triage": "Triage",
     "startExam": "Start Exam",
@@ -5724,7 +5766,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -5937,7 +5981,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -5972,6 +6044,7 @@
     "expired": "Expired",
     "failedToLoad": "Failed to load certificates",
     "failedToPrint": "Failed to load certificate for printing",
+    "failedToLoadEnterprises": "Failed to load enterprises for filtering",
     "certTypes": {
       "health_certificate": "General Health Certificate",
       "fitness_to_travel": "Fitness to Travel Certificate",
@@ -6019,6 +6092,7 @@
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
     "failedToCreate": "Failed to create certificate",
+    "failedToLoadEnterprises": "Failed to load enterprises list",
     "noCertTypeSelected": "Please select a certificate type",
     "viewAllCertificates": "View All Certificates",
     "createAnother": "Create Another",
@@ -6363,6 +6437,7 @@
     "clinicalNotes": "Clinical Notes (optional)",
     "clinicalNotesPlaceholder": "Include relevant history, current condition, and what you need from the receiving hospital...",
     "reasonPlaceholder": "e.g., Specialist consultation needed, surgical intervention required...",
+    "hospitalsLoadFailed": "Failed to load network hospitals list",
     "selectHospital": "— Select hospital —",
     "selectVet": "— Select vet (optional) —",
     "sending": "Sending Referral...",
@@ -6631,7 +6706,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "Couldn't load your saved notification preferences — showing defaults"
   },
   "emailTemplates": {
     "title": "Email Templates",
@@ -6700,6 +6776,7 @@
       "suppliers": "Suppliers",
       "history": "History",
       "reorders": "Reorders",
+      "transfers": "Transfers",
       "analytics": "Analytics",
       "settings": "Settings"
     },
@@ -6820,6 +6897,7 @@
     "reorder": {
       "title": "Request Reorder",
       "supplier": "Supplier",
+      "suppliersLoadFailed": "Failed to load suppliers list",
       "selectSupplier": "Select a supplier",
       "supplierRequired": "Please select a supplier",
       "quantity": "Quantity to Order",
@@ -6976,6 +7054,44 @@
         "cancelled": "Cancelled"
       }
     },
+    "transfers": {
+      "title": "Inter-Hospital Medication Transfers",
+      "newRequest": "New Transfer Request",
+      "activeRequests": "Active Requests",
+      "requests": "requests",
+      "noActive": "No active transfer requests",
+      "empty": "No transfer history",
+      "route": "Route",
+      "requestedBy": "Requested By",
+      "sourceHospital": "From Hospital",
+      "destHospital": "To Hospital",
+      "selectHospital": "Select hospital",
+      "medications": "Medications",
+      "selectMedication": "Select medication",
+      "addLine": "Add Medication",
+      "submitRequest": "Submit Request",
+      "addTracking": "Add Tracking",
+      "decline": "Decline",
+      "declineReason": "Reason for declining",
+      "formIncomplete": "Select both hospitals and at least one medication line",
+      "sameHospital": "Source and destination hospitals must be different",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "preparing": "Preparing",
+        "shipped": "Shipped",
+        "received": "Received",
+        "fulfilled": "Fulfilled",
+        "declined": "Declined"
+      },
+      "advanceTo": {
+        "accepted": "Accept",
+        "preparing": "Mark Preparing",
+        "shipped": "Mark Shipped",
+        "received": "Mark Received",
+        "fulfilled": "Mark Fulfilled"
+      }
+    },
     "analytics": {
       "title": "Pharmacy Analytics",
       "days": "days",
@@ -7051,6 +7167,8 @@
     "receiptTitle": "Payment Receipt",
     "patient": "Patient",
     "doctor": "Doctor",
+    "pharmacy": "Pharmacy",
+    "medications": "Medications",
     "animal": "Animal",
     "date": "Date",
     "totalPaid": "Total paid",
@@ -7135,6 +7253,7 @@
     "subtitle": "Per-doctor commission overrides — blank fields use the global default",
     "globalSettings": "Global defaults",
     "globalInfo": "Global default: {{percent}}% + {{flat}} flat fee per paid booking. Change it in System Settings (commission.defaultPercent / commission.flatFee).",
+    "globalsLoadFailed": "Failed to load the current global commission defaults — showing fallback values",
     "saved": "Override saved. Applies to new payments only — past payments keep their snapshot.",
     "saveFailed": "Failed to save the override.",
     "searchPlaceholder": "Search doctor by name or email…",
@@ -7270,6 +7389,9 @@
     "refundsOut": "Refunds out",
     "netRevenue": "Net platform revenue",
     "netRevenueHint": "commission + processing charges − gateway fees",
+    "pharmacyRevenueTitle": "Pharmacy revenue (selected range)",
+    "pharmacyCollected": "Pharmacy collected",
+    "pharmacyPending": "Pharmacy pending payment",
     "liabilitiesTitle": "Liabilities (current)",
     "doctorClearing": "Doctor earnings clearing",
     "doctorAvailable": "Doctor earnings available",
@@ -7284,5 +7406,103 @@
     "stuckPending": "Stuck pending payments",
     "stuckPendingHint": "pending > 1h — reconciliation retries daily",
     "openHolds": "Open payment holds"
+  },
+  "animalClass": {
+    "fieldLabel": "Class",
+    "selectClass": "Select class",
+    "anyClass": "Any Class",
+    "sire": "Sire",
+    "dam": "Dam",
+    "selectSire": "Select sire (optional)",
+    "selectDam": "Select dam (optional)",
+    "breedingStatus": "Breeding Status",
+    "selectBreedingStatus": "Select status",
+    "notBred": "Not Bred",
+    "pregnant": "Pregnant",
+    "notPregnant": "Not Pregnant",
+    "lastBreedingDate": "Last Breeding Date",
+    "expectedDueDate": "Expected Due Date",
+    "cattle_bull": "Bull",
+    "cattle_cow": "Cow",
+    "cattle_calf": "Calf",
+    "cattle_bull_calf": "Bull Calf",
+    "cattle_heifer_calf": "Heifer Calf",
+    "cattle_heifer": "Heifer",
+    "cattle_bullock": "Bullock",
+    "cattle_steer": "Steer",
+    "buffalo_bull": "Buffalo Bull",
+    "buffalo_cow": "Buffalo Cow",
+    "buffalo_calf": "Buffalo Calf",
+    "buffalo_bull_calf": "Buffalo Bull Calf",
+    "buffalo_heifer_calf": "Buffalo Heifer Calf",
+    "buffalo_heifer": "Buffalo Heifer",
+    "buffalo_bullock": "Buffalo Bullock",
+    "sheep_ram": "Ram",
+    "sheep_ewe": "Ewe",
+    "sheep_lamb": "Lamb",
+    "sheep_ram_lamb": "Ram Lamb",
+    "sheep_ewe_lamb": "Ewe Lamb",
+    "sheep_wether": "Wether",
+    "goat_buck": "Buck",
+    "goat_doe": "Doe",
+    "goat_buckling": "Buckling",
+    "goat_goatling": "Goatling",
+    "goat_kid": "Kid",
+    "pig_boar": "Boar",
+    "pig_sow": "Sow",
+    "pig_gilt": "Gilt",
+    "pig_barrow": "Barrow",
+    "dog_male": "Dog",
+    "dog_bitch": "Bitch",
+    "dog_pup": "Pup",
+    "cat_tom": "Tom Cat",
+    "cat_queen": "Queen Cat",
+    "cat_kitten": "Kitten",
+    "cat_neuter": "Neuter"
+  },
+  "masterData": {
+    "title": "Master Data",
+    "subtitle": "Manage species, breeds, animal classes, and marketplace dropdown values — no code deploy needed.",
+    "tabs": {
+      "species": "Species",
+      "breeds": "Breeds",
+      "classes": "Animal Classes",
+      "categories": "Marketplace Categories",
+      "conditions": "Marketplace Conditions"
+    },
+    "filterBySpecies": "Species",
+    "selectSpeciesPrompt": "— Select a species —",
+    "addNew": "Add New",
+    "editEntry": "Edit Entry",
+    "reactivate": "Reactivate",
+    "noEntries": "No entries yet",
+    "protectedHint": "Protected — core logic depends on this code",
+    "labelKeyHint": "Leave blank to keep the built-in translation",
+    "confirmDelete": "Delete this entry? This cannot be undone.",
+    "deleteBlocked": "Could not delete — it may still be in use",
+    "updatedSuccess": "Updated successfully",
+    "createdSuccess": "Created successfully",
+    "archivedSuccess": "Deactivated",
+    "restoredSuccess": "Reactivated",
+    "deletedSuccess": "Deleted",
+    "errors": {
+      "speciesRequired": "Select a species first"
+    },
+    "gender": {
+      "unknown": "Unknown"
+    },
+    "col": {
+      "icon": "Icon",
+      "code": "Code",
+      "label": "Label",
+      "category": "Category",
+      "earTag": "Uses ear tags",
+      "sortOrder": "Sort order",
+      "value": "Value (internal code)",
+      "impliedGender": "Implied gender",
+      "canBePregnant": "Can be pregnant",
+      "canProduceMilk": "Can produce milk",
+      "marketplaceEligible": "Sellable on Marketplace"
+    }
   }
 }

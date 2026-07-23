@@ -30,6 +30,12 @@ const DOCUMENT_MIMES = [
   'text/plain',
 ];
 
+const VIDEO_MIMES = [
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+];
+
 const ALL_ALLOWED = [...IMAGE_MIMES, ...DOCUMENT_MIMES];
 
 // ── File filter factory ───────────────────────────────────────
@@ -69,4 +75,16 @@ export const uploadDocument = multer({
   fileFilter: createFileFilter(DOCUMENT_MIMES),
 });
 
-export { IMAGE_MIMES, DOCUMENT_MIMES, ALL_ALLOWED };
+/**
+ * Video-only upload, max 100 MB.
+ * 100 MB is a coarse pre-gate against obviously oversized files — the real
+ * limit is duration (60s), checked server-side after upload since multer
+ * can't read a video's length from the raw bytes.
+ */
+export const uploadVideo = multer({
+  storage: memoryStorage,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB
+  fileFilter: createFileFilter(VIDEO_MIMES),
+});
+
+export { IMAGE_MIMES, DOCUMENT_MIMES, VIDEO_MIMES, ALL_ALLOWED };

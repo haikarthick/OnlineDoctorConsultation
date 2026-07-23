@@ -150,7 +150,7 @@ const TreatmentCampaigns: React.FC = () => {
       {error && !showForm && <div className="alert alert-error">{error}</div>}
 
       <div className="filters-bar">
-        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input" style={{ maxWidth: '350px' }}>
+        <select value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} className="search-input si-58fb376a">
           <option value="">Select Enterprise...</option>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
@@ -172,21 +172,21 @@ const TreatmentCampaigns: React.FC = () => {
           <button className="btn btn-primary" onClick={() => { resetForm(); setShowForm(true) }}>+ Create Campaign</button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+        <div className="si-22cdfbdb">
           {campaigns.map(camp => (
             <div key={camp.id} className="card" style={{ borderRadius: '12px', padding: '1.25rem', borderLeft: `4px solid ${STATUS_COLORS[camp.status] || '#6c757d'}` }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                <span style={{ fontSize: '1.5rem' }}>{CAMPAIGN_TYPE_ICONS[camp.campaignType] || '📋'}</span>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ margin: 0 }}>{camp.name}</h3>
-                  <span className="badge" style={{ fontSize: '0.75rem' }}>{CAMPAIGN_TYPE_LABELS[camp.campaignType] || camp.campaignType}</span>
+              <div className="si-d2493201">
+                <span className="si-25a9f042">{CAMPAIGN_TYPE_ICONS[camp.campaignType] || '📋'}</span>
+                <div className="si-6acd75e8">
+                  <h3 className="si-44087c4b">{camp.name}</h3>
+                  <span className="badge si-8c23064b">{CAMPAIGN_TYPE_LABELS[camp.campaignType] || camp.campaignType}</span>
                 </div>
                 <span className="badge" style={{ background: STATUS_COLORS[camp.status] || '#6c757d', color: '#fff', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '12px' }}>
                   {getStatusLabel(camp.status)}
                 </span>
               </div>
-              {camp.description && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>{camp.description}</p>}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem 1rem', fontSize: '0.8rem', marginTop: '0.5rem' }}>
+              {camp.description && <p className="si-cf622af4">{camp.description}</p>}
+              <div className="si-442101a9">
                 {camp.targetSpecies && <div><strong>Species:</strong> {camp.targetSpecies}</div>}
                 {camp.medication && <div><strong>Medication:</strong> {camp.medication}</div>}
                 {camp.dosage && <div><strong>Dosage:</strong> {camp.dosage}</div>}
@@ -196,11 +196,11 @@ const TreatmentCampaigns: React.FC = () => {
                 <div><strong>Treated:</strong> {camp.treatedCount}/{camp.totalAnimals}</div>
               </div>
               {camp.totalAnimals > 0 && (
-                <div style={{ height: '6px', background: 'var(--border)', borderRadius: '3px', marginTop: '0.5rem', overflow: 'hidden' }}>
+                <div className="si-e243e932">
                   <div style={{ height: '100%', width: `${Math.min(100, (camp.treatedCount / camp.totalAnimals) * 100)}%`, background: STATUS_COLORS[camp.status] || '#6c757d', borderRadius: '3px' }} />
                 </div>
               )}
-              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+              <div className="si-3429dc13">
                 <button className="btn btn-sm btn-secondary" onClick={() => openEdit(camp)}>{t('common.edit')}</button>
                 <button className="btn btn-sm btn-danger" onClick={() => handleDelete(camp.id)}>{t('common.delete')}</button>
               </div>
@@ -219,7 +219,7 @@ const TreatmentCampaigns: React.FC = () => {
                 <label>Campaign Name *</label>
                 <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="si-ec24da01">
                 <div className="form-group">
                   <label>Campaign Type *</label>
                   <select value={formData.campaignType} onChange={e => setFormData(f => ({ ...f, campaignType: e.target.value }))} required>
@@ -252,7 +252,7 @@ const TreatmentCampaigns: React.FC = () => {
                   {formData.targetGroupId && groups.length > 0 && (() => {
                     const sel = groups.find(g => g.id === formData.targetGroupId)
                     return sel && sel.animalCount != null ? (
-                      <small style={{ color: 'var(--text-secondary)', display: 'block', marginTop: '0.25rem' }}>
+                      <small className="si-d6f17824">
                         📊 {sel.animalCount} animals in this group will be included
                       </small>
                     ) : null
@@ -279,7 +279,7 @@ const TreatmentCampaigns: React.FC = () => {
                 <label>{t('common.notes')}</label>
                 <textarea rows={2} value={formData.notes} onChange={e => setFormData(f => ({ ...f, notes: e.target.value }))} />
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+              <div className="si-5af10afb">
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
                 <button type="submit" className="btn btn-primary">{editingCampaign ? 'Update' : 'Create'} Campaign</button>
               </div>

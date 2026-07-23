@@ -178,8 +178,8 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
       const all = res.data?.vets || res.data?.items || []
       setAllSpecializations([...new Set(all.flatMap((v: VetProfile) => v.specializations || []))].sort() as string[])
       setAllLanguages([...new Set(all.flatMap((v: VetProfile) => v.languages || []))].sort() as string[])
-    }).catch(() => {})
-  }, [])
+    }).catch(() => setError(t('findDoctor.filterOptionsLoadFailed')))
+  }, [t])
 
   useEffect(() => { setPage(0); loadVets(0) }, [loadVets])
 
@@ -209,7 +209,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
   ].filter(Boolean).length
 
   const renderStars = (rating: number) => (
-    <span style={{ display: 'inline-flex', gap: 1 }}>
+    <span className="si-317a3d7a">
       {Array.from({ length: 5 }, (_, i) => (
         <span key={i} style={{ color: i < Math.round(rating) ? '#f59e0b' : '#d1d5db', fontSize: 14 }}>★</span>
       ))}
@@ -217,7 +217,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
   )
 
   const renderRatingFilter = () => (
-    <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+    <div className="si-ba711cbb">
       {[0, 1, 2, 3, 4].map(r => (
         <button key={r} onClick={() => setMinRating(r === minRating ? 0 : r)}
           style={{
@@ -242,37 +242,26 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
     const remainder = slots.length - 8
 
     return (
-      <div style={{
-        padding: '8px 16px 12px',
-        borderTop: '1px dashed #d1fae5',
-        background: 'linear-gradient(to bottom, #f0fdf4, #ffffff)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
-          <span style={{
-            fontSize: 10, fontWeight: 700, color: '#15803d',
-            textTransform: 'uppercase', letterSpacing: '0.05em',
-          }}>
+      <div className="si-2bc3baf0">
+        <div className="si-f7c49cb1">
+          <span className="si-d14faa43">
             ✅ {slots.length} slot{slots.length !== 1 ? 's' : ''} · {formatDateLabel(selectedDate)}
             {timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : ''}
           </span>
         </div>
-        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="si-a3a7e182">
           {shown.map(slot => (
             <button
               key={slot.startTime}
               onClick={e => { e.stopPropagation(); handleSlotBook(vet, slot.startTime) }}
               title={`Book ${formatSlotTime(slot.startTime)} — pre-fills date & time`}
-              style={{
-                padding: '4px 10px', borderRadius: 20, cursor: 'pointer',
-                border: '1.5px solid #16a34a', background: 'white', color: '#16a34a',
-                fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', transition: 'all 0.15s',
-              }}
+              className="si-98553089"
               onMouseEnter={e => {
-                ;(e.currentTarget as HTMLElement).style.background = '#16a34a'
+                (e.currentTarget as HTMLElement).style.background = '#16a34a'
                 ;(e.currentTarget as HTMLElement).style.color = 'white'
               }}
               onMouseLeave={e => {
-                ;(e.currentTarget as HTMLElement).style.background = 'white'
+                (e.currentTarget as HTMLElement).style.background = 'white'
                 ;(e.currentTarget as HTMLElement).style.color = '#16a34a'
               }}
             >
@@ -280,7 +269,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
             </button>
           ))}
           {remainder > 0 && (
-            <span style={{ fontSize: 11, color: '#6b7280', fontStyle: 'italic' }}>
+            <span className="si-e3289aa0">
               +{remainder} more
             </span>
           )}
@@ -306,30 +295,30 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
         cursor: 'pointer', position: 'relative',
       }}
         onMouseEnter={e => {
-          ;(e.currentTarget as HTMLElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.12)'
+          (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 24px rgba(0,0,0,0.12)'
           ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'
         }}
         onMouseLeave={e => {
-          ;(e.currentTarget as HTMLElement).style.boxShadow = hasSlots ? '0 2px 12px rgba(22,163,74,0.10)' : '0 1px 6px rgba(0,0,0,0.04)'
+          (e.currentTarget as HTMLElement).style.boxShadow = hasSlots ? '0 2px 12px rgba(22,163,74,0.10)' : '0 1px 6px rgba(0,0,0,0.04)'
           ;(e.currentTarget as HTMLElement).style.transform = 'none'
         }}
         onClick={() => onNavigate(`/vet-profile/${vet.userId}`)}
       >
         {/* ── Badge row (top-right) ── */}
-        <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+        <div className="si-5f623a02">
           {vet.isAvailable
-            ? <span style={{ background: '#059669', color: 'white', padding: '3px 10px', borderRadius: 12, fontSize: 10, fontWeight: 700 }}>● Available</span>
-            : <span style={{ background: '#6b7280', color: 'white', padding: '3px 10px', borderRadius: 12, fontSize: 10, fontWeight: 600 }}>Unavailable</span>
+            ? <span className="si-bc5175b0">● Available</span>
+            : <span className="si-03c300cb">Unavailable</span>
           }
           {hasSlots && (
-            <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: 10, fontSize: 10, fontWeight: 700 }}>
+            <span className="si-be418e92">
               📅 {vet.totalAvailableSlots} open
             </span>
           )}
         </div>
 
         {/* ── Avatar + name ── */}
-        <div style={{ padding: '22px 20px 10px', textAlign: 'center', paddingRight: 90 }}>
+        <div className="si-5c24077d">
           <div style={{
             width: 68, height: 68, borderRadius: '50%',
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -340,58 +329,58 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
           }}>
             {vet.firstName?.charAt(0) || '🐾'}
           </div>
-          <h3 style={{ margin: '0 0 3px', fontSize: 16, fontWeight: 700, color: '#1f2937', lineHeight: 1.2 }}>
+          <h3 className="si-4777b23e">
             Dr. {vet.firstName || ''} {vet.lastName || ''}
           </h3>
-          <p style={{ margin: 0, color: '#6b7280', fontSize: 12, lineHeight: 1.4 }}>
+          <p className="si-21080d68">
             {(vet.specializations || []).slice(0, 2).join(' · ') || 'General Veterinarian'}
           </p>
         </div>
 
         {/* ── Ratings + stats ── */}
-        <div style={{ padding: '0 16px 10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8, justifyContent: 'center' }}>
+        <div className="si-b406d666">
+          <div className="si-528a0cfa">
             {renderStars(Number(vet.rating) || 0)}
-            <span style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>{Number(vet.rating || 0).toFixed(1)}</span>
-            <span style={{ color: '#9ca3af', fontSize: 12 }}>({vet.totalReviews || 0})</span>
+            <span className="si-2fed5332">{Number(vet.rating || 0).toFixed(1)}</span>
+            <span className="si-3f4bbe41">({vet.totalReviews || 0})</span>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 10 }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#2563eb', fontSize: 15 }}>{experience}</div>
-              <div style={{ color: '#9ca3af', fontSize: 10 }}>Yrs Exp</div>
+          <div className="si-963f6cba">
+            <div className="si-4b6b7fbc">
+              <div className="si-91310d8f">{experience}</div>
+              <div className="si-85dee051">Yrs Exp</div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#059669', fontSize: 15 }}>{vet.totalConsultations || 0}</div>
-              <div style={{ color: '#9ca3af', fontSize: 10 }}>Consults</div>
+            <div className="si-4b6b7fbc">
+              <div className="si-609091ae">{vet.totalConsultations || 0}</div>
+              <div className="si-85dee051">Consults</div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 700, color: '#8b5cf6', fontSize: 15 }}>{formatCurrency(vet.consultationFee || 0)}</div>
-              <div style={{ color: '#9ca3af', fontSize: 10 }}>Per Session</div>
+            <div className="si-4b6b7fbc">
+              <div className="si-9c2e9d7b">{formatCurrency(vet.consultationFee || 0)}</div>
+              <div className="si-85dee051">Per Session</div>
             </div>
           </div>
 
           {/* Tags */}
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 6 }}>
+          <div className="si-620f955b">
             {(vet.languages || []).slice(0, 2).map(l => (
-              <span key={l} style={{ background: '#f3f4f6', color: '#4b5563', padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 500 }}>
+              <span key={l} className="si-d9973be4">
                 🌐 {l}
               </span>
             ))}
             {vet.acceptsEmergency && (
-              <span style={{ background: '#fef2f2', color: '#dc2626', padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 600 }}>
+              <span className="si-41dff0f1">
                 🚨 Emergency
               </span>
             )}
             {vet.isVerified && (
-              <span style={{ background: '#ecfdf5', color: '#059669', padding: '2px 7px', borderRadius: 10, fontSize: 10, fontWeight: 600 }}>
+              <span className="si-97e68fb4">
                 ✓ Verified
               </span>
             )}
           </div>
 
           {vet.clinicName && (
-            <div style={{ fontSize: 11, color: '#6b7280', textAlign: 'center', marginBottom: 4 }}>
+            <div className="si-6a41eb8b">
               🏥 {vet.clinicName}
             </div>
           )}
@@ -401,15 +390,15 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
         {renderSlotChips(vet)}
 
         {/* ── Action buttons ── */}
-        <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 'auto' }}
+        <div className="si-6e677b63"
           onClick={e => e.stopPropagation()}>
-          <button className="btn btn-primary"
-            style={{ width: '100%', fontSize: 13, padding: '8px 16px' }}
+          <button className="btn btn-primary si-1e1fafbf"
+           
             onClick={() => onNavigate(`/book-consultation?vetId=${vet.userId}${selectedDate ? `&date=${selectedDate}` : ''}`)}>
             📅 {t('findDoctor.bookConsultation')}
           </button>
-          <button className="btn btn-outline"
-            style={{ width: '100%', fontSize: 13, padding: '8px 16px' }}
+          <button className="btn btn-outline si-1e1fafbf"
+           
             onClick={() => onNavigate(`/vet-profile/${vet.userId}`)}>
             {t('findDoctor.viewProfile')}
           </button>
@@ -421,9 +410,9 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
   return (
     <div className="module-page">
       {/* ── Page Header ── */}
-      <div style={{ marginBottom: 16 }}>
-        <h1 style={{ margin: '0 0 4px', fontSize: 26, color: '#1f2937' }}>🔍 {t('findDoctor.title')}</h1>
-        <p style={{ margin: 0, color: '#6b7280', fontSize: 14 }}>
+      <div className="si-7e63ec4f">
+        <h1 className="si-d52452f6">🔍 {t('findDoctor.title')}</h1>
+        <p className="si-48d05eba">
           {selectedDate
             ? <>Showing doctors available on <strong>{formatDateLabel(selectedDate)}</strong>{timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : ''}</>
             : <>Browse {total > 0 ? `${total} ` : ''}qualified veterinarians — search by name, specialty, language, and more</>
@@ -432,30 +421,22 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
       </div>
 
       {/* ── Smart Availability Panel ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 60%, #f0fdf4 100%)',
-        borderRadius: 14, border: '1px solid #bae6fd',
-        padding: '16px 20px', marginBottom: 16,
-        boxShadow: '0 2px 10px rgba(14,165,233,0.08)',
-      }}>
+      <div className="si-32fdb2f0">
         {/* Panel header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div className="si-eab13361">
           <div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#0c4a6e' }}>📅 {t('findDoctor.findByAvailability')}</span>
-            <span style={{ fontSize: 12, color: '#0369a1', marginLeft: 8 }}>
+            <span className="si-135ec834">📅 {t('findDoctor.findByAvailability')}</span>
+            <span className="si-98e040aa">
               {selectedDate ? t('findDoctor.filteringTo', { date: formatDateLabel(selectedDate) }) : t('findDoctor.pickDate')}
             </span>
           </div>
           {selectedDate && (
-            <button onClick={clearDateFilter} style={{
-              padding: '4px 12px', borderRadius: 20, border: '1px solid #bae6fd',
-              background: 'white', color: '#0369a1', fontSize: 12, cursor: 'pointer', fontWeight: 600,
-            }}>✕ {t('findDoctor.clearDate')}</button>
+            <button onClick={clearDateFilter} className="si-030751bf">✕ {t('findDoctor.clearDate')}</button>
           )}
         </div>
 
         {/* Date chips */}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+        <div className="si-8be018fb">
           {dateChips.map(({ dateStr, label }) => {
             const active = selectedDate === dateStr
             return (
@@ -477,17 +458,13 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
             value={selectedDate}
             min={new Date().toISOString().split('T')[0]}
             onChange={e => { setSelectedDate(e.target.value); setPage(0) }}
-            style={{
-              padding: '6px 10px', borderRadius: 20, border: '1px solid #bae6fd',
-              fontSize: 12, cursor: 'pointer', background: 'white', color: '#0369a1',
-              outline: 'none',
-            }}
+            className="si-4efb60c9"
           />
         </div>
 
         {/* Time-of-day filter */}
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, color: '#0369a1', fontWeight: 600 }}>🕐 Time:</span>
+        <div className="si-c94c5bb2">
+          <span className="si-c96f2222">🕐 Time:</span>
           {([
             { key: '' as TimeOfDay,        label: 'Any time'       },
             { key: 'morning'   as TimeOfDay, label: '🌅 Morning',   sub: '8am–12pm' },
@@ -503,7 +480,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
                 color: active ? 'white' : '#0369a1',
                 transition: 'all 0.15s', whiteSpace: 'nowrap',
               }}>
-                {label}{active && sub ? <span style={{ marginLeft: 4, fontSize: 10, opacity: 0.9 }}>{sub}</span> : null}
+                {label}{active && sub ? <span className="si-b23916fa">{sub}</span> : null}
               </button>
             )
           })}
@@ -511,33 +488,27 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
       </div>
 
       {/* ── Search Bar ── */}
-      <div style={{
-        background: 'white', borderRadius: 12, border: '1px solid #e5e7eb',
-        padding: '16px 20px', marginBottom: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.03)'
-      }}>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 250, position: 'relative' }}>
-            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: 16 }}>🔍</span>
+      <div className="si-5f8ad53d">
+        <div className="si-1f73e46e">
+          <div className="si-05f4f186">
+            <span className="si-76ae0d73">🔍</span>
             <input
               type="text"
               placeholder={t('findDoctor.searchPlaceholder')}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%', padding: '10px 12px 10px 36px', border: '1px solid #d1d5db',
-                borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box'
-              }}
+              className="si-24d1216a"
             />
           </div>
 
           <select value={specialtyFilter} onChange={e => setSpecialtyFilter(e.target.value)}
-            style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 13, minWidth: 160, background: 'white' }}>
+            className="si-8e949da0">
             <option value="">{t('findDoctor.allSpecializations')}</option>
             {allSpecializations.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
 
           <select value={certTypeFilter} onChange={e => { setCertTypeFilter(e.target.value); setPage(0) }}
-            style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 13, minWidth: 180, background: 'white' }}>
+            className="si-615b5f01">
             <option value="">{t('findDoctor.allCertificates')}</option>
             {['health_certificate','fitness_to_travel','rabies_vaccination','vaccination_record','pre_travel','sterilization','treatment','animal_injury','post_mortem','breeding_soundness','pregnancy_diagnosis','infertility_evaluation','fitness_for_sale','animal_valuation'].map(ct => (
               <option key={ct} value={ct}>{t(`vetCertificates.certTypes.${ct}` as any)}</option>
@@ -545,7 +516,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
           </select>
 
           <select value={languageFilter} onChange={e => setLanguageFilter(e.target.value)}
-            style={{ padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 13, minWidth: 130, background: 'white' }}>
+            className="si-71e77c6f">
             <option value="">{t('findDoctor.allLanguages')}</option>
             {allLanguages.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
@@ -560,7 +531,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
             }}>
             ⚙️ {t('findDoctor.filters')}
             {activeFilterCount > 0 && (
-              <span style={{ background: '#4F46E5', color: 'white', width: 20, height: 20, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>
+              <span className="si-21a5804d">
                 {activeFilterCount}
               </span>
             )}
@@ -569,40 +540,37 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
 
         {/* ── Advanced Filters Panel ── */}
         {showFilters && (
-          <div style={{
-            marginTop: 14, paddingTop: 14, borderTop: '1px solid #e5e7eb',
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, alignItems: 'end'
-          }}>
+          <div className="si-90643671">
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>{t('findDoctor.minimumRating')}</label>
+              <label className="si-13e1b2f2">{t('findDoctor.minimumRating')}</label>
               {renderRatingFilter()}
             </div>
 
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 4, display: 'block' }}>{t('findDoctor.maxFee')}</label>
+              <label className="si-13e1b2f2">{t('findDoctor.maxFee')}</label>
               <input type="number" min={0} step={10} placeholder="e.g. 100"
                 value={maxFee} onChange={e => setMaxFee(e.target.value ? Number(e.target.value) : '')}
-                style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 13, boxSizing: 'border-box' }}
+                className="si-adaf9bd5"
               />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
+            <div className="si-977f8af1">
+              <label className="si-6fa2ebba">
                 <input type="checkbox" checked={emergencyOnly} onChange={e => setEmergencyOnly(e.target.checked)}
-                  style={{ width: 16, height: 16, accentColor: '#dc2626' }} />
+                  className="si-78409a5a" />
                 <span>🚨 {t('findDoctor.acceptsEmergency')}</span>
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
+              <label className="si-6fa2ebba">
                 <input type="checkbox" checked={availableOnly} onChange={e => setAvailableOnly(e.target.checked)}
-                  style={{ width: 16, height: 16, accentColor: '#059669' }} />
+                  className="si-65c82051" />
                 <span>🟢 {t('findDoctor.availableOnly')}</span>
               </label>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="si-85143a6f">
               {activeFilterCount > 0 && (
                 <button onClick={clearFilters}
-                  style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid #fca5a5', background: '#fef2f2', cursor: 'pointer', fontSize: 12, color: '#dc2626', fontWeight: 600 }}>
+                  className="si-32f42128">
                   ✕ {t('findDoctor.clearAllFilters')}
                 </button>
               )}
@@ -612,12 +580,9 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
       </div>
 
       {/* ── Toolbar: Sort, View Toggle, Results Count ── */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        marginBottom: 16, flexWrap: 'wrap', gap: 10
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 13, color: '#6b7280' }}>
+      <div className="si-3ed6b9ef">
+        <div className="si-98d3a741">
+          <span className="si-c3b93ebb">
             {loading
               ? 'Searching...'
               : selectedDate
@@ -627,13 +592,13 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="si-98d3a741">
           <select value={sortBy} onChange={e => setSortBy(e.target.value as SortOption)}
-            style={{ padding: '7px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 12, background: 'white' }}>
+            className="si-5d9b44b7">
             {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
 
-          <div style={{ display: 'flex', border: '1px solid #d1d5db', borderRadius: 8, overflow: 'hidden' }}>
+          <div className="si-e4a608e7">
             <button onClick={() => setViewMode('grid')}
               style={{
                 padding: '7px 10px', border: 'none', cursor: 'pointer', fontSize: 14,
@@ -653,43 +618,43 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
 
       {/* ── Error ── */}
       {error && (
-        <div style={{ padding: '14px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="si-5cb041a9">
           <span>⚠️ {error}</span>
-          <button className="btn btn-outline" style={{ fontSize: 12, padding: '4px 12px' }} onClick={() => loadVets(page)}>Retry</button>
+          <button className="btn btn-outline si-8e26482f" onClick={() => loadVets(page)}>Retry</button>
         </div>
       )}
 
       {/* ── Loading ── */}
       {loading && (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+        <div className="si-9c193b4c">
           <div className="loading-spinner" />
         </div>
       )}
 
       {/* ── Results ── */}
       {!loading && vets.length === 0 && !error ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: 56, marginBottom: 16 }}>{selectedDate ? '📅' : '🔍'}</div>
-          <h3 style={{ fontSize: 20, color: '#1f2937', marginBottom: 8 }}>
+        <div className="si-9ae995d6">
+          <div className="si-71a36f28">{selectedDate ? '📅' : '🔍'}</div>
+          <h3 className="si-3bada533">
             {selectedDate
               ? t('findDoctor.noAvailable', { date: formatDateLabel(selectedDate), time: timeOfDay ? ` · ${TIME_RANGES[timeOfDay].desc}` : '' })
               : t('findDoctor.noMatch')
             }
           </h3>
-          <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 16 }}>
+          <p className="si-edc77e88">
             {selectedDate
               ? t('findDoctor.tryDifferentDate')
               : t('findDoctor.tryBroadening')
             }
           </p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="si-ba6b8f5f">
             {selectedDate && (
-              <button onClick={clearDateFilter} className="btn btn-primary" style={{ fontSize: 14 }}>
+              <button onClick={clearDateFilter} className="btn btn-primary si-38c57a68">
                 {t('findDoctor.browseAll')}
               </button>
             )}
             {activeFilterCount > 0 && (
-              <button onClick={clearFilters} className="btn btn-outline" style={{ fontSize: 14 }}>{t('findDoctor.clearFiltersBtn')}</button>
+              <button onClick={clearFilters} className="btn btn-outline si-38c57a68">{t('findDoctor.clearFiltersBtn')}</button>
             )}
           </div>
         </div>
@@ -706,10 +671,7 @@ const FindDoctor: React.FC<FindDoctorProps> = ({ onNavigate }) => {
 
           {/* ── Pagination ── */}
           {totalPages > 1 && (
-            <div style={{
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              gap: 8, marginTop: 28, paddingTop: 20, borderTop: '1px solid #e5e7eb'
-            }}>
+            <div className="si-7f5fc3d9">
               <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}
                 style={{
                   padding: '8px 14px', borderRadius: 8, border: '1px solid #d1d5db',

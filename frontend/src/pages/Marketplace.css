@@ -872,6 +872,41 @@
 .mp-detail-video-el { width: 100%; max-height: 360px; border-radius: 10px; background: #000; }
 .mp-card-video-badge { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 13px; padding: 2px 7px; border-radius: 6px; }
 
+/* ─── Listing Detail — Image Gallery ─── */
+.mp-detail-gallery { margin-bottom: 14px; }
+.mp-detail-gallery-main {
+  width: 100%;
+  max-height: 420px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mp-detail-gallery-main img { width: 100%; height: 100%; max-height: 420px; object-fit: contain; }
+.mp-detail-gallery-thumbs { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.mp-detail-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: #f1f5f9;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+.mp-detail-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.mp-detail-thumb.active { border-color: #667eea; }
+.mp-detail-thumb:hover { border-color: #a5b4fc; }
+@media (max-width: 640px) {
+  .mp-detail-gallery-main { max-height: 280px; }
+  .mp-detail-gallery-main img { max-height: 280px; }
+  .mp-detail-thumb { width: 52px; height: 52px; }
+}
+
 @media (max-width: 480px) {
   .mp-price-hint-body { flex-direction: column; gap: 4px; }
   .mp-pagination { gap: 8px; }

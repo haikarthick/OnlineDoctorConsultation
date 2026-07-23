@@ -66,15 +66,15 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavig
       </div>
 
       {/* Filters */}
-      <div className="search-filter-bar" style={{ marginBottom: 24 }}>
+      <div className="search-filter-bar si-af65fe13">
         <input
-          className="form-input"
+          className="form-input si-6acd75e8"
           placeholder={t('consultationManagement.searchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ flex: 1 }}
+         
         />
-        <select className="form-input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: 170 }}>
+        <select className="form-input si-f5a545c3" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
           <option value="">{t('consultationManagement.allStatuses')}</option>
           <option value="scheduled">{t('consultationManagement.scheduled')}</option>
           <option value="in_progress">{t('consultationManagement.inProgress')}</option>
@@ -90,7 +90,7 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavig
         <div className="loading-container"><div className="loading-spinner" /></div>
       ) : filteredConsultations.length === 0 ? (
         <div className="empty-state">
-          <div style={{ fontSize: 48 }}>🩺</div>
+          <div className="si-353e617d">🩺</div>
           <h3>{t('consultationManagement.noConsultationsFound')}</h3>
         </div>
       ) : (
@@ -110,7 +110,7 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ onNavig
             <tbody>
               {filteredConsultations.map(c => (
                 <tr key={c.id}>
-                  <td><code style={{ fontSize: 12 }}>{c.id.slice(0, 8)}</code></td>
+                  <td><code className="si-756a9f21">{c.id.slice(0, 8)}</code></td>
                   <td>{c.title || t('consultationManagement.untitled')}</td>
                   <td>{c.petOwnerName || '—'}</td>
                   <td>{c.vetName || '—'}</td>

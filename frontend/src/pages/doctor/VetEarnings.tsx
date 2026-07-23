@@ -179,54 +179,54 @@ const VetEarnings: React.FC = () => {
 
       {/* ── Earnings ledger (payment module §6) ── */}
       {ledger && (
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 14 }}>
-            <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px' }}>
-              <div style={{ color: '#6b7280', fontSize: 13 }}>{t('earningsLedger.clearing')}</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#b45309' }}>{formatCurrency(ledger.clearing)}</div>
-              <div style={{ color: '#9ca3af', fontSize: 11 }}>{t('earningsLedger.clearingHint', { days: ledger.clearanceDays })}</div>
+        <div className="si-576ad7ab">
+          <div className="si-26bb084f">
+            <div className="si-73701409">
+              <div className="si-c3b93ebb">{t('earningsLedger.clearing')}</div>
+              <div className="si-c9f6f584">{formatCurrency(ledger.clearing)}</div>
+              <div className="si-a5de6cea">{t('earningsLedger.clearingHint', { days: ledger.clearanceDays })}</div>
             </div>
-            <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px' }}>
-              <div style={{ color: '#6b7280', fontSize: 13 }}>{t('earningsLedger.available')}</div>
+            <div className="si-73701409">
+              <div className="si-c3b93ebb">{t('earningsLedger.available')}</div>
               <div style={{ fontSize: 22, fontWeight: 700, color: ledger.available < 0 ? '#dc2626' : '#15803d' }}>{formatCurrency(ledger.available)}</div>
               {ledger.available < 0 && (
-                <div style={{ color: '#dc2626', fontSize: 11 }}>{t('earningsLedger.negativeHint')}</div>
+                <div className="si-941af66a">{t('earningsLedger.negativeHint')}</div>
               )}
             </div>
-            <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px' }}>
-              <div style={{ color: '#6b7280', fontSize: 13 }}>{t('earningsLedger.locked')}</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#6d28d9' }}>{formatCurrency(ledger.locked)}</div>
+            <div className="si-73701409">
+              <div className="si-c3b93ebb">{t('earningsLedger.locked')}</div>
+              <div className="si-e5d9bda7">{formatCurrency(ledger.locked)}</div>
             </div>
-            <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px' }}>
-              <div style={{ color: '#6b7280', fontSize: 13 }}>{t('earningsLedger.withdrawn')}</div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#1d4ed8' }}>{formatCurrency(ledger.withdrawn)}</div>
+            <div className="si-73701409">
+              <div className="si-c3b93ebb">{t('earningsLedger.withdrawn')}</div>
+              <div className="si-364c1a5b">{formatCurrency(ledger.withdrawn)}</div>
             </div>
           </div>
 
           {/* Threshold progress toward minimum withdrawal (§6.1) */}
-          <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px', marginBottom: 14 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
-              <span style={{ color: '#6b7280' }}>{t('earningsLedger.withdrawalThreshold')}</span>
-              <span style={{ fontWeight: 600 }}>{formatCurrency(Math.max(ledger.available, 0))} / {formatCurrency(ledger.minWithdrawalAmount)}</span>
+          <div className="si-f7a0b6a7">
+            <div className="si-410451ff">
+              <span className="si-23033f05">{t('earningsLedger.withdrawalThreshold')}</span>
+              <span className="si-b2cfcbec">{formatCurrency(Math.max(ledger.available, 0))} / {formatCurrency(ledger.minWithdrawalAmount)}</span>
             </div>
-            <div style={{ background: '#f3f4f6', borderRadius: 999, height: 10, overflow: 'hidden' }}>
+            <div className="si-85b1fbd5">
               <div style={{ width: `${thresholdProgress}%`, background: thresholdProgress >= 100 ? '#15803d' : '#2563eb', height: '100%', borderRadius: 999, transition: 'width 0.4s' }} />
             </div>
-            <div style={{ color: '#9ca3af', fontSize: 12, marginTop: 6 }}>
+            <div className="si-822af7c2">
               {thresholdProgress >= 100 ? t('earningsLedger.thresholdReached') : t('earningsLedger.thresholdHint')}
             </div>
           </div>
 
           {/* Withdrawal card (§6.3) */}
-          <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px', marginBottom: 14 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+          <div className="si-f7a0b6a7">
+            <div className="si-07f0b96d">
               <div>
-                <div style={{ fontWeight: 700 }}>{t('withdrawals.title')}</div>
-                <div style={{ color: '#6b7280', fontSize: 13 }}>
+                <div className="si-f3347717">{t('withdrawals.title')}</div>
+                <div className="si-c3b93ebb">
                   {payoutSaved ? t('withdrawals.payoutOnFile') : t('withdrawals.payoutMissing')}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="si-d223efb3">
                 <button className="module-btn" onClick={() => setShowPayoutForm(v => !v)}>
                   {t('withdrawals.payoutDetails')}
                 </button>
@@ -241,25 +241,25 @@ const VetEarnings: React.FC = () => {
             </div>
 
             {actionMsg && (
-              <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', borderRadius: 8, padding: '8px 12px', marginTop: 10, fontSize: 13 }}>
+              <div className="si-6189703b">
                 {actionMsg}
               </div>
             )}
 
             {showPayoutForm && (
-              <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
+              <div className="si-7586ce37">
                 <input placeholder={t('withdrawals.accountName')} value={payout.accountName}
                   onChange={e => setPayout(p => ({ ...p, accountName: e.target.value }))}
-                  style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px' }} />
+                  className="si-9c357596" />
                 <input placeholder={t('withdrawals.accountNumber')} value={payout.accountNumber}
                   onChange={e => setPayout(p => ({ ...p, accountNumber: e.target.value }))}
-                  style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px' }} />
+                  className="si-9c357596" />
                 <input placeholder={t('withdrawals.ifsc')} value={payout.ifsc}
                   onChange={e => setPayout(p => ({ ...p, ifsc: e.target.value }))}
-                  style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px' }} />
+                  className="si-9c357596" />
                 <input placeholder={t('withdrawals.upi')} value={payout.upi}
                   onChange={e => setPayout(p => ({ ...p, upi: e.target.value }))}
-                  style={{ border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px' }} />
+                  className="si-9c357596" />
                 <button className="module-btn primary" disabled={actionBusy} onClick={savePayoutDetails}>
                   {actionBusy ? t('common.loading') : t('common.save')}
                 </button>
@@ -267,20 +267,20 @@ const VetEarnings: React.FC = () => {
             )}
 
             {withdrawals.length > 0 && (
-              <div style={{ marginTop: 12, borderTop: '1px solid #f1f5f9', paddingTop: 10 }}>
+              <div className="si-e3041b91">
                 {withdrawals.slice(0, 5).map(w => (
-                  <div key={w.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13, padding: '6px 0', gap: 8, flexWrap: 'wrap' }}>
+                  <div key={w.id} className="si-3f840b9b">
                     <span>
                       <strong>{formatCurrency(parseFloat(String(w.amount)))}</strong>
                       {parseFloat(String(w.tdsAmount || 0)) > 0 && (
-                        <span style={{ color: '#6b7280' }}> · TDS {formatCurrency(parseFloat(String(w.tdsAmount)))} · {t('withdrawals.netPaid')} {formatCurrency(parseFloat(String(w.netPaidAmount || 0)))}</span>
+                        <span className="si-23033f05"> · TDS {formatCurrency(parseFloat(String(w.tdsAmount)))} · {t('withdrawals.netPaid')} {formatCurrency(parseFloat(String(w.netPaidAmount || 0)))}</span>
                       )}
-                      {w.utrReference && <span style={{ color: '#6b7280' }}> · {w.utrReference}</span>}
+                      {w.utrReference && <span className="si-23033f05"> · {w.utrReference}</span>}
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontWeight: 600 }}>{String(t(`withdrawals.statuses.${w.status}`, w.status))}</span>
+                    <span className="si-bab2d193">
+                      <span className="si-b2cfcbec">{String(t(`withdrawals.statuses.${w.status}`, w.status))}</span>
                       {w.status === 'requested' && (
-                        <button className="module-btn" style={{ padding: '3px 10px', fontSize: 12 }} disabled={actionBusy} onClick={() => cancelWithdrawal(w.id)}>
+                        <button className="module-btn si-0bf6d12d" disabled={actionBusy} onClick={() => cancelWithdrawal(w.id)}>
                           {t('common.cancel')}
                         </button>
                       )}
@@ -293,33 +293,33 @@ const VetEarnings: React.FC = () => {
 
           {/* Statement */}
           {statement.length > 0 && (
-            <div style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden' }}>
-              <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', fontWeight: 700 }}>{t('earningsLedger.statementTitle')}</div>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <div className="si-0b7c8512">
+              <div className="si-761baba8">{t('earningsLedger.statementTitle')}</div>
+              <div className="si-9aa6c55f">
+                <table className="si-ec76dd85">
                   <thead>
-                    <tr style={{ background: '#f9fafb', textAlign: 'left' }}>
-                      <th style={{ padding: '8px 12px' }}>{t('earningsLedger.colDate')}</th>
-                      <th style={{ padding: '8px 12px' }}>{t('earningsLedger.colType')}</th>
-                      <th style={{ padding: '8px 12px' }}>{t('earningsLedger.colPatient')}</th>
-                      <th style={{ padding: '8px 12px', textAlign: 'right' }}>{t('earningsLedger.colGross')}</th>
-                      <th style={{ padding: '8px 12px', textAlign: 'right' }}>{t('earningsLedger.colCommission')}</th>
-                      <th style={{ padding: '8px 12px', textAlign: 'right' }}>{t('earningsLedger.colNet')}</th>
-                      <th style={{ padding: '8px 12px' }}>{t('earningsLedger.colStatus')}</th>
+                    <tr className="si-321a0f36">
+                      <th className="si-6032b198">{t('earningsLedger.colDate')}</th>
+                      <th className="si-6032b198">{t('earningsLedger.colType')}</th>
+                      <th className="si-6032b198">{t('earningsLedger.colPatient')}</th>
+                      <th className="si-2d673c2a">{t('earningsLedger.colGross')}</th>
+                      <th className="si-2d673c2a">{t('earningsLedger.colCommission')}</th>
+                      <th className="si-2d673c2a">{t('earningsLedger.colNet')}</th>
+                      <th className="si-6032b198">{t('earningsLedger.colStatus')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {statement.map((row) => (
-                      <tr key={row.id} style={{ borderTop: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}>{row.createdAt ? formatDate(row.createdAt) : '—'}</td>
-                        <td style={{ padding: '8px 12px' }}>{String(t(`earningsLedger.types.${row.type}`, row.type))}</td>
-                        <td style={{ padding: '8px 12px' }}>{row.patientName || '—'}{row.animalName ? ` (${row.animalName})` : ''}</td>
-                        <td style={{ padding: '8px 12px', textAlign: 'right' }}>{formatCurrency(parseFloat(String(row.grossAmount || 0)))}</td>
-                        <td style={{ padding: '8px 12px', textAlign: 'right' }}>{formatCurrency(parseFloat(String(row.commissionAmount || 0)))}</td>
+                      <tr key={row.id} className="si-c20fa118">
+                        <td className="si-85d1aad6">{row.createdAt ? formatDate(row.createdAt) : '—'}</td>
+                        <td className="si-6032b198">{String(t(`earningsLedger.types.${row.type}`, row.type))}</td>
+                        <td className="si-6032b198">{row.patientName || '—'}{row.animalName ? ` (${row.animalName})` : ''}</td>
+                        <td className="si-2d673c2a">{formatCurrency(parseFloat(String(row.grossAmount || 0)))}</td>
+                        <td className="si-2d673c2a">{formatCurrency(parseFloat(String(row.commissionAmount || 0)))}</td>
                         <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 600, color: parseFloat(String(row.netAmount)) < 0 ? '#dc2626' : '#111827' }}>
                           {formatCurrency(parseFloat(String(row.netAmount || 0)))}
                         </td>
-                        <td style={{ padding: '8px 12px' }}>{String(t(`earningsLedger.statuses.${row.status}`, row.status))}</td>
+                        <td className="si-6032b198">{String(t(`earningsLedger.statuses.${row.status}`, row.status))}</td>
                       </tr>
                     ))}
                   </tbody>

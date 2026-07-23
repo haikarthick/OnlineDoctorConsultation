@@ -74,8 +74,8 @@ describe('Extended Validation Schemas', () => {
   });
 
   describe('createMedicalRecordSchema', () => {
-    it('accepts valid', () => { expect(createMedicalRecordSchema.validate({ animalId: u, recordType: 'checkup', title: 'Checkup', content: 'Healthy' }).error).toBeUndefined(); });
-    it('rejects missing title', () => { expect(createMedicalRecordSchema.validate({ recordType: 'checkup', content: 'text' }).error).toBeDefined(); });
+    it('accepts valid', () => { expect(createMedicalRecordSchema.validate({ animalId: u, recordType: 'other', title: 'Checkup', content: 'Healthy' }).error).toBeUndefined(); });
+    it('rejects missing title', () => { expect(createMedicalRecordSchema.validate({ recordType: 'other', content: 'text' }).error).toBeDefined(); });
   });
 
   describe('updateMedicalRecordSchema', () => {

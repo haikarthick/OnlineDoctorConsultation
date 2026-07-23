@@ -4,21 +4,12 @@ import { useTranslation } from 'react-i18next'
 import apiService from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { MarketplaceListing } from '../types'
+import { cldCardImageProps, cldDetailImageProps } from '../utils/media'
+import { useMasterData } from '../context/MasterDataContext'
 import './Marketplace.css'
 import './PublicMarketplace.css'
 
-const CATEGORY_KEYS: Array<{ value: string; labelKey: string }> = [
-  { value: '', labelKey: 'marketplace.categories.all' },
-  { value: 'animal', labelKey: 'marketplace.categories.animals' },
-  { value: 'feed', labelKey: 'marketplace.categories.feed' },
-  { value: 'equipment', labelKey: 'marketplace.categories.equipment' },
-  { value: 'medicine', labelKey: 'marketplace.categories.medicine' },
-  { value: 'semen_embryo', labelKey: 'marketplace.categories.semenEmbryo' },
-  { value: 'service', labelKey: 'marketplace.categories.services' },
-  { value: 'other', labelKey: 'marketplace.categories.other' },
-]
 const CATEGORY_ICONS: Record<string, string> = { animal: '🐄', feed: '🌾', equipment: '🔧', medicine: '💊', semen_embryo: '🧬', service: '🩺', other: '📦' }
-const SPECIES_LIST = ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Horse', 'Camel', 'Pig', 'Poultry', 'Dog', 'Cat', 'Other']
 
 const g = (l: any, ...keys: string[]): any => { for (const k of keys) { if (l[k] !== undefined && l[k] !== null) return l[k]; } return undefined }
 
@@ -26,6 +17,12 @@ const PublicMarketplace: React.FC = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
+  const { classTermsForSpecies, marketplaceCategories, resolveLabel, marketplaceEligibleSpecies } = useMasterData()
+  const SPECIES_LIST = marketplaceEligibleSpecies
+  const CATEGORY_KEYS: Array<{ value: string; label: string }> = [
+    { value: '', label: t('marketplace.categories.all') },
+    ...marketplaceCategories.map(c => ({ value: c.code, label: resolveLabel(c, t) })),
+  ]
 
   const [listings, setListings] = useState<MarketplaceListing[]>([])
   const [total, setTotal] = useState(0)
@@ -201,13 +198,13 @@ const PublicMarketplace: React.FC = () => {
                 ))
               ) : (
                 (stats?.category_facets?.length ? stats.category_facets : CATEGORY_KEYS.filter(c => c.value).map(c => ({ category: c.value }))).map((f: any) => {
-                  const labelKey = CATEGORY_KEYS.find(c => c.value === f.category)?.labelKey
+                  const catLabel = CATEGORY_KEYS.find(c => c.value === f.category)?.label
                   return (
                     <button key={f.category}
                       className={`pub-mp-facet ${filters.category === f.category ? 'active' : ''}`}
                       onClick={() => updateFilter('category', filters.category === f.category ? '' : f.category)}>
                       <span className="pub-mp-facet-icon">{CATEGORY_ICONS[f.category] || '📦'}</span>
-                      <span className="pub-mp-facet-name">{labelKey ? t(labelKey) : f.category}</span>
+                      <span className="pub-mp-facet-name">{catLabel || f.category}</span>
                       {f.count !== undefined && <span className="pub-mp-facet-count">{f.count}</span>}
                     </button>
                   )
@@ -221,7 +218,7 @@ const PublicMarketplace: React.FC = () => {
           <input className="module-input" value={searchInput} onChange={e => setSearchInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') applySearch(searchInput) }} placeholder={t('marketplace.searchLivestock')} />
           <select className="module-input" value={filters.category || ''} onChange={e => updateFilter('category', e.target.value)}>
-            {CATEGORY_KEYS.map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+            {CATEGORY_KEYS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
           <select className="module-input" value={filters.species || ''} onChange={e => updateFilter('species', e.target.value)}>
             <option value="">{t('marketplace.livestock.allSpecies')}</option>
@@ -232,6 +229,12 @@ const PublicMarketplace: React.FC = () => {
             <option value="male">{t('marketplace.genderLabel.male')}</option>
             <option value="female">{t('marketplace.genderLabel.female')}</option>
           </select>
+          {filters.species && classTermsForSpecies(filters.species).length > 0 && (
+            <select className="module-input" value={filters.animalClass || ''} onChange={e => updateFilter('animalClass', e.target.value)}>
+              <option value="">{t('animalClass.anyClass')}</option>
+              {classTermsForSpecies(filters.species).map(c => <option key={c.value} value={c.value}>{t(c.labelKey)}</option>)}
+            </select>
+          )}
           <select className="module-input" value={sortBy} onChange={e => { setSortBy(e.target.value); setPage(0) }}>
             <option value="">{t('marketplace.sort.default')}</option>
             <option value="price_asc">{t('marketplace.sort.priceAsc')}</option>
@@ -349,7 +352,7 @@ const PublicListingCard: React.FC<{ listing: MarketplaceListing; formatCurrency:
       {tier === 'spotlight' && !isHot && <div className="mp-hot-ribbon spotlight-ribbon">{t('marketplace.card.spotlightLabel')}</div>}
 
       <div className="mp-card-img">
-        {images.length > 0 ? <img src={images[0]} alt={l.title} /> : <div className="mp-card-img-placeholder">{CATEGORY_ICONS[l.category] || '📦'}</div>}
+        {images.length > 0 ? <img {...cldCardImageProps(images[0])} alt={l.title} loading="lazy" /> : <div className="mp-card-img-placeholder">{CATEGORY_ICONS[l.category] || '📦'}</div>}
       </div>
 
       <div className="mp-card-body">
@@ -407,12 +410,14 @@ const PublicListingDetail: React.FC<{
   t: (key: string, opts?: any) => string;
 }> = ({ listing: l, formatCurrency, onBack, onLoginPrompt, isAuthenticated, t }) => {
   const navigate = useNavigate()
+  const { findClassTerm } = useMasterData()
   const species = l.species
   const breed = l.breed
   const milkYield = g(l, 'dailyMilkYield', 'daily_milk_yield')
   const weight = g(l, 'animalWeightKg', 'animal_weight_kg')
   const age = g(l, 'animalAgeMonths', 'animal_age_months')
   const gender = l.gender
+  const animalClass = g(l, 'animalClass', 'animal_class')
   const lactation = g(l, 'lactationNumber', 'lactation_number')
   const pregnancy = g(l, 'pregnancyStatus', 'pregnancy_status')
   const pregMonth = g(l, 'pregnancyMonth', 'pregnancy_month')
@@ -429,6 +434,9 @@ const PublicListingDetail: React.FC<{
   const breederVerified = g(l, 'breederVerified', 'breeder_verified')
   const welfareAtt = g(l, 'welfareAttestation', 'welfare_attestation')
   const tags = typeof l.tags === 'string' ? JSON.parse(l.tags || '[]') : (l.tags || [])
+  const images = typeof l.images === 'string' ? JSON.parse(l.images || '[]') : (l.images || [])
+  const videoUrl = g(l, 'videoUrl', 'video_url')
+  const [activeImageIdx, setActiveImageIdx] = React.useState(0)
 
   return (
     <div className="mp-detail">
@@ -444,6 +452,29 @@ const PublicListingDetail: React.FC<{
             {l.featured && <span className="mp-badge featured">⭐ Featured</span>}
           </div>
 
+          {images.length > 0 && (
+            <div className="mp-detail-gallery">
+              <div className="mp-detail-gallery-main">
+                <img {...cldDetailImageProps(images[activeImageIdx])} alt={l.title} />
+              </div>
+              {images.length > 1 && (
+                <div className="mp-detail-gallery-thumbs">
+                  {images.map((img: string, i: number) => (
+                    <button key={i} type="button" className={`mp-detail-thumb ${i === activeImageIdx ? 'active' : ''}`} onClick={() => setActiveImageIdx(i)}>
+                      <img {...cldCardImageProps(img)} alt={`${l.title} ${i + 1}`} loading="lazy" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {videoUrl && (
+            <div className="mp-detail-video">
+              <video controls preload="metadata" src={videoUrl} className="mp-detail-video-el" />
+            </div>
+          )}
+
           <h2>{l.title}</h2>
           <p className="mp-sell-step-desc">{l.description || t('marketplace.detail.noDescription')}</p>
           <div className="mp-detail-price">{l.price ? formatCurrency(l.price) : t('marketplace.contactForPrice')}</div>
@@ -455,7 +486,11 @@ const PublicListingDetail: React.FC<{
               <div className="mp-detail-grid">
                 {species && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.species')}</span><span className="mp-detail-value">{species}</span></div>}
                 {breed && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.breed')}</span><span className="mp-detail-value">{breed}</span></div>}
-                {gender && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{{ male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') }[gender] || gender}</span></div>}
+                {(gender || animalClass) && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.gender')}</span><span className="mp-detail-value">{(() => {
+                  const term = animalClass ? findClassTerm(species || '', animalClass) : undefined
+                  if (term) return t(term.labelKey)
+                  return (gender && ({ male: t('marketplace.genderLabel.male'), female: t('marketplace.genderLabel.female'), unknown: t('marketplace.genderLabel.unknown') } as Record<string, string>)[gender]) || gender
+                })()}</span></div>}
                 {age && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.age')}</span><span className="mp-detail-value">{age >= 12 ? `${Math.floor(age / 12)}y ${age % 12}m` : `${age} ${t('marketplace.units.months')}`}</span></div>}
                 {weight && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.weightKg')}</span><span className="mp-detail-value">{weight} {t('marketplace.units.kg')}</span></div>}
                 {lactation !== undefined && lactation !== null && <div className="mp-detail-item"><span className="mp-detail-label">{t('marketplace.livestock.lactation')}</span><span className="mp-detail-value">{lactation}</span></div>}
@@ -501,7 +536,7 @@ const PublicListingDetail: React.FC<{
           </div>
 
           {tags.length > 0 && (
-            <div className="mp-card-tags" style={{ marginTop: 16 }}>
+            <div className="mp-card-tags si-b0aee75b">
               {tags.map((tag: string) => <span key={tag} className="mp-tag">{tag}</span>)}
             </div>
           )}

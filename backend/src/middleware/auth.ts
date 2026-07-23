@@ -58,7 +58,15 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
 
 export const roleMiddleware = (allowedRoles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!req.userRole || !allowedRoles.includes(req.userRole)) {
+    // Multi-role support (P4-HIGH1): a user's primary role (users.role) is always
+    // authoritative, and any secondary roles granted via user_roles also grant access.
+    const grantedRoles = req.userRoles && req.userRoles.length > 0
+      ? req.userRoles
+      : (req.userRole ? [req.userRole] : []);
+    const hasAccess = !!req.userRole && (
+      allowedRoles.includes(req.userRole) || grantedRoles.some(r => allowedRoles.includes(r))
+    );
+    if (!hasAccess) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     next();

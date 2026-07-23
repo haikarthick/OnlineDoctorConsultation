@@ -113,7 +113,7 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
               <p>{t('login.subtitle')}</p>
             </div>
 
-            <div className="hospital-callout" role="note" style={{ marginBottom: '1rem' }}>
+            <div className="hospital-callout si-1cb81cae" role="note">
               <span className="hospital-callout-icon">🏥</span>
               <div className="hospital-callout-body">
                 <strong>{t('login.hospitalStaffTitle')}</strong>
@@ -123,10 +123,10 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
 
             {dbWaking && (
               <div className="message db-waking" role="status" aria-live="polite">
-                <span className="spinner" aria-hidden="true" style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid #bbb', borderTopColor: '#2563eb', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginRight: 8 }} />
+                <span className="spinner si-50a892c0" aria-hidden="true" />
                 {t('login.dbWakingUp', { countdown: retryCountdown })}
                 <br />
-                <small style={{ opacity: 0.75 }}>{t('login.dbWakingUpNote')}</small>
+                <small className="si-f340ef6a">{t('login.dbWakingUpNote')}</small>
               </div>
             )}
 
@@ -156,13 +156,13 @@ export default function Login({ onSwitchToRegister, onGoHome, onForgotPassword }
               </div>
 
               <div className="form-group">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                <div className="si-84e16d8f">
                   <label htmlFor="login-password">{t('login.password')}</label>
                   {onForgotPassword && (
                     <button
                       type="button"
-                      className="link-btn"
-                      style={{ fontSize: 13, color: '#667eea', fontWeight: 500 }}
+                      className="link-btn si-c87a3f67"
+                     
                       onClick={onForgotPassword}
                       tabIndex={0}
                     >

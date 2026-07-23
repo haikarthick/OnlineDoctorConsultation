@@ -214,7 +214,7 @@ export default function NetworkSubscriptions() {
               </thead>
               <tbody>
                 {networks.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>No networks found</td></tr>
+                  <tr><td colSpan={6} className="si-edd302ee">No networks found</td></tr>
                 ) : networks.map(n => {
                   const pct = n.seatLimit ? Math.round((n.seatsUsed / n.seatLimit) * 100) : 0
                   const barClass = getSeatColor(n.seatsUsed, n.seatLimit)

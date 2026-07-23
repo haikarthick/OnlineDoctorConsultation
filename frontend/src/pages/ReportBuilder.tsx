@@ -121,12 +121,12 @@ const ReportBuilderPage: React.FC = () => {
     const columns = Object.keys(rows[0])
     return (
       <div>
-        <div className="card-stats" style={{ marginBottom: '1rem' }}>
+        <div className="card-stats si-1cb81cae">
           <div>Rows: <strong>{data.totalRows || rows.length}</strong></div>
           {data.period && <div>Period: <strong>{data.period}</strong></div>}
           {data.reportDate && <div>Date: <strong>{new Date(data.reportDate).toLocaleDateString()}</strong></div>}
         </div>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="si-9aa6c55f">
           <table className="data-table">
             <thead><tr>{columns.map(c => <th key={c}>{c.replace(/_/g, ' ')}</th>)}</tr></thead>
             <tbody>
@@ -175,7 +175,7 @@ const ReportBuilderPage: React.FC = () => {
 
           {tab === 'generate' && (
             <div>
-              <h2 style={{ marginBottom: '1.5rem' }}>{t('reportBuilder.selectReportType')}</h2>
+              <h2 className="si-1e52b2bd">{t('reportBuilder.selectReportType')}</h2>
               <div className="cards-grid">
                 {REPORT_TYPES.map(rt => (
                   <div key={rt.value} className={`card ${genForm.reportType === rt.value ? 'card-selected' : ''}`}
@@ -187,7 +187,7 @@ const ReportBuilderPage: React.FC = () => {
                 ))}
               </div>
 
-              <form className="module-form" onSubmit={handleGenerate} style={{ marginTop: '1.5rem' }}>
+              <form className="module-form si-70453e1a" onSubmit={handleGenerate}>
                 <div className="form-grid">
                   <div className="form-group"><label>{t('reportBuilder.reportName')}</label><input value={genForm.name} onChange={e => setGenForm({ ...genForm, name: e.target.value })} placeholder="Auto-generated if empty" /></div>
                   <div className="form-group"><label>{t('reportBuilder.format')}</label>
@@ -219,7 +219,7 @@ const ReportBuilderPage: React.FC = () => {
                       <td>{(r.generatedAt || (r as any).generated_at) ? new Date(r.generatedAt || (r as any).generated_at).toLocaleString() : '–'}</td>
                       <td>
                         <button className="btn-sm" onClick={() => handleViewReport(r.id)}>{t('common.view')}</button>
-                        <button className="btn-sm btn-danger" onClick={() => handleDeleteReport(r.id)} style={{ marginLeft: '4px' }}>{t('common.delete')}</button>
+                        <button className="btn-sm btn-danger si-fd5a3e17" onClick={() => handleDeleteReport(r.id)}>{t('common.delete')}</button>
                       </td>
                     </tr>
                   ))}
@@ -233,7 +233,7 @@ const ReportBuilderPage: React.FC = () => {
             <div>
               {selectedReport ? (
                 <div>
-                  <div className="card full-width" style={{ marginBottom: '1rem' }}>
+                  <div className="card full-width si-1cb81cae">
                     <h2>{selectedReport.name}</h2>
                     <div className="card-meta">
                       <span className="badge">{typeInfo(selectedReport.reportType || (selectedReport as any).report_type)?.label || selectedReport.reportType}</span>

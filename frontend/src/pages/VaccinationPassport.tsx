@@ -5,12 +5,7 @@ import apiService from '../services/api'
 import { useTranslation } from 'react-i18next'
 import '../styles/modules.css'
 import './VaccinationPassport.css'
-
-// ─── Species icons ───────────────────────────────────────────
-const SPECIES_ICONS: Record<string, string> = {
-  Dog: '🐕', Cat: '🐈', Bird: '🐦', Horse: '🐴', Cattle: '🐄',
-  Sheep: '🐑', Goat: '🐐', Pig: '🐷', Rabbit: '🐰', Other: '🐾',
-}
+import { useMasterData } from '../context/MasterDataContext'
 
 // ─── Types ───────────────────────────────────────────────────
 interface PassportDose {
@@ -105,12 +100,14 @@ function ComplianceMeter({ percent }: { percent: number }) {
 
 const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _onNavigate }) => {
   const { t } = useTranslation()
+  const { speciesIcon } = useMasterData()
   const { user } = useAuth()
   const { formatDate } = useSettings()
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'passport' | 'compliance' | 'history'>('passport')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Passport data — keyed by animalId
   const [passports, setPassports] = useState<PassportAnimal[]>([])
@@ -308,7 +305,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
   // ── Render passport card ─────────────────────────────────────
   const renderPassportCard = (animal: PassportAnimal) => {
     const isExpanded = expandedAnimal === animal.animalId
-    const icon = SPECIES_ICONS[animal.species] || '🐾'
+    const icon = speciesIcon(animal.species)
     return (
       <div key={animal.animalId} className="vp-passport-card">
         {/* Card header */}
@@ -322,12 +319,19 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
               <div className="vp-animal-name">{animal.animalName}</div>
               {animal.animalUniqueId && (
                 <div
-                  className="vc-id-badge"
+                  className="vc-id-badge si-4af0b366"
                   title={`VetCare ID — click to copy`}
-                  onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(animal.animalUniqueId!).catch(() => {}) }}
-                  style={{ cursor: 'pointer', fontFamily: 'monospace', fontSize: 11, color: '#6366f1', background: '#eef2ff', borderRadius: 4, padding: '2px 6px', display: 'inline-block', marginTop: 2 }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const id = animal.animalUniqueId!
+                    navigator.clipboard?.writeText(id).then(() => {
+                      setCopiedId(id)
+                      setTimeout(() => setCopiedId(prev => (prev === id ? null : prev)), 1500)
+                    }).catch(() => setError(t('common.copyFailed')))
+                  }}
+                 
                 >
-                  🏷️ {animal.animalUniqueId}
+                  {copiedId === animal.animalUniqueId ? `✅ ${t('common.copied')}` : `🏷️ ${animal.animalUniqueId}`}
                 </div>
               )}
               <div className="vp-animal-meta">
@@ -473,7 +477,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
               {complianceSummary.map((row) => (
                 <tr key={row.animalId}>
                   <td>
-                    <span className="vp-table-icon">{SPECIES_ICONS[row.species] || '🐾'}</span>
+                    <span className="vp-table-icon">{speciesIcon(row.species)}</span>
                     {row.animalName}
                   </td>
                   <td>{row.species}</td>
@@ -524,7 +528,7 @@ const VaccinationPassport: React.FC<VaccinationPassportProps> = ({ onNavigate: _
           <option value="">{t('vaccinationPassport.selectAnimal')}</option>
           {passports.map((a) => (
             <option key={a.animalId} value={a.animalId}>
-              {SPECIES_ICONS[a.species] || '🐾'} {a.animalName} ({a.species}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
+              {speciesIcon(a.species)} {a.animalName} ({a.species}){(isAdmin || isVet) && a.ownerName ? ` — ${a.ownerName}` : ''}
             </option>
           ))}
         </select>

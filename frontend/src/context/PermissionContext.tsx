@@ -109,6 +109,7 @@ export const PERMISSION_ROUTE_MAP: Record<string, string[]> = {
   // Vaccination
   vaccination_passport: ['/vaccination-passport'],
   admin_vaccine_protocols: ['/admin/vaccine-protocols'],
+  admin_master_data: ['/admin/master-data'],
   // Veterinary Certificates
   vet_certificates: ['/vet-certificates', '/doctor/certificates/new'],
   vet_earnings: ['/doctor/earnings'],
@@ -201,6 +202,7 @@ export const NAV_PERMISSION_MAP: Record<string, string> = {
   // Vaccination
   'vaccination-passport': 'vaccination_passport',
   'admin-vaccine-protocols': 'admin_vaccine_protocols',
+  'admin-master-data': 'admin_master_data',
   // Veterinary Certificates
   'vet-certificates': 'vet_certificates',
   'certificate-writer': 'vet_certificates',

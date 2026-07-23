@@ -88,6 +88,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "कॉपी हो गया!",
+    "copyFailed": "क्लिपबोर्ड पर कॉपी नहीं हो सका",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -101,7 +103,8 @@
     "fillRequired": "Please fill all required fields",
     "none": "None",
     "error": "Error",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "previous": "पिछला"
   },
   "nav": {
     "brand": "VetCare",
@@ -202,7 +205,8 @@
     "commissionSettings": "कमीशन नियम",
     "settlements": "निपटान",
     "referrals": "रेफ़रल",
-    "financeReports": "वित्त रिपोर्ट"
+    "financeReports": "वित्त रिपोर्ट",
+    "masterData": "मास्टर डेटा"
   },
   "login": {
     "welcome": "वापस स्वागत है",
@@ -868,7 +872,10 @@
       "todayQueue": "आज की कतार",
       "activeInpatients": "सक्रिय भर्ती",
       "pendingReferrals": "लंबित रेफरल",
-      "branchStaff": "शाखा स्टाफ"
+      "branchStaff": "शाखा स्टाफ",
+      "rxPendingReview": "फार्मासिस्ट समीक्षा हेतु लंबित नुस्खे",
+      "rxRejectedThisWeek": "इस सप्ताह अस्वीकृत नुस्खे",
+      "rxDispensed": "वितरित नुस्खे"
     },
     "quickActions": {
       "viewConsultations": "परामर्श देखें",
@@ -1269,7 +1276,8 @@
       "confirmRemove": "क्या आप इस पशु को हटाना चाहते हैं?",
       "removed": "पशु सफलतापूर्वक हटाया गया",
       "failedSave": "पशु सहेजने में विफल",
-      "failedRemove": "पशु हटाने में विफल"
+      "failedRemove": "पशु हटाने में विफल",
+      "failedLoadEnterprises": "आपकी एंटरप्राइज़ सूची लोड करने में विफल"
     },
     "pageTitle": "मेरे पशु",
     "loading": "पशु लोड हो रहे हैं...",
@@ -1514,7 +1522,15 @@
       "validUntil": "तक मान्य:",
       "active": "सक्रिय",
       "expired": "समाप्त",
-      "addButton": "नुस्खा लिखें"
+      "addButton": "नुस्खा लिखें",
+      "networkPharmacy": "नेटवर्क फार्मेसी",
+      "dispensedOn": "{{date}} को वितरित",
+      "reviewStatus": {
+        "pending_review": "फार्मासिस्ट समीक्षा की प्रतीक्षा में",
+        "approved_for_dispensing": "स्वीकृत — वितरण की प्रतीक्षा में",
+        "rejected": "फार्मासिस्ट द्वारा अस्वीकृत",
+        "needs_clarification": "फार्मासिस्ट ने स्पष्टीकरण मांगा"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ टीकाकरण जोड़ें",
@@ -3121,6 +3137,12 @@
   "marketplace": {
     "pageTitle": "🏪 खरीद-बिक्री बाज़ार",
     "subtitle": "पशु खरीदें और बेचें — उपकरण और पशु चिकित्सा आपूर्ति देखें",
+    "errors": {
+      "dashboardLoadFailed": "आपका डैशबोर्ड लोड करने में विफल",
+      "favoritesLoadFailed": "आपके पसंदीदा लोड करने में विफल",
+      "adminDataLoadFailed": "एडमिन लिस्टिंग और आँकड़े लोड करने में विफल",
+      "monetizationLoadFailed": "मुद्रीकरण सेटिंग्स लोड करने में विफल"
+    },
     "tabs": {
       "dashboard": "📊 डैशबोर्ड",
       "browse": "🛒 ब्राउज़ करें",
@@ -3295,7 +3317,7 @@
       "autoPopulated": "पशु विवरण स्वतः भर दिया गया!",
       "fieldsAutoFilled": "आपके पशु की प्रोफ़ाइल से फ़ील्ड स्वतः भरे गए। आप नीचे कोई भी फ़ील्ड संपादित कर सकते हैं।",
       "imagesTitle": "लिस्टिंग छवियाँ",
-      "imagesLabel": "5 तक छवियाँ अपलोड करें",
+      "imagesLabel": "{{count}} तक छवियाँ अपलोड करें",
       "uploading": "अपलोड हो रहा है...",
       "uploadFailed": "छवि अपलोड विफल",
       "selectBreed": "नस्ल चुनें",
@@ -3314,7 +3336,12 @@
       "videoAdded": "वीडियो जोड़ा गया",
       "removeVideo": "वीडियो हटाएं",
       "videoUploaded": "वीडियो अपलोड किया गया",
-      "videoHint": "एक छोटा वीडियो विश्वास बनाता है और अधिक प्रतिक्रियाएं दिलाता है।"
+      "videoHint": "एक छोटा वीडियो विश्वास बनाता है और अधिक प्रतिक्रियाएं दिलाता है।",
+      "imageTooLarge": "छवि बहुत बड़ी है — अधिकतम {{maxMb}}MB",
+      "videoTooLarge": "वीडियो बहुत बड़ा है — अधिकतम {{maxMb}}MB",
+      "videoTooLong": "वीडियो बहुत लंबा है — अधिकतम {{maxSec}} सेकंड",
+      "uploadingVideo": "वीडियो अपलोड हो रहा है...",
+      "videoLimits": "अधिकतम {{maxSec}} सेकंड, {{maxMb}}MB तक"
     },
     "detail": {
       "backToListings": "← लिस्टिंग पर वापस",
@@ -3859,6 +3886,7 @@
     "loadTrail": "ट्रेल लोड करें",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -4030,7 +4058,8 @@
     "next": "अगला",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "फ़िल्टर विकल्प लोड करने में विफल (विशेषज्ञता/भाषाएँ)"
   },
   "myBookings": {
     "title": "मेरी बुकिंग",
@@ -4166,6 +4195,7 @@
     "failedToSendMessage": "संदेश भेजने में विफल",
     "noMediaStream": "कोई मीडिया स्ट्रीम उपलब्ध नहीं",
     "failedToStartRecording": "रिकॉर्डिंग शुरू करने में विफल",
+    "recordingNotifyFailed": "दूसरे प्रतिभागी को रिकॉर्डिंग परिवर्तन की सूचना नहीं दी जा सकी",
     "micUnavailable": "माइक्रोफोन उपलब्ध नहीं",
     "cameraStillUnavailable": "कैमरा अभी भी उपलब्ध नहीं",
     "duration": "अवधि",
@@ -4478,6 +4508,7 @@
     "cameraUnavailable": "कैमरा उपलब्ध नहीं",
     "noMediaStream": "कोई मीडिया स्ट्रीम उपलब्ध नहीं",
     "failedToStartRecording": "रिकॉर्डिंग शुरू करने में विफल",
+    "recordingNotifyFailed": "दूसरे प्रतिभागी को रिकॉर्डिंग परिवर्तन की सूचना नहीं दी जा सकी",
     "failedToSaveNotes": "नोट्स सेव करने में विफल",
     "confirmComplete": "क्या यह परामर्श पूरा करना है? यह सत्र समाप्त करेगा और मरीज़ को सूचित करेगा।",
     "failedToComplete": "परामर्श पूरा करने में विफल",
@@ -4676,6 +4707,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5255,6 +5293,7 @@
     "verify": "सत्यापित करें",
     "unverify": "असत्यापित करें",
     "pendingDocReviews": "लंबित दस्तावेज़ समीक्षाएँ",
+    "pendingLoadFailed": "लंबित दस्तावेज़ समीक्षाएँ लोड करने में विफल",
     "noDocReviews": "कोई लंबित दस्तावेज़ समीक्षा नहीं",
     "reviewDocuments": "दस्तावेज़ों की समीक्षा करें",
     "verifyHospital": "अस्पताल सत्यापित करें",
@@ -5281,6 +5320,9 @@
     "checkInPatient": "रोगी चेक इन",
     "noPatients": "कतार में कोई रोगी नहीं",
     "unknownPatient": "अज्ञात रोगी",
+    "medicationDispensed": "दवा वितरित",
+    "medicationReady": "दवा वितरण के लिए तैयार",
+    "medicationPendingReview": "फार्मासिस्ट समीक्षा की प्रतीक्षा में दवा",
     "owner": "मालिक",
     "triage": "ट्राइएज",
     "startExam": "परीक्षा शुरू करें",
@@ -5729,7 +5771,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -5942,7 +5986,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "पशु चिकित्सा प्रमाणपत्र",
@@ -5977,6 +6049,7 @@
     "expired": "समाप्त",
     "failedToLoad": "प्रमाणपत्र लोड करने में विफल",
     "failedToPrint": "प्रिंटिंग के लिए प्रमाणपत्र लोड करने में विफल",
+    "failedToLoadEnterprises": "फ़िल्टरिंग के लिए एंटरप्राइज़ लोड करने में विफल",
     "certTypes": {
       "health_certificate": "सामान्य स्वास्थ्य प्रमाणपत्र",
       "fitness_to_travel": "यात्रा उपयुक्तता प्रमाणपत्र",
@@ -6023,6 +6096,7 @@
     "failedToSave": "प्रमाणपत्र सहेजने में विफल",
     "failedToIssue": "प्रमाणपत्र जारी करने में विफल",
     "failedToCreate": "प्रमाणपत्र बनाने में विफल",
+    "failedToLoadEnterprises": "एंटरप्राइज़ सूची लोड करने में विफल",
     "noCertTypeSelected": "कृपया प्रमाणपत्र प्रकार चुनें",
     "viewAllCertificates": "सभी प्रमाणपत्र देखें",
     "createAnother": "अन्य बनाएं",
@@ -6361,6 +6435,7 @@
     "create": "रेफरल बनाएं",
     "createTitle": "मरीज को नेटवर्क अस्पताल में रेफर करें",
     "createSubtitle": "इस मरीज को अपने नेटवर्क के किसी अन्य अस्पताल में भेजें",
+    "hospitalsLoadFailed": "नेटवर्क अस्पतालों की सूची लोड करने में विफल",
     "toHospital": "प्राप्तकर्ता अस्पताल *",
     "toVet": "प्राप्तकर्ता पशुचिकित्सक (वैकल्पिक)",
     "reason": "रेफर करने का कारण *",
@@ -6636,7 +6711,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "आपकी सहेजी गई सूचना प्राथमिकताएँ लोड नहीं हो सकीं — डिफ़ॉल्ट दिखाई जा रही हैं"
   },
   "emailTemplates": {
     "title": "ईमेल टेम्पलेट",
@@ -6705,6 +6781,7 @@
       "catalog": "Catalog",
       "history": "History",
       "reorders": "Reorders",
+      "transfers": "Transfers",
       "analytics": "Analytics"
     },
     "stats": {
@@ -6824,6 +6901,7 @@
     "reorder": {
       "title": "पुनर्ऑर्डर",
       "supplier": "आपूर्तिकर्ता",
+      "suppliersLoadFailed": "आपूर्तिकर्ता सूची लोड करने में विफल",
       "selectSupplier": "चुनें",
       "supplierRequired": "आपूर्तिकर्ता चुनें",
       "quantity": "मात्रा",
@@ -6981,6 +7059,44 @@
         "cancelled": "Cancelled"
       }
     },
+    "transfers": {
+      "title": "Inter-Hospital Medication Transfers",
+      "newRequest": "New Transfer Request",
+      "activeRequests": "Active Requests",
+      "requests": "requests",
+      "noActive": "No active transfer requests",
+      "empty": "No transfer history",
+      "route": "Route",
+      "requestedBy": "Requested By",
+      "sourceHospital": "From Hospital",
+      "destHospital": "To Hospital",
+      "selectHospital": "Select hospital",
+      "medications": "Medications",
+      "selectMedication": "Select medication",
+      "addLine": "Add Medication",
+      "submitRequest": "Submit Request",
+      "addTracking": "Add Tracking",
+      "decline": "Decline",
+      "declineReason": "Reason for declining",
+      "formIncomplete": "Select both hospitals and at least one medication line",
+      "sameHospital": "Source and destination hospitals must be different",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "preparing": "Preparing",
+        "shipped": "Shipped",
+        "received": "Received",
+        "fulfilled": "Fulfilled",
+        "declined": "Declined"
+      },
+      "advanceTo": {
+        "accepted": "Accept",
+        "preparing": "Mark Preparing",
+        "shipped": "Mark Shipped",
+        "received": "Mark Received",
+        "fulfilled": "Mark Fulfilled"
+      }
+    },
     "analytics": {
       "title": "Pharmacy Analytics",
       "days": "days",
@@ -7056,6 +7172,8 @@
     "receiptTitle": "भुगतान रसीद",
     "patient": "मरीज़",
     "doctor": "डॉक्टर",
+    "pharmacy": "फार्मेसी",
+    "medications": "दवाइयाँ",
     "animal": "पशु",
     "date": "तारीख",
     "totalPaid": "कुल भुगतान",
@@ -7140,6 +7258,7 @@
     "subtitle": "डॉक्टर-स्तरीय कमीशन ओवरराइड — खाली फ़ील्ड वैश्विक डिफ़ॉल्ट उपयोग करते हैं",
     "globalSettings": "वैश्विक डिफ़ॉल्ट",
     "globalInfo": "वैश्विक डिफ़ॉल्ट: {{percent}}% + {{flat}} फ्लैट शुल्क प्रति भुगतान बुकिंग। इसे सिस्टम सेटिंग्स में बदलें।",
+    "globalsLoadFailed": "मौजूदा वैश्विक कमीशन डिफ़ॉल्ट लोड करने में विफल — फ़ॉलबैक मान दिखाए जा रहे हैं",
     "saved": "ओवरराइड सहेजा गया। केवल नए भुगतानों पर लागू होगा — पुराने भुगतान अपना स्नैपशॉट रखते हैं।",
     "saveFailed": "ओवरराइड सहेजने में विफल।",
     "searchPlaceholder": "नाम या ईमेल से डॉक्टर खोजें…",
@@ -7275,6 +7394,9 @@
     "refundsOut": "रिफंड",
     "netRevenue": "शुद्ध प्लेटफ़ॉर्म राजस्व",
     "netRevenueHint": "कमीशन + प्रोसेसिंग शुल्क − गेटवे शुल्क",
+    "pharmacyRevenueTitle": "फार्मेसी राजस्व (चयनित अवधि)",
+    "pharmacyCollected": "फार्मेसी से प्राप्त राशि",
+    "pharmacyPending": "फार्मेसी लंबित भुगतान",
     "liabilitiesTitle": "देनदारियाँ (वर्तमान)",
     "doctorClearing": "डॉक्टर कमाई क्लियरिंग में",
     "doctorAvailable": "डॉक्टर कमाई उपलब्ध",
@@ -7289,5 +7411,103 @@
     "stuckPending": "अटके लंबित भुगतान",
     "stuckPendingHint": "1 घंटे से लंबित — दैनिक समाधान प्रयास",
     "openHolds": "खुले भुगतान होल्ड"
+  },
+  "animalClass": {
+    "fieldLabel": "वर्ग",
+    "selectClass": "वर्ग चुनें",
+    "anyClass": "कोई भी वर्ग",
+    "sire": "नर जनक (सायर)",
+    "dam": "मादा जनक (डैम)",
+    "selectSire": "नर जनक चुनें (वैकल्पिक)",
+    "selectDam": "मादा जनक चुनें (वैकल्पिक)",
+    "breedingStatus": "प्रजनन स्थिति",
+    "selectBreedingStatus": "स्थिति चुनें",
+    "notBred": "गर्भित नहीं हुई",
+    "pregnant": "गर्भवती",
+    "notPregnant": "गर्भवती नहीं",
+    "lastBreedingDate": "अंतिम प्रजनन तिथि",
+    "expectedDueDate": "प्रसव की संभावित तिथि",
+    "cattle_bull": "सांड",
+    "cattle_cow": "गाय",
+    "cattle_calf": "बछड़ा",
+    "cattle_bull_calf": "नर बछड़ा",
+    "cattle_heifer_calf": "मादा बछड़ा",
+    "cattle_heifer": "बछिया",
+    "cattle_bullock": "बैल",
+    "cattle_steer": "बधिया बैल (मांस हेतु)",
+    "buffalo_bull": "भैंसा",
+    "buffalo_cow": "भैंस",
+    "buffalo_calf": "भैंस का बछड़ा",
+    "buffalo_bull_calf": "नर भैंस बछड़ा",
+    "buffalo_heifer_calf": "मादा भैंस बछड़ा",
+    "buffalo_heifer": "भैंस बछिया",
+    "buffalo_bullock": "भैंसा बैल",
+    "sheep_ram": "मेढ़ा",
+    "sheep_ewe": "भेड़ी",
+    "sheep_lamb": "मेमना",
+    "sheep_ram_lamb": "नर मेमना",
+    "sheep_ewe_lamb": "मादा मेमना",
+    "sheep_wether": "बधिया मेढ़ा",
+    "goat_buck": "बकरा",
+    "goat_doe": "बकरी",
+    "goat_buckling": "नर बकरी बच्चा",
+    "goat_goatling": "मादा बकरी बच्चा",
+    "goat_kid": "मेमना (बकरी)",
+    "pig_boar": "सूअर (नर)",
+    "pig_sow": "सूअरी",
+    "pig_gilt": "युवा सूअरी",
+    "pig_barrow": "बधिया सूअर",
+    "dog_male": "कुत्ता",
+    "dog_bitch": "कुतिया",
+    "dog_pup": "पिल्ला",
+    "cat_tom": "नर बिल्ला",
+    "cat_queen": "मादा बिल्ली",
+    "cat_kitten": "बिल्ली का बच्चा",
+    "cat_neuter": "बधिया बिल्ली"
+  },
+  "masterData": {
+    "title": "मास्टर डेटा",
+    "subtitle": "प्रजाति, नस्ल, पशु वर्ग और मार्केटप्लेस ड्रॉपडाउन मान प्रबंधित करें — कोड डिप्लॉय की आवश्यकता नहीं।",
+    "tabs": {
+      "species": "प्रजाति",
+      "breeds": "नस्लें",
+      "classes": "पशु वर्ग",
+      "categories": "मार्केटप्लेस श्रेणियाँ",
+      "conditions": "मार्केटप्लेस स्थितियाँ"
+    },
+    "filterBySpecies": "प्रजाति",
+    "selectSpeciesPrompt": "— प्रजाति चुनें —",
+    "addNew": "नया जोड़ें",
+    "editEntry": "प्रविष्टि संपादित करें",
+    "reactivate": "पुनः सक्रिय करें",
+    "noEntries": "अभी कोई प्रविष्टि नहीं",
+    "protectedHint": "सुरक्षित — मुख्य लॉजिक इस कोड पर निर्भर है",
+    "labelKeyHint": "अंतर्निहित अनुवाद बनाए रखने के लिए खाली छोड़ें",
+    "confirmDelete": "इस प्रविष्टि को हटाएं? इसे पूर्ववत नहीं किया जा सकता।",
+    "deleteBlocked": "हटाया नहीं जा सका — यह अभी भी उपयोग में हो सकता है",
+    "updatedSuccess": "सफलतापूर्वक अपडेट किया गया",
+    "createdSuccess": "सफलतापूर्वक बनाया गया",
+    "archivedSuccess": "निष्क्रिय किया गया",
+    "restoredSuccess": "पुनः सक्रिय किया गया",
+    "deletedSuccess": "हटा दिया गया",
+    "errors": {
+      "speciesRequired": "पहले एक प्रजाति चुनें"
+    },
+    "gender": {
+      "unknown": "अज्ञात"
+    },
+    "col": {
+      "icon": "आइकन",
+      "code": "कोड",
+      "label": "लेबल",
+      "category": "श्रेणी",
+      "earTag": "ईयर टैग उपयोग करता है",
+      "sortOrder": "क्रम",
+      "value": "मान (आंतरिक कोड)",
+      "impliedGender": "निहित लिंग",
+      "canBePregnant": "गर्भवती हो सकती है",
+      "canProduceMilk": "दूध दे सकती है",
+      "marketplaceEligible": "मार्केटप्लेस पर बिक्री योग्य"
+    }
   }
 }

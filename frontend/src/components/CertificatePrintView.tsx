@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettings } from '../context/SettingsContext'
+import { useMasterData } from '../context/MasterDataContext'
 import './CertificatePrintView.css'
 
 // ─── Types ────────────────────────────────────────────────────
@@ -50,6 +51,7 @@ export interface CertificatePrintData {
   animalBreed?: string
   animalDob?: string
   animalGender?: string
+  animalClass?: string
   // Owner
   ownerFirstName?: string
   ownerLastName?: string
@@ -179,6 +181,7 @@ function VaccineTable({ details, t }: { details?: { vaccines?: VaccinationEntry[
 const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, onClose }) => {
   const { t } = useTranslation()
   const { formatDate } = useSettings()
+  const { findClassTerm } = useMasterData()
   const tpl = { ...DEFAULT_TEMPLATE, ...template }
   const overlayRef = useRef<HTMLDivElement>(null)
   const docRef = useRef<HTMLDivElement>(null)
@@ -367,7 +370,11 @@ const CertificatePrintView: React.FC<Props> = ({ certificate: cert, template, on
               <div className="cert-info-row">
                 <span className="cert-info-label">{t('certificatePrint.age')} / {t('certificatePrint.gender')}:</span>
                 <span className="cert-info-value">
-                  {[calcAge(cert.animalDob), cert.animalGender].filter(Boolean).join(' / ')}
+                  {(() => {
+                    const classTerm = cert.animalClass ? findClassTerm(cert.animalSpecies || '', cert.animalClass) : undefined
+                    const genderOrClass = classTerm ? t(classTerm.labelKey) : cert.animalGender
+                    return [calcAge(cert.animalDob), genderOrClass].filter(Boolean).join(' / ')
+                  })()}
                 </span>
               </div>
             )}

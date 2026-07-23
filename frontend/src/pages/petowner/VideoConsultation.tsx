@@ -434,7 +434,7 @@ setNewMessage(messageText) // restore message on failure
         mediaRecorderRef.current = recorder
         setIsRecording(true)
         if (session) {
-          apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => {})
+          apiService.sendVideoMessage(session.id, '🔴 Recording started').catch(() => setError(t('videoConsultation.recordingNotifyFailed')))
         }
       } catch (err) {
 setError(t('videoConsultation.failedToStartRecording'))
@@ -447,7 +447,7 @@ setError(t('videoConsultation.failedToStartRecording'))
       }
       setIsRecording(false)
       if (session) {
-        apiService.sendVideoMessage(session.id, '⏹️ Recording stopped').catch(() => {})
+        apiService.sendVideoMessage(session.id, '⏹️ Recording stopped').catch(() => setError(t('videoConsultation.recordingNotifyFailed')))
       }
     }
   }
@@ -548,15 +548,15 @@ setError(t('videoConsultation.failedToStartRecording'))
   if (session?.status === 'ended') {
     return (
       <div className="module-page">
-        <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>📹</div>
-          <h1 style={{ marginBottom: 8 }}>{t('videoConsultation.ended')}</h1>
-          <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 8 }}>
+        <div className="si-bd60beb2">
+          <div className="si-7615cf7c">📹</div>
+          <h1 className="si-dab75309">{t('videoConsultation.ended')}</h1>
+          <p className="si-712f4327">
             {t('videoConsultation.duration')}: {formatDuration(session.duration || callDuration)}
           </p>
           {(session.recordingUrl || recordingUrl) && (
-            <div style={{ marginTop: 20, marginBottom: 16 }}>
-              <p style={{ color: '#059669', fontSize: 14, marginBottom: 12 }}>
+            <div className="si-ef14b2c1">
+              <p className="si-c338391d">
                 🎬 {t('videoConsultation.recordingAvailable')}
               </p>
               {recordingUrl && (
@@ -564,25 +564,25 @@ setError(t('videoConsultation.failedToStartRecording'))
                   <video
                     src={recordingUrl}
                     controls
-                    style={{ maxWidth: 500, width: '100%', borderRadius: 8, marginBottom: 12 }}
+                    className="si-a7540650"
                   />
                   <br />
                   <a
                     href={recordingUrl}
                     download={`consultation-${conId}-${new Date().toISOString().slice(0,10)}.webm`}
-                    className="btn btn-outline"
-                    style={{ display: 'inline-block', textDecoration: 'none' }}
+                    className="btn btn-outline si-315b6ed5"
+                   
                   >
                     ⬇️ {t('videoConsultation.downloadRecording')}
                   </a>
                 </>
               )}
               {!recordingUrl && session.recordingUrl && (
-                <p style={{ color: '#6b7280', fontSize: 13 }}>{t('videoConsultation.recordingSaved')}</p>
+                <p className="si-c3b93ebb">{t('videoConsultation.recordingSaved')}</p>
               )}
             </div>
           )}
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 24 }}>
+          <div className="si-cf8b12ae">
             <button className="btn btn-primary" onClick={() => onNavigate('/consultations')}>
               {t('videoConsultation.viewConsultations')}
             </button>
@@ -592,13 +592,13 @@ setError(t('videoConsultation.failedToStartRecording'))
           </div>
           {/* Chat transcript */}
           {messages.length > 0 && (
-            <div style={{ maxWidth: 500, margin: '32px auto 0', textAlign: 'left' }}>
-              <h3 style={{ marginBottom: 12 }}>💬 {t('videoConsultation.chatTranscript')} ({messages.length} {t('videoConsultation.messages')})</h3>
-              <div style={{ background: '#f9fafb', borderRadius: 8, padding: 16, maxHeight: 300, overflow: 'auto' }}>
+            <div className="si-969bb5a5">
+              <h3 className="si-bab8e8bc">💬 {t('videoConsultation.chatTranscript')} ({messages.length} {t('videoConsultation.messages')})</h3>
+              <div className="si-cfed40cb">
                 {messages.map(msg => (
-                  <div key={msg.id} style={{ marginBottom: 8, fontSize: 13 }}>
+                  <div key={msg.id} className="si-4815af7f">
                     <strong>{msg.senderName}</strong>: {msg.message}
-                    <span style={{ color: '#9ca3af', marginLeft: 8, fontSize: 11 }}>
+                    <span className="si-a69da2c2">
                       {formatTime(msg.timestamp)}
                     </span>
                   </div>
@@ -608,20 +608,20 @@ setError(t('videoConsultation.failedToStartRecording'))
           )}
           {/* Prescriptions */}
           {prescriptions.length > 0 && (
-            <div style={{ maxWidth: 500, margin: '24px auto 0', textAlign: 'left' }}>
-              <h3 style={{ marginBottom: 12 }}>💊 {t('videoConsultation.prescriptions')} ({prescriptions.length})</h3>
+            <div className="si-8b56bd22">
+              <h3 className="si-bab8e8bc">💊 {t('videoConsultation.prescriptions')} ({prescriptions.length})</h3>
               {prescriptions.map((rx: any) => (
-                <div key={rx.id} style={{ background: '#f0fdf4', borderRadius: 8, padding: 16, marginBottom: 12, border: '1px solid #bbf7d0' }}>
+                <div key={rx.id} className="si-7731684c">
                   {Array.isArray(rx.medications) && rx.medications.map((med: any, mi: number) => (
                     <div key={mi} style={{ marginBottom: mi < rx.medications.length - 1 ? 8 : 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>💊 {med.name || t('videoConsultation.medication')}</div>
-                      {med.dosage && <p style={{ fontSize: 13, margin: '4px 0' }}><strong>{t('videoConsultation.dosage')}:</strong> {med.dosage}</p>}
-                      {med.frequency && <p style={{ fontSize: 13, margin: '4px 0' }}><strong>{t('videoConsultation.frequency')}:</strong> {med.frequency}</p>}
-                      {med.duration && <p style={{ fontSize: 13, margin: '4px 0' }}><strong>{t('videoConsultation.durationLabel')}:</strong> {med.duration}</p>}
+                      <div className="si-d1107ba4">💊 {med.name || t('videoConsultation.medication')}</div>
+                      {med.dosage && <p className="si-b04aa309"><strong>{t('videoConsultation.dosage')}:</strong> {med.dosage}</p>}
+                      {med.frequency && <p className="si-b04aa309"><strong>{t('videoConsultation.frequency')}:</strong> {med.frequency}</p>}
+                      {med.duration && <p className="si-b04aa309"><strong>{t('videoConsultation.durationLabel')}:</strong> {med.duration}</p>}
                     </div>
                   ))}
-                  {rx.instructions && <p style={{ fontSize: 13, margin: '8px 0 0' }}><strong>{t('videoConsultation.instructions')}:</strong> {rx.instructions}</p>}
-                  <p style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>{t('videoConsultation.validUntil')}: {rx.validUntil ? formatDate(rx.validUntil) : 'N/A'}</p>
+                  {rx.instructions && <p className="si-4bdc4082"><strong>{t('videoConsultation.instructions')}:</strong> {rx.instructions}</p>}
+                  <p className="si-3341a4cc">{t('videoConsultation.validUntil')}: {rx.validUntil ? formatDate(rx.validUntil) : 'N/A'}</p>
                 </div>
               ))}
             </div>
@@ -638,7 +638,7 @@ setError(t('videoConsultation.failedToStartRecording'))
           <h1>{t('videoConsultation.title')}</h1>
           <p className="page-subtitle">
             {session?.status === 'active' ? (
-              <span style={{ color: '#059669', fontWeight: 600 }}>
+              <span className="si-e5391e22">
                 🔴 {t('videoConsultation.live')} — {formatDuration(callDuration)}
               </span>
             ) : session?.status === 'waiting' ? (
@@ -650,7 +650,7 @@ setError(t('videoConsultation.failedToStartRecording'))
         </div>
         {session && (session.status as string) !== 'ended' && (
           <div className="page-header-actions">
-            <span className="badge badge-active" style={{ fontSize: 14, padding: '6px 14px' }}>
+            <span className="badge badge-active si-2cefa73a">
               {t('videoConsultation.room')}: {session.roomId}
             </span>
           </div>
@@ -658,17 +658,17 @@ setError(t('videoConsultation.failedToStartRecording'))
       </div>
 
       {error && (
-        <div style={{ padding: '12px 18px', background: '#fef2f2', color: '#dc2626', borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
+        <div className="si-131754ed">
           ⚠️ {error}
-          <button style={{ marginLeft: 12, background: 'none', border: '1px solid #dc2626', color: '#dc2626', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }} onClick={() => setError('')}>{t('videoConsultation.dismiss')}</button>
+          <button className="si-f8c15521" onClick={() => setError('')}>{t('videoConsultation.dismiss')}</button>
         </div>
       )}
 
       {!session ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>📹</div>
-          <h2 style={{ marginBottom: 8 }}>{t('videoConsultation.settingUp')}</h2>
-          <p style={{ color: '#6b7280', marginBottom: 24 }}>
+        <div className="si-9ae995d6">
+          <div className="si-7615cf7c">📹</div>
+          <h2 className="si-dab75309">{t('videoConsultation.settingUp')}</h2>
+          <p className="si-0490821b">
             {t('videoConsultation.connectingRoom')}
           </p>
           <div className="loading-spinner" />
@@ -697,16 +697,15 @@ setError(t('videoConsultation.failedToStartRecording'))
                     <div className="video-avatar">{user?.role === 'veterinarian' ? '🧑' : '👨‍⚕️'}</div>
                     <p>{connectionState === 'connecting' ? t('videoConsultation.connectingDoctor') : t('videoConsultation.waitingDoctorVideo')}</p>
                     {mediaMode === 'audio-only' && (
-                      <p style={{ fontSize: 13, color: '#fbbf24', marginTop: 8 }}>🎤 {t('videoConsultation.audioOnlyMode')}</p>
+                      <p className="si-8e438b3b">🎤 {t('videoConsultation.audioOnlyMode')}</p>
                     )}
                     {mediaMode === 'none' && (
-                      <p style={{ fontSize: 13, color: '#f87171', marginTop: 8 }}>💬 {t('videoConsultation.chatOnlyMode')}</p>
+                      <p className="si-ff8aeeff">💬 {t('videoConsultation.chatOnlyMode')}</p>
                     )}
                   </div>
                 )}
                 {isScreenSharing && (
-                  <div style={{ position: 'absolute', bottom: 70, left: 16, background: 'rgba(0,0,0,.75)',
-                    color: '#fff', padding: '4px 12px', borderRadius: 8, fontSize: 13, zIndex: 10 }}>
+                  <div className="si-1ded27be">
                     🖥️ {t('videoConsultation.screenSharingActive')}
                   </div>
                 )}
@@ -733,7 +732,7 @@ setError(t('videoConsultation.failedToStartRecording'))
             {/* Self view — real camera feed or status indicator */}
             <div className="video-self" style={isCameraOff || mediaMode !== 'video' ? {} : { padding: 0, overflow: 'hidden' }}>
               {isCameraOff || mediaMode !== 'video' ? (
-                <span style={{ textAlign: 'center', fontSize: 13 }}>
+                <span className="si-ecda976e">
                   {mediaMode === 'audio-only' ? t('videoConsultation.audioOnly') : mediaMode === 'none' ? t('videoConsultation.chatOnly') : t('videoConsultation.cameraOff')}
                 </span>
               ) : (
@@ -742,13 +741,7 @@ setError(t('videoConsultation.failedToStartRecording'))
                   autoPlay
                   playsInline
                   muted
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: 'inherit',
-                    transform: 'scaleX(-1)'
-                  }}
+                  className="si-cb5aeea0"
                 />
               )}
             </div>
@@ -796,7 +789,7 @@ setError(t('videoConsultation.failedToStartRecording'))
             )}
 
             {session.status === 'waiting' && (
-              <div className="video-controls" style={{ gap: 12 }}>
+              <div className="video-controls si-fdd5bef3">
                 <button className="btn btn-success btn-lg" onClick={handleStartSession}>
                   ▶ {t('videoConsultation.joinCall')}
                 </button>
@@ -804,8 +797,8 @@ setError(t('videoConsultation.failedToStartRecording'))
             )}
 
             {isRecording && (
-              <div style={{ position: 'absolute', top: 16, left: 16, display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(220,38,38,.9)', color: 'white', padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600 }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'white', display: 'inline-block', animation: 'pulse 1s infinite' }} />
+              <div className="si-fe782970">
+                <span className="si-00e70c6a" />
                 REC {formatDuration(callDuration)}
               </div>
             )}
@@ -821,9 +814,9 @@ setError(t('videoConsultation.failedToStartRecording'))
 
               <div className="chat-messages">
                 {messages.length === 0 && (
-                  <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
+                  <div className="si-4f4232ea">
                     <p>{t('videoConsultation.noMessages')}</p>
-                    <p style={{ fontSize: 13 }}>{t('videoConsultation.startConversation')}</p>
+                    <p className="si-0a803082">{t('videoConsultation.startConversation')}</p>
                   </div>
                 )}
                 {messages.map(msg => (
@@ -859,8 +852,8 @@ setError(t('videoConsultation.failedToStartRecording'))
 
           {!showChat && (
             <button
-              className="btn btn-outline"
-              style={{ position: 'fixed', bottom: 20, right: 20 }}
+              className="btn btn-outline si-b34d9cba"
+             
               onClick={() => setShowChat(true)}
             >
               💬 {t('videoConsultation.chat')}

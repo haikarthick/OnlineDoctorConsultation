@@ -285,7 +285,7 @@ const FeedInventory: React.FC = () => {
                             <button className="btn btn-sm" onClick={() => startEdit(f)}>{t('common.edit')}</button>
                             {restockId === f.id ? (
                               <span className="inline-form">
-                                <input type="number" step="0.01" placeholder="Qty" value={restockQty} onChange={e => setRestockQty(e.target.value)} style={{ width: 80 }} />
+                                <input type="number" step="0.01" placeholder="Qty" value={restockQty} onChange={e => setRestockQty(e.target.value)} className="si-a30c62ec" />
                                 <button className="btn btn-sm btn-success" onClick={handleRestock}>✓</button>
                                 <button className="btn btn-sm" onClick={() => setRestockId(null)}>✗</button>
                               </span>

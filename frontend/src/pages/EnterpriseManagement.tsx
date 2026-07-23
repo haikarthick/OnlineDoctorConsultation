@@ -238,10 +238,10 @@ const EnterpriseManagement: React.FC = () => {
 
       {/* Enterprise Map Overview */}
       {showMapOverview && (
-        <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 20 }}>
-          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-            <h3 style={{ margin: 0 }}>🗺️ Enterprise Locations</h3>
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+        <div className="si-a87c8813">
+          <div className="si-5214c8b8">
+            <h3 className="si-44087c4b">🗺️ Enterprise Locations</h3>
+            <p className="si-29492778">
               {enterprises.filter(e => e.gpsLatitude && e.gpsLongitude).length} of {enterprises.length} enterprises have GPS coordinates
             </p>
           </div>
@@ -256,9 +256,9 @@ const EnterpriseManagement: React.FC = () => {
               popup: (
                 <div>
                   <strong>{typeIcon(ent.enterpriseType)} {ent.name}</strong><br />
-                  <span style={{ fontSize: 12 }}>{ENTERPRISE_TYPE_LABELS[ent.enterpriseType] || ent.enterpriseType}</span><br />
-                  {ent.city && <span style={{ fontSize: 12 }}>{ent.city}{ent.state ? `, ${ent.state}` : ''}</span>}
-                  <div style={{ fontSize: 12, marginTop: 4 }}>
+                  <span className="si-756a9f21">{ENTERPRISE_TYPE_LABELS[ent.enterpriseType] || ent.enterpriseType}</span><br />
+                  {ent.city && <span className="si-756a9f21">{ent.city}{ent.state ? `, ${ent.state}` : ''}</span>}
+                  <div className="si-692258ce">
                     👥 {ent.memberCount || 0} members · 🐾 {ent.animalCount || 0} animals
                   </div>
                 </div>
@@ -269,9 +269,9 @@ const EnterpriseManagement: React.FC = () => {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+      <div className="si-dcfaac94">
         {/* Enterprise List */}
-        <div style={{ flex: '1', minWidth: '300px' }}>
+        <div className="si-03587c55">
           {loading ? (
             <div className="loading-spinner">{t('enterpriseManagement.loading')}</div>
           ) : filtered.length === 0 ? (
@@ -284,26 +284,26 @@ const EnterpriseManagement: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+            <div className="cards-grid si-243e7be2">
               {filtered.map(ent => (
                 <div key={ent.id}
                   className={`card ${selectedEnterprise?.id === ent.id ? 'card-selected' : ''}`}
                   style={{ cursor: 'pointer', border: selectedEnterprise?.id === ent.id ? '2px solid var(--primary)' : '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}
                   onClick={() => selectEnterprise(ent)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                    <span style={{ fontSize: '2rem' }}>{typeIcon(ent.enterpriseType)}</span>
+                  <div className="si-d2493201">
+                    <span className="si-fc27df36">{typeIcon(ent.enterpriseType)}</span>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{ent.name}</h3>
-                      <span className="badge" style={{ fontSize: '0.75rem' }}>{ENTERPRISE_TYPE_LABELS[ent.enterpriseType] || ent.enterpriseType}</span>
+                      <h3 className="si-2a119c30">{ent.name}</h3>
+                      <span className="badge si-8c23064b">{ENTERPRISE_TYPE_LABELS[ent.enterpriseType] || ent.enterpriseType}</span>
                     </div>
                   </div>
-                  {ent.address && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>📍 {ent.city ? `${ent.city}, ${ent.state || ''}` : ent.address}</p>}
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', fontSize: '0.85rem' }}>
+                  {ent.address && <p className="si-cf622af4">📍 {ent.city ? `${ent.city}, ${ent.state || ''}` : ent.address}</p>}
+                  <div className="si-53035512">
                     <span>👥 {ent.memberCount || 0} members</span>
                     <span>🐾 {ent.animalCount || 0} animals</span>
                   </div>
-                  <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                  <div className="si-3429dc13">
                     <button className="btn btn-sm btn-secondary" onClick={e => { e.stopPropagation(); openEdit(ent) }}>{t('common.edit')}</button>
                     {(isAdmin || ent.ownerId === user?.id) && (
                       <button className="btn btn-sm btn-danger" onClick={e => { e.stopPropagation(); handleDelete(ent.id) }}>{t('common.delete')}</button>
@@ -317,49 +317,49 @@ const EnterpriseManagement: React.FC = () => {
 
         {/* Stats Panel */}
         {selectedEnterprise && stats && (
-          <div style={{ width: '320px', background: 'var(--surface)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)', alignSelf: 'flex-start' }}>
-            <h3 style={{ margin: '0 0 1rem' }}>{selectedEnterprise.name} — Overview</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <div style={{ background: 'var(--background)', borderRadius: '8px', padding: '0.75rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.totalAnimals}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Animals</div>
+          <div className="si-78b34307">
+            <h3 className="si-7f683059">{selectedEnterprise.name} — Overview</h3>
+            <div className="si-b2577ace">
+              <div className="si-6e899795">
+                <div className="si-7729e24e">{stats.totalAnimals}</div>
+                <div className="si-93f5e4c5">Animals</div>
               </div>
-              <div style={{ background: 'var(--background)', borderRadius: '8px', padding: '0.75rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.totalGroups}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Groups</div>
+              <div className="si-6e899795">
+                <div className="si-7729e24e">{stats.totalGroups}</div>
+                <div className="si-93f5e4c5">Groups</div>
               </div>
-              <div style={{ background: 'var(--background)', borderRadius: '8px', padding: '0.75rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.totalLocations}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Locations</div>
+              <div className="si-6e899795">
+                <div className="si-7729e24e">{stats.totalLocations}</div>
+                <div className="si-93f5e4c5">Locations</div>
               </div>
-              <div style={{ background: 'var(--background)', borderRadius: '8px', padding: '0.75rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.totalMembers}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Members</div>
+              <div className="si-6e899795">
+                <div className="si-7729e24e">{stats.totalMembers}</div>
+                <div className="si-93f5e4c5">Members</div>
               </div>
             </div>
             {stats.animalsBySpecies.length > 0 && (
-              <div style={{ marginTop: '1rem' }}>
-                <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem' }}>Animals by Species</h4>
+              <div className="si-216c99b7">
+                <h4 className="si-305f3e0a">Animals by Species</h4>
                 {stats.animalsBySpecies.map(s => (
-                  <div key={s.species} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.25rem 0', fontSize: '0.85rem' }}>
+                  <div key={s.species} className="si-4721f179">
                     <span>{s.species}</span>
-                    <span style={{ fontWeight: 600 }}>{s.count}</span>
+                    <span className="si-b2cfcbec">{s.count}</span>
                   </div>
                 ))}
               </div>
             )}
             {selectedEnterprise.licenseNumber && (
-              <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <div className="si-c9622f6f">
                 📋 License: {selectedEnterprise.licenseNumber}
               </div>
             )}
             {selectedEnterprise.regulatoryId && (
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <div className="si-62bd76f7">
                 🏛️ Regulatory ID: {selectedEnterprise.regulatoryId}
               </div>
             )}
             {selectedEnterprise.gpsLatitude && selectedEnterprise.gpsLongitude && (
-              <div style={{ marginTop: '0.75rem', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <div className="si-1f1ebdcd">
                 <MapView
                   height={180}
                   center={[+(selectedEnterprise.gpsLatitude), +(selectedEnterprise.gpsLongitude)]}
@@ -379,31 +379,31 @@ const EnterpriseManagement: React.FC = () => {
 
         {/* Members Panel */}
         {selectedEnterprise && (
-          <div style={{ width: '320px', background: 'var(--surface)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)', alignSelf: 'flex-start' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem' }}>👥 {t('enterpriseManagement.tabs.members')}</h3>
+          <div className="si-78b34307">
+            <div className="si-c66b816b">
+              <h3 className="si-1b87764a">👥 {t('enterpriseManagement.tabs.members')}</h3>
               {(isAdmin || selectedEnterprise.ownerId === user?.id) && (
                 <button className="btn btn-sm btn-primary" onClick={() => { setShowInviteModal(true); setInviteError('') }}>+ Invite</button>
               )}
             </div>
             {membersLoading ? (
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Loading...</p>
+              <p className="si-62bd76f7">Loading...</p>
             ) : members.length === 0 ? (
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No members yet</p>
+              <p className="si-62bd76f7">No members yet</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div className="si-bbd60ea4">
                 {members.map(m => (
-                  <div key={m.userId} style={{ background: 'var(--background)', borderRadius: '8px', padding: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.userName || m.userEmail || m.userId.slice(0, 8)}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{m.userEmail}</div>
+                  <div key={m.userId} className="si-e162b4a6">
+                    <div className="si-26d7edc3">
+                      <div className="si-2d596e02">{m.userName || m.userEmail || m.userId.slice(0, 8)}</div>
+                      <div className="si-93f5e4c5">{m.userEmail}</div>
                     </div>
                     {m.role !== 'owner' && (isAdmin || selectedEnterprise.ownerId === user?.id) ? (
                       <>
                         <select
                           value={m.role}
                           disabled={updatingMemberId === m.userId}
-                          style={{ fontSize: '0.8rem', padding: '0.2rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--surface)' }}
+                          className="si-9c640ad7"
                           onChange={e => handleUpdateMemberRole(m.userId, e.target.value)}
                         >
                           <option value="manager">Manager</option>
@@ -412,10 +412,10 @@ const EnterpriseManagement: React.FC = () => {
                           <option value="worker">Worker</option>
                           <option value="viewer">Viewer</option>
                         </select>
-                        <button className="btn btn-sm btn-danger" style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }} onClick={() => handleRemoveMember(m.userId)}>✗</button>
+                        <button className="btn btn-sm btn-danger si-a517fcb0" onClick={() => handleRemoveMember(m.userId)}>✗</button>
                       </>
                     ) : (
-                      <span className="badge" style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem' }}>{m.role}</span>
+                      <span className="badge si-a517fcb0">{m.role}</span>
                     )}
                   </div>
                 ))}
@@ -428,15 +428,15 @@ const EnterpriseManagement: React.FC = () => {
       {/* Invite Member Modal */}
       {showInviteModal && <div className="edit-form-overlay" onClick={() => setShowInviteModal(false)} />}
       {showInviteModal && (
-        <div className="edit-form-panel" style={{ maxWidth: '420px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <h2 style={{ margin: 0 }}>Invite Member</h2>
+        <div className="edit-form-panel si-4b1b6758">
+          <div className="si-c66b816b">
+            <h2 className="si-44087c4b">Invite Member</h2>
             <button className="btn btn-sm btn-secondary" onClick={() => setShowInviteModal(false)}>✕</button>
           </div>
           <form onSubmit={handleInviteMember}>
-            {inviteError && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{inviteError}</div>}
+            {inviteError && <div className="alert alert-error si-1cb81cae">{inviteError}</div>}
             <div className="form-group">
-              <label>Email Address <span style={{ color: '#ef4444' }}>*</span></label>
+              <label>Email Address <span className="si-4fb20e94">*</span></label>
               <input
                 type="email" required
                 value={inviteEmail}
@@ -446,7 +446,7 @@ const EnterpriseManagement: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label>Role <span style={{ color: '#ef4444' }}>*</span></label>
+              <label>Role <span className="si-4fb20e94">*</span></label>
               <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} className="module-input">
                 <option value="manager">Manager</option>
                 <option value="supervisor">Supervisor</option>
@@ -455,9 +455,9 @@ const EnterpriseManagement: React.FC = () => {
                 <option value="viewer">Viewer</option>
               </select>
             </div>
-            {!inviteEmail && <p style={{ color: '#f59e0b', fontSize: '0.85rem', margin: '0 0 0.75rem' }}>⚠️ Enter a registered user's email to proceed</p>}
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>* Required field</p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+            {!inviteEmail && <p className="si-6ea836c5">⚠️ Enter a registered user's email to proceed</p>}
+            <p className="si-5047a40e">* Required field</p>
+            <div className="si-7a8f2044">
               <button type="button" className="btn btn-secondary" onClick={() => setShowInviteModal(false)}>Cancel</button>
               <button type="submit" className="btn btn-primary" disabled={!inviteEmail || inviteLoading}>
                 {inviteLoading ? '⏳ Inviting...' : '+ Invite Member'}
@@ -475,8 +475,8 @@ const EnterpriseManagement: React.FC = () => {
             <form onSubmit={handleSubmit}>
               {error && <div className="alert alert-error">{error}</div>}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <div className="si-ec24da01">
+                <div className="form-group si-06af062a">
                   <label>Enterprise Name *</label>
                   <input type="text" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} required />
                 </div>
@@ -496,12 +496,12 @@ const EnterpriseManagement: React.FC = () => {
                   <input type="tel" value={formData.phone} onChange={e => setFormData(f => ({ ...f, phone: e.target.value }))} />
                 </div>
 
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <div className="form-group si-06af062a">
                   <label>Description</label>
                   <textarea rows={2} value={formData.description} onChange={e => setFormData(f => ({ ...f, description: e.target.value }))} />
                 </div>
 
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <div className="form-group si-06af062a">
                   <label>Address</label>
                   <input type="text" value={formData.address} onChange={e => setFormData(f => ({ ...f, address: e.target.value }))} />
                 </div>
@@ -528,9 +528,9 @@ const EnterpriseManagement: React.FC = () => {
 
                 <div className="form-group">
                   <label>Total Area</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input type="number" step="0.01" value={formData.totalArea} onChange={e => setFormData(f => ({ ...f, totalArea: e.target.value }))} style={{ flex: 1 }} />
-                    <select value={formData.areaUnit} onChange={e => setFormData(f => ({ ...f, areaUnit: e.target.value }))} style={{ width: '100px' }}>
+                  <div className="si-6fdaaf49">
+                    <input type="number" step="0.01" value={formData.totalArea} onChange={e => setFormData(f => ({ ...f, totalArea: e.target.value }))} className="si-6acd75e8" />
+                    <select value={formData.areaUnit} onChange={e => setFormData(f => ({ ...f, areaUnit: e.target.value }))} className="si-fccc6ec7">
                       <option value="acres">Acres</option>
                       <option value="hectares">Hectares</option>
                       <option value="sqft">Sq Ft</option>
@@ -573,9 +573,9 @@ const EnterpriseManagement: React.FC = () => {
                   <input type="number" step="0.000001" placeholder="Click map below" value={formData.gpsLongitude} onChange={e => setFormData(f => ({ ...f, gpsLongitude: e.target.value }))} />
                 </div>
 
-                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <div className="form-group si-06af062a">
                   <label>📍 Set Location on Map</label>
-                  <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                  <div className="si-acec1d66">
                     <MapView
                       height={200}
                       markers={formData.gpsLatitude && formData.gpsLongitude ? [{
@@ -594,7 +594,7 @@ const EnterpriseManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
+              <div className="si-9a4d96fa">
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowForm(false); resetForm() }}>{t('common.cancel')}</button>
                 <button type="submit" className="btn btn-primary">{editingEnterprise ? 'Update' : 'Create'} Enterprise</button>
               </div>

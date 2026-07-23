@@ -62,7 +62,10 @@ describe('StaffWorkflowService', () => {
   describe('checkInToQueue', () => {
     it('should check in a patient to the queue', async () => {
       const entry = { id: 'q1', hospital_id: 'h1', animal_id: 'a1' };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [entry] });
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [] })                 // duplicate check — none found
+        .mockResolvedValueOnce({ rows: [{ next_num: 1 }] })  // next queue number
+        .mockResolvedValueOnce({ rows: [entry] });           // INSERT
       const result = await staffWorkflowService.checkInToQueue({ hospitalId: 'h1', animalId: 'a1', ownerId: 'o1', reason: 'Checkup' });
       expect(result).toEqual(entry);
     });
@@ -187,7 +190,9 @@ describe('StaffWorkflowService', () => {
   describe('admitPatient', () => {
     it('should admit a patient', async () => {
       const admission = { id: 'adm1', hospital_id: 'h1', animal_id: 'a1' };
-      (database.query as jest.Mock).mockResolvedValue({ rows: [admission] });
+      (database.query as jest.Mock)
+        .mockResolvedValueOnce({ rows: [] })          // duplicate admission check — none found
+        .mockResolvedValueOnce({ rows: [admission] }); // INSERT
       const result = await staffWorkflowService.admitPatient({ hospitalId: 'h1', animalId: 'a1', ownerId: 'o1', admittedBy: 'u1', admissionType: 'emergency' });
       expect(result).toEqual(admission);
     });

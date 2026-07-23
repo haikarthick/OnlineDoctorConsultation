@@ -82,6 +82,8 @@
     "view": "View",
     "remove": "Remove",
     "apply": "Apply",
+    "copied": "പകർത്തി!",
+    "copyFailed": "ക്ലിപ്പ്ബോർഡിലേക്ക് പകർത്താൻ കഴിഞ്ഞില്ല",
     "failedToLoad": "Failed to load data",
     "failedToSave": "Failed to save",
     "failedToDelete": "Failed to delete",
@@ -101,7 +103,8 @@
     "fillRequired": "Please fill all required fields",
     "none": "None",
     "error": "Error",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "previous": "മുമ്പത്തെ"
   },
   "nav": {
     "brand": "VetCare",
@@ -202,7 +205,8 @@
     "commissionSettings": "കമ്മീഷൻ നിയമങ്ങൾ",
     "settlements": "സെറ്റിൽമെന്റുകൾ",
     "referrals": "റഫറലുകൾ",
-    "financeReports": "ഫിനാൻസ് റിപ്പോർട്ടുകൾ"
+    "financeReports": "ഫിനാൻസ് റിപ്പോർട്ടുകൾ",
+    "masterData": "മാസ്റ്റർ ഡാറ്റ"
   },
   "login": {
     "welcome": "തിരികെ സ്വാഗതം",
@@ -867,7 +871,10 @@
       "todayQueue": "Today's Queue",
       "activeInpatients": "Active Inpatients",
       "pendingReferrals": "Pending Referrals",
-      "branchStaff": "Branch Staff"
+      "branchStaff": "Branch Staff",
+      "rxPendingReview": "ഫാർമസിസ്റ്റ് അവലോകനത്തിനായി കാത്തിരിക്കുന്ന കുറിപ്പടികൾ",
+      "rxRejectedThisWeek": "ഈ ആഴ്ച നിരസിച്ച കുറിപ്പടികൾ",
+      "rxDispensed": "വിതരണം ചെയ്ത കുറിപ്പടികൾ"
     },
     "quickActions": {
       "viewConsultations": "കൺസൾട്ടേഷനുകൾ കാണുക",
@@ -1269,7 +1276,8 @@
       "confirmRemove": "ഈ മൃഗത്തെ നീക്കം ചെയ്യണമെന്ന് ഉറപ്പാണോ?",
       "removed": "മൃഗം വിജയകരമായി നീക്കം ചെയ്തു",
       "failedSave": "മൃഗത്തെ സേവ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു",
-      "failedRemove": "മൃഗത്തെ നീക്കം ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു"
+      "failedRemove": "മൃഗത്തെ നീക്കം ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു",
+      "failedLoadEnterprises": "നിങ്ങളുടെ എന്റർപ്രൈസ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല"
     },
     "pageTitle": "എന്റെ മൃഗങ്ങൾ",
     "loading": "മൃഗങ്ങൾ ലോഡ് ചെയ്യുന്നു...",
@@ -1513,7 +1521,15 @@
       "validUntil": "ഇത് വരെ സാധുവാണ്:",
       "active": "സജീവം",
       "expired": "കാലഹരണപ്പെട്ടു",
-      "addButton": "Write Prescription"
+      "addButton": "Write Prescription",
+      "networkPharmacy": "നെറ്റ്‌വർക്ക് ഫാർമസി",
+      "dispensedOn": "{{date}} ന് വിതരണം ചെയ്തു",
+      "reviewStatus": {
+        "pending_review": "ഫാർമസിസ്റ്റ് അവലോകനത്തിനായി കാത്തിരിക്കുന്നു",
+        "approved_for_dispensing": "അംഗീകരിച്ചു — വിതരണത്തിനായി കാത്തിരിക്കുന്നു",
+        "rejected": "ഫാർമസിസ്റ്റ് നിരസിച്ചു",
+        "needs_clarification": "ഫാർമസിസ്റ്റ് വിശദീകരണം ആവശ്യപ്പെട്ടു"
+      }
     },
     "vaccinationsTab": {
       "addButton": "+ വാക്‌സിനേഷൻ ചേർക്കുക",
@@ -2920,6 +2936,12 @@
   "marketplace": {
     "pageTitle": "🏪 വാങ്ങൽ-വിൽപ്പന മാർക്കറ്റ്",
     "subtitle": "മൃഗങ്ങളെ വാങ്ങുകയും വിൽക്കുകയും ചെയ്യുക — ഉപകരണങ്ങളും വെറ്ററിനറി സാമഗ്രികളും ബ്രൗസ് ചെയ്യുക",
+    "errors": {
+      "dashboardLoadFailed": "നിങ്ങളുടെ ഡാഷ്‌ബോർഡ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
+      "favoritesLoadFailed": "നിങ്ങളുടെ പ്രിയപ്പെട്ടവ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
+      "adminDataLoadFailed": "അഡ്മിൻ ലിസ്റ്റിംഗുകളും സ്ഥിതിവിവരക്കണക്കുകളും ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
+      "monetizationLoadFailed": "മോണിറ്റൈസേഷൻ ക്രമീകരണങ്ങൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല"
+    },
     "tabs": {
       "dashboard": "📊 ഡാഷ്‌ബോർഡ്",
       "browse": "🐾 ബ്രൗസ് ചെയ്യുക",
@@ -3094,7 +3116,7 @@
       "autoPopulated": "മൃഗ വിശദാംശങ്ങൾ ഓട്ടോ-ഫിൽ ചെയ്തു!",
       "fieldsAutoFilled": "നിങ്ങളുടെ മൃഗത്തിന്റെ പ്രൊഫൈലിൽ നിന്ന് ഫീൽഡുകൾ ഓട്ടോ-ഫിൽ ചെയ്തു. താഴെയുള്ള ഏതെങ്കിലും ഫീൽഡ് നിങ്ങൾക്ക് എഡിറ്റ് ചെയ്യാം.",
       "imagesTitle": "ലിസ്റ്റിംഗ് ചിത്രങ്ങൾ",
-      "imagesLabel": "5 ചിത്രങ്ങൾ വരെ അപ്‌ലോഡ് ചെയ്യുക",
+      "imagesLabel": "{{count}} ചിത്രങ്ങൾ വരെ അപ്‌ലോഡ് ചെയ്യുക",
       "uploading": "അപ്‌ലോഡ് ചെയ്യുന്നു...",
       "uploadFailed": "ചിത്ര അപ്‌ലോഡ് പരാജയപ്പെട്ടു",
       "selectBreed": "ഇനം തിരഞ്ഞെടുക്കുക",
@@ -3113,7 +3135,12 @@
       "videoAdded": "വീഡിയോ ചേർത്തു",
       "removeVideo": "വീഡിയോ നീക്കുക",
       "videoUploaded": "വീഡിയോ അപ്‌ലോഡ് ചെയ്തു",
-      "videoHint": "ഒരു ചെറിയ വീഡിയോ വിശ്വാസം വളർത്തുകയും കൂടുതൽ പ്രതികരണങ്ങൾ നേടുകയും ചെയ്യുന്നു."
+      "videoHint": "ഒരു ചെറിയ വീഡിയോ വിശ്വാസം വളർത്തുകയും കൂടുതൽ പ്രതികരണങ്ങൾ നേടുകയും ചെയ്യുന്നു.",
+      "imageTooLarge": "ചിത്രം വളരെ വലുതാണ് — പരമാവധി {{maxMb}}MB",
+      "videoTooLarge": "വീഡിയോ വളരെ വലുതാണ് — പരമാവധി {{maxMb}}MB",
+      "videoTooLong": "വീഡിയോ വളരെ ദൈർഘ്യമേറിയതാണ് — പരമാവധി {{maxSec}} സെക്കൻഡ്",
+      "uploadingVideo": "വീഡിയോ അപ്‌ലോഡ് ചെയ്യുന്നു...",
+      "videoLimits": "പരമാവധി {{maxSec}} സെക്കൻഡ്, {{maxMb}}MB വരെ"
     },
     "detail": {
       "backToListings": "← ലിസ്റ്റിംഗുകളിലേക്ക് മടങ്ങുക",
@@ -3654,6 +3681,7 @@
     "loadTrail": "പാത ലോഡ് ചെയ്യുക",
     "zoneCreated": "Geofence zone created successfully",
     "eventRecorded": "Geospatial event recorded successfully",
+    "enterprisesLoadFailed": "Failed to load your enterprises list",
     "chooseEnterprise": "Choose an enterprise...",
     "liveZoneEventMap": "Live Zone & Event Map",
     "zone": "Zone",
@@ -3825,7 +3853,8 @@
     "next": "അടുത്തത്",
     "certificateFilter": "Certificate Services",
     "allCertificates": "All Certificate Types",
-    "failedToLoad": "Failed to load veterinarians. Please try again."
+    "failedToLoad": "Failed to load veterinarians. Please try again.",
+    "filterOptionsLoadFailed": "ഫിൽട്ടർ ഓപ്ഷനുകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല (സ്പെഷ്യലൈസേഷനുകൾ/ഭാഷകൾ)"
   },
   "myBookings": {
     "title": "എന്റെ ബുക്കിങ്ങുകൾ",
@@ -3961,6 +3990,7 @@
     "failedToSendMessage": "Failed to send message",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "റെക്കോർഡിംഗ് മാറ്റത്തെക്കുറിച്ച് മറ്റ് പങ്കാളിയെ അറിയിക്കാൻ കഴിഞ്ഞില്ല",
     "micUnavailable": "Microphone unavailable",
     "cameraStillUnavailable": "Camera still unavailable",
     "duration": "Duration",
@@ -4273,6 +4303,7 @@
     "cameraUnavailable": "Camera unavailable",
     "noMediaStream": "No media stream available",
     "failedToStartRecording": "Failed to start recording",
+    "recordingNotifyFailed": "റെക്കോർഡിംഗ് മാറ്റത്തെക്കുറിച്ച് മറ്റ് പങ്കാളിയെ അറിയിക്കാൻ കഴിഞ്ഞില്ല",
     "failedToSaveNotes": "Failed to save notes",
     "confirmComplete": "Complete this consultation? This will end the session and notify the patient.",
     "failedToComplete": "Failed to complete consultation",
@@ -4438,6 +4469,13 @@
     "topEarningVets": "Top Earning Vets",
     "dailyRevenue": "Daily Revenue",
     "totalTransactions": "Total Transactions",
+    "pharmacyActivity": "Pharmacy Activity (all networks)",
+    "dispensingToday": "Dispensed Today",
+    "dispensingThisWeek": "Dispensed This Week",
+    "pendingReviewsAllNetworks": "Pending Reviews",
+    "lowStockItems": "Low Stock Items",
+    "networks": "networks",
+    "pharmacyRevenueThisWeek": "Pharmacy Revenue (7d)",
     "refundsIssued": "Refunds Issued",
     "liveVideoSessions": "Live Video Sessions",
     "totalBookings": "Total Bookings"
@@ -5017,6 +5055,7 @@
     "verify": "പരിശോധിക്കുക",
     "unverify": "പരിശോധന റദ്ദാക്കുക",
     "pendingDocReviews": "തീർപ്പുകാത്തിരിക്കുന്ന രേഖ അവലോകനങ്ങൾ",
+    "pendingLoadFailed": "തീർപ്പുകാത്തിരിക്കുന്ന രേഖ അവലോകനങ്ങൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
     "noDocReviews": "തീർപ്പുകാത്തിരിക്കുന്ന രേഖ അവലോകനങ്ങളില്ല",
     "reviewDocuments": "രേഖകൾ അവലോകനം ചെയ്യുക",
     "verifyHospital": "ആശുപത്രി പരിശോധിക്കുക",
@@ -5043,6 +5082,9 @@
     "checkInPatient": "രോഗിയെ ചെക്ക് ഇൻ ചെയ്യുക",
     "noPatients": "ക്യൂവിൽ രോഗികളില്ല",
     "unknownPatient": "അജ്ഞാത രോഗി",
+    "medicationDispensed": "മരുന്ന് വിതരണം ചെയ്തു",
+    "medicationReady": "മരുന്ന് വിതരണത്തിന് തയ്യാർ",
+    "medicationPendingReview": "മരുന്ന് ഫാർമസിസ്റ്റ് അവലോകനത്തിനായി കാത്തിരിക്കുന്നു",
     "owner": "ഉടമ",
     "triage": "ട്രയാജ്",
     "startExam": "പരിശോധന ആരംഭിക്കുക",
@@ -5382,7 +5424,8 @@
     "dailyDigest": "Daily Operations Digest",
     "dailyDigestDesc": "Receive a daily summary of patient and referral activity",
     "emailNotifications": "Email Notifications",
-    "preferenceSaved": "Notification preferences saved"
+    "preferenceSaved": "Notification preferences saved",
+    "loadFailed": "നിങ്ങളുടെ സേവ് ചെയ്ത അറിയിപ്പ് മുൻഗണനകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല — ഡിഫോൾട്ടുകൾ കാണിക്കുന്നു"
   },
   "hospitalNetworks": {
     "title": "Hospital Networks",
@@ -5665,6 +5708,7 @@
       "catalog": "Catalog",
       "history": "History",
       "reorders": "Reorders",
+      "transfers": "Transfers",
       "analytics": "Analytics"
     },
     "stats": {
@@ -5784,6 +5828,7 @@
     "reorder": {
       "title": "Reorder",
       "supplier": "Supplier",
+      "suppliersLoadFailed": "വിതരണക്കാരുടെ ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
       "selectSupplier": "Select supplier",
       "supplierRequired": "Select a supplier",
       "quantity": "Qty",
@@ -5939,6 +5984,44 @@
         "shipped": "Shipped",
         "received": "Received",
         "cancelled": "Cancelled"
+      }
+    },
+    "transfers": {
+      "title": "Inter-Hospital Medication Transfers",
+      "newRequest": "New Transfer Request",
+      "activeRequests": "Active Requests",
+      "requests": "requests",
+      "noActive": "No active transfer requests",
+      "empty": "No transfer history",
+      "route": "Route",
+      "requestedBy": "Requested By",
+      "sourceHospital": "From Hospital",
+      "destHospital": "To Hospital",
+      "selectHospital": "Select hospital",
+      "medications": "Medications",
+      "selectMedication": "Select medication",
+      "addLine": "Add Medication",
+      "submitRequest": "Submit Request",
+      "addTracking": "Add Tracking",
+      "decline": "Decline",
+      "declineReason": "Reason for declining",
+      "formIncomplete": "Select both hospitals and at least one medication line",
+      "sameHospital": "Source and destination hospitals must be different",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "preparing": "Preparing",
+        "shipped": "Shipped",
+        "received": "Received",
+        "fulfilled": "Fulfilled",
+        "declined": "Declined"
+      },
+      "advanceTo": {
+        "accepted": "Accept",
+        "preparing": "Mark Preparing",
+        "shipped": "Mark Shipped",
+        "received": "Mark Received",
+        "fulfilled": "Mark Fulfilled"
       }
     },
     "analytics": {
@@ -6401,7 +6484,9 @@
       "deleteDeptFailed": "Failed to delete department",
       "deleteServiceFailed": "Failed to delete service",
       "updateFailed": "Update failed",
-      "inviteFailed": "Failed to send invite"
+      "inviteFailed": "Failed to send invite",
+      "invitesLoadFailed": "Failed to load doctor invites",
+      "revokeInviteFailed": "Failed to revoke invite"
     },
     "confirmRemoveDoctor": "Remove {{name}}?",
     "confirmDeleteDept": "Delete department \"{{name}}\"?",
@@ -6614,7 +6699,35 @@
     "validUntil": "Valid Until",
     "noExpiry": "No expiry date",
     "rxRef": "Rx Ref",
+    "generated": "Generated",
+    "pharmacyRouting": "Pharmacy Routing",
+    "forwardedTo": "Forwarded to: {{pharmacy}}",
+    "networkPharmacy": "network pharmacy"
+  },
+  "pharmacyReceipt": {
+    "previewTitle": "Dispensing Receipt Preview",
+    "print": "Print Receipt",
+    "pharmacy": "Pharmacy",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "patient": "Patient",
+    "owner": "Owner",
+    "vet": "Prescribing Vet",
+    "method": "Method",
+    "colMedication": "Medication",
+    "colQty": "Qty",
+    "colUnitPrice": "Unit Price",
+    "colTotal": "Total",
+    "total": "Total",
+    "dispensedBy": "Dispensed by",
     "generated": "Generated"
+  },
+  "medicationLabel": {
+    "previewTitle": "Medication Label Preview",
+    "printAll": "Print Labels",
+    "printLabels": "Print Labels",
+    "owner": "Owner",
+    "quantity": "Qty"
   },
   "vetCertificates": {
     "title": "Veterinary Certificates",
@@ -6649,6 +6762,7 @@
     "expired": "Expired",
     "failedToLoad": "Failed to load certificates",
     "failedToPrint": "Failed to load certificate for printing",
+    "failedToLoadEnterprises": "ഫിൽട്ടറിംഗിനായി എന്റർപ്രൈസുകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
     "certTypes": {
       "health_certificate": "General Health Certificate",
       "fitness_to_travel": "Fitness to Travel Certificate",
@@ -6696,6 +6810,7 @@
     "failedToSave": "Failed to save certificate",
     "failedToIssue": "Failed to issue certificate",
     "failedToCreate": "Failed to create certificate",
+    "failedToLoadEnterprises": "എന്റർപ്രൈസ് ലിസ്റ്റ് ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല",
     "noCertTypeSelected": "Please select a certificate type",
     "viewAllCertificates": "View All Certificates",
     "createAnother": "Create Another",
@@ -6826,6 +6941,7 @@
     "clinicalNotes": "Clinical Notes (optional)",
     "clinicalNotesPlaceholder": "Include relevant history, current condition, and what you need from the receiving hospital...",
     "reasonPlaceholder": "e.g., Specialist consultation needed, surgical intervention required...",
+    "hospitalsLoadFailed": "Failed to load network hospitals list",
     "selectHospital": "— Select hospital —",
     "selectVet": "— Select vet (optional) —",
     "sending": "Sending Referral...",
@@ -7052,6 +7168,8 @@
     "receiptTitle": "പേയ്മെന്റ് രസീത്",
     "patient": "രോഗി",
     "doctor": "ഡോക്ടർ",
+    "pharmacy": "ഫാർമസി",
+    "medications": "മരുന്നുകൾ",
     "animal": "മൃഗം",
     "date": "തീയതി",
     "totalPaid": "ആകെ അടച്ചത്",
@@ -7136,6 +7254,7 @@
     "subtitle": "ഡോക്ടർതല കമ്മീഷൻ ഓവർറൈഡുകൾ — ശൂന്യമായ ഫീൽഡുകൾ ഗ്ലോബൽ ഡിഫോൾട്ട് ഉപയോഗിക്കുന്നു",
     "globalSettings": "ഗ്ലോബൽ ഡിഫോൾട്ടുകൾ",
     "globalInfo": "ഗ്ലോബൽ ഡിഫോൾട്ട്: {{percent}}% + ഓരോ പെയ്ഡ് ബുക്കിംഗിനും {{flat}} ഫ്ലാറ്റ് ഫീസ്. System Settings ൽ മാറ്റുക.",
+    "globalsLoadFailed": "നിലവിലെ ഗ്ലോബൽ കമ്മീഷൻ ഡിഫോൾട്ടുകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല — ഫാൾബാക്ക് മൂല്യങ്ങൾ കാണിക്കുന്നു",
     "saved": "ഓവർറൈഡ് സേവ് ചെയ്തു. പുതിയ പേയ്മെന്റുകൾക്ക് മാത്രം ബാധകം.",
     "saveFailed": "ഓവർറൈഡ് സേവ് ചെയ്യാനായില്ല.",
     "searchPlaceholder": "പേര് അല്ലെങ്കിൽ ഇമെയിൽ ഉപയോഗിച്ച് ഡോക്ടറെ തിരയുക…",
@@ -7271,6 +7390,9 @@
     "refundsOut": "റീഫണ്ടുകൾ",
     "netRevenue": "അറ്റ പ്ലാറ്റ്ഫോം വരുമാനം",
     "netRevenueHint": "കമ്മീഷൻ + പ്രോസസ്സിംഗ് − ഗേറ്റ്‌വേ ഫീസ്",
+    "pharmacyRevenueTitle": "ഫാർമസി വരുമാനം (തിരഞ്ഞെടുത്ത കാലയളവ്)",
+    "pharmacyCollected": "ഫാർമസി ലഭിച്ചത്",
+    "pharmacyPending": "ഫാർമസി തീർപ്പാക്കാത്ത പണമടയ്ക്കൽ",
     "liabilitiesTitle": "ബാധ്യതകൾ (നിലവിൽ)",
     "doctorClearing": "ഡോക്ടർ വരുമാനം ക്ലിയറിംഗിൽ",
     "doctorAvailable": "ഡോക്ടർ വരുമാനം ലഭ്യം",
@@ -7285,5 +7407,103 @@
     "stuckPending": "കുടുങ്ങിയ പെൻഡിംഗ് പേയ്മെന്റുകൾ",
     "stuckPendingHint": "1 മണിക്കൂറിലധികം — ദിവസേന പൊരുത്തപ്പെടുത്തൽ ശ്രമം",
     "openHolds": "തുറന്ന പേയ്മെന്റ് ഹോൾഡുകൾ"
+  },
+  "animalClass": {
+    "fieldLabel": "വർഗ്ഗം",
+    "selectClass": "വർഗ്ഗം തിരഞ്ഞെടുക്കുക",
+    "anyClass": "ഏത് വർഗ്ഗവും",
+    "sire": "അച്ഛൻ മൃഗം (സയർ)",
+    "dam": "അമ്മ മൃഗം (ഡാം)",
+    "selectSire": "അച്ഛൻ മൃഗത്തെ തിരഞ്ഞെടുക്കുക (ഐച്ഛികം)",
+    "selectDam": "അമ്മ മൃഗത്തെ തിരഞ്ഞെടുക്കുക (ഐച്ഛികം)",
+    "breedingStatus": "പ്രജനന നില",
+    "selectBreedingStatus": "നില തിരഞ്ഞെടുക്കുക",
+    "notBred": "പ്രജനനം നടത്തിയിട്ടില്ല",
+    "pregnant": "ഗർഭിണി",
+    "notPregnant": "ഗർഭിണിയല്ല",
+    "lastBreedingDate": "അവസാന പ്രജനന തീയതി",
+    "expectedDueDate": "പ്രതീക്ഷിക്കുന്ന പ്രസവ തീയതി",
+    "cattle_bull": "കാള",
+    "cattle_cow": "പശു",
+    "cattle_calf": "കിടാവ്",
+    "cattle_bull_calf": "ആൺ കിടാവ്",
+    "cattle_heifer_calf": "പെൺ കിടാവ്",
+    "cattle_heifer": "പശുക്കുട്ടി (പ്രായപൂർത്തി)",
+    "cattle_bullock": "കാളവണ്ടിക്കാള",
+    "cattle_steer": "ഷണ്ഡീകരിച്ച കാള (മാംസത്തിന്)",
+    "buffalo_bull": "എരുമ കാള",
+    "buffalo_cow": "എരുമ",
+    "buffalo_calf": "എരുമക്കുട്ടി",
+    "buffalo_bull_calf": "ആൺ എരുമക്കുട്ടി",
+    "buffalo_heifer_calf": "പെൺ എരുമക്കുട്ടി",
+    "buffalo_heifer": "ഇളം എരുമ",
+    "buffalo_bullock": "എരുമ കാളവണ്ടിക്കാള",
+    "sheep_ram": "ചെമ്മരിയാട് മുട്ടൻ",
+    "sheep_ewe": "ചെമ്മരിയാട്",
+    "sheep_lamb": "കുഞ്ഞാട്",
+    "sheep_ram_lamb": "ആൺ കുഞ്ഞാട്",
+    "sheep_ewe_lamb": "പെൺ കുഞ്ഞാട്",
+    "sheep_wether": "ഷണ്ഡീകരിച്ച മുട്ടൻ ആട്",
+    "goat_buck": "ആട്ടുകൊറ്റൻ",
+    "goat_doe": "ആട്",
+    "goat_buckling": "ആൺ ആട്ടിൻകുട്ടി",
+    "goat_goatling": "പെൺ ആട്ടിൻകുട്ടി",
+    "goat_kid": "ആട്ടിൻകുട്ടി",
+    "pig_boar": "ആൺ പന്നി",
+    "pig_sow": "പെൺ പന്നി",
+    "pig_gilt": "ഇളം പെൺ പന്നി",
+    "pig_barrow": "ഷണ്ഡീകരിച്ച പന്നി",
+    "dog_male": "നായ",
+    "dog_bitch": "പെൺ നായ",
+    "dog_pup": "നായ്ക്കുട്ടി",
+    "cat_tom": "ആൺ പൂച്ച",
+    "cat_queen": "പെൺ പൂച്ച",
+    "cat_kitten": "പൂച്ചക്കുട്ടി",
+    "cat_neuter": "ഷണ്ഡീകരിച്ച പൂച്ച"
+  },
+  "masterData": {
+    "title": "മാസ്റ്റർ ഡാറ്റ",
+    "subtitle": "സ്പീഷീസുകൾ, ബ്രീഡുകൾ, മൃഗ വിഭാഗങ്ങൾ, മാർക്കറ്റ്‌പ്ലേസ് ഡ്രോപ്പ്ഡൗൺ മൂല്യങ്ങൾ എന്നിവ കൈകാര്യം ചെയ്യുക — കോഡ് ഡിപ്ലോയ് ആവശ്യമില്ല.",
+    "tabs": {
+      "species": "സ്പീഷീസുകൾ",
+      "breeds": "ബ്രീഡുകൾ",
+      "classes": "മൃഗ വിഭാഗങ്ങൾ",
+      "categories": "മാർക്കറ്റ്‌പ്ലേസ് വിഭാഗങ്ങൾ",
+      "conditions": "മാർക്കറ്റ്‌പ്ലേസ് അവസ്ഥകൾ"
+    },
+    "filterBySpecies": "സ്പീഷീസ്",
+    "selectSpeciesPrompt": "— ഒരു സ്പീഷീസ് തിരഞ്ഞെടുക്കുക —",
+    "addNew": "പുതിയത് ചേർക്കുക",
+    "editEntry": "എൻട്രി എഡിറ്റ് ചെയ്യുക",
+    "reactivate": "വീണ്ടും സജീവമാക്കുക",
+    "noEntries": "ഇതുവരെ എൻട്രികളൊന്നുമില്ല",
+    "protectedHint": "സംരക്ഷിതം — പ്രധാന ലോജിക് ഈ കോഡിനെ ആശ്രയിക്കുന്നു",
+    "labelKeyHint": "അന്തർനിർമ്മിത വിവർത്തനം നിലനിർത്താൻ ശൂന്യമായി വിടുക",
+    "confirmDelete": "ഈ എൻട്രി ഇല്ലാതാക്കണോ? ഇത് പഴയപടിയാക്കാൻ കഴിയില്ല.",
+    "deleteBlocked": "ഇല്ലാതാക്കാൻ കഴിഞ്ഞില്ല — ഇത് ഇപ്പോഴും ഉപയോഗത്തിലായിരിക്കാം",
+    "updatedSuccess": "വിജയകരമായി പുതുക്കി",
+    "createdSuccess": "വിജയകരമായി സൃഷ്ടിച്ചു",
+    "archivedSuccess": "നിർജ്ജീവമാക്കി",
+    "restoredSuccess": "വീണ്ടും സജീവമാക്കി",
+    "deletedSuccess": "ഇല്ലാതാക്കി",
+    "errors": {
+      "speciesRequired": "ആദ്യം ഒരു സ്പീഷീസ് തിരഞ്ഞെടുക്കുക"
+    },
+    "gender": {
+      "unknown": "അജ്ഞാതം"
+    },
+    "col": {
+      "icon": "ഐക്കൺ",
+      "code": "കോഡ്",
+      "label": "ലേബൽ",
+      "category": "വിഭാഗം",
+      "earTag": "ഇയർ ടാഗ് ഉപയോഗിക്കുന്നു",
+      "sortOrder": "ക്രമം",
+      "value": "മൂല്യം (ആന്തരിക കോഡ്)",
+      "impliedGender": "സൂചിത ലിംഗം",
+      "canBePregnant": "ഗർഭിണിയാകാം",
+      "canProduceMilk": "പാൽ ഉത്പാദിപ്പിക്കാം",
+      "marketplaceEligible": "മാർക്കറ്റ്‌പ്ലേസിൽ വിൽക്കാവുന്നത്"
+    }
   }
 }

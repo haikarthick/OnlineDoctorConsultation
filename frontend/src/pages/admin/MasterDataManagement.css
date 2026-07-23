@@ -1,0 +1,19 @@
+.module-loading {
+  text-align: center;
+  color: #6b7280;
+  padding: 40px;
+  font-size: 0.95rem;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+.inactive-row {
+  opacity: 0.55;
+}

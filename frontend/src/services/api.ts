@@ -8,112 +8,123 @@ function getCookie(name: string): string | null {
   return match ? decodeURIComponent(match[2]) : null
 }
 
-class ApiService {
-  private client: AxiosInstance
-  private csrfToken: string | null = null
+// ─── Shared Axios client ──────────────────────────────────────────
+// This is THE single Axios instance + auth/CSRF/refresh interceptor stack
+// for the whole app. services/api/client.ts re-exports it rather than
+// creating its own — previously it duplicated all of this with a subtly
+// different (weaker) 403/CSRF error-shape check, and its CSRF token cache
+// was a separate variable that never synced with this one, so a token
+// rotated on one client wasn't known to the other.
+let sharedCsrfToken: string | null = null
 
-  constructor() {
-    this.client = axios.create({
-      baseURL: API_BASE_URL,
-      timeout: 60000, // 60s — free-tier Render DB can take up to 30-90s to wake from sleep
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+export const sharedClient: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 60000, // 60s — free-tier Render DB can take up to 30-90s to wake from sleep
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
 
-    // Request interceptor - attach auth token + CSRF token
-    this.client.interceptors.request.use(
-      (config: InternalAxiosRequestConfig) => {
-        const token = localStorage.getItem('authToken')
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`
-        }
-        // Attach CSRF token for state-changing requests
-        const method = (config.method || '').toUpperCase()
-        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-          const csrf = this.csrfToken || getCookie('__csrf')
-          if (csrf && config.headers) {
-            config.headers['X-CSRF-Token'] = csrf
-          }
-        }
-        return config
-      },
-      (error: AxiosError) => Promise.reject(error)
-    )
-
-    // Response interceptor - handle common errors
-    this.client.interceptors.response.use(
-      (response: AxiosResponse) => response,
-      async (error: AxiosError) => {
-        const originalConfig = error.config as InternalAxiosRequestConfig & { _authRetry?: boolean; _csrfRetry?: boolean }
-
-        // On 401, try to refresh the token before logging out
-        if (error.response?.status === 401 && originalConfig && !originalConfig._authRetry) {
-          originalConfig._authRetry = true
-          const refreshTk = localStorage.getItem('refreshToken')
-          if (refreshTk) {
-            try {
-              const res = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken: refreshTk }, { withCredentials: true })
-              const { token: newToken, refreshToken: newRefreshToken } = res.data.data
-              localStorage.setItem('authToken', newToken)
-              if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken)
-              if (originalConfig.headers) {
-                originalConfig.headers.Authorization = `Bearer ${newToken}`
-              }
-              return this.client.request(originalConfig)
-            } catch {
-              // Refresh failed — logout
-            }
-          }
-          localStorage.removeItem('authToken')
-          localStorage.removeItem('authUser')
-          localStorage.removeItem('refreshToken')
-          window.location.href = '/'
-        }
-
-        // If CSRF token expired/missing, fetch a new one and retry once
-        if (error.response?.status === 403 && originalConfig && !originalConfig._csrfRetry) {
-          const data = error.response?.data as any
-          const errorStr = typeof data?.error === 'string' ? data.error : JSON.stringify(data?.error || '')
-          if (errorStr.includes('CSRF')) {
-            await this.fetchCsrfToken()
-            originalConfig._csrfRetry = true
-            return this.client.request(originalConfig)
-          }
-        }
-        return Promise.reject(error)
+// Request interceptor - attach auth token + CSRF token
+sharedClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = localStorage.getItem('authToken')
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    // Attach CSRF token for state-changing requests
+    const method = (config.method || '').toUpperCase()
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      const csrf = sharedCsrfToken || getCookie('__csrf')
+      if (csrf && config.headers) {
+        config.headers['X-CSRF-Token'] = csrf
       }
-    )
+    }
+    return config
+  },
+  (error: AxiosError) => Promise.reject(error)
+)
 
-    // Add timeout flag so pages can show user-friendly message instead of raw axios error
-    this.client.interceptors.response.use(
-      undefined,
-      (error: AxiosError) => {
-        if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-          const enriched = new Error(
-            'The server is taking longer than expected to respond (possibly waking from sleep). Please wait a moment and try again.'
-          ) as any
-          enriched.isTimeout = true
-          enriched.originalError = error
-          return Promise.reject(enriched)
+// Response interceptor - handle common errors
+sharedClient.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  async (error: AxiosError) => {
+    const originalConfig = error.config as InternalAxiosRequestConfig & { _authRetry?: boolean; _csrfRetry?: boolean }
+
+    // On 401, try to refresh the token before logging out
+    if (error.response?.status === 401 && originalConfig && !originalConfig._authRetry) {
+      originalConfig._authRetry = true
+      const refreshTk = localStorage.getItem('refreshToken')
+      if (refreshTk) {
+        try {
+          const res = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken: refreshTk }, { withCredentials: true })
+          const { token: newToken, refreshToken: newRefreshToken } = res.data.data
+          localStorage.setItem('authToken', newToken)
+          if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken)
+          if (originalConfig.headers) {
+            originalConfig.headers.Authorization = `Bearer ${newToken}`
+          }
+          return sharedClient.request(originalConfig)
+        } catch {
+          // Refresh failed — logout
         }
-        return Promise.reject(error)
       }
-    )
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('authUser')
+      localStorage.removeItem('refreshToken')
+      window.location.href = '/'
+    }
 
-    // Fetch initial CSRF token
-    this.fetchCsrfToken().catch(() => { /* silent — will retry on 403 */ })
+    // If CSRF token expired/missing, fetch a new one and retry once
+    if (error.response?.status === 403 && originalConfig && !originalConfig._csrfRetry) {
+      const data = error.response?.data as any
+      const errorStr = typeof data?.error === 'string' ? data.error : JSON.stringify(data?.error || '')
+      if (errorStr.includes('CSRF')) {
+        await fetchCsrfToken()
+        originalConfig._csrfRetry = true
+        return sharedClient.request(originalConfig)
+      }
+    }
+    return Promise.reject(error)
   }
+)
+
+// Add timeout flag so pages can show user-friendly message instead of raw axios error
+sharedClient.interceptors.response.use(
+  undefined,
+  (error: AxiosError) => {
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      const enriched = new Error(
+        'The server is taking longer than expected to respond (possibly waking from sleep). Please wait a moment and try again.'
+      ) as any
+      enriched.isTimeout = true
+      enriched.originalError = error
+      return Promise.reject(enriched)
+    }
+    return Promise.reject(error)
+  }
+)
+
+/** Fetch a CSRF token from the server and cache it (shared across every consumer of sharedClient) */
+export async function fetchCsrfToken(): Promise<void> {
+  try {
+    const response = await sharedClient.get('/csrf-token')
+    sharedCsrfToken = response.data.csrfToken
+  } catch {
+    // non-fatal; requests without cookies bypass CSRF anyway
+  }
+}
+
+// Fetch initial CSRF token
+fetchCsrfToken().catch(() => { /* silent — will retry on 403 */ })
+
+class ApiService {
+  private client: AxiosInstance = sharedClient
 
   /** Fetch a CSRF token from the server and cache it */
   async fetchCsrfToken(): Promise<void> {
-    try {
-      const response = await this.client.get('/csrf-token')
-      this.csrfToken = response.data.csrfToken
-    } catch {
-      // non-fatal; requests without cookies bypass CSRF anyway
-    }
+    return fetchCsrfToken()
   }
 
   // ─── Auth ──────────────────────────────────────────────────
@@ -162,6 +173,22 @@ class ApiService {
     formData.append('file', file)
     if (folder) formData.append('folder', folder)
     const response = await this.client.post('/files/upload', formData, { headers: { 'Content-Type': undefined } })
+    return response.data
+  }
+
+  async uploadImageFile(file: File, folder?: string) {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (folder) formData.append('folder', folder)
+    const response = await this.client.post('/files/upload-image', formData, { headers: { 'Content-Type': undefined } })
+    return response.data
+  }
+
+  async uploadVideoFile(file: File, folder?: string) {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (folder) formData.append('folder', folder)
+    const response = await this.client.post('/files/upload-video', formData, { headers: { 'Content-Type': undefined } })
     return response.data
   }
 
@@ -401,6 +428,11 @@ class ApiService {
 
   async getPrescriptionsByAnimal(animalId: string, params?: { limit?: number; offset?: number }) {
     const response = await this.client.get(`/prescriptions/animal/${animalId}`, { params })
+    return response.data
+  }
+
+  async getVetPharmacyStats() {
+    const response = await this.client.get('/vet/pharmacy-stats')
     return response.data
   }
 
@@ -908,6 +940,11 @@ class ApiService {
     return response.data
   }
 
+  async getAdminPharmacyOverview() {
+    const response = await this.client.get('/admin/pharmacy-overview')
+    return response.data
+  }
+
   async adminListUsers(params?: { limit?: number; offset?: number; role?: string; search?: string; isActive?: string }) {
     const response = await this.client.get('/admin/users', { params })
     return response.data
@@ -1055,6 +1092,16 @@ class ApiService {
 
   async adminSendTestEmail(to: string) {
     const response = await this.client.post('/admin/settings/test-email', { to })
+    return response.data
+  }
+
+  async adminGetEmailTemplates() {
+    const response = await this.client.get('/admin/email-templates')
+    return response.data
+  }
+
+  async adminUpdateEmailTemplate(templateName: string, data: { subject: string; body: string }) {
+    const response = await this.client.put(`/admin/email-templates/${templateName}`, data)
     return response.data
   }
 
@@ -2564,6 +2611,42 @@ class ApiService {
     return response.data
   }
 
+  // ─── Master Data (admin CRUD) ──────────────────────────────────
+  async adminListMasterSpecies() { return (await this.client.get('/admin/master-data/species')).data }
+  async adminCreateMasterSpecies(data: any) { return (await this.client.post('/admin/master-data/species', data)).data }
+  async adminUpdateMasterSpecies(id: string, data: any) { return (await this.client.put(`/admin/master-data/species/${id}`, data)).data }
+  async adminArchiveMasterSpecies(id: string) { return (await this.client.patch(`/admin/master-data/species/${id}/archive`, {})).data }
+  async adminRestoreMasterSpecies(id: string) { return (await this.client.patch(`/admin/master-data/species/${id}/restore`, {})).data }
+  async adminDeleteMasterSpecies(id: string) { return (await this.client.delete(`/admin/master-data/species/${id}`)).data }
+
+  async adminListMasterBreeds(speciesId?: string) { return (await this.client.get('/admin/master-data/breeds', { params: speciesId ? { speciesId } : {} })).data }
+  async adminCreateMasterBreed(data: any) { return (await this.client.post('/admin/master-data/breeds', data)).data }
+  async adminUpdateMasterBreed(id: string, data: any) { return (await this.client.put(`/admin/master-data/breeds/${id}`, data)).data }
+  async adminArchiveMasterBreed(id: string) { return (await this.client.patch(`/admin/master-data/breeds/${id}/archive`, {})).data }
+  async adminRestoreMasterBreed(id: string) { return (await this.client.patch(`/admin/master-data/breeds/${id}/restore`, {})).data }
+  async adminDeleteMasterBreed(id: string) { return (await this.client.delete(`/admin/master-data/breeds/${id}`)).data }
+
+  async adminListMasterAnimalClasses(speciesId?: string) { return (await this.client.get('/admin/master-data/animal-classes', { params: speciesId ? { speciesId } : {} })).data }
+  async adminCreateMasterAnimalClass(data: any) { return (await this.client.post('/admin/master-data/animal-classes', data)).data }
+  async adminUpdateMasterAnimalClass(id: string, data: any) { return (await this.client.put(`/admin/master-data/animal-classes/${id}`, data)).data }
+  async adminArchiveMasterAnimalClass(id: string) { return (await this.client.patch(`/admin/master-data/animal-classes/${id}/archive`, {})).data }
+  async adminRestoreMasterAnimalClass(id: string) { return (await this.client.patch(`/admin/master-data/animal-classes/${id}/restore`, {})).data }
+  async adminDeleteMasterAnimalClass(id: string) { return (await this.client.delete(`/admin/master-data/animal-classes/${id}`)).data }
+
+  async adminListMasterMarketplaceCategories() { return (await this.client.get('/admin/master-data/marketplace/categories')).data }
+  async adminCreateMasterMarketplaceCategory(data: any) { return (await this.client.post('/admin/master-data/marketplace/categories', data)).data }
+  async adminUpdateMasterMarketplaceCategory(id: string, data: any) { return (await this.client.put(`/admin/master-data/marketplace/categories/${id}`, data)).data }
+  async adminArchiveMasterMarketplaceCategory(id: string) { return (await this.client.patch(`/admin/master-data/marketplace/categories/${id}/archive`, {})).data }
+  async adminRestoreMasterMarketplaceCategory(id: string) { return (await this.client.patch(`/admin/master-data/marketplace/categories/${id}/restore`, {})).data }
+  async adminDeleteMasterMarketplaceCategory(id: string) { return (await this.client.delete(`/admin/master-data/marketplace/categories/${id}`)).data }
+
+  async adminListMasterMarketplaceConditions() { return (await this.client.get('/admin/master-data/marketplace/conditions')).data }
+  async adminCreateMasterMarketplaceCondition(data: any) { return (await this.client.post('/admin/master-data/marketplace/conditions', data)).data }
+  async adminUpdateMasterMarketplaceCondition(id: string, data: any) { return (await this.client.put(`/admin/master-data/marketplace/conditions/${id}`, data)).data }
+  async adminArchiveMasterMarketplaceCondition(id: string) { return (await this.client.patch(`/admin/master-data/marketplace/conditions/${id}/archive`, {})).data }
+  async adminRestoreMasterMarketplaceCondition(id: string) { return (await this.client.patch(`/admin/master-data/marketplace/conditions/${id}/restore`, {})).data }
+  async adminDeleteMasterMarketplaceCondition(id: string) { return (await this.client.delete(`/admin/master-data/marketplace/conditions/${id}`)).data }
+
   async getAnimalVaccineAssignments(animalId: string) {
     const response = await this.client.get(`/animals/${animalId}/vaccine-assignments`)
     return response.data
@@ -2692,7 +2775,7 @@ class ApiService {
   async registerWalkInPatientDirect(networkId: string, data: {
     hospitalId: string; patientName: string; patientPhone?: string; patientEmail?: string; patientAddress?: string;
     animalName: string; animalSpecies: string; animalBreed?: string;
-    animalGender?: string; animalDob?: string; animalWeight?: number;
+    animalGender?: string; animalClass?: string; animalDob?: string; animalWeight?: number;
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
     animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;
@@ -2707,7 +2790,7 @@ class ApiService {
   async registerWalkInStandalone(hospitalId: string, data: {
     patientName: string; patientPhone?: string; patientEmail?: string; patientAddress?: string;
     animalName: string; animalSpecies: string; animalBreed?: string;
-    animalGender?: string; animalDob?: string; animalWeight?: number;
+    animalGender?: string; animalClass?: string; animalDob?: string; animalWeight?: number;
     animalColor?: string; animalMicrochipId?: string; animalRegistrationNumber?: string;
     animalIsNeutered?: boolean; animalMedicalNotes?: string; animalAvatarUrl?: string;
     animalInsuranceProvider?: string; animalInsurancePolicyNumber?: string; animalInsuranceExpiry?: string;

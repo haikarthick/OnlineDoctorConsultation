@@ -106,7 +106,7 @@ const DigitalTwinPage: React.FC = () => {
   }
 
   const renderDashboard = () => {
-    if (!dashboard) return <p style={{ color: '#888', textAlign: 'center' }}>{t('digitalTwin.selectForDashboard')}</p>
+    if (!dashboard) return <p className="si-380a494b">{t('digitalTwin.selectForDashboard')}</p>
     return (
       <div>
         <div className="module-stats">
@@ -115,7 +115,7 @@ const DigitalTwinPage: React.FC = () => {
           <div className="stat-card"><div className="stat-value">{dashboard.byScenarioType?.length || 0}</div><div className="stat-label">{t('digitalTwin.stats.scenarioTypes')}</div></div>
         </div>
         {dashboard.recentSimulations?.length > 0 && (
-          <div className="module-card" style={{ marginTop: 24 }}>
+          <div className="module-card si-b4c2d096">
             <h3>{t('digitalTwin.recentSimulations')}</h3>
             <table className="module-table">
               <thead><tr><th>{t('common.name')}</th><th>{t('digitalTwin.twin')}</th><th>{t('digitalTwin.scenario')}</th><th>{t('common.status')}</th><th>{t('digitalTwin.duration')}</th><th>{t('common.actions')}</th></tr></thead>
@@ -136,14 +136,14 @@ const DigitalTwinPage: React.FC = () => {
   const renderSimParams = () => {
     const st = simForm.scenarioType
     const inp = (label: string, field: string, type = 'number') => (
-      <div style={{ flex: 1, minWidth: 180 }}>
+      <div className="si-0f14bb0a">
         <label className="module-label">{label}</label>
         <input className="module-input" type={type} value={(simForm as any)[field]}
           onChange={e => setSimForm(f => ({ ...f, [field]: e.target.value }))} />
       </div>
     )
     return (
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+      <div className="si-7e460960">
         {st === 'disease_spread' && <>{inp('Infection Rate', 'infectionRate')}{inp('Vaccination Rate', 'vaccinationRate')}{inp('Days', 'simulationDays')}{inp('Initial Infected', 'initialInfected')}</>}
         {st === 'resource_optimization' && <>{inp('Workers', 'workers')}{inp('Animals', 'animals')}{inp('Feed Budget/Day', 'feedBudgetPerDay')}</>}
         {st === 'financial_forecast' && <>{inp('Monthly Revenue', 'monthlyRevenue')}{inp('Monthly Cost', 'monthlyCost')}{inp('Growth Rate', 'growthRate')}{inp('Months', 'months')}</>}
@@ -157,9 +157,9 @@ const DigitalTwinPage: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('digitalTwin.pageTitle')}</h1>
-          <p style={{ color: '#666', margin: '8px 0 0' }}>{t('digitalTwin.subtitle')}</p>
+          <p className="si-f80b783e">{t('digitalTwin.subtitle')}</p>
         </div>
-        <select className="module-input" value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)} style={{ width: 260 }}>
+        <select className="module-input si-9d41e9d7" value={selectedEnterpriseId} onChange={e => setSelectedEnterpriseId(e.target.value)}>
           <option value="">{t('common.selectEnterprise')}</option>
           {enterprises.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
         </select>
@@ -176,73 +176,73 @@ const DigitalTwinPage: React.FC = () => {
         ))}
       </div>
 
-      {loading && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>{t('common.loading')}</div>}
+      {loading && <div className="si-6a429654">{t('common.loading')}</div>}
 
       {!loading && tab === 'dashboard' && renderDashboard()}
 
       {!loading && tab === 'twins' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <div className="si-01b12315">
             <button className="module-btn primary" onClick={() => setShowCreateTwin(true)} disabled={!selectedEnterpriseId}>{t('digitalTwin.createTwin')}</button>
           </div>
           {showCreateTwin && (
-            <div className="module-card" style={{ marginBottom: 16 }}>
+            <div className="module-card si-7e63ec4f">
               <h3>{t('digitalTwin.createDigitalTwin')}</h3>
               <div className="module-form">
                 <div><label className="module-label">{t('common.name')}</label><input className="module-input" value={twinForm.name} onChange={e => setTwinForm(f => ({ ...f, name: e.target.value }))} /></div>
                 <div><label className="module-label">{t('common.type')}</label><select className="module-input" value={twinForm.twinType} onChange={e => setTwinForm(f => ({ ...f, twinType: e.target.value }))}>{TWIN_TYPES.map(tt => <option key={tt} value={tt}>{tt}</option>)}</select></div>
                 <div><label className="module-label">{t('common.description')}</label><textarea className="module-input" value={twinForm.description} onChange={e => setTwinForm(f => ({ ...f, description: e.target.value }))} /></div>
               </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <div className="si-085d7dba">
                 <button className="module-btn primary" onClick={createTwin}>{t('digitalTwin.create')}</button>
                 <button className="module-btn" onClick={() => setShowCreateTwin(false)}>{t('common.cancel')}</button>
               </div>
             </div>
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
+          <div className="si-8ebf7d50">
             {twins.map(t => (
               <div key={t.id} className="module-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h4 style={{ margin: 0 }}>{t.name}</h4>
+                <div className="si-9803f8d1">
+                  <h4 className="si-44087c4b">{t.name}</h4>
                   <span className="module-badge">{t.twinType}</span>
                 </div>
-                {t.description && <p style={{ color: '#666', fontSize: 14, margin: '8px 0' }}>{t.description}</p>}
-                <div style={{ fontSize: 12, color: '#888' }}>Created: {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '–'}</div>
+                {t.description && <p className="si-911d5ad5">{t.description}</p>}
+                <div className="si-a3f3564c">Created: {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '–'}</div>
               </div>
             ))}
-            {twins.length === 0 && <p style={{ color: '#888' }}>{t('digitalTwin.noTwins')}</p>}
+            {twins.length === 0 && <p className="si-40d2db53">{t('digitalTwin.noTwins')}</p>}
           </div>
         </div>
       )}
 
       {!loading && tab === 'simulate' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <div className="si-01b12315">
             <button className="module-btn primary" onClick={() => setShowSimForm(true)} disabled={twins.length === 0}>{t('digitalTwin.newSimulation')}</button>
           </div>
           {showSimForm && (
-            <div className="module-card" style={{ marginBottom: 24 }}>
+            <div className="module-card si-af65fe13">
               <h3>{t('digitalTwin.runSimulation')}</h3>
               <div className="module-form">
-                <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('common.name')}</label><input className="module-input" value={simForm.name} onChange={e => setSimForm(f => ({ ...f, name: e.target.value }))} placeholder="Simulation name" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('digitalTwin.twin')}</label><select className="module-input" value={simForm.twinId} onChange={e => setSimForm(f => ({ ...f, twinId: e.target.value }))}><option value="">{t('digitalTwin.selectTwin')}</option>{twins.map(tw => <option key={tw.id} value={tw.id}>{tw.name}</option>)}</select></div>
+                <div className="si-c3866b40">
+                  <div className="si-6acd75e8"><label className="module-label">{t('common.name')}</label><input className="module-input" value={simForm.name} onChange={e => setSimForm(f => ({ ...f, name: e.target.value }))} placeholder="Simulation name" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('digitalTwin.twin')}</label><select className="module-input" value={simForm.twinId} onChange={e => setSimForm(f => ({ ...f, twinId: e.target.value }))}><option value="">{t('digitalTwin.selectTwin')}</option>{twins.map(tw => <option key={tw.id} value={tw.id}>{tw.name}</option>)}</select></div>
                 </div>
                 <div><label className="module-label">{t('digitalTwin.scenarioType')}</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+                  <div className="si-8193f804">
                     {SCENARIO_TYPES.map(s => (
                       <div key={s.value} onClick={() => setSimForm(f => ({ ...f, scenarioType: s.value }))}
                         style={{ padding: 16, borderRadius: 8, border: `2px solid ${simForm.scenarioType === s.value ? '#667eea' : '#eee'}`,
                           cursor: 'pointer', background: simForm.scenarioType === s.value ? '#667eea08' : 'white' }}>
-                        <div style={{ fontWeight: 600 }}>{s.label}</div>
-                        <div style={{ fontSize: 12, color: '#888' }}>{s.desc}</div>
+                        <div className="si-b2cfcbec">{s.label}</div>
+                        <div className="si-a3f3564c">{s.desc}</div>
                       </div>
                     ))}
                   </div>
                 </div>
-                <div style={{ marginTop: 16 }}><label className="module-label">{t('digitalTwin.parameters')}</label>{renderSimParams()}</div>
+                <div className="si-b0aee75b"><label className="module-label">{t('digitalTwin.parameters')}</label>{renderSimParams()}</div>
               </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <div className="si-085d7dba">
                 <button className="module-btn primary" onClick={runSimulation}>▸ {t('digitalTwin.runSimulation')}</button>
                 <button className="module-btn" onClick={() => setShowSimForm(false)}>{t('common.cancel')}</button>
               </div>
@@ -250,9 +250,9 @@ const DigitalTwinPage: React.FC = () => {
           )}
 
           {selectedSimulation && (
-            <div className="module-card" style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <h3 style={{ margin: 0 }}>Results: {selectedSimulation.name}</h3>
+            <div className="module-card si-af65fe13">
+              <div className="si-101fd1d0">
+                <h3 className="si-44087c4b">Results: {selectedSimulation.name}</h3>
                 <button className="module-btn small" onClick={() => setSelectedSimulation(null)}>{t('common.close')}</button>
               </div>
               <div className="module-stats">
@@ -261,14 +261,14 @@ const DigitalTwinPage: React.FC = () => {
                 ))}
               </div>
               {selectedSimulation.resultData?.rows && selectedSimulation.resultData.rows.length > 0 && (
-                <div style={{ marginTop: 16, maxHeight: 300, overflow: 'auto' }}>
+                <div className="si-dc2fd41f">
                   <table className="module-table">
                     <thead><tr>{Object.keys(selectedSimulation.resultData.rows[0]).map(k => <th key={k}>{k}</th>)}</tr></thead>
                     <tbody>{selectedSimulation.resultData.rows.slice(0, 30).map((row: any, i: number) => (
                       <tr key={i}>{Object.values(row).map((v, j) => <td key={j}>{String(v)}</td>)}</tr>
                     ))}</tbody>
                   </table>
-                  {selectedSimulation.resultData.rows.length > 30 && <p style={{ textAlign: 'center', color: '#888' }}>Showing 30 of {selectedSimulation.resultData.rows.length} rows</p>}
+                  {selectedSimulation.resultData.rows.length > 30 && <p className="si-380a494b">Showing 30 of {selectedSimulation.resultData.rows.length} rows</p>}
                 </div>
               )}
             </div>
@@ -285,7 +285,7 @@ const DigitalTwinPage: React.FC = () => {
               ))}
             </tbody>
           </table>
-          {simulations.length === 0 && <p style={{ color: '#888', textAlign: 'center', marginTop: 20 }}>{t('digitalTwin.noSimulations')}</p>}
+          {simulations.length === 0 && <p className="si-3a7b9567">{t('digitalTwin.noSimulations')}</p>}
         </div>
       )}
     </div>

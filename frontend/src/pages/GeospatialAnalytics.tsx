@@ -38,7 +38,7 @@ const GeospatialAnalytics: React.FC = () => {
     animalId: '', eventType: 'location_update', latitude: '', longitude: '', metadata: '',
   })
 
-  useEffect(() => { apiService.listEnterprises().then(r => setEnterprises(r.data?.items || r.data || [])).catch(() => {}) }, [])
+  useEffect(() => { apiService.listEnterprises().then(r => setEnterprises(r.data?.items || r.data || [])).catch(() => setError(t('geospatialAnalytics.enterprisesLoadFailed'))) }, [t])
 
   useEffect(() => { if (enterpriseId) fetchAll() }, [enterpriseId])
 
@@ -112,9 +112,9 @@ const GeospatialAnalytics: React.FC = () => {
       <div className="module-header">
         <div>
           <h1>{t('geospatialAnalytics.pageTitle')}</h1>
-          <p style={{ color: '#666', margin: '8px 0 0' }}>{t('geospatialAnalytics.subtitle')}</p>
+          <p className="si-f80b783e">{t('geospatialAnalytics.subtitle')}</p>
         </div>
-        <select className="module-input" style={{ width: 220 }} value={enterpriseId} onChange={e => setEnterpriseId(e.target.value)}>
+        <select className="module-input si-1af35bc5" value={enterpriseId} onChange={e => setEnterpriseId(e.target.value)}>
           {enterprises.map(ent => <option key={ent.id} value={ent.id}>{ent.name}</option>)}
         </select>
       </div>
@@ -130,23 +130,23 @@ const GeospatialAnalytics: React.FC = () => {
         ))}
       </div>
 
-      {loading && <div style={{ textAlign: 'center', padding: 40, color: '#888' }}>{t('common.loading')}</div>}
+      {loading && <div className="si-6a429654">{t('common.loading')}</div>}
 
       {!loading && tab === 'dashboard' && dashboard && (
         <div>
           <div className="module-stats">
             <div className="stat-card"><div className="stat-value">{dashboard.summary?.totalZones || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.totalZones')}</div></div>
             <div className="stat-card"><div className="stat-value">{dashboard.summary?.activeZones || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.activeZones')}</div></div>
-            <div className="stat-card"><div className="stat-value" style={{ color: '#ef4444' }}>{dashboard.summary?.restrictedZones || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.restricted')}</div></div>
+            <div className="stat-card"><div className="stat-value si-4fb20e94">{dashboard.summary?.restrictedZones || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.restricted')}</div></div>
             <div className="stat-card"><div className="stat-value">{dashboard.summary?.events24h || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.events24h')}</div></div>
             <div className="stat-card"><div className="stat-value">{dashboard.summary?.trackedAnimals || 0}</div><div className="stat-label">{t('geospatialAnalytics.stats.trackedAnimals')}</div></div>
           </div>
 
           {/* Interactive Overview Map */}
-          <div className="module-card" style={{ marginTop: 20, padding: 0, overflow: 'hidden', borderRadius: 12 }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ margin: 0 }}>📍 {t('geospatialAnalytics.liveZoneEventMap')}</h3>
-              <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>Zones shown as circles, recent events as markers</p>
+          <div className="module-card si-5e2e1af1">
+            <div className="si-16ab549f">
+              <h3 className="si-44087c4b">📍 {t('geospatialAnalytics.liveZoneEventMap')}</h3>
+              <p className="si-7438976a">Zones shown as circles, recent events as markers</p>
             </div>
             <MapView
               height={480}
@@ -160,9 +160,9 @@ const GeospatialAnalytics: React.FC = () => {
                 popup: (
                   <div>
                     <strong>{z.name}</strong><br />
-                    <span style={{ fontSize: 12 }}>{z.zone_type} · {z.radius_meters}m radius</span><br />
-                    {z.is_restricted && <span style={{ color: '#ef4444', fontSize: 12 }}>🚫 Restricted Zone</span>}
-                    <div style={{ fontSize: 12, marginTop: 4 }}>Events: {z.event_count || 0}</div>
+                    <span className="si-756a9f21">{z.zone_type} · {z.radius_meters}m radius</span><br />
+                    {z.is_restricted && <span className="si-a41d01e2">🚫 Restricted Zone</span>}
+                    <div className="si-692258ce">Events: {z.event_count || 0}</div>
                   </div>
                 ),
               }))}
@@ -175,9 +175,9 @@ const GeospatialAnalytics: React.FC = () => {
                 popup: (
                   <div>
                     <strong>{ev.animal_name}</strong><br />
-                    <span className={`module-badge ${ev.event_type === 'zone_breach' ? 'error' : ''}`} style={{ fontSize: 11 }}>{ev.event_type}</span><br />
-                    {ev.zone_name && <span style={{ fontSize: 12 }}>Zone: {ev.zone_name}</span>}<br />
-                    <span style={{ fontSize: 11, color: '#888' }}>{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString() : ''}</span>
+                    <span className={`module-badge ${ev.event_type === 'zone_breach' ? 'error' : ''} si-6af9d82f`}>{ev.event_type}</span><br />
+                    {ev.zone_name && <span className="si-756a9f21">Zone: {ev.zone_name}</span>}<br />
+                    <span className="si-dd67611c">{ev.recorded_at ? new Date(ev.recorded_at).toLocaleString() : ''}</span>
                   </div>
                 ),
               }))}
@@ -185,7 +185,7 @@ const GeospatialAnalytics: React.FC = () => {
           </div>
 
           {dashboard.recentEvents?.length > 0 && (
-            <div className="module-card" style={{ marginTop: 20 }}>
+            <div className="module-card si-138c678b">
               <h3>{t('geospatialAnalytics.recentEvents')}</h3>
               <table className="module-table"><thead><tr><th>{t('iotSensors.time')}</th><th>{t('genomicLineage.animal')}</th><th>{t('common.type')}</th><th>{t('geospatialAnalytics.zone')}</th><th>{t('geospatialAnalytics.location')}</th></tr></thead>
                 <tbody>{dashboard.recentEvents.map((ev: any) => (
@@ -200,33 +200,33 @@ const GeospatialAnalytics: React.FC = () => {
 
       {!loading && tab === 'zones' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <div className="si-01b12315">
             <button className="module-btn primary" onClick={() => setShowZoneForm(true)}>{t('geospatialAnalytics.newZone')}</button>
           </div>
           {showZoneForm && (
-            <div className="module-card" style={{ marginBottom: 20 }}>
+            <div className="module-card si-478be2e9">
               <h3>{t('geospatialAnalytics.createZone')}</h3>
-              <p style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>💡 Click on the map below to set the zone center coordinates</p>
+              <p className="si-a18d6d63">💡 Click on the map below to set the zone center coordinates</p>
               <div className="module-form">
-                <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 2 }}><label className="module-label">{t('geospatialAnalytics.zoneName')}</label><input className="module-input" value={zoneForm.name} onChange={e => setZoneForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. North Pasture" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('common.type')}</label>
+                <div className="si-c3866b40">
+                  <div className="si-cd7f5466"><label className="module-label">{t('geospatialAnalytics.zoneName')}</label><input className="module-input" value={zoneForm.name} onChange={e => setZoneForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. North Pasture" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('common.type')}</label>
                     <select className="module-input" value={zoneForm.zoneType} onChange={e => setZoneForm(f => ({ ...f, zoneType: e.target.value, color: ZONE_COLORS[e.target.value] || '#3b82f6' }))}>
                       {ZONE_TYPES.map(zt => <option key={zt} value={zt}>{zt}</option>)}</select></div>
                 </div>
-                <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.centerLatitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLat} onChange={e => setZoneForm(f => ({ ...f, centerLat: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.centerLongitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLng} onChange={e => setZoneForm(f => ({ ...f, centerLng: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.radiusMeters')}</label><input className="module-input" type="number" value={zoneForm.radiusMeters} onChange={e => setZoneForm(f => ({ ...f, radiusMeters: e.target.value }))} /></div>
+                <div className="si-c3866b40">
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLatitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLat} onChange={e => setZoneForm(f => ({ ...f, centerLat: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.centerLongitude')}</label><input className="module-input" type="number" step="0.0001" value={zoneForm.centerLng} onChange={e => setZoneForm(f => ({ ...f, centerLng: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.radiusMeters')}</label><input className="module-input" type="number" value={zoneForm.radiusMeters} onChange={e => setZoneForm(f => ({ ...f, radiusMeters: e.target.value }))} /></div>
                 </div>
-                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                <div className="si-1d133837">
                   <div><label className="module-label">{t('geospatialAnalytics.color')}</label><input type="color" value={zoneForm.color} onChange={e => setZoneForm(f => ({ ...f, color: e.target.value }))} /></div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={zoneForm.alertOnEntry} onChange={e => setZoneForm(f => ({ ...f, alertOnEntry: e.target.checked }))} />{t('geospatialAnalytics.alertOnEntry')}</label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={zoneForm.alertOnExit} onChange={e => setZoneForm(f => ({ ...f, alertOnExit: e.target.checked }))} />{t('geospatialAnalytics.alertOnExit')}</label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={zoneForm.isRestricted} onChange={e => setZoneForm(f => ({ ...f, isRestricted: e.target.checked }))} />{t('geospatialAnalytics.restrictedZone')}</label>
+                  <label className="si-c2db3694"><input type="checkbox" checked={zoneForm.alertOnEntry} onChange={e => setZoneForm(f => ({ ...f, alertOnEntry: e.target.checked }))} />{t('geospatialAnalytics.alertOnEntry')}</label>
+                  <label className="si-c2db3694"><input type="checkbox" checked={zoneForm.alertOnExit} onChange={e => setZoneForm(f => ({ ...f, alertOnExit: e.target.checked }))} />{t('geospatialAnalytics.alertOnExit')}</label>
+                  <label className="si-c2db3694"><input type="checkbox" checked={zoneForm.isRestricted} onChange={e => setZoneForm(f => ({ ...f, isRestricted: e.target.checked }))} />{t('geospatialAnalytics.restrictedZone')}</label>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <div className="si-085d7dba">
                 <button className="module-btn primary" onClick={createZone}>{t('geospatialAnalytics.createZone')}</button>
                 <button className="module-btn" onClick={() => setShowZoneForm(false)}>{t('common.cancel')}</button>
               </div>
@@ -234,10 +234,10 @@ const GeospatialAnalytics: React.FC = () => {
           )}
 
           {/* Interactive Zone Map */}
-          <div className="module-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 12, marginBottom: 20 }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ margin: 0 }}>📍 {t('geospatialAnalytics.geofenceZonesMap')}</h3>
-              <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
+          <div className="module-card si-fd7717d4">
+            <div className="si-16ab549f">
+              <h3 className="si-44087c4b">📍 {t('geospatialAnalytics.geofenceZonesMap')}</h3>
+              <p className="si-7438976a">
                 {zones.length} zone{zones.length !== 1 ? 's' : ''} · Click map to set new zone center
               </p>
             </div>
@@ -253,10 +253,10 @@ const GeospatialAnalytics: React.FC = () => {
                 popup: (
                   <div>
                     <strong>{z.name}</strong><br />
-                    <span style={{ fontSize: 12 }}>{z.zoneType} · {z.radiusMeters}m radius</span><br />
-                    {z.isRestricted && <span style={{ color: '#ef4444', fontSize: 12 }}>🚫 Restricted</span>}
-                    {z.alertOnEntry && <span style={{ fontSize: 12 }}> · 🔔 Entry</span>}
-                    {z.alertOnExit && <span style={{ fontSize: 12 }}> · 🔕 Exit</span>}
+                    <span className="si-756a9f21">{z.zoneType} · {z.radiusMeters}m radius</span><br />
+                    {z.isRestricted && <span className="si-a41d01e2">🚫 Restricted</span>}
+                    {z.alertOnEntry && <span className="si-756a9f21"> · 🔔 Entry</span>}
+                    {z.alertOnExit && <span className="si-756a9f21"> · 🔕 Exit</span>}
                   </div>
                 ),
               }))}
@@ -266,7 +266,7 @@ const GeospatialAnalytics: React.FC = () => {
                 lng: +zoneForm.centerLng,
                 color: zoneForm.color || '#ec4899',
                 pulse: true,
-                popup: <div><strong>New Zone Center</strong><br /><span style={{ fontSize: 12 }}>{zoneForm.centerLat}, {zoneForm.centerLng}</span></div>,
+                popup: <div><strong>New Zone Center</strong><br /><span className="si-756a9f21">{zoneForm.centerLat}, {zoneForm.centerLng}</span></div>,
               }] : []}
               onClick={(lat, lng) => {
                 if (showZoneForm) {
@@ -278,41 +278,41 @@ const GeospatialAnalytics: React.FC = () => {
           </div>
 
           {/* Zone List */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+          <div className="si-00515fb0">
             {zones.map(z => (
               <div key={z.id} className="module-card" style={{ borderLeft: `4px solid ${z.color || ZONE_COLORS[z.zoneType] || '#3b82f6'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h4 style={{ margin: 0 }}>{z.name}</h4>
-                  <div style={{ display: 'flex', gap: 4 }}>
+                <div className="si-9803f8d1">
+                  <h4 className="si-44087c4b">{z.name}</h4>
+                  <div className="si-9f48dfc6">
                     {z.isRestricted && <span className="module-badge error">🚫 Restricted</span>}
                     <span className={`module-badge ${z.status === 'active' ? 'success' : ''}`}>{z.status === 'active' ? 'Active' : 'Inactive'}</span>
                   </div>
                 </div>
-                <div style={{ fontSize: 13, color: '#888', marginTop: 6 }}>{z.zoneType} · {z.radiusMeters}m radius</div>
-                <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>📍 {(+(z.centerLat ?? 0)).toFixed(4)}, {(+(z.centerLng ?? 0)).toFixed(4)}</div>
-                <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 12 }}>
+                <div className="si-372890a0">{z.zoneType} · {z.radiusMeters}m radius</div>
+                <div className="si-46511ff4">📍 {(+(z.centerLat ?? 0)).toFixed(4)}, {(+(z.centerLng ?? 0)).toFixed(4)}</div>
+                <div className="si-35725c93">
                   {z.alertOnEntry && <span>🔔 Entry Alerts</span>}
                   {z.alertOnExit && <span>🔕 Exit Alerts</span>}
                 </div>
               </div>
             ))}
-            {zones.length === 0 && <p style={{ color: '#888' }}>{t('geospatialAnalytics.noZones')}</p>}
+            {zones.length === 0 && <p className="si-40d2db53">{t('geospatialAnalytics.noZones')}</p>}
           </div>
         </div>
       )}
 
       {!loading && tab === 'events' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <div className="si-01b12315">
             <button className="module-btn primary" onClick={() => setShowEventForm(true)}>{t('geospatialAnalytics.recordEvent')}</button>
           </div>
           {showEventForm && (
-            <div className="module-card" style={{ marginBottom: 20 }}>
+            <div className="module-card si-478be2e9">
               <h3>{t('geospatialAnalytics.recordGeospatialEvent')}</h3>
-              <p style={{ fontSize: 13, color: '#888', marginBottom: 8 }}>💡 Click on the map below to set the event coordinates</p>
+              <p className="si-a18d6d63">💡 Click on the map below to set the event coordinates</p>
               <div className="module-form">
-                <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.animalId')}</label>
+                <div className="si-c3866b40">
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.animalId')}</label>
                     <SearchSelect
                       placeholder="Search animal by name..."
                       value={eventForm.animalId}
@@ -328,17 +328,17 @@ const GeospatialAnalytics: React.FC = () => {
                       }}
                     />
                   </div>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.eventType')}</label>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.eventType')}</label>
                     <select className="module-input" value={eventForm.eventType} onChange={e => setEventForm(f => ({ ...f, eventType: e.target.value }))}>
                       {EVENT_TYPES.map(et => <option key={et} value={et}>{et.replace(/_/g, ' ')}</option>)}</select></div>
                 </div>
-                <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.latitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.latitude} onChange={e => setEventForm(f => ({ ...f, latitude: e.target.value }))} placeholder="Click map or type" /></div>
-                  <div style={{ flex: 1 }}><label className="module-label">{t('geospatialAnalytics.longitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.longitude} onChange={e => setEventForm(f => ({ ...f, longitude: e.target.value }))} placeholder="Click map or type" /></div>
+                <div className="si-c3866b40">
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.latitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.latitude} onChange={e => setEventForm(f => ({ ...f, latitude: e.target.value }))} placeholder="Click map or type" /></div>
+                  <div className="si-6acd75e8"><label className="module-label">{t('geospatialAnalytics.longitude')}</label><input className="module-input" type="number" step="0.0001" value={eventForm.longitude} onChange={e => setEventForm(f => ({ ...f, longitude: e.target.value }))} placeholder="Click map or type" /></div>
                 </div>
                 <div><label className="module-label">{t('geospatialAnalytics.metadata')}</label><input className="module-input" value={eventForm.metadata} onChange={e => setEventForm(f => ({ ...f, metadata: e.target.value }))} placeholder='{"speed": 5.2, "heading": 270}' /></div>
               </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <div className="si-085d7dba">
                 <button className="module-btn primary" onClick={createEvent}>{t('geospatialAnalytics.recordEvent')}</button>
                 <button className="module-btn" onClick={() => setShowEventForm(false)}>{t('common.cancel')}</button>
               </div>
@@ -346,10 +346,10 @@ const GeospatialAnalytics: React.FC = () => {
           )}
 
           {/* Interactive Events Map */}
-          <div className="module-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 12, marginBottom: 20 }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ margin: 0 }}>📡 {t('geospatialAnalytics.eventLocationsMap')}</h3>
-              <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
+          <div className="module-card si-fd7717d4">
+            <div className="si-16ab549f">
+              <h3 className="si-44087c4b">📡 {t('geospatialAnalytics.eventLocationsMap')}</h3>
+              <p className="si-7438976a">
                 {events.length} event{events.length !== 1 ? 's' : ''} · Click map to set event coordinates
               </p>
             </div>
@@ -370,12 +370,12 @@ const GeospatialAnalytics: React.FC = () => {
                   popup: (
                     <div>
                       <strong>{ev.animalName || ev.animalId}</strong><br />
-                      <span className={`module-badge ${et === 'boundary_breach' || et === 'zone_breach' ? 'error' : ''}`}
-                        style={{ fontSize: 11 }}>{ev.eventType?.replace(/_/g, ' ')}</span><br />
-                      {ev.zoneName && <span style={{ fontSize: 12 }}>Zone: {ev.zoneName}</span>}
+                      <span className={`module-badge ${et === 'boundary_breach' || et === 'zone_breach' ? 'error' : ''} si-6af9d82f`}
+                       >{ev.eventType?.replace(/_/g, ' ')}</span><br />
+                      {ev.zoneName && <span className="si-756a9f21">Zone: {ev.zoneName}</span>}
                       {ev.zoneName && <br />}
-                      <span style={{ fontSize: 11, color: '#888' }}>{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : ''}</span>
-                      {ev.metadata && <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>{JSON.stringify(ev.metadata).slice(0, 80)}</div>}
+                      <span className="si-dd67611c">{ev.createdAt ? new Date(ev.createdAt).toLocaleString() : ''}</span>
+                      {ev.metadata && <div className="si-7e00f8e2">{JSON.stringify(ev.metadata).slice(0, 80)}</div>}
                     </div>
                   ),
                 }}),
@@ -385,7 +385,7 @@ const GeospatialAnalytics: React.FC = () => {
                   lng: +eventForm.longitude,
                   color: '#ec4899',
                   pulse: true,
-                  popup: <div><strong>New Event Location</strong><br /><span style={{ fontSize: 12 }}>{eventForm.latitude}, {eventForm.longitude}</span></div>,
+                  popup: <div><strong>New Event Location</strong><br /><span className="si-756a9f21">{eventForm.latitude}, {eventForm.longitude}</span></div>,
                 }] : []),
               ]}
               circles={zones.map(z => ({
@@ -395,7 +395,7 @@ const GeospatialAnalytics: React.FC = () => {
                 radius: +(z.radiusMeters ?? 100),
                 color: z.color || ZONE_COLORS[z.zoneType] || '#3b82f6',
                 fillOpacity: 0.08,
-                popup: <span style={{ fontSize: 12 }}>{z.name}</span>,
+                popup: <span className="si-756a9f21">{z.name}</span>,
               }))}
               onClick={(lat, lng) => {
                 if (showEventForm) {
@@ -407,11 +407,11 @@ const GeospatialAnalytics: React.FC = () => {
           </div>
 
           {/* Legend */}
-          <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap', fontSize: 12 }}>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#22c55e', marginRight: 4 }}></span>{t('geospatialAnalytics.legend.locationUpdate')}</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#8b5cf6', marginRight: 4 }}></span>{t('geospatialAnalytics.legend.zoneEntryExit')}</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#ef4444', marginRight: 4 }}></span>{t('geospatialAnalytics.legend.breach')}</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#f97316', marginRight: 4 }}></span>{t('geospatialAnalytics.legend.sosAlert')}</span>
+          <div className="si-92d1d3e8">
+            <span><span className="si-d19ebc2f"></span>{t('geospatialAnalytics.legend.locationUpdate')}</span>
+            <span><span className="si-66687b12"></span>{t('geospatialAnalytics.legend.zoneEntryExit')}</span>
+            <span><span className="si-1f7cf318"></span>{t('geospatialAnalytics.legend.breach')}</span>
+            <span><span className="si-33ea94d4"></span>{t('geospatialAnalytics.legend.sosAlert')}</span>
           </div>
 
           <div className="module-card">
@@ -425,13 +425,13 @@ const GeospatialAnalytics: React.FC = () => {
                     <td>{ev.animalName || ev.animalId}</td>
                     <td><span className={`module-badge ${ev.eventType === 'boundary_breach' ? 'error' : ev.eventType === 'speed_alert' ? 'error' : ''}`}>{ev.eventType?.replace(/_/g, ' ')}</span></td>
                     <td>{ev.zoneName || '—'}</td>
-                    <td style={{ fontSize: 12 }}>{(+(ev.latitude ?? 0)).toFixed(4)}, {(+(ev.longitude ?? 0)).toFixed(4)}</td>
-                    <td style={{ fontSize: 12 }}>{ev.metadata ? JSON.stringify(ev.metadata).slice(0, 60) : '—'}</td>
+                    <td className="si-756a9f21">{(+(ev.latitude ?? 0)).toFixed(4)}, {(+(ev.longitude ?? 0)).toFixed(4)}</td>
+                    <td className="si-756a9f21">{ev.metadata ? JSON.stringify(ev.metadata).slice(0, 60) : '—'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            {events.length === 0 && <p style={{ textAlign: 'center', color: '#888' }}>{t('geospatialAnalytics.noEvents')}</p>}
+            {events.length === 0 && <p className="si-380a494b">{t('geospatialAnalytics.noEvents')}</p>}
           </div>
         </div>
       )}
@@ -439,10 +439,10 @@ const GeospatialAnalytics: React.FC = () => {
       {!loading && tab === 'heatmap' && (
         <div>
           {/* Interactive Heatmap */}
-          <div className="module-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 12, marginBottom: 24 }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 style={{ margin: 0 }}>🔥 {t('geospatialAnalytics.locationDensityHeatmap')}</h3>
-              <p style={{ fontSize: 13, color: '#888', margin: '4px 0 0' }}>
+          <div className="module-card si-fcab6f48">
+            <div className="si-16ab549f">
+              <h3 className="si-44087c4b">🔥 {t('geospatialAnalytics.locationDensityHeatmap')}</h3>
+              <p className="si-7438976a">
                 {heatmapData.length} data point{heatmapData.length !== 1 ? 's' : ''} · Warmer colors indicate higher activity
               </p>
             </div>
@@ -460,12 +460,12 @@ const GeospatialAnalytics: React.FC = () => {
                 radius: +(z.radiusMeters ?? 100),
                 color: '#64748b',
                 fillOpacity: 0.05,
-                popup: <span style={{ fontSize: 12 }}>{z.name}</span>,
+                popup: <span className="si-756a9f21">{z.name}</span>,
               }))}
               fitToData={heatmapData.length > 0}
             />
             {heatmapData.length === 0 && (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#888', borderTop: '1px solid #e5e7eb' }}>
+              <div className="si-e5375a70">
                 {t('geospatialAnalytics.noLocationData')}
               </div>
             )}
@@ -474,9 +474,9 @@ const GeospatialAnalytics: React.FC = () => {
           {/* Movement Trail */}
           <div className="module-card">
             <h3>🐾 {t('geospatialAnalytics.movementTrail')}</h3>
-            <p style={{ fontSize: 13, color: '#888' }}>{t('geospatialAnalytics.trackAnimalMovement')}</p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <div style={{ flex: 1 }}>
+            <p className="si-fb366e09">{t('geospatialAnalytics.trackAnimalMovement')}</p>
+            <div className="si-319b7b12">
+              <div className="si-6acd75e8">
                 <SearchSelect
                   placeholder="Search animal by name..."
                   value={trailAnimalId}
@@ -496,7 +496,7 @@ const GeospatialAnalytics: React.FC = () => {
             </div>
 
             {trailData && (
-              <div style={{ marginTop: 16 }}>
+              <div className="si-b0aee75b">
                 <div className="module-stats">
                   <div className="stat-card"><div className="stat-value">{trailData.pointCount || 0}</div><div className="stat-label">{t('geospatialAnalytics.points')}</div></div>
                   <div className="stat-card"><div className="stat-value">{(+(trailData.totalDistanceKm ?? 0)).toFixed(2)}</div><div className="stat-label">{t('geospatialAnalytics.distanceKm')}</div></div>
@@ -504,7 +504,7 @@ const GeospatialAnalytics: React.FC = () => {
 
                 {/* Trail Map */}
                 {trailData.trail?.length > 0 && (
-                  <div style={{ marginTop: 16, borderRadius: 12, overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+                  <div className="si-e2acd78d">
                     <MapView
                       height={400}
                       polylines={[{
@@ -523,7 +523,7 @@ const GeospatialAnalytics: React.FC = () => {
                           popup: (
                             <div>
                               <strong>Start</strong><br />
-                              <span style={{ fontSize: 12 }}>{trailData.trail[0].recorded_at ? new Date(trailData.trail[0].recorded_at).toLocaleString() : '—'}</span>
+                              <span className="si-756a9f21">{trailData.trail[0].recorded_at ? new Date(trailData.trail[0].recorded_at).toLocaleString() : '—'}</span>
                             </div>
                           ),
                         }] : []),
@@ -536,7 +536,7 @@ const GeospatialAnalytics: React.FC = () => {
                           popup: (
                             <div>
                               <strong>Latest Position</strong><br />
-                              <span style={{ fontSize: 12 }}>{trailData.trail[trailData.trail.length - 1].recorded_at ? new Date(trailData.trail[trailData.trail.length - 1].recorded_at).toLocaleString() : '—'}</span>
+                              <span className="si-756a9f21">{trailData.trail[trailData.trail.length - 1].recorded_at ? new Date(trailData.trail[trailData.trail.length - 1].recorded_at).toLocaleString() : '—'}</span>
                             </div>
                           ),
                         }] : []),
@@ -547,10 +547,10 @@ const GeospatialAnalytics: React.FC = () => {
                 )}
 
                 {trailData.trail?.length > 0 && (
-                  <div style={{ marginTop: 12 }}>
+                  <div className="si-66faea9d">
                     <details>
-                      <summary style={{ cursor: 'pointer', fontSize: 13, color: '#666' }}>📋 Trail Points Table ({trailData.trail.length} points)</summary>
-                      <table className="module-table" style={{ marginTop: 8 }}>
+                      <summary className="si-02314238">📋 Trail Points Table ({trailData.trail.length} points)</summary>
+                      <table className="module-table si-cbfb1eb8">
                         <thead><tr><th>#</th><th>{t('iotSensors.time')}</th><th>{t('geospatialAnalytics.lat')}</th><th>{t('geospatialAnalytics.lng')}</th><th>{t('common.type')}</th></tr></thead>
                         <tbody>
                           {trailData.trail.slice(0, 50).map((p: any, i: number) => (

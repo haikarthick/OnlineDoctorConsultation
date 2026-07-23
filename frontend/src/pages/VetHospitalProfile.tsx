@@ -85,8 +85,8 @@ const VetHospitalProfile: React.FC = () => {
   return (
     <div className="module-page">
       {/* Breadcrumb */}
-      <div style={{ marginBottom: '.75rem', fontSize: '.85rem', color: 'var(--text-muted,#888)' }}>
-        <Link to="/vet-hospitals" style={{ color: 'var(--primary,#2563eb)', textDecoration: 'none' }}>Vet Hospitals</Link>
+      <div className="si-388fca1e">
+        <Link to="/vet-hospitals" className="si-c6f6f2cf">Vet Hospitals</Link>
         {' › '}<span>{hospital.name}</span>
       </div>
 
@@ -96,15 +96,15 @@ const VetHospitalProfile: React.FC = () => {
         <div className="vh-hero-logo-row">
           {hospital.logoUrl
             ? <img src={hospital.logoUrl} alt={hospital.name} className="vh-hero-logo" />
-            : <div className="vh-hero-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem' }}>🏥</div>}
+            : <div className="vh-hero-logo si-1f8b6373">🏥</div>}
           <div className="vh-hero-info">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem', flexWrap: 'wrap' }}>
-              <h1 style={{ margin: 0, fontSize: '1.5rem' }}>{hospital.name}</h1>
+            <div className="si-5fff49c6">
+              <h1 className="si-bdeee872">{hospital.name}</h1>
               {hospital.isVerified && <span className="badge badge-verified">✓ Verified</span>}
               {hospital.hasEmergency && <span className="badge badge-emergency">⚡ Emergency</span>}
               {hospital.is24Hours && <span className="badge badge-24h">24/7</span>}
             </div>
-            <div className="vh-hero-meta" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '.3rem' }}>
+            <div className="vh-hero-meta si-0c8f2772">
               <span>{HOSPITAL_TYPE_LABELS[hospital.hospitalType] || hospital.hospitalType}</span>
               {hospital.city && <span>📍 {hospital.city}{hospital.state ? `, ${hospital.state}` : ''}</span>}
               {hospital.rating > 0 && <StarRating value={hospital.rating} />}
@@ -112,9 +112,9 @@ const VetHospitalProfile: React.FC = () => {
           </div>
         </div>
         <div className="vh-hero-actions">
-          <button className="btn-primary" onClick={() => navigate(`/vet-hospitals/${id}/book`)} style={{ fontWeight: 700 }}>📅 {t('common.submit')}</button>
-          {hospital.phone && <a href={`tel:${hospital.phone}`} className="btn-secondary" style={{ textDecoration: 'none' }}>📞 Call</a>}
-          {hospital.email && <a href={`mailto:${hospital.email}`} className="btn-secondary" style={{ textDecoration: 'none' }}>✉ Email</a>}
+          <button className="btn-primary si-f3347717" onClick={() => navigate(`/vet-hospitals/${id}/book`)}>📅 {t('common.submit')}</button>
+          {hospital.phone && <a href={`tel:${hospital.phone}`} className="btn-secondary si-5e3b8f7d">📞 Call</a>}
+          {hospital.email && <a href={`mailto:${hospital.email}`} className="btn-secondary si-5e3b8f7d">✉ Email</a>}
           {canManage && <button className="btn-secondary" onClick={() => navigate(`/vet-hospitals/manage`)}>⚙ Manage</button>}
         </div>
       </div>
@@ -132,12 +132,12 @@ const VetHospitalProfile: React.FC = () => {
       {activeTab === 'overview' && (
         <div>
           {hospital.description && (
-            <div className="card" style={{ marginBottom: '1.25rem' }}>
-              <h3 style={{ marginTop: 0 }}>About</h3>
-              <p style={{ margin: 0, lineHeight: 1.7 }}>{hospital.description}</p>
+            <div className="card si-78c26469">
+              <h3 className="si-33c1a83e">About</h3>
+              <p className="si-744cc668">{hospital.description}</p>
             </div>
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: '.75rem', marginBottom: '1.25rem' }}>
+          <div className="si-2c1b7c31">
             {[
               { label: 'Total Doctors', value: (hospital as any).totalDoctors ?? doctors.length, icon: '👨‍⚕️' },
               { label: 'Departments', value: departments.length, icon: '🏢' },
@@ -145,32 +145,32 @@ const VetHospitalProfile: React.FC = () => {
               { label: 'Reviews', value: hospital.totalReviews, icon: '💬' },
             ].map(s => (
               <div key={s.label} className="vh-stat-card">
-                <div style={{ fontSize: '1.5rem' }}>{s.icon}</div>
+                <div className="si-25a9f042">{s.icon}</div>
                 <div className="vh-stat-value">{s.value}</div>
                 <div className="vh-stat-label">{s.label}</div>
               </div>
             ))}
           </div>
           {hospital.facilities && hospital.facilities.length > 0 && (
-            <div className="card" style={{ marginBottom: '1.25rem' }}>
-              <h3 style={{ marginTop: 0 }}>Facilities</h3>
+            <div className="card si-78c26469">
+              <h3 className="si-33c1a83e">Facilities</h3>
               <div className="hcard-chips">
                 {hospital.facilities.map(f => <span key={f} className="chip">{f}</span>)}
               </div>
             </div>
           )}
           {hospital.specializations && hospital.specializations.length > 0 && (
-            <div className="card" style={{ marginBottom: '1.25rem' }}>
-              <h3 style={{ marginTop: 0 }}>Specializations</h3>
+            <div className="card si-78c26469">
+              <h3 className="si-33c1a83e">Specializations</h3>
               <div className="hcard-chips">
                 {hospital.specializations.map(s => <span key={s} className="chip">{s}</span>)}
               </div>
             </div>
           )}
           {/* Contact Info */}
-          <div className="card" style={{ marginBottom: '1.25rem' }}>
-            <h3 style={{ marginTop: 0 }}>Contact & Hours</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '.5rem' }}>
+          <div className="card si-78c26469">
+            <h3 className="si-33c1a83e">Contact & Hours</h3>
+            <div className="si-12a8fecb">
               {hospital.phone && <div>📞 {hospital.phone}</div>}
               {(hospital as any).emergencyPhone && <div>🚨 {(hospital as any).emergencyPhone}</div>}
               {hospital.email && <div>✉ {hospital.email}</div>}
@@ -183,7 +183,7 @@ const VetHospitalProfile: React.FC = () => {
           {/* Trust & Verification section — always visible to public */}
           <div className="card trust-section">
             <div className="trust-header">
-              <h3 style={{ margin: 0 }}>🛡 Trust & Verification</h3>
+              <h3 className="si-44087c4b">🛡 Trust & Verification</h3>
               {hospital.isVerified
                 ? <span className="trust-verified-badge">✓ VetCare Verified</span>
                 : <span className="trust-pending-badge">⏳ Verification Pending</span>}
@@ -227,14 +227,14 @@ const VetHospitalProfile: React.FC = () => {
                 {departments.map(dept => (
                   <div key={dept.id} className="vh-dept-card">
                     <div className="vh-dept-name">{dept.name}</div>
-                    {dept.code && <div style={{ fontSize: '.75rem', color: 'var(--text-muted,#888)', marginBottom: '.3rem' }}>Code: {dept.code}</div>}
-                    {dept.description && <div style={{ fontSize: '.85rem', marginBottom: '.4rem' }}>{dept.description}</div>}
+                    {dept.code && <div className="si-3b29138a">Code: {dept.code}</div>}
+                    {dept.description && <div className="si-ed473f7c">{dept.description}</div>}
                     {dept.specializations && dept.specializations.length > 0 && (
                       <div className="hcard-chips">
                         {dept.specializations.map(s => <span key={s} className="chip">{s}</span>)}
                       </div>
                     )}
-                    <div style={{ fontSize: '.8rem', color: 'var(--text-muted,#888)', marginTop: '.4rem' }}>
+                    <div className="si-d8a56e10">
                       {doctors.filter(d => d.departmentId === dept.id).length} doctors
                     </div>
                   </div>
@@ -246,8 +246,8 @@ const VetHospitalProfile: React.FC = () => {
       {/* Doctors Tab */}
       {activeTab === 'doctors' && (
         <div>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}>
-            <h3 style={{ margin: 0 }}>Doctors ({doctors.length})</h3>
+          <div className="si-a7521a1e">
+            <h3 className="si-44087c4b">Doctors ({doctors.length})</h3>
             {departments.length > 0 && (
               <select className="vh-select" value={deptFilter} onChange={e => setDeptFilter(e.target.value)}>
                 <option value="">All Departments</option>
@@ -262,10 +262,10 @@ const VetHospitalProfile: React.FC = () => {
                   <div key={doc.id} className="vh-doctor-card">
                     <div className="vh-doctor-name">{doc.doctorName || `Doctor ${doc.doctorId.slice(0,6)}`}</div>
                     <div className="vh-doctor-role">{doc.hospitalRole?.replace(/_/g, ' ')}</div>
-                    {doc.title && <div style={{ fontSize: '.82rem' }}>{doc.title}</div>}
+                    {doc.title && <div className="si-de1781c0">{doc.title}</div>}
                     {doc.departmentId && <div className="vh-doctor-dept">{departments.find(d => d.id === doc.departmentId)?.name}</div>}
-                    {doc.employmentType && <div style={{ fontSize: '.78rem', color: 'var(--text-muted,#888)' }}>{doc.employmentType.replace(/_/g,'  ')}</div>}
-                    {doc.consultationFee && <div style={{ fontSize: '.85rem', color: '#059669', fontWeight: 600 }}>{formatCurrency(doc.consultationFee)}</div>}
+                    {doc.employmentType && <div className="si-bea662e8">{doc.employmentType.replace(/_/g,'  ')}</div>}
+                    {doc.consultationFee && <div className="si-e4b7e858">{formatCurrency(doc.consultationFee)}</div>}
                     {doc.isAcceptingPatients !== undefined && (
                       <div style={{ fontSize: '.78rem', color: doc.isAcceptingPatients ? '#059669' : '#dc2626' }}>
                         {doc.isAcceptingPatients ? '✓ Accepting patients' : '✗ Not accepting'}
@@ -284,14 +284,14 @@ const VetHospitalProfile: React.FC = () => {
           {services.length === 0
             ? <div className="empty-state"><div className="empty-state-icon">💊</div><p>No services listed yet</p></div>
             : Object.entries(servicesByCategory).map(([cat, svcs]) => (
-                <div key={cat} style={{ marginBottom: '1.5rem' }}>
-                  <h4 style={{ textTransform: 'capitalize', marginBottom: '.75rem', color: 'var(--primary,#2563eb)' }}>{cat}</h4>
+                <div key={cat} className="si-1e52b2bd">
+                  <h4 className="si-abefaece">{cat}</h4>
                   <div className="vh-services-grid">
                     {svcs.map(svc => (
                       <div key={svc.id} className="vh-service-card">
                         <div className="vh-service-cat">{svc.category}</div>
                         <div className="vh-service-name">{svc.serviceName}</div>
-                        {svc.description && <div style={{ fontSize: '.82rem', color: 'var(--text-muted,#666)', margin: '.3rem 0' }}>{svc.description}</div>}
+                        {svc.description && <div className="si-6ca2ab31">{svc.description}</div>}
                         {(svc.priceMin || svc.priceMax) && (
                           <div className="vh-service-price">
                             {svc.priceMin && svc.priceMax && svc.priceMin !== svc.priceMax
@@ -300,7 +300,7 @@ const VetHospitalProfile: React.FC = () => {
                           </div>
                         )}
                         {svc.durationMinutes && <div className="vh-service-duration">⏱ {svc.durationMinutes} min</div>}
-                        {svc.requiresAppointment && <div style={{ fontSize: '.75rem', color: '#9333ea', marginTop: '.25rem' }}>📅 By appointment</div>}
+                        {svc.requiresAppointment && <div className="si-8401e4d8">📅 By appointment</div>}
                       </div>
                     ))}
                   </div>

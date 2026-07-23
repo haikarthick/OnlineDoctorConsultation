@@ -187,7 +187,7 @@ const HospitalBooking: React.FC = () => {
             <div><strong>Type:</strong> {BOOKING_TYPES.find(b => b.value === bookingType)?.label}</div>
           </div>
           <p className="hb-success-note">The doctor will review and confirm your appointment. You'll receive a notification once confirmed.</p>
-          <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'center', marginTop: '1.5rem' }}>
+          <div className="si-933a2811">
             <button className="btn-secondary" onClick={() => navigate(`/vet-hospitals/${hospitalId}`)}>Back to Hospital</button>
             <button className="btn-primary" onClick={() => navigate('/my-bookings')}>View My Bookings</button>
           </div>
@@ -247,7 +247,7 @@ const HospitalBooking: React.FC = () => {
         ))}
       </div>
 
-      {error && <div className="modal-alert error" style={{ marginBottom: '1rem' }}>⚠ {error}</div>}
+      {error && <div className="modal-alert error si-1cb81cae">⚠ {error}</div>}
 
       {/* Step 1: Select Doctor */}
       {step === 'doctor' && (
@@ -335,7 +335,7 @@ const HospitalBooking: React.FC = () => {
               {!selectedDate && <p className="hb-hint">Please select a date first</p>}
               {slotsLoading && <p className="hb-hint">Loading available slots...</p>}
               {dateMessage && !slotsLoading && (
-                <div style={{ padding: '12px 16px', borderRadius: 8, background: '#fefce8', border: '1px solid #fde047', marginBottom: 8, fontSize: 14, color: '#854d0e' }}>
+                <div className="si-bfca1452">
                   {dateMessage}
                 </div>
               )}

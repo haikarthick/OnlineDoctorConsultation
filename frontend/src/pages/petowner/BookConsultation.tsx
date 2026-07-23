@@ -384,13 +384,13 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
   if (success) {
     return (
       <div className="module-page">
-        <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }}>✅</div>
-          <h1 style={{ marginBottom: 8 }}>{t('bookConsultation.successTitle')}</h1>
-          <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 24 }}>
+        <div className="si-bd60beb2">
+          <div className="si-7615cf7c">✅</div>
+          <h1 className="si-dab75309">{t('bookConsultation.successTitle')}</h1>
+          <p className="si-6bc9c38d">
             {t('bookConsultation.successMessage')}
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div className="si-7b7a3b80">
             <button className="btn btn-primary" onClick={() => onNavigate('/my-bookings')}>
               {t('bookConsultation.viewMyBookings')}
             </button>
@@ -429,12 +429,10 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       </div>
 
       {/* Progress Steps */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 36, gap: 0 }}>
+      <div className="si-8b072f33">
         {[t('bookConsultation.steps.selectDoctor'), t('bookConsultation.steps.chooseTime'), t('bookConsultation.steps.details'), t('bookConsultation.steps.confirm')].map((label, i) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4
-            }}>
+          <div key={label} className="si-267eb255">
+            <div className="si-4977896d">
               <div style={{
                 width: 36, height: 36, borderRadius: '50%', display: 'flex',
                 alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600,
@@ -459,40 +457,36 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       </div>
 
       {error && (
-        <div className="toast toast-error" style={{ position: 'relative', marginBottom: 16 }}>
+        <div className="toast toast-error si-ef1b80b9">
           {error}
         </div>
       )}
 
       {/* Persistent Doctor Info Panel — visible on steps 2, 3, 4 */}
       {selectedVet && step > 1 && (
-        <div className="card" style={{ marginBottom: 24, background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-          <div className="card-body" style={{ display: 'flex', gap: 16, alignItems: 'center', padding: '14px 20px' }}>
-            <div style={{
-              width: 52, height: 52, borderRadius: '50%', background: '#2563eb',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'white', fontSize: 22, fontWeight: 700, flexShrink: 0
-            }}>
+        <div className="card si-aff059cd">
+          <div className="card-body si-bc0f1da3">
+            <div className="si-668bc06f">
               {selectedVet.firstName?.charAt(0) || '🐾'}
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: 16, color: '#1e40af' }}>
+            <div className="si-26d7edc3">
+              <div className="si-fcbdf47a">
                 {t('bookConsultation.bookingWith')} Dr. {selectedVet.firstName} {selectedVet.lastName}
               </div>
-              <div style={{ fontSize: 13, color: '#3b82f6', marginTop: 2 }}>
+              <div className="si-9ac294d9">
                 {(selectedVet.specializations || []).join(', ') || t('bookConsultation.generalVeterinarian')}
               </div>
               {selectedVet.clinicName && (
-                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>🏥 {selectedVet.clinicName}</div>
+                <div className="si-d93f66e1">🏥 {selectedVet.clinicName}</div>
               )}
             </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: 18, color: '#2563eb' }}>
+            <div className="si-d4499730">
+              <div className="si-e9b1e170">
                 {formatCurrency(selectedVet.consultationFee || 0)}
               </div>
-              <div style={{ fontSize: 12, color: '#6b7280' }}>{t('bookConsultation.perSession')}</div>
+              <div className="si-48a0b045">{t('bookConsultation.perSession')}</div>
               {(selectedVet.rating ?? 0) > 0 && (
-                <div style={{ fontSize: 12, color: '#f59e0b', marginTop: 2 }}>
+                <div className="si-0d975b1f">
                   ⭐ {(selectedVet.rating ?? 0).toFixed(1)}
                 </div>
               )}
@@ -504,7 +498,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       {/* Step 1: Select Doctor */}
       {step === 1 && (
         <div>
-          <h2 style={{ marginBottom: 16 }}>{t('bookConsultation.selectVet')}</h2>
+          <h2 className="si-7e63ec4f">{t('bookConsultation.selectVet')}</h2>
           <div className="vet-grid">
             {vets.map(vet => (
               <div
@@ -532,7 +526,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
               <p>{t('bookConsultation.checkBackLater')}</p>
             </div>
           )}
-          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
+          <div className="si-07572340">
             <button
               className="btn btn-primary btn-lg"
               disabled={!selectedVet}
@@ -547,16 +541,16 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       {/* Step 2: Choose Time */}
       {step === 2 && (
         <div>
-          <h2 style={{ marginBottom: 16 }}>{t('bookConsultation.chooseDateTime')}</h2>
-          <div className="card" style={{ marginBottom: 20 }}>
+          <h2 className="si-7e63ec4f">{t('bookConsultation.chooseDateTime')}</h2>
+          <div className="card si-478be2e9">
             <div className="card-body">
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">{t('bookConsultation.selectDate')}</label>
                   {dateSearching ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8 }}>
-                      <div className="loading-spinner" style={{ width: 16, height: 16, flexShrink: 0 }} />
-                      <span style={{ fontSize: 13, color: '#0369a1' }}>{t('bookConsultation.findingNextDate')}</span>
+                    <div className="si-7a759a78">
+                      <div className="loading-spinner si-34eb3f90" />
+                      <span className="si-c3e04596">{t('bookConsultation.findingNextDate')}</span>
                     </div>
                   ) : (
                     <>
@@ -572,7 +566,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                         }}
                       />
                       {autoSelectedDate && selectedDate && (
-                        <p style={{ margin: '6px 0 0', fontSize: 12, color: '#059669' }}>
+                        <p className="si-b21ad2cf">
                           ✓ {t('bookConsultation.nextAvailableAutoSelected')}
                         </p>
                       )}
@@ -606,13 +600,13 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
               </div>
               <div className="card-body">
                 {slotsLoading ? (
-                  <div className="loading-container" style={{ padding: 30 }}>
+                  <div className="loading-container si-944918f6">
                     <div className="loading-spinner" />
                   </div>
                 ) : (() => {
                   const futureSlots = filterFutureSlots(availableSlots, selectedDate)
                   return futureSlots.length === 0 ? (
-                    <div className="empty-state" style={{ padding: 20 }}>
+                    <div className="empty-state si-95d82b41">
                       <p>{availableSlots.length === 0
                         ? t('bookConsultation.noSlotsAvailable')
                         : t('bookConsultation.allSlotsPassed')}</p>
@@ -635,7 +629,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
             </div>
           )}
 
-          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
+          <div className="si-2595c296">
             <button className="btn btn-outline" onClick={() => setStep(1)}>{t('bookConsultation.back')}</button>
             <button
               className="btn btn-primary btn-lg"
@@ -651,19 +645,16 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       {/* Step 3: Details */}
       {step === 3 && (
         <div>
-          <h2 style={{ marginBottom: 16 }}>{t('bookConsultation.consultationDetails')}</h2>
+          <h2 className="si-7e63ec4f">{t('bookConsultation.consultationDetails')}</h2>
 
           {/* Pre-filled context banner */}
           {prefilledContext && (
-            <div style={{
-              background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8,
-              padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#1e40af'
-            }}>
+            <div className="si-a028abe6">
               <strong>ℹ️ Pre-selected:</strong>{' '}
               {prefilledContext.animalName && <span>Animal: <strong>{prefilledContext.animalName}</strong></span>}
               {prefilledContext.enterpriseName && <span>Enterprise: <strong>{prefilledContext.enterpriseName}</strong></span>}
               {prefilledContext.groupName && <span> → Group: <strong>{prefilledContext.groupName}</strong></span>}
-              <span style={{ marginLeft: 8, color: '#6b7280', fontSize: 12 }}>
+              <span className="si-824a7a1e">
                 (You can change the selection below if needed)
               </span>
             </div>
@@ -671,10 +662,10 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
 
           {/* Selection Mode Toggle (Farmers & Admins) */}
           {(isFarmer || isAdmin) && (
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div className="card-body" style={{ padding: '12px 16px' }}>
-                <label className="form-label" style={{ marginBottom: 8 }}>{t('bookConsultation.bookingFor')}</label>
-                <div style={{ display: 'flex', gap: 8 }}>
+            <div className="card si-7e63ec4f">
+              <div className="card-body si-5792103e">
+                <label className="form-label si-dab75309">{t('bookConsultation.bookingFor')}</label>
+                <div className="si-d223efb3">
                   <button
                     type="button"
                     style={{
@@ -725,7 +716,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                       ))}
                     </select>
                     {enterprises.length === 0 && (
-                      <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>
+                      <p className="si-322b324f">
                         {t('bookConsultation.noEnterprises')}
                       </p>
                     )}
@@ -735,8 +726,8 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                     <div className="form-group">
                       <label className="form-label">🐄 {t('bookConsultation.selectHerd')}</label>
                       {loadingEnterpriseData ? (
-                        <div style={{ padding: 10, textAlign: 'center' }}>
-                          <div className="loading-spinner" style={{ width: 20, height: 20, margin: '0 auto' }} />
+                        <div className="si-83bdeb6c">
+                          <div className="loading-spinner si-22c0fd35" />
                         </div>
                       ) : (
                         <select
@@ -771,22 +762,22 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                         ))}
                       </select>
                       {filteredEnterpriseAnimals.length === 0 && (
-                        <div style={{ fontSize: 13, color: '#6b7280', marginTop: 6, padding: '10px 14px', background: '#fefce8', border: '1px solid #fde68a', borderRadius: 8 }}>
-                          <strong style={{ color: '#92400e' }}>⚠️ {selectedGroup ? t('bookConsultation.noAnimalsInGroup') : t('bookConsultation.noAnimalsInEnterprise')}</strong>
-                          <p style={{ margin: '6px 0 0', fontSize: 12, lineHeight: 1.5 }}>
+                        <div className="si-ae724942">
+                          <strong className="si-31823d6c">⚠️ {selectedGroup ? t('bookConsultation.noAnimalsInGroup') : t('bookConsultation.noAnimalsInEnterprise')}</strong>
+                          <p className="si-645dbab8">
                             {t('bookConsultation.toAddAnimals')}{' '}
                             <button type="button" onClick={() => onNavigate('/animals')}
-                              style={{ background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline', fontSize: 12, padding: 0, fontWeight: 600 }}>
+                              className="si-7e869b25">
                               {t('bookConsultation.registerNewAnimal')}
                             </button>
                             {' '}{t('bookConsultation.andAssign')}{' '}
                             <button type="button" onClick={() => onNavigate('/animal-groups')}
-                              style={{ background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', textDecoration: 'underline', fontSize: 12, padding: 0, fontWeight: 600 }}>
+                              className="si-7e869b25">
                               {t('bookConsultation.herdsAndGroups')}
                             </button>
                             {' '}{t('bookConsultation.toAssignExisting')}
                           </p>
-                          <p style={{ margin: '4px 0 0', fontSize: 12, color: '#78716c' }}>
+                          <p className="si-d7b1325f">
                             {t('bookConsultation.canStillProceed')}
                           </p>
                         </div>
@@ -796,12 +787,9 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
 
                   {/* Quick summary of selection */}
                   {selectedEnterprise && (
-                    <div style={{
-                      background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8,
-                      padding: '10px 14px', marginBottom: 8, fontSize: 13
-                    }}>
-                      <strong style={{ color: '#166534' }}>📋 Selection:</strong>{' '}
-                      <span style={{ color: '#15803d' }}>
+                    <div className="si-08054a82">
+                      <strong className="si-27f26492">📋 Selection:</strong>{' '}
+                      <span className="si-f2153d80">
                         {selectedEnterpriseName}
                         {selectedGroupName ? ` → ${selectedGroupName}` : ''}
                         {selectedAnimalObj ? ` → ${selectedAnimalObj.name}` : ' (general / herd-level)'}
@@ -816,15 +804,15 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                 <div className="form-group">
                   <label className="form-label">{t('bookConsultation.selectYourPet')}</label>
                   {animals.length === 0 ? (
-                    <div style={{ padding: '14px 16px', background: '#fefce8', border: '1px solid #fde68a', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                    <div className="si-db6c70c7">
                       <div>
-                        <strong style={{ color: '#92400e', fontSize: 13 }}>🐾 {t('bookConsultation.noPetsRegistered')}</strong>
-                        <p style={{ margin: '4px 0 0', fontSize: 12, color: '#78350f' }}>{t('bookConsultation.noPetsHint')}</p>
+                        <strong className="si-852e3180">🐾 {t('bookConsultation.noPetsRegistered')}</strong>
+                        <p className="si-1118237b">{t('bookConsultation.noPetsHint')}</p>
                       </div>
                       <button
                         type="button"
-                        className="module-btn primary"
-                        style={{ whiteSpace: 'nowrap', fontSize: 13 }}
+                        className="module-btn primary si-7a2c0aef"
+                       
                         onClick={() => onNavigate('/animals')}
                       >
                         + {t('bookConsultation.addPet')}
@@ -881,7 +869,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                   }}
                 />
                 {step3Error && (
-                  <p style={{ margin: '6px 0 0', fontSize: 13, color: '#dc2626' }}>
+                  <p className="si-4bdfd452">
                     ⚠ {step3Error}
                   </p>
                 )}
@@ -926,7 +914,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
+          <div className="si-2595c296">
             <button className="btn btn-outline" onClick={() => setStep(2)}>{t('bookConsultation.back')}</button>
             <button
               className="btn btn-primary btn-lg"
@@ -949,34 +937,34 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
       {/* Step 4: Confirm */}
       {step === 4 && (
         <div>
-          <h2 style={{ marginBottom: 16 }}>{t('bookConsultation.reviewConfirm')}</h2>
-          <div className="card" style={{ marginBottom: 20 }}>
+          <h2 className="si-7e63ec4f">{t('bookConsultation.reviewConfirm')}</h2>
+          <div className="card si-478be2e9">
             <div className="card-body">
-              <div style={{ display: 'grid', gap: 16 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="si-e295240a">
+                <div className="si-f23844fb">
                   <div>
-                    <strong style={{ color: '#6b7280', fontSize: 13 }}>{t('bookConsultation.veterinarianLabel')}</strong>
-                    <p style={{ margin: '4px 0', fontSize: 16 }}>
+                    <strong className="si-c3b93ebb">{t('bookConsultation.veterinarianLabel')}</strong>
+                    <p className="si-7ddbf1dd">
                       Dr. {selectedVet?.firstName} {selectedVet?.lastName}
                     </p>
                   </div>
                   <div>
-                    <strong style={{ color: '#6b7280', fontSize: 13 }}>{t('bookConsultation.feeLabel')}</strong>
-                    <p style={{ margin: '4px 0', fontSize: 16, fontWeight: 700, color: '#2563eb' }}>
+                    <strong className="si-c3b93ebb">{t('bookConsultation.feeLabel')}</strong>
+                    <p className="si-0112c347">
                       {formatCurrency(selectedVet?.consultationFee || 0)}
                     </p>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div className="si-f23844fb">
                   <div>
-                    <strong style={{ color: '#6b7280', fontSize: 13 }}>{t('bookConsultation.dateTimeLabel')}</strong>
-                    <p style={{ margin: '4px 0', fontSize: 16 }}>
+                    <strong className="si-c3b93ebb">{t('bookConsultation.dateTimeLabel')}</strong>
+                    <p className="si-7ddbf1dd">
                       {selectedDate} | {selectedSlot?.startTime} - {selectedSlot?.endTime}
                     </p>
                   </div>
                   <div>
-                    <strong style={{ color: '#6b7280', fontSize: 13 }}>{t('bookConsultation.typeLabel')}</strong>
-                    <p style={{ margin: '4px 0', fontSize: 16, textTransform: 'capitalize' }}>
+                    <strong className="si-c3b93ebb">{t('bookConsultation.typeLabel')}</strong>
+                    <p className="si-69225186">
                       {bookingType.replace('_', ' ')}
                     </p>
                   </div>
@@ -984,31 +972,31 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
 
                 {/* Enterprise / Group / Animal info */}
                 {selectionMode === 'enterprise' && selectedEnterprise && (
-                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '12px 16px' }}>
-                    <strong style={{ color: '#166534', fontSize: 13 }}>🏢 {t('bookConsultation.farmDetails')}</strong>
-                    <div style={{ margin: '6px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div className="si-42727ee6">
+                    <strong className="si-85f9b19e">🏢 {t('bookConsultation.farmDetails')}</strong>
+                    <div className="si-33fa0800">
                       <div>
-                        <span style={{ fontSize: 12, color: '#6b7280' }}>{t('bookConsultation.enterpriseLabel')}:</span>
-                        <p style={{ margin: '2px 0', fontWeight: 600 }}>{selectedEnterpriseName}</p>
+                        <span className="si-48a0b045">{t('bookConsultation.enterpriseLabel')}:</span>
+                        <p className="si-3611a35f">{selectedEnterpriseName}</p>
                       </div>
                       {selectedGroupName && (
                         <div>
-                          <span style={{ fontSize: 12, color: '#6b7280' }}>{t('bookConsultation.herdGroupLabel')}:</span>
-                          <p style={{ margin: '2px 0', fontWeight: 600 }}>{selectedGroupName}</p>
+                          <span className="si-48a0b045">{t('bookConsultation.herdGroupLabel')}:</span>
+                          <p className="si-3611a35f">{selectedGroupName}</p>
                         </div>
                       )}
                     </div>
                     {selectedAnimalObj && (
-                      <div style={{ marginTop: 4 }}>
-                        <span style={{ fontSize: 12, color: '#6b7280' }}>{t('bookConsultation.animalLabel')}:</span>
-                        <p style={{ margin: '2px 0', fontWeight: 600 }}>
+                      <div className="si-f48bb60f">
+                        <span className="si-48a0b045">{t('bookConsultation.animalLabel')}:</span>
+                        <p className="si-3611a35f">
                           {selectedAnimalObj.name} — {selectedAnimalObj.species}
                           {selectedAnimalObj.breed ? ` / ${selectedAnimalObj.breed}` : ''}
                         </p>
                       </div>
                     )}
                     {!selectedAnimalObj && (
-                      <p style={{ margin: '4px 0 0', fontSize: 12, color: '#059669', fontStyle: 'italic' }}>
+                      <p className="si-e2573780">
                         {t('bookConsultation.generalConsultation')}
                       </p>
                     )}
@@ -1017,8 +1005,8 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
 
                 {selectionMode === 'individual' && selectedAnimalObj && (
                   <div>
-                    <strong style={{ color: '#6b7280', fontSize: 13 }}>{t('bookConsultation.petLabel')}</strong>
-                    <p style={{ margin: '4px 0' }}>
+                    <strong className="si-c3b93ebb">{t('bookConsultation.petLabel')}</strong>
+                    <p className="si-4dc4c991">
                       {selectedAnimalObj.name} — {selectedAnimalObj.species}
                       {selectedAnimalObj.breed ? ` / ${selectedAnimalObj.breed}` : ''}
                     </p>
@@ -1026,18 +1014,18 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
                 )}
 
                 <div>
-                  <strong style={{ color: '#6b7280', fontSize: 13 }}>{t('bookConsultation.reasonLabel')}</strong>
-                  <p style={{ margin: '4px 0' }}>{reasonForVisit}</p>
+                  <strong className="si-c3b93ebb">{t('bookConsultation.reasonLabel')}</strong>
+                  <p className="si-4dc4c991">{reasonForVisit}</p>
                 </div>
                 {symptoms && (
                   <div>
-                    <strong style={{ color: '#6b7280', fontSize: 13 }}>{t('bookConsultation.symptomsLabel')}</strong>
-                    <p style={{ margin: '4px 0' }}>{symptoms}</p>
+                    <strong className="si-c3b93ebb">{t('bookConsultation.symptomsLabel')}</strong>
+                    <p className="si-4dc4c991">{symptoms}</p>
                   </div>
                 )}
                 <div>
-                  <strong style={{ color: '#6b7280', fontSize: 13 }}>{t('bookConsultation.priorityReviewLabel')}</strong>
-                  <p style={{ margin: '4px 0' }}>
+                  <strong className="si-c3b93ebb">{t('bookConsultation.priorityReviewLabel')}</strong>
+                  <p className="si-4dc4c991">
                     <span className={`badge badge-${priority === 'emergency' ? 'cancelled' : priority === 'high' ? 'pending' : 'confirmed'}`}>
                       {priority}
                     </span>
@@ -1047,7 +1035,7 @@ const BookConsultation: React.FC<BookConsultationProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
+          <div className="si-2595c296">
             <button className="btn btn-outline" onClick={() => setStep(3)}>{t('bookConsultation.back')}</button>
             <button
               className="btn btn-success btn-lg"

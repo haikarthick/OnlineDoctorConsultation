@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
+import DispensingReceiptView, { DispensingReceiptData } from '../../components/pharmacy/DispensingReceiptView'
+import MedicationLabelPrint, { LabelItem } from '../../components/pharmacy/MedicationLabelPrint'
 
 interface Medication {
   name: string
@@ -75,8 +77,16 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
   const [loadingInv, setLoadingInv] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [pharmacyInfo, setPharmacyInfo] = useState<{ pharmacy_name?: string; address?: string; phone?: string }>({})
+  const [receipt, setReceipt] = useState<DispensingReceiptData | null>(null)
+  const [labelItems, setLabelItems] = useState<LabelItem[] | null>(null)
+  const [showLabels, setShowLabels] = useState(false)
 
   const medications = parseMedications(prescription.medications)
+
+  useEffect(() => {
+    client.get(`/pharmacies/${pharmacyId}`).then(res => setPharmacyInfo(res.data || {})).catch(() => {})
+  }, [pharmacyId])
 
   // Load pharmacy inventory and pre-match medications
   useEffect(() => {
@@ -163,12 +173,13 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
     setSaving(true)
     setError('')
     try {
-      await client.post('/dispensing', {
+      const dispensedLines = lineItems.filter(l => l.inventory_id && l.quantity_dispensed > 0)
+      const res = await client.post('/dispensing', {
         prescription_id: prescription.id,
         pharmacy_id: pharmacyId,
         dispensing_method: method,
         notes,
-        line_items: lineItems.filter(l => l.inventory_id && l.quantity_dispensed > 0).map(l => ({
+        line_items: dispensedLines.map(l => ({
           med_id: l.med_id,
           inventory_id: l.inventory_id,
           batch_number: l.batch_number,
@@ -178,7 +189,29 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
           line_total: l.line_total,
         })),
       })
-      onDone()
+      setReceipt({
+        dispensingId: res.data?.id || '',
+        createdAt: res.data?.created_at || new Date().toISOString(),
+        dispensingMethod: method,
+        pharmacyName: pharmacyInfo.pharmacy_name,
+        pharmacyAddress: pharmacyInfo.address,
+        pharmacyPhone: pharmacyInfo.phone,
+        animalName: prescription.pet_name,
+        animalSpecies: prescription.animal_species,
+        ownerName: prescription.owner_name,
+        vetName: prescription.vet_name,
+        lineItems: dispensedLines.map(l => ({
+          name: l.med_name, quantity: l.quantity_dispensed, unit: l.unit,
+          unitPrice: l.unit_price, lineTotal: l.line_total, batchNumber: l.batch_number,
+        })),
+        totalCost,
+      })
+      setLabelItems(dispensedLines.map((l, idx) => ({
+        medicationName: l.med_name,
+        directions: medications[idx] ? `${medications[idx].dosage} · ${medications[idx].frequency}${medications[idx].duration ? ' · ' + medications[idx].duration : ''}` : undefined,
+        quantity: l.quantity_dispensed,
+        unit: l.unit,
+      })))
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.response?.data?.error || err.message || t('common.error'))
     } finally {
@@ -186,39 +219,63 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
     }
   }
 
+  if (receipt) {
+    return (
+      <>
+        <DispensingReceiptView
+          receipt={receipt}
+          onClose={onDone}
+          secondaryAction={labelItems && labelItems.length > 0 ? { label: `🏷 ${t('medicationLabel.printLabels')}`, onClick: () => setShowLabels(true) } : undefined}
+        />
+        {showLabels && labelItems && (
+          <MedicationLabelPrint
+            pharmacyName={pharmacyInfo.pharmacy_name}
+            pharmacyPhone={pharmacyInfo.phone}
+            animalName={prescription.pet_name}
+            animalSpecies={prescription.animal_species}
+            ownerName={prescription.owner_name}
+            rxRef={prescription.id}
+            items={labelItems}
+            onClose={() => setShowLabels(false)}
+          />
+        )}
+      </>
+    )
+  }
+
   return (
     <div className="pharm-modal-overlay" onClick={onClose}>
-      <div className="pharm-modal" style={{ maxWidth: 720 }} onClick={e => e.stopPropagation()}>
+      <div className="pharm-modal si-b86380be" onClick={e => e.stopPropagation()}>
         <div className="pharm-modal-header">
           <h2>💊 {t('pharmacy.dispense.title')}</h2>
           <button type="button" className="pharm-modal-close" onClick={onClose}>✕</button>
         </div>
 
         {/* Patient summary */}
-        <div style={{ background: '#f0f4ff', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: '0.88rem' }}>
+        <div className="si-b11f08cf">
           <strong>🐾 {prescription.pet_name}</strong>
-          {prescription.animal_species && <span style={{ color: '#666' }}> ({prescription.animal_species})</span>}
-          {' · '}<span style={{ color: '#555' }}>👤 {prescription.owner_name}</span>
-          {prescription.vet_name && <span style={{ color: '#555' }}> · 👨‍⚕️ {prescription.vet_name}</span>}
+          {prescription.animal_species && <span className="si-50edd4e9"> ({prescription.animal_species})</span>}
+          {' · '}<span className="si-c477d325">👤 {prescription.owner_name}</span>
+          {prescription.vet_name && <span className="si-c477d325"> · 👨‍⚕️ {prescription.vet_name}</span>}
         </div>
 
-        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button></div>}
+        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} className="si-540cb98a">✕</button></div>}
 
         {loadingInv ? (
-          <div style={{ textAlign: 'center', padding: '24px 0', color: '#888' }}>⏳ {t('pharmacy.dispense.loadingInventory')}</div>
+          <div className="si-fed9d898">⏳ {t('pharmacy.dispense.loadingInventory')}</div>
         ) : (
           <form onSubmit={handleSubmit}>
             {/* Medication line items */}
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ fontWeight: 600, fontSize: '0.88rem', color: '#444', display: 'block', marginBottom: 8 }}>
+            <div className="si-7e63ec4f">
+              <label className="si-86032ed0">
                 {t('pharmacy.dispense.medications')} <span className="req-star">*</span>
               </label>
               {lineItems.length === 0 ? (
-                <div className="pharmacy-empty" style={{ padding: '20px 0' }}>
-                  <p style={{ fontSize: '0.85rem' }}>{t('pharmacy.dispense.noMedications')}</p>
+                <div className="pharmacy-empty si-8a6436c0">
+                  <p className="si-1a1e3482">{t('pharmacy.dispense.noMedications')}</p>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div className="si-51b511c9">
                   {lineItems.map((line, idx) => {
                     const isOverStock = line.inventory_id && line.quantity_dispensed > line.quantity_available
                     return (
@@ -226,26 +283,26 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
                         border: `1px solid ${isOverStock ? '#f44336' : '#e0e0e0'}`,
                         borderRadius: 8, padding: '12px 14px', background: isOverStock ? '#fff5f5' : '#fafafa'
                       }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
-                          <strong style={{ fontSize: '0.9rem', color: '#1a237e' }}>
+                        <div className="si-fb9d49f5">
+                          <strong className="si-d6adcc9a">
                             {medications[idx]?.name || line.med_name}
                           </strong>
                           {medications[idx] && (
-                            <span style={{ fontSize: '0.78rem', color: '#666', background: '#e8eaf6', borderRadius: 4, padding: '2px 8px' }}>
+                            <span className="si-1c53bdb8">
                               {medications[idx].dosage} · {medications[idx].frequency}
                               {medications[idx].duration && ` · ${medications[idx].duration}`}
                             </span>
                           )}
                         </div>
 
-                        <div className="pharm-form-row" style={{ gap: 8 }}>
+                        <div className="pharm-form-row si-403e4828">
                           {/* Inventory selector */}
-                          <div className="pharm-form-group" style={{ marginBottom: 0 }}>
-                            <label style={{ fontSize: '0.78rem' }}>{t('pharmacy.dispense.inventoryBatch')}</label>
+                          <div className="pharm-form-group si-d7d15c11">
+                            <label className="si-c384180a">{t('pharmacy.dispense.inventoryBatch')}</label>
                             <select
                               value={line.inventory_id}
                               onChange={e => updateLine(idx, 'inventory_id', e.target.value)}
-                              style={{ fontSize: '0.82rem' }}
+                              className="si-c5381d69"
                             >
                               <option value="">{t('pharmacy.dispense.selectInventory')}</option>
                               {inventory.map(i => (
@@ -257,8 +314,8 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
                             </select>
                           </div>
                           {/* Quantity */}
-                          <div className="pharm-form-group" style={{ marginBottom: 0, minWidth: 90 }}>
-                            <label style={{ fontSize: '0.78rem' }}>{t('pharmacy.dispense.qty')}</label>
+                          <div className="pharm-form-group si-7120288a">
+                            <label className="si-c384180a">{t('pharmacy.dispense.qty')}</label>
                             <input
                               type="number" min="1"
                               max={line.quantity_available || 9999}
@@ -267,8 +324,8 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
                             />
                           </div>
                           {/* Unit price */}
-                          <div className="pharm-form-group" style={{ marginBottom: 0, minWidth: 90 }}>
-                            <label style={{ fontSize: '0.78rem' }}>{t('pharmacy.dispense.unitPrice')}</label>
+                          <div className="pharm-form-group si-7120288a">
+                            <label className="si-c384180a">{t('pharmacy.dispense.unitPrice')}</label>
                             <input
                               type="number" min="0" step="0.01"
                               value={line.unit_price}
@@ -276,24 +333,24 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
                             />
                           </div>
                           {/* Line total */}
-                          <div className="pharm-form-group" style={{ marginBottom: 0, minWidth: 90 }}>
-                            <label style={{ fontSize: '0.78rem' }}>{t('pharmacy.dispense.lineTotal')}</label>
-                            <div style={{ padding: '9px 12px', background: '#f5f7fa', borderRadius: 8, fontSize: '0.88rem', fontWeight: 600, color: '#1a237e' }}>
+                          <div className="pharm-form-group si-7120288a">
+                            <label className="si-c384180a">{t('pharmacy.dispense.lineTotal')}</label>
+                            <div className="si-5c4cbed7">
                               {formatCurrency(line.line_total)}
                             </div>
                           </div>
                         </div>
 
                         {line.inventory_id && (
-                          <div style={{ marginTop: 6, fontSize: '0.78rem', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                          <div className="si-bccb4078">
                             <span style={{ color: isOverStock ? '#f44336' : '#388e3c' }}>
                               {isOverStock ? '⚠️' : '✓'} {t('pharmacy.dispense.available')}: {line.quantity_available} {line.unit}
                             </span>
-                            {line.batch_number && <span style={{ color: '#888' }}>Batch: {line.batch_number}</span>}
+                            {line.batch_number && <span className="si-40d2db53">Batch: {line.batch_number}</span>}
                           </div>
                         )}
                         {!line.inventory_id && (
-                          <div style={{ marginTop: 6, fontSize: '0.78rem', color: '#e65100' }}>
+                          <div className="si-fd56b816">
                             ⚠️ {t('pharmacy.dispense.selectInventoryWarning')}
                           </div>
                         )}
@@ -305,9 +362,9 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
             </div>
 
             {/* Total cost */}
-            <div style={{ background: '#e8f5e9', borderRadius: 8, padding: '10px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#2e7d32' }}>💰 {t('pharmacy.dispense.totalCost')}</span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1b5e20' }}>{formatCurrency(totalCost)}</span>
+            <div className="si-49750ca1">
+              <span className="si-22eb4164">💰 {t('pharmacy.dispense.totalCost')}</span>
+              <span className="si-7458a255">{formatCurrency(totalCost)}</span>
             </div>
 
             {/* Dispensing method */}
@@ -328,12 +385,12 @@ export default function DispensingModal({ prescription, pharmacyId, onClose, onD
             </div>
 
             {hasStockWarning && (
-              <div className="pharm-error" style={{ marginBottom: 12 }}>
+              <div className="pharm-error si-bab8e8bc">
                 ⚠️ {t('pharmacy.dispense.stockWarningError')}
               </div>
             )}
             {hasUnmatchedItems && !hasStockWarning && (
-              <div style={{ fontSize: '0.82rem', color: '#f57f17', marginBottom: 12 }}>
+              <div className="si-f7ad46ed">
                 ⚠️ {t('pharmacy.dispense.unmatchedWarning')}
               </div>
             )}

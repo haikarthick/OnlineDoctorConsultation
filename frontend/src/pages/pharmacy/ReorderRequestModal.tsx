@@ -42,8 +42,8 @@ export default function ReorderRequestModal({ pharmacyId, networkId, item, onClo
     client.get(`/networks/${networkId}/suppliers`).then(res => {
       setSuppliers(res.data || [])
       if (res.data?.length > 0) setForm(f => ({ ...f, supplier_id: res.data[0].id }))
-    }).catch(() => {})
-  }, [networkId])
+    }).catch(() => setError(t('pharmacy.reorder.suppliersLoadFailed')))
+  }, [networkId, t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,10 +75,10 @@ export default function ReorderRequestModal({ pharmacyId, networkId, item, onClo
           <button className="pharm-modal-close" onClick={onClose}>✕</button>
         </div>
 
-        <div style={{ background: '#f5f7fa', borderRadius: 8, padding: '10px 14px', marginBottom: 14, fontSize: '0.88rem' }}>
+        <div className="si-b5128f08">
           <strong>{item.medication_name || item.med_name}</strong>
           <br />
-          <span style={{ color: '#666' }}>{t('pharmacy.stock.currentQty')}: {item.quantity} {item.unit} · {t('pharmacy.table.minStock')}: {item.min_stock_level}</span>
+          <span className="si-50edd4e9">{t('pharmacy.stock.currentQty')}: {item.quantity} {item.unit} · {t('pharmacy.table.minStock')}: {item.min_stock_level}</span>
         </div>
 
         {error && <div className="pharm-error">⚠️ {error}</div>}
@@ -91,7 +91,7 @@ export default function ReorderRequestModal({ pharmacyId, networkId, item, onClo
               {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             {!form.supplier_id && (
-              <small style={{ color: '#e65100' }}>⚠️ {t('pharmacy.reorder.supplierRequired')}</small>
+              <small className="si-4346e4cd">⚠️ {t('pharmacy.reorder.supplierRequired')}</small>
             )}
           </div>
           <div className="pharm-form-group">

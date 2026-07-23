@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import client from '../../services/api/client'
 import { useSettings } from '../../context/SettingsContext'
 import { useAutoRefresh } from '../../hooks/useAutoRefresh'
+import DispensingReceiptView, { DispensingReceiptData } from '../../components/pharmacy/DispensingReceiptView'
 
 interface DispensingRecord {
   id: string
@@ -11,6 +12,7 @@ interface DispensingRecord {
   owner_name: string
   animal_name: string
   animal_species: string
+  vet_name: string
   dispensing_method: string
   dispensing_status: string
   total_cost: number
@@ -19,6 +21,10 @@ interface DispensingRecord {
   created_at: string
   handed_over_at: string | null
   prescription_medications: any
+  pharmacy_name: string
+  pharmacy_address: string
+  pharmacy_phone: string
+  line_items: { name: string; quantity: number; unit: string; unitPrice: number; lineTotal: number; batchNumber: string }[] | null
 }
 
 interface Props {
@@ -48,6 +54,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
   const [error, setError] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [receipt, setReceipt] = useState<DispensingReceiptData | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -86,6 +93,26 @@ export default function DispensingHistory({ pharmacyId }: Props) {
     } catch { return '—' }
   }
 
+  const openReceipt = (r: DispensingRecord) => {
+    setReceipt({
+      dispensingId: r.id,
+      createdAt: r.created_at,
+      dispensingMethod: r.dispensing_method,
+      pharmacyName: r.pharmacy_name,
+      pharmacyAddress: r.pharmacy_address,
+      pharmacyPhone: r.pharmacy_phone,
+      animalName: r.animal_name,
+      animalSpecies: r.animal_species,
+      ownerName: r.owner_name,
+      vetName: r.vet_name,
+      pharmacistName: r.pharmacist_name,
+      lineItems: (r.line_items || []).map(li => ({
+        name: li.name, quantity: li.quantity, unit: li.unit, unitPrice: li.unitPrice, lineTotal: li.lineTotal, batchNumber: li.batchNumber,
+      })),
+      totalCost: r.total_cost,
+    })
+  }
+
   return (
     <div>
       <div className="pharmacy-card">
@@ -93,7 +120,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
           <h3>📜 {t('pharmacy.history.title')}</h3>
         </div>
 
-        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button></div>}
+        {error && <div className="pharm-error">⚠️ {error} <button type="button" onClick={() => setError('')} className="si-540cb98a">✕</button></div>}
 
         <div className="pharmacy-filter-bar">
           <select className="pharmacy-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
@@ -104,11 +131,11 @@ export default function DispensingHistory({ pharmacyId }: Props) {
             <option value="delivered">{t('pharmacy.history.status.delivered')}</option>
             <option value="cancelled">{t('pharmacy.history.status.cancelled')}</option>
           </select>
-          <span style={{ fontSize: '0.82rem', color: '#888' }}>{filtered.length} {t('pharmacy.history.records')}</span>
+          <span className="si-22cd98cf">{filtered.length} {t('pharmacy.history.records')}</span>
         </div>
 
         {loading ? (
-          <p style={{ color: '#888', padding: '20px 0', textAlign: 'center' }}>{t('common.loading')}</p>
+          <p className="si-43f86130">{t('common.loading')}</p>
         ) : filtered.length === 0 ? (
           <div className="pharmacy-empty">
             <div className="empty-icon">📜</div>
@@ -137,22 +164,22 @@ export default function DispensingHistory({ pharmacyId }: Props) {
                     <tr key={r.id}>
                       <td>
                         <strong>{r.animal_name || '—'}</strong>
-                        {r.animal_species && <small style={{ color: '#888', display: 'block' }}>{r.animal_species}</small>}
-                        <small style={{ color: '#888' }}>👤 {r.owner_name || '—'}</small>
+                        {r.animal_species && <small className="si-1a0c0bfa">{r.animal_species}</small>}
+                        <small className="si-40d2db53">👤 {r.owner_name || '—'}</small>
                       </td>
-                      <td style={{ maxWidth: 200 }}>
-                        <span style={{ fontSize: '0.83rem' }}>{parseMedNames(r.prescription_medications)}</span>
+                      <td className="si-d83d7d70">
+                        <span className="si-315ca681">{parseMedNames(r.prescription_medications)}</span>
                       </td>
-                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem' }}>
+                      <td className="si-86931177">
                         {formatDate(r.created_at)}
                         {r.handed_over_at && (
-                          <small style={{ display: 'block', color: '#888' }}>
+                          <small className="si-1a0c0bfa">
                             Handed: {formatDate(r.handed_over_at)}
                           </small>
                         )}
                       </td>
-                      <td style={{ whiteSpace: 'nowrap' }}>
-                        {icon} <span style={{ fontSize: '0.82rem', textTransform: 'capitalize' }}>
+                      <td className="si-ba472c26">
+                        {icon} <span className="si-033883f7">
                           {(r.dispensing_method || '').replace(/_/g, ' ')}
                         </span>
                       </td>
@@ -161,15 +188,15 @@ export default function DispensingHistory({ pharmacyId }: Props) {
                           {t(`pharmacy.history.status.${r.dispensing_status}`) || r.dispensing_status}
                         </span>
                       </td>
-                      <td style={{ fontWeight: 600, color: '#1a237e' }}>
+                      <td className="si-e9da3a87">
                         {formatCurrency(r.total_cost)}
                       </td>
-                      <td style={{ fontSize: '0.82rem', color: '#555' }}>
+                      <td className="si-f2dbbee4">
                         {r.pharmacist_name || '—'}
-                        {r.received_by && <small style={{ display: 'block', color: '#888' }}>Rcvd by: {r.received_by}</small>}
+                        {r.received_by && <small className="si-1a0c0bfa">Rcvd by: {r.received_by}</small>}
                       </td>
                       <td>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <div className="si-8aa04a6d">
                           {r.dispensing_status === 'pending' && (
                             <button type="button" className="module-btn small"
                               disabled={updatingId === r.id}
@@ -191,6 +218,11 @@ export default function DispensingHistory({ pharmacyId }: Props) {
                               {t('pharmacy.history.markDelivered')}
                             </button>
                           )}
+                          {r.dispensing_status !== 'cancelled' && (
+                            <button type="button" className="module-btn small" onClick={() => openReceipt(r)}>
+                              🖨 {t('pharmacyReceipt.print')}
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -201,6 +233,7 @@ export default function DispensingHistory({ pharmacyId }: Props) {
           </div>
         )}
       </div>
+      {receipt && <DispensingReceiptView receipt={receipt} onClose={() => setReceipt(null)} />}
     </div>
   )
 }

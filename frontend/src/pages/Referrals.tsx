@@ -178,7 +178,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
   if (checkout) {
     return (
       <div className="module-page">
-        <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '12px 16px', margin: '0 auto 8px', maxWidth: 480, fontSize: 13, color: '#1d4ed8' }}>
+        <div className="si-3234335a">
           {t('referrals.walletHopNotice')}
         </div>
         <PaymentCheckout
@@ -208,7 +208,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
       </div>
 
       {message && (
-        <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', borderRadius: 8, padding: '10px 14px', marginBottom: 14, fontSize: 14 }}>
+        <div className="si-900a41f7">
           {message}
         </div>
       )}
@@ -216,38 +216,38 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
       {loading ? (
         <div className="loading-container"><div className="loading-spinner" /><p>{t('common.loading')}</p></div>
       ) : referrals.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#6b7280' }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🔀</div>
+        <div className="si-71785fd4">
+          <div className="si-fc4388e2">🔀</div>
           <p>{t('referrals.empty')}</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div className="si-2a57fba0">
           {referrals.map((r) => (
-            <div key={r.id} style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 18px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 700 }}>
+            <div key={r.id} className="si-2e21f3c6">
+              <div className="si-fa065845">
+                <div className="si-8b796880">
+                  <div className="si-f3347717">
                     {r.fromVetName} → {r.toVetName || t('referrals.anyDoctor')}
                   </div>
-                  <div style={{ color: '#6b7280', fontSize: 13, marginTop: 2 }}>
+                  <div className="si-6467593a">
                     {r.animalName ? `${r.animalName} · ` : ''}{r.reason}
                   </div>
                   {r.paidAmount && (
-                    <div style={{ fontSize: 13, marginTop: 4 }}>
+                    <div className="si-62c5167c">
                       {t('referrals.paidAmount')}: <strong>{formatCurrency(parseFloat(String(r.paidAmount)))}</strong>
                     </div>
                   )}
-                  <div style={{ color: '#9ca3af', fontSize: 12, marginTop: 4 }}>
+                  <div className="si-322b324f">
                     {r.createdAt ? formatDate(r.createdAt) : ''}
                     {r.transferStatus === 'offered' && deadlineLeft(r) ? ` · ${deadlineLeft(r)}` : ''}
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ background: '#f3f4f6', padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600 }}>
+                <div className="si-f4e64596">
+                  <span className="si-d59e7ca1">
                     {statusLabel(r)}
                   </span>
                   {!isVet && r.transferStatus === 'offered' && (
-                    <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <div className="si-a5676f76">
                       {r.toVetId && (
                         <button className="module-btn primary" disabled={busy} onClick={() => startAccept(r, false)}>
                           {t('referrals.accept')}
@@ -256,7 +256,7 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
                       <button className="module-btn" disabled={busy} onClick={() => startAccept(r, true)}>
                         {t('referrals.chooseAnother')}
                       </button>
-                      <button className="module-btn" style={{ color: '#b91c1c' }} disabled={busy} onClick={() => setDeclining(r)}>
+                      <button className="module-btn si-650f6574" disabled={busy} onClick={() => setDeclining(r)}>
                         {t('referrals.refund')}
                       </button>
                     </div>
@@ -270,16 +270,16 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
 
       {/* Accept modal: doctor (if choosing) + date + slot */}
       {accepting && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ background: 'white', borderRadius: 12, maxWidth: 520, width: '100%', maxHeight: '85vh', overflowY: 'auto', padding: 24 }}>
-            <h3 style={{ marginBottom: 6 }}>{chooseOther ? t('referrals.chooseAnother') : t('referrals.acceptTitle')}</h3>
-            <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 14 }}>{t('referrals.acceptHint')}</p>
+        <div className="si-9f028f26">
+          <div className="si-ae33cd59">
+            <h3 className="si-3c64c436">{chooseOther ? t('referrals.chooseAnother') : t('referrals.acceptTitle')}</h3>
+            <p className="si-ea95bef1">{t('referrals.acceptHint')}</p>
 
             {(chooseOther || !accepting.toVetId) && (
               <select
                 value={chosenVetId}
                 onChange={(e) => { setChosenVetId(e.target.value); if (slotDate) loadSlots(e.target.value, slotDate) }}
-                style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px', marginBottom: 10 }}
+                className="si-a01c8879"
               >
                 <option value="">{t('referrals.selectDoctor')}</option>
                 {vets.filter((v: any) => (v.userId || v.id) !== accepting.fromVetId).map((v: any) => (
@@ -295,18 +295,18 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
               value={slotDate}
               min={new Date().toISOString().split('T')[0]}
               onChange={(e) => { setSlotDate(e.target.value); loadSlots(targetVetIdFor(accepting), e.target.value) }}
-              style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px', marginBottom: 10 }}
+              className="si-a01c8879"
             />
 
             {slotsLoading ? (
-              <p style={{ color: '#6b7280', fontSize: 13 }}>{t('common.loading')}</p>
+              <p className="si-c3b93ebb">{t('common.loading')}</p>
             ) : slots.length > 0 ? (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+              <div className="si-ed546b5f">
                 {slots.map((s: any) => (
                   <button
                     key={s.startTime}
-                    className={`module-btn${chosenSlot?.startTime === s.startTime ? ' primary' : ''}`}
-                    style={{ padding: '6px 12px', fontSize: 13 }}
+                    className={`module-btn${chosenSlot?.startTime === s.startTime ? ' primary' : ''} si-d7b5d9f9`}
+                   
                     onClick={() => setChosenSlot(s)}
                   >
                     {s.startTime}
@@ -314,14 +314,14 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
                 ))}
               </div>
             ) : slotDate ? (
-              <p style={{ color: '#9ca3af', fontSize: 13, marginBottom: 14 }}>{t('referrals.noSlots')}</p>
+              <p className="si-cf43e3ec">{t('referrals.noSlots')}</p>
             ) : null}
 
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setAccepting(null)} disabled={busy}>
+            <div className="si-ad918842">
+              <button className="btn btn-outline si-6acd75e8" onClick={() => setAccepting(null)} disabled={busy}>
                 {t('common.cancel')}
               </button>
-              <button className="btn btn-primary" style={{ flex: 1 }} disabled={busy || !chosenSlot || !targetVetIdFor(accepting)} onClick={confirmAccept}>
+              <button className="btn btn-primary si-6acd75e8" disabled={busy || !chosenSlot || !targetVetIdFor(accepting)} onClick={confirmAccept}>
                 {busy ? t('common.loading') : t('referrals.confirmAccept')}
               </button>
             </div>
@@ -331,11 +331,11 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
 
       {/* Decline (refund) modal with destination choice (D7) */}
       {declining && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ background: 'white', borderRadius: 12, maxWidth: 420, width: '100%', padding: 24 }}>
-            <h3 style={{ marginBottom: 6 }}>{t('referrals.refundTitle')}</h3>
-            <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 16 }}>{t('referrals.refundHint')}</p>
-            <div style={{ display: 'grid', gap: 10 }}>
+        <div className="si-9f028f26">
+          <div className="si-da07280d">
+            <h3 className="si-3c64c436">{t('referrals.refundTitle')}</h3>
+            <p className="si-9a3b1c05">{t('referrals.refundHint')}</p>
+            <div className="si-faca492d">
               <button className="btn btn-primary" disabled={busy} onClick={() => confirmDecline('wallet')}>
                 {t('referrals.refundToWallet')} ⚡
               </button>
@@ -352,15 +352,15 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
 
       {/* Doctor: initiate referral modal */}
       {showRefer && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div style={{ background: 'white', borderRadius: 12, maxWidth: 560, width: '100%', maxHeight: '85vh', overflowY: 'auto', padding: 24 }}>
-            <h3 style={{ marginBottom: 6 }}>{t('referrals.referTitle')}</h3>
-            <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 14 }}>{t('referrals.referHint')}</p>
+        <div className="si-9f028f26">
+          <div className="si-86866731">
+            <h3 className="si-3c64c436">{t('referrals.referTitle')}</h3>
+            <p className="si-ea95bef1">{t('referrals.referHint')}</p>
 
-            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 6 }}>{t('referrals.upcomingBookings')}</div>
-            {referable.bookings.length === 0 && <p style={{ color: '#9ca3af', fontSize: 13 }}>{t('referrals.none')}</p>}
+            <div className="si-f14fec9c">{t('referrals.upcomingBookings')}</div>
+            {referable.bookings.length === 0 && <p className="si-7b05444b">{t('referrals.none')}</p>}
             {referable.bookings.map((b: any) => (
-              <label key={b.id} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '6px 0', fontSize: 13, cursor: 'pointer' }}>
+              <label key={b.id} className="si-db8d8b8b">
                 <input type="radio" name="referSource" checked={referSource?.kind === 'booking' && referSource.id === b.id}
                   onChange={() => setReferSource({ kind: 'booking', id: b.id })} />
                 <span>
@@ -370,19 +370,19 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
               </label>
             ))}
 
-            <div style={{ fontWeight: 600, fontSize: 13, margin: '12px 0 6px' }}>{t('referrals.recentConsultations')}</div>
-            {referable.consultations.length === 0 && <p style={{ color: '#9ca3af', fontSize: 13 }}>{t('referrals.none')}</p>}
+            <div className="si-648403c6">{t('referrals.recentConsultations')}</div>
+            {referable.consultations.length === 0 && <p className="si-7b05444b">{t('referrals.none')}</p>}
             {referable.consultations.map((c: any) => (
-              <label key={c.id} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '6px 0', fontSize: 13, cursor: 'pointer' }}>
+              <label key={c.id} className="si-db8d8b8b">
                 <input type="radio" name="referSource" checked={referSource?.kind === 'consultation' && referSource.id === c.id}
                   onChange={() => setReferSource({ kind: 'consultation', id: c.id })} />
                 <span>{c.patientName}{c.animalName ? ` (${c.animalName})` : ''} — {c.completedAt ? formatDate(c.completedAt) : ''}</span>
               </label>
             ))}
 
-            <div style={{ fontWeight: 600, fontSize: 13, margin: '12px 0 6px' }}>{t('referrals.targetDoctor')}</div>
+            <div className="si-648403c6">{t('referrals.targetDoctor')}</div>
             <select value={referTargetId} onChange={(e) => setReferTargetId(e.target.value)}
-              style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px', marginBottom: 10 }}>
+              className="si-a01c8879">
               <option value="">{referSource?.kind === 'booking' ? t('referrals.patientChooses') : t('referrals.selectDoctor')}</option>
               {vets.filter((v: any) => (v.userId || v.id) !== user?.id).map((v: any) => (
                 <option key={v.userId || v.id} value={v.userId || v.id}>
@@ -393,17 +393,17 @@ const Referrals: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
 
             <textarea placeholder={t('referrals.reasonPlaceholder')} value={referReason}
               onChange={(e) => setReferReason(e.target.value)}
-              style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px', minHeight: 70, marginBottom: 6 }} />
+              className="si-0433bebb" />
 
             {referSource?.kind === 'booking' && (
-              <p style={{ color: '#b45309', fontSize: 12, marginBottom: 10 }}>{t('referrals.referCostNotice')}</p>
+              <p className="si-3926e87f">{t('referrals.referCostNotice')}</p>
             )}
 
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowRefer(false)} disabled={busy}>
+            <div className="si-ad918842">
+              <button className="btn btn-outline si-6acd75e8" onClick={() => setShowRefer(false)} disabled={busy}>
                 {t('common.cancel')}
               </button>
-              <button className="btn btn-primary" style={{ flex: 1 }}
+              <button className="btn btn-primary si-6acd75e8"
                 disabled={busy || !referSource || !referReason.trim() || (referSource?.kind === 'consultation' && !referTargetId)}
                 onClick={submitReferral}>
                 {busy ? t('common.loading') : t('referrals.submitReferral')}
